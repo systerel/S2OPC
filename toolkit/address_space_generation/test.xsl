@@ -50,16 +50,26 @@ extern SOPC_AddressSpace addressSpace;
 #define Description addressSpace.descriptionArray
 #define Description_begin addressSpace.descriptionIdxArray_begin
 #define Description_end addressSpace.descriptionIdxArray_end
+#define DEFAULT_VARIANT  {SOPC_Null_Id, SOPC_VariantArrayType_SingleValue,{0}}
 
-int test_browsename(){
+void test_browsename(){
     printf ("test BrowseName\n");
     const char *var;
     <xsl:apply-templates select = "$ua_nodes/*/@BrowseName" mode="qName"/>
-    return 0;
+}
+
+void test_value(){
+    printf ("test Value\n");
+    int pos;
+    const char* nodeid;
+    SOPC_Byte builtInTypeId;
+    const char *value;
+    const char *val;
+    <xsl:apply-templates select = "//ua:UAVariable|//ua:UAVariableType" mode="tValue"/>
 }
 
 void test_reference(){
-    printf("test reference");
+    printf("test reference \n");
     int pos;
     int res;
     int exp;
@@ -102,6 +112,7 @@ void test_${s}(){
 
 int main (){
     test_browsename();
+    test_value();
     test_reference();
     test_Description();
     test_DisplayName();
@@ -237,6 +248,53 @@ ${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var
             <xsl:message><xsl:value-of select="$bn"/> invalid qualified string format</xsl:message>
         </xsl:non-matching-substring>
     </xsl:analyze-string>
+</xsl:template>
+
+<!-- template de test des value -->
+
+<xsl:template match="ua:UAVariable[ua:Value]|ua:UAVariableType[ua:Value]" mode="tValue">
+  pos = <xsl:value-of select="position()"/>;
+  <xsl:apply-templates select="ua:Value/*" mode="tValue"/>
+</xsl:template>
+
+<xsl:template match="ua:UAVariable[not(ua:Value)]|ua:UAVariableType[not(ua:Value)]" mode="tValue">
+  <xsl:variable name="NodeId" select="@NodeId"/>
+  pos = <xsl:value-of select="position()"/>;
+  nodeid = "<xsl:value-of select="@NodeId"/>";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}<xsl:text>
+</xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}<xsl:text>
+</xsl:text>
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}<xsl:text>
+</xsl:text>
+</xsl:template>
+
+% for s in ['Boolean', 'SByte', 'Byte', 'Int16', 'Int32', 'Int64', 'Double', 'String', 'XmlElt', 'NodeId', 'Status']:
+<xsl:template match="uax:${s}" mode="tValue">
+  <xsl:variable name="NodeId" select="../../@NodeId"/>
+  nodeid = "<xsl:value-of select="../../@NodeId"/>";
+  printf("test Value for nodeid %s\n", nodeid);
+  builtInTypeId = SOPC_${s}_Id;
+<!--   value = ".${s}";
+  val = <xsl:value-of select="."/>;-->
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId ") ;}<xsl:text>
+</xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}<xsl:text>
+</xsl:text>
+<!--  ${print_value('if (strcmp((char*)addressSpace.valueArray[%s].Value, {val}) {printf("invalid Arraytype ") ;}  ',"$pos")}<xsl:text>
+</xsl:text>-->
+</xsl:template> 
+% endfor
+
+<xsl:template match="uax:Float" mode="tValue">
+  <xsl:variable name="NodeId" select="../../@NodeId"/>
+  nodeid = "<xsl:value-of select="../../@NodeId"/>";
+  printf("test Value for nodeid %s\n", nodeid);  
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Float_Id)) {printf("invalid BuiltInTypeId ") ;}<xsl:text>
+</xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}<xsl:text>
+</xsl:text>
 </xsl:template>
 
 <xsl:template name="write-string">

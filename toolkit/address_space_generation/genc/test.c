@@ -14,8 +14,9 @@ extern SOPC_AddressSpace addressSpace;
 #define Description addressSpace.descriptionArray
 #define Description_begin addressSpace.descriptionIdxArray_begin
 #define Description_end addressSpace.descriptionIdxArray_end
+#define DEFAULT_VARIANT  {SOPC_Null_Id, SOPC_VariantArrayType_SingleValue,{0}}
 
-int test_browsename(){
+void test_browsename(){
     printf ("test BrowseName\n");
     const char *var;
     if (addressSpace.browseNameArray[1].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
@@ -143,11 +144,329 @@ var = "TK";if (strcmp((char*)addressSpace.browseNameArray[61].Name.Data, var)) {
 if (addressSpace.browseNameArray[62].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
 var = "TK";if (strcmp((char*)addressSpace.browseNameArray[62].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 
-    return 0;
+}
+
+void test_value(){
+    printf ("test Value\n");
+    int pos;
+    const char* nodeid;
+    SOPC_Byte builtInTypeId;
+    const char *value;
+    const char *val;
+    
+  pos = 1;
+  
+  nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
+  printf("test Value for nodeid %s\n", nodeid);
+  builtInTypeId = SOPC_Boolean_Id;
+
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  pos = 2;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 3;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 4;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 5;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 6;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 7;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 8;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 9;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 10;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 11;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 12;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 13;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 14;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 15;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 16;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 17;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 18;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 19;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 20;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 21;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 22;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 23;
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 24;
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 25;
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 26;
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 27;
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 28;
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 29;
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 30;
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value ") ;}
+
+  pos = 31;
+  
+  nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
+  printf("test Value for nodeid %s\n", nodeid);
+  builtInTypeId = SOPC_Boolean_Id;
+
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  pos = 32;
+  
+  nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
+  printf("test Value for nodeid %s\n", nodeid);
+  builtInTypeId = SOPC_Boolean_Id;
+
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  pos = 33;
+  
+  nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
+  printf("test Value for nodeid %s\n", nodeid);
+  builtInTypeId = SOPC_Boolean_Id;
+
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  pos = 34;
+  
+  nodeid = "ns=1;i=2003";
+  printf("test Value for nodeid %s\n", nodeid);  
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Float_Id)) {printf("invalid BuiltInTypeId ") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
 }
 
 void test_reference(){
-    printf("test reference");
+    printf("test reference \n");
     int pos;
     int res;
     int exp;
@@ -7678,6 +7997,7 @@ void test_DisplayName(){
 
 int main (){
     test_browsename();
+    test_value();
     test_reference();
     test_Description();
     test_DisplayName();
