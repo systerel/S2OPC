@@ -5,67 +5,59 @@ version="2.0" xmlns:ua="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd"  xmln
 
 <!--
 
-Généralité.
-
-Analyse là https://trac.aix.systerel.fr/ingopcs/ticket/198
-
-Ordre des noeuds
-================
-A chaque noeud on fait correspondre un entier le désignant et qui correspond au type B.
-
-Cependant pour optimiser l'implantation mémoire, il faut numéroter les noeuds en les regroupants par classe et suivant l'ordre des classes dans le tableau suivant 'classes'.
-
-Les noeuds sont finalement recopiés dans une variable : 'ua_nodes'.
-Les templates de productions sont ensuites appliqués à partir de cette variable : mode 'copy'.
+Nodes order
+===========
+Each node is associated to an integer corresponding to a B type.
+However, in order to optimize memory management, nodes are numbered, grouped by and sorted according to their corresponding classes (see 'classes' list below).
+Eventually, nodes are copied into a variable: 'ua_nodes'.
+Templates used to generate data are applied on this variable in 'copy' mode.
 
 Alias
 ======
-Le reference type d'une reference peut être aliasé.
-Par exemple, l'alias suivant est défini :
+The reference type of a reference can be an alias.
+For exemple, the following alias is defined:
      <Alias Alias="HasComponent">i=47</Alias>
 
-Et une référence peut être donnée à l'aide de cet alias par exemple :
+And a reference can be defined thanks to this alias for example:
      <Reference IsForward="false" ReferenceType="HasComponent">ns=261;s=Objec ...
 
-Lors de la recopie des noeuds, les templates de recopie permettent de remplacer les alias par leur valeur.
-
+When nodes are copied, templates allow to replace alias by their values.
 
 NodeId
 =======
-Pour chaque nodeId une variable est créée ayant pour nom 'nodeid_{indice}'.
-Les tableaux sont ensuite des tableaux de pointeur sur ces variables.
-La correspondance entre les nodesId et le nom de la variable correspondant est codée en créant des noeuds de la forme :
-    <n id="la chaine donnant le node id" vn="nodeid_{position()}"/>
-Ces noeuds sont contenus dans la variable nodeid_var_names.
+For each nodeId, a variable named 'nodeid_{indice}' is created.
+The arrays then contain pointers on these variables.
+Connection between nodeIds and variables names is encoded with nodes as follows:
+    <n id="string corresponding to the node id" vn="nodeid_{position()}"/>
+These nodes are contained into the variable nodeid_var_names.
 
-
-Indice à 1
+Arrays indexes:
 ==============
-La valeur à l'indice zéro d'un tableau, zéro étant utilisé pour le codage des valeurs indet, est non significative.
-Les valeurs significatives commence à l'indice 1.
+Values of arrays at index 0 is non significant. Significant values start from index 1.
 
 Fonction
 ========
-Le codage des fonctions consiste à produire un tableau des valeurs sont crées dans l'ordre des noeuds.
-Soit la valeur est directe, soit il y a une résolution par exemple dans le cas de la fonction NodeId où la valeur est un pointeur sur la variable correspondante.
+In order to encode a function, an array of values is created. Values are sorted according to node order. 
+Eitheir the value is a direct access, or otherwise, the value is computed for example 
+in case of the function NodeId where the value is a pointer on the corresponding variable.
 
 Relation
-==========
-Les relations sont codées par trois tableaux :
-Un tableau qui est constitué de la liste des listes des valeurs des éléments.
-Par exemple pour la relation
+========
+Relations are encoded with three arrays:
+1/ An array containing the liste of elements values.
+
+For example for the relation:
     - {1|-> 2, 1|->3, 3|->2}
 
-Le tableau est :
+The array is:
     - {0, 2, 3, 2}
 
-Deux tableau qui donnent l'indice de début, et de fin, des éléments associés à l'élément.
-
-Dans le cas précédent on a
+2/ Two arrays corresponding to the starting and ending indexes.
+In the previous example we have:
     - deb = {0, 1, 1, 3}
     - fin = {0, 2, 0, 3}
 
-A noté que pour un élément qui n'a pas d'image, l'indice de fin est strictement plus petit que l'indice de début.
+Please note that for an element without an image, the ending index is stricly less that the starting index.
 
 -->
 
@@ -73,24 +65,24 @@ A noté que pour un élément qui n'a pas d'image, l'indice de fin est stricteme
 classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'ReferenceType', 'DataType', 'Method')
 %>
 
-<!-- variable contenant les alias -->
+<!-- variable contenaining alias -->
 <xsl:variable name="alias" select="//ua:Alias"/>
 
-<!-- variable contenant une recopie des noeuds à traiter afin de les ordonner. -->
+<!-- variable contening a copy of nodes in order to sort them. -->
 <xsl:variable name="ua_nodes">
     <xsl:apply-templates select="${ '|'.join(['*/ua:UA' + s for s  in classes])}" mode="copy">
         <xsl:sort select="sys:ord_class(.)"/>
     </xsl:apply-templates>
 </xsl:variable>
 
-<!-- Table d'association entre la chaine donnant un node id et le nom de la variable -->
+<!-- Table associating a string identifying a node and a variable name -->
 <xsl:variable name="nodeid_var_name">
     <xsl:for-each select="distinct-values($ua_nodes//@NodeId|$ua_nodes//ua:Reference/text()|$ua_nodes//ua:Reference/@ReferenceType)">
         <n id="{.}" vn="nodeid_{position()}"/>
     </xsl:for-each>
 </xsl:variable>
 
-<!-- Variable contenant les noeuds de type variable et variabletype -->
+<!-- Variable contenaning variable and variabletype nodes -->
 <xsl:variable name="var_vartype" select="$ua_nodes/ua:UAVariable|$ua_nodes/ua:UAVariableType"/>
 
 <xsl:template match="/">
@@ -146,7 +138,6 @@ static SOPC_QualifiedName BrowseName[NB + 1] = {{0, {0, 0, NULL}}
 };
 
 <!-- Description, DisplayName-->
-
 % for s in ['Description', 'DisplayName']:
 static SOPC_LocalizedText ${s}[] = {{{0, 0, NULL}, {0, 0, NULL}}
 <xsl:apply-templates select = "$ua_nodes/*/ua:${s}" mode="localized_text"/>
@@ -154,7 +145,6 @@ static SOPC_LocalizedText ${s}[] = {{{0, 0, NULL}, {0, 0, NULL}}
 static int ${s}_begin[] = {0, <xsl:value-of select = "for $n in $ua_nodes/* return count($n/preceding-sibling::*/ua:${s}) + 1" separator=", "/>};
 static int ${s}_end[] = {-1, <xsl:value-of select = "for $n in $ua_nodes/* return count($n/preceding-sibling::*/ua:${s}) +  count($n/ua:${s})" separator=", "/>};
 % endfor
-
 
 <!-- Reference -->
 static int reference_begin[] = {0, <xsl:value-of select = "for $n in $ua_nodes/* return count($n/preceding-sibling::*/ua:References/*) + 1" separator=", "/>};
@@ -213,26 +203,16 @@ SOPC_AddressSpace addressSpace = {
 </xsl:template>
 
 <!-- Create variant for each variable -->
-
 <xsl:template match="ua:UAVariable[ua:Value]|ua:UAVariableType[ua:Value]" mode="value"><xsl:apply-templates select="ua:Value/*" mode="value"/></xsl:template>
 <xsl:template match="ua:UAVariable[not(ua:Value)]|ua:UAVariableType[not(ua:Value)]" mode="value">, DEFAULT_VARIANT</xsl:template>
 
-<<<<<<< HEAD
-<xsl:template match="uax:Boolean" mode="value">,{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:SByte" mode="value">,{SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.SByte=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:Byte" mode="value">,{SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:Int16" mode="value">,{SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue, {.Int16=<xsl:value-of select="."/>}}</xsl:template>
-=======
-% for s in ['Boolean', 'SByte', 'Byte', 'Int16', 'Int32', 'Int64', 'Double', 'String', 'XmlElt', 'NodeId']:
-<xsl:template match="uax:${s}" mode="value">,{SOPC_${s}_Id, SOPC_VariantArrayType_SingleValue, {.${s}=<xsl:value-of select="."/>}}</xsl:template>
 
+% for s in ['Boolean', 'SByte', 'Byte', 'Int16', 'Int32', 'Int64', 'NodeId']:
+<xsl:template match="uax:${s}" mode="value">,{SOPC_${s}_Id, SOPC_VariantArrayType_SingleValue, {.${s}=<xsl:value-of select="."/>}}</xsl:template>
 % endfor
 
->>>>>>> Address space generation: add tests for values
 <xsl:template match="uax:Uint16" mode="value">,{SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:Int32" mode="value">,{SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:UInt32" mode="value">,{SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:Int64" mode="value">,{SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:UInt64" mode="value">,{SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:Float" mode="value">,{SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:Double" mode="value">,{SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev=<xsl:value-of select="."/>}}</xsl:template>
@@ -247,7 +227,6 @@ SOPC_AddressSpace addressSpace = {
 </xsl:template>
 
 <!-- generation of node id -->
-
 <xsl:template match="@*" mode="nodeId">
     <xsl:variable name="NodeId" select="."/>
     <xsl:analyze-string select="$NodeId" regex="(ns=\d+;)?(i=\d+|s=.+)">
@@ -291,7 +270,7 @@ ${print_value(',{%s,{%s,1,toSOPC_String("%s")}}/* %s*/',"regex-group(1)", "strin
     <xsl:param name="value"/>${print_value('{%s,1,toSOPC_String("%s")}',"string-length($value)","$value")}
 </xsl:template>
 
-<!-- templates de recopie des noeuds -->
+<!-- templates to copy nodes -->
 <xsl:template match="@ReferenceType" mode="copy">
     <xsl:variable name="type" select="."/>
     <xsl:attribute name="ReferenceType"><xsl:value-of select="$alias[@Alias = $type]"/></xsl:attribute>
@@ -303,9 +282,9 @@ ${print_value(',{%s,{%s,1,toSOPC_String("%s")}}/* %s*/',"regex-group(1)", "strin
     </xsl:copy>
 </xsl:template>
 
-<!-- génération de deux fonction sur le domaine des classes de noeud:
-La première 'ord_class' associe à une classe un entier permettant d'ordonner les noeuds par class.
-La deuxième 'get_enum_value' retourne l'énuméré C correspondant à une classe. -->
+<!-- generate two functions with domain is node classes:
+'ord_class' which associate to a class an integer to sort nodes by class
+'get_enum_value' returning the enumerate C corresponding to a class. -->
 % for (n, f, type) in [('ord_class', lambda x: x, 'integer'), ('get_enum_value', lambda x : 'OpcUa_NodeClass_'+ classes[x-1], 'string')]:
   <xsl:function name="sys:${n}" as="xsd:${type}">
     <xsl:param name="e"/>

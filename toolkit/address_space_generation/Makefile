@@ -3,7 +3,7 @@
 empty:=
 space:= $(empty) $(empty)
 CC=gcc
-CFLAGS=-W -Wall -ansi -pedantic -std=c99 -I./ -I../src/impl -I../../install_stack/include/
+CFLAGS=-g3 -W -Wall -ansi -pedantic -std=c99 -I./ -I../src/impl -I../../install_stack/include/
 LDFLAGS=
 EXEC=test
 XSL=add.xsl test.xsl
@@ -36,7 +36,7 @@ cleangen:
 cleanall: clean cleangen
 
 $(PATHGENC)/%.c : %.xsl testView.xml
-	ct.py $< $(PATHBUILD)/$<
+	./scripts/ct.py $< $(PATHBUILD)/$<
 	saxonb-xslt -xsl:$(PATHBUILD)/$< -s:testView.xml -o:$@
 
 $(PATHGENC)/test_%_addspace.c : test_%.xml add.xsl

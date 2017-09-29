@@ -98,7 +98,6 @@ static SOPC_QualifiedName BrowseName[NB + 1] = {{0, {0, 0, NULL}}
 };
 
 
-
 static SOPC_LocalizedText Description[] = {{{0, 0, NULL}, {0, 0, NULL}}
 , {{0,1,toSOPC_String("")},{25,1,toSOPC_String("VariablesFolderDescObj1d2")}}
 , {{0,1,toSOPC_String("")},{8,1,toSOPC_String("Int64_1d")}}
@@ -123,7 +122,6 @@ static SOPC_LocalizedText DisplayName[] = {{{0, 0, NULL}, {0, 0, NULL}}
 };
 static int DisplayName_begin[] = {0, 1, 2, 3, 4, 5, 6, 7};
 static int DisplayName_end[] = {-1, 1, 2, 3, 4, 5, 6, 7};
-
 
 
 static int reference_begin[] = {0, 1, 9, 11, 13, 15, 17, 19};

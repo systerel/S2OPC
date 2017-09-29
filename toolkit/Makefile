@@ -31,7 +31,7 @@ OBJS        =toolkit_header_init.o \
              util_variant.o \
              service_browse.o service_browse_seq.o service_browse_seq_it.o \
              msg_browse_response_bs.o service_browse_decode_bs.o
-OBJS        += testlib_read_response.o wrap_read.o 
+OBJS        += testlib_read_response.o wrap_read.o
 OBJS        += testlib_write.o
 OBJS        += toolkit_header.o io_dispatch_mgr.o service_mgr.o session_mgr.o session_core.o session_core_1_bs.o \
                session_async_bs.o session_request_handle_bs.o \
@@ -71,6 +71,8 @@ config:
 	@mkdir -p $(PATHEXEC)
 
 clean:
+	@echo "Cleaning generated address space"
+	@make -C address_space_generation clean
 	@echo "Cleaning Toolkit..."
 	@# Protect against executing rm -r /*
 	@[ -d "$(PATHOBJ)" ] && \rm -rf $(PATHOBJ) || true

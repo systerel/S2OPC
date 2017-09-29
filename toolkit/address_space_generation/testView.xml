@@ -24,6 +24,13 @@
       <Reference ReferenceType="HasComponent">i=1006</Reference>
     </References>
   </UAObject>
+  <UAVariable BrowseName="0:State" NodeId="i=2259" ParentNodeId="i=1000" DataType="Int32">
+    <DisplayName>State</DisplayName>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+   </References>
+  </UAVariable> 
   <UAVariable BrowseName="0:Int64" DataType="Int64" NodeId="i=1001" ParentNodeId="i=1000">
     <DisplayName>Int64_1dn</DisplayName>
     <Description>Int64_1d</Description>
@@ -103,9 +110,9 @@
       <Reference ReferenceType="Organizes">ns=261;s=Objects.15361.TRACKs</Reference>
     </References>
   </UAObject>
-  <UAObject BrowseName="0:SIGNALs" NodeId="ns=261;s=Objects.15361.SIGNALs" ParentNodeId="ns=261;i=15361">
+  <UAObject BrowseName="261:SIGNALs" NodeId="ns=261;s=Objects.15361.SIGNALs" ParentNodeId="ns=261;i=15361">
     <DisplayName>SIGNALs</DisplayName>
-    <Description  Locale="en">NoName</Description>
+    <Description>NoName</Description>
     <References>
       <Reference IsForward="false" ReferenceType="Organizes">ns=261;i=15361</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
@@ -114,7 +121,7 @@
       <Reference ReferenceType="Organizes">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026</Reference>
     </References>
   </UAObject>
-  <UAObject BrowseName="0:SWITCHs" NodeId="ns=261;s=Objects.15361.SWITCHs" ParentNodeId="ns=261;i=15361">
+  <UAObject BrowseName="261:SWITCHs" NodeId="ns=261;s=Objects.15361.SWITCHs" ParentNodeId="ns=261;i=15361">
     <DisplayName>SWITCHs</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -123,7 +130,7 @@
       <Reference ReferenceType="Organizes">ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1</Reference>
     </References>
   </UAObject>
-  <UAObject BrowseName="0:TRACKs" NodeId="ns=261;s=Objects.15361.TRACKs" ParentNodeId="ns=261;i=15361">
+  <UAObject BrowseName="261:TRACKs" NodeId="ns=261;s=Objects.15361.TRACKs" ParentNodeId="ns=261;i=15361">
     <DisplayName>TRACKs</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -135,7 +142,7 @@
       <Reference ReferenceType="Organizes">ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK</Reference>
     </References>
   </UAObject>
-  <UAObject BrowseName="0:BALA_RDLS_G019" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019" ParentNodeId="ns=261;s=Objects.15361.SIGNALs">
+  <UAObject BrowseName="261:BALA_RDLS_G019" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019" ParentNodeId="ns=261;s=Objects.15361.SIGNALs">
     <DisplayName>BALA_RDLS_G019</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -148,7 +155,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC</Reference>
     </References>
   </UAObject>
-  <UAObject BrowseName="0:RM" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019">
+  <UAObject BrowseName="261:RM" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019">
     <DisplayName>RM</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -162,7 +169,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK</Reference>
     </References>
   </UAObject>
-  <UAVariable BrowseName="0:GK" DataType="Boolean" NodeId="s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM" AccessLevel="2">
+  <UAVariable AccessLevel="2" BrowseName="261:GK" DataType="Boolean" NodeId="s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
     <DisplayName>GK</DisplayName>
     <Description>Permissive Signal Status, ~é€bla</Description>
     <References>
@@ -173,7 +180,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:ASK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
+  <UAVariable BrowseName="261:ASK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
     <DisplayName>ASK</DisplayName>
     <Description>Signal Approach Locking</Description>
     <References>
@@ -184,7 +191,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:XBKK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
+  <UAVariable BrowseName="261:XBKK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
     <DisplayName>XBKK</DisplayName>
     <Description>Exit blocking is in effect for the signal</Description>
     <References>
@@ -195,7 +202,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:XBZCRQ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
+  <UAVariable BrowseName="261:XBZCRQ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
     <DisplayName>XBZCRQ</DisplayName>
     <Description>Exit Block Removal Request</Description>
     <References>
@@ -206,7 +213,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:XBZ-AK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
+  <UAVariable BrowseName="261:XBZ-AK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
     <DisplayName>XBZ-AK</DisplayName>
     <Description>Exit blocking is rejected for the signal</Description>
     <References>
@@ -217,7 +224,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:XBZCRQ-AK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
+  <UAVariable BrowseName="261:XBZCRQ-AK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
     <DisplayName>XBZCRQ-AK</DisplayName>
     <Description>Exit block removal is rejected for the signal</Description>
     <References>
@@ -228,7 +235,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAObject BrowseName="0:RC" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019">
+  <UAObject BrowseName="261:RC" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019">
     <DisplayName>RC</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -241,7 +248,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC</Reference>
     </References>
   </UAObject>
-  <UAVariable BrowseName="0:SendCommand" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019">
+  <UAVariable BrowseName="261:SendCommand" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019">
     <DisplayName>SendCommand</DisplayName>
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019</Reference>
@@ -251,21 +258,21 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:OffBlocking-K" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019">
+  <UAVariable BrowseName="261:OffBlocking-K" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019">
     <DisplayName>OffBlocking-K</DisplayName>
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
   </UAVariable>
-  <UAVariable BrowseName="0:OffBlocking-CC" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019">
+  <UAVariable BrowseName="261:OffBlocking-CC" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019">
     <DisplayName>OffBlocking-CC</DisplayName>
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
   </UAVariable>
-  <UAVariable BrowseName="0:GZ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC">
+  <UAVariable BrowseName="261:GZ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC">
     <DisplayName>GZ</DisplayName>
     <Description>Signal request</Description>
     <References>
@@ -276,7 +283,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:SZ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC">
+  <UAVariable BrowseName="261:SZ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC">
     <DisplayName>SZ</DisplayName>
     <Description>Signal cancel</Description>
     <References>
@@ -287,7 +294,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:XBZ-CC" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC">
+  <UAVariable BrowseName="261:XBZ-CC" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC">
     <DisplayName>XBZ-CC</DisplayName>
     <Description>Exit Block Application Request</Description>
     <References>
@@ -298,7 +305,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:XBZCRQ-CC" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC">
+  <UAVariable BrowseName="261:XBZCRQ-CC" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC">
     <DisplayName>XBZCRQ-CC</DisplayName>
     <Description>Exit Block Removal Request</Description>
     <References>
@@ -309,7 +316,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:XBZC-CC" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC">
+  <UAVariable BrowseName="261:XBZC-CC" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC">
     <DisplayName>XBZC-CC</DisplayName>
     <Description>Exit Block Removal - Acknowledge</Description>
     <References>
@@ -320,7 +327,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAObject BrowseName="0:BALA_RDLS_G025" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025" ParentNodeId="ns=261;s=Objects.15361.SIGNALs">
+  <UAObject BrowseName="261:BALA_RDLS_G025" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025" ParentNodeId="ns=261;s=Objects.15361.SIGNALs">
     <DisplayName>BALA_RDLS_G025</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -333,7 +340,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC</Reference>
     </References>
   </UAObject>
-  <UAObject BrowseName="0:RM" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025">
+  <UAObject BrowseName="261:RM" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025">
     <DisplayName>RM</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -343,7 +350,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK</Reference>
     </References>
   </UAObject>
-  <UAVariable BrowseName="0:GK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM">
+  <UAVariable BrowseName="261:GK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM">
     <DisplayName>GK</DisplayName>
     <Description>Permissive Signal Status</Description>
     <References>
@@ -354,7 +361,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:ASK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM">
+  <UAVariable BrowseName="261:ASK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM">
     <DisplayName>ASK</DisplayName>
     <Description>Signal Approach Locking</Description>
     <References>
@@ -365,7 +372,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAObject BrowseName="0:RC" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025">
+  <UAObject BrowseName="261:RC" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025">
     <DisplayName>RC</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -375,7 +382,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ</Reference>
     </References>
   </UAObject>
-  <UAVariable BrowseName="0:SendCommand" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025">
+  <UAVariable BrowseName="261:SendCommand" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025">
     <DisplayName>SendCommand</DisplayName>
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025</Reference>
@@ -385,21 +392,21 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:OffBlocking-K" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025">
+  <UAVariable BrowseName="261:OffBlocking-K" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025">
     <DisplayName>OffBlocking-K</DisplayName>
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
   </UAVariable>
-  <UAVariable BrowseName="0:OffBlocking-CC" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025">
+  <UAVariable BrowseName="261:OffBlocking-CC" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025">
     <DisplayName>OffBlocking-CC</DisplayName>
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
   </UAVariable>
-  <UAVariable BrowseName="0:SZ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC">
+  <UAVariable BrowseName="261:SZ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC">
     <DisplayName>SZ</DisplayName>
     <Description>Signal cancel</Description>
     <References>
@@ -410,7 +417,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:GZ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC">
+  <UAVariable BrowseName="261:GZ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC">
     <DisplayName>GZ</DisplayName>
     <Description>Signal request</Description>
     <References>
@@ -421,7 +428,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAObject BrowseName="0:BALA_RDLS_G026" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026" ParentNodeId="ns=261;s=Objects.15361.SIGNALs">
+  <UAObject BrowseName="261:BALA_RDLS_G026" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026" ParentNodeId="ns=261;s=Objects.15361.SIGNALs">
     <DisplayName>BALA_RDLS_G026</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -430,7 +437,7 @@
       <Reference ReferenceType="Organizes">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM</Reference>
     </References>
   </UAObject>
-  <UAObject BrowseName="0:RM" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026">
+  <UAObject BrowseName="261:RM" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026">
     <DisplayName>RM</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -439,7 +446,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK</Reference>
     </References>
   </UAObject>
-  <UAVariable BrowseName="0:GK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM">
+  <UAVariable BrowseName="261:GK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM">
     <DisplayName>GK</DisplayName>
     <Description>Permissive Signal Status</Description>
     <References>
@@ -450,7 +457,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAObject BrowseName="0:BALA_RDLS_W1" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1" ParentNodeId="ns=261;s=Objects.15361.SWITCHs">
+  <UAObject BrowseName="261:BALA_RDLS_W1" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1" ParentNodeId="ns=261;s=Objects.15361.SWITCHs">
     <DisplayName>BALA_RDLS_W1</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -463,7 +470,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC</Reference>
     </References>
   </UAObject>
-  <UAObject BrowseName="0:RM" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1">
+  <UAObject BrowseName="261:RM" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1">
     <DisplayName>RM</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -474,7 +481,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK</Reference>
     </References>
   </UAObject>
-  <UAVariable BrowseName="0:NWK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM">
+  <UAVariable BrowseName="261:NWK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM">
     <DisplayName>NWK</DisplayName>
     <Description>Switch Detected Normal</Description>
     <References>
@@ -485,7 +492,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:RWK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM">
+  <UAVariable BrowseName="261:RWK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM">
     <DisplayName>RWK</DisplayName>
     <Description>Switch Detected Reverse</Description>
     <References>
@@ -496,7 +503,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:LK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM">
+  <UAVariable BrowseName="261:LK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM">
     <DisplayName>LK</DisplayName>
     <Description>Switch Locally Locked</Description>
     <References>
@@ -507,7 +514,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAObject BrowseName="0:RC" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1">
+  <UAObject BrowseName="261:RC" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1">
     <DisplayName>RC</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -517,7 +524,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ</Reference>
     </References>
   </UAObject>
-  <UAVariable BrowseName="0:SendCommand" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1">
+  <UAVariable BrowseName="261:SendCommand" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1">
     <DisplayName>SendCommand</DisplayName>
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1</Reference>
@@ -527,21 +534,21 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:OffBlocking-K" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1">
+  <UAVariable BrowseName="261:OffBlocking-K" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1">
     <DisplayName>OffBlocking-K</DisplayName>
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
   </UAVariable>
-  <UAVariable BrowseName="0:OffBlocking-CC" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1">
+  <UAVariable BrowseName="261:OffBlocking-CC" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1">
     <DisplayName>OffBlocking-CC</DisplayName>
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
   </UAVariable>
-  <UAVariable BrowseName="0:NWZ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC">
+  <UAVariable BrowseName="261:NWZ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC">
     <DisplayName>NWZ</DisplayName>
     <Description>Switch Calling in Normal Direction</Description>
     <References>
@@ -552,7 +559,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:RWZ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC">
+  <UAVariable BrowseName="261:RWZ" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ" ParentNodeId="ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC">
     <DisplayName>RWZ</DisplayName>
     <Description>Switch Calling in Reverse Direction</Description>
     <References>
@@ -563,7 +570,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAObject BrowseName="0:BALA_RDLS_026TK" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK" ParentNodeId="ns=261;s=Objects.15361.TRACKs">
+  <UAObject BrowseName="261:BALA_RDLS_026TK" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK" ParentNodeId="ns=261;s=Objects.15361.TRACKs">
     <DisplayName>BALA_RDLS_026TK</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -572,7 +579,7 @@
       <Reference ReferenceType="Organizes">ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM</Reference>
     </References>
   </UAObject>
-  <UAObject BrowseName="0:RM" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM" ParentNodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK">
+  <UAObject BrowseName="261:RM" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM" ParentNodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK">
     <DisplayName>RM</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -581,7 +588,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK</Reference>
     </References>
   </UAObject>
-  <UAVariable BrowseName="0:TK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK" ParentNodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM">
+  <UAVariable BrowseName="261:TK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK" ParentNodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM">
     <DisplayName>TK</DisplayName>
     <Description>Secondary Detection Status</Description>
     <References>
@@ -589,10 +596,10 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:Boolean>false</uax:Boolean>
+      <uax:Boolean>true</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAObject BrowseName="0:BALA_RDLS_OSTK" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK" ParentNodeId="ns=261;s=Objects.15361.TRACKs">
+  <UAObject BrowseName="261:BALA_RDLS_OSTK" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK" ParentNodeId="ns=261;s=Objects.15361.TRACKs">
     <DisplayName>BALA_RDLS_OSTK</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -601,7 +608,7 @@
       <Reference ReferenceType="Organizes">ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM</Reference>
     </References>
   </UAObject>
-  <UAObject BrowseName="0:RM" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM" ParentNodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK">
+  <UAObject BrowseName="261:RM" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM" ParentNodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK">
     <DisplayName>RM</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -610,7 +617,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK</Reference>
     </References>
   </UAObject>
-  <UAVariable BrowseName="0:TK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK" ParentNodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM">
+  <UAVariable BrowseName="261:TK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK" ParentNodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM">
     <DisplayName>TK</DisplayName>
     <Description>Secondary Detection Status</Description>
     <References>
@@ -618,10 +625,10 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:Boolean>false</uax:Boolean>
+      <uax:Boolean>true</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAObject BrowseName="0:BALA_RDLS_P500" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_P500" ParentNodeId="ns=261;s=Objects.15361.TRACKs">
+  <UAObject BrowseName="261:BALA_RDLS_P500" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_P500" ParentNodeId="ns=261;s=Objects.15361.TRACKs">
     <DisplayName>BALA_RDLS_P500</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -629,7 +636,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
   </UAObject>
-  <UAObject BrowseName="0:BALA_RDLS_WBK_RDLN_EBK" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK" ParentNodeId="ns=261;s=Objects.15361.TRACKs">
+  <UAObject BrowseName="261:BALA_RDLS_WBK_RDLN_EBK" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK" ParentNodeId="ns=261;s=Objects.15361.TRACKs">
     <DisplayName>BALA_RDLS_WBK_RDLN_EBK</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -638,7 +645,7 @@
       <Reference ReferenceType="Organizes">ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM</Reference>
     </References>
   </UAObject>
-  <UAObject BrowseName="0:RM" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM" ParentNodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK">
+  <UAObject BrowseName="261:RM" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM" ParentNodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK">
     <DisplayName>RM</DisplayName>
     <Description>NoName</Description>
     <References>
@@ -647,7 +654,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK</Reference>
     </References>
   </UAObject>
-  <UAVariable BrowseName="0:TK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK" ParentNodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM">
+  <UAVariable BrowseName="261:TK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK" ParentNodeId="ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM">
     <DisplayName>TK</DisplayName>
     <Description>Secondary Detection Status</Description>
     <References>
