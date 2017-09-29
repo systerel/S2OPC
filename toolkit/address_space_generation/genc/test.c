@@ -151,18 +151,69 @@ void test_value(){
     int pos;
     const char* nodeid;
     SOPC_Byte builtInTypeId;
-    const char *value;
-    const char *val;
+    char *value_node;
     
   pos = 1;
   
   nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
   printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-
   if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId ") ;}
 
   if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value ") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {printf("invalid Value ") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {printf("invalid Value ") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {printf("invalid Value ") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_String_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.String.Data, value_node)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_XmlElement_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.XmlElt.Data, value_node)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value ") ;}
+    
+  }
+
 
   pos = 2;
   nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
@@ -429,39 +480,200 @@ void test_value(){
   
   nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
   printf("test Value for nodeid %s\n", nodeid);
+  value_node = "true";
   builtInTypeId = SOPC_Boolean_Id;
-
   if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId ") ;}
 
   if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value ") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {printf("invalid Value ") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {printf("invalid Value ") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {printf("invalid Value ") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_String_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.String.Data, value_node)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_XmlElement_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.XmlElt.Data, value_node)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value ") ;}
+    
+  }
+
 
   pos = 32;
   
   nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
   printf("test Value for nodeid %s\n", nodeid);
+  value_node = "true";
   builtInTypeId = SOPC_Boolean_Id;
-
   if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId ") ;}
 
   if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value ") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {printf("invalid Value ") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {printf("invalid Value ") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {printf("invalid Value ") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_String_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.String.Data, value_node)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_XmlElement_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.XmlElt.Data, value_node)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value ") ;}
+    
+  }
+
 
   pos = 33;
   
   nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
   printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-
   if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId ") ;}
 
   if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value ") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {printf("invalid Value ") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {printf("invalid Value ") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {printf("invalid Value ") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_String_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.String.Data, value_node)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_XmlElement_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.XmlElt.Data, value_node)) {printf("invalid Value ") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value ") ;}
+    
+  }
+
 
   pos = 34;
   
   nodeid = "ns=1;i=2003";
   printf("test Value for nodeid %s\n", nodeid);  
+  value_node = "9.99";
+  float float_value;
+  sscanf(value_node, "%f", &float_value);
   if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Float_Id)) {printf("invalid BuiltInTypeId ") ;}
 
   if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype ") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Floatv == float_value)) {printf("invalid Value ") ;}
 
 }
 

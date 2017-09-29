@@ -217,10 +217,18 @@ SOPC_AddressSpace addressSpace = {
 <xsl:template match="ua:UAVariable[ua:Value]|ua:UAVariableType[ua:Value]" mode="value"><xsl:apply-templates select="ua:Value/*" mode="value"/></xsl:template>
 <xsl:template match="ua:UAVariable[not(ua:Value)]|ua:UAVariableType[not(ua:Value)]" mode="value">, DEFAULT_VARIANT</xsl:template>
 
+<<<<<<< HEAD
 <xsl:template match="uax:Boolean" mode="value">,{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:SByte" mode="value">,{SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.SByte=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:Byte" mode="value">,{SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:Int16" mode="value">,{SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue, {.Int16=<xsl:value-of select="."/>}}</xsl:template>
+=======
+% for s in ['Boolean', 'SByte', 'Byte', 'Int16', 'Int32', 'Int64', 'Double', 'String', 'XmlElt', 'NodeId']:
+<xsl:template match="uax:${s}" mode="value">,{SOPC_${s}_Id, SOPC_VariantArrayType_SingleValue, {.${s}=<xsl:value-of select="."/>}}</xsl:template>
+
+% endfor
+
+>>>>>>> Address space generation: add tests for values
 <xsl:template match="uax:Uint16" mode="value">,{SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:Int32" mode="value">,{SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:UInt32" mode="value">,{SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32=<xsl:value-of select="."/>}}</xsl:template>
@@ -232,7 +240,6 @@ SOPC_AddressSpace addressSpace = {
 <xsl:template match="uax:BString" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {.Bstring=${write_string("$st")}}}</xsl:template>
 <xsl:template match="uax:XmlElt" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_XmlElement_Id, SOPC_VariantArrayType_SingleValue, {.XmlElt=${write_string("$st")}}}</xsl:template>
 <xsl:template match="uax:NodeId" mode="value">,{SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {.NodeId=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:Status" mode="value">,{SOPC_StatusCode_Id, SOPC_VariantArrayType_SingleValue, {.Status=<xsl:value-of select="."/>}}</xsl:template>
 
 <xsl:template match="*" mode="value">
 <xsl:message terminate="yes"> unknown type <xsl:value-of select="local-name(.)"/>
