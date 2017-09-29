@@ -2,7 +2,7 @@
 
  File Name            : service_read.c
 
- Date                 : 28/09/2017 17:52:24
+ Date                 : 29/09/2017 10:51:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,15 +43,18 @@ void service_read__fill_read_response_1(
          if (service_read__l_is_valid == true) {
             address_space__read_NodeClass_Attribute(service_read__l_node,
                service_read__p_aid,
+               &service_read__l_sc,
                &service_read__l_ncl,
                &service_read__l_value);
-            if ((service_read__p_aid == constants__e_aid_Value) &&
-               (service_read__l_ncl == constants__e_ncl_Variable)) {
-               address_space__get_Value_StatusCode(service_read__l_node,
-                  &service_read__l_sc);
-            }
-            else {
-               service_read__l_sc = constants__e_sc_ok;
+            if (service_read__l_sc == constants__e_sc_ok) {
+               if ((service_read__p_aid == constants__e_aid_Value) &&
+                  (service_read__l_ncl == constants__e_ncl_Variable)) {
+                  address_space__get_Value_StatusCode(service_read__l_node,
+                     &service_read__l_sc);
+               }
+               else {
+                  service_read__l_sc = constants__e_sc_ok;
+               }
             }
             msg_read_response_bs__set_read_response(service_read__p_resp_msg,
                service_read__p_rvi,

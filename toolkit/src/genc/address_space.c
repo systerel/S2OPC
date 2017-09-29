@@ -2,7 +2,7 @@
 
  File Name            : address_space.c
 
- Date                 : 28/09/2017 17:52:21
+ Date                 : 29/09/2017 10:51:56
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -31,12 +31,15 @@ void address_space__INITIALISATION(void) {
 void address_space__read_NodeClass_Attribute(
    const constants__t_Node_i address_space__node,
    const constants__t_AttributeId_i address_space__aid,
+   constants__t_StatusCode_i * const address_space__sc,
    constants__t_NodeClass_i * const address_space__ncl,
    constants__t_Variant_i * const address_space__val) {
    address_space_bs__get_NodeClass(address_space__node,
       address_space__ncl);
    address_space_bs__read_AddressSpace_Attribute_value(address_space__node,
+      *address_space__ncl,
       address_space__aid,
+      address_space__sc,
       address_space__val);
 }
 

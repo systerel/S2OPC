@@ -2,7 +2,7 @@
 
  File Name            : address_space.h
 
- Date                 : 28/09/2017 17:52:21
+ Date                 : 29/09/2017 10:51:56
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -83,6 +83,7 @@ extern void address_space__dealloc_write_request_responses(void);
 extern void address_space__read_NodeClass_Attribute(
    const constants__t_Node_i address_space__node,
    const constants__t_AttributeId_i address_space__aid,
+   constants__t_StatusCode_i * const address_space__sc,
    constants__t_NodeClass_i * const address_space__ncl,
    constants__t_Variant_i * const address_space__val);
 extern void address_space__treat_write_request_WriteValues(
