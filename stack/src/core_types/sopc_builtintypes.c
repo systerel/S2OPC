@@ -1197,29 +1197,48 @@ SOPC_StatusCode SOPC_NodeId_Compare(const SOPC_NodeId* left,
                                     int32_t*           comparison){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && comparison != NULL){
-        switch(left->IdentifierType){
-        case IdentifierType_Numeric:
-            if(left->Data.Numeric == right->Data.Numeric){
-                *comparison = 0;
-            }else if(left->Data.Numeric < right->Data.Numeric){
+        if(left->Namespace == right->Namespace &&
+           left->IdentifierType == right->IdentifierType){
+            switch(left->IdentifierType){
+            case IdentifierType_Numeric:
+                if(left->Data.Numeric == right->Data.Numeric){
+                    *comparison = 0;
+                }else if(left->Data.Numeric < right->Data.Numeric){
+                    *comparison = -1;
+                }else{
+                    *comparison = 1;
+                }
+                status = STATUS_OK;
+                break;
+            case IdentifierType_String:
+                status = SOPC_String_Compare(&left->Data.String, &right->Data.String, false, comparison);
+                break;
+            case IdentifierType_Guid:
+                if(NULL != left->Data.Guid && NULL != right->Data.Guid){
+                    *comparison = memcmp(left->Data.Guid, right->Data.Guid, sizeof(SOPC_Guid));
+                    status = STATUS_OK;
+                } // else invalid parameters
+                break;
+            case IdentifierType_ByteString:
+                status = SOPC_ByteString_Compare(&left->Data.Bstring, &right->Data.Bstring, comparison);
+                break;
+            }
+        }else{
+            if(left->IdentifierType == right->IdentifierType){
+                if(left->Namespace < right->Namespace){
+                    *comparison = -1;
+                }else if(left->Namespace > right->Namespace){
+                    *comparison = 1;
+                }else{
+                    // Already verified in precedent conditions
+                    assert(false);
+                }
+            }else if(left->IdentifierType < right->IdentifierType){
                 *comparison = -1;
             }else{
                 *comparison = 1;
             }
             status = STATUS_OK;
-            break;
-        case IdentifierType_String:
-            status = SOPC_String_Compare(&left->Data.String, &right->Data.String, false, comparison);
-            break;
-        case IdentifierType_Guid:
-            if(NULL != left->Data.Guid && NULL != right->Data.Guid){
-                *comparison = memcmp(left->Data.Guid, right->Data.Guid, sizeof(SOPC_Guid));
-                status = STATUS_OK;
-            } // else invalid parameters
-            break;
-        case IdentifierType_ByteString:
-            status = SOPC_ByteString_Compare(&left->Data.Bstring, &right->Data.Bstring, comparison);
-            break;
         }
     }
     return status;
