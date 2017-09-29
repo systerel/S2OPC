@@ -92,28 +92,35 @@ int main(void)
   // Init unique endpoint structure
   epConfig.endpointURL = ENDPOINT_URL;
   if (secuActive) {
-	  static Certificate * serverCertificate;
-	  status = KeyManager_Certificate_CreateFromFile("./server_public/server.der", &serverCertificate);
-	  assert(STATUS_OK == status);
-	  epConfig.serverCertificate = serverCertificate;
-
-	  static AsymmetricKey *  asymmetricKey;
-	  status = KeyManager_AsymmetricKey_CreateFromFile("./server_private/server.key", &asymmetricKey, NULL, 0);
-	  assert(STATUS_OK == status);
-	  epConfig.serverKey = asymmetricKey;
-
+      static Certificate * serverCertificate;
+      static AsymmetricKey *  asymmetricKey;
       static Certificate * authCertificate;
-	  status = KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &authCertificate);
-	  assert(STATUS_OK == status);
+      static PKIProvider * pkiProvider;
 
-	  static PKIProvider * pkiProvider;
-	  status = PKIProviderStack_Create(authCertificate, NULL, &pkiProvider);
-	  assert(STATUS_OK == status);
-	  epConfig.pki = pkiProvider;
+      status = KeyManager_Certificate_CreateFromFile("./server_public/server.der", &serverCertificate);
+      epConfig.serverCertificate = serverCertificate;
+
+      if(STATUS_OK == status){    
+          status = KeyManager_AsymmetricKey_CreateFromFile("./server_private/server.key", &asymmetricKey, NULL, 0);
+          epConfig.serverKey = asymmetricKey;
+      }
+      if(STATUS_OK == status){
+          status = KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &authCertificate);
+      }
+
+      if(STATUS_OK == status){
+          status = PKIProviderStack_Create(authCertificate, NULL, &pkiProvider);
+          epConfig.pki = pkiProvider;
+      }
+    if(STATUS_OK != status){
+      printf("<Test_Server_Toolkit: Failed loading certificates and key (check paths are valid)\n");
+    }else{
+      printf("<Test_Server_Toolkit: Certificates and key loaded\n");
+    }
   } else {
-	  epConfig.serverCertificate = NULL;
-	  epConfig.serverKey = NULL;
-	  epConfig.pki = NULL;
+      epConfig.serverCertificate = NULL;
+      epConfig.serverKey = NULL;
+      epConfig.pki = NULL;
   }
   
   epConfig.secuConfigurations = secuConfig;
@@ -175,7 +182,7 @@ int main(void)
   while (STATUS_OK == status && endpointClosed == FALSE && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
-    	// Retrieve received messages on socket
+        // Retrieve received messages on socket
         SOPC_Sleep(sleepTimeout);
     }
 
@@ -191,7 +198,7 @@ int main(void)
   while (STATUS_OK == status && endpointClosed == FALSE && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
-    	// Retrieve received messages on socket
+        // Retrieve received messages on socket
         SOPC_Sleep(sleepTimeout);
     }
 
