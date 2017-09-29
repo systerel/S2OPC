@@ -830,7 +830,7 @@ void SC_Send_Response(SOPC_Action_ServiceResponseSendData* sendData)
     uint8_t willReleaseToken = FALSE;
 
     SC_Connection*       scConnection = NULL;
-    uint32_t             requestId = NULL;
+    uint32_t             requestId = 0;
     //SOPC_EncodeableType* responseType = NULL;
     SOPC_MsgBuffers*     respBuffers = NULL;
     SOPC_Socket_EndOperation_CB*  endSendCallback = NULL;

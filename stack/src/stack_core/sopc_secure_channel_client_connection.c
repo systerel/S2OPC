@@ -1015,7 +1015,7 @@ void SC_Send_Request(SOPC_Action_ServiceRequestSendData* sendRequestData)
     SC_ClientConnection* connection = NULL;
     SOPC_MsgBuffers*     msgBuffers = NULL;
     SOPC_EncodeableType* responseType = NULL;
-    uint32_t             timeout = NULL;
+    uint32_t             timeout = 0;
     SC_ResponseEvent_CB* respCallback = NULL;
     void*                respCallbackData = NULL;
     SOPC_Socket_EndOperation_CB*  endSendCallback = NULL;
