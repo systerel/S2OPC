@@ -119,7 +119,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProv
         return STATUS_NOK;
 
     *pLenMsg = (uint32_t)lenMessage;
-    if(pLenMsg == 0)
+    if(*pLenMsg == 0)
         return STATUS_NOK;
 
     switch(pProvider->pProfile->SecurityPolicyID) // TODO: should we build some API to fetch the SecurityPolicyID, or avoid to switch on it at all?
@@ -158,7 +158,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgCipherText(const CryptoPro
         return STATUS_NOK;
 
     *pLenMsg = (uint32_t)lenMessage;
-    if(pLenMsg == 0)
+    if(*pLenMsg == 0)
         return STATUS_NOK;
 
     return STATUS_OK;
