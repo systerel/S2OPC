@@ -36,6 +36,7 @@
 #include "io_dispatch_mgr.h"
 
 #include "sopc_sc_events.h"
+#include "util_b2c.h"
 
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */
 #define DESIGNATE_NEW(T, ...)       \
@@ -278,9 +279,13 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest *pWriteReq)
             printf("Cannot find NodeId[wvi = %zd]\n", i+1);
             bVerif = false;
         }
-        address_space_bs__read_AddressSpace_Attribute_value(node, constants__e_aid_Value, (constants__t_Variant_i *)&pVariant);
+        address_space_bs__read_AddressSpace_Attribute_value(node, constants__e_ncl_Variable, constants__e_aid_Value, &sc, (constants__t_Variant_i *)&pVariant);
 
-        ssc = SOPC_Variant_Compare(pVariant, &lwv[i].Value.Value, &cmp);
+        if(sc == constants__e_sc_ok){
+            ssc = SOPC_Variant_Compare(pVariant, &lwv[i].Value.Value, &cmp);
+        }else{
+            util_status_code__B_to_C(sc, &ssc);
+        }
         /* The last request is redundant with the first, and because of the way our iterators are coded, it should be ignored. So its test is different. The request shall not be taken into account. */
         if(ssc != STATUS_OK || cmp != 0)
         {

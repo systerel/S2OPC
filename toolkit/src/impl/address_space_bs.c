@@ -201,10 +201,13 @@ void address_space_bs__readall_AddressSpace_Node(
  */
 void address_space_bs__read_AddressSpace_Attribute_value(
    const constants__t_Node_i address_space_bs__node,
+   const constants__t_NodeClass_i address_space_bs__ncl,
    const constants__t_AttributeId_i address_space_bs__aid,
+   constants__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant)
 {
     /* Note: conv_* variables are abstract, we must be confident */
+    *address_space_bs__sc = constants__e_sc_ok;
     switch(address_space_bs__aid)
     {
     case constants__e_aid_NodeId:
@@ -224,9 +227,15 @@ void address_space_bs__read_AddressSpace_Attribute_value(
         *address_space_bs__variant = util_variant__new_Variant_from_LocalizedText(&(address_space_bs__a_DisplayName)[address_space_bs__node]);
         break;
     case constants__e_aid_Value:
-        assert(address_space_bs__node >= offVarsTypes);
-        assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
-        *address_space_bs__variant = util_variant__new_Variant_from_Variant(&(address_space_bs__a_Value[address_space_bs__node - offVarsTypes]));
+        if(constants__e_ncl_Variable == address_space_bs__ncl ||
+            constants__e_ncl_VariableType == address_space_bs__ncl){
+            assert(address_space_bs__node >= offVarsTypes);
+            assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
+            *address_space_bs__variant = util_variant__new_Variant_from_Variant(&(address_space_bs__a_Value[address_space_bs__node - offVarsTypes]));
+        }else{
+            *address_space_bs__sc = constants__e_sc_bad_attribute_id_invalid;
+            *address_space_bs__variant = util_variant__new_Variant_from_Indet();
+        }
         break;
     default:
         /* TODO: maybe return NULL here, to be consistent with msg_read_response_bs__write_read_response_iter and service_read__treat_read_request behavior. */
