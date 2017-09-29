@@ -66,11 +66,6 @@ void SOPC_Toolkit_Clear();
  *  OpcUa_BadInvalidState if toolkit is not initialized, already
  *  configured or address space is already set, STATUS_NOK otherwise
  */
-// TODO: implement address space configuration
-/*SOPC_StatusCode SOPC_ToolkitServer_SetAddressSpaceConfig(void*                              addressSpace,
-                                                         SOPC_AddressSpaceNotif_Fct*        pAddSpaceAccessFct,
-                                                         SOPC_AddressSpaceLocalService_Fct* pLocalServiceFct); */
-
 SOPC_StatusCode SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
 
 
