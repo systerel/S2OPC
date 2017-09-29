@@ -120,27 +120,38 @@ OPERATIONS
     /* Reads any attribute and outputs a variant (valid or not)
      * As this function uses the util_variant__new_Variant_from_* functions, the value must be freed once used
      */
-    variant <-- read_AddressSpace_Attribute_value(node, aid) =
+    sc, variant <-- read_AddressSpace_Attribute_value(node, ncl, aid) =
     PRE
         node : t_Node_i         &
         node : t_Node           &
         node : dom(a_NodeId)    &
         node : dom(a_NodeClass) &
+        ncl : t_NodeClass_i &
+        ncl = a_NodeClass(node) &
         aid  : t_AttributeId_i  &
         aid  : t_AttributeId
     THEN
+        /* TODO: add BrowseName and DisplayName cases */
         SELECT aid = e_aid_NodeId THEN
+            sc,
             variant
-            :(
+            :(  sc = e_sc_ok &
                 variant : t_Variant_i &
                 variant = conv_NodeId_Variant(a_NodeId(node))
             )
         WHEN aid = e_aid_NodeClass THEN
-            variant := conv_NodeClass_Variant(a_NodeClass(node))
-        WHEN aid = e_aid_Value THEN
-            variant := a_Value(node)
+            variant := conv_NodeClass_Variant(a_NodeClass(node)) ||
+            sc := e_sc_ok
+        WHEN aid = e_aid_BrowseName THEN
+            variant := conv_NodeClass_Variant(a_NodeClass(node)) ||
+            sc := e_sc_ok
+        WHEN aid = e_aid_Value & 
+             (ncl = e_ncl_Variable or ncl = e_ncl_VariableType) THEN
+            variant := a_Value(node) ||
+            sc := e_sc_ok
         ELSE
-            variant := c_Variant_indet
+            variant := c_Variant_indet ||
+            sc := e_sc_bad_attribute_id_invalid
         END
     END
     ;

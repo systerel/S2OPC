@@ -105,16 +105,20 @@ INITIALISATION
 
 OPERATIONS
     /* a_NodeClass(node) and any_attribute(node) */
-    ncl, val <-- read_NodeClass_Attribute(node, aid) =
+    sc, ncl, val <-- read_NodeClass_Attribute(node, aid) =
     PRE
         node : t_Node_i &
         node : t_Node &
         aid : t_AttributeId_i &
         aid : t_AttributeId
     THEN
-            /* TODO: add user-access levels */
+        /* TODO: add user-access levels */
+        /* TODO: define cases of failure (sc /= e_sc_ok): value requested on non Variable* type */
+        sc,
         ncl,
-        val:(ncl : t_NodeClass_i &
+        val:(sc : t_StatusCode_i &
+             sc : t_StatusCode &
+             ncl : t_NodeClass_i &
              ncl = a_NodeClass(node) &
              val : t_Variant_i & /* TODO: must not be left undeterministic in concretisation, so there must be an _indet */
             (

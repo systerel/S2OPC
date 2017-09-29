@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 DEFINITIONS
+    /*TODO: add browse name and display name */
     AttributeID_Node_Variant == ({
         e_aid_NodeId |-> (a_NodeId;conv_NodeId_Variant),
         e_aid_NodeClass |-> (a_NodeClass;conv_NodeClass_Variant),

@@ -90,13 +90,15 @@ OPERATIONS
         THEN
             l_is_valid, l_node <-- readall_AddressSpace_Node(p_nid);
             IF l_is_valid = TRUE THEN
-                l_ncl, l_value <-- read_NodeClass_Attribute(l_node, p_aid);
-                IF  p_aid = e_aid_Value &
-                    l_ncl = e_ncl_Variable
-                THEN
-                    l_sc <-- get_Value_StatusCode(l_node)
-                ELSE
-                    l_sc := e_sc_ok
+                l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(l_node, p_aid);
+                IF l_sc = e_sc_ok THEN
+                    IF  p_aid = e_aid_Value &
+                        l_ncl = e_ncl_Variable
+                    THEN
+                        l_sc <-- get_Value_StatusCode(l_node)
+                    ELSE
+                        l_sc := e_sc_ok
+                    END
                 END;
                 set_read_response(p_resp_msg, p_rvi, l_value, l_sc);
                 read_AddressSpace_free_value(l_value)
