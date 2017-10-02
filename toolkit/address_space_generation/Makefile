@@ -40,7 +40,7 @@ $(PATHGENC)/%.c : %.xsl testView.xml
 	saxonb-xslt -xsl:$(PATHBUILD)/$< -s:testView.xml -o:$@
 
 $(PATHGENC)/test_%_addspace.c : test_%.xml add.xsl
-	ct.py add.xsl $(PATHBUILD)/add.xsl
+	./scripts/ct.py add.xsl $(PATHBUILD)/add.xsl
 	saxonb-xslt -xsl:$(PATHBUILD)/add.xsl -s:$< -o:$@
 
 $(PATHBUILD)/%.o: $(PATHGENC)/%.c
