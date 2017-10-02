@@ -1,0 +1,2 @@
+# Python pip install requirement file
+Mako==1.0.7
