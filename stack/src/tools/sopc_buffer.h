@@ -1,5 +1,5 @@
 /**
- *  \file buffer.h
+ *  \file sopc_buffer.h
  *
  *  \brief A buffer of bytes with a maximum size, length and position.
  */

@@ -41,6 +41,7 @@ SOPC_EventDispatcherManager* SOPC_EventDispatcherManager_CreateAndStart(SOPC_Eve
  *  \brief Add the event to be treated in the given event dispatcher manager. The event is provided with parameters for event treatment.
  *
  *  \param eventMgr  Pointer of the event dispatcher manager in which action will be added
+ *  \param event     The event integer value to add to the event dispatcher manager queue
  *  \param eltId     Identifier of the element on which the event shall be interpreted
  *  \param params    Generic parameter provided with the event
  *  \param auxParam  Auxiliary integer parameter provided with the event (e.g.: status code, etc.)

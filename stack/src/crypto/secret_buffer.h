@@ -93,7 +93,9 @@ ExposedBuffer * SecretBuffer_Expose(SecretBuffer *sec);
 /**
  * \brief           Unexposes the buffer.
  *
- * \param buf       The ExposedBuffer.
+ * \param buf       The ExposedBuffer
+ * \param sec       The SecretBuffer to store the data
+ *
  */
 void SecretBuffer_Unexpose(ExposedBuffer *buf, SecretBuffer *sec);
 
