@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['tcp_5flistener_5fclosed',['TCP_Listener_Closed',['../sopc__tcp__ua__listener_8h.html#ad7f6100f49cdbc96d86ab8f0f2eaa028aeb58755d584f5f5e8e27b4e61068f77b',1,'sopc_tcp_ua_listener.h']]],
+  ['tcp_5flistener_5ferror',['TCP_Listener_Error',['../sopc__tcp__ua__listener_8h.html#ad7f6100f49cdbc96d86ab8f0f2eaa028a5e0408a3016f538d89b7aa8f3ed98e26',1,'sopc_tcp_ua_listener.h']]],
+  ['tcp_5flistener_5fopened',['TCP_Listener_Opened',['../sopc__tcp__ua__listener_8h.html#ad7f6100f49cdbc96d86ab8f0f2eaa028a1a3c7b200955fdd4bddbe96dedc5d648',1,'sopc_tcp_ua_listener.h']]],
+  ['tcp_5flistenerevent_5fclosed',['TCP_ListenerEvent_Closed',['../sopc__tcp__ua__listener_8h.html#af9244c92062a0f00dd34ba0d563b0cc6aa9811c8543b75b71d9dc7d965684f588',1,'sopc_tcp_ua_listener.h']]],
+  ['tcp_5flistenerevent_5fconnect',['TCP_ListenerEvent_Connect',['../sopc__tcp__ua__listener_8h.html#af9244c92062a0f00dd34ba0d563b0cc6a95104819f98eab20f46f3e8551d08c1f',1,'sopc_tcp_ua_listener.h']]],
+  ['tcp_5flistenerevent_5ferror',['TCP_ListenerEvent_Error',['../sopc__tcp__ua__listener_8h.html#af9244c92062a0f00dd34ba0d563b0cc6ae3733c17a448788c7d5e5723f397a4d4',1,'sopc_tcp_ua_listener.h']]],
+  ['tcp_5flistenerevent_5fopened',['TCP_ListenerEvent_Opened',['../sopc__tcp__ua__listener_8h.html#af9244c92062a0f00dd34ba0d563b0cc6a78a3dcb88486e8c1f3e4797b6f4dc90a',1,'sopc_tcp_ua_listener.h']]],
+  ['tcp_5fua_5fconnection_5fconnected',['TCP_UA_Connection_Connected',['../sopc__tcp__ua__connection_8h.html#a21cfb18e296d498a62f35e8994a5a756ac8e0aacac8e8babe85d87af2142d79fb',1,'sopc_tcp_ua_connection.h']]],
+  ['tcp_5fua_5fconnection_5fconnecting',['TCP_UA_Connection_Connecting',['../sopc__tcp__ua__connection_8h.html#a21cfb18e296d498a62f35e8994a5a756af6b42662369b50abfc10f310a66b2eae',1,'sopc_tcp_ua_connection.h']]],
+  ['tcp_5fua_5fconnection_5fdisconnected',['TCP_UA_Connection_Disconnected',['../sopc__tcp__ua__connection_8h.html#a21cfb18e296d498a62f35e8994a5a756a2a05d73ac96c44c543a693767fab331d',1,'sopc_tcp_ua_connection.h']]],
+  ['tcp_5fua_5fconnection_5ferror',['TCP_UA_Connection_Error',['../sopc__tcp__ua__connection_8h.html#a21cfb18e296d498a62f35e8994a5a756a2492b21cd930eacb21aea54d08f35278',1,'sopc_tcp_ua_connection.h']]],
+  ['tcp_5fua_5fmessage_5facknowledge',['TCP_UA_Message_Acknowledge',['../sopc__msg__buffer_8h.html#a52655ecfe5c525b5916e06c8551778c8ab42f25a9aa02f3e0daf9e490ac66e77f',1,'sopc_msg_buffer.h']]],
+  ['tcp_5fua_5fmessage_5ferror',['TCP_UA_Message_Error',['../sopc__msg__buffer_8h.html#a52655ecfe5c525b5916e06c8551778c8a3a529ca74922364cdb0e54ef5f50ab97',1,'sopc_msg_buffer.h']]],
+  ['tcp_5fua_5fmessage_5fhello',['TCP_UA_Message_Hello',['../sopc__msg__buffer_8h.html#a52655ecfe5c525b5916e06c8551778c8a8b16c25990568a3f422e269108e2e327',1,'sopc_msg_buffer.h']]],
+  ['tcp_5fua_5fmessage_5finvalid',['TCP_UA_Message_Invalid',['../sopc__msg__buffer_8h.html#a52655ecfe5c525b5916e06c8551778c8a9951dfed78ad2500347e396b41b3be7f',1,'sopc_msg_buffer.h']]],
+  ['tcp_5fua_5fmessage_5fsecuremessage',['TCP_UA_Message_SecureMessage',['../sopc__msg__buffer_8h.html#a52655ecfe5c525b5916e06c8551778c8a226599f25fc104a07e82682bb23edf74',1,'sopc_msg_buffer.h']]],
+  ['tcp_5fua_5fmessage_5funknown',['TCP_UA_Message_Unknown',['../sopc__msg__buffer_8h.html#a52655ecfe5c525b5916e06c8551778c8a415f073424a265ade3e3ac7f12c15518',1,'sopc_msg_buffer.h']]],
+  ['tmp_5fdefaultpki',['TMP_DefaultPKI',['../wrapper__channel_8c.html#affb828ee77b6a888444714cba500cc25ab159b5732387fbe50a1602595d51172a',1,'TMP_DefaultPKI():&#160;wrapper_channel.c'],['../wrapper__endpoint_8c.html#affb828ee77b6a888444714cba500cc25ab159b5732387fbe50a1602595d51172a',1,'TMP_DefaultPKI():&#160;wrapper_endpoint.c']]],
+  ['tmp_5finvalid_5fpki',['TMP_Invalid_PKI',['../wrapper__channel_8c.html#affb828ee77b6a888444714cba500cc25a21289e8f205f3a55a1c0ea2adb68b86b',1,'TMP_Invalid_PKI():&#160;wrapper_channel.c'],['../wrapper__endpoint_8c.html#affb828ee77b6a888444714cba500cc25a21289e8f205f3a55a1c0ea2adb68b86b',1,'TMP_Invalid_PKI():&#160;wrapper_endpoint.c']]],
+  ['tmp_5fno_5fpki',['TMP_NO_PKI',['../wrapper__channel_8c.html#affb828ee77b6a888444714cba500cc25af60caa59045805b14a7fef8590311194',1,'TMP_NO_PKI():&#160;wrapper_channel.c'],['../wrapper__endpoint_8c.html#affb828ee77b6a888444714cba500cc25af60caa59045805b14a7fef8590311194',1,'TMP_NO_PKI():&#160;wrapper_endpoint.c']]],
+  ['tmp_5foverride',['TMP_Override',['../wrapper__channel_8c.html#affb828ee77b6a888444714cba500cc25a86056ba2d1a7b70ca694314c98595d33',1,'TMP_Override():&#160;wrapper_channel.c'],['../wrapper__endpoint_8c.html#affb828ee77b6a888444714cba500cc25a86056ba2d1a7b70ca694314c98595d33',1,'TMP_Override():&#160;wrapper_endpoint.c']]]
+];
