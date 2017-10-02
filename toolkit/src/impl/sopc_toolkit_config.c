@@ -175,11 +175,10 @@ SOPC_StatusCode SOPC_Toolkit_Configured(){
 
 void SOPC_Toolkit_Clear(){
     SOPC_StatusCode status = STATUS_OK;
-    // Do a synchronous connections closed (effective on client only)
     if(tConfig.initDone != false){
       Mutex_Lock(&closeAllConnectionsSync.mutex);
       closeAllConnectionsSync.requestedFlag = true;
-
+      // Do a synchronous connections closed (effective on client only)
       SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
                                            APP_TO_SE_CLOSE_ALL_CONNECTIONS,
                                            0,
@@ -201,6 +200,7 @@ void SOPC_Toolkit_Clear(){
       SOPC_StackConfiguration_Clear();
       SLinkedList_Delete(tConfig.scConfigs);
       SLinkedList_Delete(tConfig.epConfigs);
+      address_space_bs__UNINITIALISATION();
       appFct = NULL;
       pAddSpaceFct = NULL;
       tConfig.locked = false;

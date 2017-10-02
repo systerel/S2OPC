@@ -158,6 +158,13 @@ void address_space_bs__INITIALISATION(void)
 /* As INITIALISATION may use mallocs, needs an UNINIT */
 void address_space_bs__UNINITIALISATION(void)
 {
+    int32_t i = 0;
+    // Clear address space values if present (to free the values allocated on write service execution)
+    if(address_space_bs__a_Value != NULL){
+      for(i = 0; i <= address_space_bs__nVariables + address_space_bs__nVariableTypes; i++){
+        SOPC_Variant_Clear(&address_space_bs__a_Value[i]);
+      }
+    }
 }
 
 
