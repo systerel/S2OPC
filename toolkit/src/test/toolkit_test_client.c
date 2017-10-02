@@ -140,6 +140,8 @@ int main(void){
   // Client private key
   char* keyLocation = "./client_private/client.key";
 
+  // If security mode is set, load certificates and key
+
   if(scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None){
       // The certificates: load
       status = KeyManager_Certificate_CreateFromFile(certificateLocation, &crt_cli);
@@ -181,8 +183,7 @@ int main(void){
       }
   }
 
-    // Init PKI provider and parse certificate and private key
-    // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
+    // Init PKI provider with certificate authority
   if(STATUS_OK == status){
       if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki)){
           printf(">>Stub_Client: Failed to create PKI\n");
@@ -203,6 +204,7 @@ int main(void){
     }
   }
 
+  // Set an address space (to could check test result valid)
   if(STATUS_OK == status){
     // NECESSARY ONLY FOR TEST PURPOSES: a client should not define an @ space in a nominal case
     status = SOPC_ToolkitServer_SetAddressSpaceConfig(&addressSpace);    
@@ -213,6 +215,7 @@ int main(void){
     }
   }
 
+  // Configure the secure channel connection to use and retrieve channel configuration index
   if(STATUS_OK == status){
     channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
     if(channel_config_idx != constants__c_channel_config_idx_indet){
@@ -227,17 +230,13 @@ int main(void){
     }
   }
 
-  /* Create a session (and underlying secure channel if necessary).
-
-     Note: in current version endpoint is managed through ENDPOINT_URL
-     variable and parameter has no effect.
-  */
+  /* Asynchronous request to create a session (and underlying secure channel if necessary). */
   if(STATUS_OK == status){
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
                                                   APP_TO_SE_ACTIVATE_SESSION,
-                                                  channel_config_idx,
-                                                  NULL, // TMP ? => user auth data ?
-                                                  user, // TMP: user integer as data
+                                                  channel_config_idx, // Channel configuration index
+                                                  NULL,
+                                                  user,
                                                   "Services: activating session !");
     if(status == STATUS_OK){
         printf(">>Test_Client_Toolkit: Creating/Activating session: OK\n");
@@ -311,8 +310,8 @@ int main(void){
     // msg freed when sent
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
                                                   APP_TO_SE_SEND_SESSION_REQUEST,
-                                                  session,
-                                                  pWriteReq,
+                                                  session, // session id
+                                                  pWriteReq, // write request structure pointer
                                                   0,
                                                   "Services: sending write request !");
 
@@ -350,8 +349,8 @@ int main(void){
     // msg freed when sent
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
                                                   APP_TO_SE_SEND_SESSION_REQUEST,
-                                                  session,
-                                                  getReadRequest_verif_message(),
+                                                  session, // session id
+                                                  getReadRequest_verif_message(), // read request structure pointer
                                                   0,
                                                   "Services: sending read request !");
 
@@ -398,9 +397,16 @@ int main(void){
          sessionClosed == false &&
          loopCpt * sleepTimeout <= loopTimeout);
 
-  address_space_bs__UNINITIALISATION();
-
   SOPC_Toolkit_Clear();
+
+  // Clear locally allocated memory
+  if(scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None){
+      KeyManager_Certificate_Free(crt_cli);
+      KeyManager_Certificate_Free(crt_srv);
+      KeyManager_AsymmetricKey_Free(priv_cli);
+      KeyManager_Certificate_Free(crt_ca);
+      PKIProviderStack_Free(pki);
+  }
 
   if(STATUS_OK == status && test_results_get_service_result() != false){
     printf(">>Test_Client_Toolkit: read request received ! \n");

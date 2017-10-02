@@ -40,15 +40,15 @@
 #include "crypto_provider.h"
 #include "pki_stack.h"
 
-static int endpointClosed = FALSE;
-static bool secuActive = !FALSE;
+static int endpointClosed = false;
+static bool secuActive = !false;
 
 void Test_ComEvent_Fct(SOPC_App_Com_Event event,
                          void*              param,
                          SOPC_StatusCode    status){
   if(event == SE_CLOSED_ENDPOINT){
     printf("<Test_Server_Toolkit: closed endpoint event: OK\n");
-    endpointClosed = !FALSE;
+    endpointClosed = !false;
   }else{
     printf("<Test_Server_Toolkit: unexpected endpoint event %d : NOK\n", event);
   }
@@ -66,7 +66,12 @@ int main(void)
   // Counter to stop waiting on timeout
   uint32_t loopCpt = 0;
 
-  // Secu policy configuration: empty
+  // Secu policy configuration: 
+  static Certificate * serverCertificate = NULL;
+  static AsymmetricKey *  asymmetricKey = NULL;
+  static Certificate * authCertificate = NULL;
+  static PKIProvider * pkiProvider = NULL;
+
   SOPC_SecurityPolicy secuConfig[3];
   SOPC_String_Initialize(&secuConfig[0].securityPolicy);
   SOPC_String_Initialize(&secuConfig[1].securityPolicy);
@@ -91,11 +96,7 @@ int main(void)
 
   // Init unique endpoint structure
   epConfig.endpointURL = ENDPOINT_URL;
-  if (secuActive) {
-      static Certificate * serverCertificate;
-      static AsymmetricKey *  asymmetricKey;
-      static Certificate * authCertificate;
-      static PKIProvider * pkiProvider;
+  if (secuActive != false){
 
       status = KeyManager_Certificate_CreateFromFile("./server_public/server.der", &serverCertificate);
       epConfig.serverCertificate = serverCertificate;
@@ -140,6 +141,7 @@ int main(void)
     }
   }
 
+  // Define server address space 
   if(STATUS_OK == status){
     status = SOPC_ToolkitServer_SetAddressSpaceConfig(&addressSpace);    
     if(STATUS_OK != status){
@@ -149,6 +151,7 @@ int main(void)
     }
   }
 
+  // Add endpoint description configuration
   if(STATUS_OK == status){
     epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);    
     if(epConfigIdx != constants__c_endpoint_config_idx_indet){
@@ -163,6 +166,7 @@ int main(void)
     }
   }
 
+  // Asynchronous request to open the endpoint
   if(STATUS_OK == status){
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
                                                   APP_TO_SE_OPEN_ENDPOINT,
@@ -177,15 +181,17 @@ int main(void)
     }
   }
 
+  // Run the server until timeout or notification that endpoint is closed
   loopCpt = 0;
   loopTimeout = 5000;
-  while (STATUS_OK == status && endpointClosed == FALSE && loopCpt * sleepTimeout <= loopTimeout)
+  while (STATUS_OK == status && endpointClosed == false && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
         SOPC_Sleep(sleepTimeout);
     }
 
+  // Asynchronous request to close the endpoint
   SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
                                        APP_TO_SE_CLOSE_ENDPOINT,
                                        1,
@@ -193,9 +199,10 @@ int main(void)
                                        0,
                                        "Services: Endpoint closing !");
 
+  // Wait until endpoint is closed
   loopCpt = 0;
   loopTimeout = 1000;
-  while (STATUS_OK == status && endpointClosed == FALSE && loopCpt * sleepTimeout <= loopTimeout)
+  while (STATUS_OK == status && endpointClosed == false && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
@@ -206,9 +213,7 @@ int main(void)
     status = OpcUa_BadTimeout;
   }
 
-  address_space_bs__UNINITIALISATION();
-  
-
+  // Clear the toolkit configuration and stop toolkit threads
   SOPC_Toolkit_Clear();
 
   if(STATUS_OK == status){
@@ -217,9 +222,19 @@ int main(void)
     printf("<Test_Server_Toolkit final result: NOK with status = '%X'\n", status);
   }
 
+  // Deallocate locally allocated data
+
   SOPC_String_Clear(&secuConfig[0].securityPolicy);
   SOPC_String_Clear(&secuConfig[1].securityPolicy);
   SOPC_String_Clear(&secuConfig[2].securityPolicy);
+
+  
+  if (secuActive != false) {
+      KeyManager_Certificate_Free(serverCertificate);
+      KeyManager_AsymmetricKey_Free(asymmetricKey);
+      KeyManager_Certificate_Free(authCertificate);
+      PKIProviderStack_Free(pkiProvider);
+  }
 
   return status;
 }
