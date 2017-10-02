@@ -58,6 +58,7 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
     OpcUa_WriteValue *lwv = (OpcUa_WriteValue *)malloc(N_VARS*sizeof(OpcUa_WriteValue));
     size_t i;
     SOPC_ByteString buf;
+    SOPC_ByteString_Initialize(&buf);
     uint32_t j;
 
     if(NULL == lwv)

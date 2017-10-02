@@ -322,6 +322,9 @@ void session_core_1_bs__set_session_state_closed(const constants__t_session_i se
       free(token);
       unique_session.session_core_1_bs__session_token = constants__c_session_token_indet;
     }
+    SOPC_ByteString_Clear(&unique_session.NonceServer);
+    SOPC_ByteString_Clear(&unique_session.NonceClient);
+    OpcUa_SignatureData_Clear(&unique_session.SignatureData);
     unique_session.session_core_1_bs__channel = constants__c_channel_indet;
   }
 }
@@ -436,9 +439,7 @@ void session_core_1_bs__server_create_session_req_do_crypto(
         /* Ask the CryptoProvider for LENGTH_NONCE random bytes */
         SOPC_ByteString_Clear(pNonce);
         pNonce->Length = LENGTH_NONCE;
-        pNonce->Data = malloc(sizeof(SOPC_Byte)*pNonce->Length); /* TODO: This should be cleared and freed with session */
-        if(NULL == pNonce->Data)
-            return;
+
         if(STATUS_OK != CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data))
             /* TODO: Should we clean half allocated things? */
             return;
@@ -465,8 +466,11 @@ void session_core_1_bs__server_create_session_req_do_crypto(
         if(STATUS_OK != CryptoProvider_AsymmetricSign(pProvider,
                                                       pToSign, lenToSign,
                                                       pECfg->serverKey,
-                                                      pSign->Signature.Data, pSign->Signature.Length))
+                                                      pSign->Signature.Data, pSign->Signature.Length)){
+            free(pToSign);
             return;
+        }
+        free(pToSign);
         /* c) Prepare the OpcUa_SignatureData */
         SOPC_String_Clear(&pSign->Algorithm);
         if(STATUS_OK != SOPC_String_CopyFromCString(&pSign->Algorithm, CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider)))
@@ -550,6 +554,7 @@ void session_core_1_bs__client_activate_session_req_do_crypto(
             return;
         memcpy(pToSign, serverCert.Data, serverCert.Length);
         memcpy(pToSign+serverCert.Length, serverNonce->Data, serverNonce->Length);
+        SOPC_ByteString_Clear(&serverCert);
         /* b) Sign and store the signature in pSign */
         SOPC_ByteString_Clear(&pSign->Signature);
         if(STATUS_OK != CryptoProvider_AsymmetricGetLength_Signature(pProvider, pSCCfg->key_priv_cli, (uint32_t *)&pSign->Signature.Length))
@@ -560,8 +565,11 @@ void session_core_1_bs__client_activate_session_req_do_crypto(
         if(STATUS_OK != CryptoProvider_AsymmetricSign(pProvider,
                                                       pToSign, lenToSign,
                                                       pSCCfg->key_priv_cli,
-                                                      pSign->Signature.Data, pSign->Signature.Length))
+                                                      pSign->Signature.Data, pSign->Signature.Length)){
+            free(pToSign);
             return;
+        }
+        free(pToSign);
         /* c) Prepare the OpcUa_SignatureData */
         SOPC_String_Clear(&pSign->Algorithm);
         if(STATUS_OK != SOPC_String_CopyFromCString(&pSign->Algorithm, CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider)))
@@ -626,9 +634,7 @@ void session_core_1_bs__client_create_session_req_do_crypto(
         /* Ask the CryptoProvider for LENGTH_NONCE random bytes */
         SOPC_ByteString_Clear(pNonce);
         pNonce->Length = LENGTH_NONCE;
-        pNonce->Data = malloc(sizeof(SOPC_Byte)*pNonce->Length);
-        if(NULL == pNonce->Data)
-            return;
+
         if(STATUS_OK != CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data))
             /* TODO: Should we clean half allocated things? */
             return;
@@ -829,6 +835,8 @@ void session_core_1_bs__server_activate_session_check_crypto(
 
     if(*session_core_1_bs__valid != false){
       // renew the server Nonce
+      free(pNonce->Data);
+      pNonce->Data = NULL;
       assert(STATUS_OK == CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data));
     }
 
