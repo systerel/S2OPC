@@ -8,7 +8,10 @@ minimal OPC UA Toolkit and a cryptographic library.
 Those elements are provided in the following directories:
 - stack: the OPC UA Stack source code, unit tests and example tests
 - toolkit: the OPC UA Toolkit model, source code and example tests
+- toolkit/address_space_generation: XSL script for address space generation 
+  and already generated address space for tests
 - libraries: the cryptographic libraries provided (only mbedtls)
+- validation: validation test of server using FreeOpcUa python client
 - bin: test binaries for OPC UA Stack and Toolkit (Linux 64 bits only)
 - install_stack: local installation of the OPC UA stack static library
   and headers
@@ -53,20 +56,32 @@ INGOPCS OPC UA Stack features
 INGOPCS OPC UA Toolkit features
 ===============================
 - Common features:
-  * Static configuration: single endpoint
-  * Security policy and mode can be used with None value only
+  * Asynchronous user application API for introduction of new architecture
+  * Available security policy (encryption schemes) with any security mode:
+    > http://opcfoundation.org/UA/SecurityPolicy#None,
+    > http://opcfoundation.org/UA/SecurityPolicy#Basic256,
+    > http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256.
 
-- Client side:
+- Client side (e.g.: toolkit/src/test/toolkit_test_client.c):
+  * 1 Secure Channel configuration on Toolkit initialization
   * Activate a session with an anonymous user
   * Send a read request
   * Send a write request
+  * Send a browse request
 
-- Server side:
- * Static address space defined with 1008 different nodes
+- Server side (e.g.: toolkit/src/test/toolkit_test_server.c):
+ * 1 Endpoint configuration on Toolkit initialization
+ * Address space generation and configuration on Toolkit intiialization:
+   > XSL script to generate a C code address space structure from XML
+     complying with https://opcfoundation.org/UA/schemas/1.03/UANodeSet.xsd
+     and with generation restrictions (e.g.: no array of values, etc.)
+   > Generated address spaces for validation tests
  * Accepts activation of a session with an anonymous user
  * Accepts to treat one service request at the same time:
    > Read service
    > Write service
+   > Browse service (simplified: no continuation point)
+   > GetEndpoints service (simplified: create session fields + server certificate)
 
 INGOPCS OPC UA Stack and Toolkit tests
 ======================================
@@ -87,11 +102,14 @@ Run all tests:
 - Tests results are provided in bin/\*.tap files and shall indicate
   "Passed" status for each test
 
-Run a particular test (bin directory):
+Run a particular test (bin/ directory):
 - OPC UA Stack unit tests: execute ./check_stack
 - OPC UA Stack client/server example: execute ./stub_server_ingopcs
   and then ./stub_client_ingopcs in parallel
 - OPC UA Toolkit read service test: execute ./toolkit_test_read
 - OPC UA Toolkit write service test: execute ./toolkit_test_write
-- OPC UA Toolkit client/server session and read service example:
+- OPC UA Toolkit client/server session and read/write service example:
   execute ./toolkit_test_server and then ./toolkit_test_client in parallel
+- OPC UA toolkit server and read / write / browse service validation:
+  execute ./toolkit_test_server and python3 client.py in validation/ directory
+  (depends on FreeOpcUa python client available on github)
