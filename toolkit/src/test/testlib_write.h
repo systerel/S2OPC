@@ -22,8 +22,7 @@
 
 #include <stdbool.h>
 
-#include "sopc_sc_events.h"
-
+#include "sopc_types.h"
 
 /**
  * Generates a new WriteRequest. Must be coherent with current Address Space (see gen_addspace.c).

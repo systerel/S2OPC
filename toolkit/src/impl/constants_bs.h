@@ -52,7 +52,7 @@ typedef void * constants_bs__t_byte_buffer_i;
 #define constants_bs__t_endpoint_config_idx_i t_entier4
 typedef void * constants_bs__t_msg_header_i;
 typedef void * constants_bs__t_msg_i;
-typedef void * constants_bs__t_request_context_i;
+#define constants_bs__t_request_context_i t_entier4
 #define constants_bs__t_request_handle_i t_entier4
 #define constants_bs__t_session_i t_entier4
 typedef void * constants_bs__t_session_token_i;

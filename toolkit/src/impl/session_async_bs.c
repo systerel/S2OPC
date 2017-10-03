@@ -19,7 +19,6 @@
 
 #include "sopc_services_events.h"
 #include "sopc_toolkit_config.h"
-#include "sopc_sc_events.h"
 #include "util_b2c.h"
 
 static constants__t_session_i unique_session_to_activate = constants__c_session_indet;

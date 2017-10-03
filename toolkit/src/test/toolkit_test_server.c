@@ -22,7 +22,6 @@
 
 #include "sopc_stack_config.h"
 #include "sopc_time.h"
-#include "sopc_endpoint.h"
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_encodeable.h"
@@ -32,7 +31,6 @@
 
 #include "wrap_read.h"
 
-#include "sopc_sc_events.h"
 #include "add.h"
 
 #include "crypto_profiles.h"
@@ -82,16 +80,16 @@ int main(void)
 
       status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
                                            SecurityPolicy_None_URI);
-      secuConfig[0].securityModes = SECURITY_MODE_NONE_MASK;
+      secuConfig[0].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
       if(STATUS_OK == status){
           status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy,
                                                SecurityPolicy_Basic256_URI);
-          secuConfig[1].securityModes = SECURITY_MODE_SIGN_MASK;
+          secuConfig[1].securityModes = SOPC_SECURITY_MODE_SIGN_MASK;
       }
       if(STATUS_OK == status){
         status = SOPC_String_AttachFromCstring(&secuConfig[2].securityPolicy,
                                              SecurityPolicy_Basic256Sha256_URI);
-        secuConfig[2].securityModes = SECURITY_MODE_SIGNANDENCRYPT_MASK;                      
+        secuConfig[2].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
       }
   }
 

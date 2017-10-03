@@ -31,7 +31,6 @@
 
 #include "constants_bs.h"
 
-#include "sopc_sc_events.h"
 #include "sopc_encoder.h"
 
 /*------------------------

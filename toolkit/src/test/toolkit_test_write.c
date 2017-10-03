@@ -28,7 +28,6 @@
 #include "toolkit_header_init.h"
 #include "address_space_bs.h"
 #include "testlib_write.h"
-#include "sopc_sc_events.h"
 #include "sopc_toolkit_config_internal.h"
 #include "add.h"
 

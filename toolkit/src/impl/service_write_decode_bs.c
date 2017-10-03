@@ -25,7 +25,6 @@
 #include "service_write_decode_bs.h"
 
 #include "sopc_types.h"
-#include "sopc_sc_events.h"
 #include "address_space_impl.h" /* e_aid_* */
 
 

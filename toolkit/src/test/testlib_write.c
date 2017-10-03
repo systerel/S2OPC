@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "testlib_write.h"
 #include "address_space_impl.h"
@@ -34,7 +35,6 @@
 #include "address_space_bs.h"
 #include "io_dispatch_mgr.h"
 
-#include "sopc_sc_events.h"
 #include "util_b2c.h"
 
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */

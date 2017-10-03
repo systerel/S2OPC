@@ -29,8 +29,6 @@
 
 #include "sopc_types.h"
 
-#include "sopc_sc_events.h"
-
 /*------------------------
    INITIALISATION Clause
   ------------------------*/

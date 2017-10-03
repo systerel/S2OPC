@@ -16,11 +16,10 @@
  */
 
 #include <stdlib.h>
+#include <assert.h>
 
 #include "util_discovery_services.h"
 #include "sopc_base_types.h"
-#include "sopc_endpoint.h"
-#include "sopc_sc_events.h"
 #include "sopc_toolkit_config.h"
 
 constants__t_StatusCode_i  build_endPoints_Descriptions(const constants__t_endpoint_config_idx_i endpoint_config_idx,
@@ -73,14 +72,14 @@ constants__t_StatusCode_i  build_endPoints_Descriptions(const constants__t_endpo
 		newEndPointDescription.SecurityPolicyUri = currentSecurityPolicy.securityPolicy;
 
 		// Add an endPoint description per security mode
-		if((SECURITY_MODE_NONE_MASK & securityModes) != 0){
+		if((SOPC_SECURITY_MODE_NONE_MASK & securityModes) != 0){
 			newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_None;
 			newEndPointDescription.SecurityLevel = 0;
 			My_OpcUa_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
 			nbEndpointDescription++;
 		}
 
-		if((SECURITY_MODE_SIGN_MASK & securityModes) != 0){
+		if((SOPC_SECURITY_MODE_SIGN_MASK & securityModes) != 0){
 			newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_Sign;
 			newEndPointDescription.SecurityLevel = 1;
                         /* Copy server certificate */
@@ -95,7 +94,7 @@ constants__t_StatusCode_i  build_endPoints_Descriptions(const constants__t_endpo
 			nbEndpointDescription++;
 		}
 
-		if((SECURITY_MODE_SIGNANDENCRYPT_MASK & securityModes) != 0){
+		if((SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK & securityModes) != 0){
 			newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
 			newEndPointDescription.SecurityLevel = 1;
                         /* Copy server certificate */

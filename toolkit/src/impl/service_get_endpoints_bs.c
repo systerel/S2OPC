@@ -25,7 +25,6 @@
 #include "service_get_endpoints_bs.h"
 #include "util_discovery_services.h"
 
-#include "sopc_sc_events.h"
 #include "sopc_types.h"
 
 #include <stdbool.h>

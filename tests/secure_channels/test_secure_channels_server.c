@@ -18,8 +18,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <assert.h>
 
-#include "sopc_endpoint.h"
 #include "sopc_time.h"
 #include "crypto_profiles.h"
 #include "key_manager.h"
@@ -27,7 +27,6 @@
 
 #include "stub_sc_sopc_services_api.h"
 #include "sopc_services_events.h"
-#include "sopc_sc_events.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"

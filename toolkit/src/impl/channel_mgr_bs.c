@@ -23,10 +23,10 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#include "sopc_secure_channels_api.h"
+
 #include "sopc_types.h"
 #include "crypto_profiles.h"
-#include "sopc_channel.h"
-#include "sopc_endpoint.h"
 
 #include "io_dispatch_mgr.h"
 #include "channel_mgr_bs.h"
@@ -68,16 +68,13 @@ void channel_mgr_bs__cli_open_secure_channel(
   if(channel_mgr_bs__config_idx != constants__c_channel_config_idx_indet){
     config = SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__config_idx);
     if(NULL != config){
-      if(STATUS_OK == SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                                           SE_TO_SC_CONNECT,
-                                                           channel_mgr_bs__config_idx,
-                                                           (void*) config,
-                                                           0,
-                                                           "Services request connection to a SC !")){
+        SOPC_SecureChannels_EnqueueEvent(SC_CONNECT,
+                                         channel_mgr_bs__config_idx,
+                                         NULL,
+                                         0);
         unique_channel.isClient = true;
         unique_channel.configIdx = channel_mgr_bs__config_idx;    
         *channel_mgr_bs__bres = true;
-      }
     }
   }
 }
@@ -163,30 +160,14 @@ void channel_mgr_bs__send_channel_msg_buffer(
    const constants__t_byte_buffer_i channel_mgr_bs__buffer,
    const constants__t_request_context_i channel_mgr_bs__request_context) {
 
-  SOPC_StatusCode status = STATUS_NOK;
-
   if(channel_mgr_bs__channel == (t_entier4) unique_channel.id){
-    SOPC_SecureChannel_OpcUaMsg* msg = calloc(1, sizeof(SOPC_SecureChannel_OpcUaMsg));
-  
-    if(msg != NULL){
-      msg->msgBuffer = (SOPC_Buffer*) channel_mgr_bs__buffer;
-      if(channel_mgr_bs__request_context != constants__c_request_context_indet){
-        msg->optContext = channel_mgr_bs__request_context;
-      }
-      status = SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                                    SE_TO_SC_SERVICE_SND_MSG,
-                                                    channel_mgr_bs__channel,
-                                                    msg,
-                                                    unique_channel.configIdx,
-                                                    "Services mgr sends a message on channel !");    
-    }
-    
+      SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG,
+                                       channel_mgr_bs__channel,
+                                       channel_mgr_bs__buffer,
+                                       channel_mgr_bs__request_context);
+
   }
 
-  if(STATUS_OK != status){
-    printf("channel_mgr_bs__send_channel_msg_buffer\n");
-    exit(1);
-  }
 }
 
 void channel_mgr_bs__is_connected_channel(
@@ -245,12 +226,10 @@ void channel_mgr_bs__close_all_channel(t_bool * const channel_mgr_bs__bres){
   *channel_mgr_bs__bres = false;
   if(unique_channel.id != constants__c_channel_indet){
     if((!false) == unique_channel.isClient){
-      SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                           SE_TO_SC_DISCONNECT,
-                                           unique_channel.id, // Shall be endpoint config index
-                                           NULL,
-                                           0,
-                                           "Close channel !");
+        SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT,
+                                         unique_channel.id,
+                                         NULL,
+                                         0);
       unique_channel.disconnecting = true;
       *channel_mgr_bs__bres = true;
     }

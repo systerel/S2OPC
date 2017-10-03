@@ -38,8 +38,6 @@
 #include "address_space_impl.h"
 #include "testlib_read_response.h"
 
-#include "sopc_sc_events.h"
-
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */
 #define DESIGNATE_NEW(T, ...)       \
   memcpy(malloc(sizeof(T)),         \

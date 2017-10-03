@@ -20,8 +20,6 @@
 #include "sopc_user_app_itf.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_services_events.h"
-#include "sopc_sc_events.h"
-
 
 void service_response_cli_cb_bs__INITIALISATION(void)
 {

@@ -19,11 +19,13 @@
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
 #include "sopc_services_events.h"
-#include "sopc_sc_events.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+
+#include "sopc_sockets_api.h"
+#include "sopc_secure_channels_api.h"
 
 #include "sopc_stack_config.h"
 #include "sopc_mutexes.h"
@@ -110,39 +112,51 @@ void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
 SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != pAppFct){
-      appFct = pAppFct;
-      status = OpcUa_BadInvalidState;
-      if(tConfig.initDone == false){
-        Mutex_Initialization(&tConfig.mut);
-        Mutex_Lock(&tConfig.mut);
-        tConfig.initDone = true;
-        status = SOPC_StackConfiguration_Initialize();
-        if(STATUS_OK == status){
-          tConfig.scConfigs = SLinkedList_Create(0);
-        }
-        if(STATUS_OK == status && NULL != tConfig.scConfigs){
-          tConfig.epConfigs = SLinkedList_Create(0);
-        }
-        if(STATUS_OK == status && NULL != tConfig.epConfigs){
-          servicesEventDispatcherMgr =
-            SOPC_EventDispatcherManager_CreateAndStart(SOPC_ServicesEventDispatcher,
-                                                       "Services event dispatcher manager");
-        }
-        if(STATUS_OK == status && NULL != tConfig.epConfigs){
-          applicationEventDispatcherMgr =
-            SOPC_EventDispatcherManager_CreateAndStart(SOPC_ApplicationEventDispatcher,
-                                                       "(Services) Application event dispatcher manager");
-        }
-        SOPC_TEMP_InitEventDispMgr(servicesEventDispatcherMgr);
-        Mutex_Unlock(&tConfig.mut);
-        // Init async close management flag
-        Mutex_Initialization(&closeAllConnectionsSync.mutex);
-        Condition_Init(&closeAllConnectionsSync.cond);
+        appFct = pAppFct;
+        status = OpcUa_BadInvalidState;
+        if(tConfig.initDone == false){
+            status = STATUS_NOK;
+            Mutex_Initialization(&tConfig.mut);
+            Mutex_Lock(&tConfig.mut);
+            tConfig.initDone = true;
 
-        if(STATUS_OK != status){
-          SOPC_Toolkit_Clear();
+            status = SOPC_StackConfiguration_Initialize();
+
+            if(STATUS_OK == status){
+                status = STATUS_NOK; // Set to OK at the end
+                tConfig.scConfigs = SLinkedList_Create(0);
+            }
+
+            if(NULL != tConfig.scConfigs){
+              tConfig.epConfigs = SLinkedList_Create(0);
+            }
+
+            if(NULL != tConfig.epConfigs){
+                SOPC_Sockets_Initialize();
+                SOPC_SecureChannels_Initialize();
+                servicesEventDispatcherMgr =
+                    SOPC_EventDispatcherManager_CreateAndStart(SOPC_ServicesEventDispatcher,
+                                                               "Services event dispatcher manager");
+            }
+            if(NULL != servicesEventDispatcherMgr){
+              applicationEventDispatcherMgr =
+                  SOPC_EventDispatcherManager_CreateAndStart(SOPC_ApplicationEventDispatcher,
+                                                             "(Services) Application event dispatcher manager");
+            }
+
+            if(NULL != applicationEventDispatcherMgr){
+                status = STATUS_OK;
+            }
+
+            Mutex_Unlock(&tConfig.mut);
+            // Init async close management flag
+            Mutex_Initialization(&closeAllConnectionsSync.mutex);
+            Condition_Init(&closeAllConnectionsSync.cond);
+
+            if(STATUS_OK != status){
+              SOPC_Toolkit_Clear();
+            }
         }
-      }
     }
     return status;
 }
@@ -179,7 +193,7 @@ void SOPC_Toolkit_ClearScConfigElt(uint32_t id, void *val)
     if(scConfig != NULL && scConfig->isClientSc == false){
         // In case of server it is an internally created config
         // => only client certificate was specifically allocated
-        // KeyManager_Certificate_Free((Certificate*) scConfig->crt_cli);
+        KeyManager_Certificate_Free((Certificate*) scConfig->crt_cli);
         free(scConfig);
     }
 }
@@ -210,11 +224,12 @@ void SOPC_Toolkit_Clear(){
       Mutex_Clear(&closeAllConnectionsSync.mutex);
       Condition_Clear(&closeAllConnectionsSync.cond);
       Mutex_Lock(&tConfig.mut);
+      SOPC_Sockets_Clear();
+      SOPC_SecureChannels_Clear();
       status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);
       (void) status; // log
       status = SOPC_EventDispatcherManager_StopAndDelete(&applicationEventDispatcherMgr);
       (void) status; // log
-      SOPC_TEMP_ClearEventDispMgr();
       SOPC_StackConfiguration_Clear();
       SOPC_Toolkit_ClearScConfigs();
       SLinkedList_Delete(tConfig.epConfigs);
