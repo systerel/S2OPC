@@ -29,7 +29,6 @@
 #include "address_space_impl.h"
 #include "testlib_read_response.h"
 #include "address_space_impl.h"
-#include "gen_addspace.h"
 
 /**
  * You should free() the returned Variant* afterwards.

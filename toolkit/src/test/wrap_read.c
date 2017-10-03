@@ -36,7 +36,6 @@
 #include "msg_read_request_bs.h"
 
 #include "address_space_impl.h"
-#include "gen_addspace.h"
 #include "testlib_read_response.h"
 
 #include "sopc_sc_events.h"

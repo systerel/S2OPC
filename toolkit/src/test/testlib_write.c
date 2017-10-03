@@ -27,7 +27,6 @@
 #include <stdio.h>
 
 #include "testlib_write.h"
-#include "gen_addspace.h"
 #include "address_space_impl.h"
 #include "util_variant.h"
 
