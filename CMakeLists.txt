@@ -45,7 +45,6 @@ file(GLOB_RECURSE UASTACK_SRCS
     "stack/src/tools/*.c"
     "toolkit/src/genc/*.c"
     "toolkit/src/impl/*.c"
-    "toolkit/src/test/*.c"
     "src/configuration/*.c"
     "src/helpers/*.c"
     "src/sockets/*.c"
@@ -64,7 +63,6 @@ set(INGOPCS_PUBLIC_INCLUDES
     "stack/src/platforms"
     "toolkit/src/genc"
     "toolkit/src/impl"
-    "toolkit/src/test"
     "src/configuration"
     "src/helpers"
     "src/sockets"
@@ -119,18 +117,46 @@ endif()
 #    target_link_libraries(check_stack PRIVATE ingopcs check)
 #endif()
 
-# Toolkit
-#add_executable(toolkit_test_client "toolkit/src/test/toolkit_test_client.c")
-#target_link_libraries(toolkit_test_client PRIVATE ingopcs)
-#
-#add_executable(toolkit_test_server "toolkit/src/test/toolkit_test_server.c")
-#target_link_libraries(toolkit_test_server PRIVATE ingopcs)
-#
-#add_executable(toolkit_test_read "toolkit/src/test/toolkit_test_read.c")
-#target_link_libraries(toolkit_test_read PRIVATE ingopcs)
-#
-#add_executable(toolkit_test_write "toolkit/src/test/toolkit_test_write.c")
-#target_link_libraries(toolkit_test_write PRIVATE ingopcs)
+# Toolkit tests
+
+# Toolkit Client
+add_executable(toolkit_test_client "toolkit/src/test/toolkit_test_client.c"
+                                   "toolkit/src/test/wrap_read.c"
+                                   "toolkit/src/test/testlib_write.c"
+                                   "toolkit/src/test/test_results.c"
+                                   "toolkit/src/test/testlib_read_response.c"
+                                   "toolkit/address_space_generation/genc/test_read_write_addspace.c")
+target_link_libraries(toolkit_test_client PRIVATE ingopcs)
+target_include_directories(toolkit_test_client PRIVATE "toolkit/address_space_generation/"
+                                                       ${INGOPCS_PUBLIC_INCLUDES} 
+                                                       ${INGOPCS_PRIVATE_INCLUDES})
+
+# Toolkit Server
+add_executable(toolkit_test_server "toolkit/src/test/toolkit_test_server.c"
+                                   "toolkit/address_space_generation/genc/add.c")
+target_link_libraries(toolkit_test_server PRIVATE ingopcs)
+target_include_directories(toolkit_test_server PRIVATE "toolkit/address_space_generation/"
+                                                       ${INGOPCS_PUBLIC_INCLUDES} 
+                                                       ${INGOPCS_PRIVATE_INCLUDES})
+
+# Tookit read service
+add_executable(toolkit_test_read "toolkit/src/test/toolkit_test_read.c"
+                                 "toolkit/src/test/wrap_read.c"
+                                 "toolkit/src/test/testlib_read_response.c"
+                                 "toolkit/address_space_generation/genc/test_read_write_addspace.c")
+target_link_libraries(toolkit_test_read PRIVATE ingopcs)
+target_include_directories(toolkit_test_read PRIVATE "toolkit/address_space_generation/"
+                                                     ${INGOPCS_PUBLIC_INCLUDES} 
+                                                     ${INGOPCS_PRIVATE_INCLUDES})
+
+# Toolkit write service
+add_executable(toolkit_test_write "toolkit/src/test/toolkit_test_write.c"
+                                  "toolkit/src/test/testlib_write.c"
+                                  "toolkit/address_space_generation/genc/test_read_write_addspace.c")
+target_link_libraries(toolkit_test_write PRIVATE ingopcs)
+target_include_directories(toolkit_test_write PRIVATE "toolkit/address_space_generation/"
+                                                      ${INGOPCS_PUBLIC_INCLUDES} 
+                                                      ${INGOPCS_PRIVATE_INCLUDES})
 
 # Sockets layer (stubbed) tests
 file(GLOB_RECURSE SOCKETS_SRC
