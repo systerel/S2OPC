@@ -179,7 +179,7 @@ void SOPC_Toolkit_ClearScConfigElt(uint32_t id, void *val)
     if(scConfig != NULL && scConfig->isClientSc == false){
         // In case of server it is an internally created config
         // => only client certificate was specifically allocated
-        KeyManager_Certificate_Free((Certificate*) scConfig->crt_cli);
+        // KeyManager_Certificate_Free((Certificate*) scConfig->crt_cli);
         free(scConfig);
     }
 }

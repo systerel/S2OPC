@@ -231,6 +231,7 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
         scConConfig = malloc(sizeof(SOPC_SecureChannel_ConnectedConfig));
         assert(NULL != scConConfig);
         scConConfig->config = malloc(sizeof(SOPC_SecureChannel_Config));
+        scConConfig->config->isClientSc = false;
         scConConfig->config->crt_cli = clientCertificate;
         scConConfig->config->crt_srv = ((SC_ServerEndpoint*)endpoint)->serverCertificate;
         scConConfig->config->msgSecurityMode = securityMode;
@@ -290,6 +291,7 @@ SOPC_StatusCode TMP_SecureChannelEvent_CB (SOPC_Channel       channel,
         scConConfig = malloc(sizeof(SOPC_SecureChannel_ConnectedConfig));
         assert(NULL != scConConfig);
         scConConfig->config = malloc(sizeof(SOPC_SecureChannel_Config));
+        scConConfig->config->isClientSc = true;
         scConConfig->config->crt_cli = clientCon->clientCertificate;
         scConConfig->config->msgSecurityMode = clientCon->securityMode;
         scConConfig->config->reqSecuPolicyUri = SOPC_String_GetRawCString(&clientCon->securityPolicy);
