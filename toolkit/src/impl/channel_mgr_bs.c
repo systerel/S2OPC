@@ -31,7 +31,6 @@
 #include "io_dispatch_mgr.h"
 #include "channel_mgr_bs.h"
 
-#include "config_toolkit.h"
 #include "util_b2c.h"
 
 #include "sopc_toolkit_config.h"

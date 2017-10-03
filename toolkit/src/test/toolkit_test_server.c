@@ -27,7 +27,6 @@
 #include "opcua_statuscodes.h"
 #include "sopc_encodeable.h"
 
-#include "config_toolkit.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_services_events.h"
 
@@ -39,6 +38,8 @@
 #include "crypto_profiles.h"
 #include "crypto_provider.h"
 #include "pki_stack.h"
+
+#define ENDPOINT_URL "opc.tcp://localhost:4841"
 
 static int endpointClosed = false;
 static bool secuActive = !false;

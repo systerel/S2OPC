@@ -34,7 +34,6 @@
 #include "sopc_time.h"
 #include "sopc_types.h"
 #include "opcua_statuscodes.h"
-#include "config_toolkit.h"
 #include "crypto_profiles.h"
 #include "pki_stack.h"
 
@@ -46,6 +45,8 @@
 
 #include "sopc_sc_events.h"
 #include "add.h"
+
+#define ENDPOINT_URL "opc.tcp://localhost:4841"
 
 static bool sessionActivated = false;
 static bool sessionClosed = false;
