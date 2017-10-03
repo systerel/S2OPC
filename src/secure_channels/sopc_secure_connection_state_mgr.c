@@ -109,7 +109,7 @@ static bool SC_CloseConnection(uint32_t connectionIdx){
             scConnection->tcpSeqProperties.sentRequestIds = NULL;
 
             // Clear TCP asymmetric security properties
-            if(scConnection->serverAsymmSecuInfo.clientCertificate){
+            if(scConnection->serverAsymmSecuInfo.clientCertificate != NULL){
                 KeyManager_Certificate_Free(scConnection->serverAsymmSecuInfo.clientCertificate);
                 scConnection->serverAsymmSecuInfo.clientCertificate = NULL;
             }

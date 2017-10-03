@@ -2045,6 +2045,7 @@ static SOPC_StatusCode SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnec
                                                  SOPC_Buffer**          outputBuffer,
                                                  SOPC_StatusCode*       errorStatus){
     assert(scConnection!= NULL);
+    assert(inputBuffer != NULL);
     assert(outputBuffer != NULL);
     assert(errorStatus != NULL);
     SOPC_SecureChannel_Config* scConfig = NULL;
@@ -2071,6 +2072,7 @@ static SOPC_StatusCode SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnec
     if(isOPN != false){
         // In specific case of OPN the input buffer contains only message body
         // (without bytes reserved for headers since it is not static size)
+        assert(scConnection->tcpMsgProperties.sendBufferSize > 0);
         nonEncryptedBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.sendBufferSize);
     }else{
         // In other cases the input buffer contains the message body
@@ -2455,7 +2457,6 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                void*                          params,
                                int32_t                        auxParam){
     SOPC_Msg_Type sendMsgType = SOPC_MSG_TYPE_INVALID;
-    SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
     SOPC_Buffer* buffer = (SOPC_Buffer*) params;
     SOPC_Buffer* outputBuffer = NULL;
     SOPC_StatusCode errorStatus = STATUS_OK;
@@ -2465,112 +2466,119 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
     bool result = false;
     // True if socket will be closed after sending this message (ERR, CLO)
     bool socketWillClose = false;
-    assert(buffer != NULL);
-    switch(event){
-    /* Sockets events: */
-    case SOCKET_RCV_BYTES: 
-        if(SOPC_DEBUG_PRINTING != false){
-            printf("ScChunksMgr: SOCKET_RCV_BYTES\n");
-        }
-        /* id = secure channel connection index,
-           params = (SOPC_Buffer*) received buffer */
-        if(scConnection != NULL){
-            SC_Chunks_TreatReceivedBuffer(scConnection,
-                                          eltId,
-                                          buffer);
-        } // else: socket should already receive close request
-        break;
-    /* SC connection manager -> OPC UA chunks message manager */
-    // id = secure channel connection index,
-    // params = (SOPC_Buffer*) buffer positioned to message payload
-    // auxParam = request Id context if response
-    case INT_SC_SND_HEL: 
-        if(SOPC_DEBUG_PRINTING != false){
-            printf("ScChunksMgr: INT_SC_SND_HEL\n");
-        }
-        isSendCase = true;
-        isSendTcpOnly = true;
-        sendMsgType = SOPC_MSG_TYPE_HEL;
-        break;
-    case INT_SC_SND_ACK:
-        if(SOPC_DEBUG_PRINTING != false){
-            printf("ScChunksMgr: INT_SC_SND_ACK\n");
-        }
-        isSendCase = true;
-        isSendTcpOnly = true;
-        sendMsgType = SOPC_MSG_TYPE_ACK;
-        break;
-    case INT_SC_SND_ERR:
-        if(SOPC_DEBUG_PRINTING != false){
-            printf("ScChunksMgr: INT_SC_SND_ERR\n");
-        }
-        socketWillClose = true;
-        isSendCase = true;
-        isSendTcpOnly = true;
-        sendMsgType = SOPC_MSG_TYPE_ERR;
-        break;
-    case INT_SC_SND_OPN:
-        if(SOPC_DEBUG_PRINTING != false){
-            printf("ScChunksMgr: INT_SC_SND_OPN\n");
-        }
-        isSendCase = true;
-        isOPN = true;
-        sendMsgType = SOPC_MSG_TYPE_SC_OPN;
-        // Note: only message to be provided without size of header reserved (variable size for asymmetric secu header)
-        break;
-    case INT_SC_SND_CLO:
-        if(SOPC_DEBUG_PRINTING != false){
-            printf("ScChunksMgr: INT_SC_SND_CLO\n");
-        }
-        socketWillClose = true;
-        isSendCase = true;
-        sendMsgType = SOPC_MSG_TYPE_SC_CLO;
-        break;
-    case INT_SC_SND_MSG_CHUNKS:
-        if(SOPC_DEBUG_PRINTING != false){
-            printf("ScChunksMgr: INT_SC_SND_MSG_CHUNKS\n");
-        }
-        isSendCase = true;
-        sendMsgType = SOPC_MSG_TYPE_SC_MSG;
-        break;
-    default:
-        // Already filtered by secure channels API module
-        assert(false);
-    }
+    SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
 
-    if(isSendCase != false){
-        result = SC_Chunks_TreatSendBuffer(scConnection,
-                                           auxParam,
-                                           sendMsgType,
-                                           isSendTcpOnly,
-                                           isOPN,
-                                           buffer,
-                                           &outputBuffer,
-                                           &errorStatus);
-        if(result == false){
-            if(socketWillClose == false){
-                // Treat as prio events
-                SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FAILURE,
-                                                               eltId,
-                                                               params,
-                                                               errorStatus);
+    assert(buffer != NULL);
+
+    if(scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED){
+        switch(event){
+        /* Sockets events: */
+        case SOCKET_RCV_BYTES:
+            if(SOPC_DEBUG_PRINTING != false){
+                printf("ScChunksMgr: SOCKET_RCV_BYTES\n");
+            }
+            /* id = secure channel connection index,
+           params = (SOPC_Buffer*) received buffer */
+            if(scConnection != NULL){
+                SC_Chunks_TreatReceivedBuffer(scConnection,
+                        eltId,
+                        buffer);
+            } // else: socket should already receive close request
+            break;
+            /* SC connection manager -> OPC UA chunks message manager */
+            // id = secure channel connection index,
+            // params = (SOPC_Buffer*) buffer positioned to message payload
+            // auxParam = request Id context if response
+        case INT_SC_SND_HEL:
+            if(SOPC_DEBUG_PRINTING != false){
+                printf("ScChunksMgr: INT_SC_SND_HEL\n");
+            }
+            isSendCase = true;
+            isSendTcpOnly = true;
+            sendMsgType = SOPC_MSG_TYPE_HEL;
+            break;
+        case INT_SC_SND_ACK:
+            if(SOPC_DEBUG_PRINTING != false){
+                printf("ScChunksMgr: INT_SC_SND_ACK\n");
+            }
+            isSendCase = true;
+            isSendTcpOnly = true;
+            sendMsgType = SOPC_MSG_TYPE_ACK;
+            break;
+        case INT_SC_SND_ERR:
+            if(SOPC_DEBUG_PRINTING != false){
+                printf("ScChunksMgr: INT_SC_SND_ERR\n");
+            }
+            socketWillClose = true;
+            isSendCase = true;
+            isSendTcpOnly = true;
+            sendMsgType = SOPC_MSG_TYPE_ERR;
+            break;
+        case INT_SC_SND_OPN:
+            if(SOPC_DEBUG_PRINTING != false){
+                printf("ScChunksMgr: INT_SC_SND_OPN\n");
+            }
+            isSendCase = true;
+            isOPN = true;
+            sendMsgType = SOPC_MSG_TYPE_SC_OPN;
+            // Note: only message to be provided without size of header reserved (variable size for asymmetric secu header)
+            break;
+        case INT_SC_SND_CLO:
+            if(SOPC_DEBUG_PRINTING != false){
+                printf("ScChunksMgr: INT_SC_SND_CLO\n");
+            }
+            socketWillClose = true;
+            isSendCase = true;
+            sendMsgType = SOPC_MSG_TYPE_SC_CLO;
+            break;
+        case INT_SC_SND_MSG_CHUNKS:
+            if(SOPC_DEBUG_PRINTING != false){
+                printf("ScChunksMgr: INT_SC_SND_MSG_CHUNKS\n");
+            }
+            isSendCase = true;
+            sendMsgType = SOPC_MSG_TYPE_SC_MSG;
+            break;
+        default:
+            // Already filtered by secure channels API module
+            assert(false);
+        }
+
+        if(isSendCase != false){
+            result = SC_Chunks_TreatSendBuffer(scConnection,
+                    auxParam,
+                    sendMsgType,
+                    isSendTcpOnly,
+                    isOPN,
+                    buffer,
+                    &outputBuffer,
+                    &errorStatus);
+            if(result == false){
+                if(socketWillClose == false){
+                    // Treat as prio events
+                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FAILURE,
+                            eltId,
+                            params,
+                            errorStatus);
+                }else{
+                    if(SOPC_DEBUG_PRINTING){
+                        printf("Failed sending message type '%d' before socket closed\n", sendMsgType);
+                    }
+                }
             }else{
-                if(SOPC_DEBUG_PRINTING){
-                    printf("Failed sending message type '%d' before socket closed\n", sendMsgType);
+                // Require write of output buffer on socket
+                SOPC_Sockets_EnqueueEvent(SOCKET_WRITE,
+                        scConnection->socketIndex,
+                        (void*) outputBuffer,
+                        0);
+
+                if(buffer != outputBuffer){
+                    // If input buffer not reused for sending on socket: delete it
+                    SOPC_Buffer_Delete(buffer);
                 }
             }
-        }else{
-            // Require write of output buffer on socket
-            SOPC_Sockets_EnqueueEvent(SOCKET_WRITE,
-                                      scConnection->socketIndex,
-                                      (void*) outputBuffer,
-                                      0);
-
-            if(buffer != outputBuffer){
-                // If input buffer not reused for sending on socket: delete it
-                SOPC_Buffer_Delete(buffer);
-            }
         }
+    }else{ // SC not connected: ignore event and delete buffer data
+        SOPC_Buffer_Delete(buffer);
     }
 }
 
