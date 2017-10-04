@@ -3,13 +3,13 @@ WORKSPACE_DIR=.
 if [[ -n $1 ]]; then
     EXEC_DIR=$1
 else
-    EXEC_DIR=$WORKSPACE_DIR/out
+    EXEC_DIR=$WORKSPACE_DIR/build
 fi
 
 cd $EXEC_DIR
 # Create script for running stub_server in background and store exit code
 echo "#!/bin/bash
-./stub_server_ingopcs
+./test_secure_channels_server
 echo \$? > server.exitcode" > test_server.sh
 chmod +x test_server.sh
 
@@ -21,7 +21,7 @@ rm -f server.exitcode
 sleep 1 # Wait server started
 
 # Execute client side of the test and retrieve exit code
-./stub_client_ingopcs
+./test_secure_channels_client
 CLIENT_EXITCODE="$?"
 # Wait end of server side execution and retrieve exit code
 sleep 10
@@ -29,9 +29,9 @@ SERVER_EXITCODE=`cat server.exitcode`
 
 # Fullfil TAP result
 if [[ $CLIENT_EXITCODE -eq 0 && $SERVER_EXITCODE -eq 0 ]]; then
-    echo "ok 1 - test: stub_client_ingopcs / stub_server_ingopcs: Passed" > client_server_result.tap
+    echo "ok 1 - test: test_secure_channels_client / test_secure_channels_server: Passed" > client_server_result.tap
 else
-    echo "not ok 1 - test: stub_client_ingopcs / stub_server_ingopcs exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" > client_server_result.tap
+    echo "not ok 1 - test: test_secure_channels_client / test_secure_channels_server exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" > client_server_result.tap
 fi
 
 ## INGOPCS API VERSION: Sign
@@ -42,7 +42,7 @@ rm -f server.exitcode
 sleep 1 # Wait server started
 
 # Execute client side of the test and retrieve exit code
-./stub_client_ingopcs sign
+./test_secure_channels_client sign
 CLIENT_EXITCODE="$?"
 # Wait end of server side execution and retrieve exit code
 sleep 10
@@ -50,9 +50,9 @@ SERVER_EXITCODE=`cat server.exitcode`
 
 # Fullfil TAP result
 if [[ $CLIENT_EXITCODE -eq 0 && $SERVER_EXITCODE -eq 0 ]]; then
-    echo "ok 2 - test: stub_client_ingopcs sign / stub_server_ingopcs: Passed" >> client_server_result.tap
+    echo "ok 2 - test: test_secure_channels_client sign / test_secure_channels_server: Passed" >> client_server_result.tap
 else
-    echo "not ok 2 - test: stub_client_ingopcs sign / stub_server_ingopcs exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" >> client_server_result.tap
+    echo "not ok 2 - test: test_secure_channels_client sign / test_secure_channels_server exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" >> client_server_result.tap
 fi
 
 ## INGOPCS API VERSION: None
@@ -63,7 +63,7 @@ rm -f server.exitcode
 sleep 1 # Wait server started
 
 # Execute client side of the test and retrieve exit code
-./stub_client_ingopcs none
+./test_secure_channels_client none
 CLIENT_EXITCODE="$?"
 # Wait end of server side execution and retrieve exit code
 sleep 10
@@ -71,9 +71,9 @@ SERVER_EXITCODE=`cat server.exitcode`
 
 # Fullfil TAP result
 if [[ $CLIENT_EXITCODE -eq 0 && $SERVER_EXITCODE -eq 0 ]]; then
-    echo "ok 3 - test: stub_client_ingopcs none / stub_server_ingopcs: Passed" >> client_server_result.tap
+    echo "ok 3 - test: test_secure_channels_client none / test_secure_channels_server: Passed" >> client_server_result.tap
 else
-    echo "not ok 3 - test: stub_client_ingopcs none / stub_server_ingopcs exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" >> client_server_result.tap
+    echo "not ok 3 - test: test_secure_channels_client none / test_secure_channels_server exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" >> client_server_result.tap
 fi
 echo "1..3" >> client_server_result.tap
 
