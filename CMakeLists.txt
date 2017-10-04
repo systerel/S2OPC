@@ -70,12 +70,12 @@ target_link_libraries(ingopcs PUBLIC m)
 
 # Toolkit tests
 
-# Unit tests
+# Toolkit helpers unit tests
 if (NOT CMAKE_CROSSCOMPILING)
-    file(GLOB_RECURSE INTERNAL_TESTS_SRCS "stack/test/ingopcs/*.c")
-    add_executable(check_stack ${INTERNAL_TESTS_SRCS})
-    target_include_directories(check_stack PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
-    target_link_libraries(check_stack PRIVATE ingopcs check)
+    file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
+    add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
+    target_include_directories(check_helpers PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
+    target_link_libraries(check_helpers PRIVATE ingopcs check)
 endif()
 
 # Toolkit Client

@@ -24,7 +24,8 @@
 
 #include <stdlib.h>
 #include <check.h>
-#include "check_stack.h"
+
+#include "check_helpers.h"
 
 
 START_TEST(test_empty)
@@ -58,7 +59,6 @@ int main(void)
     srunner_add_suite(sr, tests_make_suite_crypto_B256());
     srunner_add_suite(sr, tests_make_suite_crypto_None());
     srunner_add_suite(sr, tests_make_suite_tools());
-    srunner_add_suite(sr, tests_make_suite_core_tools());
     srunner_add_suite(sr, tests_make_suite_threads());
 
     srunner_run_all(sr, CK_NORMAL);

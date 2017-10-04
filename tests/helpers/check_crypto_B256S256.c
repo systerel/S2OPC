@@ -26,8 +26,8 @@
 #include <stdlib.h> // malloc, free
 #include <check.h>
 
+#include "check_helpers.h"
 #include "hexlify.h"
-#include "check_stack.h"
 #include "crypto_provider.h"
 #include "crypto_profiles.h"
 #include "crypto_decl.h"

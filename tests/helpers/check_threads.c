@@ -25,8 +25,7 @@
 #include <stdlib.h>
 #include <check.h>
 
-#include "check_stack.h"
-
+#include "check_helpers.h"
 #include "opcua_statuscodes.h"
 
 #include "sopc_threads.h"
