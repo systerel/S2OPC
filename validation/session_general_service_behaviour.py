@@ -1,3 +1,6 @@
+#!/usr/bin/python3.4
+#-*-coding:Utf-8 -*
+
 # Copyright (C) 2017 Systerel and others.
 #
 # This program is free software: you can redistribute it and/or modify

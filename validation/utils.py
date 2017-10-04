@@ -5,6 +5,9 @@
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
+#!/usr/bin/python3.4
+#-*-coding:Utf-8 -*
+
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
 #
@@ -18,7 +21,6 @@
 
 import time
 import traceback
-
 
 def loop_until_kbdinterrupt(fRetryDelay, func, *args, **kwargs):
     """

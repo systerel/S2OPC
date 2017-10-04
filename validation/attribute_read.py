@@ -1,3 +1,6 @@
+#!/usr/bin/python3.4
+#-*-coding:Utf-8 -*
+
 # Copyright (C) 2017 Systerel and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,45 +18,39 @@
 
 
 from opcua.ua import QualifiedName, LocalizedText, XmlElement
+from common import Type_list, Initial_values_list
 
 def attribute_read_tests(client):
 
-    # Read tests
-    Type_list = ['Int64','UInt32','Double','String','ByteString','XmlElement']
-    Value_list = [-1000,1000,2.0,"String:INGOPCS","ByteString:INGOPCS".encode(),XmlElement(u"XmlElement:INGOPCS")]
-    try:
-        for (i,e) in enumerate(Type_list):
-            nid = 1000 + i + 1
-            print('Checking nid:', nid)
-            expectedBrowseName = QualifiedName(e,0)
-            expectedDisplayName = LocalizedText(u"{}_1dn".format(e))
-            expectedDescription = u"{}_1d".format(e)
-            expectedValue = Value_list[i]
-            node = client.get_node(nid)
+    for (i,e) in enumerate(Type_list):
+        nid = 1000 + i + 1
+        print('Checking nid:', nid)
+        expectedBrowseName = QualifiedName(e,0)
+        expectedDisplayName = LocalizedText(u"{}_1dn".format(e))
+        expectedDescription = u"{}_1d".format(e)
+        expectedValue = Initial_values_list[i]
+        node = client.get_node(nid)
 
-            # check value
-            value = node.get_value()
-            print(' Value for Node {:03d}:'.format(nid), value)
-            assert(value == expectedValue)
+        # check value
+        value = node.get_value()
+        print(' Value for Node {:03d}:'.format(nid), value)
+        assert(value == expectedValue)
 
-            # check browseName
-            browse_name = node.get_browse_name()
-            print('browse_name: ', browse_name)
-            assert(browse_name == expectedBrowseName)
+        # check browseName
+        browse_name = node.get_browse_name()
+        print('browse_name: ', browse_name)
+        assert(browse_name == expectedBrowseName)
 
-            # check display name
-            display_name = node.get_display_name()
-            assert(display_name == expectedDisplayName)
+        # check display name
+        display_name = node.get_display_name()
+        assert(display_name == expectedDisplayName)
 
-            # check node class
-            class_name = node.get_node_class()
-            assert(str("NodeClass.Variable")==str(class_name))
+        # check node class
+        class_name = node.get_node_class()
+        assert(str("NodeClass.Variable")==str(class_name))
 
-            # TODO: check data type
-            #data_type = node.get_data_type()
-            #print('data type: ', data_type)
+        # TODO: check data type
+        #data_type = node.get_data_type()
+        #print('data type: ', data_type)
 
-    finally:
-        client.disconnect()
-        print('Disconnected')
 

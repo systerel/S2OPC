@@ -1,3 +1,6 @@
+#!/usr/bin/python3.4
+#-*-coding:Utf-8 -*
+
 # Copyright (C) 2017 Systerel and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,11 +17,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from opcua import ua
+from opcua.ua import QualifiedName, LocalizedText, XmlElement
+from common import Type_list, Initial_values_list, New_values_list, Variant_List
 
 def attribute_write_values_tests(client):
 
-    n1 = client.get_node(10)
-    
-    n1.set_value(ua.Variant(23, ua.VariantType.Int64))
-    print('n1:', n1.get_value())
+    for (i,e) in enumerate(Type_list):
+        nid = 1000 + i + 1
+        print('Checking nid:', nid)
+        node = client.get_node(nid)
+  
+        # write new value
+        newValue = New_values_list[i]
+        node.set_value(ua.Variant(newValue, Variant_List[i]))
+
+        # check value
+        value = node.get_value()
+        print(' Value for Node {:03d}:'.format(nid), value)
+        print(' Expected Value for Node {:03d}:'.format(nid), newValue)
+        assert(value == newValue)
+
 
