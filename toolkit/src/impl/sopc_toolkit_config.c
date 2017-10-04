@@ -24,10 +24,10 @@
 #include <string.h>
 #include <assert.h>
 
+#include "sopc_helper_endianess_cfg.h"
 #include "sopc_sockets_api.h"
 #include "sopc_secure_channels_api.h"
 
-#include "sopc_stack_config.h"
 #include "sopc_mutexes.h"
 #include "sopc_time.h"
 #include "singly_linked_list.h"
@@ -39,16 +39,23 @@
 #include "util_b2c.h"
 
 static struct {
-    uint8_t     initDone;
-    uint8_t     locked;
-    Mutex       mut;
+    uint8_t               initDone;
+    uint8_t               locked;
+    Mutex                 mut;
     SLinkedList* scConfigs;
     SLinkedList* epConfigs;
+    /* OPC UA namespace and encodeable types */
+    SOPC_NamespaceTable*  nsTable;
+    SOPC_EncodeableType** encTypesTable;
+    uint32_t              nbEncTypesTable;
 } tConfig = {
     .initDone = false,
     .locked = false,
     .scConfigs = NULL,
     .epConfigs = NULL,
+    .nsTable = NULL,
+    .encTypesTable = NULL,
+    .nbEncTypesTable = 0,
 };
 
 // Structure used to close all connections in a synchronous way
@@ -120,12 +127,9 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
             Mutex_Lock(&tConfig.mut);
             tConfig.initDone = true;
 
-            status = SOPC_StackConfiguration_Initialize();
-
-            if(STATUS_OK == status){
-                status = STATUS_NOK; // Set to OK at the end
-                tConfig.scConfigs = SLinkedList_Create(0);
-            }
+            SOPC_Helper_EndianessCfg_Initialize();
+            Namespace_Initialize(tConfig.nsTable);
+            tConfig.scConfigs = SLinkedList_Create(0);
 
             if(NULL != tConfig.scConfigs){
               tConfig.epConfigs = SLinkedList_Create(0);
@@ -230,7 +234,14 @@ void SOPC_Toolkit_Clear(){
       (void) status; // log
       status = SOPC_EventDispatcherManager_StopAndDelete(&applicationEventDispatcherMgr);
       (void) status; // log
-      SOPC_StackConfiguration_Clear();
+
+      if(tConfig.encTypesTable != NULL){
+          free(tConfig.encTypesTable);
+      }
+      tConfig.nsTable = NULL;
+      tConfig.encTypesTable = NULL;
+      tConfig.nbEncTypesTable = 0;
+
       SOPC_Toolkit_ClearScConfigs();
       SLinkedList_Delete(tConfig.epConfigs);
       tConfig.epConfigs = NULL;
@@ -330,11 +341,18 @@ SOPC_StatusCode SOPC_ToolkitConfig_SetNamespaceUris(SOPC_NamespaceTable* nsTable
     if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
         if(false == tConfig.locked){
-          status = SOPC_StackConfiguration_SetNamespaceUris(nsTable);
+            status = STATUS_OK;
+            tConfig.nsTable = nsTable;
         }
         Mutex_Unlock(&tConfig.mut);
     }
     return status;
+}
+
+static uint32_t GetKnownEncodeableTypesLength(){
+    uint32_t result = 0;
+    for(result = 0; SOPC_KnownEncodeableTypes[result] != NULL; result++);
+    return result + 1;
 }
 
 SOPC_StatusCode SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTable,
@@ -343,7 +361,47 @@ SOPC_StatusCode SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTable,
     if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
         if(false == tConfig.locked){
-          status = SOPC_StackConfiguration_AddTypes(encTypesTable, nbTypes);
+            uint32_t idx = 0;
+            uint32_t nbKnownTypes = 0;
+            SOPC_EncodeableType** additionalTypes = NULL;
+
+            if(encTypesTable != NULL && nbTypes > 0 ){
+                status = STATUS_OK;
+                if(tConfig.encTypesTable == NULL){
+                    // known types to be added
+                    nbKnownTypes = GetKnownEncodeableTypesLength();
+                    // +1 for null value termination
+                    tConfig.encTypesTable = malloc(sizeof(SOPC_EncodeableType*) * (nbKnownTypes + nbTypes + 1));
+                    if(tConfig.encTypesTable == NULL ||
+                       tConfig.encTypesTable != memcpy(tConfig.encTypesTable,
+                                                       SOPC_KnownEncodeableTypes,
+                                                       nbKnownTypes * sizeof(SOPC_EncodeableType*)))
+                    {
+                        tConfig.encTypesTable = NULL;
+                    }else{
+                        additionalTypes = tConfig.encTypesTable;
+                        tConfig.nbEncTypesTable = nbKnownTypes;
+                    }
+                }else{
+                    // +1 for null value termination
+                    additionalTypes = realloc(tConfig.encTypesTable,
+                                              sizeof(SOPC_EncodeableType*) * tConfig.nbEncTypesTable + nbTypes + 1);
+                }
+
+                if(additionalTypes != NULL){
+                    tConfig.encTypesTable = additionalTypes;
+
+                    for(idx = 0; idx < nbTypes; idx++){
+                        tConfig.encTypesTable[tConfig.nbEncTypesTable + idx] = encTypesTable[idx];
+                    }
+                    tConfig.nbEncTypesTable += nbTypes;
+                    // NULL terminated table
+
+                }else{
+                    status = STATUS_NOK;
+                }
+            }
+            return status;
         }
         Mutex_Unlock(&tConfig.mut);
     }
@@ -356,7 +414,13 @@ SOPC_EncodeableType** SOPC_ToolkitConfig_GetEncodeableTypes()
     if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
         if(tConfig.locked != false){
-            res = SOPC_StackConfiguration_GetEncodeableTypes();
+            if (tConfig.encTypesTable != NULL && tConfig.nbEncTypesTable > 0){
+                // Additional types are present: contains known types + additional
+                res = tConfig.encTypesTable;
+            }else{
+                // No additional types: return static known types
+                res = SOPC_KnownEncodeableTypes;
+            }
         }
         Mutex_Unlock(&tConfig.mut);
     }
@@ -369,7 +433,7 @@ SOPC_NamespaceTable* SOPC_ToolkitConfig_GetNamespaces()
     if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
         if(tConfig.locked != false){
-            res = SOPC_StackConfiguration_GetNamespaces();
+            res = tConfig.nsTable;
         }
         Mutex_Unlock(&tConfig.mut);
     }

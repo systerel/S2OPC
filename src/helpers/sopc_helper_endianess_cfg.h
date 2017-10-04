@@ -15,21 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_PLATFORM_DEPS_H_
-#define SOPC_PLATFORM_DEPS_H_
-
-#include <stdint.h>
+#ifndef SOPC_HELPER_ENDIANESS_CFG_H_
+#define SOPC_HELPER_ENDIANESS_CFG_H_
 
 typedef enum {
-    P_Endianess_Undefined,
-    P_Endianess_LittleEndian,
-    P_Endianess_BigEndian
-} Endianess;
+    SOPC_Endianess_Undefined,
+    SOPC_Endianess_LittleEndian,
+    SOPC_Endianess_BigEndian
+} SOPC_Endianess;
 
 // Undefined before call to initialize
-extern Endianess endianess;
-extern Endianess floatEndianess;
+extern SOPC_Endianess sopc_endianess;
+extern SOPC_Endianess sopc_floatEndianess;
 
-void InitPlatformDependencies(void);
+void SOPC_Helper_EndianessCfg_Initialize(void);
 
-#endif /* SOPC_PLATFORM_DEPS_H_ */
+#endif /* SOPC_HELPER_ENDIANESS_CFG_H_ */

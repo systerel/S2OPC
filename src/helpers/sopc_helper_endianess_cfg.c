@@ -16,17 +16,19 @@
  */
 
 #include <assert.h>
-#include "platform_deps.h"
+#include <stdint.h>
 
-Endianess endianess  = P_Endianess_Undefined;
-Endianess floatEndianess = P_Endianess_Undefined;
+#include "sopc_helper_endianess_cfg.h"
 
-uint32_t little_endian(){
+SOPC_Endianess sopc_endianess  = SOPC_Endianess_Undefined;
+SOPC_Endianess sopc_floatEndianess = SOPC_Endianess_Undefined;
+
+static uint32_t little_endian(){
   uint32_t x = 0x0001;
   return (x == *((uint8_t *)&x));
 }
 
-uint32_t float_big_endian(){
+static uint32_t float_big_endian(){
     float f = -0.0;
     // Check if sign bit is the first
 // GCC version with binary constants extension
@@ -38,15 +40,15 @@ uint32_t float_big_endian(){
         return (0x80 & *((char*) &f)) == 0x80;
 }
 
-void InitPlatformDependencies(){
+void SOPC_Helper_EndianessCfg_Initialize(){
     if(little_endian() == 0){
-        endianess = P_Endianess_BigEndian;
+        sopc_endianess = SOPC_Endianess_BigEndian;
     }else{
-        endianess = P_Endianess_LittleEndian;
+        sopc_endianess = SOPC_Endianess_LittleEndian;
     }
     if(float_big_endian() == 0){
-        floatEndianess = P_Endianess_LittleEndian;
+        sopc_floatEndianess = SOPC_Endianess_LittleEndian;
     }else{
-        floatEndianess = P_Endianess_BigEndian;
+        sopc_floatEndianess = SOPC_Endianess_BigEndian;
     }
 }

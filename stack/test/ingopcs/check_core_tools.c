@@ -27,7 +27,7 @@
 #include "sopc_encoder.h"
 #include "sopc_msg_buffer.h"
 #include "check_stack.h"
-#include "platform_deps.h"
+#include "sopc_helper_endianess_cfg.h"
 
 
 START_TEST(test_ua_msg_buffer_create_set_type)
@@ -492,7 +492,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     uint8_t* bytes = NULL;
 
     // Test encoding with same endianess in machine and UA binary
-    endianess = P_Endianess_LittleEndian;
+    sopc_endianess = SOPC_Endianess_LittleEndian;
     bytes = (uint8_t*) &v16;
     bytes[0] = 0xAB;
     bytes[1] = 0xBC;
@@ -553,7 +553,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
               bytes[4] == 0xAB && bytes[5] == 0xBC &&
               bytes[6] == 0xCD && bytes[7] == 0xDE);
 
-    floatEndianess = P_Endianess_LittleEndian;
+    sopc_floatEndianess = SOPC_Endianess_LittleEndian;
     bytes = (uint8_t*) &vfloat;
     bytes[0] = 0x00;
     bytes[1] = 0x00;
@@ -580,7 +580,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
 
 
     // Test encoding with different endianess in machine and UA binary
-    endianess = P_Endianess_BigEndian;
+    sopc_endianess = SOPC_Endianess_BigEndian;
     bytes = (uint8_t*) &v16;
     bytes[0] = 0xAB;
     bytes[1] = 0xBC;
@@ -641,7 +641,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
               bytes[3] == 0xAB && bytes[2] == 0xBC &&
               bytes[1] == 0xCD && bytes[0] == 0xDE);
 
-    floatEndianess = P_Endianess_BigEndian;
+    sopc_floatEndianess = SOPC_Endianess_BigEndian;
     bytes = (uint8_t*) &vfloat;
     bytes[0] = 0xC0;
     bytes[1] = 0xD0;
@@ -671,7 +671,7 @@ END_TEST
 
 START_TEST(test_ua_encoder_basic_types)
 {
-    InitPlatformDependencies(); // Necessary to initialize endianess configuration
+    SOPC_Helper_EndianessCfg_Initialize(); // Necessary to initialize endianess configuration
     SOPC_StatusCode status = STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 
@@ -1116,7 +1116,7 @@ END_TEST
 
 START_TEST(test_ua_encoder_other_types)
 {
-    InitPlatformDependencies(); // Necessary to initialize endianess configuration
+    SOPC_Helper_EndianessCfg_Initialize(); // Necessary to initialize endianess configuration
     SOPC_StatusCode status = STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 

@@ -24,44 +24,8 @@
 #include "sopc_namespace_table.h"
 #include "sopc_event_dispatcher_manager.h"
 #include "sopc_types.h"
-#include "key_manager.h"
 
 extern SOPC_EventDispatcherManager* servicesEventDispatcherMgr;
-
-/* Client static configuration of a Secure Channel */
-typedef struct SOPC_SecureChannel_Config {
-    uint8_t                   isClientSc;
-    const char*               url;
-    const Certificate*        crt_cli;
-    const AsymmetricKey*      key_priv_cli;
-    const Certificate*        crt_srv;
-    const PKIProvider*        pki;
-    const char*               reqSecuPolicyUri;
-    uint32_t                  requestedLifetime;
-    OpcUa_MessageSecurityMode msgSecurityMode;
-} SOPC_SecureChannel_Config;
-
-#define SOPC_SECURITY_MODE_NONE_MASK 0x01
-#define SOPC_SECURITY_MODE_SIGN_MASK 0x02
-#define SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
-#define SOPC_SECURITY_MODE_ANY_MASK 0x07
-
-typedef struct SOPC_SecurityPolicy
-{
-    SOPC_String securityPolicy; /**< Security policy URI supported */
-    uint16_t    securityModes;  /**< Mask of security modes supported (use combination of SECURITY_MODE_*_MASK values) */
-    void*       padding;        /**< Binary compatibility */
-} SOPC_SecurityPolicy;
-
-/* Server static configuration of a Endpoint listener */
-typedef struct SOPC_Endpoint_Config{
-    char*                endpointURL;
-    Certificate*         serverCertificate;
-    AsymmetricKey*       serverKey;
-    PKIProvider*         pki;
-    uint8_t              nbSecuConfigs;
-    SOPC_SecurityPolicy* secuConfigurations;
-} SOPC_Endpoint_Config;
 
 /**
  *  \brief  Initialize the toolkit configuration, libraries and threads

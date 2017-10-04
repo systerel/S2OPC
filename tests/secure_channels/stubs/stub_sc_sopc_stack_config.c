@@ -21,13 +21,13 @@
 #include <string.h>
 
 #include "sopc_types.h"
-#include "platform_deps.h"
+#include "sopc_helper_endianess_cfg.h"
 
 static SOPC_NamespaceTable* nsTable = NULL;
 
 SOPC_StatusCode SOPC_StackConfiguration_Initialize(){
     Namespace_Initialize(nsTable);
-    InitPlatformDependencies();
+    SOPC_Helper_EndianessCfg_Initialize();
     return STATUS_OK;
 }
 

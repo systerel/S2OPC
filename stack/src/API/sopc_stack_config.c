@@ -23,7 +23,7 @@
 #include "sopc_raw_sockets.h"
 #include "sopc_types.h"
 #include "sopc_sockets.h"
-#include "platform_deps.h"
+#include "sopc_helper_endianess_cfg.h"
 #include "sopc_action_queue_manager.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
@@ -117,7 +117,7 @@ SOPC_StatusCode SOPC_StackConfiguration_Initialize(){
         if(STATUS_OK == status){
             status = SOPC_Stack_ReceptionThread_Start();
         }
-        InitPlatformDependencies();
+        SOPC_Helper_EndianessCfg_Initialize();
         initDone = 1;
     }
     return status;
