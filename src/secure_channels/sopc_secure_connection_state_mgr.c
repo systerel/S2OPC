@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "../helpers_crypto/sopc_crypto_provider.h"
 #include "opcua_statuscodes.h"
 
 #include "sopc_toolkit_constants.h"
@@ -33,8 +34,6 @@
 #include "sopc_sockets_api.h"
 #include "sopc_encoder.h"
 #include "sopc_encodeable.h"
-#include "crypto_provider.h"
-
 #include "sopc_services_events.h"
 
 
@@ -113,41 +112,41 @@ static bool SC_CloseConnection(uint32_t connectionIdx){
 
             // Clear TCP asymmetric security properties
             if(scConnection->serverAsymmSecuInfo.clientCertificate != NULL){
-                KeyManager_Certificate_Free(scConnection->serverAsymmSecuInfo.clientCertificate);
+                SOPC_KeyManager_Certificate_Free(scConnection->serverAsymmSecuInfo.clientCertificate);
                 scConnection->serverAsymmSecuInfo.clientCertificate = NULL;
             }
             // scConnection->serverAsymmSecuInfo.securityPolicyUri => do not free (pointer to config data)
             scConnection->serverAsymmSecuInfo.securityPolicyUri = NULL;
 
             if(scConnection->cryptoProvider != NULL){
-                CryptoProvider_Free(scConnection->cryptoProvider);
+                SOPC_CryptoProvider_Free(scConnection->cryptoProvider);
                 scConnection->cryptoProvider = NULL;
             }
 
             // Clear security sets
             if(scConnection->precedentSecuKeySets.receiverKeySet != NULL){
-                KeySet_Delete(scConnection->precedentSecuKeySets.receiverKeySet);
+                SOPC_KeySet_Delete(scConnection->precedentSecuKeySets.receiverKeySet);
                 scConnection->precedentSecuKeySets.receiverKeySet = NULL;
             }
 
             if(scConnection->precedentSecuKeySets.senderKeySet != NULL){
-                KeySet_Delete(scConnection->precedentSecuKeySets.senderKeySet);
+                SOPC_KeySet_Delete(scConnection->precedentSecuKeySets.senderKeySet);
                 scConnection->precedentSecuKeySets.senderKeySet = NULL;
             }
 
             if(scConnection->currentSecuKeySets.receiverKeySet != NULL){
-                KeySet_Delete(scConnection->currentSecuKeySets.receiverKeySet);
+                SOPC_KeySet_Delete(scConnection->currentSecuKeySets.receiverKeySet);
                 scConnection->currentSecuKeySets.receiverKeySet = NULL;
             }
 
             if(scConnection->currentSecuKeySets.senderKeySet != NULL){
-                KeySet_Delete(scConnection->currentSecuKeySets.senderKeySet);
+                SOPC_KeySet_Delete(scConnection->currentSecuKeySets.senderKeySet);
                 scConnection->currentSecuKeySets.senderKeySet = NULL;
             }
 
             // Clear nonce
             if(scConnection->clientNonce != NULL){
-                SecretBuffer_DeleteClear(scConnection->clientNonce);
+                SOPC_SecretBuffer_DeleteClear(scConnection->clientNonce);
                 scConnection->clientNonce = NULL;
             }
 
@@ -411,10 +410,10 @@ static bool SC_ReadAndCheckOpcUaMessageType(SOPC_EncodeableType* msgType,
 
 // TODO: for each use case (client/server) the secret buffer is not adapted => avoid useless copy of nonces
 static bool SC_DeriveSymmetricKeySets(bool                isServer,
-                                      CryptoProvider*     cryptoProvider,
-                                      SecretBuffer*       clientNonce,
-                                      SecretBuffer*       serverNonce,
-                                      SC_SecurityKeySets* keySets){
+                                      SOPC_CryptoProvider*     cryptoProvider,
+                                      SOPC_SecretBuffer*       clientNonce,
+                                      SOPC_SecretBuffer*       serverNonce,
+                                      SOPC_SC_SecurityKeySets* keySets){
     assert(cryptoProvider != NULL);
     assert(clientNonce != NULL);
     assert(serverNonce != NULL);
@@ -427,7 +426,7 @@ static bool SC_DeriveSymmetricKeySets(bool                isServer,
     uint32_t signKeyLength = 0;
     uint32_t initVectorLength = 0;
 
-    status = CryptoProvider_DeriveGetLengths(cryptoProvider,
+    status = SOPC_CryptoProvider_DeriveGetLengths(cryptoProvider,
                                              &encryptKeyLength,
                                              &signKeyLength,
                                              &initVectorLength);
@@ -437,22 +436,22 @@ static bool SC_DeriveSymmetricKeySets(bool                isServer,
     }
 
     if(result != false){
-        SC_SecurityKeySet* pks = NULL;
-        keySets->receiverKeySet = KeySet_Create();
-        keySets->senderKeySet = KeySet_Create();
+        SOPC_SC_SecurityKeySet* pks = NULL;
+        keySets->receiverKeySet = SOPC_KeySet_Create();
+        keySets->senderKeySet = SOPC_KeySet_Create();
         pks = keySets->receiverKeySet;
         if(NULL != pks) {
-            pks->signKey = SecretBuffer_New(signKeyLength);
-            pks->encryptKey = SecretBuffer_New(encryptKeyLength);
-            pks->initVector = SecretBuffer_New(initVectorLength);
+            pks->signKey = SOPC_SecretBuffer_New(signKeyLength);
+            pks->encryptKey = SOPC_SecretBuffer_New(encryptKeyLength);
+            pks->initVector = SOPC_SecretBuffer_New(initVectorLength);
         }else{
             result = false;
         }
         pks = keySets->senderKeySet;
         if(NULL != pks) {
-            pks->signKey = SecretBuffer_New(signKeyLength);
-            pks->encryptKey = SecretBuffer_New(encryptKeyLength);
-            pks->initVector = SecretBuffer_New(initVectorLength);
+            pks->signKey = SOPC_SecretBuffer_New(signKeyLength);
+            pks->encryptKey = SOPC_SecretBuffer_New(encryptKeyLength);
+            pks->initVector = SOPC_SecretBuffer_New(initVectorLength);
         }else{
             result = false;
         }
@@ -461,16 +460,16 @@ static bool SC_DeriveSymmetricKeySets(bool                isServer,
     if(result != false){
         // Generate the symmetric keys
         if(isServer == false){
-            status = CryptoProvider_DeriveKeySetsClient(cryptoProvider,
+            status = SOPC_CryptoProvider_DeriveKeySetsClient(cryptoProvider,
                                                         clientNonce,
-                                                        SecretBuffer_Expose(serverNonce),
-                                                        SecretBuffer_GetLength(serverNonce),
+                                                        SOPC_SecretBuffer_Expose(serverNonce),
+                                                        SOPC_SecretBuffer_GetLength(serverNonce),
                                                         keySets->senderKeySet,
                                                         keySets->receiverKeySet);
         }else{
-            status = CryptoProvider_DeriveKeySetsServer(cryptoProvider,
-                                                        SecretBuffer_Expose(clientNonce),
-                                                        SecretBuffer_GetLength(clientNonce),
+            status = SOPC_CryptoProvider_DeriveKeySetsServer(cryptoProvider,
+                                                        SOPC_SecretBuffer_Expose(clientNonce),
+                                                        SOPC_SecretBuffer_GetLength(clientNonce),
                                                         serverNonce,
                                                         keySets->receiverKeySet,
                                                         keySets->senderKeySet);
@@ -688,7 +687,7 @@ static bool SC_ClientTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
 
     // Create crypto provider if necessary
     assert(scConnection->cryptoProvider == NULL);
-    scConnection->cryptoProvider = CryptoProvider_Create(config->reqSecuPolicyUri);
+    scConnection->cryptoProvider = SOPC_CryptoProvider_Create(config->reqSecuPolicyUri);
     if(scConnection->cryptoProvider == NULL){
         result = false;
     }
@@ -720,15 +719,15 @@ static bool SC_ClientTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         opnReq.SecurityMode = config->msgSecurityMode;
 
         if(config->msgSecurityMode != OpcUa_MessageSecurityMode_None){
-            status = CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider,
+            status = SOPC_CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider,
                                                                &scConnection->clientNonce);
 
             if(status == STATUS_OK){
                 uint8_t* bytes = NULL;
-                bytes = SecretBuffer_Expose(scConnection->clientNonce);
+                bytes = SOPC_SecretBuffer_Expose(scConnection->clientNonce);
                 status = SOPC_ByteString_CopyFromBytes(&opnReq.ClientNonce,
                                                        bytes,
-                                                       SecretBuffer_GetLength(scConnection->clientNonce));
+                                                       SOPC_SecretBuffer_GetLength(scConnection->clientNonce));
             }
 
             if(status != STATUS_OK){
@@ -836,20 +835,20 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
             }
 
             if(result != false){
-                SecretBuffer* secretServerNonce = SecretBuffer_NewFromExposedBuffer(opnResp->ServerNonce.Data, opnResp->ServerNonce.Length);
+                SOPC_SecretBuffer* secretServerNonce = SOPC_SecretBuffer_NewFromExposedBuffer(opnResp->ServerNonce.Data, opnResp->ServerNonce.Length);
                 if(secretServerNonce != NULL){
                     result = SC_DeriveSymmetricKeySets(false,
                                                        scConnection->cryptoProvider,
                                                        scConnection->clientNonce,
                                                        secretServerNonce,
                                                        &scConnection->currentSecuKeySets);
-                    SecretBuffer_DeleteClear(secretServerNonce);
+                    SOPC_SecretBuffer_DeleteClear(secretServerNonce);
                 }else{
                     result = false;
                 }
             }
 
-            SecretBuffer_DeleteClear(scConnection->clientNonce);
+            SOPC_SecretBuffer_DeleteClear(scConnection->clientNonce);
             scConnection->clientNonce = NULL;
         }
 
@@ -1184,7 +1183,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                 assert(opnReq->SecurityMode == OpcUa_MessageSecurityMode_Sign ||
                        opnReq->SecurityMode == OpcUa_MessageSecurityMode_SignAndEncrypt);
                 if(opnReq->ClientNonce.Length > 0){
-                    scConnection->clientNonce = SecretBuffer_NewFromExposedBuffer(opnReq->ClientNonce.Data, opnReq->ClientNonce.Length);
+                    scConnection->clientNonce = SOPC_SecretBuffer_NewFromExposedBuffer(opnReq->ClientNonce.Data, opnReq->ClientNonce.Length);
                     if(scConnection->clientNonce == NULL){
                         *errorStatus = OpcUa_BadTcpInternalError;
                         result = false;
@@ -1267,10 +1266,10 @@ static bool SC_Server_GenerateFreshSecureChannelAndTokenId(SOPC_SecureConnection
         while((resultSecureChannelId == 0 || resultTokenId == 0) && attempts > 0){
             attempts--;
             if(resultSecureChannelId == 0){
-                CryptoProvider_GenerateRandomID(scConnection->cryptoProvider, &newSecureChannelId);
+                SOPC_CryptoProvider_GenerateRandomID(scConnection->cryptoProvider, &newSecureChannelId);
             }
             if(resultTokenId == 0){
-                CryptoProvider_GenerateRandomID(scConnection->cryptoProvider, &newTokenId);
+                SOPC_CryptoProvider_GenerateRandomID(scConnection->cryptoProvider, &newTokenId);
             }
             occupiedScId = false;
             occupiedTokenId = false;
@@ -1329,7 +1328,7 @@ static uint32_t SC_Server_GenerateFreshTokenId(SOPC_SecureConnection* scConnecti
         uint8_t attempts = 5; // attempts to find a non conflicting secure Id
         while(resultTokenId == 0 && attempts > 0){
             attempts--;
-            CryptoProvider_GenerateRandomID(scConnection->cryptoProvider, &newTokenId);
+            SOPC_CryptoProvider_GenerateRandomID(scConnection->cryptoProvider, &newTokenId);
             occupiedId = false;
             if(newTokenId != 0){
                 // Check if other channels already use the random id in existing connections
@@ -1396,11 +1395,11 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
 
     if(result != false){
         // Fill the server nonce and generate key sets if applicable
-        SecretBuffer* serverNonce = NULL;
+        SOPC_SecretBuffer* serverNonce = NULL;
         if(scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None){
             assert(scConnection->clientNonce != NULL);
 
-            status = CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider,
+            status = SOPC_CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider,
                                                                &serverNonce);
 
             if(status == STATUS_OK){
@@ -1416,10 +1415,10 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
             if(result != false){
                 if(status == STATUS_OK){
                     uint8_t* bytes = NULL;
-                    bytes = SecretBuffer_Expose(serverNonce);
+                    bytes = SOPC_SecretBuffer_Expose(serverNonce);
                     status = SOPC_ByteString_CopyFromBytes(&opnResp.ServerNonce,
                                                            bytes,
-                                                           SecretBuffer_GetLength(scConnection->clientNonce));
+                                                           SOPC_SecretBuffer_GetLength(scConnection->clientNonce));
                 }
 
                 if(status != STATUS_OK){
@@ -1427,8 +1426,8 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
                 }
             }
 
-            SecretBuffer_DeleteClear(serverNonce);
-            SecretBuffer_DeleteClear(scConnection->clientNonce);
+            SOPC_SecretBuffer_DeleteClear(serverNonce);
+            SOPC_SecretBuffer_DeleteClear(scConnection->clientNonce);
             scConnection->clientNonce = NULL;
         }
 
@@ -1554,7 +1553,7 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
                 assert(scConfig->msgSecurityMode == OpcUa_MessageSecurityMode_Sign ||
                        scConfig->msgSecurityMode == OpcUa_MessageSecurityMode_SignAndEncrypt);
                 if(opnReq->ClientNonce.Length > 0){
-                    scConnection->clientNonce = SecretBuffer_NewFromExposedBuffer(opnReq->ClientNonce.Data, opnReq->ClientNonce.Length);
+                    scConnection->clientNonce = SOPC_SecretBuffer_NewFromExposedBuffer(opnReq->ClientNonce.Data, opnReq->ClientNonce.Length);
                     if(scConnection->clientNonce == NULL){
                         *errorStatus = OpcUa_BadTcpInternalError;
                         result = false;
@@ -1598,8 +1597,8 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     SOPC_Buffer* opnRespBuffer = NULL;
     SOPC_SecureChannel_Config* scConfig = NULL;
     SOPC_SecureConnection_SecurityToken newSecuToken;
-    SC_SecurityKeySets                  newSecuKeySets;
-    memset(&newSecuKeySets, 0, sizeof(SC_SecurityKeySets));
+    SOPC_SC_SecurityKeySets                  newSecuKeySets;
+    memset(&newSecuKeySets, 0, sizeof(SOPC_SC_SecurityKeySets));
 
     scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(scConfig != NULL);
@@ -1628,10 +1627,10 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     if(result != false){
         // Fill the server nonce and generate key sets if applicable
         if(scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None){
-            SecretBuffer* serverNonce = NULL;
+            SOPC_SecretBuffer* serverNonce = NULL;
             assert(scConnection->clientNonce != NULL);
 
-            status = CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider,
+            status = SOPC_CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider,
                                                                &serverNonce);
 
             if(status == STATUS_OK){
@@ -1647,10 +1646,10 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
             if(result != false){
                 if(status == STATUS_OK){
                     uint8_t* bytes = NULL;
-                    bytes = SecretBuffer_Expose(serverNonce);
+                    bytes = SOPC_SecretBuffer_Expose(serverNonce);
                     status = SOPC_ByteString_CopyFromBytes(&opnResp.ServerNonce,
                                                            bytes,
-                                                           SecretBuffer_GetLength(scConnection->clientNonce));
+                                                           SOPC_SecretBuffer_GetLength(scConnection->clientNonce));
                 }
 
                 if(status != STATUS_OK){
@@ -1658,8 +1657,8 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
                 }
             }
 
-            SecretBuffer_DeleteClear(serverNonce);
-            SecretBuffer_DeleteClear(scConnection->clientNonce);
+            SOPC_SecretBuffer_DeleteClear(serverNonce);
+            SOPC_SecretBuffer_DeleteClear(scConnection->clientNonce);
             scConnection->clientNonce = NULL;
         }
 
@@ -1704,10 +1703,10 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
                                                  requestId);
     }else{
         if(newSecuKeySets.receiverKeySet != NULL){
-            KeySet_Delete(newSecuKeySets.receiverKeySet);
+            SOPC_KeySet_Delete(newSecuKeySets.receiverKeySet);
         }
         if(newSecuKeySets.senderKeySet != NULL){
-            KeySet_Delete(newSecuKeySets.senderKeySet);
+            SOPC_KeySet_Delete(newSecuKeySets.senderKeySet);
         }
     }
 

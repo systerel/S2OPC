@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#include "../helpers_crypto/sopc_crypto_provider.h"
 #include "opcua_statuscodes.h"
 
 #include "sopc_toolkit_constants.h"
@@ -32,7 +33,6 @@
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_sockets_api.h"
 #include "sopc_encoder.h"
-#include "crypto_provider.h"
 
 static const uint8_t SOPC_HEL[3] = {'H','E','L'};
 static const uint8_t SOPC_ACK[3] = {'A','C','K'};
@@ -211,7 +211,7 @@ static SOPC_StatusCode SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_Secu
                                                                        SOPC_Endpoint_Config*      epConfig,
                                                                        SOPC_SecureChannel_Config* scConfig,
                                                                        bool*                      senderCertificatePresence,
-                                                                       Certificate**              clientSenderCertificate,
+                                                                       SOPC_Certificate**              clientSenderCertificate,
                                                                        bool*                      receiverCertificatePresence)
 {
     assert(scConnection != NULL);
@@ -226,8 +226,8 @@ static SOPC_StatusCode SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_Secu
     bool toSign = true;
     SOPC_ByteString otherBsAppCert;
     SOPC_ByteString_Initialize(&otherBsAppCert);
-    const Certificate* runningAppCert = NULL;
-    const PKIProvider* pkiProvider = NULL;
+    const SOPC_Certificate* runningAppCert = NULL;
+    const SOPC_PKIProvider* pkiProvider = NULL;
     SOPC_ByteString senderCertificate;
     SOPC_ByteString_Initialize(&senderCertificate);
     SOPC_ByteString receiverCertThumb;
@@ -242,7 +242,7 @@ static SOPC_StatusCode SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_Secu
         enforceSecuMode = true;
         if(scConfig->crt_srv != NULL){
             // retrieve expected sender certificate as a ByteString
-            status = KeyManager_Certificate_CopyDER(scConfig->crt_srv,
+            status = SOPC_KeyManager_Certificate_CopyDER(scConfig->crt_srv,
                     &otherBsAppCert.Data,
                     &tmpLength);
             if(tmpLength > 0){
@@ -258,7 +258,7 @@ static SOPC_StatusCode SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_Secu
             enforceSecuMode = true;
             if(scConfig->crt_cli != NULL){
                 // retrieve expected sender certificate as a ByteString
-                status = KeyManager_Certificate_CopyDER(scConfig->crt_cli,
+                status = SOPC_KeyManager_Certificate_CopyDER(scConfig->crt_cli,
                                                         &otherBsAppCert.Data,
                                                         &tmpLength);
                 if(tmpLength > 0){
@@ -303,11 +303,11 @@ static SOPC_StatusCode SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_Secu
             }
 
             if(STATUS_OK == status){
-                Certificate *cert = NULL;
-                status = KeyManager_Certificate_CreateFromDER(senderCertificate.Data, senderCertificate.Length,
+                SOPC_Certificate *cert = NULL;
+                status = SOPC_KeyManager_Certificate_CreateFromDER(senderCertificate.Data, senderCertificate.Length,
                                                               &cert);
                 if(STATUS_OK == status){
-                    status = CryptoProvider_Certificate_Validate(scConnection->cryptoProvider,
+                    status = SOPC_CryptoProvider_Certificate_Validate(scConnection->cryptoProvider,
                                                                  pkiProvider,
                                                                  cert);
                 }
@@ -317,7 +317,7 @@ static SOPC_StatusCode SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_Secu
 
                 if(scConnection->isServerConnection == false){
                     if(NULL != cert)
-                        KeyManager_Certificate_Free(cert);
+                        SOPC_KeyManager_Certificate_Free(cert);
                 }else{
                     // SERVER SIDE ONLY
                     if(STATUS_OK == status){
@@ -326,7 +326,7 @@ static SOPC_StatusCode SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_Secu
                     }else{
                         // Error case
                         if(NULL != cert)
-                            KeyManager_Certificate_Free(cert);
+                            SOPC_KeyManager_Certificate_Free(cert);
                     }
                 }
             }
@@ -358,7 +358,7 @@ static SOPC_StatusCode SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_Secu
                 uint32_t thumbprintLength = 0;
                 int32_t runningAppCertComparison = 0;
 
-                status = CryptoProvider_CertificateGetLength_Thumbprint(scConnection->cryptoProvider,
+                status = SOPC_CryptoProvider_CertificateGetLength_Thumbprint(scConnection->cryptoProvider,
                                                                         &thumbprintLength);
 
                 if(STATUS_OK == status && thumbprintLength > INT32_MAX){
@@ -371,7 +371,7 @@ static SOPC_StatusCode SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_Secu
                     if((int32_t) thumbprintLength == receiverCertThumb.Length){
                         status = SOPC_ByteString_InitializeFixedSize(&curAppCertThumbprint, (int32_t) thumbprintLength);
                         if(STATUS_OK == status){
-                            status = KeyManager_Certificate_GetThumbprint(scConnection->cryptoProvider,
+                            status = SOPC_KeyManager_Certificate_GetThumbprint(scConnection->cryptoProvider,
                                                                           runningAppCert,
                                                                           curAppCertThumbprint.Data,
                                                                           thumbprintLength);
@@ -435,7 +435,7 @@ static SOPC_StatusCode SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnec
     SOPC_Endpoint_Config* serverConfig = NULL;
     bool senderCertifPresence = false;
     bool receiverCertifThumbprintPresence = false;
-    Certificate* clientCertificate = NULL;
+    SOPC_Certificate* clientCertificate = NULL;
     int32_t compareRes = -1;
     uint32_t idx = 0;
 
@@ -506,7 +506,7 @@ static SOPC_StatusCode SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnec
 
     if(STATUS_OK == status &&
        scConnection->cryptoProvider == NULL){
-        scConnection->cryptoProvider = CryptoProvider_Create(validSecuPolicy);
+        scConnection->cryptoProvider = SOPC_CryptoProvider_Create(validSecuPolicy);
         if(scConnection->cryptoProvider == NULL){
             // Rejected by the cryptographic componenent
             status = OpcUa_BadSecurityPolicyRejected;
@@ -724,7 +724,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
     uint32_t lengthToDecrypt = encryptedBuffer->length - sequenceNumberPosition;
 
     if(isSymmetric == false){
-        const AsymmetricKey* runningAppPrivateKey = NULL;
+        const SOPC_AsymmetricKey* runningAppPrivateKey = NULL;
         if(scConnection->isServerConnection == false){
             SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
             assert(scConfig != NULL);
@@ -736,7 +736,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
         }
 
         if(runningAppPrivateKey != NULL){
-            status = CryptoProvider_AsymmetricGetLength_Decryption(scConnection->cryptoProvider,
+            status = SOPC_CryptoProvider_AsymmetricGetLength_Decryption(scConnection->cryptoProvider,
                                                                    runningAppPrivateKey,
                                                                    lengthToDecrypt,
                                                                    &decryptedTextLength);
@@ -757,7 +757,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
                                                     sequenceNumberPosition);
             }
             if(result != false){
-                status = CryptoProvider_AsymmetricDecrypt(scConnection->cryptoProvider,
+                status = SOPC_CryptoProvider_AsymmetricDecrypt(scConnection->cryptoProvider,
                                                           dataToDecrypt,
                                                           lengthToDecrypt,
                                                           runningAppPrivateKey,
@@ -775,14 +775,14 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
         }
     }else{
 
-        SC_SecurityKeySet* receiverKeySet = NULL;
+        SOPC_SC_SecurityKeySet* receiverKeySet = NULL;
         if(isPrecCryptoData == false){
             receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
         }else{
             receiverKeySet = scConnection->precedentSecuKeySets.receiverKeySet;
         }
 
-        status = CryptoProvider_SymmetricGetLength_Decryption(scConnection->cryptoProvider,
+        status = SOPC_CryptoProvider_SymmetricGetLength_Decryption(scConnection->cryptoProvider,
                                                               lengthToDecrypt,
                                                               &decryptedTextLength);
 
@@ -802,7 +802,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
                                                     sequenceNumberPosition);
             }
             if(result != false){
-                status = CryptoProvider_SymmetricDecrypt(scConnection->cryptoProvider,
+                status = SOPC_CryptoProvider_SymmetricDecrypt(scConnection->cryptoProvider,
                                                          dataToDecrypt,
                                                          lengthToDecrypt,
                                                          receiverKeySet->encryptKey,
@@ -849,8 +849,8 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
     uint32_t signaturePosition = 0;
 
     if(isSymmetric == false){
-        AsymmetricKey* publicKey = NULL;
-        const Certificate* otherAppCertificate = NULL;
+        SOPC_AsymmetricKey* publicKey = NULL;
+        const SOPC_Certificate* otherAppCertificate = NULL;
         if(scConnection->isServerConnection == false){
             // Client side
             SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
@@ -862,11 +862,11 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
         }
 
 
-        status = KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate,
+        status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate,
                                                                 &publicKey);
 
         if(status == STATUS_OK){
-            status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->cryptoProvider,
+            status = SOPC_CryptoProvider_AsymmetricGetLength_Signature(scConnection->cryptoProvider,
                                                                   publicKey,
                                                                   &signatureSize);
         }
@@ -874,7 +874,7 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
         if(status == STATUS_OK){
             signaturePosition = buffer->length - signatureSize;
 
-            status = CryptoProvider_AsymmetricVerify(scConnection->cryptoProvider,
+            status = SOPC_CryptoProvider_AsymmetricVerify(scConnection->cryptoProvider,
                                                      buffer->data,
                                                      signaturePosition,
                                                      publicKey,
@@ -882,21 +882,21 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
                                                      signatureSize);
         }
 
-        KeyManager_AsymmetricKey_Free(publicKey);
+        SOPC_KeyManager_AsymmetricKey_Free(publicKey);
     }else{
-        SC_SecurityKeySet* receiverKeySet = NULL;
+        SOPC_SC_SecurityKeySet* receiverKeySet = NULL;
         if(isPrecCryptoData == false){
             receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
         }else{
             receiverKeySet = scConnection->precedentSecuKeySets.receiverKeySet;
         }
 
-        status = CryptoProvider_SymmetricGetLength_Signature(scConnection->cryptoProvider,
+        status = SOPC_CryptoProvider_SymmetricGetLength_Signature(scConnection->cryptoProvider,
                                                              &signatureSize);
 
         if(status == STATUS_OK){
             signaturePosition = buffer->length - signatureSize;
-            status = CryptoProvider_SymmetricVerify(scConnection->cryptoProvider,
+            status = SOPC_CryptoProvider_SymmetricVerify(scConnection->cryptoProvider,
                                                     buffer->data,
                                                     signaturePosition,
                                                     receiverKeySet->signKey,
@@ -1336,7 +1336,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
     SOPC_String_Initialize(&strSecuPolicy);
     SOPC_ByteString bsSenderCert;
     SOPC_ByteString_Initialize(&bsSenderCert);
-    const Certificate* receiverCertCrypto = NULL;
+    const SOPC_Certificate* receiverCertCrypto = NULL;
 
     if(result != false)
     {
@@ -1364,7 +1364,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
 
     // Sender Certificate:
     if(result != false){
-        const Certificate* senderCert = NULL;
+        const SOPC_Certificate* senderCert = NULL;
         uint32_t length = 0;
         if(scConnection->isServerConnection == false){
             // Client side
@@ -1374,7 +1374,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
             senderCert = scConfig->crt_srv;
         }
         if(senderCert != NULL){
-            if(STATUS_OK == KeyManager_Certificate_CopyDER(senderCert, &bsSenderCert.Data, &length)
+            if(STATUS_OK == SOPC_KeyManager_Certificate_CopyDER(senderCert, &bsSenderCert.Data, &length)
                     && length <= INT32_MAX){
                 bsSenderCert.Length = (int32_t) length;
                 *senderCertificateSize = length;
@@ -1419,7 +1419,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
             SOPC_ByteString recCertThumbprint;
             SOPC_ByteString_Initialize(&recCertThumbprint);
             uint32_t thumbprintLength = 0;
-            if(STATUS_OK != CryptoProvider_CertificateGetLength_Thumbprint(scConnection->cryptoProvider,
+            if(STATUS_OK != SOPC_CryptoProvider_CertificateGetLength_Thumbprint(scConnection->cryptoProvider,
                                                                            &thumbprintLength)){
                 result = false;
                 *errorStatus = OpcUa_BadTcpInternalError;
@@ -1435,7 +1435,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
                 }
             }
             if(result != false){
-                if(STATUS_OK != KeyManager_Certificate_GetThumbprint(scConnection->cryptoProvider,
+                if(STATUS_OK != SOPC_KeyManager_Certificate_GetThumbprint(scConnection->cryptoProvider,
                                                                      receiverCertCrypto,
                                                                      recCertThumbprint.Data,
                                                                      thumbprintLength)){
@@ -1543,8 +1543,8 @@ static bool SC_Chunks_GetCryptoSizes(SOPC_SecureConnection*     scConnection,
         // ASYMMETRIC CASE
 
         if(scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None){
-            AsymmetricKey* publicKey = NULL;
-            const Certificate* otherAppCertificate = NULL;
+            SOPC_AsymmetricKey* publicKey = NULL;
+            const SOPC_Certificate* otherAppCertificate = NULL;
 
             // Asymmetric case: used only for opening channel, signature AND encryption mandatory in this case
             *toEncrypt = true;
@@ -1558,14 +1558,14 @@ static bool SC_Chunks_GetCryptoSizes(SOPC_SecureConnection*     scConnection,
                 otherAppCertificate = scConfig->crt_cli;
             }
 
-            if(STATUS_OK != KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate,
+            if(STATUS_OK != SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate,
                                                                            &publicKey)){
                 result = false;
             }
 
             if(result != false){
                 // Compute block sizes
-                if(STATUS_OK != CryptoProvider_AsymmetricGetLength_Msgs(scConnection->cryptoProvider,
+                if(STATUS_OK != SOPC_CryptoProvider_AsymmetricGetLength_Msgs(scConnection->cryptoProvider,
                                                                         publicKey,
                                                                         cipherTextBlockSize,
                                                                         plainTextBlockSize)){
@@ -1574,14 +1574,14 @@ static bool SC_Chunks_GetCryptoSizes(SOPC_SecureConnection*     scConnection,
             }
             if(result != false){
                 // Compute signature size
-                if(STATUS_OK != CryptoProvider_AsymmetricGetLength_Signature(scConnection->cryptoProvider,
+                if(STATUS_OK != SOPC_CryptoProvider_AsymmetricGetLength_Signature(scConnection->cryptoProvider,
                                                                              publicKey,
                                                                              signatureSize)){
                     result = false;
                 }
             }
 
-            KeyManager_AsymmetricKey_Free(publicKey);
+            SOPC_KeyManager_AsymmetricKey_Free(publicKey);
 
         }else{
             *toEncrypt = false; // No data encryption
@@ -1596,7 +1596,7 @@ static bool SC_Chunks_GetCryptoSizes(SOPC_SecureConnection*     scConnection,
                 // Encryption necessary: compute block sizes
                 *toEncrypt = true;
 
-                if(STATUS_OK != CryptoProvider_SymmetricGetLength_Blocks(scConnection->cryptoProvider,
+                if(STATUS_OK != SOPC_CryptoProvider_SymmetricGetLength_Blocks(scConnection->cryptoProvider,
                                                                          cipherTextBlockSize,
                                                                          plainTextBlockSize)){
                     result = false;
@@ -1608,7 +1608,7 @@ static bool SC_Chunks_GetCryptoSizes(SOPC_SecureConnection*     scConnection,
             if(result != false){
                 // Signature necessary in both Sign and SignAndEncrypt cases: compute signature size
                 *toSign = true;
-                if(STATUS_OK != CryptoProvider_SymmetricGetLength_Signature(scConnection->cryptoProvider,
+                if(STATUS_OK != SOPC_CryptoProvider_SymmetricGetLength_Signature(scConnection->cryptoProvider,
                                                                             signatureSize)){
                     result = false;
                 }
@@ -1795,7 +1795,7 @@ static bool SC_Chunks_GetEncryptedDataLength(SOPC_SecureConnection*     scConnec
     bool result = true;
 
     if(isSymmetricAlgo == false){
-        const Certificate* otherAppCertificate = NULL;
+        const SOPC_Certificate* otherAppCertificate = NULL;
         if(scConnection->isServerConnection == false){
             // Client side
             otherAppCertificate = scConfig->crt_srv;
@@ -1807,16 +1807,16 @@ static bool SC_Chunks_GetEncryptedDataLength(SOPC_SecureConnection*     scConnec
            result = false;
         }else{
 
-            AsymmetricKey* otherAppPublicKey = NULL;
+            SOPC_AsymmetricKey* otherAppPublicKey = NULL;
 
-            if(STATUS_OK != KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate,
+            if(STATUS_OK != SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate,
                                                                            &otherAppPublicKey)){
                 result = false;
             }
 
             // Retrieve cipher length
             if(result != false){
-                if(STATUS_OK != CryptoProvider_AsymmetricGetLength_Encryption(scConnection->cryptoProvider,
+                if(STATUS_OK != SOPC_CryptoProvider_AsymmetricGetLength_Encryption(scConnection->cryptoProvider,
                                                                               otherAppPublicKey,
                                                                               plainDataLength,
                                                                               cipherDataLength)){
@@ -1824,7 +1824,7 @@ static bool SC_Chunks_GetEncryptedDataLength(SOPC_SecureConnection*     scConnec
                 }
             }
 
-            KeyManager_AsymmetricKey_Free(otherAppPublicKey);
+            SOPC_KeyManager_AsymmetricKey_Free(otherAppPublicKey);
         }
     }else{
         if(scConnection->currentSecuKeySets.senderKeySet == NULL ||
@@ -1832,7 +1832,7 @@ static bool SC_Chunks_GetEncryptedDataLength(SOPC_SecureConnection*     scConnec
             result = false;
         }else{
             // Retrieve cipher length
-            if(STATUS_OK != CryptoProvider_SymmetricGetLength_Encryption(scConnection->cryptoProvider,
+            if(STATUS_OK != SOPC_CryptoProvider_SymmetricGetLength_Encryption(scConnection->cryptoProvider,
                                                                          plainDataLength,
                                                                          cipherDataLength)){
                 result = false;
@@ -1853,7 +1853,7 @@ static bool SC_Chunks_EncodeSignature(SOPC_SecureConnection* scConnection,
     SOPC_ByteString signedData;
 
     if(symmetricAlgo == false){
-            const AsymmetricKey* runningAppPrivateKey = NULL;
+            const SOPC_AsymmetricKey* runningAppPrivateKey = NULL;
             if(scConnection->isServerConnection == false){
                 SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
                 assert(scConfig != NULL);
@@ -1869,7 +1869,7 @@ static bool SC_Chunks_EncodeSignature(SOPC_SecureConnection* scConnection,
             }
 
             if(STATUS_OK == status){
-                status = CryptoProvider_AsymmetricSign(scConnection->cryptoProvider,
+                status = SOPC_CryptoProvider_AsymmetricSign(scConnection->cryptoProvider,
                                                        buffer->data,
                                                        buffer->length,
                                                        runningAppPrivateKey,
@@ -1893,7 +1893,7 @@ static bool SC_Chunks_EncodeSignature(SOPC_SecureConnection* scConnection,
         }else{
             status = SOPC_ByteString_InitializeFixedSize(&signedData, signatureSize);
             if(status == STATUS_OK){
-                status = CryptoProvider_SymmetricSign
+                status = SOPC_CryptoProvider_SymmetricSign
                           (scConnection->cryptoProvider,
                            buffer->data,
                            buffer->length,
@@ -1938,7 +1938,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
 
         SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
         assert(scConfig != NULL); // Even on server side it is guaranteed by secure connection state manager (no sending in wrong state)
-        const Certificate* otherAppCertificate = NULL;
+        const SOPC_Certificate* otherAppCertificate = NULL;
         if(scConnection->isServerConnection == false){
             // Client side
             otherAppCertificate = scConfig->crt_srv;
@@ -1947,11 +1947,11 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
             otherAppCertificate = scConfig->crt_cli;
         }
 
-        AsymmetricKey* otherAppPublicKey = NULL;
+        SOPC_AsymmetricKey* otherAppPublicKey = NULL;
         SOPC_Byte* encryptedData = NULL;
 
         // Retrieve other app public key from certificate
-        status = KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate,
+        status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate,
                                                                 &otherAppPublicKey);
 
         // Check size of encrypted data array
@@ -1978,7 +1978,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
 
         // Encrypt
         if(result != false){
-            status = CryptoProvider_AsymmetricEncrypt
+            status = SOPC_CryptoProvider_AsymmetricEncrypt
                       (scConnection->cryptoProvider,
                        dataToEncrypt,
                        dataToEncryptLength,
@@ -1991,7 +1991,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
             }
         }
 
-        KeyManager_AsymmetricKey_Free(otherAppPublicKey);
+        SOPC_KeyManager_AsymmetricKey_Free(otherAppPublicKey);
 
     }else{
         /* SYMMETRIC CASE */
@@ -2021,7 +2021,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
 
             // Encrypt
             if(result != false){
-                status = CryptoProvider_SymmetricEncrypt
+                status = SOPC_CryptoProvider_SymmetricEncrypt
                           (scConnection->cryptoProvider,
                            dataToEncrypt,
                            dataToEncryptLength,

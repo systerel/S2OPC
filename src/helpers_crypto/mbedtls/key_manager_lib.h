@@ -22,6 +22,9 @@
 #ifndef SOPC_KEY_MANAGER_LIB_H_
 #define SOPC_KEY_MANAGER_LIB_H_
 
+#include <stdbool.h>
+#include "../sopc_crypto_decl.h"
+#include "sopc_toolkit_constants.h"
 
 #include "mbedtls/pk.h"
 #include "mbedtls/x509_crt.h"
@@ -33,7 +36,7 @@
  *          It should be treated as an abstract handle.
  *          The asymmetric key structure is mainly lib-specific. Its content can be enriched for future uses.
  */
-struct AsymmetricKey {
+struct SOPC_AsymmetricKey {
     mbedtls_pk_context pk;       /**< The context of the key, mbedtls_ specific */
     bool isBorrowedFromCert;     /**< Says whether the context is borrowed from a context or not. In the latter case, the context must be mbedtls_freed */
 };
@@ -44,7 +47,7 @@ struct AsymmetricKey {
  *          It should be treated as an abstract handle.
  *          The certificate structure is mainly lib-specific. Its content can be enriched for future uses.
  */
-struct Certificate {
+struct SOPC_Certificate {
     mbedtls_x509_crt crt;   /**< Certificate as a lib-dependent format */
     uint8_t *crt_der;       /**< Certificate in the DER format, which should be canonical. Points to internal mbedtls buffer.*/
     uint32_t len_der;       /**< Length of crt_der. */
@@ -56,7 +59,7 @@ struct Certificate {
  *          Unspecified yet.
  *          This current  implementation might be too much tainted by mbedtls.
  */
-typedef struct CertificateRevList {
+typedef struct SOPC_CertificateRevList {
     mbedtls_x509_crl crl;
 } CertificateRevList;
 
@@ -78,8 +81,8 @@ typedef struct CertificateRevList {
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and STATUS_NOK when there was an error.
  */
-SOPC_StatusCode KeyManager_Certificate_GetPublicKey(const Certificate *pCert,
-                                               AsymmetricKey *pKey);
+SOPC_StatusCode KeyManager_Certificate_GetPublicKey(const SOPC_Certificate *pCert,
+                                                    SOPC_AsymmetricKey *pKey);
 
 
 #endif /* SOPC_KEY_MANAGER_LIB_H_ */

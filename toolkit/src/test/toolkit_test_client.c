@@ -19,6 +19,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "../../../src/helpers_crypto/sopc_crypto_profiles.h"
+#include "../../../src/helpers_crypto/sopc_pki_stack.h"
 #include "b2c.h"
 
 #include "toolkit_header_init.h"
@@ -34,9 +36,6 @@
 #include "sopc_time.h"
 #include "sopc_types.h"
 #include "opcua_statuscodes.h"
-#include "crypto_profiles.h"
-#include "pki_stack.h"
-
 #include "wrap_read.h"
 #include "testlib_write.h"
 
@@ -105,7 +104,7 @@ SOPC_SecureChannel_Config scConfig = {
     .key_priv_cli = NULL,
     .crt_srv = NULL,
     .pki = NULL,
-    .reqSecuPolicyUri = SecurityPolicy_Basic256Sha256_URI,
+    .reqSecuPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI,
     .requestedLifetime = 5,
     .msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt
 };
@@ -119,10 +118,10 @@ int main(void){
   // Counter to stop waiting on timeout
   uint32_t loopCpt = 0;
 
-  PKIProvider *pki = NULL;
-  Certificate *crt_cli = NULL, *crt_srv = NULL;
-  Certificate *crt_ca = NULL;
-  AsymmetricKey *priv_cli = NULL;
+  SOPC_PKIProvider *pki = NULL;
+  SOPC_Certificate *crt_cli = NULL, *crt_srv = NULL;
+  SOPC_Certificate *crt_ca = NULL;
+  SOPC_AsymmetricKey *priv_cli = NULL;
 
   constants__t_channel_config_idx_i channel_config_idx = constants__c_channel_config_idx_indet;  
   /* Note: in current version of toolkit user == 1 is considered as anonymous user */
@@ -144,7 +143,7 @@ int main(void){
 
   if(scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None){
       // The certificates: load
-      status = KeyManager_Certificate_CreateFromFile(certificateLocation, &crt_cli);
+      status = SOPC_KeyManager_Certificate_CreateFromFile(certificateLocation, &crt_cli);
       if(STATUS_OK != status){
           printf(">>Stub_Client: Failed to load client certificate\n");
       }else{
@@ -154,7 +153,7 @@ int main(void){
   }
 
   if(scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status){
-      status = KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
+      status = SOPC_KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
       if(STATUS_OK != status){
           printf(">>Stub_Client: Failed to load server certificate\n");
       }else{
@@ -165,7 +164,7 @@ int main(void){
 
   if(scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status){
       // Private key: load
-      status = KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli, NULL, 0);
+      status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli, NULL, 0);
       if(STATUS_OK != status){
           printf(">>Stub_Client: Failed to load private key\n");
       }else{
@@ -176,7 +175,7 @@ int main(void){
 
   if(scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status){
       // Certificate Authority: load
-      if(STATUS_OK != KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca)){
+      if(STATUS_OK != SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca)){
           printf(">>Stub_Client: Failed to load CA\n");
       }else{
           printf(">>Stub_Client: CA certificate loaded\n");
@@ -185,7 +184,7 @@ int main(void){
 
     // Init PKI provider with certificate authority
   if(STATUS_OK == status){
-      if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki)){
+      if(STATUS_OK != SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki)){
           printf(">>Stub_Client: Failed to create PKI\n");
       }else{
           printf(">>Stub_Client: PKI created\n");
@@ -401,11 +400,11 @@ int main(void){
 
   // Clear locally allocated memory
   if(scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None){
-      KeyManager_Certificate_Free(crt_cli);
-      KeyManager_Certificate_Free(crt_srv);
-      KeyManager_AsymmetricKey_Free(priv_cli);
-      KeyManager_Certificate_Free(crt_ca);
-      PKIProviderStack_Free(pki);
+      SOPC_KeyManager_Certificate_Free(crt_cli);
+      SOPC_KeyManager_Certificate_Free(crt_srv);
+      SOPC_KeyManager_AsymmetricKey_Free(priv_cli);
+      SOPC_KeyManager_Certificate_Free(crt_ca);
+      SOPC_PKIProviderStack_Free(pki);
   }
 
   if(STATUS_OK == status && test_results_get_service_result() != false){

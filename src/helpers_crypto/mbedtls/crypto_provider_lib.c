@@ -20,11 +20,12 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "crypto_decl.h"
-#include "crypto_profiles.h"
-#include "crypto_provider.h"
 #include "crypto_provider_lib.h"
-#include "key_manager.h"
+
+#include "../sopc_crypto_decl.h"
+#include "../sopc_crypto_profiles.h"
+#include "../sopc_crypto_provider.h"
+#include "../sopc_key_manager.h"
 #include "key_manager_lib.h"
 
 
@@ -33,17 +34,17 @@
  * ------------------------------------------------------------------------------------------------
  */
 
-SOPC_StatusCode CryptoProvider_Init(CryptoProvider *pCryptoProvider)
+SOPC_StatusCode SOPC_CryptoProvider_Init(SOPC_CryptoProvider *pCryptoProvider)
 {
-    CryptolibContext *pctx = NULL;
+    SOPC_CryptolibContext *pctx = NULL;
 
     if(NULL == pCryptoProvider)
         return STATUS_INVALID_PARAMETERS;
 
-    pctx = (CryptolibContext *)malloc(sizeof(CryptolibContext));
+    pctx = (SOPC_CryptolibContext *)malloc(sizeof(SOPC_CryptolibContext));
     if(NULL == pctx)
         return STATUS_NOK;
-    memset(pctx, 0, sizeof(CryptolibContext));
+    memset(pctx, 0, sizeof(SOPC_CryptolibContext));
 
     // TODO: it may be nice to not create a full context with SecuPolicy None
     pCryptoProvider->pCryptolibContext = pctx;
@@ -56,9 +57,9 @@ SOPC_StatusCode CryptoProvider_Init(CryptoProvider *pCryptoProvider)
 }
 
 
-SOPC_StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider)
+SOPC_StatusCode SOPC_CryptoProvider_Deinit(SOPC_CryptoProvider *pCryptoProvider)
 {
-    CryptolibContext *pCtx = NULL;
+    SOPC_CryptolibContext *pCtx = NULL;
 
     if(NULL == pCryptoProvider)
         return STATUS_INVALID_PARAMETERS;
@@ -80,15 +81,15 @@ SOPC_StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider)
  * ------------------------------------------------------------------------------------------------
  */
 
-SOPC_StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider *pProvider,
-                                                      const AsymmetricKey *pKey,
+SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(const SOPC_CryptoProvider *pProvider,
+                                                      const SOPC_AsymmetricKey *pKey,
                                                       uint32_t *lenKeyBits)
 {
     size_t lenBits = 0;
 
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == lenKeyBits)
         return STATUS_INVALID_PARAMETERS;
-    if(SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
+    if(SOPC_SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
         return STATUS_INVALID_PARAMETERS;
 
     lenBits = mbedtls_pk_get_bitlen(&pKey->pk);
@@ -101,8 +102,8 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider 
 }
 
 
-SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProvider *pProvider,
-                                                           const AsymmetricKey *pKey,
+SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText(const SOPC_CryptoProvider *pProvider,
+                                                           const SOPC_AsymmetricKey *pKey,
                                                            uint32_t *pLenMsg)
 {
     uint32_t lenHash = 0;
@@ -110,7 +111,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProv
 
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == pLenMsg)
         return STATUS_INVALID_PARAMETERS;
-    if(SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
+    if(SOPC_SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
         return STATUS_INVALID_PARAMETERS;
 
     lenMessage = mbedtls_pk_get_len(&pKey->pk);
@@ -123,12 +124,12 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProv
 
     switch(pProvider->pProfile->SecurityPolicyID) // TODO: should we build some API to fetch the SecurityPolicyID, or avoid to switch on it at all?
     {
-    case SecurityPolicy_Invalid_ID:
+    case SOPC_SecurityPolicy_Invalid_ID:
     default:
         return STATUS_NOK;
-    case SecurityPolicy_Basic256Sha256_ID: // TODO: this seems overkill to fetch the size of the chosen OAEP hash function...
-    case SecurityPolicy_Basic256_ID:
-        if(CryptoProvider_AsymmetricGetLength_OAEPHashLength(pProvider, &lenHash) != STATUS_OK)
+    case SOPC_SecurityPolicy_Basic256Sha256_ID: // TODO: this seems overkill to fetch the size of the chosen OAEP hash function...
+    case SOPC_SecurityPolicy_Basic256_ID:
+        if(SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(pProvider, &lenHash) != STATUS_OK)
             return STATUS_NOK;
         *pLenMsg -= 2*lenHash + 2; // TODO: check for underflow?
         break;
@@ -142,8 +143,8 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProv
  * \brief   Computes the size of an encrypted buffer unit.
  *          This is the length of the public key modulus.
  */
-SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgCipherText(const CryptoProvider *pProvider,
-                                                            const AsymmetricKey *pKey,
+SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText(const SOPC_CryptoProvider *pProvider,
+                                                            const SOPC_AsymmetricKey *pKey,
                                                             uint32_t *pLenMsg)
 {
     (void)(pProvider);

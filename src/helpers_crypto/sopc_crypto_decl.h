@@ -1,3 +1,9 @@
+/** \file
+ *
+ * \brief Defines the common declarations for the cryptographic objects.
+ *
+ * Avoids the circular dependencies.
+ */
 /*
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -15,20 +21,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "key_sets.h"
-#include <stdlib.h>
-#include <stddef.h>
 
-SC_SecurityKeySet* KeySet_Create(){
-    SC_SecurityKeySet* keySet = malloc(sizeof(SC_SecurityKeySet));
-    return keySet;
-}
+#ifndef SOPC_CRYPTO_DECL_H_
+#define SOPC_CRYPTO_DECL_H_
 
-void KeySet_Delete(SC_SecurityKeySet* keySet){
-    if(keySet != NULL){
-        SecretBuffer_DeleteClear(keySet->encryptKey);
-        SecretBuffer_DeleteClear(keySet->initVector);
-        SecretBuffer_DeleteClear(keySet->signKey);
-        free(keySet);
-    }
-}
+
+typedef struct SOPC_CryptoProvider SOPC_CryptoProvider;
+typedef struct SOPC_CryptoProfile SOPC_CryptoProfile;
+typedef struct SOPC_CryptolibContext SOPC_CryptolibContext;
+typedef struct SOPC_AsymmetricKey SOPC_AsymmetricKey;
+typedef struct SOPC_Certificate SOPC_Certificate;
+typedef struct SOPC_PKIProvider SOPC_PKIProvider;
+
+
+#endif /* SOPC_CRYPTO_DECL_H_ */

@@ -16,26 +16,26 @@
  */
 
 
-#include "secret_buffer.h"
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+#include "sopc_secret_buffer.h"
 
 
-struct SecretBuffer
+struct SOPC_SecretBuffer
 {
     uint32_t len; // Mandatory
     uint8_t *buf;
 };
 
 
-SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len)
+SOPC_SecretBuffer *SOPC_SecretBuffer_NewFromExposedBuffer(SOPC_ExposedBuffer *buf, uint32_t len)
 {
-    SecretBuffer *sec = NULL;
+    SOPC_SecretBuffer *sec = NULL;
 
     if(NULL != buf)
     {
-        sec = SecretBuffer_New(len);
+        sec = SOPC_SecretBuffer_New(len);
         if(NULL != sec && NULL != sec->buf)
             memcpy(sec->buf, buf, len);
     }
@@ -43,13 +43,13 @@ SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len
     return sec;
 }
 
-SecretBuffer *SecretBuffer_New(uint32_t len)
+SOPC_SecretBuffer *SOPC_SecretBuffer_New(uint32_t len)
 {
-    SecretBuffer *sec = NULL;
+    SOPC_SecretBuffer *sec = NULL;
 
     if(0 != len)
     {
-        sec = malloc(sizeof(SecretBuffer));
+        sec = malloc(sizeof(SOPC_SecretBuffer));
         if(NULL != sec)
         {
             sec->len = len;
@@ -65,7 +65,7 @@ SecretBuffer *SecretBuffer_New(uint32_t len)
     return sec;
 }
 
-void SecretBuffer_DeleteClear(SecretBuffer *sec)
+void SOPC_SecretBuffer_DeleteClear(SOPC_SecretBuffer *sec)
 {
     if(NULL != sec)
     {
@@ -78,21 +78,21 @@ void SecretBuffer_DeleteClear(SecretBuffer *sec)
     }
 }
 
-uint32_t SecretBuffer_GetLength(const SecretBuffer *sec)
+uint32_t SOPC_SecretBuffer_GetLength(const SOPC_SecretBuffer *sec)
 {
     if(NULL == sec)
         return 0;
     return sec->len;
 }
 
-ExposedBuffer *SecretBuffer_Expose(SecretBuffer *sec)
+SOPC_ExposedBuffer *SOPC_SecretBuffer_Expose(SOPC_SecretBuffer *sec)
 {
     if(NULL != sec)
         return sec->buf;
     return NULL;
 }
 
-void SecretBuffer_Unexpose(ExposedBuffer *buf, SecretBuffer *sec)
+void SOPC_SecretBuffer_Unexpose(SOPC_ExposedBuffer *buf, SOPC_SecretBuffer *sec)
 {
     (void) buf;
     (void) sec;

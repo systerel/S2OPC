@@ -18,6 +18,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../../../src/helpers_crypto/sopc_crypto_profiles.h"
+#include "../../../src/helpers_crypto/sopc_crypto_provider.h"
+#include "../../../src/helpers_crypto/sopc_pki_stack.h"
 #include "io_dispatch_mgr.h"
 
 #include "sopc_time.h"
@@ -32,9 +35,6 @@
 
 #include "add.h"
 
-#include "crypto_profiles.h"
-#include "crypto_provider.h"
-#include "pki_stack.h"
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 
@@ -65,10 +65,10 @@ int main(void)
   uint32_t loopCpt = 0;
 
   // Secu policy configuration: 
-  static Certificate * serverCertificate = NULL;
-  static AsymmetricKey *  asymmetricKey = NULL;
-  static Certificate * authCertificate = NULL;
-  static PKIProvider * pkiProvider = NULL;
+  static SOPC_Certificate * serverCertificate = NULL;
+  static SOPC_AsymmetricKey *  asymmetricKey = NULL;
+  static SOPC_Certificate * authCertificate = NULL;
+  static SOPC_PKIProvider * pkiProvider = NULL;
 
   SOPC_SecurityPolicy secuConfig[3];
   SOPC_String_Initialize(&secuConfig[0].securityPolicy);
@@ -78,16 +78,16 @@ int main(void)
   if(STATUS_OK == status){
 
       status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
-                                           SecurityPolicy_None_URI);
+                                           SOPC_SecurityPolicy_None_URI);
       secuConfig[0].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
       if(STATUS_OK == status){
           status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy,
-                                               SecurityPolicy_Basic256_URI);
+                                               SOPC_SecurityPolicy_Basic256_URI);
           secuConfig[1].securityModes = SOPC_SECURITY_MODE_SIGN_MASK;
       }
       if(STATUS_OK == status){
         status = SOPC_String_AttachFromCstring(&secuConfig[2].securityPolicy,
-                                             SecurityPolicy_Basic256Sha256_URI);
+                                             SOPC_SecurityPolicy_Basic256Sha256_URI);
         secuConfig[2].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
       }
   }
@@ -96,19 +96,19 @@ int main(void)
   epConfig.endpointURL = ENDPOINT_URL;
   if (secuActive != false){
 
-      status = KeyManager_Certificate_CreateFromFile("./server_public/server.der", &serverCertificate);
+      status = SOPC_KeyManager_Certificate_CreateFromFile("./server_public/server.der", &serverCertificate);
       epConfig.serverCertificate = serverCertificate;
 
       if(STATUS_OK == status){    
-          status = KeyManager_AsymmetricKey_CreateFromFile("./server_private/server.key", &asymmetricKey, NULL, 0);
+          status = SOPC_KeyManager_AsymmetricKey_CreateFromFile("./server_private/server.key", &asymmetricKey, NULL, 0);
           epConfig.serverKey = asymmetricKey;
       }
       if(STATUS_OK == status){
-          status = KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &authCertificate);
+          status = SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &authCertificate);
       }
 
       if(STATUS_OK == status){
-          status = PKIProviderStack_Create(authCertificate, NULL, &pkiProvider);
+          status = SOPC_PKIProviderStack_Create(authCertificate, NULL, &pkiProvider);
           epConfig.pki = pkiProvider;
       }
     if(STATUS_OK != status){
@@ -228,10 +228,10 @@ int main(void)
 
   
   if (secuActive != false) {
-      KeyManager_Certificate_Free(serverCertificate);
-      KeyManager_AsymmetricKey_Free(asymmetricKey);
-      KeyManager_Certificate_Free(authCertificate);
-      PKIProviderStack_Free(pkiProvider);
+      SOPC_KeyManager_Certificate_Free(serverCertificate);
+      SOPC_KeyManager_AsymmetricKey_Free(asymmetricKey);
+      SOPC_KeyManager_Certificate_Free(authCertificate);
+      SOPC_PKIProviderStack_Free(pkiProvider);
   }
 
   return status;

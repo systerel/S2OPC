@@ -1,4 +1,4 @@
-/** \file key_manager.h
+/** \file sopc_key_manager.h
  *
  * The KeyManager provides an API for Asymmetric Key Management such as loading signed public keys (Certificate)
  * and the corresponding private key.
@@ -28,8 +28,7 @@
 #define SOPC_KEY_MANAGER_H_
 
 
-#include "crypto_decl.h"
-
+#include "sopc_crypto_decl.h"
 #include "sopc_toolkit_constants.h"
 
 /* ------------------------------------------------------------------------------------------------
@@ -54,8 +53,8 @@
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and STATUS_NOK when there was an error.
  */
-SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint32_t lenBuf,
-                                                          AsymmetricKey **ppKey);
+SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint32_t lenBuf,
+                                                               SOPC_AsymmetricKey **ppKey);
 
 /**
  * \brief           Creates an asymmetric key (usually a private key) from a file in the DER or PEM format.
@@ -77,10 +76,10 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer,
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and STATUS_NOK when there was an error.
  */
-SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
-                                                   AsymmetricKey **ppKey,
-                                                   char *password,
-                                                   uint32_t lenPassword);
+SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
+                                                             SOPC_AsymmetricKey **ppKey,
+                                                             char *password,
+                                                             uint32_t lenPassword);
 
 /**
  * \brief           Returns the public key of the signed public key.
@@ -98,8 +97,8 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and STATUS_NOK when there was an error.
  */
-SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromCertificate(const Certificate *pCert,
-                                                               AsymmetricKey     **pKey);
+SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC_Certificate *pCert,
+                                                                    SOPC_AsymmetricKey     **pKey);
 
 /**
  * \brief           Frees a previously created asymmetric key created with KeyManager_AsymmetricKey_CreateFromBuffer() or
@@ -109,7 +108,7 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromCertificate(const Certificate
  *
  * \param pKey      A valid pointer to the key to free.
  */
-void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey);
+void SOPC_KeyManager_AsymmetricKey_Free(SOPC_AsymmetricKey *pKey);
 
 /**
  * \brief           Encodes the \p pKey as a DER buffer, and writes the result in \p pDest.
@@ -130,9 +129,9 @@ void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey);
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and STATUS_NOK when there was an error.
  */
-SOPC_StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
-                                          uint8_t *pDest, uint32_t lenDest,
-                                          uint32_t *pLenWritten);
+SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey *pKey,
+                                                    uint8_t *pDest, uint32_t lenDest,
+                                                    uint32_t *pLenWritten);
 
 
 /* ------------------------------------------------------------------------------------------------
@@ -155,8 +154,8 @@ SOPC_StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and STATUS_NOK when there was an error.
  */
-SOPC_StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32_t lenDER,
-                                                Certificate **ppCert);
+SOPC_StatusCode SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32_t lenDER,
+                                                          SOPC_Certificate **ppCert);
 
 /**
  * \brief           Creates a new Certificate (signed public key) from a file in the DER or PEM format.
@@ -173,8 +172,8 @@ SOPC_StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, u
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and STATUS_NOK when there was an error.
  */
-SOPC_StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
-                                                 Certificate **ppCert);
+SOPC_StatusCode SOPC_KeyManager_Certificate_CreateFromFile(const char *szPath,
+                                                           SOPC_Certificate **ppCert);
 
 /**
  * \brief           Frees a Certificate created with KeyManager_Certificate_CreateFromFile() or KeyManager_Certificate_CreateFromDER()
@@ -183,7 +182,7 @@ SOPC_StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
  *
  * \param pCert     The Certificate to free.
  */
-void KeyManager_Certificate_Free(Certificate *pCert);
+void SOPC_KeyManager_Certificate_Free(SOPC_Certificate *pCert);
 
 /**
  * \brief           Copies a DER description of \p pCert.
@@ -198,8 +197,8 @@ void KeyManager_Certificate_Free(Certificate *pCert);
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and STATUS_NOK when there was an error.
  */
-SOPC_StatusCode KeyManager_Certificate_CopyDER(const Certificate *pCert,
-                                          uint8_t **ppDest, uint32_t *pLenAllocated);
+SOPC_StatusCode SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate *pCert,
+                                                    uint8_t **ppDest, uint32_t *pLenAllocated);
 
 /**
  * \brief           Computes and writes the thumbprint of \p pCert to \p pDest.
@@ -219,9 +218,9 @@ SOPC_StatusCode KeyManager_Certificate_CopyDER(const Certificate *pCert,
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and STATUS_NOK when there was an error.
  */
-SOPC_StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProvider,
-                                                const Certificate *pCert,
-                                                uint8_t *pDest, uint32_t lenDest);
+SOPC_StatusCode SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider *pProvider,
+                                                          const SOPC_Certificate *pCert,
+                                                          uint8_t *pDest, uint32_t lenDest);
 
 
 #endif /* SOPC_KEY_MANAGER_H_ */

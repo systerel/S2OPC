@@ -22,16 +22,16 @@
 
 #include "sopc_event_dispatcher_manager.h"
 #include "sopc_types.h"
-#include "key_manager.h"
+#include "sopc_key_manager.h"
 
 /* Client static configuration of a Secure Channel */
 typedef struct SOPC_SecureChannel_Config {
     uint8_t                   isClientSc;
     const char*               url;
-    const Certificate*        crt_cli;
-    const AsymmetricKey*      key_priv_cli;
-    const Certificate*        crt_srv;
-    const PKIProvider*        pki;
+    const SOPC_Certificate*        crt_cli;
+    const SOPC_AsymmetricKey*      key_priv_cli;
+    const SOPC_Certificate*        crt_srv;
+    const SOPC_PKIProvider*        pki;
     const char*               reqSecuPolicyUri;
     uint32_t                  requestedLifetime;
     OpcUa_MessageSecurityMode msgSecurityMode;
@@ -52,9 +52,9 @@ typedef struct SOPC_SecurityPolicy
 /* Server static configuration of a Endpoint listener */
 typedef struct SOPC_Endpoint_Config{
     char*                endpointURL;
-    Certificate*         serverCertificate;
-    AsymmetricKey*       serverKey;
-    PKIProvider*         pki;
+    SOPC_Certificate*         serverCertificate;
+    SOPC_AsymmetricKey*       serverKey;
+    SOPC_PKIProvider*         pki;
     uint8_t              nbSecuConfigs;
     SOPC_SecurityPolicy* secuConfigurations;
 } SOPC_Endpoint_Config;

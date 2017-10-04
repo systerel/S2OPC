@@ -21,12 +21,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "crypto_decl.h"
-#include "crypto_profiles.h"
-#include "crypto_provider.h"
-#include "key_manager.h"
 #include "key_manager_lib.h"
 
+#include "../sopc_crypto_profiles.h"
+#include "../sopc_crypto_provider.h"
+#include "../sopc_key_manager.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/x509.h"
 
@@ -39,15 +38,15 @@
 /**
  * Creates an asymmetric key from a \p buffer, in DER or PEM format.
  */
-SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint32_t lenBuf,
-                                                     AsymmetricKey **ppKey)
+SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint32_t lenBuf,
+                                                     SOPC_AsymmetricKey **ppKey)
 {
-    AsymmetricKey *key = NULL;
+    SOPC_AsymmetricKey *key = NULL;
 
     if(NULL == buffer || 0 == lenBuf || NULL == ppKey)
         return STATUS_INVALID_PARAMETERS;
 
-    key = malloc(sizeof(AsymmetricKey));
+    key = malloc(sizeof(SOPC_AsymmetricKey));
     if(NULL == key)
         return STATUS_NOK;
     key->isBorrowedFromCert = false;
@@ -70,12 +69,12 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer,
  *
  * \note    Not in unit tests.
  */
-SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
-                                                   AsymmetricKey **ppKey,
+SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
+                                                   SOPC_AsymmetricKey **ppKey,
                                                    char *password,
                                                    uint32_t lenPassword)
 {
-    AsymmetricKey *key = NULL;
+    SOPC_AsymmetricKey *key = NULL;
 
     if(NULL == szPath || NULL == ppKey)
         return STATUS_INVALID_PARAMETERS;
@@ -86,7 +85,7 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
     if(NULL != password && (0 == lenPassword || '\0' != password[lenPassword]))
         return STATUS_INVALID_PARAMETERS;
 
-    key = malloc(sizeof(AsymmetricKey));
+    key = malloc(sizeof(SOPC_AsymmetricKey));
     if(NULL == key)
         return STATUS_NOK;
     key->isBorrowedFromCert = false;
@@ -103,12 +102,12 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
     return STATUS_OK;
 }
 
-SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromCertificate(const Certificate *pCert,
-                                                               AsymmetricKey **pKey)
+SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC_Certificate *pCert,
+                                                                    SOPC_AsymmetricKey **pKey)
 {
     if(NULL == pCert || NULL == pKey)
         return STATUS_INVALID_PARAMETERS;
-    *pKey = malloc(sizeof(AsymmetricKey));
+    *pKey = malloc(sizeof(SOPC_AsymmetricKey));
     if(NULL == *pKey)
         return STATUS_NOK;
     (*pKey)->isBorrowedFromCert = true;
@@ -122,7 +121,7 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromCertificate(const Certificate
  *
  * \warning     Only keys created with KeyManager_AsymmetricKey_Create*() should be freed that way.
  */
-void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey)
+void SOPC_KeyManager_AsymmetricKey_Free(SOPC_AsymmetricKey *pKey)
 {
     if(NULL == pKey)
         return;
@@ -139,7 +138,7 @@ void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey)
  *          This function does not allocate the buffer containing the DER. The operation may fail if the allocated buffer is not large enough.
  *          The required length cannot be precisely calculated, but a value of 8 times the key length in bytes is recommended.
  */
-SOPC_StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
+SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey *pKey,
                                           uint8_t *pDest, uint32_t lenDest,
                                           uint32_t *pLenWritten)
 {
@@ -153,7 +152,7 @@ SOPC_StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
     if(NULL == buffer)
         return STATUS_NOK;
 
-    *pLenWritten = mbedtls_pk_write_key_der(&((AsymmetricKey *)pKey)->pk, buffer, lenDest);
+    *pLenWritten = mbedtls_pk_write_key_der(&((SOPC_AsymmetricKey *)pKey)->pk, buffer, lenDest);
     if(*pLenWritten > 0 && *pLenWritten <= lenDest)
     {
         memcpy(pDest, buffer+lenDest-*pLenWritten, *pLenWritten);
@@ -170,17 +169,17 @@ SOPC_StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-SOPC_StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32_t lenDER,
-                                                Certificate **ppCert)
+SOPC_StatusCode SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32_t lenDER,
+                                                SOPC_Certificate **ppCert)
 {
     mbedtls_x509_crt *crt = NULL;
-    Certificate *certif = NULL;
+    SOPC_Certificate *certif = NULL;
 
     if(NULL == bufferDER || 0 == lenDER || NULL == ppCert)
         return STATUS_INVALID_PARAMETERS;
 
     // Mem alloc
-    certif = malloc(sizeof(Certificate));
+    certif = malloc(sizeof(SOPC_Certificate));
     if(NULL == certif)
         return STATUS_NOK;
 
@@ -202,7 +201,7 @@ SOPC_StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, u
     }
     else
     {
-        KeyManager_Certificate_Free(certif);
+        SOPC_KeyManager_Certificate_Free(certif);
         return STATUS_NOK;
     }
 }
@@ -213,17 +212,17 @@ SOPC_StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, u
  * \note    Same as CreateFromDER, except for a single call, can we refactor?
  *
  */
-SOPC_StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
-                                                 Certificate **ppCert)
+SOPC_StatusCode SOPC_KeyManager_Certificate_CreateFromFile(const char *szPath,
+                                                 SOPC_Certificate **ppCert)
 {
     mbedtls_x509_crt *crt = NULL;
-    Certificate *certif = NULL;
+    SOPC_Certificate *certif = NULL;
 
     if(NULL == szPath || NULL == ppCert)
         return STATUS_INVALID_PARAMETERS;
 
     // Mem alloc
-    certif = malloc(sizeof(Certificate));
+    certif = malloc(sizeof(SOPC_Certificate));
     if(NULL == certif)
         return STATUS_NOK;
 
@@ -245,13 +244,13 @@ SOPC_StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
     }
     else
     {
-        KeyManager_Certificate_Free(certif);
+        SOPC_KeyManager_Certificate_Free(certif);
         return STATUS_NOK;
     }
 }
 
 
-void KeyManager_Certificate_Free(Certificate *pCert)
+void SOPC_KeyManager_Certificate_Free(SOPC_Certificate *pCert)
 {
     if(NULL == pCert)
         return;
@@ -263,8 +262,8 @@ void KeyManager_Certificate_Free(Certificate *pCert)
 }
 
 
-SOPC_StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProvider,
-                                                const Certificate *pCert,
+SOPC_StatusCode SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider *pProvider,
+                                                const SOPC_Certificate *pCert,
                                                 uint8_t *pDest, uint32_t lenDest)
 {
     SOPC_StatusCode status = STATUS_OK;
@@ -276,25 +275,25 @@ SOPC_StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProv
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pCert || NULL == pDest || 0 == lenDest)
         return STATUS_INVALID_PARAMETERS;
 
-    if(CryptoProvider_CertificateGetLength_Thumbprint(pProvider, &lenSupposed) != STATUS_OK)
+    if(SOPC_CryptoProvider_CertificateGetLength_Thumbprint(pProvider, &lenSupposed) != STATUS_OK)
         return STATUS_NOK;
 
     if(lenDest != lenSupposed)
         return STATUS_INVALID_PARAMETERS;
 
     // Get DER
-    if(KeyManager_Certificate_CopyDER(pCert, &pDER, &lenDER) != STATUS_OK)
+    if(SOPC_KeyManager_Certificate_CopyDER(pCert, &pDER, &lenDER) != STATUS_OK)
         return STATUS_NOK;
 
     // Hash DER with SHA-1
     switch(pProvider->pProfile->SecurityPolicyID)
     {
-    case SecurityPolicy_Invalid_ID:
+    case SOPC_SecurityPolicy_Invalid_ID:
     default:
         status = STATUS_NOK;
         break;
-    case SecurityPolicy_Basic256Sha256_ID:
-    case SecurityPolicy_Basic256_ID:
+    case SOPC_SecurityPolicy_Basic256Sha256_ID:
+    case SOPC_SecurityPolicy_Basic256_ID:
         type = MBEDTLS_MD_SHA1;
         break;
     }
@@ -316,8 +315,8 @@ SOPC_StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProv
  * \brief       Fills \p pKey with public key information retrieved from \p pCert.
  * \warning     \p pKey is not valid anymore when \p pCert is freed.
  */
-SOPC_StatusCode KeyManager_Certificate_GetPublicKey(const Certificate *pCert,
-                                                    AsymmetricKey *pKey)
+SOPC_StatusCode KeyManager_Certificate_GetPublicKey(const SOPC_Certificate *pCert,
+                                                    SOPC_AsymmetricKey *pKey)
 {
     if(NULL == pCert || NULL == pKey)
         return STATUS_INVALID_PARAMETERS;

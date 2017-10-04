@@ -23,7 +23,7 @@
 
 #include <stddef.h>
 
-#include "crypto_profiles.h"
+#include "../sopc_crypto_profiles.h"
 #include "crypto_functions_lib.h"
 
 
@@ -40,8 +40,8 @@
  * CertificateSignatureAlgorithm – Sha256           OK
  */
 
-const CryptoProfile g_cpBasic256Sha256 = {
-        .SecurityPolicyID = SecurityPolicy_Basic256Sha256_ID,
+const SOPC_CryptoProfile sopc_g_cpBasic256Sha256 = {
+        .SecurityPolicyID = SOPC_SecurityPolicy_Basic256Sha256_ID,
         .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES256,
         .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES256,
         .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA256,
@@ -68,8 +68,8 @@ const CryptoProfile g_cpBasic256Sha256 = {
  * CertificateSignatureAlgorithm – Sha1 [deprecated] or Sha256 [recommended]    KO
  */
 
-const CryptoProfile g_cpBasic256 = {
-        .SecurityPolicyID = SecurityPolicy_Basic256_ID,
+const SOPC_CryptoProfile sopc_g_cpBasic256 = {
+        .SecurityPolicyID = SOPC_SecurityPolicy_Basic256_ID,
         .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES256,
         .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES256,
         .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA1,
@@ -86,8 +86,8 @@ const CryptoProfile g_cpBasic256 = {
 /* Security Policy "None": nothing to do
  */
 
- const CryptoProfile g_cpNone = {
-        .SecurityPolicyID = SecurityPolicy_None_ID,
+ const SOPC_CryptoProfile sopc_g_cpNone = {
+        .SecurityPolicyID = SOPC_SecurityPolicy_None_ID,
         .pFnSymmEncrypt = NULL,
         .pFnSymmDecrypt = NULL,
         .pFnSymmSign = NULL,

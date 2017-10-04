@@ -21,12 +21,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "../helpers_crypto/sopc_key_sets.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_builtintypes.h"
 #include "sopc_singly_linked_list.h"
-#include "secret_buffer.h"
-#include "crypto_decl.h"
-#include "key_sets.h"
+#include "sopc_secret_buffer.h"
+#include "sopc_crypto_decl.h"
 #include "sopc_types.h"
 
 typedef enum {
@@ -90,7 +90,7 @@ typedef struct SOPC_SecureConnection_TcpOpnReqAsymmSecu {
     const char*               securityPolicyUri;
     uint16_t                  validSecurityModes;  // accepted security mode for the valid security policy requested
     bool                      isSecureModeActive; // a secure mode is active (sign or signAndEncrypt) choice based on certificates presence in OPN
-    Certificate*              clientCertificate; /* temporary record of the client certificate */
+    SOPC_Certificate*              clientCertificate; /* temporary record of the client certificate */
 } SOPC_SecureConnection_TcpAsymmSecu;
 
 
@@ -133,13 +133,13 @@ typedef struct SOPC_SecureConnection {
 
     // Message body content dependent properties
     SOPC_SecureConnection_TcpProperties         tcpMsgProperties;
-    CryptoProvider*                             cryptoProvider; // defined once security policy id define (OPN req)
+    SOPC_CryptoProvider*                             cryptoProvider; // defined once security policy id define (OPN req)
     SOPC_SecureConnection_SecurityToken         precedentSecurityToken;
-    SC_SecurityKeySets                          precedentSecuKeySets;
+    SOPC_SC_SecurityKeySets                          precedentSecuKeySets;
     SOPC_SecureConnection_SecurityToken         currentSecurityToken;
-    SC_SecurityKeySets                          currentSecuKeySets;
+    SOPC_SC_SecurityKeySets                          currentSecuKeySets;
     // (Server side specific)
-    SecretBuffer*                               clientNonce; // client nonce used to create symmetric key  
+    SOPC_SecretBuffer*                               clientNonce; // client nonce used to create symmetric key  
     // (Server side specific)
     bool                                        serverNewSecuTokenActive;
 

@@ -21,6 +21,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include "../../src/helpers_crypto/sopc_crypto_profiles.h"
+#include "../../src/helpers_crypto/sopc_pki_stack.h"
 #include "stub_sc_sopc_services_api.h"
 #include "sopc_services_events.h"
 #include "sopc_toolkit_config.h"
@@ -32,8 +34,6 @@
 #include "opcua_statuscodes.h"
 #include "opcua_identifiers.h"
 
-#include "crypto_profiles.h"
-#include "pki_stack.h"
 #include "sopc_time.h"
 
 int main(int argc, char *argv[]){
@@ -51,10 +51,10 @@ int main(int argc, char *argv[]){
     SOPC_StubSC_ServicesEventParams* serviceEvent = NULL;
     uint32_t scConnectionId = 0;
 
-    PKIProvider *pki = NULL;
-    Certificate *crt_cli = NULL, *crt_srv = NULL;
-    Certificate *crt_ca = NULL;
-    AsymmetricKey *priv_cli = NULL;
+    SOPC_PKIProvider *pki = NULL;
+    SOPC_Certificate *crt_cli = NULL, *crt_srv = NULL;
+    SOPC_Certificate *crt_ca = NULL;
+    SOPC_AsymmetricKey *priv_cli = NULL;
 
     // Endpoint URL
     SOPC_String stEndpointUrl;
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
     char* sEndpointUrl = "opc.tcp://localhost:8888/myEndPoint";
 
     // Policy security:
-    char* pRequestedSecurityPolicyUri = SecurityPolicy_Basic256Sha256_URI;
+    char* pRequestedSecurityPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI;
 
     // Message security mode: None
     OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]){
     if(argc == 2){
         if(strlen(argv[1]) == strlen("none") && 0 == memcmp(argv[1], "none", strlen("none"))){
             messageSecurityMode = OpcUa_MessageSecurityMode_None;
-            pRequestedSecurityPolicyUri = SecurityPolicy_None_URI;
+            pRequestedSecurityPolicyUri = SOPC_SecurityPolicy_None_URI;
             printf(">>Stub_Client: Security mode ='None'\n");
         }else if(strlen(argv[1]) == strlen("sign") && 0 == memcmp(argv[1], "sign", strlen("sign"))){
             messageSecurityMode = OpcUa_MessageSecurityMode_Sign;
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]){
 
     if(messageSecurityMode != OpcUa_MessageSecurityMode_None){
         // The certificates: load
-        status = KeyManager_Certificate_CreateFromFile(certificateLocation, &crt_cli);
+        status = SOPC_KeyManager_Certificate_CreateFromFile(certificateLocation, &crt_cli);
         if(STATUS_OK != status){
             printf(">>Stub_Client: Failed to load client certificate\n");
         }else{
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]){
     }
 
     if(messageSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status){
-        status = KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
+        status = SOPC_KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
         if(STATUS_OK != status){
             printf(">>Stub_Client: Failed to load server certificate\n");
         }else{
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]){
 
     if(messageSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status){
         // Private key: load
-        status = KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli, NULL, 0);
+        status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli, NULL, 0);
         if(STATUS_OK != status){
             printf(">>Stub_Client: Failed to load private key\n");
         }else{
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]){
 
     if(messageSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status){
         // Certificate Authority: load
-        if(STATUS_OK != KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca)){
+        if(STATUS_OK != SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca)){
             printf(">>Stub_Client: Failed to load CA\n");
         }else{
             printf(">>Stub_Client: CA certificate loaded\n");
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]){
     // Init PKI provider and parse certificate and private key
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
     if(STATUS_OK == status){
-        if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki)){
+        if(STATUS_OK != SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki)){
             printf(">>Stub_Client: Failed to create PKI\n");
         }else{
             printf(">>Stub_Client: PKI created\n");
@@ -343,12 +343,12 @@ int main(int argc, char *argv[]){
     printf(">>Stub_Client: Final status: %x\n", status);
     SOPC_Toolkit_Clear();
 
-    PKIProviderStack_Free(pki);
+    SOPC_PKIProviderStack_Free(pki);
     SOPC_String_Clear(&stEndpointUrl);
-    KeyManager_Certificate_Free(crt_cli);
-    KeyManager_Certificate_Free(crt_srv);
-    KeyManager_Certificate_Free(crt_ca);
-    KeyManager_AsymmetricKey_Free(priv_cli);
+    SOPC_KeyManager_Certificate_Free(crt_cli);
+    SOPC_KeyManager_Certificate_Free(crt_srv);
+    SOPC_KeyManager_Certificate_Free(crt_ca);
+    SOPC_KeyManager_AsymmetricKey_Free(priv_cli);
 
     if(STATUS_OK == status){
         printf(">>Stub_Client: Stub_Client test: OK\n");

@@ -18,20 +18,20 @@
 #ifndef SOPC_KEY_SETS_H_
 #define SOPC_KEY_SETS_H_
 
-#include "secret_buffer.h"
+#include "sopc_secret_buffer.h"
 
-typedef struct SC_SecurityKeySet{
-    SecretBuffer* signKey;
-    SecretBuffer* encryptKey;
-    SecretBuffer* initVector;
-} SC_SecurityKeySet;
+typedef struct SOPC_SC_SecurityKeySet{
+    SOPC_SecretBuffer* signKey;
+    SOPC_SecretBuffer* encryptKey;
+    SOPC_SecretBuffer* initVector;
+} SOPC_SC_SecurityKeySet;
 
 typedef struct {
-    SC_SecurityKeySet* senderKeySet;
-    SC_SecurityKeySet* receiverKeySet;
-} SC_SecurityKeySets;
+    SOPC_SC_SecurityKeySet* senderKeySet;
+    SOPC_SC_SecurityKeySet* receiverKeySet;
+} SOPC_SC_SecurityKeySets;
 
-SC_SecurityKeySet* KeySet_Create();
-void KeySet_Delete(SC_SecurityKeySet* keySet);
+SOPC_SC_SecurityKeySet* SOPC_KeySet_Create();
+void SOPC_KeySet_Delete(SOPC_SC_SecurityKeySet* keySet);
 
 #endif /* SOPC_KEY_SETS_H_ */

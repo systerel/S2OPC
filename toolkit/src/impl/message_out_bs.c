@@ -254,7 +254,7 @@ void message_out_bs__write_create_session_req_msg_crypto(
 {
     SOPC_SecureChannel_Config *pSCCfg = NULL;
     OpcUa_CreateSessionRequest *pReq = (OpcUa_CreateSessionRequest *)message_out_bs__p_req_msg;
-    const Certificate *pCrtCli = NULL;
+    const SOPC_Certificate *pCrtCli = NULL;
 
     /* Retrieve the certificate */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) message_out_bs__p_channel_config_idx);
@@ -267,7 +267,7 @@ void message_out_bs__write_create_session_req_msg_crypto(
     /* Write the Certificate */
     SOPC_ByteString_Clear(&pReq->ClientCertificate);
     /* TODO: this is a malloc error, this can fail, and the B model should be notified */
-    if(STATUS_OK != KeyManager_Certificate_CopyDER(pCrtCli, &pReq->ClientCertificate.Data,
+    if(STATUS_OK != SOPC_KeyManager_Certificate_CopyDER(pCrtCli, &pReq->ClientCertificate.Data,
                                                    (uint32_t *)&pReq->ClientCertificate.Length))
         return;
 
@@ -317,7 +317,7 @@ void message_out_bs__write_create_session_resp_msg_crypto(
    constants__t_StatusCode_i * const message_out_bs__sc)
 {
     SOPC_SecureChannel_Config *pSCCfg = NULL;
-    const Certificate *pCrtSrv = NULL;
+    const SOPC_Certificate *pCrtSrv = NULL;
     SOPC_StatusCode sc = STATUS_OK;
     OpcUa_CreateSessionResponse *pResp = (OpcUa_CreateSessionResponse *) message_out_bs__p_msg;
     OpcUa_SignatureData *pSig = (OpcUa_SignatureData *)message_out_bs__p_signature;
@@ -336,7 +336,7 @@ void message_out_bs__write_create_session_resp_msg_crypto(
     if(STATUS_OK == sc) {
         SOPC_ByteString_Clear(&pResp->ServerCertificate);
         /* TODO: this is a malloc error, this can fail, and the B model should be notified */
-        sc = KeyManager_Certificate_CopyDER(pCrtSrv, &pResp->ServerCertificate.Data,
+        sc = SOPC_KeyManager_Certificate_CopyDER(pCrtSrv, &pResp->ServerCertificate.Data,
                                             (uint32_t *)&pResp->ServerCertificate.Length);
     }
 

@@ -21,8 +21,8 @@
 
 #include "util_b2c.h"
 
+#include "../../../src/helpers_crypto/sopc_crypto_profiles.h"
 #include "sopc_types.h"
-#include "crypto_profiles.h"
 
 void util_message__get_encodeable_type(const constants__t_msg_type_i message__msg_type,
                                        SOPC_EncodeableType** reqEncType,
@@ -291,15 +291,15 @@ bool util_channel__SecurityPolicy_C_to_B(const char *uri,
     if(NULL == uri || NULL == secpol)
         return false;
 
-    if(strncmp(uri, SecurityPolicy_None_URI, strlen(SecurityPolicy_None_URI)) == 0) {
+    if(strncmp(uri, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI)) == 0) {
         *secpol = constants__e_secpol_None;
         return true;
     }
-    if(strncmp(uri, SecurityPolicy_Basic256_URI, strlen(SecurityPolicy_Basic256_URI)) == 0) {
+    if(strncmp(uri, SOPC_SecurityPolicy_Basic256_URI, strlen(SOPC_SecurityPolicy_Basic256_URI)) == 0) {
         *secpol = constants__e_secpol_B256;
         return true;
     }
-    if(strncmp(uri, SecurityPolicy_Basic256Sha256_URI, strlen(SecurityPolicy_Basic256Sha256_URI)) == 0) {
+    if(strncmp(uri, SOPC_SecurityPolicy_Basic256Sha256_URI, strlen(SOPC_SecurityPolicy_Basic256Sha256_URI)) == 0) {
         *secpol = constants__e_secpol_B256S256;
         return true;
     }

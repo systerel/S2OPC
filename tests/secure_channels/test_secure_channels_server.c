@@ -20,13 +20,12 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "../../src/helpers_crypto/sopc_crypto_profiles.h"
+#include "../../src/helpers_crypto/sopc_key_manager.h"
+#include "../../src/helpers_crypto/sopc_pki_stack.h"
 #include "opcua_statuscodes.h"
 
 #include "sopc_time.h"
-#include "crypto_profiles.h"
-#include "key_manager.h"
-#include "pki_stack.h"
-
 #include "stub_sc_sopc_services_api.h"
 #include "sopc_services_events.h"
 #include "sopc_toolkit_config.h"
@@ -39,7 +38,7 @@ static bool cryptoDeactivated = false;
 
 int main(void){
     SOPC_StatusCode status = STATUS_OK;
-    PKIProvider *pki = NULL;
+    SOPC_PKIProvider *pki = NULL;
 
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
@@ -48,9 +47,9 @@ int main(void){
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
 
-    Certificate *crt_srv = NULL;
-    AsymmetricKey *priv_srv = NULL;
-    Certificate *crt_ca = NULL;
+    SOPC_Certificate *crt_srv = NULL;
+    SOPC_AsymmetricKey *priv_srv = NULL;
+    SOPC_Certificate *crt_ca = NULL;
 
     // Number of the secu policy configuration
     uint32_t nbOfSecurityPolicyConfigurations = 2;
@@ -78,7 +77,7 @@ int main(void){
 
     // The certificates: load
     if(cryptoDeactivated == false){
-        status = KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
+        status = SOPC_KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
 
         if(STATUS_OK != status){
             printf("<Stub_Server: Failed to load certificate\n");
@@ -89,7 +88,7 @@ int main(void){
 
     // Private key: load
     if(STATUS_OK == status && cryptoDeactivated == false){
-        status = KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_srv, NULL, 0);
+        status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_srv, NULL, 0);
         if(STATUS_OK != status){
             printf("<Stub_Server: Failed to load private key\n");
         }else{
@@ -99,7 +98,7 @@ int main(void){
 
     // Certificate Authority: load
     if(STATUS_OK == status  && cryptoDeactivated == false){
-        status = KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca);
+        status = SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca);
         if(STATUS_OK != status){
             printf("<Stub_Server: Failed to load CA\n");
         }else{
@@ -118,9 +117,9 @@ int main(void){
     }
 
     if(STATUS_OK == status){
-        status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy, SecurityPolicy_Basic256Sha256_URI);
+        status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy, SOPC_SecurityPolicy_Basic256Sha256_URI);
         secuConfig[0].securityModes = SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
-        status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy, SecurityPolicy_None_URI);
+        status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy, SOPC_SecurityPolicy_None_URI);
         secuConfig[1].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
     }
 
@@ -128,7 +127,7 @@ int main(void){
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
     if(STATUS_OK == status && cryptoDeactivated == false){
 
-        if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki)){
+        if(STATUS_OK != SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki)){
             printf("<Stub_Server: Failed to create PKI\n");
         }else{
             printf("<Stub_Server: PKI created\n");
@@ -347,10 +346,10 @@ int main(void){
 
     printf ("<Stub_Server: Final status: %x\n", status);
     SOPC_Toolkit_Clear();
-    PKIProviderStack_Free(pki);
-    KeyManager_Certificate_Free(crt_srv);
-    KeyManager_Certificate_Free(crt_ca);
-    KeyManager_AsymmetricKey_Free(priv_srv);
+    SOPC_PKIProviderStack_Free(pki);
+    SOPC_KeyManager_Certificate_Free(crt_srv);
+    SOPC_KeyManager_Certificate_Free(crt_ca);
+    SOPC_KeyManager_AsymmetricKey_Free(priv_srv);
     if(STATUS_OK == status){
         printf("<Stub_Server: Stub_Server test: OK\n");
     }else{

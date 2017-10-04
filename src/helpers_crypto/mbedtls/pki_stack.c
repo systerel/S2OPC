@@ -25,12 +25,11 @@
 
 #include <stdlib.h>
 
-#include "crypto_provider.h"
-#include "key_manager.h"
+#include "../sopc_crypto_provider.h"
+#include "../sopc_key_manager.h"
 #include "key_manager_lib.h"
-#include "pki.h"
-#include "pki_stack.h"
-
+#include "../sopc_pki.h"
+#include "../sopc_pki_stack.h"
 #include "mbedtls/x509.h"
 
 
@@ -51,11 +50,11 @@ static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_minimal =
 
 
 
-static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *pPKI,
-                                                       const Certificate *pToValidate)
+static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const SOPC_PKIProvider *pPKI,
+                                                       const SOPC_Certificate *pToValidate)
 {
     (void)(pPKI);
-    Certificate *cert_ca = NULL;
+    SOPC_Certificate *cert_ca = NULL;
     CertificateRevList *cert_rev_list = NULL;
     mbedtls_x509_crl *rev_list = NULL;
     uint32_t failure_reasons = 0;
@@ -71,7 +70,7 @@ static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *p
         cert_rev_list = (CertificateRevList *)(pPKI->pUserCertRevocList);
         rev_list = (mbedtls_x509_crl *)(&cert_rev_list->crl);
     }
-    cert_ca = (Certificate *)(pPKI->pUserCertAuthList);
+    cert_ca = (SOPC_Certificate *)(pPKI->pUserCertAuthList);
 
     // Now, verifies the certificate
     // crt are not const in crt_verify, but this function does not look like to modify them
@@ -89,20 +88,20 @@ static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *p
 }
 
 
-SOPC_StatusCode PKIProviderStack_Create(Certificate *pCertAuth,
+SOPC_StatusCode SOPC_PKIProviderStack_Create(SOPC_Certificate *pCertAuth,
                                    CertificateRevList *pRevocationList,
-                                   PKIProvider **ppPKI)
+                                   SOPC_PKIProvider **ppPKI)
 {
-    PKIProvider *pki = NULL;
+    SOPC_PKIProvider *pki = NULL;
 
     if(NULL == pCertAuth || NULL == ppPKI)
         return STATUS_INVALID_PARAMETERS;
 
-    pki = (PKIProvider *)malloc(sizeof(PKIProvider));
+    pki = (SOPC_PKIProvider *)malloc(sizeof(SOPC_PKIProvider));
     if(NULL == pki)
         return STATUS_NOK;
 
-    *(FnValidateCertificate *)(&pki->pFnValidateCertificate) = &PKIProviderStack_ValidateCertificate;
+    *(SOPC_FnValidateCertificate *)(&pki->pFnValidateCertificate) = &PKIProviderStack_ValidateCertificate;
     pki->pUserCertAuthList = pCertAuth;
     pki->pUserCertRevocList = pRevocationList; // Can be NULL
     pki->pUserData = NULL;
@@ -112,7 +111,7 @@ SOPC_StatusCode PKIProviderStack_Create(Certificate *pCertAuth,
 }
 
 
-void PKIProviderStack_Free(PKIProvider *pPKI)
+void SOPC_PKIProviderStack_Free(SOPC_PKIProvider *pPKI)
 {
     if(NULL != pPKI)
         free((void *)pPKI);

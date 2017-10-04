@@ -26,7 +26,7 @@
 #include "mbedtls/ctr_drbg.h"
 
 
-struct CryptolibContext {
+struct SOPC_CryptolibContext {
     mbedtls_entropy_context ctxEnt;
     mbedtls_ctr_drbg_context ctxDrbg;
 };

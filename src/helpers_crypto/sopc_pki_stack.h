@@ -1,4 +1,4 @@
-/** \file pki_stack.h
+/** \file sopc_pki_stack.h
  *
  * Defines the minimal PKI implementation provided by the stack.
  *
@@ -26,11 +26,11 @@
 #define SOPC_PKI_STACK_H_
 
 
-#include "crypto_provider.h"
-#include "key_manager.h"
-#include "pki.h"
+#include "sopc_crypto_provider.h"
+#include "sopc_key_manager.h"
+#include "sopc_pki.h"
 
-struct CertificateRevList;
+struct SOPC_CertificateRevList;
 
 /**
  * \brief           Creates the minimal validation implementation provided by the stack, which fulfills the PKIProvider interface.
@@ -51,16 +51,16 @@ struct CertificateRevList;
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and STATUS_NOK when there was an error.
  */
-SOPC_StatusCode PKIProviderStack_Create(Certificate *pCertAuth,
-                                   struct CertificateRevList *pRevocationList,
-                                   PKIProvider **ppPKI);
+SOPC_StatusCode SOPC_PKIProviderStack_Create(SOPC_Certificate *pCertAuth,
+                                             struct SOPC_CertificateRevList *pRevocationList,
+                                             SOPC_PKIProvider **ppPKI);
 
 /**
  * \brief           Frees a pki created with PKIProviderStack_Create().
  *
  * \param pPKI      A valid pointer to the pki to free.
  */
-void PKIProviderStack_Free(PKIProvider *pPKI);
+void SOPC_PKIProviderStack_Free(SOPC_PKIProvider *pPKI);
 
 
 #endif /* SOPC_PKI_STACK_H_ */

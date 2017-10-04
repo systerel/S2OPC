@@ -1,4 +1,4 @@
-/** \file pki.h
+/** \file sopc_pki.h
  *
  * Defines the common interface that a PKI should provide. This is a minimal interface, as the main
  * API for certificate and key manipulation is provided by KeyManager.
@@ -34,21 +34,18 @@
 
 
 
-#include "crypto_decl.h"
-#include "crypto_provider.h"
-#include "key_manager.h"
-
+#include "sopc_crypto_decl.h"
+#include "sopc_crypto_provider.h"
+#include "sopc_key_manager.h"
 #include "sopc_toolkit_constants.h"
 
-typedef SOPC_StatusCode (*FnValidateCertificate) (const struct PKIProvider *pPKI,
-                                                  const Certificate *pToValidate);
+typedef SOPC_StatusCode (*SOPC_FnValidateCertificate) (const struct SOPC_PKIProvider *pPKI,
+                                                       const SOPC_Certificate *pToValidate);
 
-
-// TODO: find a more appropriate name, such as PublicKeyInfra, CertificateValdiation, CryptoPKI
 /**
  * \brief   The PKIProvider object defines the common interface for the Public Key Infrastructure.
  */
-struct PKIProvider
+struct SOPC_PKIProvider
 {
     /**
      *  \brief          The validation function, which is wrapped by CryptoProvider_Certificate_Validate().
@@ -62,7 +59,7 @@ struct PKIProvider
      *
      *  \return         STATUS_OK when the certificate is successfully validated, and STATUS_INVALID_PARAMETERS or STATUS_NOK.
      */
-    const FnValidateCertificate pFnValidateCertificate;
+    const SOPC_FnValidateCertificate pFnValidateCertificate;
 
     /** \brief PKI implementations can use this placeholder to store handles to certificate authorities. */
     void *pUserCertAuthList;

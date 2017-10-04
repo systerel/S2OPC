@@ -26,7 +26,7 @@
 #include "sopc_secure_channels_api.h"
 
 #include "sopc_types.h"
-#include "crypto_profiles.h"
+#include "sopc_crypto_profiles.h"
 
 #include "io_dispatch_mgr.h"
 #include "channel_mgr_bs.h"

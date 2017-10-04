@@ -84,7 +84,7 @@ constants__t_StatusCode_i  build_endPoints_Descriptions(const constants__t_endpo
 			newEndPointDescription.SecurityLevel = 1;
                         /* Copy server certificate */
                         if(sopcEndpointConfig->serverCertificate != NULL){
-                            status = KeyManager_Certificate_CopyDER(sopcEndpointConfig->serverCertificate,
+                            status = SOPC_KeyManager_Certificate_CopyDER(sopcEndpointConfig->serverCertificate,
                                                                     &newEndPointDescription.ServerCertificate.Data,
                                                                     &tmpLength);
                             assert(STATUS_OK == status && tmpLength <= INT32_MAX);
@@ -99,7 +99,7 @@ constants__t_StatusCode_i  build_endPoints_Descriptions(const constants__t_endpo
 			newEndPointDescription.SecurityLevel = 1;
                         /* Copy server certificate */
                         if(sopcEndpointConfig->serverCertificate != NULL){
-                            status = KeyManager_Certificate_CopyDER(sopcEndpointConfig->serverCertificate,
+                            status = SOPC_KeyManager_Certificate_CopyDER(sopcEndpointConfig->serverCertificate,
                                                                     &newEndPointDescription.ServerCertificate.Data,
                                                                     &tmpLength);
                             assert(STATUS_OK == status && tmpLength <= INT32_MAX);

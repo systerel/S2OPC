@@ -1,4 +1,4 @@
-/** \file
+/** \file sopc_key_manager.c
  *
  * KeyManager provides functions for Asymmetric Key Management such as loading a signed public key,
  *  the corresponding private key, and provides the ability to verify signatures with x509 certificates.
@@ -27,10 +27,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "crypto_decl.h"
-#include "crypto_profiles.h"
-#include "key_manager.h"
 #include "key_manager_lib.h"
+#include "sopc_key_manager.h"
+
+#include "sopc_crypto_decl.h"
+#include "sopc_crypto_profiles.h"
 
 
 /* ------------------------------------------------------------------------------------------------
@@ -42,7 +43,7 @@
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-SOPC_StatusCode KeyManager_Certificate_CopyDER(const Certificate *pCert,
+SOPC_StatusCode SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate *pCert,
                                           uint8_t **ppDest, uint32_t *pLenAllocated)
 {
     uint32_t lenToAllocate = 0;

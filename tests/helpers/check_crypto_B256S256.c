@@ -26,30 +26,30 @@
 #include <stdlib.h> // malloc, free
 #include <check.h>
 
+#include "../../src/helpers_crypto/sopc_crypto_decl.h"
+#include "../../src/helpers_crypto/sopc_crypto_profiles.h"
+#include "../../src/helpers_crypto/sopc_crypto_provider.h"
+#include "../../src/helpers_crypto/sopc_key_manager.h"
+#include "../../src/helpers_crypto/sopc_pki_stack.h"
+#include "../../src/helpers_crypto/sopc_secret_buffer.h"
 #include "check_helpers.h"
 #include "hexlify.h"
-#include "crypto_provider.h"
-#include "crypto_profiles.h"
-#include "crypto_decl.h"
-#include "secret_buffer.h"
 #include "crypto_provider_lib.h"
-#include "key_manager.h"
-#include "pki_stack.h"
 
 
 
 // Using fixtures
-static CryptoProvider *crypto = NULL;
+static SOPC_CryptoProvider *crypto = NULL;
 
 static inline void setup_crypto(void)
 {
-    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
+    crypto = SOPC_CryptoProvider_Create(SOPC_SecurityPolicy_Basic256Sha256_URI);
     ck_assert(NULL != crypto);
 }
 
 static inline void teardown_crypto(void)
 {
-    CryptoProvider_Free(crypto);
+    SOPC_CryptoProvider_Free(crypto);
     crypto = NULL;
 }
 
@@ -57,7 +57,7 @@ static inline void teardown_crypto(void)
 START_TEST(test_crypto_load_B256S256)
 {
     ck_assert(NULL != crypto->pProfile);
-    ck_assert(SecurityPolicy_Basic256Sha256_ID == crypto->pProfile->SecurityPolicyID);
+    ck_assert(SOPC_SecurityPolicy_Basic256Sha256_ID == crypto->pProfile->SecurityPolicyID);
     ck_assert(NULL != crypto->pProfile->pFnSymmEncrypt);
     ck_assert(NULL != crypto->pProfile->pFnSymmDecrypt);
     ck_assert(NULL != crypto->pProfile->pFnSymmSign);
@@ -78,26 +78,26 @@ START_TEST(test_crypto_symm_lengths_B256S256)
     uint32_t len = 0, lenCiph = 0, lenDeci = 0;
 
     // Check sizes
-    ck_assert(CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &len) == STATUS_OK);
     ck_assert(32 == len);
-    ck_assert(CryptoProvider_SymmetricGetLength_SignKey(crypto, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_SignKey(crypto, &len) == STATUS_OK);
     ck_assert(32 == len);
-    ck_assert(CryptoProvider_SymmetricGetLength_Signature(crypto, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Signature(crypto, &len) == STATUS_OK);
     ck_assert(32 == len);
-    ck_assert(CryptoProvider_SymmetricGetLength_Encryption(crypto, 15, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Encryption(crypto, 15, &len) == STATUS_OK);
     ck_assert(15 == len);
-    ck_assert(CryptoProvider_SymmetricGetLength_Decryption(crypto, 15, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Decryption(crypto, 15, &len) == STATUS_OK);
     ck_assert(15 == len);
-    ck_assert(CryptoProvider_SymmetricGetLength_SecureChannelNonce(crypto, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(crypto, &len) == STATUS_OK);
     ck_assert(32 == len);
-    ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, NULL, NULL) == STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, &lenCiph, NULL) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Blocks(crypto, NULL, NULL) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Blocks(crypto, &lenCiph, NULL) == STATUS_OK);
     ck_assert(16 == lenCiph);
-    ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, NULL, &lenDeci) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Blocks(crypto, NULL, &lenDeci) == STATUS_OK);
     ck_assert(16 == lenDeci);
     lenCiph = 0;
     lenDeci = 0;
-    ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, &lenCiph, &lenDeci) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Blocks(crypto, &lenCiph, &lenDeci) == STATUS_OK);
     ck_assert(16 == lenCiph);
     ck_assert(16 == lenDeci);
 }
@@ -114,181 +114,181 @@ START_TEST(test_crypto_symm_crypt_B256S256)
     unsigned char output[128];
     char hexoutput[256];
     int i;
-    SecretBuffer *pSecKey = NULL, *pSecIV = NULL;
+    SOPC_SecretBuffer *pSecKey = NULL, *pSecIV = NULL;
 
     // Encrypt
     // This single test is not taken from the NIST test vectors...
     memset(key, 0, sizeof(key));
-    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(iv, 0, sizeof(iv));
-    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
     ck_assert(NULL != pSecIV);
     memset(input, 0, sizeof(input));
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "dc95c078a2408989ad48a21492842087", 32) == 0);
-    SecretBuffer_DeleteClear(pSecKey);
-    SecretBuffer_DeleteClear(pSecIV);
+    SOPC_SecretBuffer_DeleteClear(pSecKey);
+    SOPC_SecretBuffer_DeleteClear(pSecIV);
 
     ck_assert(unhexlify("c47b0294dbbbee0fec4757f22ffeee3587ca4730c3d33b691df38bab076bc558", key, 32) == 32);
-    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(iv, 0, sizeof(iv));
-    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
     ck_assert(NULL != pSecIV);
     memset(input, 0, sizeof(input));
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "46f2fb342d6f0ab477476fc501242c5f", 32) == 0);
-    SecretBuffer_DeleteClear(pSecKey);
-    SecretBuffer_DeleteClear(pSecIV);
+    SOPC_SecretBuffer_DeleteClear(pSecKey);
+    SOPC_SecretBuffer_DeleteClear(pSecIV);
 
     ck_assert(unhexlify("ccd1bc3c659cd3c59bc437484e3c5c724441da8d6e90ce556cd57d0752663bbc", key, 32) == 32);
-    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(iv, 0, sizeof(iv));
-    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
     ck_assert(NULL != pSecIV);
     memset(input, 0, sizeof(input));
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "304f81ab61a80c2e743b94d5002a126b", 32) == 0);
-    SecretBuffer_DeleteClear(pSecKey);
-    SecretBuffer_DeleteClear(pSecIV);
+    SOPC_SecretBuffer_DeleteClear(pSecKey);
+    SOPC_SecretBuffer_DeleteClear(pSecIV);
 
     memset(key, 0, sizeof(key));
-    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(iv, 0, sizeof(iv));
-    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
     ck_assert(NULL != pSecIV);
     ck_assert(unhexlify("0b24af36193ce4665f2825d7b4749c98", input, 16) == 16);
     memset(output, 0, sizeof(output));
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "a9ff75bd7cf6613d3731c77c3b6d0c04", 32) == 0);
-    SecretBuffer_DeleteClear(pSecKey);
-    SecretBuffer_DeleteClear(pSecIV);
+    SOPC_SecretBuffer_DeleteClear(pSecKey);
+    SOPC_SecretBuffer_DeleteClear(pSecIV);
 
     memset(key, 0, sizeof(key));
     ck_assert(unhexlify("458b67bf212d20f3a57fce392065582dcefbf381aa22949f8338ab9052260e1d", key, 32) == 32);
-    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(iv, 0, sizeof(iv));
     ck_assert(unhexlify("4c12effc5963d40459602675153e9649", iv, 16) == 16);
-    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
     ck_assert(NULL != pSecIV);
     ck_assert(unhexlify("256fd73ce35ae3ea9c25dd2a9454493e", input, 16) == 16);
     memset(output, 0, sizeof(output));
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "90b7b9630a2378f53f501ab7beff0391", 32) == 0);
-    SecretBuffer_DeleteClear(pSecKey);
-    SecretBuffer_DeleteClear(pSecIV);
+    SOPC_SecretBuffer_DeleteClear(pSecKey);
+    SOPC_SecretBuffer_DeleteClear(pSecIV);
 
     // Decrypt
     ck_assert(unhexlify("28d46cffa158533194214a91e712fc2b45b518076675affd910edeca5f41ac64", key, 32) == 32);
-    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(iv, 0, sizeof(iv));
-    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
     ck_assert(NULL != pSecIV);
     ck_assert(unhexlify("4bf3b0a69aeb6657794f2901b1440ad4", input, 16) == 16);
     memset(output, 0, sizeof(output));
-    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     for(i=0; i<16; ++i)
         ck_assert(output[i] == 0);
-    SecretBuffer_DeleteClear(pSecKey);
-    SecretBuffer_DeleteClear(pSecIV);
+    SOPC_SecretBuffer_DeleteClear(pSecKey);
+    SOPC_SecretBuffer_DeleteClear(pSecIV);
 
     ck_assert(unhexlify("07eb03a08d291d1b07408bf3512ab40c91097ac77461aad4bb859647f74f00ee", key, 32) == 32);
-    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(iv, 0, sizeof(iv));
-    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
     ck_assert(NULL != pSecIV);
     ck_assert(unhexlify("47cb030da2ab051dfc6c4bf6910d12bb", input, 16) == 16);
     memset(output, 0, sizeof(output));
-    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
     for(i=0; i<16; ++i)
         ck_assert(output[i] == 0);
-    SecretBuffer_DeleteClear(pSecKey);
-    SecretBuffer_DeleteClear(pSecIV);
+    SOPC_SecretBuffer_DeleteClear(pSecKey);
+    SOPC_SecretBuffer_DeleteClear(pSecIV);
 
     memset(key, 0, sizeof(key));
-    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(iv, 0, sizeof(iv));
-    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
     ck_assert(NULL != pSecIV);
     ck_assert(unhexlify("623a52fcea5d443e48d9181ab32c7421", input, 16) == 16);
     memset(output, 0, sizeof(output));
-    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "761c1fe41a18acf20d241650611d90f1", 32) == 0);
-    SecretBuffer_DeleteClear(pSecKey);
-    SecretBuffer_DeleteClear(pSecIV);
+    SOPC_SecretBuffer_DeleteClear(pSecKey);
+    SOPC_SecretBuffer_DeleteClear(pSecIV);
 
     memset(key, 0, sizeof(key));
     ck_assert(unhexlify("458b67bf212d20f3a57fce392065582dcefbf381aa22949f8338ab9052260e1d", key, 32) == 32);
-    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(iv, 0, sizeof(iv));
     ck_assert(unhexlify("4c12effc5963d40459602675153e9649", iv, 16) == 16);
-    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
     ck_assert(NULL != pSecIV);
     ck_assert(unhexlify("90b7b9630a2378f53f501ab7beff0391", input, 16) == 16);
     memset(output, 0, sizeof(output));
-    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "256fd73ce35ae3ea9c25dd2a9454493e", 32) == 0);
-    SecretBuffer_DeleteClear(pSecKey);
-    SecretBuffer_DeleteClear(pSecIV);
+    SOPC_SecretBuffer_DeleteClear(pSecKey);
+    SOPC_SecretBuffer_DeleteClear(pSecIV);
 
     // Encrypt + Decrypt
     ck_assert(unhexlify("07eb03a08d291d1b07408bf3512ab40c91097ac77461aad4bb859647f74f00ee", key, 32) == 32);
-    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(iv, 0, sizeof(iv));
-    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
     ck_assert(NULL != pSecIV);
     memset(input, 0, sizeof(input));
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "47cb030da2ab051dfc6c4bf6910d12bb", 32) == 0);
-    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, output, 16, pSecKey, pSecIV, input, 16) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, output, 16, pSecKey, pSecIV, input, 16) == STATUS_OK);
     ck_assert(hexlify(input, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "00000000000000000000000000000000", 32) == 0);
-    SecretBuffer_DeleteClear(pSecKey);
-    SecretBuffer_DeleteClear(pSecIV);
+    SOPC_SecretBuffer_DeleteClear(pSecKey);
+    SOPC_SecretBuffer_DeleteClear(pSecIV);
 
     // Multi-block messages
     ck_assert(unhexlify("458b67bf212d20f3a57fce392065582dcefbf381aa22949f8338ab9052260e1d", key, 32) == 32);
-    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     ck_assert(unhexlify("4c12effc5963d40459602675153e9649", iv, 16) == 16);
-    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
     ck_assert(NULL != pSecIV);
     ck_assert(unhexlify("256fd73ce35ae3ea9c25dd2a9454493e96d8633fe633b56176dce8785ce5dbbb84dbf2c8a2eeb1e96b51899605e4f13bbc11b93bf6f39b3469be14858b5b720d"
                         "4a522d36feed7a329c9b1e852c9280c47db8039c17c4921571a07d1864128330e09c308ddea1694e95c84500f1a61e614197e86a30ecc28df64ccb3ccf5437aa", input, 128) == 128);
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 128, pSecKey, pSecIV, output, 128) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 128, pSecKey, pSecIV, output, 128) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 128) == 128);
     ck_assert(memcmp(hexoutput, "90b7b9630a2378f53f501ab7beff039155008071bc8438e789932cfd3eb1299195465e6633849463fdb44375278e2fdb1310821e6492cf80ff15cb772509fb42"
                                 "6f3aeee27bd4938882fd2ae6b5bd9d91fa4a43b17bb439ebbe59c042310163a82a5fe5388796eee35a181a1271f00be29b852d8fa759bad01ff4678f010594cd", 256) == 0);
     memset(input, 0, sizeof(input));
-    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, output, 128, pSecKey, pSecIV, input, 128) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, output, 128, pSecKey, pSecIV, input, 128) == STATUS_OK);
     ck_assert(hexlify(input, hexoutput, 128) == 128);
     ck_assert(memcmp(hexoutput, "256fd73ce35ae3ea9c25dd2a9454493e96d8633fe633b56176dce8785ce5dbbb84dbf2c8a2eeb1e96b51899605e4f13bbc11b93bf6f39b3469be14858b5b720d"
                                 "4a522d36feed7a329c9b1e852c9280c47db8039c17c4921571a07d1864128330e09c308ddea1694e95c84500f1a61e614197e86a30ecc28df64ccb3ccf5437aa", 256) == 0);
@@ -296,23 +296,23 @@ START_TEST(test_crypto_symm_crypt_B256S256)
 
 
     // Assert failure on wrong parameters
-    ck_assert(CryptoProvider_SymmetricEncrypt(NULL, input, 16, pSecKey, pSecIV, output, 16) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, NULL, 16, pSecKey, pSecIV, output, 16) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 15, pSecKey, pSecIV, output, 16) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 16, NULL, pSecIV, output, 16) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, NULL, output, 16) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, NULL, 16) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 15) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricDecrypt(NULL, input, 16, pSecKey, pSecIV, output, 16) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, NULL, 16, pSecKey, pSecIV, output, 16) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, input, 15, pSecKey, pSecIV, output, 16) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, input, 16, NULL, pSecIV, output, 16) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, NULL, output, 16) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, NULL, 16) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 15) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(NULL, input, 16, pSecKey, pSecIV, output, 16) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, NULL, 16, pSecKey, pSecIV, output, 16) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 15, pSecKey, pSecIV, output, 16) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 16, NULL, pSecIV, output, 16) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, NULL, output, 16) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, NULL, 16) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 15) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(NULL, input, 16, pSecKey, pSecIV, output, 16) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, NULL, 16, pSecKey, pSecIV, output, 16) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 15, pSecKey, pSecIV, output, 16) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, NULL, pSecIV, output, 16) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, NULL, output, 16) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, NULL, 16) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 15) != STATUS_OK);
 
-    SecretBuffer_DeleteClear(pSecKey);
-    SecretBuffer_DeleteClear(pSecIV);
+    SOPC_SecretBuffer_DeleteClear(pSecKey);
+    SOPC_SecretBuffer_DeleteClear(pSecIV);
 }
 END_TEST
 
@@ -323,7 +323,7 @@ START_TEST(test_crypto_symm_sign_B256S256)
     unsigned char input[256];
     unsigned char output[32];
     char hexoutput[1024];
-    SecretBuffer *pSecKey = NULL;
+    SOPC_SecretBuffer *pSecKey = NULL;
 
     // Test cases of https://tools.ietf.org/html/rfc4231 cannot be used for Basic256Sha256
     // Test cases of http://csrc.nist.gov/groups/STM/cavp/message-authentication.html#hmac cannot be used either, as there is no corresponding key_length=32 and sig_length=32
@@ -335,38 +335,38 @@ START_TEST(test_crypto_symm_sign_B256S256)
     memset(key, 0, sizeof(key));
     ck_assert(unhexlify("ec7b07fb4f3a6b87ca8cff06ba9e0ec619a34a2d9618dc2a02bde67709ded8b4e7069d582665f23a361324d1f84807e30d2227b266c287cc342980d62cb53017", input, 64) == 64);
     ck_assert(unhexlify("7203d5e504eafe00e5dd77519eb640de3bbac660ec781166c4d460362a94c372", key, 32) == 32);
-    pSecKey = SecretBuffer_NewFromExposedBuffer(key, 32);
+    pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, 32);
     ck_assert(NULL != pSecKey);
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
-    ck_assert(CryptoProvider_SymmetricSign(crypto, input, 64, pSecKey, output, 32) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(crypto, input, 64, pSecKey, output, 32) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 32) == 32);
     ck_assert(memcmp(hexoutput, "e4185b6d49f06e8b94a552ad950983852ef20b58ee75f2c448fea587728d94db", 64) == 0);
 
     // Check verify
-    ck_assert(CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 32) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 32) == STATUS_OK);
     output[1] ^= 0x20; // Change 1 bit
-    ck_assert(CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 32) == STATUS_NOK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 32) == STATUS_NOK);
     output[1] ^= 0x20; // Revert changed bit
-    ck_assert(CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 32) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 32) == STATUS_OK);
     output[31] = 0x04; // Change 1 bit in last byte
-    ck_assert(CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 32) == STATUS_NOK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 32) == STATUS_NOK);
 
     // Check invalid parameters
-    ck_assert(CryptoProvider_SymmetricSign(NULL, input, 64, pSecKey, output, 32) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricSign(crypto, NULL, 64, pSecKey, output, 32) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricSign(crypto, input, 64, NULL, output, 32) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricSign(crypto, input, 64, pSecKey, NULL, 32) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricSign(crypto, input, 64, pSecKey, output, 0) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricSign(crypto, input, 64, pSecKey, output, 31) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricVerify(NULL, input, 64, pSecKey, output, 32) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricVerify(crypto, NULL, 64, pSecKey, output, 32) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricVerify(crypto, input, 64, NULL, output, 32) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, NULL, 32) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 0) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 31) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(NULL, input, 64, pSecKey, output, 32) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(crypto, NULL, 64, pSecKey, output, 32) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(crypto, input, 64, NULL, output, 32) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(crypto, input, 64, pSecKey, NULL, 32) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(crypto, input, 64, pSecKey, output, 0) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(crypto, input, 64, pSecKey, output, 31) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(NULL, input, 64, pSecKey, output, 32) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, NULL, 64, pSecKey, output, 32) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, NULL, output, 32) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, NULL, 32) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 0) != STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 31) != STATUS_OK);
 
-    SecretBuffer_DeleteClear(pSecKey);
+    SOPC_SecretBuffer_DeleteClear(pSecKey);
 }
 END_TEST
 
@@ -377,11 +377,11 @@ END_TEST
  */
 START_TEST(test_crypto_generate_nbytes_B256S256)
 {
-    ExposedBuffer *pExpBuffer0, *pExpBuffer1;
+    SOPC_ExposedBuffer *pExpBuffer0, *pExpBuffer1;
 
     // It is random, so...
-    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 64, &pExpBuffer0) == STATUS_OK);
-    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 64, &pExpBuffer1) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(crypto, 64, &pExpBuffer0) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(crypto, 64, &pExpBuffer1) == STATUS_OK);
     // You have a slight chance to fail here (1/(2**512))
     ck_assert_msg(memcmp(pExpBuffer0, pExpBuffer1, 64) != 0,
                   "Randomly generated two times the same 64 bytes, which should happen once in pow(2, 512) tries.");
@@ -389,34 +389,34 @@ START_TEST(test_crypto_generate_nbytes_B256S256)
     free(pExpBuffer1);
 
     // Test invalid inputs
-    ck_assert(CryptoProvider_GenerateRandomBytes(NULL, 64, &pExpBuffer0) == STATUS_INVALID_PARAMETERS);
-    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 0, &pExpBuffer0) == STATUS_INVALID_PARAMETERS);
-    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 64, NULL) == STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(NULL, 64, &pExpBuffer0) == STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(crypto, 0, &pExpBuffer0) == STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(crypto, 64, NULL) == STATUS_INVALID_PARAMETERS);
 }
 END_TEST
 
 
 START_TEST(test_crypto_generate_nonce_B256S256)
 {
-    SecretBuffer *pSecNonce0, *pSecNonce1;
-    ExposedBuffer *pExpKey0, *pExpKey1;
+    SOPC_SecretBuffer *pSecNonce0, *pSecNonce1;
+    SOPC_ExposedBuffer *pExpKey0, *pExpKey1;
 
     // It is random, so...
-    ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce0) == STATUS_OK);
-    ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce1) == STATUS_OK);
-    ck_assert(NULL != (pExpKey0 = SecretBuffer_Expose(pSecNonce0)));
-    ck_assert(NULL != (pExpKey1 = SecretBuffer_Expose(pSecNonce1)));
+    ck_assert(SOPC_CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce0) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce1) == STATUS_OK);
+    ck_assert(NULL != (pExpKey0 = SOPC_SecretBuffer_Expose(pSecNonce0)));
+    ck_assert(NULL != (pExpKey1 = SOPC_SecretBuffer_Expose(pSecNonce1)));
     // You have a slight chance to fail here (1/(2**256))
     ck_assert_msg(memcmp(pExpKey0, pExpKey1, 32) != 0,
                   "Randomly generated two times the same 32 bytes long nonce, which should happen once in pow(2, 256) tries.");
-    SecretBuffer_Unexpose(pExpKey0, pSecNonce0);
-    SecretBuffer_Unexpose(pExpKey1, pSecNonce1);
-    SecretBuffer_DeleteClear(pSecNonce0);
-    SecretBuffer_DeleteClear(pSecNonce1);
+    SOPC_SecretBuffer_Unexpose(pExpKey0, pSecNonce0);
+    SOPC_SecretBuffer_Unexpose(pExpKey1, pSecNonce1);
+    SOPC_SecretBuffer_DeleteClear(pSecNonce0);
+    SOPC_SecretBuffer_DeleteClear(pSecNonce1);
 
     // Test invalid inputs
-    ck_assert(CryptoProvider_GenerateSecureChannelNonce(NULL, &pSecNonce0) == STATUS_INVALID_PARAMETERS);
-    ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, NULL) == STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_GenerateSecureChannelNonce(NULL, &pSecNonce0) == STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_GenerateSecureChannelNonce(crypto, NULL) == STATUS_INVALID_PARAMETERS);
 }
 END_TEST
 
@@ -425,15 +425,15 @@ START_TEST(test_crypto_generate_uint32_B256S256)
 {
     uint32_t i = 0, j = 0;
 
-    ck_assert(CryptoProvider_GenerateRandomID(crypto, &i) == STATUS_OK);
-    ck_assert(CryptoProvider_GenerateRandomID(crypto, &j) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomID(crypto, &i) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomID(crypto, &j) == STATUS_OK);
     // It is random, so you should not have two times the same number (unless you are unlucky (1/2**32)).
     ck_assert_msg(i != j,
                   "Randomly generated two times the same 4 bytes random ID, which should happen once in pow(2, 32) tries");
 
     // Test invalid inputs
-    ck_assert(CryptoProvider_GenerateRandomID(NULL, &i) == STATUS_INVALID_PARAMETERS);
-    ck_assert(CryptoProvider_GenerateRandomID(crypto, NULL) == STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomID(NULL, &i) == STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomID(crypto, NULL) == STATUS_INVALID_PARAMETERS);
 }
 END_TEST
 
@@ -443,7 +443,7 @@ START_TEST(test_crypto_derive_lengths_B256S256)
     uint32_t lenKey = 0, lenKeyBis = 0, lenIV = 0;
 
     // Check sizes
-    ck_assert(CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
     ck_assert(32 == lenKey);
     ck_assert(32 == lenKeyBis);
     ck_assert(16 == lenIV);
@@ -453,28 +453,28 @@ END_TEST
 
 START_TEST(test_crypto_derive_data_B256S256)
 {
-    ExposedBuffer secret[32], seed[32], output[1024];
+    SOPC_ExposedBuffer secret[32], seed[32], output[1024];
     char hexoutput[2048];
     uint32_t lenKey, lenKeyBis, lenIV, lenSecr, lenSeed, lenOutp;
 
     // Context init
-    ck_assert(CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
     lenOutp = lenKey+lenKeyBis+lenIV;
     ck_assert(lenOutp < 1024);
-    ck_assert(CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &lenSecr) == STATUS_OK); // TODO: use future GetLength_Nonce
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &lenSecr) == STATUS_OK); // TODO: use future GetLength_Nonce
     lenSeed = lenSecr;
 
     // This test vectors is unofficial, taken from https://www.ietf.org/mail-archive/web/tls/current/msg03416.html
     ck_assert(unhexlify("9bbe436ba940f017b17652849a71db35", secret, 16) == 16);
     memcpy(seed, "test label", 10); // We don't use labels in DerivePseudoRandomData, but RFC 5246 specifies that label is prepend to seed
     ck_assert(unhexlify("a0ba9f936cda311827a6f796ffd5198c", seed+10, 16) == 16);
-    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, secret, 16, seed, 26, output, 100) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_DerivePseudoRandomData(crypto, secret, 16, seed, 26, output, 100) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 100) == 100);
     ck_assert(memcmp(hexoutput, "e3f229ba727be17b8d122620557cd453c2aab21d07c3d495329b52d4e61edb5a6b301791e90d35c9c9a46b4e14baf9af0fa0"
                                 "22f7077def17abfd3797c0564bab4fbc91666e9def9b97fce34f796789baa48082d122ee42c5a72e5a5110fff70187347b66",
                      200) == 0);
     // A second call to the same function should reset the contexts and provide the same result
-    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, secret, 16, seed, 26, output, 100) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_DerivePseudoRandomData(crypto, secret, 16, seed, 26, output, 100) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 100) == 100);
     ck_assert(memcmp(hexoutput, "e3f229ba727be17b8d122620557cd453c2aab21d07c3d495329b52d4e61edb5a6b301791e90d35c9c9a46b4e14baf9af0fa0"
                                 "22f7077def17abfd3797c0564bab4fbc91666e9def9b97fce34f796789baa48082d122ee42c5a72e5a5110fff70187347b66",
@@ -483,20 +483,20 @@ START_TEST(test_crypto_derive_data_B256S256)
     // More appropriate examples (generated by the test-writer with a Python implementation that conforms to the previous test vector)
     ck_assert(unhexlify("8bcc1010ba96bc055c1168cf84167410893d6cc4cff090f6ded0eb476b118e17", secret, lenSecr) == (int32_t)lenSecr);
     ck_assert(unhexlify("8c4584155b3df8aba84ede20a3a3778e087f0cf40d850f395b356345b0426614", seed, lenSeed) == (int32_t)lenSeed);
-    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, secret, lenSecr, seed, lenSeed, output, 64) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_DerivePseudoRandomData(crypto, secret, lenSecr, seed, lenSeed, output, 64) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 64) == 64);
     ck_assert(memcmp(hexoutput, "5a6cee5d3f4881816d4d5fa890ea9333a0ccb47998efa8c3c1f7e04ffd778b0ab71c5bc89bb418031ae54e34c6ab78a8e7a39113d72d7446ff5e54738d9d1d7e", 128) == 0);
 
     ck_assert(unhexlify("6bc8af2863fcc9e7e1d4441d8d87ae0dc42d9f62155bca420703537b05c53756", secret, lenSecr) == (int32_t)lenSecr);
     ck_assert(unhexlify("c33f3f15ae9537c4d1e618dff2260ad0f6757c0201073fc265281e60b939a322", seed, lenSeed) == (int32_t)lenSeed);
-    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, secret, lenSecr, seed, lenSeed, output, lenOutp) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_DerivePseudoRandomData(crypto, secret, lenSecr, seed, lenSeed, output, lenOutp) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, lenOutp) == (int32_t)lenOutp);
     ck_assert(memcmp(hexoutput, "ba523f60d02e153670604816cbb25301ce8cc27a04f2be01163f3dd517c2b7f636a08d3ca6ed5811d65a9605efcaf5fd137984ac4a7efc141a181f5dacaac1bd249a8e6424ad5133efd751b2c418160f",
                      2*lenOutp) == 0);
 
     ck_assert(unhexlify("d53d3776ecf8540fe1f579f6278f90cec832a19de09c915cd7ccb7bd942377a5", secret, lenSecr) == (int32_t)lenSecr);
     ck_assert(unhexlify("87f48b64bffff0a20efeb62347fa995e574aad63c7371a5dac4b3fe2ae689b65", seed, lenSeed) == (int32_t)lenSeed);
-    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, secret, lenSecr, seed, lenSeed, output, 1024) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_DerivePseudoRandomData(crypto, secret, lenSecr, seed, lenSeed, output, 1024) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 1024) == 1024);
     ck_assert(memcmp(hexoutput, "addbefdaf4e8c0b14fa7ac19e302bf45e908910ee833975c3328bfa6b7a464c8ced5976887a9fd98b824da473eb88cf1ca24c17268da6e6176cc8023c120e1d1"
                                 "60f3755cb017b1bb67127dc9ceef24647a313ac230e68cd91b57115c60b55af8bde0c37667291678f2cd874ce2b5a87223b048e43f32319dea5c9d421c29ecb7"
@@ -521,100 +521,100 @@ END_TEST
 
 START_TEST(test_crypto_derive_keysets_B256S256)
 {
-    ExposedBuffer clientNonce[32], serverNonce[32], *pout, zeros[32];
+    SOPC_ExposedBuffer clientNonce[32], serverNonce[32], *pout, zeros[32];
     char hexoutput[160];
     uint32_t lenKey, lenKeyBis, lenIV, lenCliNonce, lenSerNonce, lenOutp;
-    SC_SecurityKeySet cliKS, serKS;
+    SOPC_SC_SecurityKeySet cliKS, serKS;
 
     // Context init
-    ck_assert(CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
     lenOutp = lenKey+lenKeyBis+lenIV;
     ck_assert(lenOutp < 1024);
-    ck_assert(CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &lenCliNonce) == STATUS_OK); // TODO: use future GetLength_Nonce
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &lenCliNonce) == STATUS_OK); // TODO: use future GetLength_Nonce
     lenSerNonce = lenCliNonce;
 
     // Prepares security key sets
     memset(zeros, 0, 32);
-    ck_assert(NULL != (cliKS.signKey = SecretBuffer_NewFromExposedBuffer(zeros, lenKey)));
-    ck_assert(NULL != (cliKS.encryptKey= SecretBuffer_NewFromExposedBuffer(zeros, lenKey)));
-    ck_assert(NULL != (cliKS.initVector = SecretBuffer_NewFromExposedBuffer(zeros, lenIV)));
-    ck_assert(NULL != (serKS.signKey = SecretBuffer_NewFromExposedBuffer(zeros, lenKey)));
-    ck_assert(NULL != (serKS.encryptKey= SecretBuffer_NewFromExposedBuffer(zeros, lenKey)));
-    ck_assert(NULL != (serKS.initVector = SecretBuffer_NewFromExposedBuffer(zeros, lenIV)));
+    ck_assert(NULL != (cliKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey)));
+    ck_assert(NULL != (cliKS.encryptKey= SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey)));
+    ck_assert(NULL != (cliKS.initVector = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenIV)));
+    ck_assert(NULL != (serKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey)));
+    ck_assert(NULL != (serKS.encryptKey= SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey)));
+    ck_assert(NULL != (serKS.initVector = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenIV)));
 
     // These come from a stub_client working with OPC foundation code (e.g. commit 0fbccc98472c781a7f44ac09c1d36d2b4a0c3fb0)
     ck_assert(unhexlify("3d3b4768f275d5023c2145cbe3a4a592fb843643d791f7bd7fce75ff25128b68", clientNonce, lenCliNonce) == (int32_t)lenCliNonce);
     ck_assert(unhexlify("ccee418cbc77c2ebb38d5ffac9d2a9d0a6821fa211798e71b2d65b3abb6aec8f", serverNonce, lenSerNonce) == (int32_t)lenSerNonce);
-    ck_assert(CryptoProvider_DeriveKeySets(crypto, clientNonce, lenCliNonce, serverNonce, lenSerNonce, &cliKS, &serKS) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_DeriveKeySets(crypto, clientNonce, lenCliNonce, serverNonce, lenSerNonce, &cliKS, &serKS) == STATUS_OK);
     // 4 lines for each assert
-    ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.signKey)));
+    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(cliKS.signKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "86842427475799fa782efa5c63f5eb6f0b6dbf8a549dd5452247feaa5021714b", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout, cliKS.signKey);
-    ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.encryptKey)));
+    SOPC_SecretBuffer_Unexpose(pout, cliKS.signKey);
+    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(cliKS.encryptKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "d8de10ac4fb579f2718ddcb50ea68d1851c76644b26454e3f9339958d23429d5", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout, cliKS.encryptKey);
-    ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.initVector)));
+    SOPC_SecretBuffer_Unexpose(pout, cliKS.encryptKey);
+    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(cliKS.initVector)));
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t)lenIV);
     ck_assert(memcmp(hexoutput, "4167de62880e0bdc023aa133965c34ff", 2*lenIV) == 0);
-    SecretBuffer_Unexpose(pout, cliKS.initVector);
-    ck_assert(NULL != (pout = SecretBuffer_Expose(serKS.signKey)));
+    SOPC_SecretBuffer_Unexpose(pout, cliKS.initVector);
+    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(serKS.signKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "f6db2ad48ad3776f83086b47e9f905ee00193f87e85ccde0c3bf7eb8650e236e", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout, serKS.signKey);
-    ck_assert(NULL != (pout = SecretBuffer_Expose(serKS.encryptKey)));
+    SOPC_SecretBuffer_Unexpose(pout, serKS.signKey);
+    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(serKS.encryptKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "2c86aecfd5629ee05c49345bce3b2a7ca959a0bf4c9c281b8516a369650dbc4e", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout, serKS.encryptKey);
-    ck_assert(NULL != (pout = SecretBuffer_Expose(serKS.initVector)));
+    SOPC_SecretBuffer_Unexpose(pout, serKS.encryptKey);
+    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(serKS.initVector)));
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t)lenIV);
     ck_assert(memcmp(hexoutput, "39a4f596bcbb99e0b48114f60fc6af21", 2*lenIV) == 0);
-    SecretBuffer_Unexpose(pout, serKS.initVector);
+    SOPC_SecretBuffer_Unexpose(pout, serKS.initVector);
 
     // Another run, just to be sure...
     ck_assert(unhexlify("d821ea93a6a48a4ef49b36c5e7d1bae6c49ccb2b2ddb07c99dcf046e2225617f", clientNonce, lenCliNonce) == (int32_t)lenCliNonce);
     ck_assert(unhexlify("00a8cb99446410a70bf221d5c498d0d0b3e968a306f1a4dc5d1acbe7a37644da", serverNonce, lenSerNonce) == (int32_t)lenSerNonce);
-    ck_assert(CryptoProvider_DeriveKeySets(crypto, clientNonce, lenCliNonce, serverNonce, lenSerNonce, &cliKS, &serKS) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_DeriveKeySets(crypto, clientNonce, lenCliNonce, serverNonce, lenSerNonce, &cliKS, &serKS) == STATUS_OK);
     // 4 lines for each assert
-    ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.signKey)));
+    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(cliKS.signKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "185e860da28d3a224729926ba5b5b800214b2f74257ed39e694596520e67e574", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout, cliKS.signKey);
-    ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.encryptKey)));
+    SOPC_SecretBuffer_Unexpose(pout, cliKS.signKey);
+    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(cliKS.encryptKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "7a6c2cdc20a842a0e2039075935b14a07f578c157091328adc9d52bbb8ef727d", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout, cliKS.encryptKey);
-    ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.initVector)));
+    SOPC_SecretBuffer_Unexpose(pout, cliKS.encryptKey);
+    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(cliKS.initVector)));
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t)lenIV);
     ck_assert(memcmp(hexoutput, "dcf97c356f5ef87b7049900f74355c13", 2*lenIV) == 0);
-    SecretBuffer_Unexpose(pout, cliKS.initVector);
-    ck_assert(NULL != (pout = SecretBuffer_Expose(serKS.signKey)));
+    SOPC_SecretBuffer_Unexpose(pout, cliKS.initVector);
+    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(serKS.signKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "105b1805ecc3a25de8e2eaa5c9e94504b355990243c6163c2c8b95c1f5681694", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout, serKS.signKey);
-    ck_assert(NULL != (pout = SecretBuffer_Expose(serKS.encryptKey)));
+    SOPC_SecretBuffer_Unexpose(pout, serKS.signKey);
+    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(serKS.encryptKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "2439bdd8fc365b0fe7b7e2cfcefee67ea7bdea6c157d0b23092f0abc015792d5", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout, serKS.encryptKey);
-    ck_assert(NULL != (pout = SecretBuffer_Expose(serKS.initVector)));
+    SOPC_SecretBuffer_Unexpose(pout, serKS.encryptKey);
+    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(serKS.initVector)));
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t)lenIV);
     ck_assert(memcmp(hexoutput, "005a70781b43979940c77368677718cd", 2*lenIV) == 0);
-    SecretBuffer_Unexpose(pout, serKS.initVector);
+    SOPC_SecretBuffer_Unexpose(pout, serKS.initVector);
 
     // Clears KS
-    SecretBuffer_DeleteClear(cliKS.signKey);
-    SecretBuffer_DeleteClear(cliKS.encryptKey);
-    SecretBuffer_DeleteClear(cliKS.initVector);
-    SecretBuffer_DeleteClear(serKS.signKey);
-    SecretBuffer_DeleteClear(serKS.encryptKey);
-    SecretBuffer_DeleteClear(serKS.initVector);
+    SOPC_SecretBuffer_DeleteClear(cliKS.signKey);
+    SOPC_SecretBuffer_DeleteClear(cliKS.encryptKey);
+    SOPC_SecretBuffer_DeleteClear(cliKS.initVector);
+    SOPC_SecretBuffer_DeleteClear(serKS.signKey);
+    SOPC_SecretBuffer_DeleteClear(serKS.encryptKey);
+    SOPC_SecretBuffer_DeleteClear(serKS.initVector);
 }
 END_TEST
 
 
 // Fixture for certificate load
-static Certificate *crt_pub = NULL;
+static SOPC_Certificate *crt_pub = NULL;
 
 static inline void setup_certificate(void)
 {
@@ -642,12 +642,12 @@ static inline void setup_certificate(void)
                         "8f2e4df13c14f8250c02a56b4add9fc1f503bc7d8a8573909d8e9d3c5a008be8170b528711cc0084072ad6839b52881e613c9c8121415a4c8bcdd6e4d448616e"
                         "003addd166727c198735601abd2526b2fe9cd3158df9b258ef3101f8ddeaf2b36e8d7f6348dea70e3f5d69f8e1b4ebe8156405f55692e9342630264f1dc948a4"
                         "095da188cd50e7f8cd30fce5232cb564dc0bef2d761e12f5dde9ac93a81f67fae30d251a59f578dd6aaa7d3edbc81387dae9d67ee148d1662ca139446a8de3", der_cert, 1215) == 1215);
-    ck_assert(KeyManager_Certificate_CreateFromDER(der_cert, 1215, &crt_pub) == STATUS_OK);
+    ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(der_cert, 1215, &crt_pub) == STATUS_OK);
 }
 
 static inline void teardown_certificate(void)
 {
-    KeyManager_Certificate_Free(crt_pub);
+    SOPC_KeyManager_Certificate_Free(crt_pub);
     crt_pub = NULL;
 
     teardown_crypto();
@@ -665,7 +665,7 @@ START_TEST(test_cert_lengths_B256S256)
 {
     uint32_t len = 0;
 
-    ck_assert(CryptoProvider_CertificateGetLength_Thumbprint(crypto, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_CertificateGetLength_Thumbprint(crypto, &len) == STATUS_OK);
     ck_assert(20 == len); // SHA-1
 }
 END_TEST
@@ -679,7 +679,7 @@ START_TEST(test_cert_thumbprint_B256S256)
     //ck_assert(KeyManager_Certificate_CreateFromFile(keyman, (int8_t *)"./server_public/server.der", &crt_pub) == STATUS_OK);
 
     // Compute thumbprint
-    ck_assert(KeyManager_Certificate_GetThumbprint(crypto, crt_pub, thumb, 20) == STATUS_OK);
+    ck_assert(SOPC_KeyManager_Certificate_GetThumbprint(crypto, crt_pub, thumb, 20) == STATUS_OK);
     ck_assert(hexlify(thumb, hexoutput, 20) == 20);
     // The expected thumbprint for this certificate was calculated with openssl tool, and mbedtls API.
     ck_assert(memcmp(hexoutput, "80968e5e796b36c6c5cc8546092c36f72137d8b0", 40) == 0);
@@ -690,18 +690,18 @@ END_TEST
 
 START_TEST(test_cert_loadkey_B256S256)
 {
-    AsymmetricKey* key_pub = NULL;
+    SOPC_AsymmetricKey* key_pub = NULL;
 
     // Loads the public key from cert
-    ck_assert(KeyManager_AsymmetricKey_CreateFromCertificate(crt_pub, &key_pub) == STATUS_OK);
+    ck_assert(SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(crt_pub, &key_pub) == STATUS_OK);
 
-    KeyManager_AsymmetricKey_Free(key_pub);
+    SOPC_KeyManager_AsymmetricKey_Free(key_pub);
 }
 END_TEST
 
 
 // Fixtures for Asymetric crypto
-static AsymmetricKey *key_pub = NULL, *key_priv = NULL;
+static SOPC_AsymmetricKey *key_pub = NULL, *key_priv = NULL;
 
 // Certificates: these are not the same cert as in setup_certificate. This one was created to also embed the private key in the tests.
 // This key is 2048 bits long, which is the smallest possible.
@@ -751,23 +751,23 @@ static inline void setup_asym_keys(void)
 
     // Loads certificate from DER
     ck_assert(unhexlify(DER_ASYM_PUB_HEXA, der_cert, DER_ASYM_PUB_LENG) == DER_ASYM_PUB_LENG);
-    ck_assert(KeyManager_Certificate_CreateFromDER(der_cert, DER_ASYM_PUB_LENG, &crt_pub) == STATUS_OK);//*/
+    ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(der_cert, DER_ASYM_PUB_LENG, &crt_pub) == STATUS_OK);//*/
 
     // Loads the public key from cert
-    ck_assert(KeyManager_AsymmetricKey_CreateFromCertificate(crt_pub, &key_pub) == STATUS_OK);
+    ck_assert(SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(crt_pub, &key_pub) == STATUS_OK);
 
     // Loads the corresponding private key
     ck_assert(unhexlify(DER_ASYM_PRIV_HEXA, der_priv, DER_ASYM_PRIV_LENG) == DER_ASYM_PRIV_LENG);
-    ck_assert(KeyManager_AsymmetricKey_CreateFromBuffer(der_priv, DER_ASYM_PRIV_LENG, &key_priv) == STATUS_OK);
+    ck_assert(SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(der_priv, DER_ASYM_PRIV_LENG, &key_priv) == STATUS_OK);
 }
 
 static inline void teardown_asym_keys(void)
 {
     free(key_pub);
     key_pub = NULL;
-    KeyManager_Certificate_Free(crt_pub);
+    SOPC_KeyManager_Certificate_Free(crt_pub);
     crt_pub = NULL;
-    KeyManager_AsymmetricKey_Free(key_priv);
+    SOPC_KeyManager_AsymmetricKey_Free(key_priv);
     key_priv = NULL;
 
     teardown_crypto();
@@ -786,39 +786,39 @@ START_TEST(test_crypto_asym_lengths_B256S256)
     uint32_t lenPlain = 0, lenCiph = 0, len = 0;
 
     // Check lengths
-    ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_pub, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_pub, &len) == STATUS_OK);
     ck_assert(2048 == len);
-    ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_priv, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_priv, &len) == STATUS_OK);
     ck_assert(2048 == len);
-    ck_assert(CryptoProvider_AsymmetricGetLength_KeyBytes(crypto, key_pub, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes(crypto, key_pub, &len) == STATUS_OK);
     ck_assert(256 == len);
-    ck_assert(CryptoProvider_AsymmetricGetLength_KeyBytes(crypto, key_priv, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes(crypto, key_priv, &len) == STATUS_OK);
     ck_assert(256 == len);
-    ck_assert(CryptoProvider_AsymmetricGetLength_MsgPlainText(crypto, key_pub, &lenPlain) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricGetLength_MsgCipherText(crypto, key_pub, &lenCiph) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText(crypto, key_pub, &lenPlain) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText(crypto, key_pub, &lenCiph) == STATUS_OK);
     ck_assert(256 == lenCiph);
     ck_assert(214 == lenPlain); // 256 - 2*20 - 2
-    ck_assert(CryptoProvider_AsymmetricGetLength_Msgs(crypto, key_pub, &lenCiph, &lenPlain) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_Msgs(crypto, key_pub, &lenCiph, &lenPlain) == STATUS_OK);
     ck_assert(256 == lenCiph);
     ck_assert(214 == lenPlain); // 256 - 2*20 - 2
-    ck_assert(CryptoProvider_AsymmetricGetLength_Msgs(crypto, key_priv, &lenCiph, &lenPlain) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_Msgs(crypto, key_priv, &lenCiph, &lenPlain) == STATUS_OK);
     ck_assert(256 == lenCiph);
     ck_assert(214 == lenPlain); // 256 - 2*20 - 2
-    ck_assert(CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 32, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 32, &len) == STATUS_OK);
     ck_assert(256 == len);
-    ck_assert(CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 256, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 256, &len) == STATUS_OK);
     ck_assert(214 == len);
-    ck_assert(CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 856, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 856, &len) == STATUS_OK);
     ck_assert(1024 == len);
-    ck_assert(CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 1024, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 1024, &len) == STATUS_OK);
     ck_assert(856 == len);
-    ck_assert(CryptoProvider_AsymmetricGetLength_OAEPHashLength(crypto, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(crypto, &len) == STATUS_OK);
     ck_assert(20 == len); // SHA-1
-    ck_assert(CryptoProvider_AsymmetricGetLength_PSSHashLength(crypto, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_PSSHashLength(crypto, &len) == STATUS_OK);
     ck_assert(32 == len); // SHA-256
-    ck_assert(CryptoProvider_AsymmetricGetLength_Signature(crypto, key_pub, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_Signature(crypto, key_pub, &len) == STATUS_OK);
     ck_assert(256 == len); // One block
-    ck_assert(CryptoProvider_AsymmetricGetLength_Signature(crypto, key_priv, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_Signature(crypto, key_priv, &len) == STATUS_OK);
     ck_assert(256 == len); // One block
 }
 END_TEST
@@ -828,24 +828,24 @@ START_TEST(test_crypto_asym_crypt_B256S256)
 {
     uint8_t input[856], output[1024], input_bis[856];
     uint32_t len = 0;
-    ExposedBuffer clientNonce[32], serverNonce[32];
+    SOPC_ExposedBuffer clientNonce[32], serverNonce[32];
 
     // Encryption/Decryption
     // a) Single message (< 214)
     memset(input, 0, 856);
     memset(output, 0, 1024);
     strncpy((char *)input, "Test INGOPCS Test", 32); // And test padding btw...
-    ck_assert(CryptoProvider_AsymmetricEncrypt(crypto, input, 32, key_pub, output, 256) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricDecrypt(crypto, output, 256, key_priv, input_bis, 214, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricEncrypt(crypto, input, 32, key_pub, output, 256) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricDecrypt(crypto, output, 256, key_priv, input_bis, 214, &len) == STATUS_OK);
     ck_assert(len == 32);
     ck_assert(memcmp(input, input_bis, 32) == 0);
     // b) Multiple messages (> 214, and as output is 1024, < 856)
     //  Using previously generated nonce, to fill input[32:856]
     ck_assert(unhexlify("3d3b4768f275d5023c2145cbe3a4a592fb843643d791f7bd7fce75ff25128b68", clientNonce, 32) == 32);
     ck_assert(unhexlify("ccee418cbc77c2ebb38d5ffac9d2a9d0a6821fa211798e71b2d65b3abb6aec8f", serverNonce, 32) == 32);
-    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input+32, 856-32) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricEncrypt(crypto, input, 856, key_pub, output, 1024) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricDecrypt(crypto, output, 1024, key_priv, input_bis, 856, &len) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input+32, 856-32) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricEncrypt(crypto, input, 856, key_pub, output, 1024) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricDecrypt(crypto, output, 1024, key_priv, input_bis, 856, &len) == STATUS_OK);
     ck_assert(len == 856);
     ck_assert(memcmp(input, input_bis, 856) == 0);
 }
@@ -855,22 +855,22 @@ END_TEST
 START_TEST(test_crypto_asym_sign_verify_B256S256)
 {
     uint8_t input[856], sig[256];
-    ExposedBuffer clientNonce[32], serverNonce[32];
+    SOPC_ExposedBuffer clientNonce[32], serverNonce[32];
 
     // Signature
     // a) Single message (< 214)
     memset(input, 0, 856);
     memset(sig, 0, 256);
     strncpy((char *)input, "Test INGOPCS Test", 32); // And test padding btw...
-    ck_assert(CryptoProvider_AsymmetricSign(crypto, input, 32, key_priv, sig, 256) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricVerify(crypto, input, 32, key_pub, sig, 256) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricSign(crypto, input, 32, key_priv, sig, 256) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricVerify(crypto, input, 32, key_pub, sig, 256) == STATUS_OK);
     // b) Multiple messages (> 214, and as output is 1024, < 856)
     //  Using previously generated nonce, to fill input[32:856]
     ck_assert(unhexlify("3d3b4768f275d5023c2145cbe3a4a592fb843643d791f7bd7fce75ff25128b68", clientNonce, 32) == 32);
     ck_assert(unhexlify("ccee418cbc77c2ebb38d5ffac9d2a9d0a6821fa211798e71b2d65b3abb6aec8f", serverNonce, 32) == 32);
-    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input+32, 856-32) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricSign(crypto, input, 856, key_priv, sig, 256) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricVerify(crypto, input, 856, key_pub, sig, 256) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input+32, 856-32) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricSign(crypto, input, 856, key_priv, sig, 256) == STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricVerify(crypto, input, 856, key_pub, sig, 256) == STATUS_OK);
 }
 END_TEST
 
@@ -881,7 +881,7 @@ START_TEST(test_crypto_asym_copykey_B256S256)
     uint32_t lenDER = 0;
 
     // Copy to DER
-    ck_assert(KeyManager_AsymmetricKey_ToDER(key_priv, buffer, 2048, &lenDER) == STATUS_OK);
+    ck_assert(SOPC_KeyManager_AsymmetricKey_ToDER(key_priv, buffer, 2048, &lenDER) == STATUS_OK);
 
     // Loads DER of private key
     ck_assert(unhexlify(DER_ASYM_PRIV_HEXA, der_priv, DER_ASYM_PRIV_LENG) == DER_ASYM_PRIV_LENG);
@@ -895,17 +895,17 @@ END_TEST
 
 START_TEST(test_crypto_asym_uri_B256S256)
 {
-    ck_assert(strncmp(CryptoProvider_AsymmetricGetUri_SignAlgorithm(crypto),
-                      SecurityPolicy_Basic256Sha256_URI_SignAlgo,
-                      strlen(SecurityPolicy_Basic256Sha256_URI_SignAlgo)+1)
+    ck_assert(strncmp(SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(crypto),
+                      SOPC_SecurityPolicy_Basic256Sha256_URI_SignAlgo,
+                      strlen(SOPC_SecurityPolicy_Basic256Sha256_URI_SignAlgo)+1)
               == 0);
 }
 END_TEST
 
 
 // Fixtures for PKI: server.der certificate and CA
-static Certificate *crt_ca = NULL;
-static PKIProvider *pki = NULL;
+static SOPC_Certificate *crt_ca = NULL;
+static SOPC_PKIProvider *pki = NULL;
 
 static inline void setup_pki_stack()
 {
@@ -938,16 +938,16 @@ static inline void setup_pki_stack()
                         "43487813718d302fdb1dc1db0924920641bd0e57148c1e7fb0162649d7e631b7035961b5c64b845a42fbb16476ccea083fe6a496d5cf501683e39488a31fa5f2"
                         "f82ae85ba3194486def2b90341a72beb797c082a950116a51bce080faced2b22ab78b46aa45c7db37aab808b4482ccaf55352bc6f6d82c26787b477b8245d17a"
                         "ee497253724b25ca941782133382164b33fa2140c978a2cd72c59a567f60b76f4208333c5fe2224ca37e702f42a317148895383afb8f581493", der_ca, 1529) == 1529);
-    ck_assert(KeyManager_Certificate_CreateFromDER(der_ca, 1529, &crt_ca) == STATUS_OK);
+    ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(der_ca, 1529, &crt_ca) == STATUS_OK);
 
     // Creates PKI with ca
-    ck_assert(PKIProviderStack_Create(crt_ca, NULL, &pki) == STATUS_OK);
+    ck_assert(SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki) == STATUS_OK);
 }
 
 static inline void teardown_pki_stack()
 {
-    PKIProviderStack_Free(pki);
-    KeyManager_Certificate_Free(crt_ca);
+    SOPC_PKIProviderStack_Free(pki);
+    SOPC_KeyManager_Certificate_Free(crt_ca);
 
     teardown_certificate();
 }
@@ -963,7 +963,7 @@ END_TEST
 START_TEST(test_pki_cert_validation_B256S256)
 {
     // Checks that the PKI validates our server.pub with our cacert.der
-    ck_assert_msg(CryptoProvider_Certificate_Validate(crypto, pki, crt_pub) == STATUS_OK,
+    ck_assert_msg(SOPC_CryptoProvider_Certificate_Validate(crypto, pki, crt_pub) == STATUS_OK,
                   "Validation failed, is this a \"date\" problem?");
 }
 END_TEST
@@ -997,8 +997,8 @@ START_TEST(test_cert_copyder_B256S256)
                         "095da188cd50e7f8cd30fce5232cb564dc0bef2d761e12f5dde9ac93a81f67fae30d251a59f578dd6aaa7d3edbc81387dae9d67ee148d1662ca139446a8de3", der_cert, 1215) == 1215);
 
     // Extract 2 copies from loaded certificate
-    ck_assert(KeyManager_Certificate_CopyDER(crt_pub, &buffer0, &lenAlloc0) == STATUS_OK);
-    ck_assert(KeyManager_Certificate_CopyDER(crt_pub, &buffer1, &lenAlloc1) == STATUS_OK);
+    ck_assert(SOPC_KeyManager_Certificate_CopyDER(crt_pub, &buffer0, &lenAlloc0) == STATUS_OK);
+    ck_assert(SOPC_KeyManager_Certificate_CopyDER(crt_pub, &buffer1, &lenAlloc1) == STATUS_OK);
 
     // Both should be identical, and identical to der_cert
     ck_assert(lenAlloc0 == lenAlloc1);
