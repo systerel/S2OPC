@@ -175,13 +175,15 @@ file(GLOB_RECURSE OLD_STACK_SOCKETS_DEP_SRC
 file(GLOB_RECURSE SOCKETS_TEST
      "tests/sockets/*.c")
 
-add_executable(check_sockets ${OLD_STACK_SOCKETS_DEP_SRC}
-                             ${SOCKETS_SRC}
-                             ${SOCKETS_TEST})
-target_include_directories(check_sockets PRIVATE "tests/sockets/stubs" 
-                                                 ${INGOPCS_PUBLIC_INCLUDES} 
-                                                 ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(check_sockets PRIVATE pthread check)
+if (NOT CMAKE_CROSSCOMPILING)
+    add_executable(check_sockets ${OLD_STACK_SOCKETS_DEP_SRC}
+                                 ${SOCKETS_SRC}
+                                 ${SOCKETS_TEST})
+    target_include_directories(check_sockets PRIVATE "tests/sockets/stubs" 
+                                                     ${INGOPCS_PUBLIC_INCLUDES} 
+                                                     ${INGOPCS_PRIVATE_INCLUDES})
+    target_link_libraries(check_sockets PRIVATE pthread check)
+endif()
 
 # Secure channels (stubbed on services side) tests
 file(GLOB_RECURSE OLD_STACK_SECURE_CHANNELS_DEP_SRC
@@ -212,7 +214,7 @@ add_executable(test_secure_channels_client ${OLD_STACK_SOCKETS_DEP_SRC}
 target_include_directories(test_secure_channels_client PRIVATE "tests/secure_channels/stubs" 
                                                                ${INGOPCS_PUBLIC_INCLUDES} 
                                                                ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(test_secure_channels_client PRIVATE mbedtls pthread check)
+target_link_libraries(test_secure_channels_client PRIVATE mbedtls pthread)
 
 # Secure channels tests: SERVER executable
 add_executable(test_secure_channels_server ${OLD_STACK_SOCKETS_DEP_SRC}
@@ -224,4 +226,4 @@ add_executable(test_secure_channels_server ${OLD_STACK_SOCKETS_DEP_SRC}
 target_include_directories(test_secure_channels_server PRIVATE "tests/secure_channels/stubs" 
                                                                ${INGOPCS_PUBLIC_INCLUDES} 
                                                                ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(test_secure_channels_server PRIVATE mbedtls pthread check)
+target_link_libraries(test_secure_channels_server PRIVATE mbedtls pthread)
