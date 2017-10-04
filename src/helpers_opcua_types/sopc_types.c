@@ -38,7 +38,6 @@
 #include "sopc_types.h"
 
 /* stack */
-#include "sopc_msg_buffer.h"
 #include "sopc_encoder.h"
 
 /* types */

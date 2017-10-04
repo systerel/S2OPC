@@ -92,6 +92,9 @@
 /* Length of an UA secure message chunk sequence header */
 #define SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
 
+/* Maximum number of milliseconds that a session shall remain open without activity */
+#define SOPC_SESSION_TIMEOUT 10000
+
 /* DEBUG CONFIGURATION */
 #define SOPC_DEBUG_PRINTING false
 

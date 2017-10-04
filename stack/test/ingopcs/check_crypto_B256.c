@@ -26,7 +26,6 @@
 #include <stdlib.h> // malloc, free
 #include <check.h>
 
-#include "sopc_base_types.h"
 #include "hexlify.h"
 #include "check_stack.h"
 #include "crypto_provider.h"

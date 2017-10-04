@@ -32,9 +32,7 @@
 
 #include "constants_bs.h"
 
-#include "sopc_msg_buffer.h"
 #include "sopc_encoder.h"
-#include "sopc_stack_csts.h"
 #include "sopc_toolkit_config.h"
 #include "util_discovery_services.h"
 
@@ -170,12 +168,14 @@ void message_out_bs__encode_msg(
   SOPC_StatusCode status = STATUS_NOK;
   SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) message_out_bs__msg;
   SOPC_EncodeableType* headerType = *(SOPC_EncodeableType**) message_out_bs__msg_header;
-  SOPC_Buffer* buffer = SOPC_Buffer_Create(OPCUA_ENCODER_MAXMESSAGELENGTH);
+  SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
   if(NULL != buffer){
     status = STATUS_OK;
   }
   if(STATUS_OK == status){
-    status = SOPC_Buffer_SetDataLength(buffer, UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+    status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
+                                               SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
+                                               SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
   }
   if(STATUS_OK == status){
     // Encodeable type: either msg_type = service fault type or it is the type provided by the msg
@@ -184,7 +184,9 @@ void message_out_bs__encode_msg(
     }
   }
   if(STATUS_OK == status){
-    status = SOPC_Buffer_SetPosition(buffer, UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+    status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
+                                             SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
+                                             SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
   }
   if(STATUS_OK == status){
     status = SOPC_EncodeMsg_Type_Header_Body(buffer, 
@@ -298,7 +300,7 @@ void message_out_bs__write_create_session_msg_server_endpoints(
 
     OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) message_out_bs__resp_msg;
 
-    createSessionResp->RevisedSessionTimeout = OPCUA_SESSION_TIMEOUT;
+    createSessionResp->RevisedSessionTimeout = SOPC_SESSION_TIMEOUT;
 
     *message_out_bs__ret = build_endPoints_Descriptions(message_out_bs__endpoint_config_idx,
             &createSessionReq->EndpointUrl,

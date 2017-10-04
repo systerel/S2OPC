@@ -1,9 +1,6 @@
 cmake_minimum_required (VERSION 2.8)
 project (INGOPCS)
 
-set(stack_version STACK_1_01 CACHE STRING "Version of the string")
-set_property(CACHE stack_version PROPERTY STRINGS STACK_1_01 STACK_1_02 STACK_1_03)
-
 option(wrapper_reception_thread "Activate a global reception thread" OFF)
 
 # Extern target: mbedtls
@@ -35,18 +32,9 @@ else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-file(GLOB_RECURSE UASTACK_SRCS
-    "stack/src/API/*.c"
-    "stack/src/APIwrappers/*.c"
-    "stack/src/core_tools/*.c"
-    "stack/src/core_types/*.c"
-    "stack/src/stack_core/*.c"
-    "stack/src/tools/*.c"
+file(GLOB_RECURSE INGOPCS_SRCS
     "toolkit/src/genc/*.c"
     "toolkit/src/impl/*.c"
-)
-
-file(GLOB_RECURSE INGOPCS_SRCS
     "src/configuration/*.c"
     "src/helpers/*.c"
     "src/helpers_crypto/*.c"
@@ -55,13 +43,8 @@ file(GLOB_RECURSE INGOPCS_SRCS
     "src/secure_channels/*.c"
 )
 
-add_library(ingopcs STATIC ${PLATFORM_SRCS} ${INGOPCS_SRCS} ${UASTACK_SRCS})
+add_library(ingopcs STATIC ${PLATFORM_SRCS} ${INGOPCS_SRCS})
 set(INGOPCS_PUBLIC_INCLUDES
-    "stack/src/API"
-    "stack/src/APIwrappers"
-    "stack/src/core_types"
-    "stack/src/core_tools"
-    "stack/src/tools"
     "toolkit/src/genc"
     "toolkit/src/impl"
     "src/configuration"
@@ -75,7 +58,6 @@ set(INGOPCS_PUBLIC_INCLUDES
 set(INGOPCS_PRIVATE_INCLUDES
     "src/helpers_crypto/mbedtls"
     "src/helpers_platform_dep/${PLATFORM_DIR}"
-    "stack/src/stack_core"
     "libraries/mbedtls-2.3.0/include" # For some reason, the CMakeLists from mbedtls does not export that
 )
 target_include_directories(ingopcs BEFORE
@@ -85,34 +67,8 @@ target_include_directories(ingopcs BEFORE
 target_link_libraries(ingopcs PUBLIC mbedtls)
 target_link_libraries(ingopcs PUBLIC pthread)
 target_link_libraries(ingopcs PUBLIC m)
-set_property(TARGET ingopcs APPEND PROPERTY COMPILE_DEFINITIONS ${stack_version})
 
-if (wrapper_reception_thread)
-    set_property(TARGET ingopcs APPEND PROPERTY COMPILE_DEFINITIONS "WRAPPER_RECEPTION_THREAD")
-endif()
-
-# Stack
-
-# Stub client
-#add_executable(stub_client_ingopcs "stack/stub_client/stub_client_ingopcs.c")
-#target_link_libraries(stub_client_ingopcs PRIVATE ingopcs)
-#target_include_directories(stub_client_ingopcs BEFORE
-#    PRIVATE "stack/stub_client"
-#)
-
-# Stub server
-#add_executable(stub_server_ingopcs "stack/stub_server/stub_server_ingopcs.c")
-#target_link_libraries(stub_server_ingopcs PRIVATE ingopcs)
-#target_include_directories(stub_server_ingopcs BEFORE
-#    PRIVATE "stack/stub_server"
-#)
-
-# Client/Server tests
-#add_custom_target(client_server_test
-#    "./stack/run_client_server_test.sh"
-#    DEPENDS stub_client_ingopcs stub_server_ingopcs
-#    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-#    COMMENT "Runs the client/server tests")
+# Toolkit tests
 
 # Unit tests
 if (NOT CMAKE_CROSSCOMPILING)
@@ -121,8 +77,6 @@ if (NOT CMAKE_CROSSCOMPILING)
     target_include_directories(check_stack PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
     target_link_libraries(check_stack PRIVATE ingopcs check)
 endif()
-
-# Toolkit tests
 
 # Toolkit Client
 add_executable(toolkit_test_client "toolkit/src/test/toolkit_test_client.c"

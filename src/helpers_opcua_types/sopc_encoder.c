@@ -28,7 +28,6 @@
 #include "sopc_helper_endianess_cfg.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_namespace_table.h"
-#include "sopc_stack_config.h"
 
 #include "sopc_types.h"
 

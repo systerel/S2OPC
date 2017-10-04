@@ -23,7 +23,6 @@
 
 #include "sopc_toolkit_constants.h"
 #include "sopc_encodeabletype.h"
-#include "sopc_stack_csts.h"
 
 BEGIN_EXTERN_C
 

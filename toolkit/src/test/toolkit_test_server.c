@@ -20,7 +20,6 @@
 
 #include "io_dispatch_mgr.h"
 
-#include "sopc_stack_config.h"
 #include "sopc_time.h"
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
