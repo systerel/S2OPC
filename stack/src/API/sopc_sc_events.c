@@ -25,7 +25,7 @@
 
 #include "sopc_base_types.h"
 #include "sopc_sc_events.h"
-#include "singly_linked_list.h"
+#include "sopc_singly_linked_list.h"
 #include "sopc_channel.h"
 #include "sopc_secure_channel_client_connection.h"
 #include "opcua_identifiers.h"
@@ -62,17 +62,17 @@ typedef enum SOPC_TMP_Services_Event {
   APP_TO_SE_LOCAL_WRITE
 } SOPC_TMP_Services_Event;
 
-static SLinkedList* endpointInstList = NULL;
-static SLinkedList* secureChConConfigList = NULL;
-static SLinkedList* secureChInstList = NULL;
+static SOPC_SLinkedList* endpointInstList = NULL;
+static SOPC_SLinkedList* secureChConConfigList = NULL;
+static SOPC_SLinkedList* secureChInstList = NULL;
 
 
 SOPC_EventDispatcherManager* scEventDispatcherMgr = NULL;
 
 void SOPC_TEMP_InitEventDispMgr(SOPC_EventDispatcherManager* toolkitMgr){
-    endpointInstList = SLinkedList_Create(0);
-    secureChConConfigList = SLinkedList_Create(0);
-    secureChInstList = SLinkedList_Create(0);
+    endpointInstList = SOPC_SLinkedList_Create(0);
+    secureChConConfigList = SOPC_SLinkedList_Create(0);
+    secureChInstList = SOPC_SLinkedList_Create(0);
     tmpToolkitMgr = toolkitMgr;
     scEventDispatcherMgr =
             SOPC_EventDispatcherManager_CreateAndStart(SOPC_SecureChannelEventDispatcher,
@@ -81,9 +81,9 @@ void SOPC_TEMP_InitEventDispMgr(SOPC_EventDispatcherManager* toolkitMgr){
 
 void SOPC_TEMP_ClearEventDispMgr(){
     SOPC_EventDispatcherManager_StopAndDelete(&scEventDispatcherMgr);
-    SLinkedList_Delete(endpointInstList);
-    SLinkedList_Delete(secureChConConfigList);
-    SLinkedList_Delete(secureChInstList);
+    SOPC_SLinkedList_Delete(endpointInstList);
+    SOPC_SLinkedList_Delete(secureChConConfigList);
+    SOPC_SLinkedList_Delete(secureChInstList);
 }
 
 /* Function provided to the communication Stack to redirect a received service message to the Toolkit */
@@ -239,8 +239,8 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
         scConConfig->connectionId = *epConfigIdx; // TMP: For now we just use the EP config index, but we shall provide the SC connection id corresponding to socket id ...
         scConConfig->configIdx = *epConfigIdx; // TODO: add to toolkit config with index ? TMP: use ep config idx
 
-        assert(SLinkedList_FindFromId(secureChConConfigList, scConConfig->connectionId) == NULL); // must be unique id !
-        SLinkedList_Prepend(secureChConConfigList, scConConfig->connectionId, (void*) scConConfig);
+        assert(SOPC_SLinkedList_FindFromId(secureChConConfigList, scConConfig->connectionId) == NULL); // must be unique id !
+        SOPC_SLinkedList_Prepend(secureChConConfigList, scConConfig->connectionId, (void*) scConConfig);
         // TODO: add to toolkit config  !
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
                                              SC_TO_SE_EP_SC_CONNECTED,
@@ -250,7 +250,7 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
                                              "Secure channel connected on Endpoint");
         break;
     case SOPC_EndpointEvent_SecureChannelClosed:
-        scConConfig = SLinkedList_RemoveFromId(secureChConConfigList, secureChannelId);
+        scConConfig = SOPC_SLinkedList_RemoveFromId(secureChConConfigList, secureChannelId);
         if(NULL != scConConfig){
             if(NULL != scConConfig->config){
                 free(scConConfig->config);
@@ -300,8 +300,8 @@ SOPC_StatusCode TMP_SecureChannelEvent_CB (SOPC_Channel       channel,
 
         // CAUTION: due to API adaptation we do not use same idx when toolkit is client and server which
         //  could lead to Id conflicts !!! => DO NOT USE TOOLKIT IN SAME TIME AS CLIENT AND SERVER FOR NOW !
-        assert(SLinkedList_FindFromId(secureChConConfigList, scConConfig->configIdx) == NULL); // must be unique id !
-        SLinkedList_Prepend(secureChConConfigList, scConConfig->configIdx, (void*) scConConfig);
+        assert(SOPC_SLinkedList_FindFromId(secureChConConfigList, scConConfig->configIdx) == NULL); // must be unique id !
+        SOPC_SLinkedList_Prepend(secureChConConfigList, scConConfig->configIdx, (void*) scConConfig);
         // TODO: add to toolkit config ?
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
                                              SC_TO_SE_SC_CONNECTED,
@@ -311,9 +311,9 @@ SOPC_StatusCode TMP_SecureChannelEvent_CB (SOPC_Channel       channel,
                                              "Client secure channel connected");
         break;
     case SOPC_ChannelEvent_Disconnected:
-        ch = (SOPC_Channel) SLinkedList_RemoveFromId(secureChInstList, *configIdx);
+        ch = (SOPC_Channel) SOPC_SLinkedList_RemoveFromId(secureChInstList, *configIdx);
         assert(channel == ch);
-        scConConfig = SLinkedList_RemoveFromId(secureChConConfigList, *configIdx);
+        scConConfig = SOPC_SLinkedList_RemoveFromId(secureChConConfigList, *configIdx);
         SOPC_Channel_Delete(&channel);
         assert(NULL != tmpToolkitMgr);
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
@@ -391,7 +391,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                     epConfig->nbSecuConfigs,
                     epConfig->secuConfigurations);
             if(STATUS_OK == status){
-                if(ep != SLinkedList_Prepend(endpointInstList, id, (void*) ep)){
+                if(ep != SOPC_SLinkedList_Prepend(endpointInstList, id, (void*) ep)){
                     status = STATUS_NOK;
                 }
             }
@@ -412,7 +412,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
     case SE_TO_SC_EP_CLOSE:
         //printf("EP_CLOSE\n");
         // id ==  endpoint configuration index
-        ep = (SOPC_Endpoint) SLinkedList_RemoveFromId(endpointInstList, id);
+        ep = (SOPC_Endpoint) SOPC_SLinkedList_RemoveFromId(endpointInstList, id);
         SOPC_Endpoint_Delete(&ep);
         assert(NULL != tmpToolkitMgr);
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
@@ -450,7 +450,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                                                TMP_SecureChannelEvent_CB,
                                                (void*) idContext);
             if(STATUS_OK == status){
-                if(ch != SLinkedList_Prepend(secureChInstList, id, (void*) ch)){
+                if(ch != SOPC_SLinkedList_Prepend(secureChInstList, id, (void*) ch)){
                     status = STATUS_NOK;
                 }
             }
@@ -470,8 +470,8 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
 
     case SE_TO_SC_DISCONNECT:
         //printf("SC_DISCONNECT\n");
-        ch = (SOPC_Channel) SLinkedList_RemoveFromId(secureChInstList, id);
-        scConConfig = SLinkedList_RemoveFromId(secureChConConfigList, id);
+        ch = (SOPC_Channel) SOPC_SLinkedList_RemoveFromId(secureChInstList, id);
+        scConConfig = SOPC_SLinkedList_RemoveFromId(secureChConConfigList, id);
         if(NULL != scConConfig){
             SOPC_Channel_Delete(&ch);
             assert(NULL != tmpToolkitMgr);
@@ -497,7 +497,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         assert(NULL != tMsg);
         if(tMsg->optContext != FALSE){
             // Server response
-            ep = (SOPC_Endpoint) SLinkedList_FindFromId(endpointInstList, id);
+            ep = (SOPC_Endpoint) SOPC_SLinkedList_FindFromId(endpointInstList, id);
             assert(ep != NULL && tMsg != NULL);
             SOPC_Endpoint_SendResponse(ep,
                                        NULL, //tMsg->encType,
@@ -506,7 +506,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
 
         }else{
             // Client request
-            ch = (SOPC_Channel) SLinkedList_FindFromId(secureChInstList, auxParam);
+            ch = (SOPC_Channel) SOPC_SLinkedList_FindFromId(secureChInstList, auxParam);
             assert(ch != NULL && tMsg != NULL);
             idContext = malloc(sizeof(uint32_t));
             assert(NULL != idContext);

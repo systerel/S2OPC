@@ -18,7 +18,7 @@
 #ifndef SOPC_SECURE_CHANNEL_SERVER_ENDPOINT_H_
 #define SOPC_SECURE_CHANNEL_SERVER_ENDPOINT_H_
 
-#include "singly_linked_list.h"
+#include "sopc_singly_linked_list.h"
 #include "sopc_mutexes.h"
 #include "sopc_builtintypes.h"
 #include "sopc_namespace_table.h"
@@ -70,7 +70,7 @@ typedef struct SC_ServerEndpoint
     uint8_t                nbSecurityPolicies;
     SC_EndpointState       state;
     uint32_t               lastSecureConnectionId; // internal use only (used in secureChannelConnections)
-    SLinkedList*           secureChannelConnections;
+    SOPC_SLinkedList*           secureChannelConnections;
     TCP_UA_Listener*       transportListener;
     P_Timer                watchdogTimer;
     SC_EndpointEvent_CB*   callback;

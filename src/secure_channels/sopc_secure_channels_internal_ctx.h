@@ -23,7 +23,7 @@
 
 #include "sopc_toolkit_constants.h"
 #include "sopc_builtintypes.h"
-#include "singly_linked_list.h"
+#include "sopc_singly_linked_list.h"
 #include "secret_buffer.h"
 #include "crypto_decl.h"
 #include "key_sets.h"
@@ -96,9 +96,9 @@ typedef struct SOPC_SecureConnection_TcpOpnReqAsymmSecu {
 
 // See Part 6 table 29
 typedef struct SOPC_SecureConnection_TcpSequenceProperties {
-    uint32_t     lastSNsent;     // Last sequence number sent on connection
-    uint32_t     lastSNreceived; // Last sequence number received on connection
-    SLinkedList* sentRequestIds; // Request ids sent for which a response can be received
+    uint32_t          lastSNsent;     // Last sequence number sent on connection
+    uint32_t          lastSNreceived; // Last sequence number received on connection
+    SOPC_SLinkedList* sentRequestIds; // Request ids sent for which a response can be received
 } SOPC_SecureConnection_TcpSequenceProperties;
 
 typedef struct SOPC_SecureConnection_SecurityToken

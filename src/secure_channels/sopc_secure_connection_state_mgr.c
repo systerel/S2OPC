@@ -24,6 +24,7 @@
 
 #include "sopc_toolkit_constants.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_singly_linked_list.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_secure_channels_api_internal.h"
 #include "sopc_secure_channels_internal_ctx.h"
@@ -74,7 +75,7 @@ static bool SC_InitNewConnection(uint32_t* newConnectionIdx){
         scConnection->tcpMsgProperties.maxChunkCount = 1;
 
         // Initialize TCP sequence properties
-        scConnection->tcpSeqProperties.sentRequestIds = SLinkedList_Create(0);
+        scConnection->tcpSeqProperties.sentRequestIds = SOPC_SLinkedList_Create(0);
         if(scConnection->tcpSeqProperties.sentRequestIds == NULL){
             result = false;
         }
@@ -105,7 +106,7 @@ static bool SC_CloseConnection(uint32_t connectionIdx){
 
             // Clear TCP sequence properties
             assert(scConnection->tcpSeqProperties.sentRequestIds != NULL);
-            SLinkedList_Delete(scConnection->tcpSeqProperties.sentRequestIds);
+            SOPC_SLinkedList_Delete(scConnection->tcpSeqProperties.sentRequestIds);
             scConnection->tcpSeqProperties.sentRequestIds = NULL;
 
             // Clear TCP asymmetric security properties

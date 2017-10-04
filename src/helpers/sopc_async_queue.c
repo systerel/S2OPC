@@ -20,15 +20,15 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "singly_linked_list.h"
+#include "sopc_singly_linked_list.h"
 #include "sopc_mutexes.h"
 
 struct SOPC_AsyncQueue {
-    const char*  debugQueueName;
-    SLinkedList* queueList;
-    Condition    queueCond;
-    Mutex        queueMutex;
-    uint32_t     waitingThreads;
+    const char*       debugQueueName;
+    SOPC_SLinkedList* queueList;
+    Condition         queueCond;
+    Mutex             queueMutex;
+    uint32_t          waitingThreads;
 };
 
 SOPC_StatusCode SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char*  queueName){
@@ -39,21 +39,21 @@ SOPC_StatusCode SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char*  queue
             status = STATUS_OK;
             (*queue)->debugQueueName = queueName;
             (*queue)->waitingThreads = 0;
-            (*queue)->queueList = SLinkedList_Create(0);
+            (*queue)->queueList = SOPC_SLinkedList_Create(0);
             if(NULL == (*queue)->queueList){
                 status = STATUS_NOK;
             }
             if(STATUS_OK == status){
                 status = Condition_Init(&(*queue)->queueCond);
                 if(STATUS_OK != status){
-                    SLinkedList_Delete((*queue)->queueList);
+                    SOPC_SLinkedList_Delete((*queue)->queueList);
                     (*queue)->queueList = NULL;
                 }
             }
             if(STATUS_OK == status){
                 status = Mutex_Initialization(&(*queue)->queueMutex);
                 if(STATUS_OK != status){
-                    SLinkedList_Delete((*queue)->queueList);
+                    SOPC_SLinkedList_Delete((*queue)->queueList);
                     (*queue)->queueList = NULL;
                     Condition_Clear(&(*queue)->queueCond);
                 }
@@ -77,9 +77,9 @@ static SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQueu
         status = Mutex_Lock(&queue->queueMutex);
         if(STATUS_OK == status){
             if(firstOut == false){
-                enqueuedElt = SLinkedList_Append(queue->queueList, 0, element);
+                enqueuedElt = SOPC_SLinkedList_Append(queue->queueList, 0, element);
             }else{
-                enqueuedElt = SLinkedList_Prepend(queue->queueList, 0, element);
+                enqueuedElt = SOPC_SLinkedList_Prepend(queue->queueList, 0, element);
             }
             if(element == enqueuedElt){
                 if(queue->waitingThreads > 0){
@@ -117,16 +117,16 @@ static SOPC_StatusCode SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue,
     if(NULL != queue && NULL != element){
         status = STATUS_NOK;
         Mutex_Lock(&queue->queueMutex);
-        *element = SLinkedList_PopHead(queue->queueList);
+        *element = SOPC_SLinkedList_PopHead(queue->queueList);
         if(NULL == *element){
             if(isBlocking == FALSE){
                 status = OpcUa_BadWouldBlock;
             }else{
                 queue->waitingThreads++;
-                *element = SLinkedList_PopHead(queue->queueList);
+                *element = SOPC_SLinkedList_PopHead(queue->queueList);
                 while(NULL == *element){
                     Mutex_UnlockAndWaitCond(&queue->queueCond, &queue->queueMutex);
-                    *element = SLinkedList_PopHead(queue->queueList);
+                    *element = SOPC_SLinkedList_PopHead(queue->queueList);
                 }
                 status = STATUS_OK;
                 queue->waitingThreads--;
@@ -154,8 +154,8 @@ SOPC_StatusCode SOPC_AsyncQueue_NonBlockingDequeue(SOPC_AsyncQueue* queue,
 void SOPC_AsyncQueue_Free(SOPC_AsyncQueue** queue){
     if(NULL != queue){
         if(NULL != *queue && NULL != (*queue)->queueList){
-            SLinkedList_Apply((*queue)->queueList, SLinkedList_EltGenericFree);
-            SLinkedList_Delete((*queue)->queueList);
+            SOPC_SLinkedList_Apply((*queue)->queueList, SOPC_SLinkedList_EltGenericFree);
+            SOPC_SLinkedList_Delete((*queue)->queueList);
         }
         free(*queue);
         *queue = NULL;

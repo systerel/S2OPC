@@ -19,12 +19,12 @@
 
 #include <stdlib.h>
 
-#include "singly_linked_list.h"
+#include "sopc_singly_linked_list.h"
 #include "sopc_mutexes.h"
 
 struct SOPC_ActionQueue {
     const char*  debugQueueName;
-    SLinkedList* queueList;
+    SOPC_SLinkedList* queueList;
     Condition    queueCond;
     Mutex        queueMutex;
     uint32_t     waitingThreads;
@@ -44,21 +44,21 @@ SOPC_StatusCode SOPC_ActionQueue_Init(SOPC_ActionQueue** queue, const char*  que
             status = STATUS_OK;
             (*queue)->debugQueueName = queueName;
             (*queue)->waitingThreads = 0;
-            (*queue)->queueList = SLinkedList_Create(0);
+            (*queue)->queueList = SOPC_SLinkedList_Create(0);
             if(NULL == (*queue)->queueList){
                 status = STATUS_NOK;
             }
             if(STATUS_OK == status){
                 status = Condition_Init(&(*queue)->queueCond);
                 if(STATUS_OK != status){
-                    SLinkedList_Delete((*queue)->queueList);
+                    SOPC_SLinkedList_Delete((*queue)->queueList);
                     (*queue)->queueList = NULL;
                 }
             }
             if(STATUS_OK == status){
                 status = Mutex_Initialization(&(*queue)->queueMutex);
                 if(STATUS_OK != status){
-                    SLinkedList_Delete((*queue)->queueList);
+                    SOPC_SLinkedList_Delete((*queue)->queueList);
                     (*queue)->queueList = NULL;
                     Condition_Clear(&(*queue)->queueCond);
                 }
@@ -88,7 +88,7 @@ SOPC_StatusCode SOPC_Action_BlockingEnqueue(SOPC_ActionQueue*    queue,
             event->debugTxt = actionText;
             status = Mutex_Lock(&queue->queueMutex);
             if(STATUS_OK == status){
-                if(event == SLinkedList_Append(queue->queueList, 0, event)){
+                if(event == SOPC_SLinkedList_Append(queue->queueList, 0, event)){
                     if(queue->waitingThreads > 0){
                         Condition_SignalAll(&queue->queueCond);
                     }
@@ -112,16 +112,16 @@ SOPC_StatusCode SOPC_ActionDequeue(SOPC_ActionQueue*     queue,
     if(NULL != queue && NULL != fctPointer && NULL != fctArgument){
         status = STATUS_NOK;
         Mutex_Lock(&queue->queueMutex);
-        event = (SOPC_ActionEvent*) SLinkedList_PopHead(queue->queueList);
+        event = (SOPC_ActionEvent*) SOPC_SLinkedList_PopHead(queue->queueList);
         if(NULL == event){
             if(isBlocking == FALSE){
                 status = OpcUa_BadWouldBlock;
             }else{
                 queue->waitingThreads++;
-                event = (SOPC_ActionEvent*) SLinkedList_PopHead(queue->queueList);
+                event = (SOPC_ActionEvent*) SOPC_SLinkedList_PopHead(queue->queueList);
                 while(NULL == event){
                     Mutex_UnlockAndWaitCond(&queue->queueCond, &queue->queueMutex);
-                    event = (SOPC_ActionEvent*) SLinkedList_PopHead(queue->queueList);
+                    event = (SOPC_ActionEvent*) SOPC_SLinkedList_PopHead(queue->queueList);
                 }
                 status = STATUS_OK;
                 queue->waitingThreads--;
@@ -162,8 +162,8 @@ SOPC_StatusCode SOPC_Action_NonBlockingDequeue(SOPC_ActionQueue*     queue,
 void SOPC_ActionQueue_Free(SOPC_ActionQueue** queue){
     if(NULL != queue){
         if(NULL != *queue && NULL != (*queue)->queueList){
-            SLinkedList_Apply((*queue)->queueList, SLinkedList_EltGenericFree);
-            SLinkedList_Delete((*queue)->queueList);
+            SOPC_SLinkedList_Apply((*queue)->queueList, SOPC_SLinkedList_EltGenericFree);
+            SOPC_SLinkedList_Delete((*queue)->queueList);
         }
         free(*queue);
         *queue = NULL;

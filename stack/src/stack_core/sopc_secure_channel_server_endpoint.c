@@ -351,7 +351,7 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
             uint32_t newSecureChannelId = 0;
             uint8_t occupiedId = FALSE;
             uint8_t attempts = 5; // attempts to find a non conflicting secure Id
-            SLinkedListIterator it = NULL;
+            SOPC_SLinkedListIterator it = NULL;
             SC_Connection* otherConnection = NULL;
             while(scConnection->secureChannelId == 0 && attempts > 0){
                 attempts--;
@@ -361,13 +361,13 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
                 //  not so clear but implied by 6.7.6 part 6: "may be 0 if the Message is an OPN"
                 if(newSecureChannelId != 0){
                     // Check if other channels already use the random id in existing connections
-                    it = SLinkedList_GetIterator(sEndpoint->secureChannelConnections);
-                    otherConnection = SLinkedList_Next(&it);
+                    it = SOPC_SLinkedList_GetIterator(sEndpoint->secureChannelConnections);
+                    otherConnection = SOPC_SLinkedList_Next(&it);
                     while(occupiedId == FALSE && otherConnection != NULL){
                         if(otherConnection->secureChannelId == newSecureChannelId){
                             occupiedId = 1; // TRUE
                         }
-                        otherConnection = SLinkedList_Next(&it);
+                        otherConnection = SOPC_SLinkedList_Next(&it);
                     }
                     if(occupiedId == FALSE){
                         // Id is not used by another channel in the endpoint:
@@ -795,7 +795,7 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                 }
                 scConnection->state = SC_Connection_Disconnected;
                 // Remove secure connection from the endpoint
-                if(scConnection ==  SLinkedList_RemoveFromId(sEndpoint->secureChannelConnections,
+                if(scConnection ==  SOPC_SLinkedList_RemoveFromId(sEndpoint->secureChannelConnections,
                                                        teventCbData->scConnectionId)){
                     SC_Delete(scConnection);
                     scConnection = NULL;
@@ -972,7 +972,7 @@ SOPC_StatusCode AcceptedNewConnection(SC_ServerEndpoint* sEndpoint,
 
         if(STATUS_OK == status){
             // Add as a new secure connection to the endpoint
-            SLinkedList_Prepend(sEndpoint->secureChannelConnections,
+            SOPC_SLinkedList_Prepend(sEndpoint->secureChannelConnections,
                             sEndpoint->lastSecureConnectionId,
                             scConnection);
         }else{
@@ -1043,7 +1043,7 @@ SC_ServerEndpoint* SC_ServerEndpoint_Create(){
             memset(result, 0, sizeof(SC_ServerEndpoint));
             result->transportListener = listener;
             result->state = SC_Endpoint_Closed;
-            result->secureChannelConnections = SLinkedList_Create(OPCUA_ENDPOINT_MAXCONNECTIONS);
+            result->secureChannelConnections = SOPC_SLinkedList_Create(OPCUA_ENDPOINT_MAXCONNECTIONS);
 
             if(NULL == result->secureChannelConnections){
                 free(result);
@@ -1172,7 +1172,7 @@ SOPC_StatusCode SC_ServerEndpoint_Close(SC_ServerEndpoint* endpoint){
     return status;
 }
 
-void Internal_SLinkedList_Delete_Connection(uint32_t id, void *val){
+void Internal_SOPC_SLinkedList_Delete_Connection(uint32_t id, void *val){
     (void) id;
     SC_Delete((SC_Connection*) val);
 }
@@ -1184,9 +1184,9 @@ void SC_ServerEndpoint_Delete(SC_ServerEndpoint* endpoint){
             endpoint->transportListener = NULL;
         }
         if(endpoint->secureChannelConnections != NULL){
-            SLinkedList_Apply(endpoint->secureChannelConnections,
-                              Internal_SLinkedList_Delete_Connection);
-            SLinkedList_Delete(endpoint->secureChannelConnections);
+            SOPC_SLinkedList_Apply(endpoint->secureChannelConnections,
+                              Internal_SOPC_SLinkedList_Delete_Connection);
+            SOPC_SLinkedList_Delete(endpoint->secureChannelConnections);
         }
         if(endpoint->securityPolicies != NULL){
             free(endpoint->securityPolicies);

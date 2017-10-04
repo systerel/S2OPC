@@ -15,43 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "singly_linked_list.h"
+#include "sopc_singly_linked_list.h"
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
 
-struct SLinkedList_Elt{
+struct SOPC_SLinkedList_Elt{
     uint32_t                id;
     void*                   value;
-    struct SLinkedList_Elt* next;
+    struct SOPC_SLinkedList_Elt* next;
 };
 
-struct SLinkedList {
-    SLinkedList_Elt* first;
-    SLinkedList_Elt* last;
+struct SOPC_SLinkedList {
+    SOPC_SLinkedList_Elt* first;
+    SOPC_SLinkedList_Elt* last;
     size_t           length;
     size_t           maxLength;
 };
 
-SLinkedList* SLinkedList_Create(size_t sizeMax){
-    SLinkedList* result = malloc(sizeof(SLinkedList));
+SOPC_SLinkedList* SOPC_SLinkedList_Create(size_t sizeMax){
+    SOPC_SLinkedList* result = malloc(sizeof(SOPC_SLinkedList));
     if(result != NULL){
-        memset(result, 0, sizeof(SLinkedList));
+        memset(result, 0, sizeof(SOPC_SLinkedList));
         result->maxLength = sizeMax;
     }
     return result;
 }
 
-void* SLinkedList_Prepend(SLinkedList* list, uint32_t id, void* value){
-    SLinkedList_Elt* elt = NULL;
+void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value){
+    SOPC_SLinkedList_Elt* elt = NULL;
     if(list == NULL){
         return NULL;
     }
 
     if(list->length < list->maxLength || list->maxLength == 0){
-        elt = malloc(sizeof(SLinkedList_Elt));
+        elt = malloc(sizeof(SOPC_SLinkedList_Elt));
     }
 
     if(elt != NULL){
@@ -70,14 +70,14 @@ void* SLinkedList_Prepend(SLinkedList* list, uint32_t id, void* value){
     return value;
 }
 
-void* SLinkedList_Append(SLinkedList* list, uint32_t id, void* value){
-    SLinkedList_Elt* elt = NULL;
+void* SOPC_SLinkedList_Append(SOPC_SLinkedList* list, uint32_t id, void* value){
+    SOPC_SLinkedList_Elt* elt = NULL;
     if(list == NULL){
         return NULL;
     }
 
     if(list->length < list->maxLength || list->maxLength == 0){
-        elt = malloc(sizeof(SLinkedList_Elt));
+        elt = malloc(sizeof(SOPC_SLinkedList_Elt));
     }
 
     if(elt != NULL){
@@ -98,9 +98,9 @@ void* SLinkedList_Append(SLinkedList* list, uint32_t id, void* value){
     return value;
 }
 
-void* SLinkedList_PopHead(SLinkedList* list){
+void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list){
     void* result = NULL;
-    SLinkedList_Elt* nextElt = NULL;
+    SOPC_SLinkedList_Elt* nextElt = NULL;
 
     if(list == NULL || list->first == NULL){
        return NULL;
@@ -120,8 +120,8 @@ void* SLinkedList_PopHead(SLinkedList* list){
     return result;
 }
 
-SLinkedList_Elt* SLinkedList_InternalFind(SLinkedList* list, uint32_t id){
-    SLinkedList_Elt* elt = NULL;
+SOPC_SLinkedList_Elt* SOPC_SLinkedList_InternalFind(SOPC_SLinkedList* list, uint32_t id){
+    SOPC_SLinkedList_Elt* elt = NULL;
     if(list != NULL){
         elt = list->first;
         while(elt != 0 && elt->id != id){
@@ -131,8 +131,8 @@ SLinkedList_Elt* SLinkedList_InternalFind(SLinkedList* list, uint32_t id){
     return elt;
 }
 
-SLinkedList_Elt* SLinkedList_InternalFindPrec(SLinkedList* list, uint32_t id){
-    SLinkedList_Elt* elt = NULL;
+SOPC_SLinkedList_Elt* SOPC_SLinkedList_InternalFindPrec(SOPC_SLinkedList* list, uint32_t id){
+    SOPC_SLinkedList_Elt* elt = NULL;
     if(list != NULL && list->first != NULL){
         elt = list->first;
         while(elt->next != NULL && elt->next->id != id){
@@ -143,8 +143,8 @@ SLinkedList_Elt* SLinkedList_InternalFindPrec(SLinkedList* list, uint32_t id){
 }
 
 // Returns null => Not found, otherwise => elt pointer
-void* SLinkedList_FindFromId(SLinkedList* list, uint32_t id){
-    SLinkedList_Elt* elt = SLinkedList_InternalFind(list, id);
+void* SOPC_SLinkedList_FindFromId(SOPC_SLinkedList* list, uint32_t id){
+    SOPC_SLinkedList_Elt* elt = SOPC_SLinkedList_InternalFind(list, id);
     void* result = NULL;
     if(elt != NULL){
         result = elt->value;
@@ -152,9 +152,9 @@ void* SLinkedList_FindFromId(SLinkedList* list, uint32_t id){
     return result;
 }
 
-void SLinkedList_Apply(SLinkedList* list, void (*pFn)(uint32_t id, void *val))
+void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, void *val))
 {
-    SLinkedList_Elt* elt = NULL;
+    SOPC_SLinkedList_Elt* elt = NULL;
 
     if(NULL == list || NULL == pFn)
         return;
@@ -168,9 +168,9 @@ void SLinkedList_Apply(SLinkedList* list, void (*pFn)(uint32_t id, void *val))
 }
 
 // Returns null => Not found, otherwise => elt pointer
-void* SLinkedList_RemoveFromId(SLinkedList* list, uint32_t id){
-    SLinkedList_Elt* elt = NULL;
-    SLinkedList_Elt* nextElt = NULL;
+void* SOPC_SLinkedList_RemoveFromId(SOPC_SLinkedList* list, uint32_t id){
+    SOPC_SLinkedList_Elt* elt = NULL;
+    SOPC_SLinkedList_Elt* nextElt = NULL;
     void* result = NULL;
     if(list != NULL && list->first != NULL){
         // Not NULL nor empty list
@@ -207,9 +207,9 @@ void* SLinkedList_RemoveFromId(SLinkedList* list, uint32_t id){
     return result;
 }
 
-void SLinkedList_Clear(SLinkedList* list){
-    SLinkedList_Elt* elt = NULL;
-    SLinkedList_Elt* nextElt = NULL;
+void SOPC_SLinkedList_Clear(SOPC_SLinkedList* list){
+    SOPC_SLinkedList_Elt* elt = NULL;
+    SOPC_SLinkedList_Elt* nextElt = NULL;
     if(list != NULL){
         elt = list->first;
         while(elt != NULL){
@@ -223,26 +223,26 @@ void SLinkedList_Clear(SLinkedList* list){
     }
 }
 
-void SLinkedList_Delete(SLinkedList* list){
+void SOPC_SLinkedList_Delete(SOPC_SLinkedList* list){
     if(list != NULL){
-        SLinkedList_Clear(list);
+        SOPC_SLinkedList_Clear(list);
         free(list);
     }
 }
 
 
-void SLinkedList_EltGenericFree(uint32_t id, void *val)
+void SOPC_SLinkedList_EltGenericFree(uint32_t id, void *val)
 {
     (void)(id);
     free(val);
 }
 
-SLinkedListIterator SLinkedList_GetIterator(SLinkedList* list){
+SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list){
     return list->first;
 }
 
-void* SLinkedList_Next(SLinkedListIterator* it){
-    SLinkedList_Elt* elt = NULL;
+void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it){
+    SOPC_SLinkedList_Elt* elt = NULL;
     void* value = NULL;
     if(it != NULL && *it != NULL){
         elt = *it;

@@ -108,7 +108,7 @@ SC_ClientConnection* SC_Client_Create(){
             scClientConnection->pkiProvider = NULL;
 
             // TODO: limit set by configuration ingopc_stacks_csts ?
-            scClientConnection->pendingRequests = SLinkedList_Create(255);
+            scClientConnection->pendingRequests = SOPC_SLinkedList_Create(255);
 
             if(NULL != scClientConnection->pendingRequests){
                 status = STATUS_OK;
@@ -154,7 +154,7 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
         scConnection->serverCertificate = NULL;
         scConnection->clientCertificate = NULL;
         scConnection->clientKey = NULL;
-        SLinkedList_Delete(scConnection->pendingRequests);
+        SOPC_SLinkedList_Delete(scConnection->pendingRequests);
         scConnection->pendingRequests = NULL;
         SOPC_String_Clear(&scConnection->securityPolicy);
         if(scConnection->instance != NULL){
@@ -188,7 +188,7 @@ void SOPC_OperationEnd_RequestError(SC_ClientConnection* connection,
     void*                callbackData = NULL;
 
     // Try to remove request from pending requests
-    pRequest = SLinkedList_RemoveFromId(connection->pendingRequests,requestId);
+    pRequest = SOPC_SLinkedList_RemoveFromId(connection->pendingRequests,requestId);
     if(NULL != pRequest){
         //Retrieve from request
         callback = pRequest->callback;
@@ -415,7 +415,7 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
                                            NULL, // No callback, specifc message header used (OPN)
                                            NULL);
         if(pRequest == NULL ||
-           pRequest != SLinkedList_Prepend(cConnection->pendingRequests, requestId, pRequest)){
+           pRequest != SOPC_SLinkedList_Prepend(cConnection->pendingRequests, requestId, pRequest)){
             status = STATUS_NOK;
         }
     }
@@ -622,7 +622,7 @@ SOPC_StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnecti
 
     if(status == STATUS_OK){
         // Retrieve associated pending request
-        pRequest = SLinkedList_RemoveFromId(cConnection->pendingRequests, requestId);
+        pRequest = SOPC_SLinkedList_RemoveFromId(cConnection->pendingRequests, requestId);
         if(pRequest == NULL){
             status = STATUS_NOK;
         }
@@ -703,7 +703,7 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     if(abortReqPresence != FALSE){
         // Note: status is OK if from a prec chunk or NOK if current chunk is abort chunk
         // Retrieve request id to be aborted and call callback if any
-        pRequest = SLinkedList_RemoveFromId(cConnection->pendingRequests, abortedRequestId);
+        pRequest = SOPC_SLinkedList_RemoveFromId(cConnection->pendingRequests, abortedRequestId);
         if(pRequest != NULL){
             if(pRequest->callback != NULL){
                 pRequest->callback(cConnection,
@@ -722,7 +722,7 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     if(status == STATUS_OK){
         if(cConnection->instance->receptionBuffers->isFinal == SOPC_Msg_Chunk_Final){
             // Retrieve associated pending request for current chunk which is final
-            pRequest = SLinkedList_RemoveFromId(cConnection->pendingRequests, requestId);
+            pRequest = SOPC_SLinkedList_RemoveFromId(cConnection->pendingRequests, requestId);
             requestToRemove = 1; // True
             if(pRequest == NULL){
                 status = STATUS_NOK;
@@ -731,7 +731,7 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                 cConnection->instance->receptionBuffers->nbChunks == 1){
             // When it is the first chunk and it is intermediate we have to check request id is valid
             //  otherwise request id already validated before and not pending request not necessary
-            pRequest = SLinkedList_FindFromId(cConnection->pendingRequests, requestId);
+            pRequest = SOPC_SLinkedList_FindFromId(cConnection->pendingRequests, requestId);
             if(pRequest == NULL){
                 // Error: unknown request id !
                 // TODO: trace + callback for audit ?
@@ -992,8 +992,8 @@ void SC_Client_Disconnect(SC_ClientConnection* cConnection)
         cConnection->clientCertificate = NULL;
         cConnection->clientKey = NULL;
         if(cConnection->pendingRequests != NULL){
-            SLinkedList_Apply(cConnection->pendingRequests, SC_PendingRequestDeleteListElt);
-            SLinkedList_Clear(cConnection->pendingRequests);
+            SOPC_SLinkedList_Apply(cConnection->pendingRequests, SC_PendingRequestDeleteListElt);
+            SOPC_SLinkedList_Clear(cConnection->pendingRequests);
         }
         SOPC_String_Clear(&cConnection->securityPolicy);
         SC_Disconnect(cConnection->instance);
@@ -1051,7 +1051,7 @@ void SC_Send_Request(SOPC_Action_ServiceRequestSendData* sendRequestData)
                                                    respCallback,
                                                    respCallbackData);
                 if(pRequest == NULL ||
-                   pRequest != SLinkedList_Prepend(connection->pendingRequests, requestId, pRequest)){
+                   pRequest != SOPC_SLinkedList_Prepend(connection->pendingRequests, requestId, pRequest)){
                     status = STATUS_NOK;
                 }
             }

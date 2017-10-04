@@ -21,12 +21,12 @@
 
 #include "sopc_sockets_api.h"
 #include "sopc_secure_channels_api.h"
-#include "singly_linked_list.h"
+#include "sopc_singly_linked_list.h"
 #include "stub_sc_sopc_services_api.h"
 #include "sopc_stack_config.h"
 
-static SLinkedList* scConfigs = NULL;
-static SLinkedList* epConfigs = NULL;
+static SOPC_SLinkedList* scConfigs = NULL;
+static SOPC_SLinkedList* epConfigs = NULL;
 static uint32_t scConfigIdxMax = 0;
 static uint32_t epConfigIdxMax = 0;
 
@@ -36,10 +36,10 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
 
     SOPC_StackConfiguration_Initialize();
 
-    scConfigs = SLinkedList_Create(0);
+    scConfigs = SOPC_SLinkedList_Create(0);
 
     if(NULL != scConfigs){
-        epConfigs = SLinkedList_Create(0);
+        epConfigs = SOPC_SLinkedList_Create(0);
     }
 
     if(NULL != epConfigs){
@@ -74,8 +74,8 @@ void SOPC_Toolkit_ClearScConfigElt(uint32_t id, void *val)
 
 // Deallocate fields allocated on server side only and free all the SC configs
 static void SOPC_Toolkit_ClearScConfigs(){
-    SLinkedList_Apply(scConfigs, SOPC_Toolkit_ClearScConfigElt);
-    SLinkedList_Delete(scConfigs);
+    SOPC_SLinkedList_Apply(scConfigs, SOPC_Toolkit_ClearScConfigElt);
+    SOPC_SLinkedList_Delete(scConfigs);
     scConfigs = NULL;
 }
 
@@ -84,18 +84,18 @@ void SOPC_Toolkit_Clear(){
       SOPC_SecureChannels_Clear();
       SOPC_Services_Clear();
       SOPC_Toolkit_ClearScConfigs();
-      SLinkedList_Delete(epConfigs);
+      SOPC_SLinkedList_Delete(epConfigs);
       epConfigs = NULL;
       SOPC_StackConfiguration_Clear();
 }
 
-static SOPC_StatusCode SOPC_IntToolkitConfig_AddConfig(SLinkedList* configList,
+static SOPC_StatusCode SOPC_IntToolkitConfig_AddConfig(SOPC_SLinkedList* configList,
                                                        uint32_t     idx,
                                                        void*        config){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    void* res = SLinkedList_FindFromId(configList, idx);
+    void* res = SOPC_SLinkedList_FindFromId(configList, idx);
     if(NULL == res && NULL != config){ // Idx is unique
-        if(config == SLinkedList_Prepend(configList, idx, config)){
+        if(config == SOPC_SLinkedList_Prepend(configList, idx, config)){
             status = STATUS_OK;
         }else{
             status = STATUS_NOK;
@@ -120,7 +120,7 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
 }
 
 SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx){
-    return (SOPC_SecureChannel_Config*) SLinkedList_FindFromId(scConfigs, scConfigIdx);;
+    return (SOPC_SecureChannel_Config*) SOPC_SLinkedList_FindFromId(scConfigs, scConfigIdx);;
 }
 
 uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig){
@@ -137,5 +137,5 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig){
 }
 
 SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx){
-    return (SOPC_Endpoint_Config*) SLinkedList_FindFromId(epConfigs, epConfigIdx);
+    return (SOPC_Endpoint_Config*) SOPC_SLinkedList_FindFromId(epConfigs, epConfigIdx);
 }

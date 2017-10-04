@@ -29,11 +29,11 @@
 /**
  *  \brief Singly linked list structure
  */
-typedef struct SLinkedList SLinkedList;
+typedef struct SOPC_SLinkedList SOPC_SLinkedList;
 
-typedef struct SLinkedList_Elt SLinkedList_Elt;
+typedef struct SOPC_SLinkedList_Elt SOPC_SLinkedList_Elt;
 
-typedef SLinkedList_Elt* SLinkedListIterator;
+typedef SOPC_SLinkedList_Elt* SOPC_SLinkedListIterator;
 
 /**
  *  \brief            Create and allocate a new singly linked list containing 0 elements with a size limit of the given size.
@@ -41,7 +41,7 @@ typedef SLinkedList_Elt* SLinkedListIterator;
  *  \param sizeMax    The maximum number of elements allowed in the new linked list or 0 if no limit defined
  *  \return           Pointer to the newly allocated singly linked list
  */
-SLinkedList* SLinkedList_Create(size_t sizeMax);
+SOPC_SLinkedList* SOPC_SLinkedList_Create(size_t sizeMax);
 
 /**
  *  \brief          Add a new element (and allocate new list element) before head of the given linked list.
@@ -52,7 +52,7 @@ SLinkedList* SLinkedList_Create(size_t sizeMax);
  *
  *  \return         Pointer to the value prepended, provided as parameter, if succeeded, NULL otherwise
  */
-void* SLinkedList_Prepend(SLinkedList* list, uint32_t id, void* value);
+void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value);
 
 /**
  *  \brief          Add a new element (and allocate new list element) to the tail of the given linked list.
@@ -63,7 +63,7 @@ void* SLinkedList_Prepend(SLinkedList* list, uint32_t id, void* value);
  *
  *  \return         Pointer to the value appended, provided as parameter, if succeeded, NULL otherwise
  */
-void* SLinkedList_Append(SLinkedList* list, uint32_t id, void* value);
+void* SOPC_SLinkedList_Append(SOPC_SLinkedList* list, uint32_t id, void* value);
 
 /**
  *  \brief          Get and remove the head element of the list
@@ -72,7 +72,7 @@ void* SLinkedList_Append(SLinkedList* list, uint32_t id, void* value);
  *
  *  \return         Pointer to the head element value of the list
  */
-void* SLinkedList_PopHead(SLinkedList* list);
+void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list);
 
 /**
  *  \brief          Find the value associated to the given id in the linked list
@@ -82,18 +82,18 @@ void* SLinkedList_PopHead(SLinkedList* list);
  *
  *  \return         Pointer to the value found if succeeded, NULL otherwise
  */
-void* SLinkedList_FindFromId(SLinkedList* list, uint32_t id);
+void* SOPC_SLinkedList_FindFromId(SOPC_SLinkedList* list, uint32_t id);
 
 /**
  * \brief           Apply a function to the value of each element of the list.
  *
- *                  An example is the SLinkedList_EltGenericFree() function which frees the \p void* \p value
+ *                  An example is the SOPC_SLinkedList_EltGenericFree() function which frees the \p void* \p value
  *                  of each element of the list.
  *
  * \param list      Pointer to the linked list
  * \param pFn       Function pointer which takes the id and the value of each element
  */
-void SLinkedList_Apply(SLinkedList* list, void (*pFn)(uint32_t id, void *val));
+void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, void *val));
 
 /**
  *  \brief          Find and remove the value associated to the given id in the linked list
@@ -103,30 +103,30 @@ void SLinkedList_Apply(SLinkedList* list, void (*pFn)(uint32_t id, void *val));
  *
  *  \return         Pointer to the value removed if succeeded, NULL otherwise
  */
-void* SLinkedList_RemoveFromId(SLinkedList* list, uint32_t id);
+void* SOPC_SLinkedList_RemoveFromId(SOPC_SLinkedList* list, uint32_t id);
 
 /**
  *  \brief         Delete all elements of the given linked list
  *
  *  \param list    Pointer to the list of elements to be deleted
  */
-void SLinkedList_Clear(SLinkedList* list);
+void SOPC_SLinkedList_Clear(SOPC_SLinkedList* list);
 
 /**
  *  \brief         Delete and deallocate the given linked list
  *
  *  \param list    Pointer to the list to deallocate (pointer must not be used anymore after operation)
  */
-void SLinkedList_Delete(SLinkedList* list);
+void SOPC_SLinkedList_Delete(SOPC_SLinkedList* list);
 
 
 /**
- * \brief           Frees the value of an element of the SLinkedList.
+ * \brief           Frees the value of an element of the SOPC_SLinkedList.
  *
  *  \param id       Unique identifier associated with the element
  *  \param val      Element to be freed
  */
-void SLinkedList_EltGenericFree(uint32_t id, void *val);
+void SOPC_SLinkedList_EltGenericFree(uint32_t id, void *val);
 
 
 /**
@@ -136,13 +136,13 @@ void SLinkedList_EltGenericFree(uint32_t id, void *val);
  *
  * \return          An iterator on the given linked list
  */
-SLinkedListIterator SLinkedList_GetIterator(SLinkedList* list);
+SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list);
 
 /**
  * \brief           Return the next element pointed by iterator in the linked list  (LIFO behavior)
  *
  * \param it        An iterator on a linked list
  */
-void* SLinkedList_Next(SLinkedListIterator* it);
+void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it);
 
 #endif /* SOPC_SINGLE_LINKED_LIST_H_ */

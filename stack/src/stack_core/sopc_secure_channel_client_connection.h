@@ -20,7 +20,7 @@
 
 #include "secret_buffer.h"
 #include "pki.h"
-#include "singly_linked_list.h"
+#include "sopc_singly_linked_list.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_namespace_table.h"
@@ -47,7 +47,7 @@ typedef struct SC_ClientConnection
     const Certificate*          serverCertificate;
     const Certificate*          clientCertificate;
     AsymmetricKey*              clientKey;
-    SLinkedList*                pendingRequests;
+    SOPC_SLinkedList*                pendingRequests;
     OpcUa_MessageSecurityMode   securityMode;
     SOPC_String                 securityPolicy;
     uint32_t                    requestedLifetime;

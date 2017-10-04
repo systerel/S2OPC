@@ -24,6 +24,7 @@
 
 #include "sopc_toolkit_constants.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_singly_linked_list.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_secure_channels_api_internal.h"
 #include "sopc_secure_channels_internal_ctx.h"
@@ -684,8 +685,8 @@ static SOPC_StatusCode SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnect
     if(STATUS_OK == status){
         if(isClient != false){
             // Check received request Id was expected for the received message type
-            recordedMsgType = SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds,
-                                                       *requestId);
+            recordedMsgType = SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds,
+                                                            *requestId);
             if(recordedMsgType != NULL){
                 if(*recordedMsgType != receivedMsgType){
                     status = OpcUa_BadSecurityChecksFailed;
@@ -2421,7 +2422,7 @@ static SOPC_StatusCode SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnec
                     msgType = calloc(1, sizeof(SOPC_Msg_Type));
                     if(msgType != NULL){
                         *msgType = sendMsgType;
-                        if(msgType != SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, requestId, (void*) msgType)){
+                        if(msgType != SOPC_SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, requestId, (void*) msgType)){
                             result = false;
                         }
                     }else{

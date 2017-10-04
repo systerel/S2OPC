@@ -30,7 +30,7 @@
 
 #include "sopc_mutexes.h"
 #include "sopc_time.h"
-#include "singly_linked_list.h"
+#include "sopc_singly_linked_list.h"
 #include "sopc_encodeable.h"
 
 #include "io_dispatch_mgr.h"
@@ -42,8 +42,8 @@ static struct {
     uint8_t               initDone;
     uint8_t               locked;
     Mutex                 mut;
-    SLinkedList* scConfigs;
-    SLinkedList* epConfigs;
+    SOPC_SLinkedList* scConfigs;
+    SOPC_SLinkedList* epConfigs;
     /* OPC UA namespace and encodeable types */
     SOPC_NamespaceTable*  nsTable;
     SOPC_EncodeableType** encTypesTable;
@@ -129,10 +129,10 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
 
             SOPC_Helper_EndianessCfg_Initialize();
             Namespace_Initialize(tConfig.nsTable);
-            tConfig.scConfigs = SLinkedList_Create(0);
+            tConfig.scConfigs = SOPC_SLinkedList_Create(0);
 
             if(NULL != tConfig.scConfigs){
-              tConfig.epConfigs = SLinkedList_Create(0);
+              tConfig.epConfigs = SOPC_SLinkedList_Create(0);
             }
 
             if(NULL != tConfig.epConfigs){
@@ -204,8 +204,8 @@ void SOPC_Toolkit_ClearScConfigElt(uint32_t id, void *val)
 
 // Deallocate fields allocated on server side only and free all the SC configs
 static void SOPC_Toolkit_ClearScConfigs(){
-    SLinkedList_Apply(tConfig.scConfigs, SOPC_Toolkit_ClearScConfigElt);
-    SLinkedList_Delete(tConfig.scConfigs);
+    SOPC_SLinkedList_Apply(tConfig.scConfigs, SOPC_Toolkit_ClearScConfigElt);
+    SOPC_SLinkedList_Delete(tConfig.scConfigs);
     tConfig.scConfigs = NULL;
 }
 
@@ -243,7 +243,7 @@ void SOPC_Toolkit_Clear(){
       tConfig.nbEncTypesTable = 0;
 
       SOPC_Toolkit_ClearScConfigs();
-      SLinkedList_Delete(tConfig.epConfigs);
+      SOPC_SLinkedList_Delete(tConfig.epConfigs);
       tConfig.epConfigs = NULL;
       address_space_bs__UNINITIALISATION();
       appFct = NULL;
@@ -255,13 +255,13 @@ void SOPC_Toolkit_Clear(){
     }
 }
 
-static SOPC_StatusCode SOPC_IntToolkitConfig_AddConfig(SLinkedList* configList,
-                                                       uint32_t     idx,
-                                                       void*        config){
+static SOPC_StatusCode SOPC_IntToolkitConfig_AddConfig(SOPC_SLinkedList* configList,
+                                                       uint32_t          idx,
+                                                       void*             config){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    void* res = SLinkedList_FindFromId(configList, idx);
+    void* res = SOPC_SLinkedList_FindFromId(configList, idx);
     if(NULL == res && NULL != config){ // Idx is unique
-        if(config == SLinkedList_Prepend(configList, idx, config)){
+        if(config == SOPC_SLinkedList_Prepend(configList, idx, config)){
             status = STATUS_OK;
         }else{
             status = STATUS_NOK;
@@ -295,7 +295,7 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
     if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
         if(tConfig.locked != false){
-            res = (SOPC_SecureChannel_Config*) SLinkedList_FindFromId(tConfig.scConfigs, scConfigIdx);
+            res = (SOPC_SecureChannel_Config*) SOPC_SLinkedList_FindFromId(tConfig.scConfigs, scConfigIdx);
         }
         Mutex_Unlock(&tConfig.mut);
     }
@@ -329,7 +329,7 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
     if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
         if(tConfig.locked != false){
-            res = (SOPC_Endpoint_Config*) SLinkedList_FindFromId(tConfig.epConfigs, epConfigIdx);
+            res = (SOPC_Endpoint_Config*) SOPC_SLinkedList_FindFromId(tConfig.epConfigs, epConfigIdx);
         }
         Mutex_Unlock(&tConfig.mut);
     }
