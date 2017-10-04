@@ -18,7 +18,7 @@
 #ifndef SOPC_ASYNC_QUEUE_H_
 #define SOPC_ASYNC_QUEUE_H_
 
-#include "sopc_base_types.h"
+#include "sopc_toolkit_constants.h"
 
 typedef struct SOPC_AsyncQueue SOPC_AsyncQueue;
 

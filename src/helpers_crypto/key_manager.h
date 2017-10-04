@@ -28,8 +28,9 @@
 #define SOPC_KEY_MANAGER_H_
 
 
-#include "sopc_base_types.h"
 #include "crypto_decl.h"
+
+#include "sopc_toolkit_constants.h"
 
 /* ------------------------------------------------------------------------------------------------
  * AsymmetricKey API
@@ -54,7 +55,7 @@
  *                  and STATUS_NOK when there was an error.
  */
 SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint32_t lenBuf,
-                                                     AsymmetricKey **ppKey);
+                                                          AsymmetricKey **ppKey);
 
 /**
  * \brief           Creates an asymmetric key (usually a private key) from a file in the DER or PEM format.

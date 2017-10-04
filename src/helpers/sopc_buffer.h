@@ -23,7 +23,9 @@
 #ifndef SOPC_BUFFER_H_
 #define SOPC_BUFFER_H_
 
-#include "sopc_base_types.h"
+#include <stdint.h>
+
+#include "sopc_toolkit_constants.h"
 
 /**
  *  \brief Bytes buffer structure

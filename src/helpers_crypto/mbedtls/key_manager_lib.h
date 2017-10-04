@@ -34,8 +34,8 @@
  *          The asymmetric key structure is mainly lib-specific. Its content can be enriched for future uses.
  */
 struct AsymmetricKey {
-    mbedtls_pk_context pk;          /**< The context of the key, mbedtls_ specific */
-    uint8_t isBorrowedFromCert;     /**< Says whether the context is borrowed from a context or not. In the latter case, the context must be mbedtls_freed */
+    mbedtls_pk_context pk;       /**< The context of the key, mbedtls_ specific */
+    bool isBorrowedFromCert;     /**< Says whether the context is borrowed from a context or not. In the latter case, the context must be mbedtls_freed */
 };
 
 /**

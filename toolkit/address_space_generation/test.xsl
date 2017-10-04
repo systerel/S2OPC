@@ -38,9 +38,9 @@ classes = ['View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
 #include &lt;stdio.h>
 #include &lt;string.h>
 
+#include "sopc_toolkit_constants.h"
 #include "sopc_builtintypes.h"
 #include "sopc_types.h"
-#include "sopc_base_types.h"
 #include "sopc_user_app_itf.h"
 
 extern SOPC_AddressSpace addressSpace;

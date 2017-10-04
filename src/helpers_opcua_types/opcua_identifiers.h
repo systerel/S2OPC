@@ -32,7 +32,7 @@
 #ifndef _OpcUa_Identifiers_H_
 #define _OpcUa_Identifiers_H_ 1
 
-#include "sopc_base_types.h"
+#include "sopc_toolkit_constants.h"
 
 BEGIN_EXTERN_C
 

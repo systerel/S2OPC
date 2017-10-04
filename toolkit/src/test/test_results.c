@@ -17,10 +17,7 @@
 
 #include "test_results.h"
 
-#include "sopc_base_types.h"
-
-
-static t_bool valid_service_result = FALSE;
+static t_bool valid_service_result = false;
 static OpcUa_WriteRequest *current_pWriteRequest = NULL;
 
 

@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "opcua_statuscodes.h"
+
 #include "sopc_singly_linked_list.h"
 #include "sopc_mutexes.h"
 
@@ -111,7 +113,7 @@ SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueue(SOPC_AsyncQueue* queue,
 }
 
 static SOPC_StatusCode SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue,
-                                               uint8_t          isBlocking,
+                                               bool             isBlocking,
                                                void**           element){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != queue && NULL != element){
@@ -119,7 +121,7 @@ static SOPC_StatusCode SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue,
         Mutex_Lock(&queue->queueMutex);
         *element = SOPC_SLinkedList_PopHead(queue->queueList);
         if(NULL == *element){
-            if(isBlocking == FALSE){
+            if(isBlocking == false){
                 status = OpcUa_BadWouldBlock;
             }else{
                 queue->waitingThreads++;
@@ -142,13 +144,13 @@ static SOPC_StatusCode SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue,
 SOPC_StatusCode SOPC_AsyncQueue_BlockingDequeue(SOPC_AsyncQueue* queue,
                                                 void**           element)
 {
-    return SOPC_AsyncQueue_Dequeue(queue, !FALSE, element);
+    return SOPC_AsyncQueue_Dequeue(queue, true, element);
 }
 
 SOPC_StatusCode SOPC_AsyncQueue_NonBlockingDequeue(SOPC_AsyncQueue* queue,
                                                    void**           element)
 {
-    return SOPC_AsyncQueue_Dequeue(queue, FALSE, element);
+    return SOPC_AsyncQueue_Dequeue(queue, false, element);
 }
 
 void SOPC_AsyncQueue_Free(SOPC_AsyncQueue** queue){

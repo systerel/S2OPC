@@ -50,6 +50,7 @@ file(GLOB_RECURSE INGOPCS_SRCS
     "src/configuration/*.c"
     "src/helpers/*.c"
     "src/helpers_crypto/*.c"
+    "src/helpers_opcua_types/*.c"
     "src/sockets/*.c"
     "src/secure_channels/*.c"
 )
@@ -65,6 +66,7 @@ set(INGOPCS_PUBLIC_INCLUDES
     "toolkit/src/impl"
     "src/configuration"
     "src/helpers"
+    "src/helpers_opcua_types"
     "src/helpers_crypto"
     "src/helpers_platform_dep"
     "src/sockets"
@@ -169,7 +171,6 @@ file(GLOB_RECURSE SOCKETS_SRC
 )
 
 file(GLOB_RECURSE OLD_STACK_SOCKETS_DEP_SRC
-    "stack/src/tools/*.c"
     "stack/src/core_tools/sopc_event_dispatcher_manager.c")
 
 file(GLOB_RECURSE SOCKETS_TEST
@@ -186,13 +187,9 @@ if (NOT CMAKE_CROSSCOMPILING)
 endif()
 
 # Secure channels (stubbed on services side) tests
-file(GLOB_RECURSE OLD_STACK_SECURE_CHANNELS_DEP_SRC
-    "stack/src/API/sopc_encodeable.c"
-    "stack/src/core_types/*.c")
-
-
 file(GLOB_RECURSE SECURE_CHANNELS_SRC
     "src/secure_channels/*.c"
+    "src/helpers_opcua_types/*.c"
     "src/helpers_crypto/*.c"
 )
 
@@ -207,7 +204,6 @@ file(GLOB_RECURSE SECURE_CHANNELS_SERVER_TEST
 # Secure channels tests: CLIENT executable
 add_executable(test_secure_channels_client ${OLD_STACK_SOCKETS_DEP_SRC}
                                            ${SOCKETS_SRC}
-                                           ${OLD_STACK_SECURE_CHANNELS_DEP_SRC}
                                            ${SECURE_CHANNELS_SRC}
                                            ${SECURE_CHANNELS_CLIENT_TEST})
 
@@ -219,7 +215,6 @@ target_link_libraries(test_secure_channels_client PRIVATE mbedtls pthread)
 # Secure channels tests: SERVER executable
 add_executable(test_secure_channels_server ${OLD_STACK_SOCKETS_DEP_SRC}
                                            ${SOCKETS_SRC}
-                                           ${OLD_STACK_SECURE_CHANNELS_DEP_SRC}
                                            ${SECURE_CHANNELS_SRC}
                                            ${SECURE_CHANNELS_SERVER_TEST})
 

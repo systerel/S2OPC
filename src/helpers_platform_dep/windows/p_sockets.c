@@ -17,7 +17,7 @@
 
 #include "sopc_raw_sockets.h"
 
-#include "sopc_stack_csts.h"
+#include "opcua_statuscodes.h"
 #include "sopc_threads.h"
 
 
@@ -84,28 +84,30 @@ void Socket_Clear(Socket* sock){
 }
 
 SOPC_StatusCode Socket_Configure(Socket  sock,
-                                 uint8_t setNonBlocking)
+                                 bool    setNonBlocking)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    int true = 1;
+    const int trueInt = true;
     u_long ltrue = 1;
     int setOptStatus = -1;
     if(sock != SOPC_INVALID_SOCKET){
         status = STATUS_OK;
         // Deactivate Nagle's algorithm since we always write a TCP UA binary message (and not just few bytes)
-        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*) &true, sizeof(int));
+        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*) &trueInt, sizeof(int));
 
+        /*
         if(setOptStatus != SOCKET_ERROR){
-            int rcvbufsize = OPCUA_P_TCPRCVBUFFERSIZE;
+            int rcvbufsize = UINT16_MAX;
             setOptStatus = setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char*) &rcvbufsize, sizeof(int));
         }
 
         if(setOptStatus != SOCKET_ERROR){
-            int sndbufsize = OPCUA_P_TCPSNDBUFFERSIZE;
+            int sndbufsize = UINT16_MAX;
             setOptStatus = setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char*) &sndbufsize, sizeof(int));
         }
+        */
 
-        if(setOptStatus != SOCKET_ERROR && setNonBlocking != FALSE){
+        if(setOptStatus != SOCKET_ERROR && setNonBlocking != false){
             setOptStatus = ioctlsocket(sock, FIONBIO, &ltrue); // True => Non blocking
         }
 
@@ -118,11 +120,11 @@ SOPC_StatusCode Socket_Configure(Socket  sock,
 }
 
 SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
-                                 uint8_t             setReuseAddr,
-                                 uint8_t             setNonBlocking,
+                                 bool                setReuseAddr,
+                                 bool                setNonBlocking,
                                  Socket*             sock){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    int true = 1;
+    const int trueInt = true;
     int setOptStatus = SOCKET_ERROR;
     if(addr != NULL && sock != NULL){
         status = STATUS_OK;
@@ -135,14 +137,14 @@ SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
                 setOptStatus = 0;
             } // else SOCKET_ERROR due to init
 
-            if(setOptStatus != SOCKET_ERROR && setReuseAddr != FALSE){
-                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (char*) &true, sizeof(int));
+            if(setOptStatus != SOCKET_ERROR && setReuseAddr != false){
+                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (char*) &trueInt, sizeof(int));
             }
 
             // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
             if(setOptStatus != SOCKET_ERROR && addr->ai_family == AF_INET6){
-                int false = FALSE;
-                setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &false, sizeof(int));
+                const int falseInt = false;
+                setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &falseInt, sizeof(int));
             }
         }
         if(setOptStatus == SOCKET_ERROR){
@@ -170,7 +172,7 @@ SOPC_StatusCode Socket_Listen(Socket              sock,
 }
 
 SOPC_StatusCode Socket_Accept(Socket  listeningSock,
-                              uint8_t setNonBlocking,
+                              bool    setNonBlocking,
                               Socket* acceptedSock)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -229,17 +231,17 @@ void SocketSet_Add(Socket     sock,
     }
 }
 
-int8_t SocketSet_IsPresent(Socket     sock,
-                           SocketSet* sockSet)
+bool SocketSet_IsPresent(Socket     sock,
+                         SocketSet* sockSet)
 {
     if(sock != SOPC_INVALID_SOCKET && sockSet != NULL){
-        if(FD_ISSET(sock, sockSet) == FALSE){
-            return FALSE;
+        if(FD_ISSET(sock, sockSet) == false){
+            return false;
         }else{
-            return 1;
+            return true;
         }
     }
-    return FALSE;
+    return false;
 }
 
 void SocketSet_Clear(SocketSet* sockSet)

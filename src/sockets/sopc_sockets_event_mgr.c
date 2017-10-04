@@ -20,6 +20,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include "opcua_statuscodes.h"
+
 #include "sopc_sockets_event_mgr.h"
 
 #include "sopc_sockets_api.h"

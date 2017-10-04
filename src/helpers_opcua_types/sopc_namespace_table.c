@@ -67,7 +67,7 @@ SOPC_StatusCode Namespace_AttachTable(SOPC_NamespaceTable* dst, SOPC_NamespaceTa
     if(dst != NULL && dst->namespaceArray == NULL &&
        src != NULL && src->namespaceArray != NULL){
         status = STATUS_OK;
-        dst->clearTable = FALSE;
+        dst->clearTable = false;
         dst->lastIdx = src->lastIdx;
         dst->namespaceArray = src->namespaceArray;
     }
@@ -118,7 +118,7 @@ const char* Namespace_GetName(SOPC_NamespaceTable* namespaceTable,
 void Namespace_Clear(SOPC_NamespaceTable* namespaceTable)
 {
     if(namespaceTable != NULL){
-        if(namespaceTable->clearTable != FALSE &&
+        if(namespaceTable->clearTable != false &&
            namespaceTable->namespaceArray != NULL)
         {
             free(namespaceTable->namespaceArray);

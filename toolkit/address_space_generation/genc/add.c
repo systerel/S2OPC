@@ -21,9 +21,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "sopc_toolkit_constants.h"
 #include "sopc_builtintypes.h"
 #include "sopc_types.h"
-#include "sopc_base_types.h"
 
 #define NB_1 0    /* View */
 #define NB_2 23    /* Object */

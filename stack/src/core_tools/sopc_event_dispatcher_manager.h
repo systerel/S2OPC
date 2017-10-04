@@ -18,6 +18,8 @@
 #ifndef SOPC_EVENT_DISPATCHER_MANAGER_H_
 #define SOPC_EVENT_DISPATCHER_MANAGER_H_
 
+#include <stdint.h>
+
 #include "sopc_async_queue.h"
 
 typedef struct SOPC_EventDispatcherManager SOPC_EventDispatcherManager;

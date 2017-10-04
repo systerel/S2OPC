@@ -18,7 +18,7 @@
 #ifndef SOPC_MUTEXES_H_
 #define SOPC_MUTEXES_H_
 
-#include "sopc_base_types.h"
+#include "sopc_toolkit_constants.h"
 
 // Import Mutex type from platform dependent code
 #include "p_threads.h"

@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sopc_base_types.h"
 #include "secret_buffer.h"
 #include "crypto_profiles.h"
 #include "crypto_provider.h"

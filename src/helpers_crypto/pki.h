@@ -34,14 +34,14 @@
 
 
 
-#include "sopc_base_types.h"
 #include "crypto_decl.h"
 #include "crypto_provider.h"
 #include "key_manager.h"
 
+#include "sopc_toolkit_constants.h"
 
 typedef SOPC_StatusCode (*FnValidateCertificate) (const struct PKIProvider *pPKI,
-                                             const Certificate *pToValidate);
+                                                  const Certificate *pToValidate);
 
 
 // TODO: find a more appropriate name, such as PublicKeyInfra, CertificateValdiation, CryptoPKI

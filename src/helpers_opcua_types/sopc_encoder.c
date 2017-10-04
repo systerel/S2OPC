@@ -22,6 +22,9 @@
 #include <string.h>
 
 #include "opcua_identifiers.h"
+#include "opcua_statuscodes.h"
+
+#include "sopc_toolkit_config.h"
 #include "sopc_helper_endianess_cfg.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_namespace_table.h"
@@ -136,7 +139,7 @@ SOPC_StatusCode SOPC_Boolean_Write(const SOPC_Boolean* value, SOPC_Buffer* buf)
         return STATUS_INVALID_PARAMETERS;
     }
 
-    if(*value == FALSE){
+    if(*value == false){
         encodedValue = *value;
     }else{
         // Encoder should use 1 as True value
@@ -160,7 +163,7 @@ SOPC_StatusCode SOPC_Boolean_Read(SOPC_Boolean* value, SOPC_Buffer* buf)
     }else{
         status = SOPC_Byte_Read(value, buf);
         if(status == STATUS_OK){
-            if(*value != FALSE){
+            if(*value != false){
                 // Decoder should use 1 as True value
                 *value = 1;
             }
@@ -1234,7 +1237,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, S
     int32_t length;
     uint16_t nsIndex = OPCUA_NAMESPACE_INDEX;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SOPC_NamespaceTable* nsTable = SOPC_StackConfiguration_GetNamespaces();
+    SOPC_NamespaceTable* nsTable = SOPC_ToolkitConfig_GetNamespaces();
     SOPC_Byte encodingByte = 0;
     if(extObj != NULL){
         encodingByte = extObj->Encoding;
@@ -1304,10 +1307,10 @@ SOPC_StatusCode SOPC_ExtensionObject_ReadAux(void* value, SOPC_Buffer* buf){
 SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Buffer* buf){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_EncodeableType* encType = NULL;
-    SOPC_NamespaceTable* nsTable = SOPC_StackConfiguration_GetNamespaces();
-    SOPC_EncodeableType** encTypeTable = SOPC_StackConfiguration_GetEncodeableTypes();
+    SOPC_NamespaceTable* nsTable = SOPC_ToolkitConfig_GetNamespaces();
+    SOPC_EncodeableType** encTypeTable = SOPC_ToolkitConfig_GetEncodeableTypes();
     const char* nsName;
-    uint8_t nsFound = FALSE;
+    bool nsFound = false;
     SOPC_Byte encodingByte = 0;
     if(extObj != NULL){
         status = SOPC_NodeId_Read(&extObj->TypeId.NodeId, buf);
@@ -1324,18 +1327,18 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Buf
                 if(extObj->TypeId.NodeId.Namespace != OPCUA_NAMESPACE_INDEX){
                     nsName = Namespace_GetName(nsTable, extObj->TypeId.NodeId.Namespace);
                     if(nsName != NULL){
-                        nsFound = 1; // TRUE
+                        nsFound = true;
                     }
                 }else{
                     nsName = NULL; // <=> OPCUA_NAMESPACE_NAME in GetEncodeableType
-                    nsFound = 1; // TRUE
+                    nsFound = true;
                 }
-                if(nsFound != FALSE){
+                if(nsFound != false){
                     encType = SOPC_EncodeableType_GetEncodeableType(encTypeTable,
                                                                     nsName,
                                                                     extObj->TypeId.NodeId.Data.Numeric);
                 }
-                if(nsFound == FALSE || encType == NULL){
+                if(nsFound == false || encType == NULL){
                     // Keep as a byte string since it is unknown object
                     encodingByte = SOPC_ExtObjBodyEncoding_ByteString;
                 }else{
@@ -2272,8 +2275,8 @@ SOPC_StatusCode SOPC_MsgBodyType_Read(SOPC_Buffer*          buf,
                                       SOPC_EncodeableType** receivedEncType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SOPC_NamespaceTable* namespaceTable = SOPC_StackConfiguration_GetNamespaces();
-    SOPC_EncodeableType** knownTypes = SOPC_StackConfiguration_GetEncodeableTypes();
+    SOPC_NamespaceTable* namespaceTable = SOPC_ToolkitConfig_GetNamespaces();
+    SOPC_EncodeableType** knownTypes = SOPC_ToolkitConfig_GetEncodeableTypes();
     SOPC_EncodeableType* recEncType = NULL;
     SOPC_NodeId nodeId;
     const char* nsName;

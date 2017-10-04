@@ -22,6 +22,8 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#include "opcua_statuscodes.h"
+
 #include "sopc_toolkit_constants.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_singly_linked_list.h"
@@ -833,7 +835,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
 
 static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
                                          bool                   isSymmetric,
-                                         uint32_t               isPrecCryptoData)
+                                         bool                   isPrecCryptoData)
 {
     assert(scConnection != NULL);
     SOPC_Buffer* buffer = scConnection->chunksCtx.chunkInputBuffer;
@@ -883,7 +885,7 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
         KeyManager_AsymmetricKey_Free(publicKey);
     }else{
         SC_SecurityKeySet* receiverKeySet = NULL;
-        if(isPrecCryptoData == FALSE){
+        if(isPrecCryptoData == false){
             receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
         }else{
             receiverKeySet = scConnection->precedentSecuKeySets.receiverKeySet;

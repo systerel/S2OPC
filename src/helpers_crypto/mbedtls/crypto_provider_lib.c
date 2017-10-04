@@ -20,7 +20,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "sopc_base_types.h"
 #include "crypto_decl.h"
 #include "crypto_profiles.h"
 #include "crypto_provider.h"

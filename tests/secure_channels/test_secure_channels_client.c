@@ -29,7 +29,9 @@
 #include "sopc_encoder.h"
 #include "sopc_secure_channels_api.h"
 
+#include "opcua_statuscodes.h"
 #include "opcua_identifiers.h"
+
 #include "crypto_profiles.h"
 #include "pki_stack.h"
 #include "sopc_time.h"

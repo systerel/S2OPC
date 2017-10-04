@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "opcua_statuscodes.h"
+
 #include "sopc_toolkit_constants.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_singly_linked_list.h"

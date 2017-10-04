@@ -25,7 +25,6 @@
 
 #include <stdlib.h>
 
-#include "sopc_base_types.h"
 #include "crypto_provider.h"
 #include "key_manager.h"
 #include "key_manager_lib.h"

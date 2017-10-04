@@ -19,11 +19,11 @@
 
 #include <stdbool.h>
 
+#include "sopc_helper_endianess_cfg.h"
 #include "sopc_sockets_api.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_singly_linked_list.h"
 #include "stub_sc_sopc_services_api.h"
-#include "sopc_stack_config.h"
 
 static SOPC_SLinkedList* scConfigs = NULL;
 static SOPC_SLinkedList* epConfigs = NULL;
@@ -34,7 +34,7 @@ static uint32_t epConfigIdxMax = 0;
 SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
     (void) pAppFct;
 
-    SOPC_StackConfiguration_Initialize();
+    SOPC_Helper_EndianessCfg_Initialize();
 
     scConfigs = SOPC_SLinkedList_Create(0);
 
@@ -86,7 +86,6 @@ void SOPC_Toolkit_Clear(){
       SOPC_Toolkit_ClearScConfigs();
       SOPC_SLinkedList_Delete(epConfigs);
       epConfigs = NULL;
-      SOPC_StackConfiguration_Clear();
 }
 
 static SOPC_StatusCode SOPC_IntToolkitConfig_AddConfig(SOPC_SLinkedList* configList,
@@ -138,4 +137,15 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig){
 
 SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx){
     return (SOPC_Endpoint_Config*) SOPC_SLinkedList_FindFromId(epConfigs, epConfigIdx);
+}
+
+SOPC_EncodeableType** SOPC_ToolkitConfig_GetEncodeableTypes()
+{
+    // No additional types: return static known types
+    return SOPC_KnownEncodeableTypes;
+}
+
+SOPC_NamespaceTable* SOPC_ToolkitConfig_GetNamespaces()
+{
+    return NULL;
 }

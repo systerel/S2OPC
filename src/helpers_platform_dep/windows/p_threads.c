@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "opcua_statuscodes.h"
+
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"

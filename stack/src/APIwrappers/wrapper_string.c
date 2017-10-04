@@ -21,6 +21,7 @@
 #include <string.h>
 #include <limits.h>
 
+#include "sopc_base_types.h"
 #include "sopc_helper_string.h"
 #include "sopc_builtintypes.h"
 

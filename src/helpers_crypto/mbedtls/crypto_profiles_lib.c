@@ -21,6 +21,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stddef.h>
+
 #include "crypto_profiles.h"
 #include "crypto_functions_lib.h"
 

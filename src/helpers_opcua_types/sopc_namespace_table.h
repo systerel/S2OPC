@@ -18,6 +18,8 @@
 #ifndef SOPC_NAMESPACE_TABLE_H_
 #define SOPC_NAMESPACE_TABLE_H_
 
+#include <stdbool.h>
+
 #include "sopc_builtintypes.h"
 
 #define OPCUA_NAMESPACE_INDEX 0
@@ -33,7 +35,7 @@ typedef struct {
 typedef struct {
     uint16_t        lastIdx;
     SOPC_Namespace* namespaceArray;
-    uint8_t         clearTable;
+    bool            clearTable;
 } SOPC_NamespaceTable;
 
 void Namespace_Initialize(SOPC_NamespaceTable* nsTable);

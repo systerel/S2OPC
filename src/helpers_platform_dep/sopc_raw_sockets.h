@@ -18,11 +18,10 @@
 #ifndef SOPC_RAW_SOCKETS_H_
 #define SOPC_RAW_SOCKETS_H_
 
+#include "sopc_toolkit_constants.h"
+
 // Platform dependent types
 #include "p_sockets.h"
-
-#include "sopc_base_types.h"
-#include "opcua_statuscodes.h"
 
 /**
  *  \brief Initialize the network communication allowing to use sockets
@@ -86,15 +85,15 @@ void Socket_Clear(Socket* sock);
  *  \brief Create a new socket using the addressing information provided
  *
  *  \param addr              The addressing information used to instantiate a TCP/IP socket
- *  \param setReuseAddr      If value is not zero the socket is configured to could be reused
- *  \param setNonBlocking    If value is not zero the socket is configured to be non blocking
+ *  \param setReuseAddr      If value is not false (0) the socket is configured to could be reused
+ *  \param setNonBlocking    If value is not false (0) the socket is configured to be non blocking
  *  \param sock              (Out) Value pointed is set with the newly created socket
  *
  *  \return                  GOOD if operation succeeded, BAD otherwise.
  */
 SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
-                                 uint8_t             setReuseAddr,
-                                 uint8_t             setNonBlocking,
+                                 bool                setReuseAddr,
+                                 bool                setNonBlocking,
                                  Socket*             sock);
 
 /**
@@ -113,13 +112,13 @@ SOPC_StatusCode Socket_Listen(Socket              sock,
  *  Connection on a listening socket is detected when receiving a read event on the socket.
  *
  *  \param listeningSock    The listening socket on which a read event has been received.
- *  \param setNonBlocking   If value is not zero the connection socket is configured to be non blocking
+ *  \param setNonBlocking   If value is not false (0) the connection socket is configured to be non blocking
  *  \param acceptedSock     (Out) Value pointed is set with the newly created socket for accepted connection
  *
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
 SOPC_StatusCode Socket_Accept(Socket  listeningSock,
-                              uint8_t setNonBlocking,
+                              bool    setNonBlocking,
                               Socket* acceptedSock);
 
 /**
@@ -161,10 +160,10 @@ void SocketSet_Add(Socket     sock,
  *  \param sock       The socket to search in the set (not NULL)
  *  \param sockSet    The socket set to use for the operation (not NULL)
  *
- *  \return           Not zero if present, zero otherwise
+ *  \return           true (!= false) if present, false otherwise
  */
-int8_t SocketSet_IsPresent(Socket     sock,
-                           SocketSet* sockSet);
+bool SocketSet_IsPresent(Socket     sock,
+                         SocketSet* sockSet);
 /**
  *  \brief Clear a socket set
  *

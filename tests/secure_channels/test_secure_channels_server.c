@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "opcua_statuscodes.h"
+
 #include "sopc_time.h"
 #include "crypto_profiles.h"
 #include "key_manager.h"

@@ -227,7 +227,7 @@ static void SOPC_SocketsNetworkEventMgr_CyclicThreadStop(){
         }
         Mutex_Unlock(&receptionThread.tMutex);
         Mutex_Clear(&receptionThread.tMutex);
-        receptionThread.initDone = FALSE;
+        receptionThread.initDone = false;
     }
 }
 

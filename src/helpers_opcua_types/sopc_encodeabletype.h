@@ -24,8 +24,9 @@
 #define SOPC_ENCODEABLETYPE_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
-#include "sopc_base_types.h"
+#include "sopc_toolkit_constants.h"
 #include "sopc_buffer.h"
 
 BEGIN_EXTERN_C

@@ -19,6 +19,7 @@
 #define SOPC_TOOLKIT_CONSTANTS_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /* COMMON CONFIGURATION */
 
@@ -93,5 +94,24 @@
 
 /* DEBUG CONFIGURATION */
 #define SOPC_DEBUG_PRINTING false
+
+/* OPC UA statuses */
+// TODO: remove status code from non OPC UA services and define type in builtintypes module
+typedef uint32_t SOPC_StatusCode;
+#define STATUS_OK 0x0 // TODO: change values
+#define STATUS_OK_INCOMPLETE 0x00000001
+#define STATUS_NOK 0x80000000//0x10000000
+#define STATUS_INVALID_PARAMETERS 0x80760001//0x20000000
+#define STATUS_INVALID_STATE 0x80760002//0x30000000
+#define STATUS_INVALID_RCV_PARAMETER 0x80000003//0x40000000
+
+/* CPP macro */
+#ifdef __cplusplus
+# define BEGIN_EXTERN_C extern "C" {
+# define END_EXTERN_C }
+#else
+# define BEGIN_EXTERN_C
+# define END_EXTERN_C
+#endif
 
 #endif /* SOPC_TOOLKIT_CONSTANTS_H_ */

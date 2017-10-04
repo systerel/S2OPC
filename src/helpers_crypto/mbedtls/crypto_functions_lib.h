@@ -25,7 +25,6 @@
 #ifndef SOPC_CRYPTO_FUNCTIONS_LIB_
 #define SOPC_CRYPTO_FUNCTIONS_LIB_
 
-#include "sopc_base_types.h"
 #include "secret_buffer.h"
 #include "crypto_decl.h"
 #include "key_manager.h"

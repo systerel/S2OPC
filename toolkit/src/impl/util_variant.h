@@ -26,7 +26,7 @@
 
 #include "constants.h"
 
-#include "sopc_base_types.h"
+#include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
 
 
