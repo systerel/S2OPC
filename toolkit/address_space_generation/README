@@ -1,7 +1,5 @@
-Sur l'utilisation des outils.
-
 Additional tools are required for address space generation:
 ==========================================================
 
-- Mako: installated with Python3 thanks to ``pip3 install -r requirements.txt``
+- Mako: installed with Python3 thanks to ``pip3 install -r requirements.txt``
 - ``libsaxonb-java`` package for XSLT processor
