@@ -24,7 +24,7 @@
 #include <string.h>
 #include <limits.h>
 
-#include "base_tools.h"
+#include "sopc_helper_string.h"
 
 void SOPC_Boolean_InitializeAux(void* value){
     SOPC_Boolean_Initialize((SOPC_Boolean*) value);
@@ -883,7 +883,7 @@ SOPC_StatusCode SOPC_String_Compare(const SOPC_String* left,
         }else if(ignoreCase == false){
             *comparison = strcmp((char*) left->Data, (char*) right->Data);
         }else{
-            *comparison = strncmp_ignore_case((char*) left->Data, (char*) right->Data, left->Length);
+            *comparison = SOPC_strncmp_ignore_case((char*) left->Data, (char*) right->Data, left->Length);
         }
     }else if(left->Length > right->Length){
          *comparison = +1;

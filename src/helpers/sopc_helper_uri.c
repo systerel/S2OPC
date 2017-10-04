@@ -21,9 +21,7 @@
 #include <string.h>
 
 #include "sopc_toolkit_constants.h"
-
-// TODO: move into helpers and rename
-#include "base_tools.h"
+#include "sopc_helper_string.h"
 
 bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri,
                                    size_t*     hostnameLength,
@@ -42,7 +40,7 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri,
         *portLength = 0;
         if(strlen(uri) + 4  > SOPC_TCP_UA_MAX_URL_LENGTH){
             // Encoded value shall be less than 4096 bytes
-        }else if(strlen(uri) > 10 && strncmp_ignore_case(uri, (const char*) "opc.tcp://", 10) == 0){
+        }else if(strlen(uri) > 10 && SOPC_strncmp_ignore_case(uri, (const char*) "opc.tcp://", 10) == 0){
             // search for a ':' defining port for given IP
             // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
             for(idx = 10; idx < strlen(uri) - 1; idx++){

@@ -21,7 +21,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "base_tools.h"
+#include "sopc_helper_string.h"
 #include "sopc_stack_csts.h"
 #include "sopc_action_queue.h"
 #include "sopc_action_queue_manager.h"
@@ -78,7 +78,7 @@ SOPC_StatusCode Internal_CheckURI(const char* uri,
         if(strlen(uri) + 4  > TCP_UA_MAX_URL_LENGTH){
             // Encoded value shall be less than 4096 bytes
             status = STATUS_INVALID_PARAMETERS;
-        }else if(strlen(uri) > 10 && strncmp_ignore_case(uri, (const char*) "opc.tcp://", 10) == 0){
+        }else if(strlen(uri) > 10 && SOPC_strncmp_ignore_case(uri, (const char*) "opc.tcp://", 10) == 0){
             // search for a ':' defining port for given IP
             // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
             for(idx = 10; idx < strlen(uri) - 1; idx++){

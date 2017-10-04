@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "base_tools.h"
+#include "sopc_helper_string.h"
 
 #include <ctype.h>
 
-int strncmp_ignore_case(const char *s1, const char *s2, size_t size){
+int SOPC_strncmp_ignore_case(const char *s1, const char *s2, size_t size){
     int lc1, lc2;
     size_t idx;
     int res = -1000;

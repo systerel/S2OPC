@@ -19,7 +19,7 @@
 
 #include <string.h>
 
-#include "base_tools.h"
+#include "sopc_helper_string.h"
 #include "sopc_builtintypes.h"
 #include "sopc_namespace_table.h"
 
@@ -48,7 +48,7 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(SOPC_EncodeableType**
                     }else{
                         currentNs = current->NamespaceUri;
                     }
-                    if(strncmp_ignore_case(namespace, currentNs, strlen(namespace)+1) == 0){
+                    if(SOPC_strncmp_ignore_case(namespace, currentNs, strlen(namespace)+1) == 0){
                         result = current;
                     }
                 }

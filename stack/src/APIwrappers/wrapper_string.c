@@ -21,7 +21,7 @@
 #include <string.h>
 #include <limits.h>
 
-#include "base_tools.h"
+#include "sopc_helper_string.h"
 #include "sopc_builtintypes.h"
 
 #define NOLENGTH UINT32_MAX
@@ -220,7 +220,7 @@ int32_t OpcUa_String_StrnCmp(const SOPC_String* str1,
         }else if(ignoreCase == FALSE){
             res = strncmp((char*) str1->Data, (char*) str2->Data, length);
         }else{
-            res = strncmp_ignore_case((char*) str1->Data, (char*) str2->Data, length);
+            res = SOPC_strncmp_ignore_case((char*) str1->Data, (char*) str2->Data, length);
         }
     }else if(str1->Length > str2->Length){
          res = +1;
