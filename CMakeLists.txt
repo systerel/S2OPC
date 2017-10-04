@@ -40,23 +40,24 @@ file(GLOB_RECURSE UASTACK_SRCS
     "stack/src/APIwrappers/*.c"
     "stack/src/core_tools/*.c"
     "stack/src/core_types/*.c"
-    "stack/src/crypto/*.c"
     "stack/src/stack_core/*.c"
     "stack/src/tools/*.c"
     "toolkit/src/genc/*.c"
     "toolkit/src/impl/*.c"
+)
+
+file(GLOB_RECURSE INGOPCS_SRCS
     "src/configuration/*.c"
     "src/helpers/*.c"
+    "src/helpers_crypto/*.c"
     "src/sockets/*.c"
     "src/secure_channels/*.c"
 )
 
-add_library(ingopcs STATIC ${PLATFORM_SRCS} ${UASTACK_SRCS})
+add_library(ingopcs STATIC ${PLATFORM_SRCS} ${INGOPCS_SRCS} ${UASTACK_SRCS})
 set(INGOPCS_PUBLIC_INCLUDES
     "stack/src/API"
     "stack/src/APIwrappers"
-    "stack/src/crypto"
-    "stack/src/crypto/mbedtls"
     "stack/src/core_types"
     "stack/src/core_tools"
     "stack/src/tools"
@@ -64,11 +65,13 @@ set(INGOPCS_PUBLIC_INCLUDES
     "toolkit/src/impl"
     "src/configuration"
     "src/helpers"
+    "src/helpers_crypto"
     "src/helpers_platform_dep"
     "src/sockets"
     "src/secure_channels"
 )
 set(INGOPCS_PRIVATE_INCLUDES
+    "src/helpers_crypto/mbedtls"
     "src/helpers_platform_dep/${PLATFORM_DIR}"
     "stack/src/stack_core"
     "libraries/mbedtls-2.3.0/include" # For some reason, the CMakeLists from mbedtls does not export that
@@ -183,12 +186,12 @@ target_link_libraries(check_sockets PRIVATE pthread check)
 # Secure channels (stubbed on services side) tests
 file(GLOB_RECURSE OLD_STACK_SECURE_CHANNELS_DEP_SRC
     "stack/src/API/sopc_encodeable.c"
-    "stack/src/core_types/*.c"
-    "stack/src/crypto/*.c")
+    "stack/src/core_types/*.c")
 
 
 file(GLOB_RECURSE SECURE_CHANNELS_SRC
     "src/secure_channels/*.c"
+    "src/helpers_crypto/*.c"
 )
 
 file(GLOB_RECURSE SECURE_CHANNELS_CLIENT_TEST
