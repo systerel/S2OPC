@@ -13,20 +13,47 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+from opcua.ua import QualifiedName, LocalizedText, XmlElement
+
 def attribute_read_tests(client):
 
-    n1 = client.get_node(10)
-    n2 = client.get_node(11)
+    # Read tests
+    Type_list = ['Int64','UInt32','Double','String','ByteString','XmlElement']
+    Value_list = [-1000,1000,2.0,"String:INGOPCS","ByteString:INGOPCS".encode(),XmlElement(u"XmlElement:INGOPCS")]
+    try:
+        for (i,e) in enumerate(Type_list):
+            nid = 1000 + i + 1
+            print('Checking nid:', nid)
+            expectedBrowseName = QualifiedName(e,0)
+            expectedDisplayName = LocalizedText(u"{}_1dn".format(e))
+            expectedDescription = u"{}_1d".format(e)
+            expectedValue = Value_list[i]
+            node = client.get_node(nid)
 
-    print('n1:', n1.get_value())
-    browse_name = n1.get_browse_name()
-    print('browse_name: ', browse_name)
-    display_name = n1.get_display_name()
-    print('display_name: ', display_name)
-    class_name = n1.get_node_class()
-    print('node_class: ', class_name)
-    print('n2:', n2.get_value())
+            # check value
+            value = node.get_value()
+            print(' Value for Node {:03d}:'.format(nid), value)
+            assert(value == expectedValue)
 
+            # check browseName
+            browse_name = node.get_browse_name()
+            print('browse_name: ', browse_name)
+            assert(browse_name == expectedBrowseName)
 
+            # check display name
+            display_name = node.get_display_name()
+            assert(display_name == expectedDisplayName)
 
+            # check node class
+            class_name = node.get_node_class()
+            assert(str("NodeClass.Variable")==str(class_name))
+
+            # TODO: check data type
+            #data_type = node.get_data_type()
+            #print('data type: ', data_type)
+
+    finally:
+        client.disconnect()
+        print('Disconnected')
 

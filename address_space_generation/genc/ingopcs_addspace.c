@@ -283,7 +283,7 @@ static SOPC_QualifiedName BrowseName[NB + 1] = {{0, {0, 0, NULL}}
 ,{261,{2,1,toSOPC_String("RM")}}/* ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM*/
 ,{0,{5,1,toSOPC_String("State")}}/* i=2259*/
 ,{0,{5,1,toSOPC_String("Int64")}}/* i=1001*/
-,{0,{6,1,toSOPC_String("Uint32")}}/* i=1002*/
+,{0,{6,1,toSOPC_String("UInt32")}}/* i=1002*/
 ,{0,{6,1,toSOPC_String("Double")}}/* i=1003*/
 ,{0,{6,1,toSOPC_String("String")}}/* i=1004*/
 ,{0,{10,1,toSOPC_String("ByteString")}}/* i=1005*/
