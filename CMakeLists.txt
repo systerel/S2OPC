@@ -23,7 +23,7 @@ else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-file(GLOB PLATFORM_SRCS "stack/src/platforms/${PLATFORM_DIR}/*.c")
+file(GLOB PLATFORM_SRCS "src/helpers_platform_dep/${PLATFORM_DIR}/*.c")
 
 if(UNIX)
   # add POSIX support
@@ -60,16 +60,16 @@ set(INGOPCS_PUBLIC_INCLUDES
     "stack/src/core_types"
     "stack/src/core_tools"
     "stack/src/tools"
-    "stack/src/platforms"
     "toolkit/src/genc"
     "toolkit/src/impl"
     "src/configuration"
     "src/helpers"
+    "src/helpers_platform_dep"
     "src/sockets"
     "src/secure_channels"
 )
 set(INGOPCS_PRIVATE_INCLUDES
-    "stack/src/platforms/${PLATFORM_DIR}"
+    "src/helpers_platform_dep/${PLATFORM_DIR}"
     "stack/src/stack_core"
     "libraries/mbedtls-2.3.0/include" # For some reason, the CMakeLists from mbedtls does not export that
 )
@@ -160,12 +160,12 @@ target_include_directories(toolkit_test_write PRIVATE "toolkit/address_space_gen
 
 # Sockets layer (stubbed) tests
 file(GLOB_RECURSE SOCKETS_SRC
+    ${PLATFORM_SRCS}
     "src/helpers/*.c"
     "src/sockets/*.c"
 )
 
 file(GLOB_RECURSE OLD_STACK_SOCKETS_DEP_SRC
-    ${PLATFORM_SRCS}
     "stack/src/tools/*.c"
     "stack/src/core_tools/sopc_event_dispatcher_manager.c")
 
