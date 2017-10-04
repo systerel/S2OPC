@@ -170,15 +170,11 @@ file(GLOB_RECURSE SOCKETS_SRC
     "src/sockets/*.c"
 )
 
-file(GLOB_RECURSE OLD_STACK_SOCKETS_DEP_SRC
-    "stack/src/core_tools/sopc_event_dispatcher_manager.c")
-
 file(GLOB_RECURSE SOCKETS_TEST
      "tests/sockets/*.c")
 
 if (NOT CMAKE_CROSSCOMPILING)
-    add_executable(check_sockets ${OLD_STACK_SOCKETS_DEP_SRC}
-                                 ${SOCKETS_SRC}
+    add_executable(check_sockets ${SOCKETS_SRC}
                                  ${SOCKETS_TEST})
     target_include_directories(check_sockets PRIVATE "tests/sockets/stubs" 
                                                      ${INGOPCS_PUBLIC_INCLUDES} 
@@ -202,8 +198,7 @@ file(GLOB_RECURSE SECURE_CHANNELS_SERVER_TEST
      "tests/secure_channels/stubs/*.c")
 
 # Secure channels tests: CLIENT executable
-add_executable(test_secure_channels_client ${OLD_STACK_SOCKETS_DEP_SRC}
-                                           ${SOCKETS_SRC}
+add_executable(test_secure_channels_client ${SOCKETS_SRC}
                                            ${SECURE_CHANNELS_SRC}
                                            ${SECURE_CHANNELS_CLIENT_TEST})
 
@@ -213,8 +208,7 @@ target_include_directories(test_secure_channels_client PRIVATE "tests/secure_cha
 target_link_libraries(test_secure_channels_client PRIVATE mbedtls pthread)
 
 # Secure channels tests: SERVER executable
-add_executable(test_secure_channels_server ${OLD_STACK_SOCKETS_DEP_SRC}
-                                           ${SOCKETS_SRC}
+add_executable(test_secure_channels_server ${SOCKETS_SRC}
                                            ${SECURE_CHANNELS_SRC}
                                            ${SECURE_CHANNELS_SERVER_TEST})
 
