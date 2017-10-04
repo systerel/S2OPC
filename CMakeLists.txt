@@ -110,12 +110,12 @@ endif()
 #    COMMENT "Runs the client/server tests")
 
 # Unit tests
-#if (NOT CMAKE_CROSSCOMPILING)
-#    file(GLOB_RECURSE INTERNAL_TESTS_SRCS "stack/test/ingopcs/*.c")
-#    add_executable(check_stack ${INTERNAL_TESTS_SRCS})
-#    target_include_directories(check_stack PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
-#    target_link_libraries(check_stack PRIVATE ingopcs check)
-#endif()
+if (NOT CMAKE_CROSSCOMPILING)
+    file(GLOB_RECURSE INTERNAL_TESTS_SRCS "stack/test/ingopcs/*.c")
+    add_executable(check_stack ${INTERNAL_TESTS_SRCS})
+    target_include_directories(check_stack PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
+    target_link_libraries(check_stack PRIVATE ingopcs check)
+endif()
 
 # Toolkit tests
 
