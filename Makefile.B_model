@@ -1,0 +1,18 @@
+PATHBMODEL=./B_model
+PATHGENTRAD=$(PATHBMODEL)/tradc
+PATHTRAD=./src/services/B_genC
+
+#TODO: manage dependencies to avoid generation when source files did not changed
+
+gen: $(PATHBMODEL)/*.mch $(PATHBMODEL)/*.imp $(PATHBMODEL)/*.def
+	@m -s | grep TOTAL | awk -F '|' '{ err = $$3 ~ "OK" && $$10 ~ "OK" ? 0:1 } END {if(err == 1) print "Please typecheck and B0check before make trad"; exit err}'
+	@\rm -fr ./$(PATHTRAD)
+	@\rm -fr ./$(PATHGENTRAD)
+	m -tr
+	@mkdir $(PATHTRAD)
+	@cp $(PATHGENTRAD)/*.c $(PATHGENTRAD)/*.h $(PATHTRAD)
+	@# Renames unwanted files, such as the ones that define a void * to a t_entier4
+	@for i in constants_bs.h; do \
+	    echo "mv $(PATHTRAD)/$$i $(PATHTRAD)/$$i""_"; \
+	    mv $(PATHTRAD)/"$$i" $(PATHTRAD)/"$$i"_; \
+	done

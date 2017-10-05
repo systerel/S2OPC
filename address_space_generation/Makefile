@@ -3,7 +3,7 @@
 empty:=
 space:= $(empty) $(empty)
 CC=gcc
-CFLAGS=-g3 -W -Wall -ansi -pedantic -std=c99 -I./ -I../src/impl -I../../install_stack/include/
+CFLAGS=-g3 -W -Wall -ansi -pedantic -std=c99 -I./ -I../src/configuration -I../src/helpers -I../src/helpers_opcua_types -I../src/helpers_crypto
 LDFLAGS=
 EXEC=test
 XSL=add.xsl test.xsl

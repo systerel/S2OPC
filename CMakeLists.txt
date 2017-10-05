@@ -33,20 +33,18 @@ else()
 endif()
 
 file(GLOB_RECURSE INGOPCS_SRCS
-    "toolkit/src/genc/*.c"
-    "toolkit/src/impl/*.c"
     "src/configuration/*.c"
     "src/helpers/*.c"
     "src/helpers_crypto/*.c"
     "src/helpers_opcua_types/*.c"
     "src/sockets/*.c"
     "src/secure_channels/*.c"
+    "src/services/*.c"
 )
 
 add_library(ingopcs STATIC ${PLATFORM_SRCS} ${INGOPCS_SRCS})
+
 set(INGOPCS_PUBLIC_INCLUDES
-    "toolkit/src/genc"
-    "toolkit/src/impl"
     "src/configuration"
     "src/helpers"
     "src/helpers_opcua_types"
@@ -54,10 +52,13 @@ set(INGOPCS_PUBLIC_INCLUDES
     "src/helpers_platform_dep"
     "src/sockets"
     "src/secure_channels"
+    "src/services"
 )
 set(INGOPCS_PRIVATE_INCLUDES
     "src/helpers_crypto/mbedtls"
     "src/helpers_platform_dep/${PLATFORM_DIR}"
+    "src/services/BtoC_itf"
+    "src/services/B_genC"
     "libraries/mbedtls-2.3.0/include" # For some reason, the CMakeLists from mbedtls does not export that
 )
 target_include_directories(ingopcs BEFORE
@@ -79,41 +80,41 @@ if (NOT CMAKE_CROSSCOMPILING)
 endif()
 
 # Toolkit Client
-add_executable(toolkit_test_client "toolkit/src/test/toolkit_test_client.c"
-                                   "toolkit/src/test/wrap_read.c"
-                                   "toolkit/src/test/testlib_write.c"
-                                   "toolkit/src/test/test_results.c"
-                                   "toolkit/src/test/testlib_read_response.c"
-                                   "toolkit/address_space_generation/genc/test_read_write_addspace.c")
+add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
+                                   "tests/services/wrap_read.c"
+                                   "tests/services/testlib_write.c"
+                                   "tests/services/test_results.c"
+                                   "tests/services/testlib_read_response.c"
+                                   "address_space_generation/genc/test_read_write_addspace.c")
 target_link_libraries(toolkit_test_client PRIVATE ingopcs)
-target_include_directories(toolkit_test_client PRIVATE "toolkit/address_space_generation/"
+target_include_directories(toolkit_test_client PRIVATE "address_space_generation/"
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
 # Toolkit Server
-add_executable(toolkit_test_server "toolkit/src/test/toolkit_test_server.c"
-                                   "toolkit/address_space_generation/genc/add.c")
+add_executable(toolkit_test_server "tests/services/toolkit_test_server.c"
+                                   "address_space_generation/genc/add.c")
 target_link_libraries(toolkit_test_server PRIVATE ingopcs)
-target_include_directories(toolkit_test_server PRIVATE "toolkit/address_space_generation/"
+target_include_directories(toolkit_test_server PRIVATE "address_space_generation/"
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
 # Tookit read service
-add_executable(toolkit_test_read "toolkit/src/test/toolkit_test_read.c"
-                                 "toolkit/src/test/wrap_read.c"
-                                 "toolkit/src/test/testlib_read_response.c"
-                                 "toolkit/address_space_generation/genc/test_read_write_addspace.c")
+add_executable(toolkit_test_read "tests/services/toolkit_test_read.c"
+                                 "tests/services/wrap_read.c"
+                                 "tests/services/testlib_read_response.c"
+                                 "address_space_generation/genc/test_read_write_addspace.c")
 target_link_libraries(toolkit_test_read PRIVATE ingopcs)
-target_include_directories(toolkit_test_read PRIVATE "toolkit/address_space_generation/"
+target_include_directories(toolkit_test_read PRIVATE "address_space_generation/"
                                                      ${INGOPCS_PUBLIC_INCLUDES} 
                                                      ${INGOPCS_PRIVATE_INCLUDES})
 
 # Toolkit write service
-add_executable(toolkit_test_write "toolkit/src/test/toolkit_test_write.c"
-                                  "toolkit/src/test/testlib_write.c"
-                                  "toolkit/address_space_generation/genc/test_read_write_addspace.c")
+add_executable(toolkit_test_write "tests/services/toolkit_test_write.c"
+                                  "tests/services/testlib_write.c"
+                                  "address_space_generation/genc/test_read_write_addspace.c")
 target_link_libraries(toolkit_test_write PRIVATE ingopcs)
-target_include_directories(toolkit_test_write PRIVATE "toolkit/address_space_generation/"
+target_include_directories(toolkit_test_write PRIVATE "address_space_generation/"
                                                       ${INGOPCS_PUBLIC_INCLUDES} 
                                                       ${INGOPCS_PRIVATE_INCLUDES})
 
