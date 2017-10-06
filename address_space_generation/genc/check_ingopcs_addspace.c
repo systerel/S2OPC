@@ -7492,6 +7492,1158 @@ int nsIndex = 0;
     }
 
 
+    nodeid = "i=24";
+    pos = 64;
+    exp = 0;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "i=26";
+    pos = 65;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=27";
+    pos = 66;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 26){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 26, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=28";
+    pos = 67;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 26){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 26, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=29";
+    pos = 68;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=1";
+    pos = 69;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=2";
+    pos = 70;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 27){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 27, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=3";
+    pos = 71;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 28){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 28, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=4";
+    pos = 72;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 27){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 27, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=5";
+    pos = 73;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 28){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 28, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=6";
+    pos = 74;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 27){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 27, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=7";
+    pos = 75;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 28){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 28, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=8";
+    pos = 76;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 27){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 27, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=9";
+    pos = 77;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 28){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 28, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=10";
+    pos = 78;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 26){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 26, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=11";
+    pos = 79;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 26){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 26, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=12";
+    pos = 80;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=13";
+    pos = 81;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=14";
+    pos = 82;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=15";
+    pos = 83;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=16";
+    pos = 84;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=17";
+    pos = 85;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=18";
+    pos = 86;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=19";
+    pos = 87;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=20";
+    pos = 88;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=21";
+    pos = 89;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=22";
+    pos = 90;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=23";
+    pos = 91;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=25";
+    pos = 92;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 24){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 24, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=30";
+    pos = 93;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 15){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 15, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=121";
+    pos = 94;
+    exp = 1;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 45){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 45, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 26){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 26, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
 }
 
 int compareLocalizedText(SOPC_LocalizedText LText, const char *text, const char *locale){
@@ -8488,6 +9640,502 @@ void test_Description(){
         
             printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
             compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Secondary Detection Status", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=24";
+    pos = 64;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that can have any valid DataType.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=26";
+    pos = 65;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that can have any numeric DataType.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=27";
+    pos = 66;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that can have any integer DataType.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=28";
+    pos = 67;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that can have any unsigned integer DataType.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=29";
+    pos = 68;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an enumerated DataType.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1";
+    pos = 69;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is either TRUE or FALSE.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=2";
+    pos = 70;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an integer between -128 and 127.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=3";
+    pos = 71;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an integer between 0 and 255.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=4";
+    pos = 72;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an integer between −32,768 and 32,767.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=5";
+    pos = 73;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an integer between 0 and 65535.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=6";
+    pos = 74;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an integer between −2,147,483,648  and 2,147,483,647.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=7";
+    pos = 75;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an integer between 0 and 4,294,967,295.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=8";
+    pos = 76;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an integer between −9,223,372,036,854,775,808 and 9,223,372,036,854,775,807.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=9";
+    pos = 77;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an integer between 0 and 18,446,744,073,709,551,615.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=10";
+    pos = 78;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an IEEE 754-1985 single precision floating point number.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=11";
+    pos = 79;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an IEEE 754-1985 double precision floating point number.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=12";
+    pos = 80;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is a sequence of printable Unicode characters.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=13";
+    pos = 81;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is a Gregorian calender date and time.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=14";
+    pos = 82;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is a 128-bit globally unique identifier.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=15";
+    pos = 83;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is a sequence of bytes.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=16";
+    pos = 84;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an XML element.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=17";
+    pos = 85;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an identifier for a node within a Server address space.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=18";
+    pos = 86;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an absolute identifier for a node.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=19";
+    pos = 87;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is a code representing the outcome of an operation by a Server.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=20";
+    pos = 88;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is a name qualified by a namespace.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=21";
+    pos = 89;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is human readable Unicode text with a locale identifier.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=22";
+    pos = 90;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is any type of structure that can be described with a data encoding.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=23";
+    pos = 91;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is a structure containing a value, a status code and timestamps.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=25";
+    pos = 92;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is a structure containing diagnostics associated with a StatusCode.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=30";
+    pos = 93;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a value that is an image encoded as a string of bytes.", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=121";
+    pos = 94;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Describes a 128-bit decimal value.", "");
             printf("\n");
         
     }
@@ -9506,6 +11154,502 @@ void test_DisplayName(){
         
             printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
             compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "TK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=24";
+    pos = 64;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "BaseDataType", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=26";
+    pos = 65;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Number", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=27";
+    pos = 66;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Integer", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=28";
+    pos = 67;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "UInteger", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=29";
+    pos = 68;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Enumeration", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1";
+    pos = 69;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Boolean", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=2";
+    pos = 70;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "SByte", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=3";
+    pos = 71;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Byte", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=4";
+    pos = 72;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Int16", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=5";
+    pos = 73;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "UInt16", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=6";
+    pos = 74;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Int32", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=7";
+    pos = 75;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "UInt32", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=8";
+    pos = 76;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Int64", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=9";
+    pos = 77;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "UInt64", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=10";
+    pos = 78;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Float", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=11";
+    pos = 79;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Double", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=12";
+    pos = 80;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "String", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=13";
+    pos = 81;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "DateTime", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=14";
+    pos = 82;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Guid", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=15";
+    pos = 83;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "ByteString", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=16";
+    pos = 84;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "XmlElement", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=17";
+    pos = 85;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "NodeId", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=18";
+    pos = 86;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "ExpandedNodeId", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=19";
+    pos = 87;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "StatusCode", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=20";
+    pos = 88;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "QualifiedName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=21";
+    pos = 89;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "LocalizedText", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=22";
+    pos = 90;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Structure", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=23";
+    pos = 91;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "DataValue", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=25";
+    pos = 92;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "DiagnosticInfo", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=30";
+    pos = 93;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Image", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=121";
+    pos = 94;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Decimal128", "");
             printf("\n");
         
     }

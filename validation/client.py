@@ -31,23 +31,23 @@ if __name__=='__main__':
     client = Client(sUri)
 
     try:
-      # test secure connexions
-      safety_secure_channels_test(client)
-      #client.connect()
-      print('Connected')
+        # test secure connexions
+        safety_secure_channels_test(client)
+        #client.connect()
+        print('Connected')
 
-      endPoints = client.get_endpoints()
-      #print('endPoints:', endPoints)
+        endPoints = client.get_endpoints()
+        #print('endPoints:', endPoints)
 
-      # Read tests
-      attribute_read_tests(client)
+        # Read tests
+        attribute_read_tests(client)
 
-      # write tests
-      attribute_write_values_tests(client)
+        # write tests
+        attribute_write_values_tests(client)
 
     finally:
-      client.disconnect()
-      print('Disconnected')       
+        client.disconnect()
+        print('Disconnected')
 
     # browse tests
 #    n1 = client.get_node("ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM")

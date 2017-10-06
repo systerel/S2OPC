@@ -37,8 +37,8 @@ Values of arrays at index 0 is non significant. Significant values start from in
 
 Fonction
 ========
-In order to encode a function, an array of values is created. Values are sorted according to node order. 
-Eitheir the value is a direct access, or otherwise, the value is computed for example 
+In order to encode a function, an array of values is created. Values are sorted according to node order.
+Eitheir the value is a direct access, or otherwise, the value is computed for example
 in case of the function NodeId where the value is a pointer on the corresponding variable.
 
 Relation
@@ -252,9 +252,10 @@ SOPC_AddressSpace addressSpace = {
     <xsl:variable name="bn" select="."/>
     <xsl:variable name="pos" select="position()"/>
     <xsl:variable name="NodeId" select="../@NodeId"/>
-    <xsl:analyze-string select="$bn" regex="(\d*):(.*)">
+    <xsl:analyze-string select="$bn" regex="(\d+:)?(.+)">
         <xsl:matching-substring>
-${print_value(',{%s,{%s,1,toSOPC_String("%s")}}/* %s*/',"regex-group(1)", "string-length(regex-group(2))", "regex-group(2)", "$NodeId")}<xsl:text>
+        <xsl:variable name="nsIndex" select="if (regex-group(1)) then substring-before(regex-group(1),':') else 0"/>
+${print_value(',{%s,{%s,1,toSOPC_String("%s")}}/* %s*/',"$nsIndex", "string-length(regex-group(2))", "regex-group(2)", "$NodeId")}<xsl:text>
 </xsl:text>
         </xsl:matching-substring>
         <xsl:non-matching-substring>

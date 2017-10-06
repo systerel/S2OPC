@@ -30,5 +30,5 @@ Initial_values_list = [-1000,1000,2.0,"String:INGOPCS","ByteString:INGOPCS".enco
 # chaine aléatoire de 30 caractères
 random_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(random.randint(0,30)))
 
-New_values_list = [random.randint(-2**63+1,2**63+1),random.randint(0,2**32-1), random.uniform(-2**1022,2**1023),"String:{}".format(random_string),"ByteString:{}".format(random_string).encode(),XmlElement(u"XmlElement:{}".format(random_string))]
+New_values_list = [random.randint(-2**63,2**63-1),random.randint(0,2**32-1), random.uniform(-2**1022,2**1023),"String:{}".format(random_string),"ByteString:{}".format(random_string).encode(),XmlElement(u"XmlElement:{}".format(random_string))]
 
