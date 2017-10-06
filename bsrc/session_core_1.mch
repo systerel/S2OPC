@@ -16,7 +16,7 @@
  */
 
 MACHINE
-    session_core_1_bs
+    session_core_1
 
 SEES
     constants,
@@ -38,13 +38,16 @@ DEFINITIONS
     a_NonceClient;
 
     d_typing ==
+    /* TODO FBA a implémenter en B */
     s_session <: t_session &
-    a_state : s_session --> t_sessionState & // a session shall be associated to a state
-    a_channel : s_session +-> t_channel & // a session may be associated to a valid channel
-    a_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)
-    a_client_token : s_session +-> t_session_token & // a client session has an associated session token once create response received
-    a_server_token : t_session_token >+> s_session & // a server session has a unique authentication token in server once create response sent
-    a_user : s_session +-> t_user & // a session may be associated to a valid user
+    a_state : s_session --> t_sessionState & /* a session shall be associated to a state */
+    a_channel : s_session +-> t_channel & /* a session may be associated to a valid channel */
+    a_orphaned : s_session +-> t_channel_config_idx_i & /* a client session may be orphaned of a channel (precedently lost) */
+
+    /* TODO FBA à implémenter en C */
+    a_client_token : s_session +-> t_session_token & /* a client session has an associated session token once create response received */
+    a_server_token : t_session_token >+> s_session & /* a server session has a unique authentication token in server once create response sent */
+    a_user : s_session +-> t_user & /* a session may be associated to a valid user */
     /* The NonceServer negotiated for a session in CreateSession or ActivateSession */
     a_NonceServer : s_session +-> t_Nonce &
     /* The NonceClient is remembered by the client in Sess_Creating */
@@ -65,8 +68,7 @@ OPERATIONS
     PRE
         session_token : t_session_token_i
     THEN
-        IF session_token : t_session_token &
-            session_token : dom(a_server_token)
+        IF  session_token : dom(a_server_token)
         THEN
             session :(session : t_session_i & session = a_server_token(session_token))
         ELSE
@@ -81,8 +83,9 @@ OPERATIONS
         session : t_session &
         session : dom(a_client_token)
     THEN
-        // Guarantee only 1 session token by session provided by set_session_token PRE
-        session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
+        /* Guarantee only 1 session token by session provided by set_session_token PRE */
+        session_token :(session_token : t_session_token_i &
+                        session_token = a_client_token(session))
     END
     ;
 
@@ -110,7 +113,7 @@ OPERATIONS
     PRE
         token : t_session_token_i
     THEN
-        ret := bool(token : t_session_token & token : dom(a_server_token))
+        ret := bool(token : dom(a_server_token))
     END
     ;
 
@@ -133,20 +136,18 @@ OPERATIONS
     THEN
         s_session := s_session - {session} ||
         a_channel := {session} <<| a_channel ||
-        a_state := {session} <<| a_state ||
+        a_state := {session} <<| a_state || /* TODO FBA pas possible à implémenter car t_sessionState_i ou une valeur indet de t_sessionState non défini */
         a_user := {session} <<| a_user ||
         a_server_token := a_server_token |>> {session} ||
         a_client_token := {session} <<| a_client_token ||
         a_orphaned := {session} <<| a_orphaned
     END;
 
-    session <-- init_new_session (is_client) =
-    PRE
-        is_client : BOOL
-    THEN
+    p_session <-- init_new_session =
+    BEGIN
         IF s_session = t_session
         THEN
-            session := c_session_indet
+            p_session := c_session_indet
         ELSE
             ANY l_nsession WHERE
                 l_nsession : t_session_i &
@@ -155,7 +156,7 @@ OPERATIONS
             THEN
                 s_session := s_session \/ {l_nsession} ||
                 a_state (l_nsession) := e_session_init ||
-                session := l_nsession
+                p_session := l_nsession
             END
         END
     END
@@ -186,7 +187,8 @@ OPERATIONS
 
     ret <-- is_valid_session (session) =
     PRE
-        session : t_session_i
+        session : t_session_i &
+        session : t_session
     THEN
         ret :=  bool(session : s_session)
     END
@@ -209,7 +211,8 @@ OPERATIONS
         state /: {e_session_closed}
     THEN
         a_state (session) := state
-        // + notify  user app when session activated
+        /* + notify  user app when session activated */
+        /* TODO FBA dans un premier temps appeler une fct C */
     END
     ;
 
@@ -217,12 +220,12 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : s_session &
-        is_client : BOOL
+        is_client : BOOL /* TODO FBA à garder pour appeler du code C */
     THEN
-        a_channel := {session} <<| a_channel               || // If session had a channel, remove this relation
-        a_orphaned := {session} <<| a_orphaned             || // If session was orphaned, remove this relation
-        a_user := {session} <<| a_user                     || // If session had a user, remove this relation
-        a_server_token := a_server_token |>> {session}     || // If session had token, remove this relation
+        a_channel := {session} <<| a_channel           || /* If session had a channel, remove this relation */
+        a_orphaned := {session} <<| a_orphaned         || /* If session was orphaned, remove this relation */
+        a_user := {session} <<| a_user                 || /* If session had a user, remove this relation */
+        a_server_token := a_server_token |>> {session} || /* If session had token, remove this relation */
         a_client_token := {session} <<| a_client_token
     END
     ;
@@ -249,25 +252,20 @@ OPERATIONS
     ;
 
     // new_channel is channel on which connection is awaited to re-associate session
-    set_session_orphaned (session, lost_channel, channel_config_idx) =
+    set_session_orphaned (session, channel_config_idx) =
     PRE
         session : t_session_i &
-        session : s_session &
-        lost_channel : t_channel_i &
-        lost_channel : t_channel &
+        session : s_session   &
         channel_config_idx : t_channel_config_idx_i
     THEN
-        IF channel_config_idx : t_channel_config_idx
-        THEN
-            a_channel := a_channel |>> {lost_channel} ||
+        a_channel := {session} <<| a_channel ||
+        IF  channel_config_idx : t_channel_config_idx THEN
             a_orphaned(session) := channel_config_idx
-        ELSE
-            a_channel := a_channel |>> {lost_channel} // TODO: to be rechecked: is it ok ?
         END
     END
     ;
 
-    ret <-- is_valid_user (user) =
+    ret <-- is_valid_user (user) = /* TODO FBA devrait être déplacée dans constants.mch VMO: pour l'instant laisser là pour le C */
     PRE
         user : t_user_i
     THEN
@@ -323,12 +321,12 @@ OPERATIONS
             (valid = TRUE
              =>
              signature : t_SignatureData &
-             a_NonceServer(p_session) : t_Nonce)
-            &
+             a_NonceServer(p_session) : t_Nonce &
+             {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0) &
             (valid = FALSE
              =>
              a_NonceServer = a_NonceServer$0)
-        )
+         )
     END
     ;
     
@@ -387,15 +385,20 @@ OPERATIONS
             nonce_needed := FALSE
         ELSE
             nonce_needed := TRUE ||
-            valid :: BOOL        ||
-            IF valid = TRUE THEN
-                a_NonceClient
-                :(
-                    a_NonceClient : s_session +-> t_Nonce &
-                    {p_session} <<| a_NonceClient = {p_session} <<| a_NonceClient$0 &
-                    a_NonceClient(p_session) : t_Nonce
-                )
-            END
+            valid,
+            a_NonceClient
+            :(
+                valid : BOOL &
+                a_NonceClient : s_session +-> t_Nonce &
+
+                (valid = TRUE
+                 =>
+                 {p_session} <<| a_NonceClient = {p_session} <<| a_NonceClient$0 &
+                 a_NonceClient(p_session) : t_Nonce) &
+                (valid = FALSE
+                 =>
+                 a_NonceClient = a_NonceClient$0)
+             )
         END
     END
     ;
@@ -450,25 +453,6 @@ OPERATIONS
     END
     ;
     
-    valid <-- client_activate_session_resp_check(p_session, p_channel_config_idx, p_resp_msg) =
-    PRE
-        p_session : t_session_i &
-        p_session : s_session &
-        p_channel_config_idx : t_channel_config_idx_i &
-        p_channel_config_idx : t_channel_config_idx &
-        p_resp_msg : t_msg_i &
-        p_resp_msg = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_activate_resp
-    THEN
-        CHOICE
-            valid := TRUE
-        OR
-            valid := FALSE
-        END
-    END
-    ;
-    
     valid <-- server_activate_session_check_crypto(session, channel, channel_config_idx, activate_req_msg) =
     PRE
         session : t_session_i &
@@ -495,49 +479,6 @@ OPERATIONS
         OR
             valid := FALSE
         END
-    END;
-    
-    client_close_session_req_msg (req_msg) =
-    PRE
-        req_msg : t_msg_i &
-        req_msg = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_close_req
-    THEN
-        skip
-    END;
-    
-    client_close_session_resp_msg (resp_msg) =
-    PRE
-        resp_msg : t_msg_i &
-        resp_msg = c_msg_out &
-        c_msg_out : t_msg &
-        a_msg_out_type = e_msg_session_close_resp
-    THEN
-        skip
-    END;
-    
-    server_close_session_check_req (req_msg, resp_msg) =
-    PRE 
-        req_msg : t_msg_i &
-        req_msg = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_close_req &
-        resp_msg : t_msg_i &
-        resp_msg = c_msg_out &
-        c_msg_out : t_msg &
-        a_msg_out_type = e_msg_session_close_resp
-    THEN
-        /* TODO: return delete subscription boolean value for subscription service */
-        skip
-    END;
-    
-    session_do_nothing (session) =
-    PRE
-        session : t_session_i &
-        session : s_session
-    THEN
-        skip
     END
-    
+
 END

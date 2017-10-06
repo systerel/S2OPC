@@ -78,6 +78,7 @@ ABSTRACT_CONSTANTS
     t_channel,
     cast_t_channel,    
     t_session,
+    cast_t_session,    
     t_session_token,
     t_user,
     t_Nonce,
@@ -126,6 +127,8 @@ PROPERTIES
     t_session <: t_session_i &
     c_session_indet : t_session_i &
     c_session_indet /: t_session &
+    cast_t_session : NAT +-> t_session_i &
+    cast_t_session : perm(t_session) &
 
     t_session_token <: t_session_token_i &
     c_session_token_indet : t_session_token_i &
@@ -203,6 +206,21 @@ OPERATIONS
     END
     ;
     
+    p_card_session <-- get_card_t_session =
+    BEGIN
+        p_card_session := card(t_session)
+    END
+    ;
+
+    p_session <-- get_cast_t_session(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_session)
+    THEN
+        p_session := cast_t_session(p_ind)
+    END
+    ;
+
     p_res <-- is_t_channel(p_channel) =
     PRE
         p_channel : t_channel_i

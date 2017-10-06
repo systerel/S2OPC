@@ -28,7 +28,7 @@ SEES
     request_handle_bs
 
 IMPORTS
-    session_core_1_bs,
+    session_core_1,
     session_core_orphaned_it_bs,
     session_core_channel_lost_it_bs
 
@@ -103,7 +103,7 @@ OPERATIONS
     /* END OF LOCAL OPERATIONS */
     nsession <-- client_init_session_sm =
     BEGIN
-        nsession <-- init_new_session (TRUE)
+        nsession <-- init_new_session
     END;
 
     valid <-- client_create_session_req_sm (session, channel, create_req_msg) =
@@ -143,7 +143,7 @@ OPERATIONS
         l_secpol
     IN
         service_ret := e_sc_bad_out_of_memory;
-        l_nsession <-- init_new_session (FALSE);
+        l_nsession <-- init_new_session;
         l_valid_session <-- is_valid_session (l_nsession);
         IF l_valid_session = TRUE THEN
             create_session(l_nsession, channel, e_session_created);
@@ -386,7 +386,7 @@ OPERATIONS
                 IF l_state = e_session_userActivated & channel_config_idx /= c_channel_config_idx_indet
                 THEN
                     // Active sessions set to orphaned and channel config idx associated
-                    set_session_orphaned (l_session, lost_channel, channel_config_idx);
+                    set_session_orphaned (l_session, channel_config_idx);
                     set_session_state (l_session, e_session_scOrphaned)
                 ELSE
                     // Inactive sessions or all orphaned sessions (if no new channel can be associated)
@@ -419,7 +419,7 @@ OPERATIONS
                 l_state <-- get_session_state (l_session);
                 IF l_state = e_session_userActivated
                 THEN
-                    set_session_orphaned (l_session, channel, c_channel_config_idx_indet);
+                    set_session_orphaned (l_session, c_channel_config_idx_indet);
                     set_session_state (l_session, e_session_scOrphaned)
                 ELSE
                     set_session_state_closed (l_session, FALSE)

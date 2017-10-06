@@ -1,0 +1,169 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION
+    session_core_1_i
+
+REFINES
+    session_core_1
+
+SEES
+    constants,
+    request_handle_bs,
+    message_out_bs,
+    message_in_bs,
+    channel_mgr
+
+IMPORTS
+    session_core_1_it,
+    session_core_2,
+    session_core_bs
+
+PROMOTES
+    server_get_session_from_token,
+    client_get_token_from_session,
+    server_get_fresh_session_token,
+    server_is_valid_session_token,
+    client_set_session_token,
+    is_valid_session,
+    get_session_state,
+    set_session_channel,
+    get_session_channel,
+    is_valid_user, /* TODO FBA devrait être déplacée dans constants.mch VMO: pour l'instant laisser là pour le C */
+    set_session_user,
+    get_session_user,
+    server_create_session_req_do_crypto,
+    client_activate_session_req_do_crypto,
+    get_NonceServer,
+    client_create_session_req_do_crypto,
+    get_NonceClient,
+    drop_NonceClient,
+    client_create_session_check_crypto,
+    server_activate_session_check_crypto
+
+LOCAL_OPERATIONS
+
+    l_set_session_state(p_session, p_state) =
+    PRE
+        p_session : t_session_i &
+        p_session : s_session &
+        p_state : t_sessionState &
+        p_state /: {e_session_closed}
+    THEN
+        a_state(p_session) := p_state
+    END
+
+OPERATIONS
+   
+    /* Local operations */
+
+    l_set_session_state(p_session, p_state) =
+    BEGIN
+        set_session_state_1(p_session, p_state);
+        notify_set_session_state(p_session, p_state)
+    END
+    ;
+
+
+    /* Global operations */
+
+    delete_session (session) =
+    BEGIN
+        remove_session(session);
+        reset_session_channel(session);
+        l_set_session_state(session, e_session_closed);
+        reset_session_orphaned(session);
+        delete_session_token(session)
+    END;
+
+    p_session <-- init_new_session =
+    VAR
+        l_is_session,
+        l_continue
+    IN
+        p_session := c_session_indet;
+        l_is_session := TRUE;
+        l_continue <-- init_iter_session;
+        WHILE
+            l_continue   = TRUE &
+            l_is_session = TRUE
+        DO
+            l_continue, p_session <-- continue_iter_session;
+            l_is_session <-- is_valid_session(p_session)
+        INVARIANT
+            sessions_to_iterate <: t_session &
+            sessions_iterated   <: t_session &
+            sessions_to_iterate /\ sessions_iterated = {} &
+            sessions_to_iterate \/ sessions_iterated = t_session &
+            l_is_session = bool(p_session : s_session) &
+            (l_is_session = TRUE
+             =>
+             sessions_iterated <: s_session) &
+            (l_is_session = FALSE
+             =>
+             p_session /: s_session)
+        VARIANT
+            card(sessions_to_iterate)
+        END;
+        IF  l_is_session = TRUE THEN
+            p_session := c_session_indet
+        ELSE
+            add_session(p_session);
+            l_set_session_state(p_session, e_session_init)
+        END
+    END
+    ;
+
+    create_session (session, channel, state) =
+    BEGIN
+        set_session_channel(session, channel);
+        l_set_session_state(session, state)
+    END
+    ;
+
+    create_session_failure (session) =
+    BEGIN
+        reset_session_channel(session);
+        l_set_session_state(session, e_session_init)
+    END;
+
+    set_session_state (session, state) =
+    BEGIN
+        l_set_session_state (session, state)
+    END
+    ;
+
+   set_session_state_closed (session, is_client) =
+    BEGIN
+        reset_session_channel(session);
+        reset_session_orphaned(session);
+        close_session_token(session, is_client)
+    END
+    ;
+
+    set_session_orphaned (session, channel_config_idx) =
+    VAR
+        l_bool
+    IN
+        reset_session_channel(session);
+        l_bool <-- is_t_channel_config_idx(channel_config_idx);
+        IF  l_bool = TRUE THEN
+            set_session_orphaned_1(session, channel_config_idx)
+        END
+    END
+
+END

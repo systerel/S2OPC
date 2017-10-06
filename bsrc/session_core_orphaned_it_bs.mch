@@ -20,7 +20,7 @@ MACHINE
     
 SEES
     constants,
-    session_core_1_bs
+    session_core_1
     
 ABSTRACT_VARIABLES
     av_sessions_to_iterate,

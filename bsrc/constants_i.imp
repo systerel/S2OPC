@@ -54,6 +54,8 @@ PROMOTES
     is_t_channel_config_idx,
     is_t_endpoint_config_idx,
     is_t_channel,
+    get_card_t_session,
+    get_cast_t_session,
     get_card_t_channel,
     get_cast_t_channel,
     get_Is_SubType,
