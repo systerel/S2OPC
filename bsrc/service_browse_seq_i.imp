@@ -38,13 +38,11 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    p_continue_bri, p_bri_new <-- fill_browse_response_ref(p_bvi, p_bri, p_ref, p_dir,
-                                                           p_isreftype, p_ref_type, p_inc_subtype) =
+    p_continue_bri <-- fill_browse_response_ref(p_bvi, p_ref, p_dir,
+                                                p_isreftype, p_ref_type, p_inc_subtype) =
     PRE
         p_bvi         : t_BrowseValue_i     &
         p_bvi         : t_BrowseValue       &
-        p_bri         : t_BrowseResult_i    &
-        p_bri         : t_BrowseResult      &
         p_ref         : t_Reference_i       &
         p_ref         : t_Reference         &
         p_dir         : t_BrowseDirection_i &
@@ -54,12 +52,7 @@ LOCAL_OPERATIONS
         p_ref_type    : t_NodeId            &
         p_inc_subtype : BOOL
     THEN
-        p_continue_bri,
-        p_bri_new
-        :(
-            p_continue_bri : BOOL &
-            p_bri_new      : t_BrowseResult_i
-         )
+        p_continue_bri :: BOOL
     END
     ;
 
@@ -95,7 +88,6 @@ OPERATIONS
     /* When the target node fulfills all the filtering conditions, then fill its data and iterate
        on the browse result index.
        p_bvi          : browse value index of the starting node
-       p_bri          : browse response index
        p_ref          : reference
        p_dir          : direction(s) of references to filter
        p_isreftype    : indicates whether the reference type should be filtered. The following 2
@@ -105,17 +97,16 @@ OPERATIONS
                         type is filtered
        p_continue_bri : indicates whether the iteration should continue (it should stop if the
                         maximum number of browse response index has just been filled)
-       p_bri_new      : new value of the browse response index
     */
-    p_continue_bri, p_bri_new <-- fill_browse_response_ref(p_bvi, p_bri, p_ref, p_dir,
-                                                           p_isreftype, p_ref_type, p_inc_subtype) =
+    p_continue_bri <-- fill_browse_response_ref(p_bvi, p_ref, p_dir,
+                                                p_isreftype, p_ref_type, p_inc_subtype) =
     VAR
         l_RefType,
         l_TargetNode,
         l_IsForward,
-        l_res
+        l_res,
+        l_bri
     IN
-        p_bri_new      := p_bri;
         p_continue_bri := TRUE;
         l_RefType    <-- get_Reference_ReferenceType(p_ref);
         l_TargetNode <-- get_Reference_TargetNode(p_ref);
@@ -124,9 +115,10 @@ OPERATIONS
         IF  l_res = TRUE THEN
             l_res <-- Is_RefTypes_Compatible(p_isreftype, p_ref_type, p_inc_subtype, l_RefType);
             IF  l_res = TRUE THEN
-                l_res <-- copy_target_node_browse_result(p_bvi, p_bri, l_RefType, l_TargetNode, l_IsForward);
-                IF  l_res = TRUE THEN
-                    p_continue_bri, p_bri_new <-- continue_iter_browse_result
+                p_continue_bri, l_bri <-- continue_iter_browse_result;
+                l_res <-- copy_target_node_browse_result(p_bvi, l_bri, l_RefType, l_TargetNode, l_IsForward);
+                IF  l_res = FALSE THEN
+                    skip /* TODO report the malloc failure that occured during the copy */
                 END
             END
         END
@@ -148,16 +140,13 @@ OPERATIONS
     fill_browse_response(p_bvi, p_nb_bri, p_src_node, p_dir, p_isreftype, p_reftype, p_inc_subtype) =
     VAR
         l_continue_bri,
-        l_bri,
-        l_bri_new,
         l_continue_ref,
         l_ref
     IN
         /* Initialization of the iteration on the browse result */
         l_continue_bri <-- init_iter_browse_result(p_nb_bri);
         IF  l_continue_bri = TRUE THEN
-            /* Setting the first browse result element to store data */
-            l_continue_bri, l_bri <-- continue_iter_browse_result;
+            l_continue_bri := TRUE;
 
             /* Loop on the references starting from the source node */
             l_continue_ref <-- init_iter_reference(p_src_node);
@@ -168,9 +157,8 @@ OPERATIONS
                 l_continue_ref, l_ref <-- continue_iter_reference;
                 /* When the target node fulfills all the filtering conditions, then
                    fill its data and iterate on the browse result index */
-                l_continue_bri, l_bri_new <-- fill_browse_response_ref(p_bvi, l_bri, l_ref, p_dir,
-                                                                       p_isreftype, p_reftype, p_inc_subtype);
-                l_bri := l_bri_new
+                l_continue_bri <-- fill_browse_response_ref(p_bvi, l_ref, p_dir,
+                                                            p_isreftype, p_reftype, p_inc_subtype)
             INVARIANT
                 0=0
             VARIANT

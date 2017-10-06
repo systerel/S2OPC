@@ -86,9 +86,8 @@ OPERATIONS
     p_continue, p_bri <-- continue_iter_browse_result =
     BEGIN
         p_bri <-- get_cast_t_BrowseResult(bri_i);
-        /* TODO: why is this iterator inversed? */
-        p_continue := bool(bri_i <= nb_bri);
-        bri_i := bri_i + 1
+        bri_i := bri_i + 1;
+        p_continue := bool(bri_i <= nb_bri)
     END
     ;
 
