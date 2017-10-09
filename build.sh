@@ -3,11 +3,9 @@
 #
 # Options:
 # - Variable CROSS_COMPILE_MINGW set activate mingw cross compilation
-# - Variable NO_BMODEL_GEN set deactivate B model generation
 #
 # Steps:
-# - generate sources files from B model
-# - generate sources files for examples address space for tests
+# - configure build with cmake
 # - build the library and tests
 # - prepare test execution
 
@@ -15,64 +13,44 @@ BUILD_DIR=build
 EXEC_DIR=bin
 CERT_DIR=tests/data/cert
 
-if [[ $NO_BMODEL_GEN ]]; then
-    echo "No generation of C source files from B model"
-    if ! [[ -d src/services/B_genC/ ]]; then
-        echo "Error: generated are not present"
-        exit 1
-    fi
-else
-    echo "Generate C sources files from B model"
-    ./.translateBmodel.sh 1> /dev/null || exit 1
-    if [[ $? != 0 ]]; then
-        echo "Error: generating C source files from B model"
-        exit 1
-    fi
-fi
+echo "Build log" > build.log
 
-echo "Generate address space C files for tests"
-./.generateTestAddSpaces.sh 1> /dev/null || exit 1
-if [[ $? != 0 ]]; then
-    echo "Error: generating address spaces for tests"
-    exit 1
-fi
-
-echo "Build the library and tests with CMake"
-if [ -d "$BUILD_DIR" ]; then
-    echo "- CMake already configured"
+echo "Build the library and tests with CMake" | tee -a build.log
+if [ -f "$BUILD_DIR/CMakeCache.txt" ]; then
+    echo "- CMake already configured" | tee -a build.log
     cd $BUILD_DIR || exit 1
 else
-    echo "- Generate ./build directory"
+    echo "- Generate ./build directory" | tee -a build.log
     mkdir $BUILD_DIR || exit 1
-    echo "- Run CMake"
+    echo "- Run CMake" | tee -a build.log
     cd  $BUILD_DIR || exit 1
     if [[ $CROSS_COMPILE_MINGW ]]; then
-        cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain-mingw32-w64.cmake ..
+        cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain-mingw32-w64.cmake .. 1>> build.log
     else
-        cmake ..
+        cmake .. 1>> build.log
     fi
 fi
 if [[ $? != 0 ]]; then
-    echo "Error: build configuration failed"
+    echo "Error: build configuration failed" | tee -a build.log
     exit 1
 fi
 
-echo "- Run make"
-make 1> /dev/null
+echo "- Run make" | tee -a build.log
+make 1>> build.log
 if [[ $? != 0 ]]; then
-    echo "Error: build failed"
+    echo "Error: build failed" | tee -a build.log
     exit 1
 else
-    echo "Built library and tests with success"
+    echo "Built library and tests with success" | tee -a build.log
 fi
 cd - 1> /dev/null || exit 1
 
-echo "Prepare tests execution"
-echo "- Create $EXEC_DIR/ directory"
+echo "Prepare tests execution" | tee -a build.log
+echo "- Create $EXEC_DIR/ directory" | tee -a build.log
 \rm -fr $EXEC_DIR || exit 1
 mkdir $EXEC_DIR || exit 1
 
-echo "- Copy test binaries in $EXEC_DIR/ "
+echo "- Copy test binaries in $EXEC_DIR/ " | tee -a build.log
 for file in build/*
 do
     if [[ -f "$file" ]]
@@ -84,7 +62,7 @@ do
     fi
 done
 
-echo "- Copy test certificates in build directory"
+echo "- Copy test certificates in build directory" | tee -a build.log
 mkdir -p $EXEC_DIR/revoked $EXEC_DIR/untrusted $EXEC_DIR/trusted \
 $EXEC_DIR/client_private $EXEC_DIR/server_private \
 $EXEC_DIR/client_public $EXEC_DIR/server_public || exit 1
@@ -96,8 +74,6 @@ cp $CERT_DIR/server.key $EXEC_DIR/server_private || exit 1
 cp $CERT_DIR/server.der $EXEC_DIR/server_public || exit 1
 
 if [[ $? == 0 ]]; then
-    echo "Terminated with SUCCESS"
+    echo "Terminated with SUCCESS" | tee -a build.log
     exit 0
-else
-    exit 1
 fi
