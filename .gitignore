@@ -11,3 +11,5 @@ depand/
 bin/
 __pycache__/
 *.log
+address_space_generation/genc/
+src/services/B_genC/

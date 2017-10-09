@@ -43,35 +43,6 @@ if [[ $? != 0 ]]; then
 else
     echo "Built library and tests with success" | tee -a build.log
 fi
-cd - 1> /dev/null || exit 1
-
-echo "Prepare tests execution" | tee -a build.log
-echo "- Create $EXEC_DIR/ directory" | tee -a build.log
-\rm -fr $EXEC_DIR || exit 1
-mkdir $EXEC_DIR || exit 1
-
-echo "- Copy test binaries in $EXEC_DIR/ " | tee -a build.log
-for file in build/*
-do
-    if [[ -f "$file" ]]
-    then
-        if [[ -x "$file" ]]
-        then
-            cp "$file" $EXEC_DIR || exit 1
-        fi
-    fi
-done
-
-echo "- Copy test certificates in build directory" | tee -a build.log
-mkdir -p $EXEC_DIR/revoked $EXEC_DIR/untrusted $EXEC_DIR/trusted \
-$EXEC_DIR/client_private $EXEC_DIR/server_private \
-$EXEC_DIR/client_public $EXEC_DIR/server_public || exit 1
-cp $CERT_DIR/cacert.der $EXEC_DIR/trusted || exit 1
-cp $CERT_DIR/client.key $EXEC_DIR/client_private || exit 1
-cp $CERT_DIR/client.key $EXEC_DIR/client_private/client.pem || exit 1
-cp $CERT_DIR/client.der $EXEC_DIR/client_public || exit 1
-cp $CERT_DIR/server.key $EXEC_DIR/server_private || exit 1
-cp $CERT_DIR/server.der $EXEC_DIR/server_public || exit 1
 
 if [[ $? == 0 ]]; then
     echo "Terminated with SUCCESS" | tee -a build.log

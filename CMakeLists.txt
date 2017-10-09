@@ -4,6 +4,9 @@ project (INGOPCS)
 # Extern target: mbedtls
 add_subdirectory(libraries/mbedtls-2.3.0)
 
+# Define runtime output directory
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+
 # Compiler options (C99 compliant)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -pedantic")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Wextra -O0")
@@ -104,6 +107,23 @@ target_link_libraries(toolkit_test_server PRIVATE ingopcs)
 target_include_directories(toolkit_test_server PRIVATE "address_space_generation/"
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
+
+## COPY ALL CERTIFICATES TO BIN/ DIRECTORY
+add_custom_command(
+    TARGET toolkit_test_server POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/revoked
+    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/untrusted
+    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/trusted
+    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/client_private
+    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/server_private
+    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/client_public
+    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/server_public
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/cacert.der ${CMAKE_SOURCE_DIR}/bin/trusted/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client.key ${CMAKE_SOURCE_DIR}/bin/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client.key ${CMAKE_SOURCE_DIR}/bin/client_private/client.pem
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client.der ${CMAKE_SOURCE_DIR}/bin/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server.key ${CMAKE_SOURCE_DIR}/bin/server_private/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server.der ${CMAKE_SOURCE_DIR}/bin/server_public/)
 
 # Read service test
 add_executable(toolkit_test_read "tests/services/toolkit_test_read.c"
