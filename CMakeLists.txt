@@ -1,17 +1,16 @@
 cmake_minimum_required (VERSION 2.8)
 project (INGOPCS)
 
-option(wrapper_reception_thread "Activate a global reception thread" OFF)
-
 # Extern target: mbedtls
 add_subdirectory(libraries/mbedtls-2.3.0)
 
-# Compiler options
-# C99 compliant
+# Compiler options (C99 compliant)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -pedantic")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Wextra -O0")
 
-# Core library
+# Source files of INGOPCS library
+
+# Define platform dependent source files
 if(UNIX)
   set(PLATFORM_DIR linux)
 elseif(WIN32)
@@ -22,6 +21,7 @@ endif()
 
 file(GLOB PLATFORM_SRCS "src/helpers_platform_dep/${PLATFORM_DIR}/*.c")
 
+# Set specialized compilation flags for platform dependent source files
 if(UNIX)
   # add POSIX support
   set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_FLAGS "-D_XOPEN_SOURCE=600")
@@ -32,6 +32,7 @@ else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
+# Define non-platform dependent source files
 file(GLOB_RECURSE INGOPCS_SRCS
     "src/configuration/*.c"
     "src/helpers/*.c"
@@ -42,8 +43,10 @@ file(GLOB_RECURSE INGOPCS_SRCS
     "src/services/*.c"
 )
 
+# Define INGOPCS static library
 add_library(ingopcs STATIC ${PLATFORM_SRCS} ${INGOPCS_SRCS})
 
+# Define INGOPCS library includes
 set(INGOPCS_PUBLIC_INCLUDES
     "src/configuration"
     "src/helpers"
@@ -60,18 +63,21 @@ set(INGOPCS_PRIVATE_INCLUDES
     "src/services/BtoC_itf"
     "src/services/B_genC"
     "libraries/mbedtls-2.3.0/include" # For some reason, the CMakeLists from mbedtls does not export that
-)
+) 
 target_include_directories(ingopcs BEFORE
     PUBLIC  ${INGOPCS_PUBLIC_INCLUDES}
     PRIVATE ${INGOPCS_PRIVATE_INCLUDES}
 )
+
+# Define INGOPCS library dependencies
 target_link_libraries(ingopcs PUBLIC mbedtls)
 target_link_libraries(ingopcs PUBLIC pthread)
 target_link_libraries(ingopcs PUBLIC m)
 
-# Toolkit tests
 
-# Toolkit helpers unit tests
+# INGOPCS tests ################################################################################
+
+# Helpers unit tests
 if (NOT CMAKE_CROSSCOMPILING)
     file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
     add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
@@ -79,7 +85,7 @@ if (NOT CMAKE_CROSSCOMPILING)
     target_link_libraries(check_helpers PRIVATE ingopcs check)
 endif()
 
-# Toolkit Client
+# Client test
 add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/wrap_read.c"
                                    "tests/services/testlib_write.c"
@@ -91,7 +97,7 @@ target_include_directories(toolkit_test_client PRIVATE "address_space_generation
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
-# Toolkit Server
+# Server test
 add_executable(toolkit_test_server "tests/services/toolkit_test_server.c"
                                    "address_space_generation/genc/add.c")
 target_link_libraries(toolkit_test_server PRIVATE ingopcs)
@@ -99,7 +105,7 @@ target_include_directories(toolkit_test_server PRIVATE "address_space_generation
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
-# Tookit read service
+# Read service test
 add_executable(toolkit_test_read "tests/services/toolkit_test_read.c"
                                  "tests/services/wrap_read.c"
                                  "tests/services/testlib_read_response.c"
@@ -109,7 +115,7 @@ target_include_directories(toolkit_test_read PRIVATE "address_space_generation/"
                                                      ${INGOPCS_PUBLIC_INCLUDES} 
                                                      ${INGOPCS_PRIVATE_INCLUDES})
 
-# Toolkit write service
+# Write service test
 add_executable(toolkit_test_write "tests/services/toolkit_test_write.c"
                                   "tests/services/testlib_write.c"
                                   "address_space_generation/genc/test_read_write_addspace.c")
