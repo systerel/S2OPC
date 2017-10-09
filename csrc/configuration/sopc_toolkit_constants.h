@@ -18,6 +18,9 @@
 #ifndef SOPC_TOOLKIT_CONSTANTS_H_
 #define SOPC_TOOLKIT_CONSTANTS_H_
 
+/* Check IEEE-754 compliance */
+#include "ieee_check.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
