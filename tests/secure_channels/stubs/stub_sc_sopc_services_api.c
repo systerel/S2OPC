@@ -16,7 +16,7 @@
  */
 
 #include "stub_sc_sopc_services_api.h"
-#include "sopc_services_events.h"
+#include "sopc_services_api.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -27,9 +27,7 @@ SOPC_AsyncQueue* servicesEvents = NULL;
 void SOPC_Services_EnqueueEvent(SOPC_Services_Event scEvent,
                                 uint32_t            id,
                                 void*               params,
-                                uint32_t            auxParam,
-                                const char*         reason){
-    (void) reason;
+                                uint32_t            auxParam){
     SOPC_StubSC_ServicesEventParams* scParams = calloc(1, sizeof(SOPC_StubSC_ServicesEventParams));
     assert(scParams != NULL && servicesEvents != NULL);
     scParams->event = scEvent;

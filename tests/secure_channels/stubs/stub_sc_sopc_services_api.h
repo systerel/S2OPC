@@ -19,7 +19,7 @@
 #define _STUBS_SC_SOPC_SERVICES_API_H_
 
 #include "sopc_async_queue.h"
-#include "sopc_services_events.h"
+#include "sopc_services_api.h"
 
 void SOPC_Services_Initialize();
 

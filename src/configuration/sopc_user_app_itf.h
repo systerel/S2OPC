@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_USER_APP_CONFIG_H_
-#define SOPC_USER_APP_CONFIG_H_
+#ifndef SOPC_USER_APP_ITF_H_
+#define SOPC_USER_APP_ITF_H_
 
 #include <stdbool.h>
 
@@ -63,15 +63,27 @@ typedef struct SOPC_Endpoint_Config{
 /* Client and Server communication events to be managed by applicative code*/
 typedef enum SOPC_App_Com_Event {
   /* Client application events */
-  SE_SESSION_ACTIVATION_FAILURE,
-  SE_ACTIVATED_SESSION,
-  SE_SESSION_REACTIVATING, /* automatic new SC or manual new user on same SC */
-  SE_RCV_SESSION_RESPONSE,
-  SE_CLOSED_SESSION,
+  SE_SESSION_ACTIVATION_FAILURE, /* id = session id
+                                    (auxParam = user index ?)
+                                 */
+  SE_ACTIVATED_SESSION,          /* id = session id
+                                 */
+  SE_SESSION_REACTIVATING,       /* automatic new SC or manual new user on same SC */
+                                 /* id = session id
+                                    (auxParam = user index ?)
+                                 */
+  SE_RCV_SESSION_RESPONSE,       /* (id = session id ?)
+                                    params = (OpcUa_<MessageStruct>*) OPC UA message payload structure
+                                    auxParam = status code
+                                 */
+  SE_CLOSED_SESSION,             /* id = session id
+                                 */
   //  SE_RCV_PUBLIC_RESPONSE, => discovery services
   
   /* Server application events */
-  SE_CLOSED_ENDPOINT,
+  SE_CLOSED_ENDPOINT,            /* id = endpoint configuration index,
+                                    auxParam = status code
+                                 */
 } SOPC_App_Com_Event;
 
 
@@ -134,15 +146,6 @@ typedef enum SOPC_App_AddSpace_LocalService_Result {
   AS_LOCAL_WRITE_RESULT,
 } SOPC_App_AddSpace_LocalService_Result;
 
-/// INTERNAL USE ONLY ////
-
-extern SOPC_EventDispatcherManager* applicationEventDispatcherMgr;
-
-typedef enum SOPC_App_EventType {
-  APP_COM_EVENT = 0x0,
-  APP_ADDRESS_SPACE_NOTIF = 0x01
-} SOPC_App_EventType;
-
  // TODO: define parameter for each type of event
 typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event,
                                void*              param,
@@ -159,17 +162,4 @@ typedef void SOPC_AddressSpaceLocalService_Fct(SOPC_App_AddSpace_LocalService_Re
                                                void*                                 param,
                                                SOPC_StatusCode                       status);
 
-void SOPC_ApplicationEventDispatcher(int32_t  appEvent, 
-                                     uint32_t eventType, 
-                                     void*    params, 
-                                     uint32_t auxParam);
-
-int32_t SOPC_AppEvent_ComEvent_Create(SOPC_App_Com_Event event);
-
-int32_t SOPC_AppEvent_AddSpaceEvent_Create(SOPC_App_AddSpace_Event event);
-
-SOPC_App_EventType SOPC_AppEvent_AppEventType_Get(int32_t iEvent);
-SOPC_App_Com_Event SOPC_AppEvent_ComEvent_Get(int32_t iEvent);
-SOPC_App_AddSpace_Event SOPC_AppEvent_AddSpaceEvent_Get(int32_t iEvent);
-
-#endif // SOPC_USER_APP_CONFIG_H_
+#endif // SOPC_USER_APP_ITF_H_

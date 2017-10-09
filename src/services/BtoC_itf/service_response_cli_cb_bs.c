@@ -19,7 +19,7 @@
 
 #include "sopc_user_app_itf.h"
 #include "sopc_toolkit_config.h"
-#include "sopc_services_events.h"
+#include "sopc_services_api.h"
 
 void service_response_cli_cb_bs__INITIALISATION(void)
 {
@@ -31,11 +31,9 @@ void service_response_cli_cb_bs__INITIALISATION(void)
 void service_response_cli_cb_bs__cli_service_response(
    const constants__t_msg_i service_response_cli_cb_bs__resp_msg,
    const constants__t_StatusCode_i service_response_cli_cb_bs__status){
-   SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
-                                        SOPC_AppEvent_ComEvent_Create(SE_RCV_SESSION_RESPONSE),
-                                        0, // unused
-                                        service_response_cli_cb_bs__resp_msg,
-                                        service_response_cli_cb_bs__status,
-                                        "Session service response");
+    SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_RCV_SESSION_RESPONSE),
+                                    0, // unused
+                                    service_response_cli_cb_bs__resp_msg,
+                                    service_response_cli_cb_bs__status);
 }
 

@@ -211,12 +211,10 @@ void session_core_1_bs__create_session_failure(const constants__t_session_i sess
   if(session_core_1_bs__session == unique_session.id && false != unique_session_created){
     unique_session_created = false;
     unique_session.session_core_1_bs__state = constants__e_session_init;
-    SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
-                                         SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
-                                         0, // TMP unused ? => session idx ?
-                                         NULL, // user ?
-                                         0, // TBD: status
-                                         "Session activation failure notification");
+    SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
+                                    session_core_1_bs__session, // session id
+                                    NULL, // user ?
+                                    0); // TBD: status
   }
 }
 
@@ -254,12 +252,10 @@ void session_core_1_bs__set_session_state(
          unique_session.cli_activated_session == false)
       {
         unique_session.cli_activated_session = true;
-        SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
-                                             SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
-                                             session_core_1_bs__session,
-                                             NULL,
-                                             0, // unused
-                                             "Session activated notification");
+        SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
+                                        session_core_1_bs__session,
+                                        NULL,
+                                        0); // unused
       }
     }else if(session_core_1_bs__state == constants__e_session_userActivating ||
              session_core_1_bs__state == constants__e_session_scActivating){
@@ -267,12 +263,10 @@ void session_core_1_bs__set_session_state(
          unique_session.cli_activated_session != false){
         // session is in re-activation step
         unique_session.cli_activated_session = false;
-        SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
-                                             SOPC_AppEvent_ComEvent_Create(SE_SESSION_REACTIVATING),
-                                             session_core_1_bs__session,
-                                             NULL,
-                                             0, // unused
-                                             "Session re-activation notification");
+        SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_REACTIVATING),
+                                        session_core_1_bs__session,
+                                        NULL,
+                                        0); // unused
       }
     }
   }
@@ -287,29 +281,23 @@ void session_core_1_bs__set_session_state_closed(const constants__t_session_i se
                                            &channel);
     if(channel == constants__c_channel_indet){
       // init session phase: no channel associated (mandatory client side)
-      SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
-                                           SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
-                                           0, // TMP unused ? => session idx ?
-                                           NULL, // user ?
-                                           0, // TBD: status
-                                           "Session activation failure notification");
+        SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
+                                        session_core_1_bs__session, // session id
+                                        NULL, // user ?
+                                        0); // TBD: status
     }else{
       if(session_core_1_bs__is_client != false){
         if(unique_session.cli_activated_session == false){
-          SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
-                                               SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
-                                               0, // TMP unused ? => session idx ?
-                                               NULL, // user ?
-                                               0, // TBD: status
-                                               "Session activation failure notification");
+            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
+                                            session_core_1_bs__session, // session id
+                                            NULL, // user ?
+                                            0); // TBD: status
         }else{
           // Activated session closing
-          SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
-                                               SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
-                                               session_core_1_bs__session, // session idx
-                                               NULL,
-                                               0, // TBD: status
-                                               "Session closed notification");
+            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
+                                            session_core_1_bs__session, // session id
+                                            NULL,
+                                            0); // TBD: status
         }
       }
     }

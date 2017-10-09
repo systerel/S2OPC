@@ -27,7 +27,7 @@
 
 #include "sopc_time.h"
 #include "stub_sc_sopc_services_api.h"
-#include "sopc_services_events.h"
+#include "sopc_services_api.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"

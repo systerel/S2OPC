@@ -34,7 +34,7 @@
 #include "util_b2c.h"
 
 #include "sopc_toolkit_config.h"
-#include "sopc_services_events.h"
+#include "sopc_services_api.h"
 #include "sopc_event_dispatcher_manager.h"
 
 static struct {
@@ -145,12 +145,10 @@ void channel_mgr_bs__channel_lost(
     unique_channel.endpointIdx = constants__c_endpoint_config_idx_indet;
     if(unique_channel.disconnecting != false){
       unique_channel.disconnecting = false;
-      SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                           SE_TO_SE_SC_ALL_DISCONNECTED,
-                                           0,
-                                           NULL,
-                                           0,
-                                           "Services mgr: notify itself all SC disconnected ");
+      SOPC_Services_EnqueueEvent(SE_TO_SE_SC_ALL_DISCONNECTED,
+                                 0,
+                                 NULL,
+                                 0);
     }
   }
 }

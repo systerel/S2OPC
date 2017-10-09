@@ -34,7 +34,7 @@
 #include "sopc_sockets_api.h"
 #include "sopc_encoder.h"
 #include "sopc_encodeable.h"
-#include "sopc_services_events.h"
+#include "sopc_services_api.h"
 
 
 static SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx){
@@ -283,8 +283,7 @@ static void SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnectio
             SOPC_Services_EnqueueEvent(SC_TO_SE_SC_DISCONNECTED,
                                        scConnectionIdx,
                                        NULL,
-                                       OpcUa_BadSecureChannelClosed,
-                                       "Sending CLO request failed");
+                                       OpcUa_BadSecureChannelClosed);
         }
     }
 }
@@ -326,8 +325,7 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
                     SOPC_Services_EnqueueEvent(SC_TO_SE_SC_DISCONNECTED,
                                                scConnectionIdx,
                                                NULL,
-                                               errorStatus,
-                                               reason);
+                                               errorStatus);
                 }
             }
 
@@ -338,8 +336,7 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
             SOPC_Services_EnqueueEvent(SC_TO_SE_SC_CONNECTION_TIMEOUT,
                                        scConnection->endpointConnectionConfigIdx, // SC config idx
                                        NULL,
-                                       0,
-                                       reason);
+                                       0);
         }
     }else{
         // SERVER case
@@ -379,8 +376,7 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
                         SOPC_Services_EnqueueEvent(SC_TO_SE_SC_DISCONNECTED,
                                                    scConnectionIdx,
                                                    NULL,
-                                                   OpcUa_BadSecureChannelClosed,
-                                                   "Sending ERR request failed");
+                                                   OpcUa_BadSecureChannelClosed);
                     }
                     // Server side: notify listener that connection closed
                     SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_DISCONNECTED,
@@ -1810,8 +1806,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             SOPC_Services_EnqueueEvent(SC_TO_SE_SC_CONNECTION_TIMEOUT,
                                        eltId,
                                        NULL,
-                                       0,
-                                       "SecureConnection: init failed (invalid index or state)");
+                                       0);
         }else{
             // Require a socket connection for this secure connection
             SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT,
@@ -2011,8 +2006,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                         SOPC_Services_EnqueueEvent(SC_TO_SE_SC_CONNECTED,
                                                    eltId,
                                                    NULL,
-                                                   scConnection->endpointConnectionConfigIdx,
-                                                   "SecureConnection: connected on OPN response");
+                                                   scConnection->endpointConnectionConfigIdx);
                     }
                 }else{
                     SC_CloseSecureConnection(scConnection,
@@ -2059,8 +2053,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                             SOPC_Services_EnqueueEvent(SC_TO_SE_EP_SC_CONNECTED,
                                                        scConnection->serverEndpointConfigIdx,
                                                        (void*) &scConnection->endpointConnectionConfigIdx,
-                                                       eltId,
-                                                       "SecureConnection: connected on OPN response");
+                                                       eltId);
                         }
                     }else if(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED){
                         // transition: Connected => ConnectedRenew
@@ -2172,8 +2165,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 SOPC_Services_EnqueueEvent(SC_TO_SE_SC_SERVICE_RCV_MSG,
                                            eltId, // secure connection id
                                            params, // buffer
-                                           auxParam, // request Id
-                                           "SecureConnection: OpcUa message received on a secure connection");
+                                           auxParam); // request Id
             }else{
                 // Error case: close the socket with security check failure since SC is not established
                 SC_CloseSecureConnection(scConnection,

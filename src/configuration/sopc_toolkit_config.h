@@ -25,8 +25,6 @@
 #include "sopc_event_dispatcher_manager.h"
 #include "sopc_types.h"
 
-extern SOPC_EventDispatcherManager* servicesEventDispatcherMgr;
-
 /**
  *  \brief  Initialize the toolkit configuration, libraries and threads
  *

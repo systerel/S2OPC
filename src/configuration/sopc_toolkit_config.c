@@ -18,7 +18,7 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
-#include "sopc_services_events.h"
+#include "sopc_services_api.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -33,8 +33,6 @@
 #include "sopc_singly_linked_list.h"
 #include "sopc_encodeable.h"
 
-#include "io_dispatch_mgr.h"
-#include "toolkit_header_init.h"
 #include "address_space_impl.h"
 #include "util_b2c.h"
 
@@ -58,34 +56,18 @@ static struct {
     .nbEncTypesTable = 0,
 };
 
-// Structure used to close all connections in a synchronous way
-// (necessary on toolkit clear)
-static struct {
-    Mutex           mutex;
-    Condition       cond;
-    bool            allDisconnectedFlag;
-    bool            requestedFlag;
-} closeAllConnectionsSync = {
-  .requestedFlag = false,
-  .allDisconnectedFlag = false
-};
-
-
 static uint32_t scConfigIdxMax = 0;
 static uint32_t epConfigIdxMax = 0;
 
-SOPC_EventDispatcherManager* servicesEventDispatcherMgr = NULL;
-
-SOPC_EventDispatcherManager* applicationEventDispatcherMgr = NULL;
 static SOPC_ComEvent_Fct* appFct = NULL;
 static SOPC_AddressSpaceNotif_Fct* pAddSpaceFct = NULL;
 
-void SOPC_ApplicationEventDispatcher(int32_t  eventAndType, 
-                                     uint32_t id, 
-                                     void*    params, 
-                                     uint32_t auxParam){
+void SOPC_Internal_ApplicationEventDispatcher(int32_t  eventAndType,
+                                              uint32_t id,
+                                              void*    params,
+                                              uint32_t auxParam){
   switch(SOPC_AppEvent_AppEventType_Get(eventAndType)){
-  case APP_COM_EVENT:
+  case SOPC_APP_COM_EVENT:
     if(NULL != appFct){
       if(SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_ACTIVATED_SESSION){
         appFct(SOPC_AppEvent_ComEvent_Get(eventAndType),
@@ -104,7 +86,7 @@ void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
       }
     }
     break;
-  case APP_ADDRESS_SPACE_NOTIF:
+  case SOPC_APP_ADDRESS_SPACE_NOTIF:
     if(NULL != pAddSpaceFct){
       pAddSpaceFct(SOPC_AppEvent_AddSpaceEvent_Get(eventAndType),
                    params, // TBD
@@ -117,12 +99,9 @@ void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
 }
 
 SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != pAppFct){
         appFct = pAppFct;
-        status = OpcUa_BadInvalidState;
         if(tConfig.initDone == false){
-            status = STATUS_NOK;
             Mutex_Initialization(&tConfig.mut);
             Mutex_Lock(&tConfig.mut);
             tConfig.initDone = true;
@@ -138,41 +117,13 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
             if(NULL != tConfig.epConfigs){
                 SOPC_Sockets_Initialize();
                 SOPC_SecureChannels_Initialize();
-                servicesEventDispatcherMgr =
-                    SOPC_EventDispatcherManager_CreateAndStart(SOPC_ServicesEventDispatcher,
-                                                               "Services event dispatcher manager");
-            }
-            if(NULL != servicesEventDispatcherMgr){
-              applicationEventDispatcherMgr =
-                  SOPC_EventDispatcherManager_CreateAndStart(SOPC_ApplicationEventDispatcher,
-                                                             "(Services) Application event dispatcher manager");
-            }
-
-            if(NULL != applicationEventDispatcherMgr){
-                status = STATUS_OK;
+                SOPC_Services_Initialize();
             }
 
             Mutex_Unlock(&tConfig.mut);
-            // Init async close management flag
-            Mutex_Initialization(&closeAllConnectionsSync.mutex);
-            Condition_Init(&closeAllConnectionsSync.cond);
-
-            if(STATUS_OK != status){
-              SOPC_Toolkit_Clear();
-            }
         }
     }
-    return status;
-}
-
-
-void SOPC_Internal_AllClientSecureChannelsDisconnected(){
-  Mutex_Lock(&closeAllConnectionsSync.mutex);
-  if(closeAllConnectionsSync.requestedFlag != false){
-    closeAllConnectionsSync.allDisconnectedFlag = true;
-    Condition_SignalAll(&closeAllConnectionsSync.cond);
-  }
-  Mutex_Unlock(&closeAllConnectionsSync.mutex);
+    return STATUS_OK;
 }
 
 SOPC_StatusCode SOPC_Toolkit_Configured(){
@@ -181,8 +132,7 @@ SOPC_StatusCode SOPC_Toolkit_Configured(){
         Mutex_Lock(&tConfig.mut);
         if(tConfig.locked == false){
             tConfig.locked = true;
-            /* Init B model */
-            INITIALISATION();
+            SOPC_Services_ToolkitConfigured();
             status = STATUS_OK;
         }
         Mutex_Unlock(&tConfig.mut);
@@ -210,30 +160,16 @@ static void SOPC_Toolkit_ClearScConfigs(){
 }
 
 void SOPC_Toolkit_Clear(){
-    SOPC_StatusCode status = STATUS_OK;
     if(tConfig.initDone != false){
-      Mutex_Lock(&closeAllConnectionsSync.mutex);
-      closeAllConnectionsSync.requestedFlag = true;
-      // Do a synchronous connections closed (effective on client only)
-      SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                           APP_TO_SE_CLOSE_ALL_CONNECTIONS,
-                                           0,
-                                           NULL,
-                                           0,
-                                           "Services: Close all channel !");
-      while(closeAllConnectionsSync.allDisconnectedFlag == false){
-        Mutex_UnlockAndWaitCond(&closeAllConnectionsSync.cond, &closeAllConnectionsSync.mutex);
-      }
-      Mutex_Unlock(&closeAllConnectionsSync.mutex);
-      Mutex_Clear(&closeAllConnectionsSync.mutex);
-      Condition_Clear(&closeAllConnectionsSync.cond);
+      // Services are in charge to gracefully close all connections.
+      // It must be done before stopping the services
+      SOPC_Services_PreClear();
+
       Mutex_Lock(&tConfig.mut);
+
       SOPC_Sockets_Clear();
       SOPC_SecureChannels_Clear();
-      status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);
-      (void) status; // log
-      status = SOPC_EventDispatcherManager_StopAndDelete(&applicationEventDispatcherMgr);
-      (void) status; // log
+      SOPC_Services_Clear();
 
       if(tConfig.encTypesTable != NULL){
           free(tConfig.encTypesTable);
@@ -245,7 +181,6 @@ void SOPC_Toolkit_Clear(){
       SOPC_Toolkit_ClearScConfigs();
       SOPC_SLinkedList_Delete(tConfig.epConfigs);
       tConfig.epConfigs = NULL;
-      address_space_bs__UNINITIALISATION();
       appFct = NULL;
       pAddSpaceFct = NULL;
       tConfig.locked = false;
@@ -441,11 +376,11 @@ SOPC_NamespaceTable* SOPC_ToolkitConfig_GetNamespaces()
 }
 
 int32_t SOPC_AppEvent_ComEvent_Create(SOPC_App_Com_Event event){
-  return APP_COM_EVENT + (event << 8);
+  return SOPC_APP_COM_EVENT + (event << 8);
 }
 
 int32_t SOPC_AppEvent_AddSpaceEvent_Create(SOPC_App_AddSpace_Event event){
-  return APP_ADDRESS_SPACE_NOTIF + (event << 8);
+  return SOPC_APP_ADDRESS_SPACE_NOTIF + (event << 8);
 }
 
 SOPC_App_EventType SOPC_AppEvent_AppEventType_Get(int32_t iEvent){

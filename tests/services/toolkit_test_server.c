@@ -29,7 +29,7 @@
 #include "sopc_encodeable.h"
 
 #include "sopc_toolkit_config.h"
-#include "sopc_services_events.h"
+#include "sopc_services_api.h"
 
 #include "wrap_read.h"
 
@@ -166,12 +166,10 @@ int main(void)
 
   // Asynchronous request to open the endpoint
   if(STATUS_OK == status){
-    status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                  APP_TO_SE_OPEN_ENDPOINT,
-                                                  1,
-                                                  NULL,
-                                                  0,
-                                                  "Services: endpoint opening !");
+      SOPC_Services_EnqueueEvent(APP_TO_SE_OPEN_ENDPOINT,
+                                 epConfigIdx,
+                                 NULL,
+                                 0);
     if(STATUS_OK == status){
       printf("<Test_Server_Toolkit: Opening endpoint... \n");
     }else{
@@ -190,12 +188,10 @@ int main(void)
     }
 
   // Asynchronous request to close the endpoint
-  SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                       APP_TO_SE_CLOSE_ENDPOINT,
-                                       1,
-                                       NULL,
-                                       0,
-                                       "Services: Endpoint closing !");
+  SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT,
+                             1,
+                             NULL,
+                             0);
 
   // Wait until endpoint is closed
   loopCpt = 0;

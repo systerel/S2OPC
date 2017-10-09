@@ -23,11 +23,41 @@
 #include "sopc_toolkit_constants.h"
 #include "sopc_secure_channels_api.h"
 
-#include "sopc_services_events.h"
+#include "sopc_services_api.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
 #include "io_dispatch_mgr.h"
+#include "sopc_mutexes.h"
+
+#include "io_dispatch_mgr.h"
+#include "toolkit_header_init.h"
+
+
+static SOPC_EventDispatcherManager* servicesEventDispatcherMgr = NULL;
+
+static SOPC_EventDispatcherManager* applicationEventDispatcherMgr = NULL;
+
+// Structure used to close all connections in a synchronous way
+// (necessary on toolkit clear)
+static struct {
+    Mutex           mutex;
+    Condition       cond;
+    bool            allDisconnectedFlag;
+    bool            requestedFlag;
+} closeAllConnectionsSync = {
+  .requestedFlag = false,
+  .allDisconnectedFlag = false
+};
+
+static void SOPC_Internal_AllClientSecureChannelsDisconnected(){
+  Mutex_Lock(&closeAllConnectionsSync.mutex);
+  if(closeAllConnectionsSync.requestedFlag != false){
+    closeAllConnectionsSync.allDisconnectedFlag = true;
+    Condition_SignalAll(&closeAllConnectionsSync.cond);
+  }
+  Mutex_Unlock(&closeAllConnectionsSync.mutex);
+}
 
 void SOPC_ServicesEventDispatcher(int32_t  scEvent, 
                                   uint32_t id, 
@@ -242,14 +272,72 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
 void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent,
                                 uint32_t            id,
                                 void*               params,
-                                uint32_t            auxParam,
-                                const char*         reason){
+                                uint32_t            auxParam){
     if(servicesEventDispatcherMgr != NULL){
         SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
                                              seEvent,
                                              id,
                                              params,
                                              auxParam,
-                                             reason);
+                                             NULL);
     }
+}
+
+void SOPC_ServicesToApp_EnqueueEvent(SOPC_App_Com_Event appEvent,
+                                     uint32_t           id,
+                                     void*              params,
+                                     uint32_t           auxParam){
+    if(applicationEventDispatcherMgr != NULL){
+        SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
+                                             appEvent,
+                                             id,
+                                             params,
+                                             auxParam,
+                                             NULL);
+    }
+}
+
+void SOPC_Services_Initialize(){
+    servicesEventDispatcherMgr =
+            SOPC_EventDispatcherManager_CreateAndStart(SOPC_ServicesEventDispatcher,
+                    "Services event dispatcher manager");
+    applicationEventDispatcherMgr =
+            SOPC_EventDispatcherManager_CreateAndStart(SOPC_Internal_ApplicationEventDispatcher,
+                    "(Services) Application event dispatcher manager");
+    // Init async close management flag
+    Mutex_Initialization(&closeAllConnectionsSync.mutex);
+    Condition_Init(&closeAllConnectionsSync.cond);
+}
+
+void SOPC_Services_ToolkitConfigured(){
+    /* Init B model */
+    INITIALISATION();
+}
+
+void SOPC_Services_PreClear(){
+    Mutex_Lock(&closeAllConnectionsSync.mutex);
+    closeAllConnectionsSync.requestedFlag = true;
+    // Do a synchronous connections closed (effective on client only)
+    SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
+                                         APP_TO_SE_CLOSE_ALL_CONNECTIONS,
+                                         0,
+                                         NULL,
+                                         0,
+                                         "Services: Close all channel !");
+    while(closeAllConnectionsSync.allDisconnectedFlag == false){
+      Mutex_UnlockAndWaitCond(&closeAllConnectionsSync.cond, &closeAllConnectionsSync.mutex);
+    }
+    Mutex_Unlock(&closeAllConnectionsSync.mutex);
+    Mutex_Clear(&closeAllConnectionsSync.mutex);
+    Condition_Clear(&closeAllConnectionsSync.cond);
+}
+
+void SOPC_Services_Clear(){
+    address_space_bs__UNINITIALISATION();
+
+    SOPC_StatusCode status = STATUS_OK;
+    status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);
+    (void) status; // log
+    status = SOPC_EventDispatcherManager_StopAndDelete(&applicationEventDispatcherMgr);
+    (void) status; // log
 }

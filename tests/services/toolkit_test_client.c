@@ -32,7 +32,7 @@
 #include "util_b2c.h"
 
 #include "sopc_toolkit_config.h"
-#include "sopc_services_events.h"
+#include "sopc_services_api.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
 #include "opcua_statuscodes.h"
@@ -231,12 +231,10 @@ int main(void){
 
   /* Asynchronous request to create a session (and underlying secure channel if necessary). */
   if(STATUS_OK == status){
-    status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                  APP_TO_SE_ACTIVATE_SESSION,
-                                                  channel_config_idx, // Channel configuration index
-                                                  NULL,
-                                                  user,
-                                                  "Services: activating session !");
+    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION,
+                               channel_config_idx, // Channel configuration index
+                               NULL,
+                               user);
     if(status == STATUS_OK){
         printf(">>Test_Client_Toolkit: Creating/Activating session: OK\n");
     }else{
@@ -272,12 +270,10 @@ int main(void){
   if(STATUS_OK == status){
     /* Create a service request message and send it through session (read service)*/
     // msg freed when sent
-    status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                  APP_TO_SE_SEND_SESSION_REQUEST,
-                                                  session,
-                                                  getReadRequest_message(),
-                                                  0,
-                                                  "Services: sending read request !");
+      SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_SESSION_REQUEST,
+                                 session,
+                                 getReadRequest_message(),
+                                 0);
 
     if(STATUS_OK == status){
       printf(">>Test_Client_Toolkit: read request sending: OK'\n");
@@ -307,12 +303,10 @@ int main(void){
     pWriteReq = tlibw_new_WriteRequest();
     test_results_set_WriteRequest(pWriteReq);
     // msg freed when sent
-    status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                  APP_TO_SE_SEND_SESSION_REQUEST,
-                                                  session, // session id
-                                                  pWriteReq, // write request structure pointer
-                                                  0,
-                                                  "Services: sending write request !");
+    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_SESSION_REQUEST,
+                               session, // session id
+                               pWriteReq, // write request structure pointer
+                               0);
 
     /* Same data must be provided to verify result, since request will be freed on sending allocate a new (same content) */
     pWriteReq = tlibw_new_WriteRequest();
@@ -346,12 +340,10 @@ int main(void){
     /* Sends another ReadRequest, to verify that the AddS has changed */
     /* The callback will call the verification */
     // msg freed when sent
-    status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                  APP_TO_SE_SEND_SESSION_REQUEST,
-                                                  session, // session id
-                                                  getReadRequest_verif_message(), // read request structure pointer
-                                                  0,
-                                                  "Services: sending read request !");
+    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_SESSION_REQUEST,
+                               session, // session id
+                               getReadRequest_verif_message(), // read request structure pointer
+                               0);
 
     if(STATUS_OK == status){
       printf(">>Test_Client_Toolkit: read request sending: OK'\n");
@@ -379,12 +371,10 @@ int main(void){
 
   /* Close the session */
   if(constants__c_session_indet != session){
-    status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                  APP_TO_SE_CLOSE_SESSION,
-                                                  session,
-                                                  NULL,
-                                                  user,
-                                                  "Services: closing session !");
+    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SESSION,
+                               session,
+                               NULL,
+                               0);
   }
 
   /* Wait until session is closed or timeout */

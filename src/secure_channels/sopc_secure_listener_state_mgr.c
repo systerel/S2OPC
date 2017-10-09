@@ -29,7 +29,7 @@
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_sockets_api.h"
 
-#include "sopc_services_events.h"
+#include "sopc_services_api.h"
 
 static bool SOPC_SecureListenerStateMgr_OpeningListener(uint32_t endpointConfigIdx){
     bool result = false;
@@ -185,8 +185,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED,
                                    eltId,
                                    NULL,
-                                   0,
-                                   "SecureListener: listener closed (failure)");
+                                   0);
         break;
     /* Services events: */
     /* Services manager -> SC listener state manager */
@@ -205,8 +204,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
             SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED,
                                        eltId,
                                        NULL,
-                                       0,
-                                       "SecureListener: opening failed (invalid index or state)");
+                                       0);
         }else{
             // Notify Sockets layer to create the listener
             SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER,
@@ -228,8 +226,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED,
                                    eltId,
                                    NULL,
-                                   result,
-                                   "SecureListener: listener closed on demand");
+                                   result);
         break;
     /* Internal events: */
     /* SC connection manager -> SC listener state manager */
