@@ -21,8 +21,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "../../src/helpers_crypto/sopc_crypto_profiles.h"
-#include "../../src/helpers_crypto/sopc_pki_stack.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_pki_stack.h"
 #include "stub_sc_sopc_services_api.h"
 #include "sopc_services_api.h"
 #include "sopc_toolkit_config.h"

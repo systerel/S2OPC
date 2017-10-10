@@ -20,9 +20,9 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "../../src/helpers_crypto/sopc_crypto_profiles.h"
-#include "../../src/helpers_crypto/sopc_key_manager.h"
-#include "../../src/helpers_crypto/sopc_pki_stack.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_key_manager.h"
+#include "sopc_pki_stack.h"
 #include "opcua_statuscodes.h"
 
 #include "sopc_time.h"

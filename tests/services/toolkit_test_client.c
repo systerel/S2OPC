@@ -19,8 +19,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "../../../src/helpers_crypto/sopc_crypto_profiles.h"
-#include "../../../src/helpers_crypto/sopc_pki_stack.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_pki_stack.h"
 #include "b2c.h"
 
 #include "toolkit_header_init.h"

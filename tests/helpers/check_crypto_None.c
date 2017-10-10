@@ -26,12 +26,12 @@
 #include <stdlib.h> // malloc, free
 #include <check.h>
 
-#include "../../src/helpers_crypto/sopc_crypto_decl.h"
-#include "../../src/helpers_crypto/sopc_crypto_profiles.h"
-#include "../../src/helpers_crypto/sopc_crypto_provider.h"
-#include "../../src/helpers_crypto/sopc_key_manager.h"
-#include "../../src/helpers_crypto/sopc_pki_stack.h"
-#include "../../src/helpers_crypto/sopc_secret_buffer.h"
+#include "sopc_crypto_decl.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_crypto_provider.h"
+#include "sopc_key_manager.h"
+#include "sopc_pki_stack.h"
+#include "sopc_secret_buffer.h"
 #include "check_helpers.h"
 #include "hexlify.h"
 #include "crypto_provider_lib.h"

@@ -18,9 +18,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../../src/helpers_crypto/sopc_crypto_profiles.h"
-#include "../../../src/helpers_crypto/sopc_crypto_provider.h"
-#include "../../../src/helpers_crypto/sopc_pki_stack.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_crypto_provider.h"
+#include "sopc_pki_stack.h"
 #include "io_dispatch_mgr.h"
 
 #include "sopc_time.h"
