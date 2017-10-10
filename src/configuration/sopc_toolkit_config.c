@@ -225,7 +225,7 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
     return result;
 }
 
-SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx){
+SOPC_SecureChannel_Config* SOPC_Toolkit_GetSecureChannelConfig(uint32_t scConfigIdx){
     SOPC_SecureChannel_Config* res = NULL;
     if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);

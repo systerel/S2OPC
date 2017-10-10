@@ -21,9 +21,8 @@
 #include "sopc_user_app_itf.h"
 
 #include "sopc_builtintypes.h"
-#include "sopc_namespace_table.h"
-#include "sopc_event_dispatcher_manager.h"
 #include "sopc_types.h"
+#include "sopc_namespace_table.h"
 
 /**
  *  \brief  Initialize the toolkit configuration, libraries and threads
@@ -75,27 +74,6 @@ SOPC_StatusCode SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addr
  */
 uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig);
 
-
-/**
- *  \brief Return the secure channel configuration for the given index or null if not defined. (SOPC_Toolkit_Configured required)
- *
- *  \param scConfigIdx  The secure channel configuration index requested
- *
- *  \return Secure channel configuration at given index or NULL if
- *  index invalid or toolkit is not configured yet
- */
-SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx);
-
-/**
- *  \brief Return the endpoint configuration for the given index or null if not defined. (SOPC_Toolkit_Configured required)
- *
- *  \param epConfigIdx  The endpoint configuration index requested
- *
- *  \return Endpoint configuration at given index or NULL if
- *  index invalid or toolkit is not configured yet
- */
-SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx);
-
 /**
  *  \brief Record the given secure channel configuration in given index
  *  (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required)
@@ -120,15 +98,6 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* config);
 SOPC_StatusCode SOPC_ToolkitConfig_SetNamespaceUris(SOPC_NamespaceTable* nsTable);
 
 /**
- *  \brief Return the encodeable types table configuration used by the stack (SOPC_Toolkit_Configured required)
- *
- *  \return Encodeable types table (terminated by NULL value) or NULL if
- *  toolkit is not configured yet
- */
-SOPC_EncodeableType** SOPC_ToolkitConfig_GetEncodeableTypes();
-
-
-/**
  *  \brief Add the given encodeable types to the configuration (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required)
  *
  *  \param encTypesTable  The encodeable types to add to the encodeable types configuration (NULL terminated)
@@ -141,12 +110,5 @@ SOPC_EncodeableType** SOPC_ToolkitConfig_GetEncodeableTypes();
  */
 SOPC_StatusCode SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTable,
                                             uint32_t              nbTypes);
-
-/**
- *  \brief Return the namespace table configuration  (SOPC_Toolkit_Configured required)
- *
- *  \return Namespace table or NULL if toolkit is not configured yet
- */
-SOPC_NamespaceTable* SOPC_ToolkitConfig_GetNamespaces();
 
 #endif /* SOPC_TOOLKIT_CONFIG_H_ */

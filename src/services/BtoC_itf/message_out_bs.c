@@ -33,7 +33,7 @@
 #include "constants_bs.h"
 
 #include "sopc_encoder.h"
-#include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 #include "util_discovery_services.h"
 
 /*------------------------
@@ -243,7 +243,7 @@ void message_out_bs__write_create_session_req_msg_endpointUrl(
    const constants__t_msg_i message_out_bs__msg,
    const constants__t_channel_config_idx_i message_out_bs__channel_config_idx){
   OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) message_out_bs__msg;
-  SOPC_SecureChannel_Config* chConfig = SOPC_ToolkitClient_GetSecureChannelConfig(message_out_bs__channel_config_idx);
+  SOPC_SecureChannel_Config* chConfig = SOPC_Toolkit_GetSecureChannelConfig(message_out_bs__channel_config_idx);
   assert(STATUS_OK == SOPC_String_CopyFromCString(&createSessionReq->EndpointUrl, chConfig->url));
 }
 
@@ -257,7 +257,7 @@ void message_out_bs__write_create_session_req_msg_crypto(
     const SOPC_Certificate *pCrtCli = NULL;
 
     /* Retrieve the certificate */
-    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) message_out_bs__p_channel_config_idx);
+    pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) message_out_bs__p_channel_config_idx);
     if(NULL == pSCCfg)
         return;
     pCrtCli = pSCCfg->crt_cli;
@@ -323,7 +323,7 @@ void message_out_bs__write_create_session_resp_msg_crypto(
     OpcUa_SignatureData *pSig = (OpcUa_SignatureData *)message_out_bs__p_signature;
 
     /* Retrieve the certificate */
-    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) message_out_bs__p_channel_config_idx);
+    pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) message_out_bs__p_channel_config_idx);
     if(NULL == pSCCfg)
         sc = STATUS_NOK;
     if(STATUS_OK == sc) {

@@ -33,7 +33,7 @@
 
 #include "util_b2c.h"
 
-#include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 #include "sopc_services_api.h"
 #include "sopc_event_dispatcher_manager.h"
 
@@ -66,7 +66,7 @@ void channel_mgr_bs__cli_open_secure_channel(
   SOPC_SecureChannel_Config* config = NULL;
   *channel_mgr_bs__bres = false;
   if(channel_mgr_bs__config_idx != constants__c_channel_config_idx_indet){
-    config = SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__config_idx);
+    config = SOPC_Toolkit_GetSecureChannelConfig(channel_mgr_bs__config_idx);
     if(NULL != config){
         SOPC_SecureChannels_EnqueueEvent(SC_CONNECT,
                                          channel_mgr_bs__config_idx,
@@ -252,7 +252,7 @@ void channel_mgr_bs__get_SecurityPolicy(
 {
     SOPC_SecureChannel_Config *pSCCfg = NULL;
 
-    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(unique_channel.configIdx);
+    pSCCfg = SOPC_Toolkit_GetSecureChannelConfig(unique_channel.configIdx);
     assert(pSCCfg != NULL);
 
     /* TODO: The following assert is asserted by the PRE of the operation */

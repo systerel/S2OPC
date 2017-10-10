@@ -24,7 +24,7 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 
-#include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 #include "sopc_helper_endianess_cfg.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_namespace_table.h"

@@ -22,11 +22,12 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "../helpers_crypto/sopc_crypto_provider.h"
+#include "sopc_crypto_provider.h"
 #include "opcua_statuscodes.h"
 
 #include "sopc_toolkit_constants.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_secure_channels_api_internal.h"
@@ -483,7 +484,7 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
                                                         uint32_t               socketIdx){
     assert(scConnection != NULL);
     SOPC_Buffer* msgBuffer;
-    SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    SOPC_SecureChannel_Config* scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     bool result = false;
     SOPC_StatusCode status = STATUS_OK;
     assert(scConnection != NULL);
@@ -676,7 +677,7 @@ static bool SC_ClientTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
     assert(scConnection != NULL);
     assert(scConnection->state == SECURE_CONNECTION_STATE_SC_INIT);
     assert(scConnection->isServerConnection == false);
-    config = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    config = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(config != NULL);
 
     result = true;
@@ -768,7 +769,7 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTING);
     assert(scConnection->isServerConnection == false);
     assert(opnRespBuffer != NULL);
-    SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnectionIdx);
+    SOPC_SecureChannel_Config* scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnectionIdx);
     assert(scConfig != NULL);
 
     bool result = false;
@@ -1367,7 +1368,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     SOPC_Buffer* opnRespBuffer = NULL;
     SOPC_SecureChannel_Config* scConfig = NULL;
 
-    scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(scConfig != NULL);
 
     // Write the OPN response message
@@ -1488,7 +1489,7 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
     OpcUa_RequestHeader* reqHeader = NULL;
     OpcUa_OpenSecureChannelRequest* opnReq = NULL;
 
-    scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(scConfig != NULL);
 
 
@@ -1596,7 +1597,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     SOPC_SC_SecurityKeySets                  newSecuKeySets;
     memset(&newSecuKeySets, 0, sizeof(SOPC_SC_SecurityKeySets));
 
-    scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(scConfig != NULL);
 
     // Write the OPN request message
@@ -1790,7 +1791,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         /* id = secure channel connection index */
 
         /* Define INIT state of a client */
-        scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(eltId);
+        scConfig = SOPC_Toolkit_GetSecureChannelConfig(eltId);
         if(scConfig != NULL){
             result = SC_InitNewConnection(&idx);
             if(result != false){

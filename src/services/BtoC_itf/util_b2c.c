@@ -21,7 +21,7 @@
 
 #include "util_b2c.h"
 
-#include "../../../src/helpers_crypto/sopc_crypto_profiles.h"
+#include "sopc_crypto_profiles.h"
 #include "sopc_types.h"
 
 void util_message__get_encodeable_type(const constants__t_msg_type_i message__msg_type,

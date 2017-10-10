@@ -26,16 +26,16 @@
 #include "sopc_builtintypes.h"
 #include "sopc_encodeable.h"
 #include "sopc_types.h"
-#include "sopc_event_dispatcher_manager.h"
 #include "sopc_user_app_itf.h"
 #include "sopc_secret_buffer.h"
-#include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
+#include "sopc_services_api.h"
 
 #include "session_core_1_bs.h"
 
-#include "../../../src/helpers_crypto/sopc_crypto_profiles.h"
-#include "../../../src/helpers_crypto/sopc_crypto_provider.h"
-#include "../../../src/helpers_crypto/sopc_key_manager.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_crypto_provider.h"
+#include "sopc_key_manager.h"
 #include "channel_mgr_bs.h"
 
 #define LENGTH_NONCE 32
@@ -402,7 +402,7 @@ void session_core_1_bs__server_create_session_req_do_crypto(
 
     /* Retrieve the security policy and mode */
     /* TODO: this function is denoted CLIENT */
-    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_channel_config_idx);
+    pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_channel_config_idx);
     if(NULL == pSCCfg)
         return;
 
@@ -496,7 +496,7 @@ void session_core_1_bs__client_activate_session_req_do_crypto(
     *session_core_1_bs__signature = constants__c_SignatureData_indet;
 
     /* Retrieve the security policy and mode */
-    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__channel_config_idx);
+    pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) session_core_1_bs__channel_config_idx);
     if(NULL == pSCCfg)
         return;
 
@@ -602,7 +602,7 @@ void session_core_1_bs__client_create_session_req_do_crypto(
     *session_core_1_bs__nonce_needed = false;
 
     /* Retrieve the security policy */
-    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_channel_config_idx);
+    pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_channel_config_idx);
     if(NULL == pSCCfg)
         return;
 
@@ -678,7 +678,7 @@ void session_core_1_bs__client_create_session_check_crypto(
     *session_core_1_bs__valid = false;
 
     /* Retrieve the security policy and mode */
-    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_channel_config_idx);
+    pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_channel_config_idx);
     if(NULL == pSCCfg)
         return;
 
@@ -770,7 +770,7 @@ void session_core_1_bs__server_activate_session_check_crypto(
     *session_core_1_bs__valid = false;
 
     /* Retrieve the security policy and mode */
-    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__channel_config_idx);
+    pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) session_core_1_bs__channel_config_idx);
     if(NULL == pSCCfg)
         return;
 

@@ -18,7 +18,7 @@
 #include "service_response_cli_cb_bs.h"
 
 #include "sopc_user_app_itf.h"
-#include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 #include "sopc_services_api.h"
 
 void service_response_cli_cb_bs__INITIALISATION(void)

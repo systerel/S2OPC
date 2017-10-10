@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "../helpers_crypto/sopc_key_sets.h"
+#include "sopc_key_sets.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_builtintypes.h"
 #include "sopc_singly_linked_list.h"

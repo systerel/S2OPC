@@ -24,6 +24,7 @@
 
 #include "sopc_toolkit_constants.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_secure_channels_api_internal.h"
 #include "sopc_secure_channels_internal_ctx.h"

@@ -20,7 +20,7 @@
 
 #include "util_discovery_services.h"
 #include "sopc_toolkit_constants.h"
-#include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 
 constants__t_StatusCode_i  build_endPoints_Descriptions(const constants__t_endpoint_config_idx_i endpoint_config_idx,
                          SOPC_String*  requestEndpointUrl,
