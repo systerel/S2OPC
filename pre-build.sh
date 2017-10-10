@@ -11,14 +11,14 @@ ADDSPACE_DIR=address_space_generation
 echo "Pre-build log" > pre-build.log
 
 echo "Generate C sources files from B model" | tee -a pre-build.log
-make -C ./B_model 1>> pre-build.log
+make -C ./B_model >> pre-build.log
 if [[ $? != 0 ]]; then
     echo "Error: generating C source files from B model" | tee -a pre-build.log
     exit 1
 fi
 
 echo "Generate address space C files for tests" | tee -a pre-build.log
-make -C ./address_space_generation 1>> pre-build.log
+make -C ./address_space_generation >> pre-build.log
 if [[ $? != 0 ]]; then
     echo "Error: generating address spaces for tests" | tee -a pre-build.log
     exit 1

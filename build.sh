@@ -18,17 +18,17 @@ echo "Build log" > build.log
 echo "Build the library and tests with CMake" | tee -a build.log
 if [ -f "$BUILD_DIR/CMakeCache.txt" ]; then
     echo "- CMake already configured" | tee -a build.log
-    cd $BUILD_DIR || exit 1
 else
     echo "- Generate ./build directory" | tee -a build.log
-    mkdir $BUILD_DIR || exit 1
-    echo "- Run CMake" | tee -a build.log
-    cd  $BUILD_DIR || exit 1
+    mkdir -p $BUILD_DIR || exit 1
+    cd $BUILD_DIR  > /dev/null || exit 1
+    echo "- Run CMake"
     if [[ $CROSS_COMPILE_MINGW ]]; then
-        cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain-mingw32-w64.cmake .. 1>> build.log
+        cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain-mingw32-w64.cmake .. >> build.log
     else
-        cmake .. 1>> build.log
+        cmake .. >> build.log
     fi
+    cd - > /dev/null || exit 1
 fi
 if [[ $? != 0 ]]; then
     echo "Error: build configuration failed" | tee -a build.log
@@ -36,7 +36,7 @@ if [[ $? != 0 ]]; then
 fi
 
 echo "- Run make" | tee -a build.log
-make 1>> build.log
+make -C $BUILD_DIR >> build.log
 if [[ $? != 0 ]]; then
     echo "Error: build failed" | tee -a build.log
     exit 1

@@ -95,7 +95,7 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
                                    "address_space_generation/genc/test_read_write_addspace.c")
-target_link_libraries(toolkit_test_client PRIVATE ingopcs)
+target_link_libraries(toolkit_test_client PRIVATE ingopcs rt)
 target_include_directories(toolkit_test_client PRIVATE "address_space_generation/"
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
@@ -103,7 +103,7 @@ target_include_directories(toolkit_test_client PRIVATE "address_space_generation
 # Server test
 add_executable(toolkit_test_server "tests/services/toolkit_test_server.c"
                                    "address_space_generation/genc/add.c")
-target_link_libraries(toolkit_test_server PRIVATE ingopcs)
+target_link_libraries(toolkit_test_server PRIVATE ingopcs rt)
 target_include_directories(toolkit_test_server PRIVATE "address_space_generation/"
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
@@ -130,7 +130,7 @@ add_executable(toolkit_test_read "tests/services/toolkit_test_read.c"
                                  "tests/services/wrap_read.c"
                                  "tests/services/testlib_read_response.c"
                                  "address_space_generation/genc/test_read_write_addspace.c")
-target_link_libraries(toolkit_test_read PRIVATE ingopcs)
+target_link_libraries(toolkit_test_read PRIVATE ingopcs rt)
 target_include_directories(toolkit_test_read PRIVATE "address_space_generation/"
                                                      ${INGOPCS_PUBLIC_INCLUDES} 
                                                      ${INGOPCS_PRIVATE_INCLUDES})
@@ -139,7 +139,7 @@ target_include_directories(toolkit_test_read PRIVATE "address_space_generation/"
 add_executable(toolkit_test_write "tests/services/toolkit_test_write.c"
                                   "tests/services/testlib_write.c"
                                   "address_space_generation/genc/test_read_write_addspace.c")
-target_link_libraries(toolkit_test_write PRIVATE ingopcs)
+target_link_libraries(toolkit_test_write PRIVATE ingopcs rt)
 target_include_directories(toolkit_test_write PRIVATE "address_space_generation/"
                                                       ${INGOPCS_PUBLIC_INCLUDES} 
                                                       ${INGOPCS_PRIVATE_INCLUDES})
@@ -186,7 +186,7 @@ add_executable(test_secure_channels_client ${SOCKETS_SRC}
 target_include_directories(test_secure_channels_client PRIVATE "tests/secure_channels/stubs" 
                                                                ${INGOPCS_PUBLIC_INCLUDES} 
                                                                ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(test_secure_channels_client PRIVATE mbedtls pthread)
+target_link_libraries(test_secure_channels_client PRIVATE mbedtls pthread rt)
 
 # Secure channels tests: SERVER executable
 add_executable(test_secure_channels_server ${SOCKETS_SRC}
@@ -196,4 +196,4 @@ add_executable(test_secure_channels_server ${SOCKETS_SRC}
 target_include_directories(test_secure_channels_server PRIVATE "tests/secure_channels/stubs" 
                                                                ${INGOPCS_PUBLIC_INCLUDES} 
                                                                ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(test_secure_channels_server PRIVATE mbedtls pthread)
+target_link_libraries(test_secure_channels_server PRIVATE mbedtls pthread rt)

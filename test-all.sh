@@ -1,36 +1,12 @@
 #!/bin/bash
-
-
-#  Builds INGOPCS OPC UA stack and run tests
-#
-#  Binary files are generated in out/
-#  Use "LOCAL" as first argument to run tests locally
-#
-
+#  Builds INGOPCS library and run tests
 set -e
 
 BIN_DIR=./bin
 
-DOCKER_IMAGE=abc5dd2cdb44
-ISLOCAL=$1
-
-mid() {
-if [[ -z $ISLOCAL || $ISLOCAL != "LOCAL" ]]; then
-    sudo /etc/scripts/make-in-docker $DOCKER_IMAGE CC=gcc "$@"
-else
-    make "$@"
-fi
-}
-
 # Build and run tests
-if [[ -z $ISLOCAL || $ISLOCAL != "LOCAL" ]]; then
-    mid cleanall all
-else
-    ./cleanall.sh
-    ./pre-build.sh
-    ./build.sh
-fi
-
+./clean.sh
+./build.sh
 
 # run helpers tests
 export CK_TAP_LOG_FILE_NAME=$BIN_DIR/helpers.tap && $BIN_DIR/check_helpers
