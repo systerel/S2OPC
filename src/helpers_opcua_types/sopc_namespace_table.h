@@ -38,22 +38,22 @@ typedef struct {
     bool            clearTable;
 } SOPC_NamespaceTable;
 
-void Namespace_Initialize(SOPC_NamespaceTable* nsTable);
+void SOPC_Namespace_Initialize(SOPC_NamespaceTable* nsTable);
 
-SOPC_StatusCode Namespace_AllocateTable(SOPC_NamespaceTable* nsTable, uint32_t length);
+SOPC_StatusCode SOPC_Namespace_AllocateTable(SOPC_NamespaceTable* nsTable, uint32_t length);
 
-SOPC_NamespaceTable* Namespace_CreateTable(uint32_t length); // length + 1 <= UINT16_MAX
+SOPC_NamespaceTable* SOPC_Namespace_CreateTable(uint32_t length); // length + 1 <= UINT16_MAX
 
-SOPC_StatusCode Namespace_AttachTable(SOPC_NamespaceTable* dst, SOPC_NamespaceTable* src);
+SOPC_StatusCode SOPC_Namespace_AttachTable(SOPC_NamespaceTable* dst, SOPC_NamespaceTable* src);
 
-SOPC_StatusCode Namespace_GetIndex(SOPC_NamespaceTable* namespaceTable,
-                                   const char*          namespaceName,
-                                   uint16_t*            index);
-const char* Namespace_GetName(SOPC_NamespaceTable* namespaceTable,
-                              uint16_t             index);
+SOPC_StatusCode SOPC_Namespace_GetIndex(SOPC_NamespaceTable* namespaceTable,
+                                        const char*          namespaceName,
+                                        uint16_t*            index);
+const char* SOPC_Namespace_GetName(SOPC_NamespaceTable* namespaceTable,
+                                   uint16_t             index);
 
-void Namespace_Clear(SOPC_NamespaceTable* namespaceTable);
+void SOPC_Namespace_Clear(SOPC_NamespaceTable* namespaceTable);
 
-void Namespace_Delete(SOPC_NamespaceTable* namespaceTable);
+void SOPC_Namespace_Delete(SOPC_NamespaceTable* namespaceTable);
 
 #endif /* SOPC_NAMESPACE_TABLE_H_ */

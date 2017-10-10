@@ -107,7 +107,7 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
             tConfig.initDone = true;
 
             SOPC_Helper_EndianessCfg_Initialize();
-            Namespace_Initialize(tConfig.nsTable);
+            SOPC_Namespace_Initialize(tConfig.nsTable);
             tConfig.scConfigs = SOPC_SLinkedList_Create(0);
 
             if(NULL != tConfig.scConfigs){

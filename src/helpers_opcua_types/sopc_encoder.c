@@ -1251,7 +1251,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, S
         if(extObj->Body.Object.ObjType == NULL){
             status = STATUS_INVALID_PARAMETERS;
         }else{
-            status = Namespace_GetIndex(nsTable, extObj->Body.Object.ObjType->NamespaceUri, &nsIndex);
+            status = SOPC_Namespace_GetIndex(nsTable, extObj->Body.Object.ObjType->NamespaceUri, &nsIndex);
 
             nodeId.IdentifierType = IdentifierType_Numeric;
             nodeId.Namespace = nsIndex;
@@ -1324,7 +1324,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Buf
             // Object provided as a byte string, check if encoded object is a known type
             if(extObj->TypeId.NodeId.IdentifierType == IdentifierType_Numeric){
                 if(extObj->TypeId.NodeId.Namespace != OPCUA_NAMESPACE_INDEX){
-                    nsName = Namespace_GetName(nsTable, extObj->TypeId.NodeId.Namespace);
+                    nsName = SOPC_Namespace_GetName(nsTable, extObj->TypeId.NodeId.Namespace);
                     if(nsName != NULL){
                         nsFound = true;
                     }
@@ -2291,7 +2291,7 @@ SOPC_StatusCode SOPC_MsgBodyType_Read(SOPC_Buffer*          buf,
         if(nodeId.Namespace == OPCUA_NAMESPACE_INDEX){
             recEncType = SOPC_EncodeableType_GetEncodeableType(knownTypes, OPCUA_NAMESPACE_NAME, nodeId.Data.Numeric);
         }else{
-            nsName = Namespace_GetName(namespaceTable, nodeId.Namespace);
+            nsName = SOPC_Namespace_GetName(namespaceTable, nodeId.Namespace);
             if(nsName != NULL){
                 recEncType = SOPC_EncodeableType_GetEncodeableType(knownTypes, nsName, nodeId.Data.Numeric);
             }
