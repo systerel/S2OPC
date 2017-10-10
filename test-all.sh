@@ -9,8 +9,7 @@
 
 set -e
 
-BIN_DIR=bin
-BIN_PATH=../$BIN_DIR
+BIN_DIR=./bin
 
 DOCKER_IMAGE=abc5dd2cdb44
 ISLOCAL=$1
@@ -27,15 +26,36 @@ fi
 if [[ -z $ISLOCAL || $ISLOCAL != "LOCAL" ]]; then
     mid cleanall all
 else
-    mid clean all
+    ./cleanall.sh
+    ./pre-build.sh
+    ./build.sh
 fi
-# run stack client server tests
-mid -C stack EXEC_DIR=$BIN_PATH client_server_test
-# run stack unit tests
-mid -C stack EXEC_DIR=$BIN_PATH check CK_TAP_LOG_FILE_NAME=results.tap
-# run toolkit read test
-mid -C toolkit PATHEXEC=$BIN_PATH toolkit_test_read
-# run toolkit write test
-mid -C toolkit PATHEXEC=$BIN_PATH toolkit_test_write
-# run toolkit client server tests
-mid -C toolkit PATHEXEC=$BIN_PATH client_server_test
+
+
+# run helpers tests
+export CK_TAP_LOG_FILE_NAME=$BIN_DIR/helpers.tap && $BIN_DIR/check_helpers
+# run sockets test
+export CK_TAP_LOG_FILE_NAME=$BIN_DIR/sockets.tap && $BIN_DIR/check_sockets
+# run secure channels client / server test
+./run_client_server_test_SC_level.sh
+
+# run services tests
+## unitary service tests
+./bin/toolkit_test_read
+if [[ $? -eq 0 ]]; then
+    echo "ok 1 - test: read service test: Passed" > $BIN_DIR/service_read.tap
+else
+    echo "not ok 1 - test: read service test: $?" > $BIN_DIR/service_read.tap
+fi
+echo "1..1" >> $BIN_DIR/service_read.tap
+
+./bin/toolkit_test_write
+if [[ $? -eq 0 ]]; then
+    echo "ok 1 - test: write service test: Passed" > $BIN_DIR/service_write.tap
+else
+    echo "not ok 1 - test: write service test: $?" > $BIN_DIR/service_write.tap
+fi
+echo "1..1" >> $BIN_DIR/service_write.tap
+
+## run toolkit cilent / server test
+./run_client_server_test.sh
