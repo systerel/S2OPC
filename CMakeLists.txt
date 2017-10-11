@@ -1,9 +1,6 @@
 cmake_minimum_required (VERSION 2.8)
 project (INGOPCS)
 
-# Extern target: mbedtls
-add_subdirectory(libraries/mbedtls-2.3.0)
-
 # Define runtime output directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
@@ -65,7 +62,6 @@ set(INGOPCS_PRIVATE_INCLUDES
     "src/helpers_platform_dep/${PLATFORM_DIR}"
     "src/services/BtoC_itf"
     "src/services/B_genC"
-    "libraries/mbedtls-2.3.0/include" # For some reason, the CMakeLists from mbedtls does not export that
 ) 
 target_include_directories(ingopcs BEFORE
     PUBLIC  ${INGOPCS_PUBLIC_INCLUDES}
@@ -73,7 +69,7 @@ target_include_directories(ingopcs BEFORE
 )
 
 # Define INGOPCS library dependencies
-target_link_libraries(ingopcs PUBLIC mbedtls)
+target_link_libraries(ingopcs PUBLIC mbedtls mbedcrypto mbedx509)
 target_link_libraries(ingopcs PUBLIC pthread)
 target_link_libraries(ingopcs PUBLIC m)
 
@@ -109,7 +105,7 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
                                    "address_space_generation/genc/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_client PRIVATE ingopcs rt)
+target_link_libraries(toolkit_test_client PRIVATE ingopcs mbedtls rt)
 target_include_directories(toolkit_test_client PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
@@ -200,7 +196,7 @@ add_executable(test_secure_channels_client ${SOCKETS_SRC}
 target_include_directories(test_secure_channels_client PRIVATE "tests/secure_channels/stubs" 
                                                                ${INGOPCS_PUBLIC_INCLUDES} 
                                                                ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(test_secure_channels_client PRIVATE mbedtls pthread rt)
+target_link_libraries(test_secure_channels_client PRIVATE mbedtls mbedcrypto mbedx509 pthread rt)
 
 # Secure channels tests: SERVER executable
 add_executable(test_secure_channels_server ${SOCKETS_SRC}
@@ -210,4 +206,4 @@ add_executable(test_secure_channels_server ${SOCKETS_SRC}
 target_include_directories(test_secure_channels_server PRIVATE "tests/secure_channels/stubs" 
                                                                ${INGOPCS_PUBLIC_INCLUDES} 
                                                                ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(test_secure_channels_server PRIVATE mbedtls pthread rt)
+target_link_libraries(test_secure_channels_server PRIVATE mbedtls mbedcrypto mbedx509 pthread rt)
