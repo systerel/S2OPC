@@ -135,7 +135,7 @@ OPERATIONS
     END
     ;
     
-    bres <-- client_validate_session_service_resp (channel, req_handle) =
+    bres, session <-- client_validate_session_service_resp (channel, req_handle) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -144,7 +144,13 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type : s_service_on_session_resps
     THEN
-        bres :: BOOL
+        CHOICE
+            bres := TRUE ||
+            session :( session : t_session_i & session : t_session)
+        OR
+            bres := FALSE ||
+            session := c_session_indet
+        END
     END
     ;
     

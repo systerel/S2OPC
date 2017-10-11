@@ -265,13 +265,14 @@ OPERATIONS
         ret := l_ret
     END;
     
-    bres <-- client_validate_session_service_resp (channel, req_handle) =
+    bres, session <-- client_validate_session_service_resp (channel, req_handle) =
     VAR
         l_session,
         l_valid_session,
         l_session_state,
         l_session_channel
-    IN
+    IN  
+        session := c_session_indet;
         l_session <-- client_get_session_and_remove_request_handle (req_handle);
         l_valid_session <-- is_valid_session (l_session);
         l_session_state <-- get_session_state_or_closed (l_session);
@@ -289,6 +290,8 @@ OPERATIONS
             THEN
                 // session in invalid state or invalid channel used => close session
                 client_close_session_sm (l_session)
+            ELSE
+                session := l_session
             END
         ELSE
             bres := FALSE

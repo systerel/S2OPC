@@ -413,6 +413,7 @@ OPERATIONS
         l_request_handle,
         l_validated_req_handle,
         l_is_valid_session_resp,
+        l_session,
         l_resp_msg,
         l_valid_resp_msg,
         l_status
@@ -425,7 +426,7 @@ OPERATIONS
             l_validated_req_handle <-- client_validate_response_request_handle (l_request_handle, resp_typ);
             IF l_validated_req_handle = TRUE
             THEN
-                l_is_valid_session_resp <-- client_validate_session_service_resp (channel, l_request_handle);
+                l_is_valid_session_resp, l_session <-- client_validate_session_service_resp (channel, l_request_handle);
                 IF l_is_valid_session_resp = TRUE
                 THEN
                     l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
@@ -433,7 +434,7 @@ OPERATIONS
                     IF l_valid_resp_msg = TRUE
                     THEN
                         l_status <-- read_msg_resp_header_service_status (l_resp_msg_header);
-                        cli_service_response (l_resp_msg, l_status)
+                        cli_service_response (l_session, l_resp_msg, l_status)
                     END /* DECODE RESP CHECK */
                 END; /* VALID REQ HANDLE ASSOCIATED TO A VALID SESSION */
                 client_remove_req_handle (l_request_handle)
@@ -543,6 +544,7 @@ OPERATIONS
         l_request_handle,
         l_validated_req_handle,
         l_is_valid_session_resp,
+        l_session,
         l_resp_msg,
         l_valid_resp_msg,
         l_status
@@ -560,7 +562,7 @@ OPERATIONS
                 IF l_valid_resp_msg = TRUE
                 THEN
                     l_status <-- read_msg_resp_header_service_status (l_resp_msg_header);
-                    cli_service_response (l_resp_msg, l_status)
+                    cli_service_response (c_session_indet, l_resp_msg, l_status)
                 END; /* DECODE RESP CHECK */
                 client_remove_req_handle (l_request_handle)
             END; /* VALID REQ HANDLE */
