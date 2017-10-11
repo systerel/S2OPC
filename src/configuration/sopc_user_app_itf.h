@@ -64,9 +64,10 @@ typedef struct SOPC_Endpoint_Config{
 typedef enum SOPC_App_Com_Event {
   /* Client application events */
   SE_SESSION_ACTIVATION_FAILURE, /* id = session id
-                                    (auxParam = user index ?)
+                                    auxParam = endpoint connection config index
                                  */
   SE_ACTIVATED_SESSION,          /* id = session id
+                                    auxParam = endpoint connection config index
                                  */
   SE_SESSION_REACTIVATING,       /* automatic new SC or manual new user on same SC */
                                  /* id = session id

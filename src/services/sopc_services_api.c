@@ -223,6 +223,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
                                                  auxParam,
                                                  &bres);
     if(bres == false){
+      // TODO: check activation failure always triggered if bres == false
       // TODO: log
     }
     break;
@@ -266,7 +267,11 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
   default:
     assert(false);
   }
-  assert(STATUS_OK == status);
+  if(STATUS_OK != status){
+      if(SOPC_DEBUG_PRINTING != false){
+          printf("Invalid status on SOPC_ServicesEventDispatcher exit: %x\n", status);
+      }
+  }
 }
 
 void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent,

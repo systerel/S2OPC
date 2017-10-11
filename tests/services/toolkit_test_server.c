@@ -29,7 +29,7 @@
 #include "sopc_encodeable.h"
 
 #include "sopc_toolkit_config.h"
-#include "sopc_services_api.h"
+#include "sopc_toolkit_async_api.h"
 
 #include "wrap_read.h"
 
@@ -44,6 +44,8 @@ static bool secuActive = !false;
 void Test_ComEvent_Fct(SOPC_App_Com_Event event,
                          void*              param,
                          SOPC_StatusCode    status){
+    (void) param;
+    (void) status;
   if(event == SE_CLOSED_ENDPOINT){
     printf("<Test_Server_Toolkit: closed endpoint event: OK\n");
     endpointClosed = !false;
@@ -166,15 +168,8 @@ int main(void)
 
   // Asynchronous request to open the endpoint
   if(STATUS_OK == status){
-      SOPC_Services_EnqueueEvent(APP_TO_SE_OPEN_ENDPOINT,
-                                 epConfigIdx,
-                                 NULL,
-                                 0);
-    if(STATUS_OK == status){
       printf("<Test_Server_Toolkit: Opening endpoint... \n");
-    }else{
-      printf("<Test_Server_Toolkit: Failed opening endpoint... \n");
-    }
+      SOPC_ToolkitServer_AsyncOpenEndpoint(epConfigIdx);
   }
 
   // Run the server until timeout or notification that endpoint is closed
@@ -188,10 +183,7 @@ int main(void)
     }
 
   // Asynchronous request to close the endpoint
-  SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT,
-                             1,
-                             NULL,
-                             0);
+  SOPC_ToolkitServer_AsyncCloseEndpoint(epConfigIdx);
 
   // Wait until endpoint is closed
   loopCpt = 0;

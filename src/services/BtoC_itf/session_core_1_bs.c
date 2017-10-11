@@ -239,6 +239,7 @@ void session_core_1_bs__set_session_state(
    const constants__t_sessionState session_core_1_bs__state) {
   t_bool is_client = false;
   constants__t_channel_i channel = constants__c_channel_indet;
+  constants__t_channel_config_idx_i channel_config_idx = constants__c_channel_config_idx_indet;
   if(unique_session.id == session_core_1_bs__session){
     unique_session.session_core_1_bs__state = session_core_1_bs__state;
 
@@ -246,6 +247,8 @@ void session_core_1_bs__set_session_state(
     session_core_1_bs__get_session_channel(session_core_1_bs__session,
                                            &channel);
     channel_mgr_bs__is_client_channel(channel, &is_client);
+
+    channel_mgr_bs__get_channel_info(channel, &channel_config_idx);
 
     if(session_core_1_bs__state == constants__e_session_userActivated){
       if(is_client != false &&
@@ -255,7 +258,7 @@ void session_core_1_bs__set_session_state(
         SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
                                         session_core_1_bs__session,
                                         NULL,
-                                        0); // unused
+                                        channel_config_idx);
       }
     }else if(session_core_1_bs__state == constants__e_session_userActivating ||
              session_core_1_bs__state == constants__e_session_scActivating){

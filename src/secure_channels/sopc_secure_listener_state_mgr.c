@@ -201,11 +201,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
             result = SOPC_SecureListenerStateMgr_OpeningListener(eltId);
         }
         if(result == false){
-            // Notify Services layer that EP_OPEN failed
-            SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED,
-                                       eltId,
-                                       NULL,
-                                       0);
+            // Nothing to do: it means EP is already open or in opening step
         }else{
             // Notify Sockets layer to create the listener
             SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER,

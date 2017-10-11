@@ -39,6 +39,7 @@ endif()
 
 # Define non-platform dependent source files
 file(GLOB_RECURSE INGOPCS_SRCS
+    "src/api_toolkit/*.c"
     "src/configuration/*.c"
     "src/helpers/*.c"
     "src/helpers_crypto/*.c"
@@ -53,16 +54,17 @@ add_library(ingopcs STATIC ${PLATFORM_SRCS} ${INGOPCS_SRCS})
 
 # Define INGOPCS library includes
 set(INGOPCS_PUBLIC_INCLUDES
+    "src/api_toolkit"
     "src/configuration"
     "src/helpers"
     "src/helpers_opcua_types"
     "src/helpers_crypto"
     "src/helpers_platform_dep"
+)
+set(INGOPCS_PRIVATE_INCLUDES
     "src/sockets"
     "src/secure_channels"
     "src/services"
-)
-set(INGOPCS_PRIVATE_INCLUDES
     "src/helpers_crypto/mbedtls"
     "src/helpers_platform_dep/${PLATFORM_DIR}"
     "src/services/BtoC_itf"
