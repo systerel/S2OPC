@@ -26,10 +26,13 @@ from attribute_write_values import attribute_write_values_tests
 from safety_secure_channels import safety_secure_channels_test
 from view_basic import browse_tests
 from common import sUri
+from tap_logger import TapLogger
+
 
 if __name__=='__main__':
     print('Connecting to', sUri)
     client = Client(sUri)
+    logger = TapLogger("validation.tap")
 
     try:
         # test secure connexions
@@ -41,14 +44,15 @@ if __name__=='__main__':
         #print('endPoints:', endPoints)
 
         # Read tests
-        attribute_read_tests(client)
+        attribute_read_tests(client, logger)
 
         # write tests
-        attribute_write_values_tests(client)
+        attribute_write_values_tests(client, logger)
 
         # browse tests
-        browse_tests(client)
+        browse_tests(client, logger)
     finally:
+        logger.finalize_report()
         client.disconnect()
         print('Disconnected')
 

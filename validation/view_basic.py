@@ -22,25 +22,32 @@
 from opcua.common.node import Node
 from common import sUri
 
-def browse_tests(client):
+def browse_tests(client, logger):
 
     print("Browsing children of node ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019")
-    print("Checking children identifiers")
+    print(" children identifiers")
     n1 = client.get_node("ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019")
     children = n1.get_children()
-    assert(len(children) == 7)
+    logger.add_test('Browse Test - number of children for Node ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019', len(children) == 7)
     node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs")
+    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs', node in children)
     assert(node in children)
     node = Node(sUri,"i=61")
+    logger.add_test('Browse Test - child i=61', node in children)
     assert(node in children)
     node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM")
+    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM', node in children)
     assert(node in children)
     node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC")
+    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC', node in children)
     assert(node in children)
     node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand")
+    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand', node in children)
     assert(node in children)
     node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K")
+    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K', node in children)
     assert(node in children)
     node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC")
+    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC', node in children)
     assert(node in children)
 

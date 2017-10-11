@@ -20,7 +20,7 @@ from opcua import ua
 from opcua.ua import QualifiedName, LocalizedText, XmlElement
 from common import Type_list, Initial_values_list, New_values_list, Variant_List
 
-def attribute_write_values_tests(client):
+def attribute_write_values_tests(client, logger):
 
     for (i,e) in enumerate(Type_list):
         nid = 1000 + i + 1
@@ -35,5 +35,5 @@ def attribute_write_values_tests(client):
         value = node.get_value()
         print(' Value for Node {:03d}:'.format(nid), value)
         print(' Expected Value for Node {:03d}:'.format(nid), newValue)
-        assert(value == newValue)
+        logger.add_test('Write Test - Value for Node {:03d}'.format(nid), value == newValue)
 

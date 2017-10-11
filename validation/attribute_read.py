@@ -16,11 +16,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from opcua.ua import QualifiedName, LocalizedText, XmlElement
 from common import Type_list, Initial_values_list
 
-def attribute_read_tests(client):
+def attribute_read_tests(client, logger):
 
     for (i,e) in enumerate(Type_list):
         nid = 1000 + i + 1
@@ -33,24 +32,23 @@ def attribute_read_tests(client):
 
         # check value
         value = node.get_value()
+        logger.add_test('Read Test - Value for Node {:03d}'.format(nid), value == expectedValue)
         print(' Value for Node {:03d}:'.format(nid), value)
-        assert(value == expectedValue)
 
         # check browseName
         browse_name = node.get_browse_name()
+        logger.add_test('Read Test - browse name for Node {:03d}'.format(nid), browse_name == expectedBrowseName)
         print('browse_name: ', browse_name)
-        assert(browse_name == expectedBrowseName)
 
         # check display name
         display_name = node.get_display_name()
-        assert(display_name == expectedDisplayName)
+        logger.add_test('Read Test - display name for Node {:03d}'.format(nid), display_name == expectedDisplayName)
 
         # check node class
         class_name = node.get_node_class()
-        assert(str("NodeClass.Variable")==str(class_name))
+        logger.add_test('Read Test - node class for Node {:03d}'.format(nid), str("NodeClass.Variable")==str(class_name))
 
         # TODO: check data type
         #data_type = node.get_data_type()
         #print('data type: ', data_type)
-
 
