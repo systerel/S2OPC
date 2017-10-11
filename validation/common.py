@@ -21,6 +21,8 @@ import string
 from opcua import ua
 from opcua.ua import XmlElement
 
+sUri = 'opc.tcp://localhost:4841'
+
 Type_list = ['Int64','UInt32','Double','String','ByteString','XmlElement']
 
 Variant_List = [ua.VariantType.Int64, ua.VariantType.UInt32, ua.VariantType.Double, ua.VariantType.String, ua.VariantType.ByteString, ua.VariantType.XmlElement]

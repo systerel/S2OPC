@@ -27,7 +27,7 @@ def loop_until_kbdinterrupt(fRetryDelay, func, *args, **kwargs):
     Calls func(*args, **kwargs) in a whil loop, unitl someone sends a KeyboardInterrupt.
     When there is an exception, print the traceback on stdout and waits fRetryDelay seconds before retrying.
     Otherwise, function is called again when it's finished.
-    
+
     Returning from this means a KeyboardInterrupt occured.
     """
     assert callable(func)

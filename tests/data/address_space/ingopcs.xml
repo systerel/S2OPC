@@ -39,7 +39,7 @@
     <Alias Alias="HasTypeDefinition">i=40</Alias>
     <Alias Alias="HasModellingRule">i=37</Alias>
     <Alias Alias="HasEncoding">i=38</Alias>
-    <Alias Alias="HasDescription">i=39</Alias>    
+    <Alias Alias="HasDescription">i=39</Alias>
   </Aliases>
   <!-- COMMON PART WITH READ/WRITE TEST -->
    <UADataType NodeId="i=24" BrowseName="BaseDataType" IsAbstract="true">

@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from opcua import ua
-from opcua.crypto import security_policies 
+from opcua.crypto import security_policies
 
 def safety_secure_channels_test(client):
   #client.set_security_string("Basic256,Sign,trusted/cacert.der,client_private/client.key")

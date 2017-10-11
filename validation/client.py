@@ -24,9 +24,10 @@ from opcua import ua, Client
 from attribute_read import attribute_read_tests
 from attribute_write_values import attribute_write_values_tests
 from safety_secure_channels import safety_secure_channels_test
+from view_basic import browse_tests
+from common import sUri
 
 if __name__=='__main__':
-    sUri = 'opc.tcp://localhost:4841'
     print('Connecting to', sUri)
     client = Client(sUri)
 
@@ -45,20 +46,9 @@ if __name__=='__main__':
         # write tests
         attribute_write_values_tests(client)
 
+        # browse tests
+        browse_tests(client)
     finally:
         client.disconnect()
         print('Disconnected')
 
-    # browse tests
-#    n1 = client.get_node("ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM")
-#    print('children:')
-#    for n in n1.get_children():
-#        print('  ' + str(n.nodeid))
-    
-    # write tests
-    #n1 = client.get_node("ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK")
-    #n1.set_value(ua.Variant(True, ua.VariantType.Boolean))
-    #print('n1:', n1.get_value())
-    #n1.set_value(ua.Variant(False, ua.VariantType.Boolean))
-    #print('n1:', n1.get_value())
-    

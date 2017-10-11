@@ -26,7 +26,7 @@ def attribute_write_values_tests(client):
         nid = 1000 + i + 1
         print('Checking nid:', nid)
         node = client.get_node(nid)
-  
+
         # write new value
         newValue = New_values_list[i]
         node.set_value(ua.Variant(newValue, Variant_List[i]))
@@ -36,5 +36,4 @@ def attribute_write_values_tests(client):
         print(' Value for Node {:03d}:'.format(nid), value)
         print(' Expected Value for Node {:03d}:'.format(nid), newValue)
         assert(value == newValue)
-
 
