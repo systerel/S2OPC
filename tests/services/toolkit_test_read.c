@@ -54,5 +54,9 @@ int main()
     free(pReadReq->NodesToRead);
     free(pReadReq);
 
-    return false == bTest;
+    if(bTest == false){
+        return 1;
+    }else{
+        return 0;
+    }
 }

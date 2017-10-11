@@ -52,29 +52,35 @@ extern SOPC_AddressSpace addressSpace;
 #define Description_end addressSpace.descriptionIdxArray_end
 #define DEFAULT_VARIANT  {SOPC_Null_Id, SOPC_VariantArrayType_SingleValue,{0}}
 
-void test_browsename(){
+bool test_browsename(){
+    bool bres = true;
     printf ("test BrowseName\n");
     const char *var;
     <xsl:apply-templates select = "$ua_nodes/*/@BrowseName" mode="qName"/>
+    return bres;
 }
 
-void test_value(){
+bool test_value(){
     printf ("test Value\n");
+    bool bres = true;
     int pos;
     const char* nodeid;
     SOPC_Byte builtInTypeId;
     char *value_node;
     <xsl:apply-templates select = "//ua:UAVariable|//ua:UAVariableType" mode="tValue"/>
+    return bres;
 }
 
-void test_reference(){
+bool test_reference(){
     printf("test reference \n");
+    bool bres = true;
     int pos;
     int res;
     int exp;
     const char* nodeid;
 
     <xsl:apply-templates select="$ua_nodes/*" mode="ref"/>
+    return bres;
 }
 
 int compareLocalizedText(SOPC_LocalizedText LText, const char *text, const char *locale){
@@ -98,25 +104,32 @@ int compareLocalizedText(SOPC_LocalizedText LText, const char *text, const char 
 
 % for s in ['Description', 'DisplayName']:
 
-void test_${s}(){
+bool test_${s}(){
     printf("test ${s}\n");
+    bool bres = true;
     int pos;
     int res;
     int exp;
     const char* nodeid;
     <xsl:apply-templates select="$ua_nodes/*" mode="${s}"/>
+    return bres;
 }
 
 % endfor
 
 int main (){
-    test_browsename();
-    test_value();
-    test_reference();
-    test_Description();
-    test_DisplayName();
+    bool bres = true;
+    bres = test_browsename();
+    bres = bres &amp;&amp; test_value();
+    bres = bres &amp;&amp; test_reference();
+    bres = bres &amp;&amp; test_Description();
+    bres = bres &amp;&amp; test_DisplayName();
     printf("%zu %s\n", strlen((char *)Description[1].Text.Data), Description[1].Text.Data);
-    return 0;
+    if(bres == false){
+        return 1;
+    }else{
+        return 0;
+    }
 }
 
 </xsl:template>
@@ -130,6 +143,7 @@ int main (){
     exp = <xsl:value-of select="count(./ua:${s})"/>;
     res = ${s}_end[pos] - ${s}_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of ${s} expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -194,6 +208,7 @@ int nsIndex = <xsl:value-of select="if (regex-group(1)) then substring-after(sub
     exp = <xsl:value-of select="count(./ua:Description)"/>;
     res = addressSpace.descriptionIdxArray_end[pos] - addressSpace.descriptionIdxArray_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of description expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -213,6 +228,7 @@ int nsIndex = <xsl:value-of select="if (regex-group(1)) then substring-after(sub
     exp = <xsl:value-of select="count(./ua:References/*)"/>;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -237,10 +253,10 @@ int nsIndex = <xsl:value-of select="if (regex-group(1)) then substring-after(sub
     <xsl:variable name="NodeId" select="../@NodeId"/>
     <xsl:analyze-string select="$bn" regex="(\d*):(.*)">
         <xsl:matching-substring>
-${print_value('if (addressSpace.browseNameArray[%s].NamespaceIndex != %s) {printf("invalid BrowseName ") ;}  ',"$pos", "regex-group(1)")}<xsl:text>
+${print_value('if (addressSpace.browseNameArray[%s].NamespaceIndex != %s) {bres = false; printf("invalid BrowseName ") ;}  ',"$pos", "regex-group(1)")}<xsl:text>
 </xsl:text>
 ${print_value('var = "%s";', "regex-group(2)")}
-${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var)) {printf("invalid BrowseName ") ;}  ',"$pos")}<xsl:text>
+${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  ',"$pos")}<xsl:text>
 </xsl:text>
         </xsl:matching-substring>
         <xsl:non-matching-substring>
@@ -261,11 +277,11 @@ ${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var
   pos = <xsl:value-of select="position()"/>;
   nodeid = "<xsl:value-of select="@NodeId"/>";
   printf("test Value for nodeid %s\n", nodeid);
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}<xsl:text>
 </xsl:text>
 </xsl:template>
 
@@ -276,9 +292,9 @@ ${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "<xsl:value-of select="."/>";
   builtInTypeId = SOPC_${s}_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}<xsl:text>
 </xsl:text>
   if (builtInTypeId == SOPC_Boolean_Id) {
     bool bool_value;
@@ -288,40 +304,40 @@ ${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     int int_value;
     sscanf(value_node, "%d", &amp;int_value);
-    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {printf("invalid Value \n") ;}<xsl:text>
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}<xsl:text>
     </xsl:text>
   } else if (builtInTypeId == SOPC_Byte_Id) {
     int int_value;
     sscanf(value_node, "%d", &amp;int_value);
-    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {printf("invalid Value \n") ;}<xsl:text>
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}<xsl:text>
     </xsl:text>
   } else if (builtInTypeId == SOPC_Int16_Id) {
     int int_value;
     sscanf(value_node, "%d", &amp;int_value);
-    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {printf("invalid Value \n") ;}<xsl:text>
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}<xsl:text>
     </xsl:text>
   }else if (builtInTypeId == SOPC_Int32_Id) {
     int int_value;
     sscanf(value_node, "%d", &amp;int_value);
-    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {printf("invalid Value \n") ;}<xsl:text>
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}<xsl:text>
     </xsl:text> 
   }else if (builtInTypeId == SOPC_Int64_Id) {
     int int_value;
     sscanf(value_node, "%d", &amp;int_value);
-    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {printf("invalid Value \n") ;}<xsl:text>
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}<xsl:text>
     </xsl:text>
   }else if (builtInTypeId == SOPC_Double_Id) {
     double double_value;
     sscanf(value_node, "%lf", &amp;double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}<xsl:text>
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}<xsl:text>
     </xsl:text>
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}<xsl:text>
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}<xsl:text>
     </xsl:text>
   }
 
@@ -336,11 +352,11 @@ ${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var
   unsigned int int_value;
   sscanf(value_node, "%u", &amp;int_value);
 
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt16_Id)) {printf("invalid BuiltInTypeId \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt16_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].Value.Uint16 == int_value)) {printf("invalid Value \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].Value.Uint16 == int_value)) {bres = false; printf("invalid Value \n") ;}<xsl:text>
 </xsl:text>
 </xsl:template>
 
@@ -352,11 +368,11 @@ ${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var
   unsigned int int_value;
   sscanf(value_node, "%u", &amp;int_value);
 
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt32_Id)) {printf("invalid BuiltInTypeId \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt32_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].Value.Uint32 == int_value)) {printf("invalid Value \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].Value.Uint32 == int_value)) {bres = false; printf("invalid Value \n") ;}<xsl:text>
 </xsl:text>
 </xsl:template>
 
@@ -368,11 +384,11 @@ ${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var
   unsigned int int_value;
   sscanf(value_node, "%u", &amp;int_value);
 
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt64_Id)) {printf("invalid BuiltInTypeId \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt64_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].Value.Uint64 == int_value)) {printf("invalid Value \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].Value.Uint64 == int_value)) {bres = false; printf("invalid Value \n") ;}<xsl:text>
 </xsl:text>
 </xsl:template>
 
@@ -382,11 +398,11 @@ ${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var
   printf("test Value for nodeid %s\n", nodeid);  
   value_node = <xsl:value-of select="."/>;
 
-if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf("invalid BuiltInTypeId \n") ;}<xsl:text>
+if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}<xsl:text>
 </xsl:text>
-    if (strcmp((char*)addressSpace.valueArray[pos].Value.XmlElt.Data, value_node) != 0) {printf("invalid Value \n") ;}<xsl:text>
+    if (strcmp((char*)addressSpace.valueArray[pos].Value.XmlElt.Data, value_node) != 0) {bres = false; printf("invalid Value \n") ;}<xsl:text>
 </xsl:text>  
   
 </xsl:template>
@@ -398,11 +414,11 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
   value_node = "<xsl:value-of select="."/>";
   float float_value;
   sscanf(value_node, "%f", &amp;float_value);
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Float_Id)) {printf("invalid BuiltInTypeId \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Float_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype  \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype  \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].Value.Floatv == float_value)) {printf("invalid Value  \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].Value.Floatv == float_value)) {bres = false; printf("invalid Value  \n") ;}<xsl:text>
 </xsl:text>
 </xsl:template>
 
@@ -411,11 +427,11 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
   nodeid = "<xsl:value-of select="../../@NodeId"/>";
   printf("test Value for nodeid %s\n", nodeid);  
   value_node = <xsl:value-of select="."/>;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_String_Id)) {printf("invalid BuiltInTypeId \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_String_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}<xsl:text>
 </xsl:text>
-    if (strcmp((char*)addressSpace.valueArray[pos].Value.String.Data, value_node) != 0) {printf("invalid Value \n") ;}<xsl:text>
+    if (strcmp((char*)addressSpace.valueArray[pos].Value.String.Data, value_node) != 0) {bres = false; printf("invalid Value \n") ;}<xsl:text>
 </xsl:text>
 </xsl:template>
 
@@ -424,11 +440,11 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
   nodeid = "<xsl:value-of select="../../@NodeId"/>";
   printf("test Value for nodeid %s\n", nodeid);  
   value_node = <xsl:value-of select="."/>;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_ByteString_Id)) {printf("invalid BuiltInTypeId \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_ByteString_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}<xsl:text>
 </xsl:text>
-    if (strcmp((char*)addressSpace.valueArray[pos].Value.Bstring.Data, value_node) != 0) {printf("invalid Value \n") ;}<xsl:text>
+    if (strcmp((char*)addressSpace.valueArray[pos].Value.Bstring.Data, value_node) != 0) {bres = false; printf("invalid Value \n") ;}<xsl:text>
 </xsl:text>
 </xsl:template>
 
@@ -440,11 +456,11 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
   int int_value;
   sscanf(value_node, "%d", &amp;int_value);
 
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_StatusCode_Id)) {printf("invalid BuiltInTypeId \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_StatusCode_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}<xsl:text>
 </xsl:text>
-  if (!(addressSpace.valueArray[pos].Value.Status == int_value)) {printf("invalid Value \n") ;}<xsl:text>
+  if (!(addressSpace.valueArray[pos].Value.Status == int_value)) {bres = false; printf("invalid Value \n") ;}<xsl:text>
 </xsl:text>
 </xsl:template>
 
