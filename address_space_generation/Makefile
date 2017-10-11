@@ -1,52 +1,31 @@
-# Old makefile, ct.py moved to tooling
-
-empty:=
-space:= $(empty) $(empty)
-CC=gcc
-CFLAGS=-g3 -W -Wall -ansi -pedantic -std=c99 -I./ -I../src/configuration -I../src/helpers -I../src/helpers_opcua_types -I../src/helpers_crypto
-LDFLAGS=
-EXEC=test
-XSL=add.xsl test.xsl
-SRC=$(XSL:.xsl=.c)
-OBJ=$(SRC:.c=.o)
-OBJ_WITH_PATH=$(PATHBUILD)/$(subst $(space), $(PATHBUILD)/,$(OBJ))
-SRC_WITH_PATH=$(PATHGENC)/$(subst $(space), $(PATHGENC)/,$(SRC))
 PATHBUILD=./build
 PATHGENC=./genc
 
-.SECONDARY:$(SRC_WITH_PATH)
-.PHONY: all config clean cleangen cleanall
+XMLPATH=../tests/data/address_space
+XMLFILES=$(shell find $(XMLPATH) -name "*.xml")
+CFILES=$(patsubst $(XMLPATH)/%.xml,$(PATHGENC)/%_addspace.c,$(XMLFILES))
+CTESTFILES=$(patsubst $(XMLPATH)/%.xml,$(PATHGENC)/check_%_addspace.c,$(XMLFILES))
 
-all: config $(EXEC) $(PATHGENC)/test_read_write_addspace.c
+.PHONY: all config clean
+
+all: config $(CFILES) $(CTESTFILES)
 
 config:
-	@echo "configure directories"
+	@echo "Configure directories"
 	@mkdir -p $(PATHBUILD)
 	@mkdir -p $(PATHGENC)
 
 clean:
-	@echo "clean build directory and execs"
-	@rm -f $(EXEC)
+	@echo "Clean build and generated C files directories"
 	@rm -rf $(PATHBUILD)
-
-cleangen:
-	@echo "clean generated C files directory"
 	@rm -rf $(PATHGENC)
 
-cleanall: clean cleangen
+$(PATHGENC)/%_addspace.c: $(XMLPATH)/%.xml gen_address_space.xsl
+	@echo "Generating address space $@ from $^"
+	@./scripts/ct.py gen_address_space.xsl $(PATHBUILD)/gen_address_space.xsl
+	@saxonb-xslt -xsl:$(PATHBUILD)/gen_address_space.xsl -s:$< -o:$@
 
-$(PATHGENC)/%.c : %.xsl testView.xml
-	./scripts/ct.py $< $(PATHBUILD)/$<
-	saxonb-xslt -xsl:$(PATHBUILD)/$< -s:testView.xml -o:$@
-
-$(PATHGENC)/test_%_addspace.c : test_%.xml add.xsl
-	./scripts/ct.py add.xsl $(PATHBUILD)/add.xsl
-	saxonb-xslt -xsl:$(PATHBUILD)/add.xsl -s:$< -o:$@
-
-$(PATHBUILD)/%.o: $(PATHGENC)/%.c
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-$(EXEC): $(OBJ_WITH_PATH)
-	$(CC) -o $@ $^ $(LDFLAGS)
-
-
+$(PATHGENC)/check_%_addspace.c: $(XMLPATH)/%.xml gen_check_address_space.xsl
+	@echo "Generating address space check test $@ from $^"
+	@./scripts/ct.py gen_check_address_space.xsl $(PATHBUILD)/gen_check_address_space.xsl
+	@saxonb-xslt -xsl:$(PATHBUILD)/gen_check_address_space.xsl -s:$< -o:$@

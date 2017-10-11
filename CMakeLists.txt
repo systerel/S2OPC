@@ -80,6 +80,20 @@ target_link_libraries(ingopcs PUBLIC m)
 
 # INGOPCS tests ################################################################################
 
+# Check generated address space for tests
+set(ADDSPACEGEN_DIR "address_space_generation")
+
+add_executable(check_ingopcs_addspace "${ADDSPACEGEN_DIR}/genc/check_ingopcs_addspace.c"
+                                      "${ADDSPACEGEN_DIR}/genc/ingopcs_addspace.c")
+target_link_libraries(check_ingopcs_addspace PRIVATE)
+target_include_directories(check_ingopcs_addspace PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
+                                                          "${ADDSPACEGEN_DIR}/include")
+
+# Allow to test the generated addspace with "make test" since some tests are built using it
+enable_testing()
+add_test(check_addspace ${CMAKE_CURRENT_SOURCE_DIR}/bin/check_ingopcs_addspace)
+set_tests_properties(check_addspace PROPERTIES DEPENDS check_ingopcs_addspace)
+
 # Helpers unit tests
 if (NOT CMAKE_CROSSCOMPILING)
     file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
@@ -94,17 +108,17 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/testlib_write.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
-                                   "address_space_generation/genc/add.c")
+                                   "address_space_generation/genc/ingopcs_addspace.c")
 target_link_libraries(toolkit_test_client PRIVATE ingopcs rt)
-target_include_directories(toolkit_test_client PRIVATE "address_space_generation/"
+target_include_directories(toolkit_test_client PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
 # Server test
 add_executable(toolkit_test_server "tests/services/toolkit_test_server.c"
-                                   "address_space_generation/genc/add.c")
+                                   "address_space_generation/genc/ingopcs_addspace.c")
 target_link_libraries(toolkit_test_server PRIVATE ingopcs rt)
-target_include_directories(toolkit_test_server PRIVATE "address_space_generation/"
+target_include_directories(toolkit_test_server PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
@@ -129,18 +143,18 @@ add_custom_command(
 add_executable(toolkit_test_read "tests/services/toolkit_test_read.c"
                                  "tests/services/wrap_read.c"
                                  "tests/services/testlib_read_response.c"
-                                 "address_space_generation/genc/add.c")
+                                 "address_space_generation/genc/ingopcs_addspace.c")
 target_link_libraries(toolkit_test_read PRIVATE ingopcs rt)
-target_include_directories(toolkit_test_read PRIVATE "address_space_generation/"
+target_include_directories(toolkit_test_read PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                      ${INGOPCS_PUBLIC_INCLUDES} 
                                                      ${INGOPCS_PRIVATE_INCLUDES})
 
 # Write service test
 add_executable(toolkit_test_write "tests/services/toolkit_test_write.c"
                                   "tests/services/testlib_write.c"
-                                  "address_space_generation/genc/add.c")
+                                  "address_space_generation/genc/ingopcs_addspace.c")
 target_link_libraries(toolkit_test_write PRIVATE ingopcs rt)
-target_include_directories(toolkit_test_write PRIVATE "address_space_generation/"
+target_include_directories(toolkit_test_write PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                       ${INGOPCS_PUBLIC_INCLUDES} 
                                                       ${INGOPCS_PRIVATE_INCLUDES})
 

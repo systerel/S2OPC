@@ -28,7 +28,7 @@
 #include "address_space_bs.h"
 
 #include "wrap_read.h"
-#include "add.h"
+#include "sopc_addspace.h"
 #include "sopc_toolkit_config_internal.h"
 
 int main()

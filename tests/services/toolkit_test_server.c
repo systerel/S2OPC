@@ -33,7 +33,7 @@
 
 #include "wrap_read.h"
 
-#include "add.h"
+#include "sopc_addspace.h"
 
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"

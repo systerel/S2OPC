@@ -42,7 +42,7 @@
 #include "test_results.h"
 #include "testlib_read_response.h"
 
-#include "add.h"
+#include "sopc_addspace.h"
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 

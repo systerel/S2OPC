@@ -103,7 +103,7 @@ classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
  *  along with this program.  If not, see &lt;http://www.gnu.org/licenses/>.
  */
 
-#include "add.h"
+#include "sopc_addspace.h"
 
 #include &lt;stdio.h>
 #include &lt;stdbool.h>

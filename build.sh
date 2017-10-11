@@ -44,6 +44,13 @@ else
     echo "Built library and tests with success" | tee -a build.log
 fi
 
+echo "- Run make test" | tee -a build.log
+make -C $BUILD_DIR test >> build.log
+if [[ $? != 0 ]]; then
+    echo "Error: test failed" | tee -a build.log
+    exit 1
+fi
+
 if [[ $? == 0 ]]; then
     echo "Terminated with SUCCESS" | tee -a build.log
     exit 0

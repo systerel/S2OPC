@@ -29,7 +29,7 @@
 #include "address_space_bs.h"
 #include "testlib_write.h"
 #include "sopc_toolkit_config_internal.h"
-#include "add.h"
+#include "sopc_addspace.h"
 
 int main ()
 {
