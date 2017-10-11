@@ -94,7 +94,7 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/testlib_write.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
-                                   "address_space_generation/genc/test_read_write_addspace.c")
+                                   "address_space_generation/genc/add.c")
 target_link_libraries(toolkit_test_client PRIVATE ingopcs rt)
 target_include_directories(toolkit_test_client PRIVATE "address_space_generation/"
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
@@ -129,7 +129,7 @@ add_custom_command(
 add_executable(toolkit_test_read "tests/services/toolkit_test_read.c"
                                  "tests/services/wrap_read.c"
                                  "tests/services/testlib_read_response.c"
-                                 "address_space_generation/genc/test_read_write_addspace.c")
+                                 "address_space_generation/genc/add.c")
 target_link_libraries(toolkit_test_read PRIVATE ingopcs rt)
 target_include_directories(toolkit_test_read PRIVATE "address_space_generation/"
                                                      ${INGOPCS_PUBLIC_INCLUDES} 
@@ -138,7 +138,7 @@ target_include_directories(toolkit_test_read PRIVATE "address_space_generation/"
 # Write service test
 add_executable(toolkit_test_write "tests/services/toolkit_test_write.c"
                                   "tests/services/testlib_write.c"
-                                  "address_space_generation/genc/test_read_write_addspace.c")
+                                  "address_space_generation/genc/add.c")
 target_link_libraries(toolkit_test_write PRIVATE ingopcs rt)
 target_include_directories(toolkit_test_write PRIVATE "address_space_generation/"
                                                       ${INGOPCS_PUBLIC_INCLUDES} 

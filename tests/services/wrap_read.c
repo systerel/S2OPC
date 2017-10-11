@@ -45,22 +45,25 @@
          sizeof(T))
 
 
+const uint32_t N_READ_NODES = 7; // Read nodes with Node Id 1000 to 1000 + N_READ_NODES only
+const uint32_t N_READ_VARS = 6; // Read variables values with Node Id 1001 to 1001 + N_READ_VARS only
+
 /**
  * Creates a request of length N_REQUEST
  */
 OpcUa_ReadRequest *read_new_read_request(void)
 {
 
-    const uint32_t N_REQUESTS = address_space_bs__nNodeIds * 2 + address_space_bs__nVariables;
+    const uint32_t N_REQUESTS = N_READ_NODES * 2 + N_READ_VARS; // Read 2 attributes on each node + value attribute on each variable
 
     OpcUa_ReadValueId *lrv = (OpcUa_ReadValueId *)malloc(N_REQUESTS*sizeof(OpcUa_ReadValueId));
-    int32_t i;
+    uint32_t i;
 
     if(NULL == lrv)
         exit(1);
 
     /* All nodes Ids and classes */
-    for(i=0; i < address_space_bs__nNodeIds; ++i)
+    for(i=0; i < N_READ_NODES; ++i)
     {
         /* Request for the NodeId (...) */
         lrv[2*i+0] = (OpcUa_ReadValueId) {
@@ -82,13 +85,13 @@ OpcUa_ReadRequest *read_new_read_request(void)
 
     /* Note: variables have the last numeric node ids in the @space used for this test*/
     /* All variables */
-    for(i=0; i < address_space_bs__nVariables; ++i)
+    for(i=0; i < N_READ_VARS; ++i)
     {
         /* Request for the Value */
-        lrv[2 * address_space_bs__nNodeIds + i] = (OpcUa_ReadValueId) {
+        lrv[2 * N_READ_NODES + i] = (OpcUa_ReadValueId) {
             .NodeId = {
                 .IdentifierType = IdentifierType_Numeric,
-                .Data.Numeric = (address_space_bs__nNodeIds-1-i)+1000},
+                .Data.Numeric = (N_READ_NODES-1-i)+1000},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
             .DataEncoding = {.Name.Length = 0} };

@@ -43,14 +43,13 @@
          &(T const){ __VA_ARGS__ }, \
          sizeof(T))
 
-const uint32_t N_GROUPS = 6;
+const uint32_t N_GROUPS = 6; // Each group is a different type of variable
+const uint32_t N_VARS = 6; // Test on variables with Node Id 1001 to 1001 + N_VARS only
+// Note: There is N_VARS/N_GROUPS variables of each type (variables shall be sorted by type in predefined order below)
 
 OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
 {
-    const uint32_t N_VARS = address_space_bs__nVariables;
 
-    // Only variables in this address space (+1 object folder containing variables)
-    assert(address_space_bs__nVariables == address_space_bs__nNodeIds - 1);
     // Multiple of number of groups
     assert(N_VARS % N_GROUPS == 0);
 
@@ -208,7 +207,6 @@ void tlibw_free_WriteRequest(OpcUa_WriteRequest **ppWriteReq)
 {
     size_t i;
     OpcUa_WriteRequest *pReq;
-    const uint32_t N_VARS = address_space_bs__nVariables;
 
     if(NULL == ppWriteReq || NULL == *ppWriteReq)
         return;
@@ -346,7 +344,6 @@ bool tlibw_verify_response(OpcUa_WriteRequest *pWriteReq, OpcUa_WriteResponse *p
 
 OpcUa_ReadRequest *tlibw_new_ReadRequest_check(void)
 {
-    const uint32_t N_VARS = address_space_bs__nVariables;
     OpcUa_ReadValueId *lrv = (OpcUa_ReadValueId *)malloc(N_VARS*sizeof(OpcUa_ReadValueId));
     size_t i;
 
