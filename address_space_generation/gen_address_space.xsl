@@ -207,11 +207,12 @@ SOPC_AddressSpace addressSpace = {
 <xsl:template match="ua:UAVariable[not(ua:Value)]|ua:UAVariableType[not(ua:Value)]" mode="value">, DEFAULT_VARIANT</xsl:template>
 
 
-% for s in ['Boolean', 'SByte', 'Byte', 'Int16', 'Int32', 'Int64', 'NodeId']:
+% for s in ['Boolean', 'Byte', 'Int16', 'Int32', 'Int64', 'Guid', 'NodeId']:
 <xsl:template match="uax:${s}" mode="value">,{SOPC_${s}_Id, SOPC_VariantArrayType_SingleValue, {.${s}=<xsl:value-of select="."/>}}</xsl:template>
 % endfor
 
-<xsl:template match="uax:Uint16" mode="value">,{SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:SByte" mode="value">,{SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.Sbyte=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:UInt16" mode="value">,{SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:UInt32" mode="value">,{SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:UInt64" mode="value">,{SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:Float" mode="value">,{SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv=<xsl:value-of select="."/>}}</xsl:template>
@@ -220,6 +221,7 @@ SOPC_AddressSpace addressSpace = {
 <xsl:template match="uax:BString" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {.Bstring=${write_string("$st")}}}</xsl:template>
 <xsl:template match="uax:XmlElt" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_XmlElement_Id, SOPC_VariantArrayType_SingleValue, {.XmlElt=${write_string("$st")}}}</xsl:template>
 <xsl:template match="uax:NodeId" mode="value">,{SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {.NodeId=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:DateTime" mode="value">,{SOPC_DateTime_Id, SOPC_VariantArrayType_SingleValue, {.Date.Low32=<xsl:value-of select="."/>,.Date.High32=<xsl:value-of select="."/>}}</xsl:template>
 
 <xsl:template match="*" mode="value">
 <xsl:message terminate="yes"> unknown type <xsl:value-of select="local-name(.)"/>

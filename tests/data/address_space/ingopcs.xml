@@ -42,7 +42,7 @@
     <Alias Alias="HasDescription">i=39</Alias>
   </Aliases>
   <!-- COMMON PART WITH READ/WRITE TEST -->
-   <UADataType NodeId="i=24" BrowseName="BaseDataType" IsAbstract="true">
+  <UADataType NodeId="i=24" BrowseName="BaseDataType" IsAbstract="true">
     <DisplayName>BaseDataType</DisplayName>
     <Description>Describes a value that can have any valid DataType.</Description>
     <References />
@@ -257,7 +257,7 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=26</Reference>
     </References>
   </UADataType>
-  <!-- End: Basic types definition -->  
+  <!-- End: Basic types definition -->
   <UAObject BrowseName="0:VariablesFolderBn" NodeId="i=1000" ParentNodeId="i=85">
     <DisplayName>VariablesFolderDn</DisplayName>
     <Description>VariablesFolderDescObj1d2</Description>
@@ -346,6 +346,106 @@
     </Value>
   </UAVariable>
   <!-- END OF COMMON PART WITH READ/WRITE TEST -->
+  <UAVariable BrowseName="0:SByte" DataType="SByte" NodeId="i=1007" ParentNodeId="i=1000">
+    <DisplayName>SByte_1dn</DisplayName>
+    <Description>SByte_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:SByte>-128</uax:SByte>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:Byte" DataType="Byte" NodeId="i=1008" ParentNodeId="i=1000">
+    <DisplayName>Byte_1dn</DisplayName>
+    <Description>Byte_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Byte>255</uax:Byte>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:Int16" DataType="Int16" NodeId="i=1009" ParentNodeId="i=1000">
+    <DisplayName>Int16_1dn</DisplayName>
+    <Description>Int16_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Int16>-32768</uax:Int16>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:UInt16" DataType="UInt16" NodeId="i=1010" ParentNodeId="i=1000">
+    <DisplayName>UInt16_1dn</DisplayName>
+    <Description>UInt16_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt16>65535</uax:UInt16>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:Int32" DataType="Int32" NodeId="i=1011" ParentNodeId="i=1000">
+    <DisplayName>Int32_1dn</DisplayName>
+    <Description>Int32_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Int32>-2147483648</uax:Int32>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:UInt64" DataType="UInt64" NodeId="i=1012" ParentNodeId="i=1000">
+    <DisplayName>UInt64_1dn</DisplayName>
+    <Description>UInt64_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt64>18446744073709551615</uax:UInt64>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:Float" DataType="Float" NodeId="i=1013" ParentNodeId="i=1000">
+    <DisplayName>Float_1dn</DisplayName>
+    <Description>Float_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Float>5758787.5876875</uax:Float>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:DateTime" DataType="DateTime" NodeId="i=1014" ParentNodeId="i=1000">
+    <DisplayName>DateTime_1dn</DisplayName>
+    <Description>DateTime_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:DateTime>18446744073709551615</uax:DateTime>
+    </Value>
+  </UAVariable>
+  <!--UAVariable BrowseName="0:Guid" DataType="Guid" NodeId="i=1014" ParentNodeId="i=1000">
+    <DisplayName>Guid_1dn</DisplayName>
+    <Description>Guid_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Guid>18446744073709551615</uax:Guid>
+    </Value>
+  </UAVariable-->
+  <!-- END OF ADDITIONAL PART TO READ/WRITE TEST PART -->
   <UAObject BrowseName="261:15361" NodeId="ns=261;i=15361" ParentNodeId="i=85">
     <DisplayName>15361</DisplayName>
     <Description>NoName</Description>
