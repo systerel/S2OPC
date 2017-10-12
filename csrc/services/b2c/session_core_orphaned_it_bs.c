@@ -35,13 +35,16 @@ void session_core_orphaned_it_bs__init_iter_orphaned_t_session(
    const constants__t_channel_i session_core_orphaned_it_bs__lost_channel,
    t_bool * const session_core_orphaned_it_bs__continue) {
   // TODO: iter
-  *session_core_orphaned_it_bs__continue = 0;
+    (void) session_core_orphaned_it_bs__lost_channel;
+    *session_core_orphaned_it_bs__continue = 0;
 }
 
 void session_core_orphaned_it_bs__continue_iter_orphaned_t_session(
    constants__t_session_i * const session_core_orphaned_it_bs__session,
    t_bool * const session_core_orphaned_it_bs__continue) {
-  printf("session_core_orphaned_it_bs__continue_iter_orphaned_t_session\n");
-  exit(1);
+    (void) session_core_orphaned_it_bs__session;
+    (void) session_core_orphaned_it_bs__continue;
+    printf("session_core_orphaned_it_bs__continue_iter_orphaned_t_session\n");
+    exit(1);
 }
 

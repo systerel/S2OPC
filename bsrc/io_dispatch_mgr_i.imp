@@ -187,7 +187,8 @@ OPERATIONS
                             OR e_msg_session_service_class THEN
                                 client_receive_session_service_resp (channel, l_msg_type, buffer)
                             OR e_msg_discovery_service_class THEN
-                                client_receive_discovery_service_resp (channel, l_msg_type, buffer)
+                                /* TODO: check channel <-> req handle corresp ?: for now req handle unique in client */
+                                client_receive_discovery_service_resp (l_msg_type, buffer)
                             END
                         END
                     ELSE

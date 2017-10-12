@@ -89,9 +89,7 @@ void util_message_out_bs__alloc_msg(
   }
 }
 
-void message_out_bs__alloc_app_req_msg_header(
-   const constants__t_msg_type_i message_out_bs__msg_type,
-   constants__t_msg_header_i * const message_out_bs__nmsg_header){
+void message_out_bs__alloc_app_req_msg_header(constants__t_msg_header_i * const message_out_bs__nmsg_header){
   void* header = NULL;
   SOPC_StatusCode status = SOPC_Encodeable_Create(&OpcUa_RequestHeader_EncodeableType, &header);
   if(STATUS_OK == status){
@@ -125,6 +123,9 @@ void message_out_bs__bless_msg_out(
    const constants__t_msg_header_i message_out_bs__msg_header,
    const constants__t_msg_i message_out_bs__msg){
   /* NOTHING TO DO: in B model now message_out_bs__msg = c_msg_out now */
+    (void) message_out_bs__msg_type;
+    (void) message_out_bs__msg_header;
+    (void) message_out_bs__msg;
 }
 
 void message_out_bs__dealloc_msg_header_out(
@@ -236,7 +237,8 @@ void message_out_bs__msg_out_memory_changed(void) {
 void message_out_bs__write_activate_msg_user(
    const constants__t_msg_i message_out_bs__msg,
    const constants__t_user_i message_out_bs__user) {
-  assert(message_out_bs__user == 1); // anonymous user only for now
+    (void) message_out_bs__msg;
+    assert(message_out_bs__user == 1); // anonymous user only for now
 }
 
 void message_out_bs__write_create_session_req_msg_endpointUrl(

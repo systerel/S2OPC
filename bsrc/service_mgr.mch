@@ -183,10 +183,8 @@ OPERATIONS
     END
     ;
 
-    client_receive_discovery_service_resp (channel, resp_typ, msg_buffer) =
+    client_receive_discovery_service_resp (resp_typ, msg_buffer) =
     PRE
-        channel : t_channel_i &
-        channel : s_channel_connected &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
         a_msg_in_type : s_discovery_service_resps &

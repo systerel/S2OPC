@@ -45,10 +45,8 @@ INITIALISATION
 
 OPERATIONS
     
-    nmsg_header <-- alloc_app_req_msg_header (msg_type) =
+    nmsg_header <-- alloc_app_req_msg_header =
     PRE
-        msg_type : t_msg_type_i &
-        msg_type : t_msg_type &
         c_msg_out_header = c_msg_header_indet
     THEN
         CHOICE

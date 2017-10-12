@@ -1616,6 +1616,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
             newSecuToken.secureChannelId = scConnection->currentSecurityToken.secureChannelId;
             newSecuToken.revisedLifetime = requestedLifetime;
             //TODO: newSecuToken.createdAt
+            SOPC_DateTime_Initialize(&newSecuToken.createdAt);
         }
     }
 

@@ -109,7 +109,7 @@ OPERATIONS
     /* --------------------------------------------------------------------- */
     /* Service Write */
 
-    StatusCode_service <-- treat_write_request_WriteValues(userid) =
+    StatusCode_service <-- treat_write_request_WriteValues =
     BEGIN
         StatusCode_service := e_sc_ok ||
         a_Value,

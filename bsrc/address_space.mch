@@ -283,10 +283,8 @@ OPERATIONS
     /* --------------------------------------------------------------------- */
     /* Service Write */
 
-    StatusCode_service <-- treat_write_request_WriteValues(userid) =
+    StatusCode_service <-- treat_write_request_WriteValues =
     PRE
-        userid : t_user_i &
-        userid : t_user &
         ResponseWrite_allocated = TRUE /* TODO & userid /= c_user_local */
     THEN
         StatusCode_service,

@@ -55,13 +55,12 @@ INITIALISATION
 LOCAL_OPERATIONS
     /* Outer treat operation. Validates isvalid, asks for uid on (nid, aid),
        calls treat_write_2 which effectively records the write. */
-    sc <-- treat_write_1(isvalid, nid, aid, value, uid) =
+    sc <-- treat_write_1(isvalid, nid, aid, value) =
     PRE
         isvalid : BOOL &
         nid : t_NodeId_i &
         aid : t_AttributeId_i &
         value : t_Variant_i &
-        uid : t_user_i &
         (isvalid = TRUE
          =>
          nid : t_NodeId &
@@ -152,7 +151,7 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_write_request_WriteValues(userid) =
+    StatusCode_service <-- treat_write_request_WriteValues =
     VAR
         l_nb_req,
         l_continue,
@@ -172,7 +171,7 @@ OPERATIONS
             /* Avoids the IF with a local operation. The following local op will use
                another local op to realize the write. The latter operation can be
                re-used in another context (e.g. write request from the Application) */
-            l_status <-- treat_write_1(l_isvalid, l_nid, l_aid, l_value, userid);
+            l_status <-- treat_write_1(l_isvalid, l_nid, l_aid, l_value);
             set_ResponseWrite_StatusCode(l_wvi, l_status)
         INVARIANT
             wreqs_to_iterate <: t_WriteValue &
@@ -219,9 +218,9 @@ OPERATIONS
     END
     ;
 
-    sc <-- treat_write_1(isvalid, nid, aid, value, uid) =
+    sc <-- treat_write_1(isvalid, nid, aid, value) =
     IF isvalid = TRUE THEN
-        /* TODO: check uid */
+        /* TODO: provide and check user id */
         /* sc <-- check_user(nid, aid, uid) */
         sc <-- treat_write_2(nid, aid, value)
     ELSE

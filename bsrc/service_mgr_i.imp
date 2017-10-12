@@ -94,14 +94,12 @@ LOCAL_OPERATIONS
 
     /* TODO: call the treat write on an encoded WriteRequest */
     /* TODO: add constraints on userid? */
-    StatusCode_service <-- treat_write_request(write_msg, userid) =
+    StatusCode_service <-- treat_write_request(write_msg) =
     PRE
         write_msg : t_msg_i &
         write_msg = c_msg_in &
         c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_write_req &
-        userid : t_user_i &
-        userid : t_user
+        a_msg_in_type = e_msg_session_write_req
     THEN
         StatusCode_service
         :(  StatusCode_service : t_StatusCode_i &
@@ -151,7 +149,7 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_write_request(write_msg, userid) =
+    StatusCode_service <-- treat_write_request(write_msg) =
     VAR
         l_nb_req
     IN
@@ -162,7 +160,7 @@ OPERATIONS
             StatusCode_service <-- alloc_write_request_responses(l_nb_req);
             IF StatusCode_service = e_sc_ok
             THEN
-                StatusCode_service <-- treat_write_request_WriteValues(userid)
+                StatusCode_service <-- treat_write_request_WriteValues
             END
         END;
         free_write_request
@@ -306,7 +304,6 @@ OPERATIONS
         l_valid_msg,
         l_resp_msg_header,
         l_valid_resp_header,
-        l_session_user,
         l_ret,
         l_bret,
         l_is_valid_resp,
@@ -353,8 +350,7 @@ OPERATIONS
                                     END
                                 OR e_msg_session_write_req THEN
                                     // Write request case
-                                    l_session_user <-- get_session_user_or_indet (l_session);
-                                    l_ret <-- treat_write_request (l_req_msg, l_session_user);
+                                    l_ret <-- treat_write_request (l_req_msg);
                                     /* TODO: the following may fail (malloc) */
                                     write_WriteResponse_msg_out(l_resp_msg);
                                     dealloc_write_request_responses
@@ -537,7 +533,7 @@ OPERATIONS
     END
     ;
 
-    client_receive_discovery_service_resp (channel, resp_typ, msg_buffer) =
+    client_receive_discovery_service_resp (resp_typ, msg_buffer) =
     VAR
         l_resp_msg_header,
         l_valid_resp_header,
@@ -811,7 +807,7 @@ OPERATIONS
                     e_msg_session_browse_req
                 THEN /* s_service_reqs */
                     l_resp_typ <-- get_response_type (l_req_typ);
-                    l_msg_header <-- alloc_app_req_msg_header (l_req_typ);
+                    l_msg_header <-- alloc_app_req_msg_header;
                     l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
                     l_req_handle <-- client_fresh_req_handle (l_resp_typ);
                     l_valid_req_handle <-- is_valid_req_handle (l_req_handle);

@@ -131,9 +131,9 @@ void channel_mgr_bs__srv_new_secure_channel(
 
 void channel_mgr_bs__close_secure_channel(
    const constants__t_channel_i channel_mgr_bs__channel) {
-  printf("channel_mgr_bs__close_secure_channel\n");
-  exit(1);
-   ;
+    (void) channel_mgr_bs__channel;
+    printf("channel_mgr_bs__close_secure_channel\n");
+    exit(1);
 }
 
 void channel_mgr_bs__channel_lost(

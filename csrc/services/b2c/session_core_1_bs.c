@@ -582,6 +582,7 @@ void session_core_1_bs__get_NonceServer(
    const constants__t_session_i session_core_1_bs__p_session,
    constants__t_Nonce_i * const session_core_1_bs__nonce)
 {
+    (void) session_core_1_bs__p_session;
     *session_core_1_bs__nonce = (constants__t_Nonce_i *)(&unique_session.NonceServer);
 }
 
@@ -646,6 +647,7 @@ void session_core_1_bs__get_NonceClient(
    const constants__t_session_i session_core_1_bs__p_session,
    constants__t_Nonce_i * const session_core_1_bs__nonce)
 {
+    (void) session_core_1_bs__p_session;
     *session_core_1_bs__nonce = (constants__t_Nonce_i *)(&unique_session.NonceClient);
 }
 
@@ -653,6 +655,7 @@ void session_core_1_bs__get_NonceClient(
 void session_core_1_bs__drop_NonceClient(
    const constants__t_session_i session_core_1_bs__p_session)
 {
+    (void) session_core_1_bs__p_session;
     SOPC_ByteString_Clear(&unique_session.NonceClient);
 }
 
@@ -755,6 +758,7 @@ void session_core_1_bs__server_activate_session_check_crypto(
    const constants__t_msg_i session_core_1_bs__activate_req_msg,
    t_bool * const session_core_1_bs__valid)
 {
+    (void) session_core_1_bs__channel;
     SOPC_CryptoProvider *pProvider = NULL;
     const SOPC_SecureChannel_Config *pSCCfg = NULL;
     session *pSession = NULL;
