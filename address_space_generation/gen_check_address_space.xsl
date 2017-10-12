@@ -251,9 +251,10 @@ int nsIndex = <xsl:value-of select="if (regex-group(1)) then substring-after(sub
     <xsl:variable name="bn" select="."/>
     <xsl:variable name="pos" select="position()"/>
     <xsl:variable name="NodeId" select="../@NodeId"/>
-    <xsl:analyze-string select="$bn" regex="(\d*):(.*)">
+    <xsl:analyze-string select="$bn" regex="(\d+:)?(.+)">
         <xsl:matching-substring>
-${print_value('if (addressSpace.browseNameArray[%s].NamespaceIndex != %s) {bres = false; printf("invalid BrowseName ") ;}  ',"$pos", "regex-group(1)")}<xsl:text>
+        <xsl:variable name="nsIndex" select="if (regex-group(1)) then substring-before(regex-group(1),':') else 0"/>
+${print_value('if (addressSpace.browseNameArray[%s].NamespaceIndex != %s) {printf("invalid BrowseName ") ;}  ',"$pos", "$nsIndex")}<xsl:text>
 </xsl:text>
 ${print_value('var = "%s";', "regex-group(2)")}
 ${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  ',"$pos")}<xsl:text>
