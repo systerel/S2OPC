@@ -5,13 +5,13 @@
 # - generate sources files from B model
 # - generate sources files for examples address space for tests
 
-BMODEL_DIR=B_model
+BMODEL_DIR=bsrc
 ADDSPACE_DIR=address_space_generation
 
 echo "Pre-build log" > pre-build.log
 
 echo "Generate C sources files from B model" | tee -a pre-build.log
-make -C ./B_model >> pre-build.log
+make -C ./$BMODEL_DIR >> pre-build.log
 if [[ $? != 0 ]]; then
     echo "Error: generating C source files from B model" | tee -a pre-build.log
     exit 1

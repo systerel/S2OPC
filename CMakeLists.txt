@@ -24,7 +24,7 @@ else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-file(GLOB PLATFORM_SRCS "src/helpers_platform_dep/${PLATFORM_DIR}/*.c")
+file(GLOB PLATFORM_SRCS "csrc/helpers_platform_dep/${PLATFORM_DIR}/*.c")
 
 # Set specialized compilation flags for platform dependent source files
 if(UNIX)
@@ -39,14 +39,14 @@ endif()
 
 # Define non-platform dependent source files
 file(GLOB_RECURSE INGOPCS_SRCS
-    "src/api_toolkit/*.c"
-    "src/configuration/*.c"
-    "src/helpers/*.c"
-    "src/helpers_crypto/*.c"
-    "src/helpers_opcua_types/*.c"
-    "src/sockets/*.c"
-    "src/secure_channels/*.c"
-    "src/services/*.c"
+    "csrc/api_toolkit/*.c"
+    "csrc/configuration/*.c"
+    "csrc/helpers/*.c"
+    "csrc/crypto/*.c"
+    "csrc/opcua_types/*.c"
+    "csrc/sockets/*.c"
+    "csrc/secure_channels/*.c"
+    "csrc/services/*.c"
 )
 
 # Define INGOPCS static library
@@ -54,21 +54,21 @@ add_library(ingopcs STATIC ${PLATFORM_SRCS} ${INGOPCS_SRCS})
 
 # Define INGOPCS library includes
 set(INGOPCS_PUBLIC_INCLUDES
-    "src/api_toolkit"
-    "src/configuration"
-    "src/helpers"
-    "src/helpers_opcua_types"
-    "src/helpers_crypto"
-    "src/helpers_platform_dep"
+    "csrc/api_toolkit"
+    "csrc/configuration"
+    "csrc/helpers"
+    "csrc/opcua_types"
+    "csrc/crypto"
+    "csrc/helpers_platform_dep"
 )
 set(INGOPCS_PRIVATE_INCLUDES
-    "src/sockets"
-    "src/secure_channels"
-    "src/services"
-    "src/helpers_crypto/mbedtls"
-    "src/helpers_platform_dep/${PLATFORM_DIR}"
-    "src/services/BtoC_itf"
-    "src/services/B_genC"
+    "csrc/sockets"
+    "csrc/secure_channels"
+    "csrc/services"
+    "csrc/crypto/mbedtls"
+    "csrc/helpers_platform_dep/${PLATFORM_DIR}"
+    "csrc/services/b2c"
+    "csrc/services/bgenc"
 ) 
 target_include_directories(ingopcs BEFORE
     PUBLIC  ${INGOPCS_PUBLIC_INCLUDES}
@@ -164,8 +164,8 @@ target_include_directories(toolkit_test_write PRIVATE "${ADDSPACEGEN_DIR}/includ
 # Sockets layer (stubbed) tests
 file(GLOB_RECURSE SOCKETS_SRC
     ${PLATFORM_SRCS}
-    "src/helpers/*.c"
-    "src/sockets/*.c"
+    "csrc/helpers/*.c"
+    "csrc/sockets/*.c"
 )
 
 file(GLOB_RECURSE SOCKETS_TEST
@@ -182,9 +182,9 @@ endif()
 
 # Secure channels (stubbed on services side) tests
 file(GLOB_RECURSE SECURE_CHANNELS_SRC
-    "src/secure_channels/*.c"
-    "src/helpers_opcua_types/*.c"
-    "src/helpers_crypto/*.c"
+    "csrc/secure_channels/*.c"
+    "csrc/helpers_opcua_types/*.c"
+    "csrc/helpers_crypto/*.c"
 )
 
 file(GLOB_RECURSE SECURE_CHANNELS_CLIENT_TEST
