@@ -165,12 +165,11 @@ void SOPC_Toolkit_Clear(){
       // It must be done before stopping the services
       SOPC_Services_PreClear();
 
-      Mutex_Lock(&tConfig.mut);
-
       SOPC_Sockets_Clear();
       SOPC_SecureChannels_Clear();
       SOPC_Services_Clear();
 
+      Mutex_Lock(&tConfig.mut);
       if(tConfig.encTypesTable != NULL){
           free(tConfig.encTypesTable);
       }
