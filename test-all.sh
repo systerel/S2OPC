@@ -1,12 +1,24 @@
 #!/bin/bash
-#  Builds INGOPCS library and run tests
+#  Check toolkit tests binaries are present and run them
 set -e
+BIN_DIR=bin
 
-BIN_DIR=./bin
-
-# Build and run tests
-./clean.sh
-./build.sh
+# Check binaries are present Build
+echo "Check test binaries are present"
+if [ -f "$BIN_DIR/check_helpers" ] &&
+   [ -f "$BIN_DIR/check_sockets" ] &&
+   [ -f "$BIN_DIR/test_secure_channels_server" ] &&
+   [ -f "$BIN_DIR/test_secure_channels_client" ] &&
+   [ -f "$BIN_DIR/toolkit_test_read" ] &&
+   [ -f "$BIN_DIR/toolkit_test_write" ] &&
+   [ -f "$BIN_DIR/toolkit_test_server" ] &&
+   [ -f "$BIN_DIR/toolkit_test_client" ]
+then
+    echo "Test binaries found"
+else
+    echo "Test binary missing"
+    exit 1
+fi
 
 # run helpers tests
 export CK_TAP_LOG_FILE_NAME=$BIN_DIR/helpers.tap && $BIN_DIR/check_helpers

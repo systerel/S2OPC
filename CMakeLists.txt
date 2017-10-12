@@ -13,8 +13,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Wextra -O0")
 # Define platform dependent source files
 if(UNIX)
   set(PLATFORM_DIR linux)
+  set(STATIC_LIB_SUFFIX ".a")
 elseif(WIN32)
   set(PLATFORM_DIR windows)
+  set(STATIC_LIB_SUFFIX ".lib")
 else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -71,6 +73,7 @@ target_include_directories(ingopcs BEFORE
 # Define INGOPCS library dependencies
 target_link_libraries(ingopcs PUBLIC mbedtls mbedcrypto mbedx509)
 target_link_libraries(ingopcs PUBLIC pthread)
+target_link_libraries(ingopcs PUBLIC rt)
 target_link_libraries(ingopcs PUBLIC m)
 
 
@@ -95,7 +98,7 @@ if (NOT CMAKE_CROSSCOMPILING)
     file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
     add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
     target_include_directories(check_helpers PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
-    target_link_libraries(check_helpers PRIVATE ingopcs check)
+    target_link_libraries(check_helpers PRIVATE ingopcs libcheck${STATIC_LIB_SUFFIX})
 endif()
 
 # Client test
@@ -105,7 +108,7 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
                                    "address_space_generation/genc/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_client PRIVATE ingopcs mbedtls rt)
+target_link_libraries(toolkit_test_client PRIVATE ingopcs)
 target_include_directories(toolkit_test_client PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
@@ -113,7 +116,7 @@ target_include_directories(toolkit_test_client PRIVATE "${ADDSPACEGEN_DIR}/inclu
 # Server test
 add_executable(toolkit_test_server "tests/services/toolkit_test_server.c"
                                    "address_space_generation/genc/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_server PRIVATE ingopcs rt)
+target_link_libraries(toolkit_test_server PRIVATE ingopcs)
 target_include_directories(toolkit_test_server PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
@@ -140,7 +143,7 @@ add_executable(toolkit_test_read "tests/services/toolkit_test_read.c"
                                  "tests/services/wrap_read.c"
                                  "tests/services/testlib_read_response.c"
                                  "address_space_generation/genc/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_read PRIVATE ingopcs rt)
+target_link_libraries(toolkit_test_read PRIVATE ingopcs)
 target_include_directories(toolkit_test_read PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                      ${INGOPCS_PUBLIC_INCLUDES} 
                                                      ${INGOPCS_PRIVATE_INCLUDES})
@@ -149,7 +152,7 @@ target_include_directories(toolkit_test_read PRIVATE "${ADDSPACEGEN_DIR}/include
 add_executable(toolkit_test_write "tests/services/toolkit_test_write.c"
                                   "tests/services/testlib_write.c"
                                   "address_space_generation/genc/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_write PRIVATE ingopcs rt)
+target_link_libraries(toolkit_test_write PRIVATE ingopcs)
 target_include_directories(toolkit_test_write PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                       ${INGOPCS_PUBLIC_INCLUDES} 
                                                       ${INGOPCS_PRIVATE_INCLUDES})
@@ -170,7 +173,7 @@ if (NOT CMAKE_CROSSCOMPILING)
     target_include_directories(check_sockets PRIVATE "tests/sockets/stubs" 
                                                      ${INGOPCS_PUBLIC_INCLUDES} 
                                                      ${INGOPCS_PRIVATE_INCLUDES})
-    target_link_libraries(check_sockets PRIVATE pthread check)
+    target_link_libraries(check_sockets PRIVATE ingopcs libcheck${STATIC_LIB_SUFFIX})
 endif()
 
 # Secure channels (stubbed on services side) tests
@@ -196,7 +199,7 @@ add_executable(test_secure_channels_client ${SOCKETS_SRC}
 target_include_directories(test_secure_channels_client PRIVATE "tests/secure_channels/stubs" 
                                                                ${INGOPCS_PUBLIC_INCLUDES} 
                                                                ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(test_secure_channels_client PRIVATE mbedtls mbedcrypto mbedx509 pthread rt)
+target_link_libraries(test_secure_channels_client PRIVATE ingopcs)
 
 # Secure channels tests: SERVER executable
 add_executable(test_secure_channels_server ${SOCKETS_SRC}
@@ -206,4 +209,4 @@ add_executable(test_secure_channels_server ${SOCKETS_SRC}
 target_include_directories(test_secure_channels_server PRIVATE "tests/secure_channels/stubs" 
                                                                ${INGOPCS_PUBLIC_INCLUDES} 
                                                                ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(test_secure_channels_server PRIVATE mbedtls mbedcrypto mbedx509 pthread rt)
+target_link_libraries(test_secure_channels_server PRIVATE ingopcs)
