@@ -38,10 +38,8 @@ PROMOTES
     
 LOCAL_OPERATIONS
 
-    local_sc_activate_orphaned_sessions (channel_config_idx, channel) =
+    local_sc_activate_orphaned_sessions (channel_config_idx) =
     PRE
-        channel : t_channel_i &
-        channel : s_channel_connected &
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx
     THEN
@@ -51,7 +49,7 @@ LOCAL_OPERATIONS
 OPERATIONS
     
     /* TODO: generate events to activate sessions in session mgr */
-    local_sc_activate_orphaned_sessions (channel_config_idx, channel) =
+    local_sc_activate_orphaned_sessions (channel_config_idx) =
     VAR
         l_continue,
         l_session
@@ -244,7 +242,7 @@ OPERATIONS
     END
     ;
     
-    ret, channel, session_token <-- client_validate_session_service_req (session, req_handle, req_msg) =
+    ret, channel, session_token <-- client_validate_session_service_req (session, req_handle) =
     VAR
         l_session_state,
         l_ret
@@ -306,6 +304,7 @@ OPERATIONS
         l_session_channel
     IN
         // PRE validates req_handle valid
+        req_handle_do_nothing(req_handle); // avoid warning
         l_session <-- server_get_session_from_token (session_token);
         l_valid_session <-- is_valid_session (l_session);
         l_session_state <-- get_session_state_or_closed (l_session);
@@ -340,6 +339,7 @@ OPERATIONS
         l_session_channel
     IN
         // PRE validates req_handle valid
+        req_handle_do_nothing(req_handle); // avoid warning
         /* Coherency of messages types done in PRE for now */
         l_valid_session <-- is_valid_session (session);
         l_session_state <-- get_session_state_or_closed (session);
@@ -425,6 +425,8 @@ OPERATIONS
         l_session,
         l_valid_session
     IN
+        // PRE guarantee channel is connected
+        channel_do_nothing(channel);
         l_session <-- client_init_session_sm;
         l_valid_session <-- is_valid_session (l_session);
         IF l_valid_session = TRUE THEN
@@ -517,8 +519,10 @@ OPERATIONS
     VAR
         l_session_to_create
     IN
+        // PRE guarantee channel is connected
+        channel_do_nothing(channel);
         // Re-associate orphaned sessions waiting for sc (if there are some)
-        local_sc_activate_orphaned_sessions (channel_config_idx, channel);
+        local_sc_activate_orphaned_sessions (channel_config_idx);
         // Create session waiting for sc
         l_session_to_create <-- get_and_remove_session_to_create (channel_config_idx);
         IF l_session_to_create /= c_session_indet

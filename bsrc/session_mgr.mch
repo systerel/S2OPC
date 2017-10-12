@@ -111,14 +111,11 @@ OPERATIONS
     END
     ;
     
-    ret, channel, session_token <-- client_validate_session_service_req (session, req_handle, req_msg) =
+    ret, channel, session_token <-- client_validate_session_service_req (session, req_handle) =
     PRE
         session : t_session_i &
         req_handle : t_request_handle_i &
         req_handle : s_request_handle &
-        req_msg : t_msg_i &
-        req_msg : t_msg &
-        req_msg = c_msg_out &
         a_msg_out_type : s_service_on_session_reqs
     THEN
         CHOICE

@@ -87,5 +87,13 @@ OPERATIONS
     THEN
         ret := bool(req_handle : s_request_handle & a_client_request (req_handle) = resp_typ)
     END
+    ;
     
+    req_handle_do_nothing(req_handle) =
+    PRE
+        req_handle : t_request_handle_i
+    THEN
+        skip
+    END
+
 END

@@ -265,5 +265,13 @@ OPERATIONS
     THEN
         secpol := a_SecurityPolicy(channel)
     END
+    ;
+    
+    channel_do_nothing(channel) =
+    PRE
+        channel : t_channel_i
+    THEN
+        skip
+    END
 
 END

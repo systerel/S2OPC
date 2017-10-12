@@ -89,3 +89,8 @@ void request_handle_bs__client_remove_req_handle(
   (void) request_handle_bs__req_handle;
 }
 
+void request_handle_bs__req_handle_do_nothing(
+   const constants__t_request_handle_i request_handle_bs__req_handle)
+{
+    (void) request_handle_bs__req_handle;
+}

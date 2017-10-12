@@ -261,3 +261,8 @@ void channel_mgr_bs__get_SecurityPolicy(
     util_channel__SecurityPolicy_C_to_B(pSCCfg->reqSecuPolicyUri, channel_mgr_bs__secpol);
 }
 
+void channel_mgr_bs__channel_do_nothing(
+   const constants__t_channel_i channel_mgr_bs__channel)
+{
+    (void) channel_mgr_bs__channel;
+}

@@ -815,8 +815,7 @@ OPERATIONS
                         l_valid_msg_header = TRUE
                     THEN
                         bless_msg_out (l_req_typ, l_msg_header, req_msg);
-                        ret, l_channel, l_session_token <-- client_validate_session_service_req (session, l_req_handle,
- req_msg);
+                        ret, l_channel, l_session_token <-- client_validate_session_service_req (session, l_req_handle);
                         IF ret = e_sc_ok
                         THEN
                             write_msg_out_header_req_handle (l_msg_header, l_req_handle);

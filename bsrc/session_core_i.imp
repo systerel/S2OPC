@@ -350,10 +350,21 @@ OPERATIONS
     ;
 
     ret <-- client_activate_session_resp_sm (channel , session, activate_resp_msg) =
-    BEGIN
-        /* TODO: check response parameters */
-        set_session_state (session, e_session_userActivated);
-        ret := e_sc_ok
+    VAR
+        l_channel_config_idx,
+        l_valid_response
+    IN
+        /* PRE checked channel was session channel*/
+        l_channel_config_idx <-- get_channel_info (channel);
+        /* TODO: check response parameters + nonce param if applicable */
+        l_valid_response <-- client_activate_session_resp_check(session, l_channel_config_idx,  activate_resp_msg);
+        IF l_valid_response = TRUE 
+        THEN
+            set_session_state (session, e_session_userActivated);
+            ret := e_sc_ok
+        ELSE
+            ret := e_sc_nok
+        END
     END
     ;
 
@@ -427,6 +438,10 @@ OPERATIONS
     VAR
         l_is_connected_channel
     IN
+        /* PRE check request msg type expected */
+        /* TODO: fulfill delete subscriptions flag (to be provided as param ?) */
+        client_close_session_req_msg(close_req_msg); /* Avoid unused variable*/
+
         channel <-- get_session_channel (session);
         l_is_connected_channel <-- is_connected_channel(channel);
         IF l_is_connected_channel = TRUE
@@ -446,9 +461,11 @@ OPERATIONS
 
     ret <-- server_close_session_req_and_resp_sm (channel, session, close_req_msg, close_resp_msg) =
     BEGIN
+        /* PRE guarantee channel is connected */
+        channel_do_nothing (channel); /* Avoid unused variable */
         /* TODO: actions on pending requests or current subscriptions to manage (see request) */
-        /* No need to store the handle since we will send response in same step */
-        /* TODO: populate msg body with parameters */
+        server_close_session_check_req (close_req_msg, close_resp_msg);
+        /* No need to store the handle since we will send response in same step */       
         set_session_state_closed (session, FALSE);
         ret := e_sc_ok
     END
@@ -456,6 +473,9 @@ OPERATIONS
 
     client_close_session_resp_sm (channel, session, close_resp_msg) =
     BEGIN
+        /* PRE guarantee channel is connected */
+        channel_do_nothing (channel); /* Avoid unused variable */
+        client_close_session_resp_msg(close_resp_msg); /* Avoid unused variable*/
         /* In any case we close the session: correct channel or not  */
         set_session_state_closed (session, TRUE)
     END
@@ -476,6 +496,8 @@ OPERATIONS
     ret <-- is_session_valid_for_service (channel, session) =
     BEGIN
         // only for PRE compliance
+        channel_do_nothing (channel); /* Avoid unused variable */
+        session_do_nothing (session); /* Avoid unused variable */
         ret := TRUE
     END
     ;

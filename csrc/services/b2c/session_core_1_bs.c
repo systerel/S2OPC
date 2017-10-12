@@ -843,3 +843,37 @@ void session_core_1_bs__server_activate_session_check_crypto(
     SOPC_CryptoProvider_Free(pProvider);
 }
 
+void session_core_1_bs__client_activate_session_resp_check(
+   const constants__t_session_i session_core_1_bs__p_session,
+   const constants__t_channel_config_idx_i session_core_1_bs__p_channel_config_idx,
+   const constants__t_msg_i session_core_1_bs__p_resp_msg,
+   t_bool * const session_core_1_bs__valid){
+    (void) session_core_1_bs__p_session;
+    (void) session_core_1_bs__p_channel_config_idx;
+    (void) session_core_1_bs__p_resp_msg;
+    /* TODO: check parameter + add other operation to retrieve new server nonce ?*/
+    *session_core_1_bs__valid = true;
+}
+
+void session_core_1_bs__client_close_session_req_msg(
+   const constants__t_msg_i session_core_1_bs__req_msg){
+    (void) session_core_1_bs__req_msg;
+}
+
+void session_core_1_bs__client_close_session_resp_msg(
+   const constants__t_msg_i session_core_1_bs__resp_msg){
+    (void) session_core_1_bs__resp_msg;
+}
+
+void session_core_1_bs__server_close_session_check_req(
+   const constants__t_msg_i session_core_1_bs__req_msg,
+   const constants__t_msg_i session_core_1_bs__resp_msg){
+    (void) session_core_1_bs__req_msg;
+    (void) session_core_1_bs__resp_msg;
+}
+
+void session_core_1_bs__session_do_nothing(
+   const constants__t_session_i session_core_1_bs__session)
+{
+    (void) session_core_1_bs__session;
+}

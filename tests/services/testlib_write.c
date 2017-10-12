@@ -235,7 +235,6 @@ bool tlibw_stimulateB_with_message(void *pMsg)
     /* Calls treat */
     service_mgr__treat_write_request(
         (constants__t_msg_i) pMsg,
-        (constants__t_user_i) 0,
         (constants__t_StatusCode_i *) &sc);
 
     return sc == constants__e_sc_ok;
