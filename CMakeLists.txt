@@ -13,9 +13,12 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Wextra -O0")
 # Define platform dependent source files
 if(UNIX)
   set(PLATFORM_DIR linux)
+  set(THREAD_LIB pthread rt)
+  set(MATH_LIB m)
   set(STATIC_LIB_SUFFIX ".a")
 elseif(WIN32)
   set(PLATFORM_DIR windows)
+  set(SOCK_LIB ws2_32)
   set(STATIC_LIB_SUFFIX ".lib")
 else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
@@ -72,10 +75,9 @@ target_include_directories(ingopcs BEFORE
 
 # Define INGOPCS library dependencies
 target_link_libraries(ingopcs PUBLIC mbedtls mbedcrypto mbedx509)
-target_link_libraries(ingopcs PUBLIC pthread)
-target_link_libraries(ingopcs PUBLIC rt)
-target_link_libraries(ingopcs PUBLIC m)
-
+target_link_libraries(ingopcs PUBLIC ${MATH_LIB})
+target_link_libraries(ingopcs PUBLIC ${THREAD_LIB})
+target_link_libraries(ingopcs PUBLIC ${SOCK_LIB})
 
 # INGOPCS tests ################################################################################
 

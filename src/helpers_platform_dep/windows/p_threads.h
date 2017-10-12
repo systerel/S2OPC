@@ -18,7 +18,6 @@
 #ifndef SOPC_P_THREADS_H_
 #define SOPC_P_THREADS_H_
 
-#include <winsock2.h>
 #include <windows.h>
 
 typedef SRWLOCK Mutex;
