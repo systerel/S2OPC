@@ -1,7 +1,8 @@
 #!/bin/bash
 #  Check toolkit tests binaries are present and run them
 set -e
-BIN_DIR=bin
+BIN_DIR=./bin
+TEST_SCRIPTS=./tests/scripts
 
 # Check binaries are present Build
 echo "Check test binaries are present"
@@ -25,7 +26,7 @@ export CK_TAP_LOG_FILE_NAME=$BIN_DIR/helpers.tap && $BIN_DIR/check_helpers
 # run sockets test
 export CK_TAP_LOG_FILE_NAME=$BIN_DIR/sockets.tap && $BIN_DIR/check_sockets
 # run secure channels client / server test
-./run_client_server_test_SC_level.sh
+$TEST_SCRIPTS/run_client_server_test_SC_level.sh
 
 # run services tests
 ## unitary service tests
@@ -46,4 +47,4 @@ fi
 echo "1..1" >> $BIN_DIR/service_write.tap
 
 ## run toolkit cilent / server test
-./run_client_server_test.sh
+$TEST_SCRIPTS/run_client_server_test.sh
