@@ -46,5 +46,16 @@ else
 fi
 echo "1..1" >> $BIN_DIR/service_write.tap
 
-## run toolkit cilent / server test
+## run toolkit client / server test
 $TEST_SCRIPTS/run_client_server_test.sh
+
+## run validation tests
+pushd bin
+./toolkit_test_server&
+popd
+pushd validation
+./client.py&
+popd
+wait
+mv validation/validation.tap bin/
+
