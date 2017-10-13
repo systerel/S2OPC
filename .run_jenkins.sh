@@ -7,5 +7,6 @@ git reset --hard
 git clean -fd
 
 # run build and tests
-./test-all.sh
+./clean.sh && ./.build-in-docker.sh ./build.sh
+./.test-in-docker.sh ./test-all.sh
 
