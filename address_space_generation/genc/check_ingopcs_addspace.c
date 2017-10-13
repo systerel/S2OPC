@@ -1,0 +1,9730 @@
+
+#include <stdio.h>
+#include <string.h>
+
+#include "sopc_toolkit_constants.h"
+#include "sopc_builtintypes.h"
+#include "sopc_types.h"
+#include "sopc_user_app_itf.h"
+
+extern SOPC_AddressSpace addressSpace;
+#define DisplayName addressSpace.displayNameArray
+#define DisplayName_begin addressSpace.displayNameIdxArray_begin
+#define DisplayName_end addressSpace.displayNameIdxArray_end
+#define Description addressSpace.descriptionArray
+#define Description_begin addressSpace.descriptionIdxArray_begin
+#define Description_end addressSpace.descriptionIdxArray_end
+#define DEFAULT_VARIANT  {SOPC_Null_Id, SOPC_VariantArrayType_SingleValue,{0}}
+
+bool test_browsename(){
+    bool bres = true;
+    printf ("test BrowseName\n");
+    const char *var;
+    if (addressSpace.browseNameArray[1].NamespaceIndex != 0) {bres = false; printf("invalid BrowseName ") ;}  
+var = "VariablesFolderBn";if (strcmp((char*)addressSpace.browseNameArray[1].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[2].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "15361";if (strcmp((char*)addressSpace.browseNameArray[2].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[3].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "SIGNALs";if (strcmp((char*)addressSpace.browseNameArray[3].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[4].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "SWITCHs";if (strcmp((char*)addressSpace.browseNameArray[4].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[5].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "TRACKs";if (strcmp((char*)addressSpace.browseNameArray[5].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[6].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_G019";if (strcmp((char*)addressSpace.browseNameArray[6].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[7].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[7].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[8].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "RC";if (strcmp((char*)addressSpace.browseNameArray[8].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[9].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_G025";if (strcmp((char*)addressSpace.browseNameArray[9].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[10].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[10].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[11].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "RC";if (strcmp((char*)addressSpace.browseNameArray[11].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[12].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_G026";if (strcmp((char*)addressSpace.browseNameArray[12].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[13].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[13].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[14].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_W1";if (strcmp((char*)addressSpace.browseNameArray[14].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[15].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[15].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[16].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "RC";if (strcmp((char*)addressSpace.browseNameArray[16].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[17].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_026TK";if (strcmp((char*)addressSpace.browseNameArray[17].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[18].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[18].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[19].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_OSTK";if (strcmp((char*)addressSpace.browseNameArray[19].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[20].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[20].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[21].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_P500";if (strcmp((char*)addressSpace.browseNameArray[21].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[22].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_WBK_RDLN_EBK";if (strcmp((char*)addressSpace.browseNameArray[22].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[23].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[23].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[24].NamespaceIndex != 0) {bres = false; printf("invalid BrowseName ") ;}  
+var = "State";if (strcmp((char*)addressSpace.browseNameArray[24].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[25].NamespaceIndex != 0) {bres = false; printf("invalid BrowseName ") ;}  
+var = "Int64";if (strcmp((char*)addressSpace.browseNameArray[25].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[26].NamespaceIndex != 0) {bres = false; printf("invalid BrowseName ") ;}  
+var = "Uint32";if (strcmp((char*)addressSpace.browseNameArray[26].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[27].NamespaceIndex != 0) {bres = false; printf("invalid BrowseName ") ;}  
+var = "Double";if (strcmp((char*)addressSpace.browseNameArray[27].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[28].NamespaceIndex != 0) {bres = false; printf("invalid BrowseName ") ;}  
+var = "String";if (strcmp((char*)addressSpace.browseNameArray[28].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[29].NamespaceIndex != 0) {bres = false; printf("invalid BrowseName ") ;}  
+var = "ByteString";if (strcmp((char*)addressSpace.browseNameArray[29].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[30].NamespaceIndex != 0) {bres = false; printf("invalid BrowseName ") ;}  
+var = "XmlElement";if (strcmp((char*)addressSpace.browseNameArray[30].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[31].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "GK";if (strcmp((char*)addressSpace.browseNameArray[31].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[32].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "ASK";if (strcmp((char*)addressSpace.browseNameArray[32].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[33].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "XBKK";if (strcmp((char*)addressSpace.browseNameArray[33].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[34].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "XBZCRQ";if (strcmp((char*)addressSpace.browseNameArray[34].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[35].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "XBZ-AK";if (strcmp((char*)addressSpace.browseNameArray[35].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[36].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "XBZCRQ-AK";if (strcmp((char*)addressSpace.browseNameArray[36].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[37].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[37].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[38].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[38].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[39].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[39].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[40].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "GZ";if (strcmp((char*)addressSpace.browseNameArray[40].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[41].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "SZ";if (strcmp((char*)addressSpace.browseNameArray[41].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[42].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "XBZ-CC";if (strcmp((char*)addressSpace.browseNameArray[42].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[43].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "XBZCRQ-CC";if (strcmp((char*)addressSpace.browseNameArray[43].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[44].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "XBZC-CC";if (strcmp((char*)addressSpace.browseNameArray[44].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[45].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "GK";if (strcmp((char*)addressSpace.browseNameArray[45].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[46].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "ASK";if (strcmp((char*)addressSpace.browseNameArray[46].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[47].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[47].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[48].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[48].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[49].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[49].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[50].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "SZ";if (strcmp((char*)addressSpace.browseNameArray[50].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[51].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "GZ";if (strcmp((char*)addressSpace.browseNameArray[51].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[52].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "GK";if (strcmp((char*)addressSpace.browseNameArray[52].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[53].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "NWK";if (strcmp((char*)addressSpace.browseNameArray[53].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[54].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "RWK";if (strcmp((char*)addressSpace.browseNameArray[54].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[55].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "LK";if (strcmp((char*)addressSpace.browseNameArray[55].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[56].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[56].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[57].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[57].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[58].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[58].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[59].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "NWZ";if (strcmp((char*)addressSpace.browseNameArray[59].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[60].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "RWZ";if (strcmp((char*)addressSpace.browseNameArray[60].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[61].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "TK";if (strcmp((char*)addressSpace.browseNameArray[61].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[62].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "TK";if (strcmp((char*)addressSpace.browseNameArray[62].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[63].NamespaceIndex != 261) {bres = false; printf("invalid BrowseName ") ;}  
+var = "TK";if (strcmp((char*)addressSpace.browseNameArray[63].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+
+    return bres;
+}
+
+bool test_value(){
+    printf ("test Value\n");
+    bool bres = true;
+    int pos;
+    const char* nodeid;
+    SOPC_Byte builtInTypeId;
+    char *value_node;
+    
+  pos = 1;
+  nodeid = "i=2259";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
+
+  pos = 2;
+  
+  nodeid = "i=1001";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "-1000";
+  builtInTypeId = SOPC_Int64_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 3;
+  
+  nodeid = "i=1002";
+  printf("test Value for nodeid %s\n", nodeid);  
+  value_node = "1000";
+  unsigned int int_value;
+  sscanf(value_node, "%u", &int_value);
+
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt32_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Uint32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+
+  pos = 4;
+  
+  nodeid = "i=1003";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "2.0";
+  builtInTypeId = SOPC_Double_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 5;
+  
+  nodeid = "i=1004";
+  printf("test Value for nodeid %s\n", nodeid);  
+  value_node = "String:INGOPCS";
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_String_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+    if (strcmp((char*)addressSpace.valueArray[pos].Value.String.Data, value_node) != 0) {bres = false; printf("invalid Value \n") ;}
+
+  pos = 6;
+  
+  nodeid = "i=1005";
+  printf("test Value for nodeid %s\n", nodeid);  
+  value_node = "ByteString:INGOPCS";
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_ByteString_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+    if (strcmp((char*)addressSpace.valueArray[pos].Value.Bstring.Data, value_node) != 0) {bres = false; printf("invalid Value \n") ;}
+
+  pos = 7;
+  
+  nodeid = "i=1006";
+  printf("test Value for nodeid %s\n", nodeid);  
+  value_node = "XmlElement:INGOPCS";
+
+if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+    if (strcmp((char*)addressSpace.valueArray[pos].Value.XmlElt.Data, value_node) != 0) {bres = false; printf("invalid Value \n") ;}
+
+  pos = 8;
+  
+  nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 9;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 10;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 11;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 12;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 13;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 14;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 15;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
+
+  pos = 16;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
+
+  pos = 17;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 18;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 19;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 20;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 21;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 22;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 23;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 24;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 25;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
+
+  pos = 26;
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
+
+  pos = 27;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 28;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 29;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 30;
+  
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 31;
+  
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 32;
+  
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 33;
+  
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 34;
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
+
+  pos = 35;
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
+  printf("test Value for nodeid %s\n", nodeid);
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
+
+  pos = 36;
+  
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 37;
+  
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 38;
+  
+  nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "true";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 39;
+  
+  nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "true";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 40;
+  
+  nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    bool bool_value;
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int_value)) {bres = false; printf("invalid Value \n") ;}
+     
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    int int_value;
+    sscanf(value_node, "%d", &int_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    double double_value;
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+    return bres;
+}
+
+bool test_reference(){
+    printf("test reference \n");
+    bool bres = true;
+    int pos;
+    int res;
+    int exp;
+    const char* nodeid;
+
+    
+    nodeid = "i=1000";
+    pos = 1;
+    exp = 8;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 85){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 85, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1001){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1001, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1002){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1002, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   5, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1003){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1003, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   6, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1004){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1004, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   7, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1005){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1005, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   8, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 8 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 8 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1006){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1006, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;i=15361";
+    pos = 2;
+    exp = 5;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 85){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 85, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   5, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs";
+    pos = 3;
+    exp = 5;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 15361){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 15361, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   5, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G026")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G026 for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs";
+    pos = 4;
+    exp = 3;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 15361){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 15361, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1 for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs";
+    pos = 5;
+    exp = 6;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 15361){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 15361, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_026TK")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_026TK for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_OSTK")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_OSTK for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   5, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_P500")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_P500 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   6, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019";
+    pos = 6;
+    exp = 7;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   5, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   6, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   7, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM";
+    pos = 7;
+    exp = 8;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   5, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   6, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   7, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   8, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 8 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 8 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC";
+    pos = 8;
+    exp = 7;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   5, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   6, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   7, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025";
+    pos = 9;
+    exp = 7;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   5, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   6, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   7, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM";
+    pos = 10;
+    exp = 4;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC";
+    pos = 11;
+    exp = 4;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026";
+    pos = 12;
+    exp = 3;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G026.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G026.RM for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM";
+    pos = 13;
+    exp = 3;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G026")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G026 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1";
+    pos = 14;
+    exp = 7;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   5, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   6, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 6 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   7, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM";
+    pos = 15;
+    exp = 5;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   5, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 5 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC";
+    pos = 16;
+    exp = 4;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   4, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 4 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK";
+    pos = 17;
+    exp = 3;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_026TK.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_026TK.RM for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM";
+    pos = 18;
+    exp = 3;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_026TK")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_026TK for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK";
+    pos = 19;
+    exp = 3;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_OSTK.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_OSTK.RM for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM";
+    pos = 20;
+    exp = 3;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_OSTK")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_OSTK for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_P500";
+    pos = 21;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK";
+    pos = 22;
+    exp = 3;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM";
+    pos = 23;
+    exp = 3;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 35){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 35, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 61){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 61, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   3, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 3 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK for %s \n" , nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=2259";
+    pos = 24;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1000){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1000, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=1001";
+    pos = 25;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1000){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1000, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=1002";
+    pos = 26;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1000){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1000, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=1003";
+    pos = 27;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1000){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1000, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=1004";
+    pos = 28;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1000){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1000, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=1005";
+    pos = 29;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1000){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1000, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "i=1006";
+    pos = 30;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1000){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1000, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
+    pos = 31;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
+    pos = 32;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
+    pos = 33;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
+    pos = 34;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
+    pos = 35;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
+    pos = 36;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
+    pos = 37;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
+    pos = 38;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
+    pos = 39;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
+    pos = 40;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
+    pos = 41;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
+    pos = 42;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
+    pos = 43;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
+    pos = 44;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
+    pos = 45;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
+    pos = 46;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
+    pos = 47;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
+    pos = 48;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
+    pos = 49;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
+    pos = 50;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
+    pos = 51;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
+    pos = 52;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G026.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G026.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
+    pos = 53;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
+    pos = 54;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
+    pos = 55;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
+    pos = 56;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
+    pos = 57;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
+    pos = 58;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
+    pos = 59;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
+    pos = 60;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
+    pos = 61;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_026TK.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_026TK.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
+    pos = 62;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_OSTK.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_OSTK.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
+    pos = 63;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        bres = false;
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    return bres;
+}
+
+int compareLocalizedText(SOPC_LocalizedText LText, const char *text, const char *locale){
+    int i = 0;
+    if (strcmp((char*)LText.Locale.Data, locale) != 0){
+        printf("locale KO");
+        i++;
+    }
+    else{
+        printf("locale ok");
+    }
+    if (strcmp((char*)LText.Text.Data, text) != 0){
+        printf(", text KO");
+        i++;
+    }
+    else{
+        printf(", text ok");
+    }
+    return i;
+}
+
+
+bool test_Description(){
+    printf("test Description\n");
+    bool bres = true;
+    int pos;
+    int res;
+    int exp;
+    const char* nodeid;
+    
+    nodeid = "i=1000";
+    pos = 1;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "VariablesFolderDescObj1d2", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;i=15361";
+    pos = 2;
+    exp = 2;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+            printf("test Description %d node %d nodeid %s : ", 2, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 2 -1], "NoName", "en");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs";
+    pos = 3;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs";
+    pos = 4;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs";
+    pos = 5;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019";
+    pos = 6;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM";
+    pos = 7;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC";
+    pos = 8;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025";
+    pos = 9;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM";
+    pos = 10;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC";
+    pos = 11;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026";
+    pos = 12;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM";
+    pos = 13;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1";
+    pos = 14;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM";
+    pos = 15;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC";
+    pos = 16;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK";
+    pos = 17;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM";
+    pos = 18;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK";
+    pos = 19;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM";
+    pos = 20;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_P500";
+    pos = 21;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK";
+    pos = 22;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM";
+    pos = 23;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "NoName", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=2259";
+    pos = 24;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "i=1001";
+    pos = 25;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Int64_1d", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1002";
+    pos = 26;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "UInt32_1d", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1003";
+    pos = 27;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Double_1d", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1004";
+    pos = 28;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "String_1d", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1005";
+    pos = 29;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "ByteString_1d", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1006";
+    pos = 30;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "XmlElement_1d", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
+    pos = 31;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Permissive Signal Status, ~é€bla", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
+    pos = 32;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Signal Approach Locking", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
+    pos = 33;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Exit blocking is in effect for the signal", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
+    pos = 34;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Exit Block Removal Request", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
+    pos = 35;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Exit blocking is rejected for the signal", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
+    pos = 36;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Exit block removal is rejected for the signal", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
+    pos = 37;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
+    pos = 38;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
+    pos = 39;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
+    pos = 40;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Signal request", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
+    pos = 41;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Signal cancel", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
+    pos = 42;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Exit Block Application Request", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
+    pos = 43;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Exit Block Removal Request", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
+    pos = 44;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Exit Block Removal - Acknowledge", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
+    pos = 45;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Permissive Signal Status", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
+    pos = 46;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Signal Approach Locking", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
+    pos = 47;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
+    pos = 48;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
+    pos = 49;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
+    pos = 50;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Signal cancel", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
+    pos = 51;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Signal request", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
+    pos = 52;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Permissive Signal Status", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
+    pos = 53;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Switch Detected Normal", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
+    pos = 54;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Switch Detected Reverse", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
+    pos = 55;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Switch Locally Locked", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
+    pos = 56;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
+    pos = 57;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
+    pos = 58;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
+    pos = 59;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Switch Calling in Normal Direction", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
+    pos = 60;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Switch Calling in Reverse Direction", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
+    pos = 61;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Secondary Detection Status", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
+    pos = 62;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Secondary Detection Status", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
+    pos = 63;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "Secondary Detection Status", "");
+            printf("\n");
+        
+    }
+
+
+    return bres;
+}
+
+
+bool test_DisplayName(){
+    printf("test DisplayName\n");
+    bool bres = true;
+    int pos;
+    int res;
+    int exp;
+    const char* nodeid;
+    
+    nodeid = "i=1000";
+    pos = 1;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "VariablesFolderDn", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;i=15361";
+    pos = 2;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "15361", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs";
+    pos = 3;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "SIGNALs", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs";
+    pos = 4;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "SWITCHs", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs";
+    pos = 5;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "TRACKs", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019";
+    pos = 6;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "BALA_RDLS_G019", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM";
+    pos = 7;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "RM", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC";
+    pos = 8;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "RC", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025";
+    pos = 9;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "BALA_RDLS_G025", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM";
+    pos = 10;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "RM", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC";
+    pos = 11;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "RC", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026";
+    pos = 12;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "BALA_RDLS_G026", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM";
+    pos = 13;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "RM", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1";
+    pos = 14;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "BALA_RDLS_W1", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM";
+    pos = 15;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "RM", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC";
+    pos = 16;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "RC", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK";
+    pos = 17;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "BALA_RDLS_026TK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM";
+    pos = 18;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "RM", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK";
+    pos = 19;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "BALA_RDLS_OSTK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM";
+    pos = 20;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "RM", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_P500";
+    pos = 21;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "BALA_RDLS_P500", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK";
+    pos = 22;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "BALA_RDLS_WBK_RDLN_EBK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM";
+    pos = 23;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "RM", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=2259";
+    pos = 24;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "State", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1001";
+    pos = 25;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Int64_1dn", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1002";
+    pos = 26;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "UInt32_1dn", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1003";
+    pos = 27;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "Double_1dn", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1004";
+    pos = 28;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "String_1dn", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1005";
+    pos = 29;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "ByteString_1dn", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1006";
+    pos = 30;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "XmlElement_1dn", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
+    pos = 31;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "GK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
+    pos = 32;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "ASK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
+    pos = 33;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "XBKK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
+    pos = 34;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "XBZCRQ", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
+    pos = 35;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "XBZ-AK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
+    pos = 36;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "XBZCRQ-AK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
+    pos = 37;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "SendCommand", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
+    pos = 38;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "OffBlocking-K", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
+    pos = 39;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "OffBlocking-CC", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
+    pos = 40;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "GZ", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
+    pos = 41;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "SZ", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
+    pos = 42;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "XBZ-CC", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
+    pos = 43;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "XBZCRQ-CC", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
+    pos = 44;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "XBZC-CC", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
+    pos = 45;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "GK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
+    pos = 46;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "ASK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
+    pos = 47;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "SendCommand", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
+    pos = 48;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "OffBlocking-K", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
+    pos = 49;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "OffBlocking-CC", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
+    pos = 50;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "SZ", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
+    pos = 51;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "GZ", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
+    pos = 52;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "GK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
+    pos = 53;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "NWK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
+    pos = 54;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "RWK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
+    pos = 55;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "LK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
+    pos = 56;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "SendCommand", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
+    pos = 57;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "OffBlocking-K", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
+    pos = 58;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "OffBlocking-CC", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
+    pos = 59;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "NWZ", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
+    pos = 60;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "RWZ", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
+    pos = 61;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "TK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
+    pos = 62;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "TK", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
+    pos = 63;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        bres = false;
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "TK", "");
+            printf("\n");
+        
+    }
+
+
+    return bres;
+}
+
+
+int main (){
+    bool bres = true;
+    bres = test_browsename();
+    bres = bres && test_value();
+    bres = bres && test_reference();
+    bres = bres && test_Description();
+    bres = bres && test_DisplayName();
+    printf("%zu %s\n", strlen((char *)Description[1].Text.Data), Description[1].Text.Data);
+    if(bres == false){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+
