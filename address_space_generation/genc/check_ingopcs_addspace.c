@@ -1,10 +1,13 @@
 
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_toolkit_constants.h"
 #include "sopc_builtintypes.h"
 #include "sopc_types.h"
-#include "sopc_base_types.h"
 #include "sopc_user_app_itf.h"
 
 extern SOPC_AddressSpace addressSpace;
@@ -16,218 +19,219 @@ extern SOPC_AddressSpace addressSpace;
 #define Description_end addressSpace.descriptionIdxArray_end
 #define DEFAULT_VARIANT  {SOPC_Null_Id, SOPC_VariantArrayType_SingleValue,{0}}
 
-void test_browsename(){
+bool test_browsename(){
+    bool bres = true;
     printf ("test BrowseName\n");
     const char *var;
     if (addressSpace.browseNameArray[1].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "VariablesFolderBn";if (strcmp((char*)addressSpace.browseNameArray[1].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "VariablesFolderBn";if (strcmp((char*)addressSpace.browseNameArray[1].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[2].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "15361";if (strcmp((char*)addressSpace.browseNameArray[2].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "15361";if (strcmp((char*)addressSpace.browseNameArray[2].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[3].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "SIGNALs";if (strcmp((char*)addressSpace.browseNameArray[3].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SIGNALs";if (strcmp((char*)addressSpace.browseNameArray[3].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[4].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "SWITCHs";if (strcmp((char*)addressSpace.browseNameArray[4].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SWITCHs";if (strcmp((char*)addressSpace.browseNameArray[4].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[5].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "TRACKs";if (strcmp((char*)addressSpace.browseNameArray[5].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "TRACKs";if (strcmp((char*)addressSpace.browseNameArray[5].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[6].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "BALA_RDLS_G019";if (strcmp((char*)addressSpace.browseNameArray[6].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_G019";if (strcmp((char*)addressSpace.browseNameArray[6].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[7].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "RM";if (strcmp((char*)addressSpace.browseNameArray[7].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[7].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[8].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "RC";if (strcmp((char*)addressSpace.browseNameArray[8].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RC";if (strcmp((char*)addressSpace.browseNameArray[8].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[9].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "BALA_RDLS_G025";if (strcmp((char*)addressSpace.browseNameArray[9].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_G025";if (strcmp((char*)addressSpace.browseNameArray[9].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[10].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "RM";if (strcmp((char*)addressSpace.browseNameArray[10].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[10].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[11].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "RC";if (strcmp((char*)addressSpace.browseNameArray[11].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RC";if (strcmp((char*)addressSpace.browseNameArray[11].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[12].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "BALA_RDLS_G026";if (strcmp((char*)addressSpace.browseNameArray[12].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_G026";if (strcmp((char*)addressSpace.browseNameArray[12].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[13].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "RM";if (strcmp((char*)addressSpace.browseNameArray[13].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[13].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[14].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "BALA_RDLS_W1";if (strcmp((char*)addressSpace.browseNameArray[14].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_W1";if (strcmp((char*)addressSpace.browseNameArray[14].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[15].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "RM";if (strcmp((char*)addressSpace.browseNameArray[15].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[15].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[16].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "RC";if (strcmp((char*)addressSpace.browseNameArray[16].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RC";if (strcmp((char*)addressSpace.browseNameArray[16].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[17].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "BALA_RDLS_026TK";if (strcmp((char*)addressSpace.browseNameArray[17].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_026TK";if (strcmp((char*)addressSpace.browseNameArray[17].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[18].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "RM";if (strcmp((char*)addressSpace.browseNameArray[18].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[18].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[19].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "BALA_RDLS_OSTK";if (strcmp((char*)addressSpace.browseNameArray[19].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_OSTK";if (strcmp((char*)addressSpace.browseNameArray[19].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[20].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "RM";if (strcmp((char*)addressSpace.browseNameArray[20].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[20].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[21].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "BALA_RDLS_P500";if (strcmp((char*)addressSpace.browseNameArray[21].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_P500";if (strcmp((char*)addressSpace.browseNameArray[21].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[22].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "BALA_RDLS_WBK_RDLN_EBK";if (strcmp((char*)addressSpace.browseNameArray[22].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "BALA_RDLS_WBK_RDLN_EBK";if (strcmp((char*)addressSpace.browseNameArray[22].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[23].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "RM";if (strcmp((char*)addressSpace.browseNameArray[23].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RM";if (strcmp((char*)addressSpace.browseNameArray[23].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[24].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "State";if (strcmp((char*)addressSpace.browseNameArray[24].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "State";if (strcmp((char*)addressSpace.browseNameArray[24].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[25].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Int64";if (strcmp((char*)addressSpace.browseNameArray[25].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Int64";if (strcmp((char*)addressSpace.browseNameArray[25].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[26].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "UInt32";if (strcmp((char*)addressSpace.browseNameArray[26].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "UInt32";if (strcmp((char*)addressSpace.browseNameArray[26].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[27].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Double";if (strcmp((char*)addressSpace.browseNameArray[27].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Double";if (strcmp((char*)addressSpace.browseNameArray[27].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[28].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "String";if (strcmp((char*)addressSpace.browseNameArray[28].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "String";if (strcmp((char*)addressSpace.browseNameArray[28].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[29].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "ByteString";if (strcmp((char*)addressSpace.browseNameArray[29].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "ByteString";if (strcmp((char*)addressSpace.browseNameArray[29].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[30].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "XmlElement";if (strcmp((char*)addressSpace.browseNameArray[30].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XmlElement";if (strcmp((char*)addressSpace.browseNameArray[30].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[31].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "SByte";if (strcmp((char*)addressSpace.browseNameArray[31].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SByte";if (strcmp((char*)addressSpace.browseNameArray[31].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[32].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Byte";if (strcmp((char*)addressSpace.browseNameArray[32].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Byte";if (strcmp((char*)addressSpace.browseNameArray[32].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[33].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Int16";if (strcmp((char*)addressSpace.browseNameArray[33].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Int16";if (strcmp((char*)addressSpace.browseNameArray[33].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[34].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "UInt16";if (strcmp((char*)addressSpace.browseNameArray[34].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "UInt16";if (strcmp((char*)addressSpace.browseNameArray[34].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[35].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Int32";if (strcmp((char*)addressSpace.browseNameArray[35].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Int32";if (strcmp((char*)addressSpace.browseNameArray[35].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[36].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "UInt64";if (strcmp((char*)addressSpace.browseNameArray[36].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "UInt64";if (strcmp((char*)addressSpace.browseNameArray[36].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[37].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Float";if (strcmp((char*)addressSpace.browseNameArray[37].Name.Data, var)) {printf("invalid BrowseName ") ;}  
-if (addressSpace.browseNameArray[38].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "DateTime";if (strcmp((char*)addressSpace.browseNameArray[38].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Float";if (strcmp((char*)addressSpace.browseNameArray[37].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[38].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
+var = "GK";if (strcmp((char*)addressSpace.browseNameArray[38].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[39].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "GK";if (strcmp((char*)addressSpace.browseNameArray[39].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "ASK";if (strcmp((char*)addressSpace.browseNameArray[39].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[40].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "ASK";if (strcmp((char*)addressSpace.browseNameArray[40].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBKK";if (strcmp((char*)addressSpace.browseNameArray[40].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[41].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "XBKK";if (strcmp((char*)addressSpace.browseNameArray[41].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBZCRQ";if (strcmp((char*)addressSpace.browseNameArray[41].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[42].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "XBZCRQ";if (strcmp((char*)addressSpace.browseNameArray[42].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBZ-AK";if (strcmp((char*)addressSpace.browseNameArray[42].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[43].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "XBZ-AK";if (strcmp((char*)addressSpace.browseNameArray[43].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBZCRQ-AK";if (strcmp((char*)addressSpace.browseNameArray[43].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[44].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "XBZCRQ-AK";if (strcmp((char*)addressSpace.browseNameArray[44].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[44].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[45].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[45].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[45].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[46].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[46].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[46].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[47].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[47].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "GZ";if (strcmp((char*)addressSpace.browseNameArray[47].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[48].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "GZ";if (strcmp((char*)addressSpace.browseNameArray[48].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SZ";if (strcmp((char*)addressSpace.browseNameArray[48].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[49].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "SZ";if (strcmp((char*)addressSpace.browseNameArray[49].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBZ-CC";if (strcmp((char*)addressSpace.browseNameArray[49].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[50].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "XBZ-CC";if (strcmp((char*)addressSpace.browseNameArray[50].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBZCRQ-CC";if (strcmp((char*)addressSpace.browseNameArray[50].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[51].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "XBZCRQ-CC";if (strcmp((char*)addressSpace.browseNameArray[51].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBZC-CC";if (strcmp((char*)addressSpace.browseNameArray[51].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[52].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "XBZC-CC";if (strcmp((char*)addressSpace.browseNameArray[52].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "GK";if (strcmp((char*)addressSpace.browseNameArray[52].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[53].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "GK";if (strcmp((char*)addressSpace.browseNameArray[53].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "ASK";if (strcmp((char*)addressSpace.browseNameArray[53].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[54].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "ASK";if (strcmp((char*)addressSpace.browseNameArray[54].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[54].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[55].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[55].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[55].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[56].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[56].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[56].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[57].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[57].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SZ";if (strcmp((char*)addressSpace.browseNameArray[57].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[58].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "SZ";if (strcmp((char*)addressSpace.browseNameArray[58].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "GZ";if (strcmp((char*)addressSpace.browseNameArray[58].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[59].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "GZ";if (strcmp((char*)addressSpace.browseNameArray[59].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "GK";if (strcmp((char*)addressSpace.browseNameArray[59].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[60].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "GK";if (strcmp((char*)addressSpace.browseNameArray[60].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "NWK";if (strcmp((char*)addressSpace.browseNameArray[60].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[61].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "NWK";if (strcmp((char*)addressSpace.browseNameArray[61].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RWK";if (strcmp((char*)addressSpace.browseNameArray[61].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[62].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "RWK";if (strcmp((char*)addressSpace.browseNameArray[62].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "LK";if (strcmp((char*)addressSpace.browseNameArray[62].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[63].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "LK";if (strcmp((char*)addressSpace.browseNameArray[63].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[63].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[64].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[64].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[64].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[65].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[65].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[65].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[66].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[66].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "NWZ";if (strcmp((char*)addressSpace.browseNameArray[66].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[67].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "NWZ";if (strcmp((char*)addressSpace.browseNameArray[67].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RWZ";if (strcmp((char*)addressSpace.browseNameArray[67].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[68].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "RWZ";if (strcmp((char*)addressSpace.browseNameArray[68].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "TK";if (strcmp((char*)addressSpace.browseNameArray[68].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[69].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "TK";if (strcmp((char*)addressSpace.browseNameArray[69].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "TK";if (strcmp((char*)addressSpace.browseNameArray[69].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[70].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "TK";if (strcmp((char*)addressSpace.browseNameArray[70].Name.Data, var)) {printf("invalid BrowseName ") ;}  
-if (addressSpace.browseNameArray[71].NamespaceIndex != 261) {printf("invalid BrowseName ") ;}  
-var = "TK";if (strcmp((char*)addressSpace.browseNameArray[71].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "TK";if (strcmp((char*)addressSpace.browseNameArray[70].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[71].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
+var = "BaseDataType";if (strcmp((char*)addressSpace.browseNameArray[71].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[72].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "BaseDataType";if (strcmp((char*)addressSpace.browseNameArray[72].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Number";if (strcmp((char*)addressSpace.browseNameArray[72].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[73].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Number";if (strcmp((char*)addressSpace.browseNameArray[73].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Integer";if (strcmp((char*)addressSpace.browseNameArray[73].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[74].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Integer";if (strcmp((char*)addressSpace.browseNameArray[74].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "UInteger";if (strcmp((char*)addressSpace.browseNameArray[74].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[75].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "UInteger";if (strcmp((char*)addressSpace.browseNameArray[75].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Enumeration";if (strcmp((char*)addressSpace.browseNameArray[75].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[76].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Enumeration";if (strcmp((char*)addressSpace.browseNameArray[76].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Boolean";if (strcmp((char*)addressSpace.browseNameArray[76].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[77].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Boolean";if (strcmp((char*)addressSpace.browseNameArray[77].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SByte";if (strcmp((char*)addressSpace.browseNameArray[77].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[78].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "SByte";if (strcmp((char*)addressSpace.browseNameArray[78].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Byte";if (strcmp((char*)addressSpace.browseNameArray[78].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[79].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Byte";if (strcmp((char*)addressSpace.browseNameArray[79].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Int16";if (strcmp((char*)addressSpace.browseNameArray[79].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[80].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Int16";if (strcmp((char*)addressSpace.browseNameArray[80].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "UInt16";if (strcmp((char*)addressSpace.browseNameArray[80].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[81].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "UInt16";if (strcmp((char*)addressSpace.browseNameArray[81].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Int32";if (strcmp((char*)addressSpace.browseNameArray[81].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[82].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Int32";if (strcmp((char*)addressSpace.browseNameArray[82].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "UInt32";if (strcmp((char*)addressSpace.browseNameArray[82].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[83].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "UInt32";if (strcmp((char*)addressSpace.browseNameArray[83].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Int64";if (strcmp((char*)addressSpace.browseNameArray[83].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[84].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Int64";if (strcmp((char*)addressSpace.browseNameArray[84].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "UInt64";if (strcmp((char*)addressSpace.browseNameArray[84].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[85].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "UInt64";if (strcmp((char*)addressSpace.browseNameArray[85].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Float";if (strcmp((char*)addressSpace.browseNameArray[85].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[86].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Float";if (strcmp((char*)addressSpace.browseNameArray[86].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Double";if (strcmp((char*)addressSpace.browseNameArray[86].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[87].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Double";if (strcmp((char*)addressSpace.browseNameArray[87].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "String";if (strcmp((char*)addressSpace.browseNameArray[87].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[88].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "String";if (strcmp((char*)addressSpace.browseNameArray[88].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "DateTime";if (strcmp((char*)addressSpace.browseNameArray[88].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[89].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "DateTime";if (strcmp((char*)addressSpace.browseNameArray[89].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Guid";if (strcmp((char*)addressSpace.browseNameArray[89].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[90].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Guid";if (strcmp((char*)addressSpace.browseNameArray[90].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "ByteString";if (strcmp((char*)addressSpace.browseNameArray[90].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[91].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "ByteString";if (strcmp((char*)addressSpace.browseNameArray[91].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XmlElement";if (strcmp((char*)addressSpace.browseNameArray[91].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[92].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "XmlElement";if (strcmp((char*)addressSpace.browseNameArray[92].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "NodeId";if (strcmp((char*)addressSpace.browseNameArray[92].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[93].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "NodeId";if (strcmp((char*)addressSpace.browseNameArray[93].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "ExpandedNodeId";if (strcmp((char*)addressSpace.browseNameArray[93].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[94].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "ExpandedNodeId";if (strcmp((char*)addressSpace.browseNameArray[94].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "StatusCode";if (strcmp((char*)addressSpace.browseNameArray[94].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[95].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "StatusCode";if (strcmp((char*)addressSpace.browseNameArray[95].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "QualifiedName";if (strcmp((char*)addressSpace.browseNameArray[95].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[96].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "QualifiedName";if (strcmp((char*)addressSpace.browseNameArray[96].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "LocalizedText";if (strcmp((char*)addressSpace.browseNameArray[96].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[97].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "LocalizedText";if (strcmp((char*)addressSpace.browseNameArray[97].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Structure";if (strcmp((char*)addressSpace.browseNameArray[97].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[98].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Structure";if (strcmp((char*)addressSpace.browseNameArray[98].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "DataValue";if (strcmp((char*)addressSpace.browseNameArray[98].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[99].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "DataValue";if (strcmp((char*)addressSpace.browseNameArray[99].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "DiagnosticInfo";if (strcmp((char*)addressSpace.browseNameArray[99].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[100].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "DiagnosticInfo";if (strcmp((char*)addressSpace.browseNameArray[100].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Image";if (strcmp((char*)addressSpace.browseNameArray[100].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[101].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Image";if (strcmp((char*)addressSpace.browseNameArray[101].Name.Data, var)) {printf("invalid BrowseName ") ;}  
-if (addressSpace.browseNameArray[102].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "Decimal128";if (strcmp((char*)addressSpace.browseNameArray[102].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "Decimal128";if (strcmp((char*)addressSpace.browseNameArray[101].Name.Data, var)) {bres = false; printf("invalid BrowseName ") ;}  
 
+    return bres;
 }
 
-void test_value(){
+bool test_value(){
     printf ("test Value\n");
+    bool bres = true;
     int pos;
     const char* nodeid;
     SOPC_Byte builtInTypeId;
@@ -250,11 +254,11 @@ void test_value(){
   pos = 1;
   nodeid = "i=2259";
   printf("test Value for nodeid %s\n", nodeid);
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
-  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value \n") ;}
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
 
   pos = 2;
   
@@ -262,9 +266,9 @@ void test_value(){
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "-1000";
   builtInTypeId = SOPC_Int64_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -273,7 +277,7 @@ void test_value(){
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -297,10 +301,10 @@ void test_value(){
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
@@ -312,9 +316,9 @@ void test_value(){
   value_node = "1000";
   sscanf(value_node, "%lu", &uint32_value);
 
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt32_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt32_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (!(addressSpace.valueArray[pos].Value.Uint32 == uint32_value)) {printf("invalid Value \n") ;}
 
@@ -324,9 +328,9 @@ void test_value(){
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "2.0";
   builtInTypeId = SOPC_Double_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -335,7 +339,7 @@ void test_value(){
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -359,10 +363,10 @@ void test_value(){
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
@@ -372,22 +376,22 @@ void test_value(){
   nodeid = "i=1004";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "String:INGOPCS";
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_String_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_String_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
-    if (strcmp((char*)addressSpace.valueArray[pos].Value.String.Data, value_node) != 0) {printf("invalid Value \n") ;}
+    if (strcmp((char*)addressSpace.valueArray[pos].Value.String.Data, value_node) != 0) {bres = false; printf("invalid Value \n") ;}
 
   pos = 6;
   
   nodeid = "i=1005";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "ByteString:INGOPCS";
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_ByteString_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_ByteString_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
-    if (strcmp((char*)addressSpace.valueArray[pos].Value.Bstring.Data, value_node) != 0) {printf("invalid Value \n") ;}
+    if (strcmp((char*)addressSpace.valueArray[pos].Value.Bstring.Data, value_node) != 0) {bres = false; printf("invalid Value \n") ;}
 
   pos = 7;
   
@@ -395,9 +399,9 @@ void test_value(){
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "XmlElement:INGOPCS";
 
-if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf("invalid BuiltInTypeId \n") ;}
+if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
     if (strcmp((char*)addressSpace.valueArray[pos].Value.XmlElt.Data, value_node) != 0) {printf("invalid Value \n") ;}
 
@@ -407,9 +411,9 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "-128";
   builtInTypeId = SOPC_SByte_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -418,7 +422,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -442,10 +446,10 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
@@ -456,9 +460,9 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "255";
   builtInTypeId = SOPC_Byte_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -467,7 +471,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -491,10 +495,10 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
@@ -505,9 +509,9 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "-32768";
   builtInTypeId = SOPC_Int16_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -516,7 +520,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -540,10 +544,10 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
@@ -555,9 +559,9 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
   value_node = "65535";
   sscanf(value_node, "%hu", &uint16_value);
 
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt16_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt16_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (!(addressSpace.valueArray[pos].Value.Uint16 == uint16_value)) {printf("invalid Value \n") ;}
 
@@ -567,9 +571,9 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "-2147483648";
   builtInTypeId = SOPC_Int32_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -578,7 +582,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -602,10 +606,10 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
@@ -614,12 +618,12 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
   
   nodeid = "i=1012";
   printf("test Value for nodeid %s\n", nodeid);
-  value_node = "18446744073709551615";
+  value_node = "18446744073709551614ULL";
   sscanf(value_node, "%llu", &uint64_value);
 
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt64_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_UInt64_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (!(addressSpace.valueArray[pos].Value.Uint64 == uint64_value)) {printf("invalid Value \n") ;}
 
@@ -629,39 +633,21 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "5758787.5876875";
   sscanf(value_node, "%f", &float_value);
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Float_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Float_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype  \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype  \n") ;}
 
-  if (!(addressSpace.valueArray[pos].Value.Floatv == float_value)) {printf("invalid Value  \n") ;}
+  if (!(addressSpace.valueArray[pos].Value.Floatv == float_value)) {bres = false; printf("invalid Value  \n") ;}
 
   pos = 15;
-  
-  nodeid = "i=1014";
-  printf("test Value for nodeid %s\n", nodeid);
-  value_node = "18446744073709551615";
-  unsigned long long date_time_value;
-  sscanf(value_node, "%llu", &date_time_value);
-  date_time_value_32_lsb = date_time_value & 0xFFFFFFFF;
-  date_time_value_32_msb = date_time_value >> 32;
-
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_DateTime_Id)) {printf("invalid BuiltInTypeId \n") ;}
-
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
-
-  if (!(addressSpace.valueArray[pos].Value.Date.Low32 == date_time_value_32_lsb)) {printf("invalid Value for lsb\n") ;}
-
-  if (!(addressSpace.valueArray[pos].Value.Date.High32 == date_time_value_32_msb)) {printf("invalid Value for msb\n") ;}
-
-  pos = 16;
   
   nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -670,7 +656,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -694,23 +680,72 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 16;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    sscanf(value_node, "%hhu", &uint8_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == uint8_value)) {printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    sscanf(value_node, "%hhi", &int8_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int8_value)) {printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    sscanf(value_node, "%hi", &int16_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int16_value)) {printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    sscanf(value_node, "%li", &int32_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int32_value)) {printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    sscanf(value_node, "%lld", &int64_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int64_value)) {printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 17;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -719,7 +754,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -743,23 +778,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 18;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -768,7 +803,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -792,23 +827,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 19;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -817,7 +852,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -841,23 +876,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 20;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -866,7 +901,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -890,23 +925,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 21;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -915,7 +950,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -939,90 +974,41 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 22;
-  
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
-  printf("test Value for nodeid %s\n", nodeid);
-  value_node = "false";
-  builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
-
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
-
-  if (builtInTypeId == SOPC_Boolean_Id) {
-    if (!strcmp(value_node,"true")) {
-      bool_value = true;
-    }
-    else {
-      bool_value = false;
-    }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
-
-  } else if (builtInTypeId == SOPC_SByte_Id) {
-    sscanf(value_node, "%hhu", &uint8_value);
-    if (!(addressSpace.valueArray[pos].Value.Sbyte == uint8_value)) {printf("invalid Value \n") ;}
-    
-  } else if (builtInTypeId == SOPC_Byte_Id) {
-    sscanf(value_node, "%hhi", &int8_value);
-    if (!(addressSpace.valueArray[pos].Value.Byte == int8_value)) {printf("invalid Value \n") ;}
-    
-  } else if (builtInTypeId == SOPC_Int16_Id) {
-    sscanf(value_node, "%hi", &int16_value);
-    if (!(addressSpace.valueArray[pos].Value.Int16 == int16_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_Int32_Id) {
-    sscanf(value_node, "%li", &int32_value);
-    if (!(addressSpace.valueArray[pos].Value.Int32 == int32_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_Int64_Id) {
-    sscanf(value_node, "%lld", &int64_value);
-    if (!(addressSpace.valueArray[pos].Value.Int64 == int64_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_Double_Id) {
-    sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
-    
-  }
-
-
-  pos = 23;
   nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
   printf("test Value for nodeid %s\n", nodeid);
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
-  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value \n") ;}
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
 
-  pos = 24;
+  pos = 23;
   nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
   printf("test Value for nodeid %s\n", nodeid);
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
-  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value \n") ;}
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
 
-  pos = 25;
+  pos = 24;
   
   nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1031,7 +1017,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1055,23 +1041,72 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 25;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    sscanf(value_node, "%hhu", &uint8_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == uint8_value)) {printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    sscanf(value_node, "%hhi", &int8_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int8_value)) {printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    sscanf(value_node, "%hi", &int16_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int16_value)) {printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    sscanf(value_node, "%li", &int32_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int32_value)) {printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    sscanf(value_node, "%lld", &int64_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int64_value)) {printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 26;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1080,7 +1115,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1104,23 +1139,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 27;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1129,7 +1164,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1153,23 +1188,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 28;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1178,7 +1213,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1202,23 +1237,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 29;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1227,7 +1262,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1251,23 +1286,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 30;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1276,7 +1311,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1300,23 +1335,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 31;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1325,7 +1360,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1349,90 +1384,41 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 32;
-  
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
-  printf("test Value for nodeid %s\n", nodeid);
-  value_node = "false";
-  builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
-
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
-
-  if (builtInTypeId == SOPC_Boolean_Id) {
-    if (!strcmp(value_node,"true")) {
-      bool_value = true;
-    }
-    else {
-      bool_value = false;
-    }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
-
-  } else if (builtInTypeId == SOPC_SByte_Id) {
-    sscanf(value_node, "%hhu", &uint8_value);
-    if (!(addressSpace.valueArray[pos].Value.Sbyte == uint8_value)) {printf("invalid Value \n") ;}
-    
-  } else if (builtInTypeId == SOPC_Byte_Id) {
-    sscanf(value_node, "%hhi", &int8_value);
-    if (!(addressSpace.valueArray[pos].Value.Byte == int8_value)) {printf("invalid Value \n") ;}
-    
-  } else if (builtInTypeId == SOPC_Int16_Id) {
-    sscanf(value_node, "%hi", &int16_value);
-    if (!(addressSpace.valueArray[pos].Value.Int16 == int16_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_Int32_Id) {
-    sscanf(value_node, "%li", &int32_value);
-    if (!(addressSpace.valueArray[pos].Value.Int32 == int32_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_Int64_Id) {
-    sscanf(value_node, "%lld", &int64_value);
-    if (!(addressSpace.valueArray[pos].Value.Int64 == int64_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_Double_Id) {
-    sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
-    
-  }
-
-
-  pos = 33;
   nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
   printf("test Value for nodeid %s\n", nodeid);
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
-  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value \n") ;}
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
 
-  pos = 34;
+  pos = 33;
   nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
   printf("test Value for nodeid %s\n", nodeid);
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
-  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value \n") ;}
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
 
-  pos = 35;
+  pos = 34;
   
   nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1441,7 +1427,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1465,23 +1451,72 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 35;
+  
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    sscanf(value_node, "%hhu", &uint8_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == uint8_value)) {printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    sscanf(value_node, "%hhi", &int8_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int8_value)) {printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    sscanf(value_node, "%hi", &int16_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int16_value)) {printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    sscanf(value_node, "%li", &int32_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int32_value)) {printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    sscanf(value_node, "%lld", &int64_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int64_value)) {printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 36;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
+  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1490,7 +1525,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1514,23 +1549,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 37;
   
-  nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1539,7 +1574,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1563,23 +1598,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 38;
   
-  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1588,7 +1623,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1612,23 +1647,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 39;
   
-  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1637,7 +1672,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1661,23 +1696,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 40;
   
-  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1686,7 +1721,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1710,90 +1745,41 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 41;
-  
-  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
-  printf("test Value for nodeid %s\n", nodeid);
-  value_node = "false";
-  builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
-
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
-
-  if (builtInTypeId == SOPC_Boolean_Id) {
-    if (!strcmp(value_node,"true")) {
-      bool_value = true;
-    }
-    else {
-      bool_value = false;
-    }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
-
-  } else if (builtInTypeId == SOPC_SByte_Id) {
-    sscanf(value_node, "%hhu", &uint8_value);
-    if (!(addressSpace.valueArray[pos].Value.Sbyte == uint8_value)) {printf("invalid Value \n") ;}
-    
-  } else if (builtInTypeId == SOPC_Byte_Id) {
-    sscanf(value_node, "%hhi", &int8_value);
-    if (!(addressSpace.valueArray[pos].Value.Byte == int8_value)) {printf("invalid Value \n") ;}
-    
-  } else if (builtInTypeId == SOPC_Int16_Id) {
-    sscanf(value_node, "%hi", &int16_value);
-    if (!(addressSpace.valueArray[pos].Value.Int16 == int16_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_Int32_Id) {
-    sscanf(value_node, "%li", &int32_value);
-    if (!(addressSpace.valueArray[pos].Value.Int32 == int32_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_Int64_Id) {
-    sscanf(value_node, "%lld", &int64_value);
-    if (!(addressSpace.valueArray[pos].Value.Int64 == int64_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_Double_Id) {
-    sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
-    
-  }
-
-
-  pos = 42;
   nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
   printf("test Value for nodeid %s\n", nodeid);
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
-  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value \n") ;}
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
 
-  pos = 43;
+  pos = 42;
   nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
   printf("test Value for nodeid %s\n", nodeid);
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_Null_Id)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
-  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {printf("invalid Value \n") ;}
+  if (!(addressSpace.valueArray[pos].Value.Boolean == 0)) {bres = false; printf("invalid Value \n") ;}
 
-  pos = 44;
+  pos = 43;
   
   nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1802,7 +1788,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1826,23 +1812,72 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
+    
+  }
+
+
+  pos = 44;
+  
+  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
+  printf("test Value for nodeid %s\n", nodeid);
+  value_node = "false";
+  builtInTypeId = SOPC_Boolean_Id;
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
+
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
+
+  if (builtInTypeId == SOPC_Boolean_Id) {
+    if (!strcmp(value_node,"true")) {
+      bool_value = true;
+    }
+    else {
+      bool_value = false;
+    }
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
+
+  } else if (builtInTypeId == SOPC_SByte_Id) {
+    sscanf(value_node, "%hhu", &uint8_value);
+    if (!(addressSpace.valueArray[pos].Value.Sbyte == uint8_value)) {printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Byte_Id) {
+    sscanf(value_node, "%hhi", &int8_value);
+    if (!(addressSpace.valueArray[pos].Value.Byte == int8_value)) {printf("invalid Value \n") ;}
+    
+  } else if (builtInTypeId == SOPC_Int16_Id) {
+    sscanf(value_node, "%hi", &int16_value);
+    if (!(addressSpace.valueArray[pos].Value.Int16 == int16_value)) {printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int32_Id) {
+    sscanf(value_node, "%li", &int32_value);
+    if (!(addressSpace.valueArray[pos].Value.Int32 == int32_value)) {printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Int64_Id) {
+    sscanf(value_node, "%lld", &int64_value);
+    if (!(addressSpace.valueArray[pos].Value.Int64 == int64_value)) {printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_Double_Id) {
+    sscanf(value_node, "%lf", &double_value);
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
+    
+  }else if (builtInTypeId == SOPC_NodeId_Id) {
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 45;
   
-  nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
+  nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
   printf("test Value for nodeid %s\n", nodeid);
-  value_node = "false";
+  value_node = "true";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1851,7 +1886,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1875,23 +1910,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 46;
   
-  nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
+  nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "true";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1900,7 +1935,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -1924,72 +1959,23 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
   pos = 47;
   
-  nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
-  printf("test Value for nodeid %s\n", nodeid);
-  value_node = "true";
-  builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
-
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
-
-  if (builtInTypeId == SOPC_Boolean_Id) {
-    if (!strcmp(value_node,"true")) {
-      bool_value = true;
-    }
-    else {
-      bool_value = false;
-    }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
-
-  } else if (builtInTypeId == SOPC_SByte_Id) {
-    sscanf(value_node, "%hhu", &uint8_value);
-    if (!(addressSpace.valueArray[pos].Value.Sbyte == uint8_value)) {printf("invalid Value \n") ;}
-    
-  } else if (builtInTypeId == SOPC_Byte_Id) {
-    sscanf(value_node, "%hhi", &int8_value);
-    if (!(addressSpace.valueArray[pos].Value.Byte == int8_value)) {printf("invalid Value \n") ;}
-    
-  } else if (builtInTypeId == SOPC_Int16_Id) {
-    sscanf(value_node, "%hi", &int16_value);
-    if (!(addressSpace.valueArray[pos].Value.Int16 == int16_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_Int32_Id) {
-    sscanf(value_node, "%li", &int32_value);
-    if (!(addressSpace.valueArray[pos].Value.Int32 == int32_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_Int64_Id) {
-    sscanf(value_node, "%lld", &int64_value);
-    if (!(addressSpace.valueArray[pos].Value.Int64 == int64_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_Double_Id) {
-    sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
-    
-  }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
-    
-  }
-
-
-  pos = 48;
-  
   nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
   printf("test Value for nodeid %s\n", nodeid);
   value_node = "false";
   builtInTypeId = SOPC_Boolean_Id;
-  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {printf("invalid BuiltInTypeId \n") ;}
+  if (!(addressSpace.valueArray[pos].BuiltInTypeId == builtInTypeId)) {bres = false; printf("invalid BuiltInTypeId \n") ;}
 
-  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {printf("invalid Arraytype \n") ;}
+  if (!(addressSpace.valueArray[pos].ArrayType == SOPC_VariantArrayType_SingleValue)) {bres = false; printf("invalid Arraytype \n") ;}
 
   if (builtInTypeId == SOPC_Boolean_Id) {
     if (!strcmp(value_node,"true")) {
@@ -1998,7 +1984,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     else {
       bool_value = false;
     }
-    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
     sscanf(value_node, "%hhu", &uint8_value);
@@ -2022,18 +2008,20 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {printf
     
   }else if (builtInTypeId == SOPC_Double_Id) {
     sscanf(value_node, "%lf", &double_value);
-    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {printf("invalid Value \n") ;}
+    if (!(addressSpace.valueArray[pos].Value.Doublev == double_value)) {bres = false; printf("invalid Value \n") ;}
     
   }else if (builtInTypeId == SOPC_NodeId_Id) {
-    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {printf("invalid Value \n") ;}
+    if (!strcmp((char*)addressSpace.valueArray[pos].Value.NodeId->Data.String.Data, value_node)) {bres = false; printf("invalid Value \n") ;}
     
   }
 
 
+    return bres;
 }
 
-void test_reference(){
+bool test_reference(){
     printf("test reference \n");
+    bool bres = true;
     int pos;
     int res;
     int exp;
@@ -2045,6 +2033,7 @@ void test_reference(){
     exp = 8;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -2265,6 +2254,7 @@ int nsIndex = 0;
     exp = 5;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -2407,6 +2397,7 @@ int nsIndex = 261;
     exp = 5;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -2549,6 +2540,7 @@ int nsIndex = 261;
     exp = 3;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -2639,6 +2631,7 @@ int nsIndex = 261;
     exp = 6;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -2807,6 +2800,7 @@ int nsIndex = 261;
     exp = 7;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -3001,6 +2995,7 @@ int nsIndex = 261;
     exp = 8;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -3221,6 +3216,7 @@ int nsIndex = 261;
     exp = 7;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -3415,6 +3411,7 @@ int nsIndex = 261;
     exp = 7;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -3609,6 +3606,7 @@ int nsIndex = 261;
     exp = 4;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -3725,6 +3723,7 @@ int nsIndex = 261;
     exp = 4;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -3841,6 +3840,7 @@ int nsIndex = 261;
     exp = 3;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -3931,6 +3931,7 @@ int nsIndex = 261;
     exp = 3;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -4021,6 +4022,7 @@ int nsIndex = 261;
     exp = 7;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -4215,6 +4217,7 @@ int nsIndex = 261;
     exp = 5;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -4357,6 +4360,7 @@ int nsIndex = 261;
     exp = 4;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -4473,6 +4477,7 @@ int nsIndex = 261;
     exp = 3;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -4563,6 +4568,7 @@ int nsIndex = 261;
     exp = 3;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -4653,6 +4659,7 @@ int nsIndex = 261;
     exp = 3;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -4743,6 +4750,7 @@ int nsIndex = 261;
     exp = 3;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -4833,6 +4841,7 @@ int nsIndex = 261;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -4897,6 +4906,7 @@ int nsIndex = 0;
     exp = 3;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -4987,6 +4997,7 @@ int nsIndex = 261;
     exp = 3;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5077,6 +5088,7 @@ int nsIndex = 261;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5141,6 +5153,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5205,6 +5218,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5269,6 +5283,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5333,6 +5348,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5397,6 +5413,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5461,6 +5478,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5525,6 +5543,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5589,6 +5608,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5653,6 +5673,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5717,6 +5738,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5781,6 +5803,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5845,6 +5868,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -5909,70 +5933,7 @@ int nsIndex = 0;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
-        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
-    }
-    else{
-        
-            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
-            
-{
-SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-{
-SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 1000){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1000, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
-            
-{
-SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-{
-SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-    }
-
-
-    nodeid = "i=1014";
-    pos = 38;
-    exp = 2;
-    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
-    if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6033,10 +5994,11 @@ int nsIndex = 0;
 
 
     nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
-    pos = 39;
+    pos = 38;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6097,10 +6059,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
-    pos = 40;
+    pos = 39;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6161,10 +6124,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
-    pos = 41;
+    pos = 40;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6225,10 +6189,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
-    pos = 42;
+    pos = 41;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6289,10 +6254,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
-    pos = 43;
+    pos = 42;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6353,10 +6319,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
-    pos = 44;
+    pos = 43;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6417,10 +6384,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
-    pos = 45;
+    pos = 44;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6481,10 +6449,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
-    pos = 46;
+    pos = 45;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6545,10 +6514,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
-    pos = 47;
+    pos = 46;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6609,10 +6579,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
-    pos = 48;
+    pos = 47;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6673,10 +6644,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
-    pos = 49;
+    pos = 48;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6737,10 +6709,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
-    pos = 50;
+    pos = 49;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6801,10 +6774,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
-    pos = 51;
+    pos = 50;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6865,10 +6839,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
-    pos = 52;
+    pos = 51;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6929,10 +6904,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
-    pos = 53;
+    pos = 52;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -6993,10 +6969,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
-    pos = 54;
+    pos = 53;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7057,10 +7034,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
-    pos = 55;
+    pos = 54;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7121,10 +7099,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
-    pos = 56;
+    pos = 55;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7185,10 +7164,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
-    pos = 57;
+    pos = 56;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7249,10 +7229,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
-    pos = 58;
+    pos = 57;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7313,10 +7294,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
-    pos = 59;
+    pos = 58;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7377,10 +7359,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
-    pos = 60;
+    pos = 59;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7441,10 +7424,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
-    pos = 61;
+    pos = 60;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7505,10 +7489,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
-    pos = 62;
+    pos = 61;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7569,10 +7554,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
-    pos = 63;
+    pos = 62;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7633,10 +7619,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
-    pos = 64;
+    pos = 63;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7697,10 +7684,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
-    pos = 65;
+    pos = 64;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7761,10 +7749,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
-    pos = 66;
+    pos = 65;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7825,10 +7814,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
-    pos = 67;
+    pos = 66;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7889,10 +7879,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
-    pos = 68;
+    pos = 67;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -7953,10 +7944,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
-    pos = 69;
+    pos = 68;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8017,10 +8009,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
-    pos = 70;
+    pos = 69;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8081,10 +8074,11 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
-    pos = 71;
+    pos = 70;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8145,10 +8139,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=24";
-    pos = 72;
+    pos = 71;
     exp = 0;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8157,10 +8152,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=26";
-    pos = 73;
+    pos = 72;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8195,10 +8191,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=27";
-    pos = 74;
+    pos = 73;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8233,10 +8230,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=28";
-    pos = 75;
+    pos = 74;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8271,10 +8269,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=29";
-    pos = 76;
+    pos = 75;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8309,10 +8308,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=1";
-    pos = 77;
+    pos = 76;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8347,10 +8347,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=2";
-    pos = 78;
+    pos = 77;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8385,10 +8386,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=3";
-    pos = 79;
+    pos = 78;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8423,10 +8425,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=4";
-    pos = 80;
+    pos = 79;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8461,10 +8464,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=5";
-    pos = 81;
+    pos = 80;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8499,10 +8503,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=6";
-    pos = 82;
+    pos = 81;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8537,10 +8542,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=7";
-    pos = 83;
+    pos = 82;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8575,10 +8581,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=8";
-    pos = 84;
+    pos = 83;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8613,10 +8620,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=9";
-    pos = 85;
+    pos = 84;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8651,10 +8659,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=10";
-    pos = 86;
+    pos = 85;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8689,10 +8698,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=11";
-    pos = 87;
+    pos = 86;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8727,10 +8737,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=12";
-    pos = 88;
+    pos = 87;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8765,10 +8776,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=13";
-    pos = 89;
+    pos = 88;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8803,10 +8815,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=14";
-    pos = 90;
+    pos = 89;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8841,10 +8854,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=15";
-    pos = 91;
+    pos = 90;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8879,10 +8893,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=16";
-    pos = 92;
+    pos = 91;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8917,10 +8932,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=17";
-    pos = 93;
+    pos = 92;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8955,10 +8971,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=18";
-    pos = 94;
+    pos = 93;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -8993,10 +9010,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=19";
-    pos = 95;
+    pos = 94;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -9031,10 +9049,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=20";
-    pos = 96;
+    pos = 95;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -9069,10 +9088,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=21";
-    pos = 97;
+    pos = 96;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -9107,10 +9127,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=22";
-    pos = 98;
+    pos = 97;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -9145,10 +9166,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=23";
-    pos = 99;
+    pos = 98;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -9183,10 +9205,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=25";
-    pos = 100;
+    pos = 99;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -9221,10 +9244,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=30";
-    pos = 101;
+    pos = 100;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -9259,10 +9283,11 @@ int nsIndex = 0;
 
 
     nodeid = "i=121";
-    pos = 102;
+    pos = 101;
     exp = 1;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
+        bres = false;
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
@@ -9296,6 +9321,7 @@ int nsIndex = 0;
     }
 
 
+    return bres;
 }
 
 int compareLocalizedText(SOPC_LocalizedText LText, const char *text, const char *locale){
@@ -9318,8 +9344,9 @@ int compareLocalizedText(SOPC_LocalizedText LText, const char *text, const char 
 }
 
 
-void test_Description(){
+bool test_Description(){
     printf("test Description\n");
+    bool bres = true;
     int pos;
     int res;
     int exp;
@@ -9330,6 +9357,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9346,6 +9374,7 @@ void test_Description(){
     exp = 2;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9366,6 +9395,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9382,6 +9412,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9398,6 +9429,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9414,6 +9446,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9430,6 +9463,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9446,6 +9480,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9462,6 +9497,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9478,6 +9514,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9494,6 +9531,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9510,6 +9548,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9526,6 +9565,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9542,6 +9582,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9558,6 +9599,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9574,6 +9616,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9590,6 +9633,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9606,6 +9650,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9622,6 +9667,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9638,6 +9684,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9654,6 +9701,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9670,6 +9718,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9686,6 +9735,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9702,6 +9752,7 @@ void test_Description(){
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9714,6 +9765,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9730,6 +9782,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9746,6 +9799,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9762,6 +9816,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9778,6 +9833,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9794,6 +9850,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9810,6 +9867,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9826,6 +9884,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9842,6 +9901,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9858,6 +9918,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9874,6 +9935,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9890,6 +9952,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9906,6 +9969,7 @@ void test_Description(){
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9917,27 +9981,12 @@ void test_Description(){
     }
 
 
-    nodeid = "i=1014";
+    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
     pos = 38;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
-        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
-    }
-    else{
-        
-            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
-            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "DateTime_1d", "");
-            printf("\n");
-        
-    }
-
-
-    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
-    pos = 39;
-    exp = 1;
-    res = Description_end[pos] - Description_begin[pos] + 1;
-    if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9950,10 +9999,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
-    pos = 40;
+    pos = 39;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9966,10 +10016,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
-    pos = 41;
+    pos = 40;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9982,10 +10033,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
-    pos = 42;
+    pos = 41;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -9998,10 +10050,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
-    pos = 43;
+    pos = 42;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10014,10 +10067,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
-    pos = 44;
+    pos = 43;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10030,10 +10084,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
-    pos = 45;
+    pos = 44;
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10042,10 +10097,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
-    pos = 46;
+    pos = 45;
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10054,10 +10110,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
-    pos = 47;
+    pos = 46;
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10066,10 +10123,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
-    pos = 48;
+    pos = 47;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10082,10 +10140,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
-    pos = 49;
+    pos = 48;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10098,10 +10157,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
-    pos = 50;
+    pos = 49;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10114,10 +10174,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
-    pos = 51;
+    pos = 50;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10130,10 +10191,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
-    pos = 52;
+    pos = 51;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10146,10 +10208,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
-    pos = 53;
+    pos = 52;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10162,10 +10225,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
-    pos = 54;
+    pos = 53;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10178,10 +10242,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
-    pos = 55;
+    pos = 54;
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10190,10 +10255,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
-    pos = 56;
+    pos = 55;
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10202,10 +10268,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
-    pos = 57;
+    pos = 56;
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10214,10 +10281,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
-    pos = 58;
+    pos = 57;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10230,10 +10298,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
-    pos = 59;
+    pos = 58;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10246,10 +10315,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
-    pos = 60;
+    pos = 59;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10262,10 +10332,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
-    pos = 61;
+    pos = 60;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10278,10 +10349,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
-    pos = 62;
+    pos = 61;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10294,10 +10366,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
-    pos = 63;
+    pos = 62;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10310,10 +10383,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
-    pos = 64;
+    pos = 63;
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10322,10 +10396,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
-    pos = 65;
+    pos = 64;
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10334,10 +10409,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
-    pos = 66;
+    pos = 65;
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10346,10 +10422,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
-    pos = 67;
+    pos = 66;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10362,10 +10439,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
-    pos = 68;
+    pos = 67;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10378,10 +10456,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
-    pos = 69;
+    pos = 68;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10394,10 +10473,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
-    pos = 70;
+    pos = 69;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10410,10 +10490,11 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
-    pos = 71;
+    pos = 70;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10426,10 +10507,11 @@ void test_Description(){
 
 
     nodeid = "i=24";
-    pos = 72;
+    pos = 71;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10442,10 +10524,11 @@ void test_Description(){
 
 
     nodeid = "i=26";
-    pos = 73;
+    pos = 72;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10458,10 +10541,11 @@ void test_Description(){
 
 
     nodeid = "i=27";
-    pos = 74;
+    pos = 73;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10474,10 +10558,11 @@ void test_Description(){
 
 
     nodeid = "i=28";
-    pos = 75;
+    pos = 74;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10490,10 +10575,11 @@ void test_Description(){
 
 
     nodeid = "i=29";
-    pos = 76;
+    pos = 75;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10506,10 +10592,11 @@ void test_Description(){
 
 
     nodeid = "i=1";
-    pos = 77;
+    pos = 76;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10522,10 +10609,11 @@ void test_Description(){
 
 
     nodeid = "i=2";
-    pos = 78;
+    pos = 77;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10538,10 +10626,11 @@ void test_Description(){
 
 
     nodeid = "i=3";
-    pos = 79;
+    pos = 78;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10554,10 +10643,11 @@ void test_Description(){
 
 
     nodeid = "i=4";
-    pos = 80;
+    pos = 79;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10570,10 +10660,11 @@ void test_Description(){
 
 
     nodeid = "i=5";
-    pos = 81;
+    pos = 80;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10586,10 +10677,11 @@ void test_Description(){
 
 
     nodeid = "i=6";
-    pos = 82;
+    pos = 81;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10602,10 +10694,11 @@ void test_Description(){
 
 
     nodeid = "i=7";
-    pos = 83;
+    pos = 82;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10618,10 +10711,11 @@ void test_Description(){
 
 
     nodeid = "i=8";
-    pos = 84;
+    pos = 83;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10634,10 +10728,11 @@ void test_Description(){
 
 
     nodeid = "i=9";
-    pos = 85;
+    pos = 84;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10650,10 +10745,11 @@ void test_Description(){
 
 
     nodeid = "i=10";
-    pos = 86;
+    pos = 85;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10666,10 +10762,11 @@ void test_Description(){
 
 
     nodeid = "i=11";
-    pos = 87;
+    pos = 86;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10682,10 +10779,11 @@ void test_Description(){
 
 
     nodeid = "i=12";
-    pos = 88;
+    pos = 87;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10698,10 +10796,11 @@ void test_Description(){
 
 
     nodeid = "i=13";
-    pos = 89;
+    pos = 88;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10714,10 +10813,11 @@ void test_Description(){
 
 
     nodeid = "i=14";
-    pos = 90;
+    pos = 89;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10730,10 +10830,11 @@ void test_Description(){
 
 
     nodeid = "i=15";
-    pos = 91;
+    pos = 90;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10746,10 +10847,11 @@ void test_Description(){
 
 
     nodeid = "i=16";
-    pos = 92;
+    pos = 91;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10762,10 +10864,11 @@ void test_Description(){
 
 
     nodeid = "i=17";
-    pos = 93;
+    pos = 92;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10778,10 +10881,11 @@ void test_Description(){
 
 
     nodeid = "i=18";
-    pos = 94;
+    pos = 93;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10794,10 +10898,11 @@ void test_Description(){
 
 
     nodeid = "i=19";
-    pos = 95;
+    pos = 94;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10810,10 +10915,11 @@ void test_Description(){
 
 
     nodeid = "i=20";
-    pos = 96;
+    pos = 95;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10826,10 +10932,11 @@ void test_Description(){
 
 
     nodeid = "i=21";
-    pos = 97;
+    pos = 96;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10842,10 +10949,11 @@ void test_Description(){
 
 
     nodeid = "i=22";
-    pos = 98;
+    pos = 97;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10858,10 +10966,11 @@ void test_Description(){
 
 
     nodeid = "i=23";
-    pos = 99;
+    pos = 98;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10874,10 +10983,11 @@ void test_Description(){
 
 
     nodeid = "i=25";
-    pos = 100;
+    pos = 99;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10890,10 +11000,11 @@ void test_Description(){
 
 
     nodeid = "i=30";
-    pos = 101;
+    pos = 100;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10906,10 +11017,11 @@ void test_Description(){
 
 
     nodeid = "i=121";
-    pos = 102;
+    pos = 101;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10921,11 +11033,13 @@ void test_Description(){
     }
 
 
+    return bres;
 }
 
 
-void test_DisplayName(){
+bool test_DisplayName(){
     printf("test DisplayName\n");
+    bool bres = true;
     int pos;
     int res;
     int exp;
@@ -10936,6 +11050,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10952,6 +11067,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10968,6 +11084,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -10984,6 +11101,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11000,6 +11118,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11016,6 +11135,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11032,6 +11152,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11048,6 +11169,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11064,6 +11186,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11080,6 +11203,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11096,6 +11220,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11112,6 +11237,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11128,6 +11254,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11144,6 +11271,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11160,6 +11288,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11176,6 +11305,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11192,6 +11322,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11208,6 +11339,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11224,6 +11356,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11240,6 +11373,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11256,6 +11390,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11272,6 +11407,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11288,6 +11424,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11304,6 +11441,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11320,6 +11458,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11336,6 +11475,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11352,6 +11492,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11368,6 +11509,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11384,6 +11526,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11400,6 +11543,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11416,6 +11560,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11432,6 +11577,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11448,6 +11594,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11464,6 +11611,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11480,6 +11628,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11496,6 +11645,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11512,6 +11662,7 @@ void test_DisplayName(){
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11523,27 +11674,12 @@ void test_DisplayName(){
     }
 
 
-    nodeid = "i=1014";
+    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
     pos = 38;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
-        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
-    }
-    else{
-        
-            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
-            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "DateTime_1dn", "");
-            printf("\n");
-        
-    }
-
-
-    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
-    pos = 39;
-    exp = 1;
-    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
-    if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11556,10 +11692,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
-    pos = 40;
+    pos = 39;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11572,10 +11709,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
-    pos = 41;
+    pos = 40;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11588,10 +11726,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
-    pos = 42;
+    pos = 41;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11604,10 +11743,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
-    pos = 43;
+    pos = 42;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11620,10 +11760,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
-    pos = 44;
+    pos = 43;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11636,10 +11777,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
-    pos = 45;
+    pos = 44;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11652,10 +11794,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
-    pos = 46;
+    pos = 45;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11668,10 +11811,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
-    pos = 47;
+    pos = 46;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11684,10 +11828,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
-    pos = 48;
+    pos = 47;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11700,10 +11845,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
-    pos = 49;
+    pos = 48;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11716,10 +11862,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
-    pos = 50;
+    pos = 49;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11732,10 +11879,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
-    pos = 51;
+    pos = 50;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11748,10 +11896,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
-    pos = 52;
+    pos = 51;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11764,10 +11913,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
-    pos = 53;
+    pos = 52;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11780,10 +11930,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
-    pos = 54;
+    pos = 53;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11796,10 +11947,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
-    pos = 55;
+    pos = 54;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11812,10 +11964,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
-    pos = 56;
+    pos = 55;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11828,10 +11981,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
-    pos = 57;
+    pos = 56;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11844,10 +11998,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
-    pos = 58;
+    pos = 57;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11860,10 +12015,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
-    pos = 59;
+    pos = 58;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11876,10 +12032,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
-    pos = 60;
+    pos = 59;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11892,10 +12049,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
-    pos = 61;
+    pos = 60;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11908,10 +12066,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
-    pos = 62;
+    pos = 61;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11924,10 +12083,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
-    pos = 63;
+    pos = 62;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11940,10 +12100,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
-    pos = 64;
+    pos = 63;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11956,10 +12117,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
-    pos = 65;
+    pos = 64;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11972,10 +12134,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
-    pos = 66;
+    pos = 65;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -11988,10 +12151,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
-    pos = 67;
+    pos = 66;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12004,10 +12168,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
-    pos = 68;
+    pos = 67;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12020,10 +12185,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
-    pos = 69;
+    pos = 68;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12036,10 +12202,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
-    pos = 70;
+    pos = 69;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12052,10 +12219,11 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
-    pos = 71;
+    pos = 70;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12068,10 +12236,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=24";
-    pos = 72;
+    pos = 71;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12084,10 +12253,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=26";
-    pos = 73;
+    pos = 72;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12100,10 +12270,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=27";
-    pos = 74;
+    pos = 73;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12116,10 +12287,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=28";
-    pos = 75;
+    pos = 74;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12132,10 +12304,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=29";
-    pos = 76;
+    pos = 75;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12148,10 +12321,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=1";
-    pos = 77;
+    pos = 76;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12164,10 +12338,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=2";
-    pos = 78;
+    pos = 77;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12180,10 +12355,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=3";
-    pos = 79;
+    pos = 78;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12196,10 +12372,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=4";
-    pos = 80;
+    pos = 79;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12212,10 +12389,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=5";
-    pos = 81;
+    pos = 80;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12228,10 +12406,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=6";
-    pos = 82;
+    pos = 81;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12244,10 +12423,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=7";
-    pos = 83;
+    pos = 82;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12260,10 +12440,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=8";
-    pos = 84;
+    pos = 83;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12276,10 +12457,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=9";
-    pos = 85;
+    pos = 84;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12292,10 +12474,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=10";
-    pos = 86;
+    pos = 85;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12308,10 +12491,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=11";
-    pos = 87;
+    pos = 86;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12324,10 +12508,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=12";
-    pos = 88;
+    pos = 87;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12340,10 +12525,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=13";
-    pos = 89;
+    pos = 88;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12356,10 +12542,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=14";
-    pos = 90;
+    pos = 89;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12372,10 +12559,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=15";
-    pos = 91;
+    pos = 90;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12388,10 +12576,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=16";
-    pos = 92;
+    pos = 91;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12404,10 +12593,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=17";
-    pos = 93;
+    pos = 92;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12420,10 +12610,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=18";
-    pos = 94;
+    pos = 93;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12436,10 +12627,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=19";
-    pos = 95;
+    pos = 94;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12452,10 +12644,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=20";
-    pos = 96;
+    pos = 95;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12468,10 +12661,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=21";
-    pos = 97;
+    pos = 96;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12484,10 +12678,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=22";
-    pos = 98;
+    pos = 97;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12500,10 +12695,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=23";
-    pos = 99;
+    pos = 98;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12516,10 +12712,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=25";
-    pos = 100;
+    pos = 99;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12532,10 +12729,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=30";
-    pos = 101;
+    pos = 100;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12548,10 +12746,11 @@ void test_DisplayName(){
 
 
     nodeid = "i=121";
-    pos = 102;
+    pos = 101;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
+        bres = false;
         printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
     }
     else{
@@ -12563,16 +12762,22 @@ void test_DisplayName(){
     }
 
 
+    return bres;
 }
 
 
 int main (){
-    test_browsename();
-    test_value();
-    test_reference();
-    test_Description();
-    test_DisplayName();
+    bool bres = true;
+    bres = test_browsename();
+    bres = bres && test_value();
+    bres = bres && test_reference();
+    bres = bres && test_Description();
+    bres = bres && test_DisplayName();
     printf("%zu %s\n", strlen((char *)Description[1].Text.Data), Description[1].Text.Data);
-    return 0;
+    if(bres == false){
+        return 1;
+    }else{
+        return 0;
+    }
 }
 

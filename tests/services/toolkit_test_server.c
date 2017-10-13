@@ -174,7 +174,7 @@ int main(void)
 
   // Run the server until timeout or notification that endpoint is closed
   loopCpt = 0;
-  loopTimeout = 50000;
+  loopTimeout = 5000;
   while (STATUS_OK == status && endpointClosed == false && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;

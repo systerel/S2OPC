@@ -409,7 +409,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:UInt64>18446744073709551615</uax:UInt64>
+      <uax:UInt64>18446744073709551614ULL</uax:UInt64>
     </Value>
   </UAVariable>
   <UAVariable BrowseName="0:Float" DataType="Float" NodeId="i=1013" ParentNodeId="i=1000">
@@ -423,7 +423,7 @@
       <uax:Float>5758787.5876875</uax:Float>
     </Value>
   </UAVariable>
-  <UAVariable BrowseName="0:DateTime" DataType="DateTime" NodeId="i=1014" ParentNodeId="i=1000">
+  <!--UAVariable BrowseName="0:DateTime" DataType="DateTime" NodeId="i=1014" ParentNodeId="i=1000">
     <DisplayName>DateTime_1dn</DisplayName>
     <Description>DateTime_1d</Description>
     <References>
@@ -433,7 +433,7 @@
     <Value>
       <uax:DateTime>18446744073709551615</uax:DateTime>
     </Value>
-  </UAVariable>
+  </UAVariable-->
   <!--UAVariable BrowseName="0:Guid" DataType="Guid" NodeId="i=1014" ParentNodeId="i=1000">
     <DisplayName>Guid_1dn</DisplayName>
     <Description>Guid_1d</Description>

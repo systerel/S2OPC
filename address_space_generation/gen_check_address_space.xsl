@@ -35,6 +35,9 @@ classes = ['View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
 <xsl:variable name="var_vartype" select="$ua_nodes/ua:UAVariable|$ua_nodes/ua:UAVariableType"/>
 
 <xsl:template match="/">
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 #include &lt;stdio.h>
 #include &lt;string.h>
 

@@ -27,7 +27,7 @@
 
 #define NB_1 0    /* View */
 #define NB_2 23    /* Object */
-#define NB_3 48    /* Variable */
+#define NB_3 47    /* Variable */
 #define NB_4 0    /* VariableType */
 #define NB_5 0    /* ObjectType */
 #define NB_6 0    /* ReferenceType */
@@ -194,74 +194,72 @@ static SOPC_NodeId nodeid_75 = {IdentifierType_Numeric, 0, .Data.Numeric = 1012}
 static SOPC_ExpandedNodeId ex_nodeid_75 = {{IdentifierType_Numeric, 0, .Data.Numeric = 1012}, {0,0, NULL}, 0};
 static SOPC_NodeId nodeid_76 = {IdentifierType_Numeric, 0, .Data.Numeric = 1013};
 static SOPC_ExpandedNodeId ex_nodeid_76 = {{IdentifierType_Numeric, 0, .Data.Numeric = 1013}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_77 = {IdentifierType_Numeric, 0, .Data.Numeric = 1014};
-static SOPC_ExpandedNodeId ex_nodeid_77 = {{IdentifierType_Numeric, 0, .Data.Numeric = 1014}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_78 = {IdentifierType_String, 0, .Data.String = {42,1,toSOPC_String("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK")}};
-static SOPC_ExpandedNodeId ex_nodeid_78 = {{IdentifierType_String, 0, .Data.String = {42,1,toSOPC_String("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK")}}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_79 = {IdentifierType_Numeric, 0, .Data.Numeric = 24};
-static SOPC_ExpandedNodeId ex_nodeid_79 = {{IdentifierType_Numeric, 0, .Data.Numeric = 24}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_80 = {IdentifierType_Numeric, 0, .Data.Numeric = 26};
-static SOPC_ExpandedNodeId ex_nodeid_80 = {{IdentifierType_Numeric, 0, .Data.Numeric = 26}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_81 = {IdentifierType_Numeric, 0, .Data.Numeric = 45};
-static SOPC_ExpandedNodeId ex_nodeid_81 = {{IdentifierType_Numeric, 0, .Data.Numeric = 45}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_82 = {IdentifierType_Numeric, 0, .Data.Numeric = 27};
-static SOPC_ExpandedNodeId ex_nodeid_82 = {{IdentifierType_Numeric, 0, .Data.Numeric = 27}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_83 = {IdentifierType_Numeric, 0, .Data.Numeric = 28};
-static SOPC_ExpandedNodeId ex_nodeid_83 = {{IdentifierType_Numeric, 0, .Data.Numeric = 28}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_84 = {IdentifierType_Numeric, 0, .Data.Numeric = 29};
-static SOPC_ExpandedNodeId ex_nodeid_84 = {{IdentifierType_Numeric, 0, .Data.Numeric = 29}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_85 = {IdentifierType_Numeric, 0, .Data.Numeric = 1};
-static SOPC_ExpandedNodeId ex_nodeid_85 = {{IdentifierType_Numeric, 0, .Data.Numeric = 1}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_86 = {IdentifierType_Numeric, 0, .Data.Numeric = 2};
-static SOPC_ExpandedNodeId ex_nodeid_86 = {{IdentifierType_Numeric, 0, .Data.Numeric = 2}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_87 = {IdentifierType_Numeric, 0, .Data.Numeric = 3};
-static SOPC_ExpandedNodeId ex_nodeid_87 = {{IdentifierType_Numeric, 0, .Data.Numeric = 3}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_88 = {IdentifierType_Numeric, 0, .Data.Numeric = 4};
-static SOPC_ExpandedNodeId ex_nodeid_88 = {{IdentifierType_Numeric, 0, .Data.Numeric = 4}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_89 = {IdentifierType_Numeric, 0, .Data.Numeric = 5};
-static SOPC_ExpandedNodeId ex_nodeid_89 = {{IdentifierType_Numeric, 0, .Data.Numeric = 5}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_90 = {IdentifierType_Numeric, 0, .Data.Numeric = 6};
-static SOPC_ExpandedNodeId ex_nodeid_90 = {{IdentifierType_Numeric, 0, .Data.Numeric = 6}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_91 = {IdentifierType_Numeric, 0, .Data.Numeric = 7};
-static SOPC_ExpandedNodeId ex_nodeid_91 = {{IdentifierType_Numeric, 0, .Data.Numeric = 7}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_92 = {IdentifierType_Numeric, 0, .Data.Numeric = 8};
-static SOPC_ExpandedNodeId ex_nodeid_92 = {{IdentifierType_Numeric, 0, .Data.Numeric = 8}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_93 = {IdentifierType_Numeric, 0, .Data.Numeric = 9};
-static SOPC_ExpandedNodeId ex_nodeid_93 = {{IdentifierType_Numeric, 0, .Data.Numeric = 9}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_94 = {IdentifierType_Numeric, 0, .Data.Numeric = 10};
-static SOPC_ExpandedNodeId ex_nodeid_94 = {{IdentifierType_Numeric, 0, .Data.Numeric = 10}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_95 = {IdentifierType_Numeric, 0, .Data.Numeric = 11};
-static SOPC_ExpandedNodeId ex_nodeid_95 = {{IdentifierType_Numeric, 0, .Data.Numeric = 11}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_96 = {IdentifierType_Numeric, 0, .Data.Numeric = 12};
-static SOPC_ExpandedNodeId ex_nodeid_96 = {{IdentifierType_Numeric, 0, .Data.Numeric = 12}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_97 = {IdentifierType_Numeric, 0, .Data.Numeric = 13};
-static SOPC_ExpandedNodeId ex_nodeid_97 = {{IdentifierType_Numeric, 0, .Data.Numeric = 13}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_98 = {IdentifierType_Numeric, 0, .Data.Numeric = 14};
-static SOPC_ExpandedNodeId ex_nodeid_98 = {{IdentifierType_Numeric, 0, .Data.Numeric = 14}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_99 = {IdentifierType_Numeric, 0, .Data.Numeric = 15};
-static SOPC_ExpandedNodeId ex_nodeid_99 = {{IdentifierType_Numeric, 0, .Data.Numeric = 15}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_100 = {IdentifierType_Numeric, 0, .Data.Numeric = 16};
-static SOPC_ExpandedNodeId ex_nodeid_100 = {{IdentifierType_Numeric, 0, .Data.Numeric = 16}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_101 = {IdentifierType_Numeric, 0, .Data.Numeric = 17};
-static SOPC_ExpandedNodeId ex_nodeid_101 = {{IdentifierType_Numeric, 0, .Data.Numeric = 17}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_102 = {IdentifierType_Numeric, 0, .Data.Numeric = 18};
-static SOPC_ExpandedNodeId ex_nodeid_102 = {{IdentifierType_Numeric, 0, .Data.Numeric = 18}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_103 = {IdentifierType_Numeric, 0, .Data.Numeric = 19};
-static SOPC_ExpandedNodeId ex_nodeid_103 = {{IdentifierType_Numeric, 0, .Data.Numeric = 19}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_104 = {IdentifierType_Numeric, 0, .Data.Numeric = 20};
-static SOPC_ExpandedNodeId ex_nodeid_104 = {{IdentifierType_Numeric, 0, .Data.Numeric = 20}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_105 = {IdentifierType_Numeric, 0, .Data.Numeric = 21};
-static SOPC_ExpandedNodeId ex_nodeid_105 = {{IdentifierType_Numeric, 0, .Data.Numeric = 21}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_106 = {IdentifierType_Numeric, 0, .Data.Numeric = 22};
-static SOPC_ExpandedNodeId ex_nodeid_106 = {{IdentifierType_Numeric, 0, .Data.Numeric = 22}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_107 = {IdentifierType_Numeric, 0, .Data.Numeric = 23};
-static SOPC_ExpandedNodeId ex_nodeid_107 = {{IdentifierType_Numeric, 0, .Data.Numeric = 23}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_108 = {IdentifierType_Numeric, 0, .Data.Numeric = 25};
-static SOPC_ExpandedNodeId ex_nodeid_108 = {{IdentifierType_Numeric, 0, .Data.Numeric = 25}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_109 = {IdentifierType_Numeric, 0, .Data.Numeric = 30};
-static SOPC_ExpandedNodeId ex_nodeid_109 = {{IdentifierType_Numeric, 0, .Data.Numeric = 30}, {0,0, NULL}, 0};
-static SOPC_NodeId nodeid_110 = {IdentifierType_Numeric, 0, .Data.Numeric = 121};
-static SOPC_ExpandedNodeId ex_nodeid_110 = {{IdentifierType_Numeric, 0, .Data.Numeric = 121}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_77 = {IdentifierType_String, 0, .Data.String = {42,1,toSOPC_String("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK")}};
+static SOPC_ExpandedNodeId ex_nodeid_77 = {{IdentifierType_String, 0, .Data.String = {42,1,toSOPC_String("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK")}}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_78 = {IdentifierType_Numeric, 0, .Data.Numeric = 24};
+static SOPC_ExpandedNodeId ex_nodeid_78 = {{IdentifierType_Numeric, 0, .Data.Numeric = 24}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_79 = {IdentifierType_Numeric, 0, .Data.Numeric = 26};
+static SOPC_ExpandedNodeId ex_nodeid_79 = {{IdentifierType_Numeric, 0, .Data.Numeric = 26}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_80 = {IdentifierType_Numeric, 0, .Data.Numeric = 45};
+static SOPC_ExpandedNodeId ex_nodeid_80 = {{IdentifierType_Numeric, 0, .Data.Numeric = 45}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_81 = {IdentifierType_Numeric, 0, .Data.Numeric = 27};
+static SOPC_ExpandedNodeId ex_nodeid_81 = {{IdentifierType_Numeric, 0, .Data.Numeric = 27}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_82 = {IdentifierType_Numeric, 0, .Data.Numeric = 28};
+static SOPC_ExpandedNodeId ex_nodeid_82 = {{IdentifierType_Numeric, 0, .Data.Numeric = 28}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_83 = {IdentifierType_Numeric, 0, .Data.Numeric = 29};
+static SOPC_ExpandedNodeId ex_nodeid_83 = {{IdentifierType_Numeric, 0, .Data.Numeric = 29}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_84 = {IdentifierType_Numeric, 0, .Data.Numeric = 1};
+static SOPC_ExpandedNodeId ex_nodeid_84 = {{IdentifierType_Numeric, 0, .Data.Numeric = 1}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_85 = {IdentifierType_Numeric, 0, .Data.Numeric = 2};
+static SOPC_ExpandedNodeId ex_nodeid_85 = {{IdentifierType_Numeric, 0, .Data.Numeric = 2}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_86 = {IdentifierType_Numeric, 0, .Data.Numeric = 3};
+static SOPC_ExpandedNodeId ex_nodeid_86 = {{IdentifierType_Numeric, 0, .Data.Numeric = 3}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_87 = {IdentifierType_Numeric, 0, .Data.Numeric = 4};
+static SOPC_ExpandedNodeId ex_nodeid_87 = {{IdentifierType_Numeric, 0, .Data.Numeric = 4}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_88 = {IdentifierType_Numeric, 0, .Data.Numeric = 5};
+static SOPC_ExpandedNodeId ex_nodeid_88 = {{IdentifierType_Numeric, 0, .Data.Numeric = 5}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_89 = {IdentifierType_Numeric, 0, .Data.Numeric = 6};
+static SOPC_ExpandedNodeId ex_nodeid_89 = {{IdentifierType_Numeric, 0, .Data.Numeric = 6}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_90 = {IdentifierType_Numeric, 0, .Data.Numeric = 7};
+static SOPC_ExpandedNodeId ex_nodeid_90 = {{IdentifierType_Numeric, 0, .Data.Numeric = 7}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_91 = {IdentifierType_Numeric, 0, .Data.Numeric = 8};
+static SOPC_ExpandedNodeId ex_nodeid_91 = {{IdentifierType_Numeric, 0, .Data.Numeric = 8}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_92 = {IdentifierType_Numeric, 0, .Data.Numeric = 9};
+static SOPC_ExpandedNodeId ex_nodeid_92 = {{IdentifierType_Numeric, 0, .Data.Numeric = 9}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_93 = {IdentifierType_Numeric, 0, .Data.Numeric = 10};
+static SOPC_ExpandedNodeId ex_nodeid_93 = {{IdentifierType_Numeric, 0, .Data.Numeric = 10}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_94 = {IdentifierType_Numeric, 0, .Data.Numeric = 11};
+static SOPC_ExpandedNodeId ex_nodeid_94 = {{IdentifierType_Numeric, 0, .Data.Numeric = 11}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_95 = {IdentifierType_Numeric, 0, .Data.Numeric = 12};
+static SOPC_ExpandedNodeId ex_nodeid_95 = {{IdentifierType_Numeric, 0, .Data.Numeric = 12}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_96 = {IdentifierType_Numeric, 0, .Data.Numeric = 13};
+static SOPC_ExpandedNodeId ex_nodeid_96 = {{IdentifierType_Numeric, 0, .Data.Numeric = 13}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_97 = {IdentifierType_Numeric, 0, .Data.Numeric = 14};
+static SOPC_ExpandedNodeId ex_nodeid_97 = {{IdentifierType_Numeric, 0, .Data.Numeric = 14}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_98 = {IdentifierType_Numeric, 0, .Data.Numeric = 15};
+static SOPC_ExpandedNodeId ex_nodeid_98 = {{IdentifierType_Numeric, 0, .Data.Numeric = 15}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_99 = {IdentifierType_Numeric, 0, .Data.Numeric = 16};
+static SOPC_ExpandedNodeId ex_nodeid_99 = {{IdentifierType_Numeric, 0, .Data.Numeric = 16}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_100 = {IdentifierType_Numeric, 0, .Data.Numeric = 17};
+static SOPC_ExpandedNodeId ex_nodeid_100 = {{IdentifierType_Numeric, 0, .Data.Numeric = 17}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_101 = {IdentifierType_Numeric, 0, .Data.Numeric = 18};
+static SOPC_ExpandedNodeId ex_nodeid_101 = {{IdentifierType_Numeric, 0, .Data.Numeric = 18}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_102 = {IdentifierType_Numeric, 0, .Data.Numeric = 19};
+static SOPC_ExpandedNodeId ex_nodeid_102 = {{IdentifierType_Numeric, 0, .Data.Numeric = 19}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_103 = {IdentifierType_Numeric, 0, .Data.Numeric = 20};
+static SOPC_ExpandedNodeId ex_nodeid_103 = {{IdentifierType_Numeric, 0, .Data.Numeric = 20}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_104 = {IdentifierType_Numeric, 0, .Data.Numeric = 21};
+static SOPC_ExpandedNodeId ex_nodeid_104 = {{IdentifierType_Numeric, 0, .Data.Numeric = 21}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_105 = {IdentifierType_Numeric, 0, .Data.Numeric = 22};
+static SOPC_ExpandedNodeId ex_nodeid_105 = {{IdentifierType_Numeric, 0, .Data.Numeric = 22}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_106 = {IdentifierType_Numeric, 0, .Data.Numeric = 23};
+static SOPC_ExpandedNodeId ex_nodeid_106 = {{IdentifierType_Numeric, 0, .Data.Numeric = 23}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_107 = {IdentifierType_Numeric, 0, .Data.Numeric = 25};
+static SOPC_ExpandedNodeId ex_nodeid_107 = {{IdentifierType_Numeric, 0, .Data.Numeric = 25}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_108 = {IdentifierType_Numeric, 0, .Data.Numeric = 30};
+static SOPC_ExpandedNodeId ex_nodeid_108 = {{IdentifierType_Numeric, 0, .Data.Numeric = 30}, {0,0, NULL}, 0};
+static SOPC_NodeId nodeid_109 = {IdentifierType_Numeric, 0, .Data.Numeric = 121};
+static SOPC_ExpandedNodeId ex_nodeid_109 = {{IdentifierType_Numeric, 0, .Data.Numeric = 121}, {0,0, NULL}, 0};
 
 
 void* avoid_unused_nodes_var[] = {&nodeid_1,
@@ -373,8 +371,7 @@ void* avoid_unused_nodes_var[] = {&nodeid_1,
 &ex_nodeid_106,&nodeid_107,
 &ex_nodeid_107,&nodeid_108,
 &ex_nodeid_108,&nodeid_109,
-&ex_nodeid_109,&nodeid_110,
-&ex_nodeid_110,};
+&ex_nodeid_109,};
 
 
 static SOPC_QualifiedName BrowseName[NB + 1] = {{0, {0, 0, NULL}}
@@ -415,7 +412,6 @@ static SOPC_QualifiedName BrowseName[NB + 1] = {{0, {0, 0, NULL}}
 ,{0,{5,1,toSOPC_String("Int32")}}/* i=1011*/
 ,{0,{6,1,toSOPC_String("UInt64")}}/* i=1012*/
 ,{0,{5,1,toSOPC_String("Float")}}/* i=1013*/
-,{0,{8,1,toSOPC_String("DateTime")}}/* i=1014*/
 ,{261,{2,1,toSOPC_String("GK")}}/* s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK*/
 ,{261,{3,1,toSOPC_String("ASK")}}/* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK*/
 ,{261,{4,1,toSOPC_String("XBKK")}}/* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK*/
@@ -522,7 +518,6 @@ static SOPC_LocalizedText Description[] = {{{0, 0, NULL}, {0, 0, NULL}}
 , {{0,1,toSOPC_String("")},{8,1,toSOPC_String("Int32_1d")}}
 , {{0,1,toSOPC_String("")},{9,1,toSOPC_String("UInt64_1d")}}
 , {{0,1,toSOPC_String("")},{8,1,toSOPC_String("Float_1d")}}
-, {{0,1,toSOPC_String("")},{11,1,toSOPC_String("DateTime_1d")}}
 , {{0,1,toSOPC_String("")},{32,1,toSOPC_String("Permissive Signal Status, ~é€bla")}}
 , {{0,1,toSOPC_String("")},{23,1,toSOPC_String("Signal Approach Locking")}}
 , {{0,1,toSOPC_String("")},{41,1,toSOPC_String("Exit blocking is in effect for the signal")}}
@@ -580,8 +575,8 @@ static SOPC_LocalizedText Description[] = {{{0, 0, NULL}, {0, 0, NULL}}
 , {{0,1,toSOPC_String("")},{34,1,toSOPC_String("Describes a 128-bit decimal value.")}}
 
 };
-static int Description_begin[] = {0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 45, 45, 45, 46, 47, 48, 49, 50, 51, 52, 52, 52, 52, 53, 54, 55, 56, 57, 58, 58, 58, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93};
-static int Description_end[] = {-1, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 44, 44, 44, 45, 46, 47, 48, 49, 50, 51, 51, 51, 51, 52, 53, 54, 55, 56, 57, 57, 57, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93};
+static int Description_begin[] = {0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 44, 44, 44, 45, 46, 47, 48, 49, 50, 51, 51, 51, 51, 52, 53, 54, 55, 56, 57, 57, 57, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92};
+static int Description_end[] = {-1, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 43, 43, 43, 44, 45, 46, 47, 48, 49, 50, 50, 50, 50, 51, 52, 53, 54, 55, 56, 56, 56, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92};
 static SOPC_LocalizedText DisplayName[] = {{{0, 0, NULL}, {0, 0, NULL}}
 , {{0,1,toSOPC_String("")},{17,1,toSOPC_String("VariablesFolderDn")}}
 , {{0,1,toSOPC_String("")},{5,1,toSOPC_String("15361")}}
@@ -620,7 +615,6 @@ static SOPC_LocalizedText DisplayName[] = {{{0, 0, NULL}, {0, 0, NULL}}
 , {{0,1,toSOPC_String("")},{9,1,toSOPC_String("Int32_1dn")}}
 , {{0,1,toSOPC_String("")},{10,1,toSOPC_String("UInt64_1dn")}}
 , {{0,1,toSOPC_String("")},{9,1,toSOPC_String("Float_1dn")}}
-, {{0,1,toSOPC_String("")},{12,1,toSOPC_String("DateTime_1dn")}}
 , {{0,1,toSOPC_String("")},{2,1,toSOPC_String("GK")}}
 , {{0,1,toSOPC_String("")},{3,1,toSOPC_String("ASK")}}
 , {{0,1,toSOPC_String("")},{4,1,toSOPC_String("XBKK")}}
@@ -687,11 +681,11 @@ static SOPC_LocalizedText DisplayName[] = {{{0, 0, NULL}, {0, 0, NULL}}
 , {{0,1,toSOPC_String("")},{10,1,toSOPC_String("Decimal128")}}
 
 };
-static int DisplayName_begin[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102};
-static int DisplayName_end[] = {-1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102};
+static int DisplayName_begin[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101};
+static int DisplayName_end[] = {-1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101};
 
 
-static int reference_begin[] = {0, 1, 9, 14, 19, 22, 28, 35, 43, 50, 57, 61, 65, 68, 71, 78, 83, 87, 90, 93, 96, 99, 101, 104, 107, 109, 111, 113, 115, 117, 119, 121, 123, 125, 127, 129, 131, 133, 135, 137, 139, 141, 143, 145, 147, 149, 151, 153, 155, 157, 159, 161, 163, 165, 167, 169, 171, 173, 175, 177, 179, 181, 183, 185, 187, 189, 191, 193, 195, 197, 199, 201, 203, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232};
+static int reference_begin[] = {0, 1, 9, 14, 19, 22, 28, 35, 43, 50, 57, 61, 65, 68, 71, 78, 83, 87, 90, 93, 96, 99, 101, 104, 107, 109, 111, 113, 115, 117, 119, 121, 123, 125, 127, 129, 131, 133, 135, 137, 139, 141, 143, 145, 147, 149, 151, 153, 155, 157, 159, 161, 163, 165, 167, 169, 171, 173, 175, 177, 179, 181, 183, 185, 187, 189, 191, 193, 195, 197, 199, 201, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230};
 static int reference_end[] = {-1,
 0+8 /* i=1000 */,
 8+5 /* ns=261;i=15361 */,
@@ -730,74 +724,73 @@ static int reference_end[] = {-1,
 128+2 /* i=1011 */,
 130+2 /* i=1012 */,
 132+2 /* i=1013 */,
-134+2 /* i=1014 */,
-136+2 /* s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK */,
-138+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK */,
-140+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK */,
-142+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ */,
-144+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK */,
-146+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK */,
-148+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand */,
-150+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K */,
-152+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC */,
-154+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ */,
-156+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ */,
-158+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC */,
-160+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC */,
-162+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC */,
-164+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK */,
-166+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK */,
-168+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand */,
-170+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K */,
-172+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC */,
-174+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ */,
-176+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ */,
-178+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK */,
-180+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK */,
-182+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK */,
-184+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK */,
-186+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand */,
-188+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K */,
-190+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC */,
-192+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ */,
-194+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ */,
-196+2 /* ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK */,
-198+2 /* ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK */,
-200+2 /* ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK */,
-202+0 /* i=24 */,
-202+1 /* i=26 */,
-203+1 /* i=27 */,
-204+1 /* i=28 */,
-205+1 /* i=29 */,
-206+1 /* i=1 */,
-207+1 /* i=2 */,
-208+1 /* i=3 */,
-209+1 /* i=4 */,
-210+1 /* i=5 */,
-211+1 /* i=6 */,
-212+1 /* i=7 */,
-213+1 /* i=8 */,
-214+1 /* i=9 */,
-215+1 /* i=10 */,
-216+1 /* i=11 */,
-217+1 /* i=12 */,
-218+1 /* i=13 */,
-219+1 /* i=14 */,
-220+1 /* i=15 */,
-221+1 /* i=16 */,
-222+1 /* i=17 */,
-223+1 /* i=18 */,
-224+1 /* i=19 */,
-225+1 /* i=20 */,
-226+1 /* i=21 */,
-227+1 /* i=22 */,
-228+1 /* i=23 */,
-229+1 /* i=25 */,
-230+1 /* i=30 */,
-231+1 /* i=121 */};
-static SOPC_NodeId* reference_type[] = {NULL,  &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81, &nodeid_81};
-static SOPC_ExpandedNodeId* reference_target[] = {NULL, &ex_nodeid_3, &ex_nodeid_5, &ex_nodeid_7, &ex_nodeid_8, &ex_nodeid_9, &ex_nodeid_10, &ex_nodeid_11, &ex_nodeid_12, &ex_nodeid_3, &ex_nodeid_5, &ex_nodeid_14, &ex_nodeid_15, &ex_nodeid_16, &ex_nodeid_13, &ex_nodeid_5, &ex_nodeid_17, &ex_nodeid_18, &ex_nodeid_19, &ex_nodeid_13, &ex_nodeid_5, &ex_nodeid_20, &ex_nodeid_13, &ex_nodeid_5, &ex_nodeid_21, &ex_nodeid_22, &ex_nodeid_23, &ex_nodeid_24, &ex_nodeid_14, &ex_nodeid_5, &ex_nodeid_25, &ex_nodeid_26, &ex_nodeid_27, &ex_nodeid_28, &ex_nodeid_29, &ex_nodeid_17, &ex_nodeid_5, &ex_nodeid_30, &ex_nodeid_31, &ex_nodeid_32, &ex_nodeid_33, &ex_nodeid_34, &ex_nodeid_35, &ex_nodeid_17, &ex_nodeid_5, &ex_nodeid_36, &ex_nodeid_37, &ex_nodeid_38, &ex_nodeid_39, &ex_nodeid_40, &ex_nodeid_14, &ex_nodeid_5, &ex_nodeid_41, &ex_nodeid_42, &ex_nodeid_43, &ex_nodeid_44, &ex_nodeid_45, &ex_nodeid_18, &ex_nodeid_5, &ex_nodeid_46, &ex_nodeid_47, &ex_nodeid_18, &ex_nodeid_5, &ex_nodeid_48, &ex_nodeid_49, &ex_nodeid_14, &ex_nodeid_5, &ex_nodeid_50, &ex_nodeid_19, &ex_nodeid_5, &ex_nodeid_51, &ex_nodeid_15, &ex_nodeid_5, &ex_nodeid_52, &ex_nodeid_53, &ex_nodeid_54, &ex_nodeid_55, &ex_nodeid_56, &ex_nodeid_20, &ex_nodeid_5, &ex_nodeid_57, &ex_nodeid_58, &ex_nodeid_59, &ex_nodeid_20, &ex_nodeid_5, &ex_nodeid_60, &ex_nodeid_61, &ex_nodeid_16, &ex_nodeid_5, &ex_nodeid_62, &ex_nodeid_21, &ex_nodeid_5, &ex_nodeid_63, &ex_nodeid_16, &ex_nodeid_5, &ex_nodeid_64, &ex_nodeid_22, &ex_nodeid_5, &ex_nodeid_65, &ex_nodeid_16, &ex_nodeid_5, &ex_nodeid_16, &ex_nodeid_5, &ex_nodeid_66, &ex_nodeid_24, &ex_nodeid_5, &ex_nodeid_67, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_25, &ex_nodeid_69, &ex_nodeid_25, &ex_nodeid_69, &ex_nodeid_25, &ex_nodeid_69, &ex_nodeid_25, &ex_nodeid_69, &ex_nodeid_25, &ex_nodeid_69, &ex_nodeid_25, &ex_nodeid_69, &ex_nodeid_17, &ex_nodeid_69, &ex_nodeid_17, &ex_nodeid_69, &ex_nodeid_17, &ex_nodeid_69, &ex_nodeid_26, &ex_nodeid_69, &ex_nodeid_26, &ex_nodeid_69, &ex_nodeid_26, &ex_nodeid_69, &ex_nodeid_26, &ex_nodeid_69, &ex_nodeid_26, &ex_nodeid_69, &ex_nodeid_41, &ex_nodeid_69, &ex_nodeid_41, &ex_nodeid_69, &ex_nodeid_18, &ex_nodeid_69, &ex_nodeid_18, &ex_nodeid_69, &ex_nodeid_18, &ex_nodeid_69, &ex_nodeid_42, &ex_nodeid_69, &ex_nodeid_42, &ex_nodeid_69, &ex_nodeid_50, &ex_nodeid_69, &ex_nodeid_52, &ex_nodeid_69, &ex_nodeid_52, &ex_nodeid_69, &ex_nodeid_52, &ex_nodeid_69, &ex_nodeid_20, &ex_nodeid_69, &ex_nodeid_20, &ex_nodeid_69, &ex_nodeid_20, &ex_nodeid_69, &ex_nodeid_53, &ex_nodeid_69, &ex_nodeid_53, &ex_nodeid_69, &ex_nodeid_62, &ex_nodeid_69, &ex_nodeid_64, &ex_nodeid_69, &ex_nodeid_66, &ex_nodeid_69, &ex_nodeid_79, &ex_nodeid_80, &ex_nodeid_80, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_82, &ex_nodeid_83, &ex_nodeid_82, &ex_nodeid_83, &ex_nodeid_82, &ex_nodeid_83, &ex_nodeid_82, &ex_nodeid_83, &ex_nodeid_80, &ex_nodeid_80, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_99, &ex_nodeid_80};
-static bool reference_isForward[]={false, false, true, true, true, true, true, true, true, false, true, true, true, true, false, true, true, true, true, false, true, true, false, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, true, false, true, true, true, false, true, true, false, true, true, false, true, true, true, true, true, true, false, true, true, true, true, false, true, true, true, false, true, true, false, true, true, false, true, true, false, true, true, false, true, false, true, true, false, true, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
+134+2 /* s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK */,
+136+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK */,
+138+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK */,
+140+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ */,
+142+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK */,
+144+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK */,
+146+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand */,
+148+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K */,
+150+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC */,
+152+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ */,
+154+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ */,
+156+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC */,
+158+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC */,
+160+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC */,
+162+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK */,
+164+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK */,
+166+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand */,
+168+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K */,
+170+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC */,
+172+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ */,
+174+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ */,
+176+2 /* ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK */,
+178+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK */,
+180+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK */,
+182+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK */,
+184+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand */,
+186+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K */,
+188+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC */,
+190+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ */,
+192+2 /* ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ */,
+194+2 /* ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK */,
+196+2 /* ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK */,
+198+2 /* ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK */,
+200+0 /* i=24 */,
+200+1 /* i=26 */,
+201+1 /* i=27 */,
+202+1 /* i=28 */,
+203+1 /* i=29 */,
+204+1 /* i=1 */,
+205+1 /* i=2 */,
+206+1 /* i=3 */,
+207+1 /* i=4 */,
+208+1 /* i=5 */,
+209+1 /* i=6 */,
+210+1 /* i=7 */,
+211+1 /* i=8 */,
+212+1 /* i=9 */,
+213+1 /* i=10 */,
+214+1 /* i=11 */,
+215+1 /* i=12 */,
+216+1 /* i=13 */,
+217+1 /* i=14 */,
+218+1 /* i=15 */,
+219+1 /* i=16 */,
+220+1 /* i=17 */,
+221+1 /* i=18 */,
+222+1 /* i=19 */,
+223+1 /* i=20 */,
+224+1 /* i=21 */,
+225+1 /* i=22 */,
+226+1 /* i=23 */,
+227+1 /* i=25 */,
+228+1 /* i=30 */,
+229+1 /* i=121 */};
+static SOPC_NodeId* reference_type[] = {NULL,  &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_6, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_6, &nodeid_4, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80, &nodeid_80};
+static SOPC_ExpandedNodeId* reference_target[] = {NULL, &ex_nodeid_3, &ex_nodeid_5, &ex_nodeid_7, &ex_nodeid_8, &ex_nodeid_9, &ex_nodeid_10, &ex_nodeid_11, &ex_nodeid_12, &ex_nodeid_3, &ex_nodeid_5, &ex_nodeid_14, &ex_nodeid_15, &ex_nodeid_16, &ex_nodeid_13, &ex_nodeid_5, &ex_nodeid_17, &ex_nodeid_18, &ex_nodeid_19, &ex_nodeid_13, &ex_nodeid_5, &ex_nodeid_20, &ex_nodeid_13, &ex_nodeid_5, &ex_nodeid_21, &ex_nodeid_22, &ex_nodeid_23, &ex_nodeid_24, &ex_nodeid_14, &ex_nodeid_5, &ex_nodeid_25, &ex_nodeid_26, &ex_nodeid_27, &ex_nodeid_28, &ex_nodeid_29, &ex_nodeid_17, &ex_nodeid_5, &ex_nodeid_30, &ex_nodeid_31, &ex_nodeid_32, &ex_nodeid_33, &ex_nodeid_34, &ex_nodeid_35, &ex_nodeid_17, &ex_nodeid_5, &ex_nodeid_36, &ex_nodeid_37, &ex_nodeid_38, &ex_nodeid_39, &ex_nodeid_40, &ex_nodeid_14, &ex_nodeid_5, &ex_nodeid_41, &ex_nodeid_42, &ex_nodeid_43, &ex_nodeid_44, &ex_nodeid_45, &ex_nodeid_18, &ex_nodeid_5, &ex_nodeid_46, &ex_nodeid_47, &ex_nodeid_18, &ex_nodeid_5, &ex_nodeid_48, &ex_nodeid_49, &ex_nodeid_14, &ex_nodeid_5, &ex_nodeid_50, &ex_nodeid_19, &ex_nodeid_5, &ex_nodeid_51, &ex_nodeid_15, &ex_nodeid_5, &ex_nodeid_52, &ex_nodeid_53, &ex_nodeid_54, &ex_nodeid_55, &ex_nodeid_56, &ex_nodeid_20, &ex_nodeid_5, &ex_nodeid_57, &ex_nodeid_58, &ex_nodeid_59, &ex_nodeid_20, &ex_nodeid_5, &ex_nodeid_60, &ex_nodeid_61, &ex_nodeid_16, &ex_nodeid_5, &ex_nodeid_62, &ex_nodeid_21, &ex_nodeid_5, &ex_nodeid_63, &ex_nodeid_16, &ex_nodeid_5, &ex_nodeid_64, &ex_nodeid_22, &ex_nodeid_5, &ex_nodeid_65, &ex_nodeid_16, &ex_nodeid_5, &ex_nodeid_16, &ex_nodeid_5, &ex_nodeid_66, &ex_nodeid_24, &ex_nodeid_5, &ex_nodeid_67, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_1, &ex_nodeid_69, &ex_nodeid_25, &ex_nodeid_69, &ex_nodeid_25, &ex_nodeid_69, &ex_nodeid_25, &ex_nodeid_69, &ex_nodeid_25, &ex_nodeid_69, &ex_nodeid_25, &ex_nodeid_69, &ex_nodeid_25, &ex_nodeid_69, &ex_nodeid_17, &ex_nodeid_69, &ex_nodeid_17, &ex_nodeid_69, &ex_nodeid_17, &ex_nodeid_69, &ex_nodeid_26, &ex_nodeid_69, &ex_nodeid_26, &ex_nodeid_69, &ex_nodeid_26, &ex_nodeid_69, &ex_nodeid_26, &ex_nodeid_69, &ex_nodeid_26, &ex_nodeid_69, &ex_nodeid_41, &ex_nodeid_69, &ex_nodeid_41, &ex_nodeid_69, &ex_nodeid_18, &ex_nodeid_69, &ex_nodeid_18, &ex_nodeid_69, &ex_nodeid_18, &ex_nodeid_69, &ex_nodeid_42, &ex_nodeid_69, &ex_nodeid_42, &ex_nodeid_69, &ex_nodeid_50, &ex_nodeid_69, &ex_nodeid_52, &ex_nodeid_69, &ex_nodeid_52, &ex_nodeid_69, &ex_nodeid_52, &ex_nodeid_69, &ex_nodeid_20, &ex_nodeid_69, &ex_nodeid_20, &ex_nodeid_69, &ex_nodeid_20, &ex_nodeid_69, &ex_nodeid_53, &ex_nodeid_69, &ex_nodeid_53, &ex_nodeid_69, &ex_nodeid_62, &ex_nodeid_69, &ex_nodeid_64, &ex_nodeid_69, &ex_nodeid_66, &ex_nodeid_69, &ex_nodeid_78, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_81, &ex_nodeid_82, &ex_nodeid_81, &ex_nodeid_82, &ex_nodeid_81, &ex_nodeid_82, &ex_nodeid_81, &ex_nodeid_82, &ex_nodeid_79, &ex_nodeid_79, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_78, &ex_nodeid_98, &ex_nodeid_79};
+static bool reference_isForward[]={false, false, true, true, true, true, true, true, true, false, true, true, true, true, false, true, true, true, true, false, true, true, false, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, true, false, true, true, true, false, true, true, false, true, true, false, true, true, true, true, true, true, false, true, true, true, true, false, true, true, true, false, true, true, false, true, true, false, true, true, false, true, true, false, true, false, true, true, false, true, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
 
 
 static SOPC_NodeId* NodeId[NB+1] = {NULL,
@@ -839,7 +832,6 @@ static SOPC_NodeId* NodeId[NB+1] = {NULL,
 &nodeid_75,
 &nodeid_76,
 &nodeid_77,
-&nodeid_78,
 &nodeid_31,
 &nodeid_32,
 &nodeid_33,
@@ -872,8 +864,9 @@ static SOPC_NodeId* NodeId[NB+1] = {NULL,
 &nodeid_63,
 &nodeid_65,
 &nodeid_67,
+&nodeid_78,
 &nodeid_79,
-&nodeid_80,
+&nodeid_81,
 &nodeid_82,
 &nodeid_83,
 &nodeid_84,
@@ -901,23 +894,22 @@ static SOPC_NodeId* NodeId[NB+1] = {NULL,
 &nodeid_106,
 &nodeid_107,
 &nodeid_108,
-&nodeid_109,
-&nodeid_110};
+&nodeid_109};
 
 
 
 static OpcUa_NodeClass NodeClass[NB+1] = {OpcUa_NodeClass_Unspecified,
-    OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType
+    OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType, OpcUa_NodeClass_DataType
 };
 
 
-SOPC_Variant Value[NB_3+NB_4+1] = {DEFAULT_VARIANT, DEFAULT_VARIANT,{SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64=-1000}},{SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32=1000}},{SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev=2.0}},{SOPC_String_Id, SOPC_VariantArrayType_SingleValue, {.String={14,1,toSOPC_String("String:INGOPCS")}}},{SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {.Bstring={18,1,toSOPC_String("ByteString:INGOPCS")}}},{SOPC_XmlElement_Id, SOPC_VariantArrayType_SingleValue, {.XmlElt={18,1,toSOPC_String("XmlElement:INGOPCS")}}},{SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.Sbyte=-128}},{SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte=255}},{SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue, {.Int16=-32768}},{SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16=65535}},{SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32=-2147483648}},{SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64=18446744073709551615}},{SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv=5758787.5876875}},{SOPC_DateTime_Id, SOPC_VariantArrayType_SingleValue, {.Date.Low32=18446744073709551615,.Date.High32=18446744073709551615}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}}, DEFAULT_VARIANT, DEFAULT_VARIANT,{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}}, DEFAULT_VARIANT, DEFAULT_VARIANT,{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}}, DEFAULT_VARIANT, DEFAULT_VARIANT,{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=true}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=true}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}}};
+SOPC_Variant Value[NB_3+NB_4+1] = {DEFAULT_VARIANT, DEFAULT_VARIANT,{SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64=-1000}},{SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32=1000}},{SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev=2.0}},{SOPC_String_Id, SOPC_VariantArrayType_SingleValue, {.String={14,1,toSOPC_String("String:INGOPCS")}}},{SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {.Bstring={18,1,toSOPC_String("ByteString:INGOPCS")}}},{SOPC_XmlElement_Id, SOPC_VariantArrayType_SingleValue, {.XmlElt={18,1,toSOPC_String("XmlElement:INGOPCS")}}},{SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.Sbyte=-128}},{SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte=255}},{SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue, {.Int16=-32768}},{SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16=65535}},{SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32=-2147483648}},{SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64=18446744073709551614ULL}},{SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv=5758787.5876875}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}}, DEFAULT_VARIANT, DEFAULT_VARIANT,{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}}, DEFAULT_VARIANT, DEFAULT_VARIANT,{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}}, DEFAULT_VARIANT, DEFAULT_VARIANT,{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=true}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=true}},{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=false}}};
 
 
-static SOPC_StatusCode status_code[] = {STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK};
+static SOPC_StatusCode status_code[] = {STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK};
 
 
-static SOPC_SByte AccessLevel[] = {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+static SOPC_SByte AccessLevel[] = {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 SOPC_AddressSpace addressSpace = {
     .nbVariables = NB_3,
