@@ -6,4 +6,4 @@ set -e
 
 DOCKER_IMAGE=4bdff26d936f
 
-/etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
+sudo /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
