@@ -29,7 +29,7 @@
 /** @brief Version of the toolkit */
 #define SOPC_TOOLKIT_VERSION_MAJOR 0
 #define SOPC_TOOLKIT_VERSION_MEDIUM 2
-#define SOPC_TOOLKIT_VERSION_MINOR 0
+#define SOPC_TOOLKIT_VERSION_MINOR 1
 
 /** @brief Maximum Message Length used (must be > SOPC_TCP_UA_MIN_BUFFER_SIZE) */
 #ifndef SOPC_MAX_MESSAGE_LENGTH
