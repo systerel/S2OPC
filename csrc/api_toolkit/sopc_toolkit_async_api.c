@@ -50,7 +50,7 @@ void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId,
 }
 
 void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId){
-    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT,
+    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SESSION,
                                sessionId,
                                NULL,
                                0);
