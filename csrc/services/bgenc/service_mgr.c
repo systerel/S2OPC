@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 13/10/2017 09:44:51
+ Date                 : 16/10/2017 15:36:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -25,6 +25,7 @@ void service_mgr__INITIALISATION(void) {
 void service_mgr__get_response_type(
    const constants__t_msg_type_i service_mgr__req_msg_typ,
    constants__t_msg_type_i * const service_mgr__resp_msg_typ) {
+   *service_mgr__resp_msg_typ = constants__c_msg_type_indet;
    switch (service_mgr__req_msg_typ) {
    case constants__e_msg_get_endpoints_service_req:
       *service_mgr__resp_msg_typ = constants__e_msg_get_endpoints_service_resp;

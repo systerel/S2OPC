@@ -2,7 +2,7 @@
 
  File Name            : service_browse_seq_it.c
 
- Date                 : 13/10/2017 09:44:51
+ Date                 : 16/10/2017 15:36:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -69,9 +69,9 @@ void service_browse_seq_it__continue_iter_browse_result(
    constants__t_BrowseResult_i * const service_browse_seq_it__p_bri) {
    constants__get_cast_t_BrowseResult(service_browse_seq_it__bri_i,
       service_browse_seq_it__p_bri);
-   *service_browse_seq_it__p_continue = (service_browse_seq_it__bri_i <= service_browse_seq_it__nb_bri);
    service_browse_seq_it__bri_i = service_browse_seq_it__bri_i +
       1;
+   *service_browse_seq_it__p_continue = (service_browse_seq_it__bri_i <= service_browse_seq_it__nb_bri);
 }
 
 void service_browse_seq_it__init_iter_reference(

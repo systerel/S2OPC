@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 13/10/2017 09:44:50
+ Date                 : 16/10/2017 15:36:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -37,10 +37,10 @@ extern void io_dispatch_mgr__INITIALISATION(void);
   --------------------------*/
 extern void io_dispatch_mgr__get_msg_header_type(
    const constants__t_msg_type_i io_dispatch_mgr__msg_typ,
-   constants__t_msg_header_type * const io_dispatch_mgr__header_type);
+   constants__t_msg_header_type_i * const io_dispatch_mgr__header_type);
 extern void io_dispatch_mgr__get_msg_service_class(
    const constants__t_msg_type_i io_dispatch_mgr__msg_typ,
-   constants__t_msg_service_class * const io_dispatch_mgr__service_class);
+   constants__t_msg_service_class_i * const io_dispatch_mgr__service_class);
 
 /*--------------------
    OPERATIONS Clause

@@ -2,7 +2,7 @@
 
  File Name            : service_browse_seq.c
 
- Date                 : 13/10/2017 09:44:51
+ Date                 : 16/10/2017 15:36:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -24,21 +24,19 @@ void service_browse_seq__INITIALISATION(void) {
   --------------------*/
 void service_browse_seq__fill_browse_response_ref(
    const constants__t_BrowseValue_i service_browse_seq__p_bvi,
-   const constants__t_BrowseResult_i service_browse_seq__p_bri,
    const constants__t_Reference_i service_browse_seq__p_ref,
    const constants__t_BrowseDirection_i service_browse_seq__p_dir,
    const t_bool service_browse_seq__p_isreftype,
    const constants__t_NodeId_i service_browse_seq__p_ref_type,
    const t_bool service_browse_seq__p_inc_subtype,
-   t_bool * const service_browse_seq__p_continue_bri,
-   constants__t_BrowseResult_i * const service_browse_seq__p_bri_new) {
+   t_bool * const service_browse_seq__p_continue_bri) {
    {
       constants__t_NodeId_i service_browse_seq__l_RefType;
       constants__t_ExpandedNodeId_i service_browse_seq__l_TargetNode;
       t_bool service_browse_seq__l_IsForward;
       t_bool service_browse_seq__l_res;
+      constants__t_BrowseResult_i service_browse_seq__l_bri;
       
-      *service_browse_seq__p_bri_new = service_browse_seq__p_bri;
       *service_browse_seq__p_continue_bri = true;
       address_space__get_Reference_ReferenceType(service_browse_seq__p_ref,
          &service_browse_seq__l_RefType);
@@ -56,15 +54,16 @@ void service_browse_seq__fill_browse_response_ref(
             service_browse_seq__l_RefType,
             &service_browse_seq__l_res);
          if (service_browse_seq__l_res == true) {
+            service_browse_seq_it__continue_iter_browse_result(service_browse_seq__p_continue_bri,
+               &service_browse_seq__l_bri);
             service_browse__copy_target_node_browse_result(service_browse_seq__p_bvi,
-               service_browse_seq__p_bri,
+               service_browse_seq__l_bri,
                service_browse_seq__l_RefType,
                service_browse_seq__l_TargetNode,
                service_browse_seq__l_IsForward,
                &service_browse_seq__l_res);
-            if (service_browse_seq__l_res == true) {
-               service_browse_seq_it__continue_iter_browse_result(service_browse_seq__p_continue_bri,
-                  service_browse_seq__p_bri_new);
+            if (service_browse_seq__l_res == false) {
+               ;
             }
          }
       }
@@ -81,16 +80,14 @@ void service_browse_seq__fill_browse_response(
    const t_bool service_browse_seq__p_inc_subtype) {
    {
       t_bool service_browse_seq__l_continue_bri;
-      constants__t_BrowseResult_i service_browse_seq__l_bri;
-      constants__t_BrowseResult_i service_browse_seq__l_bri_new;
       t_bool service_browse_seq__l_continue_ref;
       constants__t_Reference_i service_browse_seq__l_ref;
       
+      service_browse_seq__l_ref = constants__c_Reference_indet;
       service_browse_seq_it__init_iter_browse_result(service_browse_seq__p_nb_bri,
          &service_browse_seq__l_continue_bri);
       if (service_browse_seq__l_continue_bri == true) {
-         service_browse_seq_it__continue_iter_browse_result(&service_browse_seq__l_continue_bri,
-            &service_browse_seq__l_bri);
+         service_browse_seq__l_continue_bri = true;
          service_browse_seq_it__init_iter_reference(service_browse_seq__p_src_node,
             &service_browse_seq__l_continue_ref);
          while ((service_browse_seq__l_continue_ref == true) &&
@@ -98,19 +95,18 @@ void service_browse_seq__fill_browse_response(
             service_browse_seq_it__continue_iter_reference(&service_browse_seq__l_continue_ref,
                &service_browse_seq__l_ref);
             service_browse_seq__fill_browse_response_ref(service_browse_seq__p_bvi,
-               service_browse_seq__l_bri,
                service_browse_seq__l_ref,
                service_browse_seq__p_dir,
                service_browse_seq__p_isreftype,
                service_browse_seq__p_reftype,
                service_browse_seq__p_inc_subtype,
-               &service_browse_seq__l_continue_bri,
-               &service_browse_seq__l_bri_new);
-            service_browse_seq__l_bri = service_browse_seq__l_bri_new;
+               &service_browse_seq__l_continue_bri);
          }
-         service_browse__fill_continuation_point(service_browse_seq__p_bvi,
-            service_browse_seq__l_continue_ref,
-            service_browse_seq__l_ref);
+         if (service_browse_seq__l_ref != constants__c_Reference_indet) {
+            service_browse__fill_continuation_point(service_browse_seq__p_bvi,
+               service_browse_seq__l_continue_ref,
+               service_browse_seq__l_ref);
+         }
       }
    }
 }

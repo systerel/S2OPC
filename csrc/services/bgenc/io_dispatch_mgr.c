@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 13/10/2017 09:44:50
+ Date                 : 16/10/2017 15:36:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -24,7 +24,8 @@ void io_dispatch_mgr__INITIALISATION(void) {
   --------------------*/
 void io_dispatch_mgr__get_msg_header_type(
    const constants__t_msg_type_i io_dispatch_mgr__msg_typ,
-   constants__t_msg_header_type * const io_dispatch_mgr__header_type) {
+   constants__t_msg_header_type_i * const io_dispatch_mgr__header_type) {
+   *io_dispatch_mgr__header_type = constants__c_msg_header_type_indet;
    switch (io_dispatch_mgr__msg_typ) {
    case constants__e_msg_get_endpoints_service_req:
    case constants__e_msg_session_create_req:
@@ -53,7 +54,7 @@ void io_dispatch_mgr__get_msg_header_type(
 
 void io_dispatch_mgr__get_msg_service_class(
    const constants__t_msg_type_i io_dispatch_mgr__msg_typ,
-   constants__t_msg_service_class * const io_dispatch_mgr__service_class) {
+   constants__t_msg_service_class_i * const io_dispatch_mgr__service_class) {
    switch (io_dispatch_mgr__msg_typ) {
    case constants__e_msg_get_endpoints_service_req:
    case constants__e_msg_get_endpoints_service_resp:
@@ -78,6 +79,7 @@ void io_dispatch_mgr__get_msg_service_class(
       *io_dispatch_mgr__service_class = constants__e_msg_session_service_class;
       break;
    default:
+      *io_dispatch_mgr__service_class = constants__c_msg_service_class_indet;
       break;
    }
 }
@@ -91,8 +93,8 @@ void io_dispatch_mgr__receive_msg_buffer(
       t_bool io_dispatch_mgr__l_is_client;
       constants__t_msg_type_i io_dispatch_mgr__l_msg_type;
       t_bool io_dispatch_mgr__l_valid_msg_type;
-      constants__t_msg_header_type io_dispatch_mgr__l_msg_header_type;
-      constants__t_msg_service_class io_dispatch_mgr__l_msg_service_class;
+      constants__t_msg_header_type_i io_dispatch_mgr__l_msg_header_type;
+      constants__t_msg_service_class_i io_dispatch_mgr__l_msg_service_class;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
       t_bool io_dispatch_mgr__l_valid_buffer_out;
       t_bool io_dispatch_mgr__l_valid_req_context;
@@ -178,6 +180,7 @@ void io_dispatch_mgr__receive_msg_buffer(
             }
             break;
          default:
+            ;
             break;
          }
       }

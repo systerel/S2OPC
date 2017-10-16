@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 13/10/2017 09:44:52
+ Date                 : 16/10/2017 15:36:25
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -165,6 +165,8 @@ void session_mgr__server_receive_session_req(
       constants__t_user_i session_mgr__l_user;
       t_bool session_mgr__l_valid_user;
       
+      *session_mgr__session = constants__c_session_indet;
+      *session_mgr__service_ret = constants__c_StatusCode_indet;
       switch (session_mgr__req_typ) {
       case constants__e_msg_session_create_req:
          session_core__server_create_session_req_and_resp_sm(session_mgr__channel,

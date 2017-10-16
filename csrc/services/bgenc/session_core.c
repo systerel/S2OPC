@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 13/10/2017 09:44:52
+ Date                 : 16/10/2017 15:36:25
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -123,6 +123,7 @@ void session_core__server_create_session_req_and_resp_sm(
       constants__t_Nonce_i session_core__l_nonce;
       constants__t_SecurityPolicy session_core__l_secpol;
       
+      *session_core__service_ret = constants__e_sc_bad_out_of_memory;
       session_core_1_bs__init_new_session(false,
          &session_core__l_nsession);
       session_core_1_bs__is_valid_session(session_core__l_nsession,
