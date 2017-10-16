@@ -143,6 +143,7 @@ OPERATIONS
         l_continue_ref,
         l_ref
     IN
+        l_ref := c_Reference_indet;
         /* Initialization of the iteration on the browse result */
         l_continue_bri <-- init_iter_browse_result(p_nb_bri);
         IF  l_continue_bri = TRUE THEN
@@ -164,8 +165,10 @@ OPERATIONS
             VARIANT
                 0
             END;
-            /* TODO: There may need more information */
-            fill_continuation_point(p_bvi, l_continue_ref, l_ref)
+            IF l_ref /= c_Reference_indet THEN
+                /* TODO: There may need more information */
+                fill_continuation_point(p_bvi, l_continue_ref, l_ref)
+            END
         END
     END
     ;
