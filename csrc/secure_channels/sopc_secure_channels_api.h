@@ -1,10 +1,4 @@
 /*
- *  \file sopc_secure_channels_api.h
- *
- *  \brief Event oriented API of the Secure Channle layer.
- *         This module is in charge of the event dispatcher thread management.
- */
-/*
  *  Copyright (C) 2017 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -20,13 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ *  \file sopc_secure_channels_api.h
+ *
+ *  \brief Event oriented API of the Secure Channel layer.
+ *         This module is in charge of the event dispatcher thread management.
+ */
 
 #ifndef _SOPC_SECURE_CHANNELS_API_H_
 #define _SOPC_SECURE_CHANNELS_API_H_
 
 #include <stdint.h>
 
-/* Secure channel input events */
+/**
+ *  \brief Secure channel input events
+ *  */
 typedef enum {
     /* External events */
     /*  Socket events */

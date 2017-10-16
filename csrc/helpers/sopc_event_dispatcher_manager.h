@@ -64,6 +64,7 @@ SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager
  *  IMPORTANT NOTE: to be used only when it is really necessary since event order is not kept
  *
  *  \param eventMgr  Pointer of the event dispatcher manager in which action will be added
+ *  \param event     The event integer value to add to the event dispatcher manager queue
  *  \param eltId     Identifier of the element on which the event shall be interpreted
  *  \param params    Generic parameter provided with the event
  *  \param auxParam  Auxiliary integer parameter provided with the event (e.g.: status code, etc.)

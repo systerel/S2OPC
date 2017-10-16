@@ -15,6 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ * \file sopc_toolkit_config.h
+ *
+ * \brief This module shall be used to initialize, configure and clear/terminate the toolkit execution.
+ *
+ * It is in charge to initialize each event based layer (sockets, secure channels, services) which will
+ * start the associated threads.
+ * It is also necessary to configure the endpoint description configuration and address space of a toolkit server instance,
+ * or the endpoint connection configuration of a toolkit client instance.
+ *
+ */
+
 #ifndef SOPC_TOOLKIT_CONFIG_H_
 #define SOPC_TOOLKIT_CONFIG_H_
 
@@ -55,7 +67,7 @@ void SOPC_Toolkit_Clear();
  *  (SOPC_ToolkitServer_Initialize required, !SOPC_Toolkit_Configured required).
  *  Note: only one address space can be set, further call will be refused.
  *
- *  \param adressSpace  The address space definition
+ *  \param addressSpace  The address space definition
  *
  *  \return STATUS_OK if configuration succeeded,
  *  OpcUa_BadInvalidState if toolkit is not initialized, already

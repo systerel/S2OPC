@@ -21,6 +21,8 @@
  *
  */
 
+#ifndef SOPC_IEEE_CHECK_H_
+#define SOPC_IEEE_CHECK_H_
 
 #include <float.h>
 
@@ -59,4 +61,6 @@
 
 #if DBL_MANT_DIG != 53
 #error "Compiler double definition differs from IEEE-754 standard"
+#endif
+
 #endif

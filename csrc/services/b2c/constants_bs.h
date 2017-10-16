@@ -16,7 +16,7 @@
  */
 /** \file
  *
- * Hand-modified _bs.h to specify my own #defines
+ * Hand-modified _bs.h to specify my own # defines
  */
 
 
