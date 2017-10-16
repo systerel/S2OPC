@@ -31,9 +31,8 @@ This project contains the following elements:
 - validation: client validation tool using FreeOpcUa python library
 
 
-
 Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
-- Pre-requesites: 
+- Pre-requesites:
   * gcc (tested with GCC version >= 4.8.4)
   * CMake (tested with CMake version >= 2.8.12.2)
   * make (tested with GNU Make version >= 3.81)
@@ -46,7 +45,7 @@ Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
 
 Address space generation:
 - see address_space_generation/README file for generator dependencies
-- XML file provided complying with schema https://opcfoundation.org/UA/schemas/1.03/UANodeSet.xsd with limitations 
+- XML file provided complying with schema https://opcfoundation.org/UA/schemas/1.03/UANodeSet.xsd with limitations
   (see tests/data/address_space/*.xml files for examples)
 
 Licenses:
@@ -98,7 +97,7 @@ INGOPCS OPC UA Toolkit tests
 ============================
 Prerequesites (validation based on FreeOpcUa python client only):
 - Python 3
-- Python cryptography 
+- Python cryptography
 
 Run all tests:
 - To run the INGOPCS OPC UA Toolkit tests: execute the test-all.sh script: "./test-all.sh"
@@ -113,6 +112,6 @@ Run a particular test (bin/ directory):
 - Toolkit client/server session and read/write service example:
   execute ./toolkit_test_server and then ./toolkit_test_client in parallel
 - Toolkit server and read / write / browse service validation:
-  execute ./toolkit_test_server and python3 client.py in validation/ directory
+  execute ./toolkit_test_server in bin/ directory and python3 client.py in validation/ directory
   (depends on FreeOpcUa python client available on github)
 
