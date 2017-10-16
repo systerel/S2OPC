@@ -572,8 +572,14 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
         socketElt = &socketsArray[eltId];
 
         buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
-        status = Socket_Read(socketElt->sock, buffer->data, SOPC_MAX_MESSAGE_LENGTH, &readBytes);
+        if(NULL != buffer){
+            status = Socket_Read(socketElt->sock, buffer->data, SOPC_MAX_MESSAGE_LENGTH, &readBytes);
+        }else{
+            status = OpcUa_BadOutOfMemory;
+        }
         if(status == OpcUa_BadWouldBlock){
+            SOPC_Buffer_Delete(buffer);
+            buffer = NULL;
             // wait next ready to read event
         }else if(status == STATUS_OK && readBytes >= 0){
             // Update buffer lengtn
@@ -584,7 +590,10 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
                                              (void*) buffer,
                                              eltId);
         }else{
-            // Failure during read operation
+            SOPC_Buffer_Delete(buffer);
+            buffer = NULL;
+            // Failure during read operation or out of memory
+            // TODO: log
             SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE,
                                              socketElt->connectionId,
                                              NULL,
