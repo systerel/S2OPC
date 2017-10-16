@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['sopc_5fapp_5faddspace_5fevent',['SOPC_App_AddSpace_Event',['../sopc__user__app__itf_8h.html#a106d0ab36a9516181eb5fce1ed9fea71',1,'sopc_user_app_itf.h']]],
+  ['sopc_5fapp_5faddspace_5flocalservice_5fresult',['SOPC_App_AddSpace_LocalService_Result',['../sopc__user__app__itf_8h.html#ae6938639e0733f4b1b9366a981c67ec6',1,'sopc_user_app_itf.h']]],
+  ['sopc_5fapp_5fcom_5fevent',['SOPC_App_Com_Event',['../sopc__user__app__itf_8h.html#a887f1dd52095dbd128e4df7be970048f',1,'sopc_user_app_itf.h']]],
+  ['sopc_5fapp_5feventtype',['SOPC_App_EventType',['../sopc__toolkit__config__internal_8h.html#a43c104474d2829b9b901a4ace3f71357',1,'sopc_toolkit_config_internal.h']]],
+  ['sopc_5fbuiltinid',['SOPC_BuiltinId',['../sopc__builtintypes_8h.html#a099be2f7100e2111ba8afff0a66078c5',1,'sopc_builtintypes.h']]],
+  ['sopc_5fdatavalue_5fencodingflag',['SOPC_DataValue_EncodingFlag',['../sopc__encoder_8h.html#a8b7de6593c5450ddbb34054c24d7aa57',1,'sopc_encoder.h']]],
+  ['sopc_5fdiaginfo_5fencodingflag',['SOPC_DiagInfo_EncodingFlag',['../sopc__encoder_8h.html#a0a1b3e743593825ec79c79f9595efbce',1,'sopc_encoder.h']]],
+  ['sopc_5fendianess',['SOPC_Endianess',['../sopc__helper__endianess__cfg_8h.html#adb98925c70e56264b28d94fd4a48c935',1,'sopc_helper_endianess_cfg.h']]],
+  ['sopc_5fextobjectbodyencoding',['SOPC_ExtObjectBodyEncoding',['../sopc__builtintypes_8h.html#a647288e6424504f4802e2037ac42ac4a',1,'sopc_builtintypes.h']]],
+  ['sopc_5fidentifiertype',['SOPC_IdentifierType',['../sopc__builtintypes_8h.html#a229b3d9962ca5ee98d556198c0334c9f',1,'sopc_builtintypes.h']]],
+  ['sopc_5flocalizedtext_5fencodingflag',['SOPC_LocalizedText_EncodingFlag',['../sopc__encoder_8h.html#ad3cf23f2b55398e64107ea27834c98b9',1,'sopc_encoder.h']]],
+  ['sopc_5fmsg_5fisfinal',['SOPC_Msg_IsFinal',['../sopc__secure__channels__internal__ctx_8h.html#a9724b40cfaf67cc4f290c5e44127f334',1,'sopc_secure_channels_internal_ctx.h']]],
+  ['sopc_5fmsg_5ftype',['SOPC_Msg_Type',['../sopc__secure__channels__internal__ctx_8h.html#ab10781f15a6567a19853043839db55a5',1,'sopc_secure_channels_internal_ctx.h']]],
+  ['sopc_5fnodeid_5fdataencoding',['SOPC_NodeId_DataEncoding',['../sopc__encoder_8h.html#af2fcabd7fea8bd8c810d1216041bf734',1,'sopc_encoder.h']]],
+  ['sopc_5fsecurechannels_5finputevent',['SOPC_SecureChannels_InputEvent',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409',1,'sopc_secure_channels_api.h']]],
+  ['sopc_5fsecureconnection_5fstate',['SOPC_SecureConnection_State',['../sopc__secure__channels__internal__ctx_8h.html#aa37c8d7e5335943c75f0bb918a28007b',1,'sopc_secure_channels_internal_ctx.h']]],
+  ['sopc_5fsecurelistener_5fstate',['SOPC_SecureListener_State',['../sopc__secure__channels__internal__ctx_8h.html#aa9beb6ab5c8ad9801bfbc54c6d0ff36b',1,'sopc_secure_channels_internal_ctx.h']]],
+  ['sopc_5fservices_5fevent',['SOPC_Services_Event',['../sopc__services__api_8h.html#a85f4a1005cec80748097c9f223fd7f89',1,'sopc_services_api.h']]],
+  ['sopc_5fsocket_5fstate',['SOPC_Socket_State',['../sopc__sockets__internal__ctx_8h.html#a24180b35ac4790dee13baa0761057384',1,'sopc_sockets_internal_ctx.h']]],
+  ['sopc_5fsockets_5finputevent',['SOPC_Sockets_InputEvent',['../sopc__sockets__api_8h.html#adf2629a0a6ea3f6ee6976121dc98f023',1,'sopc_sockets_api.h']]],
+  ['sopc_5fvariantarraytype',['SOPC_VariantArrayType',['../sopc__builtintypes_8h.html#a1f5f4a7527a4857b820acf7ba1806569',1,'sopc_builtintypes.h']]],
+  ['sopc_5fvariantarraytypeflag',['SOPC_VariantArrayTypeFlag',['../sopc__builtintypes_8h.html#a64e6c800cf41894effb9145c1edc6b77',1,'sopc_builtintypes.h']]]
+];
