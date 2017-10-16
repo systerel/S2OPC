@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Script to produce stack delivery archive
+#  Script to produce toolkit delivery archive
 #  $1 must be the branch/commit to use for generating the delivery
 #  $2 must be the delivery version number (e.g.: 1.0.0)
 
@@ -51,29 +51,42 @@ echo "Generate and commit version file 'VERSION' with '$2' content"
 echo "$2" > VERSION
 git add VERSION &> /dev/null || exit 1
 git commit -S -m "Add VERSION file" &> /dev/null || exit 1
-echo "Generate Stack and Toolkit binaries (Stack library and tests, Toolkit tests)"
-make cleanall
-make all
+echo "Generate Toolkit binaries (library and tests)"
+./clean.sh || exit 1
+./pre-build.sh || exit 1 # should not add any file modification
+mkdir -p build || exit 1
+cd build || exit 1
+cmake -DCMAKE_INSTALL_PREFIX=. .. || exit 1
+cmake --build . --target install
 if [[ $? != 0 ]]; then
-    echo "Error: Generation of Stack or Toolkit binaries failed";
+    echo "Error: Generation of Toolkit binaries failed";
     exit 1
 fi
-echo "Add Stack and Toolkit binaries"
-git add -f bin/ &>/dev/null || exit 1
-git add -f install_stack/ &>/dev/null || exit 1
-make clean || exit 1
-git co bin || exit 1
-git co install_stack || exit 1
-echo "Generate Stack documentation with doxygen"
-cd stack
-doxygen doxygen/ingopcs-stack.doxyfile &> /dev/null || exit 1
 cd ..
-echo "Add Stack documentation in delivery branch"
-git add -f stack/apidoc &> /dev/null || exit 1
+
+echo "Create install directory"
+\rm -fr install || exit 1
+mkdir -p install || exit 1
+cp -r build/lib build/include install/
+if [[ $? != 0 ]]; then
+    echo "Error: Creation of install directory failed";
+    exit 1
+fi
+
+echo "Add Toolkit binaries"
+git add -f bin/ &>/dev/null || exit 1
+git add -f install/ &>/dev/null || exit 1
+./clean.sh || exit 1
+git co bin || exit 1
+git co install || exit 1
+echo "Generate documentation with doxygen"
+doxygen doxygen/ingopcs-toolkit.doxyfile &> /dev/null || exit 1
+echo "Add documentation in delivery branch"
+git add -f apidoc &> /dev/null || exit 1
 git commit -S -m "Add doxygen documentation for version $DELIVERY_NAME" &> /dev/null || exit 1
-echo "Remove delivery script, .gitignore file and commit"
-git rm -f delivery.sh .gitignore &> /dev/null || exit 1
-git commit -S -m "Remove delivery script and .gitignore file" &> /dev/null || exit 1
+echo "Remove delivery script, docker scripts, .gitignore file and commit"
+git rm -f delivery.sh .gitignore .run_jenkins.sh .test-in-docker.sh .build-in-docker.sh &> /dev/null || exit 1
+git commit -S -m "Remove delivery script, docker scripts and .gitignore file" &> /dev/null || exit 1
 echo "Generation of archive of version $DELIVERY_NAME"
 git archive --prefix=$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME || exit 1
 
