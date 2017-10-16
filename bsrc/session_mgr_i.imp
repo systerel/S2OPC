@@ -164,6 +164,8 @@ OPERATIONS
         l_user,
         l_valid_user
     IN
+        session := c_session_indet;
+        service_ret := c_StatusCode_indet;
         CASE req_typ OF
             EITHER e_msg_session_create_req THEN
                 // SESSION CREATION REQUEST

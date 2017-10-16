@@ -133,13 +133,13 @@ SETS
         e_msg_session_create_subscription_req, e_msg_session_create_subscription_resp};
 
     /* OPC UA message header type (request / response) */
-    t_msg_header_type = {
+    t_msg_header_type_i = { c_msg_header_type_indet,
         e_msg_request_type,
         e_msg_response_type
     };
 
     /* Service type: session management / service on a session / public service */
-    t_msg_service_class = {
+    t_msg_service_class_i = { c_msg_service_class_indet,
         e_msg_session_treatment_class,
         e_msg_session_service_class,
         e_msg_discovery_service_class
@@ -221,6 +221,8 @@ ABSTRACT_CONSTANTS
     t_msg,
     t_request_context,
     t_msg_type,
+    t_msg_header_type,
+    t_msg_service_class,
     t_channel_config_idx,
     t_channel,
     t_request_handle,
@@ -416,6 +418,14 @@ PROPERTIES
     s_service_resps = s_service_on_session_resps \/ s_discovery_service_resps \/ {e_msg_service_fault_resp} &
 
     t_msg_type = s_service_reqs \/ s_service_resps &
+
+    t_msg_header_type <: t_msg_header_type_i &
+    c_msg_header_type_indet : t_msg_header_type_i &
+    c_msg_header_type_indet /: t_msg_header_type &
+    
+    t_msg_service_class <: t_msg_service_class_i &
+    c_msg_service_class_indet : t_msg_service_class_i &
+    c_msg_service_class_indet /: t_msg_service_class &
 
     Is_SubType : t_NodeId * t_NodeId --> BOOL &
 

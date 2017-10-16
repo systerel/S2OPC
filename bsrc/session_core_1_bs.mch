@@ -387,6 +387,7 @@ OPERATIONS
             nonce_needed := FALSE
         ELSE
             nonce_needed := TRUE ||
+            valid :: BOOL        ||
             IF valid = TRUE THEN
                 a_NonceClient
                 :(

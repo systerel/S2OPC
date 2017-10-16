@@ -142,6 +142,7 @@ OPERATIONS
         l_nonce,
         l_secpol
     IN
+        service_ret := e_sc_bad_out_of_memory;
         l_nsession <-- init_new_session (FALSE);
         l_valid_session <-- is_valid_session (l_nsession);
         IF l_valid_session = TRUE THEN

@@ -127,7 +127,8 @@ OPERATIONS
                 e_sc_bad_invalid_argument,
                 e_sc_bad_out_of_memory,
                 e_sc_bad_unexpected_error} ||
-            channel := c_channel_indet
+            channel := c_channel_indet     ||
+            session_token := c_session_token_indet
         END
     END
     ;

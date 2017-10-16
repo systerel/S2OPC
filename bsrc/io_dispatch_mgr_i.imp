@@ -38,6 +38,8 @@ LOCAL_OPERATIONS
         ELSIF msg_typ : s_service_resps
         THEN
             header_type := e_msg_response_type
+        ELSE
+            header_type := c_msg_header_type_indet
         END
     END
     ;
@@ -61,6 +63,8 @@ LOCAL_OPERATIONS
                 e_msg_session_close_resp}
         THEN
             service_class := e_msg_session_treatment_class
+        ELSE
+            service_class := c_msg_service_class_indet
         END
     END
 
@@ -68,6 +72,7 @@ OPERATIONS
 
     header_type <-- get_msg_header_type (msg_typ) =
     BEGIN
+        header_type := c_msg_header_type_indet;
         CASE msg_typ OF
             EITHER e_msg_get_endpoints_service_req,
                 e_msg_session_create_req,
@@ -119,6 +124,8 @@ OPERATIONS
                 e_msg_session_create_subscription_resp
             THEN
                 service_class := e_msg_session_service_class
+            ELSE
+                service_class := c_msg_service_class_indet
             END
         END
     END
@@ -163,7 +170,7 @@ OPERATIONS
                             OR e_msg_discovery_service_class THEN
                                 l_buffer_out <-- server_receive_discovery_service_req (channel, l_msg_type, buffer)
                             ELSE
-                                /* Cases shall be exhaustive: remove a B0 TC false warning */
+                                /* indet class */
                                 l_buffer_out := c_byte_buffer_indet
                             END
                         END;
@@ -195,6 +202,9 @@ OPERATIONS
                         /* Client receiving a request: close secure channel since it is not expected from server */
                         close_secure_channel (channel)
                     END
+                ELSE
+                    /* TODO: generic management of unknown message type */
+                    skip
                 END
             END
         END

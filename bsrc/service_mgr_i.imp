@@ -111,6 +111,7 @@ OPERATIONS
 
     resp_msg_typ <-- get_response_type (req_msg_typ) =
     BEGIN
+        resp_msg_typ := c_msg_type_indet;
         CASE req_msg_typ OF
             EITHER e_msg_get_endpoints_service_req THEN
                 resp_msg_typ := e_msg_get_endpoints_service_resp
