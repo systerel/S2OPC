@@ -6,4 +6,8 @@ set -e
 
 DOCKER_IMAGE=6a3b34e578f5
 
-sudo /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
+if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
+    /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
+else
+    sudo /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
+fi

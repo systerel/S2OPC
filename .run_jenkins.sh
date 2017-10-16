@@ -7,6 +7,7 @@ git reset --hard
 git clean -fd
 
 # run build and tests
+export SOPC_DOCKER_NEEDS_SUDO=1
 ./clean.sh && ./.build-in-docker.sh ./build.sh
 ./.test-in-docker.sh ./test-all.sh
 
