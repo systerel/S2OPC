@@ -15,6 +15,6 @@ if [[ -z $ISALL || $ISALL != "all" ]]; then
     echo "Do not clean generated source files"
 else
     echo "Clean generated source files from B model and test @space"
-    \rm -fr ./src/services/bgenc
+    \rm -fr ./csrc/services/bgenc
     make -C address_space_generation clean > /dev/null
 fi
