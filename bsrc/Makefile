@@ -26,7 +26,10 @@ $(BMODEL_C_FILES) $(BMODEL_H_FILES) $(PATHTRAD)/toolkit_header_init.c $(PATHTRAD
 .INTERMEDIATE: gen.intermediate
 
 gen.intermediate: $(BMODEL_MCH_PATH_SRCS) $(BMODEL_IMP_PATH_SRCS) $(BMODEL_IMP_PATH_SRCS)
-	@m -s | grep TOTAL | awk -F '|' '{ err = $$3 ~ "OK" && $$10 ~ "OK" ? 0:1 } END {if(err == 1) print "Please typecheck and B0check before make trad"; exit err}'
+	@\rm -f ./bdp/*.nf
+	@m -tc -b0 > tc.log
+	@grep -iEc '(warning|B0Check)' tc.log | xargs test 0 -eq
+	@\rm tc.log
 	@\rm -fr ./$(PATHTRAD)
 	@\rm -fr ./$(PATHGENTRAD)
 	m -tr
