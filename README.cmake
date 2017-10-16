@@ -20,4 +20,14 @@ configuration variable to point at the toolchain-mingw32-w64.cmake:
 # In the build directory
 cmake -DCMAKE_TOOLCHAIN_FILE=$(pwd)/../toolchain-mingw32-w64.cmake .. && make
 
+
+Installing library using CMake
+******************************
+
+To install toolkit library and header files using CMake, you should provide
+the path in which lib/*.a and include/*.h directories will be installed:
+
 --------------------------------------------------------------------------------
+# In the build directory
+cmake -DCMAKE_INSTALL_PREFIX=<INSTALL_PATH> ..
+cmake --build . --target install

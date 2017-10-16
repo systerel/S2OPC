@@ -53,6 +53,14 @@ file(GLOB_RECURSE INGOPCS_SRCS
 add_library(ingopcs STATIC ${PLATFORM_SRCS} ${INGOPCS_SRCS})
 
 # Define INGOPCS library includes
+file(GLOB INGOPCS_INCLUDE_FILES
+    "csrc/api_toolkit/*.h"
+    "csrc/configuration/*.h"
+    "csrc/helpers/*.h"
+    "csrc/opcua_types/*.h"
+    "csrc/crypto/*.h"
+    "csrc/helpers_platform_dep/*.h")
+
 set(INGOPCS_PUBLIC_INCLUDES
     "csrc/api_toolkit"
     "csrc/configuration"
@@ -61,6 +69,7 @@ set(INGOPCS_PUBLIC_INCLUDES
     "csrc/crypto"
     "csrc/helpers_platform_dep"
 )
+
 set(INGOPCS_PRIVATE_INCLUDES
     "csrc/sockets"
     "csrc/secure_channels"
@@ -80,6 +89,21 @@ target_link_libraries(ingopcs PUBLIC mbedtls mbedcrypto mbedx509)
 target_link_libraries(ingopcs PUBLIC ${MATH_LIB})
 target_link_libraries(ingopcs PUBLIC ${THREAD_LIB})
 target_link_libraries(ingopcs PUBLIC ${SOCK_LIB})
+
+# Define installation targets
+## retrieve public include files
+foreach(dir ${INGOPCS_PUBLIC_INCLUDES})
+    file(GLOB temp_files "${dir}/*.h")
+    list(APPEND INGOPCS_INCLUDE_FILES ${temp_files})
+endforeach()
+## set public header property
+set_target_properties(ingopcs PROPERTIES PUBLIC_HEADER "${INGOPCS_INCLUDE_FILES}")
+## install files
+install(TARGETS ingopcs
+        LIBRARY DESTINATION lib # Supposedly dynamic lib
+        ARCHIVE DESTINATION lib # Supposedly static lib
+        PUBLIC_HEADER DESTINATION include
+)
 
 # INGOPCS tests ################################################################################
 
