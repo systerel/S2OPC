@@ -46,7 +46,8 @@ PROMOTES
     get_connected_channel,
     is_disconnecting_channel,
     is_connected_channel,
-    get_SecurityPolicy
+    get_SecurityPolicy,
+    channel_do_nothing
 
 LOCAL_OPERATIONS
 

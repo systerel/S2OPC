@@ -53,7 +53,12 @@ PROMOTES
     get_NonceClient,
     drop_NonceClient,
     client_create_session_check_crypto,
-    server_activate_session_check_crypto
+    server_activate_session_check_crypto,
+    client_activate_session_resp_check,
+    client_close_session_req_msg,
+    client_close_session_resp_msg,
+    server_close_session_check_req,
+    session_do_nothing
 
 LOCAL_OPERATIONS
 
