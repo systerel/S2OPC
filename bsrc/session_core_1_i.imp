@@ -77,9 +77,12 @@ OPERATIONS
     /* Local operations */
 
     l_set_session_state(p_session, p_state) =
-    BEGIN
+    VAR
+        l_prec_state
+    IN
+        l_prec_state <-- get_session_state(p_session);
         set_session_state_1(p_session, p_state);
-        notify_set_session_state(p_session, p_state)
+        notify_set_session_state(p_session, l_prec_state, p_state)
     END
     ;
 
@@ -152,11 +155,15 @@ OPERATIONS
     END
     ;
 
-   set_session_state_closed (session, is_client) =
-    BEGIN
+    set_session_state_closed (session, is_client) =
+    VAR
+        l_prec_state
+    IN
         reset_session_channel(session);
         reset_session_orphaned(session);
-        close_session_token(session, is_client)
+        l_prec_state <-- get_session_state(session);
+        prepare_close_session(session, l_prec_state, is_client);
+        l_set_session_state(session, e_session_closed)
     END
     ;
 
