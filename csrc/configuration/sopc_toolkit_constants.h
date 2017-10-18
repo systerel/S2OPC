@@ -50,7 +50,7 @@
 
 /* SECURE CHANNEL CONFIGURATION */
 
-/** @brief Maximum number of endpoint description configured */
+/** @brief Maximum number of endpoint description configured (same as number of connection listeners) */
 #ifndef SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
 # define SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS  10
 #endif /* SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS */
@@ -60,10 +60,19 @@
 #endif /* SOPC_LISTENER_LISTEN_ALL_INTERFACES */
 
 
-/** @brief Maximum number of secure channel connections established (should be < SOPC_MAX_SOCKETS) */
+/** @brief Maximum number of secure channel connections (and configurations) established */
 #ifndef SOPC_MAX_SECURE_CONNECTIONS
 # define SOPC_MAX_SECURE_CONNECTIONS  20
 #endif /* SOPC_MAX_SECURE_CONNECTIONS */
+
+#if SOPC_MAX_SECURE_CONNECTIONS > SOPC_MAX_SOCKETS
+#error "Max number of secure connections cannot be greater than max number of sockets"
+#endif
+
+/** @brief Maximum number of sessions established */
+#ifndef SOPC_MAX_SESSIONS
+# define SOPC_MAX_SESSIONS  20
+#endif /* SOPC_MAX_SESSIONS */
 
 /* OPC UA SPECIFICATION CONFIGURATION */
 

@@ -60,3 +60,42 @@ void constants_bs__getall_conv_ExpandedNodeId_NodeId(
         *constants_bs__p_isvalid = true;
 }
 
+void constants_bs__get_card_t_channel(
+   t_entier4 * const constants_bs__p_card_channel){
+    *constants_bs__p_card_channel = constants_bs__t_channel_config_idx_i_max;
+}
+
+void constants_bs__get_card_t_session(
+   t_entier4 * const constants_bs__p_card_session){
+    *constants_bs__p_card_session = constants_bs__t_session_i_max;
+}
+
+void constants_bs__get_cast_t_channel(
+   const t_entier4 constants_bs__p_ind,
+   constants_bs__t_channel_i * const constants_bs__p_channel){
+    *constants_bs__p_channel = constants_bs__p_ind;
+}
+
+void constants_bs__get_cast_t_session(
+   const t_entier4 constants_bs__p_ind,
+   constants_bs__t_session_i * const constants_bs__p_session){
+    *constants_bs__p_session = constants_bs__p_ind;
+}
+
+void constants_bs__is_t_channel(
+   const constants_bs__t_channel_i constants_bs__p_channel,
+   t_bool * const constants_bs__p_res){
+    *constants_bs__p_res = constants_bs__c_channel_indet != constants_bs__p_channel;
+}
+
+void constants_bs__is_t_channel_config_idx(
+   const constants_bs__t_channel_config_idx_i constants_bs__p_config_idx,
+   t_bool * const constants_bs__p_res){
+    *constants_bs__p_res = constants_bs__c_channel_config_idx_indet != constants_bs__p_config_idx;
+}
+
+void constants_bs__is_t_endpoint_config_idx(
+   const constants_bs__t_endpoint_config_idx_i constants_bs__p_endpoint_config_idx,
+   t_bool * const constants_bs__p_res){
+    *constants_bs__p_res = constants_bs__c_endpoint_config_idx_indet != constants_bs__p_endpoint_config_idx;
+}
