@@ -2,7 +2,7 @@
 
  File Name            : session_core.h
 
- Date                 : 16/10/2017 15:36:25
+ Date                 : 18/10/2017 18:02:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -19,14 +19,14 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
-#include "session_core_1_bs.h"
+#include "session_core_1.h"
 #include "session_core_channel_lost_it_bs.h"
 #include "session_core_orphaned_it_bs.h"
 
 /*--------------
    SEES Clause
   --------------*/
-#include "channel_mgr_bs.h"
+#include "channel_mgr.h"
 #include "constants.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
@@ -40,14 +40,14 @@ extern void session_core__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define session_core__client_get_token_from_session session_core_1_bs__client_get_token_from_session
+#define session_core__client_get_token_from_session session_core_1__client_get_token_from_session
 #define session_core__continue_iter_orphaned_t_session session_core_orphaned_it_bs__continue_iter_orphaned_t_session
-#define session_core__delete_session session_core_1_bs__delete_session
-#define session_core__get_session_channel session_core_1_bs__get_session_channel
+#define session_core__delete_session session_core_1__delete_session
+#define session_core__get_session_channel session_core_1__get_session_channel
 #define session_core__init_iter_orphaned_t_session session_core_orphaned_it_bs__init_iter_orphaned_t_session
-#define session_core__is_valid_session session_core_1_bs__is_valid_session
-#define session_core__is_valid_user session_core_1_bs__is_valid_user
-#define session_core__server_get_session_from_token session_core_1_bs__server_get_session_from_token
+#define session_core__is_valid_session session_core_1__is_valid_session
+#define session_core__is_valid_user session_core_1__is_valid_user
+#define session_core__server_get_session_from_token session_core_1__server_get_session_from_token
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

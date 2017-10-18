@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 16/10/2017 15:36:25
+ Date                 : 18/10/2017 18:02:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -494,7 +494,7 @@ void session_mgr__client_async_activate_new_session_with_channel(
       constants__t_session_i session_mgr__l_session;
       t_bool session_mgr__l_valid_session;
       
-      channel_mgr_bs__channel_do_nothing(session_mgr__channel);
+      channel_mgr__channel_do_nothing(session_mgr__channel);
       session_core__client_init_session_sm(&session_mgr__l_session);
       session_core__is_valid_session(session_mgr__l_session,
          &session_mgr__l_valid_session);
@@ -617,7 +617,7 @@ void session_mgr__client_channel_connected_event_session(
    {
       constants__t_session_i session_mgr__l_session_to_create;
       
-      channel_mgr_bs__channel_do_nothing(session_mgr__channel);
+      channel_mgr__channel_do_nothing(session_mgr__channel);
       session_mgr__local_sc_activate_orphaned_sessions(session_mgr__channel_config_idx);
       session_async_bs__get_and_remove_session_to_create(session_mgr__channel_config_idx,
          &session_mgr__l_session_to_create);

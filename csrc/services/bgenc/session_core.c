@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 16/10/2017 15:36:25
+ Date                 : 18/10/2017 18:02:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -34,18 +34,18 @@ void session_core__server_internal_activate_req_and_resp(
       constants__t_SecurityPolicy session_core__l_secpol;
       constants__t_Nonce_i session_core__l_nonce;
       
-      channel_mgr_bs__get_channel_info(session_core__channel,
+      channel_mgr__get_channel_info(session_core__channel,
          &session_core__l_channel_config_idx);
-      channel_mgr_bs__get_SecurityPolicy(session_core__channel,
+      channel_mgr__get_SecurityPolicy(session_core__channel,
          &session_core__l_secpol);
       if (session_core__l_secpol != constants__e_secpol_None) {
-         session_core_1_bs__server_activate_session_check_crypto(session_core__session,
+         session_core_1__server_activate_session_check_crypto(session_core__session,
             session_core__channel,
             session_core__l_channel_config_idx,
             session_core__activate_req_msg,
             session_core__res_activated);
          if (*session_core__res_activated == true) {
-            session_core_1_bs__get_NonceServer(session_core__session,
+            session_core_1__get_NonceServer(session_core__session,
                &session_core__l_nonce);
             message_out_bs__write_activate_session_resp_msg_crypto(session_core__activate_resp_msg,
                session_core__l_nonce);
@@ -55,11 +55,11 @@ void session_core__server_internal_activate_req_and_resp(
          *session_core__res_activated = true;
       }
       if (*session_core__res_activated == true) {
-         session_core_1_bs__set_session_user(session_core__session,
+         session_core_1__set_session_user(session_core__session,
             session_core__user);
-         session_core_1_bs__set_session_channel(session_core__session,
+         session_core_1__set_session_channel(session_core__session,
             session_core__channel);
-         session_core_1_bs__set_session_state(session_core__session,
+         session_core_1__set_session_state(session_core__session,
             constants__e_session_userActivated);
       }
    }
@@ -67,8 +67,7 @@ void session_core__server_internal_activate_req_and_resp(
 
 void session_core__client_init_session_sm(
    constants__t_session_i * const session_core__nsession) {
-   session_core_1_bs__init_new_session(true,
-      session_core__nsession);
+   session_core_1__init_new_session(session_core__nsession);
 }
 
 void session_core__client_create_session_req_sm(
@@ -81,12 +80,12 @@ void session_core__client_create_session_req_sm(
       t_bool session_core__l_nonce_needed;
       constants__t_Nonce_i session_core__l_nonce;
       
-      session_core_1_bs__create_session(session_core__session,
+      session_core_1__create_session(session_core__session,
          session_core__channel,
          constants__e_session_creating);
-      channel_mgr_bs__get_channel_info(session_core__channel,
+      channel_mgr__get_channel_info(session_core__channel,
          &session_core__l_channel_config_idx);
-      session_core_1_bs__client_create_session_req_do_crypto(session_core__session,
+      session_core_1__client_create_session_req_do_crypto(session_core__session,
          session_core__channel,
          session_core__l_channel_config_idx,
          session_core__valid,
@@ -95,7 +94,7 @@ void session_core__client_create_session_req_sm(
          message_out_bs__write_create_session_req_msg_endpointUrl(session_core__create_req_msg,
             session_core__l_channel_config_idx);
          if (session_core__l_nonce_needed == true) {
-            session_core_1_bs__get_NonceClient(session_core__session,
+            session_core_1__get_NonceClient(session_core__session,
                &session_core__l_nonce);
             message_out_bs__write_create_session_req_msg_crypto(session_core__create_req_msg,
                session_core__l_channel_config_idx,
@@ -124,20 +123,19 @@ void session_core__server_create_session_req_and_resp_sm(
       constants__t_SecurityPolicy session_core__l_secpol;
       
       *session_core__service_ret = constants__e_sc_bad_out_of_memory;
-      session_core_1_bs__init_new_session(false,
-         &session_core__l_nsession);
-      session_core_1_bs__is_valid_session(session_core__l_nsession,
+      session_core_1__init_new_session(&session_core__l_nsession);
+      session_core_1__is_valid_session(session_core__l_nsession,
          &session_core__l_valid_session);
       if (session_core__l_valid_session == true) {
-         session_core_1_bs__create_session(session_core__l_nsession,
+         session_core_1__create_session(session_core__l_nsession,
             session_core__channel,
             constants__e_session_created);
-         session_core_1_bs__server_get_fresh_session_token(session_core__l_nsession,
+         session_core_1__server_get_fresh_session_token(session_core__l_nsession,
             &session_core__l_nsession_token);
-         session_core_1_bs__server_is_valid_session_token(session_core__l_nsession_token,
+         session_core_1__server_is_valid_session_token(session_core__l_nsession_token,
             &session_core__l_valid_session_token);
          if (session_core__l_valid_session_token == true) {
-            channel_mgr_bs__server_get_endpoint_config(session_core__channel,
+            channel_mgr__server_get_endpoint_config(session_core__channel,
                &session_core__l_endpoint_config_idx);
             message_out_bs__write_create_session_msg_session_token(session_core__create_resp_msg,
                session_core__l_nsession_token);
@@ -146,19 +144,19 @@ void session_core__server_create_session_req_and_resp_sm(
                session_core__l_endpoint_config_idx,
                session_core__service_ret);
             if (*session_core__service_ret == constants__e_sc_ok) {
-               channel_mgr_bs__get_SecurityPolicy(session_core__channel,
+               channel_mgr__get_SecurityPolicy(session_core__channel,
                   &session_core__l_secpol);
                if (session_core__l_secpol != constants__e_secpol_None) {
-                  channel_mgr_bs__get_channel_info(session_core__channel,
+                  channel_mgr__get_channel_info(session_core__channel,
                      &session_core__l_config_idx);
-                  session_core_1_bs__server_create_session_req_do_crypto(session_core__l_nsession,
+                  session_core_1__server_create_session_req_do_crypto(session_core__l_nsession,
                      session_core__create_req_msg,
                      session_core__l_endpoint_config_idx,
                      session_core__l_config_idx,
                      &session_core__l_valid_crypto,
                      &session_core__l_signature);
                   if (session_core__l_valid_crypto == true) {
-                     session_core_1_bs__get_NonceServer(session_core__l_nsession,
+                     session_core_1__get_NonceServer(session_core__l_nsession,
                         &session_core__l_nonce);
                      message_out_bs__write_create_session_resp_msg_crypto(session_core__create_resp_msg,
                         session_core__l_config_idx,
@@ -174,7 +172,7 @@ void session_core__server_create_session_req_and_resp_sm(
          }
          else {
             *session_core__service_ret = constants__e_sc_bad_out_of_memory;
-            session_core_1_bs__delete_session(session_core__l_nsession);
+            session_core_1__delete_session(session_core__l_nsession);
             session_core__l_nsession = constants__c_session_indet;
          }
       }
@@ -198,32 +196,32 @@ void session_core__client_create_session_resp_sm(
       constants__t_SecurityPolicy session_core__l_secpol;
       
       *session_core__ret = constants__e_sc_ok;
-      channel_mgr_bs__get_SecurityPolicy(session_core__channel,
+      channel_mgr__get_SecurityPolicy(session_core__channel,
          &session_core__l_secpol);
       if (session_core__l_secpol != constants__e_secpol_None) {
-         session_core_1_bs__get_NonceClient(session_core__session,
+         session_core_1__get_NonceClient(session_core__session,
             &session_core__l_nonce);
-         channel_mgr_bs__get_channel_info(session_core__channel,
+         channel_mgr__get_channel_info(session_core__channel,
             &session_core__l_channel_config_idx);
-         session_core_1_bs__client_create_session_check_crypto(session_core__session,
+         session_core_1__client_create_session_check_crypto(session_core__session,
             session_core__l_channel_config_idx,
             session_core__create_resp_msg,
             &session_core__l_valid);
          if (session_core__l_valid == true) {
-            session_core_1_bs__set_session_state(session_core__session,
+            session_core_1__set_session_state(session_core__session,
                constants__e_session_created);
-            session_core_1_bs__client_set_session_token(session_core__session,
+            session_core_1__client_set_session_token(session_core__session,
                session_core__session_token);
-            session_core_1_bs__drop_NonceClient(session_core__session);
+            session_core_1__drop_NonceClient(session_core__session);
          }
          else {
             *session_core__ret = constants__e_sc_nok;
          }
       }
       else {
-         session_core_1_bs__set_session_state(session_core__session,
+         session_core_1__set_session_state(session_core__session,
             constants__e_session_created);
-         session_core_1_bs__client_set_session_token(session_core__session,
+         session_core_1__client_set_session_token(session_core__session,
             session_core__session_token);
       }
    }
@@ -244,23 +242,23 @@ void session_core__client_user_activate_session_req_sm(
       constants__t_SignatureData_i session_core__l_signature;
       constants__t_Nonce_i session_core__l_server_nonce;
       
-      session_core_1_bs__get_session_channel(session_core__session,
+      session_core_1__get_session_channel(session_core__session,
          session_core__channel);
-      channel_mgr_bs__is_connected_channel(*session_core__channel,
+      channel_mgr__is_connected_channel(*session_core__channel,
          &session_core__l_is_connected_channel);
       if (session_core__l_is_connected_channel == true) {
-         session_core_1_bs__client_get_token_from_session(session_core__session,
+         session_core_1__client_get_token_from_session(session_core__session,
             session_core__session_token);
-         channel_mgr_bs__get_channel_info(*session_core__channel,
+         channel_mgr__get_channel_info(*session_core__channel,
             &session_core__l_channel_config_idx);
          message_out_bs__write_activate_msg_user(session_core__activate_req_msg,
             session_core__user);
-         channel_mgr_bs__get_SecurityPolicy(*session_core__channel,
+         channel_mgr__get_SecurityPolicy(*session_core__channel,
             &session_core__l_secpol);
          if (session_core__l_secpol != constants__e_secpol_None) {
-            session_core_1_bs__get_NonceServer(session_core__session,
+            session_core_1__get_NonceServer(session_core__session,
                &session_core__l_server_nonce);
-            session_core_1_bs__client_activate_session_req_do_crypto(session_core__session,
+            session_core_1__client_activate_session_req_do_crypto(session_core__session,
                session_core__l_channel_config_idx,
                session_core__l_server_nonce,
                &session_core__l_valid_crypto,
@@ -284,9 +282,9 @@ void session_core__client_user_activate_session_req_sm(
          *session_core__ret = constants__e_sc_bad_unexpected_error;
       }
       if (*session_core__ret == constants__e_sc_ok) {
-         session_core_1_bs__set_session_user(session_core__session,
+         session_core_1__set_session_user(session_core__session,
             session_core__user);
-         session_core_1_bs__set_session_state(session_core__session,
+         session_core_1__set_session_state(session_core__session,
             constants__e_session_userActivating);
       }
    }
@@ -300,15 +298,15 @@ void session_core__client_sc_activate_session_req_sm(
    {
       constants__t_user_i session_core__l_user;
       
-      session_core_1_bs__client_get_token_from_session(session_core__session,
+      session_core_1__client_get_token_from_session(session_core__session,
          session_core__session_token);
-      session_core_1_bs__get_session_user(session_core__session,
+      session_core_1__get_session_user(session_core__session,
          &session_core__l_user);
       message_out_bs__write_activate_msg_user(session_core__activate_req_msg,
          session_core__l_user);
-      session_core_1_bs__set_session_channel(session_core__session,
+      session_core_1__set_session_channel(session_core__session,
          session_core__channel);
-      session_core_1_bs__set_session_state(session_core__session,
+      session_core_1__set_session_state(session_core__session,
          constants__e_session_scActivating);
    }
 }
@@ -327,11 +325,11 @@ void session_core__server_activate_session_req_and_resp_sm(
       t_bool session_core__l_valid;
       constants__t_StatusCode_i session_core__l_ret;
       
-      session_core_1_bs__get_session_channel(session_core__session,
+      session_core_1__get_session_channel(session_core__session,
          &session_core__l_channel);
-      session_core_1_bs__get_session_user(session_core__session,
+      session_core_1__get_session_user(session_core__session,
          &session_core__l_user);
-      session_core_1_bs__get_session_state(session_core__session,
+      session_core_1__get_session_state(session_core__session,
          &session_core__l_state);
       if (session_core__l_state == constants__e_session_created) {
          if (session_core__l_channel == session_core__channel) {
@@ -423,14 +421,14 @@ void session_core__client_activate_session_resp_sm(
       constants__t_channel_config_idx_i session_core__l_channel_config_idx;
       t_bool session_core__l_valid_response;
       
-      channel_mgr_bs__get_channel_info(session_core__channel,
+      channel_mgr__get_channel_info(session_core__channel,
          &session_core__l_channel_config_idx);
-      session_core_1_bs__client_activate_session_resp_check(session_core__session,
+      session_core_1__client_activate_session_resp_check(session_core__session,
          session_core__l_channel_config_idx,
          session_core__activate_resp_msg,
          &session_core__l_valid_response);
       if (session_core__l_valid_response == true) {
-         session_core_1_bs__set_session_state(session_core__session,
+         session_core_1__set_session_state(session_core__session,
             constants__e_session_userActivated);
          *session_core__ret = constants__e_sc_ok;
       }
@@ -454,21 +452,20 @@ void session_core__client_secure_channel_lost_session_sm(
       while (session_core__l_continue == true) {
          session_core_orphaned_it_bs__continue_iter_orphaned_t_session(&session_core__l_session,
             &session_core__l_continue);
-         session_core_1_bs__is_valid_session(session_core__l_session,
+         session_core_1__is_valid_session(session_core__l_session,
             &session_core__l_valid_session);
          if (session_core__l_valid_session == true) {
-            session_core_1_bs__get_session_state(session_core__l_session,
+            session_core_1__get_session_state(session_core__l_session,
                &session_core__l_state);
             if ((session_core__l_state == constants__e_session_userActivated) &&
                (session_core__channel_config_idx != constants__c_channel_config_idx_indet)) {
-               session_core_1_bs__set_session_orphaned(session_core__l_session,
-                  session_core__lost_channel,
+               session_core_1__set_session_orphaned(session_core__l_session,
                   session_core__channel_config_idx);
-               session_core_1_bs__set_session_state(session_core__l_session,
+               session_core_1__set_session_state(session_core__l_session,
                   constants__e_session_scOrphaned);
             }
             else {
-               session_core_1_bs__set_session_state_closed(session_core__l_session,
+               session_core_1__set_session_state_closed(session_core__l_session,
                   true);
             }
          }
@@ -489,20 +486,19 @@ void session_core__server_secure_channel_lost_session_sm(
       while (session_core__l_continue == true) {
          session_core_orphaned_it_bs__continue_iter_orphaned_t_session(&session_core__l_session,
             &session_core__l_continue);
-         session_core_1_bs__is_valid_session(session_core__l_session,
+         session_core_1__is_valid_session(session_core__l_session,
             &session_core__l_valid_session);
          if (session_core__l_valid_session == true) {
-            session_core_1_bs__get_session_state(session_core__l_session,
+            session_core_1__get_session_state(session_core__l_session,
                &session_core__l_state);
             if (session_core__l_state == constants__e_session_userActivated) {
-               session_core_1_bs__set_session_orphaned(session_core__l_session,
-                  session_core__channel,
+               session_core_1__set_session_orphaned(session_core__l_session,
                   constants__c_channel_config_idx_indet);
-               session_core_1_bs__set_session_state(session_core__l_session,
+               session_core_1__set_session_state(session_core__l_session,
                   constants__e_session_scOrphaned);
             }
             else {
-               session_core_1_bs__set_session_state_closed(session_core__l_session,
+               session_core_1__set_session_state_closed(session_core__l_session,
                   false);
             }
          }
@@ -519,15 +515,15 @@ void session_core__client_close_session_req_sm(
    {
       t_bool session_core__l_is_connected_channel;
       
-      session_core_1_bs__client_close_session_req_msg(session_core__close_req_msg);
-      session_core_1_bs__get_session_channel(session_core__session,
+      session_core_1__client_close_session_req_msg(session_core__close_req_msg);
+      session_core_1__get_session_channel(session_core__session,
          session_core__channel);
-      channel_mgr_bs__is_connected_channel(*session_core__channel,
+      channel_mgr__is_connected_channel(*session_core__channel,
          &session_core__l_is_connected_channel);
       if (session_core__l_is_connected_channel == true) {
-         session_core_1_bs__client_get_token_from_session(session_core__session,
+         session_core_1__client_get_token_from_session(session_core__session,
             session_core__session_token);
-         session_core_1_bs__set_session_state(session_core__session,
+         session_core_1__set_session_state(session_core__session,
             constants__e_session_closing);
          *session_core__ret = constants__e_sc_ok;
       }
@@ -545,10 +541,10 @@ void session_core__server_close_session_req_and_resp_sm(
    const constants__t_msg_i session_core__close_req_msg,
    const constants__t_msg_i session_core__close_resp_msg,
    constants__t_StatusCode_i * const session_core__ret) {
-   channel_mgr_bs__channel_do_nothing(session_core__channel);
-   session_core_1_bs__server_close_session_check_req(session_core__close_req_msg,
+   channel_mgr__channel_do_nothing(session_core__channel);
+   session_core_1__server_close_session_check_req(session_core__close_req_msg,
       session_core__close_resp_msg);
-   session_core_1_bs__set_session_state_closed(session_core__session,
+   session_core_1__set_session_state_closed(session_core__session,
       false);
    *session_core__ret = constants__e_sc_ok;
 }
@@ -557,21 +553,21 @@ void session_core__client_close_session_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    const constants__t_msg_i session_core__close_resp_msg) {
-   channel_mgr_bs__channel_do_nothing(session_core__channel);
-   session_core_1_bs__client_close_session_resp_msg(session_core__close_resp_msg);
-   session_core_1_bs__set_session_state_closed(session_core__session,
+   channel_mgr__channel_do_nothing(session_core__channel);
+   session_core_1__client_close_session_resp_msg(session_core__close_resp_msg);
+   session_core_1__set_session_state_closed(session_core__session,
       true);
 }
 
 void session_core__client_close_session_sm(
    const constants__t_session_i session_core__session) {
-   session_core_1_bs__set_session_state_closed(session_core__session,
+   session_core_1__set_session_state_closed(session_core__session,
       true);
 }
 
 void session_core__server_close_session_sm(
    const constants__t_session_i session_core__session) {
-   session_core_1_bs__set_session_state_closed(session_core__session,
+   session_core_1__set_session_state_closed(session_core__session,
       false);
 }
 
@@ -579,8 +575,8 @@ void session_core__is_session_valid_for_service(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    t_bool * const session_core__ret) {
-   channel_mgr_bs__channel_do_nothing(session_core__channel);
-   session_core_1_bs__session_do_nothing(session_core__session);
+   channel_mgr__channel_do_nothing(session_core__channel);
+   session_core_1__session_do_nothing(session_core__session);
    *session_core__ret = true;
 }
 
@@ -590,10 +586,10 @@ void session_core__get_session_state_or_closed(
    {
       t_bool session_core__l_valid_session;
       
-      session_core_1_bs__is_valid_session(session_core__session,
+      session_core_1__is_valid_session(session_core__session,
          &session_core__l_valid_session);
       if (session_core__l_valid_session == true) {
-         session_core_1_bs__get_session_state(session_core__session,
+         session_core_1__get_session_state(session_core__session,
             session_core__state);
       }
       else {
@@ -610,16 +606,16 @@ void session_core__get_session_user_or_indet(
       constants__t_sessionState session_core__l_session_state;
       
       *session_core__user = constants__c_user_indet;
-      session_core_1_bs__is_valid_session(session_core__session,
+      session_core_1__is_valid_session(session_core__session,
          &session_core__l_valid_session);
       if (session_core__l_valid_session == true) {
-         session_core_1_bs__get_session_state(session_core__session,
+         session_core_1__get_session_state(session_core__session,
             &session_core__l_session_state);
          if ((((session_core__l_session_state != constants__e_session_created) &&
             (session_core__l_session_state != constants__e_session_creating)) &&
             (session_core__l_session_state != constants__e_session_closed)) &&
             (session_core__l_session_state != constants__e_session_init)) {
-            session_core_1_bs__get_session_user(session_core__session,
+            session_core_1__get_session_user(session_core__session,
                session_core__user);
          }
       }

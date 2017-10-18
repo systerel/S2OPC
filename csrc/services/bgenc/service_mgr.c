@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 16/10/2017 15:36:24
+ Date                 : 18/10/2017 18:02:42
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -481,7 +481,7 @@ void service_mgr__server_receive_discovery_service_req(
                   (service_mgr__l_valid_resp_header == true)) {
                   switch (service_mgr__req_typ) {
                   case constants__e_msg_get_endpoints_service_req:
-                     channel_mgr_bs__server_get_endpoint_config(service_mgr__channel,
+                     channel_mgr__server_get_endpoint_config(service_mgr__channel,
                         &service_mgr__l_endpoint_config_idx);
                      service_get_endpoints_bs__treat_get_endpoints_request(service_mgr__l_req_msg,
                         service_mgr__l_resp_msg,

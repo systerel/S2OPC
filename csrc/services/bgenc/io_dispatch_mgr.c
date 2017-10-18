@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 16/10/2017 15:36:23
+ Date                 : 18/10/2017 18:02:41
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -99,7 +99,7 @@ void io_dispatch_mgr__receive_msg_buffer(
       t_bool io_dispatch_mgr__l_valid_buffer_out;
       t_bool io_dispatch_mgr__l_valid_req_context;
       
-      channel_mgr_bs__is_connected_channel(io_dispatch_mgr__channel,
+      channel_mgr__is_connected_channel(io_dispatch_mgr__channel,
          &io_dispatch_mgr__l_connected_channel);
       service_mgr__decode_msg_type(io_dispatch_mgr__buffer,
          &io_dispatch_mgr__l_msg_type);
@@ -107,7 +107,7 @@ void io_dispatch_mgr__receive_msg_buffer(
          &io_dispatch_mgr__l_valid_msg_type);
       if ((io_dispatch_mgr__l_connected_channel == true) &&
          (io_dispatch_mgr__l_valid_msg_type == true)) {
-         channel_mgr_bs__is_client_channel(io_dispatch_mgr__channel,
+         channel_mgr__is_client_channel(io_dispatch_mgr__channel,
             &io_dispatch_mgr__l_is_client);
          io_dispatch_mgr__get_msg_header_type(io_dispatch_mgr__l_msg_type,
             &io_dispatch_mgr__l_msg_header_type);
@@ -145,13 +145,13 @@ void io_dispatch_mgr__receive_msg_buffer(
                service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
                   &io_dispatch_mgr__l_valid_buffer_out);
                if (io_dispatch_mgr__l_valid_buffer_out == true) {
-                  channel_mgr_bs__send_channel_msg_buffer(io_dispatch_mgr__channel,
+                  channel_mgr__send_channel_msg_buffer(io_dispatch_mgr__channel,
                      io_dispatch_mgr__l_buffer_out,
                      io_dispatch_mgr__request_context);
                }
             }
             else {
-               channel_mgr_bs__close_secure_channel(io_dispatch_mgr__channel);
+               channel_mgr__close_secure_channel(io_dispatch_mgr__channel);
             }
             break;
          case constants__e_msg_response_type:
@@ -176,7 +176,7 @@ void io_dispatch_mgr__receive_msg_buffer(
                }
             }
             else {
-               channel_mgr_bs__close_secure_channel(io_dispatch_mgr__channel);
+               channel_mgr__close_secure_channel(io_dispatch_mgr__channel);
             }
             break;
          default:
@@ -193,7 +193,7 @@ void io_dispatch_mgr__client_channel_connected_event(
    {
       t_bool io_dispatch_mgr__l_bres;
       
-      channel_mgr_bs__cli_set_connected_channel(io_dispatch_mgr__channel_config_idx,
+      channel_mgr__cli_set_connected_channel(io_dispatch_mgr__channel_config_idx,
          io_dispatch_mgr__channel,
          &io_dispatch_mgr__l_bres);
       if (io_dispatch_mgr__l_bres == true) {
@@ -208,7 +208,7 @@ void io_dispatch_mgr__client_secure_channel_timeout(
    {
       t_bool io_dispatch_mgr__l_bres;
       
-      channel_mgr_bs__cli_set_connection_timeout_channel(io_dispatch_mgr__channel_config_idx,
+      channel_mgr__cli_set_connection_timeout_channel(io_dispatch_mgr__channel_config_idx,
          &io_dispatch_mgr__l_bres);
    }
 }
@@ -220,7 +220,7 @@ void io_dispatch_mgr__server_channel_connected_event(
    {
       t_bool io_dispatch_mgr__l_bres;
       
-      channel_mgr_bs__srv_new_secure_channel(io_dispatch_mgr__endpoint_config_idx,
+      channel_mgr__srv_new_secure_channel(io_dispatch_mgr__endpoint_config_idx,
          io_dispatch_mgr__channel_config_idx,
          io_dispatch_mgr__channel,
          &io_dispatch_mgr__l_bres);
@@ -236,12 +236,12 @@ void io_dispatch_mgr__client_activate_new_session(
       t_bool io_dispatch_mgr__l_connected_channel;
       
       *io_dispatch_mgr__bres = false;
-      channel_mgr_bs__get_connected_channel(io_dispatch_mgr__channel_config_idx,
+      channel_mgr__get_connected_channel(io_dispatch_mgr__channel_config_idx,
          &io_dispatch_mgr__l_channel);
-      channel_mgr_bs__is_connected_channel(io_dispatch_mgr__l_channel,
+      channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
          &io_dispatch_mgr__l_connected_channel);
       if (io_dispatch_mgr__l_connected_channel == false) {
-         channel_mgr_bs__cli_open_secure_channel(io_dispatch_mgr__channel_config_idx,
+         channel_mgr__cli_open_secure_channel(io_dispatch_mgr__channel_config_idx,
             io_dispatch_mgr__bres);
          if (*io_dispatch_mgr__bres == true) {
             service_mgr__client_async_activate_new_session_without_channel(io_dispatch_mgr__channel_config_idx,
@@ -274,13 +274,13 @@ void io_dispatch_mgr__client_reactivate_session_new_user(
          &io_dispatch_mgr__l_channel,
          &io_dispatch_mgr__l_buffer_out);
       if (*io_dispatch_mgr__ret == constants__e_sc_ok) {
-         channel_mgr_bs__is_connected_channel(io_dispatch_mgr__l_channel,
+         channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
             &io_dispatch_mgr__l_connected_channel);
          service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
             &io_dispatch_mgr__l_valid_buffer_out);
          if ((io_dispatch_mgr__l_connected_channel == true) &&
             (io_dispatch_mgr__l_valid_buffer_out == true)) {
-            channel_mgr_bs__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
+            channel_mgr__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
                io_dispatch_mgr__l_buffer_out,
                constants__c_request_context_indet);
          }
@@ -304,13 +304,13 @@ void io_dispatch_mgr__client_send_service_request(
          &io_dispatch_mgr__l_channel,
          &io_dispatch_mgr__l_buffer_out);
       if (*io_dispatch_mgr__ret == constants__e_sc_ok) {
-         channel_mgr_bs__is_connected_channel(io_dispatch_mgr__l_channel,
+         channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
             &io_dispatch_mgr__l_connected_channel);
          service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
             &io_dispatch_mgr__l_valid_buffer_out);
          if ((io_dispatch_mgr__l_connected_channel == true) &&
             (io_dispatch_mgr__l_valid_buffer_out == true)) {
-            channel_mgr_bs__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
+            channel_mgr__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
                io_dispatch_mgr__l_buffer_out,
                constants__c_request_context_indet);
          }
@@ -332,13 +332,13 @@ void io_dispatch_mgr__client_send_close_session_request(
          &io_dispatch_mgr__l_channel,
          &io_dispatch_mgr__l_buffer_out);
       if (*io_dispatch_mgr__ret == constants__e_sc_ok) {
-         channel_mgr_bs__is_connected_channel(io_dispatch_mgr__l_channel,
+         channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
             &io_dispatch_mgr__l_connected_channel);
          service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
             &io_dispatch_mgr__l_valid_buffer_out);
          if ((io_dispatch_mgr__l_connected_channel == true) &&
             (io_dispatch_mgr__l_valid_buffer_out == true)) {
-            channel_mgr_bs__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
+            channel_mgr__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
                io_dispatch_mgr__l_buffer_out,
                constants__c_request_context_indet);
          }
@@ -355,9 +355,9 @@ void io_dispatch_mgr__internal_client_create_session(
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
       t_bool io_dispatch_mgr__l_valid_buffer_out;
       
-      channel_mgr_bs__get_connected_channel(io_dispatch_mgr__channel_config_idx,
+      channel_mgr__get_connected_channel(io_dispatch_mgr__channel_config_idx,
          &io_dispatch_mgr__l_channel);
-      channel_mgr_bs__is_connected_channel(io_dispatch_mgr__l_channel,
+      channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
          &io_dispatch_mgr__l_connected_channel);
       if (io_dispatch_mgr__l_connected_channel == false) {
          service_mgr__client_close_session(io_dispatch_mgr__session);
@@ -369,7 +369,7 @@ void io_dispatch_mgr__internal_client_create_session(
          service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
             &io_dispatch_mgr__l_valid_buffer_out);
          if (io_dispatch_mgr__l_valid_buffer_out == true) {
-            channel_mgr_bs__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
+            channel_mgr__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
                io_dispatch_mgr__l_buffer_out,
                constants__c_request_context_indet);
          }
@@ -386,9 +386,9 @@ void io_dispatch_mgr__internal_client_activate_orphaned_session(
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
       t_bool io_dispatch_mgr__l_valid_buffer_out;
       
-      channel_mgr_bs__get_connected_channel(io_dispatch_mgr__channel_config_idx,
+      channel_mgr__get_connected_channel(io_dispatch_mgr__channel_config_idx,
          &io_dispatch_mgr__l_channel);
-      channel_mgr_bs__is_connected_channel(io_dispatch_mgr__l_channel,
+      channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
          &io_dispatch_mgr__l_connected_channel);
       if (io_dispatch_mgr__l_connected_channel == false) {
          service_mgr__client_service_activate_orphaned_session(io_dispatch_mgr__session,
@@ -397,7 +397,7 @@ void io_dispatch_mgr__internal_client_activate_orphaned_session(
          service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
             &io_dispatch_mgr__l_valid_buffer_out);
          if (io_dispatch_mgr__l_valid_buffer_out == true) {
-            channel_mgr_bs__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
+            channel_mgr__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
                io_dispatch_mgr__l_buffer_out,
                constants__c_request_context_indet);
          }
@@ -416,26 +416,26 @@ void io_dispatch_mgr__secure_channel_lost(
       constants__t_channel_i io_dispatch_mgr__l_new_channel;
       t_bool io_dispatch_mgr__l_bres;
       
-      channel_mgr_bs__is_connected_channel(io_dispatch_mgr__channel,
+      channel_mgr__is_connected_channel(io_dispatch_mgr__channel,
          &io_dispatch_mgr__l_connected_channel);
       if (io_dispatch_mgr__l_connected_channel == true) {
-         channel_mgr_bs__is_client_channel(io_dispatch_mgr__channel,
+         channel_mgr__is_client_channel(io_dispatch_mgr__channel,
             &io_dispatch_mgr__l_is_client);
          if (io_dispatch_mgr__l_is_client == true) {
-            channel_mgr_bs__get_channel_info(io_dispatch_mgr__channel,
+            channel_mgr__get_channel_info(io_dispatch_mgr__channel,
                &io_dispatch_mgr__l_channel_config_idx);
-            channel_mgr_bs__is_disconnecting_channel(io_dispatch_mgr__l_channel_config_idx,
+            channel_mgr__is_disconnecting_channel(io_dispatch_mgr__l_channel_config_idx,
                &io_dispatch_mgr__l_disconnecting_channel);
             service_mgr__client_secure_channel_lost_session_sm(io_dispatch_mgr__channel,
                io_dispatch_mgr__l_channel_config_idx);
             if (io_dispatch_mgr__l_disconnecting_channel == false) {
-               channel_mgr_bs__get_connected_channel(io_dispatch_mgr__l_channel_config_idx,
+               channel_mgr__get_connected_channel(io_dispatch_mgr__l_channel_config_idx,
                   &io_dispatch_mgr__l_new_channel);
                if (io_dispatch_mgr__l_new_channel == constants__c_channel_indet) {
-                  channel_mgr_bs__cli_open_secure_channel(io_dispatch_mgr__l_channel_config_idx,
+                  channel_mgr__cli_open_secure_channel(io_dispatch_mgr__l_channel_config_idx,
                      &io_dispatch_mgr__l_bres);
                }
-               channel_mgr_bs__is_connected_channel(io_dispatch_mgr__l_new_channel,
+               channel_mgr__is_connected_channel(io_dispatch_mgr__l_new_channel,
                   &io_dispatch_mgr__l_valid_new_channel);
                if (io_dispatch_mgr__l_valid_new_channel == true) {
                   service_mgr__client_channel_connected_event_session(io_dispatch_mgr__l_channel_config_idx,
@@ -446,13 +446,13 @@ void io_dispatch_mgr__secure_channel_lost(
          else {
             service_mgr__server_secure_channel_lost_session_sm(io_dispatch_mgr__channel);
          }
-         channel_mgr_bs__channel_lost(io_dispatch_mgr__channel);
+         channel_mgr__channel_lost(io_dispatch_mgr__channel);
       }
    }
 }
 
 void io_dispatch_mgr__close_all_active_connections(
    t_bool * const io_dispatch_mgr__bres) {
-   channel_mgr_bs__close_all_channel(io_dispatch_mgr__bres);
+   channel_mgr__close_all_channel(io_dispatch_mgr__bres);
 }
 

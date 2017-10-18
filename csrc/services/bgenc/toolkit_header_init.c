@@ -2,7 +2,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 16/10/2017 15:36:30
+ Date                 : 18/10/2017 18:02:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -19,7 +19,10 @@
 #include "address_space.h"
 #include "address_space_bs.h"
 #include "address_space_it.h"
+#include "channel_mgr.h"
+#include "channel_mgr_1.h"
 #include "channel_mgr_bs.h"
+#include "channel_mgr_it.h"
 #include "constants.h"
 #include "constants_bs.h"
 #include "io_dispatch_mgr.h"
@@ -43,7 +46,10 @@
 #include "service_write_decode_bs.h"
 #include "session_async_bs.h"
 #include "session_core.h"
-#include "session_core_1_bs.h"
+#include "session_core_1.h"
+#include "session_core_1_it.h"
+#include "session_core_2.h"
+#include "session_core_bs.h"
 #include "session_core_channel_lost_it_bs.h"
 #include "session_core_orphaned_it_bs.h"
 #include "session_mgr.h"
@@ -58,9 +64,15 @@ void INITIALISATION(void) {
    constants__INITIALISATION();
    message_in_bs__INITIALISATION();
    message_out_bs__INITIALISATION();
+   session_core_1_it__INITIALISATION();
    request_handle_bs__INITIALISATION();
+   channel_mgr_1__INITIALISATION();
+   channel_mgr_it__INITIALISATION();
    channel_mgr_bs__INITIALISATION();
-   session_core_1_bs__INITIALISATION();
+   channel_mgr__INITIALISATION();
+   session_core_2__INITIALISATION();
+   session_core_bs__INITIALISATION();
+   session_core_1__INITIALISATION();
    session_core_orphaned_it_bs__INITIALISATION();
    session_core_channel_lost_it_bs__INITIALISATION();
    session_core__INITIALISATION();

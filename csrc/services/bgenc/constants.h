@@ -2,7 +2,7 @@
 
  File Name            : constants.h
 
- Date                 : 16/10/2017 15:36:22
+ Date                 : 18/10/2017 18:02:40
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -232,7 +232,14 @@ extern void constants__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define constants__get_Is_SubType constants_bs__get_Is_SubType
+#define constants__get_card_t_channel constants_bs__get_card_t_channel
+#define constants__get_card_t_session constants_bs__get_card_t_session
+#define constants__get_cast_t_channel constants_bs__get_cast_t_channel
+#define constants__get_cast_t_session constants_bs__get_cast_t_session
 #define constants__getall_conv_ExpandedNodeId_NodeId constants_bs__getall_conv_ExpandedNodeId_NodeId
+#define constants__is_t_channel constants_bs__is_t_channel
+#define constants__is_t_channel_config_idx constants_bs__is_t_channel_config_idx
+#define constants__is_t_endpoint_config_idx constants_bs__is_t_endpoint_config_idx
 
 /*--------------------
    OPERATIONS Clause
