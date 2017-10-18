@@ -21,38 +21,41 @@ Simple client to launch validation tests
 """
 
 from opcua import ua, Client
+from opcua.ua import SecurityPolicy
 from attribute_read import attribute_read_tests
 from attribute_write_values import attribute_write_values_tests
-from safety_secure_channels import safety_secure_channels_test
+from safety_secure_channels import secure_channels_connect
 from view_basic import browse_tests
 from common import sUri
 from tap_logger import TapLogger
-
+from opcua.crypto import security_policies
+import re
 
 if __name__=='__main__':
     print('Connecting to', sUri)
     client = Client(sUri)
     logger = TapLogger("validation.tap")
 
-    try:
-        # test secure connexions
-        safety_secure_channels_test(client)
-        #client.connect()
-        print('Connected')
+    for sp in [SecurityPolicy, security_policies.SecurityPolicyBasic256]:
+        logger.begin_section("security policy {0}".format(re.split("#",sp.URI)[-1]))
+        try:
+            secure_channels_connect(client, sp)
 
-        endPoints = client.get_endpoints()
-        #print('endPoints:', endPoints)
+            endPoints = client.get_endpoints()
+            #print('endPoints:', endPoints)
 
-        # Read tests
-        attribute_read_tests(client, logger)
+            # Read tests
+            attribute_read_tests(client, logger)
 
-        # write tests
-        attribute_write_values_tests(client, logger)
+            # write tests
+            attribute_write_values_tests(client, logger)
 
-        # browse tests
-        browse_tests(client, logger)
-    finally:
-        logger.finalize_report()
-        client.disconnect()
-        print('Disconnected')
+            # browse tests
+            browse_tests(client, logger)
+
+        finally:
+            client.disconnect()
+            print('Disconnected')
+
+    logger.finalize_report()
 

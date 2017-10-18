@@ -25,13 +25,17 @@ class TapLogger(object):
         self.nb_tests = 0
         self.fd = open(file=report_name, mode='w', encoding='utf-8')
         self.tests_results = list()
+        self.section = ""
+
+    def begin_section(self, section_name):
+        self.section = section_name
 
     def add_test(self, test_description, test_result):
         self.nb_tests = self.nb_tests + 1
         if test_result:
-            self.tests_results.append("ok {0} - {1}\n".format(self.nb_tests, test_description))
+            self.tests_results.append("ok {0} - {1} {2}\n".format(self.nb_tests, self.section, test_description))
         else:
-            self.tests_results.append("not ok {0} - {1}\n".format(self.nb_tests, test_description))
+            self.tests_results.append("not ok {0} - {1} {2}\n".format(self.nb_tests, self.section, test_description))
 
     def finalize_report(self):
         self.fd.write("1..{0}\n".format(self.nb_tests))
