@@ -29,7 +29,6 @@ def attribute_write_values_tests(client, logger):
         node = client.get_node(nid)
 
         # write new value
-        #newValue = New_values_list[i]
         print(' Expected Value for Node {:03d}:'.format(nid), newValue)
         node.set_value(ua.Variant(newValue, variantType))
 

@@ -23,6 +23,10 @@ from opcua.ua import XmlElement
 
 sUri = 'opc.tcp://localhost:4841'
 
+securityPolicyNoneURI = "http://opcfoundation.org/UA/SecurityPolicy#None"
+securityPolicyBasic256URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
+securityPolicyBasic256Sha256URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
+
 # chaine aléatoire de 30 caractères
 random_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(random.randint(0,30)))
 

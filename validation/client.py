@@ -25,6 +25,7 @@ from opcua.ua import SecurityPolicy
 from attribute_read import attribute_read_tests
 from attribute_write_values import attribute_write_values_tests
 from safety_secure_channels import secure_channels_connect
+from discovery_get_endpoints import discovery_get_endpoints_tests
 from view_basic import browse_tests
 from common import sUri
 from tap_logger import TapLogger
@@ -40,10 +41,11 @@ if __name__=='__main__':
     for sp in [SecurityPolicy, security_policies.SecurityPolicyBasic256]:
         logger.begin_section("security policy {0}".format(re.split("#",sp.URI)[-1]))
         try:
+            # secure channel connection
             secure_channels_connect(client, sp)
 
-            endPoints = client.get_endpoints()
-            #print('endPoints:', endPoints)
+            # check endpoints
+            discovery_get_endpoints_tests(client, logger)
 
             # Read tests
             print(headerString.format("Read"))
@@ -53,6 +55,7 @@ if __name__=='__main__':
             print(headerString.format("Write"))
             attribute_write_values_tests(client, logger)
 
+            # browse tests
             print(headerString.format("Browse"))
             browse_tests(client, logger)
 
