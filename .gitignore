@@ -12,5 +12,3 @@ bin/
 deleted/
 __pycache__/
 *.log
-genc/
-bgenc/
