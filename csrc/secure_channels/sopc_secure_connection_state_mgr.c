@@ -661,9 +661,9 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     return result;
 }
 
-static bool SC_ClientTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* scConnection,
-                                                       uint32_t               scConnectionIdx,
-                                                       bool                   isRenewal){
+static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnection,
+                                              uint32_t               scConnectionIdx,
+                                              bool                   isRenewal){
     bool result = false;
     SOPC_StatusCode status = STATUS_OK;
 
@@ -674,19 +674,18 @@ static bool SC_ClientTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
     OpcUa_OpenSecureChannelRequest opnReq;
     OpcUa_OpenSecureChannelRequest_Initialize(&opnReq);
 
-    assert(scConnection != NULL);
-    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_INIT);
-    assert(scConnection->isServerConnection == false);
     config = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(config != NULL);
 
     result = true;
 
     // Create crypto provider if necessary
-    assert(scConnection->cryptoProvider == NULL);
-    scConnection->cryptoProvider = SOPC_CryptoProvider_Create(config->reqSecuPolicyUri);
-    if(scConnection->cryptoProvider == NULL){
-        result = false;
+    if(isRenewal == false){
+        assert(scConnection->cryptoProvider == NULL);
+        scConnection->cryptoProvider = SOPC_CryptoProvider_Create(config->reqSecuPolicyUri);
+        if(scConnection->cryptoProvider == NULL){
+            result = false;
+        }
     }
 
     if(result != false){
@@ -717,14 +716,14 @@ static bool SC_ClientTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
 
         if(config->msgSecurityMode != OpcUa_MessageSecurityMode_None){
             status = SOPC_CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider,
-                                                               &scConnection->clientNonce);
+                    &scConnection->clientNonce);
 
             if(status == STATUS_OK){
                 uint8_t* bytes = NULL;
                 bytes = SOPC_SecretBuffer_Expose(scConnection->clientNonce);
                 status = SOPC_ByteString_CopyFromBytes(&opnReq.ClientNonce,
-                                                       bytes,
-                                                       SOPC_SecretBuffer_GetLength(scConnection->clientNonce));
+                        bytes,
+                        SOPC_SecretBuffer_GetLength(scConnection->clientNonce));
             }
 
             if(status != STATUS_OK){
@@ -749,7 +748,6 @@ static bool SC_ClientTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
     }
 
     if(result != false){
-        scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTING;
         SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_OPN,
                                                  scConnectionIdx,
                                                  (void*) opnMsgBuffer,
@@ -758,6 +756,40 @@ static bool SC_ClientTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
 
     OpcUa_RequestHeader_Clear(&reqHeader);
     OpcUa_OpenSecureChannelRequest_Clear(&opnReq);
+
+    return result;
+}
+
+static bool SC_ClientTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* scConnection,
+                                                       uint32_t               scConnectionIdx){
+    bool result = false;
+
+    assert(scConnection != NULL);
+    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_INIT);
+    result = SC_ClientTransitionHelper_SendOPN(scConnection,
+                                               scConnectionIdx,
+                                               false);
+
+    if(result != false){
+        scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTING;
+    }
+
+    return result;
+}
+
+static bool SC_ClientTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConnection* scConnection,
+                                                                uint32_t               scConnectionIdx){
+    bool result = false;
+
+    assert(scConnection != NULL);
+    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED);
+    result = SC_ClientTransitionHelper_SendOPN(scConnection,
+                                               scConnectionIdx,
+                                               true);
+
+    if(result != false){
+        scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW;
+    }
 
     return result;
 }
@@ -1861,6 +1893,29 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                                      auxParam);
         }
         break;
+    /* Test events: */
+    case DEBUG_SC_FORCE_OPN_RENEW:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: DEBUG_SC_FORCE_OPN_RENEW\n");
+        }
+        scConnection = SC_GetConnection(eltId);
+        if(scConnection != NULL){
+            if(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED && scConnection->isServerConnection == false){
+                result = SC_ClientTransition_ScConnected_To_ScConnectedRenew(scConnection,
+                                                                             eltId);
+            }
+
+            if(result == false){
+                // Error case: close the connection
+                SC_CloseSecureConnection(scConnection,
+                                         eltId,
+                                         false,
+                                         OpcUa_BadTcpInternalError,
+                                         "Open secure channel forced renew failed");
+            }
+        }
+        break;
+
     /* Internal events: */
     /* SC listener manager -> SC connection manager */
     case INT_EP_SC_CREATE:
@@ -1952,8 +2007,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                                                     (SOPC_Buffer*) params);
                 if(result != false){
                     result = SC_ClientTransition_ScInit_To_ScConnecting(scConnection,
-                                                                        eltId,
-                                                                        false);
+                                                                        eltId);
                 }
             }
 

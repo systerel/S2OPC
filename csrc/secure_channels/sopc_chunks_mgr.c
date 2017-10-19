@@ -1152,6 +1152,11 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                 result = SC_Chunks_DecodeTcpMsgHeader(&scConnection->chunksCtx);
                 if(result == false){
                     errorStatus = OpcUa_BadTcpMessageTypeInvalid;
+                }else{
+                    if(SOPC_DEBUG_PRINTING != false){
+                        printf("ChunksMgr: received TCP UA message type: %d\n",
+                               scConnection->chunksCtx.currentMsgType);
+                    }
                 }
             }
         }  /* END OF OPC UA TCP MESSAGE HEADER TREATMENT */

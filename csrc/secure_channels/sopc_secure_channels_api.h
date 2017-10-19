@@ -57,6 +57,10 @@ typedef enum {
                           params = (SOPC_Buffer*) send buffer,
                           auxParam = request Id context (optional: defined if server) */
 
+    /* Internal debug events */
+    // Could be used to force an OPN RENEW (on a CONNECTED SC only)
+    DEBUG_SC_FORCE_OPN_RENEW, /* id = secure channel connection index */
+
     /* Internal events */
     /* SC listener manager -> SC connection manager */
     INT_EP_SC_CREATE, /* id = endpoint description configuration index,

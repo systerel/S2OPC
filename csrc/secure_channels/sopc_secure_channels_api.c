@@ -72,6 +72,7 @@ static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t  event,
         break;
     /* Services manager -> SC connection state manager */
     case SC_CONNECT:
+    case DEBUG_SC_FORCE_OPN_RENEW:
     case SC_DISCONNECT:
     case SC_SERVICE_SND_MSG:
         SOPC_SecureConnectionStateMgr_Dispatcher(scEvent,
@@ -148,6 +149,7 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
         case EP_OPEN:
         case EP_CLOSE:
         case SC_CONNECT:
+        case DEBUG_SC_FORCE_OPN_RENEW:
         case SC_DISCONNECT:
         case SC_SERVICE_SND_MSG:
             SOPC_EventDispatcherManager_AddEvent(secureChannelsEventDispatcherMgr,
@@ -226,6 +228,7 @@ void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InputEvent scE
         case EP_OPEN:
         case EP_CLOSE:
         case SC_CONNECT:
+        case DEBUG_SC_FORCE_OPN_RENEW:
         case SC_DISCONNECT:
         case SC_SERVICE_SND_MSG:
         default:
@@ -277,6 +280,7 @@ void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InputEve
         case EP_OPEN:
         case EP_CLOSE:
         case SC_CONNECT:
+        case DEBUG_SC_FORCE_OPN_RENEW:
         case SC_DISCONNECT:
         case SC_SERVICE_SND_MSG:
         default:
