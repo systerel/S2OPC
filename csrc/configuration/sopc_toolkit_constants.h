@@ -74,6 +74,11 @@
 # define SOPC_MAX_SESSIONS  20
 #endif /* SOPC_MAX_SESSIONS */
 
+/** @brief Maximum number of requests sent by client pending */
+#ifndef SOPC_MAX_PENDING_REQUESTS
+# define SOPC_MAX_PENDING_REQUESTS  UINT16_MAX
+#endif /* SOPC_MAX_PENDING_REQUESTS */
+
 /* OPC UA SPECIFICATION CONFIGURATION */
 
 /** @brief Version of the used protocol */

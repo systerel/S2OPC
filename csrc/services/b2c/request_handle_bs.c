@@ -24,15 +24,17 @@
 #include <string.h>
 #include "request_handle_bs.h"
 
+#include "sopc_toolkit_constants.h"
+
 static uint16_t cpt = 0;
-static constants__t_msg_type_i client_requests[UINT16_MAX];
+static constants__t_msg_type_i client_requests[SOPC_MAX_PENDING_REQUESTS];
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void request_handle_bs__INITIALISATION(void) 
 {
-  memset(client_requests, constants__c_msg_type_indet, UINT16_MAX * sizeof(constants__t_msg_type_i));
+  memset(client_requests, constants__c_msg_type_indet, SOPC_MAX_PENDING_REQUESTS * sizeof(constants__t_msg_type_i));
 }
 
 /*--------------------

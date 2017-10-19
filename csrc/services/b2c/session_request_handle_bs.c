@@ -23,14 +23,24 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <string.h>
 
-static constants__t_session_i unique_session = constants__c_session_indet;
-static constants__t_request_handle_i unique_req_handle = constants__c_request_handle_indet;
+#include "sopc_toolkit_constants.h"
+
+/* Note: due to request handle generation on client side, request handle is unique regardless the session */
+/* Same size of array than request handles array */
+static constants__t_session_i client_requests[SOPC_MAX_PENDING_REQUESTS];
+
+/* Store number of pending requests remaining for session */
+static uint32_t session_pending_requests_nb[SOPC_MAX_SESSIONS];
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void session_request_handle_bs__INITIALISATION(){
+    memset(client_requests, constants__c_session_indet, SOPC_MAX_PENDING_REQUESTS * sizeof(constants__t_session_i));
+    memset(session_pending_requests_nb, 0, SOPC_MAX_SESSIONS * sizeof(uint32_t));
 }
 
 /*--------------------
@@ -39,35 +49,38 @@ void session_request_handle_bs__INITIALISATION(){
 void session_request_handle_bs__client_add_session_request_handle(
    const constants__t_session_i session_request_handle_bs__session,
    const constants__t_request_handle_i session_request_handle_bs__req_handle){
-  if(session_request_handle_bs__session != constants__c_session_indet &&
-     session_request_handle_bs__req_handle != constants__c_request_handle_indet &&
-     unique_session == constants__c_session_indet &&
-     unique_req_handle == constants__c_request_handle_indet){
-    unique_session = session_request_handle_bs__session;
-    unique_req_handle = session_request_handle_bs__req_handle;
-  }else{
-    printf("session_request_handle_bs__client_add_session_request_handle\n");
-    exit(1);
-  }
+    assert(session_request_handle_bs__session != constants__c_session_indet);
+    assert(session_request_handle_bs__req_handle != constants__c_request_handle_indet);
+    // It shall be a fresh request handle which means it cannot be assigned to another session
+    assert(client_requests[session_request_handle_bs__req_handle] == constants__c_session_indet);
+    client_requests[session_request_handle_bs__req_handle] = session_request_handle_bs__session;
+    session_pending_requests_nb[session_request_handle_bs__session]++;
 }
 
 void session_request_handle_bs__client_get_session_and_remove_request_handle(
    const constants__t_request_handle_i session_request_handle_bs__req_handle,
    constants__t_session_i * const session_request_handle_bs__session){
-  if(unique_req_handle != constants__c_request_handle_indet &&
-     unique_req_handle == session_request_handle_bs__req_handle){
-    *session_request_handle_bs__session = unique_session;
-    unique_session = constants__c_session_indet;
-    unique_req_handle = constants__c_request_handle_indet;
-  }else{
-    *session_request_handle_bs__session = constants__c_session_indet;
-  }
+    assert(session_request_handle_bs__req_handle != constants__c_request_handle_indet);
+    assert(client_requests[session_request_handle_bs__req_handle] != constants__c_session_indet);
+
+    *session_request_handle_bs__session = client_requests[session_request_handle_bs__req_handle];
+    client_requests[session_request_handle_bs__req_handle] = constants__c_session_indet;
+
+    assert(session_pending_requests_nb[*session_request_handle_bs__session] > 0);
+    session_pending_requests_nb[*session_request_handle_bs__session]--;
+
 }
 
 void session_request_handle_bs__client_remove_all_request_handles(
    const constants__t_session_i session_request_handle_bs__session){
-  if(session_request_handle_bs__session == unique_session){
-    unique_session = constants__c_session_indet;
-    unique_req_handle = constants__c_request_handle_indet;
-  }
+    assert(session_request_handle_bs__session != constants__c_session_indet);
+    for(uint32_t idx = 0;
+        idx < SOPC_MAX_PENDING_REQUESTS && session_pending_requests_nb[session_request_handle_bs__session] > 0;
+        idx++)
+    {
+        if(client_requests[idx] == session_request_handle_bs__session){
+            client_requests[idx] = constants__c_session_indet;
+            session_pending_requests_nb[session_request_handle_bs__session]--;
+        }
+    }
 }
