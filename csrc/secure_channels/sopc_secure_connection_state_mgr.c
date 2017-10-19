@@ -1602,8 +1602,8 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
 
     // Write the OPN request message
     opnRespBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.sendBufferSize);
-    if(opnRespBuffer == NULL){
-        result = false;
+    if(opnRespBuffer != NULL){
+        result = true;
     }
     // Note: do not let size of headers for chunks manager since it is not a fixed size
 
@@ -1711,7 +1711,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     OpcUa_ResponseHeader_Clear(&respHeader);
     OpcUa_OpenSecureChannelResponse_Clear(&opnResp);
 
-    return false;
+    return result;
 }
 
 void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
@@ -2071,6 +2071,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                                                                          auxParam,
                                                                                          requestHandle,
                                                                                          requestedLifetime);
+                            // used only if result == false
                             errorStatus = OpcUa_BadTcpInternalError;
                         }
 
