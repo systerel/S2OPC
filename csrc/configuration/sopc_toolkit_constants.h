@@ -85,7 +85,7 @@
 #endif /* SOPC_MAX_SESSIONS */
 
 /* Maximum value accepted in B model */
-#if SOPC_MAX_SECURE_CONNECTIONS > INT32_MAX
+#if SOPC_MAX_SESSIONS > INT32_MAX
 #error "Max number of sessions cannot be more than INT32_MAX"
 #endif
 
