@@ -38,13 +38,11 @@ DEFINITIONS
     a_NonceClient;
 
     d_typing ==
-    /* TODO FBA a implémenter en B */
     s_session <: t_session &
     a_state : s_session --> t_sessionState & /* a session shall be associated to a state */
     a_channel : s_session +-> t_channel & /* a session may be associated to a valid channel */
     a_orphaned : s_session +-> t_channel_config_idx_i & /* a client session may be orphaned of a channel (precedently lost) */
 
-    /* TODO FBA à implémenter en C */
     a_client_token : s_session +-> t_session_token & /* a client session has an associated session token once create response received */
     a_server_token : t_session_token >+> s_session & /* a server session has a unique authentication token in server once create response sent */
     a_user : s_session +-> t_user & /* a session may be associated to a valid user */
@@ -136,7 +134,7 @@ OPERATIONS
     THEN
         s_session := s_session - {session} ||
         a_channel := {session} <<| a_channel ||
-        a_state := {session} <<| a_state || /* TODO FBA pas possible à implémenter car t_sessionState_i ou une valeur indet de t_sessionState non défini */
+        a_state := {session} <<| a_state ||
         a_user := {session} <<| a_user ||
         a_server_token := a_server_token |>> {session} ||
         a_client_token := {session} <<| a_client_token ||

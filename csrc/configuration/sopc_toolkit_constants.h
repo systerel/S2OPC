@@ -55,6 +55,11 @@
 # define SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS  10
 #endif /* SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS */
 
+/* Maximum value accepted in B model */
+#if SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS > INT32_MAX
+#error "Max number of endpoint descriptions cannot be more than INT32_MAX"
+#endif
+
 #ifndef SOPC_LISTENER_LISTEN_ALL_INTERFACES
 # define SOPC_LISTENER_LISTEN_ALL_INTERFACES  true
 #endif /* SOPC_LISTENER_LISTEN_ALL_INTERFACES */
@@ -69,10 +74,20 @@
 #error "Max number of secure connections cannot be greater than max number of sockets"
 #endif
 
+/* Maximum value accepted in B model */
+#if SOPC_MAX_SECURE_CONNECTIONS > INT32_MAX
+#error "Max number of secure connections cannot be more than INT32_MAX"
+#endif
+
 /** @brief Maximum number of sessions established */
 #ifndef SOPC_MAX_SESSIONS
 # define SOPC_MAX_SESSIONS  20
 #endif /* SOPC_MAX_SESSIONS */
+
+/* Maximum value accepted in B model */
+#if SOPC_MAX_SECURE_CONNECTIONS > INT32_MAX
+#error "Max number of sessions cannot be more than INT32_MAX"
+#endif
 
 /** @brief Maximum number of requests sent by client pending */
 #ifndef SOPC_MAX_PENDING_REQUESTS

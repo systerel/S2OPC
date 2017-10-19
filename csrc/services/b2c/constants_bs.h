@@ -78,8 +78,8 @@ typedef void * constants_bs__t_session_token_i;
 #define constants_bs__t_endpoint_config_idx_i_max SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
 #define constants_bs__t_msg_header_i_max (-1)
 #define constants_bs__t_msg_i_max (-1)
-#define constants_bs__t_request_context_i_max (UINT32_MAX-1)
-#define constants_bs__t_request_handle_i_max (UINT32_MAX-1)
+#define constants_bs__t_request_context_i_max (-1)
+#define constants_bs__t_request_handle_i_max (-1)
 #define constants_bs__t_session_i_max SOPC_MAX_SESSIONS
 #define constants_bs__t_session_token_i_max (-1)
 #define constants_bs__t_user_i_max (-1)
