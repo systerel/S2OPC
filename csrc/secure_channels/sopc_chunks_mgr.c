@@ -826,7 +826,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
         }
     }else{
         SOPC_Buffer_Delete(scConnection->chunksCtx.chunkInputBuffer);
-        // Replace input buffer with the plain buffer (position == 0 => SN position)
+        // Replace input buffer with the plain buffer (position == SN position)
         scConnection->chunksCtx.chunkInputBuffer = plainBuffer;
     }
 
@@ -851,14 +851,18 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
     if(isSymmetric == false){
         SOPC_AsymmetricKey* publicKey = NULL;
         const SOPC_Certificate* otherAppCertificate = NULL;
-        if(scConnection->isServerConnection == false){
-            // Client side
-            SOPC_SecureChannel_Config* scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
-            assert(scConfig != NULL);
-            otherAppCertificate = scConfig->crt_srv;
-        }else{
-            // Server side: we have to use the temporary stored certificate value
+        SOPC_SecureChannel_Config* scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+
+        if(scConfig == NULL && scConnection->isServerConnection != false){
+            // Server side for new OPN: we have to use the temporary stored certificate value
             otherAppCertificate = scConnection->serverAsymmSecuInfo.clientCertificate;
+        }else{
+            // Client side or Server side in case of OPN renew
+            if(scConnection->isServerConnection == false){
+                otherAppCertificate = scConfig->crt_srv;
+            }else{
+                otherAppCertificate = scConfig->crt_cli;
+            }
         }
 
 
