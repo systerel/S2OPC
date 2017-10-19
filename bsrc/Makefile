@@ -32,11 +32,12 @@ gen.intermediate: $(BMODEL_MCH_PATH_SRCS) $(BMODEL_IMP_PATH_SRCS) $(BMODEL_IMP_P
 	@\rm tc.log
 	@\rm -fr ./$(PATHTRAD)
 	@\rm -fr ./$(PATHGENTRAD)
-	m -tr
+	@m -tr > tr.log
+	@grep -iEc '(warning|error)' tr.log | xargs test 0 -eq
+	@\rm tr.log
 	@mkdir $(PATHTRAD)
 	@cp $(PATHGENTRAD)/*.c $(PATHGENTRAD)/*.h $(PATHTRAD)
 	@# Renames unwanted files, such as the ones that define a void * to a t_entier4
 	@for i in constants_bs.h; do \
-	    echo "mv $(PATHTRAD)/$$i $(PATHTRAD)/$$i""_"; \
 	    mv $(PATHTRAD)/"$$i" $(PATHTRAD)/"$$i"_; \
 	done
