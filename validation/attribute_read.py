@@ -17,17 +17,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from opcua.ua import QualifiedName, LocalizedText, XmlElement
-from common import Type_list, Initial_values_list
+from common import variantInfoList
 
 def attribute_read_tests(client, logger):
 
-    for (i,e) in enumerate(Type_list):
+    for (i,e) in enumerate(variantInfoList):
+        (testedType, variantType, expectedValue, _) = e
         nid = 1000 + i + 1
         print('Checking nid:', nid)
-        expectedBrowseName = QualifiedName(e,0)
-        expectedDisplayName = LocalizedText(u"{}_1dn".format(e))
-        expectedDescription = u"{}_1d".format(e)
-        expectedValue = Initial_values_list[i]
+        expectedBrowseName = QualifiedName(testedType,0)
+        expectedDisplayName = LocalizedText(u"{}_1dn".format(testedType))
+        expectedDescription = u"{}_1d".format(testedType)
+        #expectedValue = Initial_values_list[i]
         node = client.get_node(nid)
 
         # check value

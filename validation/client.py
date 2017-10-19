@@ -35,6 +35,7 @@ if __name__=='__main__':
     print('Connecting to', sUri)
     client = Client(sUri)
     logger = TapLogger("validation.tap")
+    headerString = "******************* Beginning {0} tests *********************"
 
     for sp in [SecurityPolicy, security_policies.SecurityPolicyBasic256]:
         logger.begin_section("security policy {0}".format(re.split("#",sp.URI)[-1]))
@@ -45,12 +46,14 @@ if __name__=='__main__':
             #print('endPoints:', endPoints)
 
             # Read tests
+            print(headerString.format("Read"))
             attribute_read_tests(client, logger)
 
             # write tests
+            print(headerString.format("Write"))
             attribute_write_values_tests(client, logger)
 
-            # browse tests
+            print(headerString.format("Browse"))
             browse_tests(client, logger)
 
         finally:

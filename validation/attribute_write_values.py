@@ -18,22 +18,23 @@
 
 from opcua import ua
 from opcua.ua import QualifiedName, LocalizedText, XmlElement
-from common import Type_list, Initial_values_list, New_values_list, Variant_List
+from common import variantInfoList
 
 def attribute_write_values_tests(client, logger):
 
-    for (i,e) in enumerate(Type_list):
+    for (i,e) in enumerate(variantInfoList):
+        (testedType, variantType,  _,  newValue) = e
         nid = 1000 + i + 1
         print('Checking nid:', nid)
         node = client.get_node(nid)
 
         # write new value
-        newValue = New_values_list[i]
-        node.set_value(ua.Variant(newValue, Variant_List[i]))
+        #newValue = New_values_list[i]
+        print(' Expected Value for Node {:03d}:'.format(nid), newValue)
+        node.set_value(ua.Variant(newValue, variantType))
 
         # check value
         value = node.get_value()
         print(' Value for Node {:03d}:'.format(nid), value)
-        print(' Expected Value for Node {:03d}:'.format(nid), newValue)
         logger.add_test('Write Test - Value for Node {:03d}'.format(nid), value == newValue)
 
