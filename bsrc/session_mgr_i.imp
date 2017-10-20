@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-IMPLEMENTATION session_mgr_i
-REFINES session_mgr
+IMPLEMENTATION
+    session_mgr_i
+REFINES
+    session_mgr
     
 SEES
     constants,
@@ -27,6 +29,7 @@ SEES
     
 IMPORTS
     session_core,
+    session_mgr_it,
     session_request_handle_bs,
     session_async_bs
     
@@ -52,19 +55,26 @@ OPERATIONS
     local_sc_activate_orphaned_sessions (channel_config_idx) =
     VAR
         l_continue,
-        l_session
+        l_session,
+        l_dom,
+        l_channel_config_idx
     IN
-        l_continue <-- init_iter_orphaned_t_session (channel_config_idx);
-        WHILE l_continue = TRUE
-        DO
-            l_session, l_continue <-- continue_iter_orphaned_t_session;
-            client_gen_activate_orphaned_session_internal_event (l_session, channel_config_idx)
+        l_continue <-- init_iter_session;
+        WHILE l_continue = TRUE DO
+            l_continue, l_session <-- continue_iter_session;
+            l_dom, l_channel_config_idx <-- getall_orphaned(l_session);
+            IF  l_dom = TRUE &
+                l_channel_config_idx = channel_config_idx
+            THEN
+                client_gen_activate_orphaned_session_internal_event (l_session, channel_config_idx)
+            END
         INVARIANT
-            l_continue = bool(av_sessions_to_iterate /= {}) &
-            av_sessions_to_iterate /\ av_sessions_iterated = {} &
-            av_sessions_to_iterate \/ av_sessions_iterated = av_sessions_orphaned
+            sessions_to_iterate <: t_session &
+            sessions_iterated   <: t_session &
+            sessions_to_iterate /\ sessions_iterated = {} &
+            sessions_to_iterate \/ sessions_iterated = t_session
         VARIANT
-            card(av_sessions_to_iterate)
+            card(sessions_to_iterate)
         END
     END
     ;

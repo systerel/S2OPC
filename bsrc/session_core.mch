@@ -87,11 +87,12 @@ INVARIANT
     // All sessions not (created or creating or closed or init) have a user associated and only those sessions
     dom(a_state |>> {e_session_created, e_session_creating, e_session_closed, e_session_init}) = dom(a_user) &
 
-    dom(a_state |> {e_session_scOrphaned}) = dom(a_orphaned) &
-
     // All sessions have a token (except when in state creating, init or closed (since it creating can be predecessor))
     dom(a_state |>> {e_session_creating, e_session_closed, e_session_init}) = ran(a_server_token) \/ dom(a_client_token) &
-
+    
+    // Client orphaned sessions are included in orphaned sessions
+    dom(a_orphaned) <: dom(a_state |> {e_session_scOrphaned}) &
+    
     /* Sessions not (init or creating or closed) have a Nonce when their security policy is not None*/
     /* The security policy part cannot be modeled in this invariant, but is in the operations */
     /* TODO: decide whether this invariant is useful or not, as it is weak. */
@@ -546,24 +547,6 @@ OPERATIONS
         ret := TRUE
     END;
 
-    continue <-- init_iter_orphaned_t_session (channel_config_idx) =
-    PRE
-        channel_config_idx : t_channel_config_idx_i &
-        channel_config_idx : t_channel_config_idx
-    THEN
-        continue :: BOOL
-    END
-    ;
-
-    session, continue <-- continue_iter_orphaned_t_session =
-    PRE
-        av_sessions_to_iterate /= {}
-    THEN
-        session :(session : t_session_i & session : t_session) ||
-        continue :: BOOL
-    END
-    ;
-
     state <-- get_session_state_or_closed (session) =
     PRE
         session : t_session_i
@@ -616,6 +599,20 @@ OPERATIONS
     END
     ;
 
+    p_dom, p_channel <-- getall_session_channel (p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        p_dom := bool(p_session : dom(a_channel)) ||
+        IF  p_session /: dom(a_channel) THEN
+            p_channel := c_channel_indet
+        ELSE
+            p_channel := a_channel(p_session)
+        END
+    END
+    ;
+
     channel <-- get_session_channel (session) =
     PRE
         session : t_session_i &
@@ -623,6 +620,20 @@ OPERATIONS
         session : dom(a_channel)
     THEN
             channel :(channel : t_channel_i & channel = a_channel(session))
+    END
+    ;
+
+    p_dom, p_channel_config_idx <-- getall_orphaned(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        p_dom := bool(p_session : dom(a_orphaned)) ||
+        IF  p_session /: dom(a_orphaned) THEN
+            p_channel_config_idx := c_channel_config_idx_indet
+        ELSE
+            p_channel_config_idx := a_orphaned(p_session)
+        END
     END
     ;
 
