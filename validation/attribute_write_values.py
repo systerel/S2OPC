@@ -45,3 +45,28 @@ def attribute_write_values_tests(client, logger):
         # write back initial value
         node.set_value(ua.Variant(initialValue, variantType))
 
+def attribute_write_values_two_clients_tests(client1, client2, logger):
+
+    for (i,e) in enumerate(variantInfoList):
+        (testedType, variantType,  initialValue,  newValue) = e
+        nid = 1000 + i + 1
+        print('Checking nid:', nid)
+        node1 = client1.get_node(nid)
+        node2 = client2.get_node(nid)
+
+        # write new value on client 1
+        print(' Expected Value for Node {:03d}:'.format(nid), newValue)
+        node1.set_value(ua.Variant(newValue, variantType))
+
+        # check value with client 2
+        value = node2.get_value()
+        print(' Value for Node {:03d}:'.format(nid), value)
+        if testedType == 'Float':
+            # Handles float with epsilon diff, as random.uniform gave us a double,
+            # which was allegedly truncated by freeopcua to a float...
+            logger.add_test('Read/Write Test with several connexions - Value for Node {:03d}'.format(nid), abs((value - newValue)/value) <= 2**(-24))
+        else:
+            logger.add_test('Read/Write Test with several connexions - Value for Node {:03d}'.format(nid), value == newValue)
+
+        # write back initial value with client 1
+        node1.set_value(ua.Variant(initialValue, variantType))

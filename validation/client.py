@@ -23,7 +23,7 @@ Simple client to launch validation tests
 from opcua import ua, Client
 from opcua.ua import SecurityPolicy
 from attribute_read import attribute_read_tests
-from attribute_write_values import attribute_write_values_tests
+from attribute_write_values import attribute_write_values_tests, attribute_write_values_two_clients_tests
 from safety_secure_channels import secure_channels_connect
 from discovery_get_endpoints import discovery_get_endpoints_tests
 from view_basic import browse_tests
@@ -33,10 +33,12 @@ from opcua.crypto import security_policies
 import re
 
 if __name__=='__main__':
+
+    # tests with one connexion
     print('Connecting to', sUri)
     client = Client(sUri)
     logger = TapLogger("validation.tap")
-    headerString = "******************* Beginning {0} tests *********************"
+    headerString = "******************* Beginning {0} tests with one connexion *********************"
 
     for sp in [SecurityPolicy, security_policies.SecurityPolicyBasic256]:
         logger.begin_section("security policy {0}".format(re.split("#",sp.URI)[-1]))
@@ -61,6 +63,26 @@ if __name__=='__main__':
 
         finally:
             client.disconnect()
+            print('Disconnected')
+
+    # tests with several connexions
+    headerString = "******************* Beginning {0} tests with several connexions *********************"
+    client2 = Client(sUri)
+
+    for sp in [SecurityPolicy, security_policies.SecurityPolicyBasic256]:
+        logger.begin_section("security policy {0}".format(re.split("#",sp.URI)[-1]))
+        try:
+            # secure channel connection
+            secure_channels_connect(client, sp)
+            secure_channels_connect(client2, sp)
+
+            # Read/Write tests
+            print(headerString.format("Read/Write"))
+            attribute_write_values_two_clients_tests(client, client2, logger)
+
+        finally:
+            client.disconnect()
+            client2.disconnect()
             print('Disconnected')
 
     logger.finalize_report()
