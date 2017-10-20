@@ -33,7 +33,7 @@ random_string = ''.join(random.choice(string.ascii_uppercase + string.digits) fo
 # liste de tuples sous la forme (Type, valeur initiale, nouvelle valeur)
 variantInfoList = [ ('Int64', ua.VariantType.Int64, -1000, random.randint(-9223372036854775808, 9223372036854775807)),
                     ('UInt32', ua.VariantType.UInt32, 1000, random.randint(0, 4294967295)),
-                    ('Double', ua.VariantType.Double, 2.0, random.uniform(-2**1022,2**1023)),
+                    ('Double', ua.VariantType.Double, 2.0, random.uniform(0,2**1023) * random.choice([-1,1])),
                     ('String', ua.VariantType.String, "String:INGOPCS", "String:{}".format(random_string)),
                     ('ByteString', ua.VariantType.ByteString, str.encode("ByteString:INGOPCS"), "ByteString:{}".format(random_string).encode()),
                     ('XmlElement', ua.VariantType.XmlElement, XmlElement("XmlElement:INGOPCS"), XmlElement("XmlElement:{}".format(random_string))),
@@ -43,5 +43,5 @@ variantInfoList = [ ('Int64', ua.VariantType.Int64, -1000, random.randint(-92233
                     ('UInt16', ua.VariantType.UInt16, 65535, random.randint(0, 65535)),
                     ('Int32', ua.VariantType.Int32, -2147483648, random.randint(-2147483648,2147483647)),
                     ('UInt64', ua.VariantType.UInt64, 18446744073709551614, random.randint(0,18446744073709551615)),
-                    ('Float', ua.VariantType.Float, 5758787.5876875, random.uniform(-2**126,2**127)),
+                    ('Float', ua.VariantType.Float, 5758787.5876875, random.uniform(-2**127,2**127)),
                   ]
