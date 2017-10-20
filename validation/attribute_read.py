@@ -39,6 +39,7 @@ def attribute_read_tests(client, logger):
             logger.add_test('Read Test - Value for Node {:03d}'.format(nid), abs((value - expectedValue)/value) <= 2**(-24))
         else:
             logger.add_test('Read Test - Value for Node {:03d}'.format(nid), value == expectedValue)
+        print(' Expected value for Node {:03d}:'.format(nid), expectedValue)
         print(' Value for Node {:03d}:'.format(nid), value)
 
         # check browseName
