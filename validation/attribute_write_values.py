@@ -23,7 +23,7 @@ from common import variantInfoList
 def attribute_write_values_tests(client, logger):
 
     for (i,e) in enumerate(variantInfoList):
-        (testedType, variantType,  _,  newValue) = e
+        (testedType, variantType,  initialValue,  newValue) = e
         nid = 1000 + i + 1
         print('Checking nid:', nid)
         node = client.get_node(nid)
@@ -36,4 +36,7 @@ def attribute_write_values_tests(client, logger):
         value = node.get_value()
         print(' Value for Node {:03d}:'.format(nid), value)
         logger.add_test('Write Test - Value for Node {:03d}'.format(nid), value == newValue)
+
+        # write back initial value
+        node.set_value(ua.Variant(initialValue, variantType))
 
