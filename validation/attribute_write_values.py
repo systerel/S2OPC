@@ -35,7 +35,12 @@ def attribute_write_values_tests(client, logger):
         # check value
         value = node.get_value()
         print(' Value for Node {:03d}:'.format(nid), value)
-        logger.add_test('Write Test - Value for Node {:03d}'.format(nid), value == newValue)
+        if testedType == 'Float':
+            # Handles float with epsilon diff, as random.uniform gave us a double,
+            # which was allegedly truncated by freeopcua to a float...
+            logger.add_test('Write Test - Value for Node {:03d}'.format(nid), abs((value - newValue)/value) <= 2**(-24))
+        else:
+            logger.add_test('Write Test - Value for Node {:03d}'.format(nid), value == newValue)
 
         # write back initial value
         node.set_value(ua.Variant(initialValue, variantType))
