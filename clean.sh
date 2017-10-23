@@ -6,10 +6,10 @@ set -e
 
 ISALL=$1
 
-# Clean build and bin dirs
-echo "Cleaning build/ and bin/ directories"
+# Clean pre-build, build and bin dirs
+echo "Cleaning pre-build/, build/ and bin/ directories"
 \rm -f pre-build.log build.log
-\rm -fr build bin
+\rm -fr pre-build build bin
 
 if [[ -z $ISALL || $ISALL != "all" ]]; then
     echo "Do not clean generated source files"

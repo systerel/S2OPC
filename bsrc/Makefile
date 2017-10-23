@@ -17,27 +17,30 @@ BMODEL_H_FILES=$(filter-out $(PATHTRAD)/constants_bs.h, $(BMODEL_H_FILES_NOT_FIL
 
 ADDITIONAL_FILES=$(PATHTRAD)/toolkit_header_init.c $(PATHTRAD)/toolkit_header_init.h
 
-all: $(BMODEL_C_FILES) $(BMODEL_H_FILES) $(ADDITIONAL_FILES)
+# Generated C files list
+TARGET_GENERATED_FILES=$(BMODEL_C_FILES) $(BMODEL_H_FILES) $(ADDITIONAL_FILES)
 
-# All generated C files (*.c/*.h) from B model
-$(BMODEL_C_FILES) $(BMODEL_H_FILES) $(PATHTRAD)/toolkit_header_init.c $(PATHTRAD)/toolkit_header_init.h: gen.intermediate
+all: $(TARGET_GENERATED_FILES)
 
-# Indicates gen.intermediate is never present since it is an intermediate
-.INTERMEDIATE: gen.intermediate
+ifndef VERBOSE
+.SILENT:
+endif
 
-gen.intermediate: $(BMODEL_MCH_PATH_SRCS) $(BMODEL_IMP_PATH_SRCS) $(BMODEL_IMP_PATH_SRCS)
-	@\rm -f ./bdp/*.nf
-	@m -tc -b0 > tc.log
-	@grep -iEc '(warning|B0Check)' tc.log | xargs test 0 -eq
-	@\rm tc.log
-	@\rm -fr ./$(PATHTRAD)
-	@\rm -fr ./$(PATHGENTRAD)
-	@m -tr > tr.log
-	@grep -iEc '(warning|error)' tr.log | xargs test 0 -eq
-	@\rm tr.log
-	@mkdir $(PATHTRAD)
-	@cp $(PATHGENTRAD)/*.c $(PATHGENTRAD)/*.h $(PATHTRAD)
-	@# Renames unwanted files, such as the ones that define a void * to a t_entier4
-	@for i in constants_bs.h; do \
+$(TARGET_GENERATED_FILES): $(BMODEL_MCH_PATH_SRCS) $(BMODEL_IMP_PATH_SRCS) $(BMODEL_IMP_PATH_SRCS)
+	m -remove || true
+	m -c -a
+	$(RM) -f ./bdp/*.nf
+	m -tc -b0 | tee tc.log
+	grep -iEc '(warning|B0Check)' tc.log | xargs test 0 -eq
+	$(RM) tc.log
+	$(RM) -fr ./$(PATHTRAD)
+	$(RM) -fr ./$(PATHGENTRAD)
+	m -tr | tee tr.log
+	grep -iEc '(warning|error)' tr.log | xargs test 0 -eq
+	$(RM) tr.log
+	mkdir $(PATHTRAD)
+	cp $(PATHGENTRAD)/*.c $(PATHGENTRAD)/*.h $(PATHTRAD)
+#	# Renames unwanted files, such as the ones that define a void * to a t_entier4
+	for i in constants_bs.h; do \
 	    mv $(PATHTRAD)/"$$i" $(PATHTRAD)/"$$i"_; \
 	done
