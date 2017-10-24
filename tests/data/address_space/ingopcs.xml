@@ -449,7 +449,13 @@
     </Value>
   </UAVariable-->
   <!-- END OF ADDITIONAL PART TO READ/WRITE TEST PART -->
-  <UAObject BrowseName="261:15361" NodeId="ns=261;i=15361" ParentNodeId="i=85">
+  <UAVariable NodeId="i=3114" BrowseName="EnabledFlag" ParentNodeId="i=2010" DataType="Boolean" AccessLevel="3" UserAccessLevel="3">
+    <DisplayName>EnabledFlag</DisplayName>
+    <Description>If TRUE the diagnostics collection is enabled.</Description>
+    <Value>
+      <uax:Boolean>false</uax:Boolean>
+    </Value></UAVariable>
+ <UAObject BrowseName="261:15361" NodeId="ns=261;i=15361" ParentNodeId="i=85">
     <DisplayName>15361</DisplayName>
     <Description>NoName</Description>
     <Description Locale="en">NoName</Description>
