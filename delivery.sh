@@ -51,13 +51,17 @@ echo "Generate and commit version file 'VERSION' with '$2' content"
 echo "$2" > VERSION
 git add VERSION &> /dev/null || exit 1
 git commit -S -m "Add VERSION file" &> /dev/null || exit 1
+echo "Generate C source files"
+./clean.sh all || exit 1
+./.pre-build-in-docker.sh ./pre-build.sh || exit 1
+git add -f address_space_generation/genc csrc/services/bgenc
+git commit -S -m "Add generated source files"
+
 echo "Generate Toolkit binaries (library and tests)"
-./clean.sh || exit 1
-./pre-build.sh || exit 1 # should not add any file modification
 mkdir -p build || exit 1
 cd build || exit 1
-cmake -DCMAKE_INSTALL_PREFIX=. .. || exit 1
-cmake --build . --target install
+../.build-in-docker.sh cmake -DCMAKE_INSTALL_PREFIX=. .. || exit 1
+../.build-in-docker.sh cmake --build . --target install
 if [[ $? != 0 ]]; then
     echo "Error: Generation of Toolkit binaries failed";
     exit 1
@@ -85,7 +89,7 @@ echo "Add documentation in delivery branch"
 git add -f apidoc &> /dev/null || exit 1
 git commit -S -m "Add doxygen documentation for version $DELIVERY_NAME" &> /dev/null || exit 1
 echo "Remove delivery script, docker scripts, .gitignore file and commit"
-git rm -f delivery.sh .gitignore .run_jenkins.sh .test-in-docker.sh .build-in-docker.sh &> /dev/null || exit 1
+git rm -f delivery.sh .gitignore .run_jenkins.sh .build-in-docker.sh .pre-build-in-docker.sh .test-in-docker.sh &> /dev/null || exit 1
 git commit -S -m "Remove delivery script, docker scripts and .gitignore file" &> /dev/null || exit 1
 echo "Generation of archive of version $DELIVERY_NAME"
 git archive --prefix=$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME || exit 1

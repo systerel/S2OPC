@@ -11,4 +11,6 @@ depand/
 bin/
 deleted/
 __pycache__/
+genc/
+bgenc/
 *.log
