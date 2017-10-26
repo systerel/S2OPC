@@ -42,7 +42,7 @@ typedef enum {
     e_aid_Description,
     e_aid_Value = 13,
     e_aid_UserExecutable = 22
-} AttributeId;
+} util__AttributeId;
 
 #define e_aid_min e_aid_NodeId
 #define e_aid_max e_aid_UserExecutable
