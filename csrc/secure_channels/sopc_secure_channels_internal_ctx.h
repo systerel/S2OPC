@@ -174,4 +174,6 @@ void SOPC_SecureChannelsInternalContext_Initialize(void);
 /** @brief Clear the array of secure listeners/connections */
 void SOPC_SecureChannelsInternalContext_Clear(void);
 
+SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx);
+
 #endif /* SOPC_SECURE_CHANNELS_INTERNAL_CTX_H_ */

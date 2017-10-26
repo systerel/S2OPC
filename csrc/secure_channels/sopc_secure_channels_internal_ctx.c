@@ -29,5 +29,13 @@ void SOPC_SecureChannelsInternalContext_Initialize(){
     memset(secureConnectionsArray, 0, sizeof(SOPC_SecureConnection) * SOPC_MAX_SECURE_CONNECTIONS);
 }
 
+SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx){
+    SOPC_SecureConnection* scConnection = NULL;
+    if(connectionIdx < SOPC_MAX_SECURE_CONNECTIONS){
+        scConnection = &(secureConnectionsArray[connectionIdx]);
+    }
+    return scConnection;
+}
+
 void SOPC_SecureChannelsInternalContext_Clear(){
 }

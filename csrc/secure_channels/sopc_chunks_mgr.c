@@ -41,14 +41,6 @@ static const uint8_t SOPC_MSG[3] = {'M','S','G'};
 static const uint8_t SOPC_OPN[3] = {'O','P','N'};
 static const uint8_t SOPC_CLO[3] = {'C','L','O'};
 
-static SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx){
-    SOPC_SecureConnection* scConnection = NULL;
-    if(connectionIdx < SOPC_MAX_SECURE_CONNECTIONS){
-        scConnection = &(secureConnectionsArray[connectionIdx]);
-    }
-    return scConnection;
-}
-
 static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx){
     assert(chunkCtx != NULL);
     assert(chunkCtx->chunkInputBuffer != NULL);

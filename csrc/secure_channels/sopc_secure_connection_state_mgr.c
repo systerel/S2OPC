@@ -38,14 +38,6 @@
 #include "sopc_services_api.h"
 
 
-static SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx){
-    SOPC_SecureConnection* scConnection = NULL;
-    if(connectionIdx < SOPC_MAX_SECURE_CONNECTIONS){
-        scConnection = &(secureConnectionsArray[connectionIdx]);
-    }
-    return scConnection;
-}
-
 static bool SC_InitNewConnection(uint32_t* newConnectionIdx){
     bool result = false;
     SOPC_SecureConnection* scConnection = NULL;
