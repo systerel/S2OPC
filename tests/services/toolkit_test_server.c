@@ -44,7 +44,7 @@
 static int endpointClosed = false;
 static bool secuActive = !false;
 
-void Test_ComEvent_Fct(SOPC_App_Com_Event event,
+void Test_ComEvent_FctServer(SOPC_App_Com_Event event,
                          void*              param,
                          SOPC_StatusCode    status){
     (void) param;
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 
   // Init stack configuration
   if(STATUS_OK == status){
-    status = SOPC_Toolkit_Initialize(Test_ComEvent_Fct);
+    status = SOPC_Toolkit_Initialize(Test_ComEvent_FctServer);
     if(STATUS_OK != status){
       printf("<Test_Server_Toolkit: Failed initializing\n");
     }else{

@@ -52,7 +52,7 @@ static constants__t_session_i session = constants__c_session_indet;
 
 static uint32_t cptReadResps = 0;
 
-void Test_ComEvent_Fct(SOPC_App_Com_Event event,
+void Test_ComEvent_FctClient(SOPC_App_Com_Event event,
                        void*              param,
                        SOPC_StatusCode    status){
  if(event == SE_RCV_SESSION_RESPONSE){
@@ -193,7 +193,7 @@ int main(void){
 
   /* Init stack configuration */
   if(STATUS_OK == status){
-    status = SOPC_Toolkit_Initialize(Test_ComEvent_Fct);
+    status = SOPC_Toolkit_Initialize(Test_ComEvent_FctClient);
     if(STATUS_OK != status){
       printf(">>Test_Client_Toolkit: Failed initializing\n");
     }else{
