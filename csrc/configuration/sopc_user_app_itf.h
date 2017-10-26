@@ -28,10 +28,10 @@
 typedef struct SOPC_SecureChannel_Config {
     uint8_t                   isClientSc;
     const char*               url;
-    const SOPC_Certificate*        crt_cli;
-    const SOPC_AsymmetricKey*      key_priv_cli;
-    const SOPC_Certificate*        crt_srv;
-    const SOPC_PKIProvider*        pki;
+    const SOPC_Certificate*   crt_cli;
+    const SOPC_AsymmetricKey* key_priv_cli;
+    const SOPC_Certificate*   crt_srv;
+    const SOPC_PKIProvider*   pki;
     const char*               reqSecuPolicyUri;
     uint32_t                  requestedLifetime;
     OpcUa_MessageSecurityMode msgSecurityMode;

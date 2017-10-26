@@ -731,7 +731,12 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
             }
         }
 
-        opnReq.RequestedLifetime = config->requestedLifetime;
+        if(config->requestedLifetime > SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME){
+            opnReq.RequestedLifetime = config->requestedLifetime;
+        }else{
+            // TODO: log modified requested lifetime
+            opnReq.RequestedLifetime = SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME;
+        }
 
 
         // Encode the OPN message
@@ -1198,12 +1203,10 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
             result = false;
         }
 
+        // Check RequestedLifetime parameter
         if(result != false){
-            // TODO: use a coherent minimum value (in milliseconds !)
-            if(opnReq->RequestedLifetime == 0){
-                //*errorStatus = OpcUa_BadInvalidArgument; => not a TCP error message authorized error
-                *errorStatus = OpcUa_BadTcpInternalError;
-                result = false;
+        	if (opnReq->RequestedLifetime < SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME) {
+            	opnReq->RequestedLifetime = SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME;
             }
         }
 
@@ -1567,12 +1570,8 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
         }
 
         if(result != false){
-            // TODO: use a coherent minimum value (in milliseconds !)
-            if(opnReq->RequestedLifetime > 0){
-                *requestedLifetime = opnReq->RequestedLifetime;
-            }else{
-                *errorStatus = OpcUa_BadInvalidTimestampArgument;
-                result = false;
+            if (opnReq->RequestedLifetime < SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME) {
+                *requestedLifetime = SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME;
             }
         }
 

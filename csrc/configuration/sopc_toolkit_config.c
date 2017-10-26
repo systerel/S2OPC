@@ -208,7 +208,7 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
   uint32_t result = 0;
   SOPC_StatusCode status;
   if(NULL != scConfig){
-      // TODO: check all parameters of scConfig
+      // TODO: check all parameters of scConfig (requested lifetime >= MIN, etc)
         if(tConfig.initDone != false){
             Mutex_Lock(&tConfig.mut);
             // TODO: check maximum value < max configs

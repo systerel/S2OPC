@@ -127,6 +127,9 @@
 /* Maximum number of milliseconds that a session shall remain open without activity */
 #define SOPC_SESSION_TIMEOUT 10000
 
+/* Minimum value for OPN requestedLifetime parameter */
+#define SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME 10000
+
 /* DEBUG CONFIGURATION */
 #define SOPC_DEBUG_PRINTING false
 
