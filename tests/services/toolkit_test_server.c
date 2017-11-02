@@ -37,6 +37,10 @@
 
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
+#define APPLICATION_NAME "opc.tcp://localhost"
+#define APPLICATION_URI "opc.tcp://localhost"
+#define PRODUCT_URI "opc.tcp://localhost"
+
 
 static int endpointClosed = false;
 static bool secuActive = !false;
@@ -96,6 +100,7 @@ int main(void)
 
   // Init unique endpoint structure
   epConfig.endpointURL = ENDPOINT_URL;
+
   if (secuActive != false){
 
       status = SOPC_KeyManager_Certificate_CreateFromFile("./server_public/server.der", &serverCertificate);
@@ -130,6 +135,12 @@ int main(void)
   }else{
     epConfig.nbSecuConfigs = 1; 
   }
+
+  // Application description configuration
+  OpcUa_ApplicationDescription_Initialize(&epConfig.serverDescription);
+  SOPC_String_AttachFromCstring(&epConfig.serverDescription.ApplicationUri, APPLICATION_URI);
+  SOPC_String_AttachFromCstring(&epConfig.serverDescription.ProductUri, PRODUCT_URI);
+  epConfig.serverDescription.ApplicationType = OpcUa_ApplicationType_Server;
 
   // Init stack configuration
   if(STATUS_OK == status){

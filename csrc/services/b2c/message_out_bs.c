@@ -304,10 +304,11 @@ void message_out_bs__write_create_session_msg_server_endpoints(
 
     createSessionResp->RevisedSessionTimeout = SOPC_SESSION_TIMEOUT;
 
-    *message_out_bs__ret = build_endPoints_Descriptions(message_out_bs__endpoint_config_idx,
-            &createSessionReq->EndpointUrl,
-            (uint32_t*)&createSessionResp->NoOfServerEndpoints,
-            &createSessionResp->ServerEndpoints);
+    *message_out_bs__ret = SOPC_Discovery_GetEndPointsDescriptions(message_out_bs__endpoint_config_idx,
+                                                                   true,
+                                                                   &createSessionReq->EndpointUrl,
+                                                                   (uint32_t*)&createSessionResp->NoOfServerEndpoints,
+                                                                   &createSessionResp->ServerEndpoints);
 }
 
 

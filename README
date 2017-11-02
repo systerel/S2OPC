@@ -91,7 +91,7 @@ INGOPCS OPC UA Toolkit features
    > Read service
    > Write service
    > Browse service (simplified: no continuation point)
-   > GetEndpoints service (simplified: create session fields + server certificate)
+   > GetEndpoints service (restriction: locale Ids and profile URIs ignored)
 
 INGOPCS OPC UA Toolkit tests
 ============================

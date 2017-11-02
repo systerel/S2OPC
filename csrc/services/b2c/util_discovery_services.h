@@ -22,9 +22,11 @@
 #include "sopc_types.h"
 #include "sopc_builtintypes.h"
 
-constants__t_StatusCode_i  build_endPoints_Descriptions(const constants__t_endpoint_config_idx_i endpoint_config_idx,
-                         SOPC_String*  EndpointUrl,
-                         uint32_t*     nbOfEndpointDescriptions,
-                         OpcUa_EndpointDescription**   endpointDescriptions);
+constants__t_StatusCode_i  SOPC_Discovery_GetEndPointsDescriptions
+(const constants__t_endpoint_config_idx_i endpoint_config_idx,
+ bool isCreateSessionResponse,
+ SOPC_String* EndpointUrl,
+ uint32_t*    nbOfEndpointDescriptions,
+ OpcUa_EndpointDescription**   endpointDescriptions);
 
 #endif /* util_discovery_services_h_ */

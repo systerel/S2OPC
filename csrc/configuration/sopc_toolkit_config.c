@@ -208,6 +208,7 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
   uint32_t result = 0;
   SOPC_StatusCode status;
   if(NULL != scConfig){
+      // TODO: check all parameters of scConfig
         if(tConfig.initDone != false){
             Mutex_Lock(&tConfig.mut);
             // TODO: check maximum value < max configs
@@ -240,6 +241,7 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig){
     uint32_t result = 0;
     SOPC_StatusCode status;
     if(NULL != epConfig){
+        // TODO: check all parameters of epConfig: certificate presence w.r.t. secu policy, app desc (Uris are valid w.r.t. part 6), etc.
         if(tConfig.initDone != false){
             Mutex_Lock(&tConfig.mut);
             if(false == tConfig.locked){

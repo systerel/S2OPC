@@ -49,10 +49,11 @@ void service_get_endpoints_bs__treat_get_endpoints_request(
   OpcUa_GetEndpointsResponse* getEndpointsResp = (OpcUa_GetEndpointsResponse*) service_get_endpoints_bs__resp_msg;
   uint32_t configIdx = (uint32_t) service_get_endpoints_bs__endpoint_config_idx;
 
-  *service_get_endpoints_bs__ret = build_endPoints_Descriptions(configIdx,
-  			&getEndpointsReq->EndpointUrl,
-  			(uint32_t*)&getEndpointsResp->NoOfEndpoints,
-  			&getEndpointsResp->Endpoints);
+  *service_get_endpoints_bs__ret = SOPC_Discovery_GetEndPointsDescriptions(configIdx,
+                                                                           false,
+                                                                             &getEndpointsReq->EndpointUrl,
+                                                                             (uint32_t*)&getEndpointsResp->NoOfEndpoints,
+                                                                             &getEndpointsResp->Endpoints);
 
 }
 

@@ -51,12 +51,13 @@ typedef struct SOPC_SecurityPolicy
 
 /* Server static configuration of a Endpoint listener */
 typedef struct SOPC_Endpoint_Config{
-    char*                endpointURL;
-    SOPC_Certificate*         serverCertificate;
-    SOPC_AsymmetricKey*       serverKey;
-    SOPC_PKIProvider*         pki;
-    uint8_t              nbSecuConfigs;
-    SOPC_SecurityPolicy* secuConfigurations;
+    char*                        endpointURL;
+    SOPC_Certificate*            serverCertificate;
+    SOPC_AsymmetricKey*          serverKey;
+    SOPC_PKIProvider*            pki;
+    uint8_t                      nbSecuConfigs;
+    SOPC_SecurityPolicy*         secuConfigurations;
+    OpcUa_ApplicationDescription serverDescription;
 } SOPC_Endpoint_Config;
 
 
