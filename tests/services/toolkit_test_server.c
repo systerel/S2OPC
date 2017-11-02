@@ -37,9 +37,8 @@
 
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
-#define APPLICATION_NAME "opc.tcp://localhost"
-#define APPLICATION_URI "opc.tcp://localhost"
-#define PRODUCT_URI "opc.tcp://localhost"
+#define APPLICATION_URI "urn:INGOPCS:localhost"
+#define PRODUCT_URI "urn:INGOPCS:localhost"
 
 
 static int endpointClosed = false;

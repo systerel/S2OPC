@@ -43,4 +43,5 @@ nsComment            = "OpenSSL Generated Certificate"
 ####################################################################
 
 [ alternate_names ]
+URI = urn:INGOPCS:localhost #ApplicationUri
 DNS.1 = localhost
