@@ -151,9 +151,7 @@ void util_message__get_message_type(SOPC_EncodeableType* encType,
   }else if(encType == &OpcUa_ServiceFault_EncodeableType){
     *message__msg_type = constants__e_msg_service_fault_resp;
   }else{
-    printf("util_message__get_message_type\n");
-    exit(1);
-
+    *message__msg_type = constants__c_msg_type_indet;
   }
 }
 
