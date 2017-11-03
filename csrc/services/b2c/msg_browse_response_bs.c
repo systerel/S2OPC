@@ -266,7 +266,7 @@ void msg_browse_response_bs__malloc_browse_response(
 
     /* 1D arrays */
     /* pBrowseStatus */
-    pBrowseStatus               = malloc(sizeof(SOPC_StatusCode)*(nBrowseResult+1));
+    pBrowseStatus               = calloc(nBrowseResult+1, sizeof(SOPC_StatusCode));
     if(NULL == pBrowseStatus)
         *msg_browse_response_bs__p_isallocated = false;
 
@@ -276,7 +276,8 @@ void msg_browse_response_bs__malloc_browse_response(
         *msg_browse_response_bs__p_isallocated = false;
 
     /* pnReferenceDescription */
-    pnReferenceDescription      = malloc(sizeof(int32_t)*(nBrowseResult+1));
+    /* Note: pnReferenceDescription must be initialized to 0 for each response */
+    pnReferenceDescription      = calloc(nBrowseResult+1, sizeof(int32_t));
     if(NULL == pnReferenceDescription)
         *msg_browse_response_bs__p_isallocated = false;
 
@@ -348,7 +349,7 @@ void msg_browse_response_bs__malloc_browse_result(
         SOPC_NodeId_Initialize(&ppResRefTypeId[bvi][j]);
 
     /* ppResForwards */
-    ppResForwards[bvi] = malloc(sizeof(bool)*(nbri+1));
+    ppResForwards[bvi] = calloc(nbri+1, sizeof(bool));
     if(NULL == ppResForwards[bvi])
         *msg_browse_response_bs__p_isallocated = false;
 
@@ -374,7 +375,7 @@ void msg_browse_response_bs__malloc_browse_result(
         SOPC_LocalizedText_Initialize(&ppResDisplayName[bvi][j]);
 
     /* ppResNodeClass */
-    ppResNodeClass[bvi] = malloc(sizeof(OpcUa_NodeClass)*(nbri+1));
+    ppResNodeClass[bvi] = calloc(nbri+1, sizeof(OpcUa_NodeClass));
     if(NULL == ppResNodeClass[bvi])
         *msg_browse_response_bs__p_isallocated = false;
 
