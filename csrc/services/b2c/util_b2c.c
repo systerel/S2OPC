@@ -21,6 +21,7 @@
 
 #include "util_b2c.h"
 
+#include "opcua_identifiers.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_types.h"
 
@@ -29,83 +30,343 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
                                        SOPC_EncodeableType** respEncType,
                                        t_bool* isRequest) {
   switch(message__msg_type){
+  case constants__e_msg_discovery_find_servers_req:
+      *reqEncType = &OpcUa_FindServersRequest_EncodeableType;
+      *respEncType = &OpcUa_FindServersResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_discovery_find_servers_resp:
+      *reqEncType = &OpcUa_FindServersRequest_EncodeableType;
+      *respEncType = &OpcUa_FindServersResponse_EncodeableType;
+      break;
+  case constants__e_msg_discovery_find_servers_on_network_req:
+      *reqEncType = &OpcUa_FindServersOnNetworkRequest_EncodeableType;
+      *respEncType = &OpcUa_FindServersOnNetworkResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_discovery_find_servers_on_network_resp:
+      *reqEncType = &OpcUa_FindServersOnNetworkRequest_EncodeableType;
+      *respEncType = &OpcUa_FindServersOnNetworkResponse_EncodeableType;
+      break;
+  case constants__e_msg_discovery_get_endpoints_req:
+      *reqEncType = &OpcUa_GetEndpointsRequest_EncodeableType;
+      *respEncType = &OpcUa_GetEndpointsResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_discovery_get_endpoints_resp:
+      *reqEncType = &OpcUa_GetEndpointsRequest_EncodeableType;
+      *respEncType = &OpcUa_GetEndpointsResponse_EncodeableType;
+      break;
+  case constants__e_msg_discovery_register_server_req:
+      *reqEncType = &OpcUa_RegisterServerRequest_EncodeableType;
+      *respEncType = &OpcUa_RegisterServerResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_discovery_register_server_resp:
+      *reqEncType = &OpcUa_RegisterServerRequest_EncodeableType;
+      *respEncType = &OpcUa_RegisterServerResponse_EncodeableType;
+      break;
+  case constants__e_msg_discovery_register_server2_req:
+      *reqEncType = &OpcUa_RegisterServer2Request_EncodeableType;
+      *respEncType = &OpcUa_RegisterServer2Response_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_discovery_register_server2_resp:
+      *reqEncType = &OpcUa_RegisterServer2Request_EncodeableType;
+      *respEncType = &OpcUa_RegisterServer2Response_EncodeableType;
+      break;
   case constants__e_msg_session_create_req:
-    *reqEncType = &OpcUa_CreateSessionRequest_EncodeableType;
-    *respEncType = &OpcUa_CreateSessionResponse_EncodeableType;
-    *isRequest = true;
-    break;
+      *reqEncType = &OpcUa_CreateSessionRequest_EncodeableType;
+      *respEncType = &OpcUa_CreateSessionResponse_EncodeableType;
+      *isRequest = true;
+      break;
   case constants__e_msg_session_create_resp:
-    *reqEncType = &OpcUa_CreateSessionRequest_EncodeableType;
-    *respEncType = &OpcUa_CreateSessionResponse_EncodeableType;
-    break;
+      *reqEncType = &OpcUa_CreateSessionRequest_EncodeableType;
+      *respEncType = &OpcUa_CreateSessionResponse_EncodeableType;
+      break;
   case constants__e_msg_session_activate_req:
-    *reqEncType = &OpcUa_ActivateSessionRequest_EncodeableType;
-    *respEncType = &OpcUa_ActivateSessionResponse_EncodeableType;
-    *isRequest = true;
-    break;
+      *reqEncType = &OpcUa_ActivateSessionRequest_EncodeableType;
+      *respEncType = &OpcUa_ActivateSessionResponse_EncodeableType;
+      *isRequest = true;
+      break;
   case constants__e_msg_session_activate_resp:
-    *reqEncType = &OpcUa_ActivateSessionRequest_EncodeableType;
-    *respEncType = &OpcUa_ActivateSessionResponse_EncodeableType;
-    break;
+      *reqEncType = &OpcUa_ActivateSessionRequest_EncodeableType;
+      *respEncType = &OpcUa_ActivateSessionResponse_EncodeableType;
+      break;
   case constants__e_msg_session_close_req:
-    *reqEncType = &OpcUa_CloseSessionRequest_EncodeableType;
-    *respEncType = &OpcUa_CloseSessionResponse_EncodeableType;
-    *isRequest = true;
-    break;
+      *reqEncType = &OpcUa_CloseSessionRequest_EncodeableType;
+      *respEncType = &OpcUa_CloseSessionResponse_EncodeableType;
+      *isRequest = true;
+      break;
   case constants__e_msg_session_close_resp:
-    *reqEncType = &OpcUa_CloseSessionRequest_EncodeableType;
-    *respEncType = &OpcUa_CloseSessionResponse_EncodeableType;
-    break;
-  case constants__e_msg_session_read_req:
-    *reqEncType = &OpcUa_ReadRequest_EncodeableType;
-    *respEncType = &OpcUa_ReadResponse_EncodeableType;
-    *isRequest = true;
-    break;
-  case constants__e_msg_session_read_resp:
-    *reqEncType = &OpcUa_ReadRequest_EncodeableType;
-    *respEncType = &OpcUa_ReadResponse_EncodeableType;
-    break;
-  case constants__e_msg_session_write_req:
-    *reqEncType = &OpcUa_WriteRequest_EncodeableType;
-    *respEncType = &OpcUa_WriteResponse_EncodeableType;
-    *isRequest = true;
-    break;
-  case constants__e_msg_session_write_resp:
-    *reqEncType = &OpcUa_WriteRequest_EncodeableType;
-    *respEncType = &OpcUa_WriteResponse_EncodeableType;
-    break;
+      *reqEncType = &OpcUa_CloseSessionRequest_EncodeableType;
+      *respEncType = &OpcUa_CloseSessionResponse_EncodeableType;
+      break;
+  case constants__e_msg_session_cancel_req:
+      *reqEncType = &OpcUa_CancelRequest_EncodeableType;
+      *respEncType = &OpcUa_CancelResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_session_cancel_resp:
+      *reqEncType = &OpcUa_CancelRequest_EncodeableType;
+      *respEncType = &OpcUa_CancelResponse_EncodeableType;
+      break;
+  case constants__e_msg_node_add_nodes_req:
+      *reqEncType = &OpcUa_AddNodesRequest_EncodeableType;
+      *respEncType = &OpcUa_AddNodesResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_node_add_nodes_resp:
+      *reqEncType = &OpcUa_AddNodesRequest_EncodeableType;
+      *respEncType = &OpcUa_AddNodesResponse_EncodeableType;
+      break;
+  case constants__e_msg_node_add_references_req:
+      *reqEncType = &OpcUa_AddReferencesRequest_EncodeableType;
+      *respEncType = &OpcUa_AddReferencesResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_node_add_references_resp:
+      *reqEncType = &OpcUa_AddReferencesRequest_EncodeableType;
+      *respEncType = &OpcUa_AddReferencesResponse_EncodeableType;
+      break;
+  case constants__e_msg_node_delete_nodes_req:
+      *reqEncType = &OpcUa_DeleteNodesRequest_EncodeableType;
+      *respEncType = &OpcUa_DeleteNodesResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_node_delete_nodes_resp:
+      *reqEncType = &OpcUa_DeleteNodesRequest_EncodeableType;
+      *respEncType = &OpcUa_DeleteNodesResponse_EncodeableType;
+      break;
+  case constants__e_msg_node_delete_references_req:
+      *reqEncType = &OpcUa_DeleteReferencesRequest_EncodeableType;
+      *respEncType = &OpcUa_DeleteReferencesResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_node_delete_references_resp:
+      *reqEncType = &OpcUa_DeleteReferencesRequest_EncodeableType;
+      *respEncType = &OpcUa_DeleteReferencesResponse_EncodeableType;
+      break;
+  case constants__e_msg_view_browse_req:
+      *reqEncType = &OpcUa_BrowseRequest_EncodeableType;
+      *respEncType = &OpcUa_BrowseResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_view_browse_resp:
+      *reqEncType = &OpcUa_BrowseRequest_EncodeableType;
+      *respEncType = &OpcUa_BrowseResponse_EncodeableType;
+      break;
+  case constants__e_msg_view_browse_next_req:
+      *reqEncType = &OpcUa_BrowseNextRequest_EncodeableType;
+      *respEncType = &OpcUa_BrowseNextResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_view_browse_next_resp:
+      *reqEncType = &OpcUa_BrowseNextRequest_EncodeableType;
+      *respEncType = &OpcUa_BrowseNextResponse_EncodeableType;
+      break;
+  case constants__e_msg_view_translate_browse_paths_to_node_ids_req:
+      *reqEncType = &OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType;
+      *respEncType = &OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_view_translate_browse_paths_to_node_ids_resp:
+      *reqEncType = &OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType;
+      *respEncType = &OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType;
+      break;
+  case constants__e_msg_view_register_nodes_req:
+      *reqEncType = &OpcUa_RegisterNodesRequest_EncodeableType;
+      *respEncType = &OpcUa_RegisterNodesResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_view_register_nodes_resp:
+      *reqEncType = &OpcUa_RegisterNodesRequest_EncodeableType;
+      *respEncType = &OpcUa_RegisterNodesResponse_EncodeableType;
+      break;
+  case constants__e_msg_view_unregister_nodes_req:
+      *reqEncType = &OpcUa_UnregisterNodesRequest_EncodeableType;
+      *respEncType = &OpcUa_UnregisterNodesResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_view_unregister_nodes_resp:
+      *reqEncType = &OpcUa_UnregisterNodesRequest_EncodeableType;
+      *respEncType = &OpcUa_UnregisterNodesResponse_EncodeableType;
+      break;
+  case constants__e_msg_query_first_req:
+      *reqEncType = &OpcUa_QueryFirstRequest_EncodeableType;
+      *respEncType = &OpcUa_QueryFirstResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_query_first_resp:
+      *reqEncType = &OpcUa_QueryFirstRequest_EncodeableType;
+      *respEncType = &OpcUa_QueryFirstResponse_EncodeableType;
+      break;
+  case constants__e_msg_query_next_req:
+      *reqEncType = &OpcUa_QueryNextRequest_EncodeableType;
+      *respEncType = &OpcUa_QueryNextResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_query_next_resp:
+      *reqEncType = &OpcUa_QueryNextRequest_EncodeableType;
+      *respEncType = &OpcUa_QueryNextResponse_EncodeableType;
+      break;
+  case constants__e_msg_attribute_read_req:
+      *reqEncType = &OpcUa_ReadRequest_EncodeableType;
+      *respEncType = &OpcUa_ReadResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_attribute_read_resp:
+      *reqEncType = &OpcUa_ReadRequest_EncodeableType;
+      *respEncType = &OpcUa_ReadResponse_EncodeableType;
+      break;
+  case constants__e_msg_attribute_history_read_req:
+      *reqEncType = &OpcUa_HistoryReadRequest_EncodeableType;
+      *respEncType = &OpcUa_HistoryReadResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_attribute_history_read_resp:
+      *reqEncType = &OpcUa_HistoryReadRequest_EncodeableType;
+      *respEncType = &OpcUa_HistoryReadResponse_EncodeableType;
+      break;
+  case constants__e_msg_attribute_write_req:
+      *reqEncType = &OpcUa_WriteRequest_EncodeableType;
+      *respEncType = &OpcUa_WriteResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_attribute_write_resp:
+      *reqEncType = &OpcUa_WriteRequest_EncodeableType;
+      *respEncType = &OpcUa_WriteResponse_EncodeableType;
+      break;
+  case constants__e_msg_attribute_history_update_req:
+      *reqEncType = &OpcUa_HistoryUpdateRequest_EncodeableType;
+      *respEncType = &OpcUa_HistoryUpdateResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_attribute_history_update_resp:
+      *reqEncType = &OpcUa_HistoryUpdateRequest_EncodeableType;
+      *respEncType = &OpcUa_HistoryUpdateResponse_EncodeableType;
+      break;
+  case constants__e_msg_method_call_req:
+      *reqEncType = &OpcUa_CallRequest_EncodeableType;
+      *respEncType = &OpcUa_CallResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_method_call_resp:
+      *reqEncType = &OpcUa_CallRequest_EncodeableType;
+      *respEncType = &OpcUa_CallResponse_EncodeableType;
+      break;
+  case constants__e_msg_monitored_items_create_req:
+      *reqEncType = &OpcUa_CreateMonitoredItemsRequest_EncodeableType;
+      *respEncType = &OpcUa_CreateMonitoredItemsResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_monitored_items_create_resp:
+      *reqEncType = &OpcUa_CreateMonitoredItemsRequest_EncodeableType;
+      *respEncType = &OpcUa_CreateMonitoredItemsResponse_EncodeableType;
+      break;
+  case constants__e_msg_monitored_items_modify_req:
+      *reqEncType = &OpcUa_ModifyMonitoredItemsRequest_EncodeableType;
+      *respEncType = &OpcUa_ModifyMonitoredItemsResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_monitored_items_modify_resp:
+      *reqEncType = &OpcUa_ModifyMonitoredItemsRequest_EncodeableType;
+      *respEncType = &OpcUa_ModifyMonitoredItemsResponse_EncodeableType;
+      break;
+  case constants__e_msg_monitored_items_set_monitoring_mode_req:
+      *reqEncType = &OpcUa_SetMonitoringModeRequest_EncodeableType;
+      *respEncType = &OpcUa_SetMonitoringModeResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_monitored_items_set_monitoring_mode_resp:
+      *reqEncType = &OpcUa_SetMonitoringModeRequest_EncodeableType;
+      *respEncType = &OpcUa_SetMonitoringModeResponse_EncodeableType;
+      break;
+  case constants__e_msg_monitored_items_set_triggering_req:
+      *reqEncType = &OpcUa_SetTriggeringRequest_EncodeableType;
+      *respEncType = &OpcUa_SetTriggeringResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_monitored_items_set_triggering_resp:
+      *reqEncType = &OpcUa_SetTriggeringRequest_EncodeableType;
+      *respEncType = &OpcUa_SetTriggeringResponse_EncodeableType;
+      break;
+  case constants__e_msg_monitored_items_delete_req:
+      *reqEncType = &OpcUa_DeleteMonitoredItemsRequest_EncodeableType;
+      *respEncType = &OpcUa_DeleteMonitoredItemsResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_monitored_items_delete_resp:
+      *reqEncType = &OpcUa_DeleteMonitoredItemsRequest_EncodeableType;
+      *respEncType = &OpcUa_DeleteMonitoredItemsResponse_EncodeableType;
+      break;
+  case constants__e_msg_subscription_create_req:
+      *reqEncType = &OpcUa_CreateSubscriptionRequest_EncodeableType;
+      *respEncType = &OpcUa_CreateSessionResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_subscription_create_resp:
+      *reqEncType = &OpcUa_CreateSubscriptionRequest_EncodeableType;
+      *respEncType = &OpcUa_CreateSessionResponse_EncodeableType;
+      break;
+  case constants__e_msg_subscription_modify_req:
+      *reqEncType = &OpcUa_ModifySubscriptionRequest_EncodeableType;
+      *respEncType = &OpcUa_ModifySubscriptionResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_subscription_modify_resp:
+      *reqEncType = &OpcUa_ModifySubscriptionRequest_EncodeableType;
+      *respEncType = &OpcUa_ModifySubscriptionResponse_EncodeableType;
+      break;
+  case constants__e_msg_subscription_set_publishing_mode_req:
+      *reqEncType = &OpcUa_SetPublishingModeRequest_EncodeableType;
+      *respEncType = &OpcUa_SetPublishingModeResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_subscription_set_publishing_mode_resp:
+      *reqEncType = &OpcUa_SetPublishingModeRequest_EncodeableType;
+      *respEncType = &OpcUa_SetPublishingModeResponse_EncodeableType;
+      break;
+  case constants__e_msg_subscription_publish_req:
+      *reqEncType = &OpcUa_PublishRequest_EncodeableType;
+      *respEncType = &OpcUa_PublishResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_subscription_publish_resp:
+      *reqEncType = &OpcUa_PublishRequest_EncodeableType;
+      *respEncType = &OpcUa_PublishResponse_EncodeableType;
+      break;
+  case constants__e_msg_subscription_republish_req:
+      *reqEncType = &OpcUa_RepublishRequest_EncodeableType;
+      *respEncType = &OpcUa_RepublishResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_subscription_republish_resp:
+      *reqEncType = &OpcUa_RepublishRequest_EncodeableType;
+      *respEncType = &OpcUa_RepublishResponse_EncodeableType;
+      break;
+  case constants__e_msg_subscription_transfer_subscriptions_req:
+      *reqEncType = &OpcUa_TransferSubscriptionsRequest_EncodeableType;
+      *respEncType = &OpcUa_TransferSubscriptionsResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_subscription_transfer_subscriptions_resp:
+      *reqEncType = &OpcUa_TransferSubscriptionsRequest_EncodeableType;
+      *respEncType = &OpcUa_TransferSubscriptionsResponse_EncodeableType;
+      break;
+  case constants__e_msg_subscription_delete_subscriptions_req:
+      *reqEncType = &OpcUa_DeleteSubscriptionsRequest_EncodeableType;
+      *respEncType = &OpcUa_DeleteSubscriptionsResponse_EncodeableType;
+      *isRequest = true;
+      break;
+  case constants__e_msg_subscription_delete_subscriptions_resp:
+      *reqEncType = &OpcUa_DeleteSubscriptionsRequest_EncodeableType;
+      *respEncType = &OpcUa_DeleteSubscriptionsResponse_EncodeableType;
+      break;
   case constants__e_msg_service_fault_resp:
     *reqEncType = NULL;
     *respEncType = &OpcUa_ServiceFault_EncodeableType;
     break;
-  case constants__e_msg_get_endpoints_service_req:
-    *reqEncType = &OpcUa_GetEndpointsRequest_EncodeableType;
-    *respEncType = &OpcUa_GetEndpointsResponse_EncodeableType;
-    *isRequest = true;
-    break;
-  case constants__e_msg_get_endpoints_service_resp:
-    *reqEncType = &OpcUa_GetEndpointsRequest_EncodeableType;
-    *respEncType = &OpcUa_GetEndpointsResponse_EncodeableType;
-    break;
-  case constants__e_msg_session_browse_req:
-    *reqEncType = &OpcUa_BrowseRequest_EncodeableType;
-    *respEncType = &OpcUa_BrowseResponse_EncodeableType;
-    *isRequest = true;
-    break;
-  case constants__e_msg_session_browse_resp:
-    *reqEncType = &OpcUa_BrowseRequest_EncodeableType;
-    *respEncType = &OpcUa_BrowseResponse_EncodeableType;
-    break;
-  case constants__e_msg_session_create_subscription_req:
-    *reqEncType = &OpcUa_CreateSubscriptionRequest_EncodeableType;
-    *respEncType = &OpcUa_CreateSubscriptionResponse_EncodeableType;
-    *isRequest = true;
-    break;
-  case constants__e_msg_session_create_subscription_resp:
-    *reqEncType = &OpcUa_CreateSubscriptionRequest_EncodeableType;
-    *respEncType = &OpcUa_CreateSubscriptionResponse_EncodeableType;
-    break;
-
   default:
     printf("util_message__get_encodeable_type: not implemented message type required\n");
     exit(1);   
@@ -116,43 +377,235 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
 void util_message__get_message_type(SOPC_EncodeableType* encType,
                                     constants__t_msg_type_i* message__msg_type)
 {
-  if(encType == &OpcUa_CreateSessionRequest_EncodeableType){
-    *message__msg_type = constants__e_msg_session_create_req;
-  }else if(encType == &OpcUa_CreateSessionResponse_EncodeableType){
-    *message__msg_type = constants__e_msg_session_create_resp;
-  }else if(encType == &OpcUa_ActivateSessionRequest_EncodeableType){
-    *message__msg_type = constants__e_msg_session_activate_req;
-  }else if(encType == &OpcUa_ActivateSessionResponse_EncodeableType){
-    *message__msg_type = constants__e_msg_session_activate_resp;
-  }else if(encType == &OpcUa_CloseSessionRequest_EncodeableType){
-    *message__msg_type = constants__e_msg_session_close_req;
-  }else if(encType == &OpcUa_CloseSessionResponse_EncodeableType){
-    *message__msg_type = constants__e_msg_session_close_resp;
-  }else if(encType == &OpcUa_ReadRequest_EncodeableType){
-    *message__msg_type = constants__e_msg_session_read_req;
-  }else if(encType == &OpcUa_ReadResponse_EncodeableType){
-    *message__msg_type = constants__e_msg_session_read_resp;
-  }else if(encType == &OpcUa_WriteRequest_EncodeableType){
-    *message__msg_type = constants__e_msg_session_write_req;
-  }else if(encType == &OpcUa_WriteResponse_EncodeableType){
-    *message__msg_type = constants__e_msg_session_write_resp;
-  }else if(encType == &OpcUa_GetEndpointsRequest_EncodeableType){
-    *message__msg_type = constants__e_msg_get_endpoints_service_req;
-  }else if(encType == &OpcUa_GetEndpointsResponse_EncodeableType){
-    *message__msg_type = constants__e_msg_get_endpoints_service_resp;
-  }else if(encType == &OpcUa_BrowseRequest_EncodeableType){
-    *message__msg_type = constants__e_msg_session_browse_req;
-  }else if(encType == &OpcUa_BrowseResponse_EncodeableType){
-    *message__msg_type = constants__e_msg_session_browse_resp;
-  }else if(encType == &OpcUa_CreateSubscriptionRequest_EncodeableType){
-    *message__msg_type = constants__e_msg_session_create_subscription_req;
-  }else if(encType == &OpcUa_CreateSubscriptionResponse_EncodeableType){
-    *message__msg_type = constants__e_msg_session_create_subscription_resp;
-  }else if(encType == &OpcUa_ServiceFault_EncodeableType){
-    *message__msg_type = constants__e_msg_service_fault_resp;
-  }else{
-    *message__msg_type = constants__c_msg_type_indet;
-  }
+    switch(encType->TypeId){
+    case OpcUaId_FindServersRequest:
+        *message__msg_type = constants__e_msg_discovery_find_servers_req;
+        break;
+    case OpcUaId_FindServersResponse:
+        *message__msg_type = constants__e_msg_discovery_find_servers_resp;
+        break;
+    case OpcUaId_FindServersOnNetworkRequest:
+        *message__msg_type = constants__e_msg_discovery_find_servers_on_network_req;
+        break;
+    case OpcUaId_FindServersOnNetworkResponse:
+        *message__msg_type = constants__e_msg_discovery_find_servers_on_network_resp;
+        break;
+    case OpcUaId_GetEndpointsRequest:
+        *message__msg_type = constants__e_msg_discovery_get_endpoints_req;
+        break;
+    case OpcUaId_GetEndpointsResponse:
+        *message__msg_type = constants__e_msg_discovery_get_endpoints_resp;
+        break;
+    case OpcUaId_RegisterServerRequest:
+        *message__msg_type = constants__e_msg_discovery_register_server_req;
+        break;
+    case OpcUaId_RegisterServerResponse:
+        *message__msg_type = constants__e_msg_discovery_register_server_resp;
+        break;
+    case OpcUaId_RegisterServer2Request:
+        *message__msg_type = constants__e_msg_discovery_register_server2_req;
+        break;
+    case OpcUaId_RegisterServer2Response:
+        *message__msg_type = constants__e_msg_discovery_register_server2_resp;
+        break;
+    case OpcUaId_CreateSessionRequest:
+        *message__msg_type = constants__e_msg_session_create_req;
+        break;
+    case OpcUaId_CreateSessionResponse:
+        *message__msg_type = constants__e_msg_session_create_resp;
+        break;
+    case OpcUaId_ActivateSessionRequest:
+        *message__msg_type = constants__e_msg_session_activate_req;
+        break;
+    case OpcUaId_ActivateSessionResponse:
+        *message__msg_type = constants__e_msg_session_activate_resp;
+        break;
+    case OpcUaId_CloseSessionRequest:
+        *message__msg_type = constants__e_msg_session_close_req;
+        break;
+    case OpcUaId_CloseSessionResponse:
+        *message__msg_type = constants__e_msg_session_close_resp;
+        break;
+    case OpcUaId_CancelRequest:
+        *message__msg_type = constants__e_msg_session_cancel_req;
+        break;
+    case OpcUaId_CancelResponse:
+        *message__msg_type = constants__e_msg_session_cancel_resp;
+        break;
+    case OpcUaId_AddNodesRequest:
+        *message__msg_type = constants__e_msg_node_add_nodes_req;
+        break;
+    case OpcUaId_AddNodesResponse:
+        *message__msg_type = constants__e_msg_node_add_nodes_resp;
+        break;
+    case OpcUaId_AddReferencesRequest:
+        *message__msg_type = constants__e_msg_node_add_references_req;
+        break;
+    case OpcUaId_AddReferencesResponse:
+        *message__msg_type = constants__e_msg_node_add_references_resp;
+        break;
+    case OpcUaId_DeleteNodesRequest:
+        *message__msg_type = constants__e_msg_node_delete_nodes_req;
+        break;
+    case OpcUaId_DeleteNodesResponse:
+        *message__msg_type = constants__e_msg_node_delete_nodes_resp;
+        break;
+    case OpcUaId_DeleteReferencesRequest:
+        *message__msg_type = constants__e_msg_node_delete_references_req;
+        break;
+    case OpcUaId_DeleteReferencesResponse:
+        *message__msg_type = constants__e_msg_node_delete_references_resp;
+        break;
+    case OpcUaId_BrowseRequest:
+        *message__msg_type = constants__e_msg_view_browse_req;
+        break;
+    case OpcUaId_BrowseResponse:
+        *message__msg_type = constants__e_msg_view_browse_resp;
+        break;
+    case OpcUaId_BrowseNextRequest:
+        *message__msg_type = constants__e_msg_view_browse_next_req;
+        break;
+    case OpcUaId_BrowseNextResponse:
+        *message__msg_type = constants__e_msg_view_browse_next_resp;
+        break;
+    case OpcUaId_TranslateBrowsePathsToNodeIdsRequest:
+        *message__msg_type = constants__e_msg_view_translate_browse_paths_to_node_ids_req;
+        break;
+    case OpcUaId_TranslateBrowsePathsToNodeIdsResponse:
+        *message__msg_type = constants__e_msg_view_translate_browse_paths_to_node_ids_resp;
+        break;
+    case OpcUaId_RegisterNodesRequest:
+        *message__msg_type = constants__e_msg_view_register_nodes_req;
+        break;
+    case OpcUaId_RegisterNodesResponse:
+        *message__msg_type = constants__e_msg_view_register_nodes_resp;
+        break;
+    case OpcUaId_UnregisterNodesRequest:
+        *message__msg_type = constants__e_msg_view_unregister_nodes_req;
+        break;
+    case OpcUaId_UnregisterNodesResponse:
+        *message__msg_type = constants__e_msg_view_unregister_nodes_resp;
+        break;
+    case OpcUaId_QueryFirstRequest:
+        *message__msg_type = constants__e_msg_query_first_req;
+        break;
+    case OpcUaId_QueryFirstResponse:
+        *message__msg_type = constants__e_msg_query_first_resp;
+        break;
+    case OpcUaId_QueryNextRequest:
+        *message__msg_type = constants__e_msg_query_next_req;
+        break;
+    case OpcUaId_QueryNextResponse:
+        *message__msg_type = constants__e_msg_query_next_resp;
+        break;
+    case OpcUaId_ReadRequest:
+        *message__msg_type = constants__e_msg_attribute_read_req;
+        break;
+    case OpcUaId_ReadResponse:
+        *message__msg_type = constants__e_msg_attribute_read_resp;
+        break;
+    case OpcUaId_HistoryReadRequest:
+        *message__msg_type = constants__e_msg_attribute_history_read_req;
+        break;
+    case OpcUaId_HistoryReadResponse:
+        *message__msg_type = constants__e_msg_attribute_history_read_resp;
+        break;
+    case OpcUaId_WriteRequest:
+        *message__msg_type = constants__e_msg_attribute_write_req;
+        break;
+    case OpcUaId_WriteResponse:
+        *message__msg_type = constants__e_msg_attribute_write_resp;
+        break;
+    case OpcUaId_HistoryUpdateRequest:
+        *message__msg_type = constants__e_msg_attribute_history_update_req;
+        break;
+    case OpcUaId_HistoryUpdateResponse:
+        *message__msg_type = constants__e_msg_attribute_history_update_resp;
+        break;
+    case OpcUaId_CallRequest:
+        *message__msg_type = constants__e_msg_method_call_req;
+        break;
+    case OpcUaId_CallResponse:
+        *message__msg_type = constants__e_msg_method_call_resp;
+        break;
+    case OpcUaId_CreateMonitoredItemsRequest:
+        *message__msg_type = constants__e_msg_monitored_items_create_req;
+        break;
+    case OpcUaId_CreateMonitoredItemsResponse:
+        *message__msg_type = constants__e_msg_monitored_items_create_resp;
+        break;
+    case OpcUaId_ModifyMonitoredItemsRequest:
+        *message__msg_type = constants__e_msg_monitored_items_modify_req;
+        break;
+    case OpcUaId_ModifyMonitoredItemsResponse:
+        *message__msg_type = constants__e_msg_monitored_items_modify_resp;
+        break;
+    case OpcUaId_SetMonitoringModeRequest:
+        *message__msg_type = constants__e_msg_monitored_items_set_monitoring_mode_req;
+        break;
+    case OpcUaId_SetMonitoringModeResponse:
+        *message__msg_type = constants__e_msg_monitored_items_set_monitoring_mode_resp;
+        break;
+    case OpcUaId_SetTriggeringRequest:
+        *message__msg_type = constants__e_msg_monitored_items_set_triggering_req;
+        break;
+    case OpcUaId_SetTriggeringResponse:
+        *message__msg_type = constants__e_msg_monitored_items_set_triggering_resp;
+        break;
+    case OpcUaId_DeleteMonitoredItemsRequest:
+        *message__msg_type = constants__e_msg_monitored_items_delete_req;
+        break;
+    case OpcUaId_DeleteMonitoredItemsResponse:
+        *message__msg_type = constants__e_msg_monitored_items_delete_resp;
+        break;
+    case OpcUaId_CreateSubscriptionRequest:
+        *message__msg_type = constants__e_msg_subscription_create_req;
+        break;
+    case OpcUaId_CreateSubscriptionResponse:
+        *message__msg_type = constants__e_msg_subscription_create_resp;
+        break;
+    case OpcUaId_ModifySubscriptionRequest:
+        *message__msg_type = constants__e_msg_subscription_modify_req;
+        break;
+    case OpcUaId_ModifySubscriptionResponse:
+        *message__msg_type = constants__e_msg_subscription_modify_resp;
+        break;
+    case OpcUaId_SetPublishingModeRequest:
+        *message__msg_type = constants__e_msg_subscription_set_publishing_mode_req;
+        break;
+    case OpcUaId_SetPublishingModeResponse:
+        *message__msg_type = constants__e_msg_subscription_set_publishing_mode_resp;
+        break;
+    case OpcUaId_PublishRequest:
+        *message__msg_type = constants__e_msg_subscription_publish_req;
+        break;
+    case OpcUaId_PublishResponse:
+        *message__msg_type = constants__e_msg_subscription_publish_resp;
+        break;
+    case OpcUaId_RepublishRequest:
+        *message__msg_type = constants__e_msg_subscription_republish_req;
+        break;
+    case OpcUaId_RepublishResponse:
+        *message__msg_type = constants__e_msg_subscription_republish_resp;
+        break;
+    case OpcUaId_TransferSubscriptionsRequest:
+        *message__msg_type = constants__e_msg_subscription_transfer_subscriptions_req;
+        break;
+    case OpcUaId_TransferSubscriptionsResponse:
+        *message__msg_type = constants__e_msg_subscription_transfer_subscriptions_resp;
+        break;
+    case OpcUaId_DeleteSubscriptionsRequest:
+        *message__msg_type = constants__e_msg_subscription_delete_subscriptions_req;
+        break;
+    case OpcUaId_DeleteSubscriptionsResponse:
+        *message__msg_type = constants__e_msg_subscription_delete_subscriptions_resp;
+        break;
+    case OpcUaId_ServiceFault:
+        *message__msg_type = constants__e_msg_service_fault_resp;
+        break;
+    default:
+        *message__msg_type = constants__c_msg_type_indet;
+    }
 }
 
 void util_status_code__B_to_C(constants__t_StatusCode_i bstatus,
@@ -211,6 +664,9 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus,
     break;
   case constants__e_sc_bad_attribute_id_invalid:
     *status = OpcUa_BadAttributeIdInvalid;
+    break;
+  case constants__e_sc_bad_service_unsupported:
+    *status = OpcUa_BadServiceUnsupported;
     break;
   default:
     printf("util_message__B_to_C_status_code\n");
@@ -275,6 +731,9 @@ t_bool util_status_code__C_to_B(SOPC_StatusCode status,
     break;
   case OpcUa_BadAttributeIdInvalid:
     *bstatus = constants__e_sc_bad_attribute_id_invalid;
+    break;
+  case OpcUa_BadServiceUnsupported:
+    * bstatus = constants__e_sc_bad_service_unsupported;
     break;
   default:
     success = false;
