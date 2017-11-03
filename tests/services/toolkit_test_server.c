@@ -57,7 +57,7 @@ void Test_ComEvent_Fct(SOPC_App_Com_Event event,
   }
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
   SOPC_StatusCode status = STATUS_OK;
   constants__t_endpoint_config_idx_i epConfigIdx = constants__c_endpoint_config_idx_indet;
@@ -65,7 +65,7 @@ int main(void)
   // Sleep timeout in milliseconds
   const uint32_t sleepTimeout = 500;
   // Loop timeout in milliseconds
-  uint32_t loopTimeout = 20000;
+  uint32_t loopTimeout = 5000;
   // Counter to stop waiting on timeout
   uint32_t loopCpt = 0;
 
@@ -79,6 +79,17 @@ int main(void)
   SOPC_String_Initialize(&secuConfig[0].securityPolicy);
   SOPC_String_Initialize(&secuConfig[1].securityPolicy);
   SOPC_String_Initialize(&secuConfig[2].securityPolicy);
+
+  if(argc == 2){
+      int parsedInt = atoi(argv[1]);
+      if(parsedInt > 5000 && parsedInt <= INT32_MAX){
+          loopTimeout = (uint32_t) parsedInt;
+          printf("<Test_Server_Toolkit: server termination timeout modified to %d milliseconds\n", parsedInt);
+      }else{
+          printf("<Test_Server_Toolkit: Error: server termination timeout argument invalid\n");
+          return 1;
+      }
+  }
 
   if(STATUS_OK == status){
 
@@ -184,7 +195,6 @@ int main(void)
 
   // Run the server until timeout or notification that endpoint is closed
   loopCpt = 0;
-  loopTimeout = 5000;
   while (STATUS_OK == status && endpointClosed == false && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
