@@ -221,6 +221,10 @@ static SOPC_StatusCode SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_Secu
     assert(clientSenderCertificate != NULL);
 
     SOPC_StatusCode status = STATUS_OK;
+    /* toEncrypt & toSign are considered possible (true) if we do not enforce the security mode.
+     * The security mode can only be enforced when it was already defined by a received OPN message
+     * since it is not present in the asymmetric security header (only security policy defined).
+     */
     bool enforceSecuMode = false;
     bool toEncrypt = true;
     bool toSign = true;
@@ -1394,12 +1398,13 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
         }
     }
     if(result != false){
+        // Note: part 6 v1.03 table 27: This field shall be null if the Message is not signed
         if(toSign != false && bsSenderCert.Length > 0){
             if(STATUS_OK != SOPC_ByteString_Write(&bsSenderCert, buffer)){
                 result = false;
                 *errorStatus = OpcUa_BadTcpInternalError;
             }
-        }else if(toSign == false){ // Field shall be null if message not signed
+        }else if(toSign == false){
             // Note: foundation stack expects -1 value whereas 0 is also valid:
             const int32_t minusOne = -1;
             if(STATUS_OK != SOPC_Int32_Write(&minusOne, buffer)){
@@ -1424,6 +1429,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
             receiverCertCrypto = scConfig->crt_cli;
         }
 
+        // Note: part 6 v1.03 table 27: This field shall be null if the Message is not encrypted
         if(toEncrypt != false && receiverCertCrypto != NULL){
             SOPC_ByteString recCertThumbprint;
             SOPC_ByteString_Initialize(&recCertThumbprint);
@@ -2386,7 +2392,7 @@ static SOPC_StatusCode SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnec
             }
 
             if(result != false){
-                /* ENCRYTP MESSAGE */
+                /* ENCRYPT MESSAGE */
                 if(toEncrypt != false){
 
                     SOPC_Buffer* encryptedBuffer = NULL;

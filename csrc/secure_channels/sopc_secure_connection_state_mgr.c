@@ -856,7 +856,13 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
         // Retrieve the server nonce and generate key sets if applicable
         assert(opnResp != NULL);
 
-        if(scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None){
+        if(OpcUa_MessageSecurityMode_None == scConfig->msgSecurityMode){
+
+            if(opnResp->ServerNonce.Length > 0){
+                // Unexpected token
+                // TODO: log
+            }
+        }else{
             assert(scConnection->clientNonce != NULL);
 
             if(opnResp->ServerNonce.Length <= 0){
@@ -1205,8 +1211,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
             if(opnReq->SecurityMode == OpcUa_MessageSecurityMode_None){
                 if(opnReq->ClientNonce.Length > 0){
                     // Nonce unexpected
-                    result = false;
-                    *errorStatus = OpcUa_BadSecurityChecksFailed;
+                    // TODO: log
                 }
             }else{
                 assert(opnReq->SecurityMode == OpcUa_MessageSecurityMode_Sign ||
@@ -1575,8 +1580,7 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
             if(scConfig->msgSecurityMode == OpcUa_MessageSecurityMode_None){
                 if(opnReq->ClientNonce.Length > 0){
                     // Nonce unexpected
-                    result = false;
-                    *errorStatus = OpcUa_BadSecurityChecksFailed;
+                    // TODO: log
                 }
             }else{
                 assert(scConfig->msgSecurityMode == OpcUa_MessageSecurityMode_Sign ||
