@@ -58,7 +58,7 @@ OPERATIONS
         write_msg : t_msg_i &
         write_msg = c_msg_in &
         c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_write_req
+        a_msg_in_type = e_msg_attribute_write_req
     THEN
         StatusCode_service,
         d_variables

@@ -53,7 +53,7 @@ OPERATIONS
         p_msg  : t_msg_i &
         p_msg  = c_msg_in &
         c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_read_req
+        a_msg_in_type = e_msg_attribute_read_req
     THEN
         p_read_ok,
         p_nb_ReadValue,
@@ -75,7 +75,7 @@ OPERATIONS
         p_msg    : t_msg_i                     &
         p_msg    = c_msg_in                    &
         c_msg_in : t_msg                       &
-        a_msg_in_type = e_msg_session_read_req &
+        a_msg_in_type = e_msg_attribute_read_req &
         p_rvi : t_ReadValue_i                  &
         p_rvi : t_ReadValue                    &
         p_rvi : cast_t_ReadValue[0..nb_ReadValue]

@@ -55,14 +55,12 @@ LOCAL_OPERATIONS
         ELSIF msg_typ : s_service_on_session_reqs \/ s_service_on_session_resps
         THEN
             service_class := e_msg_session_service_class
-        ELSIF msg_typ : {e_msg_session_create_req,
-                e_msg_session_create_resp,
-                e_msg_session_activate_req,
-                e_msg_session_activate_resp,
-                e_msg_session_close_req,
-                e_msg_session_close_resp}
+        ELSIF msg_typ : s_session_treatment_reqs \/ s_session_treatment_resps
         THEN
             service_class := e_msg_session_treatment_class
+        ELSIF msg_typ = e_msg_service_fault_resp
+        THEN
+            service_class := e_msg_service_fault_class
         ELSE
             service_class := c_msg_service_class_indet
         END
@@ -74,24 +72,84 @@ OPERATIONS
     BEGIN
         header_type := c_msg_header_type_indet;
         CASE msg_typ OF
-            EITHER e_msg_get_endpoints_service_req,
-                e_msg_session_create_req,
+            EITHER e_msg_session_create_req,
                 e_msg_session_activate_req,
                 e_msg_session_close_req,
-                e_msg_session_read_req,
-                e_msg_session_write_req,
-                e_msg_session_browse_req,
-                e_msg_session_create_subscription_req
+                e_msg_session_cancel_req,
+                e_msg_node_add_nodes_req,
+                e_msg_node_add_references_req,
+                e_msg_node_delete_nodes_req,
+                e_msg_node_delete_references_req,
+                e_msg_view_browse_req,
+                e_msg_view_browse_next_req,
+                e_msg_view_translate_browse_paths_to_node_ids_req,
+                e_msg_view_register_nodes_req,
+                e_msg_view_unregister_nodes_req,
+                e_msg_query_first_req,
+                e_msg_query_next_req,
+                e_msg_attribute_read_req,
+                e_msg_attribute_history_read_req,
+                e_msg_attribute_write_req,
+                e_msg_attribute_history_update_req,
+                e_msg_method_call_req,
+                e_msg_monitored_items_create_req,
+                e_msg_monitored_items_modify_req,
+                e_msg_monitored_items_set_monitoring_mode_req,
+                e_msg_monitored_items_set_triggering_req,
+                e_msg_monitored_items_delete_req,
+                e_msg_subscription_create_req,
+                e_msg_subscription_modify_req,
+                e_msg_subscription_set_publishing_mode_req,
+                e_msg_subscription_publish_req,
+                e_msg_subscription_republish_req,
+                e_msg_subscription_transfer_subscriptions_req,
+                e_msg_subscription_delete_subscriptions_req,
+                e_msg_discovery_find_servers_req,
+                e_msg_discovery_find_servers_on_network_req,
+                e_msg_discovery_get_endpoints_req,
+                e_msg_discovery_register_server_req,
+                e_msg_discovery_register_server2_req
             THEN
                 header_type := e_msg_request_type
-            OR e_msg_get_endpoints_service_resp,
-                e_msg_session_create_resp,
+            OR e_msg_session_create_resp,
                 e_msg_session_activate_resp,
                 e_msg_session_close_resp,
-                e_msg_session_read_resp,
-                e_msg_session_write_resp,
-                e_msg_session_browse_resp,
-                e_msg_session_create_subscription_resp
+                e_msg_session_cancel_resp,
+                e_msg_node_add_nodes_resp,
+                e_msg_node_add_references_resp,
+                e_msg_node_delete_nodes_resp,
+                e_msg_node_delete_references_resp,
+                e_msg_view_browse_resp,
+                e_msg_view_browse_next_resp,
+                e_msg_view_translate_browse_paths_to_node_ids_resp,
+                e_msg_view_register_nodes_resp,
+                e_msg_view_unregister_nodes_resp,
+                e_msg_query_first_resp,
+                e_msg_query_next_resp,
+                e_msg_attribute_read_resp,
+                e_msg_attribute_history_read_resp,
+                e_msg_attribute_write_resp,
+                e_msg_attribute_history_update_resp,
+                e_msg_method_call_resp,
+                e_msg_monitored_items_create_resp,
+                e_msg_monitored_items_modify_resp,
+                e_msg_monitored_items_set_monitoring_mode_resp,
+                e_msg_monitored_items_set_triggering_resp,
+                e_msg_monitored_items_delete_resp,
+                e_msg_subscription_create_resp,
+                e_msg_subscription_modify_resp,
+                e_msg_subscription_set_publishing_mode_resp,
+                e_msg_subscription_publish_resp,
+                e_msg_subscription_republish_resp,
+                e_msg_subscription_transfer_subscriptions_resp,
+                e_msg_subscription_delete_subscriptions_resp,
+                e_msg_discovery_find_servers_resp,
+                e_msg_discovery_find_servers_on_network_resp,
+                e_msg_discovery_get_endpoints_resp,
+                e_msg_discovery_register_server_resp,
+                e_msg_discovery_register_server2_resp,
+                /* generic service fault */
+                e_msg_service_fault_resp
             THEN
                 header_type := e_msg_response_type
             END
@@ -102,8 +160,16 @@ OPERATIONS
     service_class <-- get_msg_service_class (msg_typ) =
     BEGIN
         CASE msg_typ OF
-            EITHER e_msg_get_endpoints_service_req,
-                e_msg_get_endpoints_service_resp
+            EITHER e_msg_discovery_find_servers_req,
+                e_msg_discovery_find_servers_resp,
+                e_msg_discovery_find_servers_on_network_req,
+                e_msg_discovery_find_servers_on_network_resp,
+                e_msg_discovery_get_endpoints_req,
+                e_msg_discovery_get_endpoints_resp,
+                e_msg_discovery_register_server_req,
+                e_msg_discovery_register_server_resp,
+                e_msg_discovery_register_server2_req,
+                e_msg_discovery_register_server2_resp
             THEN
                 service_class := e_msg_discovery_service_class
             OR e_msg_session_create_req,
@@ -111,19 +177,72 @@ OPERATIONS
                 e_msg_session_activate_req,
                 e_msg_session_activate_resp,
                 e_msg_session_close_req,
-                e_msg_session_close_resp
+                e_msg_session_close_resp,
+                e_msg_session_cancel_req,
+                e_msg_session_cancel_resp
             THEN
                 service_class := e_msg_session_treatment_class
-            OR e_msg_session_read_req,
-                e_msg_session_write_req,
-                e_msg_session_browse_req,
-                e_msg_session_create_subscription_req,
-                e_msg_session_read_resp,
-                e_msg_session_write_resp,
-                e_msg_session_browse_resp,
-                e_msg_session_create_subscription_resp
+            OR e_msg_node_add_nodes_req,
+                e_msg_node_add_nodes_resp,
+                e_msg_node_add_references_req,
+                e_msg_node_add_references_resp,
+                e_msg_node_delete_nodes_req,
+                e_msg_node_delete_nodes_resp,
+                e_msg_node_delete_references_req,
+                e_msg_node_delete_references_resp,
+                e_msg_view_browse_req,
+                e_msg_view_browse_resp,
+                e_msg_view_browse_next_req,
+                e_msg_view_browse_next_resp,
+                e_msg_view_translate_browse_paths_to_node_ids_req,
+                e_msg_view_translate_browse_paths_to_node_ids_resp,
+                e_msg_view_register_nodes_req,
+                e_msg_view_register_nodes_resp,
+                e_msg_view_unregister_nodes_req,
+                e_msg_view_unregister_nodes_resp,
+                e_msg_query_first_req,
+                e_msg_query_first_resp,
+                e_msg_query_next_req,
+                e_msg_query_next_resp,
+                e_msg_attribute_read_req,
+                e_msg_attribute_read_resp,
+                e_msg_attribute_history_read_req,
+                e_msg_attribute_history_read_resp,
+                e_msg_attribute_write_req,
+                e_msg_attribute_write_resp,
+                e_msg_attribute_history_update_req,
+                e_msg_attribute_history_update_resp,
+                e_msg_method_call_req,
+                e_msg_method_call_resp,
+                e_msg_monitored_items_create_req,
+                e_msg_monitored_items_create_resp,
+                e_msg_monitored_items_modify_req,
+                e_msg_monitored_items_modify_resp,
+                e_msg_monitored_items_set_monitoring_mode_req,
+                e_msg_monitored_items_set_monitoring_mode_resp,
+                e_msg_monitored_items_set_triggering_req,
+                e_msg_monitored_items_set_triggering_resp,
+                e_msg_monitored_items_delete_req,
+                e_msg_monitored_items_delete_resp,
+                e_msg_subscription_create_req,
+                e_msg_subscription_create_resp,
+                e_msg_subscription_modify_req,
+                e_msg_subscription_modify_resp,
+                e_msg_subscription_set_publishing_mode_req,
+                e_msg_subscription_set_publishing_mode_resp,
+                e_msg_subscription_publish_req,
+                e_msg_subscription_publish_resp,
+                e_msg_subscription_republish_req,
+                e_msg_subscription_republish_resp,
+                e_msg_subscription_transfer_subscriptions_req,
+                e_msg_subscription_transfer_subscriptions_resp,
+                e_msg_subscription_delete_subscriptions_req,
+                e_msg_subscription_delete_subscriptions_resp
             THEN
                 service_class := e_msg_session_service_class
+            OR e_msg_service_fault_resp
+            THEN
+                service_class := e_msg_service_fault_class
             ELSE
                 service_class := c_msg_service_class_indet
             END
@@ -169,7 +288,7 @@ OPERATIONS
                                 l_buffer_out <-- server_receive_session_service_req (channel, l_msg_type, buffer)
                             OR e_msg_discovery_service_class THEN
                                 l_buffer_out <-- server_receive_discovery_service_req (channel, l_msg_type, buffer)
-                            ELSE
+                            ELSE /* INCLUDES e_msg_service_fault_class => unexpected response type */
                                 /* indet class */
                                 l_buffer_out := c_byte_buffer_indet
                             END
@@ -196,6 +315,9 @@ OPERATIONS
                             OR e_msg_discovery_service_class THEN
                                 /* TODO: check channel <-> req handle corresp ?: for now req handle unique in client */
                                 client_receive_discovery_service_resp (l_msg_type, buffer)
+                            OR e_msg_service_fault_class THEN
+                                /* TODO: manage cas in which we do not know the service type ! */                                
+                                skip
                             END
                         END
                     ELSE

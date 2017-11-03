@@ -44,7 +44,7 @@ OPERATIONS
         msg  : t_msg_i &
         msg  = c_msg_in &
         c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_read_req
+        a_msg_in_type = e_msg_attribute_read_req
     THEN
         nb :: INT
     END
@@ -57,7 +57,7 @@ OPERATIONS
         msg  : t_msg_i &
         msg  = c_msg_in &
         c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_read_req &
+        a_msg_in_type = e_msg_attribute_read_req &
         rvi : t_ReadValue_i &
         rvi : t_ReadValue
     THEN
@@ -80,7 +80,7 @@ OPERATIONS
         msg  : t_msg_i &
         msg  = c_msg_in &
         c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_read_req &
+        a_msg_in_type = e_msg_attribute_read_req &
         rvi : t_ReadValue_i &
         rvi : t_ReadValue
     THEN

@@ -59,7 +59,8 @@ SETS
                       e_sc_bad_too_many_ops,
                       e_sc_bad_node_id_unknown,
                       e_sc_bad_node_id_invalid,
-                      e_sc_bad_attribute_id_invalid};
+                      e_sc_bad_attribute_id_invalid,
+                      e_sc_bad_service_unsupported};
 
     t_BrowseDirection_i = {e_bd_indet,
                            e_bd_forward,
@@ -123,14 +124,80 @@ SETS
 
     /* OPC UA message type */
     t_msg_type_i = {c_msg_type_indet, e_msg_service_fault_resp,
-        e_msg_get_endpoints_service_req, e_msg_get_endpoints_service_resp,
-        e_msg_session_create_req, e_msg_session_create_resp,
-        e_msg_session_activate_req, e_msg_session_activate_resp,
-        e_msg_session_close_req, e_msg_session_close_resp,
-        e_msg_session_read_req, e_msg_session_read_resp,
-        e_msg_session_write_req, e_msg_session_write_resp,
-        e_msg_session_browse_req, e_msg_session_browse_resp,
-        e_msg_session_create_subscription_req, e_msg_session_create_subscription_resp};
+        e_msg_discovery_find_servers_req,
+        e_msg_discovery_find_servers_resp,
+        e_msg_discovery_find_servers_on_network_req,
+        e_msg_discovery_find_servers_on_network_resp,
+        e_msg_discovery_get_endpoints_req,
+        e_msg_discovery_get_endpoints_resp,
+        e_msg_discovery_register_server_req,
+        e_msg_discovery_register_server_resp,
+        e_msg_discovery_register_server2_req,
+        e_msg_discovery_register_server2_resp,
+        e_msg_session_create_req,
+        e_msg_session_create_resp,
+        e_msg_session_activate_req,
+        e_msg_session_activate_resp,
+        e_msg_session_close_req,
+        e_msg_session_close_resp,
+        e_msg_session_cancel_req,
+        e_msg_session_cancel_resp,
+        e_msg_node_add_nodes_req,
+        e_msg_node_add_nodes_resp,
+        e_msg_node_add_references_req,
+        e_msg_node_add_references_resp,
+        e_msg_node_delete_nodes_req,
+        e_msg_node_delete_nodes_resp,
+        e_msg_node_delete_references_req,
+        e_msg_node_delete_references_resp,
+        e_msg_view_browse_req,
+        e_msg_view_browse_resp,
+        e_msg_view_browse_next_req,
+        e_msg_view_browse_next_resp,
+        e_msg_view_translate_browse_paths_to_node_ids_req,
+        e_msg_view_translate_browse_paths_to_node_ids_resp,
+        e_msg_view_register_nodes_req,
+        e_msg_view_register_nodes_resp,
+        e_msg_view_unregister_nodes_req,
+        e_msg_view_unregister_nodes_resp,
+        e_msg_query_first_req,
+        e_msg_query_first_resp,
+        e_msg_query_next_req,
+        e_msg_query_next_resp,
+        e_msg_attribute_read_req,
+        e_msg_attribute_read_resp,
+        e_msg_attribute_history_read_req,
+        e_msg_attribute_history_read_resp,
+        e_msg_attribute_write_req,
+        e_msg_attribute_write_resp,
+        e_msg_attribute_history_update_req,
+        e_msg_attribute_history_update_resp,
+        e_msg_method_call_req,
+        e_msg_method_call_resp,
+        e_msg_monitored_items_create_req,
+        e_msg_monitored_items_create_resp,
+        e_msg_monitored_items_modify_req,
+        e_msg_monitored_items_modify_resp,
+        e_msg_monitored_items_set_monitoring_mode_req,
+        e_msg_monitored_items_set_monitoring_mode_resp,
+        e_msg_monitored_items_set_triggering_req,
+        e_msg_monitored_items_set_triggering_resp,
+        e_msg_monitored_items_delete_req,
+        e_msg_monitored_items_delete_resp,
+        e_msg_subscription_create_req,
+        e_msg_subscription_create_resp,
+        e_msg_subscription_modify_req,
+        e_msg_subscription_modify_resp,
+        e_msg_subscription_set_publishing_mode_req,
+        e_msg_subscription_set_publishing_mode_resp,
+        e_msg_subscription_publish_req,
+        e_msg_subscription_publish_resp,
+        e_msg_subscription_republish_req,
+        e_msg_subscription_republish_resp,
+        e_msg_subscription_transfer_subscriptions_req,
+        e_msg_subscription_transfer_subscriptions_resp,
+        e_msg_subscription_delete_subscriptions_req,
+        e_msg_subscription_delete_subscriptions_resp};
 
     /* OPC UA message header type (request / response) */
     t_msg_header_type_i = { c_msg_header_type_indet,
@@ -142,7 +209,8 @@ SETS
     t_msg_service_class_i = { c_msg_service_class_indet,
         e_msg_session_treatment_class,
         e_msg_session_service_class,
-        e_msg_discovery_service_class
+        e_msg_discovery_service_class,
+        e_msg_service_fault_class
     }
 
 CONCRETE_CONSTANTS
@@ -229,8 +297,8 @@ ABSTRACT_CONSTANTS
     t_channel,
     t_request_handle,
 
-    s_service_treatment_reqs,
-    s_service_treatment_resps,
+    s_session_treatment_reqs,
+    s_session_treatment_resps,
     s_service_on_session_reqs,
     s_service_on_session_resps,
     s_discovery_service_reqs,
@@ -399,29 +467,96 @@ PROPERTIES
         e_buffer_in_msg_header_read,
         e_buffer_in_msg_read } &
 
-    s_service_treatment_reqs = {e_msg_session_create_req,
+    s_session_treatment_reqs = {e_msg_session_create_req,
         e_msg_session_activate_req,
-        e_msg_session_close_req} &
+        e_msg_session_close_req,
+        e_msg_session_cancel_req } &
 
-    s_service_treatment_resps = {e_msg_session_create_resp,
+    s_session_treatment_resps = {e_msg_session_create_resp,
         e_msg_session_activate_resp,
-        e_msg_session_close_resp } &
+        e_msg_session_close_resp,
+        e_msg_session_cancel_resp } &
 
-    s_service_on_session_reqs  = {e_msg_session_read_req,
-        e_msg_session_write_req,
-        e_msg_session_browse_req,
-        e_msg_session_create_subscription_req} &
+    s_service_on_session_reqs  = {
+        e_msg_node_add_nodes_req,
+        e_msg_node_add_references_req,
+        e_msg_node_delete_nodes_req,
+        e_msg_node_delete_references_req,
+        e_msg_view_browse_req,
+        e_msg_view_browse_next_req,
+        e_msg_view_translate_browse_paths_to_node_ids_req,
+        e_msg_view_register_nodes_req,
+        e_msg_view_unregister_nodes_req,
+        e_msg_query_first_req,
+        e_msg_query_next_req,
+        e_msg_attribute_read_req,
+        e_msg_attribute_history_read_req,
+        e_msg_attribute_write_req,
+        e_msg_attribute_history_update_req,
+        e_msg_method_call_req,
+        e_msg_monitored_items_create_req,
+        e_msg_monitored_items_modify_req,
+        e_msg_monitored_items_set_monitoring_mode_req,
+        e_msg_monitored_items_set_monitoring_mode_resp,
+        e_msg_monitored_items_set_triggering_req,
+        e_msg_monitored_items_delete_req,
+        e_msg_subscription_create_req,
+        e_msg_subscription_modify_req,
+        e_msg_subscription_set_publishing_mode_req,
+        e_msg_subscription_publish_req,
+        e_msg_subscription_republish_req,
+        e_msg_subscription_transfer_subscriptions_req,
+        e_msg_subscription_delete_subscriptions_req
+    } &
 
-    s_service_on_session_resps = {e_msg_session_read_resp,
-        e_msg_session_write_resp,
-        e_msg_session_browse_resp,
-        e_msg_session_create_subscription_resp} &
+    s_service_on_session_resps = {
+        e_msg_node_add_nodes_resp,
+        e_msg_node_add_references_resp,
+        e_msg_node_delete_nodes_resp,
+        e_msg_node_delete_references_resp,
+        e_msg_view_browse_resp,
+        e_msg_view_browse_next_resp,
+        e_msg_view_translate_browse_paths_to_node_ids_resp,
+        e_msg_view_register_nodes_resp,
+        e_msg_view_unregister_nodes_resp,
+        e_msg_query_first_resp,
+        e_msg_query_next_resp,
+        e_msg_attribute_read_resp,
+        e_msg_attribute_history_read_resp,
+        e_msg_attribute_write_resp,
+        e_msg_attribute_history_update_resp,
+        e_msg_method_call_resp,
+        e_msg_monitored_items_create_resp,
+        e_msg_monitored_items_modify_resp,
+        e_msg_monitored_items_set_monitoring_mode_resp,
+        e_msg_monitored_items_set_triggering_resp,
+        e_msg_monitored_items_delete_resp,
+        e_msg_subscription_create_resp,
+        e_msg_subscription_modify_resp,
+        e_msg_subscription_set_publishing_mode_resp,
+        e_msg_subscription_publish_resp,
+        e_msg_subscription_republish_resp,
+        e_msg_subscription_transfer_subscriptions_resp,
+        e_msg_subscription_delete_subscriptions_resp} &
 
-    s_discovery_service_reqs = {e_msg_get_endpoints_service_req} &
-    s_discovery_service_resps = {e_msg_get_endpoints_service_resp} &
+    s_discovery_service_reqs = {
+        e_msg_discovery_find_servers_req,
+        e_msg_discovery_find_servers_on_network_req,
+        e_msg_discovery_get_endpoints_req,
+        e_msg_discovery_register_server_req,
+        e_msg_discovery_register_server2_req
+    } &
+    
+    s_discovery_service_resps = {
+        e_msg_discovery_find_servers_resp,
+        e_msg_discovery_find_servers_on_network_resp,
+        e_msg_discovery_get_endpoints_resp,
+        e_msg_discovery_register_server_resp,
+        e_msg_discovery_register_server2_resp} 
+    &
 
-    s_service_reqs  = s_service_treatment_reqs \/ s_service_on_session_reqs \/ s_discovery_service_reqs &
-    s_service_resps = s_service_on_session_resps \/ s_discovery_service_resps \/ {e_msg_service_fault_resp} &
+    s_service_reqs  = s_session_treatment_reqs \/ s_service_on_session_reqs \/ s_discovery_service_reqs &
+    s_service_resps = s_session_treatment_resps \/ s_service_on_session_resps \/ s_discovery_service_resps \/ {e_msg_service_fault_resp} &
 
     t_msg_type = s_service_reqs \/ s_service_resps &
 

@@ -190,7 +190,7 @@ OPERATIONS
         msg_header : t_msg_header_i &
         msg_header = c_msg_in_header &
         c_msg_in_header : t_msg_header &
-        a_msg_in_type : s_service_treatment_reqs \/ s_service_on_session_reqs
+        a_msg_in_type : s_session_treatment_reqs \/ s_service_on_session_reqs
     THEN
         session_token :: t_session_token_i
     END

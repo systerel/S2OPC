@@ -60,7 +60,7 @@ OPERATIONS
         channel : s_channel_connected &
         req_typ : t_msg_type_i &
         req_typ = a_msg_in_type &
-        a_msg_in_type : s_service_treatment_reqs &
+        a_msg_in_type : s_session_treatment_reqs &
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer  &
         a_buffer_in_state = e_buffer_in_msg_type_read &
@@ -89,7 +89,7 @@ OPERATIONS
         channel : s_channel_connected &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
-        a_msg_in_type : s_service_treatment_resps &
+        a_msg_in_type : s_session_treatment_resps &
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer  &
         a_buffer_in_state = e_buffer_in_msg_type_read &

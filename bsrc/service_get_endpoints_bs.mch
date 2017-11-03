@@ -32,11 +32,11 @@ OPERATIONS
         req_msg : t_msg_i &
         req_msg = c_msg_in &
         c_msg_in : t_msg &
-        a_msg_in_type = e_msg_get_endpoints_service_req &
+        a_msg_in_type = e_msg_discovery_get_endpoints_req &
         resp_msg : t_msg_i &
         resp_msg = c_msg_out &
         c_msg_out : t_msg &
-        a_msg_out_type = e_msg_get_endpoints_service_resp
+        a_msg_out_type = e_msg_discovery_get_endpoints_resp
     THEN
         ret :(ret : t_StatusCode_i & ret : t_StatusCode)
     END
