@@ -16,6 +16,7 @@
  */
 
 #include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 
 #include <stdbool.h>
 
@@ -67,13 +68,16 @@ void SOPC_Toolkit_ClearScConfigElt(uint32_t id, void *val)
     if(scConfig != NULL && scConfig->isClientSc == false){
         // In case of server it is an internally created config
         // => only client certificate was specifically allocated
+
+#pragma GCC diagnostic ignored "-Wcast-qual"
         SOPC_KeyManager_Certificate_Free((SOPC_Certificate*) scConfig->crt_cli);
+#pragma GCC diagnostic pop
         free(scConfig);
     }
 }
 
 // Deallocate fields allocated on server side only and free all the SC configs
-static void SOPC_Toolkit_ClearScConfigs(){
+static void SOPC_Toolkit_ClearScConfigs(void){
     SOPC_SLinkedList_Apply(scConfigs, SOPC_Toolkit_ClearScConfigElt);
     SOPC_SLinkedList_Delete(scConfigs);
     scConfigs = NULL;

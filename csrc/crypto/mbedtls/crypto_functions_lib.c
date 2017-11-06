@@ -65,9 +65,9 @@ SOPC_StatusCode CryptoProvider_SymmEncrypt_AES256(const SOPC_CryptoProvider *pPr
 
     memcpy(iv_cpy, pIV, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block);
 
-    if(mbedtls_aes_setkey_enc(&aes, (unsigned char *)pKey, 256) != 0)
+    if(mbedtls_aes_setkey_enc(&aes, (const unsigned char *)pKey, 256) != 0)
         return STATUS_INVALID_PARAMETERS;
-    if(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, lenPlainText, iv_cpy, (unsigned char *)pInput, (unsigned char *)pOutput) != 0)
+    if(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, lenPlainText, iv_cpy, (const unsigned char *)pInput, (unsigned char *)pOutput) != 0)
         return STATUS_INVALID_PARAMETERS;
 
     memset(iv_cpy, 0, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block);
@@ -96,9 +96,9 @@ SOPC_StatusCode CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider *pPr
     memcpy(iv_cpy, pIV, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block);
     mbedtls_aes_init(&aes);
 
-    if(mbedtls_aes_setkey_dec(&aes, (unsigned char *)pKey, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey*8) != 0)
+    if(mbedtls_aes_setkey_dec(&aes, (const unsigned char *)pKey, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey*8) != 0)
         return STATUS_INVALID_PARAMETERS;
-    if(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, lenCipherText, iv_cpy, (unsigned char *)pInput, (unsigned char *)pOutput) != 0)
+    if(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, lenCipherText, iv_cpy, (const unsigned char *)pInput, (unsigned char *)pOutput) != 0)
         return STATUS_INVALID_PARAMETERS;
 
     memset(iv_cpy, 0, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block);
@@ -347,7 +347,7 @@ SOPC_StatusCode CryptoProvider_AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider *p
             lenToCiph = lenPlainText;
 
         if(mbedtls_rsa_rsaes_oaep_encrypt(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PUBLIC, NULL, 0,
-                                          lenToCiph, (unsigned char *)pInput, (unsigned char *)pOutput) != 0)
+                                          lenToCiph, (const unsigned char *)pInput, (unsigned char *)pOutput) != 0)
         {
             status = STATUS_NOK;
             break;
@@ -397,7 +397,7 @@ SOPC_StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider *p
     {
         // TODO: this might fail because of lenMsgPlain (doc recommend that it is at least sizeof(modulus), but here it is the length of the content)
         if(mbedtls_rsa_rsaes_oaep_decrypt(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PRIVATE, NULL, 0,
-                                          &lenDeciphed, (unsigned char *)pInput, (unsigned char *)pOutput, lenMsgPlain) != 0)
+                                          &lenDeciphed, (const unsigned char *)pInput, (unsigned char *)pOutput, lenMsgPlain) != 0)
         {
             status = STATUS_NOK;
             break;

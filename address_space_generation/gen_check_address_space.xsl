@@ -55,7 +55,7 @@ extern SOPC_AddressSpace addressSpace;
 #define Description_end addressSpace.descriptionIdxArray_end
 #define DEFAULT_VARIANT  {SOPC_Null_Id, SOPC_VariantArrayType_SingleValue,{0}}
 
-bool test_browsename(){
+bool test_browsename(void){
     bool bres = true;
     printf ("test BrowseName\n");
     const char *var;
@@ -63,7 +63,7 @@ bool test_browsename(){
     return bres;
 }
 
-bool test_value(){
+bool test_value(void){
     printf ("test Value\n");
     bool bres = true;
     int pos;
@@ -88,7 +88,7 @@ bool test_value(){
     return bres;
 }
 
-bool test_reference(){
+bool test_reference(void){
     printf("test reference \n");
     bool bres = true;
     int pos;
@@ -121,7 +121,7 @@ int compareLocalizedText(SOPC_LocalizedText LText, const char *text, const char 
 
 % for s in ['Description', 'DisplayName']:
 
-bool test_${s}(){
+bool test_${s}(void){
     printf("test ${s}\n");
     bool bres = true;
     int pos;
@@ -134,7 +134,7 @@ bool test_${s}(){
 
 % endfor
 
-int main (){
+int main (void){
     bool bres = true;
     bres = test_browsename();
     bres = bres &amp;&amp; test_value();

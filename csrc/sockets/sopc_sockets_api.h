@@ -59,8 +59,8 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent,
                                void*                   params,
                                int32_t                 auxParam);
 
-void SOPC_Sockets_Initialize();
+void SOPC_Sockets_Initialize(void);
 
-void SOPC_Sockets_Clear();
+void SOPC_Sockets_Clear(void);
 
 #endif /* _SOPC_SOCKETS_API_H_ */

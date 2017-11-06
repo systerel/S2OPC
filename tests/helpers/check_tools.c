@@ -833,11 +833,11 @@ START_TEST(test_async_queue_threads)
     Thread thread;
     AsyncQueue_Element params;
     SOPC_AsyncQueue* queue;
-    const uint8_t one = 1;
-    const uint8_t two = 2;
-    const uint8_t three = 3;
-    const uint8_t four = 4;
-    const uint8_t five = 5;
+    uint8_t one = 1;
+    uint8_t two = 2;
+    uint8_t three = 3;
+    uint8_t four = 4;
+    uint8_t five = 5;
     SOPC_StatusCode status = SOPC_AsyncQueue_Init(&queue, NULL);
     params.success = false;
     params.blockingDequeue = false;

@@ -104,7 +104,7 @@ void OpcUa_ReferenceNode_Initialize(void* pValue);
 
 void OpcUa_ReferenceNode_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ReferenceNode_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ReferenceNode_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ReferenceNode_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -136,7 +136,7 @@ void OpcUa_Node_Initialize(void* pValue);
 
 void OpcUa_Node_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_Node_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_Node_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_Node_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -168,7 +168,7 @@ void OpcUa_InstanceNode_Initialize(void* pValue);
 
 void OpcUa_InstanceNode_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_InstanceNode_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_InstanceNode_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_InstanceNode_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -200,7 +200,7 @@ void OpcUa_TypeNode_Initialize(void* pValue);
 
 void OpcUa_TypeNode_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_TypeNode_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_TypeNode_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_TypeNode_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -233,7 +233,7 @@ void OpcUa_ObjectNode_Initialize(void* pValue);
 
 void OpcUa_ObjectNode_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ObjectNode_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ObjectNode_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ObjectNode_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -266,7 +266,7 @@ void OpcUa_ObjectTypeNode_Initialize(void* pValue);
 
 void OpcUa_ObjectTypeNode_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ObjectTypeNode_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ObjectTypeNode_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ObjectTypeNode_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -307,7 +307,7 @@ void OpcUa_VariableNode_Initialize(void* pValue);
 
 void OpcUa_VariableNode_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_VariableNode_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_VariableNode_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_VariableNode_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -345,7 +345,7 @@ void OpcUa_VariableTypeNode_Initialize(void* pValue);
 
 void OpcUa_VariableTypeNode_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_VariableTypeNode_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_VariableTypeNode_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_VariableTypeNode_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -380,7 +380,7 @@ void OpcUa_ReferenceTypeNode_Initialize(void* pValue);
 
 void OpcUa_ReferenceTypeNode_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ReferenceTypeNode_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ReferenceTypeNode_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ReferenceTypeNode_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -414,7 +414,7 @@ void OpcUa_MethodNode_Initialize(void* pValue);
 
 void OpcUa_MethodNode_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_MethodNode_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_MethodNode_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_MethodNode_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -448,7 +448,7 @@ void OpcUa_ViewNode_Initialize(void* pValue);
 
 void OpcUa_ViewNode_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ViewNode_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ViewNode_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ViewNode_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -481,7 +481,7 @@ void OpcUa_DataTypeNode_Initialize(void* pValue);
 
 void OpcUa_DataTypeNode_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DataTypeNode_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DataTypeNode_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DataTypeNode_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -510,7 +510,7 @@ void OpcUa_Argument_Initialize(void* pValue);
 
 void OpcUa_Argument_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_Argument_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_Argument_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_Argument_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -536,7 +536,7 @@ void OpcUa_EnumValueType_Initialize(void* pValue);
 
 void OpcUa_EnumValueType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_EnumValueType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_EnumValueType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_EnumValueType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -563,7 +563,7 @@ void OpcUa_EnumField_Initialize(void* pValue);
 
 void OpcUa_EnumField_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_EnumField_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_EnumField_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_EnumField_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -588,7 +588,7 @@ void OpcUa_OptionSet_Initialize(void* pValue);
 
 void OpcUa_OptionSet_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_OptionSet_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_OptionSet_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_OptionSet_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -613,7 +613,7 @@ void OpcUa_TimeZoneDataType_Initialize(void* pValue);
 
 void OpcUa_TimeZoneDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_TimeZoneDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_TimeZoneDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_TimeZoneDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -662,7 +662,7 @@ void OpcUa_ApplicationDescription_Initialize(void* pValue);
 
 void OpcUa_ApplicationDescription_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ApplicationDescription_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ApplicationDescription_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ApplicationDescription_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -692,7 +692,7 @@ void OpcUa_RequestHeader_Initialize(void* pValue);
 
 void OpcUa_RequestHeader_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RequestHeader_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RequestHeader_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RequestHeader_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -722,7 +722,7 @@ void OpcUa_ResponseHeader_Initialize(void* pValue);
 
 void OpcUa_ResponseHeader_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ResponseHeader_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ResponseHeader_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ResponseHeader_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -746,7 +746,7 @@ void OpcUa_ServiceFault_Initialize(void* pValue);
 
 void OpcUa_ServiceFault_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ServiceFault_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ServiceFault_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ServiceFault_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -776,7 +776,7 @@ void OpcUa_FindServersRequest_Initialize(void* pValue);
 
 void OpcUa_FindServersRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_FindServersRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_FindServersRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_FindServersRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -802,7 +802,7 @@ void OpcUa_FindServersResponse_Initialize(void* pValue);
 
 void OpcUa_FindServersResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_FindServersResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_FindServersResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_FindServersResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -831,7 +831,7 @@ void OpcUa_ServerOnNetwork_Initialize(void* pValue);
 
 void OpcUa_ServerOnNetwork_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ServerOnNetwork_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ServerOnNetwork_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ServerOnNetwork_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -860,7 +860,7 @@ void OpcUa_FindServersOnNetworkRequest_Initialize(void* pValue);
 
 void OpcUa_FindServersOnNetworkRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_FindServersOnNetworkRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_FindServersOnNetworkRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_FindServersOnNetworkRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -887,7 +887,7 @@ void OpcUa_FindServersOnNetworkResponse_Initialize(void* pValue);
 
 void OpcUa_FindServersOnNetworkResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_FindServersOnNetworkResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_FindServersOnNetworkResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -953,7 +953,7 @@ void OpcUa_UserTokenPolicy_Initialize(void* pValue);
 
 void OpcUa_UserTokenPolicy_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_UserTokenPolicy_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_UserTokenPolicy_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_UserTokenPolicy_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -985,7 +985,7 @@ void OpcUa_EndpointDescription_Initialize(void* pValue);
 
 void OpcUa_EndpointDescription_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_EndpointDescription_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_EndpointDescription_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_EndpointDescription_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1015,7 +1015,7 @@ void OpcUa_GetEndpointsRequest_Initialize(void* pValue);
 
 void OpcUa_GetEndpointsRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_GetEndpointsRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_GetEndpointsRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_GetEndpointsRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1041,7 +1041,7 @@ void OpcUa_GetEndpointsResponse_Initialize(void* pValue);
 
 void OpcUa_GetEndpointsResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_GetEndpointsResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_GetEndpointsResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_GetEndpointsResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1075,7 +1075,7 @@ void OpcUa_RegisteredServer_Initialize(void* pValue);
 
 void OpcUa_RegisteredServer_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RegisteredServer_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RegisteredServer_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RegisteredServer_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1101,7 +1101,7 @@ void OpcUa_RegisterServerRequest_Initialize(void* pValue);
 
 void OpcUa_RegisterServerRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RegisterServerRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RegisterServerRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RegisterServerRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1125,7 +1125,7 @@ void OpcUa_RegisterServerResponse_Initialize(void* pValue);
 
 void OpcUa_RegisterServerResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RegisterServerResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RegisterServerResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RegisterServerResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1152,7 +1152,7 @@ void OpcUa_MdnsDiscoveryConfiguration_Initialize(void* pValue);
 
 void OpcUa_MdnsDiscoveryConfiguration_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_MdnsDiscoveryConfiguration_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_MdnsDiscoveryConfiguration_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_MdnsDiscoveryConfiguration_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1180,7 +1180,7 @@ void OpcUa_RegisterServer2Request_Initialize(void* pValue);
 
 void OpcUa_RegisterServer2Request_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RegisterServer2Request_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RegisterServer2Request_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RegisterServer2Request_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1208,7 +1208,7 @@ void OpcUa_RegisterServer2Response_Initialize(void* pValue);
 
 void OpcUa_RegisterServer2Response_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RegisterServer2Response_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RegisterServer2Response_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1252,7 +1252,7 @@ void OpcUa_ChannelSecurityToken_Initialize(void* pValue);
 
 void OpcUa_ChannelSecurityToken_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ChannelSecurityToken_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ChannelSecurityToken_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ChannelSecurityToken_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1282,7 +1282,7 @@ void OpcUa_OpenSecureChannelRequest_Initialize(void* pValue);
 
 void OpcUa_OpenSecureChannelRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_OpenSecureChannelRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_OpenSecureChannelRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_OpenSecureChannelRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1309,7 +1309,7 @@ void OpcUa_OpenSecureChannelResponse_Initialize(void* pValue);
 
 void OpcUa_OpenSecureChannelResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_OpenSecureChannelResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_OpenSecureChannelResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_OpenSecureChannelResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1335,7 +1335,7 @@ void OpcUa_CloseSecureChannelRequest_Initialize(void* pValue);
 
 void OpcUa_CloseSecureChannelRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CloseSecureChannelRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CloseSecureChannelRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CloseSecureChannelRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1359,7 +1359,7 @@ void OpcUa_CloseSecureChannelResponse_Initialize(void* pValue);
 
 void OpcUa_CloseSecureChannelResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CloseSecureChannelResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CloseSecureChannelResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CloseSecureChannelResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1385,7 +1385,7 @@ void OpcUa_SignedSoftwareCertificate_Initialize(void* pValue);
 
 void OpcUa_SignedSoftwareCertificate_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SignedSoftwareCertificate_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SignedSoftwareCertificate_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SignedSoftwareCertificate_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1410,7 +1410,7 @@ void OpcUa_SignatureData_Initialize(void* pValue);
 
 void OpcUa_SignatureData_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SignatureData_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SignatureData_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SignatureData_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1443,7 +1443,7 @@ void OpcUa_CreateSessionRequest_Initialize(void* pValue);
 
 void OpcUa_CreateSessionRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CreateSessionRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CreateSessionRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CreateSessionRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1478,7 +1478,7 @@ void OpcUa_CreateSessionResponse_Initialize(void* pValue);
 
 void OpcUa_CreateSessionResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CreateSessionResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CreateSessionResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CreateSessionResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1503,7 +1503,7 @@ void OpcUa_UserIdentityToken_Initialize(void* pValue);
 
 void OpcUa_UserIdentityToken_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_UserIdentityToken_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_UserIdentityToken_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_UserIdentityToken_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1527,7 +1527,7 @@ void OpcUa_AnonymousIdentityToken_Initialize(void* pValue);
 
 void OpcUa_AnonymousIdentityToken_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AnonymousIdentityToken_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AnonymousIdentityToken_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AnonymousIdentityToken_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1554,7 +1554,7 @@ void OpcUa_UserNameIdentityToken_Initialize(void* pValue);
 
 void OpcUa_UserNameIdentityToken_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_UserNameIdentityToken_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_UserNameIdentityToken_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_UserNameIdentityToken_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1579,7 +1579,7 @@ void OpcUa_X509IdentityToken_Initialize(void* pValue);
 
 void OpcUa_X509IdentityToken_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_X509IdentityToken_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_X509IdentityToken_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_X509IdentityToken_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1604,7 +1604,7 @@ void OpcUa_KerberosIdentityToken_Initialize(void* pValue);
 
 void OpcUa_KerberosIdentityToken_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_KerberosIdentityToken_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_KerberosIdentityToken_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_KerberosIdentityToken_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1630,7 +1630,7 @@ void OpcUa_IssuedIdentityToken_Initialize(void* pValue);
 
 void OpcUa_IssuedIdentityToken_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_IssuedIdentityToken_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_IssuedIdentityToken_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_IssuedIdentityToken_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1662,7 +1662,7 @@ void OpcUa_ActivateSessionRequest_Initialize(void* pValue);
 
 void OpcUa_ActivateSessionRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ActivateSessionRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ActivateSessionRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ActivateSessionRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1691,7 +1691,7 @@ void OpcUa_ActivateSessionResponse_Initialize(void* pValue);
 
 void OpcUa_ActivateSessionResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ActivateSessionResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ActivateSessionResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ActivateSessionResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1718,7 +1718,7 @@ void OpcUa_CloseSessionRequest_Initialize(void* pValue);
 
 void OpcUa_CloseSessionRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CloseSessionRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CloseSessionRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CloseSessionRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1742,7 +1742,7 @@ void OpcUa_CloseSessionResponse_Initialize(void* pValue);
 
 void OpcUa_CloseSessionResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CloseSessionResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CloseSessionResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CloseSessionResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1769,7 +1769,7 @@ void OpcUa_CancelRequest_Initialize(void* pValue);
 
 void OpcUa_CancelRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CancelRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CancelRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CancelRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1794,7 +1794,7 @@ void OpcUa_CancelResponse_Initialize(void* pValue);
 
 void OpcUa_CancelResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CancelResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CancelResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CancelResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1869,7 +1869,7 @@ void OpcUa_NodeAttributes_Initialize(void* pValue);
 
 void OpcUa_NodeAttributes_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_NodeAttributes_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_NodeAttributes_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_NodeAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1898,7 +1898,7 @@ void OpcUa_ObjectAttributes_Initialize(void* pValue);
 
 void OpcUa_ObjectAttributes_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ObjectAttributes_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ObjectAttributes_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ObjectAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1935,7 +1935,7 @@ void OpcUa_VariableAttributes_Initialize(void* pValue);
 
 void OpcUa_VariableAttributes_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_VariableAttributes_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_VariableAttributes_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_VariableAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1965,7 +1965,7 @@ void OpcUa_MethodAttributes_Initialize(void* pValue);
 
 void OpcUa_MethodAttributes_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_MethodAttributes_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_MethodAttributes_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_MethodAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -1994,7 +1994,7 @@ void OpcUa_ObjectTypeAttributes_Initialize(void* pValue);
 
 void OpcUa_ObjectTypeAttributes_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ObjectTypeAttributes_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ObjectTypeAttributes_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ObjectTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2028,7 +2028,7 @@ void OpcUa_VariableTypeAttributes_Initialize(void* pValue);
 
 void OpcUa_VariableTypeAttributes_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_VariableTypeAttributes_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_VariableTypeAttributes_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_VariableTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2059,7 +2059,7 @@ void OpcUa_ReferenceTypeAttributes_Initialize(void* pValue);
 
 void OpcUa_ReferenceTypeAttributes_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ReferenceTypeAttributes_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ReferenceTypeAttributes_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ReferenceTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2088,7 +2088,7 @@ void OpcUa_DataTypeAttributes_Initialize(void* pValue);
 
 void OpcUa_DataTypeAttributes_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DataTypeAttributes_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DataTypeAttributes_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DataTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2118,7 +2118,7 @@ void OpcUa_ViewAttributes_Initialize(void* pValue);
 
 void OpcUa_ViewAttributes_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ViewAttributes_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ViewAttributes_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ViewAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2148,7 +2148,7 @@ void OpcUa_AddNodesItem_Initialize(void* pValue);
 
 void OpcUa_AddNodesItem_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AddNodesItem_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AddNodesItem_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AddNodesItem_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2173,7 +2173,7 @@ void OpcUa_AddNodesResult_Initialize(void* pValue);
 
 void OpcUa_AddNodesResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AddNodesResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AddNodesResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AddNodesResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2200,7 +2200,7 @@ void OpcUa_AddNodesRequest_Initialize(void* pValue);
 
 void OpcUa_AddNodesRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AddNodesRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AddNodesRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AddNodesRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2228,7 +2228,7 @@ void OpcUa_AddNodesResponse_Initialize(void* pValue);
 
 void OpcUa_AddNodesResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AddNodesResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AddNodesResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AddNodesResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2258,7 +2258,7 @@ void OpcUa_AddReferencesItem_Initialize(void* pValue);
 
 void OpcUa_AddReferencesItem_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AddReferencesItem_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AddReferencesItem_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AddReferencesItem_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2285,7 +2285,7 @@ void OpcUa_AddReferencesRequest_Initialize(void* pValue);
 
 void OpcUa_AddReferencesRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AddReferencesRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AddReferencesRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AddReferencesRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2313,7 +2313,7 @@ void OpcUa_AddReferencesResponse_Initialize(void* pValue);
 
 void OpcUa_AddReferencesResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AddReferencesResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AddReferencesResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AddReferencesResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2339,7 +2339,7 @@ void OpcUa_DeleteNodesItem_Initialize(void* pValue);
 
 void OpcUa_DeleteNodesItem_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteNodesItem_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteNodesItem_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteNodesItem_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2366,7 +2366,7 @@ void OpcUa_DeleteNodesRequest_Initialize(void* pValue);
 
 void OpcUa_DeleteNodesRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteNodesRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteNodesRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteNodesRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2394,7 +2394,7 @@ void OpcUa_DeleteNodesResponse_Initialize(void* pValue);
 
 void OpcUa_DeleteNodesResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteNodesResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteNodesResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteNodesResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2423,7 +2423,7 @@ void OpcUa_DeleteReferencesItem_Initialize(void* pValue);
 
 void OpcUa_DeleteReferencesItem_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteReferencesItem_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteReferencesItem_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteReferencesItem_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2450,7 +2450,7 @@ void OpcUa_DeleteReferencesRequest_Initialize(void* pValue);
 
 void OpcUa_DeleteReferencesRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteReferencesRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteReferencesRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteReferencesRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2478,7 +2478,7 @@ void OpcUa_DeleteReferencesResponse_Initialize(void* pValue);
 
 void OpcUa_DeleteReferencesResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteReferencesResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteReferencesResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteReferencesResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2559,7 +2559,7 @@ void OpcUa_ViewDescription_Initialize(void* pValue);
 
 void OpcUa_ViewDescription_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ViewDescription_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ViewDescription_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ViewDescription_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2588,7 +2588,7 @@ void OpcUa_BrowseDescription_Initialize(void* pValue);
 
 void OpcUa_BrowseDescription_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_BrowseDescription_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_BrowseDescription_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_BrowseDescription_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2642,7 +2642,7 @@ void OpcUa_ReferenceDescription_Initialize(void* pValue);
 
 void OpcUa_ReferenceDescription_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ReferenceDescription_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ReferenceDescription_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ReferenceDescription_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2669,7 +2669,7 @@ void OpcUa_BrowseResult_Initialize(void* pValue);
 
 void OpcUa_BrowseResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_BrowseResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_BrowseResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_BrowseResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2698,7 +2698,7 @@ void OpcUa_BrowseRequest_Initialize(void* pValue);
 
 void OpcUa_BrowseRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_BrowseRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_BrowseRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_BrowseRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2726,7 +2726,7 @@ void OpcUa_BrowseResponse_Initialize(void* pValue);
 
 void OpcUa_BrowseResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_BrowseResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_BrowseResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_BrowseResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2755,7 +2755,7 @@ void OpcUa_BrowseNextRequest_Initialize(void* pValue);
 
 void OpcUa_BrowseNextRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_BrowseNextRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_BrowseNextRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_BrowseNextRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2783,7 +2783,7 @@ void OpcUa_BrowseNextResponse_Initialize(void* pValue);
 
 void OpcUa_BrowseNextResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_BrowseNextResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_BrowseNextResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_BrowseNextResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2811,7 +2811,7 @@ void OpcUa_RelativePathElement_Initialize(void* pValue);
 
 void OpcUa_RelativePathElement_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RelativePathElement_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RelativePathElement_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RelativePathElement_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2836,7 +2836,7 @@ void OpcUa_RelativePath_Initialize(void* pValue);
 
 void OpcUa_RelativePath_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RelativePath_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RelativePath_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RelativePath_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2861,7 +2861,7 @@ void OpcUa_BrowsePath_Initialize(void* pValue);
 
 void OpcUa_BrowsePath_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_BrowsePath_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_BrowsePath_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_BrowsePath_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2886,7 +2886,7 @@ void OpcUa_BrowsePathTarget_Initialize(void* pValue);
 
 void OpcUa_BrowsePathTarget_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_BrowsePathTarget_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_BrowsePathTarget_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_BrowsePathTarget_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2912,7 +2912,7 @@ void OpcUa_BrowsePathResult_Initialize(void* pValue);
 
 void OpcUa_BrowsePathResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_BrowsePathResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_BrowsePathResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_BrowsePathResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2939,7 +2939,7 @@ void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize(void* pValue);
 
 void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2967,7 +2967,7 @@ void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize(void* pValue);
 
 void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -2995,7 +2995,7 @@ void OpcUa_RegisterNodesRequest_Initialize(void* pValue);
 
 void OpcUa_RegisterNodesRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RegisterNodesRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RegisterNodesRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RegisterNodesRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3021,7 +3021,7 @@ void OpcUa_RegisterNodesResponse_Initialize(void* pValue);
 
 void OpcUa_RegisterNodesResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RegisterNodesResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RegisterNodesResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RegisterNodesResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3049,7 +3049,7 @@ void OpcUa_UnregisterNodesRequest_Initialize(void* pValue);
 
 void OpcUa_UnregisterNodesRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_UnregisterNodesRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_UnregisterNodesRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_UnregisterNodesRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3073,7 +3073,7 @@ void OpcUa_UnregisterNodesResponse_Initialize(void* pValue);
 
 void OpcUa_UnregisterNodesResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_UnregisterNodesResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_UnregisterNodesResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_UnregisterNodesResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3106,7 +3106,7 @@ void OpcUa_EndpointConfiguration_Initialize(void* pValue);
 
 void OpcUa_EndpointConfiguration_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_EndpointConfiguration_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_EndpointConfiguration_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_EndpointConfiguration_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3154,7 +3154,7 @@ void OpcUa_SupportedProfile_Initialize(void* pValue);
 
 void OpcUa_SupportedProfile_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SupportedProfile_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SupportedProfile_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SupportedProfile_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3188,7 +3188,7 @@ void OpcUa_SoftwareCertificate_Initialize(void* pValue);
 
 void OpcUa_SoftwareCertificate_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SoftwareCertificate_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SoftwareCertificate_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SoftwareCertificate_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3214,7 +3214,7 @@ void OpcUa_QueryDataDescription_Initialize(void* pValue);
 
 void OpcUa_QueryDataDescription_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_QueryDataDescription_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_QueryDataDescription_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_QueryDataDescription_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3241,7 +3241,7 @@ void OpcUa_NodeTypeDescription_Initialize(void* pValue);
 
 void OpcUa_NodeTypeDescription_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_NodeTypeDescription_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_NodeTypeDescription_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_NodeTypeDescription_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3300,7 +3300,7 @@ void OpcUa_QueryDataSet_Initialize(void* pValue);
 
 void OpcUa_QueryDataSet_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_QueryDataSet_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_QueryDataSet_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_QueryDataSet_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3328,7 +3328,7 @@ void OpcUa_NodeReference_Initialize(void* pValue);
 
 void OpcUa_NodeReference_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_NodeReference_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_NodeReference_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_NodeReference_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3354,7 +3354,7 @@ void OpcUa_ContentFilterElement_Initialize(void* pValue);
 
 void OpcUa_ContentFilterElement_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ContentFilterElement_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ContentFilterElement_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ContentFilterElement_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3379,7 +3379,7 @@ void OpcUa_ContentFilter_Initialize(void* pValue);
 
 void OpcUa_ContentFilter_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ContentFilter_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ContentFilter_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ContentFilter_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3403,7 +3403,7 @@ void OpcUa_ElementOperand_Initialize(void* pValue);
 
 void OpcUa_ElementOperand_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ElementOperand_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ElementOperand_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ElementOperand_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3427,7 +3427,7 @@ void OpcUa_LiteralOperand_Initialize(void* pValue);
 
 void OpcUa_LiteralOperand_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_LiteralOperand_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_LiteralOperand_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_LiteralOperand_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3455,7 +3455,7 @@ void OpcUa_AttributeOperand_Initialize(void* pValue);
 
 void OpcUa_AttributeOperand_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AttributeOperand_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AttributeOperand_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AttributeOperand_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3483,7 +3483,7 @@ void OpcUa_SimpleAttributeOperand_Initialize(void* pValue);
 
 void OpcUa_SimpleAttributeOperand_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SimpleAttributeOperand_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SimpleAttributeOperand_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SimpleAttributeOperand_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3511,7 +3511,7 @@ void OpcUa_ContentFilterElementResult_Initialize(void* pValue);
 
 void OpcUa_ContentFilterElementResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ContentFilterElementResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ContentFilterElementResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ContentFilterElementResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3538,7 +3538,7 @@ void OpcUa_ContentFilterResult_Initialize(void* pValue);
 
 void OpcUa_ContentFilterResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ContentFilterResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ContentFilterResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ContentFilterResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3566,7 +3566,7 @@ void OpcUa_ParsingResult_Initialize(void* pValue);
 
 void OpcUa_ParsingResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ParsingResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ParsingResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ParsingResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3597,7 +3597,7 @@ void OpcUa_QueryFirstRequest_Initialize(void* pValue);
 
 void OpcUa_QueryFirstRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_QueryFirstRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_QueryFirstRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_QueryFirstRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3629,7 +3629,7 @@ void OpcUa_QueryFirstResponse_Initialize(void* pValue);
 
 void OpcUa_QueryFirstResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_QueryFirstResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_QueryFirstResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_QueryFirstResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3657,7 +3657,7 @@ void OpcUa_QueryNextRequest_Initialize(void* pValue);
 
 void OpcUa_QueryNextRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_QueryNextRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_QueryNextRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_QueryNextRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3684,7 +3684,7 @@ void OpcUa_QueryNextResponse_Initialize(void* pValue);
 
 void OpcUa_QueryNextResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_QueryNextResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_QueryNextResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_QueryNextResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3730,7 +3730,7 @@ void OpcUa_ReadValueId_Initialize(void* pValue);
 
 void OpcUa_ReadValueId_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ReadValueId_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ReadValueId_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ReadValueId_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3759,7 +3759,7 @@ void OpcUa_ReadRequest_Initialize(void* pValue);
 
 void OpcUa_ReadRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ReadRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ReadRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ReadRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3787,7 +3787,7 @@ void OpcUa_ReadResponse_Initialize(void* pValue);
 
 void OpcUa_ReadResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ReadResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ReadResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ReadResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3815,7 +3815,7 @@ void OpcUa_HistoryReadValueId_Initialize(void* pValue);
 
 void OpcUa_HistoryReadValueId_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_HistoryReadValueId_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_HistoryReadValueId_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_HistoryReadValueId_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3841,7 +3841,7 @@ void OpcUa_HistoryReadResult_Initialize(void* pValue);
 
 void OpcUa_HistoryReadResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_HistoryReadResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_HistoryReadResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_HistoryReadResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3867,7 +3867,7 @@ void OpcUa_EventFilter_Initialize(void* pValue);
 
 void OpcUa_EventFilter_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_EventFilter_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_EventFilter_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_EventFilter_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3894,7 +3894,7 @@ void OpcUa_ReadEventDetails_Initialize(void* pValue);
 
 void OpcUa_ReadEventDetails_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ReadEventDetails_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ReadEventDetails_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ReadEventDetails_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3922,7 +3922,7 @@ void OpcUa_ReadRawModifiedDetails_Initialize(void* pValue);
 
 void OpcUa_ReadRawModifiedDetails_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ReadRawModifiedDetails_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ReadRawModifiedDetails_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ReadRawModifiedDetails_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3950,7 +3950,7 @@ void OpcUa_AggregateConfiguration_Initialize(void* pValue);
 
 void OpcUa_AggregateConfiguration_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AggregateConfiguration_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AggregateConfiguration_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AggregateConfiguration_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -3979,7 +3979,7 @@ void OpcUa_ReadProcessedDetails_Initialize(void* pValue);
 
 void OpcUa_ReadProcessedDetails_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ReadProcessedDetails_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ReadProcessedDetails_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ReadProcessedDetails_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4005,7 +4005,7 @@ void OpcUa_ReadAtTimeDetails_Initialize(void* pValue);
 
 void OpcUa_ReadAtTimeDetails_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ReadAtTimeDetails_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ReadAtTimeDetails_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ReadAtTimeDetails_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4030,7 +4030,7 @@ void OpcUa_HistoryData_Initialize(void* pValue);
 
 void OpcUa_HistoryData_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_HistoryData_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_HistoryData_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_HistoryData_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4074,7 +4074,7 @@ void OpcUa_ModificationInfo_Initialize(void* pValue);
 
 void OpcUa_ModificationInfo_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ModificationInfo_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ModificationInfo_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ModificationInfo_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4101,7 +4101,7 @@ void OpcUa_HistoryModifiedData_Initialize(void* pValue);
 
 void OpcUa_HistoryModifiedData_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_HistoryModifiedData_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_HistoryModifiedData_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_HistoryModifiedData_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4126,7 +4126,7 @@ void OpcUa_HistoryEventFieldList_Initialize(void* pValue);
 
 void OpcUa_HistoryEventFieldList_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_HistoryEventFieldList_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_HistoryEventFieldList_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_HistoryEventFieldList_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4151,7 +4151,7 @@ void OpcUa_HistoryEvent_Initialize(void* pValue);
 
 void OpcUa_HistoryEvent_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_HistoryEvent_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_HistoryEvent_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_HistoryEvent_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4181,7 +4181,7 @@ void OpcUa_HistoryReadRequest_Initialize(void* pValue);
 
 void OpcUa_HistoryReadRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_HistoryReadRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_HistoryReadRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_HistoryReadRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4209,7 +4209,7 @@ void OpcUa_HistoryReadResponse_Initialize(void* pValue);
 
 void OpcUa_HistoryReadResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_HistoryReadResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_HistoryReadResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_HistoryReadResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4237,7 +4237,7 @@ void OpcUa_WriteValue_Initialize(void* pValue);
 
 void OpcUa_WriteValue_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_WriteValue_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_WriteValue_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_WriteValue_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4264,7 +4264,7 @@ void OpcUa_WriteRequest_Initialize(void* pValue);
 
 void OpcUa_WriteRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_WriteRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_WriteRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_WriteRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4292,7 +4292,7 @@ void OpcUa_WriteResponse_Initialize(void* pValue);
 
 void OpcUa_WriteResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_WriteResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_WriteResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_WriteResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4317,7 +4317,7 @@ void OpcUa_HistoryUpdateDetails_Initialize(void* pValue);
 
 void OpcUa_HistoryUpdateDetails_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_HistoryUpdateDetails_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_HistoryUpdateDetails_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_HistoryUpdateDetails_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4362,7 +4362,7 @@ void OpcUa_UpdateDataDetails_Initialize(void* pValue);
 
 void OpcUa_UpdateDataDetails_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_UpdateDataDetails_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_UpdateDataDetails_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_UpdateDataDetails_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4389,7 +4389,7 @@ void OpcUa_UpdateStructureDataDetails_Initialize(void* pValue);
 
 void OpcUa_UpdateStructureDataDetails_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_UpdateStructureDataDetails_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_UpdateStructureDataDetails_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_UpdateStructureDataDetails_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4417,7 +4417,7 @@ void OpcUa_UpdateEventDetails_Initialize(void* pValue);
 
 void OpcUa_UpdateEventDetails_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_UpdateEventDetails_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_UpdateEventDetails_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_UpdateEventDetails_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4444,7 +4444,7 @@ void OpcUa_DeleteRawModifiedDetails_Initialize(void* pValue);
 
 void OpcUa_DeleteRawModifiedDetails_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteRawModifiedDetails_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteRawModifiedDetails_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteRawModifiedDetails_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4470,7 +4470,7 @@ void OpcUa_DeleteAtTimeDetails_Initialize(void* pValue);
 
 void OpcUa_DeleteAtTimeDetails_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteAtTimeDetails_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteAtTimeDetails_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteAtTimeDetails_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4496,7 +4496,7 @@ void OpcUa_DeleteEventDetails_Initialize(void* pValue);
 
 void OpcUa_DeleteEventDetails_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteEventDetails_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteEventDetails_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteEventDetails_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4524,7 +4524,7 @@ void OpcUa_HistoryUpdateResult_Initialize(void* pValue);
 
 void OpcUa_HistoryUpdateResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_HistoryUpdateResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_HistoryUpdateResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_HistoryUpdateResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4551,7 +4551,7 @@ void OpcUa_HistoryUpdateRequest_Initialize(void* pValue);
 
 void OpcUa_HistoryUpdateRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_HistoryUpdateRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_HistoryUpdateRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_HistoryUpdateRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4579,7 +4579,7 @@ void OpcUa_HistoryUpdateResponse_Initialize(void* pValue);
 
 void OpcUa_HistoryUpdateResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_HistoryUpdateResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_HistoryUpdateResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_HistoryUpdateResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4607,7 +4607,7 @@ void OpcUa_CallMethodRequest_Initialize(void* pValue);
 
 void OpcUa_CallMethodRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CallMethodRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CallMethodRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CallMethodRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4637,7 +4637,7 @@ void OpcUa_CallMethodResult_Initialize(void* pValue);
 
 void OpcUa_CallMethodResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CallMethodResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CallMethodResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CallMethodResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4664,7 +4664,7 @@ void OpcUa_CallRequest_Initialize(void* pValue);
 
 void OpcUa_CallRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CallRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CallRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CallRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4692,7 +4692,7 @@ void OpcUa_CallResponse_Initialize(void* pValue);
 
 void OpcUa_CallResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CallResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CallResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CallResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4770,7 +4770,7 @@ void OpcUa_DataChangeFilter_Initialize(void* pValue);
 
 void OpcUa_DataChangeFilter_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DataChangeFilter_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DataChangeFilter_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DataChangeFilter_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4797,7 +4797,7 @@ void OpcUa_AggregateFilter_Initialize(void* pValue);
 
 void OpcUa_AggregateFilter_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AggregateFilter_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AggregateFilter_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AggregateFilter_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4825,7 +4825,7 @@ void OpcUa_EventFilterResult_Initialize(void* pValue);
 
 void OpcUa_EventFilterResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_EventFilterResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_EventFilterResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_EventFilterResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4851,7 +4851,7 @@ void OpcUa_AggregateFilterResult_Initialize(void* pValue);
 
 void OpcUa_AggregateFilterResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AggregateFilterResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AggregateFilterResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AggregateFilterResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4879,7 +4879,7 @@ void OpcUa_MonitoringParameters_Initialize(void* pValue);
 
 void OpcUa_MonitoringParameters_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_MonitoringParameters_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_MonitoringParameters_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_MonitoringParameters_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4905,7 +4905,7 @@ void OpcUa_MonitoredItemCreateRequest_Initialize(void* pValue);
 
 void OpcUa_MonitoredItemCreateRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_MonitoredItemCreateRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_MonitoredItemCreateRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_MonitoredItemCreateRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4933,7 +4933,7 @@ void OpcUa_MonitoredItemCreateResult_Initialize(void* pValue);
 
 void OpcUa_MonitoredItemCreateResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_MonitoredItemCreateResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_MonitoredItemCreateResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_MonitoredItemCreateResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4962,7 +4962,7 @@ void OpcUa_CreateMonitoredItemsRequest_Initialize(void* pValue);
 
 void OpcUa_CreateMonitoredItemsRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CreateMonitoredItemsRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CreateMonitoredItemsRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CreateMonitoredItemsRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -4990,7 +4990,7 @@ void OpcUa_CreateMonitoredItemsResponse_Initialize(void* pValue);
 
 void OpcUa_CreateMonitoredItemsResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CreateMonitoredItemsResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CreateMonitoredItemsResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CreateMonitoredItemsResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5016,7 +5016,7 @@ void OpcUa_MonitoredItemModifyRequest_Initialize(void* pValue);
 
 void OpcUa_MonitoredItemModifyRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_MonitoredItemModifyRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_MonitoredItemModifyRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_MonitoredItemModifyRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5043,7 +5043,7 @@ void OpcUa_MonitoredItemModifyResult_Initialize(void* pValue);
 
 void OpcUa_MonitoredItemModifyResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_MonitoredItemModifyResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_MonitoredItemModifyResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_MonitoredItemModifyResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5072,7 +5072,7 @@ void OpcUa_ModifyMonitoredItemsRequest_Initialize(void* pValue);
 
 void OpcUa_ModifyMonitoredItemsRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ModifyMonitoredItemsRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ModifyMonitoredItemsRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ModifyMonitoredItemsRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5100,7 +5100,7 @@ void OpcUa_ModifyMonitoredItemsResponse_Initialize(void* pValue);
 
 void OpcUa_ModifyMonitoredItemsResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ModifyMonitoredItemsResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ModifyMonitoredItemsResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ModifyMonitoredItemsResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5130,7 +5130,7 @@ void OpcUa_SetMonitoringModeRequest_Initialize(void* pValue);
 
 void OpcUa_SetMonitoringModeRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SetMonitoringModeRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SetMonitoringModeRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SetMonitoringModeRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5158,7 +5158,7 @@ void OpcUa_SetMonitoringModeResponse_Initialize(void* pValue);
 
 void OpcUa_SetMonitoringModeResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SetMonitoringModeResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SetMonitoringModeResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SetMonitoringModeResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5190,7 +5190,7 @@ void OpcUa_SetTriggeringRequest_Initialize(void* pValue);
 
 void OpcUa_SetTriggeringRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SetTriggeringRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SetTriggeringRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SetTriggeringRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5222,7 +5222,7 @@ void OpcUa_SetTriggeringResponse_Initialize(void* pValue);
 
 void OpcUa_SetTriggeringResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SetTriggeringResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SetTriggeringResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SetTriggeringResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5251,7 +5251,7 @@ void OpcUa_DeleteMonitoredItemsRequest_Initialize(void* pValue);
 
 void OpcUa_DeleteMonitoredItemsRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteMonitoredItemsRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteMonitoredItemsRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteMonitoredItemsRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5279,7 +5279,7 @@ void OpcUa_DeleteMonitoredItemsResponse_Initialize(void* pValue);
 
 void OpcUa_DeleteMonitoredItemsResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteMonitoredItemsResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteMonitoredItemsResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteMonitoredItemsResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5311,7 +5311,7 @@ void OpcUa_CreateSubscriptionRequest_Initialize(void* pValue);
 
 void OpcUa_CreateSubscriptionRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CreateSubscriptionRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CreateSubscriptionRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CreateSubscriptionRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5339,7 +5339,7 @@ void OpcUa_CreateSubscriptionResponse_Initialize(void* pValue);
 
 void OpcUa_CreateSubscriptionResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_CreateSubscriptionResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_CreateSubscriptionResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_CreateSubscriptionResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5371,7 +5371,7 @@ void OpcUa_ModifySubscriptionRequest_Initialize(void* pValue);
 
 void OpcUa_ModifySubscriptionRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ModifySubscriptionRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ModifySubscriptionRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ModifySubscriptionRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5398,7 +5398,7 @@ void OpcUa_ModifySubscriptionResponse_Initialize(void* pValue);
 
 void OpcUa_ModifySubscriptionResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ModifySubscriptionResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ModifySubscriptionResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ModifySubscriptionResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5427,7 +5427,7 @@ void OpcUa_SetPublishingModeRequest_Initialize(void* pValue);
 
 void OpcUa_SetPublishingModeRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SetPublishingModeRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SetPublishingModeRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SetPublishingModeRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5455,7 +5455,7 @@ void OpcUa_SetPublishingModeResponse_Initialize(void* pValue);
 
 void OpcUa_SetPublishingModeResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SetPublishingModeResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SetPublishingModeResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SetPublishingModeResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5483,7 +5483,7 @@ void OpcUa_NotificationMessage_Initialize(void* pValue);
 
 void OpcUa_NotificationMessage_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_NotificationMessage_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_NotificationMessage_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_NotificationMessage_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5508,7 +5508,7 @@ void OpcUa_MonitoredItemNotification_Initialize(void* pValue);
 
 void OpcUa_MonitoredItemNotification_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_MonitoredItemNotification_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_MonitoredItemNotification_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_MonitoredItemNotification_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5535,7 +5535,7 @@ void OpcUa_DataChangeNotification_Initialize(void* pValue);
 
 void OpcUa_DataChangeNotification_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DataChangeNotification_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DataChangeNotification_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DataChangeNotification_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5561,7 +5561,7 @@ void OpcUa_EventFieldList_Initialize(void* pValue);
 
 void OpcUa_EventFieldList_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_EventFieldList_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_EventFieldList_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_EventFieldList_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5586,7 +5586,7 @@ void OpcUa_EventNotificationList_Initialize(void* pValue);
 
 void OpcUa_EventNotificationList_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_EventNotificationList_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_EventNotificationList_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_EventNotificationList_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5611,7 +5611,7 @@ void OpcUa_StatusChangeNotification_Initialize(void* pValue);
 
 void OpcUa_StatusChangeNotification_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_StatusChangeNotification_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_StatusChangeNotification_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_StatusChangeNotification_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5636,7 +5636,7 @@ void OpcUa_SubscriptionAcknowledgement_Initialize(void* pValue);
 
 void OpcUa_SubscriptionAcknowledgement_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SubscriptionAcknowledgement_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SubscriptionAcknowledgement_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SubscriptionAcknowledgement_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5663,7 +5663,7 @@ void OpcUa_PublishRequest_Initialize(void* pValue);
 
 void OpcUa_PublishRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_PublishRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_PublishRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_PublishRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5696,7 +5696,7 @@ void OpcUa_PublishResponse_Initialize(void* pValue);
 
 void OpcUa_PublishResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_PublishResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_PublishResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_PublishResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5724,7 +5724,7 @@ void OpcUa_RepublishRequest_Initialize(void* pValue);
 
 void OpcUa_RepublishRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RepublishRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RepublishRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RepublishRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5749,7 +5749,7 @@ void OpcUa_RepublishResponse_Initialize(void* pValue);
 
 void OpcUa_RepublishResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RepublishResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RepublishResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RepublishResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5776,7 +5776,7 @@ void OpcUa_TransferResult_Initialize(void* pValue);
 
 void OpcUa_TransferResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_TransferResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_TransferResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_TransferResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5804,7 +5804,7 @@ void OpcUa_TransferSubscriptionsRequest_Initialize(void* pValue);
 
 void OpcUa_TransferSubscriptionsRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_TransferSubscriptionsRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_TransferSubscriptionsRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_TransferSubscriptionsRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5832,7 +5832,7 @@ void OpcUa_TransferSubscriptionsResponse_Initialize(void* pValue);
 
 void OpcUa_TransferSubscriptionsResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_TransferSubscriptionsResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_TransferSubscriptionsResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_TransferSubscriptionsResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5860,7 +5860,7 @@ void OpcUa_DeleteSubscriptionsRequest_Initialize(void* pValue);
 
 void OpcUa_DeleteSubscriptionsRequest_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteSubscriptionsRequest_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteSubscriptionsRequest_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteSubscriptionsRequest_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5888,7 +5888,7 @@ void OpcUa_DeleteSubscriptionsResponse_Initialize(void* pValue);
 
 void OpcUa_DeleteSubscriptionsResponse_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DeleteSubscriptionsResponse_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DeleteSubscriptionsResponse_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -5935,7 +5935,7 @@ void OpcUa_BuildInfo_Initialize(void* pValue);
 
 void OpcUa_BuildInfo_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_BuildInfo_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_BuildInfo_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_BuildInfo_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6003,7 +6003,7 @@ void OpcUa_RedundantServerDataType_Initialize(void* pValue);
 
 void OpcUa_RedundantServerDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_RedundantServerDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_RedundantServerDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_RedundantServerDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6028,7 +6028,7 @@ void OpcUa_EndpointUrlListDataType_Initialize(void* pValue);
 
 void OpcUa_EndpointUrlListDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_EndpointUrlListDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_EndpointUrlListDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_EndpointUrlListDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6054,7 +6054,7 @@ void OpcUa_NetworkGroupDataType_Initialize(void* pValue);
 
 void OpcUa_NetworkGroupDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_NetworkGroupDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_NetworkGroupDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_NetworkGroupDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6081,7 +6081,7 @@ void OpcUa_SamplingIntervalDiagnosticsDataType_Initialize(void* pValue);
 
 void OpcUa_SamplingIntervalDiagnosticsDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6116,7 +6116,7 @@ void OpcUa_ServerDiagnosticsSummaryDataType_Initialize(void* pValue);
 
 void OpcUa_ServerDiagnosticsSummaryDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6145,7 +6145,7 @@ void OpcUa_ServerStatusDataType_Initialize(void* pValue);
 
 void OpcUa_ServerStatusDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ServerStatusDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ServerStatusDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ServerStatusDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6170,7 +6170,7 @@ void OpcUa_ServiceCounterDataType_Initialize(void* pValue);
 
 void OpcUa_ServiceCounterDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ServiceCounterDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ServiceCounterDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ServiceCounterDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6237,7 +6237,7 @@ void OpcUa_SessionDiagnosticsDataType_Initialize(void* pValue);
 
 void OpcUa_SessionDiagnosticsDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SessionDiagnosticsDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SessionDiagnosticsDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SessionDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6270,7 +6270,7 @@ void OpcUa_SessionSecurityDiagnosticsDataType_Initialize(void* pValue);
 
 void OpcUa_SessionSecurityDiagnosticsDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6295,7 +6295,7 @@ void OpcUa_StatusResult_Initialize(void* pValue);
 
 void OpcUa_StatusResult_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_StatusResult_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_StatusResult_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_StatusResult_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6349,7 +6349,7 @@ void OpcUa_SubscriptionDiagnosticsDataType_Initialize(void* pValue);
 
 void OpcUa_SubscriptionDiagnosticsDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SubscriptionDiagnosticsDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SubscriptionDiagnosticsDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6394,7 +6394,7 @@ void OpcUa_ModelChangeStructureDataType_Initialize(void* pValue);
 
 void OpcUa_ModelChangeStructureDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ModelChangeStructureDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ModelChangeStructureDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ModelChangeStructureDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6419,7 +6419,7 @@ void OpcUa_SemanticChangeStructureDataType_Initialize(void* pValue);
 
 void OpcUa_SemanticChangeStructureDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_SemanticChangeStructureDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_SemanticChangeStructureDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_SemanticChangeStructureDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6444,7 +6444,7 @@ void OpcUa_Range_Initialize(void* pValue);
 
 void OpcUa_Range_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_Range_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_Range_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_Range_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6471,7 +6471,7 @@ void OpcUa_EUInformation_Initialize(void* pValue);
 
 void OpcUa_EUInformation_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_EUInformation_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_EUInformation_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_EUInformation_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6513,7 +6513,7 @@ void OpcUa_ComplexNumberType_Initialize(void* pValue);
 
 void OpcUa_ComplexNumberType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ComplexNumberType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ComplexNumberType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ComplexNumberType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6538,7 +6538,7 @@ void OpcUa_DoubleComplexNumberType_Initialize(void* pValue);
 
 void OpcUa_DoubleComplexNumberType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_DoubleComplexNumberType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_DoubleComplexNumberType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_DoubleComplexNumberType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6567,7 +6567,7 @@ void OpcUa_AxisInformation_Initialize(void* pValue);
 
 void OpcUa_AxisInformation_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_AxisInformation_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_AxisInformation_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_AxisInformation_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6592,7 +6592,7 @@ void OpcUa_XVType_Initialize(void* pValue);
 
 void OpcUa_XVType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_XVType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_XVType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_XVType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6627,7 +6627,7 @@ void OpcUa_ProgramDiagnosticDataType_Initialize(void* pValue);
 
 void OpcUa_ProgramDiagnosticDataType_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_ProgramDiagnosticDataType_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_ProgramDiagnosticDataType_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_ProgramDiagnosticDataType_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6653,7 +6653,7 @@ void OpcUa_Annotation_Initialize(void* pValue);
 
 void OpcUa_Annotation_Clear(void* pValue);
 
-SOPC_StatusCode OpcUa_Annotation_Encode(void* pValue, SOPC_Buffer* buf);
+SOPC_StatusCode OpcUa_Annotation_Encode(const void* pValue, SOPC_Buffer* buf);
 
 SOPC_StatusCode OpcUa_Annotation_Decode(void* pValue, SOPC_Buffer* buf);
 
@@ -6685,7 +6685,7 @@ void SOPC_Clear_EnumeratedType(int32_t* enumerationValue);
 SOPC_StatusCode SOPC_Read_EnumeratedType(SOPC_Buffer* buf, int32_t* enumerationValue);
                     
 
-SOPC_StatusCode SOPC_Write_EnumeratedType(SOPC_Buffer* buf, int32_t* enumerationValue);
+SOPC_StatusCode SOPC_Write_EnumeratedType(SOPC_Buffer* buf, const int32_t* enumerationValue);
 
 /*============================================================================
  * Table of known types.

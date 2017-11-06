@@ -36,10 +36,10 @@ void SOPC_Boolean_Initialize(SOPC_Boolean* b){
     }
 }
 
-SOPC_StatusCode SOPC_Boolean_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_Boolean_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((SOPC_Boolean*) dest) = *((SOPC_Boolean*) src);
+        *((SOPC_Boolean*) dest) = *((const SOPC_Boolean*) src);
         status = STATUS_OK;
     }
     return status;
@@ -51,9 +51,9 @@ SOPC_StatusCode SOPC_Boolean_CompareAux(const void* left,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
-        SOPC_Boolean cleft = *((SOPC_Boolean*) left);
-        SOPC_Boolean cright = *((SOPC_Boolean*) right);
-        if(cleft < cright){
+        const SOPC_Boolean cleft = *((const SOPC_Boolean*)left);
+        const SOPC_Boolean cright = *((const SOPC_Boolean*)right);
+        if (cleft < cright) {
             *comparison = -1;
         }else if(cright < cleft){
             *comparison = 1;
@@ -84,10 +84,10 @@ void SOPC_SByte_Initialize(SOPC_SByte* sbyte){
     }
 }
 
-SOPC_StatusCode SOPC_SByte_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_SByte_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((SOPC_SByte*) dest) = *((SOPC_SByte*) src);
+        *((SOPC_SByte*) dest) = *((const SOPC_SByte*) src);
         status = STATUS_OK;
     }
     return status;
@@ -99,9 +99,9 @@ SOPC_StatusCode SOPC_SByte_CompareAux(const void* left,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
-        SOPC_SByte cleft = *((SOPC_SByte*) left);
-        SOPC_SByte cright = *((SOPC_SByte*) right);
-        if(cleft < cright){
+        const SOPC_SByte cleft = *((const SOPC_SByte*)left);
+        const SOPC_SByte cright = *((const SOPC_SByte*)right);
+        if (cleft < cright) {
             *comparison = -1;
         }else if(cright < cleft){
             *comparison = 1;
@@ -133,10 +133,10 @@ void SOPC_Byte_Initialize(SOPC_Byte* byte){
     }
 }
 
-SOPC_StatusCode SOPC_Byte_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_Byte_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((SOPC_Byte*) dest) = *((SOPC_Byte*) src);
+        *((SOPC_Byte*) dest) = *((const SOPC_Byte*) src);
         status = STATUS_OK;
     }
     return status;
@@ -148,9 +148,9 @@ SOPC_StatusCode SOPC_Byte_CompareAux(const void* left,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
-        SOPC_Byte cleft = *((SOPC_Byte*) left);
-        SOPC_Byte cright = *((SOPC_Byte*) right);
-        if(cleft < cright){
+        const SOPC_Byte cleft = *((const SOPC_Byte*)left);
+        const SOPC_Byte cright = *((const SOPC_Byte*)right);
+        if (cleft < cright) {
             *comparison = -1;
         }else if(cright < cleft){
             *comparison = 1;
@@ -182,10 +182,10 @@ void SOPC_Int16_Initialize(int16_t* intv){
     }
 }
 
-SOPC_StatusCode SOPC_Int16_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_Int16_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((int16_t*) dest) = *((int16_t*) src);
+        *((int16_t*) dest) = *((const int16_t*) src);
         status = STATUS_OK;
     }
     return status;
@@ -197,9 +197,9 @@ SOPC_StatusCode SOPC_Int16_CompareAux(const void* left,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
-        int16_t cleft = *((int16_t*) left);
-        int16_t cright = *((int16_t*) right);
-        if(cleft < cright){
+        const int16_t cleft = *((const int16_t*)left);
+        const int16_t cright = *((const int16_t*)right);
+        if (cleft < cright) {
             *comparison = -1;
         }else if(cright < cleft){
             *comparison = 1;
@@ -231,10 +231,10 @@ void SOPC_UInt16_Initialize(uint16_t* uint){
     }
 }
 
-SOPC_StatusCode SOPC_UInt16_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_UInt16_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((uint16_t*) dest) = *((uint16_t*) src);
+        *((uint16_t*) dest) = *((const uint16_t*) src);
         status = STATUS_OK;
     }
     return status;
@@ -246,9 +246,9 @@ SOPC_StatusCode SOPC_UInt16_CompareAux(const void* left,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
-        uint16_t cleft = *((uint16_t*) left);
-        uint16_t cright = *((uint16_t*) right);
-        if(cleft < cright){
+        const uint16_t cleft = *((const uint16_t*)left);
+        const uint16_t cright = *((const uint16_t*)right);
+        if (cleft < cright) {
             *comparison = -1;
         }else if(cright < cleft){
             *comparison = 1;
@@ -280,10 +280,10 @@ void SOPC_Int32_Initialize(int32_t* intv){
     }
 }
 
-SOPC_StatusCode SOPC_Int32_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_Int32_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((int32_t*) dest) = *((int32_t*) src);
+        *((int32_t*) dest) = *((const int32_t*) src);
         status = STATUS_OK;
     }
     return status;
@@ -295,9 +295,9 @@ SOPC_StatusCode SOPC_Int32_CompareAux(const void* left,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
-        int32_t cleft = *((int32_t*) left);
-        int32_t cright = *((int32_t*) right);
-        if(cleft < cright){
+        const int32_t cleft = *((const int32_t*)left);
+        const int32_t cright = *((const int32_t*)right);
+        if (cleft < cright) {
             *comparison = -1;
         }else if(cright < cleft){
             *comparison = 1;
@@ -328,10 +328,10 @@ void SOPC_UInt32_Initialize(uint32_t* uint){
     }
 }
 
-SOPC_StatusCode SOPC_UInt32_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_UInt32_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((uint32_t*) dest) = *((uint32_t*) src);
+        *((uint32_t*) dest) = *((const uint32_t*) src);
         status = STATUS_OK;
     }
     return status;
@@ -343,9 +343,9 @@ SOPC_StatusCode SOPC_UInt32_CompareAux(const void* left,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
-        uint32_t cleft = *((uint32_t*) left);
-        uint32_t cright = *((uint32_t*) right);
-        if(cleft < cright){
+        const uint32_t cleft = *((const uint32_t*)left);
+        const uint32_t cright = *((const uint32_t*)right);
+        if (cleft < cright) {
             *comparison = -1;
         }else if(cright < cleft){
             *comparison = 1;
@@ -376,10 +376,10 @@ void SOPC_Int64_Initialize(int64_t* intv){
     }
 }
 
-SOPC_StatusCode SOPC_Int64_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_Int64_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((int64_t*) dest) = *((int64_t*) src);
+        *((int64_t*) dest) = *((const int64_t*) src);
         status = STATUS_OK;
     }
     return status;
@@ -391,9 +391,9 @@ SOPC_StatusCode SOPC_Int64_CompareAux(const void* left,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
-        int64_t cleft = *((int64_t*) left);
-        int64_t cright = *((int64_t*) right);
-        if(cleft < cright){
+        const int64_t cleft = *((const int64_t*)left);
+        const int64_t cright = *((const int64_t*)right);
+        if (cleft < cright) {
             *comparison = -1;
         }else if(cright < cleft){
             *comparison = 1;
@@ -424,10 +424,10 @@ void SOPC_UInt64_Initialize(uint64_t* uint){
     }
 }
 
-SOPC_StatusCode SOPC_UInt64_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_UInt64_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((uint64_t*) dest) = *((uint64_t*) src);
+        *((uint64_t*) dest) = *((const uint64_t*) src);
         status = STATUS_OK;
     }
     return status;
@@ -439,9 +439,9 @@ SOPC_StatusCode SOPC_UInt64_CompareAux(const void* left,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
-        uint64_t cleft = *((uint64_t*) left);
-        uint64_t cright = *((uint64_t*) right);
-        if(cleft < cright){
+        const uint64_t cleft = *((const uint64_t*)left);
+        const uint64_t cright = *((const uint64_t*)right);
+        if (cleft < cright) {
             *comparison = -1;
         }else if(cright < cleft){
             *comparison = 1;
@@ -472,10 +472,10 @@ void SOPC_Float_Initialize(float* f){
     }
 }
 
-SOPC_StatusCode SOPC_Float_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_Float_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((float*) dest) = *((float*) src);
+        *((float*) dest) = *((const float*) src);
         status = STATUS_OK;
     }
     return status;
@@ -487,9 +487,9 @@ SOPC_StatusCode SOPC_Float_CompareAux(const void* left,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
-        float cleft = *((float*) left);
-        float cright = *((float*) right);
-        if(cleft < cright){
+        const float cleft = *((const float*)left);
+        const float cright = *((const float*)right);
+        if (cleft < cright) {
             *comparison = -1;
         }else if(cright < cleft){
             *comparison = 1;
@@ -521,10 +521,10 @@ void SOPC_Double_Initialize(double* d){
     }
 }
 
-SOPC_StatusCode SOPC_Double_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_Double_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((double*) dest) = *((double*) src);
+        *((double*) dest) = *((const double*) src);
         status = STATUS_OK;
     }
     return status;
@@ -536,9 +536,9 @@ SOPC_StatusCode SOPC_Double_CompareAux(const void* left,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
-        double cleft = *((double*) left);
-        double cright = *((double*) right);
-        if(cleft < cright){
+        const double cleft = *((const double*)left);
+        const double cright = *((const double*)right);
+        if (cleft < cright) {
             *comparison = -1;
         }else if(cright < cleft){
             *comparison = 1;
@@ -620,8 +620,8 @@ SOPC_StatusCode SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteStrin
     return status;
 }
 
-SOPC_StatusCode SOPC_ByteString_CopyAux(void* dest, void* src){
-    return SOPC_ByteString_Copy((SOPC_ByteString*) dest, (SOPC_ByteString*) src);
+SOPC_StatusCode SOPC_ByteString_CopyAux(void* dest, const void* src){
+    return SOPC_ByteString_Copy((SOPC_ByteString*) dest, (const SOPC_ByteString*) src);
 }
 
 void SOPC_ByteString_ClearAux(void* value){
@@ -668,8 +668,8 @@ SOPC_StatusCode SOPC_ByteString_Compare(const SOPC_ByteString* left,
 SOPC_StatusCode SOPC_ByteString_CompareAux(const void* left,
                                            const void* right,
                                            int32_t*    comparison){
-    return SOPC_ByteString_Compare((SOPC_ByteString*) left,
-                                   (SOPC_ByteString*) right,
+    return SOPC_ByteString_Compare((const SOPC_ByteString*) left,
+                                   (const SOPC_ByteString*) right,
                                    comparison);
 }
 
@@ -756,8 +756,8 @@ SOPC_StatusCode SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src){
     return status;
 }
 
-SOPC_StatusCode SOPC_String_CopyAux(void* dest, void* src){
-    return SOPC_String_Copy((SOPC_String*) dest, (SOPC_String*) src);
+SOPC_StatusCode SOPC_String_CopyAux(void* dest, const void* src){
+    return SOPC_String_Copy((SOPC_String*) dest, (const SOPC_String*) src);
 }
 
 void SOPC_String_ClearAux(void* value){
@@ -897,8 +897,8 @@ SOPC_StatusCode SOPC_String_Compare(const SOPC_String* left,
 SOPC_StatusCode SOPC_String_CompareAux(const void* left,
                                            const void* right,
                                            int32_t*    comparison){
-    return SOPC_String_Compare((SOPC_String*) left,
-                               (SOPC_String*) right,
+    return SOPC_String_Compare((const SOPC_String*) left,
+                               (const SOPC_String*) right,
                                false,
                                comparison);
 }
@@ -928,26 +928,26 @@ void SOPC_XmlElement_Initialize(SOPC_XmlElement* xmlElt){
 }
 
 SOPC_StatusCode SOPC_XmlElement_Copy(SOPC_XmlElement* dest, const SOPC_XmlElement* src){
-    return SOPC_ByteString_Copy((SOPC_ByteString*)dest, (SOPC_ByteString*)src);
+    return SOPC_ByteString_Copy((SOPC_ByteString*)dest, (const SOPC_ByteString*)src);
 }
 
-SOPC_StatusCode SOPC_XmlElement_CopyAux(void* dest, void* src){
-    return SOPC_XmlElement_Copy((SOPC_XmlElement*) dest, (SOPC_XmlElement*) src);
+SOPC_StatusCode SOPC_XmlElement_CopyAux(void* dest, const void* src){
+    return SOPC_XmlElement_Copy((SOPC_XmlElement*) dest, (const SOPC_XmlElement*) src);
 }
 
 SOPC_StatusCode SOPC_XmlElement_Compare(const SOPC_XmlElement* left,
                                         const SOPC_XmlElement* right,
                                         int32_t*               comparison){
-    return SOPC_ByteString_Compare((SOPC_ByteString*) left,
-                                   (SOPC_ByteString*) right,
+    return SOPC_ByteString_Compare((const SOPC_ByteString*) left,
+                                   (const SOPC_ByteString*) right,
                                    comparison);
 }
 
 SOPC_StatusCode SOPC_XmlElement_CompareAux(const void* left,
                                            const void* right,
                                            int32_t*    comparison){
-    return SOPC_ByteString_Compare((SOPC_ByteString*) left,
-                                   (SOPC_ByteString*) right,
+    return SOPC_ByteString_Compare((const SOPC_ByteString*) left,
+                                   (const SOPC_ByteString*) right,
                                    comparison);
 }
 
@@ -973,10 +973,10 @@ void SOPC_DateTime_Initialize(SOPC_DateTime* dateTime){
     }
 }
 
-SOPC_StatusCode SOPC_DateTime_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_DateTime_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((SOPC_DateTime*) dest) = *((SOPC_DateTime*) src);
+        *((SOPC_DateTime*) dest) = *((const SOPC_DateTime*) src);
         status = STATUS_OK;
     }
     return status;
@@ -1004,8 +1004,8 @@ SOPC_StatusCode SOPC_DateTime_Compare(const SOPC_DateTime* left,
 SOPC_StatusCode SOPC_DateTime_CompareAux(const void* left,
                                            const void* right,
                                            int32_t*    comparison){
-    return SOPC_DateTime_Compare((SOPC_DateTime*) left,
-                                 (SOPC_DateTime*) right,
+    return SOPC_DateTime_Compare((const SOPC_DateTime*) left,
+                                 (const SOPC_DateTime*) right,
                                  comparison);
 }
 
@@ -1054,16 +1054,14 @@ SOPC_StatusCode SOPC_Guid_Copy(SOPC_Guid* dest, const SOPC_Guid* src){
     return status;
 }
 
-SOPC_StatusCode SOPC_Guid_CopyAux(void* dest, void* src){
-    return SOPC_Guid_Copy((SOPC_Guid*) dest, (SOPC_Guid*) src);
+SOPC_StatusCode SOPC_Guid_CopyAux(void* dest, const void* src){
+    return SOPC_Guid_Copy((SOPC_Guid*) dest, (const SOPC_Guid*) src);
 }
 
 SOPC_StatusCode SOPC_Guid_Compare(const SOPC_Guid* left,
                                   const SOPC_Guid* right,
                                   int32_t*         comparison){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    uint64_t* guidLeft;
-    uint64_t* guidRight;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
         if(left->Data1 == right->Data1){
@@ -1088,8 +1086,8 @@ SOPC_StatusCode SOPC_Guid_Compare(const SOPC_Guid* left,
             }
         }
         if(*comparison == 0){
-            guidLeft = (uint64_t*) left->Data4;
-            guidRight = (uint64_t*) right->Data4;
+            const uint64_t* guidLeft = (const uint64_t*) left->Data4;
+            const uint64_t* guidRight = (const uint64_t*) right->Data4;
             if(*guidLeft < *guidRight){
                 *comparison = -1;
             }else if(*guidLeft > *guidRight){
@@ -1103,8 +1101,8 @@ SOPC_StatusCode SOPC_Guid_Compare(const SOPC_Guid* left,
 SOPC_StatusCode SOPC_Guid_CompareAux(const void* left,
                                      const void* right,
                                      int32_t*    comparison){
-    return SOPC_Guid_Compare((SOPC_Guid*) left,
-                             (SOPC_Guid*) right,
+    return SOPC_Guid_Compare((const SOPC_Guid*) left,
+                             (const SOPC_Guid*) right,
                              comparison);
 }
 
@@ -1159,8 +1157,8 @@ SOPC_StatusCode SOPC_NodeId_Copy(SOPC_NodeId* dest, const SOPC_NodeId* src){
     return status;
 }
 
-SOPC_StatusCode SOPC_NodeId_CopyAux(void* dest, void* src){
-    return SOPC_NodeId_Copy((SOPC_NodeId*) dest, (SOPC_NodeId*) src);
+SOPC_StatusCode SOPC_NodeId_CopyAux(void* dest, const void* src){
+    return SOPC_NodeId_Copy((SOPC_NodeId*) dest, (const SOPC_NodeId*) src);
 }
 
 void SOPC_NodeId_ClearAux(void* value){
@@ -1247,8 +1245,8 @@ SOPC_StatusCode SOPC_NodeId_Compare(const SOPC_NodeId* left,
 SOPC_StatusCode SOPC_NodeId_CompareAux(const void* left,
                                        const void* right,
                                        int32_t*    comparison){
-    return SOPC_NodeId_Compare((SOPC_NodeId*) left,
-                               (SOPC_NodeId*) right,
+    return SOPC_NodeId_Compare((const SOPC_NodeId*) left,
+                               (const SOPC_NodeId*) right,
                                comparison);
 }
 
@@ -1281,8 +1279,8 @@ SOPC_StatusCode SOPC_ExpandedNodeId_Copy(SOPC_ExpandedNodeId* dest, const SOPC_E
     return status;
 }
 
-SOPC_StatusCode SOPC_ExpandedNodeId_CopyAux(void* dest, void* src){
-    return SOPC_ExpandedNodeId_Copy((SOPC_ExpandedNodeId*) dest, (SOPC_ExpandedNodeId*) src);
+SOPC_StatusCode SOPC_ExpandedNodeId_CopyAux(void* dest, const void* src){
+    return SOPC_ExpandedNodeId_Copy((SOPC_ExpandedNodeId*) dest, (const SOPC_ExpandedNodeId*) src);
 }
 
 SOPC_StatusCode SOPC_ExpandedNodeId_Compare(const SOPC_ExpandedNodeId* left,
@@ -1310,8 +1308,8 @@ SOPC_StatusCode SOPC_ExpandedNodeId_Compare(const SOPC_ExpandedNodeId* left,
 SOPC_StatusCode SOPC_ExpandedNodeId_CompareAux(const void* left,
                                                const void* right,
                                                int32_t*    comparison){
-    return SOPC_ExpandedNodeId_Compare((SOPC_ExpandedNodeId*) left,
-                                       (SOPC_ExpandedNodeId*) right,
+    return SOPC_ExpandedNodeId_Compare((const SOPC_ExpandedNodeId*) left,
+                                       (const SOPC_ExpandedNodeId*) right,
                                        comparison);
 }
 
@@ -1338,10 +1336,10 @@ void SOPC_StatusCode_Initialize(SOPC_StatusCode* status){
     }
 }
 
-SOPC_StatusCode SOPC_StatusCode_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_StatusCode_CopyAux(void* dest, const void* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
-        *((SOPC_StatusCode*) dest) = *((SOPC_StatusCode*) src);
+        *((SOPC_StatusCode*) dest) = *((const SOPC_StatusCode*) src);
         status = STATUS_OK;
     }
     return status;
@@ -1353,8 +1351,8 @@ SOPC_StatusCode SOPC_StatusCode_CompareAux(const void* left,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != left && NULL != right && NULL != comparison){
         status = STATUS_OK;
-        SOPC_StatusCode cleft = *((SOPC_StatusCode*) left);
-        SOPC_StatusCode cright = *((SOPC_StatusCode*) right);
+        const SOPC_StatusCode cleft = *((const SOPC_StatusCode*) left);
+        const SOPC_StatusCode cright = *((const SOPC_StatusCode*) right);
         if(cleft < cright){
             *comparison = -1;
         }else if(cright < cleft){
@@ -1393,7 +1391,7 @@ void SOPC_DiagnosticInfo_Initialize(SOPC_DiagnosticInfo* diagInfo){
     }
 }
 
-SOPC_StatusCode SOPC_DiagnosticInfo_Copy(SOPC_DiagnosticInfo* dest, SOPC_DiagnosticInfo* src){
+SOPC_StatusCode SOPC_DiagnosticInfo_Copy(SOPC_DiagnosticInfo* dest, const SOPC_DiagnosticInfo* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != dest && NULL != src){
         status = SOPC_DiagnosticInfo_Copy(dest->InnerDiagnosticInfo, src->InnerDiagnosticInfo);
@@ -1413,8 +1411,8 @@ SOPC_StatusCode SOPC_DiagnosticInfo_Copy(SOPC_DiagnosticInfo* dest, SOPC_Diagnos
     return status;
 }
 
-SOPC_StatusCode SOPC_DiagnosticInfo_CopyAux(void* dest, void* src){
-    return SOPC_DiagnosticInfo_Copy((SOPC_DiagnosticInfo*) dest, (SOPC_DiagnosticInfo*) src);
+SOPC_StatusCode SOPC_DiagnosticInfo_CopyAux(void* dest, const void* src){
+    return SOPC_DiagnosticInfo_Copy((SOPC_DiagnosticInfo*) dest, (const SOPC_DiagnosticInfo*) src);
 }
 
 SOPC_StatusCode SOPC_DiagnosticInfo_Compare(const SOPC_DiagnosticInfo* left,
@@ -1470,8 +1468,8 @@ SOPC_StatusCode SOPC_DiagnosticInfo_Compare(const SOPC_DiagnosticInfo* left,
 SOPC_StatusCode SOPC_DiagnosticInfo_CompareAux(const void* left,
                                                const void* right,
                                                int32_t*    comparison){
-    return SOPC_DiagnosticInfo_Compare((SOPC_DiagnosticInfo*) left,
-                                       (SOPC_DiagnosticInfo*) right,
+    return SOPC_DiagnosticInfo_Compare((const SOPC_DiagnosticInfo*) left,
+                                       (const SOPC_DiagnosticInfo*) right,
                                        comparison);
 }
 
@@ -1520,8 +1518,8 @@ SOPC_StatusCode SOPC_QualifiedName_Copy(SOPC_QualifiedName* dest, const SOPC_Qua
     return status;
 }
 
-SOPC_StatusCode SOPC_QualifiedName_CopyAux(void* dest, void* src){
-    return SOPC_QualifiedName_Copy((SOPC_QualifiedName*) dest, (SOPC_QualifiedName*) src);
+SOPC_StatusCode SOPC_QualifiedName_CopyAux(void* dest, const void* src){
+    return SOPC_QualifiedName_Copy((SOPC_QualifiedName*) dest, (const SOPC_QualifiedName*) src);
 }
 
 SOPC_StatusCode SOPC_QualifiedName_Compare(const SOPC_QualifiedName* left,
@@ -1546,8 +1544,8 @@ SOPC_StatusCode SOPC_QualifiedName_Compare(const SOPC_QualifiedName* left,
 SOPC_StatusCode SOPC_QualifiedName_CompareAux(const void* left,
                                               const void* right,
                                               int32_t*    comparison){
-    return SOPC_QualifiedName_Compare((SOPC_QualifiedName*) left,
-                                       (SOPC_QualifiedName*) right,
+    return SOPC_QualifiedName_Compare((const SOPC_QualifiedName*) left,
+                                       (const SOPC_QualifiedName*) right,
                                        comparison);
 }
 
@@ -1604,13 +1602,13 @@ SOPC_StatusCode SOPC_LocalizedText_Compare(const SOPC_LocalizedText* left,
 SOPC_StatusCode SOPC_LocalizedText_CompareAux(const void* left,
                                               const void* right,
                                               int32_t*    comparison){
-    return SOPC_LocalizedText_Compare((SOPC_LocalizedText*) left,
-                                       (SOPC_LocalizedText*) right,
+    return SOPC_LocalizedText_Compare((const SOPC_LocalizedText*) left,
+                                       (const SOPC_LocalizedText*) right,
                                        comparison);
 }
 
-SOPC_StatusCode SOPC_LocalizedText_CopyAux(void* dest, void* src){
-    return SOPC_LocalizedText_Copy((SOPC_LocalizedText*) dest, (SOPC_LocalizedText*) src);
+SOPC_StatusCode SOPC_LocalizedText_CopyAux(void* dest, const void* src){
+    return SOPC_LocalizedText_Copy((SOPC_LocalizedText*) dest, (const SOPC_LocalizedText*) src);
 }
 
 void SOPC_LocalizedText_ClearAux(void* value){
@@ -1678,8 +1676,8 @@ SOPC_StatusCode SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SOPC
     return status;
 }
 
-SOPC_StatusCode SOPC_ExtensionObject_CopyAux(void* dest, void* src){
-    return SOPC_ExtensionObject_Copy((SOPC_ExtensionObject*) dest, (SOPC_ExtensionObject*) src);
+SOPC_StatusCode SOPC_ExtensionObject_CopyAux(void* dest, const void* src){
+    return SOPC_ExtensionObject_Copy((SOPC_ExtensionObject*) dest, (const SOPC_ExtensionObject*) src);
 }
 
 SOPC_StatusCode SOPC_ExtensionObject_Compare(const SOPC_ExtensionObject* left,
@@ -1717,8 +1715,8 @@ SOPC_StatusCode SOPC_ExtensionObject_Compare(const SOPC_ExtensionObject* left,
 SOPC_StatusCode SOPC_ExtensionObject_CompareAux(const void* left,
                                                 const void* right,
                                                 int32_t*    comparison){
-    return SOPC_ExtensionObject_Compare((SOPC_ExtensionObject*) left,
-                                       (SOPC_ExtensionObject*) right,
+    return SOPC_ExtensionObject_Compare((const SOPC_ExtensionObject*) left,
+                                       (const SOPC_ExtensionObject*) right,
                                        comparison);
 }
 
@@ -2042,58 +2040,58 @@ void ClearToVariantArrayBuiltInType(SOPC_BuiltinId                  builtInTypeI
 SOPC_StatusCode ApplyOpToVariantNonArrayBuiltInType(SOPC_BuiltinId               builtInTypeId,
                                                     SOPC_VariantValue*           left,
                                                     const SOPC_VariantValue*     right,
-                                                    SOPC_EncodeableObject_PfnOp* opAuxFunction){
+                                                    SOPC_EncodeableObject_PfnCopy* opAuxFunction){
     SOPC_StatusCode status = STATUS_OK;
     switch(builtInTypeId){
         case SOPC_Null_Id:
             break; // STATUS_NOK since no operation could be applied to a NULL variant
         case SOPC_Boolean_Id:
-            status = opAuxFunction((void*) &left->Boolean, (void*) &right->Boolean);
+            status = opAuxFunction((void*) &left->Boolean, (const void*) &right->Boolean);
             break;
         case SOPC_SByte_Id:
-            status = opAuxFunction((void*) &left->Sbyte, (void*) &right->Sbyte);
+            status = opAuxFunction((void*) &left->Sbyte, (const void*) &right->Sbyte);
             break;
         case SOPC_Byte_Id:
-            status = opAuxFunction((void*) &left->Byte, (void*) &right->Byte);
+            status = opAuxFunction((void*) &left->Byte, (const void*) &right->Byte);
             break;
         case SOPC_Int16_Id:
-            status = opAuxFunction((void*) &left->Int16, (void*) &right->Int16);
+            status = opAuxFunction((void*) &left->Int16, (const void*) &right->Int16);
             break;
         case SOPC_UInt16_Id:
-            status = opAuxFunction((void*) &left->Uint16, (void*) &right->Uint16);
+            status = opAuxFunction((void*) &left->Uint16, (const void*) &right->Uint16);
             break;
         case SOPC_Int32_Id:
-            status = opAuxFunction((void*) &left->Int32, (void*) &right->Int32);
+            status = opAuxFunction((void*) &left->Int32, (const void*) &right->Int32);
             break;
         case SOPC_UInt32_Id:
-            status = opAuxFunction((void*) &left->Uint32, (void*) &right->Uint32);
+            status = opAuxFunction((void*) &left->Uint32, (const void*) &right->Uint32);
             break;
         case SOPC_Int64_Id:
-            status = opAuxFunction((void*) &left->Int64, (void*) &right->Int64);
+            status = opAuxFunction((void*) &left->Int64, (const void*) &right->Int64);
             break;
         case SOPC_UInt64_Id:
-            status = opAuxFunction((void*) &left->Uint64, (void*) &right->Uint64);
+            status = opAuxFunction((void*) &left->Uint64, (const void*) &right->Uint64);
             break;
         case SOPC_Float_Id:
-            status = opAuxFunction((void*) &left->Floatv, (void*) &right->Floatv);
+            status = opAuxFunction((void*) &left->Floatv, (const void*) &right->Floatv);
             break;
         case SOPC_Double_Id:
-            status = opAuxFunction((void*) &left->Doublev, (void*) &right->Doublev);
+            status = opAuxFunction((void*) &left->Doublev, (const void*) &right->Doublev);
             break;
         case SOPC_String_Id:
-            status = opAuxFunction((void*) &left->String, (void*) &right->String);
+            status = opAuxFunction((void*) &left->String, (const void*) &right->String);
             break;
         case SOPC_DateTime_Id:
-            status = opAuxFunction((void*) &left->Date, (void*) &right->Date);
+            status = opAuxFunction((void*) &left->Date, (const void*) &right->Date);
             break;
         case SOPC_Guid_Id:
             status = opAuxFunction((void*) left->Guid, (void*) right->Guid);
             break;
         case SOPC_ByteString_Id:
-            status = opAuxFunction((void*) &left->Bstring, (void*) &right->Bstring);
+            status = opAuxFunction((void*) &left->Bstring, (const void*) &right->Bstring);
             break;
         case SOPC_XmlElement_Id:
-            status = opAuxFunction((void*) &left->XmlElt, (void*) &right->XmlElt);
+            status = opAuxFunction((void*) &left->XmlElt, (const void*) &right->XmlElt);
             break;
         case SOPC_NodeId_Id:
             status = opAuxFunction((void*) left->NodeId, (void*) right->NodeId);
@@ -2102,7 +2100,7 @@ SOPC_StatusCode ApplyOpToVariantNonArrayBuiltInType(SOPC_BuiltinId              
             status = opAuxFunction((void*) left->ExpNodeId, (void*) right->ExpNodeId);
             break;
         case SOPC_StatusCode_Id:
-            status = opAuxFunction((void*) &left->Status, (void*) &right->Status);
+            status = opAuxFunction((void*) &left->Status, (const void*) &right->Status);
             break;
         case SOPC_QualifiedName_Id:
             status = opAuxFunction((void*) left->Qname, (void*) right->Qname);
@@ -2134,7 +2132,7 @@ SOPC_StatusCode ApplyOpToVariantArrayBuiltInType(SOPC_BuiltinId                b
                                                  SOPC_VariantArrayValue*       arrayLeft,
                                                  const SOPC_VariantArrayValue* arrayRight,
                                                  int32_t                       length,
-                                                 SOPC_EncodeableObject_PfnOp*  opAuxFunction){
+                                                 SOPC_EncodeableObject_PfnCopy*  opAuxFunction){
     SOPC_StatusCode status = STATUS_NOK;
     switch(builtInTypeId){
         case SOPC_Null_Id:
@@ -2206,61 +2204,61 @@ SOPC_StatusCode CompareVariantsNonArrayBuiltInType(SOPC_BuiltinId           buil
         case SOPC_Null_Id:
             break; // STATUS_NOK since no operation could be applied to a NULL variant
         case SOPC_Boolean_Id:
-            status = compAuxFunction((void*) &left->Boolean, (void*) &right->Boolean, comparison);
+            status = compAuxFunction((const void*) &left->Boolean, (const void*) &right->Boolean, comparison);
             break;
         case SOPC_SByte_Id:
-            status = compAuxFunction((void*) &left->Sbyte, (void*) &right->Sbyte, comparison);
+            status = compAuxFunction((const void*) &left->Sbyte, (const void*) &right->Sbyte, comparison);
             break;
         case SOPC_Byte_Id:
-            status = compAuxFunction((void*) &left->Byte, (void*) &right->Byte, comparison);
+            status = compAuxFunction((const void*) &left->Byte, (const void*) &right->Byte, comparison);
             break;
         case SOPC_Int16_Id:
-            status = compAuxFunction((void*) &left->Int16, (void*) &right->Int16, comparison);
+            status = compAuxFunction((const void*) &left->Int16, (const void*) &right->Int16, comparison);
             break;
         case SOPC_UInt16_Id:
-            status = compAuxFunction((void*) &left->Uint16, (void*) &right->Uint16, comparison);
+            status = compAuxFunction((const void*) &left->Uint16, (const void*) &right->Uint16, comparison);
             break;
         case SOPC_Int32_Id:
-            status = compAuxFunction((void*) &left->Int32, (void*) &right->Int32, comparison);
+            status = compAuxFunction((const void*) &left->Int32, (const void*) &right->Int32, comparison);
             break;
         case SOPC_UInt32_Id:
-            status = compAuxFunction((void*) &left->Uint32, (void*) &right->Uint32, comparison);
+            status = compAuxFunction((const void*) &left->Uint32, (const void*) &right->Uint32, comparison);
             break;
         case SOPC_Int64_Id:
-            status = compAuxFunction((void*) &left->Int64, (void*) &right->Int64, comparison);
+            status = compAuxFunction((const void*) &left->Int64, (const void*) &right->Int64, comparison);
             break;
         case SOPC_UInt64_Id:
-            status = compAuxFunction((void*) &left->Uint64, (void*) &right->Uint64, comparison);
+            status = compAuxFunction((const void*) &left->Uint64, (const void*) &right->Uint64, comparison);
             break;
         case SOPC_Float_Id:
-            status = compAuxFunction((void*) &left->Floatv, (void*) &right->Floatv, comparison);
+            status = compAuxFunction((const void*) &left->Floatv, (const void*) &right->Floatv, comparison);
             break;
         case SOPC_Double_Id:
-            status = compAuxFunction((void*) &left->Doublev, (void*) &right->Doublev, comparison);
+            status = compAuxFunction((const void*) &left->Doublev, (const void*) &right->Doublev, comparison);
             break;
         case SOPC_String_Id:
-            status = compAuxFunction((void*) &left->String, (void*) &right->String, comparison);
+            status = compAuxFunction((const void*) &left->String, (const void*) &right->String, comparison);
             break;
         case SOPC_DateTime_Id:
-            status = compAuxFunction((void*) &left->Date, (void*) &right->Date, comparison);
+            status = compAuxFunction((const void*) &left->Date, (const void*) &right->Date, comparison);
             break;
         case SOPC_Guid_Id:
             status = compAuxFunction((void*) left->Guid, (void*) right->Guid, comparison);
             break;
         case SOPC_ByteString_Id:
-            status = compAuxFunction((void*) &left->Bstring, (void*) &right->Bstring, comparison);
+            status = compAuxFunction((const void*) &left->Bstring, (const void*) &right->Bstring, comparison);
             break;
         case SOPC_XmlElement_Id:
-            status = compAuxFunction((void*) &left->XmlElt, (void*) &right->XmlElt, comparison);
+            status = compAuxFunction((const void*) &left->XmlElt, (const void*) &right->XmlElt, comparison);
             break;
         case SOPC_NodeId_Id:
-            status = compAuxFunction((void*) left->NodeId, (void*) right->NodeId, comparison);
+            status = compAuxFunction((void*) left->NodeId, (const void*) right->NodeId, comparison);
             break;
         case SOPC_ExpandedNodeId_Id:
-            status = compAuxFunction((void*) left->ExpNodeId, (void*) right->ExpNodeId, comparison);
+            status = compAuxFunction((void*) left->ExpNodeId, (const void*) right->ExpNodeId, comparison);
             break;
         case SOPC_StatusCode_Id:
-            status = compAuxFunction((void*) &left->Status, (void*) &right->Status, comparison);
+            status = compAuxFunction((const void*) &left->Status, (const void*) &right->Status, comparison);
             break;
         case SOPC_QualifiedName_Id:
             status = compAuxFunction((void*) left->Qname, (void*) right->Qname, comparison);
@@ -2456,14 +2454,14 @@ SOPC_EncodeableObject_PfnClear* GetBuiltInTypeClearFunction(SOPC_BuiltinId built
     return clearFunction;
 }
 
-SOPC_StatusCode SOPC_Null_CopyAux(void* dest, void* src){
+SOPC_StatusCode SOPC_Null_CopyAux(void* dest, const void* src){
     (void) dest;
     (void) src;
     return STATUS_OK;
 }
 
-SOPC_EncodeableObject_PfnOp* GetBuiltInTypeCopyFunction(SOPC_BuiltinId builtInTypeId){
-    SOPC_EncodeableObject_PfnOp* copyFunction = NULL;
+SOPC_EncodeableObject_PfnCopy* GetBuiltInTypeCopyFunction(SOPC_BuiltinId builtInTypeId){
+    SOPC_EncodeableObject_PfnCopy* copyFunction = NULL;
     switch(builtInTypeId){
             case SOPC_Null_Id:
                 copyFunction = SOPC_Null_CopyAux;
@@ -2827,7 +2825,7 @@ SOPC_StatusCode SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src){
     int64_t matrixLength = 1; // For multiplication to compute from dimensions values
     int32_t idx = 0;
     if(dest != NULL && src != NULL){
-        SOPC_EncodeableObject_PfnOp* copyFunction = GetBuiltInTypeCopyFunction(src->BuiltInTypeId);
+        SOPC_EncodeableObject_PfnCopy* copyFunction = GetBuiltInTypeCopyFunction(src->BuiltInTypeId);
         if(copyFunction == NULL)
             return STATUS_NOK;
 
@@ -3013,13 +3011,13 @@ SOPC_StatusCode SOPC_Variant_Compare(const SOPC_Variant* left,
 SOPC_StatusCode SOPC_Variant_CompareAux(const void* left,
                                            const void* right,
                                            int32_t*    comparison){
-    return SOPC_Variant_Compare((SOPC_Variant*) left,
-                                   (SOPC_Variant*) right,
+    return SOPC_Variant_Compare((const SOPC_Variant*) left,
+                                   (const SOPC_Variant*) right,
                                    comparison);
 }
 
-SOPC_StatusCode SOPC_Variant_CopyAux(void* dest, void* src){
-    return SOPC_Variant_Copy((SOPC_Variant*) dest, (SOPC_Variant*) src);
+SOPC_StatusCode SOPC_Variant_CopyAux(void* dest, const void* src){
+    return SOPC_Variant_Copy((SOPC_Variant*) dest, (const SOPC_Variant*) src);
 }
 
 void SOPC_Variant_ClearAux(void* value){
@@ -3152,13 +3150,13 @@ SOPC_StatusCode SOPC_DataValue_Compare(const SOPC_DataValue* left,
 SOPC_StatusCode SOPC_DataValue_CompareAux(const void* left,
                                           const void* right,
                                           int32_t*    comparison){
-    return SOPC_DataValue_Compare((SOPC_DataValue*) left,
-                                  (SOPC_DataValue*) right,
+    return SOPC_DataValue_Compare((const SOPC_DataValue*) left,
+                                  (const SOPC_DataValue*) right,
                                   comparison);
 }
 
-SOPC_StatusCode SOPC_DataValue_CopyAux(void* dest, void* src){
-    return SOPC_DataValue_Copy((SOPC_DataValue*) dest, (SOPC_DataValue*) src);
+SOPC_StatusCode SOPC_DataValue_CopyAux(void* dest, const void* src){
+    return SOPC_DataValue_Copy((SOPC_DataValue*) dest, (const SOPC_DataValue*) src);
 }
 
 void SOPC_DataValue_ClearAux(void* value){
@@ -3186,7 +3184,7 @@ void SOPC_Initialize_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt
 }
 
 SOPC_StatusCode SOPC_Op_Array(int32_t noOfElts, void* eltsArrayLeft, void* eltsArrayRight, size_t sizeOfElt,
-                              SOPC_EncodeableObject_PfnOp* opFct)
+                              SOPC_EncodeableObject_PfnCopy* opFct)
 {
     SOPC_StatusCode status = STATUS_OK;
     size_t idx = 0;

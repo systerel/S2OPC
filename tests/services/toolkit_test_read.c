@@ -31,7 +31,7 @@
 #include "sopc_addspace.h"
 #include "sopc_toolkit_config_internal.h"
 
-int main()
+int main(void)
 {
     bool bTest;
 

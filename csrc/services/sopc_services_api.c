@@ -50,7 +50,7 @@ static struct {
   .allDisconnectedFlag = false
 };
 
-static void SOPC_Internal_AllClientSecureChannelsDisconnected(){
+static void SOPC_Internal_AllClientSecureChannelsDisconnected(void){
   Mutex_Lock(&closeAllConnectionsSync.mutex);
   if(closeAllConnectionsSync.requestedFlag != false){
     closeAllConnectionsSync.allDisconnectedFlag = true;

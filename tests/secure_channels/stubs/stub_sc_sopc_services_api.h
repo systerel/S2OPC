@@ -21,9 +21,9 @@
 #include "sopc_async_queue.h"
 #include "sopc_services_api.h"
 
-void SOPC_Services_Initialize();
+void SOPC_Services_Initialize(void);
 
-void SOPC_Services_Clear();
+void SOPC_Services_Clear(void);
 
 typedef struct SOPC_StubSC_ServicesEventParams {
     SOPC_Services_Event event;

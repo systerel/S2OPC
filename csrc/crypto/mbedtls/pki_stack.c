@@ -51,7 +51,7 @@ static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_minimal =
 
 
 static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const SOPC_PKIProvider *pPKI,
-                                                       const SOPC_Certificate *pToValidate)
+                                                            const SOPC_Certificate *pToValidate)
 {
     (void)(pPKI);
     SOPC_Certificate *cert_ca = NULL;
@@ -74,6 +74,9 @@ static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const SOPC_PKIProvid
 
     // Now, verifies the certificate
     // crt are not const in crt_verify, but this function does not look like to modify them
+
+// Assumption that certificate is not modified by mbedtls
+#pragma GCC diagnostic ignored "-Wcast-qual"
     if(mbedtls_x509_crt_verify_with_profile((mbedtls_x509_crt *)(&pToValidate->crt),
                                             (mbedtls_x509_crt *)(&cert_ca->crt),
                                             rev_list,
@@ -81,8 +84,11 @@ static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const SOPC_PKIProvid
                                             NULL, /* You can specify an expected Common Name here */
                                             &failure_reasons,
                                             NULL, NULL) != 0)
+    {
         // TODO: you could further analyze here...
         return STATUS_NOK;
+    }
+#pragma GCC diagnostic pop
 
     return STATUS_OK;
 }
@@ -101,7 +107,11 @@ SOPC_StatusCode SOPC_PKIProviderStack_Create(SOPC_Certificate *pCertAuth,
     if(NULL == pki)
         return STATUS_NOK;
 
+// The pki function pointer shall be const after this init
+#pragma GCC diagnostic ignored "-Wcast-qual"
     *(SOPC_FnValidateCertificate *)(&pki->pFnValidateCertificate) = &PKIProviderStack_ValidateCertificate;
+#pragma GCC diagnostic pop
+
     pki->pUserCertAuthList = pCertAuth;
     pki->pUserCertRevocList = pRevocationList; // Can be NULL
     pki->pUserData = NULL;

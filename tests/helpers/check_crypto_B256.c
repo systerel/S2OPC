@@ -895,7 +895,7 @@ END_TEST
 static SOPC_Certificate *crt_ca = NULL;
 static SOPC_PKIProvider *pki = NULL;
 
-static inline void setup_pki_stack()
+static inline void setup_pki_stack(void)
 {
     uint8_t der_ca[1529];
 
@@ -932,7 +932,7 @@ static inline void setup_pki_stack()
     ck_assert(SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki) == STATUS_OK);
 }
 
-static inline void teardown_pki_stack()
+static inline void teardown_pki_stack(void)
 {
     SOPC_PKIProviderStack_Free(pki);
     SOPC_KeyManager_Certificate_Free(crt_ca);

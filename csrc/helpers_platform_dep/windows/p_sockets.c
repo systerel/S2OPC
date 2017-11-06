@@ -93,7 +93,7 @@ SOPC_StatusCode Socket_Configure(Socket  sock,
     if(sock != SOPC_INVALID_SOCKET){
         status = STATUS_OK;
         // Deactivate Nagle's algorithm since we always write a TCP UA binary message (and not just few bytes)
-        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*) &trueInt, sizeof(int));
+        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const void*) &trueInt, sizeof(int));
 
         /*
         if(setOptStatus != SOCKET_ERROR){
@@ -138,13 +138,13 @@ SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
             } // else SOCKET_ERROR due to init
 
             if(setOptStatus != SOCKET_ERROR && setReuseAddr != false){
-                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (char*) &trueInt, sizeof(int));
+                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
             }
 
             // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
             if(setOptStatus != SOCKET_ERROR && addr->ai_family == AF_INET6){
                 const int falseInt = false;
-                setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &falseInt, sizeof(int));
+                setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
             }
         }
         if(setOptStatus == SOCKET_ERROR){

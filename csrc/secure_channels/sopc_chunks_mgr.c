@@ -468,7 +468,7 @@ static SOPC_StatusCode SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnec
     if(STATUS_OK == status){
         if(clientConfig != NULL){
             // CLIENT side (expected same as requested) / SERVER side (expected same as initial one)
-            status = SOPC_String_AttachFromCstring(&tmpStr, (char*) clientConfig->reqSecuPolicyUri);
+            status = SOPC_String_CopyFromCString(&tmpStr, clientConfig->reqSecuPolicyUri);
             if(STATUS_OK == status){
                 status = SOPC_String_Compare(&tmpStr, &securityPolicy, true, &compareRes);
             }
@@ -1352,7 +1352,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
 
     // Security Policy:
     if(result != false){
-        if(STATUS_OK != SOPC_String_AttachFromCstring(&strSecuPolicy, (char*) scConfig->reqSecuPolicyUri) ||
+        if(STATUS_OK != SOPC_String_CopyFromCString(&strSecuPolicy, scConfig->reqSecuPolicyUri) ||
            strSecuPolicy.Length <= 0){
             result = false;
             *errorStatus = OpcUa_BadTcpInternalError;

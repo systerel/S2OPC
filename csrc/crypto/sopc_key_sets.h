@@ -31,7 +31,7 @@ typedef struct {
     SOPC_SC_SecurityKeySet* receiverKeySet;
 } SOPC_SC_SecurityKeySets;
 
-SOPC_SC_SecurityKeySet* SOPC_KeySet_Create();
+SOPC_SC_SecurityKeySet* SOPC_KeySet_Create(void);
 void SOPC_KeySet_Delete(SOPC_SC_SecurityKeySet* keySet);
 
 #endif /* SOPC_KEY_SETS_H_ */

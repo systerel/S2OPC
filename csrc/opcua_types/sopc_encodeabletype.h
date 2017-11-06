@@ -50,7 +50,7 @@ typedef void (SOPC_EncodeableObject_PfnGetSize) (void);
 /**
  *  \brief Encoding function generic signature for an encodeable object
  */
-typedef SOPC_StatusCode (SOPC_EncodeableObject_PfnEncode) (void* value, SOPC_Buffer* msgBuffer);
+typedef SOPC_StatusCode (SOPC_EncodeableObject_PfnEncode) (const void* value, SOPC_Buffer* msgBuffer);
 
 /**
  *  \brief Decoding function generic signature for an encodeable object

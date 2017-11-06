@@ -88,12 +88,12 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event,
 }
 
 /* Function to build the read service request message */
-void* getReadRequest_message(){
+static void* getReadRequest_message(void){
   return read_new_read_request();
 }
 
 /* Function to build the verification read request */
-void* getReadRequest_verif_message() {
+static void* getReadRequest_verif_message(void) {
   return tlibw_new_ReadRequest_check();
 }
 

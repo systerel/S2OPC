@@ -130,6 +130,8 @@ void message_out_bs__bless_msg_out(
 
 void message_out_bs__dealloc_msg_header_out(
    const constants__t_msg_header_i message_out_bs__msg_header){
+// To could keep generated prototype
+#pragma GCC diagnostic ignored "-Wcast-qual"
   if((*(SOPC_EncodeableType**) message_out_bs__msg_header) == &OpcUa_ResponseHeader_EncodeableType){
     SOPC_Encodeable_Delete(&OpcUa_ResponseHeader_EncodeableType, (void**) &message_out_bs__msg_header);
   }else if((*(SOPC_EncodeableType**) message_out_bs__msg_header) == &OpcUa_RequestHeader_EncodeableType){
@@ -137,6 +139,7 @@ void message_out_bs__dealloc_msg_header_out(
   }else{
     assert(false);
   }
+#pragma GCC diagnostic pop
 }
 
 void message_out_bs__dealloc_msg_out(
@@ -156,7 +159,11 @@ void message_out_bs__dealloc_msg_out(
     }
     // TODO: status returned ?
     // TODO: const parameter modified !
+
+// To could keep generated prototype
+#pragma GCC diagnostic ignored "-Wcast-qual"
     SOPC_Encodeable_Delete(encType, (void*) &message_out_bs__msg);
+#pragma GCC diagnostic pop
   }
 }
 

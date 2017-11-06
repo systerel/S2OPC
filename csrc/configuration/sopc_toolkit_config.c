@@ -147,13 +147,16 @@ void SOPC_Toolkit_ClearScConfigElt(uint32_t id, void *val)
     if(scConfig != NULL && scConfig->isClientSc == false){
         // In case of server it is an internally created config
         // => only client certificate was specifically allocated
+// Exceptional case: configuration added internally and shall be freed on clear call
+#pragma GCC diagnostic ignored "-Wcast-qual"
         SOPC_KeyManager_Certificate_Free((SOPC_Certificate*) scConfig->crt_cli);
+#pragma GCC diagnostic pop
         free(scConfig);
     }
 }
 
 // Deallocate fields allocated on server side only and free all the SC configs
-static void SOPC_Toolkit_ClearScConfigs(){
+static void SOPC_Toolkit_ClearScConfigs(void) {
     SOPC_SLinkedList_Apply(tConfig.scConfigs, SOPC_Toolkit_ClearScConfigElt);
     SOPC_SLinkedList_Delete(tConfig.scConfigs);
     tConfig.scConfigs = NULL;
@@ -285,7 +288,7 @@ SOPC_StatusCode SOPC_ToolkitConfig_SetNamespaceUris(SOPC_NamespaceTable* nsTable
     return status;
 }
 
-static uint32_t GetKnownEncodeableTypesLength(){
+static uint32_t GetKnownEncodeableTypesLength(void) {
     uint32_t result = 0;
     for(result = 0; SOPC_KnownEncodeableTypes[result] != NULL; result++);
     return result + 1;

@@ -526,7 +526,7 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
         if(STATUS_OK == status){
             SOPC_String tmpString;
             SOPC_String_Initialize(&tmpString);
-            status = SOPC_String_AttachFromCstring(&tmpString, (char*) scConfig->url);
+            status = SOPC_String_CopyFromCString(&tmpString, scConfig->url);
             if(STATUS_OK == status){
                 status = SOPC_String_Write(&tmpString,
                                            msgBuffer);
@@ -1848,10 +1848,15 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                        0);
         }else{
             // Require a socket connection for this secure connection
+
+// URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
+#pragma GCC diagnostic ignored "-Wcast-qual"
             SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT,
                                       idx,
                                       (void*) scConfig->url,
                                       0);
+#pragma GCC diagnostic pop
+
         }
         break;
     case SC_DISCONNECT:

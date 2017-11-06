@@ -207,11 +207,14 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         if(result == false){
             // Nothing to do: it means EP is already open or in opening step
         }else{
+// URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
+#pragma GCC diagnostic ignored "-Wcast-qual"
             // Notify Sockets layer to create the listener
             SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER,
                                       eltId,
                                       (void*) epConfig->endpointURL,
                                       SOPC_LISTENER_LISTEN_ALL_INTERFACES);
+#pragma GCC diagnostic pop
         }
         break;
     case EP_CLOSE:

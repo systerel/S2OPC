@@ -23,12 +23,12 @@
 SOPC_Endianess sopc_endianess  = SOPC_Endianess_Undefined;
 SOPC_Endianess sopc_floatEndianess = SOPC_Endianess_Undefined;
 
-static uint32_t little_endian(){
+static uint32_t little_endian(void){
   uint32_t x = 0x0001;
   return (x == *((uint8_t *)&x));
 }
 
-static uint32_t float_big_endian(){
+static uint32_t float_big_endian(void){
     float f = -0.0;
     // Check if sign bit is the first
 // GCC version with binary constants extension

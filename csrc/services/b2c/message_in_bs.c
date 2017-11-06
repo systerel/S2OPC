@@ -45,6 +45,8 @@ void message_in_bs__INITIALISATION(void) {
 
 void message_in_bs__dealloc_msg_in_header(
    const constants__t_msg_header_i message_in_bs__msg_header){
+// To could keep generated prototype
+#pragma GCC diagnostic ignored "-Wcast-qual"
   if((*(SOPC_EncodeableType**) message_in_bs__msg_header) == &OpcUa_ResponseHeader_EncodeableType){
     SOPC_Encodeable_Delete(&OpcUa_ResponseHeader_EncodeableType, (void**) &message_in_bs__msg_header);
   }else if((*(SOPC_EncodeableType**) message_in_bs__msg_header) == &OpcUa_RequestHeader_EncodeableType){
@@ -52,10 +54,14 @@ void message_in_bs__dealloc_msg_in_header(
   }else{
     assert(false);
   }
+#pragma GCC diagnostic pop
 }
 
 void message_in_bs__dealloc_msg_in(const constants__t_msg_i message_in_bs__msg){
+// To could keep generated prototype
+#pragma GCC diagnostic ignored "-Wcast-qual"
   SOPC_Encodeable_Delete(*(SOPC_EncodeableType**) message_in_bs__msg, (void**) &message_in_bs__msg);
+#pragma GCC diagnostic pop
 }
 
 void message_in_bs__dealloc_msg_in_buffer(

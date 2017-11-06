@@ -49,14 +49,14 @@ SOPC_SecureChannel_Config* SOPC_Toolkit_GetSecureChannelConfig(uint32_t scConfig
  *  \return Encodeable types table (terminated by NULL value) or NULL if
  *  toolkit is not configured yet
  */
-SOPC_EncodeableType** SOPC_ToolkitConfig_GetEncodeableTypes();
+SOPC_EncodeableType** SOPC_ToolkitConfig_GetEncodeableTypes(void);
 
 /**
  *  \brief Return the namespace table configuration  (SOPC_Toolkit_Configured required)
  *
  *  \return Namespace table or NULL if toolkit is not configured yet
  */
-SOPC_NamespaceTable* SOPC_ToolkitConfig_GetNamespaces();
+SOPC_NamespaceTable* SOPC_ToolkitConfig_GetNamespaces(void);
 
 void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
 

@@ -90,23 +90,23 @@ void SOPC_ServicesToApp_EnqueueEvent(SOPC_App_Com_Event  appEvent,
 /**
  *  \brief Initializes the services and application event dispatcher threads
  */
-void SOPC_Services_Initialize();
+void SOPC_Services_Initialize(void);
 
 /**
  *  \brief Notify the toolkit configuration is terminated to could initialize the services B model
  */
-void SOPC_Services_ToolkitConfigured();
+void SOPC_Services_ToolkitConfigured(void);
 
 /**
  *  \brief Notify that the clear function will be called to could terminate
  *         operations using secure channels and sockets services.
  */
-void SOPC_Services_PreClear();
+void SOPC_Services_PreClear(void);
 
 /**
  *  \brief Stop and clear the services and application event dispatcher threads
  */
-void SOPC_Services_Clear();
+void SOPC_Services_Clear(void);
 
 
 #endif /* _SOPC_SERVICES_API_H */

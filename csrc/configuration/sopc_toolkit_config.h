@@ -55,12 +55,12 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct);
  *  OpcUa_BadInvalidState if toolkit is not initialized or already
  *  configured
  */
-SOPC_StatusCode SOPC_Toolkit_Configured();
+SOPC_StatusCode SOPC_Toolkit_Configured(void);
 
 /**
  *  \brief  Clear the stack configuration
  */
-void SOPC_Toolkit_Clear();
+void SOPC_Toolkit_Clear(void);
 
 /**
  *  \brief Set the given Address Space for the current toolkit server

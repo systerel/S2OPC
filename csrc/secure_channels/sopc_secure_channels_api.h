@@ -117,8 +117,8 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
                                       void*                          params,
                                       uint32_t                       auxParam);
 
-void SOPC_SecureChannels_Initialize();
+void SOPC_SecureChannels_Initialize(void);
 
-void SOPC_SecureChannels_Clear();
+void SOPC_SecureChannels_Clear(void);
 
 #endif /* _SOPC_SECURE_CHANNELS_API_H_ */

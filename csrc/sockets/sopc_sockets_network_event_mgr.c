@@ -203,7 +203,7 @@ static void* SOPC_SocketsNetworkEventMgr_CyclicThreadLoop(void* nullData){
     return NULL;
 }
 
-static bool SOPC_SocketsNetworkEventMgr_CyclicThreadStart(){
+static bool SOPC_SocketsNetworkEventMgr_CyclicThreadStart(void){
     bool result = false;
     if(receptionThread.initDone == false){
         Mutex_Initialization(&receptionThread.tMutex);
@@ -217,7 +217,7 @@ static bool SOPC_SocketsNetworkEventMgr_CyclicThreadStart(){
     return result;
 }
 
-static void SOPC_SocketsNetworkEventMgr_CyclicThreadStop(){
+static void SOPC_SocketsNetworkEventMgr_CyclicThreadStop(void){
     if(receptionThread.initDone != false){
         Mutex_Lock(&receptionThread.tMutex);
         // stop the reception thread
