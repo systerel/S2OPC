@@ -277,7 +277,10 @@
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
-   </References>
+    </References>
+    <Value>
+      <uax:Int32>0</uax:Int32>
+    </Value>
   </UAVariable>
   <UAVariable BrowseName="0:Int64" DataType="Int64" NodeId="i=1001" ParentNodeId="i=1000">
     <DisplayName>Int64_1dn</DisplayName>
