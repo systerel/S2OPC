@@ -151,6 +151,7 @@ int main(int argc, char *argv[])
   SOPC_String_AttachFromCstring(&epConfig.serverDescription.ApplicationUri, APPLICATION_URI);
   SOPC_String_AttachFromCstring(&epConfig.serverDescription.ProductUri, PRODUCT_URI);
   epConfig.serverDescription.ApplicationType = OpcUa_ApplicationType_Server;
+  SOPC_String_AttachFromCstring(&epConfig.serverDescription.ApplicationName.Text, "INGOPCS toolkit server example");
 
   // Init stack configuration
   if(STATUS_OK == status){
