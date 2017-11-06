@@ -418,9 +418,11 @@ OPERATIONS
                                     l_ret <-- decode_browse_request(l_req_msg);
                                     IF l_ret = e_sc_ok THEN
                                         l_ret <-- treat_browse_request_BrowseValues;
-                                        l_isvalid_write <-- write_BrowseResponse_msg_out(l_resp_msg);
-                                        IF l_isvalid_write /= TRUE THEN
-                                            l_ret := e_sc_bad_out_of_memory
+                                        IF l_ret = e_sc_ok THEN
+                                            l_isvalid_write <-- write_BrowseResponse_msg_out(l_resp_msg);
+                                            IF l_isvalid_write /= TRUE THEN
+                                                l_ret := e_sc_bad_out_of_memory
+                                            END
                                         END
                                     END;
                                     free_browse_result
