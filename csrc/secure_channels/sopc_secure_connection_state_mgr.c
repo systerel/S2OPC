@@ -178,6 +178,15 @@ static bool SC_Server_SendErrorMsgAndClose(uint32_t        scConnectionIdx,
     SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_TCP_UA_ERR_MIN_MSG_LENGTH + SOPC_TCP_UA_MAX_URL_LENGTH);
 
     if(buffer != NULL){
+        // Let size of the headers for the chunk manager
+        status = SOPC_Buffer_SetDataLength(buffer, SOPC_TCP_UA_HEADER_LENGTH);
+
+        if(STATUS_OK == status){
+            status = SOPC_Buffer_SetPosition(buffer, SOPC_TCP_UA_HEADER_LENGTH);
+        }
+    }
+
+    if(STATUS_OK == status){
         status = SOPC_UInt32_Write(&errorStatus,
                                    buffer);
     }
@@ -303,7 +312,7 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
     if(scConnection->isServerConnection == false){
         // CLIENT case
         if(isScConnected != false){
-            // Server shall alway send a close secure channel message request before closing socket
+            // Client shall alway send a close secure channel message request before closing socket
 
             if(isSocketClosed == false){
                 errBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.sendBufferSize);
@@ -352,6 +361,7 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
                                                          scConnectionIdx);
             }
         }else if(scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED){
+            // Secure Channel is NOT closed nor in init state
             if(isSocketClosed == false){
                 bool result = false;
                 // Server shall alway send a ERR message before closing socket
