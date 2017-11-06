@@ -56,11 +56,14 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
         if(scListener->state == SECURE_LISTENER_STATE_OPENED){
             // Close all active secure connections established on the listener
             for(idx = 0; idx < SOPC_MAX_SOCKETS_CONNECTIONS; idx++){
-                if(scListener->isUsedConnectionIdxArray[idx]){
+                if(scListener->isUsedConnectionIdxArray[idx] != false){
                     SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CLOSE,
                                                                    scListener->connectionIdxArray[idx],
                                                                    NULL,
                                                                    endpointConfigIdx);
+                    scListener->isUsedConnectionIdxArray[idx] = false;
+                    scListener->connectionIdxArray[idx] = 0;
+
                 }
             }
             // Close the socket listener
@@ -94,6 +97,7 @@ static bool SOPC_SecureListenerStateMgr_AddConnection(SOPC_SecureListener* scLis
         lastIdx = idx;
         if(scListener->isUsedConnectionIdxArray[idx] == false){
             scListener->connectionIdxArray[idx] = newConnectionIndex;
+            scListener->isUsedConnectionIdxArray[idx] = true;
             result = true;
         }
         idx = (idx + 1) % SOPC_MAX_SOCKETS_CONNECTIONS;
