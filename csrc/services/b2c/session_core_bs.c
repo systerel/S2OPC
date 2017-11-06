@@ -103,6 +103,15 @@ void session_core_bs__notify_set_session_state(
             }
         }
     }
+    if(session_core_bs__state == constants__e_session_closed){
+        if(constants__c_session_indet != session_core_bs__session){
+            SessionData* pSession = &sessionDataArray[session_core_bs__session];
+            SOPC_NodeId_Clear(&pSession->sessionToken);
+            SOPC_ByteString_Clear(&pSession->nonceServer);
+            SOPC_ByteString_Clear(&pSession->nonceClient);
+            OpcUa_SignatureData_Clear(&pSession->signatureData);
+        }
+    }
 }
 
 void session_core_bs__server_get_session_from_token(
