@@ -136,15 +136,9 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(const constant
         for (int iSecuConfig=0; iSecuConfig < nbSecuConfigs; iSecuConfig++){
             SOPC_SecurityPolicy currentSecurityPolicy = tabSecurityPolicy[iSecuConfig];
             uint16_t securityModes = currentSecurityPolicy.securityModes;
-            // Set userIdentityTokens
-            newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
-            if(NULL != newEndPointDescription.UserIdentityTokens){
-                newEndPointDescription.NoOfUserIdentityTokens = 1;
-                newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
-            }
 
             // Set securityPolicyUri
-            newEndPointDescription.SecurityPolicyUri = currentSecurityPolicy.securityPolicy;
+            SOPC_String_AttachFrom(&newEndPointDescription.SecurityPolicyUri, &currentSecurityPolicy.securityPolicy);
 
             // Add an EndpointDescription per security mode
             if((SOPC_SECURITY_MODE_NONE_MASK & securityModes) != 0){
@@ -152,11 +146,19 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(const constant
                 // Set securityMode
                 newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_None;
 
+                // Set userIdentityTokens
+                newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
+                if(NULL != newEndPointDescription.UserIdentityTokens){
+                    newEndPointDescription.NoOfUserIdentityTokens = 1;
+                    newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
+                }
+
                 // Set securityLevel
                 /* see §7.10 Part4 - Value 0 is for not recommended endPoint.
                    Others values corresponds to more secured endPoints.*/
                 newEndPointDescription.SecurityLevel = 0;
 
+                OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
                 if(isCreateSessionResponse == false){
                     // Set ApplicationDescription
                     SOPC_SetServerApplicationDescription(sopcEndpointConfig, &newEndPointDescription.Server);
@@ -170,11 +172,21 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(const constant
             }
 
             if((SOPC_SECURITY_MODE_SIGN_MASK & securityModes) != 0){
-                // Set securityMode & securityLevel
+
+                // Set securityMode
                 newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_Sign;
+
+                // Set userIdentityTokens
+                newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
+                if(NULL != newEndPointDescription.UserIdentityTokens){
+                    newEndPointDescription.NoOfUserIdentityTokens = 1;
+                    newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
+                }
+
+                // Set securityLevel
                 newEndPointDescription.SecurityLevel = 1;
 
-                /* GetEndpoints service only */
+                OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
                 if(isCreateSessionResponse == false){
                     // Set serverCertificate
                     SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription);
@@ -190,11 +202,21 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(const constant
             }
 
             if((SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK & securityModes) != 0){
-                // Set securityMode & securityLevel
+
+                // Set securityMode
                 newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
+
+                // Set userIdentityTokens
+                newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
+                if(NULL != newEndPointDescription.UserIdentityTokens){
+                    newEndPointDescription.NoOfUserIdentityTokens = 1;
+                    newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
+                }
+
+                // Set securityLevel
                 newEndPointDescription.SecurityLevel = 1;
 
-                /* GetEndpoints service only */
+                OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
                 if(isCreateSessionResponse == false){
                     // Set serverCertificate
                     SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription);
