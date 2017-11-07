@@ -325,8 +325,8 @@ OPERATIONS
                         close_secure_channel (channel)
                     END
                 ELSE
-                    /* TODO: generic management of unknown message type */
-                    skip
+                    /* Unknown message type: close the secure channel since it is not expected */
+                    close_secure_channel (channel)
                 END
             END
         END
