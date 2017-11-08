@@ -29,8 +29,6 @@
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
 
-BEGIN_EXTERN_C
-
 /**
  *  \brief           Instantiate and initialize an encodeable object of the given encodeable type
  *
@@ -61,7 +59,5 @@ SOPC_StatusCode SOPC_Encodeable_Delete(SOPC_EncodeableType* encTyp, void** encOb
 SOPC_StatusCode SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObject,
                                                 SOPC_EncodeableType*  encTyp,
                                                 void**                encObject);
-
-END_EXTERN_C
 
 #endif /* SOPC_ENCODEABLE_H_ */

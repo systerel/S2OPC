@@ -24,8 +24,6 @@
 #include "sopc_toolkit_constants.h"
 #include "sopc_encodeabletype.h"
 
-BEGIN_EXTERN_C
-
 // TODO: integrate to encodeable type ?
 /**
  *  \brief Copy function generic signature
@@ -522,7 +520,5 @@ SOPC_StatusCode SOPC_Comp_Array(int32_t noOfElts, void* eltsArrayLeft, void* elt
                                 SOPC_EncodeableObject_PfnComp* compFct, int32_t* comparison);
 void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
                       SOPC_EncodeableObject_PfnClear* clearFct);
-
-END_EXTERN_C
 
 #endif /* SOPC_SOPC_BUILTINTYPES_H_ */

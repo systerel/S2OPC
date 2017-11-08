@@ -143,13 +143,4 @@ typedef uint32_t SOPC_StatusCode;
 #define STATUS_INVALID_STATE 0x80760002//0x30000000
 #define STATUS_INVALID_RCV_PARAMETER 0x80000003//0x40000000
 
-/* CPP macro */
-#ifdef __cplusplus
-# define BEGIN_EXTERN_C extern "C" {
-# define END_EXTERN_C }
-#else
-# define BEGIN_EXTERN_C
-# define END_EXTERN_C
-#endif
-
 #endif /* SOPC_TOOLKIT_CONSTANTS_H_ */

@@ -29,8 +29,6 @@
 #include "sopc_toolkit_constants.h"
 #include "sopc_buffer.h"
 
-BEGIN_EXTERN_C
-
 /**
  *  \brief Initialization function generic signature for an encodeable object
  */
@@ -87,7 +85,5 @@ typedef struct SOPC_EncodeableType {
 SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(SOPC_EncodeableType** encTypesTable,
                                                            const char*           namespac,
                                                            uint32_t              typeId);
-
-END_EXTERN_C
 
 #endif /* SOPC_ENCODEABLETYPE_H_ */
