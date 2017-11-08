@@ -41,6 +41,7 @@
 #include "sopc_time.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encoder.h"
+#include "sopc_namespace_table.h"
 
 START_TEST(test_hexlify)
 {
@@ -1976,11 +1977,43 @@ START_TEST(test_ua_encoder_other_types)
 
     // Two bytes node id
     nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
-    nodeId.Data.Numeric = 114;
+    nodeId.Namespace = OPCUA_NAMESPACE_INDEX;
+    nodeId.Data.Numeric = 255;
     status = SOPC_NodeId_Write(&nodeId, buffer);
     ck_assert(status == STATUS_OK);
+    // Encoding byte
     ck_assert(buffer->data[0] == 0x00);
-    ck_assert(buffer->data[1] == 0x72);
+    // Id byte
+    ck_assert(buffer->data[1] == 0xFF);
+
+    // Four bytes node id (limit of two bytes representation on numeric value)
+    nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
+    nodeId.Namespace = OPCUA_NAMESPACE_INDEX;
+    nodeId.Data.Numeric = 256;
+    status = SOPC_NodeId_Write(&nodeId, buffer);
+    ck_assert(status == STATUS_OK);
+    // Encoding byte
+    ck_assert(buffer->data[2] == 0x01);
+    // Namespace byte
+    ck_assert(buffer->data[3] == 0x00);
+    // Id bytes
+    ck_assert(buffer->data[4] == 0x00);
+    ck_assert(buffer->data[5] == 0x01);
+
+
+    // Four bytes node id (limit of two bytes representation on namespace value)
+    nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
+    nodeId.Namespace = 1;
+    nodeId.Data.Numeric = 255;
+    status = SOPC_NodeId_Write(&nodeId, buffer);
+    ck_assert(status == STATUS_OK);
+    // Encoding byte
+    ck_assert(buffer->data[6] == 0x01);
+    // Namespace byte
+    ck_assert(buffer->data[7] == 0x01);
+    // Id bytes
+    ck_assert(buffer->data[8] == 0xFF);
+    ck_assert(buffer->data[9] == 0x00);
 
     // Four bytes node id
     nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
@@ -1988,24 +2021,47 @@ START_TEST(test_ua_encoder_other_types)
     nodeId.Data.Numeric = 1025;
     status = SOPC_NodeId_Write(&nodeId, buffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(buffer->data[2] == 0x01);
-    ck_assert(buffer->data[3] == 0x05);
-    ck_assert(buffer->data[4] == 0x01);
-    ck_assert(buffer->data[5] == 0x04);
+    // Encoding byte
+    ck_assert(buffer->data[10] == 0x01);
+    // Namespace byte
+    ck_assert(buffer->data[11] == 0x05);
+    // Id bytes
+    ck_assert(buffer->data[12] == 0x01);
+    ck_assert(buffer->data[13] == 0x04);
 
-    // Numeric node id
+    // Numeric node id (limit of four bytes representation on numeric value)
     nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
     nodeId.Namespace = 5;
-    nodeId.Data.Numeric = 0x1FFFF;
+    nodeId.Data.Numeric = 0x010000;
     status = SOPC_NodeId_Write(&nodeId, buffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(buffer->data[6] == 0x02);
-    ck_assert(buffer->data[7] == 0x05);
-    ck_assert(buffer->data[8] == 0x00);
-    ck_assert(buffer->data[9] == 0xFF);
-    ck_assert(buffer->data[10] == 0xFF);
-    ck_assert(buffer->data[11] == 0x01);
-    ck_assert(buffer->data[12] == 0x00);
+    // Encoding byte
+    ck_assert(buffer->data[14] == 0x02);
+    // Namespace bytes
+    ck_assert(buffer->data[15] == 0x05);
+    ck_assert(buffer->data[16] == 0x00);
+    // Id bytes
+    ck_assert(buffer->data[17] == 0x00);
+    ck_assert(buffer->data[18] == 0x00);
+    ck_assert(buffer->data[19] == 0x01);
+    ck_assert(buffer->data[20] == 0x00);
+
+    // Numeric node id (limit of four bytes representation on namespace value)
+    nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
+    nodeId.Namespace = 256;
+    nodeId.Data.Numeric = 1025;
+    status = SOPC_NodeId_Write(&nodeId, buffer);
+    ck_assert(status == STATUS_OK);
+    // Encoding byte
+    ck_assert(buffer->data[21] == 0x02);
+    // Namespace bytes
+    ck_assert(buffer->data[22] == 0x00);
+    ck_assert(buffer->data[23] == 0x01);
+    // Id bytes
+    ck_assert(buffer->data[24] == 0x01);
+    ck_assert(buffer->data[25] == 0x04);
+    ck_assert(buffer->data[26] == 0x00);
+    ck_assert(buffer->data[27] == 0x00);
 
     // TODO: write all other types possibles !
 
@@ -2024,9 +2080,21 @@ START_TEST(test_ua_encoder_other_types)
     status = SOPC_NodeId_Read(&nodeId2, buffer);
     ck_assert(status == STATUS_OK);
     ck_assert(nodeId2.Namespace == 0);
-    ck_assert(nodeId2.Data.Numeric == 114);
+    ck_assert(nodeId2.Data.Numeric == 255);
 
     ////// Four bytes NodeId
+    SOPC_NodeId_Clear(&nodeId2);
+    status = SOPC_NodeId_Read(&nodeId2, buffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(nodeId2.Namespace == OPCUA_NAMESPACE_INDEX);
+    ck_assert(nodeId2.Data.Numeric == 256);
+
+    SOPC_NodeId_Clear(&nodeId2);
+    status = SOPC_NodeId_Read(&nodeId2, buffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(nodeId2.Namespace == 1);
+    ck_assert(nodeId2.Data.Numeric == 255);
+
     SOPC_NodeId_Clear(&nodeId2);
     status = SOPC_NodeId_Read(&nodeId2, buffer);
     ck_assert(status == STATUS_OK);
@@ -2038,7 +2106,13 @@ START_TEST(test_ua_encoder_other_types)
     status = SOPC_NodeId_Read(&nodeId2, buffer);
     ck_assert(status == STATUS_OK);
     ck_assert(nodeId2.Namespace == 5);
-    ck_assert(nodeId2.Data.Numeric == 0x1FFFF);
+    ck_assert(nodeId2.Data.Numeric == 0x010000);
+
+    SOPC_NodeId_Clear(&nodeId2);
+    status = SOPC_NodeId_Read(&nodeId2, buffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(nodeId2.Namespace == 256);
+    ck_assert(nodeId2.Data.Numeric == 1025);
 
     // TODO: read all other types possibles !
 

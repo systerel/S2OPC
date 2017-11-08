@@ -18,8 +18,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CHECK_STACK_H
-#define CHECK_STACK_H
+#ifndef CHECK_HELPERS_H
+#define CHECK_HELPERS_H
 
 
 Suite *tests_make_suite_crypto_B256S256(void);
@@ -30,4 +30,4 @@ Suite *tests_make_suite_tools(void);
 
 Suite *tests_make_suite_threads(void);
 
-#endif  // CHECK_STACK_H
+#endif  // CHECK_HELPERS_H
