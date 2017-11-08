@@ -723,11 +723,16 @@ SOPC_NodeId_DataEncoding GetNodeIdDataEncoding(const SOPC_NodeId* nodeId){
     SOPC_NodeId_DataEncoding encodingEnum = NodeIdEncoding_Invalid;
     switch(nodeId->IdentifierType){
         case IdentifierType_Numeric:
-            if(nodeId->Data.Numeric <= UINT8_MAX){
+            if(OPCUA_NAMESPACE_INDEX == nodeId->Namespace &&
+               nodeId->Data.Numeric <= UINT8_MAX){
+                // Default namespace and Id : [0..255]
                 encodingEnum = NodeIdEncoding_TwoByte;
-            }else if(nodeId->Data.Numeric <= UINT16_MAX){
+            }else if(nodeId->Namespace <= UINT8_MAX &&
+                     nodeId->Data.Numeric <= UINT16_MAX){
+                // Namespace : [0..255] and Id : [0..65535]
                 encodingEnum = NodeIdEncoding_FourByte;
             }else{
+                // Other numeric cases: Namespace on 2 bytes and Id on 4 bytes
                 encodingEnum = NodeIdEncoding_Numeric;
             }
             break;
@@ -762,17 +767,19 @@ SOPC_StatusCode Internal_NodeId_Write(SOPC_Buffer* buf,
                 status = STATUS_INVALID_PARAMETERS;
                 break;
             case NodeIdEncoding_TwoByte:
+                assert(OPCUA_NAMESPACE_INDEX == nodeId->Namespace);
+                assert(nodeId->Data.Numeric <= UINT8_MAX);
                 byte = (SOPC_Byte) nodeId->Data.Numeric;
+
                 status = SOPC_Byte_Write(&byte, buf);
                 break;
             case  NodeIdEncoding_FourByte:
+                assert(nodeId->Namespace <= UINT8_MAX);
+                assert(nodeId->Data.Numeric <= UINT16_MAX);
                 twoBytes = (uint16_t) nodeId->Data.Numeric;
-                if(nodeId->Namespace <= UINT8_MAX){
-                    const SOPC_Byte namespace = (SOPC_Byte) nodeId->Namespace;
-                    status = SOPC_Byte_Write(&namespace, buf);
-                }else{
-                    status = STATUS_INVALID_PARAMETERS;
-                }
+                byte = (SOPC_Byte) nodeId->Namespace;
+
+                status = SOPC_Byte_Write(&byte, buf);
                 if(status == STATUS_OK){
                     status = SOPC_UInt16_Write(&twoBytes, buf);
                 }
