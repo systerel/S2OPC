@@ -1975,7 +1975,7 @@ START_TEST(test_ua_encoder_other_types)
     SOPC_NodeId_Initialize(&nodeId2);
 
     // Two bytes node id
-    nodeId.IdentifierType = IdentifierType_Numeric;
+    nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
     nodeId.Data.Numeric = 114;
     status = SOPC_NodeId_Write(&nodeId, buffer);
     ck_assert(status == STATUS_OK);
@@ -1983,7 +1983,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(buffer->data[1] == 0x72);
 
     // Four bytes node id
-    nodeId.IdentifierType = IdentifierType_Numeric;
+    nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
     nodeId.Namespace = 5;
     nodeId.Data.Numeric = 1025;
     status = SOPC_NodeId_Write(&nodeId, buffer);
@@ -1994,7 +1994,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(buffer->data[5] == 0x04);
 
     // Numeric node id
-    nodeId.IdentifierType = IdentifierType_Numeric;
+    nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
     nodeId.Namespace = 5;
     nodeId.Data.Numeric = 0x1FFFF;
     status = SOPC_NodeId_Write(&nodeId, buffer);

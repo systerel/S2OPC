@@ -38,25 +38,25 @@
 | (x & 0x000000FF00000000) >> 8
 
 typedef enum {
-    NodeIdEncoding_TwoByte = 0x00,
-    NodeIdEncoding_FourByte = 0x01,
-    NodeIdEncoding_Numeric = 0x02,
-    NodeIdEncoding_String = 0x03,
-    NodeIdEncoding_Guid = 0x04,
-    NodeIdEncoding_ByteString = 0x05,
-    NodeIdEncoding_NamespaceUriFlag = 0x80,
-    NodeIdEncoding_ServerIndexFlag = 0x40,
-    NodeIdEncoding_Invalid = 0xFF
+    SOPC_NodeIdEncoding_TwoBytes = 0x00,
+    SOPC_NodeIdEncoding_FourBytes = 0x01,
+    SOPC_NodeIdEncoding_Numeric = 0x02,
+    SOPC_NodeIdEncoding_String = 0x03,
+    SOPC_NodeIdEncoding_Guid = 0x04,
+    SOPC_NodeIdEncoding_ByteString = 0x05,
+    SOPC_NodeIdEncoding_NamespaceUriFlag = 0x80,
+    SOPC_NodeIdEncoding_ServerIndexFlag = 0x40,
+    SOPC_NodeIdEncoding_Invalid = 0xFF
 } SOPC_NodeId_DataEncoding;
 
 typedef enum {
-    DiagInfoEncoding_SymbolicId = 0x01,
-    DiagInfoEncoding_Namespace = 0x02,
-    DiagInfoEncoding_LocalizedTest = 0x04,
-    DiagInfoEncoding_Locale = 0x08,
-    DiagInfoEncoding_AdditionalInfo = 0x10,
-    DiagInfoEncoding_InnerStatusCode = 0x20,
-    DiagInfoEncoding_InnerDianosticInfo = 0x40,
+    SOPC_DiagInfoEncoding_SymbolicId = 0x01,
+    SOPC_DiagInfoEncoding_Namespace = 0x02,
+    SOPC_DiagInfoEncoding_LocalizedTest = 0x04,
+    SOPC_DiagInfoEncoding_Locale = 0x08,
+    SOPC_DiagInfoEncoding_AdditionalInfo = 0x10,
+    SOPC_DiagInfoEncoding_InnerStatusCode = 0x20,
+    SOPC_DiagInfoEncoding_InnerDianosticInfo = 0x40,
 } SOPC_DiagInfo_EncodingFlag;
 
 typedef enum {

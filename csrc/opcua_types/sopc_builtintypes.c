@@ -1135,19 +1135,19 @@ SOPC_StatusCode SOPC_NodeId_Copy(SOPC_NodeId* dest, const SOPC_NodeId* src){
         dest->Namespace = src->Namespace;
         dest->IdentifierType = src->IdentifierType;
         switch(src->IdentifierType){
-        case IdentifierType_Numeric:
+        case SOPC_IdentifierType_Numeric:
             dest->Data.Numeric = src->Data.Numeric;
             status = STATUS_OK;
             break;
-        case IdentifierType_String:
+        case SOPC_IdentifierType_String:
             SOPC_String_Initialize(&dest->Data.String);
             status = SOPC_String_Copy(&dest->Data.String, &src->Data.String);
             break;
-        case IdentifierType_Guid:
+        case SOPC_IdentifierType_Guid:
             dest->Data.Guid = malloc(sizeof(SOPC_Guid));
             status = SOPC_Guid_Copy(dest->Data.Guid, src->Data.Guid);
             break;
-        case IdentifierType_ByteString:
+        case SOPC_IdentifierType_ByteString:
             SOPC_ByteString_Initialize(&dest->Data.Bstring);
             status = SOPC_ByteString_Copy(&dest->Data.Bstring, &src->Data.Bstring);
             break;
@@ -1171,24 +1171,24 @@ void SOPC_NodeId_Clear(SOPC_NodeId* nodeId){
     if(nodeId != NULL){
         nodeId->Namespace = 0; // OPCUA namespace
         switch(nodeId->IdentifierType){
-            case IdentifierType_Numeric:
+            case SOPC_IdentifierType_Numeric:
                 SOPC_UInt32_Clear(&nodeId->Data.Numeric);
                 break;
-            case IdentifierType_String:
+            case SOPC_IdentifierType_String:
                 SOPC_String_Clear(&nodeId->Data.String);
                 break;
-            case IdentifierType_Guid:
+            case SOPC_IdentifierType_Guid:
                 SOPC_Guid_Clear(nodeId->Data.Guid);
                 if(nodeId->Data.Guid != NULL){
                     free(nodeId->Data.Guid);
                 }
                 nodeId->Data.Guid = NULL;
                 break;
-            case IdentifierType_ByteString:
+            case SOPC_IdentifierType_ByteString:
                 SOPC_ByteString_Clear(&nodeId->Data.Bstring);
                 break;
         }
-        nodeId->IdentifierType = IdentifierType_Numeric;
+        nodeId->IdentifierType = SOPC_IdentifierType_Numeric;
     }
 }
 
@@ -1200,7 +1200,7 @@ SOPC_StatusCode SOPC_NodeId_Compare(const SOPC_NodeId* left,
         if(left->Namespace == right->Namespace &&
            left->IdentifierType == right->IdentifierType){
             switch(left->IdentifierType){
-            case IdentifierType_Numeric:
+            case SOPC_IdentifierType_Numeric:
                 if(left->Data.Numeric == right->Data.Numeric){
                     *comparison = 0;
                 }else if(left->Data.Numeric < right->Data.Numeric){
@@ -1210,16 +1210,16 @@ SOPC_StatusCode SOPC_NodeId_Compare(const SOPC_NodeId* left,
                 }
                 status = STATUS_OK;
                 break;
-            case IdentifierType_String:
+            case SOPC_IdentifierType_String:
                 status = SOPC_String_Compare(&left->Data.String, &right->Data.String, false, comparison);
                 break;
-            case IdentifierType_Guid:
+            case SOPC_IdentifierType_Guid:
                 if(NULL != left->Data.Guid && NULL != right->Data.Guid){
                     *comparison = memcmp(left->Data.Guid, right->Data.Guid, sizeof(SOPC_Guid));
                     status = STATUS_OK;
                 } // else invalid parameters
                 break;
-            case IdentifierType_ByteString:
+            case SOPC_IdentifierType_ByteString:
                 status = SOPC_ByteString_Compare(&left->Data.Bstring, &right->Data.Bstring, comparison);
                 break;
             }

@@ -128,7 +128,7 @@ void service_browse_decode_bs__getall_BrowseValue(
 
         /* TODO: Have a clearer definition of what a "not specified ReferenceType" is... */
         pNid = &pBwseDesc->ReferenceTypeId;
-        if(! (pNid->IdentifierType == IdentifierType_Numeric && pNid->Data.Numeric == 0)) {
+        if(! (pNid->IdentifierType == SOPC_IdentifierType_Numeric && pNid->Data.Numeric == 0)) {
             *service_browse_decode_bs__p_isreftype = true;
             *service_browse_decode_bs__p_reftype = (constants__t_NodeId_i)pNid;
             *service_browse_decode_bs__p_inc_subtype = pBwseDesc->IncludeSubtypes;

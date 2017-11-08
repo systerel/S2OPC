@@ -70,7 +70,7 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
     {
         lwv[i] = (OpcUa_WriteValue) {
             .NodeId = {
-                .IdentifierType = IdentifierType_Numeric,
+                .IdentifierType = SOPC_IdentifierType_Numeric,
                 .Data.Numeric = i+1000+1},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
@@ -87,7 +87,7 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
     {
       lwv[i+(N_VARS/N_GROUPS)] = (OpcUa_WriteValue) {
             .NodeId = {
-                .IdentifierType = IdentifierType_Numeric,
+                .IdentifierType = SOPC_IdentifierType_Numeric,
                 .Data.Numeric = i+(N_VARS/N_GROUPS)+1000+1},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
@@ -104,7 +104,7 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
     {
         lwv[i+(N_VARS/N_GROUPS)*2] = (OpcUa_WriteValue) {
             .NodeId = {
-                .IdentifierType = IdentifierType_Numeric,
+                .IdentifierType = SOPC_IdentifierType_Numeric,
                 .Data.Numeric = i+2*(N_VARS/N_GROUPS)+1000+1},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
@@ -129,7 +129,7 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
 
         lwv[i+3*(N_VARS/N_GROUPS)] = (OpcUa_WriteValue) {
             .NodeId = {
-                .IdentifierType = IdentifierType_Numeric,
+                .IdentifierType = SOPC_IdentifierType_Numeric,
                 .Data.Numeric = i+3*(N_VARS/N_GROUPS)+1000+1},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
@@ -154,7 +154,7 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
 
         lwv[i+4*(N_VARS/N_GROUPS)] = (OpcUa_WriteValue) {
             .NodeId = {
-                .IdentifierType = IdentifierType_Numeric,
+                .IdentifierType = SOPC_IdentifierType_Numeric,
                 .Data.Numeric = i+4*(N_VARS/N_GROUPS)+1000+1},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
@@ -179,7 +179,7 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
 
         lwv[i+5*(N_VARS/N_GROUPS)] = (OpcUa_WriteValue) {
             .NodeId = {
-                .IdentifierType = IdentifierType_Numeric,
+                .IdentifierType = SOPC_IdentifierType_Numeric,
                 .Data.Numeric = i+5*(N_VARS/N_GROUPS)+1000+1},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
@@ -356,7 +356,7 @@ OpcUa_ReadRequest *tlibw_new_ReadRequest_check(void)
     {
         lrv[i] = (OpcUa_ReadValueId) {
             .NodeId = {
-                .IdentifierType = IdentifierType_Numeric,
+                .IdentifierType = SOPC_IdentifierType_Numeric,
                 .Data.Numeric = i+1000+1},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},

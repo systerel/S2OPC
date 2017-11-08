@@ -92,14 +92,14 @@ typedef struct SOPC_Guid {
 } SOPC_Guid;
 
 typedef enum SOPC_IdentifierType {
-    IdentifierType_Numeric = 0x00,
-    IdentifierType_String = 0x01,
-    IdentifierType_Guid = 0x02,
-    IdentifierType_ByteString = 0x03,
+    SOPC_IdentifierType_Numeric = 0x00,
+    SOPC_IdentifierType_String = 0x01,
+    SOPC_IdentifierType_Guid = 0x02,
+    SOPC_IdentifierType_ByteString = 0x03,
 } SOPC_IdentifierType;
 
 typedef struct SOPC_NodeId {
-    uint16_t IdentifierType; // SOPC_IdentifierType
+    SOPC_IdentifierType IdentifierType;
     uint16_t Namespace;
 
     union {

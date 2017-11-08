@@ -241,7 +241,7 @@ void util_variant__print_SOPC_Variant(SOPC_Variant *pvar)
     case SOPC_NodeId_Id:
         switch(pvar->Value.NodeId->IdentifierType)
         {
-        case IdentifierType_Numeric:
+        case SOPC_IdentifierType_Numeric:
             printf("NodeId-Numeric\n  Value: Namespace %i, ID %i\n", pvar->Value.NodeId->Namespace, pvar->Value.NodeId->Data.Numeric);
             break;
         default:

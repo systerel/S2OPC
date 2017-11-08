@@ -120,7 +120,7 @@ void session_core_bs__server_get_session_from_token(
     constants__t_session_i result = constants__c_session_indet;
     SOPC_NodeId* requestedToken = (SOPC_NodeId*) session_core_bs__session_token;
 
-    if(requestedToken->IdentifierType == IdentifierType_Numeric &&
+    if(requestedToken->IdentifierType == SOPC_IdentifierType_Numeric &&
        requestedToken->Data.Numeric > 0)
     {
         // Note: on server side, token <=> session index
@@ -147,7 +147,7 @@ void session_core_bs__server_get_fresh_session_token(
     // Important note: on server side, token is session index
     if(constants__c_session_indet != session_core_bs__session){
         // Note: Namespace = 0 for session token ?
-        sessionDataArray[session_core_bs__session].sessionToken.IdentifierType = IdentifierType_Numeric;
+        sessionDataArray[session_core_bs__session].sessionToken.IdentifierType = SOPC_IdentifierType_Numeric;
         sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric = session_core_bs__session;
         *session_core_bs__token = &(sessionDataArray[session_core_bs__session].sessionToken);
     }else{

@@ -720,30 +720,30 @@ SOPC_StatusCode SOPC_Guid_Read(SOPC_Guid* guid, SOPC_Buffer* buf)
 }
 
 SOPC_NodeId_DataEncoding GetNodeIdDataEncoding(const SOPC_NodeId* nodeId){
-    SOPC_NodeId_DataEncoding encodingEnum = NodeIdEncoding_Invalid;
+    SOPC_NodeId_DataEncoding encodingEnum = SOPC_NodeIdEncoding_Invalid;
     switch(nodeId->IdentifierType){
-        case IdentifierType_Numeric:
+        case SOPC_IdentifierType_Numeric:
             if(OPCUA_NAMESPACE_INDEX == nodeId->Namespace &&
                nodeId->Data.Numeric <= UINT8_MAX){
                 // Default namespace and Id : [0..255]
-                encodingEnum = NodeIdEncoding_TwoByte;
+                encodingEnum = SOPC_NodeIdEncoding_TwoBytes;
             }else if(nodeId->Namespace <= UINT8_MAX &&
                      nodeId->Data.Numeric <= UINT16_MAX){
                 // Namespace : [0..255] and Id : [0..65535]
-                encodingEnum = NodeIdEncoding_FourByte;
+                encodingEnum = SOPC_NodeIdEncoding_FourBytes;
             }else{
                 // Other numeric cases: Namespace on 2 bytes and Id on 4 bytes
-                encodingEnum = NodeIdEncoding_Numeric;
+                encodingEnum = SOPC_NodeIdEncoding_Numeric;
             }
             break;
-        case IdentifierType_String:
-            encodingEnum = NodeIdEncoding_String;
+        case SOPC_IdentifierType_String:
+            encodingEnum = SOPC_NodeIdEncoding_String;
             break;
-        case IdentifierType_Guid:
-            encodingEnum = NodeIdEncoding_Guid;
+        case SOPC_IdentifierType_Guid:
+            encodingEnum = SOPC_NodeIdEncoding_Guid;
             break;
-        case IdentifierType_ByteString:
-            encodingEnum = NodeIdEncoding_ByteString;
+        case SOPC_IdentifierType_ByteString:
+            encodingEnum = SOPC_NodeIdEncoding_ByteString;
             break;
     }
     return encodingEnum;
@@ -763,17 +763,17 @@ SOPC_StatusCode Internal_NodeId_Write(SOPC_Buffer* buf,
     status = SOPC_Byte_Write(&encodingByte, buf);
     if(status == STATUS_OK){
         switch(encodingType){
-            case NodeIdEncoding_Invalid:
+            case SOPC_NodeIdEncoding_Invalid:
                 status = STATUS_INVALID_PARAMETERS;
                 break;
-            case NodeIdEncoding_TwoByte:
+            case SOPC_NodeIdEncoding_TwoBytes:
                 assert(OPCUA_NAMESPACE_INDEX == nodeId->Namespace);
                 assert(nodeId->Data.Numeric <= UINT8_MAX);
                 byte = (SOPC_Byte) nodeId->Data.Numeric;
 
                 status = SOPC_Byte_Write(&byte, buf);
                 break;
-            case  NodeIdEncoding_FourByte:
+            case  SOPC_NodeIdEncoding_FourBytes:
                 assert(nodeId->Namespace <= UINT8_MAX);
                 assert(nodeId->Data.Numeric <= UINT16_MAX);
                 twoBytes = (uint16_t) nodeId->Data.Numeric;
@@ -784,25 +784,25 @@ SOPC_StatusCode Internal_NodeId_Write(SOPC_Buffer* buf,
                     status = SOPC_UInt16_Write(&twoBytes, buf);
                 }
                 break;
-            case  NodeIdEncoding_Numeric:
+            case  SOPC_NodeIdEncoding_Numeric:
                 status = SOPC_UInt16_Write(&nodeId->Namespace, buf);
                 if(status == STATUS_OK){
                     status = SOPC_UInt32_Write(&nodeId->Data.Numeric, buf);
                 }
                 break;
-            case  NodeIdEncoding_String:
+            case  SOPC_NodeIdEncoding_String:
                 status = SOPC_UInt16_Write(&nodeId->Namespace, buf);
                 if(status == STATUS_OK){
                     status = SOPC_String_Write(&nodeId->Data.String, buf);
                 }
                 break;
-            case  NodeIdEncoding_Guid:
+            case  SOPC_NodeIdEncoding_Guid:
                 status = SOPC_UInt16_Write(&nodeId->Namespace, buf);
                 if(status == STATUS_OK){
                     status = SOPC_Guid_Write(nodeId->Data.Guid, buf);
                 }
                 break;
-            case  NodeIdEncoding_ByteString:
+            case  SOPC_NodeIdEncoding_ByteString:
                 status = SOPC_UInt16_Write(&nodeId->Namespace, buf);
                 if(status == STATUS_OK){
                     status = SOPC_ByteString_Write(&nodeId->Data.Bstring, buf);
@@ -846,17 +846,17 @@ SOPC_StatusCode Internal_NodeId_Read(SOPC_Buffer* buf,
     if(status == STATUS_OK){
         encodingType = 0x0F & *encodingByte; // Eliminate flags
         switch(encodingType){
-            case NodeIdEncoding_Invalid:
+            case SOPC_NodeIdEncoding_Invalid:
                 status = STATUS_INVALID_RCV_PARAMETER;
                 break;
-            case NodeIdEncoding_TwoByte:
-                nodeId->IdentifierType = IdentifierType_Numeric;
+            case SOPC_NodeIdEncoding_TwoBytes:
+                nodeId->IdentifierType = SOPC_IdentifierType_Numeric;
                 nodeId->Namespace = 0;
                 status = SOPC_Byte_Read(&byte, buf);
                 nodeId->Data.Numeric = (uint32_t) byte;
                 break;
-            case  NodeIdEncoding_FourByte:
-                nodeId->IdentifierType = IdentifierType_Numeric;
+            case  SOPC_NodeIdEncoding_FourBytes:
+                nodeId->IdentifierType = SOPC_IdentifierType_Numeric;
                 status = SOPC_Byte_Read(&byte, buf);
                 nodeId->Namespace = byte;
                 if(status == STATUS_OK){
@@ -864,22 +864,22 @@ SOPC_StatusCode Internal_NodeId_Read(SOPC_Buffer* buf,
                     nodeId->Data.Numeric = twoBytes;
                 }
                 break;
-            case  NodeIdEncoding_Numeric:
-                nodeId->IdentifierType = IdentifierType_Numeric;
+            case  SOPC_NodeIdEncoding_Numeric:
+                nodeId->IdentifierType = SOPC_IdentifierType_Numeric;
                 status = SOPC_UInt16_Read(&nodeId->Namespace, buf);
                 if(status == STATUS_OK){
                     status = SOPC_UInt32_Read(&nodeId->Data.Numeric, buf);
                 }
                 break;
-            case  NodeIdEncoding_String:
-                nodeId->IdentifierType = IdentifierType_String;
+            case  SOPC_NodeIdEncoding_String:
+                nodeId->IdentifierType = SOPC_IdentifierType_String;
                 status = SOPC_UInt16_Read(&nodeId->Namespace, buf);
                 if(status == STATUS_OK){
                     status = SOPC_String_Read(&nodeId->Data.String, buf);
                 }
                 break;
-            case  NodeIdEncoding_Guid:
-                nodeId->IdentifierType = IdentifierType_Guid;
+            case  SOPC_NodeIdEncoding_Guid:
+                nodeId->IdentifierType = SOPC_IdentifierType_Guid;
                 status = SOPC_UInt16_Read(&nodeId->Namespace, buf);
                 if(status == STATUS_OK){
                     nodeId->Data.Guid = malloc(sizeof(SOPC_Guid));
@@ -895,8 +895,8 @@ SOPC_StatusCode Internal_NodeId_Read(SOPC_Buffer* buf,
                     }
                 }
                 break;
-            case  NodeIdEncoding_ByteString:
-                nodeId->IdentifierType = IdentifierType_ByteString;
+            case  SOPC_NodeIdEncoding_ByteString:
+                nodeId->IdentifierType = SOPC_IdentifierType_ByteString;
                 status = SOPC_UInt16_Read(&nodeId->Namespace, buf);
                 if(status == STATUS_OK){
                     status = SOPC_ByteString_Read(&nodeId->Data.Bstring, buf);
@@ -937,10 +937,10 @@ SOPC_StatusCode SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId, 
     if(expNodeId != NULL){
         encodingByte = GetNodeIdDataEncoding(&expNodeId->NodeId);
         if(expNodeId->NamespaceUri.Length > 0){
-            encodingByte |= NodeIdEncoding_NamespaceUriFlag;
+            encodingByte |= SOPC_NodeIdEncoding_NamespaceUriFlag;
         }
         if(expNodeId->ServerIndex > 0){
-            encodingByte |= NodeIdEncoding_ServerIndexFlag;
+            encodingByte |= SOPC_NodeIdEncoding_ServerIndexFlag;
         }
         status = Internal_NodeId_Write(buf, encodingByte, &expNodeId->NodeId);
     }
@@ -969,13 +969,13 @@ SOPC_StatusCode SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_Bu
     }
 
     if(status == STATUS_OK &&
-       (encodingByte & NodeIdEncoding_NamespaceUriFlag) != 0x00)
+       (encodingByte & SOPC_NodeIdEncoding_NamespaceUriFlag) != 0x00)
     {
         status = SOPC_String_Read(&expNodeId->NamespaceUri, buf);
     }
 
     if(status == STATUS_OK &&
-        (encodingByte & NodeIdEncoding_ServerIndexFlag) != 0)
+        (encodingByte & SOPC_NodeIdEncoding_ServerIndexFlag) != 0)
     {
         status = SOPC_UInt32_Read(&expNodeId->ServerIndex, buf);
     }
@@ -1011,25 +1011,25 @@ SOPC_Byte GetDiagInfoEncodingByte(const SOPC_DiagnosticInfo* diagInfo){
     assert(diagInfo != NULL);
     SOPC_Byte encodingByte = 0x00;
     if(diagInfo->SymbolicId > -1){
-        encodingByte |= DiagInfoEncoding_SymbolicId;
+        encodingByte |= SOPC_DiagInfoEncoding_SymbolicId;
     }
     if(diagInfo->NamespaceUri > -1){
-        encodingByte |= DiagInfoEncoding_Namespace;
+        encodingByte |= SOPC_DiagInfoEncoding_Namespace;
     }
     if(diagInfo->Locale > -1){
-        encodingByte |= DiagInfoEncoding_Locale;
+        encodingByte |= SOPC_DiagInfoEncoding_Locale;
     }
     if(diagInfo->LocalizedText > -1){
-        encodingByte |= DiagInfoEncoding_LocalizedTest;
+        encodingByte |= SOPC_DiagInfoEncoding_LocalizedTest;
     }
     if(diagInfo->AdditionalInfo.Length > 0){
-        encodingByte |= DiagInfoEncoding_AdditionalInfo;
+        encodingByte |= SOPC_DiagInfoEncoding_AdditionalInfo;
     }
     if(diagInfo->InnerStatusCode > 0){ // OK status code does not provide information
-        encodingByte |= DiagInfoEncoding_InnerStatusCode;
+        encodingByte |= SOPC_DiagInfoEncoding_InnerStatusCode;
     }
     if(diagInfo->InnerDiagnosticInfo != NULL){
-        encodingByte |= DiagInfoEncoding_InnerDianosticInfo;
+        encodingByte |= SOPC_DiagInfoEncoding_InnerDianosticInfo;
     }
     return encodingByte;
 }
@@ -1050,31 +1050,31 @@ SOPC_StatusCode SOPC_DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo, S
         SOPC_Byte_Write(&encodingByte, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_SymbolicId) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_SymbolicId) != 0x00){
         status = SOPC_Int32_Write(&diagInfo->SymbolicId, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_Namespace) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_Namespace) != 0x00){
         status = SOPC_Int32_Write(&diagInfo->NamespaceUri, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_Locale) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_Locale) != 0x00){
         status = SOPC_Int32_Write(&diagInfo->Locale, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_LocalizedTest) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_LocalizedTest) != 0x00){
         status = SOPC_Int32_Write(&diagInfo->LocalizedText, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_AdditionalInfo) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_AdditionalInfo) != 0x00){
         status = SOPC_String_Write(&diagInfo->AdditionalInfo, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_InnerStatusCode) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_InnerStatusCode) != 0x00){
         status = SOPC_StatusCode_Write(&diagInfo->InnerStatusCode, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_InnerDianosticInfo) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_InnerDianosticInfo) != 0x00){
         status = SOPC_DiagnosticInfo_Write(diagInfo->InnerDiagnosticInfo, buf);
     }
     return status;
@@ -1092,31 +1092,31 @@ SOPC_StatusCode SOPC_DiagnosticInfo_Read(SOPC_DiagnosticInfo* diagInfo, SOPC_Buf
         status  = SOPC_Byte_Read(&encodingByte, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_SymbolicId) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_SymbolicId) != 0x00){
         status = SOPC_Int32_Read(&diagInfo->SymbolicId, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_Namespace) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_Namespace) != 0x00){
         status = SOPC_Int32_Read(&diagInfo->NamespaceUri, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_Locale) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_Locale) != 0x00){
         status = SOPC_Int32_Read(&diagInfo->Locale, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_LocalizedTest) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_LocalizedTest) != 0x00){
         status = SOPC_Int32_Read(&diagInfo->LocalizedText, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_AdditionalInfo) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_AdditionalInfo) != 0x00){
         status = SOPC_String_Read(&diagInfo->AdditionalInfo, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_InnerStatusCode) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_InnerStatusCode) != 0x00){
         status = SOPC_StatusCode_Read(&diagInfo->InnerStatusCode, buf);
     }
     if(status == STATUS_OK &&
-        (encodingByte & DiagInfoEncoding_InnerDianosticInfo) != 0x00){
+        (encodingByte & SOPC_DiagInfoEncoding_InnerDianosticInfo) != 0x00){
         status = SOPC_DiagnosticInfo_Read(diagInfo->InnerDiagnosticInfo, buf);
     }
     if(status != STATUS_OK && diagInfo != NULL){
@@ -1260,7 +1260,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, S
         }else{
             status = SOPC_Namespace_GetIndex(nsTable, extObj->Body.Object.ObjType->NamespaceUri, &nsIndex);
 
-            nodeId.IdentifierType = IdentifierType_Numeric;
+            nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
             nodeId.Namespace = nsIndex;
             nodeId.Data.Numeric = extObj->Body.Object.ObjType->BinaryEncodingTypeId;
         }
@@ -1329,7 +1329,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Buf
         // Manage Object body decoding
         if(encodingByte == SOPC_ExtObjBodyEncoding_ByteString){
             // Object provided as a byte string, check if encoded object is a known type
-            if(extObj->TypeId.NodeId.IdentifierType == IdentifierType_Numeric){
+            if(extObj->TypeId.NodeId.IdentifierType == SOPC_IdentifierType_Numeric){
                 if(extObj->TypeId.NodeId.Namespace != OPCUA_NAMESPACE_INDEX){
                     nsName = SOPC_Namespace_GetName(nsTable, extObj->TypeId.NodeId.Namespace);
                     if(nsName != NULL){
@@ -2258,7 +2258,7 @@ SOPC_StatusCode SOPC_EncodeMsg_Type_Header_Body(SOPC_Buffer*         buf,
        (msgBody != NULL || encType->TypeId == OpcUaId_ServiceFault) &&
        encType != NULL && headerType != NULL && msgHeader != NULL)
     {
-        nodeId.IdentifierType = IdentifierType_Numeric;
+        nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
         if(encType->NamespaceUri == NULL){
             nodeId.Namespace = 0;
         }else{
@@ -2292,7 +2292,7 @@ SOPC_StatusCode SOPC_MsgBodyType_Read(SOPC_Buffer*          buf,
         status = SOPC_NodeId_Read(&nodeId, buf);
     }
 
-    if(status == STATUS_OK && nodeId.IdentifierType == OpcUa_IdType_Numeric){
+    if(status == STATUS_OK && nodeId.IdentifierType == SOPC_IdentifierType_Numeric){
 
         // Must be the case in which we cannot know the type before decoding it
         if(nodeId.Namespace == OPCUA_NAMESPACE_INDEX){
