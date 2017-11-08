@@ -84,7 +84,11 @@ void msg_browse_response_bs__set_ResponseBrowse_ContinuationPoint(
 {
     (void) msg_browse_response_bs__p_bvi;
     (void) msg_browse_response_bs__p_ref;
-    printf("Not implemented: msg_browse_response_bs__set_ResponseBrowse_ContinuationPoint\n");
+    static bool bWarned = false;
+    if (! bWarned) {
+        printf("Not implemented: msg_browse_response_bs__set_ResponseBrowse_ContinuationPoint\n");
+        bWarned = true;
+    }
 }
 
 
@@ -92,7 +96,11 @@ void msg_browse_response_bs__reset_ResponseBrowse_ContinuationPoint(
    const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi)
 {
     (void) msg_browse_response_bs__p_bvi;
-    printf("Not implemented: msg_browse_response_bs__reset_ResponseBrowse_ContinuationPoint\n");
+    static bool bWarned = false;
+    if (! bWarned) {
+        printf("Not implemented: msg_browse_response_bs__RESET_ResponseBrowse_ContinuationPoint\n");
+        bWarned = true;
+    }
 }
 
 

@@ -49,6 +49,7 @@ void msg_read_request_bs__getall_req_ReadValue_AttributeId(
     *msg_read_request_bs__aid = constants__c_AttributeId_indet;
     /* TODO: is message type checked at this point? */
     OpcUa_ReadRequest *msg_read_req = (OpcUa_ReadRequest *)msg_read_request_bs__msg;
+    static bool bWarned = false;
 
     *msg_read_request_bs__isvalid = false;
     if(! msg_read_req)
@@ -77,7 +78,10 @@ void msg_read_request_bs__getall_req_ReadValue_AttributeId(
         *msg_read_request_bs__aid = constants__e_aid_Value;
         break;
     default:
-        printf("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id\n");
+        if (! bWarned) {
+            printf("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id\n");
+            bWarned = true;
+        }
         *msg_read_request_bs__isvalid = false;
         break;
     }
