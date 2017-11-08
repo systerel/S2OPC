@@ -235,10 +235,10 @@ SOPC_AddressSpace addressSpace = {
         <xsl:matching-substring>
         <xsl:variable name="nsIndex" select="if (regex-group(1)) then substring-after(substring-before(regex-group(1),';'),'=') else 0"/>
         <xsl:variable name="ident" select="regex-group(2)"/>{<xsl:choose>
-            <xsl:when test="starts-with($ident, 'i')">IdentifierType_Numeric, <xsl:value-of select="$nsIndex"/>, .Data.Numeric = <xsl:value-of select="substring-after($ident,'=')"/></xsl:when>
-            <xsl:when test="starts-with($ident, 's')">IdentifierType_String, <xsl:value-of select="$nsIndex"/>, .Data.String = ${write_string("substring-after($ident,'=')")}</xsl:when>
-            <xsl:when test="starts-with($ident, 'g')">IdentifierType_Guid, <xsl:value-of select="$nsIndex"/>, <xsl:value-of select="substring-after($ident,'=')"/></xsl:when>
-            <xsl:when test="starts-with($ident, 'b')">IdentifierType_ByteString,  <xsl:value-of select="$nsIndex"/>, <xsl:value-of select="substring-after($ident,'=')"/></xsl:when>
+            <xsl:when test="starts-with($ident, 'i')">SOPC_IdentifierType_Numeric, <xsl:value-of select="$nsIndex"/>, .Data.Numeric = <xsl:value-of select="substring-after($ident,'=')"/></xsl:when>
+            <xsl:when test="starts-with($ident, 's')">SOPC_IdentifierType_String, <xsl:value-of select="$nsIndex"/>, .Data.String = ${write_string("substring-after($ident,'=')")}</xsl:when>
+            <xsl:when test="starts-with($ident, 'g')">SOPC_IdentifierType_Guid, <xsl:value-of select="$nsIndex"/>, <xsl:value-of select="substring-after($ident,'=')"/></xsl:when>
+            <xsl:when test="starts-with($ident, 'b')">SOPC_IdentifierType_ByteString,  <xsl:value-of select="$nsIndex"/>, <xsl:value-of select="substring-after($ident,'=')"/></xsl:when>
             <xsl:otherwise>
                 <xsl:message terminate="yes">Unknown identifier type : '<xsl:value-of select="$ident"/>'.</xsl:message>
             </xsl:otherwise>

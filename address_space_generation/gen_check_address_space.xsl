@@ -188,22 +188,22 @@ int nsIndex = <xsl:value-of select="if (regex-group(1)) then substring-after(sub
         <xsl:variable name="ident" select="regex-group(2)"/>
         <xsl:choose>
             <xsl:when test="starts-with($ident, 'i')">
-    if (res-> IdentifierType != IdentifierType_Numeric ||
+    if (res-> IdentifierType != SOPC_IdentifierType_Numeric ||
         res-> Namespace != nsIndex ||
         res-> Data.Numeric != <xsl:value-of select="substring-after($ident,'=')"/>){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, <xsl:value-of select="substring-after($ident,'=')"/>, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
             </xsl:when>
             <xsl:when test="starts-with($ident, 's')">
-    if (res-> IdentifierType != IdentifierType_String ||
+    if (res-> IdentifierType != SOPC_IdentifierType_String ||
         res-> Namespace != nsIndex ||
         strcmp((char*)res-> Data.String.Data, "<xsl:value-of select="substring-after($ident,'=')"/>")!=0) {printf ("Invalid nodeId expected <xsl:value-of select="substring-after($ident,'=')"/> for %s \n" , nodeid);}
             </xsl:when>
             <xsl:when test="starts-with($ident, 'g')">
-    if (res-> IdentifierType != IdentifierType_Guid ||
+    if (res-> IdentifierType != SOPC_IdentifierType_Guid ||
         res-> Namespace != nsIndex ) {printf ("Invalid nodeId %s", nodeid);}
 
             </xsl:when>
             <xsl:when test="starts-with($ident, 'b')">
-    if (res-> IdentifierType != IdentifierType_ByteString ||
+    if (res-> IdentifierType != SOPC_IdentifierType_ByteString ||
         res-> Namespace != nsIndex ) {printf ("Invalid nodeId %s", nodeid);}
             </xsl:when>
             <xsl:otherwise>
