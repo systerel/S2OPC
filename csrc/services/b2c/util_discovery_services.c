@@ -233,7 +233,10 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(const constant
 
         }
 
-        OpcUa_EndpointDescription* final_OpcUa_EndpointDescription = calloc(nbEndpointDescription, sizeof(OpcUa_EndpointDescription));
+        OpcUa_EndpointDescription* final_OpcUa_EndpointDescription = NULL;
+        if(nbEndpointDescription > 0){
+            final_OpcUa_EndpointDescription = calloc(nbEndpointDescription, sizeof(OpcUa_EndpointDescription));
+        }
         for (int i=0; i<nbEndpointDescription; i++){
             final_OpcUa_EndpointDescription[i] = currentConfig_EndpointDescription[i];
         }

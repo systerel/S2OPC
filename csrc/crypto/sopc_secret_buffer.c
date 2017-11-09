@@ -56,7 +56,7 @@ SOPC_SecretBuffer *SOPC_SecretBuffer_New(uint32_t len)
             sec->buf = malloc(len);
             if(NULL == sec->buf)
             {
-                free(sec->buf);
+                free(sec);
                 sec = NULL;
             }
         }

@@ -1794,7 +1794,6 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                           auxParam,
                                           NULL,
                                           0);
-                result = true;
             }
         }else{
             // In case of unidentified secure connection problem, close the socket just connected
@@ -2184,7 +2183,6 @@ SOPC_GCC_DIAGNOSTIC_RESTORE
                 isExpectedType = SC_ReadAndCheckOpcUaMessageType(&OpcUa_CloseSecureChannelRequest_EncodeableType,
                                                                  (SOPC_Buffer*) params);
                 if(isExpectedType != false){
-                    result = true;
                     // Just close the socket without any error (Part 6 §7.1.4)
                     SC_CloseSecureConnection(scConnection,
                                              eltId,

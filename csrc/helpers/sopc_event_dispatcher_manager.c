@@ -59,8 +59,6 @@ static void* SOPC_ThreadStartEventDispatcherManager(void* pEventMgr)
                     pMgr->pDispatcherFct(pParams->event, pParams->eltId, pParams->params, pParams->auxParam);
                     free(pParams);
                 }
-            }else{
-                status = STATUS_NOK;
             }
         }
     }

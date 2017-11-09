@@ -732,12 +732,13 @@ SOPC_StatusCode SOPC_CryptoProvider_GenerateSecureChannelNonce(const SOPC_Crypto
     if(STATUS_OK == status)
     {
         *ppNonce = SOPC_SecretBuffer_NewFromExposedBuffer(pExp, lenNonce);
-        if(NULL == *ppNonce)
+        if(NULL == *ppNonce){
             status = STATUS_NOK;
-    }
+        }
 
-    memset(pExp, 0, lenNonce);
-    free(pExp);
+        memset(pExp, 0, lenNonce);
+        free(pExp);
+    }
 
     return status;
 }

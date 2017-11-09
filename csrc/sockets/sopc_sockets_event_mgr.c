@@ -181,7 +181,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
             Socket_AddrInfoDelete(&res);
         }
 
-        if(result == false){
+        if(result == false && freeSocket != NULL){
             // Set as closed to be removed from used socket
             SOPC_SocketsInternalContext_CloseSocketNoLock(freeSocket->socketIdx);
         }
@@ -446,7 +446,6 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
         params = (SOPC_Buffer*) msg buffer
         */
         socketElt = &socketsArray[eltId];
-        result = true;
         buffer = (SOPC_Buffer*) params;
 
         if(socketElt->state == SOCKET_STATE_CONNECTED && NULL != buffer){

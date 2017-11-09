@@ -184,7 +184,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         /* id = endpoint description configuration index */
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
         if(epConfig != NULL){
-            result = SOPC_SecureListenerStateMgr_CloseListener(eltId);
+            SOPC_SecureListenerStateMgr_CloseListener(eltId);
         }
         // Notify Services layer that EP_OPEN failed
         SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED,

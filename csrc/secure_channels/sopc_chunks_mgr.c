@@ -751,6 +751,9 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
                 status = SOPC_Buffer_CopyWithLength(plainBuffer,
                                                     encryptedBuffer,
                                                     sequenceNumberPosition);
+                if(STATUS_OK != status){
+                    result = false;
+                }
             }
             if(result != false){
                 status = SOPC_CryptoProvider_AsymmetricDecrypt(scConnection->cryptoProvider,
@@ -760,7 +763,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
                                                           &(plainBuffer->data[sequenceNumberPosition]),
                                                           decryptedTextLength,
                                                           &decryptedTextLength);
-                if(status == STATUS_OK){
+                if(STATUS_OK == status){
                     assert(STATUS_OK == SOPC_Buffer_SetDataLength(plainBuffer, sequenceNumberPosition+decryptedTextLength));
                     // Set position to sequence header
                     assert(STATUS_OK == SOPC_Buffer_SetPosition(plainBuffer, sequenceNumberPosition));
@@ -796,6 +799,9 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
                 status = SOPC_Buffer_CopyWithLength(plainBuffer,
                                                     encryptedBuffer,
                                                     sequenceNumberPosition);
+                if(STATUS_OK != status){
+                    result = false;
+                }
             }
             if(result != false){
                 status = SOPC_CryptoProvider_SymmetricDecrypt(scConnection->cryptoProvider,
@@ -805,7 +811,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
                                                          receiverKeySet->initVector,
                                                          &(plainBuffer->data[sequenceNumberPosition]),
                                                          decryptedTextLength);
-                if(status == STATUS_OK){
+                if(STATUS_OK == status){
                     assert(STATUS_OK == SOPC_Buffer_SetDataLength(plainBuffer, sequenceNumberPosition+decryptedTextLength));
                     // Set position to sequence header
                     assert(STATUS_OK == SOPC_Buffer_SetPosition(plainBuffer, sequenceNumberPosition));
@@ -839,7 +845,7 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
 
     bool result = false;
 
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_OK;
 
     uint32_t signatureSize = 0;
     uint32_t signaturePosition = 0;
@@ -852,18 +858,21 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
         if(scConfig == NULL && scConnection->isServerConnection != false){
             // Server side for new OPN: we have to use the temporary stored certificate value
             otherAppCertificate = scConnection->serverAsymmSecuInfo.clientCertificate;
-        }else{
+        }else if(scConfig != NULL){
             // Client side or Server side in case of OPN renew
             if(scConnection->isServerConnection == false){
                 otherAppCertificate = scConfig->crt_srv;
             }else{
                 otherAppCertificate = scConfig->crt_cli;
             }
+        }else{
+            status = STATUS_NOK;
         }
 
-
-        status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate,
-                                                                &publicKey);
+        if(STATUS_OK == status){
+            status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate,
+                                                                    &publicKey);
+        }
 
         if(status == STATUS_OK){
             status = SOPC_CryptoProvider_AsymmetricGetLength_Signature(scConnection->cryptoProvider,

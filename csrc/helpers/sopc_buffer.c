@@ -111,7 +111,6 @@ SOPC_StatusCode SOPC_Buffer_SetDataLength(SOPC_Buffer* buffer, uint32_t length)
     if(buffer != NULL && buffer->data != NULL &&
        buffer->max_size >= length &&
        buffer->position <= length){
-        data = buffer->data;
         status = STATUS_OK;
         if(buffer->length > length){
             data = &(buffer->data[length]);
@@ -174,10 +173,10 @@ SOPC_StatusCode SOPC_Buffer_CopyWithLength(SOPC_Buffer* dest, SOPC_Buffer* src, 
        limitedLength <= dest->max_size)
     {
         assert(src->position <= src->length);
-        status = STATUS_OK;
 
         memcpy(dest->data, src->data, limitedLength);
         status = SOPC_Buffer_SetPosition(dest, 0);
+
         if(status == STATUS_OK){
             status = SOPC_Buffer_SetDataLength(dest, limitedLength);
         }

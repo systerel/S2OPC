@@ -43,14 +43,14 @@ typedef struct SOPC_Socket {
     SOPC_AsyncQueue*              writeQueue;
     uint8_t                       isNotWritable;
     bool                          isUsed; /* Indicates if the socket is free (false) or used (true) */
+    // false if it is a client connection, otherwise it is a server connection (linked to a listener)
+    bool                          isServerConnection;
     SOPC_Socket_State             state;
     // addresses for connection
     void*                         connectAddrs; // Possible connection addresses (to free on connection)
     void*                         nextConnectAttemptAddr; // Next connection attempt address
     // number of connection for a listener (state = LISTENING)
     uint32_t                      listenerConnections;
-    // false if it is a client connection, otherwise it is a server connection (linked to a listener)
-    bool                          isServerConnection;
     // define if isServerConnection != false
     uint32_t                      listenerSocketIdx;
 } SOPC_Socket;
