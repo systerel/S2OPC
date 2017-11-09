@@ -243,20 +243,20 @@ SOPC_GCC_DIAGNOSTIC_RESTORE
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
         if(scListener == NULL || scListener->state != SECURE_LISTENER_STATE_OPENED){
             // Error case: require secure channel closure
-            SOPC_Sockets_EnqueueEvent(INT_EP_SC_CLOSE,
-                                      auxParam,
-                                      NULL,
-                                      eltId);
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE,
+                                                     auxParam,
+                                                     NULL,
+                                                     eltId);
         }else{
             // Associates the secure channel connection to the secure listener
             result = SOPC_SecureListenerStateMgr_AddConnection(scListener,
                                                                auxParam);
             if(result == false){
                 // Error case: require secure channel closure
-                SOPC_Sockets_EnqueueEvent(INT_EP_SC_CLOSE,
-                                          auxParam,
-                                          NULL,
-                                          eltId);
+                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE,
+                                                         auxParam,
+                                                         NULL,
+                                                         eltId);
             }
         }
         break;
