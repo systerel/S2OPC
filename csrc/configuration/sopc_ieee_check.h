@@ -31,8 +31,10 @@
 #error "Compiler floating point support is not IEEE-754 compliant"
 #endif
 
-#if FLT_ROUNDS != 1
-#error "Compiler floating point support is not IEEE-754 compliant"
+#ifndef __clang__ // Clang uses __builtin_flt_rounds() function
+    #if FLT_ROUNDS != 1
+    #error "Compiler floating point support is not IEEE-754 compliant"
+    #endif
 #endif
 
 #if FLT_EVAL_METHOD != 0

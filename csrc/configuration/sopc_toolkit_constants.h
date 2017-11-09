@@ -143,14 +143,19 @@ typedef uint32_t SOPC_StatusCode;
 #define STATUS_INVALID_STATE 0x80760002//0x30000000
 #define STATUS_INVALID_RCV_PARAMETER 0x80000003//0x40000000
 
-#define str(x) #x
+#define SOPC_USE_GCC true
 
 #ifdef __GNUC__
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST _Pragma("GCC diagnostic ignored \"-Wcast-qual\"");
-#define SOPC_GCC_DIAGNOSTIC_RESTORE _Pragma("GCC diagnostic pop")
+    #ifndef __clang__
+        #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST _Pragma("GCC diagnostic ignored \"-Wcast-qual\"");
+        #define SOPC_GCC_DIAGNOSTIC_RESTORE _Pragma("GCC diagnostic pop")
+    #else
+        #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        #define SOPC_GCC_DIAGNOSTIC_RESTORE
+    #endif
 #else
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-#define SOPC_GCC_DIAGNOSTIC_RESTORE
+    #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    #define SOPC_GCC_DIAGNOSTIC_RESTORE
 #endif
 
 #endif /* SOPC_TOOLKIT_CONSTANTS_H_ */
