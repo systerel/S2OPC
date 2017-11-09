@@ -152,9 +152,9 @@ SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey *pK
     if(NULL == buffer)
         return STATUS_NOK;
 // Asymmetric key should be const in mbedtls
-#pragma GCC diagnostic ignored "-Wcast-qual"
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     *pLenWritten = mbedtls_pk_write_key_der(&((SOPC_AsymmetricKey *)pKey)->pk, buffer, lenDest);
-#pragma GCC diagnostic pop
+SOPC_GCC_DIAGNOSTIC_RESTORE
     if(*pLenWritten > 0 && *pLenWritten <= lenDest)
     {
         memcpy(pDest, buffer+lenDest-*pLenWritten, *pLenWritten);

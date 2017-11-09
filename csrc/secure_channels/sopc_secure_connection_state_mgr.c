@@ -1850,12 +1850,12 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             // Require a socket connection for this secure connection
 
 // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
-#pragma GCC diagnostic ignored "-Wcast-qual"
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
             SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT,
                                       idx,
                                       (void*) scConfig->url,
                                       0);
-#pragma GCC diagnostic pop
+SOPC_GCC_DIAGNOSTIC_RESTORE
 
         }
         break;

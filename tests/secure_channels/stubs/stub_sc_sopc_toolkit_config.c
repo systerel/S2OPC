@@ -69,9 +69,9 @@ void SOPC_Toolkit_ClearScConfigElt(uint32_t id, void *val)
         // In case of server it is an internally created config
         // => only client certificate was specifically allocated
 
-#pragma GCC diagnostic ignored "-Wcast-qual"
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
         SOPC_KeyManager_Certificate_Free((SOPC_Certificate*) scConfig->crt_cli);
-#pragma GCC diagnostic pop
+SOPC_GCC_DIAGNOSTIC_RESTORE
         free(scConfig);
     }
 }

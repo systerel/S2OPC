@@ -59,12 +59,12 @@ START_TEST(test_sockets)
     /* SERVER SIDE: listener creation */
 
 // const URI is not modified but generic API cannot guarantee it
-#pragma GCC diagnostic ignored "-Wcast-qual"
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER,
                               endpointDescConfigId,
                               (void*) uri,
                               (uint32_t) true);
-#pragma GCC diagnostic pop
+SOPC_GCC_DIAGNOSTIC_RESTORE
 
     // Retrieve event of listener creation
     SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
@@ -79,12 +79,12 @@ START_TEST(test_sockets)
     /* CLIENT SIDE: connection establishment */
     // Create client connection
 // const URI is not modified but generic API cannot guarantee it
-#pragma GCC diagnostic ignored "-Wcast-qual"
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT,
                               clientSecureChannelConnectionId,
                               (void*) uri,
                               0);
-#pragma GCC diagnostic pop
+SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /* SERVER SIDE: accepted connection (socket level only) */
     SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);

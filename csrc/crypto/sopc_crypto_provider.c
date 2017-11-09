@@ -46,9 +46,9 @@ SOPC_CryptoProvider *SOPC_CryptoProvider_Create(const char *uri)
         if(NULL != pCryptoProvider)
         {
 // The crypto provider profile shall be const after this init
-_Pragma("GCC diagnostic ignored \"-Wcast-qual\"")
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
             *(const SOPC_CryptoProfile **)(&pCryptoProvider->pProfile) = pProfile;
-#pragma GCC diagnostic pop
+SOPC_GCC_DIAGNOSTIC_RESTORE
             if(STATUS_OK != SOPC_CryptoProvider_Init(pCryptoProvider))
             {
                 free(pCryptoProvider);
