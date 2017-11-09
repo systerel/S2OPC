@@ -24,8 +24,8 @@
  *        defined during toolkit configuration.
  */
 
-#ifndef _SOPC_TOOLKIT_ASYNC_API_H
-#define _SOPC_TOOLKIT_ASYNC_API_H
+#ifndef SOPC_TOOLKIT_ASYNC_API_H
+#define SOPC_TOOLKIT_ASYNC_API_H
 
 #include <stdint.h>
 
@@ -94,4 +94,4 @@ void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId);
 /*void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx,
                                                   void*    requestStruct);*/
 
-#endif /* _SOPC_TOOLKIT_ASYNC_API_H */
+#endif /* SOPC_TOOLKIT_ASYNC_API_H */

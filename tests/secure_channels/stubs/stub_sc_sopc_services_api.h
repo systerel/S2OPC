@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _STUBS_SC_SOPC_SERVICES_API_H_
-#define _STUBS_SC_SOPC_SERVICES_API_H_
+#ifndef STUBS_SC_SOPC_SERVICES_API_H_
+#define STUBS_SC_SOPC_SERVICES_API_H_
 
 #include "sopc_async_queue.h"
 #include "sopc_services_api.h"
@@ -35,4 +35,4 @@ typedef struct SOPC_StubSC_ServicesEventParams {
 // Async queue simulating the services dispatcher and containing SOPC_StubSC_ServicesEventParams elements
 extern SOPC_AsyncQueue* servicesEvents;
 
-#endif /* _STUBS_SC_SOPC_SERVICES_API_H_ */
+#endif /* STUBS_SC_SOPC_SERVICES_API_H_ */

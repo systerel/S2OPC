@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _util_b2c_h
-#define _util_b2c_h
+#ifndef UTIL_B2C_H_
+#define UTIL_B2C_H_
 
 #include <stdbool.h>
 
@@ -58,4 +58,4 @@ bool util_NodeClass__B_to_C(constants__t_NodeClass_i bncl,
 bool util_NodeClass__C_to_B(OpcUa_NodeClass cncl,
                             constants__t_NodeClass_i *bncl);
 
-#endif /* _util_b2c_h */
+#endif /* UTIL_B2C_H_ */

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SOPC_SERVICES_API_H
-#define _SOPC_SERVICES_API_H
+#ifndef SOPC_SERVICES_API_H
+#define SOPC_SERVICES_API_H
 
 #include <stdint.h>
 
@@ -109,4 +109,4 @@ void SOPC_Services_PreClear(void);
 void SOPC_Services_Clear(void);
 
 
-#endif /* _SOPC_SERVICES_API_H */
+#endif /* SOPC_SERVICES_API_H */

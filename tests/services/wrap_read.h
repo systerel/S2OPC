@@ -16,8 +16,8 @@
  */
 
 
-#ifndef _wrap_read_h
-#define _wrap_read_h
+#ifndef WRAP_READ_H_
+#define WRAP_READ_H_
 
 
 #include <stdbool.h>
@@ -28,4 +28,4 @@ OpcUa_ReadRequest *read_new_read_request(void);
 bool read_service_test(OpcUa_ReadRequest *pReadReq);
 
 
-#endif /* _wrap_read_h */
+#endif /* WRAP_READ_H_ */

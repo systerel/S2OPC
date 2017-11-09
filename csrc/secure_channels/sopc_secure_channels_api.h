@@ -21,8 +21,8 @@
  *         This module is in charge of the event dispatcher thread management.
  */
 
-#ifndef _SOPC_SECURE_CHANNELS_API_H_
-#define _SOPC_SECURE_CHANNELS_API_H_
+#ifndef SOPC_SECURE_CHANNELS_API_H_
+#define SOPC_SECURE_CHANNELS_API_H_
 
 #include <stdint.h>
 
@@ -121,4 +121,4 @@ void SOPC_SecureChannels_Initialize(void);
 
 void SOPC_SecureChannels_Clear(void);
 
-#endif /* _SOPC_SECURE_CHANNELS_API_H_ */
+#endif /* SOPC_SECURE_CHANNELS_API_H_ */

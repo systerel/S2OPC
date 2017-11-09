@@ -21,8 +21,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SOPC_SECURE_CHANNELS_API_INTERNAL_H_
-#define _SOPC_SECURE_CHANNELS_API_INTERNAL_H_
+#ifndef SOPC_SECURE_CHANNELS_API_INTERNAL_H_
+#define SOPC_SECURE_CHANNELS_API_INTERNAL_H_
 
 #include <stdint.h>
 #include "sopc_secure_channels_api.h"
@@ -43,4 +43,4 @@ void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InputEve
                                                     uint32_t                       auxParam);
 
 
-#endif /* _SOPC_SECURE_CHANNELS_API_INTERNAL_H_ */
+#endif /* SOPC_SECURE_CHANNELS_API_INTERNAL_H_ */

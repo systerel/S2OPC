@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _STUBS_SOCKETS_SOPC_SECURE_CHANNELS_API_H_
-#define _STUBS_SOCKETS_SOPC_SECURE_CHANNELS_API_H_
+#ifndef STUBS_SOCKETS_SOPC_SECURE_CHANNELS_API_H_
+#define STUBS_SOCKETS_SOPC_SECURE_CHANNELS_API_H_
 
 #include "sopc_async_queue.h"
 
@@ -30,4 +30,4 @@ typedef struct SOPC_StubSockets_SecureChannelsEventParams {
 // Async queue simulating the secure channel dispatcher and containing SOPC_StubSockets_SecureChannelsEventParams elements
 extern SOPC_AsyncQueue* secureChannelsEvents;
 
-#endif /* _STUBS_SOCKETS_SOPC_SECURE_CHANNELS_API_H_ */
+#endif /* STUBS_SOCKETS_SOPC_SECURE_CHANNELS_API_H_ */

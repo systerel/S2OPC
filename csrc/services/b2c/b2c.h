@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _b2c_h
-#define _b2c_h
+#ifndef B2C_H_
+#define B2C_H_
 #include <stdint.h>
 #include <stdbool.h>
 
 
 /* t_bool */
-#ifndef _t_bool_
-#define _t_bool_
+#ifndef t_bool_
+#define t_bool_
 typedef bool t_bool;
 #endif /* t_bool */
 
 /* t_entier4 */
-#ifndef _t_entier4_
-#define _t_entier4_
+#ifndef t_entier4_
+#define t_entier4_
 typedef int32_t t_entier4;
 #endif  /* t_entier4 */
 
@@ -44,4 +44,4 @@ typedef int32_t t_entier4;
 #endif /* MININT */
 
 
-#endif /* _b2c_h */
+#endif /* B2C_H_ */

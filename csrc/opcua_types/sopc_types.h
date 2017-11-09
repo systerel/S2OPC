@@ -30,8 +30,8 @@
  * ======================================================================*/
 
 
-#ifndef _SOPC_Types_H_
-#define _SOPC_Types_H_ 1
+#ifndef SOPC_Types_H_
+#define SOPC_Types_H_ 1
 
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"

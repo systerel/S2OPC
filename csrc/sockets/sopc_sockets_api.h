@@ -21,8 +21,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SOPC_SOCKETS_API_H_
-#define _SOPC_SOCKETS_API_H_
+#ifndef SOPC_SOCKETS_API_H_
+#define SOPC_SOCKETS_API_H_
 
 #include <stdint.h>
 
@@ -63,4 +63,4 @@ void SOPC_Sockets_Initialize(void);
 
 void SOPC_Sockets_Clear(void);
 
-#endif /* _SOPC_SOCKETS_API_H_ */
+#endif /* SOPC_SOCKETS_API_H_ */

@@ -20,8 +20,8 @@
  * Utils to produce some Variants for basic C types: int, float, strings...
  */
 
-#ifndef _util_variant_h
-#define _util_variant_h
+#ifndef UTIL_VARIANT_H_
+#define UTIL_VARIANT_H_
 
 
 #include "constants.h"
@@ -82,4 +82,4 @@ constants__t_Variant_i util_variant__new_Variant_from_ByteString(SOPC_ByteString
  */
 void util_variant__print_SOPC_Variant(SOPC_Variant *pvar);
 
-#endif /* _util_variant_h */
+#endif /* UTIL_VARIANT_H_ */

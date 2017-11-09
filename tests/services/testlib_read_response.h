@@ -24,8 +24,8 @@
  */
 
 
-#ifndef _test_read_response_h
-#define _test_read_response_h
+#ifndef TEST_READ_RESPONSE_H_
+#define TEST_READ_RESPONSE_H_
 
 
 #include <stdbool.h>
@@ -55,4 +55,4 @@ bool test_read_request_response(OpcUa_ReadResponse *pReadResp,
                                 int verbose_level);
 
 
-#endif /* _test_read_response_h */
+#endif /* TEST_READ_RESPONSE_H_ */

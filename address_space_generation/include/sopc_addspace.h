@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _add_h
-#define _add_h
+#ifndef SOPC_ADDSPACE_H_
+#define SOPC_ADDSPACE_H_
 
 
 #include <stdbool.h>
@@ -27,4 +27,4 @@
 extern SOPC_AddressSpace addressSpace;
 
 
-#endif /* _add_h */
+#endif /* SOPC_ADDSPACE_H_ */

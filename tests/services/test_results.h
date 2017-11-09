@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _test_results_h
-#define _test_results_h
+#ifndef TEST_RESULTS_H_
+#define TEST_RESULTS_H_
 
 #include "sopc_types.h"
 #include "b2c.h"

@@ -16,8 +16,8 @@
  */
 
 
-#ifndef _testlib_write_h
-#define _testlib_write_h
+#ifndef TESTLIB_WRITE_H_
+#define TESTLIB_WRITE_H_
 
 
 #include <stdbool.h>
@@ -45,4 +45,4 @@ OpcUa_ReadRequest  *tlibw_new_ReadRequest_check(void);
 bool                tlibw_verify_response_remote(OpcUa_WriteRequest *pWriteReq, OpcUa_ReadResponse *pReadResp);
 
 
-#endif /* _testlib_write_h */
+#endif /* TESTLIB_WRITE_H_ */

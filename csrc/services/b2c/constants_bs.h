@@ -20,8 +20,8 @@
  */
 
 
-#ifndef _constants_bs_h
-#define _constants_bs_h
+#ifndef CONSTANTS_BS_H_
+#define CONSTANTS_BS_H_
 
 #include <stdlib.h>
 
