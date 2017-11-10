@@ -243,7 +243,7 @@ bool SocketSet_IsPresent(Socket     sock,
                          SocketSet* sockSet)
 {
     if(sock != -1 && sockSet != NULL){
-        if(FD_ISSET(sock, &sockSet->set) == false){
+        if(false == FD_ISSET(sock, &sockSet->set)){
             return false;
         }else{
             return true;

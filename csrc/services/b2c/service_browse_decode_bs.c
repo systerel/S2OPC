@@ -123,7 +123,7 @@ void service_browse_decode_bs__getall_BrowseValue(
     {
         pBwseDesc = &request->NodesToBrowse[service_browse_decode_bs__p_bvi-1];
         *service_browse_decode_bs__p_NodeId = (constants__t_NodeId_i *)&pBwseDesc->NodeId;
-        if(util_BrowseDirection__C_to_B(pBwseDesc->BrowseDirection, service_browse_decode_bs__p_dir) == false)
+        if(false == util_BrowseDirection__C_to_B(pBwseDesc->BrowseDirection, service_browse_decode_bs__p_dir))
             return;
 
         /* TODO: Have a clearer definition of what a "not specified ReferenceType" is... */

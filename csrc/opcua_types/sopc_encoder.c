@@ -106,7 +106,7 @@ SOPC_StatusCode SOPC_Byte_WriteAux(const void* value, SOPC_Buffer* buf){
 
 SOPC_StatusCode SOPC_Byte_Write(const SOPC_Byte* value, SOPC_Buffer* buf)
 {
-    if(value == NULL || buf == NULL){
+    if(NULL == value || NULL == buf){
         return STATUS_INVALID_PARAMETERS;
     }
     return SOPC_Buffer_Write(buf, value, 1);
@@ -120,7 +120,7 @@ SOPC_StatusCode SOPC_Byte_ReadAux(void* value, SOPC_Buffer* buf)
 
 SOPC_StatusCode SOPC_Byte_Read(SOPC_Byte* value, SOPC_Buffer* buf)
 {
-    if(value == NULL || buf == NULL){
+    if(NULL == value || NULL == buf){
         return STATUS_INVALID_PARAMETERS;
     }
     return SOPC_Buffer_Read(value, buf, 1);
@@ -134,11 +134,11 @@ SOPC_StatusCode SOPC_Boolean_WriteAux(const void* value, SOPC_Buffer* buf){
 SOPC_StatusCode SOPC_Boolean_Write(const SOPC_Boolean* value, SOPC_Buffer* buf)
 {
     SOPC_Byte encodedValue;
-    if(value == NULL){
+    if(NULL == value){
         return STATUS_INVALID_PARAMETERS;
     }
 
-    if(*value == false){
+    if(false == *value){
         encodedValue = *value;
     }else{
         // Encoder should use 1 as True value
@@ -157,7 +157,7 @@ SOPC_StatusCode SOPC_Boolean_ReadAux(void* value, SOPC_Buffer* buf)
 SOPC_StatusCode SOPC_Boolean_Read(SOPC_Boolean* value, SOPC_Buffer* buf)
 {
     SOPC_StatusCode status = STATUS_NOK;
-    if(value == NULL){
+    if(NULL == value){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = SOPC_Byte_Read(value, buf);
@@ -178,7 +178,7 @@ SOPC_StatusCode SOPC_SByte_WriteAux(const void* value, SOPC_Buffer* buf){
 
 SOPC_StatusCode SOPC_SByte_Write(const SOPC_SByte* value, SOPC_Buffer* buf)
 {
-    if(value == NULL){
+    if(NULL == value){
         return STATUS_INVALID_PARAMETERS;
     }
     return SOPC_Buffer_Write(buf, (const SOPC_Byte*) value, 1);
@@ -192,7 +192,7 @@ SOPC_StatusCode SOPC_SByte_ReadAux(void* value, SOPC_Buffer* buf)
 
 SOPC_StatusCode SOPC_SByte_Read(SOPC_SByte* value, SOPC_Buffer* buf)
 {
-    if(value == NULL){
+    if(NULL == value){
         return STATUS_INVALID_PARAMETERS;
     }
 
@@ -225,7 +225,7 @@ SOPC_StatusCode SOPC_Int16_Read(int16_t* value, SOPC_Buffer* buf)
 {
     SOPC_StatusCode status = STATUS_NOK;
     int16_t readValue;
-    if(value == NULL){
+    if(NULL == value){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = SOPC_Buffer_Read((SOPC_Byte*)&readValue, buf, 2);
@@ -262,7 +262,7 @@ SOPC_StatusCode SOPC_UInt16_ReadAux(void* value, SOPC_Buffer* buf)
 SOPC_StatusCode SOPC_UInt16_Read(uint16_t* value, SOPC_Buffer* buf)
 {
     SOPC_StatusCode status = STATUS_NOK;
-    if(value == NULL){
+    if(NULL == value){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = SOPC_Buffer_Read((SOPC_Byte*)value, buf, 2);
@@ -485,7 +485,7 @@ SOPC_StatusCode SOPC_ByteString_WriteAux(const void* value, SOPC_Buffer* buf){
 SOPC_StatusCode SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_Buffer* buf)
 {
     SOPC_StatusCode status = STATUS_NOK;
-    if(str == NULL){
+    if(NULL == str){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         int32_t length;
@@ -514,7 +514,7 @@ SOPC_StatusCode SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
 {
     SOPC_StatusCode status = STATUS_NOK;
     int32_t length;
-    if(str == NULL || (str != NULL && str->Data != NULL)){
+    if(NULL == str || (str != NULL && str->Data != NULL)){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = SOPC_Buffer_Read((SOPC_Byte*)&length, buf, 4);
@@ -549,7 +549,7 @@ SOPC_StatusCode SOPC_String_WriteAux(const void* value, SOPC_Buffer* buf){
 SOPC_StatusCode SOPC_String_Write(const SOPC_String* str, SOPC_Buffer* buf)
 {
     SOPC_StatusCode status = STATUS_NOK;
-    if(str == NULL){
+    if(NULL == str){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         int32_t length;
@@ -578,7 +578,7 @@ SOPC_StatusCode SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
 {
     SOPC_StatusCode status = STATUS_NOK;
     int32_t length;
-    if(str == NULL || (str != NULL && str->Data != NULL)){
+    if(NULL == str || (str != NULL && str->Data != NULL)){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = SOPC_Buffer_Read((SOPC_Byte*)&length, buf, 4);
@@ -883,7 +883,7 @@ SOPC_StatusCode Internal_NodeId_Read(SOPC_Buffer* buf,
                 status = SOPC_UInt16_Read(&nodeId->Namespace, buf);
                 if(status == STATUS_OK){
                     nodeId->Data.Guid = malloc(sizeof(SOPC_Guid));
-                    if(nodeId->Data.Guid == NULL){
+                    if(NULL == nodeId->Data.Guid){
                         status = STATUS_NOK;
                     }else{
                         SOPC_Guid_Initialize(nodeId->Data.Guid);
@@ -1254,7 +1254,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, S
        encodingByte == SOPC_ExtObjBodyEncoding_Object)
     {
         encodingByte = SOPC_ExtObjBodyEncoding_ByteString;
-        if(extObj->Body.Object.ObjType == NULL){
+        if(NULL == extObj->Body.Object.ObjType){
             status = STATUS_INVALID_PARAMETERS;
         }else{
             status = SOPC_Namespace_GetIndex(nsTable, extObj->Body.Object.ObjType->NamespaceUri, &nsIndex);
@@ -1343,7 +1343,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Buf
                                                                     nsName,
                                                                     extObj->TypeId.NodeId.Data.Numeric);
                 }
-                if(nsFound == false || encType == NULL){
+                if(false == nsFound || NULL == encType){
                     // Keep as a byte string since it is unknown object
                     encodingByte = SOPC_ExtObjBodyEncoding_ByteString;
                 }else{
@@ -2189,11 +2189,11 @@ SOPC_StatusCode SOPC_Read_Array(SOPC_Buffer* buf, int32_t* noOfElts, void** elts
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte* byteArray = NULL;
-    assert(buf != NULL && *eltsArray == NULL && noOfElts != NULL);
+    assert(buf != NULL && eltsArray != NULL && NULL == *eltsArray && noOfElts != NULL);
 
     if(buf != NULL && noOfElts != NULL && *noOfElts >= 0 &&
        (size_t) *noOfElts <= SIZE_MAX &&
-       eltsArray != NULL  && *eltsArray == NULL &&
+       eltsArray != NULL  && NULL == *eltsArray &&
        decodeFct != NULL){
         status = STATUS_OK;
     }
@@ -2204,7 +2204,7 @@ SOPC_StatusCode SOPC_Read_Array(SOPC_Buffer* buf, int32_t* noOfElts, void** elts
 
     if(STATUS_OK == status && *noOfElts > 0){
         *eltsArray = malloc (sizeOfElt * (size_t) *noOfElts);
-        if(*eltsArray == NULL){
+        if(NULL == *eltsArray){
             status = STATUS_NOK;
         }else{
             byteArray = (SOPC_Byte*) *eltsArray;
@@ -2283,7 +2283,7 @@ SOPC_StatusCode SOPC_EncodeMsg_Type_Header_Body(SOPC_Buffer*         buf,
        encType != NULL && headerType != NULL && msgHeader != NULL)
     {
         nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
-        if(encType->NamespaceUri == NULL){
+        if(NULL == encType->NamespaceUri){
             nodeId.Namespace = 0;
         }else{
             // TODO: find namespace Id
@@ -2326,7 +2326,7 @@ SOPC_StatusCode SOPC_MsgBodyType_Read(SOPC_Buffer*          buf,
             if(nsName != NULL){
                 recEncType = SOPC_EncodeableType_GetEncodeableType(knownTypes, nsName, nodeId.Data.Numeric);
             }
-            if(recEncType == NULL){
+            if(NULL == recEncType){
                 status = STATUS_INVALID_RCV_PARAMETER;
             }
         }

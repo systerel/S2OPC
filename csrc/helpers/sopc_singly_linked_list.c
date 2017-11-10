@@ -46,7 +46,7 @@ SOPC_SLinkedList* SOPC_SLinkedList_Create(size_t sizeMax){
 
 void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value){
     SOPC_SLinkedList_Elt* elt = NULL;
-    if(list == NULL){
+    if(NULL == list){
         return NULL;
     }
 
@@ -72,7 +72,7 @@ void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value)
 
 void* SOPC_SLinkedList_Append(SOPC_SLinkedList* list, uint32_t id, void* value){
     SOPC_SLinkedList_Elt* elt = NULL;
-    if(list == NULL){
+    if(NULL == list){
         return NULL;
     }
 
@@ -102,7 +102,7 @@ void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list){
     void* result = NULL;
     SOPC_SLinkedList_Elt* nextElt = NULL;
 
-    if(list == NULL || list->first == NULL){
+    if(NULL == list || NULL == list->first){
        return NULL;
     }
 

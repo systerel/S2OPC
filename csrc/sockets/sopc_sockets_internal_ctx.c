@@ -61,7 +61,7 @@ SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocketNoLock(bool isListener){
             result = &socketsArray[idx];
         }
         idx++;
-    }while(result == NULL && idx < SOPC_MAX_SOCKETS);
+    }while(NULL == result && idx < SOPC_MAX_SOCKETS);
 
     if(NULL != result && isListener == false){
         assert(STATUS_OK == SOPC_AsyncQueue_Init(&result->writeQueue, "Socket write msgs"));

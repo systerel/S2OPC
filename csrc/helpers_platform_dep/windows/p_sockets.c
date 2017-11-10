@@ -235,7 +235,7 @@ bool SocketSet_IsPresent(Socket     sock,
                          SocketSet* sockSet)
 {
     if(sock != SOPC_INVALID_SOCKET && sockSet != NULL){
-        if(FD_ISSET(sock, sockSet) == false){
+        if(false == FD_ISSET(sock, sockSet)){
             return false;
         }else{
             return true;

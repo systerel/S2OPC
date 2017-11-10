@@ -125,7 +125,7 @@ SOPC_StatusCode SOPC_Buffer_SetDataLength(SOPC_Buffer* buffer, uint32_t length)
 SOPC_StatusCode SOPC_Buffer_Write(SOPC_Buffer* buffer, const uint8_t* data_src, uint32_t count)
 {
     SOPC_StatusCode status = STATUS_NOK;
-    if(data_src == NULL || buffer == NULL || buffer->data == NULL){
+    if(NULL == data_src || NULL == buffer || NULL == buffer->data){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         if(buffer->position + count > buffer->max_size){

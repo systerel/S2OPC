@@ -72,7 +72,7 @@ void util_message_out_bs__alloc_msg(
   if(NULL != encTyp){
     status = SOPC_Encodeable_Create(encTyp, &msg);
     if(STATUS_OK == status){
-      if(isReq == false){
+      if(false == isReq){
         status = SOPC_Encodeable_Create(&OpcUa_ResponseHeader_EncodeableType, &header);
       }else{
         status = SOPC_Encodeable_Create(&OpcUa_RequestHeader_EncodeableType, &header);

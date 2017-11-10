@@ -49,7 +49,7 @@ static bool ParseURI (const char* uri, char** hostname, char** port){
     if(result != false){
         if(portIdx != 0 && hostnameLength != 0 && portLength != 0){
             lHostname = malloc(sizeof(char) * (hostnameLength+1));
-            if(lHostname == NULL)
+            if(NULL == lHostname)
                 return false;
             if(lHostname != memcpy(lHostname, &(uri[10]), hostnameLength)){
                 free(lHostname);
@@ -58,7 +58,7 @@ static bool ParseURI (const char* uri, char** hostname, char** port){
             lHostname[hostnameLength] = '\0';
 
             lPort = malloc(sizeof(char) * (portLength+1));
-            if(lPort == NULL){
+            if(NULL == lPort){
                 free(lHostname);
                 return false;
             }
@@ -97,7 +97,7 @@ static bool SOPC_SocketsEventMgr_ConnectClient(SOPC_Socket*        connectSocket
             connectSocket->state = SOCKET_STATE_CONNECTING;
         }
 
-        if(result == false){
+        if(false == result){
             SOPC_SocketsInternalContext_CloseSocket(connectSocket->socketIdx);
         }
     }
@@ -122,7 +122,7 @@ static bool SOPC_SocketsEventMgr_NextConnectClientAttempt(SOPC_Socket* connectSo
             }
 
             // No more attempts possible: free the attempts addresses
-            if(connectSocket->nextConnectAttemptAddr == NULL){
+            if(NULL == connectSocket->nextConnectAttemptAddr){
                 Socket_AddrInfoDelete((Socket_AddressInfo**) &connectSocket->connectAddrs);
                 connectSocket->connectAddrs = NULL;
             }
@@ -146,7 +146,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
         result = ParseURI(uri, &hostname, &port);
         if(result != false){
             freeSocket = SOPC_SocketsInternalContext_GetFreeSocketNoLock(false);
-            if(freeSocket == NULL){
+            if(NULL == freeSocket){
                 result = false;
             }
         }
@@ -159,7 +159,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
 
         if(result != false){
             // Try to connect on IP addresses provided (IPV4 and IPV6)
-            for(p = res;p != NULL && connectResult == false; p = Socket_AddrInfo_IterNext(p)) {
+            for(p = res;p != NULL && false == connectResult; p = Socket_AddrInfo_IterNext(p)) {
                 connectResult = SOPC_SocketsEventMgr_ConnectClient(freeSocket, p);
             }
             result = connectResult;
@@ -175,13 +175,13 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
             resultSocket = freeSocket;
         }
 
-        if(result == false || // connection already failed => do not keep addresses for next attempts
-           (res != NULL && freeSocket->connectAddrs == NULL)) // async connecting but NO next attempts remaining (if current fails)
+        if(false == result || // connection already failed => do not keep addresses for next attempts
+           (res != NULL && NULL == freeSocket->connectAddrs)) // async connecting but NO next attempts remaining (if current fails)
         {
             Socket_AddrInfoDelete(&res);
         }
 
-        if(result == false && freeSocket != NULL){
+        if(false == result && freeSocket != NULL){
             // Set as closed to be removed from used socket
             SOPC_SocketsInternalContext_CloseSocketNoLock(freeSocket->socketIdx);
         }
@@ -217,7 +217,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri,
         result = ParseURI(uri, &hostname, &port);
         if(result != false){
             freeSocket = SOPC_SocketsInternalContext_GetFreeSocketNoLock(true);
-            if(freeSocket == NULL){
+            if(NULL == freeSocket){
                 result = false;
             }
         }
@@ -238,9 +238,9 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri,
             // Try to connect on IP addresses provided (IPV4 and IPV6)
             p = res;
             attemptWithIPV6 = true; // IPV6 first since it supports IPV4
-            while((p != NULL || attemptWithIPV6 != false) && listenResult == false){
+            while((p != NULL || attemptWithIPV6 != false) && false == listenResult){
 
-                if(p == NULL && attemptWithIPV6 != false){
+                if(NULL == p && attemptWithIPV6 != false){
                     // Failed with IPV6 addresses (or none was present), now try with not IPV6 addresses
                     attemptWithIPV6 = false;
                     p = res;
@@ -469,7 +469,7 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
             result = false;
         }
 
-        if(result == false){
+        if(false == result){
             SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE,
                                              socketElt->connectionId,
                                              NULL,
@@ -507,7 +507,7 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
 
         // Will do a new attempt with next possible address if possible
         result = SOPC_SocketsEventMgr_NextConnectClientAttempt(socketElt);
-        if(result == false){
+        if(false == result){
             // No new attempt possible, indicates socket connection failed and close the socket
             SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE,
                                              socketElt->connectionId, // endpoint description config index

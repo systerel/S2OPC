@@ -605,7 +605,7 @@ SOPC_StatusCode SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, SOPC_Byte* 
 
 SOPC_StatusCode SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteString* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(dest != NULL && dest->Data == NULL &&
+    if(dest != NULL && NULL == dest->Data &&
        src != NULL && src->Length > 0){
         status = STATUS_OK;
         dest->Length = src->Length;
@@ -720,7 +720,7 @@ SOPC_StatusCode SOPC_String_AttachFrom(SOPC_String* dest, SOPC_String* src){
 SOPC_StatusCode SOPC_String_AttachFromCstring(SOPC_String* dest, char* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     size_t stringLength = 0;
-    if(dest != NULL && dest->Data == NULL && src != NULL){
+    if(dest != NULL && NULL == dest->Data && src != NULL){
         assert(CHAR_BIT == 8);
         stringLength = strlen(src);
         if(stringLength <= INT32_MAX)
@@ -736,7 +736,7 @@ SOPC_StatusCode SOPC_String_AttachFromCstring(SOPC_String* dest, char* src){
 
 SOPC_StatusCode SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(dest != NULL && dest->Data == NULL && src != NULL){
+    if(dest != NULL && NULL == dest->Data && src != NULL){
         // Keep null terminator for C string compatibility
         status = STATUS_OK;
         dest->Length = src->Length;
@@ -766,7 +766,7 @@ void SOPC_String_ClearAux(void* value){
 
 void SOPC_String_Clear(SOPC_String* string){
     if(string != NULL){
-        if(string->DoNotClear == false){
+        if(false == string->DoNotClear){
            if(string->Data != NULL){
                free(string->Data);
            }
@@ -786,7 +786,7 @@ SOPC_StatusCode SOPC_String_CopyFromCString(SOPC_String* string, const char* cSt
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     size_t stringLength = 0;
     size_t idx = 0;
-    if(string != NULL && string->Data == NULL
+    if(string != NULL && NULL == string->Data
        && cString != NULL){
         status = STATUS_OK;
 
@@ -872,7 +872,7 @@ SOPC_StatusCode SOPC_String_Compare(const SOPC_String* left,
                                     bool               ignoreCase,
                                     int32_t*           comparison)
 {
-    if(left == NULL || right == NULL || comparison == NULL)
+    if(NULL == left || NULL == right || NULL == comparison)
         return STATUS_INVALID_PARAMETERS;
 
     if(left->Length == right->Length)
@@ -880,7 +880,7 @@ SOPC_StatusCode SOPC_String_Compare(const SOPC_String* left,
         assert(CHAR_BIT == 8);
         if(left->Length <= 0 && right->Length <= 0){
             *comparison = 0;
-        }else if(ignoreCase == false){
+        }else if(false == ignoreCase){
             *comparison = strcmp((char*) left->Data, (char*) right->Data);
         }else{
             *comparison = SOPC_strncmp_ignore_case((char*) left->Data, (char*) right->Data, left->Length);
@@ -2826,7 +2826,7 @@ SOPC_StatusCode SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src){
     int32_t idx = 0;
     if(dest != NULL && src != NULL){
         SOPC_EncodeableObject_PfnCopy* copyFunction = GetBuiltInTypeCopyFunction(src->BuiltInTypeId);
-        if(copyFunction == NULL)
+        if(NULL == copyFunction)
             return STATUS_NOK;
 
         switch(src->ArrayType){
@@ -2929,7 +2929,7 @@ SOPC_StatusCode SOPC_Variant_Compare(const SOPC_Variant* left,
         if(left->BuiltInTypeId == right->BuiltInTypeId){
             if(left->ArrayType == right->ArrayType){
                 SOPC_EncodeableObject_PfnComp* compFunction = GetBuiltInTypeCompFunction(left->BuiltInTypeId);
-                if(compFunction == NULL)
+                if(NULL == compFunction)
                     return STATUS_NOK;
 
                 switch(right->ArrayType){
@@ -3030,7 +3030,7 @@ void SOPC_Variant_Clear(SOPC_Variant* variant){
     int32_t idx = 0;
     if(variant != NULL){
         SOPC_EncodeableObject_PfnClear* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeId);
-        if(clearFunction == NULL)
+        if(NULL == clearFunction)
             return;
 
         switch(variant->ArrayType){

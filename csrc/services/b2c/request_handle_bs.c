@@ -61,7 +61,7 @@ void request_handle_bs__client_fresh_req_handle(
   uint8_t noHandleAvailable = false;
   *request_handle_bs__request_handle = constants__c_request_handle_indet;
   if(request_handle_bs__resp_typ != constants__c_msg_type_indet){
-    while(noHandleAvailable == false &&
+    while(false == noHandleAvailable &&
            *request_handle_bs__request_handle == constants__c_request_handle_indet)
     {
       cpt = (cpt+1) % UINT16_MAX;

@@ -132,7 +132,7 @@ SOPC_StatusCode SOPC_Thread_Create(Thread* thread, void *(*startFct) (void *), v
 							          thread,
 							          0,          // use default creation flags
 							          &threadId);
-    	if(thread->thread == NULL){
+    	if(NULL == thread->thread){
     		status = STATUS_NOK;
     	}else{
     		status = STATUS_OK;
@@ -147,7 +147,7 @@ SOPC_StatusCode SOPC_Thread_Join(Thread thread){
     SOPC_StatusCode status = STATUS_NOK;
     if(thread.thread != NULL){
 		DWORD retCode = WaitForSingleObject(thread.thread, INFINITE);
-		if(retCode == WAIT_OBJECT_0){
+		if(WAIT_OBJECT_0 == retCode){
 			thread.thread = NULL;
 			status = STATUS_OK;
 		}

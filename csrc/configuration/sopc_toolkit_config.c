@@ -101,7 +101,7 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t  eventAndType,
 SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
     if(NULL != pAppFct){
         appFct = pAppFct;
-        if(tConfig.initDone == false){
+        if(false == tConfig.initDone){
             Mutex_Initialization(&tConfig.mut);
             Mutex_Lock(&tConfig.mut);
             tConfig.initDone = true;
@@ -130,7 +130,7 @@ SOPC_StatusCode SOPC_Toolkit_Configured(){
     SOPC_StatusCode status = OpcUa_BadInvalidState;
     if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
-        if(tConfig.locked == false){
+        if(false == tConfig.locked){
             tConfig.locked = true;
             SOPC_Services_ToolkitConfigured();
             status = STATUS_OK;
@@ -144,7 +144,7 @@ void SOPC_Toolkit_ClearScConfigElt(uint32_t id, void *val)
 {
     (void)(id);
     SOPC_SecureChannel_Config* scConfig = val;
-    if(scConfig != NULL && scConfig->isClientSc == false){
+    if(scConfig != NULL && false == scConfig->isClientSc){
         // In case of server it is an internally created config
         // => only client certificate was specifically allocated
 // Exceptional case: configuration added internally and shall be freed on clear call
@@ -306,12 +306,12 @@ SOPC_StatusCode SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTable,
 
             if(encTypesTable != NULL && nbTypes > 0 ){
                 status = STATUS_OK;
-                if(tConfig.encTypesTable == NULL){
+                if(NULL == tConfig.encTypesTable){
                     // known types to be added
                     nbKnownTypes = GetKnownEncodeableTypesLength();
                     // +1 for null value termination
                     tConfig.encTypesTable = malloc(sizeof(SOPC_EncodeableType*) * (nbKnownTypes + nbTypes + 1));
-                    if(tConfig.encTypesTable == NULL ||
+                    if(NULL == tConfig.encTypesTable ||
                        tConfig.encTypesTable != memcpy(tConfig.encTypesTable,
                                                        SOPC_KnownEncodeableTypes,
                                                        nbKnownTypes * sizeof(SOPC_EncodeableType*)))

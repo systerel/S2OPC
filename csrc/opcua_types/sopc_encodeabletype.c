@@ -32,17 +32,17 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(SOPC_EncodeableType**
     uint32_t idx = 0;
     if(encTypesTable != NULL){
         current = encTypesTable[idx];
-        while(current != NULL && result == NULL){
+        while(current != NULL && NULL == result){
             if(typeId == current->TypeId || typeId == current->BinaryEncodingTypeId){
                 // || typeId = current->xmlTypeId => should not be the case since we use UA binary !
-                if(current->NamespaceUri == NULL && namespace == NULL){
+                if(NULL == current->NamespaceUri && NULL == namespace){
                     // Default namespace for both
                     result = current;
                 }else{
-                    if(namespace == NULL){
+                    if(NULL == namespace){
                         namespace = OPCUA_NAMESPACE_NAME;
                     }
-                    if(current->NamespaceUri == NULL){
+                    if(NULL == current->NamespaceUri){
                         // It is considered as default namespace:
                         currentNs = OPCUA_NAMESPACE_NAME;
                     }else{
@@ -53,7 +53,7 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(SOPC_EncodeableType**
                     }
                 }
             }
-            if(result == NULL && idx < UINT32_MAX){
+            if(NULL == result && idx < UINT32_MAX){
                 idx++;
                 current = encTypesTable[idx];
             }else{

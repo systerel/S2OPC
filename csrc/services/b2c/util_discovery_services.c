@@ -114,7 +114,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(const constant
         nbSecuConfigs = sopcEndpointConfig->nbSecuConfigs;
         tabSecurityPolicy = sopcEndpointConfig->secuConfigurations;
 
-        /* if isCreateSessionResponse == false
+        /* if false == isCreateSessionResponse
          * see part 4 §5.6.2.2: it is recommended that Servers only include the endpointUrl,
          * securityMode, securityPolicyUri, userIdentityTokens, transportProfileUri
          * and securityLevel with all other parameters set to null. */
@@ -159,7 +159,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(const constant
                 newEndPointDescription.SecurityLevel = 0;
 
                 OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
-                if(isCreateSessionResponse == false){
+                if(false == isCreateSessionResponse){
                     // Set ApplicationDescription
                     SOPC_SetServerApplicationDescription(sopcEndpointConfig, &newEndPointDescription.Server);
                 }else{
@@ -187,7 +187,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(const constant
                 newEndPointDescription.SecurityLevel = 1;
 
                 OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
-                if(isCreateSessionResponse == false){
+                if(false == isCreateSessionResponse){
                     // Set serverCertificate
                     SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription);
                     // Set ApplicationDescription
@@ -217,7 +217,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(const constant
                 newEndPointDescription.SecurityLevel = 1;
 
                 OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
-                if(isCreateSessionResponse == false){
+                if(false == isCreateSessionResponse){
                     // Set serverCertificate
                     SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription);
                     // Set ApplicationDescription

@@ -317,7 +317,7 @@ void address_space_bs__get_NodeClass(
 
     bool res = util_NodeClass__C_to_B(address_space_bs__a_NodeClass[address_space_bs__p_node],
                                       address_space_bs__p_node_class);
-    if(res == false){
+    if(false == res){
       *address_space_bs__p_node_class = constants__c_NodeClass_indet;
     }
 }

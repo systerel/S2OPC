@@ -95,13 +95,13 @@ static bool SOPC_SecureListenerStateMgr_AddConnection(SOPC_SecureListener* scLis
     bool result = false;
     do{
         lastIdx = idx;
-        if(scListener->isUsedConnectionIdxArray[idx] == false){
+        if(false == scListener->isUsedConnectionIdxArray[idx]){
             scListener->connectionIdxArray[idx] = newConnectionIndex;
             scListener->isUsedConnectionIdxArray[idx] = true;
             result = true;
         }
         idx = (idx + 1) % SOPC_MAX_SOCKETS_CONNECTIONS;
-    }while(idx != scListener->lastConnectionIdxArrayIdx && result == false);
+    }while(idx != scListener->lastConnectionIdxArrayIdx && false == result);
 
     if(result != false){
         scListener->lastConnectionIdxArrayIdx = lastIdx;
@@ -123,7 +123,7 @@ static void SOPC_SecureListenerStateMgr_RemoveConnection(SOPC_SecureListener* sc
             result = true;
         }
         idx++;
-    }while(idx < SOPC_MAX_SOCKETS_CONNECTIONS && result == false);
+    }while(idx < SOPC_MAX_SOCKETS_CONNECTIONS && false == result);
 }
 
 void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
@@ -144,7 +144,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         /* id = endpoint description config index,
            auxParam = socket index */
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
-        if(scListener == NULL ||
+        if(NULL == scListener ||
            scListener->state != SECURE_LISTENER_STATE_OPENING){
             // Error case: require socket closure
             SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE,
@@ -163,7 +163,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         /* id = endpoint description config index,
            auxParam = new connection socket index */
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
-        if(scListener == NULL || scListener->state != SECURE_LISTENER_STATE_OPENED){
+        if(NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENED){
             // Error case: require socket closure
             SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE,
                                       auxParam,
@@ -204,7 +204,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         if(epConfig != NULL){
             result = SOPC_SecureListenerStateMgr_OpeningListener(eltId);
         }
-        if(result == false){
+        if(false == result){
             // Nothing to do: it means EP is already open or in opening step
         }else{
 // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
@@ -241,7 +241,7 @@ SOPC_GCC_DIAGNOSTIC_RESTORE
         /* id = endpoint description configuration index,
            auxParam = socket index for connection */
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
-        if(scListener == NULL || scListener->state != SECURE_LISTENER_STATE_OPENED){
+        if(NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENED){
             // Error case: require secure channel closure
             SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE,
                                                      auxParam,
@@ -251,7 +251,7 @@ SOPC_GCC_DIAGNOSTIC_RESTORE
             // Associates the secure channel connection to the secure listener
             result = SOPC_SecureListenerStateMgr_AddConnection(scListener,
                                                                auxParam);
-            if(result == false){
+            if(false == result){
                 // Error case: require secure channel closure
                 SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE,
                                                          auxParam,

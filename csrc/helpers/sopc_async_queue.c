@@ -78,7 +78,7 @@ static SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQueu
     if(NULL != queue && NULL != element){
         status = Mutex_Lock(&queue->queueMutex);
         if(STATUS_OK == status){
-            if(firstOut == false){
+            if(false == firstOut){
                 enqueuedElt = SOPC_SLinkedList_Append(queue->queueList, 0, element);
             }else{
                 enqueuedElt = SOPC_SLinkedList_Prepend(queue->queueList, 0, element);
@@ -121,7 +121,7 @@ static SOPC_StatusCode SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue,
         Mutex_Lock(&queue->queueMutex);
         *element = SOPC_SLinkedList_PopHead(queue->queueList);
         if(NULL == *element){
-            if(isBlocking == false){
+            if(false == isBlocking){
                 status = OpcUa_BadWouldBlock;
             }else{
                 queue->waitingThreads++;

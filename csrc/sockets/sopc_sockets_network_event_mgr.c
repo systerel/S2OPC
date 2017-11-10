@@ -132,7 +132,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                             if(uaSock->listenerConnections < SOPC_MAX_SOCKETS_CONNECTIONS){
                                 acceptSock = SOPC_SocketsInternalContext_GetFreeSocketNoLock(false);
                             }
-                            if(acceptSock == NULL){
+                            if(NULL == acceptSock){
                                 // TODO: log refusing new sockets due to limit
                             }else{
                                 if(STATUS_OK == Socket_Accept(uaSock->sock,

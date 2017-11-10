@@ -48,7 +48,7 @@ SOPC_StatusCode SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate *pCer
 {
     uint32_t lenToAllocate = 0;
 
-    if(NULL == pCert || ppDest == NULL || 0 == pLenAllocated)
+    if(NULL == pCert || NULL == ppDest || 0 == pLenAllocated)
         return STATUS_INVALID_PARAMETERS;
 
     // Allocation

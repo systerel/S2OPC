@@ -46,33 +46,33 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri,
             for(idx = 10; idx < strlen(uri) - 1; idx++){
                 if(isPort){
                     if(uri[idx] >= '0' && uri[idx] <= '9'){
-                        if(hasPort == false){
+                        if(false == hasPort){
                             // port definition
                             hasPort = 1;
                             *portIdx = idx;
                         }
-                    }else if(uri[idx] == '/' && invalid == false){
+                    }else if(uri[idx] == '/' && false == invalid){
                         // Name of the endpoint after port, invalid otherwise
-                        if(hasPort == false){
+                        if(false == hasPort){
                             invalid = 1;
                         }else{
                             *portLength = idx - *portIdx;
                             hasName = 1;
                         }
                     }else{
-                        if(hasPort == false || hasName == false){
+                        if(false == hasPort || false == hasName){
                             // unexpected character: we do not expect a endpoint name
                             invalid = 1;
                         }
                     }
                 }else{
-                     if(uri[idx] == ':' && startIPv6 == false){
+                     if(uri[idx] == ':' && false == startIPv6){
                         *hostnameLength = idx - 10;
                         isPort = 1;
                     }else if(uri[idx] == '['){
                         startIPv6 = 1;
                     }else if(uri[idx] == ']'){
-                        if(startIPv6 == false){
+                        if(false == startIPv6){
                             invalid = 1;
                         }else{
                             startIPv6 = false;
@@ -81,7 +81,7 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri,
                 }
             }
 
-            if(hasPort != false && invalid == false){
+            if(hasPort != false && false == invalid){
                 result = true;
                 if(*portLength == 0){
                     // No endpoint name after port provided

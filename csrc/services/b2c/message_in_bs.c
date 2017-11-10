@@ -89,7 +89,7 @@ void message_in_bs__decode_msg_header(
   *message_in_bs__msg_header = constants__c_msg_header_indet;
   SOPC_StatusCode status = STATUS_NOK;
   void* header = NULL;
-  if(message_in_bs__is_request == false){
+  if(false == message_in_bs__is_request){
     status = SOPC_DecodeMsg_HeaderOrBody((SOPC_Buffer*) message_in_bs__msg_buffer,
                                          &OpcUa_ResponseHeader_EncodeableType, 
                                          &header);
@@ -118,7 +118,7 @@ void message_in_bs__decode_msg(
                                      &reqEncType,
                                      &respEncType,
                                      &isReq);
-   if(isReq == false){
+   if(false == isReq){
      encType = respEncType;
    }else{
      encType = reqEncType;
