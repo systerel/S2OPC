@@ -36,7 +36,7 @@ BraceWrapping:
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
 BreakBeforeBinaryOperators: None
-BreakBeforeBraces: Attach
+BreakBeforeBraces: Allman
 BreakBeforeInheritanceComma: false
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: false
@@ -66,7 +66,7 @@ IncludeCategories:
   - Regex:           '.*'
     Priority:        3
 IncludeIsMainRegex: '([-_](test|unittest))?$'
-IndentCaseLabels: true
+IndentCaseLabels: false
 IndentWidth:     4
 IndentWrappedFunctionNames: false
 JavaScriptQuotes: Leave
@@ -90,12 +90,12 @@ PointerAlignment: Left
 ReflowComments:  true
 SortIncludes:    true
 SortUsingDeclarations: true
-SpaceAfterCStyleCast: false
+SpaceAfterCStyleCast: true
 SpaceAfterTemplateKeyword: true
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
-SpacesBeforeTrailingComments: 2
+SpacesBeforeTrailingComments: 1
 SpacesInAngles:  false
 SpacesInContainerLiterals: true
 SpacesInCStyleCastParentheses: false
