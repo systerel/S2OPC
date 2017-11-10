@@ -26,90 +26,96 @@ static constants__t_user_i unique_session_to_activate_user = constants__c_user_i
 static constants__t_session_i unique_session_to_create = constants__c_session_indet;
 static constants__t_channel_config_idx_i unique_session_to_create_idx = constants__c_channel_config_idx_indet;
 
-void session_async_bs__INITIALISATION(void)
-{
-}
+void session_async_bs__INITIALISATION(void) {}
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void session_async_bs__add_session_to_activate(
-   const constants__t_session_i session_async_bs__session,
-   const constants__t_user_i session_async_bs__user,
-   t_bool * const session_async_bs__ret)
+void session_async_bs__add_session_to_activate(const constants__t_session_i session_async_bs__session,
+                                               const constants__t_user_i session_async_bs__user,
+                                               t_bool* const session_async_bs__ret)
 {
-  if(unique_session_to_activate_user == constants__c_user_indet){
-    unique_session_to_activate_user = session_async_bs__user;
-    unique_session_to_activate = session_async_bs__session;
-    *session_async_bs__ret = true;
-  }else{
-    *session_async_bs__ret = false;
-  }  
+    if (unique_session_to_activate_user == constants__c_user_indet)
+    {
+        unique_session_to_activate_user = session_async_bs__user;
+        unique_session_to_activate = session_async_bs__session;
+        *session_async_bs__ret = true;
+    }
+    else
+    {
+        *session_async_bs__ret = false;
+    }
 }
 
 void session_async_bs__add_session_to_create(
-   const constants__t_session_i session_async_bs__session,
-   const constants__t_channel_config_idx_i session_async_bs__channel_config_idx,
-   t_bool * const session_async_bs__ret)
+    const constants__t_session_i session_async_bs__session,
+    const constants__t_channel_config_idx_i session_async_bs__channel_config_idx,
+    t_bool* const session_async_bs__ret)
 {
-  if(unique_session_to_create == constants__c_session_indet){
-    unique_session_to_create_idx = session_async_bs__channel_config_idx;
-    unique_session_to_create = session_async_bs__session;
-    *session_async_bs__ret = true;
-  }else{
-    *session_async_bs__ret = false;
-  }  
+    if (unique_session_to_create == constants__c_session_indet)
+    {
+        unique_session_to_create_idx = session_async_bs__channel_config_idx;
+        unique_session_to_create = session_async_bs__session;
+        *session_async_bs__ret = true;
+    }
+    else
+    {
+        *session_async_bs__ret = false;
+    }
 }
 
-void session_async_bs__get_and_remove_session_user_to_activate(
-   const constants__t_session_i session_async_bs__session,
-   constants__t_user_i * const session_async_bs__user){
-  if(session_async_bs__session == unique_session_to_activate){
-    *session_async_bs__user = unique_session_to_activate_user;
-    unique_session_to_activate_user = constants__c_user_indet;
-  }else{
-    *session_async_bs__user = constants__c_user_indet;
-  }
+void session_async_bs__get_and_remove_session_user_to_activate(const constants__t_session_i session_async_bs__session,
+                                                               constants__t_user_i* const session_async_bs__user)
+{
+    if (session_async_bs__session == unique_session_to_activate)
+    {
+        *session_async_bs__user = unique_session_to_activate_user;
+        unique_session_to_activate_user = constants__c_user_indet;
+    }
+    else
+    {
+        *session_async_bs__user = constants__c_user_indet;
+    }
 }
 
 void session_async_bs__get_and_remove_session_to_create(
-   const constants__t_channel_config_idx_i session_async_bs__channel_config_idx,
-   constants__t_session_i * const session_async_bs__session){
-  if(session_async_bs__channel_config_idx == unique_session_to_create_idx){
-    *session_async_bs__session = unique_session_to_create;
-    unique_session_to_create = constants__c_session_indet;
-  }else{
-    *session_async_bs__session = constants__c_session_indet;
-  }
+    const constants__t_channel_config_idx_i session_async_bs__channel_config_idx,
+    constants__t_session_i* const session_async_bs__session)
+{
+    if (session_async_bs__channel_config_idx == unique_session_to_create_idx)
+    {
+        *session_async_bs__session = unique_session_to_create;
+        unique_session_to_create = constants__c_session_indet;
+    }
+    else
+    {
+        *session_async_bs__session = constants__c_session_indet;
+    }
 }
 
 void session_async_bs__client_gen_activate_orphaned_session_internal_event(
-   const constants__t_session_i session_async_bs__session,
-   const constants__t_channel_config_idx_i session_async_bs__channel_config_idx){
-  /* TODO: check integer casts */
-  SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_ORPHANED_SESSION,
-                             (uint32_t) session_async_bs__session,
-                             NULL,
-                             (uint32_t) session_async_bs__channel_config_idx);
+    const constants__t_session_i session_async_bs__session,
+    const constants__t_channel_config_idx_i session_async_bs__channel_config_idx)
+{
+    /* TODO: check integer casts */
+    SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_ORPHANED_SESSION, (uint32_t) session_async_bs__session, NULL,
+                               (uint32_t) session_async_bs__channel_config_idx);
 }
 
 void session_async_bs__client_gen_activate_user_session_internal_event(
-   const constants__t_session_i session_async_bs__session,
-   const constants__t_user_i session_async_bs__user){
-  /* TODO: check integer casts */
-    SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_SESSION,
-                               (uint32_t) session_async_bs__session,
-                               NULL,
+    const constants__t_session_i session_async_bs__session,
+    const constants__t_user_i session_async_bs__user)
+{
+    /* TODO: check integer casts */
+    SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_SESSION, (uint32_t) session_async_bs__session, NULL,
                                (uint32_t) session_async_bs__user);
-
 }
 
 void session_async_bs__client_gen_create_session_internal_event(
-   const constants__t_session_i session_async_bs__session,
-   const constants__t_channel_config_idx_i session_async_bs__channel_config_idx){
-  /* TODO: check integer casts */
-    SOPC_Services_EnqueueEvent(SE_TO_SE_CREATE_SESSION,
-                               (uint32_t) session_async_bs__session,
-                               NULL,
+    const constants__t_session_i session_async_bs__session,
+    const constants__t_channel_config_idx_i session_async_bs__channel_config_idx)
+{
+    /* TODO: check integer casts */
+    SOPC_Services_EnqueueEvent(SE_TO_SE_CREATE_SESSION, (uint32_t) session_async_bs__session, NULL,
                                (uint32_t) session_async_bs__channel_config_idx);
 }

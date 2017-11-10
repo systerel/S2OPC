@@ -17,9 +17,8 @@
 
 #ifndef B2C_H_
 #define B2C_H_
-#include <stdint.h>
 #include <stdbool.h>
-
+#include <stdint.h>
 
 /* t_bool */
 #ifndef t_bool_
@@ -31,7 +30,7 @@ typedef bool t_bool;
 #ifndef t_entier4_
 #define t_entier4_
 typedef int32_t t_entier4;
-#endif  /* t_entier4 */
+#endif /* t_entier4 */
 
 /* MAXINT */
 #ifndef MAXINT
@@ -42,6 +41,5 @@ typedef int32_t t_entier4;
 #ifndef MININT
 #define MININT (-MAXINT)
 #endif /* MININT */
-
 
 #endif /* B2C_H_ */

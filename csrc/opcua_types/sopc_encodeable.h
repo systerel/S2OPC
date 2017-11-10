@@ -25,9 +25,9 @@
 
 #include <stdint.h>
 
-#include "sopc_toolkit_constants.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_toolkit_constants.h"
 
 /**
  *  \brief           Instantiate and initialize an encodeable object of the given encodeable type
@@ -57,7 +57,7 @@ SOPC_StatusCode SOPC_Encodeable_Delete(SOPC_EncodeableType* encTyp, void** encOb
  *  \return          STATUS_OK if creation and extension setting succeeded
  */
 SOPC_StatusCode SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObject,
-                                                SOPC_EncodeableType*  encTyp,
-                                                void**                encObject);
+                                                SOPC_EncodeableType* encTyp,
+                                                void** encObject);
 
 #endif /* SOPC_ENCODEABLE_H_ */

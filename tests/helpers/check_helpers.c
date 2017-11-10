@@ -21,12 +21,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include <stdlib.h>
 #include <check.h>
+#include <stdlib.h>
 
 #include "check_helpers.h"
-
 
 START_TEST(test_empty)
 {
@@ -34,11 +32,10 @@ START_TEST(test_empty)
 }
 END_TEST
 
-
-Suite *tests_make_suite_stack(void)
+Suite* tests_make_suite_stack(void)
 {
-    Suite *s;
-    TCase *tc_core;
+    Suite* s;
+    TCase* tc_core;
 
     s = suite_create("Stack");
     tc_core = tcase_create("Dummy");
@@ -48,11 +45,10 @@ Suite *tests_make_suite_stack(void)
     return s;
 }
 
-
 int main(void)
 {
     int number_failed;
-    SRunner *sr;
+    SRunner* sr;
 
     sr = srunner_create(tests_make_suite_stack());
     srunner_add_suite(sr, tests_make_suite_crypto_B256S256());

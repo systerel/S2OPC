@@ -20,13 +20,15 @@
 
 #include "sopc_secret_buffer.h"
 
-typedef struct SOPC_SC_SecurityKeySet{
+typedef struct SOPC_SC_SecurityKeySet
+{
     SOPC_SecretBuffer* signKey;
     SOPC_SecretBuffer* encryptKey;
     SOPC_SecretBuffer* initVector;
 } SOPC_SC_SecurityKeySet;
 
-typedef struct {
+typedef struct
+{
     SOPC_SC_SecurityKeySet* senderKeySet;
     SOPC_SC_SecurityKeySet* receiverKeySet;
 } SOPC_SC_SecurityKeySets;

@@ -22,9 +22,9 @@
 
 #include "sopc_namespace_table.h"
 
-
 /**
- *  \brief Return the endpoint configuration for the given index or null if not defined. (SOPC_Toolkit_Configured required)
+ *  \brief Return the endpoint configuration for the given index or null if not defined. (SOPC_Toolkit_Configured
+ * required)
  *
  *  \param epConfigIdx  The endpoint configuration index requested
  *
@@ -34,7 +34,8 @@
 SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx);
 
 /**
- *  \brief Return the secure channel configuration for the given index or null if not defined. (SOPC_Toolkit_Configured required)
+ *  \brief Return the secure channel configuration for the given index or null if not defined. (SOPC_Toolkit_Configured
+ * required)
  *
  *  \param scConfigIdx  The secure channel configuration index requested
  *
@@ -60,15 +61,9 @@ SOPC_NamespaceTable* SOPC_ToolkitConfig_GetNamespaces(void);
 
 void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
 
-typedef enum SOPC_App_EventType {
-  SOPC_APP_COM_EVENT = 0x0,
-  SOPC_APP_ADDRESS_SPACE_NOTIF = 0x01
-} SOPC_App_EventType;
+typedef enum SOPC_App_EventType { SOPC_APP_COM_EVENT = 0x0, SOPC_APP_ADDRESS_SPACE_NOTIF = 0x01 } SOPC_App_EventType;
 
-void SOPC_Internal_ApplicationEventDispatcher(int32_t  eventAndType,
-                                              uint32_t id,
-                                              void*    params,
-                                              uint32_t auxParam);
+void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id, void* params, uint32_t auxParam);
 
 int32_t SOPC_AppEvent_ComEvent_Create(SOPC_App_Com_Event event);
 int32_t SOPC_AppEvent_AddSpaceEvent_Create(SOPC_App_AddSpace_Event event);

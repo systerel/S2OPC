@@ -29,20 +29,20 @@
 /* Sockets input events */
 typedef enum {
     /* External events */
-    SOCKET_CREATE_SERVER, /* id = endpoint description config index,
-                             params = (const char*) URI,
-                             auxParam = (bool) listenAllInterfaces
-                          */
+    SOCKET_CREATE_SERVER,       /* id = endpoint description config index,
+                                   params = (const char*) URI,
+                                   auxParam = (bool) listenAllInterfaces
+                                */
     SOCKET_ACCEPTED_CONNECTION, /* id = socket index,
                                    auxParam = secure channel connection index */
 
     SOCKET_CREATE_CLIENT, /* id = secure channel connection index,
                              params = (const char*) URI
                           */
-    SOCKET_CLOSE, /* id = socket index */
-    SOCKET_WRITE, /* id = socket index,
-                     params = (SOPC_Buffer*) message buffer
-                  */
+    SOCKET_CLOSE,         /* id = socket index */
+    SOCKET_WRITE,         /* id = socket index,
+                             params = (SOPC_Buffer*) message buffer
+                          */
 
     /* Internal events (network event manager to event manager) */
     INT_SOCKET_ACCEPTED,
@@ -54,10 +54,7 @@ typedef enum {
 } SOPC_Sockets_InputEvent;
 
 /* Sockets event enqueue function */
-void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent,
-                               uint32_t                id,
-                               void*                   params,
-                               int32_t                 auxParam);
+void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id, void* params, int32_t auxParam);
 
 void SOPC_Sockets_Initialize(void);
 

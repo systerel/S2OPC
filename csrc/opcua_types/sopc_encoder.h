@@ -18,24 +18,17 @@
 #ifndef SOPC_ENCODER_H_
 #define SOPC_ENCODER_H_
 
+#include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
-#include "sopc_buffer.h"
 
 #define SWAP_2_BYTES(x) (x & 0x00FF) << 8 | (x & 0xFF00) >> 8
-#define SWAP_3_BYTES(x) (x & 0x0000FF) << 16 | (x & 0x00FF00) \
-| (x & 0xFF0000) >> 16
-#define SWAP_4_BYTES(x) (x & 0x000000FF) << 24 | (x & 0x0000FF00) << 8 \
-| (x & 0xFF000000) >> 24 | (x & 0x00FF0000) >> 8
-#define SWAP_8_BYTES(x) \
-(x & 0x00000000000000FF) << 56 \
-| (x & 0x000000000000FF00) << 40 \
-| (x & 0x0000000000FF0000) << 24 \
-| (x & 0x00000000FF000000) << 8 \
-| (x & 0xFF00000000000000) >> 56 \
-| (x & 0x00FF000000000000) >> 40 \
-| (x & 0x0000FF0000000000) >> 24 \
-| (x & 0x000000FF00000000) >> 8
+#define SWAP_3_BYTES(x) (x & 0x0000FF) << 16 | (x & 0x00FF00) | (x & 0xFF0000) >> 16
+#define SWAP_4_BYTES(x) (x & 0x000000FF) << 24 | (x & 0x0000FF00) << 8 | (x & 0xFF000000) >> 24 | (x & 0x00FF0000) >> 8
+#define SWAP_8_BYTES(x)                                                                                   \
+    (x & 0x00000000000000FF) << 56 | (x & 0x000000000000FF00) << 40 | (x & 0x0000000000FF0000) << 24 |    \
+        (x & 0x00000000FF000000) << 8 | (x & 0xFF00000000000000) >> 56 | (x & 0x00FF000000000000) >> 40 | \
+        (x & 0x0000FF0000000000) >> 24 | (x & 0x000000FF00000000) >> 8
 
 typedef enum {
     SOPC_NodeIdEncoding_TwoBytes = 0x00,
@@ -59,10 +52,7 @@ typedef enum {
     SOPC_DiagInfoEncoding_InnerDianosticInfo = 0x40,
 } SOPC_DiagInfo_EncodingFlag;
 
-typedef enum {
-    SOPC_LocalizedText_Locale = 0x01,
-    SOPC_LocalizedText_Text   = 0x02
-} SOPC_LocalizedText_EncodingFlag;
+typedef enum { SOPC_LocalizedText_Locale = 0x01, SOPC_LocalizedText_Text = 0x02 } SOPC_LocalizedText_EncodingFlag;
 
 typedef enum {
     SOPC_DataValue_NotNullValue = 0x01,
@@ -74,60 +64,60 @@ typedef enum {
 } SOPC_DataValue_EncodingFlag;
 
 /**
- *  \brief Encode an signed 16 bits integer from machine endianess representation to binary UA encoding endianess representation.
- *  And respectively integer from UA binary to machine endianess representation.
- *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
- *  (platform dependency module providing endianess information is used to determine the current case)
+ *  \brief Encode an signed 16 bits integer from machine endianess representation to binary UA encoding endianess
+ * representation. And respectively integer from UA binary to machine endianess representation. Note: UA binary
+ * representation is little endian thus nothing is done if machine representaiton is little endian (platform dependency
+ * module providing endianess information is used to determine the current case)
  *
  *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
  */
 void SOPC_EncodeDecode_Int16(int16_t* intv);
 
 /**
- *  \brief Encode a unsigned 16 bits integer from machine endianess representation to binary UA encoding endianess representation.
- *  And respectively integer from UA binary to machine endianess representation.
- *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
- *  (platform dependency module providing endianess information is used to determine the current case)
+ *  \brief Encode a unsigned 16 bits integer from machine endianess representation to binary UA encoding endianess
+ * representation. And respectively integer from UA binary to machine endianess representation. Note: UA binary
+ * representation is little endian thus nothing is done if machine representaiton is little endian (platform dependency
+ * module providing endianess information is used to determine the current case)
  *
  *  \param uintv     Pointer to the integer value to encode or decode with correct endianess in place
  */
 void SOPC_EncodeDecode_UInt16(uint16_t* uintv);
 
 /**
- *  \brief Encode a signed 32 bits integer from machine endianess representation to binary UA encoding endianess representation.
- *  And respectively decode integer from UA binary to machine endianess representation.
- *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
- *  (platform dependency module providing endianess information is used to determine the current case)
+ *  \brief Encode a signed 32 bits integer from machine endianess representation to binary UA encoding endianess
+ * representation. And respectively decode integer from UA binary to machine endianess representation. Note: UA binary
+ * representation is little endian thus nothing is done if machine representaiton is little endian (platform dependency
+ * module providing endianess information is used to determine the current case)
  *
  *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
  */
 void SOPC_EncodeDecode_Int32(int32_t* intv);
 
 /**
- *  \brief Encode an unsigned 32 bits integer from machine endianess representation to binary UA encoding endianess representation.
- *  And respectively integer from UA binary to machine endianess representation.
- *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
- *  (platform dependency module providing endianess information is used to determine the current case)
+ *  \brief Encode an unsigned 32 bits integer from machine endianess representation to binary UA encoding endianess
+ * representation. And respectively integer from UA binary to machine endianess representation. Note: UA binary
+ * representation is little endian thus nothing is done if machine representaiton is little endian (platform dependency
+ * module providing endianess information is used to determine the current case)
  *
  *  \param uintv     Pointer to the integer value to encode or decode with correct endianess in place
  */
 void SOPC_EncodeDecode_UInt32(uint32_t* uintv);
 
 /**
- *  \brief Encode a signed 64 bits integer from machine endianess representation to binary UA encoding endianess representation.
- *  And respectively integer from UA binary to machine endianess representation.
- *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
- *  (platform dependency module providing endianess information is used to determine the current case)
+ *  \brief Encode a signed 64 bits integer from machine endianess representation to binary UA encoding endianess
+ * representation. And respectively integer from UA binary to machine endianess representation. Note: UA binary
+ * representation is little endian thus nothing is done if machine representaiton is little endian (platform dependency
+ * module providing endianess information is used to determine the current case)
  *
  *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
  */
 void SOPC_EncodeDecode_Int64(int64_t* intv);
 
 /**
- *  \brief Encode an unsigned 64 bits integer from machine endianess representation to binary UA encoding endianess representation.
- *  And respectively integer from UA binary to machine endianess representation.
- *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
- *  (platform dependency module providing endianess information is used to determine the current case)
+ *  \brief Encode an unsigned 64 bits integer from machine endianess representation to binary UA encoding endianess
+ * representation. And respectively integer from UA binary to machine endianess representation. Note: UA binary
+ * representation is little endian thus nothing is done if machine representaiton is little endian (platform dependency
+ * module providing endianess information is used to determine the current case)
  *
  *  \param uintv     Pointer to the integer value to encode or decode with correct endianess in place
  */
@@ -255,27 +245,29 @@ SOPC_StatusCode SOPC_DataValue_WriteAux(const void* value, SOPC_Buffer* buf);
 SOPC_StatusCode SOPC_DataValue_Read(SOPC_DataValue* dataValue, SOPC_Buffer* buf);
 SOPC_StatusCode SOPC_DataValue_ReadAux(void* value, SOPC_Buffer* buf);
 
-SOPC_StatusCode SOPC_Read_Array(SOPC_Buffer* msgBuf, int32_t* noOfElts, void** eltsArray,
-                                size_t sizeOfElt, SOPC_EncodeableObject_PfnDecode* decodeFct,
+SOPC_StatusCode SOPC_Read_Array(SOPC_Buffer* msgBuf,
+                                int32_t* noOfElts,
+                                void** eltsArray,
+                                size_t sizeOfElt,
+                                SOPC_EncodeableObject_PfnDecode* decodeFct,
                                 SOPC_EncodeableObject_PfnInitialize* initializeFct,
                                 SOPC_EncodeableObject_PfnClear* clearFct);
-SOPC_StatusCode SOPC_Write_Array(SOPC_Buffer* msgBuf, const int32_t* const noOfElts, const void** eltsArray,
-                                 size_t sizeOfElt, SOPC_EncodeableObject_PfnEncode* encodeFct);
+SOPC_StatusCode SOPC_Write_Array(SOPC_Buffer* msgBuf,
+                                 const int32_t* const noOfElts,
+                                 const void** eltsArray,
+                                 size_t sizeOfElt,
+                                 SOPC_EncodeableObject_PfnEncode* encodeFct);
 
 // Encode msg body type as node id + msg header + msg body content from encodeable type and corresponding structure
-SOPC_StatusCode SOPC_EncodeMsg_Type_Header_Body(SOPC_Buffer*         buf,
+SOPC_StatusCode SOPC_EncodeMsg_Type_Header_Body(SOPC_Buffer* buf,
                                                 SOPC_EncodeableType* encType,
                                                 SOPC_EncodeableType* headerType,
-                                                void*                msgHeader,
-                                                void*                msgBody);
+                                                void* msgHeader,
+                                                void* msgBody);
 
 // Read the msg body type from buffer and return the encodeable type of the msg body
-SOPC_StatusCode SOPC_MsgBodyType_Read(SOPC_Buffer*          buf,
-                                      SOPC_EncodeableType** receivedEncType);
+SOPC_StatusCode SOPC_MsgBodyType_Read(SOPC_Buffer* buf, SOPC_EncodeableType** receivedEncType);
 
-
-SOPC_StatusCode SOPC_DecodeMsg_HeaderOrBody(SOPC_Buffer*          buffer,
-                                            SOPC_EncodeableType*  msgEncType,
-                                            void**                encodeableObj);
+SOPC_StatusCode SOPC_DecodeMsg_HeaderOrBody(SOPC_Buffer* buffer, SOPC_EncodeableType* msgEncType, void** encodeableObj);
 
 #endif /* SOPC_ENCODER_H_ */

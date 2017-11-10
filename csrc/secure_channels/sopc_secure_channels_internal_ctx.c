@@ -22,20 +22,22 @@
 
 SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
 SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS];
-uint32_t              lastSecureConnectionArrayIdx = 0;
+uint32_t lastSecureConnectionArrayIdx = 0;
 
-void SOPC_SecureChannelsInternalContext_Initialize(){
+void SOPC_SecureChannelsInternalContext_Initialize()
+{
     memset(secureListenersArray, 0, sizeof(SOPC_SecureListener) * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS);
     memset(secureConnectionsArray, 0, sizeof(SOPC_SecureConnection) * SOPC_MAX_SECURE_CONNECTIONS);
 }
 
-SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx){
+SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx)
+{
     SOPC_SecureConnection* scConnection = NULL;
-    if(connectionIdx < SOPC_MAX_SECURE_CONNECTIONS){
+    if (connectionIdx < SOPC_MAX_SECURE_CONNECTIONS)
+    {
         scConnection = &(secureConnectionsArray[connectionIdx]);
     }
     return scConnection;
 }
 
-void SOPC_SecureChannelsInternalContext_Clear(){
-}
+void SOPC_SecureChannelsInternalContext_Clear() {}

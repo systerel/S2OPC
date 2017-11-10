@@ -20,14 +20,16 @@
 
 #include "sopc_async_queue.h"
 
-typedef struct SOPC_StubSockets_SecureChannelsEventParams {
-    int32_t     event;
-    uint32_t    eltId;
-    void*       params;
-    uint32_t    auxParam;
+typedef struct SOPC_StubSockets_SecureChannelsEventParams
+{
+    int32_t event;
+    uint32_t eltId;
+    void* params;
+    uint32_t auxParam;
 } SOPC_StubSockets_SecureChannelsEventParams;
 
-// Async queue simulating the secure channel dispatcher and containing SOPC_StubSockets_SecureChannelsEventParams elements
+// Async queue simulating the secure channel dispatcher and containing SOPC_StubSockets_SecureChannelsEventParams
+// elements
 extern SOPC_AsyncQueue* secureChannelsEvents;
 
 #endif /* STUBS_SOCKETS_SOPC_SECURE_CHANNELS_API_H_ */

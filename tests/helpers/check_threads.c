@@ -21,37 +21,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include <stdlib.h>
 #include <check.h>
+#include <stdlib.h>
 
 #include "check_helpers.h"
 #include "opcua_statuscodes.h"
 
-#include "sopc_threads.h"
 #include "sopc_mutexes.h"
+#include "sopc_threads.h"
 #include "sopc_time.h"
 
 static Mutex gmutex;
 static Condition gcond;
 
-typedef struct CondRes {
+typedef struct CondRes
+{
     uint32_t protectedCondition;
     uint32_t waitingThreadStarted;
     uint32_t successCondition;
     uint32_t timeoutCondition;
 } CondRes;
 
-void* test_thread_exec_fct(void* args){
+void* test_thread_exec_fct(void* args)
+{
     uint32_t* addr_i = (uint32_t*) args;
-    while(*addr_i < 100){
+    while (*addr_i < 100)
+    {
         *addr_i = *addr_i + 1;
         SOPC_Sleep(1);
     }
     return NULL;
 }
 
-void* test_thread_mutex_fct(void* args){
+void* test_thread_mutex_fct(void* args)
+{
     Mutex_Lock(&gmutex);
     test_thread_exec_fct(args);
     Mutex_Unlock(&gmutex);
@@ -115,16 +118,19 @@ START_TEST(test_thread_mutex)
 }
 END_TEST
 
-void* test_thread_condvar_fct(void* args){
+void* test_thread_condvar_fct(void* args)
+{
     CondRes* condRes = (CondRes*) args;
     SOPC_StatusCode status = STATUS_NOK;
     status = Mutex_Lock(&gmutex);
     ck_assert(STATUS_OK == status);
     condRes->waitingThreadStarted = 1;
-    while(condRes->protectedCondition == 0){
+    while (condRes->protectedCondition == 0)
+    {
         status = Mutex_UnlockAndWaitCond(&gcond, &gmutex);
         ck_assert(STATUS_OK == status);
-        if(condRes->protectedCondition == 1){
+        if (condRes->protectedCondition == 1)
+        {
             // Set success
             condRes->successCondition = 1;
         }
@@ -133,19 +139,24 @@ void* test_thread_condvar_fct(void* args){
     return NULL;
 }
 
-void* test_thread_condvar_timed_fct(void* args){
+void* test_thread_condvar_timed_fct(void* args)
+{
     CondRes* condRes = (CondRes*) args;
     SOPC_StatusCode status = STATUS_NOK;
     status = Mutex_Lock(&gmutex);
     condRes->waitingThreadStarted = 1;
     status = STATUS_NOK;
-    while(condRes->protectedCondition == 0 && OpcUa_BadTimeout != status){
+    while (condRes->protectedCondition == 0 && OpcUa_BadTimeout != status)
+    {
         status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 1000);
     }
-    if(STATUS_OK == status && condRes->protectedCondition == 1){
+    if (STATUS_OK == status && condRes->protectedCondition == 1)
+    {
         // Set success on condition
         condRes->successCondition = 1;
-    }else if(OpcUa_BadTimeout == status && condRes->protectedCondition == 0){
+    }
+    else if (OpcUa_BadTimeout == status && condRes->protectedCondition == 0)
+    {
         condRes->timeoutCondition = 1;
     }
     status = Mutex_Unlock(&gmutex);
@@ -156,10 +167,10 @@ START_TEST(test_thread_condvar)
 {
     Thread thread;
     CondRes condRes;
-    condRes.protectedCondition = 0; // FALSE
+    condRes.protectedCondition = 0;   // FALSE
     condRes.waitingThreadStarted = 0; // FALSE
-    condRes.successCondition = 0; // FALSE
-    condRes.timeoutCondition = 0; // FALSE
+    condRes.successCondition = 0;     // FALSE
+    condRes.timeoutCondition = 0;     // FALSE
 
     // Nominal behavior (non timed waiting on condition)
     SOPC_StatusCode status = Mutex_Initialization(&gmutex);
@@ -194,10 +205,10 @@ START_TEST(test_thread_condvar)
     ck_assert(status == STATUS_OK);
 
     // Nominal behavior (timed waiting on condition)
-    condRes.protectedCondition = 0; // FALSE
+    condRes.protectedCondition = 0;   // FALSE
     condRes.waitingThreadStarted = 0; // FALSE
-    condRes.successCondition = 0; // FALSE
-    condRes.timeoutCondition = 0; // FALSE
+    condRes.successCondition = 0;     // FALSE
+    condRes.timeoutCondition = 0;     // FALSE
     status = Mutex_Initialization(&gmutex);
     ck_assert(status == STATUS_OK);
     status = Condition_Init(&gcond);
@@ -230,10 +241,10 @@ START_TEST(test_thread_condvar)
     ck_assert(status == STATUS_OK);
 
     // Degraded behavior (timed waiting on condition)
-    condRes.protectedCondition = 0; // FALSE
+    condRes.protectedCondition = 0;   // FALSE
     condRes.waitingThreadStarted = 0; // FALSE
-    condRes.successCondition = 0; // FALSE
-    condRes.timeoutCondition = 0; // FALSE
+    condRes.successCondition = 0;     // FALSE
+    condRes.timeoutCondition = 0;     // FALSE
     status = Mutex_Initialization(&gmutex);
     ck_assert(status == STATUS_OK);
     status = Condition_Init(&gcond);
@@ -304,10 +315,10 @@ START_TEST(test_thread_condvar)
 }
 END_TEST
 
-Suite *tests_make_suite_threads(void)
+Suite* tests_make_suite_threads(void)
 {
-    Suite *s;
-    TCase *tc_thread_mutex;
+    Suite* s;
+    TCase* tc_thread_mutex;
 
     s = suite_create("Threads");
     tc_thread_mutex = tcase_create("Thread execution");

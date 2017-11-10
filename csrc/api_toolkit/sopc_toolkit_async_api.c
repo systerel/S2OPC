@@ -19,39 +19,29 @@
 
 #include "sopc_services_api.h"
 
-void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointDescriptionIdx){
+void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointDescriptionIdx)
+{
     // TODO: check valid config and return bool
-    SOPC_Services_EnqueueEvent(APP_TO_SE_OPEN_ENDPOINT,
-                               endpointDescriptionIdx,
-                               NULL,
-                               0);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_OPEN_ENDPOINT, endpointDescriptionIdx, NULL, 0);
 }
 
-void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointDescriptionIdx){
-    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT,
-                               endpointDescriptionIdx,
-                               NULL,
-                               0);
+void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointDescriptionIdx)
+{
+    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT, endpointDescriptionIdx, NULL, 0);
 }
 
-void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx){
-    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION,
-                               endpointConnectionIdx,
-                               NULL,
+void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx)
+{
+    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, NULL,
                                1); // TODO: adapt B model to manage no user value at all since we treat only anonymous
 }
 
-void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId,
-                                                  void*    requestStruct){
-    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_SESSION_REQUEST,
-                               sessionId,
-                               requestStruct,
-                               0);
+void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requestStruct)
+{
+    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_SESSION_REQUEST, sessionId, requestStruct, 0);
 }
 
-void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId){
-    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SESSION,
-                               sessionId,
-                               NULL,
-                               0);
+void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId)
+{
+    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SESSION, sessionId, NULL, 0);
 }

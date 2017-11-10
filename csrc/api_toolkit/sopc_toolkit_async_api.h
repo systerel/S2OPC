@@ -36,18 +36,19 @@
  *        In case of failure the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
  *        otherwise the listener could be considered as opened.
  *
- * \param endpointDescriptionIdx  Endpoint description configuration index provided by SOPC_ToolkitServer_AddEndpointConfig()
+ * \param endpointDescriptionIdx  Endpoint description configuration index provided by
+ * SOPC_ToolkitServer_AddEndpointConfig()
  *
  */
 void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointDescriptionIdx);
-
 
 /**
  * \brief Request to close a connection listener for the given endpoint description configuration.
  *        In any case the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
  *        once triggered if the listener was opened it could be now considered closed.
  *
- * \param endpointDescriptionIdx  Endpoint description configuration index provided to SOPC_ToolkitServer_AsyncOpenEndpoint()
+ * \param endpointDescriptionIdx  Endpoint description configuration index provided to
+ * SOPC_ToolkitServer_AsyncOpenEndpoint()
  *
  */
 void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointDescriptionIdx);
@@ -66,21 +67,22 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointDescriptionIdx);
  *
  *  Note: since current activation is limited to anonymous user, no user parameter can be provided
  *
- * \param endpointConnectionIdx  Endpoint connection configuration index provided by SOPC_ToolkitClient_AddSecureChannelConfig()
+ * \param endpointConnectionIdx  Endpoint connection configuration index provided by
+ * SOPC_ToolkitClient_AddSecureChannelConfig()
  *
  */
 void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx);
 
 /**
  * \brief Request to send a service request on given active session.
- *        In case of service response received, the SE_RCV_SESSION_RESPONSE event will be triggered to SOPC_ComEvent_Fct().
+ *        In case of service response received, the SE_RCV_SESSION_RESPONSE event will be triggered to
+ * SOPC_ComEvent_Fct().
  *
  * \param sessionId      Session Id (provided by event SE_ACTIVATED_SESSION) on which the service request shall be sent
  * \param requestStruct  OPC UA message payload structure pointer (OpcUa_<MessageStruct>*)
  *
  */
-void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId,
-                                                  void*    requestStruct);
+void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requestStruct);
 
 /**
  * \brief Request to close the given session.
@@ -89,7 +91,6 @@ void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId,
  * \param sessionId      Session Id (provided by event SE_ACTIVATED_SESSION) on which the service request shall be sent
  */
 void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId);
-
 
 /*void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx,
                                                   void*    requestStruct);*/

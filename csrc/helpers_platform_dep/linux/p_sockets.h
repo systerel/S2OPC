@@ -36,9 +36,10 @@ typedef struct addrinfo Socket_AddressInfo;
 /**
  *  \brief Set of sockets type
  */
-typedef struct {
-    int    fdmax; /**< max of the set */
-    fd_set set;   /**< set */
+typedef struct
+{
+    int fdmax;  /**< max of the set */
+    fd_set set; /**< set */
 } SocketSet;
 
 #endif /* SOPC_P_SOCKETS_H_ */

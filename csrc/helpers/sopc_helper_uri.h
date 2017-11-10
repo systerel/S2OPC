@@ -21,13 +21,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-
 #define TCP_UA_MAX_URL_LENGTH 4096
 
 /** @brief: return true and output parameters if parsed with success. false otherwise */
-bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri,
-                                   size_t*     hostnameLength,
-                                   size_t*     portIdx,
-                                   size_t*     portLength);
+bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size_t* portIdx, size_t* portLength);
 
 #endif /* SOPC_HELPER_URI_H_ */

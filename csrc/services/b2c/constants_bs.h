@@ -19,7 +19,6 @@
  * Hand-modified _bs.h to specify my own # defines
  */
 
-
 #ifndef CONSTANTS_BS_H_
 #define CONSTANTS_BS_H_
 
@@ -36,28 +35,27 @@
    SETS Clause: deferred sets
   -----------------------------*/
 
-typedef void * constants_bs__t_ExpandedNodeId_i;
-typedef void * constants_bs__t_LocalizedText_i;
-typedef void * constants_bs__t_NodeId_i;
+typedef void* constants_bs__t_ExpandedNodeId_i;
+typedef void* constants_bs__t_LocalizedText_i;
+typedef void* constants_bs__t_NodeId_i;
 #define constants_bs__t_Node_i t_entier4
-typedef void * constants_bs__t_Nonce_i;
-typedef void * constants_bs__t_QualifiedName_i;
+typedef void* constants_bs__t_Nonce_i;
+typedef void* constants_bs__t_QualifiedName_i;
 #define constants_bs__t_Reference_i t_entier4
-typedef void * constants_bs__t_SignatureData_i;
+typedef void* constants_bs__t_SignatureData_i;
 #define constants_bs__t_UserId_i t_entier4
 typedef SOPC_Variant* constants_bs__t_Variant_i;
-typedef void * constants_bs__t_byte_buffer_i;
+typedef void* constants_bs__t_byte_buffer_i;
 #define constants_bs__t_channel_config_idx_i t_entier4
 #define constants_bs__t_channel_i t_entier4
 #define constants_bs__t_endpoint_config_idx_i t_entier4
-typedef void * constants_bs__t_msg_header_i;
-typedef void * constants_bs__t_msg_i;
+typedef void* constants_bs__t_msg_header_i;
+typedef void* constants_bs__t_msg_i;
 #define constants_bs__t_request_context_i t_entier4
 #define constants_bs__t_request_handle_i t_entier4
 #define constants_bs__t_session_i t_entier4
-typedef void * constants_bs__t_session_token_i;
+typedef void* constants_bs__t_session_token_i;
 #define constants_bs__t_user_i t_entier4
-
 
 /*--------------------------
    Added by the Translator
@@ -118,32 +116,25 @@ extern void constants_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void constants_bs__get_Is_SubType(
-   const constants_bs__t_NodeId_i constants_bs__p_type1,
-   const constants_bs__t_NodeId_i constants_bs__p_type2,
-   t_bool * const constants_bs__p_res);
-extern void constants_bs__get_card_t_channel(
-   t_entier4 * const constants_bs__p_card_channel);
-extern void constants_bs__get_card_t_session(
-   t_entier4 * const constants_bs__p_card_session);
-extern void constants_bs__get_cast_t_channel(
-   const t_entier4 constants_bs__p_ind,
-   constants_bs__t_channel_i * const constants_bs__p_channel);
-extern void constants_bs__get_cast_t_session(
-   const t_entier4 constants_bs__p_ind,
-   constants_bs__t_session_i * const constants_bs__p_session);
+extern void constants_bs__get_Is_SubType(const constants_bs__t_NodeId_i constants_bs__p_type1,
+                                         const constants_bs__t_NodeId_i constants_bs__p_type2,
+                                         t_bool* const constants_bs__p_res);
+extern void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel);
+extern void constants_bs__get_card_t_session(t_entier4* const constants_bs__p_card_session);
+extern void constants_bs__get_cast_t_channel(const t_entier4 constants_bs__p_ind,
+                                             constants_bs__t_channel_i* const constants_bs__p_channel);
+extern void constants_bs__get_cast_t_session(const t_entier4 constants_bs__p_ind,
+                                             constants_bs__t_session_i* const constants_bs__p_session);
 extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
-   const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
-   t_bool * const constants_bs__p_isvalid,
-   constants_bs__t_NodeId_i * const constants_bs__p_nid);
-extern void constants_bs__is_t_channel(
-   const constants_bs__t_channel_i constants_bs__p_channel,
-   t_bool * const constants_bs__p_res);
-extern void constants_bs__is_t_channel_config_idx(
-   const constants_bs__t_channel_config_idx_i constants_bs__p_config_idx,
-   t_bool * const constants_bs__p_res);
+    const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
+    t_bool* const constants_bs__p_isvalid,
+    constants_bs__t_NodeId_i* const constants_bs__p_nid);
+extern void constants_bs__is_t_channel(const constants_bs__t_channel_i constants_bs__p_channel,
+                                       t_bool* const constants_bs__p_res);
+extern void constants_bs__is_t_channel_config_idx(const constants_bs__t_channel_config_idx_i constants_bs__p_config_idx,
+                                                  t_bool* const constants_bs__p_res);
 extern void constants_bs__is_t_endpoint_config_idx(
-   const constants_bs__t_endpoint_config_idx_i constants_bs__p_endpoint_config_idx,
-   t_bool * const constants_bs__p_res);
+    const constants_bs__t_endpoint_config_idx_i constants_bs__p_endpoint_config_idx,
+    t_bool* const constants_bs__p_res);
 
 #endif

@@ -24,12 +24,13 @@ typedef SRWLOCK Mutex;
 
 typedef CONDITION_VARIABLE Condition;
 
-typedef void* (SOPCThreadStartFct) (void *);
+typedef void*(SOPCThreadStartFct)(void*);
 
-typedef struct Thread {
-    HANDLE              thread;
+typedef struct Thread
+{
+    HANDLE thread;
     SOPCThreadStartFct* startFct;
-    void*               args;
+    void* args;
 } Thread;
 
 #endif /* SOPC_P_THREADS_H_ */

@@ -22,9 +22,9 @@
 
 #include "sopc_secure_channels_api.h"
 
-void SOPC_SecureConnectionStateMgr_Dispatcher (SOPC_SecureChannels_InputEvent event,
-                                               uint32_t                       eltId,
-                                               void*                          params,
-                                               int32_t                        auxParam);
+void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
+                                              uint32_t eltId,
+                                              void* params,
+                                              int32_t auxParam);
 
 #endif /* SOPC_SECURE_CONNECTION_STATE_MGR_H_ */

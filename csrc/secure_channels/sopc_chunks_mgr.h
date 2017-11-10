@@ -22,9 +22,6 @@
 
 #include "sopc_secure_channels_api.h"
 
-void SOPC_ChunksMgr_Dispatcher (SOPC_SecureChannels_InputEvent event,
-                                uint32_t                       eltId,
-                                void*                          params,
-                                int32_t                        auxParam);
+void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t eltId, void* params, int32_t auxParam);
 
 #endif /* SOPC_CHUNKS_MGR_H_ */

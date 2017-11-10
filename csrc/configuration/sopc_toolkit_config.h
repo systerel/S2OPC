@@ -22,8 +22,8 @@
  *
  * It is in charge to initialize each event based layer (sockets, secure channels, services) which will
  * start the associated threads.
- * It is also necessary to configure the endpoint description configuration and address space of a toolkit server instance,
- * or the endpoint connection configuration of a toolkit client instance.
+ * It is also necessary to configure the endpoint description configuration and address space of a toolkit server
+ * instance, or the endpoint connection configuration of a toolkit client instance.
  *
  */
 
@@ -33,8 +33,8 @@
 #include "sopc_user_app_itf.h"
 
 #include "sopc_builtintypes.h"
-#include "sopc_types.h"
 #include "sopc_namespace_table.h"
+#include "sopc_types.h"
 
 /**
  *  \brief  Initialize the toolkit configuration, libraries and threads
@@ -75,7 +75,6 @@ void SOPC_Toolkit_Clear(void);
  */
 SOPC_StatusCode SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
 
-
 /**
  *  \brief Record the given secure channel configuration in given index
  *  (SOPC_ToolkitClient_Initialize required, !SOPC_Toolkit_Configured required)
@@ -90,7 +89,7 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
  *  \brief Record the given secure channel configuration in given index
  *  (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required)
  *  Note: it is forbidden to have 2 configurations with same endpointURL
- * 
+ *
  *  \return endpoint configuration index configuration succeeded,
  *  0 if toolkit is not initialized, already
  *  configured or otherwise
@@ -98,7 +97,8 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
 uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* config);
 
 /**
- *  \brief Set the given namespace table configuration (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required)
+ *  \brief Set the given namespace table configuration (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured
+ * required)
  *
  *  \param nsTable  The new namespace table to be used by the stack
  *
@@ -110,7 +110,8 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* config);
 SOPC_StatusCode SOPC_ToolkitConfig_SetNamespaceUris(SOPC_NamespaceTable* nsTable);
 
 /**
- *  \brief Add the given encodeable types to the configuration (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required)
+ *  \brief Add the given encodeable types to the configuration (SOPC_Toolkit_Initialize required,
+ * !SOPC_Toolkit_Configured required)
  *
  *  \param encTypesTable  The encodeable types to add to the encodeable types configuration (NULL terminated)
  *  \param nbTypes        Number of encodeable types provided in the table
@@ -120,7 +121,6 @@ SOPC_StatusCode SOPC_ToolkitConfig_SetNamespaceUris(SOPC_NamespaceTable* nsTable
  *  configured, STATUS_INVALID_PARAMETER if \p encTypesTable == NULL,
  *  STATUS_NOK otherwise
  */
-SOPC_StatusCode SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTable,
-                                            uint32_t              nbTypes);
+SOPC_StatusCode SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTable, uint32_t nbTypes);
 
 #endif /* SOPC_TOOLKIT_CONFIG_H_ */

@@ -22,14 +22,16 @@
 #include "sopc_encodeable.h"
 #include "sopc_types.h"
 
-typedef struct message__request_message {
-  OpcUa_RequestHeader requestHeader;
-  // ...
+typedef struct message__request_message
+{
+    OpcUa_RequestHeader requestHeader;
+    // ...
 } message__request_message;
 
-typedef struct message__response_message {
-  OpcUa_ResponseHeader responseHeader;
-  // ...
+typedef struct message__response_message
+{
+    OpcUa_ResponseHeader responseHeader;
+    // ...
 } message__response_message;
 
 #endif

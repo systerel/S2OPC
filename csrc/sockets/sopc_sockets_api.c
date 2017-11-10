@@ -21,39 +21,34 @@
 
 #include "sopc_event_dispatcher_manager.h"
 #include "sopc_raw_sockets.h"
+#include "sopc_sockets_event_mgr.h"
 #include "sopc_sockets_internal_ctx.h"
 #include "sopc_sockets_network_event_mgr.h"
-#include "sopc_sockets_event_mgr.h"
 
 static SOPC_EventDispatcherManager* socketsEventDispatcherMgr = NULL;
 
-
-void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent,
-                               uint32_t                id,
-                               void*                   params,
-                               int32_t                 auxParam){
-    if(NULL != socketsEventDispatcherMgr){
-        SOPC_EventDispatcherManager_AddEvent(socketsEventDispatcherMgr,
-                                             socketEvent,
-                                             id,
-                                             params,
-                                             auxParam,
-                                             NULL);
+void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id, void* params, int32_t auxParam)
+{
+    if (NULL != socketsEventDispatcherMgr)
+    {
+        SOPC_EventDispatcherManager_AddEvent(socketsEventDispatcherMgr, socketEvent, id, params, auxParam, NULL);
     }
 }
 
-void SOPC_Sockets_Initialize(){
+void SOPC_Sockets_Initialize()
+{
     assert(STATUS_OK == Socket_Network_Initialize());
     SOPC_SocketsInternalContext_Initialize();
     socketsEventDispatcherMgr =
-            SOPC_EventDispatcherManager_CreateAndStart(SOPC_SocketsEventMgr_Dispatcher,
-                                                       "Sockets event manager dispatcher");
+        SOPC_EventDispatcherManager_CreateAndStart(SOPC_SocketsEventMgr_Dispatcher, "Sockets event manager dispatcher");
     SOPC_SocketsNetworkEventMgr_Initialize();
 }
 
-void SOPC_Sockets_Clear(){
+void SOPC_Sockets_Clear()
+{
     SOPC_SocketsNetworkEventMgr_Clear();
-    if(NULL != socketsEventDispatcherMgr){
+    if (NULL != socketsEventDispatcherMgr)
+    {
         SOPC_EventDispatcherManager_StopAndDelete(&socketsEventDispatcherMgr);
     }
     SOPC_SocketsInternalContext_Clear();

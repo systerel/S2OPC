@@ -26,15 +26,14 @@
 
 #include <float.h>
 
-
 #if FLT_RADIX != 2
 #error "Compiler floating point support is not IEEE-754 compliant"
 #endif
 
 #ifndef __clang__ // Clang uses __builtin_flt_rounds() function
-    #if FLT_ROUNDS != 1
-    #error "Compiler floating point support is not IEEE-754 compliant"
-    #endif
+#if FLT_ROUNDS != 1
+#error "Compiler floating point support is not IEEE-754 compliant"
+#endif
 #endif
 
 #if FLT_EVAL_METHOD != 0

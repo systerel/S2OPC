@@ -23,12 +23,10 @@
 #ifndef UTIL_VARIANT_H_
 #define UTIL_VARIANT_H_
 
-
 #include "constants.h"
 
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
-
 
 /**
  * The returned Variant is malloced and shall be freed by the consumer
@@ -80,6 +78,6 @@ constants__t_Variant_i util_variant__new_Variant_from_ByteString(SOPC_ByteString
  * Quick and dirty print.
  * I don't do arrays...
  */
-void util_variant__print_SOPC_Variant(SOPC_Variant *pvar);
+void util_variant__print_SOPC_Variant(SOPC_Variant* pvar);
 
 #endif /* UTIL_VARIANT_H_ */

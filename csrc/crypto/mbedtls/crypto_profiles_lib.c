@@ -26,7 +26,6 @@
 #include "../sopc_crypto_profiles.h"
 #include "crypto_functions_lib.h"
 
-
 /* Security policy "Basic256Sha256", as of 09/09/2016:
  * SymmetricSignatureAlgorithm – Hmac_Sha256        OK
  * SymmetricEncryptionAlgorithm – Aes256_CBC        OK
@@ -41,18 +40,18 @@
  */
 
 const SOPC_CryptoProfile sopc_g_cpBasic256Sha256 = {
-        .SecurityPolicyID = SOPC_SecurityPolicy_Basic256Sha256_ID,
-        .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES256,
-        .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES256,
-        .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA256,
-        .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
-        .pFnGenRnd = &CryptoProvider_GenTrueRnd,
-        .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA256,
-        .pFnAsymEncrypt = &CryptoProvider_AsymEncrypt_RSA_OAEP,
-        .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
-        .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256,
-        .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256,
-        .pFnCertVerify = &CryptoProvider_CertVerify_RSA_SHA256_2048_4096,
+    .SecurityPolicyID = SOPC_SecurityPolicy_Basic256Sha256_ID,
+    .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES256,
+    .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES256,
+    .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA256,
+    .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
+    .pFnGenRnd = &CryptoProvider_GenTrueRnd,
+    .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA256,
+    .pFnAsymEncrypt = &CryptoProvider_AsymEncrypt_RSA_OAEP,
+    .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
+    .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256,
+    .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256,
+    .pFnCertVerify = &CryptoProvider_CertVerify_RSA_SHA256_2048_4096,
 };
 
 /* Security Policy "Basic256", as of 24/11/2016:
@@ -69,35 +68,34 @@ const SOPC_CryptoProfile sopc_g_cpBasic256Sha256 = {
  */
 
 const SOPC_CryptoProfile sopc_g_cpBasic256 = {
-        .SecurityPolicyID = SOPC_SecurityPolicy_Basic256_ID,
-        .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES256,
-        .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES256,
-        .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA1,
-        .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA1,
-        .pFnGenRnd = &CryptoProvider_GenTrueRnd,
-        .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA1,
-        .pFnAsymEncrypt = &CryptoProvider_AsymEncrypt_RSA_OAEP,
-        .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
-        .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1,
-        .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1,
-        .pFnCertVerify = &CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048,
+    .SecurityPolicyID = SOPC_SecurityPolicy_Basic256_ID,
+    .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES256,
+    .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES256,
+    .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA1,
+    .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA1,
+    .pFnGenRnd = &CryptoProvider_GenTrueRnd,
+    .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA1,
+    .pFnAsymEncrypt = &CryptoProvider_AsymEncrypt_RSA_OAEP,
+    .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
+    .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1,
+    .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1,
+    .pFnCertVerify = &CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048,
 };
 
 /* Security Policy "None": nothing to do
  */
 
- const SOPC_CryptoProfile sopc_g_cpNone = {
-        .SecurityPolicyID = SOPC_SecurityPolicy_None_ID,
-        .pFnSymmEncrypt = NULL,
-        .pFnSymmDecrypt = NULL,
-        .pFnSymmSign = NULL,
-        .pFnSymmVerif = NULL,
-        .pFnGenRnd = &CryptoProvider_GenTrueRnd,
-        .pFnDeriveData = NULL,
-        .pFnAsymEncrypt = NULL,
-        .pFnAsymDecrypt = NULL,
-        .pFnAsymSign = NULL,
-        .pFnAsymVerify = NULL,
-        .pFnCertVerify = NULL,
+const SOPC_CryptoProfile sopc_g_cpNone = {
+    .SecurityPolicyID = SOPC_SecurityPolicy_None_ID,
+    .pFnSymmEncrypt = NULL,
+    .pFnSymmDecrypt = NULL,
+    .pFnSymmSign = NULL,
+    .pFnSymmVerif = NULL,
+    .pFnGenRnd = &CryptoProvider_GenTrueRnd,
+    .pFnDeriveData = NULL,
+    .pFnAsymEncrypt = NULL,
+    .pFnAsymDecrypt = NULL,
+    .pFnAsymSign = NULL,
+    .pFnAsymVerify = NULL,
+    .pFnCertVerify = NULL,
 };
-

@@ -23,7 +23,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef SOPC_SECRET_BUFFER_H_
 #define SOPC_SECRET_BUFFER_H_
 
@@ -32,7 +31,6 @@
 // Types
 typedef struct SOPC_SecretBuffer SOPC_SecretBuffer;
 typedef uint8_t SOPC_ExposedBuffer;
-
 
 /* ------------------------------------------------------------------------------------------------
  * API
@@ -52,7 +50,7 @@ typedef uint8_t SOPC_ExposedBuffer;
  *
  * \return          The SecretBuffer when successful, otherwise a NULL.
  */
-SOPC_SecretBuffer *SOPC_SecretBuffer_NewFromExposedBuffer(SOPC_ExposedBuffer *buf, uint32_t len);
+SOPC_SecretBuffer* SOPC_SecretBuffer_NewFromExposedBuffer(SOPC_ExposedBuffer* buf, uint32_t len);
 
 /**
  * \brief           Creates a new empty SecretBuffer.
@@ -61,20 +59,19 @@ SOPC_SecretBuffer *SOPC_SecretBuffer_NewFromExposedBuffer(SOPC_ExposedBuffer *bu
  *
  * \return          The SecretBuffer when successful, otherwise a NULL.
  */
-SOPC_SecretBuffer *SOPC_SecretBuffer_New(uint32_t len);
+SOPC_SecretBuffer* SOPC_SecretBuffer_New(uint32_t len);
 
 /**
  * \brief           Clears the SecretBuffer from its secrets and frees it.
  *
  * \param sec       The SecretBuffer to free.
  */
-void SOPC_SecretBuffer_DeleteClear(SOPC_SecretBuffer *sec);
+void SOPC_SecretBuffer_DeleteClear(SOPC_SecretBuffer* sec);
 
 /**
  * \brief           Length of the SecretBuffer.
  */
-uint32_t SOPC_SecretBuffer_GetLength(const SOPC_SecretBuffer *sec);
-
+uint32_t SOPC_SecretBuffer_GetLength(const SOPC_SecretBuffer* sec);
 
 /**
  * \brief           Creates a ExposedBuffer from a SecretBuffer.
@@ -88,7 +85,7 @@ uint32_t SOPC_SecretBuffer_GetLength(const SOPC_SecretBuffer *sec);
  *
  * \return          The ExposedBuffer when successful, otherwise a NULL.
  */
-SOPC_ExposedBuffer * SOPC_SecretBuffer_Expose(SOPC_SecretBuffer *sec);
+SOPC_ExposedBuffer* SOPC_SecretBuffer_Expose(SOPC_SecretBuffer* sec);
 
 /**
  * \brief           Unexposes the buffer.
@@ -97,7 +94,6 @@ SOPC_ExposedBuffer * SOPC_SecretBuffer_Expose(SOPC_SecretBuffer *sec);
  * \param sec       The SecretBuffer to store the data
  *
  */
-void SOPC_SecretBuffer_Unexpose(SOPC_ExposedBuffer *buf, SOPC_SecretBuffer *sec);
-
+void SOPC_SecretBuffer_Unexpose(SOPC_ExposedBuffer* buf, SOPC_SecretBuffer* sec);
 
 #endif // SOPC_SECRET_BUFFER_H_

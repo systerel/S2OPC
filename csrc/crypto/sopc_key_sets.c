@@ -15,17 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-#include <stddef.h>
 #include "sopc_key_sets.h"
+#include <stddef.h>
+#include <stdlib.h>
 
-SOPC_SC_SecurityKeySet* SOPC_KeySet_Create(){
+SOPC_SC_SecurityKeySet* SOPC_KeySet_Create()
+{
     SOPC_SC_SecurityKeySet* keySet = malloc(sizeof(SOPC_SC_SecurityKeySet));
     return keySet;
 }
 
-void SOPC_KeySet_Delete(SOPC_SC_SecurityKeySet* keySet){
-    if(keySet != NULL){
+void SOPC_KeySet_Delete(SOPC_SC_SecurityKeySet* keySet)
+{
+    if (keySet != NULL)
+    {
         SOPC_SecretBuffer_DeleteClear(keySet->encryptKey);
         SOPC_SecretBuffer_DeleteClear(keySet->initVector);
         SOPC_SecretBuffer_DeleteClear(keySet->signKey);

@@ -15,18 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "util_variant.h"
 
+constants__t_Variant_i util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid)
+{
+    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
-constants__t_Variant_i util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid) {
-    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
-
-    if(NULL == pvar)
+    if (NULL == pvar)
         return NULL;
 
     SOPC_Variant_Initialize(pvar);
@@ -37,11 +36,11 @@ constants__t_Variant_i util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid) 
     return pvar;
 }
 
+constants__t_Variant_i util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass ncl)
+{
+    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
-constants__t_Variant_i util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass ncl) {
-    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
-
-    if(NULL == pvar)
+    if (NULL == pvar)
         return NULL;
 
     SOPC_Variant_Initialize(pvar);
@@ -52,10 +51,11 @@ constants__t_Variant_i util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass 
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* qn) {
-    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
+constants__t_Variant_i util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* qn)
+{
+    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
-    if(NULL == pvar)
+    if (NULL == pvar)
         return NULL;
 
     SOPC_Variant_Initialize(pvar);
@@ -66,10 +66,11 @@ constants__t_Variant_i util_variant__new_Variant_from_QualifiedName(SOPC_Qualifi
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt) {
-    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
+constants__t_Variant_i util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt)
+{
+    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
-    if(NULL == pvar)
+    if (NULL == pvar)
         return NULL;
 
     SOPC_Variant_Initialize(pvar);
@@ -77,13 +78,14 @@ constants__t_Variant_i util_variant__new_Variant_from_LocalizedText(SOPC_Localiz
     pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
     pvar->Value.LocalizedText = lt;
 
-    return pvar;  
+    return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_Indet(void) {
-    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
+constants__t_Variant_i util_variant__new_Variant_from_Indet(void)
+{
+    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
-    if(NULL == pvar)
+    if (NULL == pvar)
         return NULL;
 
     SOPC_Variant_Initialize(pvar);
@@ -93,15 +95,15 @@ constants__t_Variant_i util_variant__new_Variant_from_Indet(void) {
     return pvar;
 }
 
-
-constants__t_Variant_i util_variant__new_Variant_from_Variant(SOPC_Variant* pvara){
-    SOPC_Variant *pvar;
-    if(NULL == pvara)
+constants__t_Variant_i util_variant__new_Variant_from_Variant(SOPC_Variant* pvara)
+{
+    SOPC_Variant* pvar;
+    if (NULL == pvara)
         return util_variant__new_Variant_from_Indet();
 
     pvar = malloc(sizeof(SOPC_Variant));
 
-    if(NULL == pvar)
+    if (NULL == pvar)
         return NULL;
 
     memcpy(pvar, pvara, sizeof(SOPC_Variant));
@@ -109,11 +111,11 @@ constants__t_Variant_i util_variant__new_Variant_from_Variant(SOPC_Variant* pvar
     return pvar;
 }
 
+constants__t_Variant_i util_variant__new_Variant_from_uint32(uint32_t i)
+{
+    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
-constants__t_Variant_i util_variant__new_Variant_from_uint32(uint32_t i) {
-    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
-
-    if(NULL == pvar)
+    if (NULL == pvar)
         return NULL;
 
     SOPC_Variant_Initialize(pvar);
@@ -124,11 +126,11 @@ constants__t_Variant_i util_variant__new_Variant_from_uint32(uint32_t i) {
     return pvar;
 }
 
+constants__t_Variant_i util_variant__new_Variant_from_int64(int64_t i)
+{
+    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
-constants__t_Variant_i util_variant__new_Variant_from_int64(int64_t i) {
-    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
-
-    if(NULL == pvar)
+    if (NULL == pvar)
         return NULL;
 
     SOPC_Variant_Initialize(pvar);
@@ -139,11 +141,11 @@ constants__t_Variant_i util_variant__new_Variant_from_int64(int64_t i) {
     return pvar;
 }
 
+constants__t_Variant_i util_variant__new_Variant_from_double(double f)
+{
+    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
-constants__t_Variant_i util_variant__new_Variant_from_double(double f) {
-    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
-
-    if(NULL == pvar)
+    if (NULL == pvar)
         return NULL;
 
     SOPC_Variant_Initialize(pvar);
@@ -154,11 +156,11 @@ constants__t_Variant_i util_variant__new_Variant_from_double(double f) {
     return pvar;
 }
 
+constants__t_Variant_i util_variant__new_Variant_from_ByteString(SOPC_ByteString buf)
+{
+    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
-constants__t_Variant_i util_variant__new_Variant_from_ByteString(SOPC_ByteString buf) {
-    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
-
-    if(NULL == pvar)
+    if (NULL == pvar)
         return NULL;
 
     SOPC_Variant_Initialize(pvar);
@@ -169,19 +171,18 @@ constants__t_Variant_i util_variant__new_Variant_from_ByteString(SOPC_ByteString
     return pvar;
 }
 
-
-void util_variant__print_SOPC_Variant(SOPC_Variant *pvar)
+void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
 {
     char buf[128];
     size_t i;
     uint8_t c;
-    printf("Variant @%p", (void *)pvar);
+    printf("Variant @%p", (void*) pvar);
 
-    if(NULL == pvar)
+    if (NULL == pvar)
         return;
     printf(":\n  TypeId %i: ", pvar->BuiltInTypeId);
 
-    switch(pvar->BuiltInTypeId)
+    switch (pvar->BuiltInTypeId)
     {
     case SOPC_Null_Id:
         printf("Null\n");
@@ -211,10 +212,10 @@ void util_variant__print_SOPC_Variant(SOPC_Variant *pvar)
     case SOPC_ByteString_Id:
         printf("ByteString\n  Length: %d\n  Value: \"", pvar->Value.Bstring.Length);
         /* Pretty print */
-        for(i=0; i<(size_t)pvar->Value.Bstring.Length; ++i)
+        for (i = 0; i < (size_t) pvar->Value.Bstring.Length; ++i)
         {
             c = pvar->Value.Bstring.Data[i];
-            if(0x20 <= c && c < 0x80)
+            if (0x20 <= c && c < 0x80)
                 /* Displayable ascii range */
                 printf("%c", c);
             else
@@ -224,25 +225,26 @@ void util_variant__print_SOPC_Variant(SOPC_Variant *pvar)
         printf("\"\n");
         break;
     case SOPC_XmlElement_Id:
-      printf("XmlElement\n  Length: %d\n  Value: \"", pvar->Value.XmlElt.Length);
-      /* Pretty print */
-      for(i=0; i<(size_t)pvar->Value.XmlElt.Length; ++i)
-      {
-          c = pvar->Value.XmlElt.Data[i];
-          if(0x20 <= c && c < 0x80)
-              /* Displayable ascii range */
-              printf("%c", c);
-          else
-              /* Special char */
-              printf("\\x%02X", c);
-      }
-      printf("\"\n");
-      break;
+        printf("XmlElement\n  Length: %d\n  Value: \"", pvar->Value.XmlElt.Length);
+        /* Pretty print */
+        for (i = 0; i < (size_t) pvar->Value.XmlElt.Length; ++i)
+        {
+            c = pvar->Value.XmlElt.Data[i];
+            if (0x20 <= c && c < 0x80)
+                /* Displayable ascii range */
+                printf("%c", c);
+            else
+                /* Special char */
+                printf("\\x%02X", c);
+        }
+        printf("\"\n");
+        break;
     case SOPC_NodeId_Id:
-        switch(pvar->Value.NodeId->IdentifierType)
+        switch (pvar->Value.NodeId->IdentifierType)
         {
         case SOPC_IdentifierType_Numeric:
-            printf("NodeId-Numeric\n  Value: Namespace %i, ID %i\n", pvar->Value.NodeId->Namespace, pvar->Value.NodeId->Data.Numeric);
+            printf("NodeId-Numeric\n  Value: Namespace %i, ID %i\n", pvar->Value.NodeId->Namespace,
+                   pvar->Value.NodeId->Data.Numeric);
             break;
         default:
             printf("NodeId (not numeric)\n");

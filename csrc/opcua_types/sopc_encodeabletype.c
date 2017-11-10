@@ -19,44 +19,59 @@
 
 #include <string.h>
 
-#include "sopc_helper_string.h"
 #include "sopc_builtintypes.h"
+#include "sopc_helper_string.h"
 #include "sopc_namespace_table.h"
 
 SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(SOPC_EncodeableType** encTypesTable,
-                                                           const char*           namespace,
-                                                           uint32_t              typeId){
+                                                           const char* namespace,
+                                                           uint32_t typeId)
+{
     SOPC_EncodeableType* current = NULL;
     const char* currentNs = NULL;
     SOPC_EncodeableType* result = NULL;
     uint32_t idx = 0;
-    if(encTypesTable != NULL){
+    if (encTypesTable != NULL)
+    {
         current = encTypesTable[idx];
-        while(current != NULL && NULL == result){
-            if(typeId == current->TypeId || typeId == current->BinaryEncodingTypeId){
+        while (current != NULL && NULL == result)
+        {
+            if (typeId == current->TypeId || typeId == current->BinaryEncodingTypeId)
+            {
                 // || typeId = current->xmlTypeId => should not be the case since we use UA binary !
-                if(NULL == current->NamespaceUri && NULL == namespace){
+                if (NULL == current->NamespaceUri && NULL == namespace)
+                {
                     // Default namespace for both
                     result = current;
-                }else{
-                    if(NULL == namespace){
+                }
+                else
+                {
+                    if (NULL == namespace)
+                    {
                         namespace = OPCUA_NAMESPACE_NAME;
                     }
-                    if(NULL == current->NamespaceUri){
+                    if (NULL == current->NamespaceUri)
+                    {
                         // It is considered as default namespace:
                         currentNs = OPCUA_NAMESPACE_NAME;
-                    }else{
+                    }
+                    else
+                    {
                         currentNs = current->NamespaceUri;
                     }
-                    if(SOPC_strncmp_ignore_case(namespace, currentNs, strlen(namespace)+1) == 0){
+                    if (SOPC_strncmp_ignore_case(namespace, currentNs, strlen(namespace) + 1) == 0)
+                    {
                         result = current;
                     }
                 }
             }
-            if(NULL == result && idx < UINT32_MAX){
+            if (NULL == result && idx < UINT32_MAX)
+            {
                 idx++;
                 current = encTypesTable[idx];
-            }else{
+            }
+            else
+            {
                 current = NULL;
             }
         }

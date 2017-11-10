@@ -15,46 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
 #include "sopc_secret_buffer.h"
-
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 struct SOPC_SecretBuffer
 {
     uint32_t len; // Mandatory
-    uint8_t *buf;
+    uint8_t* buf;
 };
 
-
-SOPC_SecretBuffer *SOPC_SecretBuffer_NewFromExposedBuffer(SOPC_ExposedBuffer *buf, uint32_t len)
+SOPC_SecretBuffer* SOPC_SecretBuffer_NewFromExposedBuffer(SOPC_ExposedBuffer* buf, uint32_t len)
 {
-    SOPC_SecretBuffer *sec = NULL;
+    SOPC_SecretBuffer* sec = NULL;
 
-    if(NULL != buf)
+    if (NULL != buf)
     {
         sec = SOPC_SecretBuffer_New(len);
-        if(NULL != sec && NULL != sec->buf)
+        if (NULL != sec && NULL != sec->buf)
             memcpy(sec->buf, buf, len);
     }
 
     return sec;
 }
 
-SOPC_SecretBuffer *SOPC_SecretBuffer_New(uint32_t len)
+SOPC_SecretBuffer* SOPC_SecretBuffer_New(uint32_t len)
 {
-    SOPC_SecretBuffer *sec = NULL;
+    SOPC_SecretBuffer* sec = NULL;
 
-    if(0 != len)
+    if (0 != len)
     {
         sec = malloc(sizeof(SOPC_SecretBuffer));
-        if(NULL != sec)
+        if (NULL != sec)
         {
             sec->len = len;
             sec->buf = malloc(len);
-            if(NULL == sec->buf)
+            if (NULL == sec->buf)
             {
                 free(sec);
                 sec = NULL;
@@ -65,11 +62,11 @@ SOPC_SecretBuffer *SOPC_SecretBuffer_New(uint32_t len)
     return sec;
 }
 
-void SOPC_SecretBuffer_DeleteClear(SOPC_SecretBuffer *sec)
+void SOPC_SecretBuffer_DeleteClear(SOPC_SecretBuffer* sec)
 {
-    if(NULL != sec)
+    if (NULL != sec)
     {
-        if(sec->buf)
+        if (sec->buf)
         {
             memset(sec->buf, 0, sec->len);
             free(sec->buf);
@@ -78,23 +75,22 @@ void SOPC_SecretBuffer_DeleteClear(SOPC_SecretBuffer *sec)
     }
 }
 
-uint32_t SOPC_SecretBuffer_GetLength(const SOPC_SecretBuffer *sec)
+uint32_t SOPC_SecretBuffer_GetLength(const SOPC_SecretBuffer* sec)
 {
-    if(NULL == sec)
+    if (NULL == sec)
         return 0;
     return sec->len;
 }
 
-SOPC_ExposedBuffer *SOPC_SecretBuffer_Expose(SOPC_SecretBuffer *sec)
+SOPC_ExposedBuffer* SOPC_SecretBuffer_Expose(SOPC_SecretBuffer* sec)
 {
-    if(NULL != sec)
+    if (NULL != sec)
         return sec->buf;
     return NULL;
 }
 
-void SOPC_SecretBuffer_Unexpose(SOPC_ExposedBuffer *buf, SOPC_SecretBuffer *sec)
+void SOPC_SecretBuffer_Unexpose(SOPC_ExposedBuffer* buf, SOPC_SecretBuffer* sec)
 {
     (void) buf;
     (void) sec;
 }
-

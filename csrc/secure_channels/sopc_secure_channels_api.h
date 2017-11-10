@@ -32,27 +32,27 @@
 typedef enum {
     /* External events */
     /*  Socket events */
-    SOCKET_LISTENER_OPENED,/* id = endpoint description config index,
-                              auxParam = socket index
-                          */
-    SOCKET_LISTENER_CONNECTION,/* id = endpoint description config index,
-                                  auxParam = new connection socket index
-                              */
-    SOCKET_LISTENER_FAILURE,/* id = endpoint description config index */
+    SOCKET_LISTENER_OPENED,     /* id = endpoint description config index,
+                                   auxParam = socket index
+                               */
+    SOCKET_LISTENER_CONNECTION, /* id = endpoint description config index,
+                                   auxParam = new connection socket index
+                               */
+    SOCKET_LISTENER_FAILURE,    /* id = endpoint description config index */
 
     SOCKET_CONNECTION, /* id = secure channel connection index,
                           auxParam = socket index */
 
-    SOCKET_FAILURE, /* id = secure channel connection index,
-                       auxParam = socket index */
+    SOCKET_FAILURE,   /* id = secure channel connection index,
+                         auxParam = socket index */
     SOCKET_RCV_BYTES, /* id = secure channel connection index,
                          params = (SOPC_Buffer*) received buffer
                        */
     /* Services events */
-    EP_OPEN, /* id = endpoint description configuration index */
-    EP_CLOSE, /* id = endpoint description configuration index */
-    SC_CONNECT, /* id = secure channel connection index */
-    SC_DISCONNECT, /* id = secure channel connection index */
+    EP_OPEN,            /* id = endpoint description configuration index */
+    EP_CLOSE,           /* id = endpoint description configuration index */
+    SC_CONNECT,         /* id = secure channel connection index */
+    SC_DISCONNECT,      /* id = secure channel connection index */
     SC_SERVICE_SND_MSG, /* id = secure channel connection index,
                           params = (SOPC_Buffer*) send buffer,
                           auxParam = request Id context (optional: defined if server) */
@@ -65,11 +65,11 @@ typedef enum {
     /* SC listener manager -> SC connection manager */
     INT_EP_SC_CREATE, /* id = endpoint description configuration index,
                          auxParam = socket index */
-    INT_EP_SC_CLOSE, /* id = secure channel connection index,
-                        auxParam = endpoint description configuration index */
+    INT_EP_SC_CLOSE,  /* id = secure channel connection index,
+                         auxParam = endpoint description configuration index */
     /* SC connection manager -> SC listener manager */
-    INT_EP_SC_CREATED, /* id = endpoint description configuration index,
-                          auxParam = secure channel connection index */
+    INT_EP_SC_CREATED,      /* id = endpoint description configuration index,
+                               auxParam = secure channel connection index */
     INT_EP_SC_DISCONNECTED, /* id = endpoint description configuration index,
                                auxParam = secure channel connection index */
 
@@ -79,10 +79,10 @@ typedef enum {
                     // params = (SOPC_Buffer*) buffer positioned to message payload,
     INT_SC_RCV_ERR, /* -------------------------< */
 
-    INT_SC_RCV_OPN, /* >------------------------- */
-                    // id = secure channel connection index,
-                    // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_RCV_CLO, // auxParam = request Id context if request
+    INT_SC_RCV_OPN,        /* >------------------------- */
+                           // id = secure channel connection index,
+                           // params = (SOPC_Buffer*) buffer positioned to message payload,
+    INT_SC_RCV_CLO,        // auxParam = request Id context if request
     INT_SC_RCV_MSG_CHUNKS, /* -------------------------< */
 
     INT_SC_RCV_FAILURE, /* id = secure channel connection index,
@@ -92,10 +92,10 @@ typedef enum {
                            auxParam = error status in case of client */
 
     /* SC connection manager -> OPC UA chunks message manager */
-    INT_SC_SND_HEL,        /* >------------------------- */
-    INT_SC_SND_ACK,        // id = secure channel connection index,
-                           // params = (SOPC_Buffer*) buffer positioned to message payload
-                           /* -------------------------< */
+    INT_SC_SND_HEL, /* >------------------------- */
+    INT_SC_SND_ACK, // id = secure channel connection index,
+                    // params = (SOPC_Buffer*) buffer positioned to message payload
+                    /* -------------------------< */
     INT_SC_SND_ERR,
     INT_SC_SND_OPN,        /* >------------------------- */
                            // id = secure channel connection index,
@@ -113,9 +113,9 @@ typedef enum {
 /* Secure channel external event enqueue function
  * IMPORTANT NOTE: internal events use will cause an assertion error */
 void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
-                                      uint32_t                       id,
-                                      void*                          params,
-                                      uint32_t                       auxParam);
+                                      uint32_t id,
+                                      void* params,
+                                      uint32_t auxParam);
 
 void SOPC_SecureChannels_Initialize(void);
 

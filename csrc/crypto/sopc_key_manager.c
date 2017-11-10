@@ -23,7 +23,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -32,7 +31,6 @@
 
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
-
 
 /* ------------------------------------------------------------------------------------------------
  * AsymetricKey API
@@ -43,30 +41,27 @@
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-SOPC_StatusCode SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate *pCert,
-                                          uint8_t **ppDest, uint32_t *pLenAllocated)
+SOPC_StatusCode SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate* pCert,
+                                                    uint8_t** ppDest,
+                                                    uint32_t* pLenAllocated)
 {
     uint32_t lenToAllocate = 0;
 
-    if(NULL == pCert || NULL == ppDest || 0 == pLenAllocated)
+    if (NULL == pCert || NULL == ppDest || 0 == pLenAllocated)
         return STATUS_INVALID_PARAMETERS;
 
     // Allocation
     lenToAllocate = pCert->len_der;
-    if(lenToAllocate == 0)
+    if (lenToAllocate == 0)
         return STATUS_NOK;
 
-    (*ppDest) = (uint8_t *)malloc(lenToAllocate);
-    if(NULL == *ppDest)
+    (*ppDest) = (uint8_t*) malloc(lenToAllocate);
+    if (NULL == *ppDest)
         return STATUS_NOK;
 
     // Copy
-    memcpy((void *)(*ppDest), (void *)(pCert->crt_der), lenToAllocate);
+    memcpy((void*) (*ppDest), (void*) (pCert->crt_der), lenToAllocate);
     *pLenAllocated = lenToAllocate;
 
     return STATUS_OK;
 }
-
-
-
-

@@ -20,25 +20,23 @@
  * Test the ReadRequest.
  * Tests that a received request is conform to the address space (that will be reproduced) and the sent request.
  *
- * This test is laborious to maintain, as it requires the re-implementation of specific functionalities used in the B base machines.
+ * This test is laborious to maintain, as it requires the re-implementation of specific functionalities used in the B
+ * base machines.
  */
-
 
 #ifndef TEST_READ_RESPONSE_H_
 #define TEST_READ_RESPONSE_H_
 
-
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "wrap_read.h"
 #include "util_variant.h"
+#include "wrap_read.h"
 
 #include "sopc_types.h"
 
 /* Uncomment the following to print more verbose info */
 /*#define VERBOSE*/
-
 
 /**
  * Test the provided ReadResponse against a locally created address space and request
@@ -50,9 +48,8 @@
  *  2 -> 1 + prints the comparisons
  * Returns true when ReadResponse is deemed ok.
  */
-bool test_read_request_response(OpcUa_ReadResponse *pReadResp,
+bool test_read_request_response(OpcUa_ReadResponse* pReadResp,
                                 constants__t_StatusCode_i status_code,
                                 int verbose_level);
-
 
 #endif /* TEST_READ_RESPONSE_H_ */

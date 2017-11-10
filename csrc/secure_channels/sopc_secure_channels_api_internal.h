@@ -30,17 +30,16 @@
 /* Secure channel internal event enqueue function
  * IMPORTANT NOTE: non-internal events use will cause an assertion error */
 void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InputEvent scEvent,
-                                              uint32_t                       id,
-                                              void*                          params,
-                                              uint32_t                       auxParam);
+                                              uint32_t id,
+                                              void* params,
+                                              uint32_t auxParam);
 
-/* Secure channel internal event enqueue function: event will be enqueued as next to be treated (only for close SC situation)
- * Note: it is important to close the SC as soon as possible in order to avoid any treatment of new messages on a SC to be closed.
- * IMPORTANT NOTE: non-internal events will be refused */
+/* Secure channel internal event enqueue function: event will be enqueued as next to be treated (only for close SC
+ * situation) Note: it is important to close the SC as soon as possible in order to avoid any treatment of new messages
+ * on a SC to be closed. IMPORTANT NOTE: non-internal events will be refused */
 void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InputEvent scEvent,
-                                                    uint32_t                       id,
-                                                    void*                          params,
-                                                    uint32_t                       auxParam);
-
+                                                    uint32_t id,
+                                                    void* params,
+                                                    uint32_t auxParam);
 
 #endif /* SOPC_SECURE_CHANNELS_API_INTERNAL_H_ */

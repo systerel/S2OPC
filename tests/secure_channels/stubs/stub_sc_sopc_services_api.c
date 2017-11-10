@@ -18,16 +18,13 @@
 #include "stub_sc_sopc_services_api.h"
 #include "sopc_services_api.h"
 
-#include <stdlib.h>
 #include <assert.h>
+#include <stdlib.h>
 
 SOPC_AsyncQueue* servicesEvents = NULL;
 
-
-void SOPC_Services_EnqueueEvent(SOPC_Services_Event scEvent,
-                                uint32_t            id,
-                                void*               params,
-                                uint32_t            auxParam){
+void SOPC_Services_EnqueueEvent(SOPC_Services_Event scEvent, uint32_t id, void* params, uint32_t auxParam)
+{
     SOPC_StubSC_ServicesEventParams* scParams = calloc(1, sizeof(SOPC_StubSC_ServicesEventParams));
     assert(scParams != NULL && servicesEvents != NULL);
     scParams->event = scEvent;
@@ -38,11 +35,13 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event scEvent,
     assert(STATUS_OK == SOPC_AsyncQueue_BlockingEnqueue(servicesEvents, (void*) scParams));
 }
 
-void SOPC_Services_Initialize(){
+void SOPC_Services_Initialize()
+{
     assert(STATUS_OK == SOPC_AsyncQueue_Init(&servicesEvents, "StubsSC_ServicesEventQueue"));
 }
 
-void SOPC_Services_Clear(){
+void SOPC_Services_Clear()
+{
     SOPC_AsyncQueue_Free(&servicesEvents);
     servicesEvents = NULL;
 }

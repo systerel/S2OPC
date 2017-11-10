@@ -21,15 +21,14 @@
  *  and the call to the machine that should treat it.
  */
 
-
 #include <stdlib.h>
 
-#include "toolkit_header_init.h"
 #include "address_space_bs.h"
+#include "toolkit_header_init.h"
 
-#include "wrap_read.h"
 #include "sopc_addspace.h"
 #include "sopc_toolkit_config_internal.h"
+#include "wrap_read.h"
 
 int main(void)
 {
@@ -42,7 +41,7 @@ int main(void)
     INITIALISATION();
 
     /* Creates a ReadRequest */
-    OpcUa_ReadRequest *pReadReq = read_new_read_request();
+    OpcUa_ReadRequest* pReadReq = read_new_read_request();
 
     /* Main service test */
     bTest = read_service_test(pReadReq);
@@ -54,9 +53,12 @@ int main(void)
     free(pReadReq->NodesToRead);
     free(pReadReq);
 
-    if(bTest == false){
+    if (bTest == false)
+    {
         return 1;
-    }else{
+    }
+    else
+    {
         return 0;
     }
 }

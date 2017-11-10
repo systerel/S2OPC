@@ -25,7 +25,6 @@
 #ifndef SOPC_PKI_STACK_H_
 #define SOPC_PKI_STACK_H_
 
-
 #include "sopc_crypto_provider.h"
 #include "sopc_key_manager.h"
 #include "sopc_pki.h"
@@ -33,34 +32,35 @@
 struct SOPC_CertificateRevList;
 
 /**
- * \brief           Creates the minimal validation implementation provided by the stack, which fulfills the PKIProvider interface.
+ * \brief           Creates the minimal validation implementation provided by the stack, which fulfills the PKIProvider
+ * interface.
  *
  *                  This verifies the certificate in the safest manner (whole certificate chain, with date validation),
  *                  with a single certificate authority, and an optional revocation list.
- *                  It requires a certificate authority signed with SHA-256, and an RSA private key which is at least 2048 bits long.
+ *                  It requires a certificate authority signed with SHA-256, and an RSA private key which is at least
+ * 2048 bits long.
  *
  * \warning         Provided certificates must be valid until the destruction of the created PKI (they are not copied).
  *
  * \param pCertAuth A valid pointer to the Certificate of the certification authority.
- * \param pRevocationList  An optional certificate chain containing the revocation list. If NULL, no revocation list is checked.
- * \param ppPKI     A valid pointer to the newly created PKIProvider.
- *                  You should free such provider with PKIProviderStack_Free
+ * \param pRevocationList  An optional certificate chain containing the revocation list. If NULL, no revocation list is
+ * checked. \param ppPKI     A valid pointer to the newly created PKIProvider. You should free such provider with
+ * PKIProviderStack_Free
  *
  * \note            Content of the pki is unspecified when return value is not STATUS_OK.
  *
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_PKIProviderStack_Create(SOPC_Certificate *pCertAuth,
-                                             struct SOPC_CertificateRevList *pRevocationList,
-                                             SOPC_PKIProvider **ppPKI);
+SOPC_StatusCode SOPC_PKIProviderStack_Create(SOPC_Certificate* pCertAuth,
+                                             struct SOPC_CertificateRevList* pRevocationList,
+                                             SOPC_PKIProvider** ppPKI);
 
 /**
  * \brief           Frees a pki created with PKIProviderStack_Create().
  *
  * \param pPKI      A valid pointer to the pki to free.
  */
-void SOPC_PKIProviderStack_Free(SOPC_PKIProvider *pPKI);
-
+void SOPC_PKIProviderStack_Free(SOPC_PKIProvider* pPKI);
 
 #endif /* SOPC_PKI_STACK_H_ */

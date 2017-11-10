@@ -20,9 +20,8 @@
  * Implements the base machine that "sends" the ReadResponse.
  */
 
-
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "msg_read_response_bs.h"
 #include "util_b2c.h"
@@ -32,24 +31,20 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void msg_read_response_bs__INITIALISATION(void)
-{
-}
-
+void msg_read_response_bs__INITIALISATION(void) {}
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void msg_read_response_bs__alloc_read_response(
-   const t_entier4 msg_read_response_bs__p_nb_resps,
-   const constants__t_msg_i msg_read_response_bs__p_resp_msg,
-   t_bool * const msg_read_response_bs__p_isvalid)
+void msg_read_response_bs__alloc_read_response(const t_entier4 msg_read_response_bs__p_nb_resps,
+                                               const constants__t_msg_i msg_read_response_bs__p_resp_msg,
+                                               t_bool* const msg_read_response_bs__p_isvalid)
 {
-    OpcUa_ReadResponse *msg_read_resp = (OpcUa_ReadResponse *) msg_read_response_bs__p_resp_msg;
+    OpcUa_ReadResponse* msg_read_resp = (OpcUa_ReadResponse*) msg_read_response_bs__p_resp_msg;
 
     msg_read_resp->NoOfResults = msg_read_response_bs__p_nb_resps;
-    msg_read_resp->Results = (SOPC_DataValue *) calloc(msg_read_response_bs__p_nb_resps, sizeof(SOPC_DataValue));
-    if(NULL == msg_read_resp->Results)
+    msg_read_resp->Results = (SOPC_DataValue*) calloc(msg_read_response_bs__p_nb_resps, sizeof(SOPC_DataValue));
+    if (NULL == msg_read_resp->Results)
     {
         *msg_read_response_bs__p_isvalid = false;
         return;
@@ -57,31 +52,28 @@ void msg_read_response_bs__alloc_read_response(
     else
         *msg_read_response_bs__p_isvalid = true;
 
-    for(int32_t i = 0; i < msg_read_resp->NoOfResults; i++)
+    for (int32_t i = 0; i < msg_read_resp->NoOfResults; i++)
         SOPC_DataValue_Initialize(&msg_read_resp->Results[i]);
 
     msg_read_resp->NoOfDiagnosticInfos = 0;
     msg_read_resp->DiagnosticInfos = NULL;
 }
 
-
-void msg_read_response_bs__set_read_response(
-   const constants__t_msg_i msg_read_response_bs__resp_msg,
-   const constants__t_ReadValue_i msg_read_response_bs__rvi,
-   const constants__t_Variant_i msg_read_response_bs__val,
-   const constants__t_StatusCode_i msg_read_response_bs__sc)
+void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_response_bs__resp_msg,
+                                             const constants__t_ReadValue_i msg_read_response_bs__rvi,
+                                             const constants__t_Variant_i msg_read_response_bs__val,
+                                             const constants__t_StatusCode_i msg_read_response_bs__sc)
 {
-    OpcUa_ReadResponse *msg_read_resp = (OpcUa_ReadResponse *) msg_read_response_bs__resp_msg;
+    OpcUa_ReadResponse* msg_read_resp = (OpcUa_ReadResponse*) msg_read_response_bs__resp_msg;
 
     /* rvi is castable, it's one of its properties, but it starts at 1 */
-    if(constants__c_Variant_indet != msg_read_response_bs__val)
+    if (constants__c_Variant_indet != msg_read_response_bs__val)
         /* Note: the following only copies the context of the the Variant, not the entire Variant */
-        memcpy((void *)&msg_read_resp->Results[msg_read_response_bs__rvi-1].Value,
-               msg_read_response_bs__val,
+        memcpy((void*) &msg_read_resp->Results[msg_read_response_bs__rvi - 1].Value, msg_read_response_bs__val,
                sizeof(SOPC_Variant));
     else
-        SOPC_Variant_InitializeAux((void *)&msg_read_resp->Results[msg_read_response_bs__rvi-1].Value);
+        SOPC_Variant_InitializeAux((void*) &msg_read_resp->Results[msg_read_response_bs__rvi - 1].Value);
 
     /* TODO: Make a util__ that converts the status */
-    util_status_code__B_to_C(msg_read_response_bs__sc, &msg_read_resp->Results[msg_read_response_bs__rvi-1].Status);
+    util_status_code__B_to_C(msg_read_response_bs__sc, &msg_read_resp->Results[msg_read_response_bs__rvi - 1].Status);
 }

@@ -20,21 +20,19 @@
  * Implements the structures behind the address space.
  */
 
-
 #include <stdlib.h>
 #include <string.h>
 
 #include "b2c.h"
-#include "util_b2c.h"
 #include "response_write_bs.h"
+#include "util_b2c.h"
 
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
 
 /* Globals */
-static SOPC_StatusCode *arr_StatusCode; /* Indexed from 1, first element is never used. */
+static SOPC_StatusCode* arr_StatusCode; /* Indexed from 1, first element is never used. */
 static t_entier4 nb_req;
-
 
 /*------------------------
    INITIALISATION Clause
@@ -45,25 +43,22 @@ void response_write_bs__INITIALISATION(void)
     nb_req = 0;
 }
 
-
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void response_write_bs__alloc_write_request_responses_malloc(
-   const t_entier4 response_write_bs__nb_req,
-   t_bool * const response_write_bs__ResponseWrite_allocated)
+void response_write_bs__alloc_write_request_responses_malloc(const t_entier4 response_write_bs__nb_req,
+                                                             t_bool* const response_write_bs__ResponseWrite_allocated)
 {
     *response_write_bs__ResponseWrite_allocated = false; /* TODO: set a true and false in b2c.h */
     nb_req = 0;
 
-    arr_StatusCode = (SOPC_StatusCode *)malloc(sizeof(SOPC_StatusCode)*(response_write_bs__nb_req+1));
-    if(NULL != arr_StatusCode)
+    arr_StatusCode = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * (response_write_bs__nb_req + 1));
+    if (NULL != arr_StatusCode)
     {
         *response_write_bs__ResponseWrite_allocated = true;
         nb_req = response_write_bs__nb_req;
     }
 }
-
 
 void response_write_bs__reset_ResponseWrite(void)
 {
@@ -72,48 +67,39 @@ void response_write_bs__reset_ResponseWrite(void)
     nb_req = 0;
 }
 
-
-void response_write_bs__getall_ResponseWrite_StatusCode(
-   const constants__t_WriteValue_i response_write_bs__wvi,
-   t_bool * const response_write_bs__isvalid,
-   constants__t_StatusCode_i * const response_write_bs__sc)
+void response_write_bs__getall_ResponseWrite_StatusCode(const constants__t_WriteValue_i response_write_bs__wvi,
+                                                        t_bool* const response_write_bs__isvalid,
+                                                        constants__t_StatusCode_i* const response_write_bs__sc)
 {
     *response_write_bs__isvalid = false;
 
-    if(response_write_bs__wvi <= nb_req) /* It is not necessary to test arr_StatusCode */
+    if (response_write_bs__wvi <= nb_req) /* It is not necessary to test arr_StatusCode */
     {
         *response_write_bs__isvalid = true;
-        util_status_code__C_to_B(arr_StatusCode[response_write_bs__wvi],
-                                 response_write_bs__sc);
+        util_status_code__C_to_B(arr_StatusCode[response_write_bs__wvi], response_write_bs__sc);
     }
 }
 
-
-void response_write_bs__set_ResponseWrite_StatusCode(
-   const constants__t_WriteValue_i response_write_bs__wvi,
-   const constants__t_StatusCode_i response_write_bs__sc)
+void response_write_bs__set_ResponseWrite_StatusCode(const constants__t_WriteValue_i response_write_bs__wvi,
+                                                     const constants__t_StatusCode_i response_write_bs__sc)
 {
-    util_status_code__B_to_C(response_write_bs__sc,
-                             &arr_StatusCode[response_write_bs__wvi]);
+    util_status_code__B_to_C(response_write_bs__sc, &arr_StatusCode[response_write_bs__wvi]);
 }
 
-
-void response_write_bs__write_WriteResponse_msg_out(
-   const constants__t_msg_i response_write_bs__msg_out)
+void response_write_bs__write_WriteResponse_msg_out(const constants__t_msg_i response_write_bs__msg_out)
 {
-    OpcUa_WriteResponse *msg_write_resp = (OpcUa_WriteResponse *) response_write_bs__msg_out;
-    SOPC_StatusCode *lsc;
+    OpcUa_WriteResponse* msg_write_resp = (OpcUa_WriteResponse*) response_write_bs__msg_out;
+    SOPC_StatusCode* lsc;
 
-    lsc = (SOPC_StatusCode *)malloc(sizeof(SOPC_StatusCode)*nb_req);
-    if(NULL == lsc)
+    lsc = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * nb_req);
+    if (NULL == lsc)
         /* TODO: unreasonnable behavior */
         exit(1);
 
-    memcpy((void *)lsc, (void *)(arr_StatusCode + 1), sizeof(SOPC_StatusCode)*nb_req);
+    memcpy((void*) lsc, (void*) (arr_StatusCode + 1), sizeof(SOPC_StatusCode) * nb_req);
 
     msg_write_resp->NoOfResults = nb_req;
     msg_write_resp->Results = lsc;
     msg_write_resp->NoOfDiagnosticInfos = 0;
     msg_write_resp->DiagnosticInfos = NULL;
 }
-

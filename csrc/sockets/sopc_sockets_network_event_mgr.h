@@ -21,7 +21,6 @@
 void SOPC_SocketsNetworkEventMgr_Initialize(void);
 void SOPC_SocketsNetworkEventMgr_Clear(void);
 
-
 #define CYCLE_TIMEOUT_MS 500
 
 #endif /* SOPC_SOCKETS_NETWORK_EVENT_MGR_H_ */

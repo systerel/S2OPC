@@ -20,39 +20,41 @@
 
 #include <stdbool.h>
 
-#include "sopc_toolkit_constants.h"
-#include "sopc_raw_sockets.h"
-#include "sopc_mutexes.h"
 #include "sopc_async_queue.h"
+#include "sopc_mutexes.h"
+#include "sopc_raw_sockets.h"
+#include "sopc_toolkit_constants.h"
 
 typedef enum {
     SOCKET_STATE_CLOSED = 0,
     SOCKET_STATE_CONNECTING, // Client connect waiting for write event
-                       // && SO_ERROR to be verified on event to confirm connection accepted
-    SOCKET_STATE_CONNECTED,  // Client: write event received after connect / Server: connection accepted (socket level + SC connection level)
+                             // && SO_ERROR to be verified on event to confirm connection accepted
+    SOCKET_STATE_CONNECTED,  // Client: write event received after connect / Server: connection accepted (socket level +
+                             // SC connection level)
     SOCKET_STATE_LISTENING,  // Server: listening socket
     SOCKET_STATE_ACCEPTED    // Server: accepted socket connection at socket level only (missing SC connection level)
 } SOPC_Socket_State;
 
-typedef struct SOPC_Socket {
-    uint32_t                      socketIdx; /* Index in the socket array */
-    uint32_t                      connectionId; /* High-level associated connection id
-                                                  (secure channel connection index when state = CONNECTING/CONNECTED only
-                                                   OR endpoint description configuration index when state = LISTENING only) */
-    Socket                        sock;
-    SOPC_AsyncQueue*              writeQueue;
-    uint8_t                       isNotWritable;
-    bool                          isUsed; /* Indicates if the socket is free (false) or used (true) */
+typedef struct SOPC_Socket
+{
+    uint32_t socketIdx;    /* Index in the socket array */
+    uint32_t connectionId; /* High-level associated connection id
+                             (secure channel connection index when state = CONNECTING/CONNECTED only
+                              OR endpoint description configuration index when state = LISTENING only) */
+    Socket sock;
+    SOPC_AsyncQueue* writeQueue;
+    uint8_t isNotWritable;
+    bool isUsed; /* Indicates if the socket is free (false) or used (true) */
     // false if it is a client connection, otherwise it is a server connection (linked to a listener)
-    bool                          isServerConnection;
-    SOPC_Socket_State             state;
+    bool isServerConnection;
+    SOPC_Socket_State state;
     // addresses for connection
-    void*                         connectAddrs; // Possible connection addresses (to free on connection)
-    void*                         nextConnectAttemptAddr; // Next connection attempt address
+    void* connectAddrs;           // Possible connection addresses (to free on connection)
+    void* nextConnectAttemptAddr; // Next connection attempt address
     // number of connection for a listener (state = LISTENING)
-    uint32_t                      listenerConnections;
+    uint32_t listenerConnections;
     // define if isServerConnection != false
-    uint32_t                      listenerSocketIdx;
+    uint32_t listenerSocketIdx;
 } SOPC_Socket;
 
 /** @brief Array containing all sockets that can be used */
@@ -62,7 +64,7 @@ extern SOPC_Socket socketsArray[SOPC_MAX_SOCKETS];
  *
  *  Note: necessary since the socket network event manager runs on a cyclic thread
  *        in addition to the event dispatcher thread */
-extern Mutex       socketsMutex;
+extern Mutex socketsMutex;
 
 /** @brief Initialize the array of sockets */
 void SOPC_SocketsInternalContext_Initialize(void);
@@ -87,6 +89,5 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx);
  *  Note: defined here since it modifies validity of socket in array
  */
 void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx);
-
 
 #endif /* SOPC_SOCKETS_INTERNAL_CTX_H_ */

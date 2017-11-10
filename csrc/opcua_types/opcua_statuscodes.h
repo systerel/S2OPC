@@ -275,12 +275,14 @@
 #define OpcUa_BadTooManyArguments 0x80E50000
 
 /*============================================================================
- * The UA Server requires a license to operate in general or to perform a service or operation, but existing license is expired.
+ * The UA Server requires a license to operate in general or to perform a service or operation, but existing license is
+ *expired.
  *===========================================================================*/
 #define OpcUa_BadLicenseExpired 0x810E0000
 
 /*============================================================================
- * The UA Server has limits on number of allowed operations / objects, based on installed licenses, and these limits where exceeded.
+ * The UA Server has limits on number of allowed operations / objects, based on installed licenses, and these limits
+ *where exceeded.
  *===========================================================================*/
 #define OpcUa_BadLicenseLimitsExceeded 0x810F0000
 
@@ -535,7 +537,8 @@
 #define OpcUa_BadApplicationSignatureInvalid 0x80580000
 
 /*============================================================================
- * The client did not provide at least one software certificate that is valid and meets the profile requirements for the server.
+ * The client did not provide at least one software certificate that is valid and meets the profile requirements for the
+ *server.
  *===========================================================================*/
 #define OpcUa_BadNoValidCertificates 0x80590000
 
@@ -560,7 +563,8 @@
 #define OpcUa_BadReferenceNotAllowed 0x805C0000
 
 /*============================================================================
- * The requested node id was reject because it was either invalid or server does not allow node ids to be specified by the client.
+ * The requested node id was reject because it was either invalid or server does not allow node ids to be specified by
+ *the client.
  *===========================================================================*/
 #define OpcUa_BadNodeIdRejected 0x805D0000
 
@@ -660,7 +664,8 @@
 #define OpcUa_UncertainNotAllNodesAvailable 0x40C00000
 
 /*============================================================================
- * The server should have followed a reference to a node in a remote server but did not. The result set may be incomplete.
+ * The server should have followed a reference to a node in a remote server but did not. The result set may be
+ *incomplete.
  *===========================================================================*/
 #define OpcUa_GoodResultsMayBeIncomplete 0x00BA0000
 
@@ -990,7 +995,8 @@
 #define OpcUa_BadDataLost 0x809D0000
 
 /*============================================================================
- * Expected data is unavailable for the requested time range due to an un-mounted volume, an off-line archive or tape, or similar reason for temporary unavailability.
+ * Expected data is unavailable for the requested time range due to an un-mounted volume, an off-line archive or tape,
+ *or similar reason for temporary unavailability.
  *===========================================================================*/
 #define OpcUa_BadDataUnavailable 0x809E0000
 
@@ -1005,7 +1011,8 @@
 #define OpcUa_BadNoEntryExists 0x80A00000
 
 /*============================================================================
- * The client requested history using a timestamp format the server does not support (i.e requested ServerTimestamp when server only supports SourceTimestamp).
+ * The client requested history using a timestamp format the server does not support (i.e requested ServerTimestamp when
+ *server only supports SourceTimestamp).
  *===========================================================================*/
 #define OpcUa_BadTimestampNotSupported 0x80A10000
 
@@ -1085,17 +1092,20 @@
 #define OpcUa_GoodDependentValueChanged 0x00E00000
 
 /*============================================================================
- * The related EngineeringUnit has been changed but this change has not been applied to the device. The Variable Value is still dependent on the previous unit but its status is currently Bad.
+ * The related EngineeringUnit has been changed but this change has not been applied to the device. The Variable Value
+ *is still dependent on the previous unit but its status is currently Bad.
  *===========================================================================*/
 #define OpcUa_BadDominantValueChanged 0x80E10000
 
 /*============================================================================
- * A dependent value has been changed but the change has not been applied to the device. The quality of the dominant variable is uncertain.
+ * A dependent value has been changed but the change has not been applied to the device. The quality of the dominant
+ *variable is uncertain.
  *===========================================================================*/
 #define OpcUa_UncertainDependentValueChanged 0x40E20000
 
 /*============================================================================
- * A dependent value has been changed but the change has not been applied to the device. The quality of the dominant variable is Bad.
+ * A dependent value has been changed but the change has not been applied to the device. The quality of the dominant
+ *variable is Bad.
  *===========================================================================*/
 #define OpcUa_BadDependentValueChanged 0x80E30000
 

@@ -23,8 +23,8 @@
 #ifndef SOPC_SINGLY_LINKED_LIST_H_
 #define SOPC_SINGLY_LINKED_LIST_H_
 
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 /**
  *  \brief Singly linked list structure
@@ -36,7 +36,8 @@ typedef struct SOPC_SLinkedList_Elt SOPC_SLinkedList_Elt;
 typedef SOPC_SLinkedList_Elt* SOPC_SLinkedListIterator;
 
 /**
- *  \brief            Create and allocate a new singly linked list containing 0 elements with a size limit of the given size.
+ *  \brief            Create and allocate a new singly linked list containing 0 elements with a size limit of the given
+ * size.
  *
  *  \param sizeMax    The maximum number of elements allowed in the new linked list or 0 if no limit defined
  *  \return           Pointer to the newly allocated singly linked list
@@ -47,8 +48,8 @@ SOPC_SLinkedList* SOPC_SLinkedList_Create(size_t sizeMax);
  *  \brief          Add a new element (and allocate new list element) before head of the given linked list.
  *
  *  \param list     Pointer on the linked list in which new element must be added
- *  \param id       Unique identifier to associate with the element (if not unique prepend LIFO behavior for Find and Remove)
- *  \param value    Pointer to the value of the element to prepend
+ *  \param id       Unique identifier to associate with the element (if not unique prepend LIFO behavior for Find and
+ * Remove) \param value    Pointer to the value of the element to prepend
  *
  *  \return         Pointer to the value prepended, provided as parameter, if succeeded, NULL otherwise
  */
@@ -58,8 +59,8 @@ void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value)
  *  \brief          Add a new element (and allocate new list element) to the tail of the given linked list.
  *
  *  \param list     Pointer on the linked list in which new element must be added
- *  \param id       Unique identifier to associate with the element (if not unique append FIFO behavior for Find and Remove)
- *  \param value    Pointer to the value of the element to append
+ *  \param id       Unique identifier to associate with the element (if not unique append FIFO behavior for Find and
+ * Remove) \param value    Pointer to the value of the element to append
  *
  *  \return         Pointer to the value appended, provided as parameter, if succeeded, NULL otherwise
  */
@@ -93,7 +94,7 @@ void* SOPC_SLinkedList_FindFromId(SOPC_SLinkedList* list, uint32_t id);
  * \param list      Pointer to the linked list
  * \param pFn       Function pointer which takes the id and the value of each element
  */
-void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, void *val));
+void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, void* val));
 
 /**
  *  \brief          Find and remove the value associated to the given id in the linked list
@@ -119,15 +120,13 @@ void SOPC_SLinkedList_Clear(SOPC_SLinkedList* list);
  */
 void SOPC_SLinkedList_Delete(SOPC_SLinkedList* list);
 
-
 /**
  * \brief           Frees the value of an element of the SOPC_SLinkedList.
  *
  *  \param id       Unique identifier associated with the element
  *  \param val      Element to be freed
  */
-void SOPC_SLinkedList_EltGenericFree(uint32_t id, void *val);
-
+void SOPC_SLinkedList_EltGenericFree(uint32_t id, void* val);
 
 /**
  * \brief           Get an iterator on a linked list to could iterate on elements (LIFO behavior)

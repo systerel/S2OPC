@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "crypto_provider_lib.h"
 
@@ -28,21 +28,20 @@
 #include "../sopc_key_manager.h"
 #include "key_manager_lib.h"
 
-
 /* ------------------------------------------------------------------------------------------------
  * CryptoProvider creation
  * ------------------------------------------------------------------------------------------------
  */
 
-SOPC_StatusCode SOPC_CryptoProvider_Init(SOPC_CryptoProvider *pCryptoProvider)
+SOPC_StatusCode SOPC_CryptoProvider_Init(SOPC_CryptoProvider* pCryptoProvider)
 {
-    SOPC_CryptolibContext *pctx = NULL;
+    SOPC_CryptolibContext* pctx = NULL;
 
-    if(NULL == pCryptoProvider)
+    if (NULL == pCryptoProvider)
         return STATUS_INVALID_PARAMETERS;
 
-    pctx = (SOPC_CryptolibContext *)malloc(sizeof(SOPC_CryptolibContext));
-    if(NULL == pctx)
+    pctx = (SOPC_CryptolibContext*) malloc(sizeof(SOPC_CryptolibContext));
+    if (NULL == pctx)
         return STATUS_NOK;
     memset(pctx, 0, sizeof(SOPC_CryptolibContext));
 
@@ -50,22 +49,21 @@ SOPC_StatusCode SOPC_CryptoProvider_Init(SOPC_CryptoProvider *pCryptoProvider)
     pCryptoProvider->pCryptolibContext = pctx;
     mbedtls_entropy_init(&pctx->ctxEnt);
     mbedtls_ctr_drbg_init(&pctx->ctxDrbg);
-    if(mbedtls_ctr_drbg_seed(&pctx->ctxDrbg, &mbedtls_entropy_func, &pctx->ctxEnt, NULL, 0) != 0)
+    if (mbedtls_ctr_drbg_seed(&pctx->ctxDrbg, &mbedtls_entropy_func, &pctx->ctxEnt, NULL, 0) != 0)
         return STATUS_NOK;
 
     return STATUS_OK;
 }
 
-
-SOPC_StatusCode SOPC_CryptoProvider_Deinit(SOPC_CryptoProvider *pCryptoProvider)
+SOPC_StatusCode SOPC_CryptoProvider_Deinit(SOPC_CryptoProvider* pCryptoProvider)
 {
-    SOPC_CryptolibContext *pCtx = NULL;
+    SOPC_CryptolibContext* pCtx = NULL;
 
-    if(NULL == pCryptoProvider)
+    if (NULL == pCryptoProvider)
         return STATUS_INVALID_PARAMETERS;
 
     pCtx = pCryptoProvider->pCryptolibContext;
-    if(NULL != pCtx)
+    if (NULL != pCtx)
     {
         mbedtls_ctr_drbg_free(&pCtx->ctxDrbg);
         mbedtls_entropy_free(&pCtx->ctxEnt);
@@ -75,25 +73,24 @@ SOPC_StatusCode SOPC_CryptoProvider_Deinit(SOPC_CryptoProvider *pCryptoProvider)
     return STATUS_OK;
 }
 
-
 /* ------------------------------------------------------------------------------------------------
  * CryptoProvider get-length operations
  * ------------------------------------------------------------------------------------------------
  */
 
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(const SOPC_CryptoProvider *pProvider,
-                                                      const SOPC_AsymmetricKey *pKey,
-                                                      uint32_t *lenKeyBits)
+SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(const SOPC_CryptoProvider* pProvider,
+                                                                const SOPC_AsymmetricKey* pKey,
+                                                                uint32_t* lenKeyBits)
 {
     size_t lenBits = 0;
 
-    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == lenKeyBits)
+    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == lenKeyBits)
         return STATUS_INVALID_PARAMETERS;
-    if(SOPC_SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
+    if (SOPC_SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
         return STATUS_INVALID_PARAMETERS;
 
     lenBits = mbedtls_pk_get_bitlen(&pKey->pk);
-    if(lenBits > UINT32_MAX)
+    if (lenBits > UINT32_MAX)
         return STATUS_NOK;
 
     *lenKeyBits = (uint32_t) lenBits;
@@ -101,67 +98,65 @@ SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(const SOPC_Crypt
     return STATUS_OK;
 }
 
-
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText(const SOPC_CryptoProvider *pProvider,
-                                                           const SOPC_AsymmetricKey *pKey,
-                                                           uint32_t *pLenMsg)
+SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText(const SOPC_CryptoProvider* pProvider,
+                                                                     const SOPC_AsymmetricKey* pKey,
+                                                                     uint32_t* pLenMsg)
 {
     uint32_t lenHash = 0;
     size_t lenMessage = 0;
 
-    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == pLenMsg)
+    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == pLenMsg)
         return STATUS_INVALID_PARAMETERS;
-    if(SOPC_SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
+    if (SOPC_SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
         return STATUS_INVALID_PARAMETERS;
 
     lenMessage = mbedtls_pk_get_len(&pKey->pk);
-    if(lenMessage > UINT32_MAX)
+    if (lenMessage > UINT32_MAX)
         return STATUS_NOK;
 
-    *pLenMsg = (uint32_t)lenMessage;
-    if(*pLenMsg == 0)
+    *pLenMsg = (uint32_t) lenMessage;
+    if (*pLenMsg == 0)
         return STATUS_NOK;
 
-    switch(pProvider->pProfile->SecurityPolicyID) // TODO: should we build some API to fetch the SecurityPolicyID, or avoid to switch on it at all?
+    switch (pProvider->pProfile->SecurityPolicyID) // TODO: should we build some API to fetch the SecurityPolicyID, or
+                                                   // avoid to switch on it at all?
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     default:
         return STATUS_NOK;
-    case SOPC_SecurityPolicy_Basic256Sha256_ID: // TODO: this seems overkill to fetch the size of the chosen OAEP hash function...
+    case SOPC_SecurityPolicy_Basic256Sha256_ID: // TODO: this seems overkill to fetch the size of the chosen OAEP
+                                                // hash function...
     case SOPC_SecurityPolicy_Basic256_ID:
-        if(SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(pProvider, &lenHash) != STATUS_OK)
+        if (SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(pProvider, &lenHash) != STATUS_OK)
             return STATUS_NOK;
-        *pLenMsg -= 2*lenHash + 2; // TODO: check for underflow?
+        *pLenMsg -= 2 * lenHash + 2; // TODO: check for underflow?
         break;
     }
 
     return STATUS_OK;
 }
 
-
 /**
  * \brief   Computes the size of an encrypted buffer unit.
  *          This is the length of the public key modulus.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText(const SOPC_CryptoProvider *pProvider,
-                                                            const SOPC_AsymmetricKey *pKey,
-                                                            uint32_t *pLenMsg)
+SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText(const SOPC_CryptoProvider* pProvider,
+                                                                      const SOPC_AsymmetricKey* pKey,
+                                                                      uint32_t* pLenMsg)
 {
-    (void)(pProvider);
+    (void) (pProvider);
     size_t lenMessage = 0;
 
-    if(NULL == pKey || NULL == pLenMsg)
+    if (NULL == pKey || NULL == pLenMsg)
         return STATUS_INVALID_PARAMETERS;
 
     lenMessage = mbedtls_pk_get_len(&pKey->pk);
-    if(lenMessage > UINT32_MAX)
+    if (lenMessage > UINT32_MAX)
         return STATUS_NOK;
 
-    *pLenMsg = (uint32_t)lenMessage;
-    if(*pLenMsg == 0)
+    *pLenMsg = (uint32_t) lenMessage;
+    if (*pLenMsg == 0)
         return STATUS_NOK;
 
     return STATUS_OK;
 }
-
-

@@ -32,6 +32,6 @@
  *  \return      0 if string are identical in a case-insensitive way, -1 if s1 < s2 and +1 if s1 > s2
  *              (based on first lower case character value comparison).
  */
-int SOPC_strncmp_ignore_case(const char *s1, const char *s2, size_t size);
+int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size);
 
 #endif /* SOPC_HELPER_STRING_H_ */

@@ -17,28 +17,28 @@
 
 #include "service_response_cli_cb_bs.h"
 
-#include "sopc_user_app_itf.h"
-#include "sopc_toolkit_config_internal.h"
 #include "sopc_services_api.h"
+#include "sopc_toolkit_config_internal.h"
+#include "sopc_user_app_itf.h"
 
-void service_response_cli_cb_bs__INITIALISATION(void)
-{
-}
+void service_response_cli_cb_bs__INITIALISATION(void) {}
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
 void service_response_cli_cb_bs__cli_service_response(
-   const constants__t_session_i service_response_cli_cb_bs__session,
-   const constants__t_msg_i service_response_cli_cb_bs__resp_msg,
-   const constants__t_StatusCode_i service_response_cli_cb_bs__status){
-    if(constants__c_session_indet != service_response_cli_cb_bs__session){
-         SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_RCV_SESSION_RESPONSE),
-                                         service_response_cli_cb_bs__session,
-                                         service_response_cli_cb_bs__resp_msg,
-                                         service_response_cli_cb_bs__status);
-    }else{
+    const constants__t_session_i service_response_cli_cb_bs__session,
+    const constants__t_msg_i service_response_cli_cb_bs__resp_msg,
+    const constants__t_StatusCode_i service_response_cli_cb_bs__status)
+{
+    if (constants__c_session_indet != service_response_cli_cb_bs__session)
+    {
+        SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_RCV_SESSION_RESPONSE),
+                                        service_response_cli_cb_bs__session, service_response_cli_cb_bs__resp_msg,
+                                        service_response_cli_cb_bs__status);
+    }
+    else
+    {
         // TODO: SE_RCV_PUBLIC_RESPONSE
     }
 }
-

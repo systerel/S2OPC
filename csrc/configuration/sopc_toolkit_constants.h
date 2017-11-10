@@ -33,26 +33,26 @@
 
 /** @brief Maximum Message Length used (must be > SOPC_TCP_UA_MIN_BUFFER_SIZE) */
 #ifndef SOPC_MAX_MESSAGE_LENGTH
-# define SOPC_MAX_MESSAGE_LENGTH  UINT16_MAX
+#define SOPC_MAX_MESSAGE_LENGTH UINT16_MAX
 #endif /* SOPC_MAX_MESSAGE_LENGTH */
 
 /* TCP SOCKETS CONFIGURATION */
 
 /** @brief Maximum number of TCP sockets (listeners and connections) */
 #ifndef SOPC_MAX_SOCKETS
-# define SOPC_MAX_SOCKETS  150
+#define SOPC_MAX_SOCKETS 150
 #endif /* SOPC_MAX_SOCKETS */
 
 /** @brief Maximum number of TCP sockets connections on a socket listener */
 #ifndef SOPC_MAX_SOCKETS_CONNECTIONS
-# define SOPC_MAX_SOCKETS_CONNECTIONS  50
+#define SOPC_MAX_SOCKETS_CONNECTIONS 50
 #endif /* SOPC_MAX_SOCKETS_CONNECTIONS */
 
 /* SECURE CHANNEL CONFIGURATION */
 
 /** @brief Maximum number of endpoint description configured (same as number of connection listeners) */
 #ifndef SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
-# define SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS  10
+#define SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS 10
 #endif /* SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS */
 
 /* Maximum value accepted in B model */
@@ -61,13 +61,12 @@
 #endif
 
 #ifndef SOPC_LISTENER_LISTEN_ALL_INTERFACES
-# define SOPC_LISTENER_LISTEN_ALL_INTERFACES  true
+#define SOPC_LISTENER_LISTEN_ALL_INTERFACES true
 #endif /* SOPC_LISTENER_LISTEN_ALL_INTERFACES */
-
 
 /** @brief Maximum number of secure channel connections (and configurations) established */
 #ifndef SOPC_MAX_SECURE_CONNECTIONS
-# define SOPC_MAX_SECURE_CONNECTIONS  20
+#define SOPC_MAX_SECURE_CONNECTIONS 20
 #endif /* SOPC_MAX_SECURE_CONNECTIONS */
 
 #if SOPC_MAX_SECURE_CONNECTIONS > SOPC_MAX_SOCKETS
@@ -81,7 +80,7 @@
 
 /** @brief Maximum number of sessions established */
 #ifndef SOPC_MAX_SESSIONS
-# define SOPC_MAX_SESSIONS  20
+#define SOPC_MAX_SESSIONS 20
 #endif /* SOPC_MAX_SESSIONS */
 
 /* Maximum value accepted in B model */
@@ -91,15 +90,16 @@
 
 /** @brief Maximum number of requests sent by client pending */
 #ifndef SOPC_MAX_PENDING_REQUESTS
-# define SOPC_MAX_PENDING_REQUESTS  UINT16_MAX
+#define SOPC_MAX_PENDING_REQUESTS UINT16_MAX
 #endif /* SOPC_MAX_PENDING_REQUESTS */
 
 /* OPC UA SPECIFICATION CONFIGURATION */
 
 /** @brief Version of the used protocol */
-# define SOPC_PROTOCOL_VERSION  0
+#define SOPC_PROTOCOL_VERSION 0
 
-#define SOPC_TCP_UA_MIN_BUFFER_SIZE 8192 // now defined only for OPC UA Secure Conversation (minimum chunk size): see mantis #3447
+#define SOPC_TCP_UA_MIN_BUFFER_SIZE \
+    8192 // now defined only for OPC UA Secure Conversation (minimum chunk size): see mantis #3447
 
 #define SOPC_TCP_UA_MAX_URL_LENGTH 4096 // see Part 6 Table 35
 
@@ -138,24 +138,24 @@
 typedef uint32_t SOPC_StatusCode;
 #define STATUS_OK 0x0 // TODO: change values
 #define STATUS_OK_INCOMPLETE 0x00000001
-#define STATUS_NOK 0x80000000//0x10000000
-#define STATUS_INVALID_PARAMETERS 0x80760001//0x20000000
-#define STATUS_INVALID_STATE 0x80760002//0x30000000
-#define STATUS_INVALID_RCV_PARAMETER 0x80000003//0x40000000
+#define STATUS_NOK 0x80000000                   // 0x10000000
+#define STATUS_INVALID_PARAMETERS 0x80760001    // 0x20000000
+#define STATUS_INVALID_STATE 0x80760002         // 0x30000000
+#define STATUS_INVALID_RCV_PARAMETER 0x80000003 // 0x40000000
 
 #define SOPC_USE_GCC true
 
 #ifdef __GNUC__
-    #ifndef __clang__
-        #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST _Pragma("GCC diagnostic ignored \"-Wcast-qual\"");
-        #define SOPC_GCC_DIAGNOSTIC_RESTORE _Pragma("GCC diagnostic pop")
-    #else
-        #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        #define SOPC_GCC_DIAGNOSTIC_RESTORE
-    #endif
+#ifndef __clang__
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST _Pragma("GCC diagnostic ignored \"-Wcast-qual\"");
+#define SOPC_GCC_DIAGNOSTIC_RESTORE _Pragma("GCC diagnostic pop")
 #else
-    #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    #define SOPC_GCC_DIAGNOSTIC_RESTORE
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+#define SOPC_GCC_DIAGNOSTIC_RESTORE
+#endif
+#else
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+#define SOPC_GCC_DIAGNOSTIC_RESTORE
 #endif
 
 #endif /* SOPC_TOOLKIT_CONSTANTS_H_ */

@@ -20,25 +20,19 @@
  * Implements the base machine for the constants
  */
 
-
-#include "b2c.h"
 #include "constants_bs.h"
+#include "b2c.h"
 
 #include "sopc_types.h"
 
-
-void constants_bs__INITIALISATION(void)
-{
-}
-
+void constants_bs__INITIALISATION(void) {}
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void constants_bs__get_Is_SubType(
-   const constants_bs__t_NodeId_i constants_bs__p_type1,
-   const constants_bs__t_NodeId_i constants_bs__p_type2,
-   t_bool * const constants_bs__p_res)
+void constants_bs__get_Is_SubType(const constants_bs__t_NodeId_i constants_bs__p_type1,
+                                  const constants_bs__t_NodeId_i constants_bs__p_type2,
+                                  t_bool* const constants_bs__p_res)
 {
     (void) constants_bs__p_type1;
     (void) constants_bs__p_type2;
@@ -46,56 +40,55 @@ void constants_bs__get_Is_SubType(
     *constants_bs__p_res = true;
 }
 
-
-void constants_bs__getall_conv_ExpandedNodeId_NodeId(
-   const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
-   t_bool * const constants_bs__p_isvalid,
-   constants_bs__t_NodeId_i * const constants_bs__p_nid)
+void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
+                                                     t_bool* const constants_bs__p_isvalid,
+                                                     constants_bs__t_NodeId_i* const constants_bs__p_nid)
 {
     /* Reminder: This is a borrow */
-    *constants_bs__p_nid = (constants_bs__t_NodeId_i) &((SOPC_ExpandedNodeId *)constants_bs__p_expnid)->NodeId;
-    if(NULL == constants_bs__p_nid)
+    *constants_bs__p_nid = (constants_bs__t_NodeId_i) & ((SOPC_ExpandedNodeId*) constants_bs__p_expnid)->NodeId;
+    if (NULL == constants_bs__p_nid)
         *constants_bs__p_isvalid = false;
     else
         *constants_bs__p_isvalid = true;
 }
 
-void constants_bs__get_card_t_channel(
-   t_entier4 * const constants_bs__p_card_channel){
+void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel)
+{
     *constants_bs__p_card_channel = constants_bs__t_channel_config_idx_i_max;
 }
 
-void constants_bs__get_card_t_session(
-   t_entier4 * const constants_bs__p_card_session){
+void constants_bs__get_card_t_session(t_entier4* const constants_bs__p_card_session)
+{
     *constants_bs__p_card_session = constants_bs__t_session_i_max;
 }
 
-void constants_bs__get_cast_t_channel(
-   const t_entier4 constants_bs__p_ind,
-   constants_bs__t_channel_i * const constants_bs__p_channel){
+void constants_bs__get_cast_t_channel(const t_entier4 constants_bs__p_ind,
+                                      constants_bs__t_channel_i* const constants_bs__p_channel)
+{
     *constants_bs__p_channel = constants_bs__p_ind;
 }
 
-void constants_bs__get_cast_t_session(
-   const t_entier4 constants_bs__p_ind,
-   constants_bs__t_session_i * const constants_bs__p_session){
+void constants_bs__get_cast_t_session(const t_entier4 constants_bs__p_ind,
+                                      constants_bs__t_session_i* const constants_bs__p_session)
+{
     *constants_bs__p_session = constants_bs__p_ind;
 }
 
-void constants_bs__is_t_channel(
-   const constants_bs__t_channel_i constants_bs__p_channel,
-   t_bool * const constants_bs__p_res){
+void constants_bs__is_t_channel(const constants_bs__t_channel_i constants_bs__p_channel,
+                                t_bool* const constants_bs__p_res)
+{
     *constants_bs__p_res = constants_bs__c_channel_indet != constants_bs__p_channel;
 }
 
-void constants_bs__is_t_channel_config_idx(
-   const constants_bs__t_channel_config_idx_i constants_bs__p_config_idx,
-   t_bool * const constants_bs__p_res){
+void constants_bs__is_t_channel_config_idx(const constants_bs__t_channel_config_idx_i constants_bs__p_config_idx,
+                                           t_bool* const constants_bs__p_res)
+{
     *constants_bs__p_res = constants_bs__c_channel_config_idx_indet != constants_bs__p_config_idx;
 }
 
 void constants_bs__is_t_endpoint_config_idx(
-   const constants_bs__t_endpoint_config_idx_i constants_bs__p_endpoint_config_idx,
-   t_bool * const constants_bs__p_res){
+    const constants_bs__t_endpoint_config_idx_i constants_bs__p_endpoint_config_idx,
+    t_bool* const constants_bs__p_res)
+{
     *constants_bs__p_res = constants_bs__c_endpoint_config_idx_indet != constants_bs__p_endpoint_config_idx;
 }

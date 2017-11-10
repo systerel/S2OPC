@@ -21,10 +21,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef SOPC_CRYPTO_DECL_H_
 #define SOPC_CRYPTO_DECL_H_
-
 
 typedef struct SOPC_CryptoProvider SOPC_CryptoProvider;
 typedef struct SOPC_CryptoProfile SOPC_CryptoProfile;
@@ -32,6 +30,5 @@ typedef struct SOPC_CryptolibContext SOPC_CryptolibContext;
 typedef struct SOPC_AsymmetricKey SOPC_AsymmetricKey;
 typedef struct SOPC_Certificate SOPC_Certificate;
 typedef struct SOPC_PKIProvider SOPC_PKIProvider;
-
 
 #endif /* SOPC_CRYPTO_DECL_H_ */

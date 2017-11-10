@@ -22,14 +22,13 @@
 #ifndef SOPC_CRYPTO_PROVIDER_LIB_H_
 #define SOPC_CRYPTO_PROVIDER_LIB_H_
 
-#include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
+#include "mbedtls/entropy.h"
 
-
-struct SOPC_CryptolibContext {
+struct SOPC_CryptolibContext
+{
     mbedtls_entropy_context ctxEnt;
     mbedtls_ctr_drbg_context ctxDrbg;
 };
-
 
 #endif /* SOPC_CRYPTO_PROVIDER_LIB_H_ */

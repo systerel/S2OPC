@@ -23,69 +23,64 @@
 #include "sopc_user_app_itf.h"
 
 typedef enum SOPC_Services_Event {
-  /* SC to Services events */
-  SC_TO_SE_EP_SC_CONNECTED,            /* id = endpoint description config index,
-                                          params = endpoint connection config index pointer,
-                                          auxParams = secure channel connection index
-                                       */
-  SC_TO_SE_EP_CLOSED,                  /* id = endpoint description config index,
-                                       */
-  SC_TO_SE_SC_CONNECTED,               /* id = endpoint description config index,
-                                          auxParams = secure channel connection index
-                                       */
-  SC_TO_SE_SC_CONNECTION_TIMEOUT,      /* id = endpoint connection config index
-                                       */
-  SC_TO_SE_SC_DISCONNECTED,            /* id = secure channel connection index
-                                       */
-  SC_TO_SE_SC_SERVICE_RCV_MSG,         /* id = secure channel connection index,
-                                          params = (SOPC_Buffer*) OPC UA message payload buffer,
-                                          auxParam = request Id context (server side only)
-                                       */
-  /* Services to services events */
-  SE_TO_SE_SC_ALL_DISCONNECTED, // special event sent by services mgr itself (no parameters)
-  SE_TO_SE_ACTIVATE_ORPHANED_SESSION,  /* id = session id
-                                          auxParam = endpoint conneciton config index
-                                       */
-  SE_TO_SE_CREATE_SESSION,             /* id = session id
-                                          auxParam = endpoint conneciton config index
-                                       */
-  SE_TO_SE_ACTIVATE_SESSION,           /* id = session id
-                                          auxParam = user (index ?)
-                                       */
-  /* App to Services events */
-  APP_TO_SE_OPEN_ENDPOINT,             /* id = endpoint description config index
-                                       */
-  APP_TO_SE_CLOSE_ENDPOINT,            /* id = endpoint description config index
+    /* SC to Services events */
+    SC_TO_SE_EP_SC_CONNECTED,       /* id = endpoint description config index,
+                                       params = endpoint connection config index pointer,
+                                       auxParams = secure channel connection index
+                                    */
+    SC_TO_SE_EP_CLOSED,             /* id = endpoint description config index,
+                                     */
+    SC_TO_SE_SC_CONNECTED,          /* id = endpoint description config index,
+                                       auxParams = secure channel connection index
+                                    */
+    SC_TO_SE_SC_CONNECTION_TIMEOUT, /* id = endpoint connection config index
+                                     */
+    SC_TO_SE_SC_DISCONNECTED,       /* id = secure channel connection index
+                                     */
+    SC_TO_SE_SC_SERVICE_RCV_MSG,    /* id = secure channel connection index,
+                                       params = (SOPC_Buffer*) OPC UA message payload buffer,
+                                       auxParam = request Id context (server side only)
+                                    */
+    /* Services to services events */
+    SE_TO_SE_SC_ALL_DISCONNECTED,       // special event sent by services mgr itself (no parameters)
+    SE_TO_SE_ACTIVATE_ORPHANED_SESSION, /* id = session id
+                                           auxParam = endpoint conneciton config index
                                         */
-  APP_TO_SE_ACTIVATE_SESSION,          /* Connect SC + Create Session + Activate session */
-                                       /* id = endpoint connection config index,
-                                          auxParam = user (index ?)
+    SE_TO_SE_CREATE_SESSION,            /* id = session id
+                                           auxParam = endpoint conneciton config index
                                         */
-  APP_TO_SE_SEND_SESSION_REQUEST,       // TODO: manage buffer when session with channel lost ? Or return a send failure in this case
-                                        /* id = session id,
-                                           params = (OpcUa_<MessageStruct>*) OPC UA message payload structure
-                                         */
-  APP_TO_SE_CLOSE_SESSION,               /* id = session id
-                                         */
-  APP_TO_SE_CLOSE_ALL_CONNECTIONS, // Automatically called by toolkit clear (no params)
-  //  SE_SEND_PUBLIC_REQUEST, => discovery services /* Connect SC */
+    SE_TO_SE_ACTIVATE_SESSION,          /* id = session id
+                                           auxParam = user (index ?)
+                                        */
+    /* App to Services events */
+    APP_TO_SE_OPEN_ENDPOINT,         /* id = endpoint description config index
+                                      */
+    APP_TO_SE_CLOSE_ENDPOINT,        /* id = endpoint description config index
+                                      */
+    APP_TO_SE_ACTIVATE_SESSION,      /* Connect SC + Create Session + Activate session */
+                                     /* id = endpoint connection config index,
+                                        auxParam = user (index ?)
+                                      */
+    APP_TO_SE_SEND_SESSION_REQUEST,  // TODO: manage buffer when session with channel lost ? Or return a send failure in
+                                     // this case
+                                     /* id = session id,
+                                        params = (OpcUa_<MessageStruct>*) OPC UA message payload structure
+                                      */
+    APP_TO_SE_CLOSE_SESSION,         /* id = session id
+                                      */
+    APP_TO_SE_CLOSE_ALL_CONNECTIONS, // Automatically called by toolkit clear (no params)
+    //  SE_SEND_PUBLIC_REQUEST, => discovery services /* Connect SC */
 
-  /* App to Services: local services events */ 
-  APP_TO_SE_LOCAL_READ, // TBD
-  APP_TO_SE_LOCAL_WRITE // TBD
+    /* App to Services: local services events */
+    APP_TO_SE_LOCAL_READ, // TBD
+    APP_TO_SE_LOCAL_WRITE // TBD
 } SOPC_Services_Event;
 
 /* API to enqueue an event for services */
-void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent,
-                                uint32_t            id,
-                                void*               params,
-                                uint32_t            auxParam);
+void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uint32_t auxParam);
 
 /* API to enqueue an event for application */
-void SOPC_ServicesToApp_EnqueueEvent(SOPC_App_Com_Event  appEvent,
-                                     uint32_t            eventType,
-                                     void*               params,
-                                     uint32_t            auxParam);
+void SOPC_ServicesToApp_EnqueueEvent(SOPC_App_Com_Event appEvent, uint32_t eventType, void* params, uint32_t auxParam);
 
 /**
  *  \brief Initializes the services and application event dispatcher threads
@@ -107,6 +102,5 @@ void SOPC_Services_PreClear(void);
  *  \brief Stop and clear the services and application event dispatcher threads
  */
 void SOPC_Services_Clear(void);
-
 
 #endif /* SOPC_SERVICES_API_H */

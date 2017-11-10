@@ -21,15 +21,12 @@
  *        and OPC-UA values of B constants.
  */
 
-
 #ifndef address_space_impl_h_
 #define address_space_impl_h_
-
 
 #include "b2c.h"
 #include "constants.h"
 #include "sopc_types.h"
-
 
 /* AttributeIds: they are #defined by the SDK... */
 /* TODO: move them to util_*.*, and make conversion functions */
@@ -47,7 +44,6 @@ typedef enum {
 #define e_aid_min e_aid_NodeId
 #define e_aid_max e_aid_UserExecutable
 
-
 /* Attributes, and references */
 extern int32_t address_space_bs__nNodeIds;
 extern int32_t address_space_bs__nVariables;
@@ -58,20 +54,19 @@ extern int32_t address_space_bs__nDataTypes;
 extern int32_t address_space_bs__nMethods;
 extern int32_t address_space_bs__nObjects;
 extern int32_t address_space_bs__nViews;
-extern SOPC_NodeId         **address_space_bs__a_NodeId;
-extern OpcUa_NodeClass     *address_space_bs__a_NodeClass;
-extern SOPC_QualifiedName  *address_space_bs__a_BrowseName;
-extern SOPC_LocalizedText  *address_space_bs__a_DisplayName;
-extern int32_t             *address_space_bs__a_DisplayName_begin;
-extern int32_t             *address_space_bs__a_DisplayName_end;
-extern SOPC_Variant        *address_space_bs__a_Value;
-extern SOPC_StatusCode     *address_space_bs__a_Value_StatusCode;
-extern SOPC_ExpandedNodeId **address_space_bs__HasTypeDefinition;
-extern SOPC_NodeId         **address_space_bs__refs_ReferenceType;
-extern SOPC_ExpandedNodeId **address_space_bs__refs_TargetNode;
-extern bool                *address_space_bs__refs_IsForward;
-extern int32_t             *address_space_bs__RefIndexBegin;
-extern int32_t             *address_space_bs__RefIndexEnd;
-
+extern SOPC_NodeId** address_space_bs__a_NodeId;
+extern OpcUa_NodeClass* address_space_bs__a_NodeClass;
+extern SOPC_QualifiedName* address_space_bs__a_BrowseName;
+extern SOPC_LocalizedText* address_space_bs__a_DisplayName;
+extern int32_t* address_space_bs__a_DisplayName_begin;
+extern int32_t* address_space_bs__a_DisplayName_end;
+extern SOPC_Variant* address_space_bs__a_Value;
+extern SOPC_StatusCode* address_space_bs__a_Value_StatusCode;
+extern SOPC_ExpandedNodeId** address_space_bs__HasTypeDefinition;
+extern SOPC_NodeId** address_space_bs__refs_ReferenceType;
+extern SOPC_ExpandedNodeId** address_space_bs__refs_TargetNode;
+extern bool* address_space_bs__refs_IsForward;
+extern int32_t* address_space_bs__RefIndexBegin;
+extern int32_t* address_space_bs__RefIndexEnd;
 
 #endif // address_space_impl_h_

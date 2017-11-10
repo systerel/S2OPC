@@ -21,17 +21,16 @@
  *  as if it was from a remote client, tests the address space for effects.
  */
 
-
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "toolkit_header_init.h"
 #include "address_space_bs.h"
-#include "testlib_write.h"
-#include "sopc_toolkit_config_internal.h"
 #include "sopc_addspace.h"
+#include "sopc_toolkit_config_internal.h"
+#include "testlib_write.h"
+#include "toolkit_header_init.h"
 
-int main (void)
+int main(void)
 {
     bool bTest;
     int retCode;
@@ -45,8 +44,8 @@ int main (void)
     INITIALISATION();
 
     /* Creates a WriteRequest and the message */
-    OpcUa_WriteRequest  *pWriteReq = tlibw_new_WriteRequest();
-    if(NULL == pWriteReq)
+    OpcUa_WriteRequest* pWriteReq = tlibw_new_WriteRequest();
+    if (NULL == pWriteReq)
         exit(1);
 
     /* Main service test.
@@ -62,14 +61,16 @@ int main (void)
     /* Free the request */
     tlibw_free_WriteRequest(&pWriteReq);
 
-    if(bTest){
+    if (bTest)
+    {
         printf("Internal test: OK\n");
         retCode = 0;
-    }else{
+    }
+    else
+    {
         printf("Internal test: NOT ok\n");
         retCode = 1;
     }
 
     return retCode;
 }
-

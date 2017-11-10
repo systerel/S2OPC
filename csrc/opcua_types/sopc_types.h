@@ -29,29 +29,27 @@
  * Modifications: adaptation for INGOPCS project
  * ======================================================================*/
 
-
 #ifndef SOPC_Types_H_
 #define SOPC_Types_H_ 1
 
+#include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
-#include "sopc_buffer.h"
 
 #ifndef OPCUA_EXCLUDE_IdType
 /*============================================================================
  * The IdType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_IdType
-{
+typedef enum _OpcUa_IdType {
     OpcUa_IdType_Numeric = 0,
-    OpcUa_IdType_String  = 1,
-    OpcUa_IdType_Guid    = 2,
-    OpcUa_IdType_Opaque  = 3
+    OpcUa_IdType_String = 1,
+    OpcUa_IdType_Guid = 2,
+    OpcUa_IdType_Opaque = 3
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_IdType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_IdType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_IdType;
+} OpcUa_IdType;
 
 #endif
 
@@ -59,22 +57,21 @@ OpcUa_IdType;
 /*============================================================================
  * The NodeClass enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_NodeClass
-{
-    OpcUa_NodeClass_Unspecified   = 0,
-    OpcUa_NodeClass_Object        = 1,
-    OpcUa_NodeClass_Variable      = 2,
-    OpcUa_NodeClass_Method        = 4,
-    OpcUa_NodeClass_ObjectType    = 8,
-    OpcUa_NodeClass_VariableType  = 16,
+typedef enum _OpcUa_NodeClass {
+    OpcUa_NodeClass_Unspecified = 0,
+    OpcUa_NodeClass_Object = 1,
+    OpcUa_NodeClass_Variable = 2,
+    OpcUa_NodeClass_Method = 4,
+    OpcUa_NodeClass_ObjectType = 8,
+    OpcUa_NodeClass_VariableType = 16,
     OpcUa_NodeClass_ReferenceType = 32,
-    OpcUa_NodeClass_DataType      = 64,
-    OpcUa_NodeClass_View          = 128
+    OpcUa_NodeClass_DataType = 64,
+    OpcUa_NodeClass_View = 128
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_NodeClass_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_NodeClass_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_NodeClass;
+} OpcUa_NodeClass;
 
 #endif
 
@@ -82,17 +79,16 @@ OpcUa_NodeClass;
 /*============================================================================
  * The ReferenceNode structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType;
+
 typedef struct _OpcUa_ReferenceNode
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId         ReferenceTypeId;
-    SOPC_Boolean        IsInverse;
+    SOPC_NodeId ReferenceTypeId;
+    SOPC_Boolean IsInverse;
     SOPC_ExpandedNodeId TargetId;
-}
-OpcUa_ReferenceNode;
+} OpcUa_ReferenceNode;
 
 void OpcUa_ReferenceNode_Initialize(void* pValue);
 
@@ -108,23 +104,22 @@ SOPC_StatusCode OpcUa_ReferenceNode_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The Node structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_Node_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_Node_EncodeableType;
+
 typedef struct _OpcUa_Node
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId          NodeId;
-    OpcUa_NodeClass      NodeClass;
-    SOPC_QualifiedName   BrowseName;
-    SOPC_LocalizedText   DisplayName;
-    SOPC_LocalizedText   Description;
-    uint32_t             WriteMask;
-    uint32_t             UserWriteMask;
-    int32_t              NoOfReferences;
+    SOPC_NodeId NodeId;
+    OpcUa_NodeClass NodeClass;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
-}
-OpcUa_Node;
+} OpcUa_Node;
 
 void OpcUa_Node_Initialize(void* pValue);
 
@@ -140,23 +135,22 @@ SOPC_StatusCode OpcUa_Node_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The InstanceNode structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType;
+
 typedef struct _OpcUa_InstanceNode
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId          NodeId;
-    OpcUa_NodeClass      NodeClass;
-    SOPC_QualifiedName   BrowseName;
-    SOPC_LocalizedText   DisplayName;
-    SOPC_LocalizedText   Description;
-    uint32_t             WriteMask;
-    uint32_t             UserWriteMask;
-    int32_t              NoOfReferences;
+    SOPC_NodeId NodeId;
+    OpcUa_NodeClass NodeClass;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
-}
-OpcUa_InstanceNode;
+} OpcUa_InstanceNode;
 
 void OpcUa_InstanceNode_Initialize(void* pValue);
 
@@ -172,23 +166,22 @@ SOPC_StatusCode OpcUa_InstanceNode_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The TypeNode structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_TypeNode_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_TypeNode_EncodeableType;
+
 typedef struct _OpcUa_TypeNode
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId          NodeId;
-    OpcUa_NodeClass      NodeClass;
-    SOPC_QualifiedName   BrowseName;
-    SOPC_LocalizedText   DisplayName;
-    SOPC_LocalizedText   Description;
-    uint32_t             WriteMask;
-    uint32_t             UserWriteMask;
-    int32_t              NoOfReferences;
+    SOPC_NodeId NodeId;
+    OpcUa_NodeClass NodeClass;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
-}
-OpcUa_TypeNode;
+} OpcUa_TypeNode;
 
 void OpcUa_TypeNode_Initialize(void* pValue);
 
@@ -204,24 +197,23 @@ SOPC_StatusCode OpcUa_TypeNode_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ObjectNode structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType;
+
 typedef struct _OpcUa_ObjectNode
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId          NodeId;
-    OpcUa_NodeClass      NodeClass;
-    SOPC_QualifiedName   BrowseName;
-    SOPC_LocalizedText   DisplayName;
-    SOPC_LocalizedText   Description;
-    uint32_t             WriteMask;
-    uint32_t             UserWriteMask;
-    int32_t              NoOfReferences;
+    SOPC_NodeId NodeId;
+    OpcUa_NodeClass NodeClass;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
-    SOPC_Byte            EventNotifier;
-}
-OpcUa_ObjectNode;
+    SOPC_Byte EventNotifier;
+} OpcUa_ObjectNode;
 
 void OpcUa_ObjectNode_Initialize(void* pValue);
 
@@ -237,24 +229,23 @@ SOPC_StatusCode OpcUa_ObjectNode_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ObjectTypeNode structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType;
+
 typedef struct _OpcUa_ObjectTypeNode
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId          NodeId;
-    OpcUa_NodeClass      NodeClass;
-    SOPC_QualifiedName   BrowseName;
-    SOPC_LocalizedText   DisplayName;
-    SOPC_LocalizedText   Description;
-    uint32_t             WriteMask;
-    uint32_t             UserWriteMask;
-    int32_t              NoOfReferences;
+    SOPC_NodeId NodeId;
+    OpcUa_NodeClass NodeClass;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
-    SOPC_Boolean         IsAbstract;
-}
-OpcUa_ObjectTypeNode;
+    SOPC_Boolean IsAbstract;
+} OpcUa_ObjectTypeNode;
 
 void OpcUa_ObjectTypeNode_Initialize(void* pValue);
 
@@ -270,32 +261,31 @@ SOPC_StatusCode OpcUa_ObjectTypeNode_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The VariableNode structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_VariableNode_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_VariableNode_EncodeableType;
+
 typedef struct _OpcUa_VariableNode
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId          NodeId;
-    OpcUa_NodeClass      NodeClass;
-    SOPC_QualifiedName   BrowseName;
-    SOPC_LocalizedText   DisplayName;
-    SOPC_LocalizedText   Description;
-    uint32_t             WriteMask;
-    uint32_t             UserWriteMask;
-    int32_t              NoOfReferences;
+    SOPC_NodeId NodeId;
+    OpcUa_NodeClass NodeClass;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
-    SOPC_Variant         Value;
-    SOPC_NodeId          DataType;
-    int32_t              ValueRank;
-    int32_t              NoOfArrayDimensions;
-    uint32_t*            ArrayDimensions;
-    SOPC_Byte            AccessLevel;
-    SOPC_Byte            UserAccessLevel;
-    double               MinimumSamplingInterval;
-    SOPC_Boolean         Historizing;
-}
-OpcUa_VariableNode;
+    SOPC_Variant Value;
+    SOPC_NodeId DataType;
+    int32_t ValueRank;
+    int32_t NoOfArrayDimensions;
+    uint32_t* ArrayDimensions;
+    SOPC_Byte AccessLevel;
+    SOPC_Byte UserAccessLevel;
+    double MinimumSamplingInterval;
+    SOPC_Boolean Historizing;
+} OpcUa_VariableNode;
 
 void OpcUa_VariableNode_Initialize(void* pValue);
 
@@ -311,29 +301,28 @@ SOPC_StatusCode OpcUa_VariableNode_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The VariableTypeNode structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType;
+
 typedef struct _OpcUa_VariableTypeNode
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId          NodeId;
-    OpcUa_NodeClass      NodeClass;
-    SOPC_QualifiedName   BrowseName;
-    SOPC_LocalizedText   DisplayName;
-    SOPC_LocalizedText   Description;
-    uint32_t             WriteMask;
-    uint32_t             UserWriteMask;
-    int32_t              NoOfReferences;
+    SOPC_NodeId NodeId;
+    OpcUa_NodeClass NodeClass;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
-    SOPC_Variant         Value;
-    SOPC_NodeId          DataType;
-    int32_t              ValueRank;
-    int32_t              NoOfArrayDimensions;
-    uint32_t*            ArrayDimensions;
-    SOPC_Boolean         IsAbstract;
-}
-OpcUa_VariableTypeNode;
+    SOPC_Variant Value;
+    SOPC_NodeId DataType;
+    int32_t ValueRank;
+    int32_t NoOfArrayDimensions;
+    uint32_t* ArrayDimensions;
+    SOPC_Boolean IsAbstract;
+} OpcUa_VariableTypeNode;
 
 void OpcUa_VariableTypeNode_Initialize(void* pValue);
 
@@ -349,26 +338,25 @@ SOPC_StatusCode OpcUa_VariableTypeNode_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ReferenceTypeNode structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType;
+
 typedef struct _OpcUa_ReferenceTypeNode
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId          NodeId;
-    OpcUa_NodeClass      NodeClass;
-    SOPC_QualifiedName   BrowseName;
-    SOPC_LocalizedText   DisplayName;
-    SOPC_LocalizedText   Description;
-    uint32_t             WriteMask;
-    uint32_t             UserWriteMask;
-    int32_t              NoOfReferences;
+    SOPC_NodeId NodeId;
+    OpcUa_NodeClass NodeClass;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
-    SOPC_Boolean         IsAbstract;
-    SOPC_Boolean         Symmetric;
-    SOPC_LocalizedText   InverseName;
-}
-OpcUa_ReferenceTypeNode;
+    SOPC_Boolean IsAbstract;
+    SOPC_Boolean Symmetric;
+    SOPC_LocalizedText InverseName;
+} OpcUa_ReferenceTypeNode;
 
 void OpcUa_ReferenceTypeNode_Initialize(void* pValue);
 
@@ -384,25 +372,24 @@ SOPC_StatusCode OpcUa_ReferenceTypeNode_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The MethodNode structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_MethodNode_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_MethodNode_EncodeableType;
+
 typedef struct _OpcUa_MethodNode
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId          NodeId;
-    OpcUa_NodeClass      NodeClass;
-    SOPC_QualifiedName   BrowseName;
-    SOPC_LocalizedText   DisplayName;
-    SOPC_LocalizedText   Description;
-    uint32_t             WriteMask;
-    uint32_t             UserWriteMask;
-    int32_t              NoOfReferences;
+    SOPC_NodeId NodeId;
+    OpcUa_NodeClass NodeClass;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
-    SOPC_Boolean         Executable;
-    SOPC_Boolean         UserExecutable;
-}
-OpcUa_MethodNode;
+    SOPC_Boolean Executable;
+    SOPC_Boolean UserExecutable;
+} OpcUa_MethodNode;
 
 void OpcUa_MethodNode_Initialize(void* pValue);
 
@@ -418,25 +405,24 @@ SOPC_StatusCode OpcUa_MethodNode_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ViewNode structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ViewNode_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ViewNode_EncodeableType;
+
 typedef struct _OpcUa_ViewNode
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId          NodeId;
-    OpcUa_NodeClass      NodeClass;
-    SOPC_QualifiedName   BrowseName;
-    SOPC_LocalizedText   DisplayName;
-    SOPC_LocalizedText   Description;
-    uint32_t             WriteMask;
-    uint32_t             UserWriteMask;
-    int32_t              NoOfReferences;
+    SOPC_NodeId NodeId;
+    OpcUa_NodeClass NodeClass;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
-    SOPC_Boolean         ContainsNoLoops;
-    SOPC_Byte            EventNotifier;
-}
-OpcUa_ViewNode;
+    SOPC_Boolean ContainsNoLoops;
+    SOPC_Byte EventNotifier;
+} OpcUa_ViewNode;
 
 void OpcUa_ViewNode_Initialize(void* pValue);
 
@@ -452,24 +438,23 @@ SOPC_StatusCode OpcUa_ViewNode_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The DataTypeNode structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType;
+
 typedef struct _OpcUa_DataTypeNode
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId          NodeId;
-    OpcUa_NodeClass      NodeClass;
-    SOPC_QualifiedName   BrowseName;
-    SOPC_LocalizedText   DisplayName;
-    SOPC_LocalizedText   Description;
-    uint32_t             WriteMask;
-    uint32_t             UserWriteMask;
-    int32_t              NoOfReferences;
+    SOPC_NodeId NodeId;
+    OpcUa_NodeClass NodeClass;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
-    SOPC_Boolean         IsAbstract;
-}
-OpcUa_DataTypeNode;
+    SOPC_Boolean IsAbstract;
+} OpcUa_DataTypeNode;
 
 void OpcUa_DataTypeNode_Initialize(void* pValue);
 
@@ -485,20 +470,19 @@ SOPC_StatusCode OpcUa_DataTypeNode_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The Argument structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_Argument_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_Argument_EncodeableType;
+
 typedef struct _OpcUa_Argument
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String        Name;
-    SOPC_NodeId        DataType;
-    int32_t            ValueRank;
-    int32_t            NoOfArrayDimensions;
-    uint32_t*          ArrayDimensions;
+    SOPC_String Name;
+    SOPC_NodeId DataType;
+    int32_t ValueRank;
+    int32_t NoOfArrayDimensions;
+    uint32_t* ArrayDimensions;
     SOPC_LocalizedText Description;
-}
-OpcUa_Argument;
+} OpcUa_Argument;
 
 void OpcUa_Argument_Initialize(void* pValue);
 
@@ -514,17 +498,16 @@ SOPC_StatusCode OpcUa_Argument_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The EnumValueType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType;
+
 typedef struct _OpcUa_EnumValueType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int64_t            Value;
+    int64_t Value;
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
-}
-OpcUa_EnumValueType;
+} OpcUa_EnumValueType;
 
 void OpcUa_EnumValueType_Initialize(void* pValue);
 
@@ -540,18 +523,17 @@ SOPC_StatusCode OpcUa_EnumValueType_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The EnumField structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_EnumField_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_EnumField_EncodeableType;
+
 typedef struct _OpcUa_EnumField
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int64_t            Value;
+    int64_t Value;
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
-    SOPC_String        Name;
-}
-OpcUa_EnumField;
+    SOPC_String Name;
+} OpcUa_EnumField;
 
 void OpcUa_EnumField_Initialize(void* pValue);
 
@@ -567,16 +549,15 @@ SOPC_StatusCode OpcUa_EnumField_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The OptionSet structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_OptionSet_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_OptionSet_EncodeableType;
+
 typedef struct _OpcUa_OptionSet
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_ByteString Value;
     SOPC_ByteString ValidBits;
-}
-OpcUa_OptionSet;
+} OpcUa_OptionSet;
 
 void OpcUa_OptionSet_Initialize(void* pValue);
 
@@ -592,16 +573,15 @@ SOPC_StatusCode OpcUa_OptionSet_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The TimeZoneDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType;
+
 typedef struct _OpcUa_TimeZoneDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int16_t      Offset;
+    int16_t Offset;
     SOPC_Boolean DaylightSavingInOffset;
-}
-OpcUa_TimeZoneDataType;
+} OpcUa_TimeZoneDataType;
 
 void OpcUa_TimeZoneDataType_Initialize(void* pValue);
 
@@ -617,17 +597,16 @@ SOPC_StatusCode OpcUa_TimeZoneDataType_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ApplicationType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_ApplicationType
-{
-    OpcUa_ApplicationType_Server          = 0,
-    OpcUa_ApplicationType_Client          = 1,
+typedef enum _OpcUa_ApplicationType {
+    OpcUa_ApplicationType_Server = 0,
+    OpcUa_ApplicationType_Client = 1,
     OpcUa_ApplicationType_ClientAndServer = 2,
     OpcUa_ApplicationType_DiscoveryServer = 3
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_ApplicationType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_ApplicationType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_ApplicationType;
+} OpcUa_ApplicationType;
 
 #endif
 
@@ -635,22 +614,21 @@ OpcUa_ApplicationType;
 /*============================================================================
  * The ApplicationDescription structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType;
+
 typedef struct _OpcUa_ApplicationDescription
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String           ApplicationUri;
-    SOPC_String           ProductUri;
-    SOPC_LocalizedText    ApplicationName;
+    SOPC_String ApplicationUri;
+    SOPC_String ProductUri;
+    SOPC_LocalizedText ApplicationName;
     OpcUa_ApplicationType ApplicationType;
-    SOPC_String           GatewayServerUri;
-    SOPC_String           DiscoveryProfileUri;
-    int32_t               NoOfDiscoveryUrls;
-    SOPC_String*          DiscoveryUrls;
-}
-OpcUa_ApplicationDescription;
+    SOPC_String GatewayServerUri;
+    SOPC_String DiscoveryProfileUri;
+    int32_t NoOfDiscoveryUrls;
+    SOPC_String* DiscoveryUrls;
+} OpcUa_ApplicationDescription;
 
 void OpcUa_ApplicationDescription_Initialize(void* pValue);
 
@@ -666,21 +644,20 @@ SOPC_StatusCode OpcUa_ApplicationDescription_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The RequestHeader structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType;
+
 typedef struct _OpcUa_RequestHeader
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId          AuthenticationToken;
-    SOPC_DateTime        Timestamp;
-    uint32_t             RequestHandle;
-    uint32_t             ReturnDiagnostics;
-    SOPC_String          AuditEntryId;
-    uint32_t             TimeoutHint;
+    SOPC_NodeId AuthenticationToken;
+    SOPC_DateTime Timestamp;
+    uint32_t RequestHandle;
+    uint32_t ReturnDiagnostics;
+    SOPC_String AuditEntryId;
+    uint32_t TimeoutHint;
     SOPC_ExtensionObject AdditionalHeader;
-}
-OpcUa_RequestHeader;
+} OpcUa_RequestHeader;
 
 void OpcUa_RequestHeader_Initialize(void* pValue);
 
@@ -696,21 +673,20 @@ SOPC_StatusCode OpcUa_RequestHeader_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ResponseHeader structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType;
+
 typedef struct _OpcUa_ResponseHeader
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_DateTime        Timestamp;
-    uint32_t             RequestHandle;
-    SOPC_StatusCode      ServiceResult;
-    SOPC_DiagnosticInfo  ServiceDiagnostics;
-    int32_t              NoOfStringTable;
-    SOPC_String*         StringTable;
+    SOPC_DateTime Timestamp;
+    uint32_t RequestHandle;
+    SOPC_StatusCode ServiceResult;
+    SOPC_DiagnosticInfo ServiceDiagnostics;
+    int32_t NoOfStringTable;
+    SOPC_String* StringTable;
     SOPC_ExtensionObject AdditionalHeader;
-}
-OpcUa_ResponseHeader;
+} OpcUa_ResponseHeader;
 
 void OpcUa_ResponseHeader_Initialize(void* pValue);
 
@@ -726,15 +702,14 @@ SOPC_StatusCode OpcUa_ResponseHeader_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ServiceFault structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType;
+
 typedef struct _OpcUa_ServiceFault
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-}
-OpcUa_ServiceFault;
+} OpcUa_ServiceFault;
 
 void OpcUa_ServiceFault_Initialize(void* pValue);
 
@@ -751,20 +726,19 @@ SOPC_StatusCode OpcUa_ServiceFault_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The FindServersRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType;
+
 typedef struct _OpcUa_FindServersRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    SOPC_String         EndpointUrl;
-    int32_t             NoOfLocaleIds;
-    SOPC_String*        LocaleIds;
-    int32_t             NoOfServerUris;
-    SOPC_String*        ServerUris;
-}
-OpcUa_FindServersRequest;
+    SOPC_String EndpointUrl;
+    int32_t NoOfLocaleIds;
+    SOPC_String* LocaleIds;
+    int32_t NoOfServerUris;
+    SOPC_String* ServerUris;
+} OpcUa_FindServersRequest;
 
 void OpcUa_FindServersRequest_Initialize(void* pValue);
 
@@ -780,17 +754,16 @@ SOPC_StatusCode OpcUa_FindServersRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The FindServersResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType;
+
 typedef struct _OpcUa_FindServersResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader          ResponseHeader;
-    int32_t                       NoOfServers;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfServers;
     OpcUa_ApplicationDescription* Servers;
-}
-OpcUa_FindServersResponse;
+} OpcUa_FindServersResponse;
 
 void OpcUa_FindServersResponse_Initialize(void* pValue);
 
@@ -807,19 +780,18 @@ SOPC_StatusCode OpcUa_FindServersResponse_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The ServerOnNetwork structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType;
+
 typedef struct _OpcUa_ServerOnNetwork
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t     RecordId;
-    SOPC_String  ServerName;
-    SOPC_String  DiscoveryUrl;
-    int32_t      NoOfServerCapabilities;
+    uint32_t RecordId;
+    SOPC_String ServerName;
+    SOPC_String DiscoveryUrl;
+    int32_t NoOfServerCapabilities;
     SOPC_String* ServerCapabilities;
-}
-OpcUa_ServerOnNetwork;
+} OpcUa_ServerOnNetwork;
 
 void OpcUa_ServerOnNetwork_Initialize(void* pValue);
 
@@ -836,19 +808,18 @@ SOPC_StatusCode OpcUa_ServerOnNetwork_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The FindServersOnNetworkRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType;
+
 typedef struct _OpcUa_FindServersOnNetworkRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    uint32_t            StartingRecordId;
-    uint32_t            MaxRecordsToReturn;
-    int32_t             NoOfServerCapabilityFilter;
-    SOPC_String*        ServerCapabilityFilter;
-}
-OpcUa_FindServersOnNetworkRequest;
+    uint32_t StartingRecordId;
+    uint32_t MaxRecordsToReturn;
+    int32_t NoOfServerCapabilityFilter;
+    SOPC_String* ServerCapabilityFilter;
+} OpcUa_FindServersOnNetworkRequest;
 
 void OpcUa_FindServersOnNetworkRequest_Initialize(void* pValue);
 
@@ -864,18 +835,17 @@ SOPC_StatusCode OpcUa_FindServersOnNetworkRequest_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The FindServersOnNetworkResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType;
+
 typedef struct _OpcUa_FindServersOnNetworkResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader   ResponseHeader;
-    SOPC_DateTime          LastCounterResetTime;
-    int32_t                NoOfServers;
+    OpcUa_ResponseHeader ResponseHeader;
+    SOPC_DateTime LastCounterResetTime;
+    int32_t NoOfServers;
     OpcUa_ServerOnNetwork* Servers;
-}
-OpcUa_FindServersOnNetworkResponse;
+} OpcUa_FindServersOnNetworkResponse;
 
 void OpcUa_FindServersOnNetworkResponse_Initialize(void* pValue);
 
@@ -892,17 +862,16 @@ SOPC_StatusCode OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The MessageSecurityMode enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_MessageSecurityMode
-{
-    OpcUa_MessageSecurityMode_Invalid        = 0,
-    OpcUa_MessageSecurityMode_None           = 1,
-    OpcUa_MessageSecurityMode_Sign           = 2,
+typedef enum _OpcUa_MessageSecurityMode {
+    OpcUa_MessageSecurityMode_Invalid = 0,
+    OpcUa_MessageSecurityMode_None = 1,
+    OpcUa_MessageSecurityMode_Sign = 2,
     OpcUa_MessageSecurityMode_SignAndEncrypt = 3
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_MessageSecurityMode_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_MessageSecurityMode_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_MessageSecurityMode;
+} OpcUa_MessageSecurityMode;
 
 #endif
 
@@ -910,18 +879,17 @@ OpcUa_MessageSecurityMode;
 /*============================================================================
  * The UserTokenType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_UserTokenType
-{
-    OpcUa_UserTokenType_Anonymous   = 0,
-    OpcUa_UserTokenType_UserName    = 1,
+typedef enum _OpcUa_UserTokenType {
+    OpcUa_UserTokenType_Anonymous = 0,
+    OpcUa_UserTokenType_UserName = 1,
     OpcUa_UserTokenType_Certificate = 2,
     OpcUa_UserTokenType_IssuedToken = 3,
-    OpcUa_UserTokenType_Kerberos    = 4
+    OpcUa_UserTokenType_Kerberos = 4
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_UserTokenType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_UserTokenType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_UserTokenType;
+} OpcUa_UserTokenType;
 
 #endif
 
@@ -929,19 +897,18 @@ OpcUa_UserTokenType;
 /*============================================================================
  * The UserTokenPolicy structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType;
+
 typedef struct _OpcUa_UserTokenPolicy
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String         PolicyId;
+    SOPC_String PolicyId;
     OpcUa_UserTokenType TokenType;
-    SOPC_String         IssuedTokenType;
-    SOPC_String         IssuerEndpointUrl;
-    SOPC_String         SecurityPolicyUri;
-}
-OpcUa_UserTokenPolicy;
+    SOPC_String IssuedTokenType;
+    SOPC_String IssuerEndpointUrl;
+    SOPC_String SecurityPolicyUri;
+} OpcUa_UserTokenPolicy;
 
 void OpcUa_UserTokenPolicy_Initialize(void* pValue);
 
@@ -957,23 +924,22 @@ SOPC_StatusCode OpcUa_UserTokenPolicy_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The EndpointDescription structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType;
+
 typedef struct _OpcUa_EndpointDescription
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String                  EndpointUrl;
+    SOPC_String EndpointUrl;
     OpcUa_ApplicationDescription Server;
-    SOPC_ByteString              ServerCertificate;
-    OpcUa_MessageSecurityMode    SecurityMode;
-    SOPC_String                  SecurityPolicyUri;
-    int32_t                      NoOfUserIdentityTokens;
-    OpcUa_UserTokenPolicy*       UserIdentityTokens;
-    SOPC_String                  TransportProfileUri;
-    SOPC_Byte                    SecurityLevel;
-}
-OpcUa_EndpointDescription;
+    SOPC_ByteString ServerCertificate;
+    OpcUa_MessageSecurityMode SecurityMode;
+    SOPC_String SecurityPolicyUri;
+    int32_t NoOfUserIdentityTokens;
+    OpcUa_UserTokenPolicy* UserIdentityTokens;
+    SOPC_String TransportProfileUri;
+    SOPC_Byte SecurityLevel;
+} OpcUa_EndpointDescription;
 
 void OpcUa_EndpointDescription_Initialize(void* pValue);
 
@@ -990,20 +956,19 @@ SOPC_StatusCode OpcUa_EndpointDescription_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The GetEndpointsRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType;
+
 typedef struct _OpcUa_GetEndpointsRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    SOPC_String         EndpointUrl;
-    int32_t             NoOfLocaleIds;
-    SOPC_String*        LocaleIds;
-    int32_t             NoOfProfileUris;
-    SOPC_String*        ProfileUris;
-}
-OpcUa_GetEndpointsRequest;
+    SOPC_String EndpointUrl;
+    int32_t NoOfLocaleIds;
+    SOPC_String* LocaleIds;
+    int32_t NoOfProfileUris;
+    SOPC_String* ProfileUris;
+} OpcUa_GetEndpointsRequest;
 
 void OpcUa_GetEndpointsRequest_Initialize(void* pValue);
 
@@ -1019,17 +984,16 @@ SOPC_StatusCode OpcUa_GetEndpointsRequest_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The GetEndpointsResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType;
+
 typedef struct _OpcUa_GetEndpointsResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader       ResponseHeader;
-    int32_t                    NoOfEndpoints;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfEndpoints;
     OpcUa_EndpointDescription* Endpoints;
-}
-OpcUa_GetEndpointsResponse;
+} OpcUa_GetEndpointsResponse;
 
 void OpcUa_GetEndpointsResponse_Initialize(void* pValue);
 
@@ -1046,24 +1010,23 @@ SOPC_StatusCode OpcUa_GetEndpointsResponse_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The RegisteredServer structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType;
+
 typedef struct _OpcUa_RegisteredServer
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String           ServerUri;
-    SOPC_String           ProductUri;
-    int32_t               NoOfServerNames;
-    SOPC_LocalizedText*   ServerNames;
+    SOPC_String ServerUri;
+    SOPC_String ProductUri;
+    int32_t NoOfServerNames;
+    SOPC_LocalizedText* ServerNames;
     OpcUa_ApplicationType ServerType;
-    SOPC_String           GatewayServerUri;
-    int32_t               NoOfDiscoveryUrls;
-    SOPC_String*          DiscoveryUrls;
-    SOPC_String           SemaphoreFilePath;
-    SOPC_Boolean          IsOnline;
-}
-OpcUa_RegisteredServer;
+    SOPC_String GatewayServerUri;
+    int32_t NoOfDiscoveryUrls;
+    SOPC_String* DiscoveryUrls;
+    SOPC_String SemaphoreFilePath;
+    SOPC_Boolean IsOnline;
+} OpcUa_RegisteredServer;
 
 void OpcUa_RegisteredServer_Initialize(void* pValue);
 
@@ -1080,16 +1043,15 @@ SOPC_StatusCode OpcUa_RegisteredServer_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The RegisterServerRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType;
+
 typedef struct _OpcUa_RegisterServerRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader    RequestHeader;
+    OpcUa_RequestHeader RequestHeader;
     OpcUa_RegisteredServer Server;
-}
-OpcUa_RegisterServerRequest;
+} OpcUa_RegisterServerRequest;
 
 void OpcUa_RegisterServerRequest_Initialize(void* pValue);
 
@@ -1105,15 +1067,14 @@ SOPC_StatusCode OpcUa_RegisterServerRequest_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The RegisterServerResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType;
+
 typedef struct _OpcUa_RegisterServerResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-}
-OpcUa_RegisterServerResponse;
+} OpcUa_RegisterServerResponse;
 
 void OpcUa_RegisterServerResponse_Initialize(void* pValue);
 
@@ -1130,17 +1091,16 @@ SOPC_StatusCode OpcUa_RegisterServerResponse_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The MdnsDiscoveryConfiguration structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType;
+
 typedef struct _OpcUa_MdnsDiscoveryConfiguration
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String  MdnsServerName;
-    int32_t      NoOfServerCapabilities;
+    SOPC_String MdnsServerName;
+    int32_t NoOfServerCapabilities;
     SOPC_String* ServerCapabilities;
-}
-OpcUa_MdnsDiscoveryConfiguration;
+} OpcUa_MdnsDiscoveryConfiguration;
 
 void OpcUa_MdnsDiscoveryConfiguration_Initialize(void* pValue);
 
@@ -1157,18 +1117,17 @@ SOPC_StatusCode OpcUa_MdnsDiscoveryConfiguration_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The RegisterServer2Request structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType;
+
 typedef struct _OpcUa_RegisterServer2Request
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader    RequestHeader;
+    OpcUa_RequestHeader RequestHeader;
     OpcUa_RegisteredServer Server;
-    int32_t                NoOfDiscoveryConfiguration;
-    SOPC_ExtensionObject*  DiscoveryConfiguration;
-}
-OpcUa_RegisterServer2Request;
+    int32_t NoOfDiscoveryConfiguration;
+    SOPC_ExtensionObject* DiscoveryConfiguration;
+} OpcUa_RegisterServer2Request;
 
 void OpcUa_RegisterServer2Request_Initialize(void* pValue);
 
@@ -1184,19 +1143,18 @@ SOPC_StatusCode OpcUa_RegisterServer2Request_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The RegisterServer2Response structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType;
+
 typedef struct _OpcUa_RegisterServer2Response
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfConfigurationResults;
-    SOPC_StatusCode*     ConfigurationResults;
-    int32_t              NoOfDiagnosticInfos;
+    int32_t NoOfConfigurationResults;
+    SOPC_StatusCode* ConfigurationResults;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_RegisterServer2Response;
+} OpcUa_RegisterServer2Response;
 
 void OpcUa_RegisterServer2Response_Initialize(void* pValue);
 
@@ -1213,15 +1171,14 @@ SOPC_StatusCode OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The SecurityTokenRequestType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_SecurityTokenRequestType
-{
+typedef enum _OpcUa_SecurityTokenRequestType {
     OpcUa_SecurityTokenRequestType_Issue = 0,
     OpcUa_SecurityTokenRequestType_Renew = 1
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_SecurityTokenRequestType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_SecurityTokenRequestType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_SecurityTokenRequestType;
+} OpcUa_SecurityTokenRequestType;
 
 #endif
 
@@ -1229,18 +1186,17 @@ OpcUa_SecurityTokenRequestType;
 /*============================================================================
  * The ChannelSecurityToken structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType;
+
 typedef struct _OpcUa_ChannelSecurityToken
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t      ChannelId;
-    uint32_t      TokenId;
+    uint32_t ChannelId;
+    uint32_t TokenId;
     SOPC_DateTime CreatedAt;
-    uint32_t      RevisedLifetime;
-}
-OpcUa_ChannelSecurityToken;
+    uint32_t RevisedLifetime;
+} OpcUa_ChannelSecurityToken;
 
 void OpcUa_ChannelSecurityToken_Initialize(void* pValue);
 
@@ -1257,20 +1213,19 @@ SOPC_StatusCode OpcUa_ChannelSecurityToken_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The OpenSecureChannelRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType;
+
 typedef struct _OpcUa_OpenSecureChannelRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader            RequestHeader;
-    uint32_t                       ClientProtocolVersion;
+    OpcUa_RequestHeader RequestHeader;
+    uint32_t ClientProtocolVersion;
     OpcUa_SecurityTokenRequestType RequestType;
-    OpcUa_MessageSecurityMode      SecurityMode;
-    SOPC_ByteString                ClientNonce;
-    uint32_t                       RequestedLifetime;
-}
-OpcUa_OpenSecureChannelRequest;
+    OpcUa_MessageSecurityMode SecurityMode;
+    SOPC_ByteString ClientNonce;
+    uint32_t RequestedLifetime;
+} OpcUa_OpenSecureChannelRequest;
 
 void OpcUa_OpenSecureChannelRequest_Initialize(void* pValue);
 
@@ -1286,18 +1241,17 @@ SOPC_StatusCode OpcUa_OpenSecureChannelRequest_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The OpenSecureChannelResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType;
+
 typedef struct _OpcUa_OpenSecureChannelResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader       ResponseHeader;
-    uint32_t                   ServerProtocolVersion;
+    OpcUa_ResponseHeader ResponseHeader;
+    uint32_t ServerProtocolVersion;
     OpcUa_ChannelSecurityToken SecurityToken;
-    SOPC_ByteString            ServerNonce;
-}
-OpcUa_OpenSecureChannelResponse;
+    SOPC_ByteString ServerNonce;
+} OpcUa_OpenSecureChannelResponse;
 
 void OpcUa_OpenSecureChannelResponse_Initialize(void* pValue);
 
@@ -1315,15 +1269,14 @@ SOPC_StatusCode OpcUa_OpenSecureChannelResponse_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The CloseSecureChannelRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType;
+
 typedef struct _OpcUa_CloseSecureChannelRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-}
-OpcUa_CloseSecureChannelRequest;
+} OpcUa_CloseSecureChannelRequest;
 
 void OpcUa_CloseSecureChannelRequest_Initialize(void* pValue);
 
@@ -1339,15 +1292,14 @@ SOPC_StatusCode OpcUa_CloseSecureChannelRequest_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The CloseSecureChannelResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType;
+
 typedef struct _OpcUa_CloseSecureChannelResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-}
-OpcUa_CloseSecureChannelResponse;
+} OpcUa_CloseSecureChannelResponse;
 
 void OpcUa_CloseSecureChannelResponse_Initialize(void* pValue);
 
@@ -1364,16 +1316,15 @@ SOPC_StatusCode OpcUa_CloseSecureChannelResponse_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The SignedSoftwareCertificate structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType;
+
 typedef struct _OpcUa_SignedSoftwareCertificate
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_ByteString CertificateData;
     SOPC_ByteString Signature;
-}
-OpcUa_SignedSoftwareCertificate;
+} OpcUa_SignedSoftwareCertificate;
 
 void OpcUa_SignedSoftwareCertificate_Initialize(void* pValue);
 
@@ -1389,16 +1340,15 @@ SOPC_StatusCode OpcUa_SignedSoftwareCertificate_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The SignatureData structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SignatureData_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SignatureData_EncodeableType;
+
 typedef struct _OpcUa_SignatureData
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String     Algorithm;
+    SOPC_String Algorithm;
     SOPC_ByteString Signature;
-}
-OpcUa_SignatureData;
+} OpcUa_SignatureData;
 
 void OpcUa_SignatureData_Initialize(void* pValue);
 
@@ -1415,23 +1365,22 @@ SOPC_StatusCode OpcUa_SignatureData_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The CreateSessionRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType;
+
 typedef struct _OpcUa_CreateSessionRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader          RequestHeader;
+    OpcUa_RequestHeader RequestHeader;
     OpcUa_ApplicationDescription ClientDescription;
-    SOPC_String                  ServerUri;
-    SOPC_String                  EndpointUrl;
-    SOPC_String                  SessionName;
-    SOPC_ByteString              ClientNonce;
-    SOPC_ByteString              ClientCertificate;
-    double                       RequestedSessionTimeout;
-    uint32_t                     MaxResponseMessageSize;
-}
-OpcUa_CreateSessionRequest;
+    SOPC_String ServerUri;
+    SOPC_String EndpointUrl;
+    SOPC_String SessionName;
+    SOPC_ByteString ClientNonce;
+    SOPC_ByteString ClientCertificate;
+    double RequestedSessionTimeout;
+    uint32_t MaxResponseMessageSize;
+} OpcUa_CreateSessionRequest;
 
 void OpcUa_CreateSessionRequest_Initialize(void* pValue);
 
@@ -1447,26 +1396,25 @@ SOPC_StatusCode OpcUa_CreateSessionRequest_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The CreateSessionResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType;
+
 typedef struct _OpcUa_CreateSessionResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader             ResponseHeader;
-    SOPC_NodeId                      SessionId;
-    SOPC_NodeId                      AuthenticationToken;
-    double                           RevisedSessionTimeout;
-    SOPC_ByteString                  ServerNonce;
-    SOPC_ByteString                  ServerCertificate;
-    int32_t                          NoOfServerEndpoints;
-    OpcUa_EndpointDescription*       ServerEndpoints;
-    int32_t                          NoOfServerSoftwareCertificates;
+    OpcUa_ResponseHeader ResponseHeader;
+    SOPC_NodeId SessionId;
+    SOPC_NodeId AuthenticationToken;
+    double RevisedSessionTimeout;
+    SOPC_ByteString ServerNonce;
+    SOPC_ByteString ServerCertificate;
+    int32_t NoOfServerEndpoints;
+    OpcUa_EndpointDescription* ServerEndpoints;
+    int32_t NoOfServerSoftwareCertificates;
     OpcUa_SignedSoftwareCertificate* ServerSoftwareCertificates;
-    OpcUa_SignatureData              ServerSignature;
-    uint32_t                         MaxRequestMessageSize;
-}
-OpcUa_CreateSessionResponse;
+    OpcUa_SignatureData ServerSignature;
+    uint32_t MaxRequestMessageSize;
+} OpcUa_CreateSessionResponse;
 
 void OpcUa_CreateSessionResponse_Initialize(void* pValue);
 
@@ -1483,15 +1431,14 @@ SOPC_StatusCode OpcUa_CreateSessionResponse_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The UserIdentityToken structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType;
+
 typedef struct _OpcUa_UserIdentityToken
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_String PolicyId;
-}
-OpcUa_UserIdentityToken;
+} OpcUa_UserIdentityToken;
 
 void OpcUa_UserIdentityToken_Initialize(void* pValue);
 
@@ -1507,15 +1454,14 @@ SOPC_StatusCode OpcUa_UserIdentityToken_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The AnonymousIdentityToken structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType;
+
 typedef struct _OpcUa_AnonymousIdentityToken
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_String PolicyId;
-}
-OpcUa_AnonymousIdentityToken;
+} OpcUa_AnonymousIdentityToken;
 
 void OpcUa_AnonymousIdentityToken_Initialize(void* pValue);
 
@@ -1531,18 +1477,17 @@ SOPC_StatusCode OpcUa_AnonymousIdentityToken_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The UserNameIdentityToken structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType;
+
 typedef struct _OpcUa_UserNameIdentityToken
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String     PolicyId;
-    SOPC_String     UserName;
+    SOPC_String PolicyId;
+    SOPC_String UserName;
     SOPC_ByteString Password;
-    SOPC_String     EncryptionAlgorithm;
-}
-OpcUa_UserNameIdentityToken;
+    SOPC_String EncryptionAlgorithm;
+} OpcUa_UserNameIdentityToken;
 
 void OpcUa_UserNameIdentityToken_Initialize(void* pValue);
 
@@ -1558,16 +1503,15 @@ SOPC_StatusCode OpcUa_UserNameIdentityToken_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The X509IdentityToken structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType;
+
 typedef struct _OpcUa_X509IdentityToken
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String     PolicyId;
+    SOPC_String PolicyId;
     SOPC_ByteString CertificateData;
-}
-OpcUa_X509IdentityToken;
+} OpcUa_X509IdentityToken;
 
 void OpcUa_X509IdentityToken_Initialize(void* pValue);
 
@@ -1583,16 +1527,15 @@ SOPC_StatusCode OpcUa_X509IdentityToken_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The KerberosIdentityToken structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType;
+
 typedef struct _OpcUa_KerberosIdentityToken
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String     PolicyId;
+    SOPC_String PolicyId;
     SOPC_ByteString TicketData;
-}
-OpcUa_KerberosIdentityToken;
+} OpcUa_KerberosIdentityToken;
 
 void OpcUa_KerberosIdentityToken_Initialize(void* pValue);
 
@@ -1608,17 +1551,16 @@ SOPC_StatusCode OpcUa_KerberosIdentityToken_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The IssuedIdentityToken structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType;
+
 typedef struct _OpcUa_IssuedIdentityToken
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String     PolicyId;
+    SOPC_String PolicyId;
     SOPC_ByteString TokenData;
-    SOPC_String     EncryptionAlgorithm;
-}
-OpcUa_IssuedIdentityToken;
+    SOPC_String EncryptionAlgorithm;
+} OpcUa_IssuedIdentityToken;
 
 void OpcUa_IssuedIdentityToken_Initialize(void* pValue);
 
@@ -1635,22 +1577,21 @@ SOPC_StatusCode OpcUa_IssuedIdentityToken_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The ActivateSessionRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType;
+
 typedef struct _OpcUa_ActivateSessionRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader              RequestHeader;
-    OpcUa_SignatureData              ClientSignature;
-    int32_t                          NoOfClientSoftwareCertificates;
+    OpcUa_RequestHeader RequestHeader;
+    OpcUa_SignatureData ClientSignature;
+    int32_t NoOfClientSoftwareCertificates;
     OpcUa_SignedSoftwareCertificate* ClientSoftwareCertificates;
-    int32_t                          NoOfLocaleIds;
-    SOPC_String*                     LocaleIds;
-    SOPC_ExtensionObject             UserIdentityToken;
-    OpcUa_SignatureData              UserTokenSignature;
-}
-OpcUa_ActivateSessionRequest;
+    int32_t NoOfLocaleIds;
+    SOPC_String* LocaleIds;
+    SOPC_ExtensionObject UserIdentityToken;
+    OpcUa_SignatureData UserTokenSignature;
+} OpcUa_ActivateSessionRequest;
 
 void OpcUa_ActivateSessionRequest_Initialize(void* pValue);
 
@@ -1666,20 +1607,19 @@ SOPC_StatusCode OpcUa_ActivateSessionRequest_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The ActivateSessionResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType;
+
 typedef struct _OpcUa_ActivateSessionResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    SOPC_ByteString      ServerNonce;
-    int32_t              NoOfResults;
-    SOPC_StatusCode*     Results;
-    int32_t              NoOfDiagnosticInfos;
+    SOPC_ByteString ServerNonce;
+    int32_t NoOfResults;
+    SOPC_StatusCode* Results;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_ActivateSessionResponse;
+} OpcUa_ActivateSessionResponse;
 
 void OpcUa_ActivateSessionResponse_Initialize(void* pValue);
 
@@ -1697,16 +1637,15 @@ SOPC_StatusCode OpcUa_ActivateSessionResponse_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The CloseSessionRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType;
+
 typedef struct _OpcUa_CloseSessionRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    SOPC_Boolean        DeleteSubscriptions;
-}
-OpcUa_CloseSessionRequest;
+    SOPC_Boolean DeleteSubscriptions;
+} OpcUa_CloseSessionRequest;
 
 void OpcUa_CloseSessionRequest_Initialize(void* pValue);
 
@@ -1722,15 +1661,14 @@ SOPC_StatusCode OpcUa_CloseSessionRequest_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The CloseSessionResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType;
+
 typedef struct _OpcUa_CloseSessionResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-}
-OpcUa_CloseSessionResponse;
+} OpcUa_CloseSessionResponse;
 
 void OpcUa_CloseSessionResponse_Initialize(void* pValue);
 
@@ -1748,16 +1686,15 @@ SOPC_StatusCode OpcUa_CloseSessionResponse_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The CancelRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType;
+
 typedef struct _OpcUa_CancelRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    uint32_t            RequestHandle;
-}
-OpcUa_CancelRequest;
+    uint32_t RequestHandle;
+} OpcUa_CancelRequest;
 
 void OpcUa_CancelRequest_Initialize(void* pValue);
 
@@ -1773,16 +1710,15 @@ SOPC_StatusCode OpcUa_CancelRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The CancelResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType;
+
 typedef struct _OpcUa_CancelResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    uint32_t             CancelCount;
-}
-OpcUa_CancelResponse;
+    uint32_t CancelCount;
+} OpcUa_CancelResponse;
 
 void OpcUa_CancelResponse_Initialize(void* pValue);
 
@@ -1799,45 +1735,44 @@ SOPC_StatusCode OpcUa_CancelResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The NodeAttributesMask enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_NodeAttributesMask
-{
-    OpcUa_NodeAttributesMask_None                    = 0,
-    OpcUa_NodeAttributesMask_AccessLevel             = 1,
-    OpcUa_NodeAttributesMask_ArrayDimensions         = 2,
-    OpcUa_NodeAttributesMask_BrowseName              = 4,
-    OpcUa_NodeAttributesMask_ContainsNoLoops         = 8,
-    OpcUa_NodeAttributesMask_DataType                = 16,
-    OpcUa_NodeAttributesMask_Description             = 32,
-    OpcUa_NodeAttributesMask_DisplayName             = 64,
-    OpcUa_NodeAttributesMask_EventNotifier           = 128,
-    OpcUa_NodeAttributesMask_Executable              = 256,
-    OpcUa_NodeAttributesMask_Historizing             = 512,
-    OpcUa_NodeAttributesMask_InverseName             = 1024,
-    OpcUa_NodeAttributesMask_IsAbstract              = 2048,
+typedef enum _OpcUa_NodeAttributesMask {
+    OpcUa_NodeAttributesMask_None = 0,
+    OpcUa_NodeAttributesMask_AccessLevel = 1,
+    OpcUa_NodeAttributesMask_ArrayDimensions = 2,
+    OpcUa_NodeAttributesMask_BrowseName = 4,
+    OpcUa_NodeAttributesMask_ContainsNoLoops = 8,
+    OpcUa_NodeAttributesMask_DataType = 16,
+    OpcUa_NodeAttributesMask_Description = 32,
+    OpcUa_NodeAttributesMask_DisplayName = 64,
+    OpcUa_NodeAttributesMask_EventNotifier = 128,
+    OpcUa_NodeAttributesMask_Executable = 256,
+    OpcUa_NodeAttributesMask_Historizing = 512,
+    OpcUa_NodeAttributesMask_InverseName = 1024,
+    OpcUa_NodeAttributesMask_IsAbstract = 2048,
     OpcUa_NodeAttributesMask_MinimumSamplingInterval = 4096,
-    OpcUa_NodeAttributesMask_NodeClass               = 8192,
-    OpcUa_NodeAttributesMask_NodeId                  = 16384,
-    OpcUa_NodeAttributesMask_Symmetric               = 32768,
-    OpcUa_NodeAttributesMask_UserAccessLevel         = 65536,
-    OpcUa_NodeAttributesMask_UserExecutable          = 131072,
-    OpcUa_NodeAttributesMask_UserWriteMask           = 262144,
-    OpcUa_NodeAttributesMask_ValueRank               = 524288,
-    OpcUa_NodeAttributesMask_WriteMask               = 1048576,
-    OpcUa_NodeAttributesMask_Value                   = 2097152,
-    OpcUa_NodeAttributesMask_All                     = 4194303,
-    OpcUa_NodeAttributesMask_BaseNode                = 1335396,
-    OpcUa_NodeAttributesMask_Object                  = 1335524,
-    OpcUa_NodeAttributesMask_ObjectTypeOrDataType    = 1337444,
-    OpcUa_NodeAttributesMask_Variable                = 4026999,
-    OpcUa_NodeAttributesMask_VariableType            = 3958902,
-    OpcUa_NodeAttributesMask_Method                  = 1466724,
-    OpcUa_NodeAttributesMask_ReferenceType           = 1371236,
-    OpcUa_NodeAttributesMask_View                    = 1335532
+    OpcUa_NodeAttributesMask_NodeClass = 8192,
+    OpcUa_NodeAttributesMask_NodeId = 16384,
+    OpcUa_NodeAttributesMask_Symmetric = 32768,
+    OpcUa_NodeAttributesMask_UserAccessLevel = 65536,
+    OpcUa_NodeAttributesMask_UserExecutable = 131072,
+    OpcUa_NodeAttributesMask_UserWriteMask = 262144,
+    OpcUa_NodeAttributesMask_ValueRank = 524288,
+    OpcUa_NodeAttributesMask_WriteMask = 1048576,
+    OpcUa_NodeAttributesMask_Value = 2097152,
+    OpcUa_NodeAttributesMask_All = 4194303,
+    OpcUa_NodeAttributesMask_BaseNode = 1335396,
+    OpcUa_NodeAttributesMask_Object = 1335524,
+    OpcUa_NodeAttributesMask_ObjectTypeOrDataType = 1337444,
+    OpcUa_NodeAttributesMask_Variable = 4026999,
+    OpcUa_NodeAttributesMask_VariableType = 3958902,
+    OpcUa_NodeAttributesMask_Method = 1466724,
+    OpcUa_NodeAttributesMask_ReferenceType = 1371236,
+    OpcUa_NodeAttributesMask_View = 1335532
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_NodeAttributesMask_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_NodeAttributesMask_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_NodeAttributesMask;
+} OpcUa_NodeAttributesMask;
 
 #endif
 
@@ -1845,19 +1780,18 @@ OpcUa_NodeAttributesMask;
 /*============================================================================
  * The NodeAttributes structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType;
+
 typedef struct _OpcUa_NodeAttributes
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t           SpecifiedAttributes;
+    uint32_t SpecifiedAttributes;
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
-    uint32_t           WriteMask;
-    uint32_t           UserWriteMask;
-}
-OpcUa_NodeAttributes;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+} OpcUa_NodeAttributes;
 
 void OpcUa_NodeAttributes_Initialize(void* pValue);
 
@@ -1873,20 +1807,19 @@ SOPC_StatusCode OpcUa_NodeAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ObjectAttributes structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType;
+
 typedef struct _OpcUa_ObjectAttributes
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t           SpecifiedAttributes;
+    uint32_t SpecifiedAttributes;
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
-    uint32_t           WriteMask;
-    uint32_t           UserWriteMask;
-    SOPC_Byte          EventNotifier;
-}
-OpcUa_ObjectAttributes;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    SOPC_Byte EventNotifier;
+} OpcUa_ObjectAttributes;
 
 void OpcUa_ObjectAttributes_Initialize(void* pValue);
 
@@ -1902,28 +1835,27 @@ SOPC_StatusCode OpcUa_ObjectAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The VariableAttributes structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType;
+
 typedef struct _OpcUa_VariableAttributes
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t           SpecifiedAttributes;
+    uint32_t SpecifiedAttributes;
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
-    uint32_t           WriteMask;
-    uint32_t           UserWriteMask;
-    SOPC_Variant       Value;
-    SOPC_NodeId        DataType;
-    int32_t            ValueRank;
-    int32_t            NoOfArrayDimensions;
-    uint32_t*          ArrayDimensions;
-    SOPC_Byte          AccessLevel;
-    SOPC_Byte          UserAccessLevel;
-    double             MinimumSamplingInterval;
-    SOPC_Boolean       Historizing;
-}
-OpcUa_VariableAttributes;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    SOPC_Variant Value;
+    SOPC_NodeId DataType;
+    int32_t ValueRank;
+    int32_t NoOfArrayDimensions;
+    uint32_t* ArrayDimensions;
+    SOPC_Byte AccessLevel;
+    SOPC_Byte UserAccessLevel;
+    double MinimumSamplingInterval;
+    SOPC_Boolean Historizing;
+} OpcUa_VariableAttributes;
 
 void OpcUa_VariableAttributes_Initialize(void* pValue);
 
@@ -1939,21 +1871,20 @@ SOPC_StatusCode OpcUa_VariableAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The MethodAttributes structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType;
+
 typedef struct _OpcUa_MethodAttributes
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t           SpecifiedAttributes;
+    uint32_t SpecifiedAttributes;
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
-    uint32_t           WriteMask;
-    uint32_t           UserWriteMask;
-    SOPC_Boolean       Executable;
-    SOPC_Boolean       UserExecutable;
-}
-OpcUa_MethodAttributes;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    SOPC_Boolean Executable;
+    SOPC_Boolean UserExecutable;
+} OpcUa_MethodAttributes;
 
 void OpcUa_MethodAttributes_Initialize(void* pValue);
 
@@ -1969,20 +1900,19 @@ SOPC_StatusCode OpcUa_MethodAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ObjectTypeAttributes structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType;
+
 typedef struct _OpcUa_ObjectTypeAttributes
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t           SpecifiedAttributes;
+    uint32_t SpecifiedAttributes;
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
-    uint32_t           WriteMask;
-    uint32_t           UserWriteMask;
-    SOPC_Boolean       IsAbstract;
-}
-OpcUa_ObjectTypeAttributes;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    SOPC_Boolean IsAbstract;
+} OpcUa_ObjectTypeAttributes;
 
 void OpcUa_ObjectTypeAttributes_Initialize(void* pValue);
 
@@ -1998,25 +1928,24 @@ SOPC_StatusCode OpcUa_ObjectTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The VariableTypeAttributes structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType;
+
 typedef struct _OpcUa_VariableTypeAttributes
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t           SpecifiedAttributes;
+    uint32_t SpecifiedAttributes;
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
-    uint32_t           WriteMask;
-    uint32_t           UserWriteMask;
-    SOPC_Variant       Value;
-    SOPC_NodeId        DataType;
-    int32_t            ValueRank;
-    int32_t            NoOfArrayDimensions;
-    uint32_t*          ArrayDimensions;
-    SOPC_Boolean       IsAbstract;
-}
-OpcUa_VariableTypeAttributes;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    SOPC_Variant Value;
+    SOPC_NodeId DataType;
+    int32_t ValueRank;
+    int32_t NoOfArrayDimensions;
+    uint32_t* ArrayDimensions;
+    SOPC_Boolean IsAbstract;
+} OpcUa_VariableTypeAttributes;
 
 void OpcUa_VariableTypeAttributes_Initialize(void* pValue);
 
@@ -2032,22 +1961,21 @@ SOPC_StatusCode OpcUa_VariableTypeAttributes_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The ReferenceTypeAttributes structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType;
+
 typedef struct _OpcUa_ReferenceTypeAttributes
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t           SpecifiedAttributes;
+    uint32_t SpecifiedAttributes;
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
-    uint32_t           WriteMask;
-    uint32_t           UserWriteMask;
-    SOPC_Boolean       IsAbstract;
-    SOPC_Boolean       Symmetric;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    SOPC_Boolean IsAbstract;
+    SOPC_Boolean Symmetric;
     SOPC_LocalizedText InverseName;
-}
-OpcUa_ReferenceTypeAttributes;
+} OpcUa_ReferenceTypeAttributes;
 
 void OpcUa_ReferenceTypeAttributes_Initialize(void* pValue);
 
@@ -2063,20 +1991,19 @@ SOPC_StatusCode OpcUa_ReferenceTypeAttributes_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The DataTypeAttributes structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType;
+
 typedef struct _OpcUa_DataTypeAttributes
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t           SpecifiedAttributes;
+    uint32_t SpecifiedAttributes;
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
-    uint32_t           WriteMask;
-    uint32_t           UserWriteMask;
-    SOPC_Boolean       IsAbstract;
-}
-OpcUa_DataTypeAttributes;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    SOPC_Boolean IsAbstract;
+} OpcUa_DataTypeAttributes;
 
 void OpcUa_DataTypeAttributes_Initialize(void* pValue);
 
@@ -2092,21 +2019,20 @@ SOPC_StatusCode OpcUa_DataTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ViewAttributes structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType;
+
 typedef struct _OpcUa_ViewAttributes
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t           SpecifiedAttributes;
+    uint32_t SpecifiedAttributes;
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
-    uint32_t           WriteMask;
-    uint32_t           UserWriteMask;
-    SOPC_Boolean       ContainsNoLoops;
-    SOPC_Byte          EventNotifier;
-}
-OpcUa_ViewAttributes;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    SOPC_Boolean ContainsNoLoops;
+    SOPC_Byte EventNotifier;
+} OpcUa_ViewAttributes;
 
 void OpcUa_ViewAttributes_Initialize(void* pValue);
 
@@ -2122,21 +2048,20 @@ SOPC_StatusCode OpcUa_ViewAttributes_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The AddNodesItem structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType;
+
 typedef struct _OpcUa_AddNodesItem
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_ExpandedNodeId  ParentNodeId;
-    SOPC_NodeId          ReferenceTypeId;
-    SOPC_ExpandedNodeId  RequestedNewNodeId;
-    SOPC_QualifiedName   BrowseName;
-    OpcUa_NodeClass      NodeClass;
+    SOPC_ExpandedNodeId ParentNodeId;
+    SOPC_NodeId ReferenceTypeId;
+    SOPC_ExpandedNodeId RequestedNewNodeId;
+    SOPC_QualifiedName BrowseName;
+    OpcUa_NodeClass NodeClass;
     SOPC_ExtensionObject NodeAttributes;
-    SOPC_ExpandedNodeId  TypeDefinition;
-}
-OpcUa_AddNodesItem;
+    SOPC_ExpandedNodeId TypeDefinition;
+} OpcUa_AddNodesItem;
 
 void OpcUa_AddNodesItem_Initialize(void* pValue);
 
@@ -2152,16 +2077,15 @@ SOPC_StatusCode OpcUa_AddNodesItem_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The AddNodesResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType;
+
 typedef struct _OpcUa_AddNodesResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_StatusCode StatusCode;
-    SOPC_NodeId     AddedNodeId;
-}
-OpcUa_AddNodesResult;
+    SOPC_NodeId AddedNodeId;
+} OpcUa_AddNodesResult;
 
 void OpcUa_AddNodesResult_Initialize(void* pValue);
 
@@ -2178,17 +2102,16 @@ SOPC_StatusCode OpcUa_AddNodesResult_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The AddNodesRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType;
+
 typedef struct _OpcUa_AddNodesRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    int32_t             NoOfNodesToAdd;
+    int32_t NoOfNodesToAdd;
     OpcUa_AddNodesItem* NodesToAdd;
-}
-OpcUa_AddNodesRequest;
+} OpcUa_AddNodesRequest;
 
 void OpcUa_AddNodesRequest_Initialize(void* pValue);
 
@@ -2204,19 +2127,18 @@ SOPC_StatusCode OpcUa_AddNodesRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The AddNodesResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType;
+
 typedef struct _OpcUa_AddNodesResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader  ResponseHeader;
-    int32_t               NoOfResults;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfResults;
     OpcUa_AddNodesResult* Results;
-    int32_t               NoOfDiagnosticInfos;
-    SOPC_DiagnosticInfo*  DiagnosticInfos;
-}
-OpcUa_AddNodesResponse;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
+} OpcUa_AddNodesResponse;
 
 void OpcUa_AddNodesResponse_Initialize(void* pValue);
 
@@ -2233,20 +2155,19 @@ SOPC_StatusCode OpcUa_AddNodesResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The AddReferencesItem structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType;
+
 typedef struct _OpcUa_AddReferencesItem
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId         SourceNodeId;
-    SOPC_NodeId         ReferenceTypeId;
-    SOPC_Boolean        IsForward;
-    SOPC_String         TargetServerUri;
+    SOPC_NodeId SourceNodeId;
+    SOPC_NodeId ReferenceTypeId;
+    SOPC_Boolean IsForward;
+    SOPC_String TargetServerUri;
     SOPC_ExpandedNodeId TargetNodeId;
-    OpcUa_NodeClass     TargetNodeClass;
-}
-OpcUa_AddReferencesItem;
+    OpcUa_NodeClass TargetNodeClass;
+} OpcUa_AddReferencesItem;
 
 void OpcUa_AddReferencesItem_Initialize(void* pValue);
 
@@ -2263,17 +2184,16 @@ SOPC_StatusCode OpcUa_AddReferencesItem_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The AddReferencesRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType;
+
 typedef struct _OpcUa_AddReferencesRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader      RequestHeader;
-    int32_t                  NoOfReferencesToAdd;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t NoOfReferencesToAdd;
     OpcUa_AddReferencesItem* ReferencesToAdd;
-}
-OpcUa_AddReferencesRequest;
+} OpcUa_AddReferencesRequest;
 
 void OpcUa_AddReferencesRequest_Initialize(void* pValue);
 
@@ -2289,19 +2209,18 @@ SOPC_StatusCode OpcUa_AddReferencesRequest_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The AddReferencesResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType;
+
 typedef struct _OpcUa_AddReferencesResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfResults;
-    SOPC_StatusCode*     Results;
-    int32_t              NoOfDiagnosticInfos;
+    int32_t NoOfResults;
+    SOPC_StatusCode* Results;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_AddReferencesResponse;
+} OpcUa_AddReferencesResponse;
 
 void OpcUa_AddReferencesResponse_Initialize(void* pValue);
 
@@ -2318,16 +2237,15 @@ SOPC_StatusCode OpcUa_AddReferencesResponse_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The DeleteNodesItem structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType;
+
 typedef struct _OpcUa_DeleteNodesItem
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId  NodeId;
+    SOPC_NodeId NodeId;
     SOPC_Boolean DeleteTargetReferences;
-}
-OpcUa_DeleteNodesItem;
+} OpcUa_DeleteNodesItem;
 
 void OpcUa_DeleteNodesItem_Initialize(void* pValue);
 
@@ -2344,17 +2262,16 @@ SOPC_StatusCode OpcUa_DeleteNodesItem_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The DeleteNodesRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType;
+
 typedef struct _OpcUa_DeleteNodesRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader    RequestHeader;
-    int32_t                NoOfNodesToDelete;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t NoOfNodesToDelete;
     OpcUa_DeleteNodesItem* NodesToDelete;
-}
-OpcUa_DeleteNodesRequest;
+} OpcUa_DeleteNodesRequest;
 
 void OpcUa_DeleteNodesRequest_Initialize(void* pValue);
 
@@ -2370,19 +2287,18 @@ SOPC_StatusCode OpcUa_DeleteNodesRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The DeleteNodesResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType;
+
 typedef struct _OpcUa_DeleteNodesResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfResults;
-    SOPC_StatusCode*     Results;
-    int32_t              NoOfDiagnosticInfos;
+    int32_t NoOfResults;
+    SOPC_StatusCode* Results;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_DeleteNodesResponse;
+} OpcUa_DeleteNodesResponse;
 
 void OpcUa_DeleteNodesResponse_Initialize(void* pValue);
 
@@ -2399,19 +2315,18 @@ SOPC_StatusCode OpcUa_DeleteNodesResponse_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The DeleteReferencesItem structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType;
+
 typedef struct _OpcUa_DeleteReferencesItem
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId         SourceNodeId;
-    SOPC_NodeId         ReferenceTypeId;
-    SOPC_Boolean        IsForward;
+    SOPC_NodeId SourceNodeId;
+    SOPC_NodeId ReferenceTypeId;
+    SOPC_Boolean IsForward;
     SOPC_ExpandedNodeId TargetNodeId;
-    SOPC_Boolean        DeleteBidirectional;
-}
-OpcUa_DeleteReferencesItem;
+    SOPC_Boolean DeleteBidirectional;
+} OpcUa_DeleteReferencesItem;
 
 void OpcUa_DeleteReferencesItem_Initialize(void* pValue);
 
@@ -2428,17 +2343,16 @@ SOPC_StatusCode OpcUa_DeleteReferencesItem_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The DeleteReferencesRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType;
+
 typedef struct _OpcUa_DeleteReferencesRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader         RequestHeader;
-    int32_t                     NoOfReferencesToDelete;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t NoOfReferencesToDelete;
     OpcUa_DeleteReferencesItem* ReferencesToDelete;
-}
-OpcUa_DeleteReferencesRequest;
+} OpcUa_DeleteReferencesRequest;
 
 void OpcUa_DeleteReferencesRequest_Initialize(void* pValue);
 
@@ -2454,19 +2368,18 @@ SOPC_StatusCode OpcUa_DeleteReferencesRequest_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The DeleteReferencesResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType;
+
 typedef struct _OpcUa_DeleteReferencesResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfResults;
-    SOPC_StatusCode*     Results;
-    int32_t              NoOfDiagnosticInfos;
+    int32_t NoOfResults;
+    SOPC_StatusCode* Results;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_DeleteReferencesResponse;
+} OpcUa_DeleteReferencesResponse;
 
 void OpcUa_DeleteReferencesResponse_Initialize(void* pValue);
 
@@ -2483,36 +2396,35 @@ SOPC_StatusCode OpcUa_DeleteReferencesResponse_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The AttributeWriteMask enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_AttributeWriteMask
-{
-    OpcUa_AttributeWriteMask_None                    = 0,
-    OpcUa_AttributeWriteMask_AccessLevel             = 1,
-    OpcUa_AttributeWriteMask_ArrayDimensions         = 2,
-    OpcUa_AttributeWriteMask_BrowseName              = 4,
-    OpcUa_AttributeWriteMask_ContainsNoLoops         = 8,
-    OpcUa_AttributeWriteMask_DataType                = 16,
-    OpcUa_AttributeWriteMask_Description             = 32,
-    OpcUa_AttributeWriteMask_DisplayName             = 64,
-    OpcUa_AttributeWriteMask_EventNotifier           = 128,
-    OpcUa_AttributeWriteMask_Executable              = 256,
-    OpcUa_AttributeWriteMask_Historizing             = 512,
-    OpcUa_AttributeWriteMask_InverseName             = 1024,
-    OpcUa_AttributeWriteMask_IsAbstract              = 2048,
+typedef enum _OpcUa_AttributeWriteMask {
+    OpcUa_AttributeWriteMask_None = 0,
+    OpcUa_AttributeWriteMask_AccessLevel = 1,
+    OpcUa_AttributeWriteMask_ArrayDimensions = 2,
+    OpcUa_AttributeWriteMask_BrowseName = 4,
+    OpcUa_AttributeWriteMask_ContainsNoLoops = 8,
+    OpcUa_AttributeWriteMask_DataType = 16,
+    OpcUa_AttributeWriteMask_Description = 32,
+    OpcUa_AttributeWriteMask_DisplayName = 64,
+    OpcUa_AttributeWriteMask_EventNotifier = 128,
+    OpcUa_AttributeWriteMask_Executable = 256,
+    OpcUa_AttributeWriteMask_Historizing = 512,
+    OpcUa_AttributeWriteMask_InverseName = 1024,
+    OpcUa_AttributeWriteMask_IsAbstract = 2048,
     OpcUa_AttributeWriteMask_MinimumSamplingInterval = 4096,
-    OpcUa_AttributeWriteMask_NodeClass               = 8192,
-    OpcUa_AttributeWriteMask_NodeId                  = 16384,
-    OpcUa_AttributeWriteMask_Symmetric               = 32768,
-    OpcUa_AttributeWriteMask_UserAccessLevel         = 65536,
-    OpcUa_AttributeWriteMask_UserExecutable          = 131072,
-    OpcUa_AttributeWriteMask_UserWriteMask           = 262144,
-    OpcUa_AttributeWriteMask_ValueRank               = 524288,
-    OpcUa_AttributeWriteMask_WriteMask               = 1048576,
-    OpcUa_AttributeWriteMask_ValueForVariableType    = 2097152
+    OpcUa_AttributeWriteMask_NodeClass = 8192,
+    OpcUa_AttributeWriteMask_NodeId = 16384,
+    OpcUa_AttributeWriteMask_Symmetric = 32768,
+    OpcUa_AttributeWriteMask_UserAccessLevel = 65536,
+    OpcUa_AttributeWriteMask_UserExecutable = 131072,
+    OpcUa_AttributeWriteMask_UserWriteMask = 262144,
+    OpcUa_AttributeWriteMask_ValueRank = 524288,
+    OpcUa_AttributeWriteMask_WriteMask = 1048576,
+    OpcUa_AttributeWriteMask_ValueForVariableType = 2097152
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_AttributeWriteMask_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_AttributeWriteMask_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_AttributeWriteMask;
+} OpcUa_AttributeWriteMask;
 
 #endif
 
@@ -2520,16 +2432,15 @@ OpcUa_AttributeWriteMask;
 /*============================================================================
  * The BrowseDirection enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_BrowseDirection
-{
+typedef enum _OpcUa_BrowseDirection {
     OpcUa_BrowseDirection_Forward = 0,
     OpcUa_BrowseDirection_Inverse = 1,
-    OpcUa_BrowseDirection_Both    = 2
+    OpcUa_BrowseDirection_Both = 2
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_BrowseDirection_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_BrowseDirection_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_BrowseDirection;
+} OpcUa_BrowseDirection;
 
 #endif
 
@@ -2537,17 +2448,16 @@ OpcUa_BrowseDirection;
 /*============================================================================
  * The ViewDescription structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType;
+
 typedef struct _OpcUa_ViewDescription
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId   ViewId;
+    SOPC_NodeId ViewId;
     SOPC_DateTime Timestamp;
-    uint32_t      ViewVersion;
-}
-OpcUa_ViewDescription;
+    uint32_t ViewVersion;
+} OpcUa_ViewDescription;
 
 void OpcUa_ViewDescription_Initialize(void* pValue);
 
@@ -2563,20 +2473,19 @@ SOPC_StatusCode OpcUa_ViewDescription_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The BrowseDescription structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType;
+
 typedef struct _OpcUa_BrowseDescription
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId           NodeId;
+    SOPC_NodeId NodeId;
     OpcUa_BrowseDirection BrowseDirection;
-    SOPC_NodeId           ReferenceTypeId;
-    SOPC_Boolean          IncludeSubtypes;
-    uint32_t              NodeClassMask;
-    uint32_t              ResultMask;
-}
-OpcUa_BrowseDescription;
+    SOPC_NodeId ReferenceTypeId;
+    SOPC_Boolean IncludeSubtypes;
+    uint32_t NodeClassMask;
+    uint32_t ResultMask;
+} OpcUa_BrowseDescription;
 
 void OpcUa_BrowseDescription_Initialize(void* pValue);
 
@@ -2592,23 +2501,22 @@ SOPC_StatusCode OpcUa_BrowseDescription_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The BrowseResultMask enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_BrowseResultMask
-{
-    OpcUa_BrowseResultMask_None              = 0,
-    OpcUa_BrowseResultMask_ReferenceTypeId   = 1,
-    OpcUa_BrowseResultMask_IsForward         = 2,
-    OpcUa_BrowseResultMask_NodeClass         = 4,
-    OpcUa_BrowseResultMask_BrowseName        = 8,
-    OpcUa_BrowseResultMask_DisplayName       = 16,
-    OpcUa_BrowseResultMask_TypeDefinition    = 32,
-    OpcUa_BrowseResultMask_All               = 63,
+typedef enum _OpcUa_BrowseResultMask {
+    OpcUa_BrowseResultMask_None = 0,
+    OpcUa_BrowseResultMask_ReferenceTypeId = 1,
+    OpcUa_BrowseResultMask_IsForward = 2,
+    OpcUa_BrowseResultMask_NodeClass = 4,
+    OpcUa_BrowseResultMask_BrowseName = 8,
+    OpcUa_BrowseResultMask_DisplayName = 16,
+    OpcUa_BrowseResultMask_TypeDefinition = 32,
+    OpcUa_BrowseResultMask_All = 63,
     OpcUa_BrowseResultMask_ReferenceTypeInfo = 3,
-    OpcUa_BrowseResultMask_TargetInfo        = 60
+    OpcUa_BrowseResultMask_TargetInfo = 60
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_BrowseResultMask_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_BrowseResultMask_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_BrowseResultMask;
+} OpcUa_BrowseResultMask;
 
 #endif
 
@@ -2616,21 +2524,20 @@ OpcUa_BrowseResultMask;
 /*============================================================================
  * The ReferenceDescription structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType;
+
 typedef struct _OpcUa_ReferenceDescription
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId         ReferenceTypeId;
-    SOPC_Boolean        IsForward;
+    SOPC_NodeId ReferenceTypeId;
+    SOPC_Boolean IsForward;
     SOPC_ExpandedNodeId NodeId;
-    SOPC_QualifiedName  BrowseName;
-    SOPC_LocalizedText  DisplayName;
-    OpcUa_NodeClass     NodeClass;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    OpcUa_NodeClass NodeClass;
     SOPC_ExpandedNodeId TypeDefinition;
-}
-OpcUa_ReferenceDescription;
+} OpcUa_ReferenceDescription;
 
 void OpcUa_ReferenceDescription_Initialize(void* pValue);
 
@@ -2646,18 +2553,17 @@ SOPC_StatusCode OpcUa_ReferenceDescription_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The BrowseResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType;
+
 typedef struct _OpcUa_BrowseResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_StatusCode             StatusCode;
-    SOPC_ByteString             ContinuationPoint;
-    int32_t                     NoOfReferences;
+    SOPC_StatusCode StatusCode;
+    SOPC_ByteString ContinuationPoint;
+    int32_t NoOfReferences;
     OpcUa_ReferenceDescription* References;
-}
-OpcUa_BrowseResult;
+} OpcUa_BrowseResult;
 
 void OpcUa_BrowseResult_Initialize(void* pValue);
 
@@ -2674,19 +2580,18 @@ SOPC_StatusCode OpcUa_BrowseResult_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The BrowseRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType;
+
 typedef struct _OpcUa_BrowseRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader      RequestHeader;
-    OpcUa_ViewDescription    View;
-    uint32_t                 RequestedMaxReferencesPerNode;
-    int32_t                  NoOfNodesToBrowse;
+    OpcUa_RequestHeader RequestHeader;
+    OpcUa_ViewDescription View;
+    uint32_t RequestedMaxReferencesPerNode;
+    int32_t NoOfNodesToBrowse;
     OpcUa_BrowseDescription* NodesToBrowse;
-}
-OpcUa_BrowseRequest;
+} OpcUa_BrowseRequest;
 
 void OpcUa_BrowseRequest_Initialize(void* pValue);
 
@@ -2702,19 +2607,18 @@ SOPC_StatusCode OpcUa_BrowseRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The BrowseResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType;
+
 typedef struct _OpcUa_BrowseResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfResults;
-    OpcUa_BrowseResult*  Results;
-    int32_t              NoOfDiagnosticInfos;
+    int32_t NoOfResults;
+    OpcUa_BrowseResult* Results;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_BrowseResponse;
+} OpcUa_BrowseResponse;
 
 void OpcUa_BrowseResponse_Initialize(void* pValue);
 
@@ -2732,18 +2636,17 @@ SOPC_StatusCode OpcUa_BrowseResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The BrowseNextRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType;
+
 typedef struct _OpcUa_BrowseNextRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    SOPC_Boolean        ReleaseContinuationPoints;
-    int32_t             NoOfContinuationPoints;
-    SOPC_ByteString*    ContinuationPoints;
-}
-OpcUa_BrowseNextRequest;
+    SOPC_Boolean ReleaseContinuationPoints;
+    int32_t NoOfContinuationPoints;
+    SOPC_ByteString* ContinuationPoints;
+} OpcUa_BrowseNextRequest;
 
 void OpcUa_BrowseNextRequest_Initialize(void* pValue);
 
@@ -2759,19 +2662,18 @@ SOPC_StatusCode OpcUa_BrowseNextRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The BrowseNextResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType;
+
 typedef struct _OpcUa_BrowseNextResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfResults;
-    OpcUa_BrowseResult*  Results;
-    int32_t              NoOfDiagnosticInfos;
+    int32_t NoOfResults;
+    OpcUa_BrowseResult* Results;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_BrowseNextResponse;
+} OpcUa_BrowseNextResponse;
 
 void OpcUa_BrowseNextResponse_Initialize(void* pValue);
 
@@ -2788,18 +2690,17 @@ SOPC_StatusCode OpcUa_BrowseNextResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The RelativePathElement structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType;
+
 typedef struct _OpcUa_RelativePathElement
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId        ReferenceTypeId;
-    SOPC_Boolean       IsInverse;
-    SOPC_Boolean       IncludeSubtypes;
+    SOPC_NodeId ReferenceTypeId;
+    SOPC_Boolean IsInverse;
+    SOPC_Boolean IncludeSubtypes;
     SOPC_QualifiedName TargetName;
-}
-OpcUa_RelativePathElement;
+} OpcUa_RelativePathElement;
 
 void OpcUa_RelativePathElement_Initialize(void* pValue);
 
@@ -2815,16 +2716,15 @@ SOPC_StatusCode OpcUa_RelativePathElement_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The RelativePath structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RelativePath_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RelativePath_EncodeableType;
+
 typedef struct _OpcUa_RelativePath
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t                    NoOfElements;
+    int32_t NoOfElements;
     OpcUa_RelativePathElement* Elements;
-}
-OpcUa_RelativePath;
+} OpcUa_RelativePath;
 
 void OpcUa_RelativePath_Initialize(void* pValue);
 
@@ -2840,16 +2740,15 @@ SOPC_StatusCode OpcUa_RelativePath_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The BrowsePath structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType;
+
 typedef struct _OpcUa_BrowsePath
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId        StartingNode;
+    SOPC_NodeId StartingNode;
     OpcUa_RelativePath RelativePath;
-}
-OpcUa_BrowsePath;
+} OpcUa_BrowsePath;
 
 void OpcUa_BrowsePath_Initialize(void* pValue);
 
@@ -2865,16 +2764,15 @@ SOPC_StatusCode OpcUa_BrowsePath_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The BrowsePathTarget structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType;
+
 typedef struct _OpcUa_BrowsePathTarget
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_ExpandedNodeId TargetId;
-    uint32_t            RemainingPathIndex;
-}
-OpcUa_BrowsePathTarget;
+    uint32_t RemainingPathIndex;
+} OpcUa_BrowsePathTarget;
 
 void OpcUa_BrowsePathTarget_Initialize(void* pValue);
 
@@ -2890,17 +2788,16 @@ SOPC_StatusCode OpcUa_BrowsePathTarget_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The BrowsePathResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType;
+
 typedef struct _OpcUa_BrowsePathResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_StatusCode         StatusCode;
-    int32_t                 NoOfTargets;
+    SOPC_StatusCode StatusCode;
+    int32_t NoOfTargets;
     OpcUa_BrowsePathTarget* Targets;
-}
-OpcUa_BrowsePathResult;
+} OpcUa_BrowsePathResult;
 
 void OpcUa_BrowsePathResult_Initialize(void* pValue);
 
@@ -2917,17 +2814,16 @@ SOPC_StatusCode OpcUa_BrowsePathResult_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The TranslateBrowsePathsToNodeIdsRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType;
+
 typedef struct _OpcUa_TranslateBrowsePathsToNodeIdsRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    int32_t             NoOfBrowsePaths;
-    OpcUa_BrowsePath*   BrowsePaths;
-}
-OpcUa_TranslateBrowsePathsToNodeIdsRequest;
+    int32_t NoOfBrowsePaths;
+    OpcUa_BrowsePath* BrowsePaths;
+} OpcUa_TranslateBrowsePathsToNodeIdsRequest;
 
 void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize(void* pValue);
 
@@ -2943,19 +2839,18 @@ SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue, 
 /*============================================================================
  * The TranslateBrowsePathsToNodeIdsResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType;
+
 typedef struct _OpcUa_TranslateBrowsePathsToNodeIdsResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader    ResponseHeader;
-    int32_t                 NoOfResults;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfResults;
     OpcUa_BrowsePathResult* Results;
-    int32_t                 NoOfDiagnosticInfos;
-    SOPC_DiagnosticInfo*    DiagnosticInfos;
-}
-OpcUa_TranslateBrowsePathsToNodeIdsResponse;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
+} OpcUa_TranslateBrowsePathsToNodeIdsResponse;
 
 void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize(void* pValue);
 
@@ -2973,17 +2868,16 @@ SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValue,
 /*============================================================================
  * The RegisterNodesRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType;
+
 typedef struct _OpcUa_RegisterNodesRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    int32_t             NoOfNodesToRegister;
-    SOPC_NodeId*        NodesToRegister;
-}
-OpcUa_RegisterNodesRequest;
+    int32_t NoOfNodesToRegister;
+    SOPC_NodeId* NodesToRegister;
+} OpcUa_RegisterNodesRequest;
 
 void OpcUa_RegisterNodesRequest_Initialize(void* pValue);
 
@@ -2999,17 +2893,16 @@ SOPC_StatusCode OpcUa_RegisterNodesRequest_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The RegisterNodesResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType;
+
 typedef struct _OpcUa_RegisterNodesResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfRegisteredNodeIds;
-    SOPC_NodeId*         RegisteredNodeIds;
-}
-OpcUa_RegisterNodesResponse;
+    int32_t NoOfRegisteredNodeIds;
+    SOPC_NodeId* RegisteredNodeIds;
+} OpcUa_RegisterNodesResponse;
 
 void OpcUa_RegisterNodesResponse_Initialize(void* pValue);
 
@@ -3027,17 +2920,16 @@ SOPC_StatusCode OpcUa_RegisterNodesResponse_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The UnregisterNodesRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType;
+
 typedef struct _OpcUa_UnregisterNodesRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    int32_t             NoOfNodesToUnregister;
-    SOPC_NodeId*        NodesToUnregister;
-}
-OpcUa_UnregisterNodesRequest;
+    int32_t NoOfNodesToUnregister;
+    SOPC_NodeId* NodesToUnregister;
+} OpcUa_UnregisterNodesRequest;
 
 void OpcUa_UnregisterNodesRequest_Initialize(void* pValue);
 
@@ -3053,15 +2945,14 @@ SOPC_StatusCode OpcUa_UnregisterNodesRequest_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The UnregisterNodesResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType;
+
 typedef struct _OpcUa_UnregisterNodesResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-}
-OpcUa_UnregisterNodesResponse;
+} OpcUa_UnregisterNodesResponse;
 
 void OpcUa_UnregisterNodesResponse_Initialize(void* pValue);
 
@@ -3078,23 +2969,22 @@ SOPC_StatusCode OpcUa_UnregisterNodesResponse_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The EndpointConfiguration structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType;
+
 typedef struct _OpcUa_EndpointConfiguration
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t      OperationTimeout;
+    int32_t OperationTimeout;
     SOPC_Boolean UseBinaryEncoding;
-    int32_t      MaxStringLength;
-    int32_t      MaxByteStringLength;
-    int32_t      MaxArrayLength;
-    int32_t      MaxMessageSize;
-    int32_t      MaxBufferSize;
-    int32_t      ChannelLifetime;
-    int32_t      SecurityTokenLifetime;
-}
-OpcUa_EndpointConfiguration;
+    int32_t MaxStringLength;
+    int32_t MaxByteStringLength;
+    int32_t MaxArrayLength;
+    int32_t MaxMessageSize;
+    int32_t MaxBufferSize;
+    int32_t ChannelLifetime;
+    int32_t SecurityTokenLifetime;
+} OpcUa_EndpointConfiguration;
 
 void OpcUa_EndpointConfiguration_Initialize(void* pValue);
 
@@ -3110,17 +3000,16 @@ SOPC_StatusCode OpcUa_EndpointConfiguration_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The ComplianceLevel enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_ComplianceLevel
-{
-    OpcUa_ComplianceLevel_Untested   = 0,
-    OpcUa_ComplianceLevel_Partial    = 1,
+typedef enum _OpcUa_ComplianceLevel {
+    OpcUa_ComplianceLevel_Untested = 0,
+    OpcUa_ComplianceLevel_Partial = 1,
     OpcUa_ComplianceLevel_SelfTested = 2,
-    OpcUa_ComplianceLevel_Certified  = 3
+    OpcUa_ComplianceLevel_Certified = 3
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_ComplianceLevel_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_ComplianceLevel_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_ComplianceLevel;
+} OpcUa_ComplianceLevel;
 
 #endif
 
@@ -3128,21 +3017,20 @@ OpcUa_ComplianceLevel;
 /*============================================================================
  * The SupportedProfile structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType;
+
 typedef struct _OpcUa_SupportedProfile
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String           OrganizationUri;
-    SOPC_String           ProfileId;
-    SOPC_String           ComplianceTool;
-    SOPC_DateTime         ComplianceDate;
+    SOPC_String OrganizationUri;
+    SOPC_String ProfileId;
+    SOPC_String ComplianceTool;
+    SOPC_DateTime ComplianceDate;
     OpcUa_ComplianceLevel ComplianceLevel;
-    int32_t               NoOfUnsupportedUnitIds;
-    SOPC_String*          UnsupportedUnitIds;
-}
-OpcUa_SupportedProfile;
+    int32_t NoOfUnsupportedUnitIds;
+    SOPC_String* UnsupportedUnitIds;
+} OpcUa_SupportedProfile;
 
 void OpcUa_SupportedProfile_Initialize(void* pValue);
 
@@ -3158,25 +3046,24 @@ SOPC_StatusCode OpcUa_SupportedProfile_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The SoftwareCertificate structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType;
+
 typedef struct _OpcUa_SoftwareCertificate
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String             ProductName;
-    SOPC_String             ProductUri;
-    SOPC_String             VendorName;
-    SOPC_ByteString         VendorProductCertificate;
-    SOPC_String             SoftwareVersion;
-    SOPC_String             BuildNumber;
-    SOPC_DateTime           BuildDate;
-    SOPC_String             IssuedBy;
-    SOPC_DateTime           IssueDate;
-    int32_t                 NoOfSupportedProfiles;
+    SOPC_String ProductName;
+    SOPC_String ProductUri;
+    SOPC_String VendorName;
+    SOPC_ByteString VendorProductCertificate;
+    SOPC_String SoftwareVersion;
+    SOPC_String BuildNumber;
+    SOPC_DateTime BuildDate;
+    SOPC_String IssuedBy;
+    SOPC_DateTime IssueDate;
+    int32_t NoOfSupportedProfiles;
     OpcUa_SupportedProfile* SupportedProfiles;
-}
-OpcUa_SoftwareCertificate;
+} OpcUa_SoftwareCertificate;
 
 void OpcUa_SoftwareCertificate_Initialize(void* pValue);
 
@@ -3192,17 +3079,16 @@ SOPC_StatusCode OpcUa_SoftwareCertificate_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The QueryDataDescription structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType;
+
 typedef struct _OpcUa_QueryDataDescription
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RelativePath RelativePath;
-    uint32_t           AttributeId;
-    SOPC_String        IndexRange;
-}
-OpcUa_QueryDataDescription;
+    uint32_t AttributeId;
+    SOPC_String IndexRange;
+} OpcUa_QueryDataDescription;
 
 void OpcUa_QueryDataDescription_Initialize(void* pValue);
 
@@ -3218,18 +3104,17 @@ SOPC_StatusCode OpcUa_QueryDataDescription_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The NodeTypeDescription structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType;
+
 typedef struct _OpcUa_NodeTypeDescription
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_ExpandedNodeId         TypeDefinitionNode;
-    SOPC_Boolean                IncludeSubTypes;
-    int32_t                     NoOfDataToReturn;
+    SOPC_ExpandedNodeId TypeDefinitionNode;
+    SOPC_Boolean IncludeSubTypes;
+    int32_t NoOfDataToReturn;
     OpcUa_QueryDataDescription* DataToReturn;
-}
-OpcUa_NodeTypeDescription;
+} OpcUa_NodeTypeDescription;
 
 void OpcUa_NodeTypeDescription_Initialize(void* pValue);
 
@@ -3245,31 +3130,30 @@ SOPC_StatusCode OpcUa_NodeTypeDescription_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The FilterOperator enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_FilterOperator
-{
-    OpcUa_FilterOperator_Equals             = 0,
-    OpcUa_FilterOperator_IsNull             = 1,
-    OpcUa_FilterOperator_GreaterThan        = 2,
-    OpcUa_FilterOperator_LessThan           = 3,
+typedef enum _OpcUa_FilterOperator {
+    OpcUa_FilterOperator_Equals = 0,
+    OpcUa_FilterOperator_IsNull = 1,
+    OpcUa_FilterOperator_GreaterThan = 2,
+    OpcUa_FilterOperator_LessThan = 3,
     OpcUa_FilterOperator_GreaterThanOrEqual = 4,
-    OpcUa_FilterOperator_LessThanOrEqual    = 5,
-    OpcUa_FilterOperator_Like               = 6,
-    OpcUa_FilterOperator_Not                = 7,
-    OpcUa_FilterOperator_Between            = 8,
-    OpcUa_FilterOperator_InList             = 9,
-    OpcUa_FilterOperator_And                = 10,
-    OpcUa_FilterOperator_Or                 = 11,
-    OpcUa_FilterOperator_Cast               = 12,
-    OpcUa_FilterOperator_InView             = 13,
-    OpcUa_FilterOperator_OfType             = 14,
-    OpcUa_FilterOperator_RelatedTo          = 15,
-    OpcUa_FilterOperator_BitwiseAnd         = 16,
-    OpcUa_FilterOperator_BitwiseOr          = 17
+    OpcUa_FilterOperator_LessThanOrEqual = 5,
+    OpcUa_FilterOperator_Like = 6,
+    OpcUa_FilterOperator_Not = 7,
+    OpcUa_FilterOperator_Between = 8,
+    OpcUa_FilterOperator_InList = 9,
+    OpcUa_FilterOperator_And = 10,
+    OpcUa_FilterOperator_Or = 11,
+    OpcUa_FilterOperator_Cast = 12,
+    OpcUa_FilterOperator_InView = 13,
+    OpcUa_FilterOperator_OfType = 14,
+    OpcUa_FilterOperator_RelatedTo = 15,
+    OpcUa_FilterOperator_BitwiseAnd = 16,
+    OpcUa_FilterOperator_BitwiseOr = 17
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_FilterOperator_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_FilterOperator_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_FilterOperator;
+} OpcUa_FilterOperator;
 
 #endif
 
@@ -3277,18 +3161,17 @@ OpcUa_FilterOperator;
 /*============================================================================
  * The QueryDataSet structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType;
+
 typedef struct _OpcUa_QueryDataSet
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_ExpandedNodeId NodeId;
     SOPC_ExpandedNodeId TypeDefinitionNode;
-    int32_t             NoOfValues;
-    SOPC_Variant*       Values;
-}
-OpcUa_QueryDataSet;
+    int32_t NoOfValues;
+    SOPC_Variant* Values;
+} OpcUa_QueryDataSet;
 
 void OpcUa_QueryDataSet_Initialize(void* pValue);
 
@@ -3304,19 +3187,18 @@ SOPC_StatusCode OpcUa_QueryDataSet_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The NodeReference structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_NodeReference_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_NodeReference_EncodeableType;
+
 typedef struct _OpcUa_NodeReference
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId  NodeId;
-    SOPC_NodeId  ReferenceTypeId;
+    SOPC_NodeId NodeId;
+    SOPC_NodeId ReferenceTypeId;
     SOPC_Boolean IsForward;
-    int32_t      NoOfReferencedNodeIds;
+    int32_t NoOfReferencedNodeIds;
     SOPC_NodeId* ReferencedNodeIds;
-}
-OpcUa_NodeReference;
+} OpcUa_NodeReference;
 
 void OpcUa_NodeReference_Initialize(void* pValue);
 
@@ -3332,17 +3214,16 @@ SOPC_StatusCode OpcUa_NodeReference_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ContentFilterElement structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType;
+
 typedef struct _OpcUa_ContentFilterElement
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_FilterOperator  FilterOperator;
-    int32_t               NoOfFilterOperands;
+    OpcUa_FilterOperator FilterOperator;
+    int32_t NoOfFilterOperands;
     SOPC_ExtensionObject* FilterOperands;
-}
-OpcUa_ContentFilterElement;
+} OpcUa_ContentFilterElement;
 
 void OpcUa_ContentFilterElement_Initialize(void* pValue);
 
@@ -3358,16 +3239,15 @@ SOPC_StatusCode OpcUa_ContentFilterElement_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The ContentFilter structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType;
+
 typedef struct _OpcUa_ContentFilter
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t                     NoOfElements;
+    int32_t NoOfElements;
     OpcUa_ContentFilterElement* Elements;
-}
-OpcUa_ContentFilter;
+} OpcUa_ContentFilter;
 
 void OpcUa_ContentFilter_Initialize(void* pValue);
 
@@ -3383,15 +3263,14 @@ SOPC_StatusCode OpcUa_ContentFilter_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ElementOperand structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType;
+
 typedef struct _OpcUa_ElementOperand
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     uint32_t Index;
-}
-OpcUa_ElementOperand;
+} OpcUa_ElementOperand;
 
 void OpcUa_ElementOperand_Initialize(void* pValue);
 
@@ -3407,15 +3286,14 @@ SOPC_StatusCode OpcUa_ElementOperand_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The LiteralOperand structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType;
+
 typedef struct _OpcUa_LiteralOperand
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_Variant Value;
-}
-OpcUa_LiteralOperand;
+} OpcUa_LiteralOperand;
 
 void OpcUa_LiteralOperand_Initialize(void* pValue);
 
@@ -3431,19 +3309,18 @@ SOPC_StatusCode OpcUa_LiteralOperand_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The AttributeOperand structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType;
+
 typedef struct _OpcUa_AttributeOperand
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId        NodeId;
-    SOPC_String        Alias;
+    SOPC_NodeId NodeId;
+    SOPC_String Alias;
     OpcUa_RelativePath BrowsePath;
-    uint32_t           AttributeId;
-    SOPC_String        IndexRange;
-}
-OpcUa_AttributeOperand;
+    uint32_t AttributeId;
+    SOPC_String IndexRange;
+} OpcUa_AttributeOperand;
 
 void OpcUa_AttributeOperand_Initialize(void* pValue);
 
@@ -3459,19 +3336,18 @@ SOPC_StatusCode OpcUa_AttributeOperand_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The SimpleAttributeOperand structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType;
+
 typedef struct _OpcUa_SimpleAttributeOperand
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId         TypeDefinitionId;
-    int32_t             NoOfBrowsePath;
+    SOPC_NodeId TypeDefinitionId;
+    int32_t NoOfBrowsePath;
     SOPC_QualifiedName* BrowsePath;
-    uint32_t            AttributeId;
-    SOPC_String         IndexRange;
-}
-OpcUa_SimpleAttributeOperand;
+    uint32_t AttributeId;
+    SOPC_String IndexRange;
+} OpcUa_SimpleAttributeOperand;
 
 void OpcUa_SimpleAttributeOperand_Initialize(void* pValue);
 
@@ -3487,19 +3363,18 @@ SOPC_StatusCode OpcUa_SimpleAttributeOperand_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The ContentFilterElementResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType;
+
 typedef struct _OpcUa_ContentFilterElementResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_StatusCode      StatusCode;
-    int32_t              NoOfOperandStatusCodes;
-    SOPC_StatusCode*     OperandStatusCodes;
-    int32_t              NoOfOperandDiagnosticInfos;
+    SOPC_StatusCode StatusCode;
+    int32_t NoOfOperandStatusCodes;
+    SOPC_StatusCode* OperandStatusCodes;
+    int32_t NoOfOperandDiagnosticInfos;
     SOPC_DiagnosticInfo* OperandDiagnosticInfos;
-}
-OpcUa_ContentFilterElementResult;
+} OpcUa_ContentFilterElementResult;
 
 void OpcUa_ContentFilterElementResult_Initialize(void* pValue);
 
@@ -3515,18 +3390,17 @@ SOPC_StatusCode OpcUa_ContentFilterElementResult_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The ContentFilterResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType;
+
 typedef struct _OpcUa_ContentFilterResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t                           NoOfElementResults;
+    int32_t NoOfElementResults;
     OpcUa_ContentFilterElementResult* ElementResults;
-    int32_t                           NoOfElementDiagnosticInfos;
-    SOPC_DiagnosticInfo*              ElementDiagnosticInfos;
-}
-OpcUa_ContentFilterResult;
+    int32_t NoOfElementDiagnosticInfos;
+    SOPC_DiagnosticInfo* ElementDiagnosticInfos;
+} OpcUa_ContentFilterResult;
 
 void OpcUa_ContentFilterResult_Initialize(void* pValue);
 
@@ -3542,19 +3416,18 @@ SOPC_StatusCode OpcUa_ContentFilterResult_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The ParsingResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType;
+
 typedef struct _OpcUa_ParsingResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_StatusCode      StatusCode;
-    int32_t              NoOfDataStatusCodes;
-    SOPC_StatusCode*     DataStatusCodes;
-    int32_t              NoOfDataDiagnosticInfos;
+    SOPC_StatusCode StatusCode;
+    int32_t NoOfDataStatusCodes;
+    SOPC_StatusCode* DataStatusCodes;
+    int32_t NoOfDataDiagnosticInfos;
     SOPC_DiagnosticInfo* DataDiagnosticInfos;
-}
-OpcUa_ParsingResult;
+} OpcUa_ParsingResult;
 
 void OpcUa_ParsingResult_Initialize(void* pValue);
 
@@ -3571,21 +3444,20 @@ SOPC_StatusCode OpcUa_ParsingResult_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The QueryFirstRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType;
+
 typedef struct _OpcUa_QueryFirstRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader        RequestHeader;
-    OpcUa_ViewDescription      View;
-    int32_t                    NoOfNodeTypes;
+    OpcUa_RequestHeader RequestHeader;
+    OpcUa_ViewDescription View;
+    int32_t NoOfNodeTypes;
     OpcUa_NodeTypeDescription* NodeTypes;
-    OpcUa_ContentFilter        Filter;
-    uint32_t                   MaxDataSetsToReturn;
-    uint32_t                   MaxReferencesToReturn;
-}
-OpcUa_QueryFirstRequest;
+    OpcUa_ContentFilter Filter;
+    uint32_t MaxDataSetsToReturn;
+    uint32_t MaxReferencesToReturn;
+} OpcUa_QueryFirstRequest;
 
 void OpcUa_QueryFirstRequest_Initialize(void* pValue);
 
@@ -3601,23 +3473,22 @@ SOPC_StatusCode OpcUa_QueryFirstRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The QueryFirstResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType;
+
 typedef struct _OpcUa_QueryFirstResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader      ResponseHeader;
-    int32_t                   NoOfQueryDataSets;
-    OpcUa_QueryDataSet*       QueryDataSets;
-    SOPC_ByteString           ContinuationPoint;
-    int32_t                   NoOfParsingResults;
-    OpcUa_ParsingResult*      ParsingResults;
-    int32_t                   NoOfDiagnosticInfos;
-    SOPC_DiagnosticInfo*      DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfQueryDataSets;
+    OpcUa_QueryDataSet* QueryDataSets;
+    SOPC_ByteString ContinuationPoint;
+    int32_t NoOfParsingResults;
+    OpcUa_ParsingResult* ParsingResults;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
     OpcUa_ContentFilterResult FilterResult;
-}
-OpcUa_QueryFirstResponse;
+} OpcUa_QueryFirstResponse;
 
 void OpcUa_QueryFirstResponse_Initialize(void* pValue);
 
@@ -3635,17 +3506,16 @@ SOPC_StatusCode OpcUa_QueryFirstResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The QueryNextRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType;
+
 typedef struct _OpcUa_QueryNextRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    SOPC_Boolean        ReleaseContinuationPoint;
-    SOPC_ByteString     ContinuationPoint;
-}
-OpcUa_QueryNextRequest;
+    SOPC_Boolean ReleaseContinuationPoint;
+    SOPC_ByteString ContinuationPoint;
+} OpcUa_QueryNextRequest;
 
 void OpcUa_QueryNextRequest_Initialize(void* pValue);
 
@@ -3661,18 +3531,17 @@ SOPC_StatusCode OpcUa_QueryNextRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The QueryNextResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType;
+
 typedef struct _OpcUa_QueryNextResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfQueryDataSets;
-    OpcUa_QueryDataSet*  QueryDataSets;
-    SOPC_ByteString      RevisedContinuationPoint;
-}
-OpcUa_QueryNextResponse;
+    int32_t NoOfQueryDataSets;
+    OpcUa_QueryDataSet* QueryDataSets;
+    SOPC_ByteString RevisedContinuationPoint;
+} OpcUa_QueryNextResponse;
 
 void OpcUa_QueryNextResponse_Initialize(void* pValue);
 
@@ -3689,17 +3558,16 @@ SOPC_StatusCode OpcUa_QueryNextResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The TimestampsToReturn enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_TimestampsToReturn
-{
-    OpcUa_TimestampsToReturn_Source  = 0,
-    OpcUa_TimestampsToReturn_Server  = 1,
-    OpcUa_TimestampsToReturn_Both    = 2,
+typedef enum _OpcUa_TimestampsToReturn {
+    OpcUa_TimestampsToReturn_Source = 0,
+    OpcUa_TimestampsToReturn_Server = 1,
+    OpcUa_TimestampsToReturn_Both = 2,
     OpcUa_TimestampsToReturn_Neither = 3
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_TimestampsToReturn_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_TimestampsToReturn_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_TimestampsToReturn;
+} OpcUa_TimestampsToReturn;
 
 #endif
 
@@ -3707,18 +3575,17 @@ OpcUa_TimestampsToReturn;
 /*============================================================================
  * The ReadValueId structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType;
+
 typedef struct _OpcUa_ReadValueId
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId        NodeId;
-    uint32_t           AttributeId;
-    SOPC_String        IndexRange;
+    SOPC_NodeId NodeId;
+    uint32_t AttributeId;
+    SOPC_String IndexRange;
     SOPC_QualifiedName DataEncoding;
-}
-OpcUa_ReadValueId;
+} OpcUa_ReadValueId;
 
 void OpcUa_ReadValueId_Initialize(void* pValue);
 
@@ -3735,19 +3602,18 @@ SOPC_StatusCode OpcUa_ReadValueId_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ReadRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType;
+
 typedef struct _OpcUa_ReadRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader      RequestHeader;
-    double                   MaxAge;
+    OpcUa_RequestHeader RequestHeader;
+    double MaxAge;
     OpcUa_TimestampsToReturn TimestampsToReturn;
-    int32_t                  NoOfNodesToRead;
-    OpcUa_ReadValueId*       NodesToRead;
-}
-OpcUa_ReadRequest;
+    int32_t NoOfNodesToRead;
+    OpcUa_ReadValueId* NodesToRead;
+} OpcUa_ReadRequest;
 
 void OpcUa_ReadRequest_Initialize(void* pValue);
 
@@ -3763,19 +3629,18 @@ SOPC_StatusCode OpcUa_ReadRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ReadResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType;
+
 typedef struct _OpcUa_ReadResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfResults;
-    SOPC_DataValue*      Results;
-    int32_t              NoOfDiagnosticInfos;
+    int32_t NoOfResults;
+    SOPC_DataValue* Results;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_ReadResponse;
+} OpcUa_ReadResponse;
 
 void OpcUa_ReadResponse_Initialize(void* pValue);
 
@@ -3792,18 +3657,17 @@ SOPC_StatusCode OpcUa_ReadResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The HistoryReadValueId structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType;
+
 typedef struct _OpcUa_HistoryReadValueId
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId        NodeId;
-    SOPC_String        IndexRange;
+    SOPC_NodeId NodeId;
+    SOPC_String IndexRange;
     SOPC_QualifiedName DataEncoding;
-    SOPC_ByteString    ContinuationPoint;
-}
-OpcUa_HistoryReadValueId;
+    SOPC_ByteString ContinuationPoint;
+} OpcUa_HistoryReadValueId;
 
 void OpcUa_HistoryReadValueId_Initialize(void* pValue);
 
@@ -3819,17 +3683,16 @@ SOPC_StatusCode OpcUa_HistoryReadValueId_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The HistoryReadResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType;
+
 typedef struct _OpcUa_HistoryReadResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_StatusCode      StatusCode;
-    SOPC_ByteString      ContinuationPoint;
+    SOPC_StatusCode StatusCode;
+    SOPC_ByteString ContinuationPoint;
     SOPC_ExtensionObject HistoryData;
-}
-OpcUa_HistoryReadResult;
+} OpcUa_HistoryReadResult;
 
 void OpcUa_HistoryReadResult_Initialize(void* pValue);
 
@@ -3845,17 +3708,16 @@ SOPC_StatusCode OpcUa_HistoryReadResult_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The EventFilter structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_EventFilter_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_EventFilter_EncodeableType;
+
 typedef struct _OpcUa_EventFilter
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t                       NoOfSelectClauses;
+    int32_t NoOfSelectClauses;
     OpcUa_SimpleAttributeOperand* SelectClauses;
-    OpcUa_ContentFilter           WhereClause;
-}
-OpcUa_EventFilter;
+    OpcUa_ContentFilter WhereClause;
+} OpcUa_EventFilter;
 
 void OpcUa_EventFilter_Initialize(void* pValue);
 
@@ -3871,18 +3733,17 @@ SOPC_StatusCode OpcUa_EventFilter_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ReadEventDetails structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType;
+
 typedef struct _OpcUa_ReadEventDetails
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t          NumValuesPerNode;
-    SOPC_DateTime     StartTime;
-    SOPC_DateTime     EndTime;
+    uint32_t NumValuesPerNode;
+    SOPC_DateTime StartTime;
+    SOPC_DateTime EndTime;
     OpcUa_EventFilter Filter;
-}
-OpcUa_ReadEventDetails;
+} OpcUa_ReadEventDetails;
 
 void OpcUa_ReadEventDetails_Initialize(void* pValue);
 
@@ -3898,19 +3759,18 @@ SOPC_StatusCode OpcUa_ReadEventDetails_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ReadRawModifiedDetails structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType;
+
 typedef struct _OpcUa_ReadRawModifiedDetails
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_Boolean  IsReadModified;
+    SOPC_Boolean IsReadModified;
     SOPC_DateTime StartTime;
     SOPC_DateTime EndTime;
-    uint32_t      NumValuesPerNode;
-    SOPC_Boolean  ReturnBounds;
-}
-OpcUa_ReadRawModifiedDetails;
+    uint32_t NumValuesPerNode;
+    SOPC_Boolean ReturnBounds;
+} OpcUa_ReadRawModifiedDetails;
 
 void OpcUa_ReadRawModifiedDetails_Initialize(void* pValue);
 
@@ -3926,19 +3786,18 @@ SOPC_StatusCode OpcUa_ReadRawModifiedDetails_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The AggregateConfiguration structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType;
+
 typedef struct _OpcUa_AggregateConfiguration
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_Boolean UseServerCapabilitiesDefaults;
     SOPC_Boolean TreatUncertainAsBad;
-    SOPC_Byte    PercentDataBad;
-    SOPC_Byte    PercentDataGood;
+    SOPC_Byte PercentDataBad;
+    SOPC_Byte PercentDataGood;
     SOPC_Boolean UseSlopedExtrapolation;
-}
-OpcUa_AggregateConfiguration;
+} OpcUa_AggregateConfiguration;
 
 void OpcUa_AggregateConfiguration_Initialize(void* pValue);
 
@@ -3954,20 +3813,19 @@ SOPC_StatusCode OpcUa_AggregateConfiguration_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The ReadProcessedDetails structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType;
+
 typedef struct _OpcUa_ReadProcessedDetails
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_DateTime                StartTime;
-    SOPC_DateTime                EndTime;
-    double                       ProcessingInterval;
-    int32_t                      NoOfAggregateType;
-    SOPC_NodeId*                 AggregateType;
+    SOPC_DateTime StartTime;
+    SOPC_DateTime EndTime;
+    double ProcessingInterval;
+    int32_t NoOfAggregateType;
+    SOPC_NodeId* AggregateType;
     OpcUa_AggregateConfiguration AggregateConfiguration;
-}
-OpcUa_ReadProcessedDetails;
+} OpcUa_ReadProcessedDetails;
 
 void OpcUa_ReadProcessedDetails_Initialize(void* pValue);
 
@@ -3983,17 +3841,16 @@ SOPC_StatusCode OpcUa_ReadProcessedDetails_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The ReadAtTimeDetails structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType;
+
 typedef struct _OpcUa_ReadAtTimeDetails
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t        NoOfReqTimes;
+    int32_t NoOfReqTimes;
     SOPC_DateTime* ReqTimes;
-    SOPC_Boolean   UseSimpleBounds;
-}
-OpcUa_ReadAtTimeDetails;
+    SOPC_Boolean UseSimpleBounds;
+} OpcUa_ReadAtTimeDetails;
 
 void OpcUa_ReadAtTimeDetails_Initialize(void* pValue);
 
@@ -4009,16 +3866,15 @@ SOPC_StatusCode OpcUa_ReadAtTimeDetails_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The HistoryData structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_HistoryData_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_HistoryData_EncodeableType;
+
 typedef struct _OpcUa_HistoryData
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t         NoOfDataValues;
+    int32_t NoOfDataValues;
     SOPC_DataValue* DataValues;
-}
-OpcUa_HistoryData;
+} OpcUa_HistoryData;
 
 void OpcUa_HistoryData_Initialize(void* pValue);
 
@@ -4034,17 +3890,16 @@ SOPC_StatusCode OpcUa_HistoryData_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The HistoryUpdateType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_HistoryUpdateType
-{
-    OpcUa_HistoryUpdateType_Insert  = 1,
+typedef enum _OpcUa_HistoryUpdateType {
+    OpcUa_HistoryUpdateType_Insert = 1,
     OpcUa_HistoryUpdateType_Replace = 2,
-    OpcUa_HistoryUpdateType_Update  = 3,
-    OpcUa_HistoryUpdateType_Delete  = 4
+    OpcUa_HistoryUpdateType_Update = 3,
+    OpcUa_HistoryUpdateType_Delete = 4
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_HistoryUpdateType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_HistoryUpdateType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_HistoryUpdateType;
+} OpcUa_HistoryUpdateType;
 
 #endif
 
@@ -4052,17 +3907,16 @@ OpcUa_HistoryUpdateType;
 /*============================================================================
  * The ModificationInfo structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType;
+
 typedef struct _OpcUa_ModificationInfo
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_DateTime           ModificationTime;
+    SOPC_DateTime ModificationTime;
     OpcUa_HistoryUpdateType UpdateType;
-    SOPC_String             UserName;
-}
-OpcUa_ModificationInfo;
+    SOPC_String UserName;
+} OpcUa_ModificationInfo;
 
 void OpcUa_ModificationInfo_Initialize(void* pValue);
 
@@ -4078,18 +3932,17 @@ SOPC_StatusCode OpcUa_ModificationInfo_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The HistoryModifiedData structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType;
+
 typedef struct _OpcUa_HistoryModifiedData
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t                 NoOfDataValues;
-    SOPC_DataValue*         DataValues;
-    int32_t                 NoOfModificationInfos;
+    int32_t NoOfDataValues;
+    SOPC_DataValue* DataValues;
+    int32_t NoOfModificationInfos;
     OpcUa_ModificationInfo* ModificationInfos;
-}
-OpcUa_HistoryModifiedData;
+} OpcUa_HistoryModifiedData;
 
 void OpcUa_HistoryModifiedData_Initialize(void* pValue);
 
@@ -4105,16 +3958,15 @@ SOPC_StatusCode OpcUa_HistoryModifiedData_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The HistoryEventFieldList structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType;
+
 typedef struct _OpcUa_HistoryEventFieldList
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t       NoOfEventFields;
+    int32_t NoOfEventFields;
     SOPC_Variant* EventFields;
-}
-OpcUa_HistoryEventFieldList;
+} OpcUa_HistoryEventFieldList;
 
 void OpcUa_HistoryEventFieldList_Initialize(void* pValue);
 
@@ -4130,16 +3982,15 @@ SOPC_StatusCode OpcUa_HistoryEventFieldList_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The HistoryEvent structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType;
+
 typedef struct _OpcUa_HistoryEvent
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t                      NoOfEvents;
+    int32_t NoOfEvents;
     OpcUa_HistoryEventFieldList* Events;
-}
-OpcUa_HistoryEvent;
+} OpcUa_HistoryEvent;
 
 void OpcUa_HistoryEvent_Initialize(void* pValue);
 
@@ -4156,20 +4007,19 @@ SOPC_StatusCode OpcUa_HistoryEvent_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The HistoryReadRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType;
+
 typedef struct _OpcUa_HistoryReadRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader       RequestHeader;
-    SOPC_ExtensionObject      HistoryReadDetails;
-    OpcUa_TimestampsToReturn  TimestampsToReturn;
-    SOPC_Boolean              ReleaseContinuationPoints;
-    int32_t                   NoOfNodesToRead;
+    OpcUa_RequestHeader RequestHeader;
+    SOPC_ExtensionObject HistoryReadDetails;
+    OpcUa_TimestampsToReturn TimestampsToReturn;
+    SOPC_Boolean ReleaseContinuationPoints;
+    int32_t NoOfNodesToRead;
     OpcUa_HistoryReadValueId* NodesToRead;
-}
-OpcUa_HistoryReadRequest;
+} OpcUa_HistoryReadRequest;
 
 void OpcUa_HistoryReadRequest_Initialize(void* pValue);
 
@@ -4185,19 +4035,18 @@ SOPC_StatusCode OpcUa_HistoryReadRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The HistoryReadResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType;
+
 typedef struct _OpcUa_HistoryReadResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader     ResponseHeader;
-    int32_t                  NoOfResults;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfResults;
     OpcUa_HistoryReadResult* Results;
-    int32_t                  NoOfDiagnosticInfos;
-    SOPC_DiagnosticInfo*     DiagnosticInfos;
-}
-OpcUa_HistoryReadResponse;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
+} OpcUa_HistoryReadResponse;
 
 void OpcUa_HistoryReadResponse_Initialize(void* pValue);
 
@@ -4214,18 +4063,17 @@ SOPC_StatusCode OpcUa_HistoryReadResponse_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The WriteValue structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_WriteValue_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_WriteValue_EncodeableType;
+
 typedef struct _OpcUa_WriteValue
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId    NodeId;
-    uint32_t       AttributeId;
-    SOPC_String    IndexRange;
+    SOPC_NodeId NodeId;
+    uint32_t AttributeId;
+    SOPC_String IndexRange;
     SOPC_DataValue Value;
-}
-OpcUa_WriteValue;
+} OpcUa_WriteValue;
 
 void OpcUa_WriteValue_Initialize(void* pValue);
 
@@ -4242,17 +4090,16 @@ SOPC_StatusCode OpcUa_WriteValue_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The WriteRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType;
+
 typedef struct _OpcUa_WriteRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    int32_t             NoOfNodesToWrite;
-    OpcUa_WriteValue*   NodesToWrite;
-}
-OpcUa_WriteRequest;
+    int32_t NoOfNodesToWrite;
+    OpcUa_WriteValue* NodesToWrite;
+} OpcUa_WriteRequest;
 
 void OpcUa_WriteRequest_Initialize(void* pValue);
 
@@ -4268,19 +4115,18 @@ SOPC_StatusCode OpcUa_WriteRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The WriteResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType;
+
 typedef struct _OpcUa_WriteResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfResults;
-    SOPC_StatusCode*     Results;
-    int32_t              NoOfDiagnosticInfos;
+    int32_t NoOfResults;
+    SOPC_StatusCode* Results;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_WriteResponse;
+} OpcUa_WriteResponse;
 
 void OpcUa_WriteResponse_Initialize(void* pValue);
 
@@ -4297,15 +4143,14 @@ SOPC_StatusCode OpcUa_WriteResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The HistoryUpdateDetails structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType;
+
 typedef struct _OpcUa_HistoryUpdateDetails
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_NodeId NodeId;
-}
-OpcUa_HistoryUpdateDetails;
+} OpcUa_HistoryUpdateDetails;
 
 void OpcUa_HistoryUpdateDetails_Initialize(void* pValue);
 
@@ -4321,17 +4166,16 @@ SOPC_StatusCode OpcUa_HistoryUpdateDetails_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The PerformUpdateType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_PerformUpdateType
-{
-    OpcUa_PerformUpdateType_Insert  = 1,
+typedef enum _OpcUa_PerformUpdateType {
+    OpcUa_PerformUpdateType_Insert = 1,
     OpcUa_PerformUpdateType_Replace = 2,
-    OpcUa_PerformUpdateType_Update  = 3,
-    OpcUa_PerformUpdateType_Remove  = 4
+    OpcUa_PerformUpdateType_Update = 3,
+    OpcUa_PerformUpdateType_Remove = 4
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_PerformUpdateType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_PerformUpdateType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_PerformUpdateType;
+} OpcUa_PerformUpdateType;
 
 #endif
 
@@ -4339,18 +4183,17 @@ OpcUa_PerformUpdateType;
 /*============================================================================
  * The UpdateDataDetails structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType;
+
 typedef struct _OpcUa_UpdateDataDetails
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId             NodeId;
+    SOPC_NodeId NodeId;
     OpcUa_PerformUpdateType PerformInsertReplace;
-    int32_t                 NoOfUpdateValues;
-    SOPC_DataValue*         UpdateValues;
-}
-OpcUa_UpdateDataDetails;
+    int32_t NoOfUpdateValues;
+    SOPC_DataValue* UpdateValues;
+} OpcUa_UpdateDataDetails;
 
 void OpcUa_UpdateDataDetails_Initialize(void* pValue);
 
@@ -4366,18 +4209,17 @@ SOPC_StatusCode OpcUa_UpdateDataDetails_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The UpdateStructureDataDetails structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType;
+
 typedef struct _OpcUa_UpdateStructureDataDetails
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId             NodeId;
+    SOPC_NodeId NodeId;
     OpcUa_PerformUpdateType PerformInsertReplace;
-    int32_t                 NoOfUpdateValues;
-    SOPC_DataValue*         UpdateValues;
-}
-OpcUa_UpdateStructureDataDetails;
+    int32_t NoOfUpdateValues;
+    SOPC_DataValue* UpdateValues;
+} OpcUa_UpdateStructureDataDetails;
 
 void OpcUa_UpdateStructureDataDetails_Initialize(void* pValue);
 
@@ -4393,19 +4235,18 @@ SOPC_StatusCode OpcUa_UpdateStructureDataDetails_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The UpdateEventDetails structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType;
+
 typedef struct _OpcUa_UpdateEventDetails
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId                  NodeId;
-    OpcUa_PerformUpdateType      PerformInsertReplace;
-    OpcUa_EventFilter            Filter;
-    int32_t                      NoOfEventData;
+    SOPC_NodeId NodeId;
+    OpcUa_PerformUpdateType PerformInsertReplace;
+    OpcUa_EventFilter Filter;
+    int32_t NoOfEventData;
     OpcUa_HistoryEventFieldList* EventData;
-}
-OpcUa_UpdateEventDetails;
+} OpcUa_UpdateEventDetails;
 
 void OpcUa_UpdateEventDetails_Initialize(void* pValue);
 
@@ -4421,18 +4262,17 @@ SOPC_StatusCode OpcUa_UpdateEventDetails_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The DeleteRawModifiedDetails structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType;
+
 typedef struct _OpcUa_DeleteRawModifiedDetails
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId   NodeId;
-    SOPC_Boolean  IsDeleteModified;
+    SOPC_NodeId NodeId;
+    SOPC_Boolean IsDeleteModified;
     SOPC_DateTime StartTime;
     SOPC_DateTime EndTime;
-}
-OpcUa_DeleteRawModifiedDetails;
+} OpcUa_DeleteRawModifiedDetails;
 
 void OpcUa_DeleteRawModifiedDetails_Initialize(void* pValue);
 
@@ -4448,17 +4288,16 @@ SOPC_StatusCode OpcUa_DeleteRawModifiedDetails_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The DeleteAtTimeDetails structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType;
+
 typedef struct _OpcUa_DeleteAtTimeDetails
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId    NodeId;
-    int32_t        NoOfReqTimes;
+    SOPC_NodeId NodeId;
+    int32_t NoOfReqTimes;
     SOPC_DateTime* ReqTimes;
-}
-OpcUa_DeleteAtTimeDetails;
+} OpcUa_DeleteAtTimeDetails;
 
 void OpcUa_DeleteAtTimeDetails_Initialize(void* pValue);
 
@@ -4474,17 +4313,16 @@ SOPC_StatusCode OpcUa_DeleteAtTimeDetails_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The DeleteEventDetails structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType;
+
 typedef struct _OpcUa_DeleteEventDetails
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId      NodeId;
-    int32_t          NoOfEventIds;
+    SOPC_NodeId NodeId;
+    int32_t NoOfEventIds;
     SOPC_ByteString* EventIds;
-}
-OpcUa_DeleteEventDetails;
+} OpcUa_DeleteEventDetails;
 
 void OpcUa_DeleteEventDetails_Initialize(void* pValue);
 
@@ -4500,19 +4338,18 @@ SOPC_StatusCode OpcUa_DeleteEventDetails_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The HistoryUpdateResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType;
+
 typedef struct _OpcUa_HistoryUpdateResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_StatusCode      StatusCode;
-    int32_t              NoOfOperationResults;
-    SOPC_StatusCode*     OperationResults;
-    int32_t              NoOfDiagnosticInfos;
+    SOPC_StatusCode StatusCode;
+    int32_t NoOfOperationResults;
+    SOPC_StatusCode* OperationResults;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_HistoryUpdateResult;
+} OpcUa_HistoryUpdateResult;
 
 void OpcUa_HistoryUpdateResult_Initialize(void* pValue);
 
@@ -4529,17 +4366,16 @@ SOPC_StatusCode OpcUa_HistoryUpdateResult_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The HistoryUpdateRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType;
+
 typedef struct _OpcUa_HistoryUpdateRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader   RequestHeader;
-    int32_t               NoOfHistoryUpdateDetails;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t NoOfHistoryUpdateDetails;
     SOPC_ExtensionObject* HistoryUpdateDetails;
-}
-OpcUa_HistoryUpdateRequest;
+} OpcUa_HistoryUpdateRequest;
 
 void OpcUa_HistoryUpdateRequest_Initialize(void* pValue);
 
@@ -4555,19 +4391,18 @@ SOPC_StatusCode OpcUa_HistoryUpdateRequest_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The HistoryUpdateResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType;
+
 typedef struct _OpcUa_HistoryUpdateResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader       ResponseHeader;
-    int32_t                    NoOfResults;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfResults;
     OpcUa_HistoryUpdateResult* Results;
-    int32_t                    NoOfDiagnosticInfos;
-    SOPC_DiagnosticInfo*       DiagnosticInfos;
-}
-OpcUa_HistoryUpdateResponse;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
+} OpcUa_HistoryUpdateResponse;
 
 void OpcUa_HistoryUpdateResponse_Initialize(void* pValue);
 
@@ -4584,18 +4419,17 @@ SOPC_StatusCode OpcUa_HistoryUpdateResponse_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The CallMethodRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType;
+
 typedef struct _OpcUa_CallMethodRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId   ObjectId;
-    SOPC_NodeId   MethodId;
-    int32_t       NoOfInputArguments;
+    SOPC_NodeId ObjectId;
+    SOPC_NodeId MethodId;
+    int32_t NoOfInputArguments;
     SOPC_Variant* InputArguments;
-}
-OpcUa_CallMethodRequest;
+} OpcUa_CallMethodRequest;
 
 void OpcUa_CallMethodRequest_Initialize(void* pValue);
 
@@ -4611,21 +4445,20 @@ SOPC_StatusCode OpcUa_CallMethodRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The CallMethodResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType;
+
 typedef struct _OpcUa_CallMethodResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_StatusCode      StatusCode;
-    int32_t              NoOfInputArgumentResults;
-    SOPC_StatusCode*     InputArgumentResults;
-    int32_t              NoOfInputArgumentDiagnosticInfos;
+    SOPC_StatusCode StatusCode;
+    int32_t NoOfInputArgumentResults;
+    SOPC_StatusCode* InputArgumentResults;
+    int32_t NoOfInputArgumentDiagnosticInfos;
     SOPC_DiagnosticInfo* InputArgumentDiagnosticInfos;
-    int32_t              NoOfOutputArguments;
-    SOPC_Variant*        OutputArguments;
-}
-OpcUa_CallMethodResult;
+    int32_t NoOfOutputArguments;
+    SOPC_Variant* OutputArguments;
+} OpcUa_CallMethodResult;
 
 void OpcUa_CallMethodResult_Initialize(void* pValue);
 
@@ -4642,17 +4475,16 @@ SOPC_StatusCode OpcUa_CallMethodResult_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The CallRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CallRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CallRequest_EncodeableType;
+
 typedef struct _OpcUa_CallRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader      RequestHeader;
-    int32_t                  NoOfMethodsToCall;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t NoOfMethodsToCall;
     OpcUa_CallMethodRequest* MethodsToCall;
-}
-OpcUa_CallRequest;
+} OpcUa_CallRequest;
 
 void OpcUa_CallRequest_Initialize(void* pValue);
 
@@ -4668,19 +4500,18 @@ SOPC_StatusCode OpcUa_CallRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The CallResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CallResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CallResponse_EncodeableType;
+
 typedef struct _OpcUa_CallResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader    ResponseHeader;
-    int32_t                 NoOfResults;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfResults;
     OpcUa_CallMethodResult* Results;
-    int32_t                 NoOfDiagnosticInfos;
-    SOPC_DiagnosticInfo*    DiagnosticInfos;
-}
-OpcUa_CallResponse;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
+} OpcUa_CallResponse;
 
 void OpcUa_CallResponse_Initialize(void* pValue);
 
@@ -4697,16 +4528,15 @@ SOPC_StatusCode OpcUa_CallResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The MonitoringMode enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_MonitoringMode
-{
-    OpcUa_MonitoringMode_Disabled  = 0,
-    OpcUa_MonitoringMode_Sampling  = 1,
+typedef enum _OpcUa_MonitoringMode {
+    OpcUa_MonitoringMode_Disabled = 0,
+    OpcUa_MonitoringMode_Sampling = 1,
     OpcUa_MonitoringMode_Reporting = 2
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_MonitoringMode_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_MonitoringMode_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_MonitoringMode;
+} OpcUa_MonitoringMode;
 
 #endif
 
@@ -4714,16 +4544,15 @@ OpcUa_MonitoringMode;
 /*============================================================================
  * The DataChangeTrigger enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_DataChangeTrigger
-{
-    OpcUa_DataChangeTrigger_Status               = 0,
-    OpcUa_DataChangeTrigger_StatusValue          = 1,
+typedef enum _OpcUa_DataChangeTrigger {
+    OpcUa_DataChangeTrigger_Status = 0,
+    OpcUa_DataChangeTrigger_StatusValue = 1,
     OpcUa_DataChangeTrigger_StatusValueTimestamp = 2
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_DataChangeTrigger_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_DataChangeTrigger_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_DataChangeTrigger;
+} OpcUa_DataChangeTrigger;
 
 #endif
 
@@ -4731,16 +4560,15 @@ OpcUa_DataChangeTrigger;
 /*============================================================================
  * The DeadbandType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_DeadbandType
-{
-    OpcUa_DeadbandType_None     = 0,
+typedef enum _OpcUa_DeadbandType {
+    OpcUa_DeadbandType_None = 0,
     OpcUa_DeadbandType_Absolute = 1,
-    OpcUa_DeadbandType_Percent  = 2
+    OpcUa_DeadbandType_Percent = 2
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_DeadbandType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_DeadbandType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_DeadbandType;
+} OpcUa_DeadbandType;
 
 #endif
 
@@ -4748,17 +4576,16 @@ OpcUa_DeadbandType;
 /*============================================================================
  * The DataChangeFilter structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType;
+
 typedef struct _OpcUa_DataChangeFilter
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_DataChangeTrigger Trigger;
-    uint32_t                DeadbandType;
-    double                  DeadbandValue;
-}
-OpcUa_DataChangeFilter;
+    uint32_t DeadbandType;
+    double DeadbandValue;
+} OpcUa_DataChangeFilter;
 
 void OpcUa_DataChangeFilter_Initialize(void* pValue);
 
@@ -4774,18 +4601,17 @@ SOPC_StatusCode OpcUa_DataChangeFilter_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The AggregateFilter structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType;
+
 typedef struct _OpcUa_AggregateFilter
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_DateTime                StartTime;
-    SOPC_NodeId                  AggregateType;
-    double                       ProcessingInterval;
+    SOPC_DateTime StartTime;
+    SOPC_NodeId AggregateType;
+    double ProcessingInterval;
     OpcUa_AggregateConfiguration AggregateConfiguration;
-}
-OpcUa_AggregateFilter;
+} OpcUa_AggregateFilter;
 
 void OpcUa_AggregateFilter_Initialize(void* pValue);
 
@@ -4801,19 +4627,18 @@ SOPC_StatusCode OpcUa_AggregateFilter_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The EventFilterResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType;
+
 typedef struct _OpcUa_EventFilterResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t                   NoOfSelectClauseResults;
-    SOPC_StatusCode*          SelectClauseResults;
-    int32_t                   NoOfSelectClauseDiagnosticInfos;
-    SOPC_DiagnosticInfo*      SelectClauseDiagnosticInfos;
+    int32_t NoOfSelectClauseResults;
+    SOPC_StatusCode* SelectClauseResults;
+    int32_t NoOfSelectClauseDiagnosticInfos;
+    SOPC_DiagnosticInfo* SelectClauseDiagnosticInfos;
     OpcUa_ContentFilterResult WhereClauseResult;
-}
-OpcUa_EventFilterResult;
+} OpcUa_EventFilterResult;
 
 void OpcUa_EventFilterResult_Initialize(void* pValue);
 
@@ -4829,17 +4654,16 @@ SOPC_StatusCode OpcUa_EventFilterResult_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The AggregateFilterResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType;
+
 typedef struct _OpcUa_AggregateFilterResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_DateTime                RevisedStartTime;
-    double                       RevisedProcessingInterval;
+    SOPC_DateTime RevisedStartTime;
+    double RevisedProcessingInterval;
     OpcUa_AggregateConfiguration RevisedAggregateConfiguration;
-}
-OpcUa_AggregateFilterResult;
+} OpcUa_AggregateFilterResult;
 
 void OpcUa_AggregateFilterResult_Initialize(void* pValue);
 
@@ -4855,19 +4679,18 @@ SOPC_StatusCode OpcUa_AggregateFilterResult_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The MonitoringParameters structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType;
+
 typedef struct _OpcUa_MonitoringParameters
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t             ClientHandle;
-    double               SamplingInterval;
+    uint32_t ClientHandle;
+    double SamplingInterval;
     SOPC_ExtensionObject Filter;
-    uint32_t             QueueSize;
-    SOPC_Boolean         DiscardOldest;
-}
-OpcUa_MonitoringParameters;
+    uint32_t QueueSize;
+    SOPC_Boolean DiscardOldest;
+} OpcUa_MonitoringParameters;
 
 void OpcUa_MonitoringParameters_Initialize(void* pValue);
 
@@ -4883,17 +4706,16 @@ SOPC_StatusCode OpcUa_MonitoringParameters_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The MonitoredItemCreateRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType;
+
 typedef struct _OpcUa_MonitoredItemCreateRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ReadValueId          ItemToMonitor;
-    OpcUa_MonitoringMode       MonitoringMode;
+    OpcUa_ReadValueId ItemToMonitor;
+    OpcUa_MonitoringMode MonitoringMode;
     OpcUa_MonitoringParameters RequestedParameters;
-}
-OpcUa_MonitoredItemCreateRequest;
+} OpcUa_MonitoredItemCreateRequest;
 
 void OpcUa_MonitoredItemCreateRequest_Initialize(void* pValue);
 
@@ -4909,19 +4731,18 @@ SOPC_StatusCode OpcUa_MonitoredItemCreateRequest_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The MonitoredItemCreateResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType;
+
 typedef struct _OpcUa_MonitoredItemCreateResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_StatusCode      StatusCode;
-    uint32_t             MonitoredItemId;
-    double               RevisedSamplingInterval;
-    uint32_t             RevisedQueueSize;
+    SOPC_StatusCode StatusCode;
+    uint32_t MonitoredItemId;
+    double RevisedSamplingInterval;
+    uint32_t RevisedQueueSize;
     SOPC_ExtensionObject FilterResult;
-}
-OpcUa_MonitoredItemCreateResult;
+} OpcUa_MonitoredItemCreateResult;
 
 void OpcUa_MonitoredItemCreateResult_Initialize(void* pValue);
 
@@ -4938,19 +4759,18 @@ SOPC_StatusCode OpcUa_MonitoredItemCreateResult_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The CreateMonitoredItemsRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType;
+
 typedef struct _OpcUa_CreateMonitoredItemsRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader               RequestHeader;
-    uint32_t                          SubscriptionId;
-    OpcUa_TimestampsToReturn          TimestampsToReturn;
-    int32_t                           NoOfItemsToCreate;
+    OpcUa_RequestHeader RequestHeader;
+    uint32_t SubscriptionId;
+    OpcUa_TimestampsToReturn TimestampsToReturn;
+    int32_t NoOfItemsToCreate;
     OpcUa_MonitoredItemCreateRequest* ItemsToCreate;
-}
-OpcUa_CreateMonitoredItemsRequest;
+} OpcUa_CreateMonitoredItemsRequest;
 
 void OpcUa_CreateMonitoredItemsRequest_Initialize(void* pValue);
 
@@ -4966,19 +4786,18 @@ SOPC_StatusCode OpcUa_CreateMonitoredItemsRequest_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The CreateMonitoredItemsResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType;
+
 typedef struct _OpcUa_CreateMonitoredItemsResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader             ResponseHeader;
-    int32_t                          NoOfResults;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfResults;
     OpcUa_MonitoredItemCreateResult* Results;
-    int32_t                          NoOfDiagnosticInfos;
-    SOPC_DiagnosticInfo*             DiagnosticInfos;
-}
-OpcUa_CreateMonitoredItemsResponse;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
+} OpcUa_CreateMonitoredItemsResponse;
 
 void OpcUa_CreateMonitoredItemsResponse_Initialize(void* pValue);
 
@@ -4995,16 +4814,15 @@ SOPC_StatusCode OpcUa_CreateMonitoredItemsResponse_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The MonitoredItemModifyRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType;
+
 typedef struct _OpcUa_MonitoredItemModifyRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t                   MonitoredItemId;
+    uint32_t MonitoredItemId;
     OpcUa_MonitoringParameters RequestedParameters;
-}
-OpcUa_MonitoredItemModifyRequest;
+} OpcUa_MonitoredItemModifyRequest;
 
 void OpcUa_MonitoredItemModifyRequest_Initialize(void* pValue);
 
@@ -5020,18 +4838,17 @@ SOPC_StatusCode OpcUa_MonitoredItemModifyRequest_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The MonitoredItemModifyResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType;
+
 typedef struct _OpcUa_MonitoredItemModifyResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_StatusCode      StatusCode;
-    double               RevisedSamplingInterval;
-    uint32_t             RevisedQueueSize;
+    SOPC_StatusCode StatusCode;
+    double RevisedSamplingInterval;
+    uint32_t RevisedQueueSize;
     SOPC_ExtensionObject FilterResult;
-}
-OpcUa_MonitoredItemModifyResult;
+} OpcUa_MonitoredItemModifyResult;
 
 void OpcUa_MonitoredItemModifyResult_Initialize(void* pValue);
 
@@ -5048,19 +4865,18 @@ SOPC_StatusCode OpcUa_MonitoredItemModifyResult_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The ModifyMonitoredItemsRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType;
+
 typedef struct _OpcUa_ModifyMonitoredItemsRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader               RequestHeader;
-    uint32_t                          SubscriptionId;
-    OpcUa_TimestampsToReturn          TimestampsToReturn;
-    int32_t                           NoOfItemsToModify;
+    OpcUa_RequestHeader RequestHeader;
+    uint32_t SubscriptionId;
+    OpcUa_TimestampsToReturn TimestampsToReturn;
+    int32_t NoOfItemsToModify;
     OpcUa_MonitoredItemModifyRequest* ItemsToModify;
-}
-OpcUa_ModifyMonitoredItemsRequest;
+} OpcUa_ModifyMonitoredItemsRequest;
 
 void OpcUa_ModifyMonitoredItemsRequest_Initialize(void* pValue);
 
@@ -5076,19 +4892,18 @@ SOPC_StatusCode OpcUa_ModifyMonitoredItemsRequest_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The ModifyMonitoredItemsResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType;
+
 typedef struct _OpcUa_ModifyMonitoredItemsResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader             ResponseHeader;
-    int32_t                          NoOfResults;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfResults;
     OpcUa_MonitoredItemModifyResult* Results;
-    int32_t                          NoOfDiagnosticInfos;
-    SOPC_DiagnosticInfo*             DiagnosticInfos;
-}
-OpcUa_ModifyMonitoredItemsResponse;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
+} OpcUa_ModifyMonitoredItemsResponse;
 
 void OpcUa_ModifyMonitoredItemsResponse_Initialize(void* pValue);
 
@@ -5106,19 +4921,18 @@ SOPC_StatusCode OpcUa_ModifyMonitoredItemsResponse_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The SetMonitoringModeRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType;
+
 typedef struct _OpcUa_SetMonitoringModeRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader  RequestHeader;
-    uint32_t             SubscriptionId;
+    OpcUa_RequestHeader RequestHeader;
+    uint32_t SubscriptionId;
     OpcUa_MonitoringMode MonitoringMode;
-    int32_t              NoOfMonitoredItemIds;
-    uint32_t*            MonitoredItemIds;
-}
-OpcUa_SetMonitoringModeRequest;
+    int32_t NoOfMonitoredItemIds;
+    uint32_t* MonitoredItemIds;
+} OpcUa_SetMonitoringModeRequest;
 
 void OpcUa_SetMonitoringModeRequest_Initialize(void* pValue);
 
@@ -5134,19 +4948,18 @@ SOPC_StatusCode OpcUa_SetMonitoringModeRequest_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The SetMonitoringModeResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType;
+
 typedef struct _OpcUa_SetMonitoringModeResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfResults;
-    SOPC_StatusCode*     Results;
-    int32_t              NoOfDiagnosticInfos;
+    int32_t NoOfResults;
+    SOPC_StatusCode* Results;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_SetMonitoringModeResponse;
+} OpcUa_SetMonitoringModeResponse;
 
 void OpcUa_SetMonitoringModeResponse_Initialize(void* pValue);
 
@@ -5164,21 +4977,20 @@ SOPC_StatusCode OpcUa_SetMonitoringModeResponse_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The SetTriggeringRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType;
+
 typedef struct _OpcUa_SetTriggeringRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    uint32_t            SubscriptionId;
-    uint32_t            TriggeringItemId;
-    int32_t             NoOfLinksToAdd;
-    uint32_t*           LinksToAdd;
-    int32_t             NoOfLinksToRemove;
-    uint32_t*           LinksToRemove;
-}
-OpcUa_SetTriggeringRequest;
+    uint32_t SubscriptionId;
+    uint32_t TriggeringItemId;
+    int32_t NoOfLinksToAdd;
+    uint32_t* LinksToAdd;
+    int32_t NoOfLinksToRemove;
+    uint32_t* LinksToRemove;
+} OpcUa_SetTriggeringRequest;
 
 void OpcUa_SetTriggeringRequest_Initialize(void* pValue);
 
@@ -5194,23 +5006,22 @@ SOPC_StatusCode OpcUa_SetTriggeringRequest_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The SetTriggeringResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType;
+
 typedef struct _OpcUa_SetTriggeringResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfAddResults;
-    SOPC_StatusCode*     AddResults;
-    int32_t              NoOfAddDiagnosticInfos;
+    int32_t NoOfAddResults;
+    SOPC_StatusCode* AddResults;
+    int32_t NoOfAddDiagnosticInfos;
     SOPC_DiagnosticInfo* AddDiagnosticInfos;
-    int32_t              NoOfRemoveResults;
-    SOPC_StatusCode*     RemoveResults;
-    int32_t              NoOfRemoveDiagnosticInfos;
+    int32_t NoOfRemoveResults;
+    SOPC_StatusCode* RemoveResults;
+    int32_t NoOfRemoveDiagnosticInfos;
     SOPC_DiagnosticInfo* RemoveDiagnosticInfos;
-}
-OpcUa_SetTriggeringResponse;
+} OpcUa_SetTriggeringResponse;
 
 void OpcUa_SetTriggeringResponse_Initialize(void* pValue);
 
@@ -5228,18 +5039,17 @@ SOPC_StatusCode OpcUa_SetTriggeringResponse_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The DeleteMonitoredItemsRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType;
+
 typedef struct _OpcUa_DeleteMonitoredItemsRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    uint32_t            SubscriptionId;
-    int32_t             NoOfMonitoredItemIds;
-    uint32_t*           MonitoredItemIds;
-}
-OpcUa_DeleteMonitoredItemsRequest;
+    uint32_t SubscriptionId;
+    int32_t NoOfMonitoredItemIds;
+    uint32_t* MonitoredItemIds;
+} OpcUa_DeleteMonitoredItemsRequest;
 
 void OpcUa_DeleteMonitoredItemsRequest_Initialize(void* pValue);
 
@@ -5255,19 +5065,18 @@ SOPC_StatusCode OpcUa_DeleteMonitoredItemsRequest_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The DeleteMonitoredItemsResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType;
+
 typedef struct _OpcUa_DeleteMonitoredItemsResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfResults;
-    SOPC_StatusCode*     Results;
-    int32_t              NoOfDiagnosticInfos;
+    int32_t NoOfResults;
+    SOPC_StatusCode* Results;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_DeleteMonitoredItemsResponse;
+} OpcUa_DeleteMonitoredItemsResponse;
 
 void OpcUa_DeleteMonitoredItemsResponse_Initialize(void* pValue);
 
@@ -5285,21 +5094,20 @@ SOPC_StatusCode OpcUa_DeleteMonitoredItemsResponse_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The CreateSubscriptionRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType;
+
 typedef struct _OpcUa_CreateSubscriptionRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    double              RequestedPublishingInterval;
-    uint32_t            RequestedLifetimeCount;
-    uint32_t            RequestedMaxKeepAliveCount;
-    uint32_t            MaxNotificationsPerPublish;
-    SOPC_Boolean        PublishingEnabled;
-    SOPC_Byte           Priority;
-}
-OpcUa_CreateSubscriptionRequest;
+    double RequestedPublishingInterval;
+    uint32_t RequestedLifetimeCount;
+    uint32_t RequestedMaxKeepAliveCount;
+    uint32_t MaxNotificationsPerPublish;
+    SOPC_Boolean PublishingEnabled;
+    SOPC_Byte Priority;
+} OpcUa_CreateSubscriptionRequest;
 
 void OpcUa_CreateSubscriptionRequest_Initialize(void* pValue);
 
@@ -5315,19 +5123,18 @@ SOPC_StatusCode OpcUa_CreateSubscriptionRequest_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The CreateSubscriptionResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType;
+
 typedef struct _OpcUa_CreateSubscriptionResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    uint32_t             SubscriptionId;
-    double               RevisedPublishingInterval;
-    uint32_t             RevisedLifetimeCount;
-    uint32_t             RevisedMaxKeepAliveCount;
-}
-OpcUa_CreateSubscriptionResponse;
+    uint32_t SubscriptionId;
+    double RevisedPublishingInterval;
+    uint32_t RevisedLifetimeCount;
+    uint32_t RevisedMaxKeepAliveCount;
+} OpcUa_CreateSubscriptionResponse;
 
 void OpcUa_CreateSubscriptionResponse_Initialize(void* pValue);
 
@@ -5345,21 +5152,20 @@ SOPC_StatusCode OpcUa_CreateSubscriptionResponse_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The ModifySubscriptionRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType;
+
 typedef struct _OpcUa_ModifySubscriptionRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    uint32_t            SubscriptionId;
-    double              RequestedPublishingInterval;
-    uint32_t            RequestedLifetimeCount;
-    uint32_t            RequestedMaxKeepAliveCount;
-    uint32_t            MaxNotificationsPerPublish;
-    SOPC_Byte           Priority;
-}
-OpcUa_ModifySubscriptionRequest;
+    uint32_t SubscriptionId;
+    double RequestedPublishingInterval;
+    uint32_t RequestedLifetimeCount;
+    uint32_t RequestedMaxKeepAliveCount;
+    uint32_t MaxNotificationsPerPublish;
+    SOPC_Byte Priority;
+} OpcUa_ModifySubscriptionRequest;
 
 void OpcUa_ModifySubscriptionRequest_Initialize(void* pValue);
 
@@ -5375,18 +5181,17 @@ SOPC_StatusCode OpcUa_ModifySubscriptionRequest_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The ModifySubscriptionResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType;
+
 typedef struct _OpcUa_ModifySubscriptionResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    double               RevisedPublishingInterval;
-    uint32_t             RevisedLifetimeCount;
-    uint32_t             RevisedMaxKeepAliveCount;
-}
-OpcUa_ModifySubscriptionResponse;
+    double RevisedPublishingInterval;
+    uint32_t RevisedLifetimeCount;
+    uint32_t RevisedMaxKeepAliveCount;
+} OpcUa_ModifySubscriptionResponse;
 
 void OpcUa_ModifySubscriptionResponse_Initialize(void* pValue);
 
@@ -5404,18 +5209,17 @@ SOPC_StatusCode OpcUa_ModifySubscriptionResponse_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The SetPublishingModeRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType;
+
 typedef struct _OpcUa_SetPublishingModeRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    SOPC_Boolean        PublishingEnabled;
-    int32_t             NoOfSubscriptionIds;
-    uint32_t*           SubscriptionIds;
-}
-OpcUa_SetPublishingModeRequest;
+    SOPC_Boolean PublishingEnabled;
+    int32_t NoOfSubscriptionIds;
+    uint32_t* SubscriptionIds;
+} OpcUa_SetPublishingModeRequest;
 
 void OpcUa_SetPublishingModeRequest_Initialize(void* pValue);
 
@@ -5431,19 +5235,18 @@ SOPC_StatusCode OpcUa_SetPublishingModeRequest_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The SetPublishingModeResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType;
+
 typedef struct _OpcUa_SetPublishingModeResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfResults;
-    SOPC_StatusCode*     Results;
-    int32_t              NoOfDiagnosticInfos;
+    int32_t NoOfResults;
+    SOPC_StatusCode* Results;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_SetPublishingModeResponse;
+} OpcUa_SetPublishingModeResponse;
 
 void OpcUa_SetPublishingModeResponse_Initialize(void* pValue);
 
@@ -5460,18 +5263,17 @@ SOPC_StatusCode OpcUa_SetPublishingModeResponse_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The NotificationMessage structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType;
+
 typedef struct _OpcUa_NotificationMessage
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t              SequenceNumber;
-    SOPC_DateTime         PublishTime;
-    int32_t               NoOfNotificationData;
+    uint32_t SequenceNumber;
+    SOPC_DateTime PublishTime;
+    int32_t NoOfNotificationData;
     SOPC_ExtensionObject* NotificationData;
-}
-OpcUa_NotificationMessage;
+} OpcUa_NotificationMessage;
 
 void OpcUa_NotificationMessage_Initialize(void* pValue);
 
@@ -5487,16 +5289,15 @@ SOPC_StatusCode OpcUa_NotificationMessage_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The MonitoredItemNotification structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType;
+
 typedef struct _OpcUa_MonitoredItemNotification
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t       ClientHandle;
+    uint32_t ClientHandle;
     SOPC_DataValue Value;
-}
-OpcUa_MonitoredItemNotification;
+} OpcUa_MonitoredItemNotification;
 
 void OpcUa_MonitoredItemNotification_Initialize(void* pValue);
 
@@ -5512,18 +5313,17 @@ SOPC_StatusCode OpcUa_MonitoredItemNotification_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The DataChangeNotification structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType;
+
 typedef struct _OpcUa_DataChangeNotification
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t                          NoOfMonitoredItems;
+    int32_t NoOfMonitoredItems;
     OpcUa_MonitoredItemNotification* MonitoredItems;
-    int32_t                          NoOfDiagnosticInfos;
-    SOPC_DiagnosticInfo*             DiagnosticInfos;
-}
-OpcUa_DataChangeNotification;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
+} OpcUa_DataChangeNotification;
 
 void OpcUa_DataChangeNotification_Initialize(void* pValue);
 
@@ -5539,17 +5339,16 @@ SOPC_StatusCode OpcUa_DataChangeNotification_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The EventFieldList structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType;
+
 typedef struct _OpcUa_EventFieldList
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    uint32_t      ClientHandle;
-    int32_t       NoOfEventFields;
+    uint32_t ClientHandle;
+    int32_t NoOfEventFields;
     SOPC_Variant* EventFields;
-}
-OpcUa_EventFieldList;
+} OpcUa_EventFieldList;
 
 void OpcUa_EventFieldList_Initialize(void* pValue);
 
@@ -5565,16 +5364,15 @@ SOPC_StatusCode OpcUa_EventFieldList_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The EventNotificationList structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType;
+
 typedef struct _OpcUa_EventNotificationList
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t               NoOfEvents;
+    int32_t NoOfEvents;
     OpcUa_EventFieldList* Events;
-}
-OpcUa_EventNotificationList;
+} OpcUa_EventNotificationList;
 
 void OpcUa_EventNotificationList_Initialize(void* pValue);
 
@@ -5590,16 +5388,15 @@ SOPC_StatusCode OpcUa_EventNotificationList_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The StatusChangeNotification structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType;
+
 typedef struct _OpcUa_StatusChangeNotification
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_StatusCode     Status;
+    SOPC_StatusCode Status;
     SOPC_DiagnosticInfo DiagnosticInfo;
-}
-OpcUa_StatusChangeNotification;
+} OpcUa_StatusChangeNotification;
 
 void OpcUa_StatusChangeNotification_Initialize(void* pValue);
 
@@ -5615,16 +5412,15 @@ SOPC_StatusCode OpcUa_StatusChangeNotification_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The SubscriptionAcknowledgement structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType;
+
 typedef struct _OpcUa_SubscriptionAcknowledgement
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     uint32_t SubscriptionId;
     uint32_t SequenceNumber;
-}
-OpcUa_SubscriptionAcknowledgement;
+} OpcUa_SubscriptionAcknowledgement;
 
 void OpcUa_SubscriptionAcknowledgement_Initialize(void* pValue);
 
@@ -5641,17 +5437,16 @@ SOPC_StatusCode OpcUa_SubscriptionAcknowledgement_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The PublishRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType;
+
 typedef struct _OpcUa_PublishRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_RequestHeader                RequestHeader;
-    int32_t                            NoOfSubscriptionAcknowledgements;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t NoOfSubscriptionAcknowledgements;
     OpcUa_SubscriptionAcknowledgement* SubscriptionAcknowledgements;
-}
-OpcUa_PublishRequest;
+} OpcUa_PublishRequest;
 
 void OpcUa_PublishRequest_Initialize(void* pValue);
 
@@ -5667,24 +5462,23 @@ SOPC_StatusCode OpcUa_PublishRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The PublishResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType;
+
 typedef struct _OpcUa_PublishResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader      ResponseHeader;
-    uint32_t                  SubscriptionId;
-    int32_t                   NoOfAvailableSequenceNumbers;
-    uint32_t*                 AvailableSequenceNumbers;
-    SOPC_Boolean              MoreNotifications;
+    OpcUa_ResponseHeader ResponseHeader;
+    uint32_t SubscriptionId;
+    int32_t NoOfAvailableSequenceNumbers;
+    uint32_t* AvailableSequenceNumbers;
+    SOPC_Boolean MoreNotifications;
     OpcUa_NotificationMessage NotificationMessage;
-    int32_t                   NoOfResults;
-    SOPC_StatusCode*          Results;
-    int32_t                   NoOfDiagnosticInfos;
-    SOPC_DiagnosticInfo*      DiagnosticInfos;
-}
-OpcUa_PublishResponse;
+    int32_t NoOfResults;
+    SOPC_StatusCode* Results;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
+} OpcUa_PublishResponse;
 
 void OpcUa_PublishResponse_Initialize(void* pValue);
 
@@ -5702,17 +5496,16 @@ SOPC_StatusCode OpcUa_PublishResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The RepublishRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType;
+
 typedef struct _OpcUa_RepublishRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    uint32_t            SubscriptionId;
-    uint32_t            RetransmitSequenceNumber;
-}
-OpcUa_RepublishRequest;
+    uint32_t SubscriptionId;
+    uint32_t RetransmitSequenceNumber;
+} OpcUa_RepublishRequest;
 
 void OpcUa_RepublishRequest_Initialize(void* pValue);
 
@@ -5728,16 +5521,15 @@ SOPC_StatusCode OpcUa_RepublishRequest_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The RepublishResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType;
+
 typedef struct _OpcUa_RepublishResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader      ResponseHeader;
+    OpcUa_ResponseHeader ResponseHeader;
     OpcUa_NotificationMessage NotificationMessage;
-}
-OpcUa_RepublishResponse;
+} OpcUa_RepublishResponse;
 
 void OpcUa_RepublishResponse_Initialize(void* pValue);
 
@@ -5754,17 +5546,16 @@ SOPC_StatusCode OpcUa_RepublishResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The TransferResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_TransferResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_TransferResult_EncodeableType;
+
 typedef struct _OpcUa_TransferResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_StatusCode StatusCode;
-    int32_t         NoOfAvailableSequenceNumbers;
-    uint32_t*       AvailableSequenceNumbers;
-}
-OpcUa_TransferResult;
+    int32_t NoOfAvailableSequenceNumbers;
+    uint32_t* AvailableSequenceNumbers;
+} OpcUa_TransferResult;
 
 void OpcUa_TransferResult_Initialize(void* pValue);
 
@@ -5781,18 +5572,17 @@ SOPC_StatusCode OpcUa_TransferResult_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The TransferSubscriptionsRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType;
+
 typedef struct _OpcUa_TransferSubscriptionsRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    int32_t             NoOfSubscriptionIds;
-    uint32_t*           SubscriptionIds;
-    SOPC_Boolean        SendInitialValues;
-}
-OpcUa_TransferSubscriptionsRequest;
+    int32_t NoOfSubscriptionIds;
+    uint32_t* SubscriptionIds;
+    SOPC_Boolean SendInitialValues;
+} OpcUa_TransferSubscriptionsRequest;
 
 void OpcUa_TransferSubscriptionsRequest_Initialize(void* pValue);
 
@@ -5808,19 +5598,18 @@ SOPC_StatusCode OpcUa_TransferSubscriptionsRequest_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The TransferSubscriptionsResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType;
+
 typedef struct _OpcUa_TransferSubscriptionsResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_ResponseHeader  ResponseHeader;
-    int32_t               NoOfResults;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfResults;
     OpcUa_TransferResult* Results;
-    int32_t               NoOfDiagnosticInfos;
-    SOPC_DiagnosticInfo*  DiagnosticInfos;
-}
-OpcUa_TransferSubscriptionsResponse;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
+} OpcUa_TransferSubscriptionsResponse;
 
 void OpcUa_TransferSubscriptionsResponse_Initialize(void* pValue);
 
@@ -5838,17 +5627,16 @@ SOPC_StatusCode OpcUa_TransferSubscriptionsResponse_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The DeleteSubscriptionsRequest structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType;
+
 typedef struct _OpcUa_DeleteSubscriptionsRequest
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_RequestHeader RequestHeader;
-    int32_t             NoOfSubscriptionIds;
-    uint32_t*           SubscriptionIds;
-}
-OpcUa_DeleteSubscriptionsRequest;
+    int32_t NoOfSubscriptionIds;
+    uint32_t* SubscriptionIds;
+} OpcUa_DeleteSubscriptionsRequest;
 
 void OpcUa_DeleteSubscriptionsRequest_Initialize(void* pValue);
 
@@ -5864,19 +5652,18 @@ SOPC_StatusCode OpcUa_DeleteSubscriptionsRequest_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The DeleteSubscriptionsResponse structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType;
+
 typedef struct _OpcUa_DeleteSubscriptionsResponse
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     OpcUa_ResponseHeader ResponseHeader;
-    int32_t              NoOfResults;
-    SOPC_StatusCode*     Results;
-    int32_t              NoOfDiagnosticInfos;
+    int32_t NoOfResults;
+    SOPC_StatusCode* Results;
+    int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
-}
-OpcUa_DeleteSubscriptionsResponse;
+} OpcUa_DeleteSubscriptionsResponse;
 
 void OpcUa_DeleteSubscriptionsResponse_Initialize(void* pValue);
 
@@ -5893,16 +5680,15 @@ SOPC_StatusCode OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The EnumeratedTestType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_EnumeratedTestType
-{
-    OpcUa_EnumeratedTestType_Red    = 1,
+typedef enum _OpcUa_EnumeratedTestType {
+    OpcUa_EnumeratedTestType_Red = 1,
     OpcUa_EnumeratedTestType_Yellow = 4,
-    OpcUa_EnumeratedTestType_Green  = 5
+    OpcUa_EnumeratedTestType_Green = 5
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_EnumeratedTestType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_EnumeratedTestType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_EnumeratedTestType;
+} OpcUa_EnumeratedTestType;
 
 #endif
 
@@ -5910,20 +5696,19 @@ OpcUa_EnumeratedTestType;
 /*============================================================================
  * The BuildInfo structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType;
+
 typedef struct _OpcUa_BuildInfo
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String   ProductUri;
-    SOPC_String   ManufacturerName;
-    SOPC_String   ProductName;
-    SOPC_String   SoftwareVersion;
-    SOPC_String   BuildNumber;
+    SOPC_String ProductUri;
+    SOPC_String ManufacturerName;
+    SOPC_String ProductName;
+    SOPC_String SoftwareVersion;
+    SOPC_String BuildNumber;
     SOPC_DateTime BuildDate;
-}
-OpcUa_BuildInfo;
+} OpcUa_BuildInfo;
 
 void OpcUa_BuildInfo_Initialize(void* pValue);
 
@@ -5939,19 +5724,18 @@ SOPC_StatusCode OpcUa_BuildInfo_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The RedundancySupport enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_RedundancySupport
-{
-    OpcUa_RedundancySupport_None           = 0,
-    OpcUa_RedundancySupport_Cold           = 1,
-    OpcUa_RedundancySupport_Warm           = 2,
-    OpcUa_RedundancySupport_Hot            = 3,
-    OpcUa_RedundancySupport_Transparent    = 4,
+typedef enum _OpcUa_RedundancySupport {
+    OpcUa_RedundancySupport_None = 0,
+    OpcUa_RedundancySupport_Cold = 1,
+    OpcUa_RedundancySupport_Warm = 2,
+    OpcUa_RedundancySupport_Hot = 3,
+    OpcUa_RedundancySupport_Transparent = 4,
     OpcUa_RedundancySupport_HotAndMirrored = 5
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_RedundancySupport_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_RedundancySupport_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_RedundancySupport;
+} OpcUa_RedundancySupport;
 
 #endif
 
@@ -5959,21 +5743,20 @@ OpcUa_RedundancySupport;
 /*============================================================================
  * The ServerState enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_ServerState
-{
-    OpcUa_ServerState_Running            = 0,
-    OpcUa_ServerState_Failed             = 1,
-    OpcUa_ServerState_NoConfiguration    = 2,
-    OpcUa_ServerState_Suspended          = 3,
-    OpcUa_ServerState_Shutdown           = 4,
-    OpcUa_ServerState_Test               = 5,
+typedef enum _OpcUa_ServerState {
+    OpcUa_ServerState_Running = 0,
+    OpcUa_ServerState_Failed = 1,
+    OpcUa_ServerState_NoConfiguration = 2,
+    OpcUa_ServerState_Suspended = 3,
+    OpcUa_ServerState_Shutdown = 4,
+    OpcUa_ServerState_Test = 5,
     OpcUa_ServerState_CommunicationFault = 6,
-    OpcUa_ServerState_Unknown            = 7
+    OpcUa_ServerState_Unknown = 7
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_ServerState_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_ServerState_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_ServerState;
+} OpcUa_ServerState;
 
 #endif
 
@@ -5981,17 +5764,16 @@ OpcUa_ServerState;
 /*============================================================================
  * The RedundantServerDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType;
+
 typedef struct _OpcUa_RedundantServerDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String       ServerId;
-    SOPC_Byte         ServiceLevel;
+    SOPC_String ServerId;
+    SOPC_Byte ServiceLevel;
     OpcUa_ServerState ServerState;
-}
-OpcUa_RedundantServerDataType;
+} OpcUa_RedundantServerDataType;
 
 void OpcUa_RedundantServerDataType_Initialize(void* pValue);
 
@@ -6007,16 +5789,15 @@ SOPC_StatusCode OpcUa_RedundantServerDataType_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The EndpointUrlListDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType;
+
 typedef struct _OpcUa_EndpointUrlListDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    int32_t      NoOfEndpointUrlList;
+    int32_t NoOfEndpointUrlList;
     SOPC_String* EndpointUrlList;
-}
-OpcUa_EndpointUrlListDataType;
+} OpcUa_EndpointUrlListDataType;
 
 void OpcUa_EndpointUrlListDataType_Initialize(void* pValue);
 
@@ -6032,17 +5813,16 @@ SOPC_StatusCode OpcUa_EndpointUrlListDataType_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The NetworkGroupDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType;
+
 typedef struct _OpcUa_NetworkGroupDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String                    ServerUri;
-    int32_t                        NoOfNetworkPaths;
+    SOPC_String ServerUri;
+    int32_t NoOfNetworkPaths;
     OpcUa_EndpointUrlListDataType* NetworkPaths;
-}
-OpcUa_NetworkGroupDataType;
+} OpcUa_NetworkGroupDataType;
 
 void OpcUa_NetworkGroupDataType_Initialize(void* pValue);
 
@@ -6058,18 +5838,17 @@ SOPC_StatusCode OpcUa_NetworkGroupDataType_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The SamplingIntervalDiagnosticsDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType;
+
 typedef struct _OpcUa_SamplingIntervalDiagnosticsDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    double   SamplingInterval;
+    double SamplingInterval;
     uint32_t MonitoredItemCount;
     uint32_t MaxMonitoredItemCount;
     uint32_t DisabledMonitoredItemCount;
-}
-OpcUa_SamplingIntervalDiagnosticsDataType;
+} OpcUa_SamplingIntervalDiagnosticsDataType;
 
 void OpcUa_SamplingIntervalDiagnosticsDataType_Initialize(void* pValue);
 
@@ -6085,8 +5864,8 @@ SOPC_StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue, S
 /*============================================================================
  * The ServerDiagnosticsSummaryDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType;
+
 typedef struct _OpcUa_ServerDiagnosticsSummaryDataType
 {
     SOPC_EncodeableType* encodeableType;
@@ -6103,8 +5882,7 @@ typedef struct _OpcUa_ServerDiagnosticsSummaryDataType
     uint32_t PublishingIntervalCount;
     uint32_t SecurityRejectedRequestsCount;
     uint32_t RejectedRequestsCount;
-}
-OpcUa_ServerDiagnosticsSummaryDataType;
+} OpcUa_ServerDiagnosticsSummaryDataType;
 
 void OpcUa_ServerDiagnosticsSummaryDataType_Initialize(void* pValue);
 
@@ -6120,20 +5898,19 @@ SOPC_StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue, SOPC
 /*============================================================================
  * The ServerStatusDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType;
+
 typedef struct _OpcUa_ServerStatusDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_DateTime      StartTime;
-    SOPC_DateTime      CurrentTime;
-    OpcUa_ServerState  State;
-    OpcUa_BuildInfo    BuildInfo;
-    uint32_t           SecondsTillShutdown;
+    SOPC_DateTime StartTime;
+    SOPC_DateTime CurrentTime;
+    OpcUa_ServerState State;
+    OpcUa_BuildInfo BuildInfo;
+    uint32_t SecondsTillShutdown;
     SOPC_LocalizedText ShutdownReason;
-}
-OpcUa_ServerStatusDataType;
+} OpcUa_ServerStatusDataType;
 
 void OpcUa_ServerStatusDataType_Initialize(void* pValue);
 
@@ -6149,16 +5926,15 @@ SOPC_StatusCode OpcUa_ServerStatusDataType_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The ServiceCounterDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType;
+
 typedef struct _OpcUa_ServiceCounterDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     uint32_t TotalCount;
     uint32_t ErrorCount;
-}
-OpcUa_ServiceCounterDataType;
+} OpcUa_ServiceCounterDataType;
 
 void OpcUa_ServiceCounterDataType_Initialize(void* pValue);
 
@@ -6174,28 +5950,28 @@ SOPC_StatusCode OpcUa_ServiceCounterDataType_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The SessionDiagnosticsDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType;
+
 typedef struct _OpcUa_SessionDiagnosticsDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId                  SessionId;
-    SOPC_String                  SessionName;
+    SOPC_NodeId SessionId;
+    SOPC_String SessionName;
     OpcUa_ApplicationDescription ClientDescription;
-    SOPC_String                  ServerUri;
-    SOPC_String                  EndpointUrl;
-    int32_t                      NoOfLocaleIds;
-    SOPC_String*                 LocaleIds;
-    double                       ActualSessionTimeout;
-    uint32_t                     MaxResponseMessageSize;
-    SOPC_DateTime                ClientConnectionTime;
-    SOPC_DateTime                ClientLastContactTime;
-    uint32_t                     CurrentSubscriptionsCount;
-    uint32_t                     CurrentMonitoredItemsCount;
-    uint32_t                     CurrentPublishRequestsInQueue;
+    SOPC_String ServerUri;
+    SOPC_String EndpointUrl;
+    int32_t NoOfLocaleIds;
+    SOPC_String* LocaleIds;
+    double ActualSessionTimeout;
+    uint32_t MaxResponseMessageSize;
+    SOPC_DateTime ClientConnectionTime;
+    SOPC_DateTime ClientLastContactTime;
+    uint32_t CurrentSubscriptionsCount;
+    uint32_t CurrentMonitoredItemsCount;
+    uint32_t CurrentPublishRequestsInQueue;
     OpcUa_ServiceCounterDataType TotalRequestCount;
-    uint32_t                     UnauthorizedRequestCount;
+    uint32_t UnauthorizedRequestCount;
     OpcUa_ServiceCounterDataType ReadCount;
     OpcUa_ServiceCounterDataType HistoryReadCount;
     OpcUa_ServiceCounterDataType WriteCount;
@@ -6224,8 +6000,7 @@ typedef struct _OpcUa_SessionDiagnosticsDataType
     OpcUa_ServiceCounterDataType QueryNextCount;
     OpcUa_ServiceCounterDataType RegisterNodesCount;
     OpcUa_ServiceCounterDataType UnregisterNodesCount;
-}
-OpcUa_SessionDiagnosticsDataType;
+} OpcUa_SessionDiagnosticsDataType;
 
 void OpcUa_SessionDiagnosticsDataType_Initialize(void* pValue);
 
@@ -6241,24 +6016,23 @@ SOPC_StatusCode OpcUa_SessionDiagnosticsDataType_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The SessionSecurityDiagnosticsDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType;
+
 typedef struct _OpcUa_SessionSecurityDiagnosticsDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId               SessionId;
-    SOPC_String               ClientUserIdOfSession;
-    int32_t                   NoOfClientUserIdHistory;
-    SOPC_String*              ClientUserIdHistory;
-    SOPC_String               AuthenticationMechanism;
-    SOPC_String               Encoding;
-    SOPC_String               TransportProtocol;
+    SOPC_NodeId SessionId;
+    SOPC_String ClientUserIdOfSession;
+    int32_t NoOfClientUserIdHistory;
+    SOPC_String* ClientUserIdHistory;
+    SOPC_String AuthenticationMechanism;
+    SOPC_String Encoding;
+    SOPC_String TransportProtocol;
     OpcUa_MessageSecurityMode SecurityMode;
-    SOPC_String               SecurityPolicyUri;
-    SOPC_ByteString           ClientCertificate;
-}
-OpcUa_SessionSecurityDiagnosticsDataType;
+    SOPC_String SecurityPolicyUri;
+    SOPC_ByteString ClientCertificate;
+} OpcUa_SessionSecurityDiagnosticsDataType;
 
 void OpcUa_SessionSecurityDiagnosticsDataType_Initialize(void* pValue);
 
@@ -6274,16 +6048,15 @@ SOPC_StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue, SO
 /*============================================================================
  * The StatusResult structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_StatusResult_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_StatusResult_EncodeableType;
+
 typedef struct _OpcUa_StatusResult
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_StatusCode     StatusCode;
+    SOPC_StatusCode StatusCode;
     SOPC_DiagnosticInfo DiagnosticInfo;
-}
-OpcUa_StatusResult;
+} OpcUa_StatusResult;
 
 void OpcUa_StatusResult_Initialize(void* pValue);
 
@@ -6299,45 +6072,44 @@ SOPC_StatusCode OpcUa_StatusResult_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The SubscriptionDiagnosticsDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType;
+
 typedef struct _OpcUa_SubscriptionDiagnosticsDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId  SessionId;
-    uint32_t     SubscriptionId;
-    SOPC_Byte    Priority;
-    double       PublishingInterval;
-    uint32_t     MaxKeepAliveCount;
-    uint32_t     MaxLifetimeCount;
-    uint32_t     MaxNotificationsPerPublish;
+    SOPC_NodeId SessionId;
+    uint32_t SubscriptionId;
+    SOPC_Byte Priority;
+    double PublishingInterval;
+    uint32_t MaxKeepAliveCount;
+    uint32_t MaxLifetimeCount;
+    uint32_t MaxNotificationsPerPublish;
     SOPC_Boolean PublishingEnabled;
-    uint32_t     ModifyCount;
-    uint32_t     EnableCount;
-    uint32_t     DisableCount;
-    uint32_t     RepublishRequestCount;
-    uint32_t     RepublishMessageRequestCount;
-    uint32_t     RepublishMessageCount;
-    uint32_t     TransferRequestCount;
-    uint32_t     TransferredToAltClientCount;
-    uint32_t     TransferredToSameClientCount;
-    uint32_t     PublishRequestCount;
-    uint32_t     DataChangeNotificationsCount;
-    uint32_t     EventNotificationsCount;
-    uint32_t     NotificationsCount;
-    uint32_t     LatePublishRequestCount;
-    uint32_t     CurrentKeepAliveCount;
-    uint32_t     CurrentLifetimeCount;
-    uint32_t     UnacknowledgedMessageCount;
-    uint32_t     DiscardedMessageCount;
-    uint32_t     MonitoredItemCount;
-    uint32_t     DisabledMonitoredItemCount;
-    uint32_t     MonitoringQueueOverflowCount;
-    uint32_t     NextSequenceNumber;
-    uint32_t     EventQueueOverFlowCount;
-}
-OpcUa_SubscriptionDiagnosticsDataType;
+    uint32_t ModifyCount;
+    uint32_t EnableCount;
+    uint32_t DisableCount;
+    uint32_t RepublishRequestCount;
+    uint32_t RepublishMessageRequestCount;
+    uint32_t RepublishMessageCount;
+    uint32_t TransferRequestCount;
+    uint32_t TransferredToAltClientCount;
+    uint32_t TransferredToSameClientCount;
+    uint32_t PublishRequestCount;
+    uint32_t DataChangeNotificationsCount;
+    uint32_t EventNotificationsCount;
+    uint32_t NotificationsCount;
+    uint32_t LatePublishRequestCount;
+    uint32_t CurrentKeepAliveCount;
+    uint32_t CurrentLifetimeCount;
+    uint32_t UnacknowledgedMessageCount;
+    uint32_t DiscardedMessageCount;
+    uint32_t MonitoredItemCount;
+    uint32_t DisabledMonitoredItemCount;
+    uint32_t MonitoringQueueOverflowCount;
+    uint32_t NextSequenceNumber;
+    uint32_t EventQueueOverFlowCount;
+} OpcUa_SubscriptionDiagnosticsDataType;
 
 void OpcUa_SubscriptionDiagnosticsDataType_Initialize(void* pValue);
 
@@ -6353,18 +6125,17 @@ SOPC_StatusCode OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue, SOPC_
 /*============================================================================
  * The ModelChangeStructureVerbMask enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_ModelChangeStructureVerbMask
-{
-    OpcUa_ModelChangeStructureVerbMask_NodeAdded        = 1,
-    OpcUa_ModelChangeStructureVerbMask_NodeDeleted      = 2,
-    OpcUa_ModelChangeStructureVerbMask_ReferenceAdded   = 4,
+typedef enum _OpcUa_ModelChangeStructureVerbMask {
+    OpcUa_ModelChangeStructureVerbMask_NodeAdded = 1,
+    OpcUa_ModelChangeStructureVerbMask_NodeDeleted = 2,
+    OpcUa_ModelChangeStructureVerbMask_ReferenceAdded = 4,
     OpcUa_ModelChangeStructureVerbMask_ReferenceDeleted = 8,
-    OpcUa_ModelChangeStructureVerbMask_DataTypeChanged  = 16
+    OpcUa_ModelChangeStructureVerbMask_DataTypeChanged = 16
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_ModelChangeStructureVerbMask_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_ModelChangeStructureVerbMask_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_ModelChangeStructureVerbMask;
+} OpcUa_ModelChangeStructureVerbMask;
 
 #endif
 
@@ -6372,17 +6143,16 @@ OpcUa_ModelChangeStructureVerbMask;
 /*============================================================================
  * The ModelChangeStructureDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType;
+
 typedef struct _OpcUa_ModelChangeStructureDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_NodeId Affected;
     SOPC_NodeId AffectedType;
-    SOPC_Byte   Verb;
-}
-OpcUa_ModelChangeStructureDataType;
+    SOPC_Byte Verb;
+} OpcUa_ModelChangeStructureDataType;
 
 void OpcUa_ModelChangeStructureDataType_Initialize(void* pValue);
 
@@ -6398,16 +6168,15 @@ SOPC_StatusCode OpcUa_ModelChangeStructureDataType_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The SemanticChangeStructureDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType;
+
 typedef struct _OpcUa_SemanticChangeStructureDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     SOPC_NodeId Affected;
     SOPC_NodeId AffectedType;
-}
-OpcUa_SemanticChangeStructureDataType;
+} OpcUa_SemanticChangeStructureDataType;
 
 void OpcUa_SemanticChangeStructureDataType_Initialize(void* pValue);
 
@@ -6423,16 +6192,15 @@ SOPC_StatusCode OpcUa_SemanticChangeStructureDataType_Decode(void* pValue, SOPC_
 /*============================================================================
  * The Range structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_Range_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_Range_EncodeableType;
+
 typedef struct _OpcUa_Range
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     double Low;
     double High;
-}
-OpcUa_Range;
+} OpcUa_Range;
 
 void OpcUa_Range_Initialize(void* pValue);
 
@@ -6448,18 +6216,17 @@ SOPC_StatusCode OpcUa_Range_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The EUInformation structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_EUInformation_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_EUInformation_EncodeableType;
+
 typedef struct _OpcUa_EUInformation
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String        NamespaceUri;
-    int32_t            UnitId;
+    SOPC_String NamespaceUri;
+    int32_t UnitId;
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
-}
-OpcUa_EUInformation;
+} OpcUa_EUInformation;
 
 void OpcUa_EUInformation_Initialize(void* pValue);
 
@@ -6475,16 +6242,15 @@ SOPC_StatusCode OpcUa_EUInformation_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The AxisScaleEnumeration enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_AxisScaleEnumeration
-{
+typedef enum _OpcUa_AxisScaleEnumeration {
     OpcUa_AxisScaleEnumeration_Linear = 0,
-    OpcUa_AxisScaleEnumeration_Log    = 1,
-    OpcUa_AxisScaleEnumeration_Ln     = 2
+    OpcUa_AxisScaleEnumeration_Log = 1,
+    OpcUa_AxisScaleEnumeration_Ln = 2
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_AxisScaleEnumeration_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_AxisScaleEnumeration_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_AxisScaleEnumeration;
+} OpcUa_AxisScaleEnumeration;
 
 #endif
 
@@ -6492,16 +6258,15 @@ OpcUa_AxisScaleEnumeration;
 /*============================================================================
  * The ComplexNumberType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType;
+
 typedef struct _OpcUa_ComplexNumberType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     float Real;
     float Imaginary;
-}
-OpcUa_ComplexNumberType;
+} OpcUa_ComplexNumberType;
 
 void OpcUa_ComplexNumberType_Initialize(void* pValue);
 
@@ -6517,16 +6282,15 @@ SOPC_StatusCode OpcUa_ComplexNumberType_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The DoubleComplexNumberType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType;
+
 typedef struct _OpcUa_DoubleComplexNumberType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     double Real;
     double Imaginary;
-}
-OpcUa_DoubleComplexNumberType;
+} OpcUa_DoubleComplexNumberType;
 
 void OpcUa_DoubleComplexNumberType_Initialize(void* pValue);
 
@@ -6542,20 +6306,19 @@ SOPC_StatusCode OpcUa_DoubleComplexNumberType_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The AxisInformation structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType;
+
 typedef struct _OpcUa_AxisInformation
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    OpcUa_EUInformation        EngineeringUnits;
-    OpcUa_Range                EURange;
-    SOPC_LocalizedText         Title;
+    OpcUa_EUInformation EngineeringUnits;
+    OpcUa_Range EURange;
+    SOPC_LocalizedText Title;
     OpcUa_AxisScaleEnumeration AxisScaleType;
-    int32_t                    NoOfAxisSteps;
-    double*                    AxisSteps;
-}
-OpcUa_AxisInformation;
+    int32_t NoOfAxisSteps;
+    double* AxisSteps;
+} OpcUa_AxisInformation;
 
 void OpcUa_AxisInformation_Initialize(void* pValue);
 
@@ -6571,16 +6334,15 @@ SOPC_StatusCode OpcUa_AxisInformation_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The XVType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_XVType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_XVType_EncodeableType;
+
 typedef struct _OpcUa_XVType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
     double X;
-    float  Value;
-}
-OpcUa_XVType;
+    float Value;
+} OpcUa_XVType;
 
 void OpcUa_XVType_Initialize(void* pValue);
 
@@ -6596,26 +6358,25 @@ SOPC_StatusCode OpcUa_XVType_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ProgramDiagnosticDataType structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType;
+
 typedef struct _OpcUa_ProgramDiagnosticDataType
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_NodeId        CreateSessionId;
-    SOPC_String        CreateClientName;
-    SOPC_DateTime      InvocationCreationTime;
-    SOPC_DateTime      LastTransitionTime;
-    SOPC_String        LastMethodCall;
-    SOPC_NodeId        LastMethodSessionId;
-    int32_t            NoOfLastMethodInputArguments;
-    OpcUa_Argument*    LastMethodInputArguments;
-    int32_t            NoOfLastMethodOutputArguments;
-    OpcUa_Argument*    LastMethodOutputArguments;
-    SOPC_DateTime      LastMethodCallTime;
+    SOPC_NodeId CreateSessionId;
+    SOPC_String CreateClientName;
+    SOPC_DateTime InvocationCreationTime;
+    SOPC_DateTime LastTransitionTime;
+    SOPC_String LastMethodCall;
+    SOPC_NodeId LastMethodSessionId;
+    int32_t NoOfLastMethodInputArguments;
+    OpcUa_Argument* LastMethodInputArguments;
+    int32_t NoOfLastMethodOutputArguments;
+    OpcUa_Argument* LastMethodOutputArguments;
+    SOPC_DateTime LastMethodCallTime;
     OpcUa_StatusResult LastMethodReturnStatus;
-}
-OpcUa_ProgramDiagnosticDataType;
+} OpcUa_ProgramDiagnosticDataType;
 
 void OpcUa_ProgramDiagnosticDataType_Initialize(void* pValue);
 
@@ -6631,17 +6392,16 @@ SOPC_StatusCode OpcUa_ProgramDiagnosticDataType_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The Annotation structure.
  *===========================================================================*/
- extern struct SOPC_EncodeableType OpcUa_Annotation_EncodeableType;
- 
+extern struct SOPC_EncodeableType OpcUa_Annotation_EncodeableType;
+
 typedef struct _OpcUa_Annotation
 {
     SOPC_EncodeableType* encodeableType;
     // IMPORTANT NOTE: request / response header IN MSG BODY is kept only for old stack compilation compatibility
-    SOPC_String   Message;
-    SOPC_String   UserName;
+    SOPC_String Message;
+    SOPC_String UserName;
     SOPC_DateTime AnnotationTime;
-}
-OpcUa_Annotation;
+} OpcUa_Annotation;
 
 void OpcUa_Annotation_Initialize(void* pValue);
 
@@ -6657,18 +6417,17 @@ SOPC_StatusCode OpcUa_Annotation_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ExceptionDeviationFormat enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_ExceptionDeviationFormat
-{
-    OpcUa_ExceptionDeviationFormat_AbsoluteValue    = 0,
-    OpcUa_ExceptionDeviationFormat_PercentOfValue   = 1,
-    OpcUa_ExceptionDeviationFormat_PercentOfRange   = 2,
+typedef enum _OpcUa_ExceptionDeviationFormat {
+    OpcUa_ExceptionDeviationFormat_AbsoluteValue = 0,
+    OpcUa_ExceptionDeviationFormat_PercentOfValue = 1,
+    OpcUa_ExceptionDeviationFormat_PercentOfRange = 2,
     OpcUa_ExceptionDeviationFormat_PercentOfEURange = 3,
-    OpcUa_ExceptionDeviationFormat_Unknown          = 4
+    OpcUa_ExceptionDeviationFormat_Unknown = 4
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_OpcUa_ExceptionDeviationFormat_MaxEnumerationValue = OpcUa_Int32_Max
+    ,
+    _OpcUa_ExceptionDeviationFormat_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
-}
-OpcUa_ExceptionDeviationFormat;
+} OpcUa_ExceptionDeviationFormat;
 
 #endif
 
@@ -6677,7 +6436,6 @@ void SOPC_Initialize_EnumeratedType(int32_t* enumerationValue);
 void SOPC_Clear_EnumeratedType(int32_t* enumerationValue);
 
 SOPC_StatusCode SOPC_Read_EnumeratedType(SOPC_Buffer* buf, int32_t* enumerationValue);
-                    
 
 SOPC_StatusCode SOPC_Write_EnumeratedType(SOPC_Buffer* buf, const int32_t* enumerationValue);
 

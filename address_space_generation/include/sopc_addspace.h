@@ -18,13 +18,11 @@
 #ifndef SOPC_ADDSPACE_H_
 #define SOPC_ADDSPACE_H_
 
-
 #include <stdbool.h>
 #include <stdint.h>
 
 #include "sopc_user_app_itf.h"
 
 extern SOPC_AddressSpace addressSpace;
-
 
 #endif /* SOPC_ADDSPACE_H_ */

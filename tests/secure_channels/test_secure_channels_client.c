@@ -15,28 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
 #include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "sopc_crypto_profiles.h"
+#include "sopc_encoder.h"
 #include "sopc_pki_stack.h"
-#include "stub_sc_sopc_services_api.h"
+#include "sopc_secure_channels_api.h"
 #include "sopc_services_api.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
-#include "sopc_encoder.h"
-#include "sopc_secure_channels_api.h"
+#include "stub_sc_sopc_services_api.h"
 
-#include "opcua_statuscodes.h"
 #include "opcua_identifiers.h"
+#include "opcua_statuscodes.h"
 
 #include "sopc_time.h"
 
-int main(int argc, char *argv[]){
+int main(int argc, char* argv[])
+{
     SOPC_StatusCode status = STATUS_OK;
 
     // Sleep timeout in milliseconds
@@ -51,10 +52,10 @@ int main(int argc, char *argv[]){
     SOPC_StubSC_ServicesEventParams* serviceEvent = NULL;
     uint32_t scConnectionId = 0;
 
-    SOPC_PKIProvider *pki = NULL;
+    SOPC_PKIProvider* pki = NULL;
     SOPC_Certificate *crt_cli = NULL, *crt_srv = NULL;
-    SOPC_Certificate *crt_ca = NULL;
-    SOPC_AsymmetricKey *priv_cli = NULL;
+    SOPC_Certificate* crt_ca = NULL;
+    SOPC_AsymmetricKey* priv_cli = NULL;
 
     // Endpoint URL
     SOPC_String stEndpointUrl;
@@ -68,18 +69,26 @@ int main(int argc, char *argv[]){
     OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
 
     // Manage change of security policy and mode (none = None, None | sign = Basic256Sha256)
-    if(argc == 2){
-        if(strlen(argv[1]) == strlen("none") && 0 == memcmp(argv[1], "none", strlen("none"))){
+    if (argc == 2)
+    {
+        if (strlen(argv[1]) == strlen("none") && 0 == memcmp(argv[1], "none", strlen("none")))
+        {
             messageSecurityMode = OpcUa_MessageSecurityMode_None;
             pRequestedSecurityPolicyUri = SOPC_SecurityPolicy_None_URI;
             printf(">>Stub_Client: Security mode ='None'\n");
-        }else if(strlen(argv[1]) == strlen("sign") && 0 == memcmp(argv[1], "sign", strlen("sign"))){
+        }
+        else if (strlen(argv[1]) == strlen("sign") && 0 == memcmp(argv[1], "sign", strlen("sign")))
+        {
             messageSecurityMode = OpcUa_MessageSecurityMode_Sign;
             printf(">>Stub_Client: Security mode ='Sign'\n");
-        }else{
+        }
+        else
+        {
             printf(">>Stub_Client: Security mode ='SignAndEncrypt'\n");
         }
-    }else{
+    }
+    else
+    {
         printf(">>Stub_Client: Security mode ='SignAndEncrypt'\n");
     }
     printf(">>Stub_Client: Security policy ='%s'\n", pRequestedSecurityPolicyUri);
@@ -92,66 +101,91 @@ int main(int argc, char *argv[]){
     // Client private key
     char* keyLocation = "./client_private/client.key";
 
-    if(messageSecurityMode != OpcUa_MessageSecurityMode_None){
+    if (messageSecurityMode != OpcUa_MessageSecurityMode_None)
+    {
         // The certificates: load
         status = SOPC_KeyManager_Certificate_CreateFromFile(certificateLocation, &crt_cli);
-        if(STATUS_OK != status){
+        if (STATUS_OK != status)
+        {
             printf(">>Stub_Client: Failed to load client certificate\n");
-        }else{
+        }
+        else
+        {
             printf(">>Stub_Client: Client certificate loaded\n");
         }
     }
 
-    if(messageSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status){
+    if (messageSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status)
+    {
         status = SOPC_KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
-        if(STATUS_OK != status){
+        if (STATUS_OK != status)
+        {
             printf(">>Stub_Client: Failed to load server certificate\n");
-        }else{
+        }
+        else
+        {
             printf(">>Stub_Client: Server certificate loaded\n");
         }
     }
 
-    if(messageSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status){
+    if (messageSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status)
+    {
         // Private key: load
         status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli, NULL, 0);
-        if(STATUS_OK != status){
+        if (STATUS_OK != status)
+        {
             printf(">>Stub_Client: Failed to load private key\n");
-        }else{
+        }
+        else
+        {
             printf(">>Stub_Client: Client private key loaded\n");
         }
     }
 
-    if(messageSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status){
+    if (messageSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status)
+    {
         // Certificate Authority: load
-        if(STATUS_OK != SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca)){
+        if (STATUS_OK != SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca))
+        {
             printf(">>Stub_Client: Failed to load CA\n");
-        }else{
+        }
+        else
+        {
             printf(">>Stub_Client: CA certificate loaded\n");
         }
     }
 
     // Init PKI provider and parse certificate and private key
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
-    if(STATUS_OK == status){
-        if(STATUS_OK != SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki)){
+    if (STATUS_OK == status)
+    {
+        if (STATUS_OK != SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki))
+        {
             printf(">>Stub_Client: Failed to create PKI\n");
-        }else{
+        }
+        else
+        {
             printf(">>Stub_Client: PKI created\n");
         }
     }
 
-	// Init toolkit configuration
-    if(STATUS_OK == status){
+    // Init toolkit configuration
+    if (STATUS_OK == status)
+    {
         status = SOPC_Toolkit_Initialize(NULL);
-        if(STATUS_OK != status){
+        if (STATUS_OK != status)
+        {
             printf(">>Stub_Client: Failed initializing toolkit\n");
-        }else{
+        }
+        else
+        {
             printf(">>Stub_Client: Toolkit initialized\n");
         }
     }
 
     // Start connection to server
-    if(STATUS_OK == status){
+    if (STATUS_OK == status)
+    {
         scConfig.isClientSc = true;
         scConfig.msgSecurityMode = messageSecurityMode;
         scConfig.reqSecuPolicyUri = pRequestedSecurityPolicyUri;
@@ -166,43 +200,48 @@ int main(int argc, char *argv[]){
         assert(scConfigIdx != 0);
         assert(STATUS_OK == SOPC_Toolkit_Configured());
 
-        SOPC_SecureChannels_EnqueueEvent(SC_CONNECT,
-                                         scConfigIdx,
-                                         NULL,
-                                         0);
+        SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, scConfigIdx, NULL, 0);
         printf(">>Stub_Client: Establishing connection to server...\n");
     }
 
-
-
-    while ((STATUS_OK == status || OpcUa_BadWouldBlock == status) && serviceEvent == NULL && loopCpt * sleepTimeout <= loopTimeout){
+    while ((STATUS_OK == status || OpcUa_BadWouldBlock == status) && serviceEvent == NULL &&
+           loopCpt * sleepTimeout <= loopTimeout)
+    {
         status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
-        if(STATUS_OK != status){
+        if (STATUS_OK != status)
+        {
             loopCpt++;
-    	    SOPC_Sleep(sleepTimeout);
+            SOPC_Sleep(sleepTimeout);
         }
     }
 
-    if(STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout){
+    if (STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout)
+    {
         status = OpcUa_BadTimeout;
-    }else if(STATUS_OK == status && serviceEvent == NULL){
+    }
+    else if (STATUS_OK == status && serviceEvent == NULL)
+    {
         status = OpcUa_BadUnexpectedError;
     }
     loopCpt = 0;
 
-    if(STATUS_OK == status){
-        if(serviceEvent->event == SC_TO_SE_SC_CONNECTED &&
-           serviceEvent->auxParam == scConfigIdx){
+    if (STATUS_OK == status)
+    {
+        if (serviceEvent->event == SC_TO_SE_SC_CONNECTED && serviceEvent->auxParam == scConfigIdx)
+        {
             scConnectionId = serviceEvent->eltId;
             printf(">>Stub_Client: Connection to server established\n");
-        }else{
+        }
+        else
+        {
             printf(">>Stub_Client: Unexpected event received '%d'\n", serviceEvent->event);
             status = OpcUa_BadSecureChannelClosed;
         }
         free(serviceEvent);
         serviceEvent = NULL;
     }
-    if(STATUS_OK != status){
+    if (STATUS_OK != status)
+    {
         printf(">>Stub_Client: Failed to establish connection to server\n");
     }
 
@@ -210,132 +249,151 @@ int main(int argc, char *argv[]){
     OpcUa_RequestHeader rHeader;
     OpcUa_GetEndpointsRequest cRequest;
 
-    if(STATUS_OK == status){
+    if (STATUS_OK == status)
+    {
         // Endpoint URL in OPC UA string format
         status = SOPC_String_AttachFromCstring(&stEndpointUrl, sEndpointUrl);
     }
 
-    if(STATUS_OK == status){
+    if (STATUS_OK == status)
+    {
         // Initialization of empty request
-        OpcUa_RequestHeader_Initialize (&rHeader);
+        OpcUa_RequestHeader_Initialize(&rHeader);
         OpcUa_GetEndpointsRequest_Initialize(&cRequest);
 
-        cRequest.EndpointUrl     = stEndpointUrl;
-        cRequest.NoOfLocaleIds   = 0;
-        cRequest.LocaleIds       = NULL;
+        cRequest.EndpointUrl = stEndpointUrl;
+        cRequest.NoOfLocaleIds = 0;
+        cRequest.LocaleIds = NULL;
         cRequest.NoOfProfileUris = 0;
-        cRequest.ProfileUris     = NULL;
+        cRequest.ProfileUris = NULL;
 
         SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
         assert(NULL != buffer);
         status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
-                                                   SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
-                                                   SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+                                                       SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
+                                                       SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
         assert(STATUS_OK == status);
         status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
-                                                 SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
-                                                 SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+                                                     SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
+                                                     SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
         assert(STATUS_OK == status);
-        status = SOPC_EncodeMsg_Type_Header_Body(buffer,
-                                                 &OpcUa_GetEndpointsRequest_EncodeableType,
-                                                 &OpcUa_RequestHeader_EncodeableType,
-                                                 (void*)&rHeader,
-                                                 (void*)&cRequest);
+        status =
+            SOPC_EncodeMsg_Type_Header_Body(buffer, &OpcUa_GetEndpointsRequest_EncodeableType,
+                                            &OpcUa_RequestHeader_EncodeableType, (void*) &rHeader, (void*) &cRequest);
         assert(STATUS_OK == status);
 
-        SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG,
-                                         scConnectionId,
-                                         (void*) buffer,
-                                         0);
+        SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConnectionId, (void*) buffer, 0);
 
         printf(">>Stub_Client: Calling GetEndpoint service...\n");
     }
 
-    while ((STATUS_OK == status || OpcUa_BadWouldBlock == status) && serviceEvent == NULL && loopCpt * sleepTimeout <= loopTimeout){
+    while ((STATUS_OK == status || OpcUa_BadWouldBlock == status) && serviceEvent == NULL &&
+           loopCpt * sleepTimeout <= loopTimeout)
+    {
         status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
-        if(STATUS_OK != status){
+        if (STATUS_OK != status)
+        {
             loopCpt++;
-    	    SOPC_Sleep(sleepTimeout);
+            SOPC_Sleep(sleepTimeout);
         }
     }
 
-    if(STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout){
+    if (STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout)
+    {
         status = OpcUa_BadTimeout;
-    }else if(STATUS_OK == status && serviceEvent == NULL){
+    }
+    else if (STATUS_OK == status && serviceEvent == NULL)
+    {
         status = OpcUa_BadUnexpectedError;
     }
     loopCpt = 0;
 
-    if(STATUS_OK == status){
-        if(serviceEvent->event == SC_TO_SE_SC_SERVICE_RCV_MSG){
-            if(serviceEvent->eltId == scConnectionId &&
-                    serviceEvent->params != NULL &&
-                    serviceEvent->auxParam == 0){
+    if (STATUS_OK == status)
+    {
+        if (serviceEvent->event == SC_TO_SE_SC_SERVICE_RCV_MSG)
+        {
+            if (serviceEvent->eltId == scConnectionId && serviceEvent->params != NULL && serviceEvent->auxParam == 0)
+            {
                 SOPC_EncodeableType* encType = NULL;
-                SOPC_MsgBodyType_Read((SOPC_Buffer*) serviceEvent->params,
-                                      &encType);
+                SOPC_MsgBodyType_Read((SOPC_Buffer*) serviceEvent->params, &encType);
                 SOPC_Buffer_Delete((SOPC_Buffer*) serviceEvent->params);
                 serviceEvent->params = NULL;
 
-                if(encType == &OpcUa_ServiceFault_EncodeableType){
+                if (encType == &OpcUa_ServiceFault_EncodeableType)
+                {
                     printf(">>Stub_Client: GetEndpoint service call failed with a service fault => OK\n");
-                }else if(encType == &OpcUa_GetEndpointsResponse_EncodeableType){
+                }
+                else if (encType == &OpcUa_GetEndpointsResponse_EncodeableType)
+                {
                     printf(">>Stub_Client: GetEndpoint service call succeeded => OK\n");
-                }else{
+                }
+                else
+                {
                     status = OpcUa_BadUnknownResponse;
                 }
-
-            }else{
+            }
+            else
+            {
                 printf(">>Stub_Client: Unexpected service received message parameters values\n");
                 status = OpcUa_BadUnexpectedError;
             }
-        }else{
+        }
+        else
+        {
             printf(">>Stub_Client: Unexpected event received '%d'\n", serviceEvent->event);
             status = OpcUa_BadUnexpectedError;
         }
         free(serviceEvent);
         serviceEvent = NULL;
     }
-    if(STATUS_OK != status){
+    if (STATUS_OK != status)
+    {
         printf(">>Stub_Client: GetEndpoint service call failed\n");
     }
 
     // CLOSE THE SECURE CHANNEL
-    if(STATUS_OK == status){
-        SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT,
-                                         scConnectionId,
-                                         NULL,
-                                         0);
+    if (STATUS_OK == status)
+    {
+        SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, scConnectionId, NULL, 0);
         printf(">>Stub_Client: Closing secure connection\n");
     }
 
-
-    while ((STATUS_OK == status || OpcUa_BadWouldBlock == status) && serviceEvent == NULL && loopCpt * sleepTimeout <= loopTimeout){
+    while ((STATUS_OK == status || OpcUa_BadWouldBlock == status) && serviceEvent == NULL &&
+           loopCpt * sleepTimeout <= loopTimeout)
+    {
         status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
-        if(STATUS_OK != status){
+        if (STATUS_OK != status)
+        {
             loopCpt++;
             SOPC_Sleep(sleepTimeout);
         }
     }
 
-    if(STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout){
+    if (STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout)
+    {
         status = OpcUa_BadTimeout;
-    }else if(STATUS_OK == status && serviceEvent == NULL){
+    }
+    else if (STATUS_OK == status && serviceEvent == NULL)
+    {
         status = OpcUa_BadUnexpectedError;
     }
     loopCpt = 0;
 
-    if(STATUS_OK == status){
-        if(serviceEvent->event == SC_TO_SE_SC_DISCONNECTED &&
-           serviceEvent->eltId == scConnectionId){
+    if (STATUS_OK == status)
+    {
+        if (serviceEvent->event == SC_TO_SE_SC_DISCONNECTED && serviceEvent->eltId == scConnectionId)
+        {
             printf(">>Stub_Client: secure connection closed => OK \n");
-        }else{
+        }
+        else
+        {
             printf(">>Stub_Client: Unexpected event received '%d'\n", serviceEvent->event);
             status = OpcUa_BadSecureChannelClosed;
         }
         free(serviceEvent);
         serviceEvent = NULL;
-        if(STATUS_OK != status){
+        if (STATUS_OK != status)
+        {
             printf(">>Stub_Client: close secure connection failed\n");
         }
     }
@@ -350,12 +408,16 @@ int main(int argc, char *argv[]){
     SOPC_KeyManager_Certificate_Free(crt_ca);
     SOPC_KeyManager_AsymmetricKey_Free(priv_cli);
 
-    if(STATUS_OK == status){
+    if (STATUS_OK == status)
+    {
         printf(">>Stub_Client: Stub_Client test: OK\n");
-    }else{
+    }
+    else
+    {
         printf(">>Stub_Client: Stub_Client test: NOK\n");
     }
-    if(status != 0){
+    if (status != 0)
+    {
         return -1;
     }
     return status;

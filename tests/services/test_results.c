@@ -18,22 +18,24 @@
 #include "test_results.h"
 
 static t_bool valid_service_result = false;
-static OpcUa_WriteRequest *current_pWriteRequest = NULL;
+static OpcUa_WriteRequest* current_pWriteRequest = NULL;
 
-
-void test_results_set_service_result(t_bool res){
-  valid_service_result = res;
+void test_results_set_service_result(t_bool res)
+{
+    valid_service_result = res;
 }
 
-void test_results_set_WriteRequest(OpcUa_WriteRequest *pWriteReq) {
-  current_pWriteRequest = pWriteReq;
+void test_results_set_WriteRequest(OpcUa_WriteRequest* pWriteReq)
+{
+    current_pWriteRequest = pWriteReq;
 }
 
-
-t_bool test_results_get_service_result(void){
-  return valid_service_result;
+t_bool test_results_get_service_result(void)
+{
+    return valid_service_result;
 }
 
-OpcUa_WriteRequest *test_results_get_WriteRequest(void) {
-  return current_pWriteRequest;
+OpcUa_WriteRequest* test_results_get_WriteRequest(void)
+{
+    return current_pWriteRequest;
 }

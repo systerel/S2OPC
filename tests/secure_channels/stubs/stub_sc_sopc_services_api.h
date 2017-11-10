@@ -25,11 +25,12 @@ void SOPC_Services_Initialize(void);
 
 void SOPC_Services_Clear(void);
 
-typedef struct SOPC_StubSC_ServicesEventParams {
+typedef struct SOPC_StubSC_ServicesEventParams
+{
     SOPC_Services_Event event;
-    uint32_t            eltId;
-    void*               params;
-    uint32_t            auxParam;
+    uint32_t eltId;
+    void* params;
+    uint32_t auxParam;
 } SOPC_StubSC_ServicesEventParams;
 
 // Async queue simulating the services dispatcher and containing SOPC_StubSC_ServicesEventParams elements

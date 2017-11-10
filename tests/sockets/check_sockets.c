@@ -20,18 +20,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
 #include <check.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "sopc_buffer.h"
 
-#include "sopc_sockets_api.h"
 #include "sopc_secure_channels_api.h"
+#include "sopc_sockets_api.h"
 #include "stub_sockets_sopc_secure_channels_api.h"
-
 
 const char* uri = "opc.tcp://localhost:8888/myEndPoint";
 const uint32_t endpointDescConfigId = 10;
@@ -58,13 +56,10 @@ START_TEST(test_sockets)
 
     /* SERVER SIDE: listener creation */
 
-// const URI is not modified but generic API cannot guarantee it
-SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER,
-                              endpointDescConfigId,
-                              (void*) uri,
-                              (uint32_t) true);
-SOPC_GCC_DIAGNOSTIC_RESTORE
+    // const URI is not modified but generic API cannot guarantee it
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER, endpointDescConfigId, (void*) uri, (uint32_t) true);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
 
     // Retrieve event of listener creation
     SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
@@ -78,13 +73,10 @@ SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /* CLIENT SIDE: connection establishment */
     // Create client connection
-// const URI is not modified but generic API cannot guarantee it
-SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT,
-                              clientSecureChannelConnectionId,
-                              (void*) uri,
-                              0);
-SOPC_GCC_DIAGNOSTIC_RESTORE
+    // const URI is not modified but generic API cannot guarantee it
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, clientSecureChannelConnectionId, (void*) uri, 0);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /* SERVER SIDE: accepted connection (socket level only) */
     SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
@@ -111,28 +103,23 @@ SOPC_GCC_DIAGNOSTIC_RESTORE
     /* SERVER SIDE: finish accepting connection (secure channel level) */
     // Note: a new secure channel (with associated connection index) has been created and
     //       must be recorded by the socket as the connection Id
-    SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION,
-                              serverSocketIdx,
-                              NULL,
-                              serverSecureChannelConnectionId);
+    SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, serverSocketIdx, NULL, serverSecureChannelConnectionId);
 
     /* CLIENT SIDE: send a msg buffer through connection */
-    for(idx = 0; idx < 1000; idx++){
+    for (idx = 0; idx < 1000; idx++)
+    {
         byte = (idx % 256);
         SOPC_Buffer_Write(sendBuffer, &byte, 1);
     }
-    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE,
-                              clientSocketIdx,
-                              (void*) sendBuffer,
-                              0);
-
+    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (void*) sendBuffer, 0);
 
     /* SERVER SIDE: receive a msg buffer through connection */
     // Accumulate received bytes in a unique buffer
     receivedBytes = 0;
     // Let 5 attempts to retrieve all the bytes
     attempts = 0;
-    while(receivedBytes < 1000 && attempts < 5){
+    while (receivedBytes < 1000 && attempts < 5)
+    {
         SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
         // Check event
         ck_assert(scEventParams->event == SOCKET_RCV_BYTES);
@@ -156,34 +143,30 @@ SOPC_GCC_DIAGNOSTIC_RESTORE
     SOPC_Buffer_SetPosition(accBuffer, 0);
 
     // Check acc buffer content
-    for(idx = 0; idx < 1000; idx++){
+    for (idx = 0; idx < 1000; idx++)
+    {
         SOPC_Buffer_Read(&byte, accBuffer, 1);
         ck_assert(byte == (idx % 256));
     }
-
-
-
 
     /* SERVER SIDE: send a msg buffer through connection */
     sendBuffer = SOPC_Buffer_Create(1000);
     SOPC_Buffer_Reset(accBuffer);
 
-    for(idx = 0; idx < 1000; idx++){
+    for (idx = 0; idx < 1000; idx++)
+    {
         byte = (idx % 256);
         SOPC_Buffer_Write(sendBuffer, &byte, 1);
     }
-    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE,
-                              serverSocketIdx,
-                              (void*) sendBuffer,
-                              0);
-
+    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, serverSocketIdx, (void*) sendBuffer, 0);
 
     /* CLIENT SIDE: receive a msg buffer through connection */
     // Accumulate received bytes in a unique buffer
     receivedBytes = 0;
     // Let 5 attempts to retrieve all the bytes
     attempts = 0;
-    while(receivedBytes < 1000 && attempts < 5){
+    while (receivedBytes < 1000 && attempts < 5)
+    {
         SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
         // Check event
         ck_assert(scEventParams->event == SOCKET_RCV_BYTES);
@@ -207,7 +190,8 @@ SOPC_GCC_DIAGNOSTIC_RESTORE
     SOPC_Buffer_SetPosition(accBuffer, 0);
 
     // Check acc buffer content
-    for(idx = 0; idx < 1000; idx++){
+    for (idx = 0; idx < 1000; idx++)
+    {
         SOPC_Buffer_Read(&byte, accBuffer, 1);
         ck_assert(byte == (idx % 256));
     }
@@ -215,10 +199,7 @@ SOPC_GCC_DIAGNOSTIC_RESTORE
     SOPC_Buffer_Delete(accBuffer);
 
     /* CLIENT SIDE: receive a msg buffer through connection */
-    SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE,
-                              clientSocketIdx,
-                              NULL,
-                              0);
+    SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, clientSocketIdx, NULL, 0);
 
     /* SERVER SIDE: accepted connection (socket level only) */
     SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
@@ -236,10 +217,10 @@ SOPC_GCC_DIAGNOSTIC_RESTORE
 }
 END_TEST
 
-Suite *tests_make_suite_sockets(void)
+Suite* tests_make_suite_sockets(void)
 {
-    Suite *s;
-    TCase *tc_sockets;
+    Suite* s;
+    TCase* tc_sockets;
 
     s = suite_create("Sockets");
     tc_sockets = tcase_create("Sockets");
@@ -252,7 +233,7 @@ Suite *tests_make_suite_sockets(void)
 int main(void)
 {
     int number_failed;
-    SRunner *sr;
+    SRunner* sr;
 
     sr = srunner_create(tests_make_suite_sockets());
 

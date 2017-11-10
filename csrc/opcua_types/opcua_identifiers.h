@@ -34,9 +34,8 @@
 
 #include "sopc_toolkit_constants.h"
 
-
 /*============================================================================
-* DataType Identifiers
+ * DataType Identifiers
  *===========================================================================*/
 #define OpcUaId_BaseDataType 24
 #define OpcUaId_Number 26
@@ -364,7 +363,7 @@
 #define OpcUaId_ExceptionDeviationFormat 890
 
 /*============================================================================
-* Method Identifiers
+ * Method Identifiers
  *===========================================================================*/
 #define OpcUaId_ServerType_Namespaces_AddressSpaceFile_Open 11533
 #define OpcUaId_ServerType_Namespaces_AddressSpaceFile_Close 11536
@@ -656,7 +655,7 @@
 #define OpcUaId_AmqpGroupTypeAddReaderType 15585
 
 /*============================================================================
-* Object Identifiers
+ * Object Identifiers
  *===========================================================================*/
 #define OpcUaId_DefaultBinary 3062
 #define OpcUaId_DefaultXml 3063
@@ -1379,7 +1378,7 @@
 #define OpcUaId_Annotation_Encoding_DefaultBinary 893
 
 /*============================================================================
-* ObjectType Identifiers
+ * ObjectType Identifiers
  *===========================================================================*/
 #define OpcUaId_BaseObjectType 58
 #define OpcUaId_FolderType 61
@@ -1539,7 +1538,7 @@
 #define OpcUaId_AmqpReaderTransportType 15178
 
 /*============================================================================
-* ReferenceType Identifiers
+ * ReferenceType Identifiers
  *===========================================================================*/
 #define OpcUaId_References 31
 #define OpcUaId_NonHierarchicalReferences 32
@@ -1574,7 +1573,7 @@
 #define OpcUaId_HasDataSetReader 15297
 
 /*============================================================================
-* Variable Identifiers
+ * Variable Identifiers
  *===========================================================================*/
 #define OpcUaId_DataTypeDescriptionType_DataTypeVersion 104
 #define OpcUaId_DataTypeDescriptionType_DictionaryFragment 105
@@ -1708,8 +1707,10 @@
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_ClientConnectionTime 12107
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_ClientLastContactTime 12108
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_CurrentSubscriptionsCount 12109
-#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_CurrentMonitoredItemsCount 12110
-#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_CurrentPublishRequestsInQueue 12111
+#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_CurrentMonitoredItemsCount \
+    12110
+#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_CurrentPublishRequestsInQueue \
+    12111
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_TotalRequestCount 12112
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_UnauthorizedRequestCount 12113
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_ReadCount 12114
@@ -1727,7 +1728,8 @@
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_SetPublishingModeCount 12126
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_PublishCount 12127
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_RepublishCount 12128
-#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_TransferSubscriptionsCount 12129
+#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_TransferSubscriptionsCount \
+    12129
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_DeleteSubscriptionsCount 12130
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_AddNodesCount 12131
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_AddReferencesCount 12132
@@ -1735,16 +1737,20 @@
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_DeleteReferencesCount 12134
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_BrowseCount 12135
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_BrowseNextCount 12136
-#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_TranslateBrowsePathsToNodeIdsCount 12137
+#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_TranslateBrowsePathsToNodeIdsCount \
+    12137
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_QueryFirstCount 12138
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_QueryNextCount 12139
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_RegisterNodesCount 12140
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionDiagnostics_UnregisterNodesCount 12141
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionSecurityDiagnostics 12142
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionSecurityDiagnostics_SessionId 12143
-#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionSecurityDiagnostics_ClientUserIdOfSession 12144
-#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionSecurityDiagnostics_ClientUserIdHistory 12145
-#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionSecurityDiagnostics_AuthenticationMechanism 12146
+#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionSecurityDiagnostics_ClientUserIdOfSession \
+    12144
+#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionSecurityDiagnostics_ClientUserIdHistory \
+    12145
+#define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionSecurityDiagnostics_AuthenticationMechanism \
+    12146
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionSecurityDiagnostics_Encoding 12147
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionSecurityDiagnostics_TransportProtocol 12148
 #define OpcUaId_SessionsDiagnosticsSummaryType_Placeholder_ClientName_SessionSecurityDiagnostics_SecurityMode 12149
@@ -2033,7 +2039,8 @@
 #define OpcUaId_SamplingIntervalDiagnosticsArrayType_SamplingIntervalDiagnostics_SamplingInterval 12780
 #define OpcUaId_SamplingIntervalDiagnosticsArrayType_SamplingIntervalDiagnostics_SampledMonitoredItemsCount 12781
 #define OpcUaId_SamplingIntervalDiagnosticsArrayType_SamplingIntervalDiagnostics_MaxSampledMonitoredItemsCount 12782
-#define OpcUaId_SamplingIntervalDiagnosticsArrayType_SamplingIntervalDiagnostics_DisabledMonitoredItemsSamplingCount 12783
+#define OpcUaId_SamplingIntervalDiagnosticsArrayType_SamplingIntervalDiagnostics_DisabledMonitoredItemsSamplingCount \
+    12783
 #define OpcUaId_SamplingIntervalDiagnosticsType_SamplingInterval 2166
 #define OpcUaId_SamplingIntervalDiagnosticsType_SampledMonitoredItemsCount 11697
 #define OpcUaId_SamplingIntervalDiagnosticsType_MaxSampledMonitoredItemsCount 11698
@@ -3076,16 +3083,25 @@
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Read_InputArguments 13964
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Read_OutputArguments 13965
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Write_InputArguments 13967
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition_InputArguments 13969
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition_OutputArguments 13970
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition_InputArguments 13972
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition_InputArguments \
+    13969
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition_OutputArguments \
+    13970
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition_InputArguments \
+    13972
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_LastUpdateTime 13973
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks_InputArguments 13975
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks_OutputArguments 13976
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate_InputArguments 13978
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate_OutputArguments 13979
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate_InputArguments 13981
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate_InputArguments 13983
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks_InputArguments \
+    13975
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks_OutputArguments \
+    13976
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate_InputArguments \
+    13978
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate_OutputArguments \
+    13979
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate_InputArguments \
+    13981
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate_InputArguments \
+    13983
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateTypes 13984
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Size 13987
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Writable 13988
@@ -3102,11 +3118,16 @@
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition_InputArguments 14006
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_LastUpdateTime 14007
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks_InputArguments 14009
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks_OutputArguments 14010
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate_InputArguments 14012
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate_OutputArguments 14013
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate_InputArguments 14015
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate_InputArguments 14017
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks_OutputArguments \
+    14010
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate_InputArguments \
+    14012
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate_OutputArguments \
+    14013
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate_InputArguments \
+    14015
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate_InputArguments \
+    14017
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateTypes 14018
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Size 14021
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Writable 14022
@@ -3118,16 +3139,25 @@
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Read_InputArguments 14032
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Read_OutputArguments 14033
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Write_InputArguments 14035
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition_InputArguments 14037
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition_OutputArguments 14038
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition_InputArguments 14040
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition_InputArguments \
+    14037
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition_OutputArguments \
+    14038
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition_InputArguments \
+    14040
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_LastUpdateTime 14041
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks_InputArguments 14043
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks_OutputArguments 14044
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate_InputArguments 14046
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate_OutputArguments 14047
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate_InputArguments 14049
-#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate_InputArguments 14051
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks_InputArguments \
+    14043
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks_OutputArguments \
+    14044
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate_InputArguments \
+    14046
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate_OutputArguments \
+    14047
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate_InputArguments \
+    14049
+#define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate_InputArguments \
+    14051
 #define OpcUaId_ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateTypes 14052
 #define OpcUaId_ServerConfigurationType_ServerCapabilities 12708
 #define OpcUaId_ServerConfigurationType_SupportedPrivateKeyFormats 12583
@@ -3151,15 +3181,22 @@
 #define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Read_OutputArguments 12654
 #define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Write_InputArguments 12656
 #define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition_InputArguments 12658
-#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition_OutputArguments 12659
+#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition_OutputArguments \
+    12659
 #define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition_InputArguments 12661
 #define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_LastUpdateTime 12662
-#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks_InputArguments 12664
-#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks_OutputArguments 12665
-#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate_InputArguments 14160
-#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate_OutputArguments 12667
-#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate_InputArguments 12669
-#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate_InputArguments 12671
+#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks_InputArguments \
+    12664
+#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks_OutputArguments \
+    12665
+#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate_InputArguments \
+    14160
+#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate_OutputArguments \
+    12667
+#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate_InputArguments \
+    12669
+#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate_InputArguments \
+    12671
 #define OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateTypes 14161
 #define OpcUaId_ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_Size 14090
 #define OpcUaId_ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_Writable 14091
@@ -3197,11 +3234,16 @@
 #define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition_InputArguments 14143
 #define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_LastUpdateTime 14144
 #define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks_InputArguments 14146
-#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks_OutputArguments 14147
-#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate_InputArguments 14149
-#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate_OutputArguments 14150
-#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate_InputArguments 14152
-#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate_InputArguments 14154
+#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks_OutputArguments \
+    14147
+#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate_InputArguments \
+    14149
+#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate_OutputArguments \
+    14150
+#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate_InputArguments \
+    14152
+#define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate_InputArguments \
+    14154
 #define OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateTypes 14155
 #define OpcUaId_ServerConfiguration_ServerCapabilities 12710
 #define OpcUaId_ServerConfiguration_SupportedPrivateKeyFormats 12639
@@ -3324,9 +3366,12 @@
 #define OpcUaId_DataSetFolderType_Placeholder_DataSetFolderName_RemovePublishedDataSet_InputArguments 14486
 #define OpcUaId_DataSetFolderType_Placeholder_PublishedDataSetName_ConfigurationVersion 14489
 #define OpcUaId_DataSetFolderType_Placeholder_PublishedDataSetName_DataSetMetaData 15221
-#define OpcUaId_DataSetFolderType_Placeholder_PublishedDataSetName_ExtensionFields_AddExtensionField_InputArguments 15475
-#define OpcUaId_DataSetFolderType_Placeholder_PublishedDataSetName_ExtensionFields_AddExtensionField_OutputArguments 15476
-#define OpcUaId_DataSetFolderType_Placeholder_PublishedDataSetName_ExtensionFields_RemoveExtensionField_InputArguments 15478
+#define OpcUaId_DataSetFolderType_Placeholder_PublishedDataSetName_ExtensionFields_AddExtensionField_InputArguments \
+    15475
+#define OpcUaId_DataSetFolderType_Placeholder_PublishedDataSetName_ExtensionFields_AddExtensionField_OutputArguments \
+    15476
+#define OpcUaId_DataSetFolderType_Placeholder_PublishedDataSetName_ExtensionFields_RemoveExtensionField_InputArguments \
+    15478
 #define OpcUaId_DataSetFolderType_AddPublishedDataItems_InputArguments 14494
 #define OpcUaId_DataSetFolderType_AddPublishedDataItems_OutputArguments 14495
 #define OpcUaId_DataSetFolderType_AddPublishedEvents_InputArguments 14497
@@ -3710,7 +3755,7 @@
 #define OpcUaId_OpcUa_BinarySchema_Annotation 8244
 
 /*============================================================================
-* VariableType Identifiers
+ * VariableType Identifiers
  *===========================================================================*/
 #define OpcUaId_BaseVariableType 62
 #define OpcUaId_BaseDataVariableType 63

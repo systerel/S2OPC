@@ -25,7 +25,7 @@
 typedef struct SOPC_EventDispatcherManager SOPC_EventDispatcherManager;
 
 // Function is always in charge to deallocate params in case it is not NULL
-typedef void SOPC_EventDispatcherFct (int32_t event, uint32_t eltId, void* params, uint32_t auxParam);
+typedef void SOPC_EventDispatcherFct(int32_t event, uint32_t eltId, void* params, uint32_t auxParam);
 
 /**
  *  \brief Create and start the event dispatcher manager treatment, then event can be added in the event queue and
@@ -37,10 +37,11 @@ typedef void SOPC_EventDispatcherFct (int32_t event, uint32_t eltId, void* param
  *  \return  NULL if event dispatcher manager failed, event dispatcher manager in case of success
  */
 SOPC_EventDispatcherManager* SOPC_EventDispatcherManager_CreateAndStart(SOPC_EventDispatcherFct fctPointer,
-                                                                        const char*             name);
+                                                                        const char* name);
 
 /**
- *  \brief Add the event to be treated in the given event dispatcher manager. The event is provided with parameters for event treatment.
+ *  \brief Add the event to be treated in the given event dispatcher manager. The event is provided with parameters for
+ * event treatment.
  *
  *  \param eventMgr  Pointer of the event dispatcher manager in which action will be added
  *  \param event     The event integer value to add to the event dispatcher manager queue
@@ -50,14 +51,15 @@ SOPC_EventDispatcherManager* SOPC_EventDispatcherManager_CreateAndStart(SOPC_Eve
  *  \param debugName Indicates in a human readable way the event added to the queue
  *  \return             STATUS_OK if action added successfully,
  *                      STATUS_INVALID_PARAMETER in case event dispatcher manager pointer is NULL,
- *                      STATUS_NOK otherwise (event dispatcher manager not started, function pointer and argument both NULL).
+ *                      STATUS_NOK otherwise (event dispatcher manager not started, function pointer and argument both
+ * NULL).
  */
 SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager* eventMgr,
-                                                     int32_t                      event,
-                                                     uint32_t                     eltId,
-                                                     void*                        params,
-                                                     uint32_t                     auxParam,
-                                                     const char*                  debugName);
+                                                     int32_t event,
+                                                     uint32_t eltId,
+                                                     void* params,
+                                                     uint32_t auxParam,
+                                                     const char* debugName);
 
 /**
  *  \brief Similar to *_AddEvent but the event will be added to be the next one to be treated
@@ -71,14 +73,15 @@ SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager
  *  \param debugName Indicates in a human readable way the event added to the queue
  *  \return             STATUS_OK if action added successfully,
  *                      STATUS_INVALID_PARAMETER in case event dispatcher manager pointer is NULL,
- *                      STATUS_NOK otherwise (event dispatcher manager not started, function pointer and argument both NULL).
+ *                      STATUS_NOK otherwise (event dispatcher manager not started, function pointer and argument both
+ * NULL).
  */
 SOPC_StatusCode SOPC_EventDispatcherManager_AddEventAsNext(SOPC_EventDispatcherManager* eventMgr,
-                                                           int32_t                      event,
-                                                           uint32_t                     eltId,
-                                                           void*                        params,
-                                                           uint32_t                     auxParam,
-                                                           const char*                  debugName);
+                                                           int32_t event,
+                                                           uint32_t eltId,
+                                                           void* params,
+                                                           uint32_t auxParam,
+                                                           const char* debugName);
 
 /**
  *  \brief Stops the event dispatcher manager treatment.

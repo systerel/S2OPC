@@ -19,34 +19,29 @@
  *
  */
 
-
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include "constants.h"
 
 #include "address_space_impl.h"
 #include "testlib_read_response.h"
-#include "address_space_impl.h"
 
 /**
  * You should free() the returned Variant* afterwards.
  */
-SOPC_Variant* new_variant_rvi(SOPC_NodeId     **pnids,
-                              OpcUa_NodeClass *pncls,
-                              SOPC_Variant    *pvars,
-                              SOPC_StatusCode *pscs,
-                              uint32_t        attr_id,
-                              int32_t          rvi)
+SOPC_Variant* new_variant_rvi(SOPC_NodeId** pnids,
+                              OpcUa_NodeClass* pncls,
+                              SOPC_Variant* pvars,
+                              SOPC_StatusCode* pscs,
+                              uint32_t attr_id,
+                              int32_t rvi)
 {
-    if(NULL == pnids ||
-       NULL == pncls ||
-       NULL == pvars ||
-       NULL == pscs)
+    if (NULL == pnids || NULL == pncls || NULL == pvars || NULL == pscs)
         return NULL;
 
-    switch(attr_id)
+    switch (attr_id)
     {
     case e_aid_NodeId:
         return util_variant__new_Variant_from_NodeId(pnids[rvi]);
@@ -56,33 +51,30 @@ SOPC_Variant* new_variant_rvi(SOPC_NodeId     **pnids,
         assert(address_space_bs__nViews >= 0);
         assert(address_space_bs__nObjects >= 0);
         assert(rvi >= address_space_bs__nViews + address_space_bs__nObjects);
-        assert(rvi - (address_space_bs__nViews + address_space_bs__nObjects) <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
-        return util_variant__new_Variant_from_Variant
-                (&pvars[rvi - (address_space_bs__nViews + address_space_bs__nObjects)]);
+        assert(rvi - (address_space_bs__nViews + address_space_bs__nObjects) <=
+               address_space_bs__nVariables + address_space_bs__nVariableTypes);
+        return util_variant__new_Variant_from_Variant(
+            &pvars[rvi - (address_space_bs__nViews + address_space_bs__nObjects)]);
     default:
         return NULL;
     }
 }
 
-
 /** Returns NOK on not found or compare-error */
-SOPC_StatusCode get_rvi(SOPC_NodeId **pnids,
-                        SOPC_NodeId *target_nid,
-                        int32_t *prvi)
+SOPC_StatusCode get_rvi(SOPC_NodeId** pnids, SOPC_NodeId* target_nid, int32_t* prvi)
 {
-    if(NULL == pnids ||
-       NULL == target_nid ||
-       NULL == prvi)
+    if (NULL == pnids || NULL == target_nid || NULL == prvi)
         return STATUS_INVALID_PARAMETERS;
 
     int32_t i;
     int32_t comp;
 
-    for(i=1; i <= address_space_bs__nNodeIds; i++)
+    for (i = 1; i <= address_space_bs__nNodeIds; i++)
     {
-        if(STATUS_OK != SOPC_NodeId_Compare(pnids[i], target_nid, &comp))
+        if (STATUS_OK != SOPC_NodeId_Compare(pnids[i], target_nid, &comp))
             return STATUS_NOK;
-        if(comp == 0) {
+        if (comp == 0)
+        {
             *prvi = i;
             return STATUS_OK;
         }
@@ -91,33 +83,31 @@ SOPC_StatusCode get_rvi(SOPC_NodeId **pnids,
     return STATUS_NOK;
 }
 
-
-bool test_read_request_response(OpcUa_ReadResponse *pReadResp,
-                                constants__t_StatusCode_i status_code,
-                                int verbose)
+bool test_read_request_response(OpcUa_ReadResponse* pReadResp, constants__t_StatusCode_i status_code, int verbose)
 {
     printf("--> ReadRequest test result: ");
-    if(verbose > 0)
+    if (verbose > 0)
         printf("\n");
 
     bool bTestOk = false;
     int32_t comp = 0;
-    SOPC_Variant *pvar;
+    SOPC_Variant* pvar;
     int32_t i, rvi = 0;
 
     /* Check the service StatusCode */
-    if(verbose > 0)
+    if (verbose > 0)
         printf("Service status code: %d (should be %d)\n", status_code, constants__e_sc_ok);
     bTestOk = constants__e_sc_ok == status_code;
 
     /* Creates a Request */
-    OpcUa_ReadRequest *pReadReq = read_new_read_request();
+    OpcUa_ReadRequest* pReadReq = read_new_read_request();
 
     /* Prints the Response */
-    if(verbose > 0)
+    if (verbose > 0)
     {
         printf("pReadResp->NoOfResults: %d\n", pReadResp->NoOfResults);
-        for(i=0; i < pReadResp->NoOfResults; ++i) {
+        for (i = 0; i < pReadResp->NoOfResults; ++i)
+        {
             /* Note: Status is a B-StatusCode */
             printf("pReadResp->Results[%d].Status: 0x%08X\n", i, pReadResp->Results[i].Status);
             util_variant__print_SOPC_Variant(&pReadResp->Results[i].Value);
@@ -125,36 +115,34 @@ bool test_read_request_response(OpcUa_ReadResponse *pReadResp,
     }
 
     /* Test number of results */
-    if(bTestOk)
+    if (bTestOk)
         bTestOk = pReadReq->NoOfNodesToRead == pReadResp->NoOfResults;
 
     /* Analyze each response element */
-    for(i=0; bTestOk && i < pReadReq->NoOfNodesToRead; ++i) {
+    for (i = 0; bTestOk && i < pReadReq->NoOfNodesToRead; ++i)
+    {
         /* Find NodeId's rvi */
         bTestOk = STATUS_OK == get_rvi(address_space_bs__a_NodeId, &pReadReq->NodesToRead[i].NodeId, &rvi);
         /* Find desired attribute and wrap it in a new SOPC_Variant* */
-        if(bTestOk){
-            pvar = new_variant_rvi(address_space_bs__a_NodeId, 
-                                   address_space_bs__a_NodeClass, 
-                                   address_space_bs__a_Value, 
-                                   address_space_bs__a_Value_StatusCode,
-                                   pReadReq->NodesToRead[i].AttributeId, 
-                                   rvi);
-        }else{
+        if (bTestOk)
+        {
+            pvar = new_variant_rvi(address_space_bs__a_NodeId, address_space_bs__a_NodeClass, address_space_bs__a_Value,
+                                   address_space_bs__a_Value_StatusCode, pReadReq->NodesToRead[i].AttributeId, rvi);
+        }
+        else
+        {
             pvar = NULL;
         }
         /* Compares the wrapped value with the response to the request */
-        bTestOk = bTestOk && STATUS_OK == SOPC_Variant_Compare(&pReadResp->Results[i].Value,
-                                                               pvar,
-                                                               &comp);
+        bTestOk = bTestOk && STATUS_OK == SOPC_Variant_Compare(&pReadResp->Results[i].Value, pvar, &comp);
         bTestOk = bTestOk && comp == 0;
-        if(verbose > 1)
+        if (verbose > 1)
         {
             printf("-- Comparing pvar:\n");
             util_variant__print_SOPC_Variant(pvar);
             printf("-- with response[%d]:\n", i);
             util_variant__print_SOPC_Variant(&pReadResp->Results[i].Value);
-            if(bTestOk)
+            if (bTestOk)
                 printf("-- ok\n");
             else
                 printf("-- nok\n");
@@ -166,7 +154,7 @@ bool test_read_request_response(OpcUa_ReadResponse *pReadResp,
     free(pReadReq->NodesToRead);
     free(pReadReq);
 
-    if(bTestOk)
+    if (bTestOk)
         printf("OK\n");
     else
         printf("NOT ok\n");

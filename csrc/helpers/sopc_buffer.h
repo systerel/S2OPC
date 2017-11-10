@@ -30,7 +30,8 @@
 /**
  *  \brief Bytes buffer structure
  */
-typedef struct {
+typedef struct
+{
     uint32_t max_size; /**< maximum size (allocated bytes) */
     uint32_t position; /**< read/write position */
     uint32_t length;   /**< data length */
@@ -82,10 +83,10 @@ void SOPC_Buffer_Reset(SOPC_Buffer* buffer);
  *  \param buffer   Pointer to the buffer to reset to the given position
  *  \param position New position of the reset buffer (position <= buffer->length)
  *
- *  \return         0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, invalid position)
+ *  \return         0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, invalid
+ * position)
  */
-SOPC_StatusCode SOPC_Buffer_ResetAfterPosition(SOPC_Buffer*  buffer,
-                                     uint32_t position);
+SOPC_StatusCode SOPC_Buffer_ResetAfterPosition(SOPC_Buffer* buffer, uint32_t position);
 
 /**
  *  \brief             Set buffer to the given position
@@ -93,7 +94,8 @@ SOPC_StatusCode SOPC_Buffer_ResetAfterPosition(SOPC_Buffer*  buffer,
  *  \param buffer      Pointer to the buffer to set to the given position
  *  \param position    New position of the buffer (<= buffer->length)
  *
- *  \return            0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, invalid position)
+ *  \return            0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, invalid
+ * position)
  */
 SOPC_StatusCode SOPC_Buffer_SetPosition(SOPC_Buffer* buffer, uint32_t position);
 
@@ -103,29 +105,34 @@ SOPC_StatusCode SOPC_Buffer_SetPosition(SOPC_Buffer* buffer, uint32_t position);
  *  \param buffer    Pointer to the buffer to set to the given length
  *  \param length    New length of the buffer (<= buffer->maxsize && >= buffer->position)
  *
- *  \return          0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, invalid length)
+ *  \return          0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, invalid
+ * length)
  */
 SOPC_StatusCode SOPC_Buffer_SetDataLength(SOPC_Buffer* buffer, uint32_t length);
 
 /**
- *  \brief             Write the given bytes into the buffer data bytes from the buffer position (adapting buffer position and length if necessary)
+ *  \brief             Write the given bytes into the buffer data bytes from the buffer position (adapting buffer
+ * position and length if necessary)
  *
  *  \param buffer      Pointer to the buffer to write into
  *  \param data_src    Pointer to the bytes to be write in the buffer (HYP: nb bytes >= count bytes)
  *  \param count       Number of bytes to write in the buffer (count + buffer->position <= buffer->maxsize)
  *
- *  \return            0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, full buffer avoiding operation)
+ *  \return            0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, full buffer
+ * avoiding operation)
  */
 SOPC_StatusCode SOPC_Buffer_Write(SOPC_Buffer* buffer, const uint8_t* data_src, uint32_t count);
 
 /**
- *  \brief              Read the given bytes of the buffer data bytes from the buffer position (adapting buffer position to next position to read)
+ *  \brief              Read the given bytes of the buffer data bytes from the buffer position (adapting buffer position
+ * to next position to read)
  *
  *  \param data_dest    Pointer to the bytes to set to read bytes value of the buffer (HYP: nb bytes >= count bytes)
  *  \param buffer       Pointer to the buffer to read from
  *  \param count        Number of bytes to read from the buffer (count + buffer->position <= buffer->length)
  *
- *  \return             0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, empty buffer avoiding operation)
+ *  \return             0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, empty
+ * buffer avoiding operation)
  */
 SOPC_StatusCode SOPC_Buffer_Read(uint8_t* data_dest, SOPC_Buffer* buffer, uint32_t count);
 
@@ -135,18 +142,22 @@ SOPC_StatusCode SOPC_Buffer_Read(uint8_t* data_dest, SOPC_Buffer* buffer, uint32
  *  \param dest    Pointer to the destination buffer of the copy operation (dest->maxsize >= src->length)
  *  \param src     Pointer to the source buffer of the copy operation
  *
- *  \return        0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, incompatible size)
+ *  \return        0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, incompatible
+ * size)
  */
 SOPC_StatusCode SOPC_Buffer_Copy(SOPC_Buffer* dest, SOPC_Buffer* src);
 
 /**
- *  \brief                  Copy the data bytes and properties for the given length from the source buffer to the destination buffer
+ *  \brief                  Copy the data bytes and properties for the given length from the source buffer to the
+ * destination buffer
  *
  *  \param dest             Pointer to the destination buffer of the copy operation (dest->maxsize >= limitedLength)
- *  \param src              Pointer to the source buffer of the copy operation (src->length >= limitedLength, src->position <= limitedLength)
- *  \param limitedLength    The length to use for the copy, number of bytes copied and length set in destination buffer
+ *  \param src              Pointer to the source buffer of the copy operation (src->length >= limitedLength,
+ * src->position <= limitedLength) \param limitedLength    The length to use for the copy, number of bytes copied and
+ * length set in destination buffer
  *
- *  \return                 0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, incompatible size)
+ *  \return                 0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content,
+ * incompatible size)
  */
 SOPC_StatusCode SOPC_Buffer_CopyWithLength(SOPC_Buffer* dest, SOPC_Buffer* src, uint32_t limitedLength);
 

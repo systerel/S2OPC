@@ -20,41 +20,34 @@
  * Implements the structures behind the address space.
  */
 
-
-#include "b2c.h"
 #include "service_get_endpoints_bs.h"
+#include "b2c.h"
 #include "util_discovery_services.h"
 
 #include "sopc_types.h"
 
-#include <stdbool.h>
 #include <assert.h>
+#include <stdbool.h>
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void service_get_endpoints_bs__INITIALISATION(void)
-{
-}
+void service_get_endpoints_bs__INITIALISATION(void) {}
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
 void service_get_endpoints_bs__treat_get_endpoints_request(
-   const constants__t_msg_i service_get_endpoints_bs__req_msg,
-   const constants__t_msg_i service_get_endpoints_bs__resp_msg,
-   const constants__t_endpoint_config_idx_i service_get_endpoints_bs__endpoint_config_idx,
-   constants__t_StatusCode_i * const service_get_endpoints_bs__ret){
-  OpcUa_GetEndpointsRequest* getEndpointsReq = (OpcUa_GetEndpointsRequest*) service_get_endpoints_bs__req_msg;
-  OpcUa_GetEndpointsResponse* getEndpointsResp = (OpcUa_GetEndpointsResponse*) service_get_endpoints_bs__resp_msg;
-  uint32_t configIdx = (uint32_t) service_get_endpoints_bs__endpoint_config_idx;
+    const constants__t_msg_i service_get_endpoints_bs__req_msg,
+    const constants__t_msg_i service_get_endpoints_bs__resp_msg,
+    const constants__t_endpoint_config_idx_i service_get_endpoints_bs__endpoint_config_idx,
+    constants__t_StatusCode_i* const service_get_endpoints_bs__ret)
+{
+    OpcUa_GetEndpointsRequest* getEndpointsReq = (OpcUa_GetEndpointsRequest*) service_get_endpoints_bs__req_msg;
+    OpcUa_GetEndpointsResponse* getEndpointsResp = (OpcUa_GetEndpointsResponse*) service_get_endpoints_bs__resp_msg;
+    uint32_t configIdx = (uint32_t) service_get_endpoints_bs__endpoint_config_idx;
 
-  *service_get_endpoints_bs__ret = SOPC_Discovery_GetEndPointsDescriptions(configIdx,
-                                                                           false,
-                                                                             &getEndpointsReq->EndpointUrl,
-                                                                             (uint32_t*)&getEndpointsResp->NoOfEndpoints,
-                                                                             &getEndpointsResp->Endpoints);
-
+    *service_get_endpoints_bs__ret = SOPC_Discovery_GetEndPointsDescriptions(
+        configIdx, false, &getEndpointsReq->EndpointUrl, (uint32_t*) &getEndpointsResp->NoOfEndpoints,
+        &getEndpointsResp->Endpoints);
 }
-
-

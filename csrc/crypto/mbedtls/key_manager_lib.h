@@ -29,16 +29,17 @@
 #include "mbedtls/pk.h"
 #include "mbedtls/x509_crt.h"
 
-
 /**
  * \brief   The asymmetric key representation.
  *
  *          It should be treated as an abstract handle.
  *          The asymmetric key structure is mainly lib-specific. Its content can be enriched for future uses.
  */
-struct SOPC_AsymmetricKey {
-    mbedtls_pk_context pk;       /**< The context of the key, mbedtls_ specific */
-    bool isBorrowedFromCert;     /**< Says whether the context is borrowed from a context or not. In the latter case, the context must be mbedtls_freed */
+struct SOPC_AsymmetricKey
+{
+    mbedtls_pk_context pk;   /**< The context of the key, mbedtls_ specific */
+    bool isBorrowedFromCert; /**< Says whether the context is borrowed from a context or not. In the latter case, the
+                                context must be mbedtls_freed */
 };
 
 /**
@@ -47,10 +48,12 @@ struct SOPC_AsymmetricKey {
  *          It should be treated as an abstract handle.
  *          The certificate structure is mainly lib-specific. Its content can be enriched for future uses.
  */
-struct SOPC_Certificate {
-    mbedtls_x509_crt crt;   /**< Certificate as a lib-dependent format */
-    uint8_t *crt_der;       /**< Certificate in the DER format, which should be canonical. Points to internal mbedtls buffer.*/
-    uint32_t len_der;       /**< Length of crt_der. */
+struct SOPC_Certificate
+{
+    mbedtls_x509_crt crt; /**< Certificate as a lib-dependent format */
+    uint8_t*
+        crt_der; /**< Certificate in the DER format, which should be canonical. Points to internal mbedtls buffer.*/
+    uint32_t len_der; /**< Length of crt_der. */
 };
 
 /**
@@ -59,10 +62,10 @@ struct SOPC_Certificate {
  *          Unspecified yet.
  *          This current  implementation might be too much tainted by mbedtls.
  */
-typedef struct SOPC_CertificateRevList {
+typedef struct SOPC_CertificateRevList
+{
     mbedtls_x509_crl crl;
 } CertificateRevList;
-
 
 /**
  * \brief           Returns the internal public key of the given signed public key.
@@ -81,8 +84,6 @@ typedef struct SOPC_CertificateRevList {
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and STATUS_NOK when there was an error.
  */
-SOPC_StatusCode KeyManager_Certificate_GetPublicKey(const SOPC_Certificate *pCert,
-                                                    SOPC_AsymmetricKey *pKey);
-
+SOPC_StatusCode KeyManager_Certificate_GetPublicKey(const SOPC_Certificate* pCert, SOPC_AsymmetricKey* pKey);
 
 #endif /* SOPC_KEY_MANAGER_LIB_H_ */
