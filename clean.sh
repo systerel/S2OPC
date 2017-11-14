@@ -9,7 +9,7 @@ ISALL=$1
 # Clean pre-build, build and bin dirs
 echo "Cleaning pre-build/, build/ and bin/ directories"
 \rm -f pre-build-check.log pre-build.log build.log
-\rm -fr pre-build build bin
+\rm -fr pre-build build build_mingw build_clang bin
 
 if [[ -z $ISALL || $ISALL != "all" ]]; then
     echo "Do not clean generated source files"

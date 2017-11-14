@@ -10,9 +10,15 @@
 # - prepare test execution
 
 CURDIR=`pwd`
-BUILD_DIR=build
 EXEC_DIR=bin
 CERT_DIR=tests/data/cert
+
+if [[ $CROSS_COMPILE_MINGW ]]; then
+    BUILD_DIR=build_mingw
+else
+    BUILD_DIR=build
+fi
+
 
 echo "Build log" > $CURDIR/build.log
 
@@ -20,7 +26,7 @@ echo "Build the library and tests with CMake" | tee -a $CURDIR/build.log
 if [ -f "$BUILD_DIR/CMakeCache.txt" ]; then
     echo "- CMake already configured" | tee -a $CURDIR/build.log
 else
-    echo "- Generate ./build directory" | tee -a $CURDIR/build.log
+    echo "- Generate ./$BUILD_DIR directory" | tee -a $CURDIR/build.log
     mkdir -p $BUILD_DIR || exit 1
     cd $BUILD_DIR  > /dev/null || exit 1
     echo "- Run CMake" | tee -a $CURDIR/build.log
