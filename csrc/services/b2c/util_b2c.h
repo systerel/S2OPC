@@ -50,4 +50,12 @@ bool util_NodeClass__B_to_C(constants__t_NodeClass_i bncl, OpcUa_NodeClass* cncl
 /* Returns true or false upon failure (invalid bncl) */
 bool util_NodeClass__C_to_B(OpcUa_NodeClass cncl, constants__t_NodeClass_i* bncl);
 
-#endif /* UTIL_B2C_H_ */
+/* Returns true or false upon failure (c_TimestampsToReturn_invalid or invalid pcttr) */
+bool util_TimestampsToReturn__B_to_C(constants__t_TimestampsToReturn_i bttr,
+                                     OpcUa_TimestampsToReturn* pcttr);
+
+/* Returns true or false upon failure (invalid pbttr) */
+bool util_TimestampsToReturn__C_to_B(OpcUa_TimestampsToReturn cttr,
+                                     constants__t_TimestampsToReturn_i* pbttr);
+
+#endif /* UTIL_B2C_H */

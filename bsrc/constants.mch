@@ -71,6 +71,12 @@ SETS
 
     /*t_Timestamp;*/
 
+    t_TimestampsToReturn_i = {c_TimestampsToReturn_indet,
+                              e_ttr_source,
+                              e_ttr_server,
+                              e_ttr_both,
+                              e_ttr_neither};
+
     /* A ReadValue of a ReadRequest. The size of that will define the nb_max_read_value. */
     t_ReadValue_i;
 
@@ -258,6 +264,7 @@ ABSTRACT_CONSTANTS
 
     t_StatusCode,
     t_BrowseDirection,
+    t_TimestampsToReturn,
     t_AttributeId,
     t_NodeClass,
     t_Variant,
@@ -338,6 +345,12 @@ PROPERTIES
     t_BrowseDirection = {e_bd_forward,
                          e_bd_inverse,
                          e_bd_both} &
+
+    t_TimestampsToReturn = {c_TimestampsToReturn_indet,
+                            e_ttr_source,
+                            e_ttr_server,
+                            e_ttr_both,
+                            e_ttr_neither} &
 
     t_AttributeId = {e_aid_NodeId, e_aid_NodeClass, e_aid_Value} &
 

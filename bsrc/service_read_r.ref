@@ -63,19 +63,22 @@ INITIALISATION
 
 OPERATIONS
 
-    p_read_ok, p_nb_ReadValue <-- check_ReadRequest(p_msg) =
+    p_read_ok, p_nb_ReadValue, p_tsToReturn <-- check_ReadRequest(p_msg) =
     BEGIN
         p_read_ok,
         p_nb_ReadValue,
+        p_tsToReturn,
         nb_ReadValue,
         ReadValue_NodeId,
         ReadValue_AttributeId
         :(  p_read_ok      : BOOL & /* Error code, for now a simple Bool */
             p_nb_ReadValue : INT  &
+            p_tsToReturn   : t_TimestampsToReturn_i &
             d_inv_read            &
             (p_read_ok = TRUE
              =>
-             p_nb_ReadValue = nb_ReadValue)
+             p_nb_ReadValue = nb_ReadValue &
+             p_tsToReturn : t_TimestampsToReturn)
         )
     END
     ;

@@ -50,6 +50,17 @@ OPERATIONS
     END
     ;
 
+    p_tsToReturn <-- read_req_TimestampsToReturn(p_msg) =
+    PRE
+        p_msg : t_msg_i &
+        p_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_attribute_read_req
+    THEN
+        p_tsToReturn :: t_TimestampsToReturn_i
+    END
+    ;
+
     /* Returns the NodeId (pointer or hash_id, or...)
      * Does not check if there is a node in the AddressSpace corresponding to this nid */
     isvalid, nid <-- getall_req_ReadValue_NodeId(msg, rvi) =

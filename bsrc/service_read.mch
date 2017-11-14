@@ -60,7 +60,7 @@ INITIALISATION
 
 OPERATIONS
 
-    p_read_ok, p_nb_ReadValue <-- check_ReadRequest(p_msg) =
+    p_read_ok, p_nb_ReadValue, p_tsToReturn <-- check_ReadRequest(p_msg) =
     PRE
         p_msg    : t_msg_i  &
         p_msg    = c_msg_in &
@@ -69,23 +69,27 @@ OPERATIONS
     THEN
         p_read_ok,
         p_nb_ReadValue,
+        p_tsToReturn,
         nb_ReadValue,
         ReadValue_NodeId,
         ReadValue_AttributeId
         :(  p_read_ok             : BOOL                         &
             p_nb_ReadValue        : INT                          &
+            p_tsToReturn          : t_TimestampsToReturn_i       &
             data_Value_Value      : t_ReadValue +-> t_Variant    &
             data_Value_StatusCode : t_ReadValue +-> t_StatusCode
         )
     END
     ;
 
-    p_isvalid <-- alloc_read_response(p_nb_resps, p_resp_msg) =
+    p_isvalid <-- alloc_read_response(p_nb_resps, p_TimestampsToReturn, p_resp_msg) =
     PRE
-        p_nb_resps : NAT                &
-        p_nb_resps <= k_n_read_resp_max &
-        p_resp_msg : t_msg_i            &
-        p_resp_msg = c_msg_out          &
+        p_nb_resps : NAT                              &
+        p_nb_resps <= k_n_read_resp_max               &
+        p_TimestampsToReturn : t_TimestampsToReturn_i &
+        p_TimestampsToReturn : t_TimestampsToReturn   &
+        p_resp_msg : t_msg_i                          &
+        p_resp_msg = c_msg_out                        &
         c_msg_out  : t_msg
     THEN
         p_isvalid :: BOOL  /* malloc result */

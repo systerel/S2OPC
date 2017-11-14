@@ -24,6 +24,7 @@
 #include <stdio.h>
 
 #include "msg_read_request_bs.h"
+#include "util_b2c.h"
 
 #include "address_space_impl.h"
 #include "sopc_types.h"
@@ -104,6 +105,24 @@ void msg_read_request_bs__getall_req_ReadValue_NodeId(const constants__t_msg_i m
     *msg_read_request_bs__isvalid = true;
     *msg_read_request_bs__nid =
         (constants__t_NodeId_i*) &msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].NodeId;
+}
+
+void msg_read_request_bs__read_req_TimestampsToReturn(const constants__t_msg_i msg_read_request_bs__p_msg,
+                                                      constants__t_TimestampsToReturn_i * const msg_read_request_bs__p_tsToReturn)
+{
+    OpcUa_ReadRequest *msg_read_req = (OpcUa_ReadRequest *) msg_read_request_bs__p_msg;
+    bool status = NULL != msg_read_req;
+
+    if (status)
+    {
+        status = util_TimestampsToReturn__C_to_B(msg_read_req->TimestampsToReturn,
+                                                 msg_read_request_bs__p_tsToReturn);
+    }
+
+    if (! status)
+    {
+        *msg_read_request_bs__p_tsToReturn = constants__c_TimestampsToReturn_indet;
+    }
 }
 
 void msg_read_request_bs__read_req_nb_ReadValue(const constants__t_msg_i msg_read_request_bs__msg,

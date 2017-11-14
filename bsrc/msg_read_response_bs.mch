@@ -49,10 +49,12 @@ INITIALISATION
 
 OPERATIONS
 
-    p_isvalid <-- alloc_read_response(p_nb_resps, p_resp_msg) =
+    p_isvalid <-- alloc_read_response(p_nb_resps, p_TimestampsToReturn, p_resp_msg) =
     PRE
         p_nb_resps : NAT &
         p_nb_resps <= k_n_read_resp_max &
+        p_TimestampsToReturn : t_TimestampsToReturn_i &
+        p_TimestampsToReturn : t_TimestampsToReturn &
         p_resp_msg : t_msg_i &
         p_resp_msg = c_msg_out &
         c_msg_out  : t_msg
