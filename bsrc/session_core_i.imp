@@ -110,7 +110,6 @@ OPERATIONS
     VAR
         l_channel_config_idx,
         l_nonce_needed,
-        l_nonce_valid,
         l_nonce
     IN
         create_session (session, channel, e_session_creating);

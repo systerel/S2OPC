@@ -451,7 +451,6 @@ OPERATIONS
     VAR
         l_valid_session,
         l_session_state,
-        l_connected_channel,
         l_ret
     IN
         l_valid_session <-- is_valid_session (session);
@@ -538,7 +537,6 @@ OPERATIONS
     VAR
         l_valid_session,
         l_session_state,
-        l_connected_channel,
         l_ret
     IN
         l_valid_session <-- is_valid_session(session);

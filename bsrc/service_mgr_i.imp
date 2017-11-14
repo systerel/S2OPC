@@ -231,7 +231,6 @@ OPERATIONS
     VAR
         l_req_msg_header,
         l_valid_req_header,
-        l_checked_req_header,
         l_req_msg,
         l_valid_req,
         l_request_handle,
@@ -367,7 +366,6 @@ OPERATIONS
         l_bret,
         l_is_valid_resp,
         l_buffer_out,
-        l_valid_buffer,
         l_isvalid_write
     IN
         l_buffer_out := c_byte_buffer_indet;
@@ -512,10 +510,6 @@ OPERATIONS
         l_valid_req_header,
         l_request_handle,
         l_valid_req_handle,
-        l_session_token,
-        l_is_valid_req,
-        l_session,
-        l_snd_session_err,
         l_req_msg,
         l_valid_req,
         l_resp_msg_typ,
@@ -523,11 +517,8 @@ OPERATIONS
         l_valid_msg,
         l_resp_msg_header,
         l_valid_resp_header,
-        l_session_user,
         l_ret,
-        l_is_valid_resp,
         l_buffer_out,
-        l_valid_buffer,
         l_endpoint_config_idx
     IN
         l_buffer_out := c_byte_buffer_indet;
@@ -600,8 +591,6 @@ OPERATIONS
         l_valid_resp_header,
         l_request_handle,
         l_validated_req_handle,
-        l_is_valid_session_resp,
-        l_session,
         l_resp_msg,
         l_valid_resp_msg,
         l_status
@@ -643,7 +632,6 @@ OPERATIONS
         l_req_handle,
         l_valid_req_handle,
         l_valid_msg,
-        l_valid_session,
         l_buffer,
         l_valid_buffer,
         l_ret

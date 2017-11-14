@@ -453,8 +453,7 @@ OPERATIONS
         l_channel,
         l_connected_channel,
         l_buffer_out,
-        l_valid_buffer_out,
-        l_ret
+        l_valid_buffer_out
     IN
         l_channel <-- get_connected_channel (channel_config_idx);
         l_connected_channel <-- is_connected_channel (l_channel);

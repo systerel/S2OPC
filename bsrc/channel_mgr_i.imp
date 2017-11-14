@@ -124,7 +124,6 @@ OPERATIONS
 
     bres <-- cli_open_secure_channel (config_idx) =
     VAR
-        l_open_bres,
         l_dom,
         l_channel,
         l_card_connecting,
