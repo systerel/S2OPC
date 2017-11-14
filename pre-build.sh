@@ -19,6 +19,8 @@ LOGPATH=$CURDIR/pre-build.log
 # Redirect all output and errors to log file
 echo "Pre-build log" > $LOGPATH
 
+EXITCODE=0
+
 if [[ -z $TOOLING_DIR ]]; then
     # If tooling directory not define only call make target
     echo "Environment variable TOOLING_DIR not set (CAUTION: no generation from B model possible)" | tee -a $LOGPATH
@@ -48,15 +50,23 @@ fi
 
 if [[ $? != 0 ]]; then
     echo "ERROR: generating C source files from B model" | tee -a $LOGPATH
-    exit 1
+    EXITCODE=1
 fi
+# Remove pre-build directory in any case
+\rm -rf $CURDIR/$PREBUILD
 
 
 echo "Generate address space C files for tests" | tee -a $LOGPATH
 make -C ./address_space_generation >> $LOGPATH
 if [[ $? != 0 ]]; then
     echo "ERROR: generating address spaces for tests" | tee -a $LOGPATH
-    exit 1
-else
-    echo "Completed with SUCCESS" | tee -a $LOGPATH
+    EXITCODE=1
 fi
+
+if [[ $EXITCODE -eq 0 ]]; then
+    echo "Completed with SUCCESS" | tee -a $LOGPATH
+else
+    echo "Completed with ERRORS" | tee -a $LOGPATH
+fi
+
+exit $EXITCODE

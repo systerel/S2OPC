@@ -13,6 +13,7 @@ TMP_TOOLING_DIR=$(pwd)/$PREBUILD/tooling
 DOCKER_IMAGE=ca487e4c9dde
 
 # Create dir to store tooling directory for generation
+\rm -rf $PREBUILD
 mkdir -p $TMP_TOOLING_DIR > /dev/null
 cd $TMP_TOOLING_DIR > /dev/null
 
