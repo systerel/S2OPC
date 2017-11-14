@@ -36,10 +36,6 @@
 #endif
 #endif
 
-#if FLT_EVAL_METHOD != 0
-#error "Compiler floating point support is not IEEE-754 compliant"
-#endif
-
 #if FLT_MAX_EXP != 128
 #error "Compiler float definition differs from IEEE-754 standard"
 #endif
