@@ -8,7 +8,7 @@ ISALL=$1
 
 # Clean pre-build, build and bin dirs
 echo "Cleaning pre-build/, build/ and bin/ directories"
-\rm -f pre-build.log build.log
+\rm -f pre-build-check.log pre-build.log build.log
 \rm -fr pre-build build bin
 
 if [[ -z $ISALL || $ISALL != "all" ]]; then

@@ -58,5 +58,5 @@ if [[ $? != 0 ]]; then
     echo "ERROR: generating address spaces for tests" | tee -a $LOGPATH
     exit 1
 else
-    echo "Terminated with SUCCESS" | tee -a $LOGPATH
+    echo "Completed with SUCCESS" | tee -a $LOGPATH
 fi

@@ -57,6 +57,6 @@ else
 fi
 
 if [[ $? == 0 ]]; then
-    echo "Terminated with SUCCESS" | tee -a $CURDIR/build.log
+    echo "Completed with SUCCESS" | tee -a $CURDIR/build.log
     exit 0
 fi

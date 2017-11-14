@@ -92,9 +92,9 @@ else
 fi
 
 if [[ $EXITCODE -eq 0 ]]; then
-    echo "Terminated with SUCCESS" | tee -a $LOGPATH
+    echo "Completed with SUCCESS" | tee -a $LOGPATH
 else
-    echo "Terminated with ERRORS" | tee -a $LOGPATH
+    echo "Completed with ERRORS" | tee -a $LOGPATH
 fi
 
 exit $EXITCODE
