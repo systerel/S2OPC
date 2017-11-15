@@ -86,7 +86,8 @@ void msg_read_response_bs__alloc_read_response(const t_entier4 msg_read_response
 void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_response_bs__resp_msg,
                                              const constants__t_ReadValue_i msg_read_response_bs__rvi,
                                              const constants__t_Variant_i msg_read_response_bs__val,
-                                             const constants__t_StatusCode_i msg_read_response_bs__sc)
+                                             const constants__t_StatusCode_i msg_read_response_bs__sc,
+                                             const constants__t_AttributeId_i msg_read_response_bs__aid)
 {
     OpcUa_ReadResponse* pMsgReadResp = (OpcUa_ReadResponse*) msg_read_response_bs__resp_msg;
     /* rvi is castable, it's one of its properties, but it starts at 1 */
@@ -110,7 +111,8 @@ void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_r
 
         util_status_code__B_to_C(msg_read_response_bs__sc, &pDataValue->Status);
 
-        if (constants__e_ttr_both == ttrRequested || constants__e_ttr_source == ttrRequested)
+        if (msg_read_response_bs__aid == constants__e_aid_Value &&
+            (constants__e_ttr_both == ttrRequested || constants__e_ttr_source == ttrRequested))
         {
             SOPC_DateTime_FromInt64(&pDataValue->SourceTimestamp, now());
         }

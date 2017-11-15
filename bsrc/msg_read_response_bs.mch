@@ -72,19 +72,23 @@ OPERATIONS
     END
     ;
 
-    set_read_response(resp_msg, rvi, val, sc) =
+    set_read_response(resp_msg, rvi, val, sc, aid) =
     PRE
-        resp_msg    : t_msg_i        &
-        resp_msg    = c_msg_out      &
-        c_msg_out   : t_msg          &
-        rvi         : t_ReadValue_i  &
-        rvi         : t_ReadValue    &
-        val         : t_Variant_i    &
+        resp_msg    : t_msg_i         &
+        resp_msg    = c_msg_out       &
+        c_msg_out   : t_msg           &
+        rvi         : t_ReadValue_i   &
+        rvi         : t_ReadValue     &
+        val         : t_Variant_i     &
         (val /= c_Variant_indet
          =>
-         val : t_Variant)            &
-        sc          : t_StatusCode_i &
-        sc          : t_StatusCode
+         val : t_Variant)             &
+        sc          : t_StatusCode_i  &
+        sc          : t_StatusCode    &
+        aid         : t_AttributeId_i &
+        (sc = e_sc_ok
+         =>
+         aid : t_AttributeId)
     THEN
         IF  val /= c_Variant_indet THEN
             data_Value_Value(rvi) := val

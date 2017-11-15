@@ -100,19 +100,19 @@ OPERATIONS
                         l_sc := e_sc_ok
                     END
                 END;
-                set_read_response(p_resp_msg, p_rvi, l_value, l_sc);
+                set_read_response(p_resp_msg, p_rvi, l_value, l_sc, p_aid);
                 read_AddressSpace_free_value(l_value)
             ELSE
                 /* Invalid at this level means the node Id is unknown:
                    node Id cannot be invalid in case p_is_valid = TRUE */
-                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_node_id_unknown)
+                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_node_id_unknown, p_aid)
             END
         ELSE
             IF p_nid = c_NodeId_indet THEN
-                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_node_id_invalid)
+                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_node_id_invalid, p_aid)
             ELSE
                 /* It shall be p_aid = c_AttributeId_indet case */
-                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_attribute_id_invalid)
+                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_attribute_id_invalid, p_aid)
             END
         END
     END
