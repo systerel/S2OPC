@@ -37,7 +37,8 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id,
 
 void SOPC_Sockets_Initialize()
 {
-    assert(STATUS_OK == Socket_Network_Initialize());
+    SOPC_ReturnStatus status = Socket_Network_Initialize();
+    assert(SOPC_STATUS_OK == status);
     SOPC_SocketsInternalContext_Initialize();
     socketsEventDispatcherMgr =
         SOPC_EventDispatcherManager_CreateAndStart(SOPC_SocketsEventMgr_Dispatcher, "Sockets event manager dispatcher");

@@ -18,6 +18,7 @@
 #ifndef SOPC_RAW_SOCKETS_H_
 #define SOPC_RAW_SOCKETS_H_
 
+#include <stdbool.h>
 #include "sopc_toolkit_constants.h"
 
 // Platform dependent types
@@ -26,12 +27,12 @@
 /**
  *  \brief Initialize the network communication allowing to use sockets
  */
-SOPC_StatusCode Socket_Network_Initialize(void);
+bool Socket_Network_Initialize(void);
 
 /**
  *  \brief Clear the network communication when sockets not used anymore
  */
-SOPC_StatusCode Socket_Network_Clear(void);
+bool Socket_Network_Clear(void);
 
 /**
  *  \brief Provide a linked list of socket addressing information for establishing TCP connections over IPV4 and IPV6
@@ -43,7 +44,7 @@ SOPC_StatusCode Socket_Network_Clear(void);
  *
  *  \return            GOOD if operation succeeded, BAD otherwise.
  */
-SOPC_StatusCode Socket_AddrInfo_Get(char* hostname, char* port, Socket_AddressInfo** addrs);
+SOPC_ReturnStatus Socket_AddrInfo_Get(char* hostname, char* port, Socket_AddressInfo** addrs);
 
 /**
  *  \brief Given a socket addressing information element of a linked list,
@@ -91,7 +92,7 @@ void Socket_Clear(Socket* sock);
  *
  *  \return                  GOOD if operation succeeded, BAD otherwise.
  */
-SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr, bool setReuseAddr, bool setNonBlocking, Socket* sock);
+SOPC_ReturnStatus Socket_CreateNew(Socket_AddressInfo* addr, bool setReuseAddr, bool setNonBlocking, Socket* sock);
 
 /**
  *  \brief Configure the socket to listen connections using the given addressing information
@@ -101,7 +102,7 @@ SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr, bool setReuseAddr, bo
  *
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
-SOPC_StatusCode Socket_Listen(Socket sock, Socket_AddressInfo* addr);
+SOPC_ReturnStatus Socket_Listen(Socket sock, Socket_AddressInfo* addr);
 
 /**
  *  \brief Operation to accept a connection on a listening socket
@@ -113,7 +114,7 @@ SOPC_StatusCode Socket_Listen(Socket sock, Socket_AddressInfo* addr);
  *
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
-SOPC_StatusCode Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock);
+SOPC_ReturnStatus Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock);
 
 /**
  *  \brief Operation to establish a connection using the given socket and addressing information
@@ -125,7 +126,7 @@ SOPC_StatusCode Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket*
  *
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
-SOPC_StatusCode Socket_Connect(Socket sock, Socket_AddressInfo* addr);
+SOPC_ReturnStatus Socket_Connect(Socket sock, Socket_AddressInfo* addr);
 
 /**
  *  \brief Operation to check connection establishment result on a connecting socket
@@ -136,7 +137,7 @@ SOPC_StatusCode Socket_Connect(Socket sock, Socket_AddressInfo* addr);
  *
  *  \return        GOOD if connection succeeded, BAD otherwise.
  */
-SOPC_StatusCode Socket_CheckAckConnect(Socket sock);
+SOPC_ReturnStatus Socket_CheckAckConnect(Socket sock);
 
 /**
  *  \brief Add a socket to the given socket set
@@ -185,11 +186,11 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketS
  *  \param count     The number of bytes to write
  *  \param sentBytes Pointer to the number of bytes sent on socket after call
  *
- *  \return          STATUS_OK if all bytes were written,
- *                   OpcUa_BadWouldBlock if socket write operation would block,
- *                   STATUS_NOK if it failed and
+ *  \return          SOPC_STATUS_OK if all bytes were written,
+ *                   SOPC_STATUS_WOULD_BLOCK if socket write operation would block,
+ *                   SOPC_STATUS_NOK if it failed and
  */
-SOPC_StatusCode Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint32_t* sentBytes);
+SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint32_t* sentBytes);
 
 /**
  *  \brief Read data through the socket
@@ -199,9 +200,10 @@ SOPC_StatusCode Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint32_
  *  \param dataSize     The number of bytes that can be set (or expected to be read)
  *  \param readCount    The number of bytes actually read on the socket
  *
- *  \return         GOOD if operation succeeded, BAD_DISCONNECT in case of disconnection and BAD otherwise.
+ *  \return         GOOD if operation succeeded, SOPC_STATUS_CLOSED in case of disconnection and SOPC_STATUS_NOK
+ * otherwise.
  */
-SOPC_StatusCode Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int32_t* readCount);
+SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int32_t* readCount);
 
 /**
  *  \brief Close the socket connection and/or clear the socket

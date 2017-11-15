@@ -22,9 +22,9 @@
 
 #include "sopc_namespace_table.h"
 
-SOPC_StatusCode SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** encObject)
+SOPC_ReturnStatus SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** encObject)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (encTyp != NULL && encTyp->Initialize != NULL && encTyp->AllocationSize > 0 && encObject != NULL &&
         NULL == *encObject)
     {
@@ -32,38 +32,38 @@ SOPC_StatusCode SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** encOb
         if (*encObject != NULL)
         {
             encTyp->Initialize(*encObject);
-            status = STATUS_OK;
+            status = SOPC_STATUS_OK;
         }
         else
         {
-            status = STATUS_NOK;
+            status = SOPC_STATUS_NOK;
         }
     }
     return status;
 }
 
-SOPC_StatusCode SOPC_Encodeable_Delete(SOPC_EncodeableType* encTyp, void** encObject)
+SOPC_ReturnStatus SOPC_Encodeable_Delete(SOPC_EncodeableType* encTyp, void** encObject)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (encTyp != NULL && encTyp->Clear != NULL && encObject != NULL && *encObject != NULL)
     {
         encTyp->Clear(*encObject);
         free(*encObject);
         *encObject = NULL;
-        status = STATUS_OK;
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
 
-SOPC_StatusCode SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObject,
-                                                SOPC_EncodeableType* encTyp,
-                                                void** encObject)
+SOPC_ReturnStatus SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObject,
+                                                  SOPC_EncodeableType* encTyp,
+                                                  void** encObject)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (extObject != NULL && extObject->Encoding == SOPC_ExtObjBodyEncoding_None)
     {
         status = SOPC_Encodeable_Create(encTyp, encObject);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             extObject->Encoding = SOPC_ExtObjBodyEncoding_Object;
             extObject->Body.Object.ObjType = encTyp;

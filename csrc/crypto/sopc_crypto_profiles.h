@@ -77,62 +77,62 @@ extern const SOPC_CryptoProfile sopc_g_cpNone;
  * Internal CryptoProfile function pointers.
  * ------------------------------------------------------------------------------------------------
  */
-typedef SOPC_StatusCode (*FnSymmetricEncrypt)(const SOPC_CryptoProvider* pProvider,
-                                              const uint8_t* pInput,
-                                              uint32_t lenPlainText,
-                                              const SOPC_ExposedBuffer* pKey,
-                                              const SOPC_ExposedBuffer* pIV,
-                                              uint8_t* pOutput,
-                                              uint32_t lenOutput);
-typedef SOPC_StatusCode (*FnSymmetricDecrypt)(const SOPC_CryptoProvider* pProvider,
-                                              const uint8_t* pInput,
-                                              uint32_t lenCipherText,
-                                              const SOPC_ExposedBuffer* pKey,
-                                              const SOPC_ExposedBuffer* pIV,
-                                              uint8_t* pOutput,
-                                              uint32_t lenOutput);
-typedef SOPC_StatusCode (*FnSymmetricSign)(const SOPC_CryptoProvider* pProvider,
-                                           const uint8_t* pInput,
-                                           uint32_t lenInput,
-                                           const SOPC_ExposedBuffer* pKey,
-                                           uint8_t* pOutput);
-typedef SOPC_StatusCode (*FnSymmetricVerify)(const SOPC_CryptoProvider* pProvider,
+typedef SOPC_ReturnStatus (*FnSymmetricEncrypt)(const SOPC_CryptoProvider* pProvider,
+                                                const uint8_t* pInput,
+                                                uint32_t lenPlainText,
+                                                const SOPC_ExposedBuffer* pKey,
+                                                const SOPC_ExposedBuffer* pIV,
+                                                uint8_t* pOutput,
+                                                uint32_t lenOutput);
+typedef SOPC_ReturnStatus (*FnSymmetricDecrypt)(const SOPC_CryptoProvider* pProvider,
+                                                const uint8_t* pInput,
+                                                uint32_t lenCipherText,
+                                                const SOPC_ExposedBuffer* pKey,
+                                                const SOPC_ExposedBuffer* pIV,
+                                                uint8_t* pOutput,
+                                                uint32_t lenOutput);
+typedef SOPC_ReturnStatus (*FnSymmetricSign)(const SOPC_CryptoProvider* pProvider,
                                              const uint8_t* pInput,
                                              uint32_t lenInput,
                                              const SOPC_ExposedBuffer* pKey,
-                                             const uint8_t* pSignature);
-typedef SOPC_StatusCode (*FnGenerateRandom)(const SOPC_CryptoProvider* pProvider,
-                                            SOPC_ExposedBuffer* pData,
-                                            uint32_t lenData);
-typedef SOPC_StatusCode (*FnDerivePseudoRandomData)(const SOPC_CryptoProvider* pProvider,
-                                                    const SOPC_ExposedBuffer* pSecret,
-                                                    uint32_t lenSecret,
-                                                    const SOPC_ExposedBuffer* pSeed,
-                                                    uint32_t lenSeed,
-                                                    SOPC_ExposedBuffer* pOutput,
-                                                    uint32_t lenOutput);
-typedef SOPC_StatusCode (*FnAsymmetricEncrypt)(const SOPC_CryptoProvider* pProvider,
+                                             uint8_t* pOutput);
+typedef SOPC_ReturnStatus (*FnSymmetricVerify)(const SOPC_CryptoProvider* pProvider,
                                                const uint8_t* pInput,
-                                               uint32_t lenPlainText,
-                                               const SOPC_AsymmetricKey* pKey,
-                                               uint8_t* pOutput);
-typedef SOPC_StatusCode (*FnAsymmetricDecrypt)(const SOPC_CryptoProvider* pProvider,
-                                               const uint8_t* pInput,
-                                               uint32_t lenCipherText,
-                                               const SOPC_AsymmetricKey* pKey,
-                                               uint8_t* pOutput,
-                                               uint32_t* lenWritten);
-typedef SOPC_StatusCode (*FnAsymmetricSign)(const SOPC_CryptoProvider* pProvider,
-                                            const uint8_t* pInput,
-                                            uint32_t lenInput,
-                                            const SOPC_AsymmetricKey* pKey,
-                                            uint8_t* pSignature);
-typedef SOPC_StatusCode (*FnAsymmetricVerify)(const SOPC_CryptoProvider* pProvider,
+                                               uint32_t lenInput,
+                                               const SOPC_ExposedBuffer* pKey,
+                                               const uint8_t* pSignature);
+typedef SOPC_ReturnStatus (*FnGenerateRandom)(const SOPC_CryptoProvider* pProvider,
+                                              SOPC_ExposedBuffer* pData,
+                                              uint32_t lenData);
+typedef SOPC_ReturnStatus (*FnDerivePseudoRandomData)(const SOPC_CryptoProvider* pProvider,
+                                                      const SOPC_ExposedBuffer* pSecret,
+                                                      uint32_t lenSecret,
+                                                      const SOPC_ExposedBuffer* pSeed,
+                                                      uint32_t lenSeed,
+                                                      SOPC_ExposedBuffer* pOutput,
+                                                      uint32_t lenOutput);
+typedef SOPC_ReturnStatus (*FnAsymmetricEncrypt)(const SOPC_CryptoProvider* pProvider,
+                                                 const uint8_t* pInput,
+                                                 uint32_t lenPlainText,
+                                                 const SOPC_AsymmetricKey* pKey,
+                                                 uint8_t* pOutput);
+typedef SOPC_ReturnStatus (*FnAsymmetricDecrypt)(const SOPC_CryptoProvider* pProvider,
+                                                 const uint8_t* pInput,
+                                                 uint32_t lenCipherText,
+                                                 const SOPC_AsymmetricKey* pKey,
+                                                 uint8_t* pOutput,
+                                                 uint32_t* lenWritten);
+typedef SOPC_ReturnStatus (*FnAsymmetricSign)(const SOPC_CryptoProvider* pProvider,
                                               const uint8_t* pInput,
                                               uint32_t lenInput,
                                               const SOPC_AsymmetricKey* pKey,
-                                              const uint8_t* pSignature);
-typedef SOPC_StatusCode (*FnCertificateVerify)(const SOPC_CryptoProvider* pCrypto, const SOPC_Certificate* pCert);
+                                              uint8_t* pSignature);
+typedef SOPC_ReturnStatus (*FnAsymmetricVerify)(const SOPC_CryptoProvider* pProvider,
+                                                const uint8_t* pInput,
+                                                uint32_t lenInput,
+                                                const SOPC_AsymmetricKey* pKey,
+                                                const uint8_t* pSignature);
+typedef SOPC_ReturnStatus (*FnCertificateVerify)(const SOPC_CryptoProvider* pCrypto, const SOPC_Certificate* pCert);
 
 /* ------------------------------------------------------------------------------------------------
  * The CryptoProfile definition

@@ -80,7 +80,8 @@ void message_in_bs__decode_msg_type(const constants__t_byte_buffer_i message_in_
 {
     *message_in_bs__msg_type = constants__c_msg_type_indet;
     SOPC_EncodeableType* encType = NULL;
-    if (STATUS_OK == SOPC_MsgBodyType_Read((SOPC_Buffer*) message_in_bs__msg_buffer, &encType))
+    SOPC_ReturnStatus status = SOPC_MsgBodyType_Read((SOPC_Buffer*) message_in_bs__msg_buffer, &encType);
+    if (SOPC_STATUS_OK == status)
     {
         util_message__get_message_type(encType, message_in_bs__msg_type);
     }
@@ -91,7 +92,7 @@ void message_in_bs__decode_msg_header(const t_bool message_in_bs__is_request,
                                       constants__t_msg_header_i* const message_in_bs__msg_header)
 {
     *message_in_bs__msg_header = constants__c_msg_header_indet;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     void* header = NULL;
     if (false == message_in_bs__is_request)
     {
@@ -103,7 +104,7 @@ void message_in_bs__decode_msg_header(const t_bool message_in_bs__is_request,
         status = SOPC_DecodeMsg_HeaderOrBody((SOPC_Buffer*) message_in_bs__msg_buffer,
                                              &OpcUa_RequestHeader_EncodeableType, &header);
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         *message_in_bs__msg_header = header;
     }
@@ -114,7 +115,7 @@ void message_in_bs__decode_msg(const constants__t_msg_type_i message_in_bs__msg_
                                constants__t_msg_i* const message_in_bs__msg)
 {
     *message_in_bs__msg = constants__c_msg_indet;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_EncodeableType* reqEncType = NULL;
     SOPC_EncodeableType* respEncType = NULL;
     SOPC_EncodeableType* encType = NULL;
@@ -131,7 +132,7 @@ void message_in_bs__decode_msg(const constants__t_msg_type_i message_in_bs__msg_
     }
 
     status = SOPC_DecodeMsg_HeaderOrBody((SOPC_Buffer*) message_in_bs__msg_buffer, encType, &msg);
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         *message_in_bs__msg = (constants__t_msg_i) msg;
     }
@@ -218,10 +219,5 @@ void message_in_bs__read_msg_req_header_session_token(const constants__t_msg_hea
 void message_in_bs__read_msg_resp_header_service_status(const constants__t_msg_header_i message_in_bs__msg_header,
                                                         constants__t_StatusCode_i* const message_in_bs__status)
 {
-    if (false == util_status_code__C_to_B(((OpcUa_ResponseHeader*) message_in_bs__msg_header)->ServiceResult,
-                                          message_in_bs__status))
-    {
-        printf("message_in_bs__read_msg_resp_header_service_status\n");
-        exit(1);
-    }
+    util_status_code__C_to_B(((OpcUa_ResponseHeader*) message_in_bs__msg_header)->ServiceResult, message_in_bs__status);
 }

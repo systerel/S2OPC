@@ -46,7 +46,7 @@ void service_write_decode_bs__decode_write_request(
 {
     /* TODO: actually decode something */
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) service_write_decode_bs__write_msg;
-    *service_write_decode_bs__StatusCode_service = constants__e_sc_nok;
+    *service_write_decode_bs__StatusCode_service = constants__e_sc_bad_unexpected_error;
 
     if (encType == &OpcUa_WriteRequest_EncodeableType)
     {

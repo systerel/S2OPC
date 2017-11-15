@@ -50,6 +50,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
     SOPC_Socket* uaSock = NULL;
     SOPC_Socket* acceptSock = NULL;
     SocketSet readSet, writeSet, exceptSet;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     SocketSet_Clear(&readSet);
     SocketSet_Clear(&writeSet);
@@ -114,7 +115,8 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                     if (SocketSet_IsPresent(uaSock->sock, &writeSet) != false)
                     {
                         // Check connection erros: mandatory when non blocking connection
-                        if (STATUS_OK != Socket_CheckAckConnect(uaSock->sock))
+                        status = Socket_CheckAckConnect(uaSock->sock);
+                        if (SOPC_STATUS_OK != status)
                         {
                             SOPC_Sockets_EnqueueEvent(INT_SOCKET_CONNECTION_ATTEMPT_FAILED, idx, NULL, 0);
                         }
@@ -148,9 +150,10 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                             }
                             else
                             {
-                                if (STATUS_OK == Socket_Accept(uaSock->sock,
-                                                               1, // Non blocking socket
-                                                               &acceptSock->sock))
+                                status = Socket_Accept(uaSock->sock,
+                                                       1, // Non blocking socket
+                                                       &acceptSock->sock);
+                                if (SOPC_STATUS_OK == status)
                                 {
                                     acceptSock->isUsed = true;
                                     acceptSock->isServerConnection = true;

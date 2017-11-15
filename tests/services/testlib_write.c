@@ -214,7 +214,7 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest* pWriteReq)
     SOPC_Variant* pVariant;
     bool bVerif = true;
     int32_t cmp;
-    SOPC_StatusCode ssc;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     if (NULL == pWriteReq)
         exit(1);
@@ -244,19 +244,19 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest* pWriteReq)
 
         if (sc == constants__e_sc_ok)
         {
-            ssc = SOPC_Variant_Compare(pVariant, &lwv[i].Value.Value, &cmp);
+            status = SOPC_Variant_Compare(pVariant, &lwv[i].Value.Value, &cmp);
         }
         else
         {
-            util_status_code__B_to_C(sc, &ssc);
+            status = SOPC_STATUS_NOK;
         }
         /* The last request is redundant with the first, and because of the way our iterators are coded, it should be
          * ignored. So its test is different. The request shall not be taken into account. */
-        if (ssc != STATUS_OK || cmp != 0)
+        if (status != SOPC_STATUS_OK || cmp != 0)
         {
             printf(
                 "Request[wvi = %zd] did not change the address space (Compare sc = %d, cmp = %d)\n+ Expected value:\n",
-                i, ssc, cmp);
+                i, status, cmp);
             util_variant__print_SOPC_Variant(&lwv[i].Value.Value);
             printf("+ Read value:\n");
             util_variant__print_SOPC_Variant(pVariant);
@@ -292,7 +292,7 @@ bool tlibw_verify_response(OpcUa_WriteRequest* pWriteReq, OpcUa_WriteResponse* p
     /* Verify the vector of StatusCode, should all be OK */
     for (i = 0; i < pWriteReq->NoOfNodesToWrite; ++i)
     {
-        if (pWriteResp->Results[i] != STATUS_OK)
+        if (pWriteResp->Results[i] != 0x00000000)
         {
             printf("Response[wvi = %d] is not OK (%d)\n", i, pWriteResp->Results[i]);
             bVerif = false;
@@ -345,7 +345,7 @@ bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, OpcUa_ReadRespo
     bool bVerif = true;
     int32_t i;
     int32_t cmp;
-    SOPC_StatusCode sc;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     if (NULL == pWriteReq || NULL == pReadResp)
     {
@@ -363,15 +363,15 @@ bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, OpcUa_ReadRespo
     /* Verify that the read value is the requested write value */
     for (i = 0; i < pReadResp->NoOfResults; ++i)
     {
-        sc = SOPC_Variant_Compare(&pReadResp->Results[i].Value,            /* <-- Variant */
-                                  &pWriteReq->NodesToWrite[i].Value.Value, /* <-- Variant */
-                                  &cmp);
-        if (sc != STATUS_OK || cmp != 0)
+        status = SOPC_Variant_Compare(&pReadResp->Results[i].Value,            /* <-- Variant */
+                                      &pWriteReq->NodesToWrite[i].Value.Value, /* <-- Variant */
+                                      &cmp);
+        if (status != SOPC_STATUS_OK || cmp != 0)
         {
             printf(
                 "Response[rvi = %d] is different from Request[wvi = %d] (Compare sc = %d, cmp = %d)\n+ Expected "
                 "value:\n",
-                i, i, sc, cmp);
+                i, i, status, cmp);
             util_variant__print_SOPC_Variant(&pWriteReq->NodesToWrite[i].Value.Value);
             printf("+ Read value:\n");
             util_variant__print_SOPC_Variant(&pReadResp->Results[i].Value);

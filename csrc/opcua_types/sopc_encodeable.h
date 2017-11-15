@@ -34,18 +34,18 @@
  *
  *  \param encTyp    Encodeable type of the encodeable object to instantiate and initialize
  *  \param encObject Pointer to be set with the address of the newly created encodeable object
- *  \return          STATUS_OK if creation succeeded
+ *  \return          SOPC_SOPC_STATUS_OK if creation succeeded
  */
-SOPC_StatusCode SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** encObject);
+SOPC_ReturnStatus SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** encObject);
 
 /**
  *  \brief           Instantiate and initialize an encodeable object of the given encodeable type
  *
  *  \param encTyp    Encodeable type of the encodeable object to deallocate
  *  \param encObject Pointer to the address of the encodeable object to delete (set to NULL if operation succeded)
- *  \return          STATUS_OK if deletion succeeded
+ *  \return          SOPC_SOPC_STATUS_OK if deletion succeeded
  */
-SOPC_StatusCode SOPC_Encodeable_Delete(SOPC_EncodeableType* encTyp, void** encObject);
+SOPC_ReturnStatus SOPC_Encodeable_Delete(SOPC_EncodeableType* encTyp, void** encObject);
 
 /**
  *  \brief           Create an encodeable object of the given encodeable type and set it in
@@ -54,10 +54,10 @@ SOPC_StatusCode SOPC_Encodeable_Delete(SOPC_EncodeableType* encTyp, void** encOb
  *  \param extObject Extension object in which the newly created encodeable object must be set
  *  \param encTyp    Encodeable type of the encodeable object to instantiate and initialize
  *  \param encObject Pointer to be set with the address of the newly created encodeable object
- *  \return          STATUS_OK if creation and extension setting succeeded
+ *  \return          SOPC_SOPC_STATUS_OK if creation and extension setting succeeded
  */
-SOPC_StatusCode SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObject,
-                                                SOPC_EncodeableType* encTyp,
-                                                void** encObject);
+SOPC_ReturnStatus SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObject,
+                                                  SOPC_EncodeableType* encTyp,
+                                                  void** encObject);
 
 #endif /* SOPC_ENCODEABLE_H_ */

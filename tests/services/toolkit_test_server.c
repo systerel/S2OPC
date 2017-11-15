@@ -59,7 +59,7 @@ void Test_ComEvent_FctServer(SOPC_App_Com_Event event, void* param, SOPC_StatusC
 
 int main(int argc, char* argv[])
 {
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     constants__t_endpoint_config_idx_i epConfigIdx = constants__c_endpoint_config_idx_indet;
     SOPC_Endpoint_Config epConfig;
     // Sleep timeout in milliseconds
@@ -95,16 +95,16 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy, SOPC_SecurityPolicy_None_URI);
         secuConfig[0].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy, SOPC_SecurityPolicy_Basic256_URI);
             secuConfig[1].securityModes = SOPC_SECURITY_MODE_SIGN_MASK;
         }
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status =
                 SOPC_String_AttachFromCstring(&secuConfig[2].securityPolicy, SOPC_SecurityPolicy_Basic256Sha256_URI);
@@ -120,23 +120,23 @@ int main(int argc, char* argv[])
         status = SOPC_KeyManager_Certificate_CreateFromFile("./server_public/server.der", &serverCertificate);
         epConfig.serverCertificate = serverCertificate;
 
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status =
                 SOPC_KeyManager_AsymmetricKey_CreateFromFile("./server_private/server.key", &asymmetricKey, NULL, 0);
             epConfig.serverKey = asymmetricKey;
         }
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &authCertificate);
         }
 
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_PKIProviderStack_Create(authCertificate, NULL, &pkiProvider);
             epConfig.pki = pkiProvider;
         }
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             printf("<Test_Server_Toolkit: Failed loading certificates and key (check paths are valid)\n");
         }
@@ -170,10 +170,10 @@ int main(int argc, char* argv[])
     SOPC_String_AttachFromCstring(&epConfig.serverDescription.ApplicationName.Text, "INGOPCS toolkit server example");
 
     // Init stack configuration
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Toolkit_Initialize(Test_ComEvent_FctServer);
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             printf("<Test_Server_Toolkit: Failed initializing\n");
         }
@@ -184,10 +184,10 @@ int main(int argc, char* argv[])
     }
 
     // Define server address space
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ToolkitServer_SetAddressSpaceConfig(&addressSpace);
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             printf("<Test_Server_Toolkit: Failed to configure the @ space\n");
         }
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
     }
 
     // Add endpoint description configuration
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);
         if (epConfigIdx != constants__c_endpoint_config_idx_indet)
@@ -207,9 +207,9 @@ int main(int argc, char* argv[])
         }
         else
         {
-            status = STATUS_NOK;
+            status = SOPC_STATUS_NOK;
         }
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             printf("<Test_Server_Toolkit: Failed to configure the endpoint\n");
         }
@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
     }
 
     // Asynchronous request to open the endpoint
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         printf("<Test_Server_Toolkit: Opening endpoint... \n");
         SOPC_ToolkitServer_AsyncOpenEndpoint(epConfigIdx);
@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
 
     // Run the server until timeout or notification that endpoint is closed
     loopCpt = 0;
-    while (STATUS_OK == status && endpointClosed == false && loopCpt * sleepTimeout <= loopTimeout)
+    while (SOPC_STATUS_OK == status && endpointClosed == false && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
@@ -241,7 +241,7 @@ int main(int argc, char* argv[])
     // Wait until endpoint is closed
     loopCpt = 0;
     loopTimeout = 1000;
-    while (STATUS_OK == status && endpointClosed == false && loopCpt * sleepTimeout <= loopTimeout)
+    while (SOPC_STATUS_OK == status && endpointClosed == false && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
@@ -250,13 +250,13 @@ int main(int argc, char* argv[])
 
     if (loopCpt * sleepTimeout > loopTimeout)
     {
-        status = OpcUa_BadTimeout;
+        status = SOPC_STATUS_TIMEOUT;
     }
 
     // Clear the toolkit configuration and stop toolkit threads
     SOPC_Toolkit_Clear();
 
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         printf("<Test_Server_Toolkit final result: OK\n");
     }

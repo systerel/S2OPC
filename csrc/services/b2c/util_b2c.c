@@ -615,10 +615,10 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     switch (bstatus)
     {
     case constants__e_sc_ok:
-        *status = STATUS_OK;
+        *status = 0x00000000;
         break;
-    case constants__e_sc_nok:
-        *status = STATUS_NOK;
+    case constants__e_sc_bad_internal_error:
+        *status = OpcUa_BadInternalError;
         break;
     case constants__e_sc_bad_secure_channel_id_invalid:
         *status = OpcUa_BadSecureChannelIdInvalid;
@@ -676,16 +676,15 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     }
 }
 
-t_bool util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i* bstatus)
+void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i* bstatus)
 {
-    t_bool success = true;
     switch (status)
     {
-    case STATUS_OK:
+    case 0x00000000:
         *bstatus = constants__e_sc_ok;
         break;
-    case STATUS_NOK:
-        *bstatus = constants__e_sc_nok;
+    case OpcUa_BadInternalError:
+        *bstatus = constants__e_sc_bad_internal_error;
         break;
     case OpcUa_BadSecureChannelClosed:
         *bstatus = constants__e_sc_bad_secure_channel_closed;
@@ -739,9 +738,9 @@ t_bool util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_
         *bstatus = constants__e_sc_bad_service_unsupported;
         break;
     default:
-        success = false;
+        // Not identified status code
+        *bstatus = constants__c_StatusCode_indet;
     }
-    return success;
 }
 
 bool util_channel__SecurityPolicy_C_to_B(const char* uri, constants__t_SecurityPolicy* secpol)

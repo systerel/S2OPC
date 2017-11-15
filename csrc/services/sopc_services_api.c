@@ -66,7 +66,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
                auxParam);
     }
     SOPC_Services_Event event = (SOPC_Services_Event) scEvent;
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Endpoint_Config* epConfig = NULL;
     constants__t_StatusCode_i sCode = constants__e_sc_ok;
     bool bres = false;
@@ -192,14 +192,14 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(id);
         if (NULL == epConfig)
         {
-            status = STATUS_INVALID_PARAMETERS;
+            status = SOPC_STATUS_INVALID_PARAMETERS;
         }
         else
         {
             SOPC_SecureChannels_EnqueueEvent(EP_OPEN,
                                              id, // Server endpoint config idx
                                              NULL, 0);
-            status = STATUS_OK;
+            status = SOPC_STATUS_OK;
         }
         break;
     case APP_TO_SE_CLOSE_ENDPOINT:
@@ -212,12 +212,12 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(id);
         if (NULL == epConfig)
         {
-            status = STATUS_INVALID_PARAMETERS;
+            status = SOPC_STATUS_INVALID_PARAMETERS;
         }
         else
         {
             SOPC_SecureChannels_EnqueueEvent(EP_CLOSE, id, NULL, 0);
-            status = STATUS_OK;
+            status = SOPC_STATUS_OK;
         }
         break;
     case APP_TO_SE_ACTIVATE_SESSION:
@@ -245,7 +245,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         io_dispatch_mgr__client_send_service_request(id, params, &sCode);
         if (sCode != constants__e_sc_ok)
         {
-            status = STATUS_NOK;
+            status = SOPC_STATUS_NOK;
         }
         break;
     case APP_TO_SE_CLOSE_SESSION:
@@ -275,7 +275,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
     default:
         assert(false);
     }
-    if (STATUS_OK != status)
+    if (SOPC_STATUS_OK != status)
     {
         if (SOPC_DEBUG_PRINTING != false)
         {
@@ -337,7 +337,7 @@ void SOPC_Services_Clear()
 {
     address_space_bs__UNINITIALISATION();
 
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);
     (void) status; // log
     status = SOPC_EventDispatcherManager_StopAndDelete(&applicationEventDispatcherMgr);

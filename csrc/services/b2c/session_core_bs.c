@@ -177,11 +177,13 @@ void session_core_bs__client_set_session_token(const constants__t_session_i sess
                                                const constants__t_session_token_i session_core_bs__token)
 {
     SOPC_NodeId* sessionToken = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (constants__c_session_indet != session_core_bs__session &&
         constants__c_session_token_indet != session_core_bs__token)
     {
         sessionToken = &(sessionDataArray[session_core_bs__session].sessionToken);
-        if (STATUS_OK != SOPC_NodeId_Copy(sessionToken, (SOPC_NodeId*) session_core_bs__token))
+        status = SOPC_NodeId_Copy(sessionToken, (SOPC_NodeId*) session_core_bs__token);
+        if (SOPC_STATUS_OK != status)
         {
             // In case of failure, ensure session token is cleared
             SOPC_NodeId_Clear(sessionToken);
@@ -270,6 +272,7 @@ void session_core_bs__server_create_session_req_do_crypto(
     uint8_t* pToSign = NULL;
     uint32_t lenToSign = 0;
     OpcUa_CreateSessionRequest* pReq = (OpcUa_CreateSessionRequest*) session_core_bs__p_req_msg;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     *session_core_bs__valid = false;
     *session_core_bs__signature = constants__c_SignatureData_indet;
@@ -304,7 +307,8 @@ void session_core_bs__server_create_session_req_do_crypto(
             SOPC_ByteString_Clear(pNonce);
             pNonce->Length = LENGTH_NONCE;
 
-            if (STATUS_OK != SOPC_CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data))
+            status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data);
+            if (SOPC_STATUS_OK != status)
                 /* TODO: Should we clean half allocated things? */
                 return;
 
@@ -322,25 +326,33 @@ void session_core_bs__server_create_session_req_do_crypto(
             memcpy(pToSign + pReq->ClientCertificate.Length, pReq->ClientNonce.Data, pReq->ClientNonce.Length);
             /* b) Sign and store the signature in pSign */
             SOPC_ByteString_Clear(&pSign->Signature);
-            if (STATUS_OK != SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pECfg->serverKey,
-                                                                               (uint32_t*) &pSign->Signature.Length))
+            status = SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pECfg->serverKey,
+                                                                       (uint32_t*) &pSign->Signature.Length);
+            if (SOPC_STATUS_OK != status)
                 return;
+
             pSign->Signature.Data =
                 malloc(sizeof(SOPC_Byte) * pSign->Signature.Length); /* TODO: This should be freed with session */
             if (NULL == pSign->Signature.Data)
                 return;
-            if (STATUS_OK != SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pECfg->serverKey,
-                                                                pSign->Signature.Data, pSign->Signature.Length))
+
+            status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pECfg->serverKey,
+                                                        pSign->Signature.Data, pSign->Signature.Length);
+            if (SOPC_STATUS_OK != status)
             {
                 free(pToSign);
                 return;
             }
+
             free(pToSign);
             /* c) Prepare the OpcUa_SignatureData */
             SOPC_String_Clear(&pSign->Algorithm);
-            if (STATUS_OK != SOPC_String_CopyFromCString(&pSign->Algorithm,
-                                                         SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider)))
+
+            status = SOPC_String_CopyFromCString(&pSign->Algorithm,
+                                                 SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider));
+            if (SOPC_STATUS_OK != status)
                 return;
+
             *session_core_bs__signature = pSign;
 
             /* Clean */
@@ -369,6 +381,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
     OpcUa_SignatureData* pSign = NULL;
     uint8_t* pToSign = NULL;
     uint32_t lenToSign = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     *session_core_bs__valid = false;
     *session_core_bs__signature = constants__c_SignatureData_indet;
@@ -405,15 +418,15 @@ void session_core_bs__client_activate_session_req_do_crypto(
                 SOPC_StatusCode status;
                 // retrieve expected sender certificate as a ByteString
                 status = SOPC_KeyManager_Certificate_CopyDER(pSCCfg->crt_srv, &serverCert.Data, &tmpLength);
+                if (SOPC_STATUS_OK != status)
+                {
+                    return;
+                }
                 if (tmpLength > 0)
                 {
                     serverCert.Length = (int32_t) tmpLength;
                 }
                 else
-                {
-                    return;
-                }
-                if (STATUS_OK != status)
                 {
                     return;
                 }
@@ -428,24 +441,30 @@ void session_core_bs__client_activate_session_req_do_crypto(
             SOPC_ByteString_Clear(&serverCert);
             /* b) Sign and store the signature in pSign */
             SOPC_ByteString_Clear(&pSign->Signature);
-            if (STATUS_OK != SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pSCCfg->key_priv_cli,
-                                                                               (uint32_t*) &pSign->Signature.Length))
+            status = SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pSCCfg->key_priv_cli,
+                                                                       (uint32_t*) &pSign->Signature.Length);
+            if (SOPC_STATUS_OK != status)
                 return;
+
             pSign->Signature.Data = malloc(
                 sizeof(SOPC_Byte) * pSign->Signature.Length); /* TODO: This should not be stored in unique session ? */
             if (NULL == pSign->Signature.Data)
                 return;
-            if (STATUS_OK != SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pSCCfg->key_priv_cli,
-                                                                pSign->Signature.Data, pSign->Signature.Length))
+
+            status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pSCCfg->key_priv_cli,
+                                                        pSign->Signature.Data, pSign->Signature.Length);
+            if (SOPC_STATUS_OK != status)
             {
                 free(pToSign);
                 return;
             }
+
             free(pToSign);
             /* c) Prepare the OpcUa_SignatureData */
             SOPC_String_Clear(&pSign->Algorithm);
-            if (STATUS_OK != SOPC_String_CopyFromCString(&pSign->Algorithm,
-                                                         SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider)))
+            status = SOPC_String_CopyFromCString(&pSign->Algorithm,
+                                                 SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider));
+            if (SOPC_STATUS_OK != status)
                 return;
             *session_core_bs__signature = pSign;
 
@@ -485,6 +504,7 @@ void session_core_bs__client_create_session_req_do_crypto(
     SOPC_SecureChannel_Config* pSCCfg = NULL;
     SessionData* pSession = NULL;
     SOPC_ByteString* pNonce = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     /* Default answer */
     *session_core_bs__valid = false;
@@ -515,7 +535,8 @@ void session_core_bs__client_create_session_req_do_crypto(
             SOPC_ByteString_Clear(pNonce);
             pNonce->Length = LENGTH_NONCE;
 
-            if (STATUS_OK != SOPC_CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data))
+            status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data);
+            if (SOPC_STATUS_OK != status)
                 /* TODO: Should we clean half allocated things? */
                 return;
 
@@ -570,6 +591,7 @@ void session_core_bs__client_create_session_check_crypto(
     const SOPC_Certificate *pCrtCli = NULL, *pCrtSrv = NULL;
     const char* szSignUri = NULL;
     SOPC_AsymmetricKey* pKeyCrtSrv = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     /* Default answer */
     *session_core_bs__valid = false;
@@ -598,7 +620,9 @@ void session_core_bs__client_create_session_check_crypto(
 
         if (pResp->ServerNonce.Length <= 0)
             return;
-        if (STATUS_OK != SOPC_ByteString_Copy(&pSession->nonceServer, &pResp->ServerNonce))
+
+        status = SOPC_ByteString_Copy(&pSession->nonceServer, &pResp->ServerNonce);
+        if (SOPC_STATUS_OK != status)
             return;
 
         /* Build CryptoProvider */
@@ -612,7 +636,8 @@ void session_core_bs__client_create_session_check_crypto(
         {
             /* Build signed data (client certificate + client nonce) */
             /* a) Get Der of client certificate */
-            if (STATUS_OK == SOPC_KeyManager_Certificate_CopyDER(pCrtCli, &pDerCli, &lenDerCli))
+            status = SOPC_KeyManager_Certificate_CopyDER(pCrtCli, &pDerCli, &lenDerCli);
+            if (SOPC_STATUS_OK == status)
             {
                 /* b) Concat Nonce */
                 lenToVerify = lenDerCli + LENGTH_NONCE;
@@ -625,13 +650,17 @@ void session_core_bs__client_create_session_check_crypto(
 
                     /* Verify given signature */
                     /* a) Retrieve public key from certificate */
-                    if (STATUS_OK == SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtSrv, &pKeyCrtSrv))
+                    status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtSrv, &pKeyCrtSrv);
+                    if (SOPC_STATUS_OK == status)
                     {
                         /* b) Call AsymVerify */
-                        if (STATUS_OK == SOPC_CryptoProvider_AsymmetricVerify(pProvider, pToVerify, lenToVerify,
-                                                                              pKeyCrtSrv, pSignCandid->Signature.Data,
-                                                                              pSignCandid->Signature.Length))
+                        status = SOPC_CryptoProvider_AsymmetricVerify(pProvider, pToVerify, lenToVerify, pKeyCrtSrv,
+                                                                      pSignCandid->Signature.Data,
+                                                                      pSignCandid->Signature.Length);
+                        if (SOPC_STATUS_OK == status)
+                        {
                             *session_core_bs__valid = true;
+                        }
                     }
                 }
             }
@@ -666,6 +695,7 @@ void session_core_bs__server_activate_session_check_crypto(
     const SOPC_Certificate *pCrtCli = NULL, *pCrtSrv = NULL;
     const char* szSignUri = NULL;
     SOPC_AsymmetricKey* pKeyCrtCli = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     /* Default answer */
     *session_core_bs__valid = false;
@@ -700,7 +730,8 @@ void session_core_bs__server_activate_session_check_crypto(
         {
             /* Build signed data (server certificate + server nonce) */
             /* a) Get Der of client certificate */
-            if (STATUS_OK == SOPC_KeyManager_Certificate_CopyDER(pCrtSrv, &pDerSrv, &lenDerSrv))
+            status = SOPC_KeyManager_Certificate_CopyDER(pCrtSrv, &pDerSrv, &lenDerSrv);
+            if (SOPC_STATUS_OK == status)
             {
                 /* b) Concat Nonce */
                 lenToVerify = lenDerSrv + LENGTH_NONCE;
@@ -713,13 +744,17 @@ void session_core_bs__server_activate_session_check_crypto(
 
                     /* Verify given signature */
                     /* a) Retrieve public key from certificate */
-                    if (STATUS_OK == SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtCli, &pKeyCrtCli))
+                    status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtCli, &pKeyCrtCli);
+                    if (SOPC_STATUS_OK == status)
                     {
                         /* b) Call AsymVerify */
-                        if (STATUS_OK == SOPC_CryptoProvider_AsymmetricVerify(pProvider, pToVerify, lenToVerify,
-                                                                              pKeyCrtCli, pSignCandid->Signature.Data,
-                                                                              pSignCandid->Signature.Length))
+                        status = SOPC_CryptoProvider_AsymmetricVerify(pProvider, pToVerify, lenToVerify, pKeyCrtCli,
+                                                                      pSignCandid->Signature.Data,
+                                                                      pSignCandid->Signature.Length);
+                        if (SOPC_STATUS_OK == status)
+                        {
                             *session_core_bs__valid = true;
+                        }
                     }
                 }
             }
@@ -730,7 +765,8 @@ void session_core_bs__server_activate_session_check_crypto(
             // renew the server Nonce
             free(pNonce->Data);
             pNonce->Data = NULL;
-            assert(STATUS_OK == SOPC_CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data));
+            status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data);
+            assert(SOPC_STATUS_OK == status);
         }
 
         /* Clear */

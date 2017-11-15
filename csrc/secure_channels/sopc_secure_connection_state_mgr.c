@@ -178,7 +178,7 @@ static bool SC_CloseConnection(uint32_t connectionIdx)
 static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_StatusCode errorStatus, char* reason)
 {
     bool result = false;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_String tempString;
     SOPC_String_Initialize(&tempString);
 
@@ -189,26 +189,26 @@ static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_Status
         // Let size of the headers for the chunk manager
         status = SOPC_Buffer_SetDataLength(buffer, SOPC_TCP_UA_HEADER_LENGTH);
 
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_Buffer_SetPosition(buffer, SOPC_TCP_UA_HEADER_LENGTH);
         }
     }
 
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_UInt32_Write(&errorStatus, buffer);
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         SOPC_String_AttachFromCstring(&tempString, reason);
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_String_Write(&tempString, buffer);
     }
 
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         result = true;
 
@@ -234,7 +234,7 @@ static void SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnectio
     assert(scConnection != NULL);
     SOPC_Buffer* msgBuffer;
     bool result = false;
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     OpcUa_RequestHeader reqHeader;
     OpcUa_RequestHeader_Initialize(&reqHeader);
@@ -249,7 +249,7 @@ static void SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnectio
         status = SOPC_Buffer_SetDataLength(msgBuffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
                                                           SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
                                                           SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_Buffer_SetPosition(msgBuffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
                                                             SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
@@ -265,14 +265,14 @@ static void SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnectio
         // No content to fill: it is an empty body !
 
         // Encode message in buffer
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_EncodeMsg_Type_Header_Body(msgBuffer, &OpcUa_CloseSecureChannelRequest_EncodeableType,
                                                      &OpcUa_RequestHeader_EncodeableType, (void*) &reqHeader,
                                                      (void*) &cloReq);
         }
 
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             result = true;
             // Delay SC closure after CLO message treatment will be done by chunks manager
@@ -417,7 +417,9 @@ static bool SC_ReadAndCheckOpcUaMessageType(SOPC_EncodeableType* msgType, SOPC_B
     assert(msgBuffer != NULL);
     SOPC_EncodeableType* msgEncType = NULL;
     bool result = false;
-    if (STATUS_OK == SOPC_MsgBodyType_Read(msgBuffer, &msgEncType))
+    // Read msg type
+    SOPC_ReturnStatus status = SOPC_MsgBodyType_Read(msgBuffer, &msgEncType);
+    if (SOPC_STATUS_OK == status)
     {
         if (msgEncType == msgType)
         {
@@ -444,7 +446,7 @@ static bool SC_DeriveSymmetricKeySets(bool isServer,
     assert(keySets != NULL);
 
     bool result = false;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     uint32_t encryptKeyLength = 0;
     uint32_t signKeyLength = 0;
@@ -452,7 +454,7 @@ static bool SC_DeriveSymmetricKeySets(bool isServer,
 
     status = SOPC_CryptoProvider_DeriveGetLengths(cryptoProvider, &encryptKeyLength, &signKeyLength, &initVectorLength);
 
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         result = true;
     }
@@ -501,7 +503,7 @@ static bool SC_DeriveSymmetricKeySets(bool isServer,
                                                              SOPC_SecretBuffer_GetLength(clientNonce), serverNonce,
                                                              keySets->receiverKeySet, keySets->senderKeySet);
         }
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             result = false;
         }
@@ -519,7 +521,7 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     SOPC_SecureChannel_Config* scConfig =
         SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     bool result = false;
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     assert(scConnection != NULL);
     assert(scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT);
 
@@ -531,44 +533,44 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     {
         // Let size of the header for the chunk manager
         status = SOPC_Buffer_SetDataLength(msgBuffer, SOPC_TCP_UA_HEADER_LENGTH);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             SOPC_Buffer_SetPosition(msgBuffer, SOPC_TCP_UA_HEADER_LENGTH);
         }
         // Encode Hello message body
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.protocolVersion, msgBuffer);
         }
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveBufferSize, msgBuffer);
         }
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.sendBufferSize, msgBuffer);
         }
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.maxMessageSize, msgBuffer);
         }
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.maxChunkCount, msgBuffer);
         }
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             SOPC_String tmpString;
             SOPC_String_Initialize(&tmpString);
             status = SOPC_String_CopyFromCString(&tmpString, scConfig->url);
-            if (STATUS_OK == status)
+            if (SOPC_STATUS_OK == status)
             {
                 status = SOPC_String_Write(&tmpString, msgBuffer);
             }
             SOPC_String_Clear(&tmpString);
         }
 
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             result = true;
         }
@@ -600,7 +602,7 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     assert(scConnection != NULL);
     assert(ackMsgBuffer != NULL);
     bool result = false;
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t tempValue = 0;
 
     assert(scConnection->state == SECURE_CONNECTION_STATE_TCP_NEGOTIATE);
@@ -612,7 +614,7 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
 
     // Read protocol version of server
     status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer);
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         // Check protocol version compatible
         if (scConnection->tcpMsgProperties.protocolVersion > tempValue)
@@ -623,11 +625,11 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     }
 
     // ReceiveBufferSize
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         // Read receive buffer size of SERVER
         status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             // Adapt send buffer size if needed
             if (scConnection->tcpMsgProperties.sendBufferSize > tempValue)
@@ -638,23 +640,23 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
                 }
                 else
                 {
-                    status = STATUS_INVALID_RCV_PARAMETER;
+                    status = SOPC_STATUS_INVALID_PARAMETERS;
                 }
             }
             else if (scConnection->tcpMsgProperties.sendBufferSize < tempValue)
             {
                 // shall not be larger than what requested in Hello message
-                status = STATUS_INVALID_RCV_PARAMETER;
+                status = SOPC_STATUS_INVALID_PARAMETERS;
             }
         }
     }
 
     // SendBufferSize
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         // Read sending buffer size of SERVER
         status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             // Check size and adapt receive buffer size if needed
             if (scConnection->tcpMsgProperties.receiveBufferSize > tempValue)
@@ -665,22 +667,22 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
                 }
                 else
                 {
-                    status = STATUS_INVALID_RCV_PARAMETER;
+                    status = SOPC_STATUS_INVALID_PARAMETERS;
                 }
             }
             else if (scConnection->tcpMsgProperties.receiveBufferSize < tempValue)
             {
                 // shall not be larger than what requested in Hello message
-                status = STATUS_INVALID_RCV_PARAMETER;
+                status = SOPC_STATUS_INVALID_PARAMETERS;
             }
         }
     }
 
     // MaxMessageSize of SERVER
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             if (scConnection->tcpMsgProperties.maxMessageSize > tempValue ||
                 scConnection->tcpMsgProperties.maxMessageSize == 0)
@@ -692,10 +694,10 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     }
 
     // MaxChunkCount of SERVER
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             if (scConnection->tcpMsgProperties.maxChunkCount > tempValue ||
                 scConnection->tcpMsgProperties.maxChunkCount == 0)
@@ -705,7 +707,7 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
         }
     }
 
-    if (STATUS_OK != status)
+    if (SOPC_STATUS_OK != status)
     {
         result = false;
     }
@@ -723,7 +725,7 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
                                               bool isRenewal)
 {
     bool result = false;
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     SOPC_SecureChannel_Config* config = NULL;
     SOPC_Buffer* opnMsgBuffer;
@@ -784,7 +786,7 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
             status = SOPC_CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider,
                                                                     &scConnection->clientNonce);
 
-            if (status == STATUS_OK)
+            if (SOPC_STATUS_OK == status)
             {
                 uint8_t* bytes = NULL;
                 bytes = SOPC_SecretBuffer_Expose(scConnection->clientNonce);
@@ -792,7 +794,7 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
                                                        SOPC_SecretBuffer_GetLength(scConnection->clientNonce));
             }
 
-            if (status != STATUS_OK)
+            if (status != SOPC_STATUS_OK)
             {
                 result = false;
             }
@@ -813,7 +815,7 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
             SOPC_EncodeMsg_Type_Header_Body(opnMsgBuffer, &OpcUa_OpenSecureChannelRequest_EncodeableType,
                                             &OpcUa_RequestHeader_EncodeableType, (void*) &reqHeader, (void*) &opnReq);
 
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             result = false;
         }
@@ -875,12 +877,12 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     assert(scConfig != NULL);
 
     bool result = false;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_ResponseHeader* respHeader = NULL;
     OpcUa_OpenSecureChannelResponse* opnResp = NULL;
 
-    if (STATUS_OK ==
-        SOPC_DecodeMsg_HeaderOrBody(opnRespBuffer, &OpcUa_ResponseHeader_EncodeableType, (void**) &respHeader))
+    status = SOPC_DecodeMsg_HeaderOrBody(opnRespBuffer, &OpcUa_ResponseHeader_EncodeableType, (void**) &respHeader);
+    if (SOPC_STATUS_OK == status)
     {
         assert(respHeader != NULL);
         result = true;
@@ -889,7 +891,7 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     if (result != false)
     {
         // TODO: check timestamp ?
-        if (respHeader->ServiceResult != STATUS_OK)
+        if (respHeader->ServiceResult != SOPC_STATUS_OK)
         {
             result = false;
         }
@@ -904,7 +906,7 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
         // Decode message
         status = SOPC_DecodeMsg_HeaderOrBody(opnRespBuffer, &OpcUa_OpenSecureChannelResponse_EncodeableType,
                                              (void**) &opnResp);
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             result = false;
         }
@@ -1012,7 +1014,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     // Note: errorStatus must be an error allowed in OPC UA TCP error message (part 6 Table 38)
     assert(scConnection != NULL);
     bool result = false;
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Endpoint_Config* epConfig = NULL;
     SOPC_String epUrl;
     SOPC_String_Initialize(&epUrl);
@@ -1032,7 +1034,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
 
     // Read protocol version of server
     status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         // Check protocol version compatible
         if (scConnection->tcpMsgProperties.protocolVersion > tempValue)
@@ -1041,13 +1043,18 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
             scConnection->tcpMsgProperties.protocolVersion = tempValue;
         } // else => server will return the last version it supports
     }
+    else
+    {
+        result = false;
+        *errorStatus = OpcUa_BadDecodingError;
+    }
 
     // ReceiveBufferSize
-    if (STATUS_OK == status)
+    if (result != false)
     {
         // Read receive buffer size of CLIENT
         status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             // Adapt send buffer size if needed
             if (scConnection->tcpMsgProperties.sendBufferSize > tempValue)
@@ -1058,18 +1065,24 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
                 }
                 else
                 {
-                    status = STATUS_INVALID_RCV_PARAMETER;
+                    result = false;
+                    *errorStatus = OpcUa_BadInvalidArgument;
                 }
             }
+        }
+        else
+        {
+            result = false;
+            *errorStatus = OpcUa_BadDecodingError;
         }
     }
 
     // SendBufferSize
-    if (STATUS_OK == status)
+    if (result != false)
     {
         // Read sending buffer size of CLIENT
         status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             // Check size and adapt receive buffer size if needed
             if (scConnection->tcpMsgProperties.receiveBufferSize > tempValue)
@@ -1080,18 +1093,24 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
                 }
                 else
                 {
-                    status = STATUS_INVALID_RCV_PARAMETER;
+                    result = false;
+                    *errorStatus = OpcUa_BadInvalidArgument;
                 }
             }
             // In other case do not change size since it should be configured with max size by default
         }
+        else
+        {
+            result = false;
+            *errorStatus = OpcUa_BadDecodingError;
+        }
     }
 
     // MaxMessageSize of CLIENT
-    if (STATUS_OK == status)
+    if (result != false)
     {
         status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             if (scConnection->tcpMsgProperties.maxMessageSize > tempValue ||
                 scConnection->tcpMsgProperties.maxMessageSize == 0)
@@ -1099,13 +1118,18 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
                 scConnection->tcpMsgProperties.maxMessageSize = tempValue;
             }
         }
+        else
+        {
+            result = false;
+            *errorStatus = OpcUa_BadDecodingError;
+        }
     }
 
     // MaxChunkCount of CLIENT
-    if (STATUS_OK == status)
+    if (result != false)
     {
         status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             if (scConnection->tcpMsgProperties.maxChunkCount > tempValue ||
                 scConnection->tcpMsgProperties.maxChunkCount == 0)
@@ -1113,55 +1137,56 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
                 scConnection->tcpMsgProperties.maxChunkCount = tempValue;
             }
         }
+        else
+        {
+            result = false;
+            *errorStatus = OpcUa_BadDecodingError;
+        }
     }
 
     // EndpointURL
-    if (STATUS_OK == status)
+    if (result != false)
     {
         status = SOPC_String_Read(&url, helloMsgBuffer);
         // Note: this parameter is normally used to could forward to an endpoint sharing the same port
         //       but not in the same process.
         //       This is not supported by INGOPCS secure channels layer, as consequence expected URL is only the one
         //       configured.
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             if (url.Length > SOPC_TCP_UA_MAX_URL_LENGTH)
             {
-                status = OpcUa_BadTcpEndpointUrlInvalid;
+                result = false;
+                *errorStatus = OpcUa_BadTcpEndpointUrlInvalid;
             }
             else
             {
                 int32_t compareValue;
                 status = SOPC_String_AttachFromCstring(&epUrl, epConfig->endpointURL);
-                if (STATUS_OK == status)
+                if (SOPC_STATUS_OK == status)
                 {
                     status = SOPC_String_Compare(&epUrl, &url, true, &compareValue);
-                }
-                if (STATUS_OK == status)
-                {
-                    if (compareValue != 0)
+                    if (SOPC_STATUS_OK == status)
                     {
-                        status = OpcUa_BadTcpEndpointUrlInvalid;
+                        if (compareValue != 0)
+                        {
+                            result = false;
+                            *errorStatus = OpcUa_BadTcpEndpointUrlInvalid;
+                        }
                     }
+                }
+                if (SOPC_STATUS_OK != status)
+                {
+                    result = false;
+                    *errorStatus = OpcUa_BadTcpInternalError;
                 }
             }
         }
-
-        if (STATUS_OK != status && OpcUa_BadTcpEndpointUrlInvalid != status)
+        else
         {
-            status = OpcUa_BadTcpInternalError;
+            result = false;
+            *errorStatus = OpcUa_BadDecodingError;
         }
-    }
-    else
-    {
-        // Note: any precedent status error shall be reported as an internal error
-        status = OpcUa_BadTcpInternalError;
-    }
-
-    if (STATUS_OK != status)
-    {
-        result = false;
-        *errorStatus = status;
     }
 
     if (result != false)
@@ -1181,7 +1206,7 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
                                                        SOPC_StatusCode* errorStatus)
 {
     bool result = false;
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* ackMsgBuffer = NULL;
 
     assert(scConnection != NULL);
@@ -1194,32 +1219,32 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     // Reuse the received message buffer: set length and position after TCP UA header
     ackMsgBuffer = helloMsgBuffer;
     status = SOPC_Buffer_SetPosition(ackMsgBuffer, SOPC_TCP_UA_HEADER_LENGTH);
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Buffer_SetDataLength(ackMsgBuffer, SOPC_TCP_UA_HEADER_LENGTH);
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.protocolVersion, ackMsgBuffer);
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveBufferSize, ackMsgBuffer);
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.sendBufferSize, ackMsgBuffer);
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.maxMessageSize, ackMsgBuffer);
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.maxChunkCount, ackMsgBuffer);
     }
 
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         result = true;
     }
@@ -1258,12 +1283,13 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
     SOPC_Endpoint_Config* epConfig = NULL;
     OpcUa_RequestHeader* reqHeader = NULL;
     OpcUa_OpenSecureChannelRequest* opnReq = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     epConfig = SOPC_ToolkitServer_GetEndpointConfig(scConnection->serverEndpointConfigIdx);
     assert(epConfig != NULL);
 
-    if (STATUS_OK ==
-        SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader))
+    status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
+    if (SOPC_STATUS_OK == status)
     {
         assert(reqHeader != NULL);
         result = true;
@@ -1275,9 +1301,17 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         *requestHandle = reqHeader->RequestHandle;
     }
 
-    if (result != false &&
-        STATUS_OK == SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_OpenSecureChannelRequest_EncodeableType,
-                                                 (void**) &opnReq))
+    if (result != false)
+    {
+        status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_OpenSecureChannelRequest_EncodeableType,
+                                             (void**) &opnReq);
+        if (SOPC_STATUS_OK != status)
+        {
+            result = false;
+        }
+    }
+    if (result != false)
+
     {
         assert(opnReq != NULL);
         if (scConnection->tcpMsgProperties.protocolVersion != opnReq->ClientProtocolVersion)
@@ -1566,7 +1600,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     assert(scConnection->cryptoProvider != NULL);
 
     bool result = false;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_ResponseHeader respHeader;
     OpcUa_ResponseHeader_Initialize(&respHeader);
     OpcUa_OpenSecureChannelResponse opnResp;
@@ -1608,7 +1642,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
 
             status = SOPC_CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider, &serverNonce);
 
-            if (status == STATUS_OK)
+            if (SOPC_STATUS_OK == status)
             {
                 result = SC_DeriveSymmetricKeySets(true, scConnection->cryptoProvider, scConnection->clientNonce,
                                                    serverNonce, &scConnection->currentSecuKeySets);
@@ -1620,7 +1654,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
 
             if (result != false)
             {
-                if (status == STATUS_OK)
+                if (SOPC_STATUS_OK == status)
                 {
                     uint8_t* bytes = NULL;
                     bytes = SOPC_SecretBuffer_Expose(serverNonce);
@@ -1628,7 +1662,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
                                                            SOPC_SecretBuffer_GetLength(scConnection->clientNonce));
                 }
 
-                if (status != STATUS_OK)
+                if (status != SOPC_STATUS_OK)
                 {
                     result = false;
                 }
@@ -1660,7 +1694,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
                                                  &OpcUa_ResponseHeader_EncodeableType, (void*) &respHeader,
                                                  (void*) &opnResp);
 
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             result = false;
         }
@@ -1698,12 +1732,13 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
     SOPC_SecureChannel_Config* scConfig = NULL;
     OpcUa_RequestHeader* reqHeader = NULL;
     OpcUa_OpenSecureChannelRequest* opnReq = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(scConfig != NULL);
 
-    if (STATUS_OK ==
-        SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader))
+    status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
+    if (SOPC_STATUS_OK == status)
     {
         assert(reqHeader != NULL);
         result = true;
@@ -1715,9 +1750,16 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
         *requestHandle = reqHeader->RequestHandle;
     }
 
-    if (result != false &&
-        STATUS_OK == SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_OpenSecureChannelRequest_EncodeableType,
-                                                 (void**) &opnReq))
+    if (result != false)
+    {
+        status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_OpenSecureChannelRequest_EncodeableType,
+                                             (void**) &opnReq);
+        if (SOPC_STATUS_OK != status)
+        {
+            result = false;
+        }
+    }
+    if (result != false)
     {
         assert(opnReq != NULL);
         if (scConnection->tcpMsgProperties.protocolVersion != opnReq->ClientProtocolVersion)
@@ -1804,7 +1846,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     assert(scConnection->isServerConnection != false);
 
     bool result = false;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_ResponseHeader respHeader;
     OpcUa_ResponseHeader_Initialize(&respHeader);
     OpcUa_OpenSecureChannelResponse opnResp;
@@ -1855,7 +1897,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
 
             status = SOPC_CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider, &serverNonce);
 
-            if (status == STATUS_OK)
+            if (SOPC_STATUS_OK == status)
             {
                 result = SC_DeriveSymmetricKeySets(true, scConnection->cryptoProvider, scConnection->clientNonce,
                                                    serverNonce, &newSecuKeySets);
@@ -1867,7 +1909,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
 
             if (result != false)
             {
-                if (status == STATUS_OK)
+                if (SOPC_STATUS_OK == status)
                 {
                     uint8_t* bytes = NULL;
                     bytes = SOPC_SecretBuffer_Expose(serverNonce);
@@ -1875,7 +1917,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
                                                            SOPC_SecretBuffer_GetLength(scConnection->clientNonce));
                 }
 
-                if (status != STATUS_OK)
+                if (status != SOPC_STATUS_OK)
                 {
                     result = false;
                 }
@@ -1905,7 +1947,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
                                                  &OpcUa_ResponseHeader_EncodeableType, (void*) &respHeader,
                                                  (void*) &opnResp);
 
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             result = false;
         }
@@ -1953,7 +1995,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     SOPC_SecureConnection* scConnection = NULL;
     uint32_t requestHandle = 0;
     uint32_t requestedLifetime = 0;
-    SOPC_StatusCode errorStatus = STATUS_OK;
+    SOPC_StatusCode errorStatus = 0x00000000; // Good
     switch (event)
     {
     /* Sockets events: */

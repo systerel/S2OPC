@@ -50,7 +50,7 @@ void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message_out_bs
 {
     void* header = NULL;
     void* msg = NULL;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = SOPC_STATUS_NOK;
 
     SOPC_EncodeableType* encTyp = NULL;
     SOPC_EncodeableType* reqEncTyp = NULL;
@@ -72,7 +72,7 @@ void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message_out_bs
     if (NULL != encTyp)
     {
         status = SOPC_Encodeable_Create(encTyp, &msg);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             if (false == isReq)
             {
@@ -88,7 +88,7 @@ void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message_out_bs
             SOPC_Encodeable_Delete(encTyp, &msg);
         }
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         *message_out_bs__nmsg = (constants__t_msg_i) msg;
         *message_out_bs__nmsg_header = (constants__t_msg_header_i) header;
@@ -103,7 +103,7 @@ void message_out_bs__alloc_app_req_msg_header(constants__t_msg_header_i* const m
 {
     void* header = NULL;
     SOPC_StatusCode status = SOPC_Encodeable_Create(&OpcUa_RequestHeader_EncodeableType, &header);
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         *message_out_bs__nmsg_header = (constants__t_msg_header_i) header;
     }
@@ -191,40 +191,38 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
                                 constants__t_byte_buffer_i* const message_out_bs__buffer)
 {
     *message_out_bs__buffer = constants__c_byte_buffer_indet;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = SOPC_STATUS_NOK;
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) message_out_bs__msg;
     SOPC_EncodeableType* headerType = *(SOPC_EncodeableType**) message_out_bs__msg_header;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
     if (NULL != buffer)
     {
-        status = STATUS_OK;
+        status = SOPC_STATUS_OK;
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
                                                        SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
                                                        SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         // Encodeable type: either msg_type = service fault type or it is the type provided by the msg
         if (message_out_bs__msg_type == constants__e_msg_service_fault_resp)
         {
             encType = &OpcUa_ServiceFault_EncodeableType;
         }
-    }
-    if (STATUS_OK == status)
-    {
+
         status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
                                                      SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
                                                      SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_EncodeMsg_Type_Header_Body(buffer, encType, headerType, message_out_bs__msg_header,
                                                  message_out_bs__msg);
     }
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         *message_out_bs__buffer = (constants__t_byte_buffer_i) buffer;
     }
@@ -272,9 +270,11 @@ void message_out_bs__write_create_session_req_msg_endpointUrl(
     const constants__t_msg_i message_out_bs__msg,
     const constants__t_channel_config_idx_i message_out_bs__channel_config_idx)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) message_out_bs__msg;
     SOPC_SecureChannel_Config* chConfig = SOPC_Toolkit_GetSecureChannelConfig(message_out_bs__channel_config_idx);
-    assert(STATUS_OK == SOPC_String_CopyFromCString(&createSessionReq->EndpointUrl, chConfig->url));
+    status = SOPC_String_CopyFromCString(&createSessionReq->EndpointUrl, chConfig->url);
+    assert(SOPC_STATUS_OK == status);
 }
 
 void message_out_bs__write_create_session_req_msg_crypto(
@@ -285,6 +285,7 @@ void message_out_bs__write_create_session_req_msg_crypto(
     SOPC_SecureChannel_Config* pSCCfg = NULL;
     OpcUa_CreateSessionRequest* pReq = (OpcUa_CreateSessionRequest*) message_out_bs__p_req_msg;
     const SOPC_Certificate* pCrtCli = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     /* Retrieve the certificate */
     pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) message_out_bs__p_channel_config_idx);
@@ -297,14 +298,16 @@ void message_out_bs__write_create_session_req_msg_crypto(
     /* Write the Certificate */
     SOPC_ByteString_Clear(&pReq->ClientCertificate);
     /* TODO: this is a malloc error, this can fail, and the B model should be notified */
-    if (STATUS_OK != SOPC_KeyManager_Certificate_CopyDER(pCrtCli, &pReq->ClientCertificate.Data,
-                                                         (uint32_t*) &pReq->ClientCertificate.Length))
+    status = SOPC_KeyManager_Certificate_CopyDER(pCrtCli, &pReq->ClientCertificate.Data,
+                                                 (uint32_t*) &pReq->ClientCertificate.Length);
+    if (SOPC_STATUS_OK != status)
         return;
 
     /* Write the nonce */
     SOPC_ByteString_Clear(&pReq->ClientNonce);
     /* TODO: this can also fail because of the malloc */
-    if (STATUS_OK != SOPC_ByteString_Copy(&pReq->ClientNonce, (SOPC_ByteString*) message_out_bs__p_nonce))
+    status = SOPC_ByteString_Copy(&pReq->ClientNonce, (SOPC_ByteString*) message_out_bs__p_nonce);
+    if (SOPC_STATUS_OK != status)
         return;
 }
 
@@ -315,9 +318,9 @@ void message_out_bs__write_create_session_msg_session_token(
     OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) message_out_bs__msg;
     SOPC_StatusCode status;
     status = SOPC_NodeId_Copy(&createSessionResp->AuthenticationToken, message_out_bs__session_token);
-    assert(STATUS_OK == status);
+    assert(SOPC_STATUS_OK == status);
     status = SOPC_NodeId_Copy(&createSessionResp->SessionId, message_out_bs__session_token);
-    assert(STATUS_OK == status);
+    assert(SOPC_STATUS_OK == status);
 }
 
 void message_out_bs__write_create_session_msg_server_endpoints(
@@ -342,83 +345,100 @@ void message_out_bs__write_create_session_resp_msg_crypto(
     const constants__t_channel_config_idx_i message_out_bs__p_channel_config_idx,
     const constants__t_Nonce_i message_out_bs__p_nonce,
     const constants__t_SignatureData_i message_out_bs__p_signature,
-    constants__t_StatusCode_i* const message_out_bs__sc)
+    t_bool* const message_out_bs__bret)
 {
     SOPC_SecureChannel_Config* pSCCfg = NULL;
     const SOPC_Certificate* pCrtSrv = NULL;
-    SOPC_StatusCode sc = STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool result = true;
     OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) message_out_bs__p_msg;
     OpcUa_SignatureData* pSig = (OpcUa_SignatureData*) message_out_bs__p_signature;
 
     /* Retrieve the certificate */
     pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) message_out_bs__p_channel_config_idx);
     if (NULL == pSCCfg)
-        sc = STATUS_NOK;
-    if (STATUS_OK == sc)
+    {
+        result = false;
+    }
+    if (result != false)
     {
         pCrtSrv = pSCCfg->crt_srv;
         if (NULL == pCrtSrv)
-            sc = STATUS_NOK;
+        {
+            result = false;
+        }
     }
 
     /* Write the Certificate */
-    if (STATUS_OK == sc)
+    if (result != false)
     {
         SOPC_ByteString_Clear(&pResp->ServerCertificate);
         /* TODO: this is a malloc error, this can fail, and the B model should be notified */
-        sc = SOPC_KeyManager_Certificate_CopyDER(pCrtSrv, &pResp->ServerCertificate.Data,
-                                                 (uint32_t*) &pResp->ServerCertificate.Length);
+        status = SOPC_KeyManager_Certificate_CopyDER(pCrtSrv, &pResp->ServerCertificate.Data,
+                                                     (uint32_t*) &pResp->ServerCertificate.Length);
+
+        /* TODO: should borrow a reference instead of copy */
+        /* Copy Nonce */
+        status = SOPC_ByteString_Copy(&pResp->ServerNonce, (SOPC_ByteString*) message_out_bs__p_nonce);
+
+        /* TODO: should borrow a reference instead of copy */
+        /* Copy Signature, which is not a built-in, so copy its fields */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_String_Copy(&pResp->ServerSignature.Algorithm, &pSig->Algorithm);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_ByteString_Copy(&pResp->ServerSignature.Signature, &pSig->Signature);
+        }
+
+        if (status != SOPC_STATUS_OK)
+        {
+            result = false;
+        }
     }
 
-    /* Copy Nonce */
-    /* TODO: should borrow a reference instead of copy */
-    if (STATUS_OK == sc)
-        sc = SOPC_ByteString_Copy(&pResp->ServerNonce, (SOPC_ByteString*) message_out_bs__p_nonce);
-
-    /* Copy Signature, which is not a built-in, so copy its fields */
-    /* TODO: should borrow a reference instead of copy */
-    if (STATUS_OK == sc)
-        sc = SOPC_String_Copy(&pResp->ServerSignature.Algorithm, &pSig->Algorithm);
-    if (STATUS_OK == sc)
-        sc = SOPC_ByteString_Copy(&pResp->ServerSignature.Signature, &pSig->Signature);
-
-    if (STATUS_OK == sc)
-        *message_out_bs__sc = constants__e_sc_ok;
-    else
-        *message_out_bs__sc = constants__e_sc_nok;
+    *message_out_bs__bret = result;
 }
 
 void message_out_bs__write_activate_session_req_msg_crypto(const constants__t_msg_i message_out_bs__activate_req_msg,
                                                            const constants__t_SignatureData_i message_out_bs__signature,
-                                                           constants__t_StatusCode_i* const message_out_bs__sc)
+                                                           bool* const message_out_bs__bret)
 
 {
-    SOPC_StatusCode sc = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_ActivateSessionRequest* pReq = (OpcUa_ActivateSessionRequest*) message_out_bs__activate_req_msg;
     OpcUa_SignatureData* pSig = (OpcUa_SignatureData*) message_out_bs__signature;
 
     /* Copy Signature, which is not a built-in, so copy its fields */
     /* TODO: should borrow a reference instead of copy */
-    sc = SOPC_String_Copy(&pReq->ClientSignature.Algorithm, &pSig->Algorithm);
+    status = SOPC_String_Copy(&pReq->ClientSignature.Algorithm, &pSig->Algorithm);
 
-    if (STATUS_OK == sc)
-        sc = SOPC_ByteString_Copy(&pReq->ClientSignature.Signature, &pSig->Signature);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ByteString_Copy(&pReq->ClientSignature.Signature, &pSig->Signature);
+    }
 
-    if (STATUS_OK == sc)
-        *message_out_bs__sc = constants__e_sc_ok;
+    if (SOPC_STATUS_OK == status)
+    {
+        *message_out_bs__bret = true;
+    }
     else
-        *message_out_bs__sc = constants__e_sc_nok;
+    {
+        *message_out_bs__bret = false;
+    }
 }
 
 void message_out_bs__write_activate_session_resp_msg_crypto(const constants__t_msg_i message_out_bs__activate_resp_msg,
                                                             const constants__t_Nonce_i message_out_bs__nonce)
 {
     OpcUa_ActivateSessionResponse* pResp = (OpcUa_ActivateSessionResponse*) message_out_bs__activate_resp_msg;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     /* Write the nonce */
     /* TODO: this can also fail because of the malloc */
-    if (STATUS_OK != SOPC_ByteString_Copy(&pResp->ServerNonce, (SOPC_ByteString*) message_out_bs__nonce))
-        return;
+    status = SOPC_ByteString_Copy(&pResp->ServerNonce, (SOPC_ByteString*) message_out_bs__nonce);
+    assert(SOPC_STATUS_OK == status);
 }
 
 void message_out_bs__write_msg_out_header_req_handle(const constants__t_msg_header_i message_out_bs__msg_header,
@@ -444,18 +464,15 @@ void message_out_bs__write_msg_out_header_session_token(
 {
     SOPC_NodeId* authToken = (SOPC_NodeId*) message_out_bs__session_token;
 
-    if (STATUS_OK !=
-        SOPC_NodeId_Copy(&((OpcUa_RequestHeader*) message_out_bs__msg_header)->AuthenticationToken, authToken))
-    {
-        printf("message_out_bs__write_msg_header_session_token\n");
-        exit(1);
-    }
+    SOPC_ReturnStatus status =
+        SOPC_NodeId_Copy(&((OpcUa_RequestHeader*) message_out_bs__msg_header)->AuthenticationToken, authToken);
+    assert(SOPC_STATUS_OK == status);
 }
 
 void message_out_bs__write_msg_resp_header_service_status(const constants__t_msg_header_i message_out_bs__msg_header,
                                                           const constants__t_StatusCode_i message_out_bs__status_code)
 {
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = OpcUa_BadInternalError;
     util_status_code__B_to_C(message_out_bs__status_code, &status);
     ((OpcUa_ResponseHeader*) message_out_bs__msg_header)->ServiceResult = status;
 }

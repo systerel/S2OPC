@@ -44,8 +44,8 @@ static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_minimal = {
     .rsa_min_bitlen = 2048,
 };
 
-static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const SOPC_PKIProvider* pPKI,
-                                                            const SOPC_Certificate* pToValidate)
+static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProvider* pPKI,
+                                                              const SOPC_Certificate* pToValidate)
 {
     (void) (pPKI);
     SOPC_Certificate* cert_ca = NULL;
@@ -54,9 +54,9 @@ static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const SOPC_PKIProvid
     uint32_t failure_reasons = 0;
 
     if (NULL == pPKI || NULL == pToValidate)
-        return STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL == pPKI->pFnValidateCertificate || NULL == pPKI->pUserCertAuthList) // TODO: useful pFn verification?
-        return STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
 
     // Gathers certificates from pki structure
     if (NULL != pPKI->pUserCertRevocList)
@@ -77,25 +77,25 @@ static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const SOPC_PKIProvid
             &failure_reasons, NULL, NULL) != 0)
     {
         // TODO: you could further analyze here...
-        return STATUS_NOK;
+        return SOPC_STATUS_NOK;
     }
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    return STATUS_OK;
+    return SOPC_STATUS_OK;
 }
 
-SOPC_StatusCode SOPC_PKIProviderStack_Create(SOPC_Certificate* pCertAuth,
-                                             CertificateRevList* pRevocationList,
-                                             SOPC_PKIProvider** ppPKI)
+SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_Certificate* pCertAuth,
+                                               CertificateRevList* pRevocationList,
+                                               SOPC_PKIProvider** ppPKI)
 {
     SOPC_PKIProvider* pki = NULL;
 
     if (NULL == pCertAuth || NULL == ppPKI)
-        return STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
 
     pki = (SOPC_PKIProvider*) malloc(sizeof(SOPC_PKIProvider));
     if (NULL == pki)
-        return STATUS_NOK;
+        return SOPC_STATUS_NOK;
 
     // The pki function pointer shall be const after this init
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
@@ -107,7 +107,7 @@ SOPC_StatusCode SOPC_PKIProviderStack_Create(SOPC_Certificate* pCertAuth,
     pki->pUserData = NULL;
     *ppPKI = pki;
 
-    return STATUS_OK;
+    return SOPC_STATUS_OK;
 }
 
 void SOPC_PKIProviderStack_Free(SOPC_PKIProvider* pPKI)

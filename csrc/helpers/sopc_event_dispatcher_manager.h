@@ -49,17 +49,17 @@ SOPC_EventDispatcherManager* SOPC_EventDispatcherManager_CreateAndStart(SOPC_Eve
  *  \param params    Generic parameter provided with the event
  *  \param auxParam  Auxiliary integer parameter provided with the event (e.g.: status code, etc.)
  *  \param debugName Indicates in a human readable way the event added to the queue
- *  \return             STATUS_OK if action added successfully,
- *                      STATUS_INVALID_PARAMETER in case event dispatcher manager pointer is NULL,
- *                      STATUS_NOK otherwise (event dispatcher manager not started, function pointer and argument both
- * NULL).
+ *  \return             SOPC_STATUS_OK if action added successfully,
+ *                      SOPC_STATUS_INVALID_PARAMETER in case event dispatcher manager pointer is NULL,
+ *                      SOPC_STATUS_NOK otherwise (event dispatcher manager not started, function pointer and argument
+ * both NULL).
  */
-SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager* eventMgr,
-                                                     int32_t event,
-                                                     uint32_t eltId,
-                                                     void* params,
-                                                     uint32_t auxParam,
-                                                     const char* debugName);
+SOPC_ReturnStatus SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager* eventMgr,
+                                                       int32_t event,
+                                                       uint32_t eltId,
+                                                       void* params,
+                                                       uint32_t auxParam,
+                                                       const char* debugName);
 
 /**
  *  \brief Similar to *_AddEvent but the event will be added to be the next one to be treated
@@ -71,27 +71,27 @@ SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager
  *  \param params    Generic parameter provided with the event
  *  \param auxParam  Auxiliary integer parameter provided with the event (e.g.: status code, etc.)
  *  \param debugName Indicates in a human readable way the event added to the queue
- *  \return             STATUS_OK if action added successfully,
- *                      STATUS_INVALID_PARAMETER in case event dispatcher manager pointer is NULL,
- *                      STATUS_NOK otherwise (event dispatcher manager not started, function pointer and argument both
- * NULL).
+ *  \return             SOPC_STATUS_OK if action added successfully,
+ *                      SOPC_STATUS_INVALID_PARAMETER in case event dispatcher manager pointer is NULL,
+ *                      SOPC_STATUS_NOK otherwise (event dispatcher manager not started, function pointer and argument
+ * both NULL).
  */
-SOPC_StatusCode SOPC_EventDispatcherManager_AddEventAsNext(SOPC_EventDispatcherManager* eventMgr,
-                                                           int32_t event,
-                                                           uint32_t eltId,
-                                                           void* params,
-                                                           uint32_t auxParam,
-                                                           const char* debugName);
+SOPC_ReturnStatus SOPC_EventDispatcherManager_AddEventAsNext(SOPC_EventDispatcherManager* eventMgr,
+                                                             int32_t event,
+                                                             uint32_t eltId,
+                                                             void* params,
+                                                             uint32_t auxParam,
+                                                             const char* debugName);
 
 /**
  *  \brief Stops the event dispatcher manager treatment.
  *
  *  \param eventMgr  Address of the pointer of the event dispatcher manager to stop
  *
- *  \return  STATUS_OK if it stopped successfully and *eventMgr == NULL,
- *           STATUS_INVALID_PARAMETER in case event dispatcher manager pointer is NULL,
- *           STATUS_NOK otherwise (already stopped, failed to stop).
+ *  \return  SOPC_STATUS_OK if it stopped successfully and *eventMgr == NULL,
+ *           SOPC_STATUS_INVALID_PARAMETER in case event dispatcher manager pointer is NULL,
+ *           SOPC_STATUS_NOK otherwise (already stopped, failed to stop).
  */
-SOPC_StatusCode SOPC_EventDispatcherManager_StopAndDelete(SOPC_EventDispatcherManager** eventMgr);
+SOPC_ReturnStatus SOPC_EventDispatcherManager_StopAndDelete(SOPC_EventDispatcherManager** eventMgr);
 
 #endif /* SOPC_EVENT_DISPATCHER_MANAGER_H_ */

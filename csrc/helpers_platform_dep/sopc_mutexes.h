@@ -23,20 +23,20 @@
 // Import Mutex type from platform dependent code
 #include "p_threads.h"
 
-SOPC_StatusCode Condition_Init(Condition* cond);
-SOPC_StatusCode Condition_Clear(Condition* cond);
+SOPC_ReturnStatus Condition_Init(Condition* cond);
+SOPC_ReturnStatus Condition_Clear(Condition* cond);
 
 // Must be called between lock and unlock of Mutex ued to wait on condition
-SOPC_StatusCode Condition_SignalAll(Condition* cond);
+SOPC_ReturnStatus Condition_SignalAll(Condition* cond);
 
-SOPC_StatusCode Mutex_Initialization(Mutex* mut);
-SOPC_StatusCode Mutex_Clear(Mutex* mut);
-SOPC_StatusCode Mutex_Lock(Mutex* mut);
-SOPC_StatusCode Mutex_Unlock(Mutex* mut);
+SOPC_ReturnStatus Mutex_Initialization(Mutex* mut);
+SOPC_ReturnStatus Mutex_Clear(Mutex* mut);
+SOPC_ReturnStatus Mutex_Lock(Mutex* mut);
+SOPC_ReturnStatus Mutex_Unlock(Mutex* mut);
 
 // Lock on return
-SOPC_StatusCode Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut);
-// Lock on return. Return OpcUa_BadTimeout in case of timeout before condition signaled
-SOPC_StatusCode Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs);
+SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut);
+// Lock on return. Return SOPC_STATUS_TIMEOUT in case of timeout before condition signaled
+SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs);
 
 #endif /* SOPC_MUTEXES_H_ */

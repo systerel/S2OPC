@@ -60,27 +60,27 @@ SOPC_Variant* new_variant_rvi(SOPC_NodeId** pnids,
     }
 }
 
-/** Returns NOK on not found or compare-error */
-SOPC_StatusCode get_rvi(SOPC_NodeId** pnids, SOPC_NodeId* target_nid, int32_t* prvi)
+/** Returns false on not found or compare-error */
+static bool get_rvi(SOPC_NodeId** pnids, SOPC_NodeId* target_nid, int32_t* prvi)
 {
     if (NULL == pnids || NULL == target_nid || NULL == prvi)
-        return STATUS_INVALID_PARAMETERS;
+        return false;
 
     int32_t i;
     int32_t comp;
 
     for (i = 1; i <= address_space_bs__nNodeIds; i++)
     {
-        if (STATUS_OK != SOPC_NodeId_Compare(pnids[i], target_nid, &comp))
-            return STATUS_NOK;
+        if (SOPC_STATUS_OK != SOPC_NodeId_Compare(pnids[i], target_nid, &comp))
+            return false;
         if (comp == 0)
         {
             *prvi = i;
-            return STATUS_OK;
+            return true;
         }
     }
 
-    return STATUS_NOK;
+    return true;
 }
 
 bool test_read_request_response(OpcUa_ReadResponse* pReadResp, constants__t_StatusCode_i status_code, int verbose)
@@ -122,7 +122,7 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, constants__t_Stat
     for (i = 0; bTestOk && i < pReadReq->NoOfNodesToRead; ++i)
     {
         /* Find NodeId's rvi */
-        bTestOk = STATUS_OK == get_rvi(address_space_bs__a_NodeId, &pReadReq->NodesToRead[i].NodeId, &rvi);
+        bTestOk = get_rvi(address_space_bs__a_NodeId, &pReadReq->NodesToRead[i].NodeId, &rvi);
         /* Find desired attribute and wrap it in a new SOPC_Variant* */
         if (bTestOk)
         {
@@ -134,7 +134,7 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, constants__t_Stat
             pvar = NULL;
         }
         /* Compares the wrapped value with the response to the request */
-        bTestOk = bTestOk && STATUS_OK == SOPC_Variant_Compare(&pReadResp->Results[i].Value, pvar, &comp);
+        bTestOk = bTestOk && SOPC_STATUS_OK == SOPC_Variant_Compare(&pReadResp->Results[i].Value, pvar, &comp);
         bTestOk = bTestOk && comp == 0;
         if (verbose > 1)
         {

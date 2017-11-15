@@ -46,7 +46,7 @@ void service_browse_decode_bs__decode_browse_request(
 {
     /* TODO: actually decode something */
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) service_browse_decode_bs__req_payload;
-    *service_browse_decode_bs__StatusCode_service = constants__e_sc_nok;
+    *service_browse_decode_bs__StatusCode_service = constants__e_sc_bad_unexpected_error;
 
     if (encType == &OpcUa_BrowseRequest_EncodeableType)
     {

@@ -105,12 +105,14 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_ReferenceTypeId(
     const constants__t_BrowseResult_i msg_browse_response_bs__p_bri,
     const constants__t_NodeId_i msg_browse_response_bs__p_NodeId)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     assert(NULL != ppResRefTypeId);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResRefTypeId[msg_browse_response_bs__p_bvi]);
     assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
-    assert(STATUS_OK == SOPC_NodeId_Copy(&ppResRefTypeId[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                                         (SOPC_NodeId*) msg_browse_response_bs__p_NodeId));
+    status = SOPC_NodeId_Copy(&ppResRefTypeId[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
+                              (SOPC_NodeId*) msg_browse_response_bs__p_NodeId);
+    assert(SOPC_STATUS_OK == status);
 }
 
 void msg_browse_response_bs__set_ResponseBrowse_Res_Forwards(
@@ -130,13 +132,14 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_BrowseName(
     const constants__t_BrowseResult_i msg_browse_response_bs__p_bri,
     const constants__t_QualifiedName_i msg_browse_response_bs__p_BrowseName)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     assert(NULL != ppResBrowseName);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResBrowseName[msg_browse_response_bs__p_bvi]);
     assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
-    assert(STATUS_OK ==
-           SOPC_QualifiedName_Copy(&ppResBrowseName[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                                   (SOPC_QualifiedName*) msg_browse_response_bs__p_BrowseName));
+    status = SOPC_QualifiedName_Copy(&ppResBrowseName[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
+                                     (SOPC_QualifiedName*) msg_browse_response_bs__p_BrowseName);
+    assert(SOPC_STATUS_OK == status);
 }
 
 void msg_browse_response_bs__reset_ResponseBrowse_Res_BrowseName(
@@ -155,13 +158,14 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_DisplayName(
     const constants__t_BrowseResult_i msg_browse_response_bs__p_bri,
     const constants__t_LocalizedText_i msg_browse_response_bs__p_DisplayName)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     assert(NULL != ppResDisplayName);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResDisplayName[msg_browse_response_bs__p_bvi]);
     assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
-    assert(STATUS_OK ==
-           SOPC_LocalizedText_Copy(&ppResDisplayName[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                                   (SOPC_LocalizedText*) msg_browse_response_bs__p_DisplayName));
+    status = SOPC_LocalizedText_Copy(&ppResDisplayName[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
+                                     (SOPC_LocalizedText*) msg_browse_response_bs__p_DisplayName);
+    assert(SOPC_STATUS_OK == status);
 }
 
 void msg_browse_response_bs__reset_ResponseBrowse_Res_DisplayName(
@@ -205,13 +209,14 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_NodeId(
     const constants__t_BrowseResult_i msg_browse_response_bs__p_bri,
     const constants__t_ExpandedNodeId_i msg_browse_response_bs__p_ExpandedNodeId)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     assert(NULL != ppResNodeId);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResNodeId[msg_browse_response_bs__p_bvi]);
     assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
-    assert(STATUS_OK ==
-           SOPC_ExpandedNodeId_Copy(&ppResNodeId[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                                    (SOPC_ExpandedNodeId*) msg_browse_response_bs__p_ExpandedNodeId));
+    status = SOPC_ExpandedNodeId_Copy(&ppResNodeId[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
+                                      (SOPC_ExpandedNodeId*) msg_browse_response_bs__p_ExpandedNodeId);
+    assert(SOPC_STATUS_OK == status);
     /* Also update the current number of references recorded for this BrowseResult */
     /* TODO: this implementation counts on the order of the iterator, which must be increasing */
     assert(NULL != pnReferenceDescription);
@@ -223,18 +228,24 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_TypeDefinition(
     const constants__t_BrowseResult_i msg_browse_response_bs__p_bri,
     const constants__t_ExpandedNodeId_i msg_browse_response_bs__p_TypeDefinition)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     assert(NULL != ppResTypeDefinition);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResTypeDefinition[msg_browse_response_bs__p_bvi]);
     assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     /* TODO: Temporary check. HasTypeDefinition shall not be NULL by PRE here. */
     if (NULL == msg_browse_response_bs__p_TypeDefinition)
+    {
         SOPC_ExpandedNodeId_Initialize(
             &ppResTypeDefinition[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri]);
+    }
     else
-        assert(STATUS_OK == SOPC_ExpandedNodeId_Copy(
-                                &ppResTypeDefinition[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                                (SOPC_ExpandedNodeId*) msg_browse_response_bs__p_TypeDefinition));
+    {
+        status =
+            SOPC_ExpandedNodeId_Copy(&ppResTypeDefinition[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
+                                     (SOPC_ExpandedNodeId*) msg_browse_response_bs__p_TypeDefinition);
+        assert(SOPC_STATUS_OK == status);
+    }
 }
 
 void msg_browse_response_bs__reset_ResponseBrowse_Res_TypeDefinition(
@@ -443,6 +454,7 @@ void msg_browse_response_bs__write_BrowseResponse_msg_out(const constants__t_msg
     OpcUa_BrowseResult* lbr;
     OpcUa_ReferenceDescription* lrd;
     int32_t i, j, nRefs;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     /* TODO: Verify (in previous code) that msg_browse_response_bs__p_msg_out is initialized correctly */
     *msg_browse_response_bs__p_isvalid = false;
@@ -473,17 +485,26 @@ void msg_browse_response_bs__write_BrowseResponse_msg_out(const constants__t_msg
 
         for (j = 0; j < nRefs; ++j)
         {
-            if (STATUS_OK != SOPC_NodeId_Copy(&lrd[j].ReferenceTypeId, &ppResRefTypeId[i + 1][j + 1]))
+            status = SOPC_NodeId_Copy(&lrd[j].ReferenceTypeId, &ppResRefTypeId[i + 1][j + 1]);
+            if (SOPC_STATUS_OK != status)
                 return;
+
             lrd[j].IsForward = ppResForwards[i + 1][j + 1];
-            if (STATUS_OK != SOPC_ExpandedNodeId_Copy(&lrd[j].NodeId, &ppResNodeId[i + 1][j + 1]))
+            status = SOPC_ExpandedNodeId_Copy(&lrd[j].NodeId, &ppResNodeId[i + 1][j + 1]);
+            if (SOPC_STATUS_OK != status)
                 return;
-            if (STATUS_OK != SOPC_QualifiedName_Copy(&lrd[j].BrowseName, &ppResBrowseName[i + 1][j + 1]))
+
+            status = SOPC_QualifiedName_Copy(&lrd[j].BrowseName, &ppResBrowseName[i + 1][j + 1]);
+            if (SOPC_STATUS_OK != status)
                 return;
-            if (STATUS_OK != SOPC_LocalizedText_Copy(&lrd[j].DisplayName, &ppResDisplayName[i + 1][j + 1]))
+
+            status = SOPC_LocalizedText_Copy(&lrd[j].DisplayName, &ppResDisplayName[i + 1][j + 1]);
+            if (SOPC_STATUS_OK != status)
                 return;
             lrd[j].NodeClass = ppResNodeClass[i + 1][j + 1];
-            if (STATUS_OK != SOPC_ExpandedNodeId_Copy(&lrd[j].TypeDefinition, &ppResTypeDefinition[i + 1][j + 1]))
+
+            status = SOPC_ExpandedNodeId_Copy(&lrd[j].TypeDefinition, &ppResTypeDefinition[i + 1][j + 1]);
+            if (SOPC_STATUS_OK != status)
                 return;
         }
     }

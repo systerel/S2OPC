@@ -36,12 +36,12 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
     scParams->params = params;
     scParams->auxParam = auxParam;
 
-    assert(STATUS_OK == SOPC_AsyncQueue_BlockingEnqueue(secureChannelsEvents, (void*) scParams));
+    assert(SOPC_STATUS_OK == SOPC_AsyncQueue_BlockingEnqueue(secureChannelsEvents, (void*) scParams));
 }
 
 void SOPC_SecureChannels_Initialize()
 {
-    assert(STATUS_OK == SOPC_AsyncQueue_Init(&secureChannelsEvents, "StubsSockets_SecureChannelEventQueue"));
+    assert(SOPC_STATUS_OK == SOPC_AsyncQueue_Init(&secureChannelsEvents, "StubsSockets_SecureChannelEventQueue"));
 }
 
 void SOPC_SecureChannels_Clear()

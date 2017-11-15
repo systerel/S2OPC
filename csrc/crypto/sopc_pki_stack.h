@@ -47,14 +47,14 @@ struct SOPC_CertificateRevList;
  * checked. \param ppPKI     A valid pointer to the newly created PKIProvider. You should free such provider with
  * PKIProviderStack_Free
  *
- * \note            Content of the pki is unspecified when return value is not STATUS_OK.
+ * \note            Content of the pki is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
- *                  and STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_PKIProviderStack_Create(SOPC_Certificate* pCertAuth,
-                                             struct SOPC_CertificateRevList* pRevocationList,
-                                             SOPC_PKIProvider** ppPKI);
+SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_Certificate* pCertAuth,
+                                               struct SOPC_CertificateRevList* pRevocationList,
+                                               SOPC_PKIProvider** ppPKI);
 
 /**
  * \brief           Frees a pki created with PKIProviderStack_Create().

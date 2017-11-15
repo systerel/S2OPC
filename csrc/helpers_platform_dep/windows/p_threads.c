@@ -15,123 +15,121 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "opcua_statuscodes.h"
-
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
 
-SOPC_StatusCode Condition_Init(Condition* cond)
+SOPC_ReturnStatus Condition_Init(Condition* cond)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (cond != NULL)
     {
         InitializeConditionVariable(cond);
-        status = STATUS_OK;
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
 
-SOPC_StatusCode Condition_Clear(Condition* cond)
+SOPC_ReturnStatus Condition_Clear(Condition* cond)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (cond != NULL)
     {
-        status = STATUS_OK;
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
 
-SOPC_StatusCode Condition_SignalAll(Condition* cond)
+SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (cond != NULL)
     {
         WakeAllConditionVariable(cond);
-        status = STATUS_OK;
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
 
-SOPC_StatusCode Mutex_Initialization(Mutex* mut)
+SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
         InitializeSRWLock(mut);
-        status = STATUS_OK;
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
 
-SOPC_StatusCode Mutex_Clear(Mutex* mut)
+SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
-        status = STATUS_OK;
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
 
-SOPC_StatusCode Mutex_Lock(Mutex* mut)
+SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
         AcquireSRWLockExclusive(mut);
-        status = STATUS_OK;
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
 
-SOPC_StatusCode Mutex_Unlock(Mutex* mut)
+SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
         ReleaseSRWLockExclusive(mut);
-        status = STATUS_OK;
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
 
-SOPC_StatusCode Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
+SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (cond != NULL && mut != NULL)
     {
         BOOL res = SleepConditionVariableSRW(cond, mut, INFINITE, 0);
         if (res == 0)
         {
             // Possible to retrieve error with GetLastError (see msdn doc)
-            status = STATUS_NOK;
+            status = SOPC_STATUS_NOK;
         }
         else
         {
-            status = STATUS_OK;
+            status = SOPC_STATUS_OK;
         }
     }
     return status;
 }
 
-SOPC_StatusCode Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs)
+SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (cond != NULL && mut != NULL && milliSecs > 0)
     {
         BOOL res = SleepConditionVariableSRW(cond, mut, (DWORD) milliSecs, 0);
         if (res == 0)
         {
-            status = STATUS_NOK;
+            status = SOPC_STATUS_NOK;
             if (ERROR_TIMEOUT == GetLastError())
             {
-                status = OpcUa_BadTimeout;
+                status = SOPC_STATUS_TIMEOUT;
             }
         }
         else
         {
-            status = STATUS_OK;
+            status = SOPC_STATUS_OK;
         }
     }
     return status;
@@ -146,9 +144,9 @@ DWORD WINAPI SOPC_Thread_StartFct(LPVOID args)
     return 0;
 }
 
-SOPC_StatusCode SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs)
+SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     DWORD threadId = 0;
     if (thread != NULL && startFct != NULL)
     {
@@ -161,11 +159,11 @@ SOPC_StatusCode SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), voi
                                       &threadId);
         if (NULL == thread->thread)
         {
-            status = STATUS_NOK;
+            status = SOPC_STATUS_NOK;
         }
         else
         {
-            status = STATUS_OK;
+            status = SOPC_STATUS_OK;
         }
     }
     else if (thread != NULL)
@@ -175,16 +173,16 @@ SOPC_StatusCode SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), voi
     return status;
 }
 
-SOPC_StatusCode SOPC_Thread_Join(Thread thread)
+SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
 {
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (thread.thread != NULL)
     {
         DWORD retCode = WaitForSingleObject(thread.thread, INFINITE);
         if (WAIT_OBJECT_0 == retCode)
         {
             thread.thread = NULL;
-            status = STATUS_OK;
+            status = SOPC_STATUS_OK;
         }
     }
     return status;

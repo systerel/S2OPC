@@ -66,21 +66,21 @@ START_TEST(test_thread_exec)
     Thread thread;
     uint32_t cpt = 0;
     // Nominal behavior
-    SOPC_StatusCode status = SOPC_Thread_Create(&thread, test_thread_exec_fct, &cpt);
-    ck_assert(status == STATUS_OK);
+    SOPC_ReturnStatus status = SOPC_Thread_Create(&thread, test_thread_exec_fct, &cpt);
+    ck_assert(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
     ck_assert(cpt > 0 && cpt < 100);
     status = SOPC_Thread_Join(thread);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     ck_assert(cpt == 100);
 
     // Degraded behavior
     status = SOPC_Thread_Create(NULL, test_thread_exec_fct, &cpt);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = SOPC_Thread_Create(&thread, NULL, &cpt);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = SOPC_Thread_Join(thread);
-    ck_assert(status == STATUS_NOK);
+    ck_assert(status == SOPC_STATUS_NOK);
 }
 END_TEST
 
@@ -89,46 +89,46 @@ START_TEST(test_thread_mutex)
     Thread thread;
     uint32_t cpt = 0;
     // Nominal behavior
-    SOPC_StatusCode status = Mutex_Initialization(&gmutex);
-    ck_assert(status == STATUS_OK);
+    SOPC_ReturnStatus status = Mutex_Initialization(&gmutex);
+    ck_assert(status == SOPC_STATUS_OK);
     status = Mutex_Lock(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     status = SOPC_Thread_Create(&thread, test_thread_mutex_fct, &cpt);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
     ck_assert(cpt == 0);
     Mutex_Unlock(&gmutex);
     SOPC_Sleep(10);
     ck_assert(cpt > 0 && cpt < 100);
     status = SOPC_Thread_Join(thread);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     ck_assert(cpt == 100);
     status = Mutex_Clear(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
 
     // Degraded behavior
     status = Mutex_Initialization(NULL);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_Lock(NULL);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_Unlock(NULL);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_Clear(NULL);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
 }
 END_TEST
 
 void* test_thread_condvar_fct(void* args)
 {
     CondRes* condRes = (CondRes*) args;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     status = Mutex_Lock(&gmutex);
-    ck_assert(STATUS_OK == status);
+    ck_assert(SOPC_STATUS_OK == status);
     condRes->waitingThreadStarted = 1;
     while (condRes->protectedCondition == 0)
     {
         status = Mutex_UnlockAndWaitCond(&gcond, &gmutex);
-        ck_assert(STATUS_OK == status);
+        ck_assert(SOPC_STATUS_OK == status);
         if (condRes->protectedCondition == 1)
         {
             // Set success
@@ -142,20 +142,20 @@ void* test_thread_condvar_fct(void* args)
 void* test_thread_condvar_timed_fct(void* args)
 {
     CondRes* condRes = (CondRes*) args;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     status = Mutex_Lock(&gmutex);
     condRes->waitingThreadStarted = 1;
-    status = STATUS_NOK;
-    while (condRes->protectedCondition == 0 && OpcUa_BadTimeout != status)
+    status = SOPC_STATUS_NOK;
+    while (condRes->protectedCondition == 0 && SOPC_STATUS_TIMEOUT != status)
     {
         status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 1000);
     }
-    if (STATUS_OK == status && condRes->protectedCondition == 1)
+    if (SOPC_STATUS_OK == status && condRes->protectedCondition == 1)
     {
         // Set success on condition
         condRes->successCondition = 1;
     }
-    else if (OpcUa_BadTimeout == status && condRes->protectedCondition == 0)
+    else if (SOPC_STATUS_TIMEOUT == status && condRes->protectedCondition == 0)
     {
         condRes->timeoutCondition = 1;
     }
@@ -173,26 +173,26 @@ START_TEST(test_thread_condvar)
     condRes.timeoutCondition = 0;     // FALSE
 
     // Nominal behavior (non timed waiting on condition)
-    SOPC_StatusCode status = Mutex_Initialization(&gmutex);
-    ck_assert(status == STATUS_OK);
+    SOPC_ReturnStatus status = Mutex_Initialization(&gmutex);
+    ck_assert(status == SOPC_STATUS_OK);
     status = Condition_Init(&gcond);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     status = SOPC_Thread_Create(&thread, test_thread_condvar_fct, &condRes);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
     status = Mutex_Lock(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     // Check thread is waiting and mutex is released since we locked it !
     ck_assert(condRes.waitingThreadStarted == 1);
     // Trigger the condition now
     condRes.protectedCondition = 1;
     status = Mutex_Unlock(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     // Signal condition has changed
     status = Condition_SignalAll(&gcond);
     // Wait thread termination
     status = SOPC_Thread_Join(thread);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     // Check thread successfully terminated on condition
     status = Mutex_Lock(&gmutex);
     ck_assert(condRes.successCondition == 1);
@@ -200,9 +200,9 @@ START_TEST(test_thread_condvar)
 
     // Clear mutex and Condtion
     status = Mutex_Clear(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     status = Condition_Clear(&gcond);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
 
     // Nominal behavior (timed waiting on condition)
     condRes.protectedCondition = 0;   // FALSE
@@ -210,25 +210,25 @@ START_TEST(test_thread_condvar)
     condRes.successCondition = 0;     // FALSE
     condRes.timeoutCondition = 0;     // FALSE
     status = Mutex_Initialization(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     status = Condition_Init(&gcond);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
     status = Mutex_Lock(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     // Check thread is waiting and mutex is released since we locked it !
     ck_assert(condRes.waitingThreadStarted == 1);
     // Trigger the condition now
     condRes.protectedCondition = 1;
     status = Mutex_Unlock(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     // Signal condition has changed
     status = Condition_SignalAll(&gcond);
     // Wait thread termination
     status = SOPC_Thread_Join(thread);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
 
     status = Mutex_Lock(&gmutex);
     ck_assert(condRes.successCondition == 1);
@@ -236,9 +236,9 @@ START_TEST(test_thread_condvar)
 
     // Clear mutex and Condtion
     status = Mutex_Clear(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     status = Condition_Clear(&gcond);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
 
     // Degraded behavior (timed waiting on condition)
     condRes.protectedCondition = 0;   // FALSE
@@ -246,24 +246,24 @@ START_TEST(test_thread_condvar)
     condRes.successCondition = 0;     // FALSE
     condRes.timeoutCondition = 0;     // FALSE
     status = Mutex_Initialization(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     status = Condition_Init(&gcond);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
     status = Mutex_Lock(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     // Check thread is waiting and mutex is released since we locked it !
     ck_assert(condRes.waitingThreadStarted == 1);
     // DO NOT CHANGE CONDITION
     status = Mutex_Unlock(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     // DO NOT SIGNAL CONDITION CHANGE
 
     // Wait thread termination
     status = SOPC_Thread_Join(thread);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
 
     // Check timeout on condition occured
     status = Mutex_Lock(&gmutex);
@@ -272,46 +272,46 @@ START_TEST(test_thread_condvar)
 
     // Clear mutex and Condtion
     status = Mutex_Clear(&gmutex);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
     status = Condition_Clear(&gcond);
-    ck_assert(status == STATUS_OK);
+    ck_assert(status == SOPC_STATUS_OK);
 
     // Degraded behavior (invalid parameter)
     status = Condition_Init(NULL);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Condition_Clear(NULL);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Condition_SignalAll(NULL);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_UnlockAndWaitCond(NULL, &gmutex);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_UnlockAndWaitCond(&gcond, NULL);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_UnlockAndWaitCond(NULL, NULL);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
 
     status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 0);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
 
     status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 0);
 
     status = Mutex_UnlockAndTimedWaitCond(NULL, NULL, 100);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
 
     status = Mutex_UnlockAndTimedWaitCond(NULL, NULL, 0);
-    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
 }
 END_TEST
 

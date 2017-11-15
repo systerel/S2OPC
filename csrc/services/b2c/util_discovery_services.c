@@ -39,7 +39,7 @@ const OpcUa_UserTokenPolicy anonymousUserTokenPolicy = {
 
 static void SOPC_SetServerCertificate(SOPC_Endpoint_Config* sopcEndpointConfig, OpcUa_EndpointDescription* epDesc)
 {
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     uint32_t tmpLength = 0;
 
     if (sopcEndpointConfig->serverCertificate != NULL)
@@ -47,7 +47,7 @@ static void SOPC_SetServerCertificate(SOPC_Endpoint_Config* sopcEndpointConfig, 
         status = SOPC_KeyManager_Certificate_CopyDER(sopcEndpointConfig->serverCertificate,
                                                      &epDesc->ServerCertificate.Data, &tmpLength);
     }
-    assert(STATUS_OK == status && tmpLength <= INT32_MAX);
+    assert(SOPC_STATUS_OK == status && tmpLength <= INT32_MAX);
     epDesc->ServerCertificate.Length = (int32_t) tmpLength;
 }
 
@@ -84,7 +84,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
     constants__t_StatusCode_i serviceResult = constants__e_sc_bad_invalid_argument;
 
     SOPC_Endpoint_Config* sopcEndpointConfig = NULL;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_String configEndPointURL;
     int32_t endPointURLComparison = 0;
     uint8_t nbSecuConfigs = 0;
@@ -97,7 +97,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
     if (NULL != sopcEndpointConfig)
     {
         status = SOPC_String_AttachFromCstring(&configEndPointURL, sopcEndpointConfig->endpointURL);
-        assert(STATUS_OK == status);
+        assert(SOPC_STATUS_OK == status);
 
         /* We check that the endPointURL provided by the request matches
          * the configuration endPointURL */
@@ -109,7 +109,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
         serviceResult = constants__e_sc_bad_unexpected_error;
     }
 
-    if (constants__e_sc_ok == serviceResult && (status != STATUS_OK || endPointURLComparison != 0))
+    if (constants__e_sc_ok == serviceResult && (status != SOPC_STATUS_OK || endPointURLComparison != 0))
     {
         *nbOfEndpointDescriptions = 0;
         serviceResult = constants__e_sc_bad_invalid_argument;

@@ -61,6 +61,7 @@ SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocketNoLock(bool isListener)
 {
     SOPC_Socket* result = NULL;
     uint32_t idx = 1; // index 0 is forbidden => reserved for invalid index
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     do
     {
         if (false == socketsArray[idx].isUsed)
@@ -73,7 +74,8 @@ SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocketNoLock(bool isListener)
 
     if (NULL != result && isListener == false)
     {
-        assert(STATUS_OK == SOPC_AsyncQueue_Init(&result->writeQueue, "Socket write msgs"));
+        status = SOPC_AsyncQueue_Init(&result->writeQueue, "Socket write msgs");
+        assert(SOPC_STATUS_OK == status);
     }
     return result;
 }
@@ -82,7 +84,7 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx)
 {
     SOPC_Socket* socket = NULL;
     void* elt = NULL;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (socketIdx < SOPC_MAX_SOCKETS && socketsArray[socketIdx].isUsed != false)
     {
         socket = &socketsArray[socketIdx];
@@ -102,7 +104,7 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx)
         {
             // Clear all buffers in the queue
             status = SOPC_AsyncQueue_NonBlockingDequeue(socket->writeQueue, &elt);
-            while (STATUS_OK == status && NULL != elt)
+            while (SOPC_STATUS_OK == status && NULL != elt)
             {
                 SOPC_Buffer_Delete((SOPC_Buffer*) elt);
                 elt = NULL;

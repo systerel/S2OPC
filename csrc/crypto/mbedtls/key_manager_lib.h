@@ -79,11 +79,11 @@ typedef struct SOPC_CertificateRevList
  * \param pKey      A valid pointer to the AsymmetricKey which will be rewritten to contain the public key.
  *                  This is not a deep copy, and the key is not valid anymore when the certificate is not valid.
  *
- * \note            Content of the certificate is unspecified when return value is not STATUS_OK.
+ * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
- *                  and STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode KeyManager_Certificate_GetPublicKey(const SOPC_Certificate* pCert, SOPC_AsymmetricKey* pKey);
+SOPC_ReturnStatus KeyManager_Certificate_GetPublicKey(const SOPC_Certificate* pCert, SOPC_AsymmetricKey* pKey);
 
 #endif /* SOPC_KEY_MANAGER_LIB_H_ */

@@ -174,6 +174,7 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
     constants__t_Node_i i;
     SOPC_NodeId *pnid_req, *pnid;
     int nid_cmp;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     *address_space_bs__nid_valid = false;
 
@@ -188,7 +189,8 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
         if (NULL == pnid)
             continue;
 
-        if (STATUS_OK != SOPC_NodeId_Compare(pnid_req, pnid, &nid_cmp))
+        status = SOPC_NodeId_Compare(pnid_req, pnid, &nid_cmp);
+        if (SOPC_STATUS_OK != status)
             continue; /* That should be an error */
 
         if (nid_cmp == 0)
@@ -260,13 +262,15 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_Node
 void address_space_bs__set_Value(const constants__t_Node_i address_space_bs__node,
                                  const constants__t_Variant_i address_space_bs__value)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     assert(address_space_bs__node >= offVarsTypes);
     assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
     SOPC_Variant* pvar = &address_space_bs__a_Value[address_space_bs__node - offVarsTypes];
     // Clear old value
     SOPC_Variant_Clear(pvar);
     /* Deep-copy the new value */
-    assert(STATUS_OK == SOPC_Variant_Copy(pvar, (SOPC_Variant*) address_space_bs__value));
+    status = SOPC_Variant_Copy(pvar, (SOPC_Variant*) address_space_bs__value);
+    assert(SOPC_STATUS_OK == status);
 }
 
 void address_space_bs__get_Value_StatusCode(const constants__t_Node_i address_space_bs__node,
@@ -274,12 +278,8 @@ void address_space_bs__get_Value_StatusCode(const constants__t_Node_i address_sp
 {
     assert(address_space_bs__node >= offVarsTypes);
     assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
-    bool res = util_status_code__C_to_B(address_space_bs__a_Value_StatusCode[address_space_bs__node - offVarsTypes],
-                                        address_space_bs__sc);
-    if (false == res)
-    {
-        *address_space_bs__sc = constants__c_StatusCode_indet;
-    }
+    util_status_code__C_to_B(address_space_bs__a_Value_StatusCode[address_space_bs__node - offVarsTypes],
+                             address_space_bs__sc);
 }
 
 void address_space_bs__read_AddressSpace_free_value(const constants__t_Variant_i address_space_bs__val)

@@ -20,8 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "opcua_statuscodes.h"
-
 #include "sopc_sockets_event_mgr.h"
 
 #include "sopc_buffer.h"
@@ -88,18 +86,21 @@ static bool ParseURI(const char* uri, char** hostname, char** port)
 static bool SOPC_SocketsEventMgr_ConnectClient(SOPC_Socket* connectSocket, Socket_AddressInfo* addr)
 {
     bool result = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (connectSocket != NULL && addr != NULL && connectSocket->state == SOCKET_STATE_CLOSED)
     {
-        if (STATUS_OK == Socket_CreateNew(addr,
-                                          false, // Do not reuse
-                                          true,  // Non blocking socket
-                                          &connectSocket->sock))
+        status = Socket_CreateNew(addr,
+                                  false, // Do not reuse
+                                  true,  // Non blocking socket
+                                  &connectSocket->sock);
+        if (SOPC_STATUS_OK == status)
         {
             result = true;
         }
         if (result != false)
         {
-            if (STATUS_OK != Socket_Connect(connectSocket->sock, addr))
+            status = Socket_Connect(connectSocket->sock, addr);
+            if (SOPC_STATUS_OK != status)
             {
                 result = false;
             }
@@ -159,6 +160,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
     bool connectResult = false;
     char* hostname = NULL;
     char* port = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     if (uri != NULL)
     {
@@ -175,7 +177,8 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
 
         if (result != false)
         {
-            if (STATUS_OK != Socket_AddrInfo_Get(hostname, port, &res))
+            status = Socket_AddrInfo_Get(hostname, port, &res);
+            if (SOPC_STATUS_OK != status)
             {
                 result = false;
             }
@@ -242,6 +245,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
     bool listenResult = false;
     char* hostname = NULL;
     char* port = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     if (uri != NULL)
     {
@@ -264,7 +268,8 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
                 hostname = NULL;
             }
 
-            if (STATUS_OK != Socket_AddrInfo_Get(hostname, port, &res))
+            status = Socket_AddrInfo_Get(hostname, port, &res);
+            if (SOPC_STATUS_OK != status)
             {
                 result = false;
             }
@@ -288,17 +293,19 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
                     if ((attemptWithIPV6 != false && Socket_AddrInfo_IsIPV6(p) != false) ||
                         (attemptWithIPV6 == false && Socket_AddrInfo_IsIPV6(p) == false))
                     {
-                        if (STATUS_OK != Socket_CreateNew(p,
-                                                          true, // Reuse
-                                                          true, // Non blocking socket
-                                                          &freeSocket->sock))
+                        status = Socket_CreateNew(p,
+                                                  true, // Reuse
+                                                  true, // Non blocking socket
+                                                  &freeSocket->sock);
+                        if (SOPC_STATUS_OK != status)
                         {
                             result = false;
                         }
 
                         if (result != false)
                         {
-                            if (STATUS_OK != Socket_Listen(freeSocket->sock, p))
+                            status = Socket_Listen(freeSocket->sock, p);
+                            if (SOPC_STATUS_OK != status)
                             {
                                 result = false;
                             }
@@ -353,7 +360,7 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* socket)
     uint8_t* data = NULL;
     uint32_t count = 0;
     uint32_t sentBytes = 0;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     if (NULL == socket || NULL == socket->writeQueue || socket->sock == SOPC_INVALID_SOCKET ||
         socket->isNotWritable != false)
@@ -365,11 +372,11 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* socket)
     while (writeQueueResult != false && nothingToDequeue == false && writeBlocked == false)
     {
         status = SOPC_AsyncQueue_NonBlockingDequeue(socket->writeQueue, (void**) &buffer);
-        if (OpcUa_BadWouldBlock == status)
+        if (SOPC_STATUS_WOULD_BLOCK == status)
         {
             nothingToDequeue = true;
         }
-        else if (STATUS_OK != status || NULL == buffer)
+        else if (SOPC_STATUS_OK != status || NULL == buffer)
         {
             writeQueueResult = false;
         }
@@ -379,11 +386,11 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* socket)
             data = &(buffer->data[buffer->position]);
             count = buffer->length - buffer->position;
             status = Socket_Write(socket->sock, data, count, &sentBytes);
-            if (OpcUa_BadWouldBlock == status)
+            if (SOPC_STATUS_WOULD_BLOCK == status)
             {
                 writeBlocked = true;
             }
-            else if (STATUS_OK != status)
+            else if (SOPC_STATUS_OK != status)
             {
                 writeQueueResult = false;
                 SOPC_Buffer_Delete(buffer);
@@ -403,7 +410,7 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* socket)
         buffer->position = buffer->position + sentBytes;
         // Re-enqueue in LIFO mode to be the next buffer to treat
         status = SOPC_AsyncQueue_BlockingEnqueueFirstOut(socket->writeQueue, buffer);
-        assert(STATUS_OK == status);
+        assert(SOPC_STATUS_OK == status);
     }
     else
     {
@@ -419,7 +426,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
     SOPC_Socket* socketElt = NULL;
     SOPC_Buffer* buffer = NULL;
     int32_t readBytes = 0;
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     switch (socketEvent)
     {
@@ -520,7 +527,8 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
             // socket state cannot be changed from CONNECTED state by another thread
 
             // Prepare buffer to be written (position set to 0 since it has been written precedently)
-            assert(STATUS_OK == SOPC_Buffer_SetPosition(buffer, 0));
+            status = SOPC_Buffer_SetPosition(buffer, 0);
+            assert(SOPC_STATUS_OK == status);
             // Enqueue message buffer to send
             SOPC_AsyncQueue_BlockingEnqueue(socketElt->writeQueue, params);
             result = true;
@@ -650,15 +658,15 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
         else
         {
-            status = OpcUa_BadOutOfMemory;
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
-        if (status == OpcUa_BadWouldBlock)
+        if (status == SOPC_STATUS_WOULD_BLOCK)
         {
             SOPC_Buffer_Delete(buffer);
             buffer = NULL;
             // wait next ready to read event
         }
-        else if (status == STATUS_OK && readBytes >= 0)
+        else if (SOPC_STATUS_OK == status && readBytes >= 0)
         {
             // Update buffer lengtn
             SOPC_Buffer_SetDataLength(buffer, readBytes);

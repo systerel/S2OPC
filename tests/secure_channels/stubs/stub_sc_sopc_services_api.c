@@ -32,12 +32,12 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event scEvent, uint32_t id, void* 
     scParams->params = params;
     scParams->auxParam = auxParam;
 
-    assert(STATUS_OK == SOPC_AsyncQueue_BlockingEnqueue(servicesEvents, (void*) scParams));
+    assert(SOPC_STATUS_OK == SOPC_AsyncQueue_BlockingEnqueue(servicesEvents, (void*) scParams));
 }
 
 void SOPC_Services_Initialize()
 {
-    assert(STATUS_OK == SOPC_AsyncQueue_Init(&servicesEvents, "StubsSC_ServicesEventQueue"));
+    assert(SOPC_STATUS_OK == SOPC_AsyncQueue_Init(&servicesEvents, "StubsSC_ServicesEventQueue"));
 }
 
 void SOPC_Services_Clear()

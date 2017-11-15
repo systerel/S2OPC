@@ -20,8 +20,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "opcua_statuscodes.h"
-
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 
@@ -34,42 +32,42 @@ struct SOPC_AsyncQueue
     uint32_t waitingThreads;
 };
 
-SOPC_StatusCode SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char* queueName)
+SOPC_ReturnStatus SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char* queueName)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != queue)
     {
         *queue = malloc(sizeof(SOPC_AsyncQueue));
         if (*queue != NULL)
         {
-            status = STATUS_OK;
+            status = SOPC_STATUS_OK;
             (*queue)->debugQueueName = queueName;
             (*queue)->waitingThreads = 0;
             (*queue)->queueList = SOPC_SLinkedList_Create(0);
             if (NULL == (*queue)->queueList)
             {
-                status = STATUS_NOK;
+                status = SOPC_STATUS_NOK;
             }
-            if (STATUS_OK == status)
+            if (SOPC_STATUS_OK == status)
             {
                 status = Condition_Init(&(*queue)->queueCond);
-                if (STATUS_OK != status)
+                if (SOPC_STATUS_OK != status)
                 {
                     SOPC_SLinkedList_Delete((*queue)->queueList);
                     (*queue)->queueList = NULL;
                 }
             }
-            if (STATUS_OK == status)
+            if (SOPC_STATUS_OK == status)
             {
                 status = Mutex_Initialization(&(*queue)->queueMutex);
-                if (STATUS_OK != status)
+                if (SOPC_STATUS_OK != status)
                 {
                     SOPC_SLinkedList_Delete((*queue)->queueList);
                     (*queue)->queueList = NULL;
                     Condition_Clear(&(*queue)->queueCond);
                 }
             }
-            if (STATUS_OK != status)
+            if (SOPC_STATUS_OK != status)
             {
                 free(*queue);
                 *queue = NULL;
@@ -79,14 +77,16 @@ SOPC_StatusCode SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char* queueN
     return status;
 }
 
-static SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQueue* queue, void* element, bool firstOut)
+static SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQueue* queue,
+                                                                    void* element,
+                                                                    bool firstOut)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     void* enqueuedElt = NULL;
     if (NULL != queue && NULL != element)
     {
         status = Mutex_Lock(&queue->queueMutex);
-        if (STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
             if (false == firstOut)
             {
@@ -105,7 +105,7 @@ static SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQueu
             }
             else
             {
-                status = STATUS_NOK;
+                status = SOPC_STATUS_NOK;
             }
             Mutex_Unlock(&queue->queueMutex);
         }
@@ -113,29 +113,29 @@ static SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQueu
     return status;
 }
 
-SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueueFirstOut(SOPC_AsyncQueue* queue, void* element)
+SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueueFirstOut(SOPC_AsyncQueue* queue, void* element)
 {
     return SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(queue, element, true);
 }
 
-SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueue(SOPC_AsyncQueue* queue, void* element)
+SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueue(SOPC_AsyncQueue* queue, void* element)
 {
     return SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(queue, element, false);
 }
 
-static SOPC_StatusCode SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue, bool isBlocking, void** element)
+static SOPC_ReturnStatus SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue, bool isBlocking, void** element)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != queue && NULL != element)
     {
-        status = STATUS_NOK;
+        status = SOPC_STATUS_NOK;
         Mutex_Lock(&queue->queueMutex);
         *element = SOPC_SLinkedList_PopHead(queue->queueList);
         if (NULL == *element)
         {
             if (false == isBlocking)
             {
-                status = OpcUa_BadWouldBlock;
+                status = SOPC_STATUS_WOULD_BLOCK;
             }
             else
             {
@@ -146,25 +146,25 @@ static SOPC_StatusCode SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue, bool isBl
                     Mutex_UnlockAndWaitCond(&queue->queueCond, &queue->queueMutex);
                     *element = SOPC_SLinkedList_PopHead(queue->queueList);
                 }
-                status = STATUS_OK;
+                status = SOPC_STATUS_OK;
                 queue->waitingThreads--;
             }
         }
         else
         {
-            status = STATUS_OK;
+            status = SOPC_STATUS_OK;
         }
         Mutex_Unlock(&queue->queueMutex);
     }
     return status;
 }
 
-SOPC_StatusCode SOPC_AsyncQueue_BlockingDequeue(SOPC_AsyncQueue* queue, void** element)
+SOPC_ReturnStatus SOPC_AsyncQueue_BlockingDequeue(SOPC_AsyncQueue* queue, void** element)
 {
     return SOPC_AsyncQueue_Dequeue(queue, true, element);
 }
 
-SOPC_StatusCode SOPC_AsyncQueue_NonBlockingDequeue(SOPC_AsyncQueue* queue, void** element)
+SOPC_ReturnStatus SOPC_AsyncQueue_NonBlockingDequeue(SOPC_AsyncQueue* queue, void** element)
 {
     return SOPC_AsyncQueue_Dequeue(queue, false, element);
 }

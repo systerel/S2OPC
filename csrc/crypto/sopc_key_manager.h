@@ -48,14 +48,14 @@
  * \param ppKey     A handle to the created key. This object must be freed with a call to
  * KeyManager_AsymmetricKey_Free().
  *
- * \note            Content of the key is unspecified when return value is not STATUS_OK.
+ * \note            Content of the key is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
- *                  and STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* buffer,
-                                                               uint32_t lenBuf,
-                                                               SOPC_AsymmetricKey** ppKey);
+SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* buffer,
+                                                                 uint32_t lenBuf,
+                                                                 SOPC_AsymmetricKey** ppKey);
 
 /**
  * \brief           Creates an asymmetric key (usually a private key) from a file in the DER or PEM format.
@@ -72,15 +72,15 @@ SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* bu
  *                  with at most \p lenPassword non null chars, and at least \p lenPassword + 1 allocated chars.
  * \param lenPassword  The length of the password.
  *
- * \note            Content of the key is unspecified when return value is not STATUS_OK.
+ * \note            Content of the key is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
- *                  and STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPath,
-                                                             SOPC_AsymmetricKey** ppKey,
-                                                             char* password,
-                                                             uint32_t lenPassword);
+SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPath,
+                                                               SOPC_AsymmetricKey** ppKey,
+                                                               char* password,
+                                                               uint32_t lenPassword);
 
 /**
  * \brief           Returns the public key of the signed public key.
@@ -94,13 +94,13 @@ SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPath,
  * must be freed with a call to KeyManager_AsymmetricKey_Free() which will only deallocate the
  * structure.
  *
- * \note            Content of the certificate is unspecified when return value is not STATUS_OK.
+ * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
- *                  and STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC_Certificate* pCert,
-                                                                    SOPC_AsymmetricKey** pKey);
+SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC_Certificate* pCert,
+                                                                      SOPC_AsymmetricKey** pKey);
 
 /**
  * \brief           Frees a previously created asymmetric key created with KeyManager_AsymmetricKey_CreateFromBuffer()
@@ -119,22 +119,22 @@ void SOPC_KeyManager_AsymmetricKey_Free(SOPC_AsymmetricKey* pKey);
  *                  must be provided. A rule of thumb is to provide a buffer which is at least
  *                  8 times longer than the key (8*CryptoProvider_AsymmetricGetLength_KeyBytes()).
  *
- *                  When STATUS_NOK is returned, the function may be called again with a larger buffer.
+ *                  When SOPC_STATUS_NOK is returned, the function may be called again with a larger buffer.
  *
  * \param pKey      A valid pointer to the asymmetric key (public/private) to encode.
  * \param pDest     A valid pointer to the buffer which will receive the DER encoded key.
  * \param lenDest   The length in bytes of the buffer \p pDest.
  * \param pLenWritten  A valid pointer to the number of bytes written to pDest.
  *
- * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
- *                  and STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* pKey,
-                                                    uint8_t* pDest,
-                                                    uint32_t lenDest,
-                                                    uint32_t* pLenWritten);
+SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* pKey,
+                                                      uint8_t* pDest,
+                                                      uint32_t lenDest,
+                                                      uint32_t* pLenWritten);
 
 /* ------------------------------------------------------------------------------------------------
  * Cert API
@@ -151,14 +151,14 @@ SOPC_StatusCode SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* pK
  * \param ppCert    A valid handle to the newly created Certificate.
  *                  This object must be freed with a call to KeyManager_Certificate_Free().
  *
- * \note            Content of the certificate is unspecified when return value is not STATUS_OK.
+ * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
- *                  and STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* bufferDER,
-                                                          uint32_t lenDER,
-                                                          SOPC_Certificate** ppCert);
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* bufferDER,
+                                                            uint32_t lenDER,
+                                                            SOPC_Certificate** ppCert);
 
 /**
  * \brief           Creates a new Certificate (signed public key) from a file in the DER or PEM format.
@@ -170,12 +170,12 @@ SOPC_StatusCode SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* bufferD
  * \param ppCert    A valid handle to the newly created Certificate.
  *                  This object must be freed with a call to KeyManager_Certificate_Free().
  *
- * \note            Content of the certificate is unspecified when return value is not STATUS_OK.
+ * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
- *                  and STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath, SOPC_Certificate** ppCert);
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath, SOPC_Certificate** ppCert);
 
 /**
  * \brief           Frees a Certificate created with KeyManager_Certificate_CreateFromFile() or
@@ -196,14 +196,14 @@ void SOPC_KeyManager_Certificate_Free(SOPC_Certificate* pCert);
  * key. The allocated buffer must be freed by the caller. \param pLenAllocated  A valid pointer to the length allocated
  * by this operation.
  *
- * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
- *                  and STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate* pCert,
-                                                    uint8_t** ppDest,
-                                                    uint32_t* pLenAllocated);
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate* pCert,
+                                                      uint8_t** ppDest,
+                                                      uint32_t* pLenAllocated);
 
 /**
  * \brief           Computes and writes the thumbprint of \p pCert to \p pDest.
@@ -218,14 +218,14 @@ SOPC_StatusCode SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate* pCer
  * \param pDest     A valid pointer to the buffer that will contain the thumbprint.
  * \param lenDest   The length in bytes of \p pDest.
  *
- * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
- *                  and STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider* pProvider,
-                                                          const SOPC_Certificate* pCert,
-                                                          uint8_t* pDest,
-                                                          uint32_t lenDest);
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider* pProvider,
+                                                            const SOPC_Certificate* pCert,
+                                                            uint8_t* pDest,
+                                                            uint32_t lenDest);
 
 #endif /* SOPC_KEY_MANAGER_H_ */

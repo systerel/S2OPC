@@ -38,18 +38,18 @@ void SOPC_Namespace_Initialize(SOPC_NamespaceTable* nsTable)
     }
 }
 
-SOPC_StatusCode SOPC_Namespace_AllocateTable(SOPC_NamespaceTable* nsTable, uint32_t length)
+SOPC_ReturnStatus SOPC_Namespace_AllocateTable(SOPC_NamespaceTable* nsTable, uint32_t length)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (nsTable != NULL)
     {
-        status = STATUS_OK;
+        status = SOPC_STATUS_OK;
         nsTable->clearTable = 1; // True
         nsTable->lastIdx = length - 1;
         nsTable->namespaceArray = malloc(sizeof(SOPC_Namespace) * length);
         if (NULL == nsTable->namespaceArray)
         {
-            status = STATUS_NOK;
+            status = SOPC_STATUS_NOK;
         }
     }
     return status;
@@ -61,7 +61,7 @@ SOPC_NamespaceTable* SOPC_Namespace_CreateTable(uint32_t length)
     if (length - 1 <= UINT16_MAX)
     {
         result = malloc(sizeof(SOPC_NamespaceTable));
-        if (SOPC_Namespace_AllocateTable(result, length) != STATUS_OK && result != NULL)
+        if (SOPC_Namespace_AllocateTable(result, length) != SOPC_STATUS_OK && result != NULL)
         {
             free(result);
             result = NULL;
@@ -70,12 +70,12 @@ SOPC_NamespaceTable* SOPC_Namespace_CreateTable(uint32_t length)
     return result;
 }
 
-SOPC_StatusCode SOPC_Namespace_AttachTable(SOPC_NamespaceTable* dst, SOPC_NamespaceTable* src)
+SOPC_ReturnStatus SOPC_Namespace_AttachTable(SOPC_NamespaceTable* dst, SOPC_NamespaceTable* src)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (dst != NULL && NULL == dst->namespaceArray && src != NULL && src->namespaceArray != NULL)
     {
-        status = STATUS_OK;
+        status = SOPC_STATUS_OK;
         dst->clearTable = false;
         dst->lastIdx = src->lastIdx;
         dst->namespaceArray = src->namespaceArray;
@@ -83,20 +83,22 @@ SOPC_StatusCode SOPC_Namespace_AttachTable(SOPC_NamespaceTable* dst, SOPC_Namesp
     return status;
 }
 
-SOPC_StatusCode SOPC_Namespace_GetIndex(SOPC_NamespaceTable* namespaceTable, const char* namespaceName, uint16_t* index)
+SOPC_ReturnStatus SOPC_Namespace_GetIndex(SOPC_NamespaceTable* namespaceTable,
+                                          const char* namespaceName,
+                                          uint16_t* index)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Namespace namespaceEntry;
     if (namespaceTable != NULL)
     {
         if (NULL == namespaceName)
         {
-            status = STATUS_OK;
+            status = SOPC_STATUS_OK;
             index = OPCUA_NAMESPACE_INDEX;
         }
         else
         {
-            status = STATUS_NOK;
+            status = SOPC_STATUS_NOK;
             uint32_t idx = 0;
             for (idx = 0; idx <= namespaceTable->lastIdx; idx++)
             {
@@ -104,7 +106,7 @@ SOPC_StatusCode SOPC_Namespace_GetIndex(SOPC_NamespaceTable* namespaceTable, con
                 if (SOPC_strncmp_ignore_case(namespaceEntry.namespaceName, namespaceName, strlen(namespaceName) + 1) ==
                     0)
                 {
-                    status = STATUS_OK;
+                    status = SOPC_STATUS_OK;
                     *index = namespaceEntry.namespaceIndex;
                 }
             }

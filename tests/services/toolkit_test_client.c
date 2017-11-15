@@ -132,7 +132,7 @@ int main(void)
 
     constants__t_channel_config_idx_i channel_config_idx = constants__c_channel_config_idx_indet;
 
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     OpcUa_WriteRequest* pWriteReq = NULL;
 
@@ -150,7 +150,7 @@ int main(void)
     {
         // The certificates: load
         status = SOPC_KeyManager_Certificate_CreateFromFile(certificateLocation, &crt_cli);
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to load client certificate\n");
         }
@@ -161,10 +161,10 @@ int main(void)
         }
     }
 
-    if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status)
+    if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
         status = SOPC_KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to load server certificate\n");
         }
@@ -175,11 +175,11 @@ int main(void)
         }
     }
 
-    if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status)
+    if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
         // Private key: load
         status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli, NULL, 0);
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to load private key\n");
         }
@@ -190,10 +190,10 @@ int main(void)
         }
     }
 
-    if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status)
+    if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
         // Certificate Authority: load
-        if (STATUS_OK != SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca))
+        if (SOPC_STATUS_OK != SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca))
         {
             printf(">>Stub_Client: Failed to load CA\n");
         }
@@ -204,9 +204,9 @@ int main(void)
     }
 
     // Init PKI provider with certificate authority
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
-        if (STATUS_OK != SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki))
+        if (SOPC_STATUS_OK != SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki))
         {
             printf(">>Stub_Client: Failed to create PKI\n");
         }
@@ -218,10 +218,10 @@ int main(void)
     }
 
     /* Init stack configuration */
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Toolkit_Initialize(Test_ComEvent_FctClient);
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             printf(">>Test_Client_Toolkit: Failed initializing\n");
         }
@@ -232,11 +232,11 @@ int main(void)
     }
 
     // Set an address space (to could check test result valid)
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         // NECESSARY ONLY FOR TEST PURPOSES: a client should not define an @ space in a nominal case
         status = SOPC_ToolkitServer_SetAddressSpaceConfig(&addressSpace);
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             printf(">>Test_Client_Toolkit: Failed to configure the @ space\n");
         }
@@ -247,7 +247,7 @@ int main(void)
     }
 
     // Configure the secure channel connection to use and retrieve channel configuration index
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
         if (channel_config_idx != constants__c_channel_config_idx_indet)
@@ -256,9 +256,9 @@ int main(void)
         }
         else
         {
-            status = STATUS_NOK;
+            status = SOPC_STATUS_NOK;
         }
-        if (STATUS_OK != status)
+        if (SOPC_STATUS_OK != status)
         {
             printf(">>Test_Client_Toolkit: Failed to configure the secure channel\n");
         }
@@ -269,7 +269,7 @@ int main(void)
     }
 
     /* Asynchronous request to create a session (and underlying secure channel if necessary). */
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx);
         printf(">>Test_Client_Toolkit: Creating/Activating session: OK\n");
@@ -277,7 +277,7 @@ int main(void)
 
     /* Wait until session is activated or timeout */
     loopCpt = 0;
-    while (STATUS_OK == status && sessionActivated == false && sessionClosed == false &&
+    while (SOPC_STATUS_OK == status && sessionActivated == false && sessionClosed == false &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
@@ -287,15 +287,15 @@ int main(void)
 
     if (loopCpt * sleepTimeout > loopTimeout)
     {
-        status = OpcUa_BadTimeout;
+        status = SOPC_STATUS_TIMEOUT;
     }
 
     if (sessionClosed == true)
     {
-        status = STATUS_NOK;
+        status = SOPC_STATUS_NOK;
     }
 
-    if (STATUS_OK == status && sessionActivated != false)
+    if (SOPC_STATUS_OK == status && sessionActivated != false)
     {
         printf(">>Test_Client_Toolkit: Session activated: OK'\n");
     }
@@ -304,7 +304,7 @@ int main(void)
         printf(">>Test_Client_Toolkit: Session activated: NOK'\n");
     }
 
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         /* Create a service request message and send it through session (read service)*/
         // msg freed when sent
@@ -314,7 +314,8 @@ int main(void)
 
     /* Wait until service response is received */
     loopCpt = 0;
-    while (STATUS_OK == status && test_results_get_service_result() == false && loopCpt * sleepTimeout <= loopTimeout)
+    while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
+           loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         SOPC_Sleep(100);
@@ -322,10 +323,10 @@ int main(void)
 
     if (loopCpt * sleepTimeout > loopTimeout)
     {
-        status = OpcUa_BadTimeout;
+        status = SOPC_STATUS_TIMEOUT;
     }
 
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         // Reset expected result
         test_results_set_service_result(false);
@@ -345,7 +346,8 @@ int main(void)
 
     /* Wait until service response is received */
     loopCpt = 0;
-    while (STATUS_OK == status && test_results_get_service_result() == false && loopCpt * sleepTimeout <= loopTimeout)
+    while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
+           loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         SOPC_Sleep(100);
@@ -353,10 +355,10 @@ int main(void)
 
     if (loopCpt * sleepTimeout > loopTimeout)
     {
-        status = OpcUa_BadTimeout;
+        status = SOPC_STATUS_TIMEOUT;
     }
 
-    if (STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         // Reset expected result
         test_results_set_service_result(false);
@@ -370,7 +372,8 @@ int main(void)
 
     /* Wait until service response is received */
     loopCpt = 0;
-    while (STATUS_OK == status && test_results_get_service_result() == false && loopCpt * sleepTimeout <= loopTimeout)
+    while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
+           loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         SOPC_Sleep(100);
@@ -378,7 +381,7 @@ int main(void)
 
     if (loopCpt * sleepTimeout > loopTimeout)
     {
-        status = OpcUa_BadTimeout;
+        status = SOPC_STATUS_TIMEOUT;
     }
 
     /* Now the request can be freed */
@@ -397,7 +400,7 @@ int main(void)
     {
         loopCpt++;
         SOPC_Sleep(100);
-    } while (STATUS_OK == status && sessionClosed == false && loopCpt * sleepTimeout <= loopTimeout);
+    } while (SOPC_STATUS_OK == status && sessionClosed == false && loopCpt * sleepTimeout <= loopTimeout);
 
     SOPC_Toolkit_Clear();
 
@@ -411,7 +414,7 @@ int main(void)
         SOPC_PKIProviderStack_Free(pki);
     }
 
-    if (STATUS_OK == status && test_results_get_service_result() != false)
+    if (SOPC_STATUS_OK == status && test_results_get_service_result() != false)
     {
         printf(">>Test_Client_Toolkit: read request received ! \n");
         printf(">>Test_Client_Toolkit final result: OK\n");

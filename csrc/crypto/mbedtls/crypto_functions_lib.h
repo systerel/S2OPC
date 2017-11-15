@@ -32,52 +32,52 @@
  * Basic256Sha256
  * ------------------------------------------------------------------------------------------------
  */
-SOPC_StatusCode CryptoProvider_SymmEncrypt_AES256(const SOPC_CryptoProvider* pProvider,
-                                                  const uint8_t* pInput,
-                                                  uint32_t lenPlainText,
-                                                  const SOPC_ExposedBuffer* pKey,
-                                                  const SOPC_ExposedBuffer* pIV,
-                                                  uint8_t* pOutput,
-                                                  uint32_t lenOutput);
-SOPC_StatusCode CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* pProvider,
-                                                  const uint8_t* pInput,
-                                                  uint32_t lenCipherText,
-                                                  const SOPC_ExposedBuffer* pKey,
-                                                  const SOPC_ExposedBuffer* pIV,
-                                                  uint8_t* pOutput,
-                                                  uint32_t lenOutput);
-SOPC_StatusCode CryptoProvider_SymmSign_HMAC_SHA256(const SOPC_CryptoProvider* pProvider,
+SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES256(const SOPC_CryptoProvider* pProvider,
                                                     const uint8_t* pInput,
-                                                    uint32_t lenInput,
+                                                    uint32_t lenPlainText,
                                                     const SOPC_ExposedBuffer* pKey,
-                                                    uint8_t* pOutput);
-SOPC_StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const SOPC_CryptoProvider* pProvider,
+                                                    const SOPC_ExposedBuffer* pIV,
+                                                    uint8_t* pOutput,
+                                                    uint32_t lenOutput);
+SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* pProvider,
+                                                    const uint8_t* pInput,
+                                                    uint32_t lenCipherText,
+                                                    const SOPC_ExposedBuffer* pKey,
+                                                    const SOPC_ExposedBuffer* pIV,
+                                                    uint8_t* pOutput,
+                                                    uint32_t lenOutput);
+SOPC_ReturnStatus CryptoProvider_SymmSign_HMAC_SHA256(const SOPC_CryptoProvider* pProvider,
                                                       const uint8_t* pInput,
                                                       uint32_t lenInput,
                                                       const SOPC_ExposedBuffer* pKey,
-                                                      const uint8_t* pSignature);
-SOPC_StatusCode CryptoProvider_GenTrueRnd(const SOPC_CryptoProvider* pProvider,
-                                          SOPC_ExposedBuffer* pData,
-                                          uint32_t lenData);
-SOPC_StatusCode CryptoProvider_DeriveData_PRF_SHA256(const SOPC_CryptoProvider* pProvider,
-                                                     const SOPC_ExposedBuffer* pSecret,
-                                                     uint32_t lenSecret,
-                                                     const SOPC_ExposedBuffer* pSeed,
-                                                     uint32_t lenSeed,
-                                                     SOPC_ExposedBuffer* pOutput,
-                                                     uint32_t lenOutput);
+                                                      uint8_t* pOutput);
+SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA256(const SOPC_CryptoProvider* pProvider,
+                                                        const uint8_t* pInput,
+                                                        uint32_t lenInput,
+                                                        const SOPC_ExposedBuffer* pKey,
+                                                        const uint8_t* pSignature);
+SOPC_ReturnStatus CryptoProvider_GenTrueRnd(const SOPC_CryptoProvider* pProvider,
+                                            SOPC_ExposedBuffer* pData,
+                                            uint32_t lenData);
+SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA256(const SOPC_CryptoProvider* pProvider,
+                                                       const SOPC_ExposedBuffer* pSecret,
+                                                       uint32_t lenSecret,
+                                                       const SOPC_ExposedBuffer* pSeed,
+                                                       uint32_t lenSeed,
+                                                       SOPC_ExposedBuffer* pOutput,
+                                                       uint32_t lenOutput);
 
-SOPC_StatusCode CryptoProvider_AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
-                                                    const uint8_t* pInput,
-                                                    uint32_t lenPlainText,
-                                                    const SOPC_AsymmetricKey* pKey,
-                                                    uint8_t* pOutput);
-SOPC_StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
-                                                    const uint8_t* pInput,
-                                                    uint32_t lenPlainText,
-                                                    const SOPC_AsymmetricKey* pKey,
-                                                    uint8_t* pOutput,
-                                                    uint32_t* pLenWritten);
+SOPC_ReturnStatus CryptoProvider_AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
+                                                      const uint8_t* pInput,
+                                                      uint32_t lenPlainText,
+                                                      const SOPC_AsymmetricKey* pKey,
+                                                      uint8_t* pOutput);
+SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
+                                                      const uint8_t* pInput,
+                                                      uint32_t lenPlainText,
+                                                      const SOPC_AsymmetricKey* pKey,
+                                                      uint8_t* pOutput,
+                                                      uint32_t* pLenWritten);
 /**
  * This one is too up-to-date, don't use (but was tested). As not said by the current security policy, classic stack
  * uses PKCS#1 v1.5 padding, not PSS...
@@ -91,77 +91,77 @@ SOPC_StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* p
  *   applications, and while still appropriate for new applications, a
  *   gradual transition to RSASSA-PSS is encouraged.
  */
-SOPC_StatusCode CryptoProvider_AsymSign_RSASSA_PSS(const SOPC_CryptoProvider* pProvider,
-                                                   const uint8_t* pInput,
-                                                   uint32_t lenInput,
-                                                   const SOPC_AsymmetricKey* pKey,
-                                                   uint8_t* pSignature);
-/**
- * This one is too up-to-date, don't use (but was tested). As not said by the current security policy, classic stack
- * uses PKCS#1 v1.5 padding, not PSS...
- *
- * https://tools.ietf.org/html/rfc3447#section-8
- *   Two signature schemes with appendix are specified in this document:
- *   RSASSA-PSS and RSASSA-PKCS1-v1_5.  Although no attacks are known
- *   against RSASSA-PKCS1-v1_5, in the interest of increased robustness,
- *   RSASSA-PSS is recommended for eventual adoption in new applications.
- *   RSASSA-PKCS1-v1_5 is included for compatibility with existing
- *   applications, and while still appropriate for new applications, a
- *   gradual transition to RSASSA-PSS is encouraged.
- */
-SOPC_StatusCode CryptoProvider_AsymVerify_RSASSA_PSS(const SOPC_CryptoProvider* pProvider,
+SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PSS(const SOPC_CryptoProvider* pProvider,
                                                      const uint8_t* pInput,
                                                      uint32_t lenInput,
                                                      const SOPC_AsymmetricKey* pKey,
-                                                     const uint8_t* pSignature);
+                                                     uint8_t* pSignature);
+/**
+ * This one is too up-to-date, don't use (but was tested). As not said by the current security policy, classic stack
+ * uses PKCS#1 v1.5 padding, not PSS...
+ *
+ * https://tools.ietf.org/html/rfc3447#section-8
+ *   Two signature schemes with appendix are specified in this document:
+ *   RSASSA-PSS and RSASSA-PKCS1-v1_5.  Although no attacks are known
+ *   against RSASSA-PKCS1-v1_5, in the interest of increased robustness,
+ *   RSASSA-PSS is recommended for eventual adoption in new applications.
+ *   RSASSA-PKCS1-v1_5 is included for compatibility with existing
+ *   applications, and while still appropriate for new applications, a
+ *   gradual transition to RSASSA-PSS is encouraged.
+ */
+SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PSS(const SOPC_CryptoProvider* pProvider,
+                                                       const uint8_t* pInput,
+                                                       uint32_t lenInput,
+                                                       const SOPC_AsymmetricKey* pKey,
+                                                       const uint8_t* pSignature);
 
-SOPC_StatusCode CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const SOPC_CryptoProvider* pProvider,
-                                                                  const uint8_t* pInput,
-                                                                  uint32_t lenInput,
-                                                                  const SOPC_AsymmetricKey* pKey,
-                                                                  uint8_t* pSignature);
-SOPC_StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256(const SOPC_CryptoProvider* pProvider,
+SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const SOPC_CryptoProvider* pProvider,
                                                                     const uint8_t* pInput,
                                                                     uint32_t lenInput,
                                                                     const SOPC_AsymmetricKey* pKey,
-                                                                    const uint8_t* pSignature);
+                                                                    uint8_t* pSignature);
+SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256(const SOPC_CryptoProvider* pProvider,
+                                                                      const uint8_t* pInput,
+                                                                      uint32_t lenInput,
+                                                                      const SOPC_AsymmetricKey* pKey,
+                                                                      const uint8_t* pSignature);
 
-SOPC_StatusCode CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const SOPC_CryptoProvider* pCrypto,
-                                                               const SOPC_Certificate* pCert);
+SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const SOPC_CryptoProvider* pCrypto,
+                                                                 const SOPC_Certificate* pCert);
 
 /* ------------------------------------------------------------------------------------------------
  * Basic256
  * ------------------------------------------------------------------------------------------------
  */
 
-SOPC_StatusCode CryptoProvider_SymmSign_HMAC_SHA1(const SOPC_CryptoProvider* pProvider,
-                                                  const uint8_t* pInput,
-                                                  uint32_t lenInput,
-                                                  const SOPC_ExposedBuffer* pKey,
-                                                  uint8_t* pOutput);
-SOPC_StatusCode CryptoProvider_SymmVerify_HMAC_SHA1(const SOPC_CryptoProvider* pProvider,
+SOPC_ReturnStatus CryptoProvider_SymmSign_HMAC_SHA1(const SOPC_CryptoProvider* pProvider,
                                                     const uint8_t* pInput,
                                                     uint32_t lenInput,
                                                     const SOPC_ExposedBuffer* pKey,
-                                                    const uint8_t* pSignature);
-SOPC_StatusCode CryptoProvider_DeriveData_PRF_SHA1(const SOPC_CryptoProvider* pProvider,
-                                                   const SOPC_ExposedBuffer* pSecret,
-                                                   uint32_t lenSecret,
-                                                   const SOPC_ExposedBuffer* pSeed,
-                                                   uint32_t lenSeed,
-                                                   SOPC_ExposedBuffer* pOutput,
-                                                   uint32_t lenOutput);
-SOPC_StatusCode CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1(const SOPC_CryptoProvider* pProvider,
-                                                                const uint8_t* pInput,
-                                                                uint32_t lenInput,
-                                                                const SOPC_AsymmetricKey* pKey,
-                                                                uint8_t* pSignature);
-SOPC_StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1(const SOPC_CryptoProvider* pProvider,
+                                                    uint8_t* pOutput);
+SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA1(const SOPC_CryptoProvider* pProvider,
+                                                      const uint8_t* pInput,
+                                                      uint32_t lenInput,
+                                                      const SOPC_ExposedBuffer* pKey,
+                                                      const uint8_t* pSignature);
+SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA1(const SOPC_CryptoProvider* pProvider,
+                                                     const SOPC_ExposedBuffer* pSecret,
+                                                     uint32_t lenSecret,
+                                                     const SOPC_ExposedBuffer* pSeed,
+                                                     uint32_t lenSeed,
+                                                     SOPC_ExposedBuffer* pOutput,
+                                                     uint32_t lenOutput);
+SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1(const SOPC_CryptoProvider* pProvider,
                                                                   const uint8_t* pInput,
                                                                   uint32_t lenInput,
                                                                   const SOPC_AsymmetricKey* pKey,
-                                                                  const uint8_t* pSignature);
-SOPC_StatusCode CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048(const SOPC_CryptoProvider* pCrypto,
-                                                                    const SOPC_Certificate* pCert);
+                                                                  uint8_t* pSignature);
+SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1(const SOPC_CryptoProvider* pProvider,
+                                                                    const uint8_t* pInput,
+                                                                    uint32_t lenInput,
+                                                                    const SOPC_AsymmetricKey* pKey,
+                                                                    const uint8_t* pSignature);
+SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048(const SOPC_CryptoProvider* pCrypto,
+                                                                      const SOPC_Certificate* pCert);
 
 #endif /* SOPC_CRYPTO_FUNCTIONS_LIB_ */

@@ -79,7 +79,7 @@ void SOPC_CryptoProvider_Free(SOPC_CryptoProvider* pCryptoProvider);
  * \note        The implementation is specific to the chosen cryptographic library.
  * \note        Internal API.
  */
-SOPC_StatusCode SOPC_CryptoProvider_Init(SOPC_CryptoProvider* pCryptoProvider);
+SOPC_ReturnStatus SOPC_CryptoProvider_Init(SOPC_CryptoProvider* pCryptoProvider);
 
 /**
  * \brief       Deinitializes a CryptoProvider context (this process is specific to the chosen cryptographic library).
@@ -88,7 +88,7 @@ SOPC_StatusCode SOPC_CryptoProvider_Init(SOPC_CryptoProvider* pCryptoProvider);
  * \note        The implementation is specific to the chosen cryptographic library.
  * \note        Internal API.
  */
-SOPC_StatusCode SOPC_CryptoProvider_Deinit(SOPC_CryptoProvider* pCryptoProvider);
+SOPC_ReturnStatus SOPC_CryptoProvider_Deinit(SOPC_CryptoProvider* pCryptoProvider);
 
 /* ------------------------------------------------------------------------------------------------
  * CryptoProvider get-length & uris operations
@@ -102,14 +102,14 @@ SOPC_StatusCode SOPC_CryptoProvider_Deinit(SOPC_CryptoProvider* pCryptoProvider)
  *
  * \param pProvider An initialized cryptographic context.
  * \param pLength   A valid pointer to the length in bytes of the key. Its content is unspecified
- *                  when return value is not STATUS_OK.
+ *                  when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
- *                  \p pProvider not correctly initialized, and STATUS_NOK for an unsupported
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized, and SOPC_STATUS_NOK for an unsupported
  *                  security policy.
  */
-SOPC_StatusCode SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(const SOPC_CryptoProvider* pProvider,
-                                                                 uint32_t* pLength);
+SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(const SOPC_CryptoProvider* pProvider,
+                                                                   uint32_t* pLength);
 
 /**
  * \brief           Writes the length in bytes in \p pLengthOut of an encrypted message of \p lengthIn bytes.
@@ -119,14 +119,14 @@ SOPC_StatusCode SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(const SOPC_Cryp
  * \param pProvider An initialized cryptographic context.
  * \param lengthIn  The length in bytes of the message to encrypt.
  * \param pLengthOut  A valid pointer to the length in bytes of the ciphered message. Its content is
- *                  unspecified when return value is not STATUS_OK.
+ *                  unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when given pointers are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when given pointers are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_SymmetricGetLength_Encryption(const SOPC_CryptoProvider* pProvider,
-                                                                  uint32_t lengthIn,
-                                                                  uint32_t* pLengthOut);
+SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Encryption(const SOPC_CryptoProvider* pProvider,
+                                                                    uint32_t lengthIn,
+                                                                    uint32_t* pLengthOut);
 
 /**
  * \brief           Writes the length in bytes in \p pLengthOut of a decrypted message of \p lengthIn bytes.
@@ -136,14 +136,14 @@ SOPC_StatusCode SOPC_CryptoProvider_SymmetricGetLength_Encryption(const SOPC_Cry
  * \param pProvider An initialized cryptographic context.
  * \param lengthIn  The length in bytes of the message to decrypt.
  * \param pLengthOut  A valid pointer to the length in bytes of the deciphered message. Its content is
- *                  unspecified when return value is not STATUS_OK.
+ *                  unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when given pointers are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when given pointers are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_SymmetricGetLength_Decryption(const SOPC_CryptoProvider* pProvider,
-                                                                  uint32_t lengthIn,
-                                                                  uint32_t* pLengthOut);
+SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Decryption(const SOPC_CryptoProvider* pProvider,
+                                                                    uint32_t lengthIn,
+                                                                    uint32_t* pLengthOut);
 
 /**
  * \brief           Writes the length in bytes in \p pLength of the key used for symmetric signature.
@@ -152,25 +152,26 @@ SOPC_StatusCode SOPC_CryptoProvider_SymmetricGetLength_Decryption(const SOPC_Cry
  *
  * \param pProvider An initialized cryptographic context.
  * \param pLength   A valid pointer to the length in bytes of the key. Its content is unspecified
- *                  when return value is not STATUS_OK.
+ *                  when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_SymmetricGetLength_SignKey(const SOPC_CryptoProvider* pProvider, uint32_t* pLength);
+SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_SignKey(const SOPC_CryptoProvider* pProvider,
+                                                                 uint32_t* pLength);
 
 /**
  * \brief           Provides the length in bytes of the symmetric signature message.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pLength   A valid pointer to the length in bytes of the signature message.
- *                  Its content is unspecified when return value is not STATUS_OK.
+ *                  Its content is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_SymmetricGetLength_Signature(const SOPC_CryptoProvider* pProvider,
-                                                                 uint32_t* pLength);
+SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Signature(const SOPC_CryptoProvider* pProvider,
+                                                                   uint32_t* pLength);
 
 /**
  * \brief           Provides the lengths in bytes of the blocks used in the symmetric encryption process.
@@ -184,27 +185,27 @@ SOPC_StatusCode SOPC_CryptoProvider_SymmetricGetLength_Signature(const SOPC_Cryp
  * decryption process.
  *
  * \note            The values held by \p pCipherTextBlockSize and \p pPlainTextBlockSize are unspecified
- *                  when return value is not STATUS_OK.
+ *                  when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_SymmetricGetLength_Blocks(const SOPC_CryptoProvider* pProvider,
-                                                              uint32_t* pCipherTextBlockSize,
-                                                              uint32_t* pPlainTextBlockSize);
+SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Blocks(const SOPC_CryptoProvider* pProvider,
+                                                                uint32_t* pCipherTextBlockSize,
+                                                                uint32_t* pPlainTextBlockSize);
 
 /**
  * \brief           Provides the length in bytes of the SecureChannel nonces used in the symmetric encryption process.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pLenNonce  A valid pointer to the length in bytes of the nonce used by the encryption process.
- *                   Its content is unspecified when return value is not STATUS_OK.
+ *                   Its content is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(const SOPC_CryptoProvider* pProvider,
-                                                                          uint32_t* pLenNonce);
+SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(const SOPC_CryptoProvider* pProvider,
+                                                                            uint32_t* pLenNonce);
 
 /**
  * \brief           Provides the lengths in bytes of the secrets derived from the nonce exchange.
@@ -215,15 +216,15 @@ SOPC_StatusCode SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(const 
  * \param pSymmInitVectorLength  A valid pointer to the length in bytes of the symmetric initialization vector.
  *
  * \note            The values held by \p pSymmCryptoKeyLength, \p pSymmSignKeyLength and \p pSymmInitVectorLength
- *                  are unspecified when return value is not STATUS_OK.
+ *                  are unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_DeriveGetLengths(const SOPC_CryptoProvider* pProvider,
-                                                     uint32_t* pSymmCryptoKeyLength,
-                                                     uint32_t* pSymmSignKeyLength,
-                                                     uint32_t* pSymmInitVectorLength);
+SOPC_ReturnStatus SOPC_CryptoProvider_DeriveGetLengths(const SOPC_CryptoProvider* pProvider,
+                                                       uint32_t* pSymmCryptoKeyLength,
+                                                       uint32_t* pSymmSignKeyLength,
+                                                       uint32_t* pSymmInitVectorLength);
 
 /**
  * \brief           Writes the length in bits in \p pLenKeyBits of the asymmetric key \p pKey.
@@ -234,16 +235,16 @@ SOPC_StatusCode SOPC_CryptoProvider_DeriveGetLengths(const SOPC_CryptoProvider* 
  * \param pProvider An initialized cryptographic context.
  * \param pKey      A valid pointer to an AsymmetricKey.
  * \param pLenKeyBits  A valid pointer to the output length in bits. Its content is unspecified when
- *                  return value is not STATUS_OK.
+ *                  return value is not SOPC_STATUS_OK.
  *
  * \note            The implementation is specific to the chosen cryptographic library.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(const SOPC_CryptoProvider* pProvider,
-                                                                const SOPC_AsymmetricKey* pKey,
-                                                                uint32_t* pLenKeyBits);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(const SOPC_CryptoProvider* pProvider,
+                                                                  const SOPC_AsymmetricKey* pKey,
+                                                                  uint32_t* pLenKeyBits);
 
 /**
  * \brief           Writes the length in bytes in \p pLenKeyBytes of the asymmetric key \p pKey.
@@ -254,30 +255,30 @@ SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(const SOPC_Crypt
  * \param pProvider     An initialized cryptographic context.
  * \param pKey          A valid pointer to an AsymmetricKey.
  * \param pLenKeyBytes  A valid pointer to the output length in bytes. Its content is unspecified when
- *                      return value is not STATUS_OK.
+ *                      return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes(const SOPC_CryptoProvider* pProvider,
-                                                                 const SOPC_AsymmetricKey* pKey,
-                                                                 uint32_t* pLenKeyBytes);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes(const SOPC_CryptoProvider* pProvider,
+                                                                   const SOPC_AsymmetricKey* pKey,
+                                                                   uint32_t* pLenKeyBytes);
 
 /**
  * \brief           Provides the length of the hash used for OAEP encryption/decryption.
  *
  * \note            Internal API.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(const SOPC_CryptoProvider* pProvider,
-                                                                       uint32_t* length);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(const SOPC_CryptoProvider* pProvider,
+                                                                         uint32_t* length);
 
 /**
  * \brief           Provides the length of the hash used for PSS signature/verification.
  *
  * \note            Internal API.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_PSSHashLength(const SOPC_CryptoProvider* pProvider,
-                                                                      uint32_t* length);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_PSSHashLength(const SOPC_CryptoProvider* pProvider,
+                                                                        uint32_t* length);
 
 /**
  * \brief           Provides the lengths in bytes of the messages used in asymmetric encryption process.
@@ -291,13 +292,13 @@ SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_PSSHashLength(const SOPC
  * encryption process. \param pPlainTextBlockSize   An optional pointer to the length in bytes of the ciphered message
  * used by the decryption process.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_Msgs(const SOPC_CryptoProvider* pProvider,
-                                                             const SOPC_AsymmetricKey* pKey,
-                                                             uint32_t* pCipherTextBlockSize,
-                                                             uint32_t* pPlainTextBlockSize);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_Msgs(const SOPC_CryptoProvider* pProvider,
+                                                               const SOPC_AsymmetricKey* pKey,
+                                                               uint32_t* pCipherTextBlockSize,
+                                                               uint32_t* pPlainTextBlockSize);
 
 /**
  * \brief           Provides the maximum length in bytes of a message to be encrypted with a single asymmetric
@@ -310,12 +311,12 @@ SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_Msgs(const SOPC_CryptoPr
  *
  * \note            The implementation is specific to the chosen cryptographic library.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText(const SOPC_CryptoProvider* pProvider,
-                                                                     const SOPC_AsymmetricKey* pKey,
-                                                                     uint32_t* pLenMsg);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText(const SOPC_CryptoProvider* pProvider,
+                                                                       const SOPC_AsymmetricKey* pKey,
+                                                                       uint32_t* pLenMsg);
 
 /**
  * \brief           Provides the length in bytes of a ciphered message to be decrypted with a single asymmetric
@@ -327,12 +328,12 @@ SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText(const SOPC_
  *
  * \note            The implementation is specific to the chosen cryptographic library.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText(const SOPC_CryptoProvider* pProvider,
-                                                                      const SOPC_AsymmetricKey* pKey,
-                                                                      uint32_t* pLenMsg);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText(const SOPC_CryptoProvider* pProvider,
+                                                                        const SOPC_AsymmetricKey* pKey,
+                                                                        uint32_t* pLenMsg);
 
 /** \brief          Calculates the size of the required output buffer to cipher lengthIn bytes through
  *                  asymmetric encryption.
@@ -343,15 +344,15 @@ SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText(const SOPC
  * \param pKey      A valid pointer to an AsymmetricKey.
  * \param lengthIn  The length in bytes of the payload to encrypt.
  * \param pLengthOut  A valid pointer to the length in bytes of the corresponding encrypted payload.
- *                    Its content is unspecified when return value is not STATUS_OK.
+ *                    Its content is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
- *                  \p pProvider not correctly initialized, STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized, SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_Encryption(const SOPC_CryptoProvider* pProvider,
-                                                                   const SOPC_AsymmetricKey* pKey,
-                                                                   uint32_t lengthIn,
-                                                                   uint32_t* pLengthOut);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_Encryption(const SOPC_CryptoProvider* pProvider,
+                                                                     const SOPC_AsymmetricKey* pKey,
+                                                                     uint32_t lengthIn,
+                                                                     uint32_t* pLengthOut);
 
 /**
  * \brief           Calculates the size of the required output buffer to decipher lengthIn bytes through
@@ -363,15 +364,15 @@ SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_Encryption(const SOPC_Cr
  * \param pKey      A valid pointer to an AsymmetricKey.
  * \param lengthIn  The length in bytes of the payload to decrypt.
  * \param pLengthOut  A valid pointer to the length in bytes of the corresponding decrypted payload.
- *                    Its content is unspecified when return value is not STATUS_OK.
+ *                    Its content is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
- *                  \p pProvider not correctly initialized, STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized, SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_Decryption(const SOPC_CryptoProvider* pProvider,
-                                                                   const SOPC_AsymmetricKey* pKey,
-                                                                   uint32_t lengthIn,
-                                                                   uint32_t* pLengthOut);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_Decryption(const SOPC_CryptoProvider* pProvider,
+                                                                     const SOPC_AsymmetricKey* pKey,
+                                                                     uint32_t lengthIn,
+                                                                     uint32_t* pLengthOut);
 
 /**
  * \brief           Calculates the size of the required output buffer to contain the asymmetric signature.
@@ -381,14 +382,14 @@ SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_Decryption(const SOPC_Cr
  * \param pProvider An initialized cryptographic context.
  * \param pKey      A valid pointer to an AsymmetricKey.
  * \param pLength   A valid pointer to the length in bytes of the signature.
- *                  Its content is unspecified when return value is not STATUS_OK.
+ *                  Its content is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
- *                  \p pProvider not correctly initialized, STATUS_NOK when there was an error.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized, SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricGetLength_Signature(const SOPC_CryptoProvider* pProvider,
-                                                                  const SOPC_AsymmetricKey* pKey,
-                                                                  uint32_t* pLength);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_Signature(const SOPC_CryptoProvider* pProvider,
+                                                                    const SOPC_AsymmetricKey* pKey,
+                                                                    uint32_t* pLength);
 
 /**
  * \brief           Returns the URI of the AsymetricSignatureAlgorithm.
@@ -404,13 +405,13 @@ const char* SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(const SOPC_Crypto
  *
  * \param pProvider An initialized cryptographic context.
  * \param pLength   A valid pointer to the length in bytes of the signature.
- *                  Its content is unspecified when return value is not STATUS_OK.
+ *                  Its content is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode SOPC_CryptoProvider_CertificateGetLength_Thumbprint(const SOPC_CryptoProvider* pProvider,
-                                                                    uint32_t* pLength);
+SOPC_ReturnStatus SOPC_CryptoProvider_CertificateGetLength_Thumbprint(const SOPC_CryptoProvider* pProvider,
+                                                                      uint32_t* pLength);
 
 /* ------------------------------------------------------------------------------------------------
  * Symmetric cryptography
@@ -436,19 +437,19 @@ SOPC_StatusCode SOPC_CryptoProvider_CertificateGetLength_Thumbprint(const SOPC_C
  * \param lenOutput The exact length of the ciphered payload. CryptoProvider_SymmetricGetLength_Encryption()
  *                  provides the expected size of this buffer.
  *
- * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error.
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider* pProvider,
-                                                     const uint8_t* pInput,
-                                                     uint32_t lenPlainText,
-                                                     SOPC_SecretBuffer* pKey,
-                                                     SOPC_SecretBuffer* pIV,
-                                                     uint8_t* pOutput,
-                                                     uint32_t lenOutput);
+SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider* pProvider,
+                                                       const uint8_t* pInput,
+                                                       uint32_t lenPlainText,
+                                                       SOPC_SecretBuffer* pKey,
+                                                       SOPC_SecretBuffer* pIV,
+                                                       uint8_t* pOutput,
+                                                       uint32_t lenOutput);
 
 /**
  * \brief           Decrypts a payload \p pInput of \p lenPlainText bytes into a padded deciphered payload \p pOutput.
@@ -471,19 +472,19 @@ SOPC_StatusCode SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider* 
  * \param lenOutput The exact length of the deciphered payload. CryptoProvider_SymmetricGetLength_Decryption()
  *                  provides the expected size of this buffer.
  *
- * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error.
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider* pProvider,
-                                                     const uint8_t* pInput,
-                                                     uint32_t lenCipherText,
-                                                     SOPC_SecretBuffer* pKey,
-                                                     SOPC_SecretBuffer* pIV,
-                                                     uint8_t* pOutput,
-                                                     uint32_t lenOutput);
+SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider* pProvider,
+                                                       const uint8_t* pInput,
+                                                       uint32_t lenCipherText,
+                                                       SOPC_SecretBuffer* pKey,
+                                                       SOPC_SecretBuffer* pIV,
+                                                       uint8_t* pOutput,
+                                                       uint32_t lenOutput);
 
 /**
  * \brief           Signs a payload \p pInput of \p lenInput bytes, writes the signature in \p pOutput of \p lenOutput
@@ -503,18 +504,18 @@ SOPC_StatusCode SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider* 
  * \param lenOutput The exact length of the signature buffer. CryptoProvider_SymmetricGetLength_Signature()
  *                  provides the expected size of this buffer.
  *
- * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error.
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* pProvider,
-                                                  const uint8_t* pInput,
-                                                  uint32_t lenInput,
-                                                  SOPC_SecretBuffer* pKey,
-                                                  uint8_t* pOutput,
-                                                  uint32_t lenOutput);
+SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* pProvider,
+                                                    const uint8_t* pInput,
+                                                    uint32_t lenInput,
+                                                    SOPC_SecretBuffer* pKey,
+                                                    uint8_t* pOutput,
+                                                    uint32_t lenOutput);
 
 /**
  * \brief           Verifies the signature \p pSignature of the payload \p pInput of \p lenInput bytes.
@@ -535,18 +536,18 @@ SOPC_StatusCode SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* pPr
  * \param lenOutput The exact length of the signature buffer. CryptoProvider_SymmetricGetLength_Signature()
  *                  provides the expected size of this buffer.
  *
- * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error.
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_SymmetricVerify(const SOPC_CryptoProvider* pProvider,
-                                                    const uint8_t* pInput,
-                                                    uint32_t lenInput,
-                                                    SOPC_SecretBuffer* pKey,
-                                                    const uint8_t* pSignature,
-                                                    uint32_t lenOutput);
+SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricVerify(const SOPC_CryptoProvider* pProvider,
+                                                      const uint8_t* pInput,
+                                                      uint32_t lenInput,
+                                                      SOPC_SecretBuffer* pKey,
+                                                      const uint8_t* pSignature,
+                                                      uint32_t lenOutput);
 
 /* ------------------------------------------------------------------------------------------------
  * Random and pseudo-random functionalities
@@ -566,15 +567,15 @@ SOPC_StatusCode SOPC_CryptoProvider_SymmetricVerify(const SOPC_CryptoProvider* p
  * \param nBytes    Number of bytes to generate (and length of the created \p ppBuffer).
  * \param ppBuffer  A valid handle to the newly created ExposedBuffer.
  *
- * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error (e.g. no entropy source).
+ *                  and SOPC_STATUS_NOK when there was an error (e.g. no entropy source).
  */
-SOPC_StatusCode SOPC_CryptoProvider_GenerateRandomBytes(const SOPC_CryptoProvider* pProvider,
-                                                        uint32_t nBytes,
-                                                        SOPC_ExposedBuffer** ppBuffer);
+SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomBytes(const SOPC_CryptoProvider* pProvider,
+                                                          uint32_t nBytes,
+                                                          SOPC_ExposedBuffer** ppBuffer);
 
 /**
  * \brief           Generates a single truly random nonce for the SecureChannel creation.
@@ -586,14 +587,14 @@ SOPC_StatusCode SOPC_CryptoProvider_GenerateRandomBytes(const SOPC_CryptoProvide
  * \param pProvider An initialized cryptographic context.
  * \param ppNonce   A valid handle to the newly created SecretBuffer.
  *
- * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error (e.g. no entropy source).
+ *                  and SOPC_STATUS_NOK when there was an error (e.g. no entropy source).
  */
-SOPC_StatusCode SOPC_CryptoProvider_GenerateSecureChannelNonce(const SOPC_CryptoProvider* pProvider,
-                                                               SOPC_SecretBuffer** ppNonce);
+SOPC_ReturnStatus SOPC_CryptoProvider_GenerateSecureChannelNonce(const SOPC_CryptoProvider* pProvider,
+                                                                 SOPC_SecretBuffer** ppNonce);
 
 /**
  * \brief           Generates 4 bytes of truly random data.
@@ -601,13 +602,13 @@ SOPC_StatusCode SOPC_CryptoProvider_GenerateSecureChannelNonce(const SOPC_Crypto
  * \param pProvider An initialized cryptographic context.
  * \param pID       A valid pointer which will contain the random data.
  *
- * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error (e.g. no entropy source).
+ *                  and SOPC_STATUS_NOK when there was an error (e.g. no entropy source).
  */
-SOPC_StatusCode SOPC_CryptoProvider_GenerateRandomID(const SOPC_CryptoProvider* pProvider, uint32_t* pID);
+SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomID(const SOPC_CryptoProvider* pProvider, uint32_t* pID);
 
 /**
  * \brief           Derives pseudo-random data from the randomly generated and shared secrets.
@@ -615,13 +616,13 @@ SOPC_StatusCode SOPC_CryptoProvider_GenerateRandomID(const SOPC_CryptoProvider* 
  * \note            Internal API, use CryptoProvider_DeriveKeySetsClient() or CryptoProvider_DeriveKeySetsServer()
  * instead.
  */
-SOPC_StatusCode SOPC_CryptoProvider_DerivePseudoRandomData(const SOPC_CryptoProvider* pProvider,
-                                                           const SOPC_ExposedBuffer* pSecret,
-                                                           uint32_t lenSecret,
-                                                           const SOPC_ExposedBuffer* pSeed,
-                                                           uint32_t lenSeed,
-                                                           SOPC_ExposedBuffer* pOutput,
-                                                           uint32_t lenOutput);
+SOPC_ReturnStatus SOPC_CryptoProvider_DerivePseudoRandomData(const SOPC_CryptoProvider* pProvider,
+                                                             const SOPC_ExposedBuffer* pSecret,
+                                                             uint32_t lenSecret,
+                                                             const SOPC_ExposedBuffer* pSeed,
+                                                             uint32_t lenSeed,
+                                                             SOPC_ExposedBuffer* pOutput,
+                                                             uint32_t lenOutput);
 
 /**
  * \brief           Derive pseudo-random key sets from the randomly generated and shared secrets.
@@ -638,19 +639,19 @@ SOPC_StatusCode SOPC_CryptoProvider_DerivePseudoRandomData(const SOPC_CryptoProv
  * derived data. \param pServerKeySet     A valid pointer to a pre-allocated SC_SecurityKeySet which will contain the
  * server side derived data.
  *
- * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ * \note            Contents of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error.
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_DeriveKeySets(const SOPC_CryptoProvider* pProvider,
-                                                  const SOPC_ExposedBuffer* pClientNonce,
-                                                  uint32_t lenClientNonce,
-                                                  const SOPC_ExposedBuffer* pServerNonce,
-                                                  uint32_t lenServerNonce,
-                                                  SOPC_SC_SecurityKeySet* pClientKeySet,
-                                                  SOPC_SC_SecurityKeySet* pServerKeySet);
+SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySets(const SOPC_CryptoProvider* pProvider,
+                                                    const SOPC_ExposedBuffer* pClientNonce,
+                                                    uint32_t lenClientNonce,
+                                                    const SOPC_ExposedBuffer* pServerNonce,
+                                                    uint32_t lenServerNonce,
+                                                    SOPC_SC_SecurityKeySet* pClientKeySet,
+                                                    SOPC_SC_SecurityKeySet* pServerKeySet);
 
 /**
  * \brief           Derive pseudo-random key sets from the randomly generated and shared secrets.
@@ -666,18 +667,18 @@ SOPC_StatusCode SOPC_CryptoProvider_DeriveKeySets(const SOPC_CryptoProvider* pPr
  * derived data. \param pServerKeySet     A valid pointer to a pre-allocated SC_SecurityKeySet which will contain the
  * server side derived data.
  *
- * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ * \note            Contents of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error.
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_DeriveKeySetsClient(const SOPC_CryptoProvider* pProvider, // DeriveKeySets
-                                                        SOPC_SecretBuffer* pClientNonce,
-                                                        const SOPC_ExposedBuffer* pServerNonce,
-                                                        uint32_t lenServerNonce,
-                                                        SOPC_SC_SecurityKeySet* pClientKeySet,
-                                                        SOPC_SC_SecurityKeySet* pServerKeySet);
+SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySetsClient(const SOPC_CryptoProvider* pProvider, // DeriveKeySets
+                                                          SOPC_SecretBuffer* pClientNonce,
+                                                          const SOPC_ExposedBuffer* pServerNonce,
+                                                          uint32_t lenServerNonce,
+                                                          SOPC_SC_SecurityKeySet* pClientKeySet,
+                                                          SOPC_SC_SecurityKeySet* pServerKeySet);
 
 /**
  * \brief           Derive pseudo-random key sets from the randomly generated and shared secrets.
@@ -693,18 +694,18 @@ SOPC_StatusCode SOPC_CryptoProvider_DeriveKeySetsClient(const SOPC_CryptoProvide
  * derived data. \param pServerKeySet     A valid pointer to a pre-allocated SC_SecurityKeySet which will contain the
  * server side derived data.
  *
- * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ * \note            Contents of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error.
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_DeriveKeySetsServer(const SOPC_CryptoProvider* pProvider,
-                                                        const SOPC_ExposedBuffer* pClientNonce,
-                                                        uint32_t lenClientNonce,
-                                                        SOPC_SecretBuffer* pServerNonce,
-                                                        SOPC_SC_SecurityKeySet* pClientKeySet,
-                                                        SOPC_SC_SecurityKeySet* pServerKeySet);
+SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySetsServer(const SOPC_CryptoProvider* pProvider,
+                                                          const SOPC_ExposedBuffer* pClientNonce,
+                                                          uint32_t lenClientNonce,
+                                                          SOPC_SecretBuffer* pServerNonce,
+                                                          SOPC_SC_SecurityKeySet* pClientKeySet,
+                                                          SOPC_SC_SecurityKeySet* pServerKeySet);
 
 /* ------------------------------------------------------------------------------------------------
  * Asymmetric cryptography
@@ -732,18 +733,18 @@ SOPC_StatusCode SOPC_CryptoProvider_DeriveKeySetsServer(const SOPC_CryptoProvide
  * \param lenOutput The exact length of the ciphered payload. CryptoProvider_AsymmetricGetLength_Encryption()
  *                  provides the expected size of this buffer.
  *
- * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ * \note            Contents of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error.
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvider* pProvider,
-                                                      const uint8_t* pInput,
-                                                      uint32_t lenInput,
-                                                      const SOPC_AsymmetricKey* pKey,
-                                                      uint8_t* pOutput,
-                                                      uint32_t lenOutput);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvider* pProvider,
+                                                        const uint8_t* pInput,
+                                                        uint32_t lenInput,
+                                                        const SOPC_AsymmetricKey* pKey,
+                                                        uint8_t* pOutput,
+                                                        uint32_t lenOutput);
 
 /**
  * \brief           Decrypts a payload \p pInput of \p lenInput bytes.
@@ -769,19 +770,19 @@ SOPC_StatusCode SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvider*
  * \param pLenWritten  An optional pointer to the length in bytes that are written to the \p pOutput buffer.
  *                     Useful to determine the actual size of the plain text.
  *
- * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ * \note            Contents of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error.
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvider* pProvider,
-                                                      const uint8_t* pInput,
-                                                      uint32_t lenInput,
-                                                      const SOPC_AsymmetricKey* pKey,
-                                                      uint8_t* pOutput,
-                                                      uint32_t lenOutput,
-                                                      uint32_t* pLenWritten);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvider* pProvider,
+                                                        const uint8_t* pInput,
+                                                        uint32_t lenInput,
+                                                        const SOPC_AsymmetricKey* pKey,
+                                                        uint8_t* pOutput,
+                                                        uint32_t lenOutput,
+                                                        uint32_t* pLenWritten);
 
 /**
  * \brief           Signs a payload \p pInput of \p lenInput bytes.
@@ -809,18 +810,18 @@ SOPC_StatusCode SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvider*
  * The exact length of the signature payload. CryptoProvider_AsymmetricGetLength_Signature() provides the expected size
  * of this buffer.
  *
- * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ * \note            Contents of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error (e.g. no entropy source).
+ *                  and SOPC_STATUS_NOK when there was an error (e.g. no entropy source).
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* pProvider,
-                                                   const uint8_t* pInput,
-                                                   uint32_t lenInput,
-                                                   const SOPC_AsymmetricKey* pKeyPrivateLocal,
-                                                   uint8_t* pSignature,
-                                                   uint32_t lenSignature);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* pProvider,
+                                                     const uint8_t* pInput,
+                                                     uint32_t lenInput,
+                                                     const SOPC_AsymmetricKey* pKeyPrivateLocal,
+                                                     uint8_t* pSignature,
+                                                     uint32_t lenSignature);
 
 /**
  * \brief           Verifies the signature \p pSignature of a payload \p pInput of \p lenInput bytes.
@@ -844,18 +845,18 @@ SOPC_StatusCode SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* pP
  * lenSignature The exact length of the signature payload. CryptoProvider_AsymmetricGetLength_Signature() provides the
  * expected size of this buffer.
  *
- * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ * \note            Contents of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error.
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider* pProvider,
-                                                     const uint8_t* pInput,
-                                                     uint32_t lenInput,
-                                                     const SOPC_AsymmetricKey* pKeyRemotePublic,
-                                                     const uint8_t* pSignature,
-                                                     uint32_t lenSignature);
+SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider* pProvider,
+                                                       const uint8_t* pInput,
+                                                       uint32_t lenInput,
+                                                       const SOPC_AsymmetricKey* pKeyRemotePublic,
+                                                       const uint8_t* pSignature,
+                                                       uint32_t lenSignature);
 
 /* ------------------------------------------------------------------------------------------------
  * Certificate validation
@@ -876,14 +877,14 @@ SOPC_StatusCode SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider* 
  * \param pPKI      An initialized public key infrastructure (PKIProvider).
  * \param pCert     A valid pointer to the Certificate to validate.
  *
- * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ * \note            Contents of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error.
+ *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_StatusCode SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProvider* pProvider,
-                                                         const SOPC_PKIProvider* pPKI,
-                                                         const SOPC_Certificate* pCert);
+SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProvider* pProvider,
+                                                           const SOPC_PKIProvider* pPKI,
+                                                           const SOPC_Certificate* pCert);
 
 #endif /* SOPC_CRYPTO_PROVIDER_H_ */
