@@ -672,8 +672,7 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
         *status = OpcUa_BadServiceUnsupported;
         break;
     default:
-        printf("util_message__B_to_C_status_code\n");
-        exit(1);
+        *status = OpcUa_BadInternalError;
     }
 }
 

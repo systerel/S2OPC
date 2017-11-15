@@ -239,6 +239,8 @@ OPERATIONS
                     // session token was not correct => return error
                     service_ret := e_sc_bad_session_id_invalid
                 END
+            ELSE
+                service_ret := e_sc_bad_service_unsupported
             END
         END
     END
