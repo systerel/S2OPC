@@ -301,22 +301,22 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- alloc_write_request_responses(nb_req) =
+    bret <-- alloc_write_request_responses(nb_req) =
     PRE
         nb_req : NAT &
         ResponseWrite_allocated = FALSE
     THEN
-        StatusCode_service,
+        bret,
         ResponseWrite_StatusCode,
         ResponseWrite_allocated
         :(
-            StatusCode_service : t_StatusCode_i &
-            StatusCode_service : t_StatusCode &
+            bret : BOOL &
             ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
             ResponseWrite_allocated : BOOL &
             (ResponseWrite_allocated = FALSE
              =>
-             ResponseWrite_StatusCode = {})
+             ResponseWrite_StatusCode = {}) &
+            bret = ResponseWrite_allocated
         )
     END
     ;

@@ -43,7 +43,7 @@ OPERATIONS
             ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
             (ResponseWrite_allocated = TRUE
              =>
-             ResponseWrite_StatusCode = cast_t_WriteValue[1..nb_req] * {e_sc_nok}) &
+             ResponseWrite_StatusCode = cast_t_WriteValue[1..nb_req] * {e_sc_bad_internal_error}) &
             (ResponseWrite_allocated = FALSE
              =>
              ResponseWrite_StatusCode = ResponseWrite_StatusCode$0)

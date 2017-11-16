@@ -671,6 +671,9 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_service_unsupported:
         *status = OpcUa_BadServiceUnsupported;
         break;
+    case constants__e_sc_bad_write_not_supported:
+        *status = OpcUa_BadWriteNotSupported;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -736,6 +739,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         break;
     case OpcUa_BadServiceUnsupported:
         *bstatus = constants__e_sc_bad_service_unsupported;
+        break;
+    case OpcUa_BadWriteNotSupported:
+        *bstatus = constants__e_sc_bad_write_not_supported;
         break;
     default:
         // Not identified status code

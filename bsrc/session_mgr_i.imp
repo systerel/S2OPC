@@ -79,8 +79,9 @@ OPERATIONS
         l_session_channel,
         l_resp_status,
         l_session_user,
-        l_ret
+        l_bret
     IN
+        l_bret := FALSE;
         l_session <-- client_get_session_and_remove_request_handle (req_handle);
         l_session_state <-- get_session_state_or_closed (l_session); // Note: state != closed => session is valid
         l_resp_status <-- read_msg_resp_header_service_status (resp_header);
@@ -92,7 +93,7 @@ OPERATIONS
                         l_session_channel <-- get_session_channel (l_session);
                         IF l_session_channel = channel THEN
                             l_session_token <-- read_create_session_msg_session_token (resp_msg);
-                            l_ret <-- client_create_session_resp_sm (channel, l_session, l_session_token, resp_msg);
+                            l_bret <-- client_create_session_resp_sm (channel, l_session, l_session_token, resp_msg);
                             /* TODO: react if error: must drop the nonce, but do we close the connexion? */
                             // If session is created, trigger event for activation of session with async data
                             l_session_state <-- get_session_state_or_closed (l_session);
@@ -102,16 +103,19 @@ OPERATIONS
                                 IF l_session_user /= c_user_indet
                                 THEN
                                     client_gen_activate_user_session_internal_event (l_session, l_session_user)
-                                END
+                                END;
+                                l_bret := TRUE
                             ELSE
                                 /* The session may be not e_session_created when Nonce generation failed */
-                                l_ret := e_sc_bad_out_of_memory
+                                l_bret := FALSE
                             END
                         ELSE
-                            l_ret := e_sc_bad_secure_channel_id_invalid
+                            /* Bad secure channel */
+                            skip
                         END
                     ELSE
-                        l_ret := e_sc_bad_invalid_state
+                        /* Session invalid state */
+                        skip
                     END
                 OR e_msg_session_activate_resp THEN
                     IF l_session_state = e_session_userActivating or
@@ -119,12 +123,14 @@ OPERATIONS
                     THEN
                         l_session_channel <-- get_session_channel (l_session);
                         IF l_session_channel = channel THEN	
-                            l_ret <-- client_activate_session_resp_sm (channel, l_session, resp_msg)
+                            l_bret <-- client_activate_session_resp_sm (channel, l_session, resp_msg)
                         ELSE
-                            l_ret := e_sc_bad_secure_channel_id_invalid
+                            /* Bad secure channel */
+                            skip
                         END
                     ELSE
-                        l_ret := e_sc_bad_invalid_state
+                        /* Session invalid state */
+                        skip
                     END
                 OR e_msg_session_close_resp THEN
                     IF l_session_state = e_session_closing
@@ -133,23 +139,28 @@ OPERATIONS
                         IF l_session_channel = channel THEN
                             client_remove_all_request_handles (l_session);
                             client_close_session_resp_sm (channel, l_session, resp_msg);
-                            l_ret := e_sc_ok
+                            l_bret := TRUE
                         ELSE
-                            l_ret := e_sc_bad_secure_channel_id_invalid
+                            /* Bad secure channel */
+                            skip
                         END
                     ELSE
-                        l_ret := e_sc_bad_invalid_state
+                        /* Session invalid state */
+                        skip
                     END
+                OR e_msg_session_cancel_resp THEN
+                    /* Service not supported */
+                    skip
                 ELSE
-                    /* Note: PRE guarantee it will not be the case */
-                    l_ret := e_sc_bad_unexpected_error
+                    /* Service unknown */
+                    skip
                 END
             END
         ELSE
-             // Reponse error => session will be closed
-            l_ret := l_resp_status
+            // Reponse error => session will be closed
+            skip
         END;
-        IF l_ret /= e_sc_ok THEN
+        IF l_bret = FALSE THEN
             client_close_session_sm (session)
         END;
         session := l_session
@@ -367,13 +378,14 @@ OPERATIONS
     END
     ;
     
-    ret <-- client_create_session_req (session, channel, req_handle, create_req_msg) = 
+    bret <-- client_create_session_req (session, channel, req_handle, create_req_msg) = 
     VAR
         l_valid_session,
         l_session_state,
         l_valid,
-        l_ret
+        l_bret
     IN
+        l_bret := FALSE;
         l_valid_session <-- is_valid_session (session);
         l_session_state <-- get_session_state_or_closed (session);
         IF l_valid_session = TRUE
@@ -383,17 +395,20 @@ OPERATIONS
                 l_valid <-- client_create_session_req_sm (session, channel, create_req_msg);
                 IF l_valid = TRUE THEN
                     client_add_session_request_handle (session, req_handle);
-                    l_ret := e_sc_ok
+                    l_bret := TRUE
                 ELSE
-                    l_ret := e_sc_nok
+                    /* Create session request data failed */
+                    skip
                 END
             ELSE
-                l_ret := e_sc_bad_invalid_state
+                /* Session invalid state */
+                skip
             END
         ELSE
-            l_ret := e_sc_bad_invalid_argument
+            /* Session invalid */
+            skip
         END;
-        ret := l_ret
+        bret := l_bret
     END;
     
     bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user) =

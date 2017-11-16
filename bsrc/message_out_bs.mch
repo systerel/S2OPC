@@ -263,7 +263,8 @@ OPERATIONS
         skip
     END
     ;
-
+    
+    /* ret is status code of get_endpoints-ish service for create session response */
     ret <-- write_create_session_msg_server_endpoints (req_msg, resp_msg, endpoint_config_idx) =
     PRE
         req_msg : t_msg_i &
@@ -280,7 +281,7 @@ OPERATIONS
     END
     ;
 
-    sc <-- write_create_session_resp_msg_crypto(p_msg, p_channel_config_idx, p_nonce, p_signature) =
+    bret <-- write_create_session_resp_msg_crypto(p_msg, p_channel_config_idx, p_nonce, p_signature) =
     PRE
         p_msg : t_msg_i &
         p_msg = c_msg_out &
@@ -292,10 +293,7 @@ OPERATIONS
         p_signature : t_SignatureData_i &
         p_signature : t_SignatureData
     THEN
-        sc :(
-            sc : t_StatusCode_i &
-            sc : t_StatusCode
-        )
+        bret :: BOOL
     END
     ;
 
@@ -315,7 +313,7 @@ OPERATIONS
     END
     ;
     
-    sc <-- write_activate_session_req_msg_crypto(activate_req_msg, signature) =
+    bret <-- write_activate_session_req_msg_crypto(activate_req_msg, signature) =
     PRE
         activate_req_msg : t_msg_i &
         activate_req_msg = c_msg_out &
@@ -324,10 +322,7 @@ OPERATIONS
         signature : t_SignatureData_i &
         signature : t_SignatureData
     THEN
-        sc :(
-            sc : t_StatusCode_i &
-            sc : t_StatusCode
-        )
+        bret :: BOOL
     END
     ;
     

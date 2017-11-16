@@ -82,30 +82,33 @@ OPERATIONS
     END
     ;
 
-    isvalid, nid, aid, value <-- getall_WriteValue(wvi) =
+    isvalid, status, nid, aid, value <-- getall_WriteValue(wvi) =
     PRE
         wvi : t_WriteValue_i &
         wvi : cast_t_WriteValue[1..nb_WriteValue]
     THEN
-        isvalid := bool(wvi : dom(WriteValue_NodeId) &
-                        wvi : dom(WriteValue_AttributeId) &
-                        wvi : dom(WriteValue_Value)) ||
         IF wvi : dom(WriteValue_NodeId) &
-           wvi : dom(WriteValue_AttributeId) &
-           wvi : dom(WriteValue_Value)
+            wvi : dom(WriteValue_AttributeId) &
+            wvi : dom(WriteValue_Value)
         THEN
-            nid,
-            aid,
-            value
-            :(
-                nid : t_NodeId_i &
-                nid = WriteValue_NodeId(wvi) &
-                aid : t_AttributeId_i &
-                aid = WriteValue_AttributeId(wvi) &
-                value : t_Variant_i &
-                value = WriteValue_Value(wvi)
-            )
+            IF WriteValue_AttributeId(wvi) : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value} THEN
+                isvalid := TRUE ||
+                status :: t_StatusCode_i ||
+                nid,
+                aid,
+                value :(nid : t_NodeId_i  & nid = WriteValue_NodeId(wvi) &     
+                        aid : t_AttributeId_i & aid = WriteValue_AttributeId(wvi) &
+                        value : t_Variant_i & value = WriteValue_Value(wvi))
+            ELSE
+                isvalid := FALSE ||
+                status := e_sc_bad_attribute_id_invalid ||
+                nid := WriteValue_NodeId(wvi) ||
+                aid := WriteValue_AttributeId(wvi) ||
+                value := WriteValue_Value(wvi)
+            END
         ELSE
+            isvalid := FALSE ||
+            status := e_sc_bad_internal_error ||
             nid :: t_NodeId_i ||
             aid :: t_AttributeId_i ||
             value :: t_Variant_i

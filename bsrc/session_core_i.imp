@@ -139,7 +139,8 @@ OPERATIONS
         l_valid_crypto,
         l_signature,
         l_nonce,
-        l_secpol
+        l_secpol,
+        l_bret
     IN
         service_ret := e_sc_bad_out_of_memory;
         l_nsession <-- init_new_session;
@@ -166,7 +167,10 @@ OPERATIONS
                         l_valid_crypto, l_signature <-- server_create_session_req_do_crypto(l_nsession, create_req_msg, l_endpoint_config_idx, l_config_idx);
                         IF  l_valid_crypto = TRUE THEN
                             l_nonce <-- get_NonceServer(l_nsession);
-                            service_ret <-- write_create_session_resp_msg_crypto(create_resp_msg, l_config_idx, l_nonce, l_signature)
+                            l_bret <-- write_create_session_resp_msg_crypto(create_resp_msg, l_config_idx, l_nonce, l_signature);
+                            IF l_bret = FALSE THEN
+                                service_ret := e_sc_bad_unexpected_error
+                            END
                         ELSE
                             /* TODO: add bad security check failed error and use it instead */
                             service_ret := e_sc_bad_unexpected_error
@@ -185,7 +189,7 @@ OPERATIONS
     END
     ;
 
-    ret <-- client_create_session_resp_sm (channel, session, session_token, create_resp_msg) =
+    bret <-- client_create_session_resp_sm (channel, session, session_token, create_resp_msg) =
     VAR
         l_nonce,
         l_valid,
@@ -195,7 +199,7 @@ OPERATIONS
         /* TODO: check Request:handle == Response:handle ; Response:Cert_server == Cert_server */
         /* TODO? check Response:serverEndpoints */
         /* Check server signature */
-        ret := e_sc_ok;
+        bret := TRUE;
         l_secpol <-- get_SecurityPolicy(channel);
         IF l_secpol /= e_secpol_None THEN
             /* Note: receiving a request implies that we sent it, and Nonce, if needed, was valid, hence get_NonceClient cannot fail. */
@@ -209,7 +213,7 @@ OPERATIONS
                 client_set_session_token (session, session_token);
                 drop_NonceClient(session)
             ELSE
-                ret := e_sc_nok
+                bret := FALSE
             END
         ELSE
             set_session_state (session, e_session_created);
@@ -225,7 +229,8 @@ OPERATIONS
         l_secpol,
         l_valid_crypto,
         l_signature,
-        l_server_nonce
+        l_server_nonce,
+        l_bret
     IN
         channel <-- get_session_channel (session);
         l_is_connected_channel <-- is_connected_channel(channel);
@@ -241,7 +246,12 @@ OPERATIONS
                 // TODO: validate server nonce ? Or guaranteed by session state ?
                 l_valid_crypto, l_signature <-- client_activate_session_req_do_crypto(session, l_channel_config_idx, l_server_nonce);
                 IF l_valid_crypto = TRUE THEN
-                    ret <-- write_activate_session_req_msg_crypto(activate_req_msg, l_signature)
+                    l_bret <-- write_activate_session_req_msg_crypto(activate_req_msg, l_signature);
+                    IF l_bret = TRUE THEN
+                        ret := e_sc_ok
+                    ELSE
+                        ret := e_sc_bad_unexpected_error
+                    END
                 ELSE
                     /* TODO: add bad security check failed error and use it instead */
                     ret := e_sc_bad_unexpected_error
@@ -349,7 +359,7 @@ OPERATIONS
     END
     ;
 
-    ret <-- client_activate_session_resp_sm (channel , session, activate_resp_msg) =
+    bret <-- client_activate_session_resp_sm (channel , session, activate_resp_msg) =
     VAR
         l_channel_config_idx,
         l_valid_response
@@ -361,9 +371,9 @@ OPERATIONS
         IF l_valid_response = TRUE 
         THEN
             set_session_state (session, e_session_userActivated);
-            ret := e_sc_ok
+            bret := TRUE
         ELSE
-            ret := e_sc_nok
+            bret := FALSE
         END
     END
     ;

@@ -72,9 +72,7 @@ OPERATIONS
         req_handle : s_request_handle &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
-        a_msg_in_type : {e_msg_session_create_resp,
-            e_msg_session_activate_resp,
-            e_msg_session_close_resp} &
+        a_msg_in_type : s_session_treatment_resps &
         resp_header : t_msg_header_i &
         resp_header = c_msg_in_header &
         c_msg_in_header : t_msg_header &
@@ -196,7 +194,7 @@ OPERATIONS
     END
     ;
     
-    ret <-- client_create_session_req (session, channel, req_handle, create_req_msg) = 
+    bret <-- client_create_session_req (session, channel, req_handle, create_req_msg) = 
     PRE
         session : t_session_i &
         channel : t_channel_i &
@@ -208,7 +206,7 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_create_req
     THEN
-        ret :: {e_sc_bad_invalid_argument, e_sc_bad_invalid_state, e_sc_bad_out_of_memory, e_sc_ok}
+        bret :: BOOL
     END
     ;
     

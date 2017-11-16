@@ -210,16 +210,19 @@ OPERATIONS
 
     StatusCode_service <-- treat_write_request(write_msg) =
     VAR
-        l_nb_req
+        l_nb_req,
+        l_bret
     IN
         StatusCode_service <-- decode_write_request(write_msg);
         IF StatusCode_service = e_sc_ok
         THEN
             l_nb_req <-- get_nb_WriteValue;
-            StatusCode_service <-- alloc_write_request_responses(l_nb_req);
-            IF StatusCode_service = e_sc_ok
+            l_bret <-- alloc_write_request_responses(l_nb_req);
+            IF l_bret = TRUE
             THEN
                 StatusCode_service <-- treat_write_request_WriteValues
+            ELSE
+                StatusCode_service := e_sc_bad_out_of_memory
             END
         END;
         free_write_request
@@ -634,7 +637,7 @@ OPERATIONS
         l_valid_msg,
         l_buffer,
         l_valid_buffer,
-        l_ret
+        l_bret
     IN
         l_buffer := c_byte_buffer_indet;
         l_msg_header, l_req_msg <-- alloc_req_msg (e_msg_session_create_req);
@@ -647,8 +650,8 @@ OPERATIONS
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle  = TRUE
             THEN
-                l_ret <-- client_create_session_req (session, channel, l_req_handle, l_req_msg);
-                IF l_ret = e_sc_ok
+                l_bret <-- client_create_session_req (session, channel, l_req_handle, l_req_msg);
+                IF l_bret = TRUE
                 THEN
                     write_msg_out_header_req_handle (l_msg_header, l_req_handle);
                     l_buffer <-- encode_msg (e_msg_session_create_req, l_msg_header, l_req_msg);

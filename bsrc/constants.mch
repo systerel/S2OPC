@@ -43,7 +43,7 @@ SETS
                        e_aid_DisplayName,
                        e_aid_Description,
                        e_aid_Value};
-    t_StatusCode_i = {c_StatusCode_indet, e_sc_ok, e_sc_nok,
+    t_StatusCode_i = {c_StatusCode_indet, e_sc_ok, e_sc_bad_internal_error,
                       e_sc_bad_secure_channel_closed,
                       e_sc_bad_secure_channel_id_invalid,
                       e_sc_bad_connection_closed,
@@ -60,7 +60,8 @@ SETS
                       e_sc_bad_node_id_unknown,
                       e_sc_bad_node_id_invalid,
                       e_sc_bad_attribute_id_invalid,
-                      e_sc_bad_service_unsupported};
+                      e_sc_bad_service_unsupported,
+                      e_sc_bad_write_not_supported};
 
     t_BrowseDirection_i = {e_bd_indet,
                            e_bd_forward,
@@ -331,19 +332,7 @@ PROPERTIES
     c_Reference_indet : t_Reference_i &
     c_Reference_indet /: t_Reference &
 
-    t_StatusCode = {e_sc_ok, e_sc_nok,
-                      e_sc_bad_secure_channel_closed,
-                      e_sc_bad_connection_closed,
-                      e_sc_bad_invalid_state,
-                      e_sc_bad_session_id_invalid,
-                      e_sc_bad_session_closed,
-                      e_sc_bad_identity_token_invalid,
-                      e_sc_bad_encoding_error,
-                      e_sc_bad_invalid_argument,
-                      e_sc_bad_unexpected_error,
-                      e_sc_bad_out_of_memory,
-                      e_sc_bad_nothing_to_do,
-                      e_sc_bad_too_many_ops} &
+    t_StatusCode = t_StatusCode_i - {c_StatusCode_indet} &
 
     t_BrowseDirection = {e_bd_forward,
                          e_bd_inverse,

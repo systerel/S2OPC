@@ -55,14 +55,16 @@ INITIALISATION
 LOCAL_OPERATIONS
     /* Outer treat operation. Validates isvalid, asks for uid on (nid, aid),
        calls treat_write_2 which effectively records the write. */
-    sc <-- treat_write_1(isvalid, nid, aid, value) =
+    sc <-- treat_write_1(isvalid, status, nid, aid, value) =
     PRE
         isvalid : BOOL &
+        status : t_StatusCode_i &
         nid : t_NodeId_i &
         aid : t_AttributeId_i &
         value : t_Variant_i &
         (isvalid = TRUE
-         =>
+            =>
+         status : t_StatusCode &
          nid : t_NodeId &
          aid : t_AttributeId &
          value : t_Variant) &
@@ -76,6 +78,7 @@ LOCAL_OPERATIONS
             sc : t_StatusCode &
             a_Value : t_Node +-> t_Variant &
             (isvalid = TRUE &
+             status : t_StatusCode_i &
              nid : ran(a_NodeId) &
              aid = e_aid_Value &
              a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable
@@ -84,11 +87,13 @@ LOCAL_OPERATIONS
              sc = e_sc_ok &
              a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> value}) &
             (not(isvalid = TRUE &
+                 status : t_StatusCode_i &
+                 status : t_StatusCode &
                  nid : ran(a_NodeId) &
                  aid = e_aid_Value &
                  a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable)
              =>
-             sc = e_sc_nok &
+             sc : {e_sc_bad_internal_error, e_sc_bad_attribute_id_invalid, e_sc_bad_node_id_unknown, e_sc_bad_write_not_supported} &
              a_Value = a_Value$0)
         )
     END
@@ -121,7 +126,7 @@ LOCAL_OPERATIONS
                  aid = e_aid_Value &
                  a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable)
              =>
-             sc = e_sc_nok &
+             sc : {e_sc_bad_node_id_unknown, e_sc_bad_write_not_supported} &
              a_Value = a_Value$0)
         )
     END
@@ -137,17 +142,14 @@ OPERATIONS
     /* --------------------------------------------------------------------- */
     /* Service Write */
 
-    StatusCode_service <-- alloc_write_request_responses(nb_req) =
+    bret <-- alloc_write_request_responses(nb_req) =
     BEGIN
-        StatusCode_service := e_sc_nok;
         IF nb_req <= k_n_WriteResponse_max THEN
-            ResponseWrite_allocated <-- alloc_write_request_responses_malloc(nb_req);
-            IF ResponseWrite_allocated = TRUE THEN
-                StatusCode_service := e_sc_ok
-            END
+            ResponseWrite_allocated <-- alloc_write_request_responses_malloc(nb_req)
         ELSE
             ResponseWrite_allocated := FALSE
-        END
+        END;
+        bret := ResponseWrite_allocated
     END
     ;
 
@@ -159,7 +161,8 @@ OPERATIONS
         l_nid,
         l_value,
         l_wvi,
-        l_status,
+        l_status1,
+        l_status2,
         l_isvalid
     IN
         StatusCode_service := e_sc_ok;
@@ -167,12 +170,13 @@ OPERATIONS
         l_continue <-- init_iter_write_request(l_nb_req);
         WHILE l_continue = TRUE DO
             l_continue, l_wvi <-- continue_iter_write_request;
-            l_isvalid, l_nid, l_aid, l_value <-- getall_WriteValue(l_wvi);
+            l_isvalid, l_status1, l_nid, l_aid, l_value <-- getall_WriteValue(l_wvi);
             /* Avoids the IF with a local operation. The following local op will use
                another local op to realize the write. The latter operation can be
                re-used in another context (e.g. write request from the Application) */
-            l_status <-- treat_write_1(l_isvalid, l_nid, l_aid, l_value);
-            set_ResponseWrite_StatusCode(l_wvi, l_status)
+
+            l_status2 <-- treat_write_1(l_isvalid, l_status1, l_nid, l_aid, l_value);
+            set_ResponseWrite_StatusCode(l_wvi, l_status2)
         INVARIANT
             wreqs_to_iterate <: t_WriteValue &
             wreqs_iterated <: t_WriteValue &
@@ -193,18 +197,24 @@ OPERATIONS
                                                                     WriteValue_NodeId~ ;
                         (cast_t_WriteValue[1..nb_WriteValue] /\
                          WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_Value) &
-                                    
+                 
             ResponseWrite_StatusCode = %wvi.(
                 wvi : t_WriteValue &
                 wvi : wreqs_iterated
                 |
-                {FALSE |-> e_sc_nok,
-                 TRUE  |-> e_sc_ok }(bool(wvi : dom(WriteValue_NodeId)              &
-                                          wvi : dom(WriteValue_AttributeId)         &
-                                          wvi : dom(WriteValue_Value)               &
-                                          WriteValue_NodeId(wvi) : ran(a_NodeId)    &
-                                          WriteValue_AttributeId(wvi) = e_aid_Value &
-                                          a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) = e_ncl_Variable)))
+                {FALSE |-> e_sc_bad_internal_error,
+                 TRUE  |-> {FALSE |-> e_sc_bad_attribute_id_invalid,
+                            TRUE  |-> {FALSE |-> e_sc_bad_node_id_unknown,
+                                       TRUE  |-> {FALSE |-> e_sc_bad_write_not_supported,
+                                                  TRUE  |-> e_sc_ok
+                                                 } (bool(WriteValue_AttributeId(wvi) = e_aid_Value &
+                                                        a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) 
+                                                         = e_ncl_Variable))
+                                      } (bool(WriteValue_NodeId(wvi) : ran(a_NodeId)))
+                           }(bool(WriteValue_AttributeId(wvi) : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value}))
+                }(bool(wvi : dom(WriteValue_NodeId) &
+                        wvi : dom(WriteValue_Value) & 
+                        wvi : dom(WriteValue_AttributeId))))
         VARIANT
             card(wreqs_to_iterate)
         END
@@ -218,13 +228,13 @@ OPERATIONS
     END
     ;
 
-    sc <-- treat_write_1(isvalid, nid, aid, value) =
+    sc <-- treat_write_1(isvalid, status, nid, aid, value) =
     IF isvalid = TRUE THEN
         /* TODO: provide and check user id */
         /* sc <-- check_user(nid, aid, uid) */
         sc <-- treat_write_2(nid, aid, value)
     ELSE
-        sc := e_sc_nok
+        sc := status
     END
     ;
 
@@ -234,7 +244,7 @@ OPERATIONS
         l_node,
         l_ncl
     IN
-        sc := e_sc_nok;
+        sc := e_sc_bad_node_id_unknown;
         l_isvalid, l_node <-- readall_AddressSpace_Node(nid);
         IF l_isvalid = TRUE THEN
             IF aid = e_aid_Value THEN
@@ -243,6 +253,8 @@ OPERATIONS
                     set_Value(l_node, value);
                     sc := e_sc_ok
                 END
+            ELSE
+                sc := e_sc_bad_write_not_supported
             END
         END
     END

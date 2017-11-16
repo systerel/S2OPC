@@ -227,7 +227,7 @@ OPERATIONS
     ;
 
     // Client receive create session response from server
-    ret <-- client_create_session_resp_sm (channel, session, session_token, create_resp_msg) =
+    bret <-- client_create_session_resp_sm (channel, session, session_token, create_resp_msg) =
     PRE
         channel       : t_channel_i &
         channel       : s_channel_connected   &
@@ -247,14 +247,14 @@ OPERATIONS
             CHOICE
                 a_state(session) := e_session_created       ||
                 a_client_token(session) := session_token    ||
-                ret := e_sc_ok                              ||
+                bret := TRUE                                ||
                 a_NonceClient := {session} <<| a_NonceClient
             OR
                 // Constraints on message content not verified
-                ret := e_sc_nok
+                bret := FALSE
             END
         ELSE
-            ret := e_sc_bad_invalid_argument
+            bret := FALSE
         END
     END
     ;
@@ -363,7 +363,7 @@ OPERATIONS
     END
     ;
 
-    ret <-- client_activate_session_resp_sm (channel, session, activate_resp_msg) =
+    bret <-- client_activate_session_resp_sm (channel, session, activate_resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
@@ -378,11 +378,11 @@ OPERATIONS
     THEN
         CHOICE
             a_state(session) := e_session_userActivated ||
-            ret := e_sc_ok
+            bret := TRUE
             // modify credential if user was already associated, sends response
         OR
             // TBD: invalid response msg content
-            ret := e_sc_nok
+            bret := FALSE
         END
     END
     ;

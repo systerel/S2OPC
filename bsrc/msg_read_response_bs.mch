@@ -65,7 +65,7 @@ OPERATIONS
 
             (p_isvalid = FALSE
              =>
-             response_StatusCode = e_sc_nok)
+             response_StatusCode = e_sc_bad_out_of_memory)
          )
     END
     ;

@@ -72,7 +72,7 @@ LOCAL_OPERATIONS
            =>
            data_Value_Value = {p_rvi} <<| data_Value_Value$0 &
            data_Value_StatusCode = data_Value_StatusCode$0 <+
-                                   {p_rvi |-> e_sc_nok})
+                                   {p_rvi |-> e_sc_bad_internal_error})
          )
     END
 
@@ -155,7 +155,7 @@ OPERATIONS
             %rvi.(rvi : t_ReadValue &
                   rvi : rreqs_iterated
                   |
-                  {FALSE |-> e_sc_nok,
+                  {FALSE |-> e_sc_bad_internal_error,
                    TRUE  |->
                              {FALSE |-> e_sc_ok,
                               TRUE  |-> a_Value_StatusCode(a_NodeId~(ReadValue_NodeId(rvi)))}
