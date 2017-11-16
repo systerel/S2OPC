@@ -42,46 +42,33 @@ void msg_read_request_bs__getall_req_ReadValue_AttributeId(const constants__t_ms
                                                            t_bool* const msg_read_request_bs__isvalid,
                                                            constants__t_AttributeId_i* const msg_read_request_bs__aid)
 {
-    *msg_read_request_bs__aid = constants__c_AttributeId_indet;
     /* TODO: is message type checked at this point? */
     OpcUa_ReadRequest* msg_read_req = (OpcUa_ReadRequest*) msg_read_request_bs__msg;
     static bool bWarned = false;
+    bool isvalid = NULL != msg_read_req;
 
-    *msg_read_request_bs__isvalid = false;
-    if (!msg_read_req)
-        return;
-    if (msg_read_request_bs__rvi > msg_read_req->NoOfNodesToRead)
-        return;
-    if (!msg_read_req->NodesToRead)
-        return;
-
-    *msg_read_request_bs__isvalid = true;
-    switch (msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].AttributeId)
+    *msg_read_request_bs__aid = constants__c_AttributeId_indet;
+    if (isvalid)
     {
-    case e_aid_NodeId:
-        *msg_read_request_bs__aid = constants__e_aid_NodeId;
-        break;
-    case e_aid_NodeClass:
-        *msg_read_request_bs__aid = constants__e_aid_NodeClass;
-        break;
-    case e_aid_BrowseName:
-        *msg_read_request_bs__aid = constants__e_aid_BrowseName;
-        break;
-    case e_aid_DisplayName:
-        *msg_read_request_bs__aid = constants__e_aid_DisplayName;
-        break;
-    case e_aid_Value:
-        *msg_read_request_bs__aid = constants__e_aid_Value;
-        break;
-    default:
-        if (!bWarned)
-        {
-            printf("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id\n");
-            bWarned = true;
-        }
-        *msg_read_request_bs__isvalid = false;
-        break;
+        isvalid = msg_read_request_bs__rvi <= msg_read_req->NoOfNodesToRead;
     }
+    if (isvalid)
+    {
+        isvalid = NULL != msg_read_req->NodesToRead;
+    }
+
+    if (isvalid)
+    {
+        isvalid = util_AttributeId__C_to_B(msg_read_req->NodesToRead[msg_read_request_bs__rvi-1].AttributeId,
+                                           msg_read_request_bs__aid);
+    }
+    if (! isvalid && ! bWarned)
+    {
+        printf("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id\n");
+        bWarned = true;
+    }
+    
+    *msg_read_request_bs__isvalid = isvalid;
 }
 
 void msg_read_request_bs__getall_req_ReadValue_NodeId(const constants__t_msg_i msg_read_request_bs__msg,

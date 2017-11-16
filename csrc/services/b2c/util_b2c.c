@@ -23,7 +23,6 @@
 
 #include "opcua_identifiers.h"
 #include "sopc_crypto_profiles.h"
-#include "sopc_types.h"
 
 void util_message__get_encodeable_type(const constants__t_msg_type_i message__msg_type,
                                        SOPC_EncodeableType** reqEncType,
@@ -966,6 +965,75 @@ bool util_TimestampsToReturn__C_to_B(OpcUa_TimestampsToReturn cttr,
             break;
         case OpcUa_TimestampsToReturn_Neither:
             *pbttr = constants__e_ttr_neither;
+            break;
+        default:
+            status = false;
+            break;
+        }
+    }
+
+    return status;
+}
+
+
+bool util_AttributeId__B_to_C(constants__t_AttributeId_i baid,
+                              uint32_t* pcaid)
+{
+    bool status = NULL != pcaid;
+
+    if (status)
+    {
+        switch (baid)
+        {
+        case constants__e_aid_NodeId:
+            *pcaid = e_aid_NodeId;
+            break;
+        case constants__e_aid_NodeClass:
+            *pcaid = e_aid_NodeClass;
+            break;
+        case constants__e_aid_BrowseName:
+            *pcaid = e_aid_BrowseName;
+            break;
+        case constants__e_aid_DisplayName:
+            *pcaid = e_aid_DisplayName;
+            break;
+        case constants__e_aid_Value:
+            *pcaid = e_aid_Value;
+            break;
+        case constants__c_AttributeId_indet:
+        default:
+            status = false;
+            break;
+        }
+    }
+
+    return status;
+}
+
+
+bool util_AttributeId__C_to_B(uint32_t caid,
+                              constants__t_AttributeId_i* pbaid)
+{
+    bool status = NULL != pbaid;
+
+    if (status)
+    {
+        switch (caid)
+        {
+        case e_aid_NodeId:
+            *pbaid = constants__e_aid_NodeId;
+            break;
+        case e_aid_NodeClass:
+            *pbaid = constants__e_aid_NodeClass;
+            break;
+        case e_aid_BrowseName:
+            *pbaid = constants__e_aid_BrowseName;
+            break;
+        case e_aid_DisplayName:
+            *pbaid = constants__e_aid_DisplayName;
+            break;
+        case e_aid_Value:
+            *pbaid = constants__e_aid_Value;
             break;
         default:
             status = false;
