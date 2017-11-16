@@ -38,6 +38,7 @@ typedef enum {
     e_aid_DisplayName,
     e_aid_Description,
     e_aid_Value = 13,
+    e_aid_AccessLevel = 17,
     e_aid_UserExecutable = 22
 } util__AttributeId;
 

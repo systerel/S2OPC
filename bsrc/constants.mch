@@ -42,8 +42,11 @@ SETS
                        e_aid_BrowseName,
                        e_aid_DisplayName,
                        e_aid_Description,
-                       e_aid_Value};
-    t_StatusCode_i = {c_StatusCode_indet, e_sc_ok, e_sc_bad_generic, e_sc_uncertain_generic,
+                       e_aid_Value,
+                       e_aid_AccessLevel};
+    t_StatusCode_i = {c_StatusCode_indet, e_sc_ok,
+                      e_sc_bad_generic,
+                      e_sc_uncertain_generic,
                       e_sc_bad_internal_error,
                       e_sc_bad_secure_channel_closed,
                       e_sc_bad_secure_channel_id_invalid,
@@ -352,7 +355,13 @@ PROPERTIES
                             e_ttr_both,
                             e_ttr_neither} &
 
-    t_AttributeId = {e_aid_NodeId, e_aid_NodeClass, e_aid_Value} &
+    t_AttributeId = {e_aid_NodeId,
+                     e_aid_NodeClass,
+                     e_aid_BrowseName,
+                     e_aid_DisplayName,
+                     e_aid_Description,
+                     e_aid_Value,
+                     e_aid_AccessLevel} &
 
     t_NodeClass = t_NodeClass_i - {c_NodeClass_indet} &
 

@@ -1000,6 +1000,9 @@ bool util_AttributeId__B_to_C(constants__t_AttributeId_i baid,
         case constants__e_aid_Value:
             *pcaid = e_aid_Value;
             break;
+        case constants__e_aid_AccessLevel:
+            *pcaid = e_aid_AccessLevel;
+            break;
         case constants__c_AttributeId_indet:
         default:
             status = false;
@@ -1034,6 +1037,9 @@ bool util_AttributeId__C_to_B(uint32_t caid,
             break;
         case e_aid_Value:
             *pbaid = constants__e_aid_Value;
+            break;
+        case e_aid_AccessLevel:
+            *pbaid = constants__e_aid_AccessLevel;
             break;
         default:
             status = false;
