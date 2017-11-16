@@ -108,6 +108,8 @@ classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
 #include &lt;stdio.h>
 #include &lt;stdbool.h>
 
+#include "opcua_statuscodes.h"
+
 #include "sopc_toolkit_constants.h"
 #include "sopc_builtintypes.h"
 #include "sopc_types.h"
@@ -166,7 +168,7 @@ static OpcUa_NodeClass NodeClass[NB+1] = {OpcUa_NodeClass_Unspecified,
 SOPC_Variant Value[NB_3+NB_4+1] = {DEFAULT_VARIANT<xsl:apply-templates select="$var_vartype" mode="value"/>};
 
 <!-- StatusCode -->
-static SOPC_StatusCode status_code[] = {STATUS_NOK, <xsl:value-of select = "for $n in $var_vartype return if ($n/ua:Value) then 'STATUS_OK' else 'STATUS_NOK'" separator=", "/>};
+static SOPC_StatusCode status_code[] = {OpcUa_BadDataUnavailable, <xsl:value-of select = "for $n in $var_vartype return if ($n/ua:Value) then '0x00000000' else 'OpcUa_BadDataUnavailable'" separator=", "/>};
 
 <!-- Access level -->
 static SOPC_SByte AccessLevel[] = {0, <xsl:value-of select = "for $n in $ua_nodes/ua:UAVariable return if ($n/@AccessLevel) then $n/@AccessLevel else 1" separator=", "/>};
