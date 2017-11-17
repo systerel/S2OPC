@@ -38,14 +38,14 @@ CLANG_BUILD_DIR=clang_build
 cd $CLANG_BUILD_DIR
 CC=clang cmake .. >> $LOGPATH | tee -a $LOGPATH
 make all >> $LOGPATH
-cd - >> $LOGPATH
 if [[ $? != 0 ]]; then
+    cd - >> $LOGPATH
     echo "ERROR: compiling project with Clang compiler: see log $LOGPATH / use make clean all in $CLANG_BUILD_DIR" | tee -a $LOGPATH
     EXITCODE=1
 else
+    cd - >> $LOGPATH
     \rm -fr $CLANG_BUILD_DIR
 fi
-
 
 #### Analyze C sources with clang-tidy ####
 
