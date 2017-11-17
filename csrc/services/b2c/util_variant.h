@@ -56,6 +56,11 @@ constants__t_Variant_i util_variant__new_Variant_from_Variant(SOPC_Variant* pvar
 /**
  * The returned Variant is malloced and shall be freed by the consumer.
  */
+constants__t_Variant_i util_variant__new_Variant_from_Byte(uint8_t i);
+
+/**
+ * The returned Variant is malloced and shall be freed by the consumer.
+ */
 constants__t_Variant_i util_variant__new_Variant_from_uint32(uint32_t i);
 
 /**

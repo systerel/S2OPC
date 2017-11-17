@@ -251,6 +251,9 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_Node
             *address_space_bs__variant = util_variant__new_Variant_from_Indet();
         }
         break;
+    case constants__e_aid_AccessLevel:
+        *address_space_bs__variant = util_variant__new_Variant_from_Byte(SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite);
+        break;
     default:
         /* TODO: maybe return NULL here, to be consistent with msg_read_response_bs__write_read_response_iter and
          * service_read__treat_read_request behavior. */
