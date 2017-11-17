@@ -18,80 +18,18 @@
 #ifndef SOPC_TOOLKIT_CONSTANTS_H_
 #define SOPC_TOOLKIT_CONSTANTS_H_
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "sopc_toolkit_config_constants.h"
+
+/* Check configured constants values */
+#include "sopc_config_constants_check.h"
 
 /* Check IEEE-754 compliance */
 #include "sopc_ieee_check.h"
-
-/* COMMON CONFIGURATION */
 
 /** @brief Version of the toolkit */
 #define SOPC_TOOLKIT_VERSION_MAJOR 0
 #define SOPC_TOOLKIT_VERSION_MEDIUM 2
 #define SOPC_TOOLKIT_VERSION_MINOR 1
-
-/** @brief Maximum Message Length used (must be > SOPC_TCP_UA_MIN_BUFFER_SIZE) */
-#ifndef SOPC_MAX_MESSAGE_LENGTH
-#define SOPC_MAX_MESSAGE_LENGTH UINT16_MAX
-#endif /* SOPC_MAX_MESSAGE_LENGTH */
-
-/* TCP SOCKETS CONFIGURATION */
-
-/** @brief Maximum number of TCP sockets (listeners and connections) */
-#ifndef SOPC_MAX_SOCKETS
-#define SOPC_MAX_SOCKETS 150
-#endif /* SOPC_MAX_SOCKETS */
-
-/** @brief Maximum number of TCP sockets connections on a socket listener */
-#ifndef SOPC_MAX_SOCKETS_CONNECTIONS
-#define SOPC_MAX_SOCKETS_CONNECTIONS 50
-#endif /* SOPC_MAX_SOCKETS_CONNECTIONS */
-
-/* SECURE CHANNEL CONFIGURATION */
-
-/** @brief Maximum number of endpoint description configured (same as number of connection listeners) */
-#ifndef SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
-#define SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS 10
-#endif /* SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS */
-
-/* Maximum value accepted in B model */
-#if SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS > INT32_MAX
-#error "Max number of endpoint descriptions cannot be more than INT32_MAX"
-#endif
-
-#ifndef SOPC_LISTENER_LISTEN_ALL_INTERFACES
-#define SOPC_LISTENER_LISTEN_ALL_INTERFACES true
-#endif /* SOPC_LISTENER_LISTEN_ALL_INTERFACES */
-
-/** @brief Maximum number of secure channel connections (and configurations) established */
-#ifndef SOPC_MAX_SECURE_CONNECTIONS
-#define SOPC_MAX_SECURE_CONNECTIONS 20
-#endif /* SOPC_MAX_SECURE_CONNECTIONS */
-
-#if SOPC_MAX_SECURE_CONNECTIONS > SOPC_MAX_SOCKETS
-#error "Max number of secure connections cannot be greater than max number of sockets"
-#endif
-
-/* Maximum value accepted in B model */
-#if SOPC_MAX_SECURE_CONNECTIONS > INT32_MAX
-#error "Max number of secure connections cannot be more than INT32_MAX"
-#endif
-
-/** @brief Maximum number of sessions established */
-#ifndef SOPC_MAX_SESSIONS
-#define SOPC_MAX_SESSIONS 20
-#endif /* SOPC_MAX_SESSIONS */
-
-/* Maximum value accepted in B model */
-#if SOPC_MAX_SESSIONS > INT32_MAX
-#error "Max number of sessions cannot be more than INT32_MAX"
-#endif
-
-/** @brief Maximum number of requests sent by client pending */
-#ifndef SOPC_MAX_PENDING_REQUESTS
-#define SOPC_MAX_PENDING_REQUESTS UINT16_MAX
-#endif /* SOPC_MAX_PENDING_REQUESTS */
 
 /* OPC UA SPECIFICATION CONFIGURATION */
 
@@ -123,15 +61,6 @@
 #define SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH 4
 /* Length of an UA secure message chunk sequence header */
 #define SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
-
-/* Maximum number of milliseconds that a session shall remain open without activity */
-#define SOPC_SESSION_TIMEOUT 10000
-
-/* Minimum value for OPN requestedLifetime parameter */
-#define SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME 10000
-
-/* DEBUG CONFIGURATION */
-#define SOPC_DEBUG_PRINTING false
 
 /* SOPC return statuses */
 typedef enum SOPC_ReturnStatus {
