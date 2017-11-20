@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -173,7 +174,6 @@ constants__t_Variant_i util_variant__new_Variant_from_ByteString(SOPC_ByteString
 
 void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
 {
-    char buf[128];
     size_t i;
     uint8_t c;
     printf("Variant @%p", (void*) pvar);
@@ -191,13 +191,13 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
         printf("Boolean\n  Value: %i\n", pvar->Value.Boolean);
         break;
     case SOPC_Int32_Id:
-        printf("Int32\n  Value: %i\n", pvar->Value.Int32);
+        printf("Int32\n  Value: %" PRIi32 "\n", pvar->Value.Int32);
         break;
     case SOPC_UInt32_Id:
-        printf("UInt32\n  Value: %u\n", pvar->Value.Uint32);
+        printf("UInt32\n  Value: %" PRIu32 "\n", pvar->Value.Uint32);
         break;
     case SOPC_Int64_Id:
-        printf("Int64\n  Value: %li\n", pvar->Value.Int64);
+        printf("Int64\n  Value: %" PRIi64 "\n", pvar->Value.Int64);
         break;
     case SOPC_Float_Id:
         printf("Float\n  Value: %g\n", pvar->Value.Floatv);
@@ -206,11 +206,11 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
         printf("Double\n  Value: %g\n", pvar->Value.Doublev);
         break;
     case SOPC_String_Id:
-        sprintf(buf, "String\n  Value: \"%%%i.%is\"\n", pvar->Value.String.Length, pvar->Value.String.Length);
-        printf(buf, pvar->Value.String.Data);
+        printf("String\n  Value: \"%*.*s\"\n", pvar->Value.String.Length, pvar->Value.String.Length,
+               pvar->Value.String.Data);
         break;
     case SOPC_ByteString_Id:
-        printf("ByteString\n  Length: %d\n  Value: \"", pvar->Value.Bstring.Length);
+        printf("ByteString\n  Length: %" PRIi32 "\n  Value: \"", pvar->Value.Bstring.Length);
         /* Pretty print */
         for (i = 0; i < (size_t) pvar->Value.Bstring.Length; ++i)
         {
@@ -225,7 +225,7 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
         printf("\"\n");
         break;
     case SOPC_XmlElement_Id:
-        printf("XmlElement\n  Length: %d\n  Value: \"", pvar->Value.XmlElt.Length);
+        printf("XmlElement\n  Length: %" PRIi32 "\n  Value: \"", pvar->Value.XmlElt.Length);
         /* Pretty print */
         for (i = 0; i < (size_t) pvar->Value.XmlElt.Length; ++i)
         {
@@ -243,7 +243,7 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
         switch (pvar->Value.NodeId->IdentifierType)
         {
         case SOPC_IdentifierType_Numeric:
-            printf("NodeId-Numeric\n  Value: Namespace %i, ID %i\n", pvar->Value.NodeId->Namespace,
+            printf("NodeId-Numeric\n  Value: Namespace %" PRIu16 ", ID %" PRIu32 "\n", pvar->Value.NodeId->Namespace,
                    pvar->Value.NodeId->Data.Numeric);
             break;
         default:
@@ -252,7 +252,7 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
         }
         break;
     case SOPC_StatusCode_Id:
-        printf("StatusCode\n  Value: %i\n", pvar->Value.Status);
+        printf("StatusCode\n  Value: %" PRIu32 "\n", pvar->Value.Status);
         break;
     case SOPC_SByte_Id:
     case SOPC_Byte_Id:

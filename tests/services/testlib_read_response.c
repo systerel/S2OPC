@@ -18,8 +18,8 @@
 /** \file
  *
  */
-
 #include <assert.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -109,7 +109,7 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, constants__t_Stat
         for (i = 0; i < pReadResp->NoOfResults; ++i)
         {
             /* Note: Status is a B-StatusCode */
-            printf("pReadResp->Results[%d].Status: 0x%08X\n", i, pReadResp->Results[i].Status);
+            printf("pReadResp->Results[%" PRIi32 "].Status: 0x%08X\n", i, pReadResp->Results[i].Status);
             util_variant__print_SOPC_Variant(&pReadResp->Results[i].Value);
         }
     }
@@ -120,6 +120,7 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, constants__t_Stat
 
     /* Analyze each response element */
     for (i = 0; bTestOk && i < pReadReq->NoOfNodesToRead; ++i)
+
     {
         /* Find NodeId's rvi */
         bTestOk = get_rvi(address_space_bs__a_NodeId, &pReadReq->NodesToRead[i].NodeId, &rvi);
