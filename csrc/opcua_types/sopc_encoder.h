@@ -238,12 +238,16 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
 SOPC_ReturnStatus SOPC_ExtensionObject_ReadAux(void* value, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_Variant_Write(const SOPC_Variant* variant, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_Variant_WriteAux(const void* value, SOPC_Buffer* buf);
+SOPC_ReturnStatus SOPC_Variant_WriteAux_Nested(const void* value, SOPC_Buffer* buf, uint32_t nestedLevel);
 SOPC_ReturnStatus SOPC_Variant_Read(SOPC_Variant* variant, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_Variant_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_ReturnStatus SOPC_Variant_ReadAux_Nested(void* value, SOPC_Buffer* buf, uint32_t nestedLevel);
 SOPC_ReturnStatus SOPC_DataValue_Write(const SOPC_DataValue* dataValue, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_DataValue_WriteAux(const void* value, SOPC_Buffer* buf);
+SOPC_ReturnStatus SOPC_DataValue_WriteAux_Nested(const void* value, SOPC_Buffer* buf, uint32_t nestedLevel);
 SOPC_ReturnStatus SOPC_DataValue_Read(SOPC_DataValue* dataValue, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_DataValue_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_ReturnStatus SOPC_DataValue_ReadAux_Nested(void* value, SOPC_Buffer* buf, uint32_t nestedLevel);
 
 SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* msgBuf,
                                   int32_t* noOfElts,
