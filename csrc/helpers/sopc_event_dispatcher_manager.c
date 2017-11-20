@@ -28,7 +28,7 @@ struct SOPC_EventDispatcherManager
 {
     SOPC_AsyncQueue* queue;
     SOPC_EventDispatcherFct* pDispatcherFct;
-    bool stopMgr;
+    bool* stopMgr;
     Thread mgrThread;
 };
 
@@ -56,10 +56,12 @@ static void* SOPC_ThreadStartEventDispatcherManager(void* pEventMgr)
         {
             if (pAnonParam != NULL)
             {
-                if (pAnonParam == &pMgr->stopMgr)
+                if (pAnonParam == pMgr->stopMgr)
                 { // It is the stop flag address
-                    assert(pMgr->stopMgr != false);
+                    assert(*pMgr->stopMgr != false);
                     localStopMgr = true;
+                    free(pMgr->stopMgr);
+                    pMgr->stopMgr = NULL;
                 }
                 else
                 { // Nominal case
@@ -81,11 +83,15 @@ SOPC_EventDispatcherManager* SOPC_EventDispatcherManager_CreateAndStart(SOPC_Eve
     pEventMgr = calloc(1, sizeof(SOPC_EventDispatcherManager));
     if (NULL != pEventMgr)
     {
-        status = SOPC_AsyncQueue_Init(&pEventMgr->queue, name);
+        pEventMgr->stopMgr = calloc(1, sizeof(bool));
+        if (NULL != pEventMgr->stopMgr)
+        {
+            status = SOPC_AsyncQueue_Init(&pEventMgr->queue, name);
+        }
         if (SOPC_STATUS_OK == status)
         {
             pEventMgr->pDispatcherFct = fctPointer;
-            pEventMgr->stopMgr = false;
+            *pEventMgr->stopMgr = false;
             status =
                 SOPC_Thread_Create(&pEventMgr->mgrThread, SOPC_ThreadStartEventDispatcherManager, (void*) pEventMgr);
         }
@@ -111,7 +117,7 @@ static SOPC_ReturnStatus SOPC_EventDispatcherManager_AddEventInternal(SOPC_Event
     if (NULL != eventMgr)
     {
         status = SOPC_STATUS_INVALID_STATE;
-        if (false == eventMgr->stopMgr)
+        if (false == *eventMgr->stopMgr)
         {
             pParams = calloc(1, sizeof(SOPC_EventDispatcherParams));
             if (NULL != pParams)
@@ -166,11 +172,11 @@ SOPC_ReturnStatus SOPC_EventDispatcherManager_StopAndDelete(SOPC_EventDispatcher
     if (NULL != eventMgr && NULL != *eventMgr)
     {
         status = SOPC_STATUS_INVALID_STATE;
-        if (false == (*eventMgr)->stopMgr)
+        if (false == *(*eventMgr)->stopMgr)
         {
-            (*eventMgr)->stopMgr = !false;
+            *(*eventMgr)->stopMgr = true;
             // Use stopMgr flag address as indicator all precedent actions were treated
-            status = SOPC_AsyncQueue_BlockingEnqueue((*eventMgr)->queue, &(*eventMgr)->stopMgr);
+            status = SOPC_AsyncQueue_BlockingEnqueue((*eventMgr)->queue, (*eventMgr)->stopMgr);
         }
         if (SOPC_STATUS_OK == status)
         {
