@@ -4,10 +4,10 @@
 #
 set -e
 
-DOCKER_IMAGE=3cc8a142a455
+DOCKER_IMAGE=0f82477cd7ac
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
-    /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
+    /etc/scripts/run-in-docker $DOCKER_IMAGE CROSS_COMPILE_MINGW=true "$@"
 else
-    sudo /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
+    sudo /etc/scripts/run-in-docker $DOCKER_IMAGE CROSS_COMPILE_MINGW=true "$@"
 fi

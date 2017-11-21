@@ -26,11 +26,9 @@ if(UNIX)
   set(PLATFORM_DIR linux)
   set(THREAD_LIB pthread rt)
   set(MATH_LIB m)
-  set(STATIC_LIB_SUFFIX ".a")
 elseif(WIN32)
   set(PLATFORM_DIR windows)
   set(SOCK_LIB ws2_32)
-  set(STATIC_LIB_SUFFIX ".lib")
 else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -133,11 +131,13 @@ add_test(check_addspace ${CMAKE_CURRENT_SOURCE_DIR}/bin/check_ingopcs_addspace)
 set_tests_properties(check_addspace PROPERTIES DEPENDS check_ingopcs_addspace)
 
 # Helpers unit tests
-if (NOT CMAKE_CROSSCOMPILING)
-    file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
-    add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
-    target_include_directories(check_helpers PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
-    target_link_libraries(check_helpers PRIVATE ingopcs libcheck${STATIC_LIB_SUFFIX})
+file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
+add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
+target_include_directories(check_helpers PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(check_helpers PRIVATE ingopcs libcheck.a)
+if(WIN32)
+  # libcheck dependency to provide missing functions on windows
+  target_link_libraries(check_helpers PRIVATE compat)
 endif()
 
 # Client test
@@ -206,13 +206,15 @@ file(GLOB_RECURSE SOCKETS_SRC
 file(GLOB_RECURSE SOCKETS_TEST
      "tests/sockets/*.c")
 
-if (NOT CMAKE_CROSSCOMPILING)
-    add_executable(check_sockets ${SOCKETS_SRC}
-                                 ${SOCKETS_TEST})
-    target_include_directories(check_sockets PRIVATE "tests/sockets/stubs" 
-                                                     ${INGOPCS_PUBLIC_INCLUDES} 
-                                                     ${INGOPCS_PRIVATE_INCLUDES})
-    target_link_libraries(check_sockets PRIVATE ingopcs libcheck${STATIC_LIB_SUFFIX})
+add_executable(check_sockets ${SOCKETS_SRC}
+                             ${SOCKETS_TEST})
+target_include_directories(check_sockets PRIVATE "tests/sockets/stubs" 
+                                                 ${INGOPCS_PUBLIC_INCLUDES} 
+                                                 ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(check_sockets PRIVATE ingopcs libcheck.a)
+if(WIN32)
+  # libcheck dependency to provide missing functions on windows
+  target_link_libraries(check_sockets PRIVATE compat)
 endif()
 
 # Secure channels (stubbed on services side) tests
