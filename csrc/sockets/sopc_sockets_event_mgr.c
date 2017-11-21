@@ -297,7 +297,11 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
                                                   true, // Reuse
                                                   true, // Non blocking socket
                                                   &freeSocket->sock);
-                        if (SOPC_STATUS_OK != status)
+                        if (SOPC_STATUS_OK == status)
+                        {
+                            result = true;
+                        }
+                        else
                         {
                             result = false;
                         }
