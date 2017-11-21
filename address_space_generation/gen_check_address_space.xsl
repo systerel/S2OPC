@@ -141,7 +141,6 @@ int main (void){
     bres = bres &amp;&amp; test_reference();
     bres = bres &amp;&amp; test_Description();
     bres = bres &amp;&amp; test_DisplayName();
-    printf("%zu %s\n", strlen((char *)Description[1].Text.Data), Description[1].Text.Data);
     if(bres == false){
         return 1;
     }else{

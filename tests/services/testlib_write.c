@@ -21,6 +21,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -207,7 +208,7 @@ bool tlibw_stimulateB_with_message(void* pMsg)
 bool tlibw_verify_effects_local(OpcUa_WriteRequest* pWriteReq)
 {
     OpcUa_WriteValue* lwv;
-    size_t i;
+    int32_t i;
     t_bool isvalid;
     constants__t_StatusCode_i sc;
     constants__t_Node_i node;
@@ -221,13 +222,13 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest* pWriteReq)
 
     lwv = pWriteReq->NodesToWrite;
 
-    for (i = 0; i < (size_t)(pWriteReq->NoOfNodesToWrite); ++i)
+    for (i = 0; i < pWriteReq->NoOfNodesToWrite; ++i)
     {
         /* Checks that the response [i] is ok */
         response_write_bs__getall_ResponseWrite_StatusCode(i + 1, &isvalid, &sc);
         if (!isvalid || constants__e_sc_ok != sc)
         {
-            printf("Response[wvi = %zd] is invalid (isvalid = %d, sc = %d)\n", i + 1, isvalid, sc);
+            printf("Response[wvi = %" PRIi32 "] is invalid (isvalid = %d, sc = %d)\n", i + 1, isvalid, sc);
             bVerif = false;
         }
         /* Directly checks in the address space that the request [i] is effective */
@@ -236,7 +237,7 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest* pWriteReq)
         address_space_bs__readall_AddressSpace_Node((constants__t_NodeId_i) &lwv[i].NodeId, &isvalid, &node);
         if (!isvalid)
         {
-            printf("Cannot find NodeId[wvi = %zd]\n", i + 1);
+            printf("Cannot find NodeId[wvi = %" PRIi32 "]\n", i + 1);
             bVerif = false;
         }
         address_space_bs__read_AddressSpace_Attribute_value(node, constants__e_ncl_Variable, constants__e_aid_Value,
@@ -254,9 +255,9 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest* pWriteReq)
          * ignored. So its test is different. The request shall not be taken into account. */
         if (status != SOPC_STATUS_OK || cmp != 0)
         {
-            printf(
-                "Request[wvi = %zd] did not change the address space (Compare sc = %d, cmp = %d)\n+ Expected value:\n",
-                i, status, cmp);
+            printf("Request[wvi = %" PRIi32 "] did not change the address space (Compare sc = %d, cmp = %" PRIi32
+                   ")\n+ Expected value:\n",
+                   i, status, cmp);
             util_variant__print_SOPC_Variant(&lwv[i].Value.Value);
             printf("+ Read value:\n");
             util_variant__print_SOPC_Variant(pVariant);
@@ -284,8 +285,8 @@ bool tlibw_verify_response(OpcUa_WriteRequest* pWriteReq, OpcUa_WriteResponse* p
 
     if (pWriteResp->NoOfResults != pWriteReq->NoOfNodesToWrite)
     {
-        printf("Number of responses (%d) differs from number of requests (%d)\n", pWriteResp->NoOfResults,
-               pWriteReq->NoOfNodesToWrite);
+        printf("Number of responses (%" PRIi32 ") differs from number of requests (%" PRIi32 ")\n",
+               pWriteResp->NoOfResults, pWriteReq->NoOfNodesToWrite);
         return false; /* Can't continue, as there might be something very wrong here */
     }
 
@@ -294,7 +295,7 @@ bool tlibw_verify_response(OpcUa_WriteRequest* pWriteReq, OpcUa_WriteResponse* p
     {
         if (pWriteResp->Results[i] != 0x00000000)
         {
-            printf("Response[wvi = %d] is not OK (%d)\n", i, pWriteResp->Results[i]);
+            printf("Response[wvi = %" PRIi32 "] is not OK (%" PRIi32 ")\n", i, pWriteResp->Results[i]);
             bVerif = false;
         }
     }
@@ -355,7 +356,7 @@ bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, OpcUa_ReadRespo
 
     if (pWriteReq->NoOfNodesToWrite < pReadResp->NoOfResults)
     {
-        printf("Number of request (%d) < number of response (%d)\n", pWriteReq->NoOfNodesToWrite,
+        printf("Number of request (%" PRIi32 ") < number of response (%" PRIi32 ")\n", pWriteReq->NoOfNodesToWrite,
                pReadResp->NoOfResults);
         return false;
     }
@@ -368,10 +369,11 @@ bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, OpcUa_ReadRespo
                                       &cmp);
         if (status != SOPC_STATUS_OK || cmp != 0)
         {
-            printf(
-                "Response[rvi = %d] is different from Request[wvi = %d] (Compare sc = %d, cmp = %d)\n+ Expected "
-                "value:\n",
-                i, i, status, cmp);
+            printf("Response[rvi = %" PRIi32 "] is different from Request[wvi = %" PRIi32 "] (Compare sc = %" PRIi32
+                   ", cmp = %" PRIi32
+                   ")\n+ Expected "
+                   "value:\n",
+                   i, i, status, cmp);
             util_variant__print_SOPC_Variant(&pWriteReq->NodesToWrite[i].Value.Value);
             printf("+ Read value:\n");
             util_variant__print_SOPC_Variant(&pReadResp->Results[i].Value);
