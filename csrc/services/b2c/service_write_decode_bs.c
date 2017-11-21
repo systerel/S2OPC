@@ -83,6 +83,7 @@ void service_write_decode_bs__get_nb_WriteValue(t_entier4* const service_write_d
  */
 void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i service_write_decode_bs__wvi,
                                                 t_bool* const service_write_decode_bs__isvalid,
+                                                constants__t_StatusCode_i* const service_write_decode_bs__status,
                                                 constants__t_NodeId_i* const service_write_decode_bs__nid,
                                                 constants__t_AttributeId_i* const service_write_decode_bs__aid,
                                                 constants__t_Variant_i* const service_write_decode_bs__value)
@@ -96,6 +97,7 @@ void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i 
     OpcUa_WriteValue* wv;
 
     *service_write_decode_bs__isvalid = false;
+    *service_write_decode_bs__status = constants__c_StatusCode_indet;
 
     if (NULL != request && service_write_decode_bs__wvi <= request->NoOfNodesToWrite)
     {
@@ -116,8 +118,13 @@ void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i 
             break;
         default:
             *service_write_decode_bs__isvalid = false;
+            *service_write_decode_bs__status = constants__e_sc_bad_attribute_id_invalid;
             break;
         }
         *service_write_decode_bs__value = (constants__t_Variant_i) &wv->Value.Value;
+    }
+    else
+    {
+        *service_write_decode_bs__status = constants__e_sc_bad_internal_error;
     }
 }

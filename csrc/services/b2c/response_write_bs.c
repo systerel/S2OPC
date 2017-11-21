@@ -53,6 +53,10 @@ void response_write_bs__alloc_write_request_responses_malloc(const t_entier4 res
     nb_req = 0;
 
     arr_StatusCode = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * (response_write_bs__nb_req + 1));
+    for (int32_t i = 0; i <= response_write_bs__nb_req; i++)
+    {
+        arr_StatusCode[i] = OpcUa_BadInternalError;
+    }
     if (NULL != arr_StatusCode)
     {
         *response_write_bs__ResponseWrite_allocated = true;
