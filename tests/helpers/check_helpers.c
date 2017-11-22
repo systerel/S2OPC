@@ -56,6 +56,7 @@ int main(void)
     srunner_add_suite(sr, tests_make_suite_crypto_None());
     srunner_add_suite(sr, tests_make_suite_tools());
     srunner_add_suite(sr, tests_make_suite_threads());
+    srunner_add_suite(sr, tests_make_suite_time());
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);

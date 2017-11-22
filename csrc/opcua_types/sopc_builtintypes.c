@@ -1164,8 +1164,7 @@ void SOPC_DateTime_Initialize(SOPC_DateTime* dateTime)
 {
     if (dateTime != NULL)
     {
-        dateTime->Low32 = 0;
-        dateTime->High32 = 0;
+        *dateTime = 0;
     }
 }
 
@@ -1185,14 +1184,11 @@ SOPC_ReturnStatus SOPC_DateTime_Compare(const SOPC_DateTime* left, const SOPC_Da
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != left && NULL != right && NULL != comparison)
     {
-        int64_t dateLeft, dateRight;
-        dateLeft = SOPC_DateTime_ToInt64(left);
-        dateRight = SOPC_DateTime_ToInt64(right);
-        if (dateLeft < dateRight)
+        if (*left < *right)
         {
             *comparison = -1;
         }
-        else if (dateRight < dateLeft)
+        else if (*right < *left)
         {
             *comparison = 1;
         }
@@ -1217,27 +1213,6 @@ void SOPC_DateTime_ClearAux(void* value)
 void SOPC_DateTime_Clear(SOPC_DateTime* dateTime)
 {
     SOPC_DateTime_Initialize(dateTime);
-}
-
-int64_t SOPC_DateTime_ToInt64(const SOPC_DateTime* dateTime)
-{
-    int64_t result = 0;
-    uint64_t shiftHigh = 0;
-    if (dateTime != NULL)
-    {
-        shiftHigh = dateTime->High32;
-        result = dateTime->Low32 + (shiftHigh << 32);
-    }
-    return result;
-}
-
-void SOPC_DateTime_FromInt64(SOPC_DateTime* dateTime, int64_t date)
-{
-    if (dateTime != NULL)
-    {
-        dateTime->Low32 = date & 0x00000000FFFFFFFF;
-        dateTime->High32 = date >> 32;
-    }
 }
 
 void SOPC_Guid_InitializeAux(void* value)

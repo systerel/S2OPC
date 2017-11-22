@@ -715,11 +715,9 @@ SOPC_ReturnStatus SOPC_DateTime_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_DateTime_Write(const SOPC_DateTime* date, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    int64_t dateTime = 0;
     if (NULL != date)
     {
-        dateTime = SOPC_DateTime_ToInt64(date);
-        status = SOPC_Int64_Write(&dateTime, buf);
+        status = SOPC_Int64_Write(date, buf);
     }
     return status;
 }
@@ -732,11 +730,9 @@ SOPC_ReturnStatus SOPC_DateTime_ReadAux(void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_DateTime_Read(SOPC_DateTime* date, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    int64_t dateTime = 0;
     if (NULL != date)
     {
-        status = SOPC_Int64_Read(&dateTime, buf);
-        SOPC_DateTime_FromInt64(date, dateTime);
+        status = SOPC_Int64_Read(date, buf);
     }
     return status;
 }
@@ -2541,7 +2537,7 @@ static SOPC_Byte GetDataValueEncodingMask(const SOPC_DataValue* dataValue)
     {
         mask |= SOPC_DataValue_NotGoodStatusCode;
     }
-    if (dataValue->SourceTimestamp.Low32 > 0 || dataValue->SourceTimestamp.High32 > 0)
+    if (dataValue->SourceTimestamp > 0)
     {
         mask |= SOPC_DataValue_NotMinSourceDate;
     }
@@ -2549,7 +2545,7 @@ static SOPC_Byte GetDataValueEncodingMask(const SOPC_DataValue* dataValue)
     {
         mask |= SOPC_DataValue_NotZeroSourcePico;
     }
-    if (dataValue->ServerTimestamp.Low32 > 0 || dataValue->ServerTimestamp.Low32 > 0)
+    if (dataValue->ServerTimestamp > 0)
     {
         mask |= SOPC_DataValue_NotMinServerDate;
     }
@@ -2664,8 +2660,7 @@ static SOPC_ReturnStatus SOPC_DataValue_Read_Internal(SOPC_DataValue* dataValue,
         }
         else
         {
-            dataValue->SourceTimestamp.Low32 = 0;
-            dataValue->SourceTimestamp.High32 = 0;
+            dataValue->SourceTimestamp = 0;
         }
         if (SOPC_STATUS_OK == status && (encodingMask & SOPC_DataValue_NotZeroSourcePico) != 0)
         {
@@ -2681,8 +2676,7 @@ static SOPC_ReturnStatus SOPC_DataValue_Read_Internal(SOPC_DataValue* dataValue,
         }
         else
         {
-            dataValue->ServerTimestamp.Low32 = 0;
-            dataValue->ServerTimestamp.High32 = 0;
+            dataValue->ServerTimestamp = 0;
         }
         if (SOPC_STATUS_OK == status && (encodingMask & SOPC_DataValue_NotZeroServerPico) != 0)
         {

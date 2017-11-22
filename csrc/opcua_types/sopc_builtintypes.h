@@ -78,11 +78,7 @@ typedef struct SOPC_String
 typedef SOPC_String SOPC_XmlElement;
 typedef SOPC_String SOPC_ByteString;
 
-typedef struct SOPC_DateTime
-{
-    uint32_t Low32;
-    uint32_t High32;
-} SOPC_DateTime;
+typedef int64_t SOPC_DateTime;
 
 typedef struct SOPC_Guid
 {
@@ -412,7 +408,6 @@ SOPC_ReturnStatus SOPC_DateTime_Compare(const SOPC_DateTime* left, const SOPC_Da
 SOPC_ReturnStatus SOPC_DateTime_CompareAux(const void* left, const void* right, int32_t* comparison);
 void SOPC_DateTime_Clear(SOPC_DateTime* dateTime);
 void SOPC_DateTime_ClearAux(void* value);
-int64_t SOPC_DateTime_ToInt64(const SOPC_DateTime* dateTime);
 void SOPC_DateTime_FromInt64(SOPC_DateTime* dateTime, int64_t date);
 
 void SOPC_Guid_Initialize(SOPC_Guid* guid);

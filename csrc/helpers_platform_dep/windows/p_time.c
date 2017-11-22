@@ -1,8 +1,3 @@
-/**
- *  \file sopc_time.h
- *
- *  \brief Tools for time management
- */
 /*
  *  Copyright (C) 2017 Systerel and others.
  *
@@ -20,26 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_TIME_H_
-#define SOPC_TIME_H_
+#include <stdint.h>
+#include <windows.h>
 
-#include "sopc_builtintypes.h"
+#include "sopc_time.h"
 
-/**
- *  \brief Suspend current thread execution for (at least) a microsecond interval
- *
- *  \param microsecs  The microsecond interval value for which execution must be suspended
- */
-void SOPC_Sleep(unsigned int microsecs);
+SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
+{
+    SOPC_DateTime result = 0;
+    FILETIME fileCurrentTime;
+    ULARGE_INTEGER currentTime;
 
-/**
- * \brief return the current time in DateTime format which is nanoseconds from 1601/01/01 00:00:00 UTC
- *
- * Note: since the clock is not monotonic, it should not be used to measure elapsed time
- *
- * \return the current time in DateTime format
- *
- */
-SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void);
+    GetSystemTimeAsFileTime(&fileCurrentTime);
+    currentTime.LowPart = fileCurrentTime.dwLowDateTime;
+    currentTime.HighPart = fileCurrentTime.dwHighDateTime;
 
-#endif /* SOPC_TIME_H_ */
+    result = currentTime.QuadPart;
+
+    return result;
+}
