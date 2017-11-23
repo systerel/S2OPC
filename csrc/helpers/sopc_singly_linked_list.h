@@ -67,6 +67,26 @@ void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value)
 void* SOPC_SLinkedList_Append(SOPC_SLinkedList* list, uint32_t id, void* value);
 
 /**
+ * \brief           Insert element in sorted list in correct index regarding compare function.
+ *                  The element will be inserted before the element for which the compare function return that new
+ * element is < to the existing element (compare returns -1 when new element is left operand and < to right operand).
+ *
+ *                  Important note: the provided list shall be sorted regarding the same compare function.
+ *
+ * \param list      Pointer to the linked list
+ * \param id        Identifier of the given value
+ * \param value     Value to insert in the sorted list
+ * \param pFn       Compare function pointer returning a int8_t equals to -1 if left value < right value, 0 if left
+ * value == right value and 1 if left value > right value
+ *
+ *  \return         Pointer to the value insterted, provided as parameter, if succeeded, NULL otherwise
+ */
+void* SOPC_SLinkedList_SortedInsert(SOPC_SLinkedList* list,
+                                    uint32_t id,
+                                    void* value,
+                                    int8_t (*pCompFn)(void* left, void* right));
+
+/**
  *  \brief          Get and remove the head element of the list
  *
  *  \param list     Pointer on the linked list from which head element must be returned and removed
@@ -143,5 +163,14 @@ SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list);
  * \param it        An iterator on a linked list
  */
 void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it);
+
+/**
+ * \brief           Get then number of elements in the linked list
+ *
+ * \param list      Pointer to the list
+ *
+ * \return          The number of elements in the list
+ */
+uint32_t SOPC_SLinkedList_GetLength(SOPC_SLinkedList* list);
 
 #endif /* SOPC_SINGLE_LINKED_LIST_H_ */

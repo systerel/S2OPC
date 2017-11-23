@@ -32,15 +32,6 @@ struct SOPC_EventDispatcherManager
     Thread mgrThread;
 };
 
-typedef struct SOPC_EventDispatcherParams
-{
-    int32_t event;
-    uint32_t eltId;
-    void* params;
-    uint32_t auxParam;
-    const char* debugName;
-} SOPC_EventDispatcherParams;
-
 static void* SOPC_ThreadStartEventDispatcherManager(void* pEventMgr)
 {
     assert(NULL != pEventMgr);

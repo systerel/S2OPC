@@ -94,4 +94,16 @@ SOPC_ReturnStatus SOPC_EventDispatcherManager_AddEventAsNext(SOPC_EventDispatche
  */
 SOPC_ReturnStatus SOPC_EventDispatcherManager_StopAndDelete(SOPC_EventDispatcherManager** eventMgr);
 
+/**
+ * \brief Internal use only
+ */
+typedef struct SOPC_EventDispatcherParams
+{
+    int32_t event;
+    uint32_t eltId;
+    void* params;
+    uint32_t auxParam;
+    const char* debugName;
+} SOPC_EventDispatcherParams;
+
 #endif /* SOPC_EVENT_DISPATCHER_MANAGER_H_ */
