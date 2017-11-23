@@ -47,15 +47,78 @@ START_TEST(test_current_time)
 }
 END_TEST
 
+START_TEST(test_elapsed_time)
+{
+    SOPC_DateTime tdate = SOPC_Time_GetCurrentTimeUTC();
+    SOPC_DateTime tdate2;
+    uint64_t elapsedMs = 0;
+    int8_t compareResult = 0;
+    SOPC_TimeReference* tref = NULL;
+    SOPC_TimeReference* tref2 = NULL;
+
+    tref = SOPC_TimeReference_GetCurrent();
+    ck_assert(tref != NULL);
+    /* Test SOPC_TimeReference_Compare */
+    // tref == tref
+    compareResult = SOPC_TimeReference_Compare(tref, tref);
+    ck_assert(compareResult == 0);
+
+    // NULL == NULL
+    compareResult = SOPC_TimeReference_Compare(NULL, NULL);
+    ck_assert(compareResult == 0);
+
+    // tref > NULL
+    compareResult = SOPC_TimeReference_Compare(tref, NULL);
+    ck_assert(compareResult == 1);
+
+    compareResult = SOPC_TimeReference_Compare(NULL, tref);
+    ck_assert(compareResult == -1);
+
+    // (tref2 > tref)
+    SOPC_Sleep(20); // Sleep 20 ms to ensure time is different (windows implementation less precise)
+    tref2 = SOPC_TimeReference_GetCurrent();
+    ck_assert(tref2 != NULL);
+
+    compareResult = SOPC_TimeReference_Compare(tref2, tref);
+    ck_assert(compareResult == 1);
+
+    compareResult = SOPC_TimeReference_Compare(tref, tref2);
+    ck_assert(compareResult == -1);
+
+    /* Test SOPC_TimeReference_AddMilliseconds */
+
+    // Nominal case (compute elpase time)
+    tref = SOPC_TimeReference_GetCurrent();
+    tref2 = SOPC_TimeReference_AddMilliseconds(tref, 1000);
+
+    // Wait 1000 ms elapsed (target time reference <= current time reference)
+    while (SOPC_TimeReference_Compare(tref2, tref) > 0)
+    {
+        SOPC_Sleep(50);
+        tref = SOPC_TimeReference_GetCurrent();
+    }
+    tdate2 = SOPC_Time_GetCurrentTimeUTC();
+    elapsedMs = (tdate2 - tdate) / 10000; // 100 nanoseconds to milliseconds
+
+    // Check computed elapsed time value (on non monotonic clock) is 1000ms +/- 100ms
+    ck_assert(1000 - 100 < elapsedMs && elapsedMs < 1000 + 100);
+    SOPC_TimeReference_Free(tref);
+    SOPC_TimeReference_Free(tref2);
+}
+END_TEST
+
 Suite* tests_make_suite_time(void)
 {
     Suite* s;
-    TCase* tc_time;
+    TCase *tc_time, *tc_elapsed_time;
 
     s = suite_create("Time tests");
     tc_time = tcase_create("Time");
     tcase_add_test(tc_time, test_current_time);
     suite_add_tcase(s, tc_time);
+    tc_elapsed_time = tcase_create("Elapsed Time");
+    tcase_add_test(tc_elapsed_time, test_elapsed_time);
+    suite_add_tcase(s, tc_elapsed_time);
 
     return s;
 }

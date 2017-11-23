@@ -76,7 +76,14 @@ typedef enum SOPC_ReturnStatus {
     SOPC_STATUS_NOT_SUPPORTED
 } SOPC_ReturnStatus;
 
-#define SOPC_USE_GCC true
+/**
+ * \brief the toolkit provide and use monotonic clock for time references (used for timers)
+ * Note: it is possible to set the clock as non monotonic defining variable on configuration. Otherwise default value is
+ * true.
+ */
+#ifndef SOPC_MONOTONIC_CLOCK
+#define SOPC_MONOTONIC_CLOCK true
+#endif
 
 #ifdef __GNUC__
 #ifndef __clang__

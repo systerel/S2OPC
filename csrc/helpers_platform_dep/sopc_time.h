@@ -25,6 +25,8 @@
 
 #include "sopc_builtintypes.h"
 
+#include "p_time.h"
+
 /**
  *  \brief Suspend current thread execution for (at least) a microsecond interval
  *
@@ -41,5 +43,44 @@ void SOPC_Sleep(unsigned int microsecs);
  *
  */
 SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void);
+
+/**
+ * \brief return the current time reference
+ *
+ * Note: clock is monotonic if SOPC_MONOTONIC_CLOCK is true
+ *
+ * \return the current time reference
+ *
+ */
+SOPC_TimeReference* SOPC_TimeReference_GetCurrent(void);
+
+/**
+ * \brief return the time reference corresponding to the given time reference incremented by the given duration in
+ * milliseconds
+ *
+ * \param timeRef the time reference to be incremented
+ * \param ms      the duration in milliseconds to use for increment
+ *
+ * \return the new time reference incremented by the given duration or with the maximum value in case of overflow
+ *         or NULL incase timerRef == NULL or new memory allocation failed
+ *
+ */
+SOPC_TimeReference* SOPC_TimeReference_AddMilliseconds(const SOPC_TimeReference* timeRef, uint64_t ms);
+
+/**
+ * \brief return the comparison of given time references
+ *
+ * \param left  the left time reference operand (NULL pointer considered less than any other value)
+ * \param right the right time reference operand (NULL pointer considered less than any other value)
+ *
+ * \return -1 if \p left < \p right operand, 0 if \p left = \p right and 1 if \p left > right
+ *
+ */
+int8_t SOPC_TimeReference_Compare(SOPC_TimeReference* left, SOPC_TimeReference* right);
+
+/**
+ * \brief free the given time reference
+ */
+void SOPC_TimeReference_Free(SOPC_TimeReference* tref);
 
 #endif /* SOPC_TIME_H_ */
