@@ -355,6 +355,13 @@ SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int
     if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0)
     {
         *readCount = recv(sock, data, dataSize, 0);
+
+        /* Extract of man recv (release 3.54 of the Linux man-pages project):
+         * RETURN VALUE
+         * These calls return the number of bytes received, or -1 if an error occurred.  In the event of an error,
+         * errno is set to indicate the error.  The return value will be 0 when the peer has performed  an orderly
+         * shutdown. */
+
         if (*readCount > 0)
         {
             status = SOPC_STATUS_OK;
@@ -365,6 +372,12 @@ SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int
         }
         else if (*readCount == -1)
         {
+            /* Extract of man recv (release 3.54 of the Linux man-pages project):
+             * If  no  messages  are available at the socket, the receive calls wait for a message to arrive, unless the
+             * socket is onblocking (see fcntl(2)), in which case the value -1 is returned and the external variable
+             * errno is set to EAGAIN or  WOULDBLOCK.  The receive calls normally return any data available, up to the
+             * requested amount, rather than waiting for receipt of the full amount requested.*/
+
             if (errno == EAGAIN || errno == EWOULDBLOCK)
             {
                 status = SOPC_STATUS_WOULD_BLOCK;
