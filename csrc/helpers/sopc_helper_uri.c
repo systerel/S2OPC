@@ -27,11 +27,11 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size
 {
     bool result = false;
     size_t idx = 0;
-    uint8_t isPort = false;
-    uint8_t hasPort = false;
-    uint8_t hasName = false;
-    uint8_t invalid = false;
-    uint8_t startIPv6 = false;
+    bool isPort = false;
+    bool hasPort = false;
+    bool hasName = false;
+    bool invalid = false;
+    bool startIPv6 = false;
     if (uri != NULL && hostnameLength != NULL && portLength != NULL)
     {
         *hostnameLength = 0;
@@ -47,14 +47,14 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size
             // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
             for (idx = 10; idx < strlen(uri) - 1; idx++)
             {
-                if (isPort)
+                if (false != isPort)
                 {
                     if (uri[idx] >= '0' && uri[idx] <= '9')
                     {
                         if (false == hasPort)
                         {
                             // port definition
-                            hasPort = 1;
+                            hasPort = true;
                             *portIdx = idx;
                         }
                     }
@@ -63,12 +63,12 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size
                         // Name of the endpoint after port, invalid otherwise
                         if (false == hasPort)
                         {
-                            invalid = 1;
+                            invalid = true;
                         }
                         else
                         {
                             *portLength = idx - *portIdx;
-                            hasName = 1;
+                            hasName = true;
                         }
                     }
                     else
@@ -76,7 +76,7 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size
                         if (false == hasPort || false == hasName)
                         {
                             // unexpected character: we do not expect a endpoint name
-                            invalid = 1;
+                            invalid = true;
                         }
                     }
                 }
@@ -85,17 +85,17 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size
                     if (uri[idx] == ':' && false == startIPv6)
                     {
                         *hostnameLength = idx - 10;
-                        isPort = 1;
+                        isPort = true;
                     }
                     else if (uri[idx] == '[')
                     {
-                        startIPv6 = 1;
+                        startIPv6 = true;
                     }
                     else if (uri[idx] == ']')
                     {
                         if (false == startIPv6)
                         {
-                            invalid = 1;
+                            invalid = true;
                         }
                         else
                         {

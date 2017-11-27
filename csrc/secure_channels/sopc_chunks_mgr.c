@@ -2946,7 +2946,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
 
     assert(buffer != NULL);
 
-    if (scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
+    if (scConnection != NULL && scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
     {
         switch (event)
         {
