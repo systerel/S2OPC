@@ -27,7 +27,7 @@ typedef struct SOPC_EventTimer
     uint32_t id;
     SOPC_EventDispatcherManager* eventMgr;
     SOPC_EventDispatcherParams eventParams;
-    SOPC_TimeReference* endTime;
+    SOPC_TimeReference endTime;
 } SOPC_EventTimer;
 
 #define SOPC_MAX_TIMERS UINT16_MAX
@@ -146,22 +146,19 @@ void SOPC_EventTimer_Clear()
 
 uint32_t SOPC_EventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
                                 SOPC_EventDispatcherParams eventParams,
-                                SOPC_TimeReference* startTime,
                                 uint64_t msDelay)
 {
     SOPC_EventTimer* newTimer = NULL;
-    SOPC_TimeReference* targetTime = NULL;
+    SOPC_TimeReference targetTime = 0;
     uint32_t result = 0;
     void* insertResult = NULL;
     if (false != initialized)
     {
         // Create target time reference
-        targetTime = SOPC_TimeReference_AddMilliseconds(startTime, msDelay);
-        if (NULL != targetTime)
-        {
-            // Allocate new timer
-            newTimer = calloc(1, sizeof(SOPC_EventTimer));
-        }
+        targetTime = SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference_GetCurrent(), msDelay);
+        // Allocate new timer
+        newTimer = calloc(1, sizeof(SOPC_EventTimer));
+
         if (NULL != newTimer)
         {
             // Configure timeout parameters
@@ -215,7 +212,7 @@ void SOPC_EventTimer_CyclicTimersEvaluation()
 {
     SOPC_SLinkedListIterator timerIt = NULL;
     SOPC_EventTimer* timer = NULL;
-    SOPC_TimeReference* currentTimeRef = NULL;
+    SOPC_TimeReference currentTimeRef = 0;
     int8_t compareResult = 0;
     uint32_t timerId = 0;
     if (false != initialized)

@@ -53,31 +53,18 @@ START_TEST(test_elapsed_time)
     SOPC_DateTime tdate2;
     uint64_t elapsedMs = 0;
     int8_t compareResult = 0;
-    SOPC_TimeReference* tref = NULL;
-    SOPC_TimeReference* tref2 = NULL;
+    SOPC_TimeReference tref = 0;
+    SOPC_TimeReference tref2 = 0;
 
     tref = SOPC_TimeReference_GetCurrent();
-    ck_assert(tref != NULL);
     /* Test SOPC_TimeReference_Compare */
     // tref == tref
     compareResult = SOPC_TimeReference_Compare(tref, tref);
     ck_assert(compareResult == 0);
 
-    // NULL == NULL
-    compareResult = SOPC_TimeReference_Compare(NULL, NULL);
-    ck_assert(compareResult == 0);
-
-    // tref > NULL
-    compareResult = SOPC_TimeReference_Compare(tref, NULL);
-    ck_assert(compareResult == 1);
-
-    compareResult = SOPC_TimeReference_Compare(NULL, tref);
-    ck_assert(compareResult == -1);
-
     // (tref2 > tref)
     SOPC_Sleep(20); // Sleep 20 ms to ensure time is different (windows implementation less precise)
     tref2 = SOPC_TimeReference_GetCurrent();
-    ck_assert(tref2 != NULL);
 
     compareResult = SOPC_TimeReference_Compare(tref2, tref);
     ck_assert(compareResult == 1);
@@ -102,8 +89,6 @@ START_TEST(test_elapsed_time)
 
     // Check computed elapsed time value (on non monotonic clock) is 1000ms +/- 100ms
     ck_assert(1000 - 100 < elapsedMs && elapsedMs < 1000 + 100);
-    SOPC_TimeReference_Free(tref);
-    SOPC_TimeReference_Free(tref2);
 }
 END_TEST
 

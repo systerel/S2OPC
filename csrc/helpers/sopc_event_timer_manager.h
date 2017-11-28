@@ -39,15 +39,13 @@ void SOPC_EventTimer_Clear(void);
  *
  * \param eventMgr    the event dispatch manager to which event params will be provided on timeout
  * \param eventParams the event parameters that will be provided on timeout to the event dispatch manager
- * \param startTime   the time reference to be used as start time
- * \param msDelay     the delay from time reference before timeout in milliseconds
+ * \param msDelay     the delay from current time before timeout in milliseconds
  *
  * \return the timer identifier
  *
  * */
 uint32_t SOPC_EventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
                                 SOPC_EventDispatcherParams eventParams,
-                                SOPC_TimeReference* startTime,
                                 uint64_t msDelay);
 
 /**

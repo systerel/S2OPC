@@ -33,7 +33,7 @@ else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-file(GLOB PLATFORM_SRCS "csrc/helpers_platform_dep/${PLATFORM_DIR}/*.c")
+file(GLOB PLATFORM_SRCS "csrc/helpers_platform_dep/*.c" "csrc/helpers_platform_dep/${PLATFORM_DIR}/*.c")
 
 # Set specialized compilation flags for platform dependent source files
 if(UNIX)

@@ -27,8 +27,9 @@
  * UTC), and Linux times starts on epoch, 1970/01/01 00:00:00 UTC.
  * */
 static const uint64_t SOPC_SECONDS_BETWEEN_EPOCHS = 11644473600;
-static const uint64_t SOPC_SECONDS_TO_100_NANOSECONDS = 10000000; // 10^7
-static const uint64_t SOPC_MILLISECONDS_TO_NANOSECONDS = 1000000; // 10^6
+static const uint64_t SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7
+static const uint64_t SOPC_SECOND_TO_NANOSECONDS = 1000000000;   // 10^9
+static const uint64_t SOPC_MILLISECOND_TO_NANOSECONDS = 1000000; // 10^6
 
 SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
 {
@@ -50,9 +51,9 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
         if (UINT64_MAX - SOPC_SECONDS_BETWEEN_EPOCHS > intermediateResult)
         {
             intermediateResult += SOPC_SECONDS_BETWEEN_EPOCHS;
-            if (UINT64_MAX / SOPC_SECONDS_TO_100_NANOSECONDS > intermediateResult)
+            if (UINT64_MAX / SOPC_SECOND_TO_100_NANOSECONDS > intermediateResult)
             {
-                intermediateResult *= SOPC_SECONDS_TO_100_NANOSECONDS;
+                intermediateResult *= SOPC_SECOND_TO_100_NANOSECONDS;
                 result = currentTime.tv_nsec / 100; // set nanosecs in 100 nanosecs
                 if ((uint64_t) INT64_MAX >= intermediateResult + (uint64_t) result)
                 {
@@ -76,7 +77,7 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
     return result;
 }
 
-SOPC_TimeReference* SOPC_TimeReference_GetCurrent()
+SOPC_TimeReference SOPC_TimeReference_GetCurrent()
 {
     /* Extract of clock_gettime documentation:
      *
@@ -96,128 +97,47 @@ SOPC_TimeReference* SOPC_TimeReference_GetCurrent()
      */
 
     int gettimeResult;
-    SOPC_TimeReference* result = calloc(1, sizeof(SOPC_TimeReference));
+    struct timespec currentTime;
+    SOPC_TimeReference result = 0;
+    uint64_t nanosecs = 0;
 
-    if (result != NULL)
+    gettimeResult = clock_gettime(CLOCK_MONOTONIC_RAW, &currentTime);
+    if (gettimeResult != 0)
     {
-        gettimeResult = clock_gettime(CLOCK_MONOTONIC_RAW, result);
-        if (gettimeResult != 0)
-        {
-            gettimeResult = clock_gettime(CLOCK_MONOTONIC, result);
-        }
-        if (gettimeResult != 0)
-        {
-            /* If the system does not support monotonic clock,
-             * it is necessary to set SOPC_MONOTONIC_CLOCK to false.
-             * In this latter case the real time is used which is not monotonic
-             * and there is no guarantee on elapsed duration computation.
-             * */
-            assert(false == SOPC_MONOTONIC_CLOCK);
-            gettimeResult = clock_gettime(CLOCK_REALTIME, result);
-            // Realtime clock shall always be available
-            assert(0 == gettimeResult);
-        }
+        gettimeResult = clock_gettime(CLOCK_MONOTONIC, &currentTime);
     }
-    return result;
-}
-
-SOPC_TimeReference* SOPC_TimeReference_AddMilliseconds(const SOPC_TimeReference* timeRef, uint64_t ms)
-{
-    SOPC_TimeReference* result = NULL;
-    uint64_t seconds;
-    uint64_t nanoseconds;
-
-    if (timeRef != NULL)
+    if (gettimeResult != 0)
     {
-        result = calloc(1, sizeof(SOPC_TimeReference));
+        /* If the system does not support monotonic clock,
+         * it is necessary to set SOPC_MONOTONIC_CLOCK to false.
+         * In this latter case the real time is used which is not monotonic
+         * and there is no guarantee on elapsed duration computation.
+         * */
+        assert(false == SOPC_MONOTONIC_CLOCK);
+        gettimeResult = clock_gettime(CLOCK_REALTIME, &currentTime);
     }
+    // At least realtime clock shall always be available
+    assert(0 == gettimeResult);
 
-    if (result != NULL)
+    if (currentTime.tv_sec > 0 && UINT64_MAX / 1000 > (uint64_t) currentTime.tv_sec)
     {
-        seconds = ms / 1000; // seconds
+        result = (uint64_t) currentTime.tv_sec * 1000; // Add seconds to results
 
-        if (seconds > (uint64_t) INT64_MAX - (uint64_t) timeRef->tv_sec)
+        if (currentTime.tv_nsec > 0 && (uint64_t) currentTime.tv_nsec < SOPC_SECOND_TO_NANOSECONDS)
         {
-            result->tv_sec = INT64_MAX;
+            nanosecs = (uint64_t) currentTime.tv_nsec;
         }
         else
         {
-            result->tv_sec = timeRef->tv_sec + (int64_t) seconds; // Add seconds
+            nanosecs = SOPC_SECOND_TO_NANOSECONDS - 1; // Use maximum nanoseconds representable (< 1 second)
         }
-
-        // milliseconds rest
-        nanoseconds = ms % 1000;
-        // milliseconds to nanoseconds
-        if (nanoseconds > (uint64_t) INT64_MAX / SOPC_MILLISECONDS_TO_NANOSECONDS)
-        {
-            nanoseconds = UINT64_MAX; // > INT64_MAX - timeRef->tv_nsec
-        }
-        else
-        {
-            nanoseconds = nanoseconds * SOPC_MILLISECONDS_TO_NANOSECONDS;
-        }
-
-        if (nanoseconds > (uint64_t) INT64_MAX - (uint64_t) timeRef->tv_nsec)
-        {
-            result->tv_nsec = INT64_MAX;
-        }
-        else
-        {
-            result->tv_nsec = timeRef->tv_nsec + (int64_t) nanoseconds;
-        }
-    }
-
-    return result;
-}
-
-int8_t SOPC_TimeReference_Compare(SOPC_TimeReference* left, SOPC_TimeReference* right)
-{
-    int8_t result = 0;
-    if (NULL == left && NULL == right)
-    {
-        result = 0;
-    }
-    else if (NULL == left)
-    {
-        result = -1;
-    }
-    else if (NULL == right)
-    {
-        result = 1;
+        // Since nanosecs < 1 second no overflow possible
+        result = result + nanosecs / SOPC_MILLISECOND_TO_NANOSECONDS; // Add milliseconds to result
     }
     else
     {
-        if (left->tv_sec == right->tv_sec)
-        {
-            if (left->tv_nsec == right->tv_nsec)
-            {
-                result = 0;
-            }
-            else if (left->tv_nsec < right->tv_nsec)
-            {
-                result = -1;
-            }
-            else
-            {
-                result = 1;
-            }
-        }
-        else if (left->tv_sec < right->tv_sec)
-        {
-            result = -1;
-        }
-        else
-        {
-            result = 1;
-        }
+        result = UINT64_MAX; // Use maximum representable value
     }
-    return result;
-}
 
-void SOPC_TimeReference_Free(SOPC_TimeReference* tref)
-{
-    if (NULL != tref)
-    {
-        free(tref);
-    }
+    return result;
 }

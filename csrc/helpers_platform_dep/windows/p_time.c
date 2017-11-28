@@ -35,7 +35,7 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
     return result;
 }
 
-SOPC_TimeReference* SOPC_TimeReference_GetCurrent()
+SOPC_TimeReference SOPC_TimeReference_GetCurrent()
 {
     /* Extract of GetTickCount64 function documentation:
      *
@@ -46,73 +46,5 @@ SOPC_TimeReference* SOPC_TimeReference_GetCurrent()
      * Note: more precise counter could be used if necessary:
      * https://msdn.microsoft.com/en-us/library/windows/desktop/dn553408%28v=vs.85%29.aspx
      */
-    SOPC_TimeReference* result = calloc(1, sizeof(SOPC_TimeReference));
-    if (NULL != result)
-    {
-        *result = GetTickCount64();
-    }
-    return result;
-}
-
-SOPC_TimeReference* SOPC_TimeReference_AddMilliseconds(const SOPC_TimeReference* timeRef, uint64_t ms)
-{
-    SOPC_TimeReference* result = NULL;
-    if (timeRef != NULL)
-    {
-        result = calloc(1, sizeof(SOPC_TimeReference));
-    }
-
-    if (result != NULL)
-    {
-        if (ms > UINT64_MAX - *timeRef)
-        {
-            *result = UINT64_MAX;
-        }
-        else
-        {
-            *result = *timeRef + ms;
-        }
-    }
-    return result;
-}
-
-int8_t SOPC_TimeReference_Compare(SOPC_TimeReference* left, SOPC_TimeReference* right)
-{
-    int8_t result = 0;
-    if (NULL == left && NULL == right)
-    {
-        result = 0;
-    }
-    else if (NULL == left)
-    {
-        result = -1;
-    }
-    else if (NULL == right)
-    {
-        result = 1;
-    }
-    else
-    {
-        if (*left == *right)
-        {
-            result = 0;
-        }
-        else if (*left < *right)
-        {
-            result = -1;
-        }
-        else
-        {
-            result = 1;
-        }
-    }
-    return result;
-}
-
-void SOPC_TimeReference_Free(SOPC_TimeReference* tref)
-{
-    if (NULL != tref)
-    {
-        free(tref);
-    }
+    return GetTickCount64();
 }
