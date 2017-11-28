@@ -60,6 +60,7 @@ void SOPC_EventTimer_Cancel(uint32_t timerId);
  * \brief Evaluation of the started timers, in case of timeout the given event will be triggered to the given event
  * dispatcher manager
  *
+ * Note: this function is automatically called by the toolkit
  */
 void SOPC_EventTimer_CyclicTimersEvaluation(void);
 
