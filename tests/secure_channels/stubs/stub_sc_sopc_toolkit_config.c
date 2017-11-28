@@ -20,6 +20,7 @@
 
 #include <stdbool.h>
 
+#include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianess_cfg.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_singly_linked_list.h"
@@ -46,6 +47,7 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 
     if (NULL != epConfigs)
     {
+        SOPC_EventTimer_Initialize();
         SOPC_Sockets_Initialize();
         SOPC_SecureChannels_Initialize();
         SOPC_Services_Initialize();
@@ -94,6 +96,7 @@ static void SOPC_Toolkit_ClearScConfigs(void)
 void SOPC_Toolkit_Clear()
 {
     SOPC_Sockets_Clear();
+    SOPC_EventTimer_Clear();
     SOPC_SecureChannels_Clear();
     SOPC_Services_Clear();
     SOPC_Toolkit_ClearScConfigs();

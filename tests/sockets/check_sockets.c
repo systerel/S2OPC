@@ -27,6 +27,7 @@
 
 #include "sopc_buffer.h"
 
+#include "sopc_event_timer_manager.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_sockets_api.h"
 #include "stub_sockets_sopc_secure_channels_api.h"
@@ -51,6 +52,7 @@ START_TEST(test_sockets)
     uint32_t receivedBytes = 0;
     uint8_t attempts = 0;
 
+    SOPC_EventTimer_Initialize();
     SOPC_SecureChannels_Initialize();
     SOPC_Sockets_Initialize();
 
@@ -213,6 +215,7 @@ START_TEST(test_sockets)
     scEventParams = NULL;
 
     SOPC_Sockets_Clear();
+    SOPC_EventTimer_Clear();
     SOPC_SecureChannels_Clear();
 }
 END_TEST

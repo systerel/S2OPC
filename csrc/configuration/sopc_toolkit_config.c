@@ -29,6 +29,7 @@
 #include "sopc_sockets_api.h"
 
 #include "sopc_encodeable.h"
+#include "sopc_event_timer_manager.h"
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_time.h"
@@ -129,6 +130,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 
             if (NULL != tConfig.epConfigs)
             {
+                SOPC_EventTimer_Initialize();
                 SOPC_Sockets_Initialize();
                 SOPC_SecureChannels_Initialize();
                 SOPC_Services_Initialize();
@@ -191,6 +193,7 @@ void SOPC_Toolkit_Clear()
         SOPC_Services_PreClear();
 
         SOPC_Sockets_Clear();
+        SOPC_EventTimer_Clear();
         SOPC_SecureChannels_Clear();
         SOPC_Services_Clear();
 

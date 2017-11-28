@@ -25,6 +25,7 @@
 #include "sopc_sockets_api.h"
 #include "sopc_sockets_internal_ctx.h"
 
+#include "sopc_event_timer_manager.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
@@ -209,8 +210,8 @@ static void* SOPC_SocketsNetworkEventMgr_CyclicThreadLoop(void* nullData)
     (void) nullData;
     while (receptionThread.stopFlag == false)
     {
-        SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(CYCLE_TIMEOUT_MS);
-        SOPC_Sleep(1);
+        SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(SOPC_MAX_CYCLE_TIMEOUT_MS);
+        SOPC_EventTimer_CyclicTimersEvaluation();
     }
     return NULL;
 }
