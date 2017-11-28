@@ -21,6 +21,8 @@
 #ifndef CHECK_HELPERS_H
 #define CHECK_HELPERS_H
 
+#include <check.h>
+
 Suite* tests_make_suite_crypto_B256S256(void);
 Suite* tests_make_suite_crypto_B256(void);
 Suite* tests_make_suite_crypto_None(void);
@@ -30,5 +32,7 @@ Suite* tests_make_suite_tools(void);
 Suite* tests_make_suite_threads(void);
 
 Suite* tests_make_suite_time(void);
+
+Suite* tests_make_suite_timers(void);
 
 #endif // CHECK_HELPERS_H
