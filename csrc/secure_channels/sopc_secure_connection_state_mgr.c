@@ -1784,9 +1784,14 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
 
         if (result != false)
         {
+            // Note: the revised lifetime is not updated in SC configuration for RENEW
             if (opnReq->RequestedLifetime < SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME)
             {
                 *requestedLifetime = SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME;
+            }
+            else
+            {
+                *requestedLifetime = opnReq->RequestedLifetime;
             }
         }
 
