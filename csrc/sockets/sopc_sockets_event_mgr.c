@@ -655,37 +655,40 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
         socketElt = &socketsArray[eltId];
 
-        buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
-        if (NULL != buffer)
+        if (socketElt->state == SOCKET_STATE_CONNECTED)
         {
-            status = Socket_Read(socketElt->sock, buffer->data, SOPC_MAX_MESSAGE_LENGTH, &readBytes);
-        }
-        else
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-        if (status == SOPC_STATUS_WOULD_BLOCK)
-        {
-            SOPC_Buffer_Delete(buffer);
-            buffer = NULL;
-            // wait next ready to read event
-        }
-        else if (SOPC_STATUS_OK == status && readBytes >= 0)
-        {
-            // Update buffer lengtn
-            SOPC_Buffer_SetDataLength(buffer, readBytes);
-            // Transmit to secure channel connection associated
-            SOPC_SecureChannels_EnqueueEvent(SOCKET_RCV_BYTES, socketElt->connectionId, (void*) buffer, eltId);
-        }
-        else
-        {
-            SOPC_Buffer_Delete(buffer);
-            buffer = NULL;
-            // Failure during read operation or out of memory
-            // TODO: log
-            SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
-            SOPC_SocketsInternalContext_CloseSocket(eltId);
-        }
+            buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
+            if (NULL != buffer)
+            {
+                status = Socket_Read(socketElt->sock, buffer->data, SOPC_MAX_MESSAGE_LENGTH, &readBytes);
+            }
+            else
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            if (status == SOPC_STATUS_WOULD_BLOCK)
+            {
+                SOPC_Buffer_Delete(buffer);
+                buffer = NULL;
+                // wait next ready to read event
+            }
+            else if (SOPC_STATUS_OK == status && readBytes >= 0)
+            {
+                // Update buffer lengtn
+                SOPC_Buffer_SetDataLength(buffer, readBytes);
+                // Transmit to secure channel connection associated
+                SOPC_SecureChannels_EnqueueEvent(SOCKET_RCV_BYTES, socketElt->connectionId, (void*) buffer, eltId);
+            }
+            else
+            {
+                SOPC_Buffer_Delete(buffer);
+                buffer = NULL;
+                // Failure during read operation or out of memory
+                // TODO: log
+                SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
+                SOPC_SocketsInternalContext_CloseSocket(eltId);
+            }
+        } // else: ignore event since socket could have been closed since event was triggered
 
         break;
     case INT_SOCKET_READY_TO_WRITE:
@@ -696,19 +699,21 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         socketElt = &socketsArray[eltId];
 
         // Socket is connected
-        assert(socketElt->state == SOCKET_STATE_CONNECTED);
+        if (socketElt->state == SOCKET_STATE_CONNECTED)
+        {
+            if (socketElt->isNotWritable == false)
+            {
+                // Not expected: ignore
+            }
+            else
+            {
+                // Socket was not writable
+                socketElt->isNotWritable = false;
+                // Trigger the socket write treatment
+                SOPC_SocketsEventMgr_TreatWriteBuffer(socketElt);
+            }
+        } // else: ignore event since socket could have been closed since event was triggered
 
-        if (socketElt->isNotWritable == false)
-        {
-            // Not expected: ignore
-        }
-        else
-        {
-            // Socket was not writable
-            socketElt->isNotWritable = false;
-            // Trigger the socket write treatment
-            SOPC_SocketsEventMgr_TreatWriteBuffer(socketElt);
-        }
         break;
     default:
         assert(false);
