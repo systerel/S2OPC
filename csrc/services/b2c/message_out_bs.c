@@ -50,7 +50,7 @@ void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message_out_bs
 {
     void* header = NULL;
     void* msg = NULL;
-    SOPC_StatusCode status = SOPC_STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     SOPC_EncodeableType* encTyp = NULL;
     SOPC_EncodeableType* reqEncTyp = NULL;
@@ -102,7 +102,7 @@ void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message_out_bs
 void message_out_bs__alloc_app_req_msg_header(constants__t_msg_header_i* const message_out_bs__nmsg_header)
 {
     void* header = NULL;
-    SOPC_StatusCode status = SOPC_Encodeable_Create(&OpcUa_RequestHeader_EncodeableType, &header);
+    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_RequestHeader_EncodeableType, &header);
     if (SOPC_STATUS_OK == status)
     {
         *message_out_bs__nmsg_header = (constants__t_msg_header_i) header;
@@ -191,7 +191,7 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
                                 constants__t_byte_buffer_i* const message_out_bs__buffer)
 {
     *message_out_bs__buffer = constants__c_byte_buffer_indet;
-    SOPC_StatusCode status = SOPC_STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) message_out_bs__msg;
     SOPC_EncodeableType* headerType = *(SOPC_EncodeableType**) message_out_bs__msg_header;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
@@ -316,7 +316,7 @@ void message_out_bs__write_create_session_msg_session_token(
     const constants__t_session_token_i message_out_bs__session_token)
 {
     OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) message_out_bs__msg;
-    SOPC_StatusCode status;
+    SOPC_ReturnStatus status;
     status = SOPC_NodeId_Copy(&createSessionResp->AuthenticationToken, message_out_bs__session_token);
     assert(SOPC_STATUS_OK == status);
     status = SOPC_NodeId_Copy(&createSessionResp->SessionId, message_out_bs__session_token);
@@ -472,7 +472,7 @@ void message_out_bs__write_msg_out_header_session_token(
 void message_out_bs__write_msg_resp_header_service_status(const constants__t_msg_header_i message_out_bs__msg_header,
                                                           const constants__t_StatusCode_i message_out_bs__status_code)
 {
-    SOPC_StatusCode status = OpcUa_BadInternalError;
+    SOPC_ReturnStatus status = OpcUa_BadInternalError;
     util_status_code__B_to_C(message_out_bs__status_code, &status);
     ((OpcUa_ResponseHeader*) message_out_bs__msg_header)->ServiceResult = status;
 }

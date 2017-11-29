@@ -32,7 +32,7 @@ static SOPC_SLinkedList* epConfigs = NULL;
 static uint32_t scConfigIdxMax = 0;
 static uint32_t epConfigIdxMax = 0;
 
-SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
+SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 {
     (void) pAppFct;
 
@@ -64,7 +64,7 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
     }
 }
 
-SOPC_StatusCode SOPC_Toolkit_Configured()
+SOPC_ReturnStatus SOPC_Toolkit_Configured()
 {
     return SOPC_STATUS_OK;
 }
@@ -104,9 +104,9 @@ void SOPC_Toolkit_Clear()
     epConfigs = NULL;
 }
 
-static SOPC_StatusCode SOPC_IntToolkitConfig_AddConfig(SOPC_SLinkedList* configList, uint32_t idx, void* config)
+static SOPC_ReturnStatus SOPC_IntToolkitConfig_AddConfig(SOPC_SLinkedList* configList, uint32_t idx, void* config)
 {
-    SOPC_StatusCode status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     void* res = SOPC_SLinkedList_FindFromId(configList, idx);
     if (NULL == res && NULL != config)
     { // Idx is unique
@@ -125,7 +125,7 @@ static SOPC_StatusCode SOPC_IntToolkitConfig_AddConfig(SOPC_SLinkedList* configL
 uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
 {
     uint32_t result = 0;
-    SOPC_StatusCode status;
+    SOPC_ReturnStatus status;
     if (NULL != scConfig)
     {
         scConfigIdxMax++;

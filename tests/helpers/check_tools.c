@@ -76,7 +76,7 @@ END_TEST
 
 START_TEST(test_buffer_create)
 {
-    SOPC_StatusCode status = 0;
+    SOPC_ReturnStatus status = 0;
 
     // Test creation
     //// Test nominal case
@@ -123,7 +123,7 @@ START_TEST(test_buffer_read_write)
 {
     uint8_t data[4] = {0x00, 0x01, 0x02, 0x03};
     uint8_t readData[4] = {0x00, 0x00, 0x00, 0x00};
-    SOPC_StatusCode status = 0;
+    SOPC_ReturnStatus status = 0;
     SOPC_Buffer* buf = NULL;
 
     // Test write
@@ -245,7 +245,7 @@ END_TEST
 START_TEST(test_buffer_copy)
 {
     uint8_t data[4] = {0x00, 0x01, 0x02, 0x03};
-    SOPC_StatusCode status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buf = NULL;
     SOPC_Buffer* buf2 = NULL;
 
@@ -354,7 +354,7 @@ END_TEST
 START_TEST(test_buffer_reset)
 {
     uint8_t data[4] = {0x00, 0x01, 0x02, 0x03};
-    SOPC_StatusCode status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buf = NULL;
 
     // Test copy
@@ -435,7 +435,7 @@ END_TEST
 START_TEST(test_buffer_set_properties)
 {
     uint8_t data[4] = {0x00, 0x01, 0x02, 0x03};
-    SOPC_StatusCode status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buf = NULL;
 
     // Test copy
@@ -881,7 +881,7 @@ START_TEST(test_async_queue)
     SOPC_AsyncQueue* queue = NULL;
     int paramAndRes = -10;
     int paramAndRes2 = 0;
-    SOPC_StatusCode status = SOPC_AsyncQueue_Init(&queue, NULL);
+    SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&queue, NULL);
     ck_assert(status == SOPC_STATUS_OK);
     status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &paramAndRes);
     ck_assert(status == SOPC_STATUS_OK);
@@ -910,7 +910,7 @@ typedef struct AsyncQueue_Element
 void* test_async_queue_blocking_dequeue_fct(void* args)
 {
     void* arg = NULL;
-    SOPC_StatusCode status;
+    SOPC_ReturnStatus status;
     AsyncQueue_Element* param = (AsyncQueue_Element*) args;
     uint8_t nbDequeued = 0;
     uint8_t lastValueDeq = 0;
@@ -939,7 +939,7 @@ void* test_async_queue_blocking_dequeue_fct(void* args)
 void* test_async_queue_nonblocking_dequeue_fct(void* args)
 {
     void* arg = NULL;
-    SOPC_StatusCode status;
+    SOPC_ReturnStatus status;
     AsyncQueue_Element* param = (AsyncQueue_Element*) args;
     uint8_t nbDequeued = 0;
     uint8_t lastValueDeq = 0;
@@ -984,7 +984,7 @@ START_TEST(test_async_queue_threads)
     uint8_t three = 3;
     uint8_t four = 4;
     uint8_t five = 5;
-    SOPC_StatusCode status = SOPC_AsyncQueue_Init(&queue, NULL);
+    SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&queue, NULL);
     params.success = false;
     params.blockingDequeue = false;
     params.nbMsgs = 5;
@@ -1209,7 +1209,7 @@ END_TEST
 START_TEST(test_ua_encoder_basic_types)
 {
     SOPC_Helper_EndianessCfg_Initialize(); // Necessary to initialize endianess configuration
-    SOPC_StatusCode status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 
     SOPC_Buffer* bufferFull = SOPC_Buffer_Create(8);
@@ -1623,7 +1623,7 @@ END_TEST
 START_TEST(test_ua_encoder_other_types)
 {
     SOPC_Helper_EndianessCfg_Initialize(); // Necessary to initialize endianess configuration
-    SOPC_StatusCode status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 
     SOPC_Buffer* bufferFull = SOPC_Buffer_Create(8);

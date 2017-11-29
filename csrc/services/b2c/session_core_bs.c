@@ -415,7 +415,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
             if (pSCCfg->crt_srv != NULL)
             {
                 uint32_t tmpLength;
-                SOPC_StatusCode status;
+                SOPC_ReturnStatus status;
                 // retrieve expected sender certificate as a ByteString
                 status = SOPC_KeyManager_Certificate_CopyDER(pSCCfg->crt_srv, &serverCert.Data, &tmpLength);
                 if (SOPC_STATUS_OK != status)
