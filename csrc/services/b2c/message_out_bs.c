@@ -33,6 +33,7 @@
 #include "constants_bs.h"
 
 #include "sopc_encoder.h"
+#include "sopc_time.h"
 #include "sopc_toolkit_config_internal.h"
 #include "util_discovery_services.h"
 
@@ -191,6 +192,8 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
                                 constants__t_byte_buffer_i* const message_out_bs__buffer)
 {
     *message_out_bs__buffer = constants__c_byte_buffer_indet;
+    OpcUa_RequestHeader* reqHeader = NULL;
+    OpcUa_ResponseHeader* respHeader = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) message_out_bs__msg;
     SOPC_EncodeableType* headerType = *(SOPC_EncodeableType**) message_out_bs__msg_header;
@@ -216,6 +219,26 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
         status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
                                                      SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
                                                      SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Encode req/resp header content not dependent on message content
+        if (&OpcUa_RequestHeader_EncodeableType == headerType)
+        {
+            reqHeader = (OpcUa_RequestHeader*) message_out_bs__msg_header;
+            reqHeader->Timestamp = SOPC_Time_GetCurrentTimeUTC();
+            // TODO: reqHeader->AuditEntryId ?
+            reqHeader->TimeoutHint = 0; // TODO: to be configured by each service ?
+        }
+        else if (&OpcUa_ResponseHeader_EncodeableType == headerType)
+        {
+            respHeader = (OpcUa_ResponseHeader*) message_out_bs__msg_header;
+            respHeader->Timestamp = SOPC_Time_GetCurrentTimeUTC();
+        }
+        else
+        {
+            assert(false);
+        }
     }
     if (SOPC_STATUS_OK == status)
     {

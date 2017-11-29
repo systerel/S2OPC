@@ -33,6 +33,7 @@
 #include "sopc_services_api.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_sockets_api.h"
+#include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_toolkit_constants.h"
@@ -259,6 +260,7 @@ static void SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnectio
         // Fill header
         reqHeader.RequestHandle = scConnectionIdx;
         // TODO: reqHeader.AuditEntryId ?
+        reqHeader.Timestamp = SOPC_Time_GetCurrentTimeUTC();
         reqHeader.TimeoutHint = 0; // TODO: define same timeout as the one set to set SC disconnected without response
 
         // Fill close request
@@ -765,6 +767,7 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
     {
         // Fill request header
         reqHeader.RequestHandle = scConnectionIdx;
+        reqHeader.Timestamp = SOPC_Time_GetCurrentTimeUTC();
         // TODO: reqHeader.AuditEntryId ?
         reqHeader.TimeoutHint = 0; // TODO: define same timeout as the one set to set SC disconnected without response
 
@@ -1659,7 +1662,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
                     uint8_t* bytes = NULL;
                     bytes = SOPC_SecretBuffer_Expose(serverNonce);
                     status = SOPC_ByteString_CopyFromBytes(&opnResp.ServerNonce, bytes,
-                                                           SOPC_SecretBuffer_GetLength(scConnection->clientNonce));
+                                                           SOPC_SecretBuffer_GetLength(serverNonce));
                 }
 
                 if (status != SOPC_STATUS_OK)
@@ -1678,7 +1681,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     {
         // Fill the rest
 
-        // TODO: timestamp
+        respHeader.Timestamp = SOPC_Time_GetCurrentTimeUTC();
         respHeader.RequestHandle = requestHandle;
 
         opnResp.ServerProtocolVersion = scConnection->tcpMsgProperties.protocolVersion;
@@ -1686,8 +1689,6 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
         opnResp.SecurityToken.TokenId = scConnection->currentSecurityToken.tokenId;
         opnResp.SecurityToken.RevisedLifetime = scConnection->currentSecurityToken.revisedLifetime;
         opnResp.SecurityToken.CreatedAt = scConnection->currentSecurityToken.createdAt;
-
-        // TODO: opnResp.ServerNonce
 
         // Encode the OPN message
         status = SOPC_EncodeMsg_Type_Header_Body(opnRespBuffer, &OpcUa_OpenSecureChannelResponse_EncodeableType,
@@ -1919,7 +1920,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
                     uint8_t* bytes = NULL;
                     bytes = SOPC_SecretBuffer_Expose(serverNonce);
                     status = SOPC_ByteString_CopyFromBytes(&opnResp.ServerNonce, bytes,
-                                                           SOPC_SecretBuffer_GetLength(scConnection->clientNonce));
+                                                           SOPC_SecretBuffer_GetLength(serverNonce));
                 }
 
                 if (status != SOPC_STATUS_OK)
@@ -1936,7 +1937,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
 
     if (result != false)
     {
-        // TODO: timestamp
+        respHeader.Timestamp = SOPC_Time_GetCurrentTimeUTC();
         respHeader.RequestHandle = requestHandle;
 
         opnResp.ServerProtocolVersion = scConnection->tcpMsgProperties.protocolVersion;
@@ -1944,8 +1945,6 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
         opnResp.SecurityToken.TokenId = newSecuToken.tokenId;
         opnResp.SecurityToken.RevisedLifetime = newSecuToken.revisedLifetime;
         opnResp.SecurityToken.CreatedAt = newSecuToken.createdAt;
-
-        // TODO: opnResp.ServerNonce
 
         // Encode the OPN message
         status = SOPC_EncodeMsg_Type_Header_Body(opnRespBuffer, &OpcUa_OpenSecureChannelResponse_EncodeableType,
