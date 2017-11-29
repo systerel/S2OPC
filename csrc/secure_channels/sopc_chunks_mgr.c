@@ -1340,7 +1340,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
     uint32_t sizeToRead = 0;
     uint32_t sizeAlreadyRead = 0;
     uint32_t sizeAvailable = 0;
-    SOPC_StatusCode errorStatus = 0x00000000; // Good
+    SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
     uint32_t requestId = 0;
     bool result = true;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
@@ -2935,7 +2935,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
     SOPC_Msg_Type sendMsgType = SOPC_MSG_TYPE_INVALID;
     SOPC_Buffer* buffer = (SOPC_Buffer*) params;
     SOPC_Buffer* outputBuffer = NULL;
-    SOPC_StatusCode errorStatus = 0x00000000; // Good
+    SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
     bool isSendCase = false;
     bool isSendTcpOnly = false;
     bool isOPN = false;

@@ -615,7 +615,13 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     switch (bstatus)
     {
     case constants__e_sc_ok:
-        *status = 0x00000000;
+        *status = SOPC_GoodGenericStatus;
+        break;
+    case constants__e_sc_bad_generic:
+        *status = SOPC_BadStatusMask; // generic bad status
+        break;
+    case constants__e_sc_uncertain_generic:
+        *status = SOPC_UncertainStatusMask; // generic uncertain status
         break;
     case constants__e_sc_bad_internal_error:
         *status = OpcUa_BadInternalError;
@@ -683,9 +689,6 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
 {
     switch (status)
     {
-    case 0x00000000:
-        *bstatus = constants__e_sc_ok;
-        break;
     case OpcUa_BadInternalError:
         *bstatus = constants__e_sc_bad_internal_error;
         break;
@@ -744,8 +747,23 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         *bstatus = constants__e_sc_bad_write_not_supported;
         break;
     default:
-        // Not identified status code
-        *bstatus = constants__c_StatusCode_indet;
+        if ((status & SOPC_GoodStatusOppositeMask) == 0)
+        {
+            *bstatus = constants__e_sc_ok;
+        }
+        else if ((status & SOPC_BadStatusMask) != 0)
+        {
+            *bstatus = constants__e_sc_bad_generic;
+        }
+        else if ((status & SOPC_UncertainStatusMask) != 0)
+        {
+            *bstatus = constants__e_sc_uncertain_generic;
+        }
+        else
+        {
+            // Not identified status code
+            *bstatus = constants__c_StatusCode_indet;
+        }
     }
 }
 

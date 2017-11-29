@@ -1999,7 +1999,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     SOPC_SecureConnection* scConnection = NULL;
     uint32_t requestHandle = 0;
     uint32_t requestedLifetime = 0;
-    SOPC_StatusCode errorStatus = 0x00000000; // Good
+    SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
     switch (event)
     {
     /* Sockets events: */

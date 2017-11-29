@@ -27,6 +27,22 @@
 typedef uint32_t SOPC_StatusCode;
 
 /**
+ * \brief A generic Good status code
+ */
+#define SOPC_GoodGenericStatus 0x00000000
+
+/**
+ * \brief An opposite mask for Good status code: Good status <=> (status & SOPC_GoodStatusOppositeMask) == 0
+ */
+#define SOPC_GoodStatusOppositeMask 0xC0000000
+
+/**
+ * Masks to check status for Uncertain/Bad/Reserved status code: <X> status <=> (status & SOPC_<X>StatusMask) != 0
+ */
+#define SOPC_UncertainStatusMask 0x40000000
+#define SOPC_BadStatusMask 0x80000000
+
+/**
  *  \brief Copy function generic signature
  */
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnCopy)(void* dest, const void* src);
