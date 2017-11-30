@@ -220,8 +220,8 @@ SOPC_AddressSpace addressSpace = {
 <xsl:template match="uax:Float" mode="value">,{SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:Double" mode="value">,{SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:String" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_String_Id, SOPC_VariantArrayType_SingleValue, {.String=${write_string("$st")}}}</xsl:template>
-<xsl:template match="uax:BString" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {.Bstring=${write_string("$st")}}}</xsl:template>
-<xsl:template match="uax:XmlElt" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_XmlElement_Id, SOPC_VariantArrayType_SingleValue, {.XmlElt=${write_string("$st")}}}</xsl:template>
+<xsl:template match="uax:ByteString" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {.Bstring=${write_string("$st")}}}</xsl:template>
+<xsl:template match="uax:XmlElement" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_XmlElement_Id, SOPC_VariantArrayType_SingleValue, {.XmlElt=${write_string("$st")}}}</xsl:template>
 <xsl:template match="uax:NodeId" mode="value">,{SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {.NodeId=<xsl:value-of select="."/>}}</xsl:template>
 <xsl:template match="uax:DateTime" mode="value">,{SOPC_DateTime_Id, SOPC_VariantArrayType_SingleValue, {.Date.Low32=<xsl:value-of select="."/>,.Date.High32=<xsl:value-of select="."/>}}</xsl:template>
 

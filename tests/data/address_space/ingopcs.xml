@@ -3,6 +3,7 @@
   <NamespaceUris>
     <Uri>FEP_NS_261</Uri>
   </NamespaceUris>
+
   <!-- Basic types definition -->
   <Aliases>
     <Alias Alias="Boolean">i=1</Alias>
@@ -41,11 +42,12 @@
     <Alias Alias="HasEncoding">i=38</Alias>
     <Alias Alias="HasDescription">i=39</Alias>
   </Aliases>
-  <!-- COMMON PART WITH READ/WRITE TEST -->
   <UADataType NodeId="i=24" BrowseName="BaseDataType" IsAbstract="true">
     <DisplayName>BaseDataType</DisplayName>
     <Description>Describes a value that can have any valid DataType.</Description>
-    <References />
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
+    </References>
   </UADataType>
   <UADataType NodeId="i=26" BrowseName="Number" IsAbstract="true">
     <DisplayName>Number</DisplayName>
@@ -258,6 +260,42 @@
     </References>
   </UADataType>
   <!-- End: Basic types definition -->
+  <!-- Root Folders -->
+  <UAObjectType NodeId="i=58" BrowseName="BaseObjectType">
+    <DisplayName>BaseObjectType</DisplayName>
+    <Description>The base type for all object nodes.</Description>
+    <References />
+  </UAObjectType>
+  <UAObjectType NodeId="i=61" BrowseName="FolderType">
+    <DisplayName>FolderType</DisplayName>
+    <Description>The type for objects that organize other nodes.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+    </References>
+  </UAObjectType>
+  <UAObject NodeId="i=84" BrowseName="Root" SymbolicName="RootFolder">
+    <DisplayName>Root</DisplayName>
+    <Description>The root of the server address space.</Description>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=85" BrowseName="Objects" SymbolicName="ObjectsFolder">
+    <DisplayName>Objects</DisplayName>
+    <Description>The browse entry point when looking for objects in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=84</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=86" BrowseName="Types" SymbolicName="TypesFolder">
+    <DisplayName>Types</DisplayName>
+    <Description>The browse entry point when looking for types in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=84</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>  <!-- COMMON PART WITH READ/WRITE TEST -->
   <UAObject BrowseName="0:VariablesFolderBn" NodeId="i=1000" ParentNodeId="i=85">
     <DisplayName>VariablesFolderDn</DisplayName>
     <Description>VariablesFolderDescObj1d2</Description>
@@ -334,7 +372,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:BString>"ByteString:INGOPCS"</uax:BString>
+      <uax:ByteString>"ByteString:INGOPCS"</uax:ByteString>
     </Value>
   </UAVariable>
   <UAVariable BrowseName="0:XmlElement" DataType="XmlElement" NodeId="i=1006" ParentNodeId="i=1000">
@@ -345,7 +383,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:XmlElt>"XmlElement:INGOPCS"</uax:XmlElt>
+      <uax:XmlElement>"XmlElement:INGOPCS"</uax:XmlElement>
     </Value>
   </UAVariable>
   <!-- END OF COMMON PART WITH READ/WRITE TEST -->
@@ -1019,7 +1057,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:Boolean>false</uax:Boolean> 
+      <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
 </UANodeSet>

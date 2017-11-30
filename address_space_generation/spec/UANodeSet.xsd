@@ -27,7 +27,7 @@
       <xs:attribute name="LastModified" type="xs:dateTime" use="optional"></xs:attribute>
     </xs:complexType>
   </xs:element>
-  
+
   <xs:element name="UANodeSetChanges">
     <xs:complexType>
       <xs:sequence>

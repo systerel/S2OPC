@@ -419,7 +419,7 @@ ${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var
 </xsl:text>
 </xsl:template>
 
-<xsl:template match="uax:XmlElt" mode="tValue">
+<xsl:template match="uax:XmlElement" mode="tValue">
   <xsl:variable name="NodeId" select="../../@NodeId"/>
   nodeid = "<xsl:value-of select="../../@NodeId"/>";
   printf("test Value for nodeid %s\n", nodeid);
@@ -460,7 +460,7 @@ if (!(addressSpace.valueArray[pos].BuiltInTypeId == SOPC_XmlElement_Id)) {bres =
 </xsl:text>
 </xsl:template>
 
-<xsl:template match="uax:BString" mode="tValue">
+<xsl:template match="uax:ByteString" mode="tValue">
   <xsl:variable name="NodeId" select="../../@NodeId"/>
   nodeid = "<xsl:value-of select="../../@NodeId"/>";
   printf("test Value for nodeid %s\n", nodeid);
