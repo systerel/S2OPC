@@ -63,7 +63,14 @@ static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpo
     SOPC_String_AttachFrom(&appDesc->GatewayServerUri, &sopcEndpointConfig->serverDescription.GatewayServerUri);
     SOPC_String_AttachFrom(&appDesc->DiscoveryProfileUri, &sopcEndpointConfig->serverDescription.DiscoveryProfileUri);
 
-    appDesc->DiscoveryUrls = calloc(sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls, sizeof(SOPC_String));
+    if (sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls >= 0)
+    {
+        appDesc->DiscoveryUrls = calloc(sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls, sizeof(SOPC_String));
+    }
+    else
+    {
+        appDesc->DiscoveryUrls = NULL;
+    }
     if (appDesc->DiscoveryUrls != NULL)
     {
         for (idx = 0; idx < sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls; idx++)
@@ -258,12 +265,18 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
         if (nbEndpointDescription > 0)
         {
             final_OpcUa_EndpointDescription = calloc(nbEndpointDescription, sizeof(OpcUa_EndpointDescription));
+            if (final_OpcUa_EndpointDescription != NULL)
+            {
+                for (int i = 0; i < nbEndpointDescription; i++)
+                {
+                    final_OpcUa_EndpointDescription[i] = currentConfig_EndpointDescription[i];
+                }
+            }
+            else
+            {
+                serviceResult = constants__e_sc_bad_out_of_memory;
+            }
         }
-        for (int i = 0; i < nbEndpointDescription; i++)
-        {
-            final_OpcUa_EndpointDescription[i] = currentConfig_EndpointDescription[i];
-        }
-
         *nbOfEndpointDescriptions = nbEndpointDescription;
         *endpointDescriptions = final_OpcUa_EndpointDescription;
     }

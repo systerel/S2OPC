@@ -711,7 +711,14 @@ SOPC_ReturnStatus SOPC_ByteString_InitializeFixedSize(SOPC_ByteString* bstring, 
         status = SOPC_STATUS_OK;
         SOPC_ByteString_Initialize(bstring);
         bstring->Length = size;
-        bstring->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte) * size);
+        if ((uint64_t) size * 1 <= SIZE_MAX)
+        {
+            bstring->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte) * (size_t) size);
+        }
+        else
+        {
+            bstring->Data = NULL;
+        }
         if (bstring->Data != NULL)
         {
             memset(bstring->Data, 0, size);
@@ -730,7 +737,14 @@ SOPC_ReturnStatus SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, SOPC_Byte
     if (dest != NULL && bytes != NULL && length > 0)
     {
         dest->Length = length;
-        dest->Data = malloc(sizeof(SOPC_Byte) * length);
+        if (length > 0 && (uint64_t) length * 1 <= SIZE_MAX)
+        {
+            dest->Data = malloc(sizeof(SOPC_Byte) * (size_t) length);
+        }
+        else
+        {
+            dest->Data = NULL;
+        }
         if (dest->Data != NULL)
         {
             memcpy(dest->Data, bytes, length);
@@ -747,7 +761,14 @@ SOPC_ReturnStatus SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteStr
     {
         status = SOPC_STATUS_OK;
         dest->Length = src->Length;
-        dest->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte) * dest->Length);
+        if (dest->Length > 0 && (uint64_t) dest->Length * 1 <= SIZE_MAX)
+        {
+            dest->Data = malloc(sizeof(SOPC_Byte) * (size_t) dest->Length);
+        }
+        else
+        {
+            dest->Data = NULL;
+        }
         if (dest->Data != NULL)
         {
             // No need of secure copy, both have same size here
@@ -855,7 +876,10 @@ SOPC_String* SOPC_String_Create()
 {
     SOPC_String* string = NULL;
     string = (SOPC_String*) malloc(sizeof(SOPC_String));
-    SOPC_String_Initialize(string);
+    if (NULL != string)
+    {
+        SOPC_String_Initialize(string);
+    }
     return string;
 }
 
@@ -899,9 +923,9 @@ SOPC_ReturnStatus SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src)
         // Keep null terminator for C string compatibility
         status = SOPC_STATUS_OK;
         dest->Length = src->Length;
-        if (dest->Length > 0)
+        if (dest->Length > 0 && (uint64_t) dest->Length * sizeof(SOPC_Byte) <= SIZE_MAX)
         {
-            dest->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte) * dest->Length + 1);
+            dest->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte) * (size_t) dest->Length + 1);
             if (dest->Data != NULL)
             {
                 // No need of secure copy, both have same size here
@@ -1351,7 +1375,14 @@ SOPC_ReturnStatus SOPC_NodeId_Copy(SOPC_NodeId* dest, const SOPC_NodeId* src)
             break;
         case SOPC_IdentifierType_Guid:
             dest->Data.Guid = malloc(sizeof(SOPC_Guid));
-            status = SOPC_Guid_Copy(dest->Data.Guid, src->Data.Guid);
+            if (dest->Data.Guid != NULL)
+            {
+                status = SOPC_Guid_Copy(dest->Data.Guid, src->Data.Guid);
+            }
+            else
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
             break;
         case SOPC_IdentifierType_ByteString:
             SOPC_ByteString_Initialize(&dest->Data.Bstring);
@@ -3198,7 +3229,6 @@ SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId, 
         {
             status = SOPC_STATUS_NOK;
         }
-        val->DiagInfo = NULL;
         break;
     case SOPC_Variant_Id:
         // Part 6 Table 14 (v1.03): "The value shall not be a Variant
@@ -3357,9 +3387,11 @@ SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src)
                         error = true;
                     }
                 }
-                if (false == error)
+                if (false == error && src->Value.Matrix.Dimensions > 0 &&
+                    (uint64_t) src->Value.Matrix.Dimensions * sizeof(int32_t) <= SIZE_MAX)
                 {
-                    dest->Value.Matrix.ArrayDimensions = malloc(src->Value.Matrix.Dimensions * sizeof(int32_t));
+                    dest->Value.Matrix.ArrayDimensions =
+                        malloc((size_t) src->Value.Matrix.Dimensions * sizeof(int32_t));
                     if (NULL != dest->Value.Matrix.ArrayDimensions)
                     {
                         dest->Value.Matrix.Dimensions = src->Value.Matrix.Dimensions;
@@ -3721,7 +3753,7 @@ SOPC_ReturnStatus SOPC_Op_Array(int32_t noOfElts,
     size_t pos = 0;
     SOPC_Byte* byteArrayLeft = eltsArrayLeft;
     SOPC_Byte* byteArrayRight = eltsArrayRight;
-    if (noOfElts >= 0 && (size_t) noOfElts <= SIZE_MAX && byteArrayLeft != NULL && byteArrayRight != NULL)
+    if (noOfElts >= 0 && (uint64_t) noOfElts <= SIZE_MAX && byteArrayLeft != NULL && byteArrayRight != NULL)
     {
         for (idx = 0; idx < (size_t) noOfElts && SOPC_STATUS_OK == status; idx++)
         {
@@ -3748,7 +3780,7 @@ SOPC_ReturnStatus SOPC_Comp_Array(int32_t noOfElts,
     size_t pos = 0;
     SOPC_Byte* byteArrayLeft = eltsArrayLeft;
     SOPC_Byte* byteArrayRight = eltsArrayRight;
-    if (noOfElts >= 0 && (size_t) noOfElts <= SIZE_MAX && byteArrayLeft != NULL && byteArrayRight != NULL)
+    if (noOfElts >= 0 && (uint64_t) noOfElts <= SIZE_MAX && byteArrayLeft != NULL && byteArrayRight != NULL)
     {
         *comparison = 0;
         for (idx = 0; idx < (size_t) noOfElts && SOPC_STATUS_OK == status && *comparison == 0; idx++)
@@ -3769,7 +3801,7 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
     size_t idx = 0;
     size_t pos = 0;
     SOPC_Byte* byteArray = NULL;
-    if (noOfElts != NULL && *noOfElts >= 0 && (size_t) *noOfElts <= SIZE_MAX && eltsArray != NULL)
+    if (noOfElts != NULL && *noOfElts >= 0 && (uint64_t) *noOfElts <= SIZE_MAX && eltsArray != NULL)
     {
         byteArray = *eltsArray;
         if (byteArray != NULL)

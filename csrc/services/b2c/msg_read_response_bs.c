@@ -43,7 +43,14 @@ void msg_read_response_bs__alloc_read_response(const t_entier4 msg_read_response
     OpcUa_ReadResponse* msg_read_resp = (OpcUa_ReadResponse*) msg_read_response_bs__p_resp_msg;
 
     msg_read_resp->NoOfResults = msg_read_response_bs__p_nb_resps;
-    msg_read_resp->Results = (SOPC_DataValue*) calloc(msg_read_response_bs__p_nb_resps, sizeof(SOPC_DataValue));
+    if (msg_read_response_bs__p_nb_resps > 0)
+    {
+        msg_read_resp->Results = (SOPC_DataValue*) calloc(msg_read_response_bs__p_nb_resps, sizeof(SOPC_DataValue));
+    }
+    else
+    {
+        msg_read_resp->Results = NULL;
+    }
     if (NULL == msg_read_resp->Results)
     {
         *msg_read_response_bs__p_isvalid = false;
@@ -66,14 +73,18 @@ void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_r
 {
     OpcUa_ReadResponse* msg_read_resp = (OpcUa_ReadResponse*) msg_read_response_bs__resp_msg;
 
-    /* rvi is castable, it's one of its properties, but it starts at 1 */
-    if (constants__c_Variant_indet != msg_read_response_bs__val)
-        /* Note: the following only copies the context of the the Variant, not the entire Variant */
-        memcpy((void*) &msg_read_resp->Results[msg_read_response_bs__rvi - 1].Value, msg_read_response_bs__val,
-               sizeof(SOPC_Variant));
-    else
-        SOPC_Variant_InitializeAux((void*) &msg_read_resp->Results[msg_read_response_bs__rvi - 1].Value);
+    if (msg_read_response_bs__rvi > 0)
+    {
+        /* rvi is castable, it's one of its properties, but it starts at 1 */
+        if (constants__c_Variant_indet != msg_read_response_bs__val)
+            /* Note: the following only copies the context of the the Variant, not the entire Variant */
+            memcpy((void*) &msg_read_resp->Results[msg_read_response_bs__rvi - 1].Value, msg_read_response_bs__val,
+                   sizeof(SOPC_Variant));
+        else
+            SOPC_Variant_InitializeAux((void*) &msg_read_resp->Results[msg_read_response_bs__rvi - 1].Value);
 
-    /* TODO: Make a util__ that converts the status */
-    util_status_code__B_to_C(msg_read_response_bs__sc, &msg_read_resp->Results[msg_read_response_bs__rvi - 1].Status);
+        /* TODO: Make a util__ that converts the status */
+        util_status_code__B_to_C(msg_read_response_bs__sc,
+                                 &msg_read_resp->Results[msg_read_response_bs__rvi - 1].Status);
+    }
 }

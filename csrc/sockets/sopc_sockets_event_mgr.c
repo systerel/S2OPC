@@ -355,7 +355,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
     return resultSocket;
 }
 
-static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* socket)
+static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* sock)
 {
     bool nothingToDequeue = false;
     bool writeQueueResult = true;
@@ -366,8 +366,7 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* socket)
     uint32_t sentBytes = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    if (NULL == socket || NULL == socket->writeQueue || socket->sock == SOPC_INVALID_SOCKET ||
-        socket->isNotWritable != false)
+    if (NULL == sock || NULL == sock->writeQueue || sock->sock == SOPC_INVALID_SOCKET || sock->isNotWritable != false)
     {
         writeQueueResult = false;
     }
@@ -375,7 +374,7 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* socket)
     /* Dequeue message to write and sent through socket until nothing no message remain or socket write blocked */
     while (writeQueueResult != false && nothingToDequeue == false && writeBlocked == false)
     {
-        status = SOPC_AsyncQueue_NonBlockingDequeue(socket->writeQueue, (void**) &buffer);
+        status = SOPC_AsyncQueue_NonBlockingDequeue(sock->writeQueue, (void**) &buffer);
         if (SOPC_STATUS_WOULD_BLOCK == status)
         {
             nothingToDequeue = true;
@@ -389,7 +388,7 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* socket)
             sentBytes = 0;
             data = &(buffer->data[buffer->position]);
             count = buffer->length - buffer->position;
-            status = Socket_Write(socket->sock, data, count, &sentBytes);
+            status = Socket_Write(sock->sock, data, count, &sentBytes);
             if (SOPC_STATUS_WOULD_BLOCK == status)
             {
                 writeBlocked = true;
@@ -409,11 +408,11 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* socket)
     if (writeBlocked != false)
     {
         // Socket write blocked, wait for a ready to write event
-        socket->isNotWritable = true;
+        sock->isNotWritable = true;
         // (Re-enqueue) updated buffer position for next attempt
         buffer->position = buffer->position + sentBytes;
         // Re-enqueue in LIFO mode to be the next buffer to treat
-        status = SOPC_AsyncQueue_BlockingEnqueueFirstOut(socket->writeQueue, buffer);
+        status = SOPC_AsyncQueue_BlockingEnqueueFirstOut(sock->writeQueue, buffer);
         assert(SOPC_STATUS_OK == status);
     }
     else

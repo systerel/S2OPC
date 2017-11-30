@@ -52,13 +52,21 @@ void response_write_bs__alloc_write_request_responses_malloc(const t_entier4 res
     *response_write_bs__ResponseWrite_allocated = false; /* TODO: set a true and false in b2c.h */
     nb_req = 0;
 
-    arr_StatusCode = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * (response_write_bs__nb_req + 1));
-    for (int32_t i = 0; i <= response_write_bs__nb_req; i++)
+    if (response_write_bs__nb_req >= 0 &&
+        (uint64_t)(response_write_bs__nb_req + 1) <= (uint64_t) SIZE_MAX / sizeof(SOPC_StatusCode))
     {
-        arr_StatusCode[i] = OpcUa_BadInternalError;
+        arr_StatusCode = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * (size_t)(response_write_bs__nb_req + 1));
+    }
+    else
+    {
+        arr_StatusCode = NULL;
     }
     if (NULL != arr_StatusCode)
     {
+        for (int32_t i = 0; i <= response_write_bs__nb_req; i++)
+        {
+            arr_StatusCode[i] = OpcUa_BadInternalError;
+        }
         *response_write_bs__ResponseWrite_allocated = true;
         nb_req = response_write_bs__nb_req;
     }
@@ -93,14 +101,18 @@ void response_write_bs__set_ResponseWrite_StatusCode(const constants__t_WriteVal
 void response_write_bs__write_WriteResponse_msg_out(const constants__t_msg_i response_write_bs__msg_out)
 {
     OpcUa_WriteResponse* msg_write_resp = (OpcUa_WriteResponse*) response_write_bs__msg_out;
-    SOPC_StatusCode* lsc;
+    SOPC_StatusCode* lsc = NULL;
 
-    lsc = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * nb_req);
+    if ((uint64_t) SIZE_MAX / sizeof(SOPC_StatusCode) >= (uint64_t) nb_req)
+    {
+        lsc = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * nb_req);
+
+        memcpy((void*) lsc, (void*) (arr_StatusCode + 1), sizeof(SOPC_StatusCode) * nb_req);
+    }
+
     if (NULL == lsc)
         /* TODO: unreasonnable behavior */
         exit(1);
-
-    memcpy((void*) lsc, (void*) (arr_StatusCode + 1), sizeof(SOPC_StatusCode) * nb_req);
 
     msg_write_resp->NoOfResults = nb_req;
     msg_write_resp->Results = lsc;

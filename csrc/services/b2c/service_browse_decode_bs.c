@@ -111,11 +111,12 @@ void service_browse_decode_bs__getall_BrowseValue(const constants__t_BrowseValue
     *service_browse_decode_bs__p_reftype = constants__c_NodeId_indet;
     *service_browse_decode_bs__p_inc_subtype = false;
 
-    if (NULL != request) /* && 0 < service_browse_decode_bs__p_bvi && service_browse_decode_bs__p_bvi <=
-                            request->NoOfNodesToBrowse) These are already verified by PRE */
+    if (NULL != request && service_browse_decode_bs__p_bvi > 0)
+    /* && 0 < service_browse_decode_bs__p_bvi && service_browse_decode_bs__p_bvi <=
+request->NoOfNodesToBrowse) These are already verified by PRE */
     {
         pBwseDesc = &request->NodesToBrowse[service_browse_decode_bs__p_bvi - 1];
-        *service_browse_decode_bs__p_NodeId = (constants__t_NodeId_i*) &pBwseDesc->NodeId;
+        *service_browse_decode_bs__p_NodeId = (constants__t_NodeId_i) &pBwseDesc->NodeId;
         if (false == util_BrowseDirection__C_to_B(pBwseDesc->BrowseDirection, service_browse_decode_bs__p_dir))
             return;
 

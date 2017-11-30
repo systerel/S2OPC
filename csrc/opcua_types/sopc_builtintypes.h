@@ -266,8 +266,8 @@ typedef union SOPC_VariantValue {
 
 typedef struct SOPC_Variant
 {
-    SOPC_Byte BuiltInTypeId;
-    SOPC_Byte ArrayType;
+    SOPC_BuiltinId BuiltInTypeId;
+    SOPC_VariantArrayType ArrayType;
     SOPC_VariantValue Value;
 } SOPC_Variant;
 

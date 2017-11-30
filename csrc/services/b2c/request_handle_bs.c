@@ -58,7 +58,7 @@ void request_handle_bs__client_validate_response_request_handle(
     }
 }
 
-void request_handle_bs__client_fresh_req_handle(constants__t_msg_type_i request_handle_bs__resp_typ,
+void request_handle_bs__client_fresh_req_handle(const constants__t_msg_type_i request_handle_bs__resp_typ,
                                                 constants__t_request_handle_i* const request_handle_bs__request_handle)
 {
     uint32_t startedIdx = cpt;

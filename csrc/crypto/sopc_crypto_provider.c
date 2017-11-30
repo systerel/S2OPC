@@ -620,7 +620,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* p
         return SOPC_STATUS_INVALID_PARAMETERS;
 
     pExpKey = SOPC_SecretBuffer_Expose(pKey);
-    if (NULL == pKey)
+    if (NULL == pExpKey)
         return SOPC_STATUS_NOK;
 
     status = pProvider->pProfile->pFnSymmSign(pProvider, pInput, lenInput, pExpKey, pOutput);
@@ -657,7 +657,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricVerify(const SOPC_CryptoProvider*
         return SOPC_STATUS_INVALID_PARAMETERS;
 
     pExpKey = SOPC_SecretBuffer_Expose(pKey);
-    if (NULL == pKey)
+    if (NULL == pExpKey)
         return SOPC_STATUS_NOK;
 
     status = pProvider->pProfile->pFnSymmVerif(pProvider, pInput, lenInput, pExpKey, pSignature);

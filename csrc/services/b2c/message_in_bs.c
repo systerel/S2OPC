@@ -81,7 +81,7 @@ void message_in_bs__decode_msg_type(const constants__t_byte_buffer_i message_in_
     *message_in_bs__msg_type = constants__c_msg_type_indet;
     SOPC_EncodeableType* encType = NULL;
     SOPC_ReturnStatus status = SOPC_MsgBodyType_Read((SOPC_Buffer*) message_in_bs__msg_buffer, &encType);
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && encType != NULL)
     {
         util_message__get_message_type(encType, message_in_bs__msg_type);
     }

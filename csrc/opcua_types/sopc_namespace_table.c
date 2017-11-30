@@ -46,7 +46,7 @@ SOPC_ReturnStatus SOPC_Namespace_AllocateTable(SOPC_NamespaceTable* nsTable, uin
         status = SOPC_STATUS_OK;
         nsTable->clearTable = 1; // True
         nsTable->lastIdx = length - 1;
-        nsTable->namespaceArray = malloc(sizeof(SOPC_Namespace) * length);
+        nsTable->namespaceArray = malloc(sizeof(SOPC_Namespace) * (size_t) length);
         if (NULL == nsTable->namespaceArray)
         {
             status = SOPC_STATUS_NOK;

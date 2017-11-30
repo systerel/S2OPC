@@ -1018,6 +1018,9 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
 
     if (false == result)
     {
+        // Clear all buffers
+        SOPC_Buffer_Delete(scConnection->chunksCtx.chunkInputBuffer);
+
         if (plainBuffer != NULL)
         {
             SOPC_Buffer_Delete(plainBuffer);
@@ -1496,6 +1499,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                         SOPC_SecureChannels_EnqueueInternalEvent(scEvent, scConnectionIdx,
                                                                  (void*) chunkCtx->chunkInputBuffer, requestId);
                     }
+                    chunkCtx->chunkInputBuffer = NULL;
                     // reset chunk context (buffer not deallocated since provided to secure connection state manager)
                     memset(&scConnection->chunksCtx, 0, sizeof(SOPC_SecureConnection_ChunkMgrCtx));
                 }
@@ -1630,26 +1634,21 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection* scConnecti
     const SOPC_Certificate* receiverCertCrypto = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    if (result != false)
-    {
-        toEncrypt = SC_Chunks_IsMsgEncrypted(scConfig->msgSecurityMode, true);
-        toSign = SC_Chunks_IsMsgSigned(scConfig->msgSecurityMode);
-    }
+    toEncrypt = SC_Chunks_IsMsgEncrypted(scConfig->msgSecurityMode, true);
+    toSign = SC_Chunks_IsMsgSigned(scConfig->msgSecurityMode);
 
     // Security Policy:
-    if (result != false)
+    status = SOPC_String_CopyFromCString(&strSecuPolicy, scConfig->reqSecuPolicyUri);
+    if (SOPC_STATUS_OK != status || strSecuPolicy.Length <= 0)
     {
-        status = SOPC_String_CopyFromCString(&strSecuPolicy, scConfig->reqSecuPolicyUri);
-        if (SOPC_STATUS_OK != status || strSecuPolicy.Length <= 0)
-        {
-            result = false;
-            *errorStatus = OpcUa_BadTcpInternalError;
-        }
-        else
-        {
-            *securityPolicyLength = (uint32_t) strSecuPolicy.Length;
-        }
+        result = false;
+        *errorStatus = OpcUa_BadTcpInternalError;
     }
+    else
+    {
+        *securityPolicyLength = (uint32_t) strSecuPolicy.Length;
+    }
+
     if (result != false)
     {
         status = SOPC_String_Write(&strSecuPolicy, buffer);
@@ -3046,6 +3045,8 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
                         printf("Failed sending message type '%d' before socket closed\n", sendMsgType);
                     }
                 }
+                // If buffer not reused for sending on socket: delete it
+                SOPC_Buffer_Delete(buffer);
             }
             else
             {
@@ -3054,7 +3055,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
 
                 if (buffer != outputBuffer)
                 {
-                    // If input buffer not reused for sending on socket: delete it
+                    // If buffer not reused for sending on socket: delete it
                     SOPC_Buffer_Delete(buffer);
                 }
             }

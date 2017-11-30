@@ -52,7 +52,8 @@ void session_request_handle_bs__client_add_session_request_handle(
     const constants__t_request_handle_i session_request_handle_bs__req_handle)
 {
     assert(session_request_handle_bs__session != constants__c_session_indet);
-    assert(session_request_handle_bs__req_handle != constants__c_request_handle_indet);
+    assert(session_request_handle_bs__req_handle != constants__c_request_handle_indet &&
+           session_request_handle_bs__req_handle >= 0);
     // It shall be a fresh request handle which means it cannot be assigned to another session
     assert(client_requests[session_request_handle_bs__req_handle] == constants__c_session_indet);
     client_requests[session_request_handle_bs__req_handle] = session_request_handle_bs__session;

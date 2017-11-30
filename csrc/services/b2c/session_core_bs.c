@@ -273,6 +273,7 @@ void session_core_bs__server_create_session_req_do_crypto(
     uint32_t lenToSign = 0;
     OpcUa_CreateSessionRequest* pReq = (OpcUa_CreateSessionRequest*) session_core_bs__p_req_msg;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    uint32_t sigLength;
 
     *session_core_bs__valid = false;
     *session_core_bs__signature = constants__c_SignatureData_indet;
@@ -318,21 +319,39 @@ void session_core_bs__server_create_session_req_do_crypto(
             if (pReq->ClientNonce.Length <= 0)
                 // client Nonce is not present
                 return;
-            lenToSign = pReq->ClientCertificate.Length + pReq->ClientNonce.Length;
-            pToSign = malloc(sizeof(uint8_t) * lenToSign);
+            if (pReq->ClientCertificate.Length >= 0 && pReq->ClientNonce.Length > 0 &&
+                (uint64_t) pReq->ClientCertificate.Length + pReq->ClientNonce.Length <= SIZE_MAX / sizeof(uint8_t))
+            {
+                lenToSign = pReq->ClientCertificate.Length + pReq->ClientNonce.Length;
+                pToSign = malloc(sizeof(uint8_t) * (size_t) lenToSign);
+            }
+            else
+            {
+                pToSign = NULL;
+            }
             if (NULL == pToSign)
                 return;
-            memcpy(pToSign, pReq->ClientCertificate.Data, pReq->ClientCertificate.Length);
-            memcpy(pToSign + pReq->ClientCertificate.Length, pReq->ClientNonce.Data, pReq->ClientNonce.Length);
+            memcpy(pToSign, pReq->ClientCertificate.Data, (size_t) pReq->ClientCertificate.Length);
+            memcpy(pToSign + pReq->ClientCertificate.Length, pReq->ClientNonce.Data, (size_t) pReq->ClientNonce.Length);
             /* b) Sign and store the signature in pSign */
             SOPC_ByteString_Clear(&pSign->Signature);
-            status = SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pECfg->serverKey,
-                                                                       (uint32_t*) &pSign->Signature.Length);
+            status = SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pECfg->serverKey, &sigLength);
+            assert(sigLength <= INT32_MAX);
+            pSign->Signature.Length = (int32_t) sigLength;
             if (SOPC_STATUS_OK != status)
                 return;
 
-            pSign->Signature.Data =
-                malloc(sizeof(SOPC_Byte) * pSign->Signature.Length); /* TODO: This should be freed with session */
+            if (pSign->Signature.Length >= 0 && (uint64_t) pSign->Signature.Length * sizeof(SOPC_Byte) <= SIZE_MAX)
+            {
+                pSign->Signature.Data = malloc(sizeof(SOPC_Byte) * (size_t) pSign->Signature.Length); /* TODO: This
+                                                                                                should be
+                                                                                                freed with
+                                                                                                session */
+            }
+            else
+            {
+                pSign->Signature.Data = NULL;
+            }
             if (NULL == pSign->Signature.Data)
                 return;
 
@@ -356,7 +375,8 @@ void session_core_bs__server_create_session_req_do_crypto(
             *session_core_bs__signature = pSign;
 
             /* Clean */
-            /* TODO: with the many previous returns, you do not always free it */
+            /* TODO: with the many previous returns, you do
+             * not always free it */
             SOPC_CryptoProvider_Free(pProvider);
             pProvider = NULL;
         }
@@ -382,6 +402,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
     uint8_t* pToSign = NULL;
     uint32_t lenToSign = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    uint32_t tmpLength = 0;
 
     *session_core_bs__valid = false;
     *session_core_bs__signature = constants__c_SignatureData_indet;
@@ -414,8 +435,6 @@ void session_core_bs__client_activate_session_req_do_crypto(
 
             if (pSCCfg->crt_srv != NULL)
             {
-                uint32_t tmpLength;
-                SOPC_ReturnStatus status;
                 // retrieve expected sender certificate as a ByteString
                 status = SOPC_KeyManager_Certificate_CopyDER(pSCCfg->crt_srv, &serverCert.Data, &tmpLength);
                 if (SOPC_STATUS_OK != status)
@@ -431,13 +450,20 @@ void session_core_bs__client_activate_session_req_do_crypto(
                     return;
                 }
             }
-
-            lenToSign = serverCert.Length + serverNonce->Length;
-            pToSign = malloc(sizeof(uint8_t) * lenToSign);
+            if (serverCert.Length >= 0 && serverNonce->Length >= 0 &&
+                (uint64_t) serverCert.Length + serverNonce->Length <= SIZE_MAX / sizeof(uint8_t))
+            {
+                lenToSign = serverCert.Length + serverNonce->Length;
+                pToSign = malloc(sizeof(uint8_t) * (size_t) lenToSign);
+            }
+            else
+            {
+                pToSign = NULL;
+            }
             if (NULL == pToSign)
                 return;
-            memcpy(pToSign, serverCert.Data, serverCert.Length);
-            memcpy(pToSign + serverCert.Length, serverNonce->Data, serverNonce->Length);
+            memcpy(pToSign, serverCert.Data, (size_t) serverCert.Length);
+            memcpy(pToSign + serverCert.Length, serverNonce->Data, (size_t) serverNonce->Length);
             SOPC_ByteString_Clear(&serverCert);
             /* b) Sign and store the signature in pSign */
             SOPC_ByteString_Clear(&pSign->Signature);
@@ -446,8 +472,16 @@ void session_core_bs__client_activate_session_req_do_crypto(
             if (SOPC_STATUS_OK != status)
                 return;
 
-            pSign->Signature.Data = malloc(
-                sizeof(SOPC_Byte) * pSign->Signature.Length); /* TODO: This should not be stored in unique session ? */
+            if (pSign->Signature.Length >= 0 && (uint64_t) pSign->Signature.Length * sizeof(SOPC_Byte) <= SIZE_MAX)
+            {
+                pSign->Signature.Data =
+                    malloc(sizeof(SOPC_Byte) *
+                           (size_t) pSign->Signature.Length); /* TODO: This should not be stored in unique session ? */
+            }
+            else
+            {
+                pSign->Signature.Data = NULL;
+            }
             if (NULL == pSign->Signature.Data)
                 return;
 
@@ -483,7 +517,7 @@ void session_core_bs__get_NonceServer(const constants__t_session_i session_core_
 {
     if (constants__c_session_indet != session_core_bs__p_session)
     {
-        *session_core_bs__nonce = (constants__t_Nonce_i*) &(sessionDataArray[session_core_bs__p_session].nonceServer);
+        *session_core_bs__nonce = (constants__t_Nonce_i) & (sessionDataArray[session_core_bs__p_session].nonceServer);
     }
     else
     {
@@ -556,7 +590,7 @@ void session_core_bs__get_NonceClient(const constants__t_session_i session_core_
 {
     if (constants__c_session_indet != session_core_bs__p_session)
     {
-        *session_core_bs__nonce = (constants__t_Nonce_i*) &(sessionDataArray[session_core_bs__p_session].nonceClient);
+        *session_core_bs__nonce = (constants__t_Nonce_i) & (sessionDataArray[session_core_bs__p_session].nonceClient);
     }
     else
     {
@@ -632,7 +666,7 @@ void session_core_bs__client_create_session_check_crypto(
         /* Verify signature algorithm URI */
         szSignUri = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider);
 
-        if (strncmp((char*) pSignCandid->Algorithm.Data, szSignUri, strlen(szSignUri) + 1) == 0)
+        if (szSignUri != NULL && strncmp((char*) pSignCandid->Algorithm.Data, szSignUri, strlen(szSignUri) + 1) == 0)
         {
             /* Build signed data (client certificate + client nonce) */
             /* a) Get Der of client certificate */
@@ -726,7 +760,7 @@ void session_core_bs__server_activate_session_check_crypto(
         /* Verify signature algorithm URI */
         szSignUri = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider);
 
-        if (strncmp((char*) pSignCandid->Algorithm.Data, szSignUri, strlen(szSignUri) + 1) == 0)
+        if (szSignUri != NULL && strncmp((char*) pSignCandid->Algorithm.Data, szSignUri, strlen(szSignUri) + 1) == 0)
         {
             /* Build signed data (server certificate + server nonce) */
             /* a) Get Der of client certificate */

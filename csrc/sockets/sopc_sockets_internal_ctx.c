@@ -82,36 +82,36 @@ SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocketNoLock(bool isListener)
 
 void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx)
 {
-    SOPC_Socket* socket = NULL;
+    SOPC_Socket* sock = NULL;
     void* elt = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (socketIdx < SOPC_MAX_SOCKETS && socketsArray[socketIdx].isUsed != false)
     {
-        socket = &socketsArray[socketIdx];
-        Socket_Close(&socket->sock);
-        socket->isUsed = false;
-        socket->state = SOCKET_STATE_CLOSED;
-        socket->isServerConnection = false;
-        socket->listenerSocketIdx = 0;
-        socket->listenerConnections = 0;
-        if (socket->connectAddrs != NULL)
+        sock = &socketsArray[socketIdx];
+        Socket_Close(&sock->sock);
+        sock->isUsed = false;
+        sock->state = SOCKET_STATE_CLOSED;
+        sock->isServerConnection = false;
+        sock->listenerSocketIdx = 0;
+        sock->listenerConnections = 0;
+        if (sock->connectAddrs != NULL)
         {
-            Socket_AddrInfoDelete((Socket_AddressInfo**) &socket->connectAddrs);
+            Socket_AddrInfoDelete((Socket_AddressInfo**) &sock->connectAddrs);
         }
-        socket->connectAddrs = NULL;
-        socket->nextConnectAttemptAddr = NULL;
-        if (socket->writeQueue != NULL)
+        sock->connectAddrs = NULL;
+        sock->nextConnectAttemptAddr = NULL;
+        if (sock->writeQueue != NULL)
         {
             // Clear all buffers in the queue
-            status = SOPC_AsyncQueue_NonBlockingDequeue(socket->writeQueue, &elt);
+            status = SOPC_AsyncQueue_NonBlockingDequeue(sock->writeQueue, &elt);
             while (SOPC_STATUS_OK == status && NULL != elt)
             {
                 SOPC_Buffer_Delete((SOPC_Buffer*) elt);
                 elt = NULL;
-                status = SOPC_AsyncQueue_NonBlockingDequeue(socket->writeQueue, &elt);
+                status = SOPC_AsyncQueue_NonBlockingDequeue(sock->writeQueue, &elt);
             }
             // Clear the queue
-            SOPC_AsyncQueue_Free(&socket->writeQueue);
+            SOPC_AsyncQueue_Free(&sock->writeQueue);
         }
     }
 }

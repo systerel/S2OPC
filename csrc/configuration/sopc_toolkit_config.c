@@ -369,7 +369,11 @@ SOPC_ReturnStatus SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTabl
                     // known types to be added
                     nbKnownTypes = GetKnownEncodeableTypesLength();
                     // +1 for null value termination
-                    tConfig.encTypesTable = malloc(sizeof(SOPC_EncodeableType*) * (nbKnownTypes + nbTypes + 1));
+                    if (((uint64_t) nbKnownTypes + nbTypes + 1) <= SIZE_MAX / sizeof(SOPC_EncodeableType*))
+                    {
+                        tConfig.encTypesTable =
+                            malloc(sizeof(SOPC_EncodeableType*) * (size_t)(nbKnownTypes + nbTypes + 1));
+                    } // else NULL due to previous condition
                     if (NULL == tConfig.encTypesTable ||
                         tConfig.encTypesTable != memcpy(tConfig.encTypesTable, SOPC_KnownEncodeableTypes,
                                                         nbKnownTypes * sizeof(SOPC_EncodeableType*)))
@@ -384,9 +388,17 @@ SOPC_ReturnStatus SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTabl
                 }
                 else
                 {
-                    // +1 for null value termination
-                    additionalTypes = realloc(tConfig.encTypesTable,
-                                              sizeof(SOPC_EncodeableType*) * tConfig.nbEncTypesTable + nbTypes + 1);
+                    if ((uint64_t) tConfig.nbEncTypesTable + nbTypes + 1 <= SIZE_MAX / sizeof(SOPC_EncodeableType*))
+                    {
+                        // +1 for null value termination
+                        additionalTypes =
+                            realloc(tConfig.encTypesTable,
+                                    sizeof(SOPC_EncodeableType*) * (size_t) tConfig.nbEncTypesTable + nbTypes + 1);
+                    }
+                    else
+                    {
+                        additionalTypes = NULL;
+                    }
                 }
 
                 if (additionalTypes != NULL)
@@ -463,17 +475,20 @@ int32_t SOPC_AppEvent_AddSpaceEvent_Create(SOPC_App_AddSpace_Event event)
 
 SOPC_App_EventType SOPC_AppEvent_AppEventType_Get(int32_t iEvent)
 {
-    return (iEvent & 0xFF);
+    assert(iEvent >= 0); // Ensure bitwise operation is not implem defined (it is the case on signed values)
+    return ((uint64_t) iEvent & 0xFF);
 }
 
 SOPC_App_Com_Event SOPC_AppEvent_ComEvent_Get(int32_t iEvent)
 {
-    return (iEvent >> 8);
+    assert(iEvent >= 0); // Ensure bitwise operation is not implem defined (it is the case on signed values)
+    return ((uint64_t) iEvent >> 8);
 }
 
 SOPC_App_AddSpace_Event SOPC_AppEvent_AddSpaceEvent_Get(int32_t iEvent)
 {
-    return (iEvent >> 8);
+    assert(iEvent >= 0); // Ensure bitwise operation is not implem defined (it is the case on signed values)
+    return ((uint64_t) iEvent >> 8);
 }
 
 void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)

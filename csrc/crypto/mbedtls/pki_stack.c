@@ -85,7 +85,7 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
 }
 
 SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_Certificate* pCertAuth,
-                                               CertificateRevList* pRevocationList,
+                                               struct SOPC_CertificateRevList* pRevocationList,
                                                SOPC_PKIProvider** ppPKI)
 {
     SOPC_PKIProvider* pki = NULL;

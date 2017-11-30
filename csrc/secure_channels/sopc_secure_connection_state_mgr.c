@@ -221,6 +221,11 @@ static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_Status
         // IMPORTANT NOTE: will be 1st event to be treated regarding INT_SC_CLOSE
         SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_ERR, scConnectionIdx, (void*) buffer, 0);
     }
+    else if (buffer != NULL)
+    {
+        // Buffer will not be used anymore
+        SOPC_Buffer_Delete(buffer);
+    }
 
     SOPC_String_Clear(&tempString);
 
@@ -286,6 +291,11 @@ static void SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnectio
             SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_CLO, scConnectionIdx, (void*) msgBuffer,
                                                            -1); // no request Id context in request
         }
+        else if (msgBuffer != NULL)
+        {
+            // Buffer will not be used anymore
+            SOPC_Buffer_Delete(msgBuffer);
+        }
     }
 
     OpcUa_RequestHeader_Clear(&reqHeader);
@@ -309,7 +319,6 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
                                      SOPC_StatusCode errorStatus,
                                      char* reason)
 {
-    SOPC_Buffer* errBuffer = NULL;
     assert(scConnection != NULL);
     bool immediateClose = false;
     const bool isScConnected = (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
@@ -323,15 +332,7 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
 
             if (false == isSocketClosed)
             {
-                errBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.sendBufferSize);
-                if (errBuffer != NULL)
-                {
-                    SC_Client_SendCloseSecureChannelRequestAndClose(scConnection, scConnectionIdx, errorStatus, reason);
-                }
-                else
-                {
-                    immediateClose = true;
-                }
+                SC_Client_SendCloseSecureChannelRequestAndClose(scConnection, scConnectionIdx, errorStatus, reason);
             }
             else
             {
@@ -531,7 +532,7 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     // Max size of buffer is message minimum size + URL bytes length
     msgBuffer = SOPC_Buffer_Create(SOPC_TCP_UA_HEL_MIN_MSG_LENGTH + SOPC_TCP_UA_MAX_URL_LENGTH);
 
-    if (msgBuffer != NULL)
+    if (msgBuffer != NULL && scConfig != NULL)
     {
         // Let size of the header for the chunk manager
         status = SOPC_Buffer_SetDataLength(msgBuffer, SOPC_TCP_UA_HEADER_LENGTH);
@@ -583,6 +584,11 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
         scConnection->socketIndex = socketIdx;
         scConnection->state = SECURE_CONNECTION_STATE_TCP_NEGOTIATE;
         SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_HEL, scConnectionIdx, (void*) msgBuffer, 0);
+    }
+    else if (msgBuffer != NULL)
+    {
+        // Buffer will not be used anymore
+        SOPC_Buffer_Delete(msgBuffer);
     }
 
     return result;
@@ -1036,8 +1042,16 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     // Read the Hello message content
 
     // Read protocol version of server
-    status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
-    if (SOPC_STATUS_OK == status)
+    if (epConfig != NULL)
+    {
+        status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
+    }
+    else
+    {
+        result = false;
+        *errorStatus = OpcUa_BadInternalError;
+    }
+    if (result != false && SOPC_STATUS_OK == status)
     {
         // Check protocol version compatible
         if (scConnection->tcpMsgProperties.protocolVersion > tempValue)
@@ -1046,7 +1060,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
             scConnection->tcpMsgProperties.protocolVersion = tempValue;
         } // else => server will return the last version it supports
     }
-    else
+    else if (result != false)
     {
         result = false;
         *errorStatus = OpcUa_BadDecodingError;
@@ -1706,6 +1720,11 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
         scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTED;
         SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_OPN, scConnectionIdx, (void*) opnRespBuffer, requestId);
     }
+    else if (opnRespBuffer != NULL)
+    {
+        // Buffer will not be used anymore
+        SOPC_Buffer_Delete(opnRespBuffer);
+    }
 
     OpcUa_ResponseHeader_Clear(&respHeader);
     OpcUa_OpenSecureChannelResponse_Clear(&opnResp);
@@ -1971,6 +1990,11 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     }
     else
     {
+        if (opnRespBuffer != NULL)
+        {
+            // Buffer will not be used anymore
+            SOPC_Buffer_Delete(opnRespBuffer);
+        }
         if (newSecuKeySets.receiverKeySet != NULL)
         {
             SOPC_KeySet_Delete(newSecuKeySets.receiverKeySet);

@@ -45,10 +45,6 @@ typedef enum _OpcUa_IdType {
     OpcUa_IdType_String = 1,
     OpcUa_IdType_Guid = 2,
     OpcUa_IdType_Opaque = 3
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_IdType_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_IdType;
 
 #endif
@@ -67,10 +63,6 @@ typedef enum _OpcUa_NodeClass {
     OpcUa_NodeClass_ReferenceType = 32,
     OpcUa_NodeClass_DataType = 64,
     OpcUa_NodeClass_View = 128
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_NodeClass_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_NodeClass;
 
 #endif
@@ -602,10 +594,6 @@ typedef enum _OpcUa_ApplicationType {
     OpcUa_ApplicationType_Client = 1,
     OpcUa_ApplicationType_ClientAndServer = 2,
     OpcUa_ApplicationType_DiscoveryServer = 3
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_ApplicationType_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_ApplicationType;
 
 #endif
@@ -867,10 +855,6 @@ typedef enum _OpcUa_MessageSecurityMode {
     OpcUa_MessageSecurityMode_None = 1,
     OpcUa_MessageSecurityMode_Sign = 2,
     OpcUa_MessageSecurityMode_SignAndEncrypt = 3
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_MessageSecurityMode_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_MessageSecurityMode;
 
 #endif
@@ -885,10 +869,6 @@ typedef enum _OpcUa_UserTokenType {
     OpcUa_UserTokenType_Certificate = 2,
     OpcUa_UserTokenType_IssuedToken = 3,
     OpcUa_UserTokenType_Kerberos = 4
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_UserTokenType_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_UserTokenType;
 
 #endif
@@ -1174,10 +1154,6 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_Buffer
 typedef enum _OpcUa_SecurityTokenRequestType {
     OpcUa_SecurityTokenRequestType_Issue = 0,
     OpcUa_SecurityTokenRequestType_Renew = 1
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_SecurityTokenRequestType_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_SecurityTokenRequestType;
 
 #endif
@@ -1768,10 +1744,6 @@ typedef enum _OpcUa_NodeAttributesMask {
     OpcUa_NodeAttributesMask_Method = 1466724,
     OpcUa_NodeAttributesMask_ReferenceType = 1371236,
     OpcUa_NodeAttributesMask_View = 1335532
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_NodeAttributesMask_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_NodeAttributesMask;
 
 #endif
@@ -2420,10 +2392,6 @@ typedef enum _OpcUa_AttributeWriteMask {
     OpcUa_AttributeWriteMask_ValueRank = 524288,
     OpcUa_AttributeWriteMask_WriteMask = 1048576,
     OpcUa_AttributeWriteMask_ValueForVariableType = 2097152
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_AttributeWriteMask_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_AttributeWriteMask;
 
 #endif
@@ -2436,10 +2404,6 @@ typedef enum _OpcUa_BrowseDirection {
     OpcUa_BrowseDirection_Forward = 0,
     OpcUa_BrowseDirection_Inverse = 1,
     OpcUa_BrowseDirection_Both = 2
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_BrowseDirection_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_BrowseDirection;
 
 #endif
@@ -2512,10 +2476,6 @@ typedef enum _OpcUa_BrowseResultMask {
     OpcUa_BrowseResultMask_All = 63,
     OpcUa_BrowseResultMask_ReferenceTypeInfo = 3,
     OpcUa_BrowseResultMask_TargetInfo = 60
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_BrowseResultMask_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_BrowseResultMask;
 
 #endif
@@ -3005,10 +2965,6 @@ typedef enum _OpcUa_ComplianceLevel {
     OpcUa_ComplianceLevel_Partial = 1,
     OpcUa_ComplianceLevel_SelfTested = 2,
     OpcUa_ComplianceLevel_Certified = 3
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_ComplianceLevel_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_ComplianceLevel;
 
 #endif
@@ -3149,10 +3105,6 @@ typedef enum _OpcUa_FilterOperator {
     OpcUa_FilterOperator_RelatedTo = 15,
     OpcUa_FilterOperator_BitwiseAnd = 16,
     OpcUa_FilterOperator_BitwiseOr = 17
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_FilterOperator_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_FilterOperator;
 
 #endif
@@ -3563,10 +3515,6 @@ typedef enum _OpcUa_TimestampsToReturn {
     OpcUa_TimestampsToReturn_Server = 1,
     OpcUa_TimestampsToReturn_Both = 2,
     OpcUa_TimestampsToReturn_Neither = 3
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_TimestampsToReturn_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_TimestampsToReturn;
 
 #endif
@@ -3895,10 +3843,6 @@ typedef enum _OpcUa_HistoryUpdateType {
     OpcUa_HistoryUpdateType_Replace = 2,
     OpcUa_HistoryUpdateType_Update = 3,
     OpcUa_HistoryUpdateType_Delete = 4
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_HistoryUpdateType_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_HistoryUpdateType;
 
 #endif
@@ -4171,10 +4115,6 @@ typedef enum _OpcUa_PerformUpdateType {
     OpcUa_PerformUpdateType_Replace = 2,
     OpcUa_PerformUpdateType_Update = 3,
     OpcUa_PerformUpdateType_Remove = 4
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_PerformUpdateType_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_PerformUpdateType;
 
 #endif
@@ -4532,10 +4472,6 @@ typedef enum _OpcUa_MonitoringMode {
     OpcUa_MonitoringMode_Disabled = 0,
     OpcUa_MonitoringMode_Sampling = 1,
     OpcUa_MonitoringMode_Reporting = 2
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_MonitoringMode_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_MonitoringMode;
 
 #endif
@@ -4548,10 +4484,6 @@ typedef enum _OpcUa_DataChangeTrigger {
     OpcUa_DataChangeTrigger_Status = 0,
     OpcUa_DataChangeTrigger_StatusValue = 1,
     OpcUa_DataChangeTrigger_StatusValueTimestamp = 2
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_DataChangeTrigger_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_DataChangeTrigger;
 
 #endif
@@ -4564,10 +4496,6 @@ typedef enum _OpcUa_DeadbandType {
     OpcUa_DeadbandType_None = 0,
     OpcUa_DeadbandType_Absolute = 1,
     OpcUa_DeadbandType_Percent = 2
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_DeadbandType_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_DeadbandType;
 
 #endif
@@ -5684,10 +5612,6 @@ typedef enum _OpcUa_EnumeratedTestType {
     OpcUa_EnumeratedTestType_Red = 1,
     OpcUa_EnumeratedTestType_Yellow = 4,
     OpcUa_EnumeratedTestType_Green = 5
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_EnumeratedTestType_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_EnumeratedTestType;
 
 #endif
@@ -5731,10 +5655,6 @@ typedef enum _OpcUa_RedundancySupport {
     OpcUa_RedundancySupport_Hot = 3,
     OpcUa_RedundancySupport_Transparent = 4,
     OpcUa_RedundancySupport_HotAndMirrored = 5
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_RedundancySupport_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_RedundancySupport;
 
 #endif
@@ -5752,10 +5672,6 @@ typedef enum _OpcUa_ServerState {
     OpcUa_ServerState_Test = 5,
     OpcUa_ServerState_CommunicationFault = 6,
     OpcUa_ServerState_Unknown = 7
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_ServerState_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_ServerState;
 
 #endif
@@ -6131,10 +6047,6 @@ typedef enum _OpcUa_ModelChangeStructureVerbMask {
     OpcUa_ModelChangeStructureVerbMask_ReferenceAdded = 4,
     OpcUa_ModelChangeStructureVerbMask_ReferenceDeleted = 8,
     OpcUa_ModelChangeStructureVerbMask_DataTypeChanged = 16
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_ModelChangeStructureVerbMask_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_ModelChangeStructureVerbMask;
 
 #endif
@@ -6246,10 +6158,6 @@ typedef enum _OpcUa_AxisScaleEnumeration {
     OpcUa_AxisScaleEnumeration_Linear = 0,
     OpcUa_AxisScaleEnumeration_Log = 1,
     OpcUa_AxisScaleEnumeration_Ln = 2
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_AxisScaleEnumeration_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_AxisScaleEnumeration;
 
 #endif
@@ -6423,10 +6331,6 @@ typedef enum _OpcUa_ExceptionDeviationFormat {
     OpcUa_ExceptionDeviationFormat_PercentOfRange = 2,
     OpcUa_ExceptionDeviationFormat_PercentOfEURange = 3,
     OpcUa_ExceptionDeviationFormat_Unknown = 4
-#if OPCUA_FORCE_INT32_ENUMS
-    ,
-    _OpcUa_ExceptionDeviationFormat_MaxEnumerationValue = OpcUa_Int32_Max
-#endif
 } OpcUa_ExceptionDeviationFormat;
 
 #endif

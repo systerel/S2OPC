@@ -160,20 +160,19 @@ void message_out_bs__dealloc_msg_header_out(const constants__t_msg_header_i mess
 void message_out_bs__dealloc_msg_out(const constants__t_msg_i message_out_bs__msg)
 {
     // First field of each message structure is an encodeable type
-    SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) message_out_bs__msg;
+    SOPC_EncodeableType* encType = NULL;
     if (message_out_bs__msg != constants__c_msg_indet)
     {
+        encType = *(SOPC_EncodeableType**) message_out_bs__msg;
         if (&OpcUa_ReadResponse_EncodeableType == encType)
         {
             /* Current implementation share the variants of the address space in the response,
                avoid deallocation of those variants */
             OpcUa_ReadResponse* readMsg = (OpcUa_ReadResponse*) message_out_bs__msg;
-            if (NULL != readMsg)
-            {
-                free(readMsg->Results);
-                readMsg->Results = NULL;
-                readMsg->NoOfResults = 0;
-            }
+            // NULL != readMsg <=> message_out_bs__msg != constants__c_msg_indet
+            free(readMsg->Results);
+            readMsg->Results = NULL;
+            readMsg->NoOfResults = 0;
         }
         // TODO: status returned ?
         // TODO: const parameter modified !
@@ -296,7 +295,10 @@ void message_out_bs__write_create_session_req_msg_endpointUrl(
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) message_out_bs__msg;
     SOPC_SecureChannel_Config* chConfig = SOPC_Toolkit_GetSecureChannelConfig(message_out_bs__channel_config_idx);
-    status = SOPC_String_CopyFromCString(&createSessionReq->EndpointUrl, chConfig->url);
+    if (NULL != chConfig)
+    {
+        status = SOPC_String_CopyFromCString(&createSessionReq->EndpointUrl, chConfig->url);
+    }
     assert(SOPC_STATUS_OK == status);
 }
 
@@ -309,6 +311,7 @@ void message_out_bs__write_create_session_req_msg_crypto(
     OpcUa_CreateSessionRequest* pReq = (OpcUa_CreateSessionRequest*) message_out_bs__p_req_msg;
     const SOPC_Certificate* pCrtCli = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    uint32_t certLength = 0;
 
     /* Retrieve the certificate */
     pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) message_out_bs__p_channel_config_idx);
@@ -321,8 +324,9 @@ void message_out_bs__write_create_session_req_msg_crypto(
     /* Write the Certificate */
     SOPC_ByteString_Clear(&pReq->ClientCertificate);
     /* TODO: this is a malloc error, this can fail, and the B model should be notified */
-    status = SOPC_KeyManager_Certificate_CopyDER(pCrtCli, &pReq->ClientCertificate.Data,
-                                                 (uint32_t*) &pReq->ClientCertificate.Length);
+    status = SOPC_KeyManager_Certificate_CopyDER(pCrtCli, &pReq->ClientCertificate.Data, &certLength);
+    assert(certLength <= INT32_MAX);
+    pReq->ClientCertificate.Length = (int32_t) certLength;
     if (SOPC_STATUS_OK != status)
         return;
 
@@ -426,7 +430,7 @@ void message_out_bs__write_create_session_resp_msg_crypto(
 
 void message_out_bs__write_activate_session_req_msg_crypto(const constants__t_msg_i message_out_bs__activate_req_msg,
                                                            const constants__t_SignatureData_i message_out_bs__signature,
-                                                           bool* const message_out_bs__bret)
+                                                           t_bool* const message_out_bs__bret)
 
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;

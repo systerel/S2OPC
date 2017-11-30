@@ -29,8 +29,8 @@ int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size)
         res = 0;
         for (idx = 0; idx < size && res == 0; idx++)
         {
-            lc1 = tolower(s1[idx]);
-            lc2 = tolower(s2[idx]);
+            lc1 = tolower((unsigned char) s1[idx]);
+            lc2 = tolower((unsigned char) s2[idx]);
             if (lc1 < lc2)
             {
                 res = -1;

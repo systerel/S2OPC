@@ -556,7 +556,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
-    if (NULL == str || (str != NULL && str->Data != NULL))
+    if (NULL == str || str->Data != NULL)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -567,10 +567,10 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
         {
             if (length > 0)
             {
-                if (length <= SOPC_MAX_STRING_LENGTH)
+                if (length <= SOPC_MAX_STRING_LENGTH && (uint64_t) length * 1 <= SIZE_MAX)
                 {
                     str->Length = length;
-                    str->Data = malloc(sizeof(SOPC_Byte) * length);
+                    str->Data = malloc(sizeof(SOPC_Byte) * (size_t) length);
                     if (str->Data != NULL)
                     {
                         status = SOPC_Buffer_Read(str->Data, buf, length);
@@ -638,7 +638,7 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
-    if (NULL == str || (str != NULL && str->Data != NULL))
+    if (NULL == str || str->Data != NULL)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -649,11 +649,11 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
         {
             if (length > 0)
             {
-                if (length <= SOPC_MAX_STRING_LENGTH)
+                if (length <= SOPC_MAX_STRING_LENGTH && (uint64_t) length + 1 <= SIZE_MAX)
                 {
                     str->Length = length;
                     // +1 to add '\0' character for CString compatibility
-                    str->Data = malloc(sizeof(SOPC_Byte) * (length + 1));
+                    str->Data = malloc(sizeof(SOPC_Byte) * (size_t)(length + 1));
                     if (str->Data != NULL)
                     {
                         status = SOPC_Buffer_Read(str->Data, buf, length);
@@ -1576,12 +1576,19 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
             if (SOPC_STATUS_OK == status)
             {
                 extObj->Body.Object.Value = malloc(extObj->Body.Object.ObjType->AllocationSize);
-                extObj->Body.Object.ObjType->Initialize(extObj->Body.Object.Value);
-                status = extObj->Body.Object.ObjType->Decode(extObj->Body.Object.Value, buf);
-                if (SOPC_STATUS_OK != status)
+                if (extObj->Body.Object.Value != NULL)
                 {
-                    free(extObj->Body.Object.Value);
-                    extObj->Body.Object.Value = NULL;
+                    extObj->Body.Object.ObjType->Initialize(extObj->Body.Object.Value);
+                    status = extObj->Body.Object.ObjType->Decode(extObj->Body.Object.Value, buf);
+                    if (SOPC_STATUS_OK != status)
+                    {
+                        free(extObj->Body.Object.Value);
+                        extObj->Body.Object.Value = NULL;
+                    }
+                }
+                else
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
                 }
             }
             break;
@@ -1621,10 +1628,9 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Byte* byteArray = NULL;
-    assert(buf != NULL && eltsArray != NULL && NULL == *eltsArray && noOfElts != NULL);
 
-    if (buf != NULL && noOfElts != NULL && *noOfElts >= 0 && *noOfElts <= SOPC_MAX_ARRAY_LENGTH &&
-        (size_t) *noOfElts <= SIZE_MAX && eltsArray != NULL && NULL == *eltsArray && decodeFct != NULL)
+    if (buf != NULL && noOfElts != NULL && *noOfElts >= 0 && *noOfElts <= SOPC_MAX_ARRAY_LENGTH && eltsArray != NULL &&
+        (uint64_t) *noOfElts <= SIZE_MAX && NULL == *eltsArray && decodeFct != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2027,12 +2033,14 @@ static SOPC_ReturnStatus SOPC_Variant_Write_Internal(const SOPC_Variant* variant
             if (SOPC_STATUS_OK == status)
             {
                 // array
-                int32_t idx = 0;
                 for (idx = 0; idx < variant->Value.Matrix.Dimensions; idx++)
                 {
                     status = SOPC_Int32_Write(&variant->Value.Matrix.ArrayDimensions[idx], buf);
                 }
             }
+            break;
+        default:
+            status = SOPC_STATUS_ENCODING_ERROR;
             break;
         }
     }
@@ -2238,6 +2246,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             status = SOPC_DiagnosticInfo_Read(val->DiagInfo, buf);
             if (status != SOPC_STATUS_OK)
             {
+                SOPC_DiagnosticInfo_Clear(val->DiagInfo);
                 free(val->DiagInfo);
                 val->DiagInfo = NULL;
             }
@@ -2450,7 +2459,8 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
             }
 
             if (SOPC_STATUS_OK == status &&
-                (variant->Value.Matrix.Dimensions < 0 || variant->Value.Matrix.Dimensions > SOPC_MAX_ARRAY_LENGTH))
+                (variant->Value.Matrix.Dimensions < 0 || variant->Value.Matrix.Dimensions > SOPC_MAX_ARRAY_LENGTH ||
+                 (uint64_t) variant->Value.Matrix.Dimensions * 1 > SIZE_MAX))
             {
                 status = SOPC_STATUS_ENCODING_ERROR;
             }
@@ -2458,7 +2468,8 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
             if (SOPC_STATUS_OK == status)
             {
                 // array
-                variant->Value.Matrix.ArrayDimensions = malloc(sizeof(int32_t) * variant->Value.Matrix.Dimensions);
+                variant->Value.Matrix.ArrayDimensions =
+                    malloc(sizeof(int32_t) * (size_t) variant->Value.Matrix.Dimensions);
                 if (variant->Value.Matrix.Dimensions == 0)
                 {
                     matrixLength = 0;
@@ -2502,12 +2513,15 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
             }
 
             break;
+        default:
+            status = SOPC_STATUS_ENCODING_ERROR;
+            break;
         }
     }
 
     if (status != SOPC_STATUS_OK && variant != NULL)
     {
-        variant->BuiltInTypeId = 0; // encoding byte read assignement
+        variant->BuiltInTypeId = SOPC_Null_Id; // encoding byte read assignement
         SOPC_Int32_Clear(&variant->Value.Matrix.Dimensions);
     }
 
@@ -2687,7 +2701,7 @@ static SOPC_ReturnStatus SOPC_DataValue_Read_Internal(SOPC_DataValue* dataValue,
             dataValue->ServerPicoSeconds = 0;
         }
 
-        if (status != SOPC_STATUS_OK && dataValue != NULL)
+        if (status != SOPC_STATUS_OK)
         {
             SOPC_Variant_Clear(&dataValue->Value);
             SOPC_StatusCode_Clear(&dataValue->Status);
@@ -2722,10 +2736,9 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Byte* byteArray = NULL;
-    assert(buf != NULL && eltsArray != NULL && NULL == *eltsArray && noOfElts != NULL);
 
     if (buf != NULL && noOfElts != NULL && *noOfElts >= 0 && *noOfElts <= SOPC_MAX_ARRAY_LENGTH &&
-        (size_t) *noOfElts <= SIZE_MAX && eltsArray != NULL && NULL == *eltsArray && decodeFct != NULL)
+        (uint64_t) *noOfElts * sizeOfElt <= SIZE_MAX && eltsArray != NULL && NULL == *eltsArray && decodeFct != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2778,15 +2791,15 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Write_Array(SOPC_Buffer* buf,
-                                   const int32_t* noOfElts,
+SOPC_ReturnStatus SOPC_Write_Array(SOPC_Buffer* msgBuf,
+                                   const int32_t* const noOfElts,
                                    const void** eltsArray,
                                    size_t sizeOfElt,
                                    SOPC_EncodeableObject_PfnEncode* encodeFct)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
 
-    if (buf != NULL && noOfElts != NULL && eltsArray != NULL && encodeFct != NULL)
+    if (msgBuf != NULL && noOfElts != NULL && eltsArray != NULL && encodeFct != NULL)
     {
         if (*noOfElts > 0)
         {
@@ -2803,7 +2816,7 @@ SOPC_ReturnStatus SOPC_Write_Array(SOPC_Buffer* buf,
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Int32_Write(noOfElts, buf);
+        status = SOPC_Int32_Write(noOfElts, msgBuf);
     }
     if (SOPC_STATUS_OK == status && *noOfElts > 0)
     {
@@ -2813,7 +2826,7 @@ SOPC_ReturnStatus SOPC_Write_Array(SOPC_Buffer* buf,
         for (idx = 0; SOPC_STATUS_OK == status && idx < (size_t) *noOfElts; idx++)
         {
             pos = idx * sizeOfElt;
-            status = encodeFct(&(byteArray[pos]), buf);
+            status = encodeFct(&(byteArray[pos]), msgBuf);
         }
     }
     return status;

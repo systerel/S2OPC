@@ -88,6 +88,10 @@ SOPC_EventDispatcherManager* SOPC_EventDispatcherManager_CreateAndStart(SOPC_Eve
         }
         if (SOPC_STATUS_OK != status)
         {
+            if (NULL != pEventMgr->stopMgr)
+            {
+                free(pEventMgr->stopMgr);
+            }
             free(pEventMgr);
             pEventMgr = NULL;
         }
