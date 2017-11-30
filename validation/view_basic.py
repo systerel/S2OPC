@@ -28,9 +28,11 @@ def browse_tests(client, logger):
     n1 = client.get_node("ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019")
     children = n1.get_children()
     # checking number of children and their associated ids
-    logger.add_test('Browse Test - number of children for Node ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019', len(children) == 7)
+    logger.add_test('Browse Test - number of children for Node ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019', len(children) == 6)
+    #backward references shall not be taken into account
     node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs")
-    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs', node in children)
+    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs', node not in children)
+    #checking forward references
     node = Node(sUri,"i=61")
     logger.add_test('Browse Test - child i=61', node in children)
     node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM")

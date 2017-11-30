@@ -40,7 +40,8 @@ if __name__=='__main__':
     logger = TapLogger("validation.tap")
     headerString = "******************* Beginning {0} tests with one connexion *********************"
 
-    for sp in [SecurityPolicy, security_policies.SecurityPolicyBasic256]:
+    #for sp in [SecurityPolicy, security_policies.SecurityPolicyBasic256]:
+    for sp in [SecurityPolicy]:
         logger.begin_section("security policy {0}".format(re.split("#",sp.URI)[-1]))
         try:
             # secure channel connection

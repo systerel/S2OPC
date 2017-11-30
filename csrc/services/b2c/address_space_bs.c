@@ -354,7 +354,7 @@ void address_space_bs__get_Reference_TargetNode(const constants__t_Reference_i a
 void address_space_bs__get_Reference_IsForward(const constants__t_Reference_i address_space_bs__p_ref,
                                                t_bool* const address_space_bs__p_IsForward)
 {
-    *address_space_bs__p_IsForward = &((t_bool*) address_space_bs__refs_IsForward)[address_space_bs__p_ref];
+    *address_space_bs__p_IsForward = ((t_bool*) address_space_bs__refs_IsForward)[address_space_bs__p_ref];
 }
 
 void address_space_bs__get_Node_RefIndexBegin(const constants__t_Node_i address_space_bs__p_node,
