@@ -643,7 +643,7 @@
       <Reference ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK</Reference>
     </References>
   </UAObject>
-  <UAVariable AccessLevel="2" BrowseName="261:GK" DataType="Boolean" NodeId="s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
+  <UAVariable AccessLevel="2" BrowseName="261:GK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
     <DisplayName>GK</DisplayName>
     <Description>Permissive Signal Status, ~é€bla</Description>
     <References>
