@@ -297,9 +297,77 @@
     <Description>The browse entry point when looking for types in the server address space.</Description>
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">i=84</Reference>
+      <Reference ReferenceType="Organizes">i=88</Reference>
+      <Reference ReferenceType="Organizes">i=89</Reference>
+      <Reference ReferenceType="Organizes">i=90</Reference>
+      <Reference ReferenceType="Organizes">i=91</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
-  </UAObject>  <!-- COMMON PART WITH READ/WRITE TEST -->
+  </UAObject>
+ <UAObject NodeId="i=88" BrowseName="ObjectTypes" SymbolicName="ObjectTypesFolder">
+    <DisplayName>ObjectTypes</DisplayName>
+    <Description>The browse entry point when looking for object types in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
+      <Reference ReferenceType="Organizes">i=58</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=89" BrowseName="VariableTypes" SymbolicName="VariableTypesFolder">
+    <DisplayName>VariableTypes</DisplayName>
+    <Description>The browse entry point when looking for variable types in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
+      <Reference ReferenceType="Organizes">i=62</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=90" BrowseName="DataTypes" SymbolicName="DataTypesFolder">
+    <DisplayName>DataTypes</DisplayName>
+    <Description>The browse entry point when looking for data types in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
+      <Reference ReferenceType="Organizes">i=24</Reference>
+      <Reference ReferenceType="Organizes">i=26</Reference>
+      <Reference ReferenceType="Organizes">i=27</Reference>
+      <Reference ReferenceType="Organizes">i=28</Reference>
+      <Reference ReferenceType="Organizes">i=29</Reference>
+      <Reference ReferenceType="Organizes">i=1</Reference>
+      <Reference ReferenceType="Organizes">i=2</Reference>
+      <Reference ReferenceType="Organizes">i=3</Reference>
+      <Reference ReferenceType="Organizes">i=4</Reference>
+      <Reference ReferenceType="Organizes">i=5</Reference>
+      <Reference ReferenceType="Organizes">i=6</Reference>
+      <Reference ReferenceType="Organizes">i=7</Reference>
+      <Reference ReferenceType="Organizes">i=8</Reference>
+      <Reference ReferenceType="Organizes">i=9</Reference>
+      <Reference ReferenceType="Organizes">i=10</Reference>
+      <Reference ReferenceType="Organizes">i=11</Reference>
+      <Reference ReferenceType="Organizes">i=12</Reference>
+      <Reference ReferenceType="Organizes">i=13</Reference>
+      <Reference ReferenceType="Organizes">i=14</Reference>
+      <Reference ReferenceType="Organizes">i=15</Reference>
+      <Reference ReferenceType="Organizes">i=16</Reference>
+      <Reference ReferenceType="Organizes">i=17</Reference>
+      <Reference ReferenceType="Organizes">i=18</Reference>
+      <Reference ReferenceType="Organizes">i=19</Reference>
+      <Reference ReferenceType="Organizes">i=20</Reference>
+      <Reference ReferenceType="Organizes">i=21</Reference>
+      <Reference ReferenceType="Organizes">i=22</Reference>
+      <Reference ReferenceType="Organizes">i=23</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=91" BrowseName="ReferenceTypes" SymbolicName="ReferenceTypesFolder">
+    <DisplayName>ReferenceTypes</DisplayName>
+    <Description>The browse entry point when looking for reference types in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
+      <Reference ReferenceType="Organizes">i=31</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <!-- COMMON PART WITH READ/WRITE TEST -->
   <UAObject BrowseName="0:VariablesFolderBn" NodeId="i=1000" ParentNodeId="i=85">
     <DisplayName>VariablesFolderDn</DisplayName>
     <Description>VariablesFolderDescObj1d2</Description>
