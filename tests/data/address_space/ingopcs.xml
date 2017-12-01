@@ -535,7 +535,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:UInt64>18446744073709551614ULL</uax:UInt64>
+      <uax:UInt64>1844674407370955</uax:UInt64>
     </Value>
   </UAVariable>
   <UAVariable BrowseName="0:Float" DataType="Float" NodeId="i=1013" ParentNodeId="i=1000">

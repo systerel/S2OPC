@@ -42,6 +42,6 @@ variantInfoList = [ ('Int64', ua.VariantType.Int64, -1000, random.randint(-92233
                     ('Int16', ua.VariantType.Int16, -32768, random.randint(-32768, 32767)),
                     ('UInt16', ua.VariantType.UInt16, 65535, random.randint(0, 65535)),
                     ('Int32', ua.VariantType.Int32, -2147483648, random.randint(-2147483648,2147483647)),
-                    ('UInt64', ua.VariantType.UInt64, 18446744073709551614, random.randint(0,18446744073709551615)),
+                    ('UInt64', ua.VariantType.UInt64, 1844674407370955, random.randint(0,18446744073709551615)),
                     ('Float', ua.VariantType.Float, 5758787.5876875, random.uniform(-2**127,2**127)),
                   ]
