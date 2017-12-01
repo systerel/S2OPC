@@ -2,7 +2,7 @@ PATHBUILD=./build
 PATHGENC=./genc
 
 XMLPATH=../tests/data/address_space
-XMLFILES=$(shell find $(XMLPATH) -name "*.xml")
+XMLFILES=$(shell find $(XMLPATH) -name "*.xml" | grep -v "/parts/")
 CFILES=$(patsubst $(XMLPATH)/%.xml,$(PATHGENC)/%_addspace.c,$(XMLFILES))
 CTESTFILES=$(patsubst $(XMLPATH)/%.xml,$(PATHGENC)/check_%_addspace.c,$(XMLFILES))
 
