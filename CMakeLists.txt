@@ -58,8 +58,8 @@ file(GLOB_RECURSE INGOPCS_SRCS
     "csrc/services/*.c"
 )
 
-# Define INGOPCS static library
-add_library(ingopcs STATIC ${PLATFORM_SRCS} ${INGOPCS_SRCS})
+# Define INGOPCS library (static or shared based on BUILD_SHARED_LIBS)
+add_library(ingopcs ${PLATFORM_SRCS} ${INGOPCS_SRCS})
 
 # Define INGOPCS library includes
 file(GLOB INGOPCS_INCLUDE_FILES
@@ -96,6 +96,10 @@ target_include_directories(ingopcs BEFORE
 # Define INGOPCS library dependencies
 set(INGOPCS_DEP_LIBS mbedtls mbedcrypto mbedx509 ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
 target_link_libraries(ingopcs PUBLIC ${INGOPCS_DEP_LIBS})
+if(WIN32)
+  # always link libc statically (even in case of shared library)
+  target_link_libraries(ingopcs PRIVATE -static-libgcc)
+endif()
 
 # Define installation targets
 ## retrieve public include files
