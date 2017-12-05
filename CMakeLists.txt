@@ -94,10 +94,8 @@ target_include_directories(ingopcs BEFORE
 )
 
 # Define INGOPCS library dependencies
-target_link_libraries(ingopcs PUBLIC mbedtls mbedcrypto mbedx509)
-target_link_libraries(ingopcs PUBLIC ${MATH_LIB})
-target_link_libraries(ingopcs PUBLIC ${THREAD_LIB})
-target_link_libraries(ingopcs PUBLIC ${SOCK_LIB})
+set(INGOPCS_DEP_LIBS mbedtls mbedcrypto mbedx509 ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
+target_link_libraries(ingopcs PUBLIC ${INGOPCS_DEP_LIBS})
 
 # Define installation targets
 ## retrieve public include files
@@ -115,6 +113,17 @@ install(TARGETS ingopcs
 )
 
 # INGOPCS tests ################################################################################
+
+# lib Check dependency: set specialized linking configuration dependent on platform
+if(UNIX)
+  # force static linking
+  set(LIBCHECK_DEP_LIB libcheck.a)
+elseif(WIN32)
+  # force static linking + libcheck dependency to provide missing functions on windows
+  set(LIBCHECK_DEP_LIB libcheck.a compat)
+else()
+  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
 
 # Check generated address space for tests
 set(ADDSPACEGEN_DIR "address_space_generation")
@@ -134,11 +143,7 @@ set_tests_properties(check_addspace PROPERTIES DEPENDS check_ingopcs_addspace)
 file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
 add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
 target_include_directories(check_helpers PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(check_helpers PRIVATE ingopcs libcheck.a)
-if(WIN32)
-  # libcheck dependency to provide missing functions on windows
-  target_link_libraries(check_helpers PRIVATE compat)
-endif()
+target_link_libraries(check_helpers PRIVATE ingopcs ${LIBCHECK_DEP_LIB})
 
 # Client test
 add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
@@ -211,17 +216,13 @@ add_executable(check_sockets ${SOCKETS_SRC}
 target_include_directories(check_sockets PRIVATE "tests/sockets/stubs" 
                                                  ${INGOPCS_PUBLIC_INCLUDES} 
                                                  ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(check_sockets PRIVATE ingopcs libcheck.a)
-if(WIN32)
-  # libcheck dependency to provide missing functions on windows
-  target_link_libraries(check_sockets PRIVATE compat)
-endif()
+target_link_libraries(check_sockets PRIVATE ${LIBCHECK_DEP_LIB} ${INGOPCS_DEP_LIBS})
 
 # Secure channels (stubbed on services side) tests
 file(GLOB_RECURSE SECURE_CHANNELS_SRC
     "csrc/secure_channels/*.c"
-    "csrc/helpers_opcua_types/*.c"
-    "csrc/helpers_crypto/*.c"
+    "csrc/opcua_types/*.c"
+    "csrc/crypto/*.c"
 )
 
 file(GLOB_RECURSE SECURE_CHANNELS_CLIENT_TEST
@@ -240,14 +241,14 @@ add_executable(test_secure_channels_client ${SOCKETS_SRC}
 target_include_directories(test_secure_channels_client PRIVATE "tests/secure_channels/stubs" 
                                                                ${INGOPCS_PUBLIC_INCLUDES} 
                                                                ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(test_secure_channels_client PRIVATE ingopcs)
+target_link_libraries(test_secure_channels_client PRIVATE ${INGOPCS_DEP_LIBS})
 
 # Secure channels tests: SERVER executable
 add_executable(test_secure_channels_server ${SOCKETS_SRC}
                                            ${SECURE_CHANNELS_SRC}
                                            ${SECURE_CHANNELS_SERVER_TEST})
+target_link_libraries(test_secure_channels_server PRIVATE ${INGOPCS_DEP_LIBS})
 
 target_include_directories(test_secure_channels_server PRIVATE "tests/secure_channels/stubs" 
                                                                ${INGOPCS_PUBLIC_INCLUDES} 
                                                                ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(test_secure_channels_server PRIVATE ingopcs)
