@@ -323,11 +323,11 @@ ${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var
     if (!(addressSpace.valueArray[pos].Value.Boolean == bool_value)) {bres = false; printf("invalid Value \n") ;}
 
   } else if (builtInTypeId == SOPC_SByte_Id) {
-    sscanf(value_node, "%hhu", &amp;uint8_value);
+    sscanf(value_node, "%hhi", &amp;int8_value);
     if (!(addressSpace.valueArray[pos].Value.Sbyte == uint8_value)) {printf("invalid Value \n") ;}<xsl:text>
     </xsl:text>
   } else if (builtInTypeId == SOPC_Byte_Id) {
-    sscanf(value_node, "%hhi", &amp;int8_value);
+    sscanf(value_node, "%hhu", &amp;uint8_value);
     if (!(addressSpace.valueArray[pos].Value.Byte == int8_value)) {printf("invalid Value \n") ;}<xsl:text>
     </xsl:text>
   } else if (builtInTypeId == SOPC_Int16_Id) {
