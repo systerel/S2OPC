@@ -163,7 +163,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:Float>5758787.5876875</uax:Float>
+      <uax:Float>109517.875</uax:Float>
     </Value>
   </UAVariable>
   <!--UAVariable BrowseName="0:DateTime" DataType="DateTime" NodeId="i=1014" ParentNodeId="i=1000">
