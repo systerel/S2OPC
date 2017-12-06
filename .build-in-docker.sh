@@ -4,7 +4,7 @@
 #
 set -e
 
-DOCKER_IMAGE=4bdff26d936f
+DOCKER_IMAGE=8046bfc4ba1e
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
     /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
