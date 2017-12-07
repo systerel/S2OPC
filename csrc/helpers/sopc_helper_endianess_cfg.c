@@ -23,10 +23,36 @@
 SOPC_Endianess sopc_endianess = SOPC_Endianess_Undefined;
 SOPC_Endianess sopc_floatEndianess = SOPC_Endianess_Undefined;
 
-static uint32_t little_endian(void)
+static SOPC_Endianess compute_integer_endianness(void)
 {
-    uint32_t x = 0x0001;
-    return (x == *((uint8_t*) &x));
+    uint64_t x = 0x0123456789ABCDEF;
+    uint8_t *pX = (uint8_t*) &x;
+    SOPC_Endianess endianness = SOPC_Endianess_Undefined;
+
+    if (pX[0] == 0x01 &&
+        pX[1] == 0x23 &&
+        pX[2] == 0x45 &&
+        pX[3] == 0x67 &&
+        pX[4] == 0x89 &&
+        pX[5] == 0xAB &&
+        pX[6] == 0xCD &&
+        pX[7] == 0xEF)
+    {
+        endianness = SOPC_Endianess_BigEndian;
+    }
+    else if (pX[0] == 0xEF &&
+             pX[1] == 0xCD &&
+             pX[2] == 0xAB &&
+             pX[3] == 0x89 &&
+             pX[4] == 0x67 &&
+             pX[5] == 0x45 &&
+             pX[6] == 0x23 &&
+             pX[7] == 0x01)
+    {
+        endianness = SOPC_Endianess_LittleEndian;
+    }
+
+    return endianness;
 }
 
 static SOPC_Endianess compute_float_endianness(void)
@@ -80,13 +106,6 @@ static SOPC_Endianess compute_float_endianness(void)
 
 void SOPC_Helper_EndianessCfg_Initialize()
 {
-    if (little_endian() == 0)
-    {
-        sopc_endianess = SOPC_Endianess_BigEndian;
-    }
-    else
-    {
-        sopc_endianess = SOPC_Endianess_LittleEndian;
-    }
+    sopc_endianess = compute_integer_endianness();
     sopc_floatEndianess = compute_float_endianness();
 }
