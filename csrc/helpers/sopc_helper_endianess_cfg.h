@@ -18,7 +18,12 @@
 #ifndef SOPC_HELPER_ENDIANESS_CFG_H_
 #define SOPC_HELPER_ENDIANESS_CFG_H_
 
-typedef enum { SOPC_Endianess_Undefined, SOPC_Endianess_LittleEndian, SOPC_Endianess_BigEndian } SOPC_Endianess;
+typedef enum {
+    SOPC_Endianess_Undefined,
+    SOPC_Endianess_LittleEndian,
+    SOPC_Endianess_BigEndian,
+    SOPC_Endianness_FloatARMMiddleEndian
+} SOPC_Endianess;
 
 // Undefined before call to initialize
 extern SOPC_Endianess sopc_endianess;

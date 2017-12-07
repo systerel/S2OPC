@@ -29,16 +29,53 @@ static uint32_t little_endian(void)
     return (x == *((uint8_t*) &x));
 }
 
-static uint32_t float_big_endian(void)
+static SOPC_Endianess compute_float_endianness(void)
 {
-    float f = -0.0;
-    // Check if sign bit is the first
-    // GCC version with binary constants extension
-    //    assert((0b10000000 & *((char*) &f)) == 0b10000000 ||
-    //           (0b10000000 & ((char*) &f)[3]) == 0b10000000);
-    //    return (0b10000000 & *((char*) &f)) == 0b10000000;
-    assert((0x80 & *((char*) &f)) == 0x80 || (0x80 & ((char*) &f)[3]) == 0x80);
-    return (0x80 & *((char*) &f)) == 0x80;
+    double d = -0x1.3456789ABCDEFp-1005;
+    uint8_t *pD = (uint8_t*) &d;
+    SOPC_Endianess endianness = SOPC_Endianess_Undefined;
+
+    /* Check whether the double is encoded in one of the three known forms.
+     * Big endian has sign and exponent bytes first.
+     * Little endian has sign and exponent bytes last.
+     * ARM's half endianness is big endian in groups of 4 bytes,
+     *  but the least significant 4 bytes are first.
+     */
+    if (pD[0] == 0x81 &&
+        pD[1] == 0x23 &&
+        pD[2] == 0x45 &&
+        pD[3] == 0x67 &&
+        pD[4] == 0x89 &&
+        pD[5] == 0xAB &&
+        pD[6] == 0xCD &&
+        pD[7] == 0xEF)
+    {
+        endianness = SOPC_Endianess_BigEndian;
+    }
+    else if (pD[0] == 0xEF &&
+             pD[1] == 0xCD &&
+             pD[2] == 0xAB &&
+             pD[3] == 0x89 &&
+             pD[4] == 0x67 &&
+             pD[5] == 0x45 &&
+             pD[6] == 0x23 &&
+             pD[7] == 0x81)
+    {
+        endianness = SOPC_Endianess_LittleEndian;
+    }
+    else if (pD[0] == 0x67 &&
+             pD[1] == 0x45 &&
+             pD[2] == 0x23 &&
+             pD[3] == 0x81 &&
+             pD[4] == 0xEF &&
+             pD[5] == 0xCD &&
+             pD[6] == 0xAB &&
+             pD[7] == 0x89)
+    {
+        endianness = SOPC_Endianness_FloatARMMiddleEndian;
+    }
+
+    return endianness;
 }
 
 void SOPC_Helper_EndianessCfg_Initialize()
@@ -51,12 +88,5 @@ void SOPC_Helper_EndianessCfg_Initialize()
     {
         sopc_endianess = SOPC_Endianess_LittleEndian;
     }
-    if (float_big_endian() == 0)
-    {
-        sopc_floatEndianess = SOPC_Endianess_LittleEndian;
-    }
-    else
-    {
-        sopc_floatEndianess = SOPC_Endianess_BigEndian;
-    }
+    sopc_floatEndianess = compute_float_endianness();
 }

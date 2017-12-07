@@ -91,9 +91,16 @@ void SOPC_EncodeDecode_Float(float* floatv)
 {
     assert(sopc_floatEndianess != SOPC_Endianess_Undefined);
     uint32_t* fourBytes = (uint32_t*) floatv;
-    if (sopc_floatEndianess == SOPC_Endianess_BigEndian)
+
+    switch (sopc_floatEndianess)
     {
+    case SOPC_Endianess_BigEndian:
         *fourBytes = SWAP_4_BYTES(*fourBytes);
+        break;
+    case SOPC_Endianess_LittleEndian:
+    case SOPC_Endianness_FloatARMMiddleEndian:
+    default:
+        break;
     }
 }
 
@@ -101,9 +108,18 @@ void SOPC_EncodeDecode_Double(double* doublev)
 {
     assert(sopc_floatEndianess != SOPC_Endianess_Undefined);
     uint64_t* eightBytes = (uint64_t*) doublev;
-    if (sopc_floatEndianess == SOPC_Endianess_BigEndian)
+
+    switch (sopc_floatEndianess)
     {
+    case SOPC_Endianess_BigEndian:
         *eightBytes = SWAP_8_BYTES(*eightBytes);
+        break;
+    case SOPC_Endianness_FloatARMMiddleEndian:
+        *eightBytes = SWAP_2_DWORDS(*eightBytes);
+        break;
+    case SOPC_Endianess_LittleEndian:
+    default:
+        break;
     }
 }
 
