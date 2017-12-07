@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_HELPER_ENDIANESS_CFG_H_
-#define SOPC_HELPER_ENDIANESS_CFG_H_
+#ifndef SOPC_HELPER_ENDIANNESS_CFG_H_
+#define SOPC_HELPER_ENDIANNESS_CFG_H_
 
 typedef enum {
-    SOPC_Endianess_Undefined,
-    SOPC_Endianess_LittleEndian,
-    SOPC_Endianess_BigEndian,
+    SOPC_Endianness_Undefined,
+    SOPC_Endianness_LittleEndian,
+    SOPC_Endianness_BigEndian,
     SOPC_Endianness_FloatARMMiddleEndian
-} SOPC_Endianess;
+} SOPC_Endianness;
 
 // Undefined before call to initialize
-extern SOPC_Endianess sopc_endianess;
-extern SOPC_Endianess sopc_floatEndianess;
+extern SOPC_Endianness sopc_endianness;
+extern SOPC_Endianness sopc_floatEndianness;
 
-void SOPC_Helper_EndianessCfg_Initialize(void);
+void SOPC_Helper_EndiannessCfg_Initialize(void);
 
-#endif /* SOPC_HELPER_ENDIANESS_CFG_H_ */
+#endif /* SOPC_HELPER_ENDIANNESS_CFG_H_ */

@@ -24,7 +24,7 @@
 #include "opcua_identifiers.h"
 
 #include "sopc_encodeabletype.h"
-#include "sopc_helper_endianess_cfg.h"
+#include "sopc_helper_endianness_cfg.h"
 #include "sopc_namespace_table.h"
 #include "sopc_toolkit_config_internal.h"
 
@@ -33,8 +33,8 @@
 void SOPC_EncodeDecode_Int16(int16_t* intv)
 {
     uint16_t* twoBytes = (uint16_t*) intv;
-    assert(sopc_endianess != SOPC_Endianess_Undefined);
-    if (sopc_endianess == SOPC_Endianess_BigEndian)
+    assert(sopc_endianness != SOPC_Endianness_Undefined);
+    if (sopc_endianness == SOPC_Endianness_BigEndian)
     {
         *twoBytes = SWAP_2_BYTES(*twoBytes);
     }
@@ -42,8 +42,8 @@ void SOPC_EncodeDecode_Int16(int16_t* intv)
 
 void SOPC_EncodeDecode_UInt16(uint16_t* uintv)
 {
-    assert(sopc_endianess != SOPC_Endianess_Undefined);
-    if (sopc_endianess == SOPC_Endianess_BigEndian)
+    assert(sopc_endianness != SOPC_Endianness_Undefined);
+    if (sopc_endianness == SOPC_Endianness_BigEndian)
     {
         *uintv = SWAP_2_BYTES(*uintv);
     }
@@ -51,9 +51,9 @@ void SOPC_EncodeDecode_UInt16(uint16_t* uintv)
 
 void SOPC_EncodeDecode_Int32(int32_t* intv)
 {
-    assert(sopc_endianess != SOPC_Endianess_Undefined);
+    assert(sopc_endianness != SOPC_Endianness_Undefined);
     uint32_t* fourBytes = (uint32_t*) intv;
-    if (sopc_endianess == SOPC_Endianess_BigEndian)
+    if (sopc_endianness == SOPC_Endianness_BigEndian)
     {
         *fourBytes = SWAP_4_BYTES(*fourBytes);
     }
@@ -61,8 +61,8 @@ void SOPC_EncodeDecode_Int32(int32_t* intv)
 
 void SOPC_EncodeDecode_UInt32(uint32_t* uintv)
 {
-    assert(sopc_endianess != SOPC_Endianess_Undefined);
-    if (sopc_endianess == SOPC_Endianess_BigEndian)
+    assert(sopc_endianness != SOPC_Endianness_Undefined);
+    if (sopc_endianness == SOPC_Endianness_BigEndian)
     {
         *uintv = SWAP_4_BYTES(*uintv);
     }
@@ -70,9 +70,9 @@ void SOPC_EncodeDecode_UInt32(uint32_t* uintv)
 
 void SOPC_EncodeDecode_Int64(int64_t* intv)
 {
-    assert(sopc_endianess != SOPC_Endianess_Undefined);
+    assert(sopc_endianness != SOPC_Endianness_Undefined);
     uint64_t* eightBytes = (uint64_t*) intv;
-    if (sopc_endianess == SOPC_Endianess_BigEndian)
+    if (sopc_endianness == SOPC_Endianness_BigEndian)
     {
         *eightBytes = SWAP_8_BYTES(*eightBytes);
     }
@@ -80,8 +80,8 @@ void SOPC_EncodeDecode_Int64(int64_t* intv)
 
 void SOPC_EncodeDecode_UInt64(uint64_t* uintv)
 {
-    assert(sopc_endianess != SOPC_Endianess_Undefined);
-    if (sopc_endianess == SOPC_Endianess_BigEndian)
+    assert(sopc_endianness != SOPC_Endianness_Undefined);
+    if (sopc_endianness == SOPC_Endianness_BigEndian)
     {
         *uintv = SWAP_8_BYTES(*uintv);
     }
@@ -89,15 +89,15 @@ void SOPC_EncodeDecode_UInt64(uint64_t* uintv)
 
 void SOPC_EncodeDecode_Float(float* floatv)
 {
-    assert(sopc_floatEndianess != SOPC_Endianess_Undefined);
+    assert(sopc_floatEndianness != SOPC_Endianness_Undefined);
     uint32_t* fourBytes = (uint32_t*) floatv;
 
-    switch (sopc_floatEndianess)
+    switch (sopc_floatEndianness)
     {
-    case SOPC_Endianess_BigEndian:
+    case SOPC_Endianness_BigEndian:
         *fourBytes = SWAP_4_BYTES(*fourBytes);
         break;
-    case SOPC_Endianess_LittleEndian:
+    case SOPC_Endianness_LittleEndian:
     case SOPC_Endianness_FloatARMMiddleEndian:
     default:
         break;
@@ -106,18 +106,18 @@ void SOPC_EncodeDecode_Float(float* floatv)
 
 void SOPC_EncodeDecode_Double(double* doublev)
 {
-    assert(sopc_floatEndianess != SOPC_Endianess_Undefined);
+    assert(sopc_floatEndianness != SOPC_Endianness_Undefined);
     uint64_t* eightBytes = (uint64_t*) doublev;
 
-    switch (sopc_floatEndianess)
+    switch (sopc_floatEndianness)
     {
-    case SOPC_Endianess_BigEndian:
+    case SOPC_Endianness_BigEndian:
         *eightBytes = SWAP_8_BYTES(*eightBytes);
         break;
     case SOPC_Endianness_FloatARMMiddleEndian:
         *eightBytes = SWAP_2_DWORDS(*eightBytes);
         break;
-    case SOPC_Endianess_LittleEndian:
+    case SOPC_Endianness_LittleEndian:
     default:
         break;
     }

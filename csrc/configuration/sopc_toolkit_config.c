@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sopc_helper_endianess_cfg.h"
+#include "sopc_helper_endianness_cfg.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_sockets_api.h"
 
@@ -119,7 +119,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
             Mutex_Lock(&tConfig.mut);
             tConfig.initDone = true;
 
-            SOPC_Helper_EndianessCfg_Initialize();
+            SOPC_Helper_EndiannessCfg_Initialize();
             SOPC_Namespace_Initialize(tConfig.nsTable);
             tConfig.scConfigs = SOPC_SLinkedList_Create(0);
 

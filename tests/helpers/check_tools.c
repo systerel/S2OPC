@@ -35,7 +35,7 @@
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encoder.h"
-#include "sopc_helper_endianess_cfg.h"
+#include "sopc_helper_endianness_cfg.h"
 #include "sopc_helper_string.h"
 #include "sopc_namespace_table.h"
 #include "sopc_singly_linked_list.h"
@@ -1035,7 +1035,7 @@ START_TEST(test_async_queue_threads)
 }
 END_TEST
 
-START_TEST(test_ua_encoder_endianess_mgt)
+START_TEST(test_ua_encoder_endianness_mgt)
 {
     int16_t v16 = 0;
     uint16_t vu16 = 0;
@@ -1048,8 +1048,8 @@ START_TEST(test_ua_encoder_endianess_mgt)
 
     uint8_t* bytes = NULL;
 
-    // Test encoding with same endianess in machine and UA binary
-    sopc_endianess = SOPC_Endianess_LittleEndian;
+    // Test encoding with same endianness in machine and UA binary
+    sopc_endianness = SOPC_Endianness_LittleEndian;
     bytes = (uint8_t*) &v16;
     bytes[0] = 0xAB;
     bytes[1] = 0xBC;
@@ -1104,7 +1104,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     ck_assert(bytes[0] == 0x00 && bytes[1] == 0x11 && bytes[2] == 0x22 && bytes[3] == 0x33 && bytes[4] == 0xAB &&
               bytes[5] == 0xBC && bytes[6] == 0xCD && bytes[7] == 0xDE);
 
-    sopc_floatEndianess = SOPC_Endianess_LittleEndian;
+    sopc_floatEndianness = SOPC_Endianness_LittleEndian;
     bytes = (uint8_t*) &vfloat;
     bytes[0] = 0x00;
     bytes[1] = 0x00;
@@ -1126,8 +1126,8 @@ START_TEST(test_ua_encoder_endianess_mgt)
     ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0x00 && bytes[3] == 0x00 && bytes[4] == 0x00 &&
               bytes[5] == 0x00 && bytes[6] == 0x1A && bytes[7] == 0xC0);
 
-    // Test encoding with different endianess in machine and UA binary
-    sopc_endianess = SOPC_Endianess_BigEndian;
+    // Test encoding with different endianness in machine and UA binary
+    sopc_endianness = SOPC_Endianness_BigEndian;
     bytes = (uint8_t*) &v16;
     bytes[0] = 0xAB;
     bytes[1] = 0xBC;
@@ -1182,7 +1182,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     ck_assert(bytes[7] == 0x00 && bytes[6] == 0x11 && bytes[5] == 0x22 && bytes[4] == 0x33 && bytes[3] == 0xAB &&
               bytes[2] == 0xBC && bytes[1] == 0xCD && bytes[0] == 0xDE);
 
-    sopc_floatEndianess = SOPC_Endianess_BigEndian;
+    sopc_floatEndianness = SOPC_Endianness_BigEndian;
     bytes = (uint8_t*) &vfloat;
     bytes[0] = 0xC0;
     bytes[1] = 0xD0;
@@ -1208,7 +1208,7 @@ END_TEST
 
 START_TEST(test_ua_encoder_basic_types)
 {
-    SOPC_Helper_EndianessCfg_Initialize(); // Necessary to initialize endianess configuration
+    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize endianness configuration
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 
@@ -1622,7 +1622,7 @@ END_TEST
 
 START_TEST(test_ua_encoder_other_types)
 {
-    SOPC_Helper_EndianessCfg_Initialize(); // Necessary to initialize endianess configuration
+    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize endianness configuration
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 
@@ -2253,7 +2253,7 @@ Suite* tests_make_suite_tools(void)
     suite_add_tcase(s, tc_async_queue);
 
     tc_encoder = tcase_create("UA Encoder");
-    tcase_add_test(tc_encoder, test_ua_encoder_endianess_mgt);
+    tcase_add_test(tc_encoder, test_ua_encoder_endianness_mgt);
     tcase_add_test(tc_encoder, test_ua_encoder_basic_types);
     tcase_add_test(tc_encoder, test_ua_encoder_other_types);
     suite_add_tcase(s, tc_encoder);
