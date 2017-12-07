@@ -22,14 +22,14 @@
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
 
-#define SWAP_2_BYTES(x) (x & 0x00FF) << 8 | (x & 0xFF00) >> 8
-#define SWAP_3_BYTES(x) (x & 0x0000FF) << 16 | (x & 0x00FF00) | (x & 0xFF0000) >> 16
-#define SWAP_4_BYTES(x) (x & 0x000000FF) << 24 | (x & 0x0000FF00) << 8 | (x & 0xFF000000) >> 24 | (x & 0x00FF0000) >> 8
-#define SWAP_8_BYTES(x)                                                                                   \
-    (x & 0x00000000000000FF) << 56 | (x & 0x000000000000FF00) << 40 | (x & 0x0000000000FF0000) << 24 |    \
-        (x & 0x00000000FF000000) << 8 | (x & 0xFF00000000000000) >> 56 | (x & 0x00FF000000000000) >> 40 | \
-        (x & 0x0000FF0000000000) >> 24 | (x & 0x000000FF00000000) >> 8
-#define SWAP_2_DWORDS(x) ( (x & 0x00000000FFFFFFFF) << 32 | (x & 0xFFFFFFFF00000000) >> 32 )
+#define SWAP_2_BYTES(x) ( ((x) & 0x00FF) << 8 | ((x) & 0xFF00) >> 8 )
+#define SWAP_3_BYTES(x) ( ((x) & 0x0000FF) << 16 | ((x) & 0x00FF00) | ((x) & 0xFF0000) >> 16 )
+#define SWAP_4_BYTES(x) ( ((x) & 0x000000FF) << 24 | ((x) & 0x0000FF00) << 8 | ((x) & 0xFF000000) >> 24 | ((x) & 0x00FF0000) >> 8 )
+#define SWAP_8_BYTES(x) \
+    ( ((x) & 0x00000000000000FF) << 56 | ((x) & 0x000000000000FF00) << 40 | ((x) & 0x0000000000FF0000) << 24 | \
+      ((x) & 0x00000000FF000000) << 8  | ((x) & 0xFF00000000000000) >> 56 | ((x) & 0x00FF000000000000) >> 40 | \
+      ((x) & 0x0000FF0000000000) >> 24 | ((x) & 0x000000FF00000000) >> 8 )
+#define SWAP_2_DWORDS(x) ( ((x) & 0x00000000FFFFFFFF) << 32 | ((x) & 0xFFFFFFFF00000000) >> 32 )
 
 typedef enum {
     SOPC_NodeIdEncoding_TwoBytes = 0x00,
