@@ -1234,11 +1234,42 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
         {
             if (scConnection->currentSecurityToken.secureChannelId == 0)
             {
-                // OK it is a new secure channel: value can be 0 or other
-                if (secureChannelId != 0)
+                /* It is a new secure channel (security token not defined => new OPN), value shall be:
+                 * - 0 from client (server case)
+                 * - not 0 from server (client case)
+                 */
+                if (scConnection->isServerConnection == false)
                 {
-                    // Store the secure channel Id as temporary context to be checked
-                    scConnection->clientSecureChannelId = secureChannelId;
+                    // Client side
+                    if (secureChannelId != 0)
+                    {
+                        /* Store the secure channel Id provided as temporary context to be checked in case of new OPN
+                         * (ISSUE) response. It shall be checked when decoding the OPN response in SC state manager
+                         * transition to ScConnected state.
+                         */
+                        scConnection->clientSecureChannelId = secureChannelId;
+                    }
+                    else
+                    {
+                        // The server shall always provide a secure channel Id != 0
+                        result = false;
+                        *errorStatus = OpcUa_BadSecurityChecksFailed;
+                    }
+                }
+                else
+                {
+                    // Server side
+                    if (secureChannelId != 0)
+                    {
+                        // The client shall not provide a secure channel Id != 0 on new OPN
+                        /*
+                         * Note: the specification 1.03 part 6 §6.7.6 does not indicate clearly that client shall send
+                         * 0 but it is due to the fact it does not differentiate client/server case. It seems reasonable
+                         * to guarantee it anyway: "This value may be 0 if the Message is an OpenSecureChannel request."
+                         */
+                        result = false;
+                        *errorStatus = OpcUa_BadSecurityChecksFailed;
+                    } // else: secure channel Id == 0 from client expected, then new Id set by server in OPN response
                 }
             }
             else if (scConnection->currentSecurityToken.secureChannelId != secureChannelId)
@@ -1252,7 +1283,7 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
         {
             if (scConnection->currentSecurityToken.secureChannelId != secureChannelId)
             {
-                // Error: it shall be the expected secure channel Id
+                // Error: it shall be the expected secure channel Id when not an OPN
                 result = false;
                 *errorStatus = OpcUa_BadTcpSecureChannelUnknown;
             }
@@ -1261,6 +1292,7 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
 
     if (result != false && asymmSecuHeader != false)
     {
+        // OPN case: asymmetric secu header
         bool isSecurityActive = false;
         result = SC_Chunks_CheckAsymmetricSecurityHeader(scConnection, &isSecurityActive, errorStatus);
         if (result != false)
@@ -1273,7 +1305,7 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
 
     if (result != false && symmSecuHeader != false)
     {
-        // TODO: toDecrypt / toCheckSignature
+        // CLO or MSG case: symmetric security header
         SOPC_SecureChannel_Config* scConfig =
             SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
         // If a symmetric message is received, secure channel should be configured

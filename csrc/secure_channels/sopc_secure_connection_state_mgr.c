@@ -930,9 +930,9 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
             result = false;
         }
         // Check chanel Id and security token provided by the server
-        if (opnResp->SecurityToken.ChannelId == 0 ||
+        if (0 == opnResp->SecurityToken.ChannelId ||
             scConnection->clientSecureChannelId != opnResp->SecurityToken.ChannelId || // same Id at TCP level
-            opnResp->SecurityToken.TokenId == 0)
+            0 == opnResp->SecurityToken.TokenId)
         {
             result = false;
         }
