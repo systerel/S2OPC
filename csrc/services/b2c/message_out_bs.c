@@ -347,6 +347,7 @@ void message_out_bs__write_create_session_msg_session_token(
     status = SOPC_NodeId_Copy(&createSessionResp->AuthenticationToken, message_out_bs__session_token);
     assert(SOPC_STATUS_OK == status);
     status = SOPC_NodeId_Copy(&createSessionResp->SessionId, message_out_bs__session_token);
+    createSessionResp->SessionId.Data.Numeric += 10000;
     assert(SOPC_STATUS_OK == status);
 }
 
