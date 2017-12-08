@@ -26,6 +26,7 @@
 #include "sopc_key_sets.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_singly_linked_list.h"
+#include "sopc_time.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
 
@@ -110,7 +111,8 @@ typedef struct SOPC_SecureConnection_SecurityToken
 {
     uint32_t secureChannelId; // TODO: move secure channel Id outside (it shall not be changed with the token)
     uint32_t tokenId;
-    SOPC_DateTime createdAt;
+    SOPC_DateTime createdAt;               // OpcUa date format
+    SOPC_TimeReference lifetimeEndTimeRef; // target time reference (monotonic)
     uint32_t revisedLifetime;
 } SOPC_SecureConnection_SecurityToken;
 
@@ -145,7 +147,10 @@ typedef struct SOPC_SecureConnection
     SOPC_SC_SecurityKeySets currentSecuKeySets;
     // (Server side specific)
     SOPC_SecretBuffer* clientNonce; // client nonce used to create symmetric key
+
     // (Server side specific)
+    // flag indicating if the new (current) security token shall be used to send MSG otherwise use precedent until
+    // new one activated by client (reception of MSG with new token)
     bool serverNewSecuTokenActive;
 
     /* Server or Client side connection */

@@ -990,7 +990,7 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
         scConnection->currentSecurityToken.tokenId = opnResp->SecurityToken.TokenId;
         scConnection->currentSecurityToken.createdAt = opnResp->SecurityToken.CreatedAt;
         scConnection->currentSecurityToken.revisedLifetime = opnResp->SecurityToken.RevisedLifetime;
-        scConnection->serverNewSecuTokenActive = true; // There is no precedent security token on establishement
+        scConnection->serverNewSecuTokenActive = true; // There is no precedent security token on establishment
     }
 
     if (result != false)
@@ -1644,7 +1644,9 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
                                                                 &scConnection->currentSecurityToken.secureChannelId,
                                                                 &scConnection->currentSecurityToken.tokenId);
         scConnection->currentSecurityToken.revisedLifetime = scConfig->requestedLifetime;
-        // TODO: scConnection->currentSecurityToken.createdAt
+        scConnection->currentSecurityToken.createdAt = SOPC_Time_GetCurrentTimeUTC();
+        scConnection->currentSecurityToken.lifetimeEndTimeRef = SOPC_TimeReference_AddMilliseconds(
+            SOPC_TimeReference_GetCurrent(), scConnection->currentSecurityToken.revisedLifetime);
     }
 
     // Fill response header
@@ -1905,8 +1907,9 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
         {
             newSecuToken.secureChannelId = scConnection->currentSecurityToken.secureChannelId;
             newSecuToken.revisedLifetime = requestedLifetime;
-            // TODO: newSecuToken.createdAt
-            SOPC_DateTime_Initialize(&newSecuToken.createdAt);
+            newSecuToken.createdAt = SOPC_Time_GetCurrentTimeUTC();
+            newSecuToken.lifetimeEndTimeRef =
+                SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference_GetCurrent(), newSecuToken.revisedLifetime);
         }
     }
 
@@ -1984,7 +1987,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
         scConnection->precedentSecuKeySets = scConnection->currentSecuKeySets;
         scConnection->currentSecurityToken = newSecuToken;
         scConnection->currentSecuKeySets = newSecuKeySets;
-        // Precedent security token will remain active until expiration or client sent message with new token
+        // Precedent security token will remain active until expiration or recetion of client message with new token
         scConnection->serverNewSecuTokenActive = false;
         SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_OPN, scConnectionIdx, (void*) opnRespBuffer, requestId);
     }

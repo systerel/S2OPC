@@ -697,6 +697,35 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
     return result;
 }
 
+static bool SC_Chunks_IsSecuTokenValid(bool isServerConnection, SOPC_SecureConnection_SecurityToken secuToken)
+{
+    bool result = false;
+    SOPC_TimeReference currentTimeRef = SOPC_TimeReference_GetCurrent();
+    uint64_t expiredMs = 0;
+    if (currentTimeRef <= secuToken.lifetimeEndTimeRef)
+    {
+        result = true;
+    }
+    else
+    {
+        if (false == isServerConnection)
+        {
+            /* Client side:
+             * Specification 1.03 part 4 §5.5.2.1:
+             * c) Clients should accept Messages secured by an expired SecurityToken for up to 25 % of the token
+             * lifetime.
+             */
+            // Number of milliseconds since token expiration
+            expiredMs = currentTimeRef - secuToken.lifetimeEndTimeRef;
+            if (expiredMs <= secuToken.revisedLifetime * 0.25)
+            {
+                result = true;
+            }
+        } // else: nothing indicated on server side => token invalid once expired
+    }
+    return result;
+}
+
 static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConnection,
                                                    bool* isPrecCryptoData,
                                                    SOPC_StatusCode* errorStatus)
@@ -707,6 +736,7 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
     uint32_t tokenId = 0;
     bool result = true;
+    bool isTokenValid = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     status = SOPC_UInt32_Read(&tokenId, chunkCtx->chunkInputBuffer);
@@ -730,25 +760,45 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
         }
         else
         {
-            // SERVER side: should accept precedent security token until expiration
+            /* SERVER side:
+             * - accepts precedent token even if a new one is defined until token expiration
+             * - accepts the current or new token, if first use of new token set the flag to use the new one to send MSG
+             */
             if (scConnection->currentSecurityToken.tokenId == tokenId)
             {
-                // Use of the current (or new) security token => OK
+                // It shall be the current security token or first use of new security token
                 if (false == scConnection->serverNewSecuTokenActive)
                 {
+                    // In case of first use of new security token, we shall enforce the old one cannot be used
+                    // anymore
                     scConnection->serverNewSecuTokenActive = true;
                 }
                 *isPrecCryptoData = false;
+
+                // Check token expiration
+                isTokenValid =
+                    SC_Chunks_IsSecuTokenValid(scConnection->isServerConnection, scConnection->currentSecurityToken);
             }
-            else if (scConnection->precedentSecurityToken.tokenId == tokenId &&
+            else if (false == scConnection->serverNewSecuTokenActive && // new security token never used by client
+                     scConnection->precedentSecurityToken.tokenId == tokenId && // security token is the precedent one
+                     // check precedent security token is defined
                      scConnection->precedentSecurityToken.secureChannelId != 0 &&
                      scConnection->precedentSecurityToken.tokenId != 0)
             {
                 // Still valid with old security token => OK
                 *isPrecCryptoData = true;
-                // TODO: control expiration of precedent token
+
+                // Check token expiration
+                isTokenValid =
+                    SC_Chunks_IsSecuTokenValid(scConnection->isServerConnection, scConnection->currentSecurityToken);
             }
             else
+            {
+                result = false;
+                *errorStatus = OpcUa_BadSecureChannelTokenUnknown;
+            }
+
+            if (true == result && isTokenValid == false)
             {
                 result = false;
                 *errorStatus = OpcUa_BadSecureChannelTokenUnknown;
