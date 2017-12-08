@@ -101,11 +101,7 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent()
     SOPC_TimeReference result = 0;
     uint64_t nanosecs = 0;
 
-    gettimeResult = clock_gettime(CLOCK_MONOTONIC_RAW, &currentTime);
-    if (gettimeResult != 0)
-    {
-        gettimeResult = clock_gettime(CLOCK_MONOTONIC, &currentTime);
-    }
+    gettimeResult = clock_gettime(CLOCK_MONOTONIC, &currentTime);
     if (gettimeResult != 0)
     {
         /* If the system does not support monotonic clock,
