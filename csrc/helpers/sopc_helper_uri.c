@@ -28,6 +28,7 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size
     bool result = false;
     size_t idx = 0;
     bool isPort = false;
+    bool endOfPort = false;
     bool hasPort = false;
     bool hasName = false;
     bool invalid = false;
@@ -47,7 +48,7 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size
             // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
             for (idx = 10; idx < strlen(uri) - 1; idx++)
             {
-                if (false != isPort)
+                if (false != isPort && false == endOfPort)
                 {
                     if (uri[idx] >= '0' && uri[idx] <= '9')
                     {
@@ -69,6 +70,7 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size
                         {
                             *portLength = idx - *portIdx;
                             hasName = true;
+                            endOfPort = true; // End of port definition
                         }
                     }
                     else
@@ -82,25 +84,34 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size
                 }
                 else
                 {
-                    if (uri[idx] == ':' && false == startIPv6)
+                    if (false == endOfPort)
                     {
-                        *hostnameLength = idx - 10;
-                        isPort = true;
-                    }
-                    else if (uri[idx] == '[')
-                    {
-                        startIPv6 = true;
-                    }
-                    else if (uri[idx] == ']')
-                    {
-                        if (false == startIPv6)
+                        // Treatment before the port parsing
+                        if (uri[idx] == ':' && false == startIPv6)
                         {
-                            invalid = true;
+                            *hostnameLength = idx - 10;
+                            isPort = true;
                         }
-                        else
+                        else if (uri[idx] == '[')
                         {
-                            startIPv6 = false;
+                            startIPv6 = true;
                         }
+                        else if (uri[idx] == ']')
+                        {
+                            if (false == startIPv6)
+                            {
+                                invalid = true;
+                            }
+                            else
+                            {
+                                startIPv6 = false;
+                            }
+                        }
+                    }
+                    else if (hasPort)
+                    {
+                        // Treatment after the port parsing
+                        // TODO: check absence of forbidden characters
                     }
                 }
             }
