@@ -59,15 +59,15 @@ void msg_read_request_bs__getall_req_ReadValue_AttributeId(const constants__t_ms
 
     if (isvalid)
     {
-        isvalid = util_AttributeId__C_to_B(msg_read_req->NodesToRead[msg_read_request_bs__rvi-1].AttributeId,
+        isvalid = util_AttributeId__C_to_B(msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].AttributeId,
                                            msg_read_request_bs__aid);
     }
-    if (! isvalid && ! bWarned)
+    if (!isvalid && !bWarned)
     {
         printf("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id\n");
         bWarned = true;
     }
-    
+
     *msg_read_request_bs__isvalid = isvalid;
 }
 
@@ -94,19 +94,19 @@ void msg_read_request_bs__getall_req_ReadValue_NodeId(const constants__t_msg_i m
         (constants__t_NodeId_i*) &msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].NodeId;
 }
 
-void msg_read_request_bs__read_req_TimestampsToReturn(const constants__t_msg_i msg_read_request_bs__p_msg,
-                                                      constants__t_TimestampsToReturn_i * const msg_read_request_bs__p_tsToReturn)
+void msg_read_request_bs__read_req_TimestampsToReturn(
+    const constants__t_msg_i msg_read_request_bs__p_msg,
+    constants__t_TimestampsToReturn_i* const msg_read_request_bs__p_tsToReturn)
 {
-    OpcUa_ReadRequest *msg_read_req = (OpcUa_ReadRequest *) msg_read_request_bs__p_msg;
+    OpcUa_ReadRequest* msg_read_req = (OpcUa_ReadRequest*) msg_read_request_bs__p_msg;
     bool status = NULL != msg_read_req;
 
     if (status)
     {
-        status = util_TimestampsToReturn__C_to_B(msg_read_req->TimestampsToReturn,
-                                                 msg_read_request_bs__p_tsToReturn);
+        status = util_TimestampsToReturn__C_to_B(msg_read_req->TimestampsToReturn, msg_read_request_bs__p_tsToReturn);
     }
 
-    if (! status)
+    if (!status)
     {
         *msg_read_request_bs__p_tsToReturn = constants__c_TimestampsToReturn_indet;
     }

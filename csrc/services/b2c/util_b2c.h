@@ -52,19 +52,15 @@ bool util_NodeClass__B_to_C(constants__t_NodeClass_i bncl, OpcUa_NodeClass* cncl
 bool util_NodeClass__C_to_B(OpcUa_NodeClass cncl, constants__t_NodeClass_i* bncl);
 
 /* Returns true or false upon failure (c_TimestampsToReturn_indet or invalid pcttr) */
-bool util_TimestampsToReturn__B_to_C(constants__t_TimestampsToReturn_i bttr,
-                                     OpcUa_TimestampsToReturn* pcttr);
+bool util_TimestampsToReturn__B_to_C(constants__t_TimestampsToReturn_i bttr, OpcUa_TimestampsToReturn* pcttr);
 
 /* Returns true or false upon failure (invalid pbttr) */
-bool util_TimestampsToReturn__C_to_B(OpcUa_TimestampsToReturn cttr,
-                                     constants__t_TimestampsToReturn_i* pbttr);
+bool util_TimestampsToReturn__C_to_B(OpcUa_TimestampsToReturn cttr, constants__t_TimestampsToReturn_i* pbttr);
 
 /* Returns true or false upon failure (c_AttributeId_indet or invalid pcaid) */
-bool util_AttributeId__B_to_C(constants__t_AttributeId_i baid,
-                              uint32_t* pcaid);
+bool util_AttributeId__B_to_C(constants__t_AttributeId_i baid, uint32_t* pcaid);
 
 /* Returns true or false upon failure (invalid caid or invalid pbaid) */
-bool util_AttributeId__C_to_B(uint32_t caid,
-                              constants__t_AttributeId_i* pbaid);
+bool util_AttributeId__C_to_B(uint32_t caid, constants__t_AttributeId_i* pbaid);
 
 #endif /* UTIL_B2C_H */

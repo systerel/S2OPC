@@ -27,29 +27,27 @@
 #include "msg_read_response_bs.h"
 #include "util_b2c.h"
 
-#include "sopc_types.h"
 #include "sopc_time.h"
-
+#include "sopc_types.h"
 
 /*----------
    Globals
   ----------*/
 static constants__t_TimestampsToReturn_i ttrRequested = constants__e_ttr_neither;
 
-
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void msg_read_response_bs__INITIALISATION(void) {}
 
-
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void msg_read_response_bs__alloc_read_response(const t_entier4 msg_read_response_bs__p_nb_resps,
-                                               const constants__t_TimestampsToReturn_i msg_read_response_bs__p_TimestampsToReturn,
-                                               const constants__t_msg_i msg_read_response_bs__p_resp_msg,
-                                               t_bool* const msg_read_response_bs__p_isvalid)
+void msg_read_response_bs__alloc_read_response(
+    const t_entier4 msg_read_response_bs__p_nb_resps,
+    const constants__t_TimestampsToReturn_i msg_read_response_bs__p_TimestampsToReturn,
+    const constants__t_msg_i msg_read_response_bs__p_resp_msg,
+    t_bool* const msg_read_response_bs__p_isvalid)
 {
     OpcUa_ReadResponse* msg_read_resp = (OpcUa_ReadResponse*) msg_read_response_bs__p_resp_msg;
 
@@ -79,7 +77,6 @@ void msg_read_response_bs__alloc_read_response(const t_entier4 msg_read_response
     ttrRequested = msg_read_response_bs__p_TimestampsToReturn;
 }
 
-
 void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_response_bs__resp_msg,
                                              const constants__t_ReadValue_i msg_read_response_bs__rvi,
                                              const constants__t_Variant_i msg_read_response_bs__val,
@@ -97,9 +94,7 @@ void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_r
         if (constants__c_Variant_indet != msg_read_response_bs__val)
         {
             /* Note: the following only copies the context of the Variant, not the entire Variant */
-            memcpy((void*) &pDataValue->Value,
-                   msg_read_response_bs__val,
-                   sizeof(SOPC_Variant));
+            memcpy((void*) &pDataValue->Value, msg_read_response_bs__val, sizeof(SOPC_Variant));
         }
         else
         {
@@ -119,4 +114,3 @@ void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_r
         }
     }
 }
-

@@ -114,7 +114,7 @@ constants__t_Variant_i util_variant__new_Variant_from_Variant(SOPC_Variant* pvar
 
 constants__t_Variant_i util_variant__new_Variant_from_Byte(uint8_t i)
 {
-    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
     if (NULL != pvar)
     {

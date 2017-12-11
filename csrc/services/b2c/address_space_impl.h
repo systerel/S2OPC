@@ -45,11 +45,9 @@ typedef enum {
 #define e_aid_min e_aid_NodeId
 #define e_aid_max e_aid_UserExecutable
 
-
 /* Access levels, taken from Part 3 §5.6.2 Table 8 */
-#define SOPC_AccessLevelMask_CurrentRead    1
-#define SOPC_AccessLevelMask_CurrentWrite   2
-
+#define SOPC_AccessLevelMask_CurrentRead 1
+#define SOPC_AccessLevelMask_CurrentWrite 2
 
 /* Attributes, and references */
 extern int32_t address_space_bs__nNodeIds;

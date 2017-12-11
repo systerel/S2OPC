@@ -914,8 +914,7 @@ bool util_NodeClass__C_to_B(OpcUa_NodeClass cncl, constants__t_NodeClass_i* bncl
     return true;
 }
 
-bool util_TimestampsToReturn__B_to_C(constants__t_TimestampsToReturn_i bttr,
-                                     OpcUa_TimestampsToReturn* pcttr)
+bool util_TimestampsToReturn__B_to_C(constants__t_TimestampsToReturn_i bttr, OpcUa_TimestampsToReturn* pcttr)
 {
     bool status = NULL != pcttr && constants__c_TimestampsToReturn_indet == bttr;
 
@@ -945,8 +944,7 @@ bool util_TimestampsToReturn__B_to_C(constants__t_TimestampsToReturn_i bttr,
     return status;
 }
 
-bool util_TimestampsToReturn__C_to_B(OpcUa_TimestampsToReturn cttr,
-                                     constants__t_TimestampsToReturn_i* pbttr)
+bool util_TimestampsToReturn__C_to_B(OpcUa_TimestampsToReturn cttr, constants__t_TimestampsToReturn_i* pbttr)
 {
     bool status = NULL != pbttr;
 
@@ -975,9 +973,7 @@ bool util_TimestampsToReturn__C_to_B(OpcUa_TimestampsToReturn cttr,
     return status;
 }
 
-
-bool util_AttributeId__B_to_C(constants__t_AttributeId_i baid,
-                              uint32_t* pcaid)
+bool util_AttributeId__B_to_C(constants__t_AttributeId_i baid, uint32_t* pcaid)
 {
     bool status = NULL != pcaid;
 
@@ -1013,9 +1009,7 @@ bool util_AttributeId__B_to_C(constants__t_AttributeId_i baid,
     return status;
 }
 
-
-bool util_AttributeId__C_to_B(uint32_t caid,
-                              constants__t_AttributeId_i* pbaid)
+bool util_AttributeId__C_to_B(uint32_t caid, constants__t_AttributeId_i* pbaid)
 {
     bool status = NULL != pbaid;
 
