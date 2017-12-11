@@ -124,6 +124,13 @@ classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
 
 #define DEFAULT_VARIANT  {SOPC_Null_Id, SOPC_VariantArrayType_SingleValue,{0}}
 
+<!-- check if address space contains duplicated nodes ids -->
+<xsl:for-each-group select="$ua_nodes//@NodeId" group-by=".">
+  <xsl:if test="count(current-group()) ne 1">
+    <xsl:message>NodeId value <xsl:value-of select="current-grouping-key()"/> is duplicated in address space</xsl:message>
+  </xsl:if>
+</xsl:for-each-group>
+
 <!-- Create variables for each node id -->
 <xsl:for-each select="$nodeid_var_name/*">
 static SOPC_NodeId <xsl:value-of select="@vn"/> = <xsl:apply-templates select="@id" mode="nodeId"/>;<xsl:text/>
