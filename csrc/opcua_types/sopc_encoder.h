@@ -66,82 +66,90 @@ typedef enum {
 } SOPC_DataValue_EncodingFlag;
 
 /**
- *  \brief Encode an signed 16 bits integer from machine endianness representation to binary UA encoding endianness
- * representation. And respectively integer from UA binary to machine endianness representation. Note: UA binary
- * representation is little endian thus nothing is done if machine representaiton is little endian (platform dependency
- * module providing endianness information is used to determine the current case)
+ * \brief Encodes an signed 16 bits integer from machine endianness representation to binary UA encoding endianness
+ * representation. Also decodes from UA binary to machine endianness representation.
+ *
+ * \note UA binary representation is little endian thus nothing is done if machine representation is little endian
+ * (SOPC_Helper_Endianness_GetInteger() is used to determine the machine endianness)
  *
  *  \param intv     Pointer to the integer value to encode or decode with correct endianness in place
  */
 void SOPC_EncodeDecode_Int16(int16_t* intv);
 
 /**
- *  \brief Encode a unsigned 16 bits integer from machine endianness representation to binary UA encoding endianness
- * representation. And respectively integer from UA binary to machine endianness representation. Note: UA binary
- * representation is little endian thus nothing is done if machine representaiton is little endian (platform dependency
- * module providing endianness information is used to determine the current case)
+ * \brief Encodes a unsigned 16 bits integer from machine endianness representation to binary UA encoding endianness
+ * representation. Also decodes from UA binary to machine endianness representation.
+ *
+ * \note UA binary representation is little endian thus nothing is done if machine representation is little endian
+ * (SOPC_Helper_Endianness_GetInteger() is used to determine the machine endianness)
  *
  *  \param uintv     Pointer to the integer value to encode or decode with correct endianness in place
  */
 void SOPC_EncodeDecode_UInt16(uint16_t* uintv);
 
 /**
- *  \brief Encode a signed 32 bits integer from machine endianness representation to binary UA encoding endianness
- * representation. And respectively decode integer from UA binary to machine endianness representation. Note: UA binary
- * representation is little endian thus nothing is done if machine representaiton is little endian (platform dependency
- * module providing endianness information is used to determine the current case)
+ * \brief Encodes a signed 32 bits integer from machine endianness representation to binary UA encoding endianness
+ * representation. Also decodes from UA binary to machine endianness representation.
+ *
+ * \note UA binary representation is little endian thus nothing is done if machine representation is little endian
+ * (SOPC_Helper_Endianness_GetInteger() is used to determine the machine endianness)
  *
  *  \param intv     Pointer to the integer value to encode or decode with correct endianness in place
  */
 void SOPC_EncodeDecode_Int32(int32_t* intv);
 
 /**
- *  \brief Encode an unsigned 32 bits integer from machine endianness representation to binary UA encoding endianness
- * representation. And respectively integer from UA binary to machine endianness representation. Note: UA binary
- * representation is little endian thus nothing is done if machine representaiton is little endian (platform dependency
- * module providing endianness information is used to determine the current case)
+ * \brief Encodes an unsigned 32 bits integer from machine endianness representation to binary UA encoding endianness
+ * representation. Also decodes from UA binary to machine endianness representation.
+ *
+ * \note UA binary representation is little endian thus nothing is done if machine representation is little endian
+ * (SOPC_Helper_Endianness_GetInteger() is used to determine the machine endianness)
  *
  *  \param uintv     Pointer to the integer value to encode or decode with correct endianness in place
  */
 void SOPC_EncodeDecode_UInt32(uint32_t* uintv);
 
 /**
- *  \brief Encode a signed 64 bits integer from machine endianness representation to binary UA encoding endianness
- * representation. And respectively integer from UA binary to machine endianness representation. Note: UA binary
- * representation is little endian thus nothing is done if machine representaiton is little endian (platform dependency
- * module providing endianness information is used to determine the current case)
+ * \brief Encodes a signed 64 bits integer from machine endianness representation to binary UA encoding endianness
+ * representation. Also decodes from UA binary to machine endianness representation.
+ *
+ * \note UA binary representation is little endian thus nothing is done if machine representation is little endian
+ * (SOPC_Helper_Endianness_GetInteger() is used to determine the machine endianness)
  *
  *  \param intv     Pointer to the integer value to encode or decode with correct endianness in place
  */
 void SOPC_EncodeDecode_Int64(int64_t* intv);
 
 /**
- *  \brief Encode an unsigned 64 bits integer from machine endianness representation to binary UA encoding endianness
- * representation. And respectively integer from UA binary to machine endianness representation. Note: UA binary
- * representation is little endian thus nothing is done if machine representaiton is little endian (platform dependency
- * module providing endianness information is used to determine the current case)
+ * \brief Encodes an unsigned 64 bits integer from machine endianness representation to binary UA encoding endianness
+ * representation. Also decodes from UA binary to machine endianness representation.
+ *
+ * \note UA binary representation is little endian thus nothing is done if machine representation is little endian
+ * (SOPC_Helper_Endianness_GetInteger() is used to determine the machine endianness)
  *
  *  \param uintv     Pointer to the integer value to encode or decode with correct endianness in place
  */
 void SOPC_EncodeDecode_UInt64(uint64_t* uintv);
 
 /**
- *  \brief Encode a float from machine endianness representation to binary UA encoding endianness representation.
- *  And respectively float from UA binary to machine endianness representation.
- *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
- *  (platform dependency module providing endianness information is used to determine the current case)
+ * \brief Encodes a float from machine endianness representation to binary UA encoding endianness representation.
+ * Also decodes from UA binary to machine endianness representation.
  *
- *  \param floatv     Pointer to the integer value to encode or decode with correct endianness in place
+ * \note UA binary representation is little endian thus nothing is done if machine representation is little endian
+ * (SOPC_Helper_Endianness_GetFloat() is used to determine the machine endianness)
+ *
+ * \param floatv     Pointer to the integer value to encode or decode with correct endianness in place
  */
 void SOPC_EncodeDecode_Float(float* floatv);
 
 /**
- *  \brief Encode a double from machine endianness representation to binary UA encoding endianness representation.
- *  And respectively decode a double from UA binary to machine endianness representation.
- *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
- *  (platform dependency module providing endianness information is used to determine the current case)
+ * \brief Encodes a double from machine endianness representation to binary UA encoding endianness representation.
+ * Also decodes from UA binary to machine endianness representation.
  *
- *  \param doublev     Pointer to the integer value to encode or decode with correct endianness in place
+ * \note UA binary representation is little endian thus nothing is done if machine representation is little endian
+ * (SOPC_Helper_Endianness_GetFloat() is used to determine the machine endianness)
+ *
+ * \param doublev     Pointer to the integer value to encode or decode with correct endianness in place
  */
 void SOPC_EncodeDecode_Double(double* doublev);
 

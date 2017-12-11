@@ -18,6 +18,9 @@
 #ifndef SOPC_HELPER_ENDIANNESS_CFG_H_
 #define SOPC_HELPER_ENDIANNESS_CFG_H_
 
+/**
+ * \brief Supported endianness configurations.
+ */
 typedef enum {
     SOPC_Endianness_Undefined,
     SOPC_Endianness_LittleEndian,
@@ -25,10 +28,42 @@ typedef enum {
     SOPC_Endianness_FloatARMMiddleEndian
 } SOPC_Endianness;
 
+/**
+ * \brief Initializes machine endianness detection.
+ */
 void SOPC_Helper_EndiannessCfg_Initialize(void);
+
+/**
+ * \brief   Gets the endianness for integer operations.
+ *
+ * \return  SOPC_Endianness_Undefined when machine endianness is neither little endian nor big endian.
+ */
 SOPC_Endianness SOPC_Helper_Endianness_GetInteger(void);
+
+/**
+ * \brief   Gets the endianness for floating-point operations.
+ *
+ * \return  SOPC_Endianness_Undefined when machine endianness is not little endian, big endian, or ARM's special middle
+ * endian.
+ */
 SOPC_Endianness SOPC_Helper_Endianness_GetFloat(void);
+
+/**
+ * \brief   Overrides machine endianness detection for integer operations.
+ *
+ * \warn    Solely for tests.
+ *
+ * \param endianness  The integer endianness.
+ */
 void SOPC_Helper_Endianness_SetInteger(SOPC_Endianness endianness);
+
+/**
+ * \brief   Overrides machine endianness detection for float operations.
+ *
+ * \warn    Solely for tests.
+ *
+ * \param endianness  The floating-point endianness.
+ */
 void SOPC_Helper_Endianness_SetFloat(SOPC_Endianness endianness);
 
 #endif /* SOPC_HELPER_ENDIANNESS_CFG_H_ */
