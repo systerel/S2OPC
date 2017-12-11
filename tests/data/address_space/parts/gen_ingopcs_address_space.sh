@@ -20,7 +20,7 @@ main() {
     # suppression des deux premières lignes et de la partie namespaceris/alias
     sed "1,2d" $user_as_file | sed  "/Alias/d" | sed "/NamespaceUris/d" >> $GEN_AS
 
-    printf "Generation terminée"
+    printf "Generation terminée \n"
 }
 
 main $@

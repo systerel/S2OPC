@@ -205,7 +205,7 @@
     <DisplayName>SIGNALs</DisplayName>
     <Description>NoName</Description>
     <References>
-      <Reference ReferenceType="Organizes">ns=261;i=15361</Reference>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=261;i=15361</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
       <Reference ReferenceType="Organizes">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019</Reference>
       <Reference ReferenceType="Organizes">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025</Reference>
