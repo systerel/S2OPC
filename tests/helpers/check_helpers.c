@@ -26,32 +26,12 @@
 
 #include "check_helpers.h"
 
-START_TEST(test_empty)
-{
-    ;
-}
-END_TEST
-
-Suite* tests_make_suite_stack(void)
-{
-    Suite* s;
-    TCase* tc_core;
-
-    s = suite_create("Stack");
-    tc_core = tcase_create("Dummy");
-    tcase_add_test(tc_core, test_empty);
-    suite_add_tcase(s, tc_core);
-
-    return s;
-}
-
 int main(void)
 {
     int number_failed;
     SRunner* sr;
 
-    sr = srunner_create(tests_make_suite_stack());
-    srunner_add_suite(sr, tests_make_suite_crypto_B256S256());
+    sr = srunner_create(tests_make_suite_crypto_B256S256());
     srunner_add_suite(sr, tests_make_suite_crypto_B256());
     srunner_add_suite(sr, tests_make_suite_crypto_None());
     srunner_add_suite(sr, tests_make_suite_tools());

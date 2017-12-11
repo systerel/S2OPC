@@ -37,6 +37,7 @@
 #include "sopc_encoder.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_helper_string.h"
+#include "sopc_helper_uri.h"
 #include "sopc_namespace_table.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_threads.h"
@@ -870,6 +871,45 @@ START_TEST(test_base_tools)
     ck_assert(-1 == SOPC_strncmp_ignore_case(ntest4, test2, 2));
     ck_assert(-1 == SOPC_strncmp_ignore_case(ntest4, test3, 2));
     ck_assert(-1 == SOPC_strncmp_ignore_case(ntest4, test4, 2));
+}
+END_TEST
+
+START_TEST(test_helper_uri)
+{
+    size_t hostLength = 0;
+    size_t portIdx = 0;
+    size_t portLength = 0;
+
+    // Not a TCP UA address
+    ck_assert(false == SOPC_Helper_URI_ParseTcpUaUri("http://localhost:9999/test", &hostLength, &portIdx, &portLength));
+
+    ck_assert(false !=
+              SOPC_Helper_URI_ParseTcpUaUri("opc.tcp://localhost:9999/test", &hostLength, &portIdx, &portLength));
+    ck_assert(9 == hostLength);
+    ck_assert(10 + hostLength + 1 == portIdx);
+    ck_assert(4 == portLength);
+
+    ck_assert(false != SOPC_Helper_URI_ParseTcpUaUri("opc.tcp://localhost:9999/test/moreThingsInPath/plus", &hostLength,
+                                                     &portIdx, &portLength));
+    ck_assert(9 == hostLength);
+    ck_assert(10 + hostLength + 1 == portIdx);
+    ck_assert(4 == portLength);
+
+    // No port defined
+    ck_assert(false == SOPC_Helper_URI_ParseTcpUaUri("opc.tcp://localhost:/test", &hostLength, &portIdx, &portLength));
+    ck_assert(false == SOPC_Helper_URI_ParseTcpUaUri("opc.tcp://localhost/test", &hostLength, &portIdx, &portLength));
+
+    ck_assert(false !=
+              SOPC_Helper_URI_ParseTcpUaUri("opc.tcp://192.168.4.1:9/test", &hostLength, &portIdx, &portLength));
+    ck_assert(11 == hostLength);
+    ck_assert(10 + hostLength + 1 == portIdx);
+    ck_assert(1 == portLength);
+
+    ck_assert(false != SOPC_Helper_URI_ParseTcpUaUri("opc.tcp://[fe80::250:b6ff:fe17:9f3a]:99999/test", &hostLength,
+                                                     &portIdx, &portLength));
+    ck_assert(26 == hostLength);
+    ck_assert(10 + hostLength + 1 == portIdx);
+    ck_assert(5 == portLength);
 }
 END_TEST
 
@@ -2251,8 +2291,9 @@ Suite* tests_make_suite_tools(void)
     TCase *tc_hexlify, *tc_basetools, *tc_encoder, *tc_buffer, *tc_linkedlist, *tc_async_queue;
 
     s = suite_create("Tools");
-    tc_basetools = tcase_create("Base tools");
+    tc_basetools = tcase_create("String tools");
     tcase_add_test(tc_basetools, test_base_tools);
+    tcase_add_test(tc_basetools, test_helper_uri);
     suite_add_tcase(s, tc_basetools);
     tc_buffer = tcase_create("Buffer");
     tcase_add_test(tc_buffer, test_buffer_create);
