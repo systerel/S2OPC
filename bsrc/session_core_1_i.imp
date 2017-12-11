@@ -159,11 +159,14 @@ OPERATIONS
     VAR
         l_prec_state
     IN
+        // TODO: make delete_session local, call prepare_close_session and use local delete_session
+        remove_session(session);
         reset_session_channel(session);
         reset_session_orphaned(session);
         l_prec_state <-- get_session_state(session);
         prepare_close_session(session, l_prec_state, is_client);
-        l_set_session_state(session, e_session_closed)
+        l_set_session_state(session, e_session_closed);
+        delete_session_token(session)
     END
     ;
 
