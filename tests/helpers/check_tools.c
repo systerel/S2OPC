@@ -1049,7 +1049,7 @@ START_TEST(test_ua_encoder_endianness_mgt)
     uint8_t* bytes = NULL;
 
     // Test encoding with same endianness in machine and UA binary
-    sopc_endianness = SOPC_Endianness_LittleEndian;
+    SOPC_Helper_Endianness_SetInteger(SOPC_Endianness_LittleEndian);
     bytes = (uint8_t*) &v16;
     bytes[0] = 0xAB;
     bytes[1] = 0xBC;
@@ -1104,7 +1104,7 @@ START_TEST(test_ua_encoder_endianness_mgt)
     ck_assert(bytes[0] == 0x00 && bytes[1] == 0x11 && bytes[2] == 0x22 && bytes[3] == 0x33 && bytes[4] == 0xAB &&
               bytes[5] == 0xBC && bytes[6] == 0xCD && bytes[7] == 0xDE);
 
-    sopc_floatEndianness = SOPC_Endianness_LittleEndian;
+    SOPC_Helper_Endianness_SetFloat(SOPC_Endianness_LittleEndian);
     bytes = (uint8_t*) &vfloat;
     bytes[0] = 0x00;
     bytes[1] = 0x00;
@@ -1127,7 +1127,7 @@ START_TEST(test_ua_encoder_endianness_mgt)
               bytes[5] == 0x00 && bytes[6] == 0x1A && bytes[7] == 0xC0);
 
     // Test encoding with different endianness in machine and UA binary
-    sopc_endianness = SOPC_Endianness_BigEndian;
+    SOPC_Helper_Endianness_SetInteger(SOPC_Endianness_BigEndian);
     bytes = (uint8_t*) &v16;
     bytes[0] = 0xAB;
     bytes[1] = 0xBC;
@@ -1182,7 +1182,7 @@ START_TEST(test_ua_encoder_endianness_mgt)
     ck_assert(bytes[7] == 0x00 && bytes[6] == 0x11 && bytes[5] == 0x22 && bytes[4] == 0x33 && bytes[3] == 0xAB &&
               bytes[2] == 0xBC && bytes[1] == 0xCD && bytes[0] == 0xDE);
 
-    sopc_floatEndianness = SOPC_Endianness_BigEndian;
+    SOPC_Helper_Endianness_SetFloat(SOPC_Endianness_BigEndian);
     bytes = (uint8_t*) &vfloat;
     bytes[0] = 0xC0;
     bytes[1] = 0xD0;

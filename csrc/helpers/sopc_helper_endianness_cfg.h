@@ -25,10 +25,10 @@ typedef enum {
     SOPC_Endianness_FloatARMMiddleEndian
 } SOPC_Endianness;
 
-// Undefined before call to initialize
-extern SOPC_Endianness sopc_endianness;
-extern SOPC_Endianness sopc_floatEndianness;
-
 void SOPC_Helper_EndiannessCfg_Initialize(void);
+SOPC_Endianness SOPC_Helper_Endianness_GetInteger(void);
+SOPC_Endianness SOPC_Helper_Endianness_GetFloat(void);
+void SOPC_Helper_Endianness_SetInteger(SOPC_Endianness endianness);
+void SOPC_Helper_Endianness_SetFloat(SOPC_Endianness endianness);
 
 #endif /* SOPC_HELPER_ENDIANNESS_CFG_H_ */

@@ -33,8 +33,8 @@
 void SOPC_EncodeDecode_Int16(int16_t* intv)
 {
     uint16_t* twoBytes = (uint16_t*) intv;
-    assert(sopc_endianness != SOPC_Endianness_Undefined);
-    if (sopc_endianness == SOPC_Endianness_BigEndian)
+    assert(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
+    if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
     {
         *twoBytes = SWAP_2_BYTES(*twoBytes);
     }
@@ -42,8 +42,8 @@ void SOPC_EncodeDecode_Int16(int16_t* intv)
 
 void SOPC_EncodeDecode_UInt16(uint16_t* uintv)
 {
-    assert(sopc_endianness != SOPC_Endianness_Undefined);
-    if (sopc_endianness == SOPC_Endianness_BigEndian)
+    assert(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
+    if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
     {
         *uintv = SWAP_2_BYTES(*uintv);
     }
@@ -51,9 +51,9 @@ void SOPC_EncodeDecode_UInt16(uint16_t* uintv)
 
 void SOPC_EncodeDecode_Int32(int32_t* intv)
 {
-    assert(sopc_endianness != SOPC_Endianness_Undefined);
+    assert(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
     uint32_t* fourBytes = (uint32_t*) intv;
-    if (sopc_endianness == SOPC_Endianness_BigEndian)
+    if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
     {
         *fourBytes = SWAP_4_BYTES(*fourBytes);
     }
@@ -61,8 +61,8 @@ void SOPC_EncodeDecode_Int32(int32_t* intv)
 
 void SOPC_EncodeDecode_UInt32(uint32_t* uintv)
 {
-    assert(sopc_endianness != SOPC_Endianness_Undefined);
-    if (sopc_endianness == SOPC_Endianness_BigEndian)
+    assert(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
+    if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
     {
         *uintv = SWAP_4_BYTES(*uintv);
     }
@@ -70,9 +70,9 @@ void SOPC_EncodeDecode_UInt32(uint32_t* uintv)
 
 void SOPC_EncodeDecode_Int64(int64_t* intv)
 {
-    assert(sopc_endianness != SOPC_Endianness_Undefined);
+    assert(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
     uint64_t* eightBytes = (uint64_t*) intv;
-    if (sopc_endianness == SOPC_Endianness_BigEndian)
+    if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
     {
         *eightBytes = SWAP_8_BYTES(*eightBytes);
     }
@@ -80,8 +80,8 @@ void SOPC_EncodeDecode_Int64(int64_t* intv)
 
 void SOPC_EncodeDecode_UInt64(uint64_t* uintv)
 {
-    assert(sopc_endianness != SOPC_Endianness_Undefined);
-    if (sopc_endianness == SOPC_Endianness_BigEndian)
+    assert(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
+    if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
     {
         *uintv = SWAP_8_BYTES(*uintv);
     }
@@ -89,10 +89,10 @@ void SOPC_EncodeDecode_UInt64(uint64_t* uintv)
 
 void SOPC_EncodeDecode_Float(float* floatv)
 {
-    assert(sopc_floatEndianness != SOPC_Endianness_Undefined);
+    assert(SOPC_Helper_Endianness_GetFloat() != SOPC_Endianness_Undefined);
     uint32_t* fourBytes = (uint32_t*) floatv;
 
-    switch (sopc_floatEndianness)
+    switch (SOPC_Helper_Endianness_GetFloat())
     {
     case SOPC_Endianness_BigEndian:
         *fourBytes = SWAP_4_BYTES(*fourBytes);
@@ -106,10 +106,10 @@ void SOPC_EncodeDecode_Float(float* floatv)
 
 void SOPC_EncodeDecode_Double(double* doublev)
 {
-    assert(sopc_floatEndianness != SOPC_Endianness_Undefined);
+    assert(SOPC_Helper_Endianness_GetFloat() != SOPC_Endianness_Undefined);
     uint64_t* eightBytes = (uint64_t*) doublev;
 
-    switch (sopc_floatEndianness)
+    switch (SOPC_Helper_Endianness_GetFloat())
     {
     case SOPC_Endianness_BigEndian:
         *eightBytes = SWAP_8_BYTES(*eightBytes);

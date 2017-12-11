@@ -20,10 +20,12 @@
 
 #include "sopc_helper_endianness_cfg.h"
 
-SOPC_Endianness sopc_endianness = SOPC_Endianness_Undefined;
-SOPC_Endianness sopc_floatEndianness = SOPC_Endianness_Undefined;
 
-static SOPC_Endianness compute_integer_endianness(void)
+static SOPC_Endianness endianness_integer = SOPC_Endianness_Undefined;
+static SOPC_Endianness endianness_float = SOPC_Endianness_Undefined;
+
+
+static SOPC_Endianness compute_endianness_integer(void)
 {
     uint64_t x = 0x0123456789ABCDEF;
     uint8_t *pX = (uint8_t*) &x;
@@ -55,7 +57,8 @@ static SOPC_Endianness compute_integer_endianness(void)
     return endianness;
 }
 
-static SOPC_Endianness compute_float_endianness(void)
+
+static SOPC_Endianness compute_endianness_float(void)
 {
     double d = -0x1.3456789ABCDEFp-1005;
     uint8_t *pD = (uint8_t*) &d;
@@ -104,8 +107,31 @@ static SOPC_Endianness compute_float_endianness(void)
     return endianness;
 }
 
+
 void SOPC_Helper_EndiannessCfg_Initialize()
 {
-    sopc_endianness = compute_integer_endianness();
-    sopc_floatEndianness = compute_float_endianness();
+    endianness_integer = compute_endianness_integer();
+    endianness_float = compute_endianness_float();
 }
+
+
+SOPC_Endianness SOPC_Helper_Endianness_GetInteger(void)
+{
+    return endianness_integer;
+}
+
+SOPC_Endianness SOPC_Helper_Endianness_GetFloat(void)
+{
+    return endianness_float;
+}
+
+void SOPC_Helper_Endianness_SetInteger(SOPC_Endianness endianness)
+{
+    endianness_integer = endianness;
+}
+
+void SOPC_Helper_Endianness_SetFloat(SOPC_Endianness endianness)
+{
+    endianness_float = endianness;
+}
+
