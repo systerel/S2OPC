@@ -246,16 +246,18 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
         if (tConfig.initDone != false)
         {
             Mutex_Lock(&tConfig.mut);
-            // TODO: check maximum value < max configs
-            scConfigIdxMax++;
-            status = SOPC_IntToolkitConfig_AddConfig(tConfig.scConfigs, scConfigIdxMax, (void*) scConfig);
-            if (SOPC_STATUS_OK == status)
+            if (scConfigIdxMax < SOPC_MAX_SECURE_CONNECTIONS)
             {
-                result = scConfigIdxMax;
-            }
-            else
-            {
-                scConfigIdxMax--;
+                scConfigIdxMax++;
+                status = SOPC_IntToolkitConfig_AddConfig(tConfig.scConfigs, scConfigIdxMax, (void*) scConfig);
+                if (SOPC_STATUS_OK == status)
+                {
+                    result = scConfigIdxMax;
+                }
+                else
+                {
+                    scConfigIdxMax--;
+                }
             }
             Mutex_Unlock(&tConfig.mut);
         }
@@ -291,16 +293,18 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
             Mutex_Lock(&tConfig.mut);
             if (false == tConfig.locked)
             {
-                // TODO: check maximum value < max configs
-                epConfigIdxMax++;
-                status = SOPC_IntToolkitConfig_AddConfig(tConfig.epConfigs, epConfigIdxMax, (void*) epConfig);
-                if (SOPC_STATUS_OK == status)
+                if (epConfigIdxMax < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
                 {
-                    result = epConfigIdxMax;
-                }
-                else
-                {
-                    epConfigIdxMax--;
+                    epConfigIdxMax++;
+                    status = SOPC_IntToolkitConfig_AddConfig(tConfig.epConfigs, epConfigIdxMax, (void*) epConfig);
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        result = epConfigIdxMax;
+                    }
+                    else
+                    {
+                        epConfigIdxMax--;
+                    }
                 }
             }
             Mutex_Unlock(&tConfig.mut);

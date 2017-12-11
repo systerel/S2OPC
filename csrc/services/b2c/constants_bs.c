@@ -81,18 +81,23 @@ void constants_bs__get_cast_t_session(const t_entier4 constants_bs__p_ind,
 void constants_bs__is_t_channel(const constants_bs__t_channel_i constants_bs__p_channel,
                                 t_bool* const constants_bs__p_res)
 {
-    *constants_bs__p_res = constants_bs__c_channel_indet != constants_bs__p_channel;
+    *constants_bs__p_res = (constants_bs__c_channel_indet != constants_bs__p_channel && constants_bs__p_channel > 0 &&
+                            constants_bs__p_channel <= SOPC_MAX_SECURE_CONNECTIONS);
 }
 
 void constants_bs__is_t_channel_config_idx(const constants_bs__t_channel_config_idx_i constants_bs__p_config_idx,
                                            t_bool* const constants_bs__p_res)
 {
-    *constants_bs__p_res = constants_bs__c_channel_config_idx_indet != constants_bs__p_config_idx;
+    *constants_bs__p_res =
+        (constants_bs__c_channel_config_idx_indet != constants_bs__p_config_idx && constants_bs__p_config_idx > 0 &&
+         constants_bs__p_config_idx <= SOPC_MAX_SECURE_CONNECTIONS);
 }
 
 void constants_bs__is_t_endpoint_config_idx(
     const constants_bs__t_endpoint_config_idx_i constants_bs__p_endpoint_config_idx,
     t_bool* const constants_bs__p_res)
 {
-    *constants_bs__p_res = constants_bs__c_endpoint_config_idx_indet != constants_bs__p_endpoint_config_idx;
+    *constants_bs__p_res = (constants_bs__p_endpoint_config_idx != constants_bs__c_endpoint_config_idx_indet &&
+                            constants_bs__p_endpoint_config_idx > 0 &&
+                            constants_bs__p_endpoint_config_idx <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS);
 }
