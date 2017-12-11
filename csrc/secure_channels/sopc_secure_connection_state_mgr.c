@@ -361,7 +361,7 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
     else
     {
         // SERVER case
-        if (scConnection->state == SECURE_CONNECTION_STATE_SC_INIT)
+        if (scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT)
         {
             // No correct hello message received: just close without error message
             if (SC_CloseConnection(scConnectionIdx) != false)
