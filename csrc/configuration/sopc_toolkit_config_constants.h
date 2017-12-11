@@ -79,7 +79,9 @@
 #endif /* SOPC_MAX_SECURE_CONNECTIONS */
 
 /* Minimum value for OPN requestedLifetime parameter */
+#ifndef SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME
 #define SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME 10000
+#endif
 
 /** @brief Maximum number of requests sent by client pending */
 #ifndef SOPC_MAX_PENDING_REQUESTS
@@ -94,10 +96,14 @@
 #endif /* SOPC_MAX_SESSIONS */
 
 /* Maximum number of milliseconds that a session shall remain open without activity */
+#ifndef SOPC_SESSION_TIMEOUT
 #define SOPC_SESSION_TIMEOUT 10000
+#endif
 
 /* DEBUG CONFIGURATION */
 
+#ifndef SOPC_DEBUG_PRINTING
 #define SOPC_DEBUG_PRINTING false
+#endif
 
 #endif /* SOPC_TOOLKIT_CONFIG_CONSTANTS_H_ */
