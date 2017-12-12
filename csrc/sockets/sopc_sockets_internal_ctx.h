@@ -27,12 +27,13 @@
 
 typedef enum {
     SOCKET_STATE_CLOSED = 0,
-    SOCKET_STATE_CONNECTING, // Client connect waiting for write event
-                             // && SO_ERROR to be verified on event to confirm connection accepted
-    SOCKET_STATE_CONNECTED,  // Client: write event received after connect / Server: connection accepted (socket level +
-                             // SC connection level)
-    SOCKET_STATE_LISTENING,  // Server: listening socket
-    SOCKET_STATE_ACCEPTED    // Server: accepted socket connection at socket level only (missing SC connection level)
+    SOCKET_STATE_CONNECTING,        // Client connect waiting for write event
+                                    // && SO_ERROR to be verified on event to confirm connection accepted
+    SOCKET_STATE_CONNECTING_FAILED, // Temporary state set by the network manager before event manager set it closed
+    SOCKET_STATE_CONNECTED, // Client: write event received after connect / Server: connection accepted (socket level +
+                            // SC connection level)
+    SOCKET_STATE_LISTENING, // Server: listening socket
+    SOCKET_STATE_ACCEPTED   // Server: accepted socket connection at socket level only (missing SC connection level)
 } SOPC_Socket_State;
 
 typedef struct SOPC_Socket

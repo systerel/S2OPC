@@ -63,7 +63,8 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
     for (idx = 0; idx < SOPC_MAX_SOCKETS; idx++)
     {
         uaSock = &(socketsArray[idx]);
-        if (uaSock->isUsed != false && uaSock->state != SOCKET_STATE_CLOSED && uaSock->state != SOCKET_STATE_ACCEPTED)
+        if (uaSock->isUsed != false && uaSock->state != SOCKET_STATE_CLOSED && uaSock->state != SOCKET_STATE_ACCEPTED &&
+            uaSock->state != SOCKET_STATE_CONNECTING_FAILED)
         { // Note: accepted state is a state in which we do not know what to do
           //       in case of data received (no high-level connection set).
           //       Wait CONNECTED state for those sockets to treat events again.
@@ -119,6 +120,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                         status = Socket_CheckAckConnect(uaSock->sock);
                         if (SOPC_STATUS_OK != status)
                         {
+                            uaSock->state = SOCKET_STATE_CONNECTING_FAILED;
                             SOPC_Sockets_EnqueueEvent(INT_SOCKET_CONNECTION_ATTEMPT_FAILED, idx, NULL, 0);
                         }
                         else

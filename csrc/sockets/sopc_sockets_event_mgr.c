@@ -585,7 +585,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
         socketElt = &socketsArray[eltId];
         // State is connecting
-        assert(socketElt->state == SOCKET_STATE_CONNECTING);
+        assert(socketElt->state == SOCKET_STATE_CONNECTING_FAILED);
 
         // Will do a new attempt with next possible address if possible
         result = SOPC_SocketsEventMgr_NextConnectClientAttempt(socketElt);
