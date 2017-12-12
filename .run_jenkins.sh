@@ -1,6 +1,7 @@
 #!/bin/bash
 # script launched by Jenkins CI system
 #
+set -e
 
 # clean repository before build
 git reset --hard
