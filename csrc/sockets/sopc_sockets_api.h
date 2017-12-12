@@ -45,8 +45,8 @@ typedef enum {
                           */
 
     /* Internal events (network event manager to event manager) */
-    INT_SOCKET_ACCEPTED,
-    INT_SOCKET_CONNECTION_ATTEMPT_FAILED,
+    INT_SOCKET_LISTENER_CONNECTION_ATTEMPT, /* idx of listening socket */
+    INT_SOCKET_CONNECTION_ATTEMPT_FAILED,   /* idx of socket for the rest */
     INT_SOCKET_CONNECTED,
     INT_SOCKET_CLOSE,
     INT_SOCKET_READY_TO_READ,

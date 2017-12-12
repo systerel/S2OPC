@@ -41,6 +41,15 @@ static struct
     .stopFlag = false,
 };
 
+static void SOPC_Internal_TriggerEventToSocketsManager(SOPC_Socket* socket,
+                                                       SOPC_Sockets_InputEvent socketEvent,
+                                                       uint32_t socketIdx)
+{
+    // Do not treat any network event until triggered event treated
+    socket->waitTreatNetworkEvent = true;
+    SOPC_Sockets_EnqueueEvent(socketEvent, socketIdx, NULL, 0);
+}
+
 // Treat sockets events if some are present or wait for events (until timeout)
 static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
 {
@@ -49,7 +58,6 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
     bool socketsUsed = false;
     int32_t nbReady = 0;
     SOPC_Socket* uaSock = NULL;
-    SOPC_Socket* acceptSock = NULL;
     SocketSet readSet, writeSet, exceptSet;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
@@ -63,14 +71,18 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
     for (idx = 0; idx < SOPC_MAX_SOCKETS; idx++)
     {
         uaSock = &(socketsArray[idx]);
-        if (uaSock->isUsed != false && uaSock->state != SOCKET_STATE_CLOSED && uaSock->state != SOCKET_STATE_ACCEPTED &&
-            uaSock->state != SOCKET_STATE_CONNECTING_FAILED)
+        if (uaSock->isUsed != false && false == uaSock->waitTreatNetworkEvent &&
+            (uaSock->state == SOCKET_STATE_CONNECTED || uaSock->state == SOCKET_STATE_CONNECTING ||
+             uaSock->state == SOCKET_STATE_LISTENING))
         { // Note: accepted state is a state in which we do not know what to do
           //       in case of data received (no high-level connection set).
           //       Wait CONNECTED state for those sockets to treat events again.
             socketsUsed = true;
-            if (uaSock->state == SOCKET_STATE_CONNECTING)
+            if (uaSock->state == SOCKET_STATE_CONNECTING ||
+                (uaSock->state == SOCKET_STATE_CONNECTED && uaSock->isNotWritable != false))
             {
+                // Wait for an event indicating connection succeeded/failed in CONNECTING state
+                // or Wait for an event indicating connection is writable again in CONNECTED state
                 SocketSet_Add(uaSock->sock, &writeSet);
             }
             else
@@ -116,18 +128,16 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
 
                     if (SocketSet_IsPresent(uaSock->sock, &writeSet) != false)
                     {
-                        // Check connection erros: mandatory when non blocking connection
+                        // Check connection errors: mandatory when non blocking connection
                         status = Socket_CheckAckConnect(uaSock->sock);
                         if (SOPC_STATUS_OK != status)
                         {
-                            uaSock->state = SOCKET_STATE_CONNECTING_FAILED;
-                            SOPC_Sockets_EnqueueEvent(INT_SOCKET_CONNECTION_ATTEMPT_FAILED, idx, NULL, 0);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CONNECTION_ATTEMPT_FAILED,
+                                                                       idx);
                         }
                         else
                         {
-                            uaSock->state = SOCKET_STATE_CONNECTED;
-
-                            SOPC_Sockets_EnqueueEvent(INT_SOCKET_CONNECTED, idx, NULL, 0);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CONNECTED, idx);
                         }
                     }
                 }
@@ -139,55 +149,29 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                     {
                         if (uaSock->state == SOCKET_STATE_CONNECTED)
                         {
-                            SOPC_Sockets_EnqueueEvent(INT_SOCKET_READY_TO_READ, idx, NULL, 0);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_READY_TO_READ, idx);
                         }
                         else if (uaSock->state == SOCKET_STATE_LISTENING)
                         {
-                            if (uaSock->listenerConnections < SOPC_MAX_SOCKETS_CONNECTIONS)
-                            {
-                                acceptSock = SOPC_SocketsInternalContext_GetFreeSocketNoLock(false);
-                            }
-                            if (NULL == acceptSock)
-                            {
-                                // TODO: log refusing new sockets due to limit
-                            }
-                            else
-                            {
-                                status = Socket_Accept(uaSock->sock,
-                                                       1, // Non blocking socket
-                                                       &acceptSock->sock);
-                                if (SOPC_STATUS_OK == status)
-                                {
-                                    acceptSock->isUsed = true;
-                                    acceptSock->isServerConnection = true;
-                                    acceptSock->listenerSocketIdx = uaSock->socketIdx;
-                                    acceptSock->state = SOCKET_STATE_ACCEPTED;
-                                    // Temporarly copy endpoint description config index (waiting for SC connection
-                                    // index)
-                                    acceptSock->connectionId = uaSock->connectionId;
-
-                                    SOPC_Sockets_EnqueueEvent(INT_SOCKET_ACCEPTED, acceptSock->socketIdx, NULL,
-                                                              uaSock->socketIdx);
-                                }
-                            }
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_LISTENER_CONNECTION_ATTEMPT,
+                                                                       uaSock->socketIdx);
                         }
                         else
                         {
                             // TODO: log an error
-                            SOPC_Sockets_EnqueueEvent(INT_SOCKET_CLOSE, idx, NULL, 0);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                         }
                     }
                     else if (SocketSet_IsPresent(uaSock->sock, &writeSet) != false)
                     {
                         if (uaSock->state == SOCKET_STATE_CONNECTED)
                         {
-                            // Indicates that socket is writable again
-                            SOPC_Sockets_EnqueueEvent(INT_SOCKET_READY_TO_WRITE, idx, NULL, 0);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_READY_TO_WRITE, idx);
                         }
                         else
                         {
                             // TODO: log an error
-                            SOPC_Sockets_EnqueueEvent(INT_SOCKET_CLOSE, idx, NULL, 0);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                         }
                     }
                 }
@@ -196,7 +180,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                 if (SocketSet_IsPresent(uaSock->sock, &exceptSet) != false)
                 {
                     // TODO: retrieve exception and log an error
-                    SOPC_Sockets_EnqueueEvent(INT_SOCKET_CLOSE, idx, NULL, 0);
+                    SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                 }
             }
         }
@@ -214,6 +198,8 @@ static void* SOPC_SocketsNetworkEventMgr_CyclicThreadLoop(void* nullData)
     {
         SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(SOPC_MAX_CYCLE_TIMEOUT_MS);
         SOPC_EventTimer_CyclicTimersEvaluation();
+        // Sleep used to avoid select (used by TreatSocketsEvents) to block other threads
+        SOPC_Sleep(1);
     }
     return NULL;
 }

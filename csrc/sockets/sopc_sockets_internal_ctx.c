@@ -91,6 +91,7 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx)
         Socket_Close(&sock->sock);
         sock->isUsed = false;
         sock->state = SOCKET_STATE_CLOSED;
+        sock->waitTreatNetworkEvent = false;
         sock->isServerConnection = false;
         sock->listenerSocketIdx = 0;
         sock->listenerConnections = 0;
@@ -116,7 +117,7 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx)
     }
 }
 
-void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
+void SOPC_SocketsInternalContext_CloseSocketLock(uint32_t socketIdx)
 {
     Mutex_Lock(&socketsMutex);
     SOPC_SocketsInternalContext_CloseSocketNoLock(socketIdx);

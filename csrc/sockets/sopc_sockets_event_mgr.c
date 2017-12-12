@@ -83,7 +83,7 @@ static bool ParseURI(const char* uri, char** hostname, char** port)
     return result;
 }
 
-static bool SOPC_SocketsEventMgr_ConnectClient(SOPC_Socket* connectSocket, Socket_AddressInfo* addr)
+static bool SOPC_SocketsEventMgr_ConnectClient_NoLock(SOPC_Socket* connectSocket, Socket_AddressInfo* addr)
 {
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -112,25 +112,28 @@ static bool SOPC_SocketsEventMgr_ConnectClient(SOPC_Socket* connectSocket, Socke
 
         if (false == result)
         {
-            SOPC_SocketsInternalContext_CloseSocket(connectSocket->socketIdx);
+            SOPC_SocketsInternalContext_CloseSocketLock(connectSocket->socketIdx);
         }
     }
     return result;
 }
 
-static bool SOPC_SocketsEventMgr_NextConnectClientAttempt(SOPC_Socket* connectSocket)
+static bool SOPC_SocketsEventMgr_NextConnectClientAttempt_Lock(SOPC_Socket* connectSocket)
 {
     bool result = false;
     if (connectSocket != false && connectSocket->state == SOCKET_STATE_CONNECTING)
     {
+        Mutex_Lock(&socketsMutex);
         // Close precedently created socket
         Socket_Close(&connectSocket->sock);
+        // Set state closed but do not reset rest of data (contains next attempt configuration
+        connectSocket->state = SOCKET_STATE_CLOSED;
 
         // Check if next connection attempt available
         Socket_AddressInfo* nextAddr = (Socket_AddressInfo*) connectSocket->nextConnectAttemptAddr;
         if (nextAddr != NULL)
         {
-            result = SOPC_SocketsEventMgr_ConnectClient(connectSocket, nextAddr);
+            result = SOPC_SocketsEventMgr_ConnectClient_NoLock(connectSocket, nextAddr);
             if (result != false)
             {
                 connectSocket->nextConnectAttemptAddr = NULL;
@@ -147,11 +150,12 @@ static bool SOPC_SocketsEventMgr_NextConnectClientAttempt(SOPC_Socket* connectSo
                 connectSocket->connectAddrs = NULL;
             }
         }
+        Mutex_Unlock(&socketsMutex);
     }
     return result;
 }
 
-static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
+static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket_Lock(const char* uri)
 {
     SOPC_Socket* resultSocket = NULL;
     Socket_AddressInfo *res = NULL, *p = NULL;
@@ -189,7 +193,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
             // Try to connect on IP addresses provided (IPV4 and IPV6)
             for (p = res; p != NULL && false == connectResult; p = Socket_AddrInfo_IterNext(p))
             {
-                connectResult = SOPC_SocketsEventMgr_ConnectClient(freeSocket, p);
+                connectResult = SOPC_SocketsEventMgr_ConnectClient_NoLock(freeSocket, p);
             }
             result = connectResult;
         }
@@ -235,7 +239,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
     return resultSocket;
 }
 
-static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uint8_t listenAllItfs)
+static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket_Lock(const char* uri, uint8_t listenAllItfs)
 {
     SOPC_Socket* resultSocket = NULL;
     bool result = false;
@@ -355,7 +359,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
     return resultSocket;
 }
 
-static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* sock)
+static bool SOPC_SocketsEventMgr_TreatWriteBuffer_NoLock(SOPC_Socket* sock)
 {
     bool nothingToDequeue = false;
     bool writeQueueResult = true;
@@ -415,11 +419,16 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* sock)
         status = SOPC_AsyncQueue_BlockingEnqueueFirstOut(sock->writeQueue, buffer);
         assert(SOPC_STATUS_OK == status);
     }
-    else
-    {
-    }
 
     return writeQueueResult;
+}
+
+static void SOPC_SocketsEventMgr_SetInternalEventAsTreated_Lock(SOPC_Socket* socketElt)
+{
+    Mutex_Lock(&socketsMutex);
+    // Event treated
+    socketElt->waitTreatNetworkEvent = false;
+    Mutex_Unlock(&socketsMutex);
 }
 
 void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params, uint32_t auxParam)
@@ -427,6 +436,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
     bool result = false;
     SOPC_Sockets_InputEvent socketEvent = (SOPC_Sockets_InputEvent) event;
     SOPC_Socket* socketElt = NULL;
+    SOPC_Socket* acceptSock = NULL;
     SOPC_Buffer* buffer = NULL;
     int32_t readBytes = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -443,7 +453,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         params = (const char*) URI,
         auxParms = (bool) listenAllInterfaces
         */
-        socketElt = SOPC_SocketsEventMgr_CreateServerSocket((const char*) params, (bool) auxParam);
+        socketElt = SOPC_SocketsEventMgr_CreateServerSocket_Lock((const char*) params, (bool) auxParam);
         if (NULL != socketElt)
         {
             socketElt->connectionId = eltId;
@@ -483,7 +493,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         id = secure channel connection index,
         params = (const char*) URI
         */
-        socketElt = SOPC_SocketsEventMgr_CreateClientSocket((const char*) params);
+        socketElt = SOPC_SocketsEventMgr_CreateClientSocket_Lock((const char*) params);
         if (NULL != socketElt)
         {
             socketElt->connectionId = eltId;
@@ -501,16 +511,17 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         /* id = socket index */
         socketElt = &socketsArray[eltId];
 
-        if (socketElt->isServerConnection != false)
+        if (socketElt->isServerConnection != false && socketElt->state != SOCKET_STATE_CLOSED)
         {
             // Management of number of connection on a listener
-            if (socketsArray[socketElt->socketIdx].state == SOCKET_STATE_LISTENING)
+            if (socketsArray[socketElt->listenerSocketIdx].state == SOCKET_STATE_LISTENING &&
+                socketsArray[socketElt->listenerSocketIdx].listenerConnections > 0)
             {
-                socketsArray[socketElt->socketIdx].listenerConnections--;
+                socketsArray[socketElt->listenerSocketIdx].listenerConnections--;
             }
         }
 
-        SOPC_SocketsInternalContext_CloseSocket(eltId);
+        SOPC_SocketsInternalContext_CloseSocketLock(eltId);
         break;
     case SOCKET_WRITE:
         if (SOPC_DEBUG_PRINTING != false)
@@ -538,7 +549,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
             if (socketElt->isNotWritable == false)
             {
                 // If socket is in writable state: trigger the socket write treatment
-                result = SOPC_SocketsEventMgr_TreatWriteBuffer(socketElt);
+                result = SOPC_SocketsEventMgr_TreatWriteBuffer_NoLock(socketElt);
             }
         }
         else
@@ -555,28 +566,60 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         {
             SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
             // Definitively close the socket
-            SOPC_SocketsInternalContext_CloseSocket(eltId);
+            SOPC_SocketsInternalContext_CloseSocketLock(eltId);
         }
 
         break;
-    case INT_SOCKET_ACCEPTED:
+    case INT_SOCKET_LISTENER_CONNECTION_ATTEMPT:
         if (SOPC_DEBUG_PRINTING != false)
         {
-            printf("SocketEvent: INT_SOCKET_ACCEPTED\n");
+            printf("SocketEvent: INT_SOCKET_LISTENER_CONNECTION_ATTEMPT\n");
         }
         socketElt = &socketsArray[eltId];
 
         // State was set to accepted by network event manager
-        assert(socketElt->state == SOCKET_STATE_ACCEPTED);
-        assert(socketsArray[auxParam].state == SOCKET_STATE_LISTENING);
-        // Increment number of connections on listener
-        socketsArray[auxParam].listenerConnections++;
+        assert(socketElt->state == SOCKET_STATE_LISTENING);
 
-        // Send to the secure channel listener state manager and wait for SOCKET_ACCEPTED_CONNECTION for association
-        // with connection index
-        SOPC_SecureChannels_EnqueueEvent(SOCKET_LISTENER_CONNECTION,
-                                         socketElt->connectionId, // endpoint description config index
-                                         NULL, eltId);
+        Mutex_Lock(&socketsMutex);
+        if (socketElt->listenerConnections < SOPC_MAX_SOCKETS_CONNECTIONS)
+        {
+            acceptSock = SOPC_SocketsInternalContext_GetFreeSocketNoLock(false);
+        }
+        if (NULL == acceptSock)
+        {
+            // TODO: log refusing new sockets due to limit
+        }
+        else
+        {
+            status = Socket_Accept(socketElt->sock,
+                                   1, // Non blocking socket
+                                   &acceptSock->sock);
+            if (SOPC_STATUS_OK == status)
+            {
+                acceptSock->isUsed = true;
+                acceptSock->isServerConnection = true;
+                acceptSock->listenerSocketIdx = socketElt->socketIdx;
+                // Temporarly copy endpoint description config index (waiting for new SC connection
+                // index once created)
+                acceptSock->connectionId = socketElt->connectionId;
+                // Set initial state of new socket
+                acceptSock->state = SOCKET_STATE_ACCEPTED;
+
+                // Increment number of connections on listener
+                socketElt->listenerConnections++;
+
+                // Send to the secure channel listener state manager and wait for SOCKET_ACCEPTED_CONNECTION for
+                // association with connection index
+                SOPC_SecureChannels_EnqueueEvent(SOCKET_LISTENER_CONNECTION,
+                                                 acceptSock->connectionId, // endpoint description config index
+                                                 NULL, acceptSock->socketIdx);
+            }
+        }
+
+        // Release listening socket for network manager
+        socketElt->waitTreatNetworkEvent = false;
+        Mutex_Unlock(&socketsMutex);
+
         break;
     case INT_SOCKET_CONNECTION_ATTEMPT_FAILED:
         if (SOPC_DEBUG_PRINTING != false)
@@ -585,10 +628,10 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
         socketElt = &socketsArray[eltId];
         // State is connecting
-        assert(socketElt->state == SOCKET_STATE_CONNECTING_FAILED);
+        assert(socketElt->state == SOCKET_STATE_CONNECTING);
 
         // Will do a new attempt with next possible address if possible
-        result = SOPC_SocketsEventMgr_NextConnectClientAttempt(socketElt);
+        result = SOPC_SocketsEventMgr_NextConnectClientAttempt_Lock(socketElt);
         if (false == result)
         {
             // No new attempt possible, indicates socket connection failed and close the socket
@@ -596,8 +639,13 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
                                              socketElt->connectionId, // endpoint description config index
                                              NULL, 0);
             // Definitively close the socket
-            SOPC_SocketsInternalContext_CloseSocket(eltId);
+            SOPC_SocketsInternalContext_CloseSocketLock(eltId);
         }
+        else
+        {
+            SOPC_SocketsEventMgr_SetInternalEventAsTreated_Lock(socketElt);
+        }
+
         break;
     case INT_SOCKET_CONNECTED:
         if (SOPC_DEBUG_PRINTING != false)
@@ -606,7 +654,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
         socketElt = &socketsArray[eltId];
         // State was set to connected by network manager
-        assert(socketElt->state == SOCKET_STATE_CONNECTED);
+        assert(socketElt->state == SOCKET_STATE_CONNECTING);
 
         // No more attempts expected: free the attempts addresses
         if (socketElt->connectAddrs != NULL)
@@ -620,6 +668,13 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         SOPC_SecureChannels_EnqueueEvent(SOCKET_CONNECTION,
                                          socketElt->connectionId, // secure channel connection index
                                          NULL, eltId);
+
+        Mutex_Lock(&socketsMutex);
+        // Event treated
+        socketElt->waitTreatNetworkEvent = false;
+        socketElt->state = SOCKET_STATE_CONNECTED;
+        Mutex_Unlock(&socketsMutex);
+
         break;
     case INT_SOCKET_CLOSE:
         if (SOPC_DEBUG_PRINTING != false)
@@ -632,20 +687,21 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         {
             SOPC_SecureChannels_EnqueueEvent(SOCKET_LISTENER_FAILURE, socketElt->connectionId, NULL, eltId);
         }
-        else
+        else if (socketElt->state != SOCKET_STATE_CLOSED)
         {
             if (socketElt->isServerConnection != false)
             {
                 // Management of number of connection on a listener
-                if (socketsArray[socketElt->socketIdx].state == SOCKET_STATE_LISTENING)
+                if (socketsArray[socketElt->listenerSocketIdx].state == SOCKET_STATE_LISTENING &&
+                    socketsArray[socketElt->listenerSocketIdx].listenerConnections > 0)
                 {
-                    socketsArray[socketElt->socketIdx].listenerConnections--;
+                    socketsArray[socketElt->listenerSocketIdx].listenerConnections--;
                 }
             }
             SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
         }
 
-        SOPC_SocketsInternalContext_CloseSocket(eltId);
+        SOPC_SocketsInternalContext_CloseSocketLock(eltId);
         break;
     case INT_SOCKET_READY_TO_READ:
         if (SOPC_DEBUG_PRINTING != false)
@@ -685,8 +741,10 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
                 // Failure during read operation or out of memory
                 // TODO: log
                 SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
-                SOPC_SocketsInternalContext_CloseSocket(eltId);
+                SOPC_SocketsInternalContext_CloseSocketLock(eltId);
             }
+
+            SOPC_SocketsEventMgr_SetInternalEventAsTreated_Lock(socketElt);
         } // else: ignore event since socket could have been closed since event was triggered
 
         break;
@@ -709,8 +767,10 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
                 // Socket was not writable
                 socketElt->isNotWritable = false;
                 // Trigger the socket write treatment
-                SOPC_SocketsEventMgr_TreatWriteBuffer(socketElt);
+                SOPC_SocketsEventMgr_TreatWriteBuffer_NoLock(socketElt);
             }
+
+            SOPC_SocketsEventMgr_SetInternalEventAsTreated_Lock(socketElt);
         } // else: ignore event since socket could have been closed since event was triggered
 
         break;

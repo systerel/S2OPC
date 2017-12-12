@@ -27,13 +27,12 @@
 
 typedef enum {
     SOCKET_STATE_CLOSED = 0,
-    SOCKET_STATE_CONNECTING,        // Client connect waiting for write event
-                                    // && SO_ERROR to be verified on event to confirm connection accepted
-    SOCKET_STATE_CONNECTING_FAILED, // Temporary state set by the network manager before event manager set it closed
-    SOCKET_STATE_CONNECTED, // Client: write event received after connect / Server: connection accepted (socket level +
-                            // SC connection level)
-    SOCKET_STATE_LISTENING, // Server: listening socket
-    SOCKET_STATE_ACCEPTED   // Server: accepted socket connection at socket level only (missing SC connection level)
+    SOCKET_STATE_CONNECTING, // Client connect waiting for write event
+                             // && SO_ERROR to be verified on event to confirm connection accepted
+    SOCKET_STATE_CONNECTED,  // Client: write event received after connect / Server: connection accepted (socket level +
+                             // SC connection level)
+    SOCKET_STATE_LISTENING,  // Server: listening socket
+    SOCKET_STATE_ACCEPTED    // Server: accepted socket connection at socket level only (missing SC connection level)
 } SOPC_Socket_State;
 
 typedef struct SOPC_Socket
@@ -44,8 +43,12 @@ typedef struct SOPC_Socket
                               OR endpoint description configuration index when state = LISTENING only) */
     Socket sock;
     SOPC_AsyncQueue* writeQueue;
-    uint8_t isNotWritable;
-    bool isUsed; /* Indicates if the socket is free (false) or used (true) */
+    bool waitTreatNetworkEvent; /* Synchronization flag between socket network thread and event manager thread. Once a
+                                   network event is received and triggered an event to be treated by a socket event
+                                   manager, the flag is set and no network event searched until triggered event is
+                                   treated. */
+    bool isNotWritable; // Indicates when a write attempt blocked, the flag is set until a write event occurs on socket
+    bool isUsed;        /* Indicates if the socket is free (false) or used (true) */
     // false if it is a client connection, otherwise it is a server connection (linked to a listener)
     bool isServerConnection;
     SOPC_Socket_State state;
@@ -89,6 +92,6 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx);
  *  (automatic lock of the mutex during call).
  *  Note: defined here since it modifies validity of socket in array
  */
-void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx);
+void SOPC_SocketsInternalContext_CloseSocketLock(uint32_t socketIdx);
 
 #endif /* SOPC_SOCKETS_INTERNAL_CTX_H_ */
