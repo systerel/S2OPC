@@ -127,7 +127,7 @@ classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
 <!-- check if address space contains duplicated nodes ids -->
 <xsl:for-each-group select="$ua_nodes//@NodeId" group-by=".">
   <xsl:if test="count(current-group()) ne 1">
-    <xsl:message>NodeId value <xsl:value-of select="current-grouping-key()"/> is duplicated in address space</xsl:message>
+    <xsl:message terminate="yes">NodeId value <xsl:value-of select="current-grouping-key()"/> is duplicated in address space</xsl:message>
   </xsl:if>
 </xsl:for-each-group>
 
