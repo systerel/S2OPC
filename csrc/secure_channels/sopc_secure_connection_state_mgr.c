@@ -99,6 +99,7 @@ static bool SC_CloseConnection(uint32_t connectionIdx)
 {
     SOPC_SecureConnection* scConnection = NULL;
     bool result = false;
+    bool configRes = false;
     if (connectionIdx < SOPC_MAX_SECURE_CONNECTIONS)
     {
         scConnection = &(secureConnectionsArray[connectionIdx]);
@@ -167,6 +168,16 @@ static bool SC_CloseConnection(uint32_t connectionIdx)
             {
                 // Close the underlying socket
                 SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, scConnection->socketIndex, NULL, 0);
+            }
+
+            if (scConnection->isServerConnection != false)
+            {
+                // Remove the connection configuration created on connection establishment
+                configRes = SOPC_ToolkitServer_RemoveSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+                if (configRes == false)
+                {
+                    // TODO: log error
+                }
             }
 
             // Clear the rest (state=0 <=> SC_CLOSED)
@@ -321,6 +332,7 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
 {
     assert(scConnection != NULL);
     bool immediateClose = false;
+    uint32_t serverEndpointConfigIdx = 0;
     const bool isScConnected = (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
                                 scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
     if (false == scConnection->isServerConnection)
@@ -397,9 +409,11 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
             }
             if (immediateClose != false)
             {
+                serverEndpointConfigIdx = scConnection->serverEndpointConfigIdx;
                 // Immediatly close the connection if failed
                 if (SC_CloseConnection(scConnectionIdx) != false)
                 {
+                    scConnection = NULL; // Closed connection
                     if (isScConnected != false)
                     {
                         // Notify services in case of successful closure of a SC connected
@@ -407,8 +421,8 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
                                                    OpcUa_BadSecureChannelClosed);
                     }
                     // Server side: notify listener that connection closed
-                    SOPC_SecureChannels_EnqueueInternalEvent(
-                        INT_EP_SC_DISCONNECTED, scConnection->serverEndpointConfigIdx, NULL, scConnectionIdx);
+                    SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_DISCONNECTED, serverEndpointConfigIdx, NULL,
+                                                             scConnectionIdx);
                 }
             }
         }
@@ -522,7 +536,7 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     assert(scConnection != NULL);
     SOPC_Buffer* msgBuffer;
     SOPC_SecureChannel_Config* scConfig =
-        SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     assert(scConnection != NULL);
@@ -742,7 +756,7 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
     OpcUa_OpenSecureChannelRequest opnReq;
     OpcUa_OpenSecureChannelRequest_Initialize(&opnReq);
 
-    config = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    config = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(config != NULL);
 
     result = true;
@@ -882,7 +896,7 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTING);
     assert(false == scConnection->isServerConnection);
     assert(opnRespBuffer != NULL);
-    SOPC_SecureChannel_Config* scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnectionIdx);
+    SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnectionIdx);
     assert(scConfig != NULL);
 
     bool result = false;
@@ -1442,7 +1456,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                 nconfig->reqSecuPolicyUri = scConnection->serverAsymmSecuInfo.securityPolicyUri;
                 nconfig->requestedLifetime = opnReq->RequestedLifetime;
                 nconfig->url = epConfig->endpointURL;
-                idx = SOPC_ToolkitClient_AddSecureChannelConfig(nconfig);
+                idx = SOPC_ToolkitServer_AddSecureChannelConfig(nconfig);
                 if (idx == 0)
                 {
                     result = false;
@@ -1625,7 +1639,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     SOPC_Buffer* opnRespBuffer = NULL;
     SOPC_SecureChannel_Config* scConfig = NULL;
 
-    scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(scConfig != NULL);
 
     // Write the OPN response message
@@ -1756,7 +1770,7 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
     OpcUa_OpenSecureChannelRequest* opnReq = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(scConfig != NULL);
 
     status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
@@ -1884,7 +1898,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     SOPC_SC_SecurityKeySets newSecuKeySets;
     memset(&newSecuKeySets, 0, sizeof(SOPC_SC_SecurityKeySets));
 
-    scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(scConfig != NULL);
 
     // Write the OPN request message
@@ -2090,7 +2104,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         /* id = secure channel connection index */
 
         /* Define INIT state of a client */
-        scConfig = SOPC_Toolkit_GetSecureChannelConfig(eltId);
+        scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(eltId);
         if (scConfig != NULL)
         {
             result = SC_InitNewConnection(&idx);

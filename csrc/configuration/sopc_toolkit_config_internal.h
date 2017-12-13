@@ -34,15 +34,50 @@
 SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx);
 
 /**
- *  \brief Return the secure channel configuration for the given index or null if not defined. (SOPC_Toolkit_Configured
- * required)
+ *  \brief (SERVER SIDE ONLY) Record the given secure channel configuration in returned index
+ *  (SOPC_ToolkitClient_Initialize required, !SOPC_Toolkit_Configured required)
+ * Note: the set of indexes of secure channel configuration for client and server are disjoint
+ *
+ *  \return secure channel configuration index if configuration succeeded,
+ *  0 if toolkit is not initialized, already
+ *  configured or otherwise
+ */
+uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig);
+
+/**
+ *  \brief (SERVER SIDE ONLY) Remove the secure channel configuration for the given server index
+ *
+ * Note: the set of indexes of secure channel configuration for client and server are disjoint
+ *
+ *  \param serverScConfigIdx  The secure channel configuration index requested
+ *
+ *  \return true if succeeded, false otherwise
+ */
+bool SOPC_ToolkitServer_RemoveSecureChannelConfig(uint32_t serverScConfigIdx);
+
+/**
+ *  \brief (SERVER SIDE ONLY) Return the secure channel configuration for the given index or null if not defined.
+ * (SOPC_Toolkit_Configured required)
+ * Note: the set of indexes of secure channel configuration for client and server are disjoint
  *
  *  \param scConfigIdx  The secure channel configuration index requested
  *
  *  \return Secure channel configuration at given index or NULL if
  *  index invalid or toolkit is not configured yet
  */
-SOPC_SecureChannel_Config* SOPC_Toolkit_GetSecureChannelConfig(uint32_t scConfigIdx);
+SOPC_SecureChannel_Config* SOPC_ToolkitServer_GetSecureChannelConfig(uint32_t serverScConfigIdx);
+
+/**
+ *  \brief (CLIENT SIDE ONLY)  Return the secure channel configuration for the given index or null if not defined.
+ * (SOPC_Toolkit_Configured required)
+ * Note: the set of indexes of secure channel configuration for client and server are disjoint
+ *
+ *  \param scConfigIdx  The secure channel configuration index requested
+ *
+ *  \return Secure channel configuration at given index or NULL if
+ *  index invalid or toolkit is not configured yet
+ */
+SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx);
 
 /**
  *  \brief Return the encodeable types table configuration used by the stack (SOPC_Toolkit_Configured required)

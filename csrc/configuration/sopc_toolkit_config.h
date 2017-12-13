@@ -76,7 +76,7 @@ void SOPC_Toolkit_Clear(void);
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
 
 /**
- *  \brief Record the given secure channel configuration in given index
+ *  \brief Record the given secure channel configuration in returned index
  *  (SOPC_ToolkitClient_Initialize required, !SOPC_Toolkit_Configured required)
  *
  *  \return secure channel configuration index if configuration succeeded,

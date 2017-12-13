@@ -525,7 +525,7 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
     if (false == scConnection->isServerConnection)
     {
         // CLIENT side
-        clientConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        clientConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
         if (NULL == clientConfig)
         {
             result = false;
@@ -545,7 +545,7 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
             scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
         {
             // A client connection config shall already be defined and contains security expected
-            clientConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            clientConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
             if (NULL == clientConfig)
             {
                 result = false;
@@ -949,7 +949,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
         if (false == scConnection->isServerConnection)
         {
             SOPC_SecureChannel_Config* scConfig =
-                SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+                SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
             assert(scConfig != NULL);
             runningAppPrivateKey = scConfig->key_priv_cli;
         }
@@ -1103,8 +1103,16 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection, bo
     {
         SOPC_AsymmetricKey* publicKey = NULL;
         const SOPC_Certificate* otherAppCertificate = NULL;
-        SOPC_SecureChannel_Config* scConfig =
-            SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        SOPC_SecureChannel_Config* scConfig = NULL;
+
+        if (false == scConnection->isServerConnection)
+        {
+            scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        }
+        else
+        {
+            scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        }
 
         if (NULL == scConfig && scConnection->isServerConnection != false)
         {
@@ -1203,6 +1211,8 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
     bool toDecrypt = false;
     bool toCheckSignature = false;
     bool isPrecCryptoData = false;
+
+    SOPC_SecureChannel_Config* scConfig = NULL;
 
     // Note: for non secure message we already check those messages are expected
     //       regarding the connection type (client/server)
@@ -1356,8 +1366,14 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
     if (result != false && symmSecuHeader != false)
     {
         // CLO or MSG case: symmetric security header
-        SOPC_SecureChannel_Config* scConfig =
-            SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        if (false == scConnection->isServerConnection)
+        {
+            scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        }
+        else
+        {
+            scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        }
         // If a symmetric message is received, secure channel should be configured
         if (NULL == scConfig)
         {
@@ -2322,7 +2338,7 @@ static bool SC_Chunks_EncodeSignature(SOPC_SecureConnection* scConnection,
         if (false == scConnection->isServerConnection)
         {
             SOPC_SecureChannel_Config* scConfig =
-                SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+                SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
             assert(scConfig != NULL);
             runningAppPrivateKey = scConfig->key_priv_cli;
         }
@@ -2399,6 +2415,8 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
     assert(encryptedBuffer != NULL);
     bool result = false;
 
+    SOPC_SecureChannel_Config* scConfig = NULL;
+
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Byte* dataToEncrypt = &nonEncryptedBuffer->data[sequenceNumberPosition];
     const uint32_t dataToEncryptLength = nonEncryptedBuffer->length - sequenceNumberPosition;
@@ -2407,19 +2425,20 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
     {
         /* ASYMMETRIC CASE */
 
-        SOPC_SecureChannel_Config* scConfig =
-            SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
-        assert(scConfig != NULL); // Even on server side it is guaranteed by secure connection state manager (no
-                                  // sending in wrong state)
         const SOPC_Certificate* otherAppCertificate = NULL;
         if (false == scConnection->isServerConnection)
         {
             // Client side
+            scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            assert(scConfig != NULL);
             otherAppCertificate = scConfig->crt_srv;
         }
         else
         {
             // Server side
+            scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            assert(scConfig != NULL); // Even on server side it is guaranteed by secure connection state manager (no
+                                      // sending in wrong state)
             otherAppCertificate = scConfig->crt_cli;
         }
 
@@ -2579,7 +2598,14 @@ static bool SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnection,
             /* ENCODE OPC UA SECURE CONVERSATION MESSAGE PHASE*/
 
             // Note: when sending a secure conversation message, the secure connection configuration shall be defined
-            scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            if (false == scConnection->isServerConnection)
+            {
+                scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            }
+            else
+            {
+                scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            }
             assert(scConfig != NULL); // Even on server side guaranteed by the secure connection state manager
 
             bool toEncrypt = SC_Chunks_IsMsgEncrypted(scConfig->msgSecurityMode, isOPN);

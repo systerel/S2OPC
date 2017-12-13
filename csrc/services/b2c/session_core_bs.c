@@ -284,7 +284,7 @@ void session_core_bs__server_create_session_req_do_crypto(
 
         /* Retrieve the security policy and mode */
         /* TODO: this function is denoted CLIENT */
-        pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) session_core_bs__p_channel_config_idx);
+        pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig((uint32_t) session_core_bs__p_channel_config_idx);
         if (NULL == pSCCfg)
             return;
 
@@ -411,7 +411,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
     {
         pSession = &sessionDataArray[session_core_bs__session];
         /* Retrieve the security policy and mode */
-        pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) session_core_bs__channel_config_idx);
+        pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_bs__channel_config_idx);
         if (NULL == pSCCfg)
             return;
 
@@ -549,7 +549,7 @@ void session_core_bs__client_create_session_req_do_crypto(
         pSession = &sessionDataArray[session_core_bs__p_session];
 
         /* Retrieve the security policy */
-        pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) session_core_bs__p_channel_config_idx);
+        pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_bs__p_channel_config_idx);
         if (NULL == pSCCfg)
             return;
 
@@ -635,7 +635,7 @@ void session_core_bs__client_create_session_check_crypto(
         pSession = &sessionDataArray[session_core_bs__p_session];
 
         /* Retrieve the security policy and mode */
-        pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) session_core_bs__p_channel_config_idx);
+        pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_bs__p_channel_config_idx);
         if (NULL == pSCCfg)
             return;
 
@@ -739,7 +739,7 @@ void session_core_bs__server_activate_session_check_crypto(
         pSession = &sessionDataArray[session_core_bs__session];
 
         /* Retrieve the security policy and mode */
-        pSCCfg = SOPC_Toolkit_GetSecureChannelConfig((uint32_t) session_core_bs__channel_config_idx);
+        pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig((uint32_t) session_core_bs__channel_config_idx);
         if (NULL == pSCCfg)
             return;
 

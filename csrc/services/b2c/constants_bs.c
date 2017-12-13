@@ -90,7 +90,7 @@ void constants_bs__is_t_channel_config_idx(const constants_bs__t_channel_config_
 {
     *constants_bs__p_res =
         (constants_bs__c_channel_config_idx_indet != constants_bs__p_config_idx && constants_bs__p_config_idx > 0 &&
-         constants_bs__p_config_idx <= SOPC_MAX_SECURE_CONNECTIONS);
+         constants_bs__p_config_idx <= SOPC_MAX_SECURE_CONNECTIONS * 2); // (1 for client side + 1 for server side)
 }
 
 void constants_bs__is_t_endpoint_config_idx(

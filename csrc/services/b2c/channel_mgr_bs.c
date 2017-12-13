@@ -48,7 +48,7 @@ void channel_mgr_bs__INITIALISATION(void) {}
 void channel_mgr_bs__prepare_cli_open_secure_channel(
     const constants__t_channel_config_idx_i channel_mgr_bs__p_config_idx)
 {
-    SOPC_SecureChannel_Config* config = SOPC_Toolkit_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
+    SOPC_SecureChannel_Config* config = SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
     if (NULL != config)
     {
         SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, channel_mgr_bs__p_config_idx, NULL, 0);
@@ -94,7 +94,11 @@ void channel_mgr_bs__get_SecurityPolicy(const constants__t_channel_i channel_mgr
 
     channel_mgr_1__get_channel_info(channel_mgr_bs__channel, (int32_t*) &scConfigIdx);
 
-    pSCCfg = SOPC_Toolkit_GetSecureChannelConfig(scConfigIdx);
+    pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(scConfigIdx);
+    if (pSCCfg == NULL)
+    {
+        pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(scConfigIdx);
+    }
     assert(pSCCfg != NULL);
 
     util_channel__SecurityPolicy_C_to_B(pSCCfg->reqSecuPolicyUri, channel_mgr_bs__secpol);

@@ -18,6 +18,7 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
 
+#include <assert.h>
 #include <stdbool.h>
 
 #include "sopc_event_timer_manager.h"
@@ -27,10 +28,8 @@
 #include "sopc_sockets_api.h"
 #include "stub_sc_sopc_services_api.h"
 
-static SOPC_SLinkedList* scConfigs = NULL;
-static SOPC_SLinkedList* epConfigs = NULL;
-static uint32_t scConfigIdxMax = 0;
-static uint32_t epConfigIdxMax = 0;
+static SOPC_SecureChannel_Config* scConfigSingleton = NULL;
+static SOPC_Endpoint_Config* epConfigSingleton = NULL;
 
 SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 {
@@ -38,30 +37,11 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 
     SOPC_Helper_EndiannessCfg_Initialize();
 
-    scConfigs = SOPC_SLinkedList_Create(0);
-
-    if (NULL != scConfigs)
-    {
-        epConfigs = SOPC_SLinkedList_Create(0);
-    }
-
-    if (NULL != epConfigs)
-    {
-        SOPC_EventTimer_Initialize();
-        SOPC_Sockets_Initialize();
-        SOPC_SecureChannels_Initialize();
-        SOPC_Services_Initialize();
-    }
-
-    if (NULL == epConfigs)
-    {
-        SOPC_Toolkit_Clear();
-        return SOPC_STATUS_NOK;
-    }
-    else
-    {
-        return SOPC_STATUS_OK;
-    }
+    SOPC_EventTimer_Initialize();
+    SOPC_Sockets_Initialize();
+    SOPC_SecureChannels_Initialize();
+    SOPC_Services_Initialize();
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_Toolkit_Configured()
@@ -69,10 +49,8 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
     return SOPC_STATUS_OK;
 }
 
-void SOPC_Toolkit_ClearScConfigElt(uint32_t id, void* val)
+void SOPC_Toolkit_ClearScConfigElt(SOPC_SecureChannel_Config* scConfig)
 {
-    (void) (id);
-    SOPC_SecureChannel_Config* scConfig = val;
     if (scConfig != NULL && scConfig->isClientSc == false)
     {
         // In case of server it is an internally created config
@@ -85,90 +63,89 @@ void SOPC_Toolkit_ClearScConfigElt(uint32_t id, void* val)
     }
 }
 
-// Deallocate fields allocated on server side only and free all the SC configs
-static void SOPC_Toolkit_ClearScConfigs(void)
-{
-    SOPC_SLinkedList_Apply(scConfigs, SOPC_Toolkit_ClearScConfigElt);
-    SOPC_SLinkedList_Delete(scConfigs);
-    scConfigs = NULL;
-}
-
 void SOPC_Toolkit_Clear()
 {
     SOPC_Sockets_Clear();
     SOPC_EventTimer_Clear();
     SOPC_SecureChannels_Clear();
     SOPC_Services_Clear();
-    SOPC_Toolkit_ClearScConfigs();
-    SOPC_SLinkedList_Delete(epConfigs);
-    epConfigs = NULL;
-}
-
-static SOPC_ReturnStatus SOPC_IntToolkitConfig_AddConfig(SOPC_SLinkedList* configList, uint32_t idx, void* config)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    void* res = SOPC_SLinkedList_FindFromId(configList, idx);
-    if (NULL == res && NULL != config)
-    { // Idx is unique
-        if (config == SOPC_SLinkedList_Prepend(configList, idx, config))
-        {
-            status = SOPC_STATUS_OK;
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
-    return status;
+    SOPC_Toolkit_ClearScConfigElt(scConfigSingleton);
+    scConfigSingleton = NULL;
+    epConfigSingleton = NULL;
 }
 
 uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
 {
     uint32_t result = 0;
-    SOPC_ReturnStatus status;
-    if (NULL != scConfig)
+    if (NULL == scConfigSingleton)
     {
-        scConfigIdxMax++;
-        status = SOPC_IntToolkitConfig_AddConfig(scConfigs, scConfigIdxMax, (void*) scConfig);
-        if (SOPC_STATUS_OK == status)
-        {
-            result = scConfigIdxMax;
-        }
-        else
-        {
-            scConfigIdxMax--;
-        }
+        result = 1;
+        scConfigSingleton = scConfig;
     }
     return result;
 }
 
-SOPC_SecureChannel_Config* SOPC_Toolkit_GetSecureChannelConfig(uint32_t scConfigIdx)
+SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx)
 {
-    return (SOPC_SecureChannel_Config*) SOPC_SLinkedList_FindFromId(scConfigs, scConfigIdx);
-    ;
+    SOPC_SecureChannel_Config* result = NULL;
+    if (scConfigIdx == 1)
+    {
+        result = scConfigSingleton;
+    }
+    return result;
+}
+
+uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
+{
+    uint32_t result = 0;
+    if (NULL == scConfigSingleton)
+    {
+        result = 10;
+        scConfigSingleton = scConfig;
+    }
+    return result;
+}
+
+bool SOPC_ToolkitServer_RemoveSecureChannelConfig(uint32_t serverScConfigIdx)
+{
+    bool result = false;
+    if (serverScConfigIdx == 10)
+    {
+        scConfigSingleton = NULL;
+        result = true;
+    }
+    return result;
+}
+
+SOPC_SecureChannel_Config* SOPC_ToolkitServer_GetSecureChannelConfig(uint32_t serverScConfigIdx)
+{
+    SOPC_SecureChannel_Config* result = NULL;
+    if (serverScConfigIdx == 10)
+    {
+        result = scConfigSingleton;
+    }
+    return result;
 }
 
 uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
 {
     uint32_t result = 0;
-    if (NULL != epConfig)
+    if (NULL == epConfigSingleton)
     {
-        epConfigIdxMax++;
-        if (SOPC_STATUS_OK == SOPC_IntToolkitConfig_AddConfig(epConfigs, epConfigIdxMax, (void*) epConfig))
-        {
-            result = epConfigIdxMax;
-        }
-        else
-        {
-            epConfigIdxMax--;
-        }
+        result = 2;
+        epConfigSingleton = epConfig;
     }
     return result;
 }
 
 SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
 {
-    return (SOPC_Endpoint_Config*) SOPC_SLinkedList_FindFromId(epConfigs, epConfigIdx);
+    SOPC_Endpoint_Config* result = NULL;
+    if (epConfigIdx == 2)
+    {
+        result = epConfigSingleton;
+    }
+    return result;
 }
 
 SOPC_EncodeableType** SOPC_ToolkitConfig_GetEncodeableTypes()

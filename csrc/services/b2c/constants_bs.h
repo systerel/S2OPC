@@ -71,7 +71,7 @@ typedef void* constants_bs__t_session_token_i;
 #define constants_bs__t_UserId_i_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
 #define constants_bs__t_byte_buffer_i_max (-1)
-#define constants_bs__t_channel_config_idx_i_max SOPC_MAX_SECURE_CONNECTIONS
+#define constants_bs__t_channel_config_idx_i_max (2 * SOPC_MAX_SECURE_CONNECTIONS)
 #define constants_bs__t_channel_i_max SOPC_MAX_SECURE_CONNECTIONS
 #define constants_bs__t_endpoint_config_idx_i_max SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
 #define constants_bs__t_msg_header_i_max (-1)
