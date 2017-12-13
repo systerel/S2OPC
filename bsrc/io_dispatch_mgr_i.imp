@@ -353,11 +353,9 @@ OPERATIONS
     END
     ;
 
-    server_channel_connected_event (endpoint_config_idx, channel_config_idx, channel) =
-    VAR
-        l_bres
-    IN
-        l_bres <-- srv_new_secure_channel (endpoint_config_idx, channel_config_idx, channel)
+    bres <-- server_channel_connected_event (endpoint_config_idx, channel_config_idx, channel) =
+    BEGIN
+        bres <-- srv_new_secure_channel (endpoint_config_idx, channel_config_idx, channel)
     END
     ;
 

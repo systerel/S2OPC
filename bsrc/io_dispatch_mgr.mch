@@ -100,7 +100,7 @@ OPERATIONS
     END
     ;
 
-    server_channel_connected_event (endpoint_config_idx, channel_config_idx, channel) =
+    bres <-- server_channel_connected_event (endpoint_config_idx, channel_config_idx, channel) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
         endpoint_config_idx : t_endpoint_config_idx &
@@ -109,7 +109,7 @@ OPERATIONS
         channel : t_channel_i &
         channel : t_channel
     THEN
-        skip
+        bres :: BOOL
     END
     ;
 

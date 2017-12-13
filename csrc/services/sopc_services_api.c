@@ -81,7 +81,12 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // id ==  endpoint configuration index
         // params = channel configuration index POINTER
         // auxParam == connection Id
-        io_dispatch_mgr__server_channel_connected_event(id, *(uint32_t*) params, auxParam);
+        io_dispatch_mgr__server_channel_connected_event(id, *(uint32_t*) params, auxParam, &bres);
+        if (bres == false)
+        {
+            // TODO: log error: not coherent between B expectations and C code state
+            SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, auxParam, NULL, 0);
+        }
         break;
     case SC_TO_SE_EP_CLOSED:
         if (SOPC_DEBUG_PRINTING != false)
