@@ -54,42 +54,74 @@ git commit -S -m "Add VERSION file" &> /dev/null || exit 1
 echo "Generate C source files"
 ./clean.sh all || exit 1
 ./.pre-build-in-docker.sh ./pre-build.sh || exit 1
+# Format the generated files added to avoid failure on further format verification
+./.check-in-docker.sh ./.format.sh || exit 1
 git add -f address_space_generation/genc csrc/services/bgenc
 git commit -S -m "Add generated source files"
 
-echo "Generate Toolkit binaries (library and tests)"
+# Clean directories in which linux binaries / library are installed
+rm -fr bin_linux install_linux
+
+echo "Generate Toolkit linux shared binaries (library and tests)"
 mkdir -p build || exit 1
 cd build || exit 1
-../.build-in-docker.sh cmake -DCMAKE_INSTALL_PREFIX=. .. || exit 1
+../.build-in-docker.sh cmake -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=../install_linux .. || exit 1
 ../.build-in-docker.sh cmake --build . --target install
 if [[ $? != 0 ]]; then
-    echo "Error: Generation of Toolkit binaries failed";
+    echo "Error: Generation of Toolkit linux shared binaries failed";
     exit 1
 fi
+# Do not keep the binaries generated with shared library
+rm -fr ../bin
 cd ..
 
-echo "Create install directory"
-\rm -fr install || exit 1
-mkdir -p install || exit 1
-cp -r build/lib build/include install/
+echo "Generate Toolkit linux static binaries (library and tests)"
+mkdir -p build || exit 1
+cd build || exit 1
+../.build-in-docker.sh cmake -DBUILD_SHARED_LIBS=false -DCMAKE_INSTALL_PREFIX=../install_linux .. || exit 1
+../.build-in-docker.sh cmake --build . --target install
 if [[ $? != 0 ]]; then
-    echo "Error: Creation of install directory failed";
+    echo "Error: Generation of Toolkit linux static binaries failed";
+    exit 1
+fi
+cp -r ../bin ../bin_linux
+cd ..
+
+
+# Clean directories in which windows binaries / libraries are installed
+rm -fr bin_windows install_windows
+
+echo "Generate Toolkit windows binaries (library and tests)"
+mkdir -p build_toolchain || exit 1
+cd build_toolchain || exit 1
+../.mingwbuild-in-docker.sh cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=../install_windows .. || exit 1
+../.mingwbuild-in-docker.sh cmake --build . --target install
+if [[ $? != 0 ]]; then
+    echo "Error: Generation of Toolkit windows binaries failed";
+    exit 1
+fi
+rm -fr ../bin_windows
+cp -r ../bin ../bin_windows
+cd ..
+
+echo "Check code with clang tools"
+./.check-in-docker.sh ./.check-code.sh
+if [[ $? != 0 ]]; then
+    echo "Error: Checking code with clang tools";
     exit 1
 fi
 
 echo "Add Toolkit binaries"
-git add -f bin/ &>/dev/null || exit 1
-git add -f install/ &>/dev/null || exit 1
+git add -f bin_linux bin_windows &>/dev/null || exit 1
+git add -f install_linux install_windows &>/dev/null || exit 1
 ./clean.sh || exit 1
-git co bin || exit 1
-git co install || exit 1
 echo "Generate documentation with doxygen"
 doxygen doxygen/ingopcs-toolkit.doxyfile &> /dev/null || exit 1
 echo "Add documentation in delivery branch"
 git add -f apidoc &> /dev/null || exit 1
 git commit -S -m "Add doxygen documentation for version $DELIVERY_NAME" &> /dev/null || exit 1
 echo "Remove delivery script, docker scripts, .gitignore file and commit"
-git rm -f delivery.sh .gitignore .*.sh &> /dev/null || exit 1
+git rm -f delivery.sh .gitignore .*.sh acceptances_tests &> /dev/null || exit 1
 git commit -S -m "Remove delivery script, docker scripts and .gitignore file" &> /dev/null || exit 1
 echo "Generation of archive of version $DELIVERY_NAME"
 git archive --prefix=$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME || exit 1
