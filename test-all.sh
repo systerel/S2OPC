@@ -59,3 +59,13 @@ popd
 wait
 mv validation/validation.tap bin/
 
+## run validation tests
+pushd bin
+./toolkit_test_server 20000&
+popd
+pushd validation
+./client_sc_renew.py&
+popd
+wait
+mv validation/sc_renew.tap bin/
+

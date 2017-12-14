@@ -27,6 +27,7 @@ from attribute_write_values import attribute_write_values_tests, attribute_write
 from safety_secure_channels import secure_channels_connect
 from discovery_get_endpoints import discovery_get_endpoints_tests
 from view_basic import browse_tests
+from sc_renew import secure_channel_renew
 from common import sUri
 from tap_logger import TapLogger
 from opcua.crypto import security_policies
@@ -39,9 +40,8 @@ if __name__=='__main__':
     client = Client(sUri)
     logger = TapLogger("validation.tap")
     headerString = "******************* Beginning {0} tests with one connexion *********************"
-
-    #for sp in [SecurityPolicy, security_policies.SecurityPolicyBasic256]:
-    for sp in [SecurityPolicy]:
+    for sp in [SecurityPolicy, security_policies.SecurityPolicyBasic256]:
+    #for sp in [SecurityPolicy]:
         logger.begin_section("security policy {0}".format(re.split("#",sp.URI)[-1]))
         try:
             # secure channel connection
@@ -53,6 +53,12 @@ if __name__=='__main__':
             # Read tests
             print(headerString.format("Read"))
             attribute_read_tests(client, logger)
+
+            # Force renew secure channel (nominal case)
+            print(headerString.format("Renew SC"))
+            client.open_secure_channel(renew=True)
+            logger.add_test('OPN renew test - renewed secure channel', True)
+            print("Secure channel renewed")
 
             # write tests
             print(headerString.format("Write"))
@@ -87,4 +93,3 @@ if __name__=='__main__':
             print('Disconnected')
 
     logger.finalize_report()
-

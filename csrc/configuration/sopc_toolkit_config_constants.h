@@ -80,7 +80,7 @@
 
 /* Minimum value for OPN requestedLifetime parameter */
 #ifndef SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME
-#define SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME 10000
+#define SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME 1000
 #endif
 
 /** @brief Maximum number of requests sent by client pending */
