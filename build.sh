@@ -2,7 +2,9 @@
 # Script to build the INGOPCS project:
 #
 # Options:
-# - Variable CROSS_COMPILE_MINGW set activate mingw cross compilation
+# - Variable CMAKE_TOOLCHAIN_FILE set with filename of toolchain config in root directory
+# - Variable BUILD_SHARED_LIBS set to compile the shared library instead of static one
+# - Variable CMAKE_INSTALL_PREFIX set to configure the install prefix of cmake
 #
 # Steps:
 # - configure build with cmake
@@ -13,8 +15,8 @@ CURDIR=`pwd`
 EXEC_DIR=bin
 CERT_DIR=tests/data/cert
 
-if [[ $CROSS_COMPILE_MINGW ]]; then
-    BUILD_DIR=build_mingw
+if [[ $CMAKE_TOOLCHAIN_FILE ]]; then
+    BUILD_DIR=build_toolchain
 else
     BUILD_DIR=build
 fi
@@ -30,11 +32,16 @@ else
     mkdir -p $BUILD_DIR || exit 1
     cd $BUILD_DIR  > /dev/null || exit 1
     echo "- Run CMake" | tee -a $CURDIR/build.log
-    if [[ $CROSS_COMPILE_MINGW ]]; then
-        cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain-mingw32-w64.cmake .. >> $CURDIR/build.log
-    else
-        cmake .. >> $CURDIR/build.log
+    if [[ $CMAKE_TOOLCHAIN_FILE ]]; then
+        CMAKE_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../$CMAKE_TOOLCHAIN_FILE"
     fi
+    if [[ $BUILD_SHARED_LIBS ]]; then
+        CMAKE_OPTIONS="$CMAKE_OPTIONS -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS"
+    fi
+    if [[ $CMAKE_INSTALL_PREFIX ]]; then
+        CMAKE_OPTIONS="$CMAKE_OPTIONS -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX"
+    fi
+    cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
     cd - > /dev/null || exit 1
 fi
 if [[ $? != 0 ]]; then
@@ -51,7 +58,7 @@ else
     echo "Built library and tests with success" | tee -a $CURDIR/build.log
 fi
 
-if [[ $CROSS_COMPILE_MINGW ]]; then
+if [[ $CMAKE_TOOLCHAIN_FILE ]]; then
     echo "- Do not run make test when cross compiling"
 else
     echo "- Run make test" | tee -a $CURDIR/build.log
