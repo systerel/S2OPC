@@ -409,6 +409,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                 // Check thumbprint matches current app certificate thumbprint
                 *receiverCertificatePresence = true;
                 SOPC_ByteString curAppCertThumbprint;
+                SOPC_ByteString_Initialize(&curAppCertThumbprint);
                 uint32_t thumbprintLength = 0;
                 int32_t runningAppCertComparison = 0;
 
