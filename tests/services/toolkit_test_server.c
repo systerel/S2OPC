@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "io_dispatch_mgr.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_pki_stack.h"
@@ -30,8 +29,6 @@
 
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
-
-#include "wrap_read.h"
 
 #include "sopc_addspace.h"
 
@@ -60,7 +57,7 @@ void Test_ComEvent_FctServer(SOPC_App_Com_Event event, void* param, SOPC_ReturnS
 int main(int argc, char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    constants__t_endpoint_config_idx_i epConfigIdx = constants__c_endpoint_config_idx_indet;
+    uint32_t epConfigIdx = 0;
     SOPC_Endpoint_Config epConfig;
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
@@ -201,7 +198,7 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);
-        if (epConfigIdx != constants__c_endpoint_config_idx_indet)
+        if (epConfigIdx != 0)
         {
             status = SOPC_Toolkit_Configured();
         }

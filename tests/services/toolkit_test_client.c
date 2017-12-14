@@ -19,17 +19,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "b2c.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_pki_stack.h"
 
-#include "constants_bs.h"
-#include "io_dispatch_mgr.h"
-#include "toolkit_header_init.h"
-
-#include "address_space_impl.h"
 #include "test_results.h"
-#include "util_b2c.h"
 
 #include "opcua_statuscodes.h"
 #include "sopc_time.h"
@@ -48,7 +41,7 @@
 
 static bool sessionActivated = false;
 static bool sessionClosed = false;
-static constants__t_session_i session = constants__c_session_indet;
+static int32_t session = 0;
 
 static uint32_t cptReadResps = 0;
 
@@ -86,7 +79,7 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, void* param, SOPC_StatusC
     else if (event == SE_ACTIVATED_SESSION)
     {
         sessionActivated = true;
-        session = *(constants__t_session_i*) param;
+        session = *(int32_t*) param;
     }
     else if (event == SE_SESSION_ACTIVATION_FAILURE || event == SE_CLOSED_SESSION)
     {
@@ -130,7 +123,7 @@ int main(void)
     SOPC_Certificate* crt_ca = NULL;
     SOPC_AsymmetricKey* priv_cli = NULL;
 
-    constants__t_channel_config_idx_i channel_config_idx = constants__c_channel_config_idx_indet;
+    uint32_t channel_config_idx = 0;
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -250,7 +243,7 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
-        if (channel_config_idx != constants__c_channel_config_idx_indet)
+        if (channel_config_idx != 0)
         {
             status = SOPC_Toolkit_Configured();
         }
@@ -389,7 +382,7 @@ int main(void)
     tlibw_free_WriteRequest((OpcUa_WriteRequest**) &pWriteReq);
 
     /* Close the session */
-    if (constants__c_session_indet != session)
+    if (0 != session)
     {
         SOPC_ToolkitClient_AsyncCloseSession(session);
     }

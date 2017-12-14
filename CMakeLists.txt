@@ -68,7 +68,8 @@ file(GLOB INGOPCS_INCLUDE_FILES
     "csrc/helpers/*.h"
     "csrc/opcua_types/*.h"
     "csrc/crypto/*.h"
-    "csrc/helpers_platform_dep/*.h")
+    "csrc/helpers_platform_dep/*.h"
+    "csrc/services/b2c/*.h")
 
 set(INGOPCS_PUBLIC_INCLUDES
     "csrc/api_toolkit"
@@ -77,6 +78,7 @@ set(INGOPCS_PUBLIC_INCLUDES
     "csrc/opcua_types"
     "csrc/crypto"
     "csrc/helpers_platform_dep"
+    "csrc/services/b2c"
 )
 
 set(INGOPCS_PRIVATE_INCLUDES
@@ -85,7 +87,6 @@ set(INGOPCS_PRIVATE_INCLUDES
     "csrc/services"
     "csrc/crypto/mbedtls"
     "csrc/helpers_platform_dep/${PLATFORM_DIR}"
-    "csrc/services/b2c"
     "csrc/services/bgenc"
 ) 
 target_include_directories(ingopcs BEFORE
