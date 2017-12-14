@@ -4,7 +4,7 @@
 #
 set -e
 
-DOCKER_IMAGE=0f82477cd7ac
+DOCKER_IMAGE=f7d86fcc79d5
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
     /etc/scripts/run-in-docker $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true "$@"
