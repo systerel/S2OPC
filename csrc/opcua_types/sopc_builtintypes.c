@@ -757,26 +757,33 @@ SOPC_ReturnStatus SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, SOPC_Byte
 SOPC_ReturnStatus SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteString* src)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (dest != NULL && NULL == dest->Data && src != NULL && src->Length > 0)
+    if (dest != NULL && NULL == dest->Data && src != NULL)
     {
-        status = SOPC_STATUS_OK;
         dest->Length = src->Length;
-        if (dest->Length > 0 && (uint64_t) dest->Length * 1 <= SIZE_MAX)
+        if ((uint64_t) dest->Length * 1 <= SIZE_MAX)
         {
-            dest->Data = malloc(sizeof(SOPC_Byte) * (size_t) dest->Length);
+            status = SOPC_STATUS_OK;
+            if (dest->Length > 0)
+            {
+                dest->Data = malloc(sizeof(SOPC_Byte) * (size_t) dest->Length);
+                if (dest->Data != NULL)
+                {
+                    // No need of secure copy, both have same size here
+                    memcpy(dest->Data, src->Data, dest->Length);
+                }
+                else
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+            else
+            {
+                dest->Data = NULL;
+            }
         }
         else
         {
             dest->Data = NULL;
-        }
-        if (dest->Data != NULL)
-        {
-            // No need of secure copy, both have same size here
-            memcpy(dest->Data, src->Data, dest->Length);
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
         }
     }
     return status;
@@ -921,22 +928,29 @@ SOPC_ReturnStatus SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src)
     if (dest != NULL && NULL == dest->Data && src != NULL)
     {
         // Keep null terminator for C string compatibility
-        status = SOPC_STATUS_OK;
         dest->Length = src->Length;
-        if (dest->Length > 0 && (uint64_t) dest->Length * sizeof(SOPC_Byte) <= SIZE_MAX)
+        if ((uint64_t) dest->Length * sizeof(SOPC_Byte) <= SIZE_MAX)
         {
-            dest->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte) * (size_t) dest->Length + 1);
-            if (dest->Data != NULL)
+            status = SOPC_STATUS_OK;
+            if (dest->Length > 0)
             {
-                // No need of secure copy, both have same size here
-                memcpy(dest->Data, src->Data, dest->Length);
-                dest->Data[dest->Length] = '\0';
-                // Since it is a copy, be sure to clear bytes on clear
-                dest->DoNotClear = false;
+                dest->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte) * (size_t) dest->Length + 1);
+                if (dest->Data != NULL)
+                {
+                    // No need of secure copy, both have same size here
+                    memcpy(dest->Data, src->Data, dest->Length);
+                    dest->Data[dest->Length] = '\0';
+                    // Since it is a copy, be sure to clear bytes on clear
+                    dest->DoNotClear = false;
+                }
+                else
+                {
+                    status = SOPC_STATUS_NOK;
+                }
             }
             else
             {
-                status = SOPC_STATUS_NOK;
+                dest->Data = NULL;
             }
         }
     }
