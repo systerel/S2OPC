@@ -111,50 +111,45 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
 
 SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL != pAppFct)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (NULL == pAppFct)
     {
-        status = SOPC_STATUS_INVALID_STATE;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status && false != tConfig.initDone)
+    {
         appFct = pAppFct;
-        if (false == tConfig.initDone)
+
+        Mutex_Initialization(&tConfig.mut);
+        Mutex_Lock(&tConfig.mut);
+        tConfig.initDone = true;
+
+        SOPC_Helper_EndiannessCfg_Initialize();
+        SOPC_Namespace_Initialize(tConfig.nsTable);
+
+        if (SIZE_MAX / SOPC_MAX_SECURE_CONNECTIONS < sizeof(SOPC_SecureChannel_Config*) ||
+            SIZE_MAX / SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS < sizeof(SOPC_Endpoint_Config*))
         {
             status = SOPC_STATUS_NOK;
-            Mutex_Initialization(&tConfig.mut);
-            Mutex_Lock(&tConfig.mut);
-            tConfig.initDone = true;
-
-            SOPC_Helper_EndiannessCfg_Initialize();
-            SOPC_Namespace_Initialize(tConfig.nsTable);
-
-            if (SIZE_MAX / SOPC_MAX_SECURE_CONNECTIONS >= sizeof(SOPC_SecureChannel_Config*))
-            {
-                memset(tConfig.scConfigs, 0, SOPC_MAX_SECURE_CONNECTIONS * sizeof(SOPC_SecureChannel_Config*));
-                memset(tConfig.serverScConfigs, 0, SOPC_MAX_SECURE_CONNECTIONS * sizeof(SOPC_SecureChannel_Config*));
-                status = SOPC_STATUS_OK;
-            }
-
-            if (SOPC_STATUS_OK == status &&
-                SIZE_MAX / SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS >= sizeof(SOPC_Endpoint_Config*))
-            {
-                memset(tConfig.epConfigs, 0,
-                       SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS * sizeof(SOPC_Endpoint_Config*));
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
-
-            if (SOPC_STATUS_OK == status)
-            {
-                SOPC_EventTimer_Initialize();
-                SOPC_Sockets_Initialize();
-                SOPC_SecureChannels_Initialize();
-                SOPC_Services_Initialize();
-            }
-
-            Mutex_Unlock(&tConfig.mut);
         }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            memset(tConfig.scConfigs, 0, SOPC_MAX_SECURE_CONNECTIONS * sizeof(SOPC_SecureChannel_Config*));
+            memset(tConfig.serverScConfigs, 0, SOPC_MAX_SECURE_CONNECTIONS * sizeof(SOPC_SecureChannel_Config*));
+            memset(tConfig.epConfigs, 0,
+                   SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS * sizeof(SOPC_Endpoint_Config*));
+            SOPC_EventTimer_Initialize();
+            SOPC_Sockets_Initialize();
+            SOPC_SecureChannels_Initialize();
+            SOPC_Services_Initialize();
+        }
+
+        Mutex_Unlock(&tConfig.mut);
     }
+
     return status;
 }
 
