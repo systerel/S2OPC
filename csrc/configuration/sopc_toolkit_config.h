@@ -42,7 +42,7 @@
  *  \param pAppFct  Pointer to applicative code function in charge of toolkit communication events
  *
  *  \return SOPC_STATUS_OK if initialization succeeded,
- *  SOPC_STATUS_INVALID_PARAMETER if \p pAppFct == NULL or
+ *  SOPC_STATUS_INVALID_PARAMETERS if \p pAppFct == NULL or
  *  SOPC_STATUS_INVALID_STATE if toolkit already initialized and
  *  SOPC_STATUS_NOK otherwise
  */

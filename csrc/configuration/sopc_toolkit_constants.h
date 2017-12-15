@@ -23,9 +23,6 @@
 /* Check configured constants values */
 #include "sopc_config_constants_check.h"
 
-/* Check IEEE-754 compliance */
-#include "sopc_ieee_check.h"
-
 /** @brief Version of the toolkit */
 #define SOPC_TOOLKIT_VERSION_MAJOR 0
 #define SOPC_TOOLKIT_VERSION_MEDIUM 2

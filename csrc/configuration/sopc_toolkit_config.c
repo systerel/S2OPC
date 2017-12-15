@@ -37,6 +37,9 @@
 #include "address_space_impl.h"
 #include "util_b2c.h"
 
+/* Check IEEE-754 compliance */
+#include "sopc_ieee_check.h"
+
 static struct
 {
     uint8_t initDone;
@@ -139,8 +142,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         {
             memset(tConfig.scConfigs, 0, SOPC_MAX_SECURE_CONNECTIONS * sizeof(SOPC_SecureChannel_Config*));
             memset(tConfig.serverScConfigs, 0, SOPC_MAX_SECURE_CONNECTIONS * sizeof(SOPC_SecureChannel_Config*));
-            memset(tConfig.epConfigs, 0,
-                   SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS * sizeof(SOPC_Endpoint_Config*));
+            memset(tConfig.epConfigs, 0, SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS * sizeof(SOPC_Endpoint_Config*));
             SOPC_EventTimer_Initialize();
             SOPC_Sockets_Initialize();
             SOPC_SecureChannels_Initialize();

@@ -17,7 +17,7 @@
 
 /** \file
  *
- * \brief Imports <float.h> and verifies the defined macros to be IEEE-754 compliant.
+ * \brief Include this file and call SOPC_IEEE_Check to assert IEEE-754 compliance.
  *
  */
 
@@ -25,10 +25,17 @@
 #define SOPC_IEEE_CHECK_H_
 
 #include <float.h>
+#include <stdbool.h>
 
-#if FLT_RADIX != 2
-#error "Compiler floating point support is not IEEE-754 compliant"
-#endif
+/**
+ * \brief Checks the floating-point compliance to IEEE-754 standard.
+ *
+ * Most of the verifications are done at compile time with #if statements,
+ * but some of them must be done at execution time.
+ *
+ * \return  true if floating-point arithmetics are compliant to IEEE-754.
+ */
+bool SOPC_IEEE_Check(void);
 
 #ifndef __clang__ // Clang uses __builtin_flt_rounds() function
 #if FLT_ROUNDS != 1
