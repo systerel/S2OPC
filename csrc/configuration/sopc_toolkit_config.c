@@ -121,7 +121,17 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    if (false == SOPC_IEEE_Check())
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
     if (SOPC_STATUS_OK == status && false != tConfig.initDone)
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+
+    if (SOPC_STATUS_OK == status && false == tConfig.initDone)
     {
         appFct = pAppFct;
 
