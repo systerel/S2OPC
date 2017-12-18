@@ -59,8 +59,24 @@ echo "Generate C source files"
 git add -f address_space_generation/genc csrc/services/bgenc
 git commit -S -m "Add generated source files"
 
+# Clean directories in which windows binaries / libraries are installed
+rm -fr bin_windows install_windows
+
+echo "Generate Toolkit windows binaries (library and tests)"
+mkdir -p build_toolchain || exit 1
+cd build_toolchain || exit 1
+../.mingwbuild-in-docker.sh cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=../install_windows .. || exit 1
+../.mingwbuild-in-docker.sh cmake --build . --target install
+if [[ $? != 0 ]]; then
+    echo "Error: Generation of Toolkit windows binaries failed";
+    exit 1
+fi
+rm -fr ../bin_windows
+cp -r ../bin ../bin_windows
+cd ..
+
 # Clean directories in which linux binaries / library are installed
-rm -fr bin_linux install_linux
+rm -fr bin install_linux
 
 echo "Generate Toolkit linux shared binaries (library and tests)"
 mkdir -p build || exit 1
@@ -84,24 +100,6 @@ if [[ $? != 0 ]]; then
     echo "Error: Generation of Toolkit linux static binaries failed";
     exit 1
 fi
-cp -r ../bin ../bin_linux
-cd ..
-
-
-# Clean directories in which windows binaries / libraries are installed
-rm -fr bin_windows install_windows
-
-echo "Generate Toolkit windows binaries (library and tests)"
-mkdir -p build_toolchain || exit 1
-cd build_toolchain || exit 1
-../.mingwbuild-in-docker.sh cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=../install_windows .. || exit 1
-../.mingwbuild-in-docker.sh cmake --build . --target install
-if [[ $? != 0 ]]; then
-    echo "Error: Generation of Toolkit windows binaries failed";
-    exit 1
-fi
-rm -fr ../bin_windows
-cp -r ../bin ../bin_windows
 cd ..
 
 echo "Check code with clang tools"
@@ -112,7 +110,7 @@ if [[ $? != 0 ]]; then
 fi
 
 echo "Add Toolkit binaries"
-git add -f bin_linux bin_windows &>/dev/null || exit 1
+git add -f bin bin_windows &>/dev/null || exit 1
 git add -f install_linux install_windows &>/dev/null || exit 1
 ./clean.sh || exit 1
 echo "Generate documentation with doxygen"
