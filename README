@@ -10,7 +10,7 @@ This project contains the following elements:
 - address_space_generation: address space XML description to C source file generator to configure server Toolkit
 - address_space_generation/genc: already generated C source files for the Toolkit tests
 - apidoc: generated HTML documentation of the C source code with doxygen
-- bin_linux: built binaries tests of the toolkit for Linux platform (64 bits)
+- bin: built binaries tests of the toolkit for Linux platform (64 bits)
 - bin_windows: built binaries tests and DLL of the toolkit for Windows platform (32 bits)
 - bsrc: B model of the Toolkit used to generate C source files for services management layer
 - build: compiled files during CMake and make execution
