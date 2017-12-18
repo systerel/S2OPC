@@ -540,7 +540,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:SByte>-128</uax:SByte>
+      <uax:SByte>-127</uax:SByte>
     </Value>
   </UAVariable>
   <UAVariable BrowseName="0:Byte" DataType="Byte" NodeId="i=1008" ParentNodeId="i=1000">
@@ -562,7 +562,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:Int16>-32768</uax:Int16>
+      <uax:Int16>-32767</uax:Int16>
     </Value>
   </UAVariable>
   <UAVariable BrowseName="0:UInt16" DataType="UInt16" NodeId="i=1010" ParentNodeId="i=1000">
@@ -584,7 +584,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:Int32>-2147483648</uax:Int32>
+      <uax:Int32>-2147483647</uax:Int32>
     </Value>
   </UAVariable>
   <UAVariable BrowseName="0:UInt64" DataType="UInt64" NodeId="i=1012" ParentNodeId="i=1000">
