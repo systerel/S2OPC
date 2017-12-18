@@ -10,7 +10,8 @@ This project contains the following elements:
 - address_space_generation: address space XML description to C source file generator to configure server Toolkit
 - address_space_generation/genc: already generated C source files for the Toolkit tests
 - apidoc: generated HTML documentation of the C source code with doxygen
-- bin: built binaries tests of the toolkit
+- bin_linux: built binaries tests of the toolkit for Linux platform (64 bits)
+- bin_windows: built binaries tests and DLL of the toolkit for Windows platform (32 bits)
 - bsrc: B model of the Toolkit used to generate C source files for services management layer
 - build: compiled files during CMake and make execution
 - csrc: root directory for C source files of the INGOPCS project OPC UA Toolkit
@@ -27,6 +28,8 @@ This project contains the following elements:
 - csrc/bgenc: generated C source files from B model
 - csrc/sockets: sockets management layer base on I/O event dispatcher
 - doxygen: doxygen configuration file for HTML documentation generation
+- installation_linux: library (static and shared) and headers to install the toolkit as a library
+- installation_windows: shared library and headers to install the toolkit as a library
 - tests: tests source code and data for the Toolkit library
 - validation: client validation tool using FreeOpcUa python library
 
@@ -60,11 +63,12 @@ agpl-3.0.txt
 Current status:
 - Security policies available: None, Basic256 and Basic256Sha256
 - Security mode available: None, Sign and SignAndEncrypt
-- Server instantiation: several endpoint descriptions, 1 address space, 1 secure channel instance and 1 session instance
-- Server services: getEndpoints, read, write and simplified browse (no continuation point)
-- Client instantiation: 1 secure channel instance and 1 session instance
+- Server instantiation: several endpoint descriptions, 1 address space, multiple secure channel instances and session instances
+- Server services: getEndpoints, read (no index), write (no index) and simplified browse (no continuation point)
+- Client instantiation: multiple secure channel instances and session instances
 - Client services requests: read, write and browse
-- Address space with following attributes: NodeId, NodeClass, BrowseName, Value (with single value Variants), References
+- Address space with following attributes: NodeId, NodeClass, BrowseName, Value (with single value Variants), 
+  References, Access Level (R/W default value only)
 
 INGOPCS OPC UA Toolkit features
 ===============================
@@ -76,7 +80,7 @@ INGOPCS OPC UA Toolkit features
     > http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256.
 
 - Client side (e.g.: tests/services/toolkit_test_client.c):
-  * 1 Secure Channel configuration on Toolkit initialization
+  * Secure Channel configurations on Toolkit initialization
   * Activate a session with an anonymous user
   * Send a read request
   * Send a write request
@@ -85,8 +89,8 @@ INGOPCS OPC UA Toolkit features
 - Server side (e.g.: tests/services/toolkit_test_server.c):
  * Endpoint descriptions configuration on Toolkit initialization
  * 1 address space configuration on Toolkit intialization
- * Checks and acceptes 1 instance of secure channel
- * Checks and accepts activation of 1 session with an anonymous user
+ * Checks and accepts several instances of secure channel
+ * Checks and accepts activation of several sessions with an anonymous user
  * Accepts to treat one service request at the same time:
    > Read service
    > Write service
@@ -101,7 +105,7 @@ Prerequesites (validation based on FreeOpcUa python client only):
 
 Run all tests:
 - To run the INGOPCS OPC UA Toolkit tests: execute the test-all.sh script: "./test-all.sh"
-- Tests results are provided in bin/*.tap files and shall indicate "Passed" status for each test
+- Tests results are provided in bin/*.tap files and shall indicate "ok" status for each test
 
 Run a particular test (bin/ directory):
 - Toolkit helpers unit tests: execute ./check_helpers
@@ -114,4 +118,8 @@ Run a particular test (bin/ directory):
 - Toolkit server and read / write / browse service validation:
   execute ./toolkit_test_server in bin/ directory and python3 client.py in validation/ directory
   (depends on FreeOpcUa python client available on github)
+- Toolkit server and secure channel security token renewal validation:
+  execute ./toolkit_test_server in bin/ directory and python3
+  client_sc_renew.py in validation/ directory (depends on FreeOpcUa
+  python client available on github)
 
