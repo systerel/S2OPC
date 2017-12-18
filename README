@@ -24,8 +24,8 @@ This project contains the following elements:
 - csrc/opcua_types: opcua types implementation, encoder and helpers
 - csrc/secure_channels: secure channels services management layer based on I/O event dispatcher
 - csrc/services: services (except secure channels) management layer based on I/O event dispatcher
-- csrc/b2c: adaptation layer between generated C source files from B model and C source code
-- csrc/bgenc: generated C source files from B model
+- csrc/services/b2c: adaptation layer between generated C source files from B model and C source code
+- csrc/services/bgenc: generated C source files from B model
 - csrc/sockets: sockets management layer base on I/O event dispatcher
 - doxygen: doxygen configuration file for HTML documentation generation
 - installation_linux: library (static and shared) and headers to install the toolkit as a library
@@ -67,7 +67,7 @@ Current status:
 - Server services: getEndpoints, read (no index), write (no index) and simplified browse (no continuation point)
 - Client instantiation: multiple secure channel instances and session instances
 - Client services requests: read, write and browse
-- Address space with following attributes: NodeId, NodeClass, BrowseName, Value (with single value Variants), 
+- Address space with following attributes: NodeId, NodeClass, BrowseName, Value (with single value Variants),
   References, Access Level (R/W default value only)
 
 INGOPCS OPC UA Toolkit features
