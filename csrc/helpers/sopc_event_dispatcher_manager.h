@@ -15,6 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ *  \file
+ *
+ *  \brief An event dispatcher manager. Once started it runs the provided treatment function on event reception.
+ */
+
 #ifndef SOPC_EVENT_DISPATCHER_MANAGER_H_
 #define SOPC_EVENT_DISPATCHER_MANAGER_H_
 

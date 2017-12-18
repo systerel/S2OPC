@@ -15,6 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ *  \file
+ *
+ *  \brief A platform independent API to use sockets
+ */
+
 #ifndef SOPC_RAW_SOCKETS_H_
 #define SOPC_RAW_SOCKETS_H_
 

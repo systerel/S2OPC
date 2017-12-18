@@ -1,12 +1,3 @@
-/** \file sopc_key_manager.h
- *
- * The KeyManager provides an API for Asymmetric Key Management such as loading signed public keys (Certificate)
- * and the corresponding private key.
- *
- * KeyManager is different than PKIProvider, which only handles signed public key validation and storage.
- *
- * KeyManager API is context-less. The KeyManager is generic, and is not linked to the current security policy.
- */
 /*
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -22,6 +13,16 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** \file sopc_key_manager.h
+ *
+ * \brief The KeyManager provides an API for Asymmetric Key Management such as loading signed public keys (Certificate)
+ * and the corresponding private key.
+ *
+ * KeyManager is different than PKIProvider, which only handles signed public key validation and storage.
+ *
+ * KeyManager API is context-less. The KeyManager is generic, and is not linked to the current security policy.
  */
 
 #ifndef SOPC_KEY_MANAGER_H_

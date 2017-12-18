@@ -37,7 +37,7 @@ typedef uint32_t SOPC_StatusCode;
 #define SOPC_GoodStatusOppositeMask 0xC0000000
 
 /**
- * Masks to check status for Uncertain/Bad/Reserved status code: <X> status <=> (status & SOPC_<X>StatusMask) != 0
+ * Masks to check status for Uncertain/Bad/Reserved status code: X status <=> (status & SOPC_<X>StatusMask) != 0
  */
 #define SOPC_UncertainStatusMask 0x40000000
 #define SOPC_BadStatusMask 0x80000000

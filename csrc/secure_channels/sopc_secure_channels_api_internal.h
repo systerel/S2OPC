@@ -1,10 +1,4 @@
 /*
- *  \file sopc_secure_channels_api.h
- *
- *  \brief Event oriented API of the Secure Channle layer.
- *         This module is in charge of the event dispatcher thread management.
- */
-/*
  *  Copyright (C) 2017 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify

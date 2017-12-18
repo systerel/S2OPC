@@ -1,8 +1,3 @@
-/**
- * \file sopc_singly_linked_list.h
- *
- *  \brief A singly linked list based on elements with unique identifiers and dynamically allocated.
- */
 /*
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -18,6 +13,12 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * \file sopc_singly_linked_list.h
+ *
+ *  \brief A singly linked list based on elements with unique identifiers and dynamically allocated.
  */
 
 #ifndef SOPC_SINGLY_LINKED_LIST_H_
@@ -76,7 +77,7 @@ void* SOPC_SLinkedList_Append(SOPC_SLinkedList* list, uint32_t id, void* value);
  * \param list      Pointer to the linked list
  * \param id        Identifier of the given value
  * \param value     Value to insert in the sorted list
- * \param pFn       Compare function pointer returning a int8_t equals to -1 if left value < right value, 0 if left
+ * \param pCompFn   Compare function pointer returning a int8_t equals to -1 if left value < right value, 0 if left
  * value == right value and 1 if left value > right value
  *
  *  \return         Pointer to the value insterted, provided as parameter, if succeeded, NULL otherwise

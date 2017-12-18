@@ -1,9 +1,3 @@
-/** \file
- *
- * \brief Defines the cryptographic profiles: constants and struct.
- *
- * \note The constants defined in this file are mainly based on the test specification (Part 7).
- */
 /*
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -19,6 +13,13 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** \file
+ *
+ * \brief Defines the cryptographic profiles: constants and struct.
+ *
+ * \note The constants defined in this file are mainly based on the test specification (Part 7).
  */
 
 #ifndef SOPC_CRYPTO_PROFILES_H_

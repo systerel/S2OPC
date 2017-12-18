@@ -15,6 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ *  \file
+ *
+ *  \brief A platform independent API to use threads
+ */
+
 #ifndef SOPC_THREADS_H_
 #define SOPC_THREADS_H_
 

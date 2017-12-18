@@ -1,11 +1,3 @@
-/**
- *  \file sopc_secret_buffer.h
- *  \brief SecretBuffer (mangled key) and ExposedBuffer (contiguous deciphered buffered) APIs.
- *
- *  Sensitive information should be stored as SecretBuffer (e.g. crypto keys, nonces, initialisation vectors).
- *  The current implementation of the SecretBuffer is a contiguous buffer, but that could be changed without
- *  impact on the API.
- */
 /*
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -21,6 +13,15 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ *  \file sopc_secret_buffer.h
+ *  \brief SecretBuffer (mangled key) and ExposedBuffer (contiguous deciphered buffered) APIs.
+ *
+ *  Sensitive information should be stored as SecretBuffer (e.g. crypto keys, nonces, initialisation vectors).
+ *  The current implementation of the SecretBuffer is a contiguous buffer, but that could be changed without
+ *  impact on the API.
  */
 
 #ifndef SOPC_SECRET_BUFFER_H_

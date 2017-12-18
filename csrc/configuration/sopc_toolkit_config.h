@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
+/**
  * \file sopc_toolkit_config.h
  *
  * \brief This module shall be used to initialize, configure and clear/terminate the toolkit execution.

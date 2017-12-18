@@ -1,8 +1,3 @@
-/**
- *  \file sopc_buffer.h
- *
- *  \brief A buffer of bytes with a maximum size, length and position.
- */
 /*
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -18,6 +13,12 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ *  \file sopc_buffer.h
+ *
+ *  \brief A buffer of bytes with a maximum size, length and position.
  */
 
 #ifndef SOPC_BUFFER_H_

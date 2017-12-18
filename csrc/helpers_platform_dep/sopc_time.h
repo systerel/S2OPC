@@ -1,8 +1,3 @@
-/**
- *  \file sopc_time.h
- *
- *  \brief Tools for time management
- */
 /*
  *  Copyright (C) 2017 Systerel and others.
  *
@@ -18,6 +13,12 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ *  \file sopc_time.h
+ *
+ *  \brief Tools for time management
  */
 
 #ifndef SOPC_TIME_H_

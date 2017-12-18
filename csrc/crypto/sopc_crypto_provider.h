@@ -1,8 +1,3 @@
-/** \file sopc_crypto_provider.h
- *
- * \brief   Defines the cryptographic API. This API mainly relies on the CryptoProvider, which is composed of
- *          lib-specific data alongside a read-only CryptoProfile.
- */
 /*
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -18,6 +13,12 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** \file sopc_crypto_provider.h
+ *
+ * \brief   Defines the cryptographic API. This API mainly relies on the CryptoProvider, which is composed of
+ *          lib-specific data alongside a read-only CryptoProfile.
  */
 
 #ifndef SOPC_CRYPTO_PROVIDER_H_

@@ -30,7 +30,7 @@
 /**
  * \brief Checks the floating-point compliance to IEEE-754 standard.
  *
- * Most of the verifications are done at compile time with #if statements,
+ * Most of the verifications are done at compile time with \#if statements,
  * but some of them must be done at execution time.
  *
  * \return  true if floating-point arithmetics are compliant to IEEE-754.

@@ -1,17 +1,3 @@
-/** \file sopc_pki.h
- *
- * Defines the common interface that a PKI should provide. This is a minimal interface, as the main
- * API for certificate and key manipulation is provided by KeyManager.
- *
- * The stack will not provide a full-blown configurable PKI.
- * The stack provides only a minimal, always safe validating PKI.
- *
- * The stack will not provide any advanced certificate storage.
- * You can use "user-specific" handles in the PKIProvider struct to implement more options.
- *
- * The pFnValidateCertificate function should not be called directly, but you should call
- * CryptoProvider_Certificate_Validate() instead.
- */
 /*
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -27,6 +13,21 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** \file sopc_pki.h
+ *
+ * \brief Defines the common interface that a PKI should provide. This is a minimal interface, as the main
+ * API for certificate and key manipulation is provided by KeyManager.
+ *
+ * The stack will not provide a full-blown configurable PKI.
+ * The stack provides only a minimal, always safe validating PKI.
+ *
+ * The stack will not provide any advanced certificate storage.
+ * You can use "user-specific" handles in the PKIProvider struct to implement more options.
+ *
+ * The pFnValidateCertificate function should not be called directly, but you should call
+ * CryptoProvider_Certificate_Validate() instead.
  */
 
 #ifndef SOPC_PKI_H_

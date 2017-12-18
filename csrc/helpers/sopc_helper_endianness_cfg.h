@@ -15,6 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ *  \file
+ *
+ *  \brief Evaluates and records the endianness configuration of the current machine.
+ */
+
 #ifndef SOPC_HELPER_ENDIANNESS_CFG_H_
 #define SOPC_HELPER_ENDIANNESS_CFG_H_
 
@@ -51,7 +57,7 @@ SOPC_Endianness SOPC_Helper_Endianness_GetFloat(void);
 /**
  * \brief   Overrides machine endianness detection for integer operations.
  *
- * \warn    Solely for tests.
+ * \warning    Solely for tests.
  *
  * \param endianness  The integer endianness.
  */
@@ -60,7 +66,7 @@ void SOPC_Helper_Endianness_SetInteger(SOPC_Endianness endianness);
 /**
  * \brief   Overrides machine endianness detection for float operations.
  *
- * \warn    Solely for tests.
+ * \warning    Solely for tests.
  *
  * \param endianness  The floating-point endianness.
  */

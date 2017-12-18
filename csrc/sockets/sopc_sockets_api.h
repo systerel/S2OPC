@@ -1,10 +1,4 @@
 /*
- *  \file sopc_sockets_api.h
- *
- *  \brief Event oriented API of the Sockets layer.
- *         This module is in charge of the event dispatcher thread management.
- */
-/*
  *  Copyright (C) 2017 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,6 +13,14 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ *  \file sopc_sockets_api.h
+ *
+ *  \brief Event oriented API of the Sockets layer.
+ *
+ *         This module is in charge of the event dispatcher thread management.
  */
 
 #ifndef SOPC_SOCKETS_API_H_

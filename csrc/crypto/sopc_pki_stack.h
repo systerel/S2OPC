@@ -1,10 +1,3 @@
-/** \file sopc_pki_stack.h
- *
- * Defines the minimal PKI implementation provided by the stack.
- *
- * The stack will not to provide a full-blown configurable PKI.
- * The stack provides only a minimal, always safe validating PKI.
- */
 /*
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -20,6 +13,14 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** \file sopc_pki_stack.h
+ *
+ * \brief Defines the minimal PKI implementation provided by the stack.
+ *
+ * The stack will not to provide a full-blown configurable PKI.
+ * The stack provides only a minimal, always safe validating PKI.
  */
 
 #ifndef SOPC_PKI_STACK_H_

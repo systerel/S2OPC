@@ -15,6 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ *  \file
+ *
+ *  \brief An event timer manager which allow to associate an event to enqueue in an event dispatcher manager on timer
+ * expiration.
+ *
+ *  \note  SOPC_EventTimer_CyclicTimersEvaluation function shall be called to evaluate timers expiration (already
+ * integrated in toolkit).
+ */
+
 #ifndef SOPC_EVENT_TIMER_MANAGER_H
 #define SOPC_EVENT_TIMER_MANAGER_H
 

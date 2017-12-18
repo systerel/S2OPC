@@ -20,6 +20,7 @@
  *
  * \brief This module provides an asynchronous API to request toolkit services
  *        It is required to configure the toolkit before calling any service.
+ *
  *        Service responses are always provided asynchronously through the callback
  *        defined during toolkit configuration.
  */

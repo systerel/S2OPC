@@ -1,9 +1,3 @@
-/** \file
- *
- * \brief Defines the common declarations for the cryptographic objects.
- *
- * Avoids the circular dependencies.
- */
 /*
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -19,6 +13,13 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** \file
+ *
+ * \brief Defines the common declarations for the cryptographic objects.
+ *
+ * Avoids the circular dependencies.
  */
 
 #ifndef SOPC_CRYPTO_DECL_H_

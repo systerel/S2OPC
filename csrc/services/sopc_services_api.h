@@ -15,6 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ *  \file sopc_sockets_api.h
+ *
+ *  \brief Event oriented API of the Services layer.
+ *
+ *         This module is in charge of the event dispatcher thread management.
+ */
+
 #ifndef SOPC_SERVICES_API_H
 #define SOPC_SERVICES_API_H
 

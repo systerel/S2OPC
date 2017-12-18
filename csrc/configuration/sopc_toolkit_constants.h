@@ -15,6 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** \file
+ *
+ * \brief Contains the constants used by the Tookit. Those constants are not intended to be modified.
+ *
+ */
+
 #ifndef SOPC_TOOLKIT_CONSTANTS_H_
 #define SOPC_TOOLKIT_CONSTANTS_H_
 

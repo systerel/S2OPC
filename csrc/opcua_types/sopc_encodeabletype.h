@@ -1,8 +1,3 @@
-/**
- *  \file sopc_encodeabletype.h
- *
- *  \brief Encodeable type and services
- */
 /*
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -18,6 +13,12 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ *  \file sopc_encodeabletype.h
+ *
+ *  \brief Encodeable type and services
  */
 
 #ifndef SOPC_ENCODEABLETYPE_H_

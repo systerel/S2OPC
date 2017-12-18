@@ -15,6 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** \file
+ *
+ * \brief Contains the types to be used by the user application to use the Toolkit
+ *
+ */
+
 #ifndef SOPC_USER_APP_ITF_H_
 #define SOPC_USER_APP_ITF_H_
 

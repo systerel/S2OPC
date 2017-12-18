@@ -15,6 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** \file
+ *
+ * \brief Toolkit internal use only: access to the shared configuration of the Toolkit and tools for interaction with
+ * user application.
+ *
+ */
+
 #ifndef SOPC_TOOLKIT_CONFIG_INTERNAL_H_
 #define SOPC_TOOLKIT_CONFIG_INTERNAL_H_
 
@@ -60,7 +67,7 @@ bool SOPC_ToolkitServer_RemoveSecureChannelConfig(uint32_t serverScConfigIdx);
  * (SOPC_Toolkit_Configured required)
  * Note: the set of indexes of secure channel configuration for client and server are disjoint
  *
- *  \param scConfigIdx  The secure channel configuration index requested
+ *  \param serverScConfigIdx  The secure channel configuration index requested
  *
  *  \return Secure channel configuration at given index or NULL if
  *  index invalid or toolkit is not configured yet
