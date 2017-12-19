@@ -1180,6 +1180,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
     {
         // Clear all buffers
         SOPC_Buffer_Delete(scConnection->chunksCtx.chunkInputBuffer);
+        scConnection->chunksCtx.chunkInputBuffer = NULL;
 
         if (plainBuffer != NULL)
         {
