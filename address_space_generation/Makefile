@@ -1,5 +1,6 @@
 PATHBUILD=./build
 PATHGENC=./genc
+PATHSCRIPT=./scripts
 
 XMLPATH=../tests/data/address_space
 XMLFILES=$(shell find $(XMLPATH) -name "*.xml" | grep -v "/parts/")
@@ -20,14 +21,15 @@ clean:
 	@rm -rf $(PATHBUILD)
 	@rm -rf $(PATHGENC)
 
-$(PATHGENC)/%_addspace.c: $(XMLPATH)/%.xml gen_address_space.xsl
+$(PATHGENC)/%_addspace.c: $(XMLPATH)/%.xml $(PATHSCRIPT)/gen_address_space.xsl
 	@echo "Generating address space $@ from $^"
+	@$(PATHSCRIPT)/gen_ingopcs_address_space.sh $(XMLPATH)/parts/User_Address_Space.xml $(XMLPATH)/ingopcs.xml
 	@xmllint -schema spec/UANodeSet.xsd -noout $<
-	@./scripts/ct.py gen_address_space.xsl $(PATHBUILD)/gen_address_space.xsl
+	@$(PATHSCRIPT)/ct.py $(PATHSCRIPT)/gen_address_space.xsl $(PATHBUILD)/gen_address_space.xsl
 	@saxonb-xslt -xsl:$(PATHBUILD)/gen_address_space.xsl -s:$< -o:$@
 
-$(PATHGENC)/check_%_addspace.c: $(XMLPATH)/%.xml gen_check_address_space.xsl
+$(PATHGENC)/check_%_addspace.c: $(XMLPATH)/%.xml $(PATHSCRIPT)/gen_check_address_space.xsl
 	@echo "Generating address space check test $@ from $^"
 	@xmllint -schema spec/UANodeSet.xsd -noout $<
-	@./scripts/ct.py gen_check_address_space.xsl $(PATHBUILD)/gen_check_address_space.xsl
+	@./scripts/ct.py $(PATHSCRIPT)/gen_check_address_space.xsl $(PATHBUILD)/gen_check_address_space.xsl
 	@saxonb-xslt -xsl:$(PATHBUILD)/gen_check_address_space.xsl -s:$< -o:$@
