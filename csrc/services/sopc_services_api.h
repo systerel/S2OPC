@@ -38,7 +38,7 @@ typedef enum SOPC_Services_Event {
                                     */
     SC_TO_SE_EP_CLOSED,             /* id = endpoint description config index,
                                      */
-    SC_TO_SE_SC_CONNECTED,          /* id = endpoint description config index,
+    SC_TO_SE_SC_CONNECTED,          /* id = secure channel connection index,
                                        auxParams = secure channel connection index
                                     */
     SC_TO_SE_SC_CONNECTION_TIMEOUT, /* id = endpoint connection config index

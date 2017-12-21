@@ -107,7 +107,6 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
             printf("SC_TO_SE_SC_CONNECTED\n");
         }
         // id == connection Id
-        // params = SC config (for secure channel Id only ?) ? => TMP: NULL for now
         // auxParam == secure channel configuration index
         // => B model entry point to add
         io_dispatch_mgr__client_channel_connected_event(auxParam, id);

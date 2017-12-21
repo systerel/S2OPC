@@ -71,7 +71,7 @@ typedef struct SOPC_Endpoint_Config
 /* Client and Server communication events to be managed by applicative code*/
 typedef enum SOPC_App_Com_Event {
     /* Client application events */
-    SE_SESSION_ACTIVATION_FAILURE, /* id = session id
+    SE_SESSION_ACTIVATION_FAILURE, /* id = session id (or 0 if not yet defined)
                                       auxParam = endpoint connection config index
                                    */
     SE_ACTIVATED_SESSION,          /* id = session id
