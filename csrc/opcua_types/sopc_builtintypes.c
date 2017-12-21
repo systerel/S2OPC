@@ -929,11 +929,12 @@ SOPC_ReturnStatus SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src)
     {
         // Keep null terminator for C string compatibility
         dest->Length = src->Length;
-        if ((uint64_t) dest->Length * sizeof(SOPC_Byte) <= SIZE_MAX)
+        if (dest->Length > 0)
         {
-            status = SOPC_STATUS_OK;
-            if (dest->Length > 0)
+            if ((uint64_t) dest->Length * sizeof(SOPC_Byte) <= SIZE_MAX)
             {
+                status = SOPC_STATUS_OK;
+
                 dest->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte) * (size_t) dest->Length + 1);
                 if (dest->Data != NULL)
                 {
@@ -945,13 +946,18 @@ SOPC_ReturnStatus SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src)
                 }
                 else
                 {
-                    status = SOPC_STATUS_NOK;
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
                 }
             }
             else
             {
-                dest->Data = NULL;
+                status = SOPC_STATUS_OUT_OF_MEMORY;
             }
+        }
+        else
+        {
+            status = SOPC_STATUS_OK;
+            dest->Data = NULL;
         }
     }
     return status;
