@@ -1108,14 +1108,15 @@ SOPC_ReturnStatus SOPC_String_Compare(const SOPC_String* left,
     if (NULL == left || NULL == right || NULL == comparison)
         return SOPC_STATUS_INVALID_PARAMETERS;
 
-    if (left->Length == right->Length)
+    if (left->Length <= 0 && right->Length <= 0)
+    {
+        // Both NULL strings => considered equal
+        *comparison = 0;
+    }
+    else if (left->Length == right->Length)
     {
         assert(CHAR_BIT == 8);
-        if (left->Length <= 0 && right->Length <= 0)
-        {
-            *comparison = 0;
-        }
-        else if (false == ignoreCase)
+        if (false == ignoreCase)
         {
             *comparison = strcmp((char*) left->Data, (char*) right->Data);
         }
