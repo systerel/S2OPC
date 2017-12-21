@@ -2287,10 +2287,56 @@ START_TEST(test_ua_encoder_other_types)
 }
 END_TEST
 
+START_TEST(test_ua_string_type)
+{
+    // Non regression test on string copy
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    bool result = false;
+    int32_t comp_res = -1;
+    SOPC_String s1, s2;
+    SOPC_String_Initialize(&s1);
+    SOPC_String_Initialize(&s2);
+
+    // Test a NULL string with length=-1 copy
+    s1.Length = -1;
+    status = SOPC_String_Copy(&s2, &s1);
+    ck_assert(SOPC_STATUS_OK == status);
+    result = SOPC_String_Equal(&s1, &s2);
+    ck_assert(result != false);
+
+    // Test a NULL string with length=0 copy
+    s1.Length = 0;
+    status = SOPC_String_Copy(&s2, &s1);
+    ck_assert(SOPC_STATUS_OK == status);
+    result = SOPC_String_Equal(&s1, &s2);
+    ck_assert(result != false);
+
+    // Test 2 possible forms of NULL strings equality
+    s1.Length = -1;
+    s2.Length = 0;
+    result = SOPC_String_Equal(&s1, &s2);
+    ck_assert(result != false);
+    result = SOPC_String_Equal(&s2, &s1);
+    ck_assert(result != false);
+
+    // Test a non NULL string copy
+    SOPC_String_AttachFromCstring(&s1, "Test of string copy !");
+    result = SOPC_String_Equal(&s1, &s2);
+    ck_assert(result == false);
+    status = SOPC_String_Copy(&s2, &s1);
+    result = SOPC_String_Equal(&s1, &s2);
+    ck_assert(result != false);
+    result = SOPC_String_Compare(&s1, &s2, true, &comp_res);
+    ck_assert(comp_res == 0);
+    result = SOPC_String_Compare(&s1, &s2, false, &comp_res);
+    ck_assert(comp_res == 0);
+}
+END_TEST
+
 Suite* tests_make_suite_tools(void)
 {
     Suite* s;
-    TCase *tc_hexlify, *tc_basetools, *tc_encoder, *tc_buffer, *tc_linkedlist, *tc_async_queue;
+    TCase *tc_hexlify, *tc_basetools, *tc_encoder, *tc_ua_types, *tc_buffer, *tc_linkedlist, *tc_async_queue;
 
     s = suite_create("Tools");
     tc_basetools = tcase_create("String tools");
@@ -2323,6 +2369,10 @@ Suite* tests_make_suite_tools(void)
     tcase_add_test(tc_encoder, test_ua_encoder_basic_types);
     tcase_add_test(tc_encoder, test_ua_encoder_other_types);
     suite_add_tcase(s, tc_encoder);
+
+    tc_ua_types = tcase_create("UA Types");
+    tcase_add_test(tc_ua_types, test_ua_string_type);
+    suite_add_tcase(s, tc_ua_types);
 
     return s;
 }
