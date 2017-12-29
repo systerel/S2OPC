@@ -84,7 +84,7 @@ bool test_value(void){
     unsigned long date_time_value_32_msb;
     float float_value;
     int status_value;
-    <xsl:apply-templates select = "//ua:UAVariable|//ua:UAVariableType" mode="tValue"/>
+    <xsl:apply-templates select = "$ua_nodes/ua:UAVariable|$ua_nodes/ua:UAVariableType" mode="tValue"/>
     return bres;
 }
 

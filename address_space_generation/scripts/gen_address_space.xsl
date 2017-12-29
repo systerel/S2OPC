@@ -65,12 +65,12 @@ Please note that for an element without an image, the ending index is stricly le
 classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'ReferenceType', 'DataType', 'Method')
 %>
 
-<!-- variable contenaining alias -->
+<!-- variable containing alias -->
 <xsl:variable name="alias" select="//ua:Alias"/>
 
-<!-- variable contening a copy of nodes in order to sort them. -->
+<!-- variable containing a copy of nodes in order to sort them. -->
 <xsl:variable name="ua_nodes">
-    <xsl:apply-templates select="${ '|'.join(['*/ua:UA' + s for s  in classes])}" mode="copy">
+    <xsl:apply-templates select="${ '|'.join(['*/ua:UA' + s for s in classes])}" mode="copy">
         <xsl:sort select="sys:ord_class(.)"/>
     </xsl:apply-templates>
 </xsl:variable>
@@ -82,7 +82,7 @@ classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
     </xsl:for-each>
 </xsl:variable>
 
-<!-- Variable contenaning variable and variabletype nodes -->
+<!-- Variable containing variable and variabletype nodes -->
 <xsl:variable name="var_vartype" select="$ua_nodes/ua:UAVariable|$ua_nodes/ua:UAVariableType"/>
 
 <xsl:template match="/">
@@ -213,7 +213,11 @@ SOPC_AddressSpace addressSpace = {
 
 <!-- Create variant for each variable -->
 <xsl:template match="ua:UAVariable[ua:Value]|ua:UAVariableType[ua:Value]" mode="value"><xsl:apply-templates select="ua:Value/*" mode="value"/></xsl:template>
-<xsl:template match="ua:UAVariable[not(ua:Value)]|ua:UAVariableType[not(ua:Value)]" mode="value">, DEFAULT_VARIANT</xsl:template>
+<xsl:template match="ua:UAVariableType[not(ua:Value)]" mode="value">, DEFAULT_VARIANT
+    <xsl:message>VariableType without value</xsl:message>
+</xsl:template>
+
+<xsl:template match="ua:UAVariable[not(ua:Value)]" mode="value">, DEFAULT_VARIANT</xsl:template>
 
 
 % for s in ['Boolean', 'Byte', 'Int16', 'Int32', 'Int64', 'Guid', 'NodeId']:
