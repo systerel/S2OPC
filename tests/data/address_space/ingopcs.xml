@@ -252,6 +252,11 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=15</Reference>
     </References>
   </UADataType>
+  <UAReferenceType NodeId="i=31" BrowseName="References" IsAbstract="true" Symmetric="true">
+    <DisplayName>References</DisplayName>
+    <Description>The abstract base type for all references.</Description>
+    <References />
+  </UAReferenceType>
   <UADataType NodeId="i=121" BrowseName="Decimal128">
     <DisplayName>Decimal128</DisplayName>
     <Description>Describes a 128-bit decimal value.</Description>
@@ -273,7 +278,12 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
     </References>
   </UAObjectType>
-   <UAVariableType NodeId="i=63" BrowseName="BaseDataVariableType" ValueRank="-2">
+  <UAVariableType NodeId="i=62" BrowseName="BaseVariableType" IsAbstract="true" ValueRank="-2">
+    <DisplayName>BaseVariableType</DisplayName>
+    <Description>The abstract base type for all variable nodes.</Description>
+    <References />
+  </UAVariableType>
+  <UAVariableType NodeId="i=63" BrowseName="BaseDataVariableType" ValueRank="-2">
     <DisplayName>BaseDataVariableType</DisplayName>
     <Description>The type for variable that represents a process value.</Description>
     <References>
