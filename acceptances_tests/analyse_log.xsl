@@ -22,17 +22,17 @@ version="2.0">
             5: OK/Log
             6: Back-trace
         -->
-<xsl:when test="starts-with($testresult, '0')">ko <xsl:value-of select="regex-group(1)" /> - <xsl:value-of select="$description"/><xsl:text>
+<xsl:when test="starts-with($testresult, '0')">Error-<xsl:value-of select="regex-group(1)" />-<xsl:value-of select="$description"/><xsl:text>
 </xsl:text></xsl:when>
-<xsl:when test="starts-with($testresult, '1')">ok <xsl:value-of select="regex-group(1)" /> - <xsl:value-of select="$description"/><xsl:text>
+<xsl:when test="starts-with($testresult, '1')">Warning-<xsl:value-of select="regex-group(1)" />-<xsl:value-of select="$description"/><xsl:text>
 </xsl:text></xsl:when>
-<xsl:when test="starts-with($testresult, '2')">ko <xsl:value-of select="regex-group(1)" /> - <xsl:value-of select="$description"/><xsl:text>
+<xsl:when test="starts-with($testresult, '2')">Not implemented-<xsl:value-of select="regex-group(1)" />-<xsl:value-of select="$description"/><xsl:text>
 </xsl:text></xsl:when>
-<xsl:when test="starts-with($testresult, '3')">ko <xsl:value-of select="regex-group(1)" /> - <xsl:value-of select="$description"/><xsl:text>
+<xsl:when test="starts-with($testresult, '3')">Skipped-<xsl:value-of select="regex-group(1)" />-<xsl:value-of select="$description"/><xsl:text>
 </xsl:text></xsl:when>
-<xsl:when test="starts-with($testresult, '4')">ko <xsl:value-of select="regex-group(1)" /> - <xsl:value-of select="$description"/><xsl:text>
+<xsl:when test="starts-with($testresult, '4')">Not supported-<xsl:value-of select="regex-group(1)" />-<xsl:value-of select="$description"/><xsl:text>
 </xsl:text></xsl:when>
-<xsl:when test="starts-with($testresult, '5')">ok <xsl:value-of select="regex-group(1)" /> - <xsl:value-of select="$description"/><xsl:text>
+<xsl:when test="starts-with($testresult, '5')">Ok-<xsl:value-of select="regex-group(1)" />-<xsl:value-of select="$description"/><xsl:text>
 </xsl:text></xsl:when>
 <xsl:when test="starts-with($testresult, '6')"><xsl:message>Unsupported testresult code <xsl:value-of select="regex-group(1)"/> for test <xsl:value-of select="$testname"/> </xsl:message></xsl:when>
         </xsl:choose>
