@@ -1,5 +1,6 @@
 #!/bin/bash
 IFS=$'\n\t'
+export DISPLAY=:0.0
 #set -x
 
 LOG_FILE=server_acceptance_tests.log
@@ -7,6 +8,8 @@ TMP_FILE=`mktemp`
 TAP_FILE=server_acceptance_tests.tap
 #SELECTION=./Acceptation_INGOPCS/Acceptation_INGOPCS_nonreg.selection.xml
 SELECTION=Acceptation_INGOPCS/Acceptation_INGOPCS.selection.xml
+UACTT_ERROR_FILE=uactt_error.log
+
 
 SKIPPED_TESTS_FILE=skipped_tests.cfg
 KNOWN_BUGS_FILES=known_bugs.cfg
@@ -42,9 +45,22 @@ function check_test {
 # main script
 
 rm -f $LOG_FILE $TAP_FILE
+echo -e "Launching server"
+pushd ../bin
+./toolkit_test_server 200000&
+popd
+
 echo -e "Launching Acceptance Test Tool"
 
-/opt/opcfoundation/uactt/uacompliancetest.sh -s ./Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>/dev/null
+/opt/opcfoundation/uactt/uacompliancetest.sh -s ./Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE&
+
+wait
+
+# test that log file is available
+if [ ! -f $LOG_FILE ];then
+    echo "UACTT log file hasn't been written."
+fi
+
 
 echo -e "End of acceptance tests - Generating Test Report"
 
