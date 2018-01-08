@@ -17,5 +17,9 @@ export SOPC_DOCKER_NEEDS_SUDO=1
 ./clean.sh && ./.build-in-docker.sh ./build.sh
 # Run tests on Linux target
 ./.test-in-docker.sh ./test-all.sh
+# run acceptance tests on Linux target
+pushd acceptances_tests/
+../.run-uactt-in-docker.sh ./launch_acceptance_tests.sh
+popd
 # Build binaries for Windows target on Linux host
 ./.mingwbuild-in-docker.sh CROSS_COMPILE_MINGW=true ./build.sh
