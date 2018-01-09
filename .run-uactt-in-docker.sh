@@ -4,7 +4,8 @@
 #
 set -e
 
-DOCKER_IMAGE=fd3c7151ee9a
+# uactt 1.2
+DOCKER_IMAGE=283e3aec4f94
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
     /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
