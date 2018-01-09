@@ -1,6 +1,10 @@
 #!/bin/bash
 IFS=$'\n\t'
-export DISPLAY=:0.0
+# Start a virtual display 99 to could run the acceptance test tools which use it
+Xvfb :99 -screen 0 800x600x16 -ac &
+# Retrieve PID to kill virtual display after running acceptance tool
+XVFB_PID=$!
+export DISPLAY=:99
 #set -x
 
 LOG_FILE=server_acceptance_tests.log
@@ -52,9 +56,10 @@ popd
 
 echo -e "Launching Acceptance Test Tool"
 
-/opt/opcfoundation/uactt/uacompliancetest.sh -s ./Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE&
+/opt/opcfoundation/uactt/uacompliancetest.sh -s ./Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE
 
-wait
+# kill virtual display since not necessary anymore
+kill -9 $XVFB_PID
 
 # test that log file is available
 if [ ! -f $LOG_FILE ];then
