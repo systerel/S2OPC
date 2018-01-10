@@ -84,7 +84,7 @@ while read line; do
         "Error")
         let 'num_tests++'
         # is it a known bug ?
-        if check_test $KNOWN_BUGS_FILES $test_description
+        if check_test $KNOWN_BUGS_FILES "${test_number}-${test_description}"
         then
             echo "ok $num_tests $test_number $test_description # TODO Known bug" >> $TAP_FILE
         else
@@ -101,7 +101,7 @@ while read line; do
         "Not implemented")
         let 'num_tests++'
         # is it a skipped test ?
-        if check_test $SKIPPED_TESTS_FILE $test_description
+        if check_test $SKIPPED_TESTS_FILE "${test_number}-${test_description}"
         then
             echo "ok $num_tests $test_number $test_description # skip Known bug" >> $TAP_FILE
         else
@@ -113,7 +113,7 @@ while read line; do
         "Skipped")
         let 'num_tests++'
         # is it a skipped test ?
-        if check_test $SKIPPED_TESTS_FILE $test_description
+        if check_test $SKIPPED_TESTS_FILE "${test_number}-${test_description}"
         then
             echo "ok $num_tests $test_number $test_description # skip Known bug" >> $TAP_FILE
         else
@@ -125,7 +125,7 @@ while read line; do
         "Not supported")
         let 'num_tests++'
         # is it a skipped test ?
-        if check_test $SKIPPED_TESTS_FILE $test_description
+        if check_test $SKIPPED_TESTS_FILE "${test_number}-${test_description}"
         then
             echo "ok $num_tests $test_number $test_description # skip Known bug" >> $TAP_FILE
         else
@@ -137,7 +137,7 @@ while read line; do
         "Ok")
         let 'num_tests++'
         # was it a known bug ?
-        if check_test $KNOWN_BUGS_FILES $test_description
+        if check_test $KNOWN_BUGS_FILES "${test_number}-${test_description}"
         then
             echo "ok $num_tests $test_number $test_description - FIXED KNOWN BUG" >> $TAP_FILE
         else
