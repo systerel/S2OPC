@@ -87,7 +87,7 @@ while read line; do
         # is it a known bug ?
         if check_test $KNOWN_BUGS_FILES $test_description
         then
-            echo "ok $num_tests - $test_number $test_description - KNOWN BUG" >> $TAP_FILE
+            echo "ok $num_tests - # TODO Known bug:$test_number $test_description" >> $TAP_FILE
         else
         #otherwise log an error in tap report
             echo "not ok $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
@@ -104,7 +104,7 @@ while read line; do
         # is it a skipped test ?
         if check_test $SKIPPED_TESTS_FILE $test_description
         then
-            echo "ok $num_tests - $test_number $test_description - SKIPPED TEST" >> $TAP_FILE
+            echo "ok $num_tests - # skip Known bug:$test_number $test_description" >> $TAP_FILE
         else
         # otherwise log an error in tap report
             echo "not ok $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
@@ -116,7 +116,7 @@ while read line; do
         # is it a skipped test ?
         if check_test $SKIPPED_TESTS_FILE $test_description
         then
-            echo "ok $num_tests - $test_number $test_description - SKIPPED TEST" >> $TAP_FILE
+            echo "ok $num_tests - # skip Known bug:$test_number $test_description" >> $TAP_FILE
         else
         # otherwise log an error in tap report
             echo "not ok $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
@@ -128,7 +128,7 @@ while read line; do
         # is it a skipped test ?
         if check_test $SKIPPED_TESTS_FILE $test_description
         then
-            echo "ok $num_tests - $test_number $test_description - SKIPPED TEST" >> $TAP_FILE
+            echo "ok $num_tests - # skip Known bug:$test_number $test_description" >> $TAP_FILE
         else
         # otherwise log an error in tap report
             echo "not ok $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
