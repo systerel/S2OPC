@@ -33,9 +33,9 @@ class TapLogger(object):
     def add_test(self, test_description, test_result):
         self.nb_tests = self.nb_tests + 1
         if test_result:
-            self.tests_results.append("ok {0} - {1} {2}\n".format(self.nb_tests, self.section, test_description))
+            self.tests_results.append("ok {0} {1} {2}\n".format(self.nb_tests, self.section, test_description))
         else:
-            self.tests_results.append("not ok {0} - {1} {2}\n".format(self.nb_tests, self.section, test_description))
+            self.tests_results.append("not ok {0} {1} {2}\n".format(self.nb_tests, self.section, test_description))
 
     def finalize_report(self):
         self.fd.write("1..{0}\n".format(self.nb_tests))
