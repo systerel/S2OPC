@@ -8,7 +8,8 @@ export DISPLAY=:99
 #set -x
 
 LOG_FILE=server_acceptance_tests.log
-TMP_FILE=`mktemp`
+#TMP_FILE=`mktemp`
+TMP_FILE=/tmp/tmp.txt
 TAP_FILE=server_acceptance_tests.tap
 #SELECTION=./Acceptation_INGOPCS/Acceptation_INGOPCS_nonreg.selection.xml
 SELECTION=Acceptation_INGOPCS/Acceptation_INGOPCS.selection.xml
@@ -73,82 +74,85 @@ echo -e "End of acceptance tests - Generating Test Report"
 # first step: analyse XML thanks to xlst
 saxonb-xslt -xsl:analyse_log.xsl -s:$LOG_FILE -o:$TMP_FILE
 # next step: build a tap report
-NB_TESTS=`wc -l $TMP_FILE | awk '{print $1}'`
 num_tests=0
 
-echo "1..$NB_TESTS" > $TAP_FILE
-
 while read line; do
-    let 'num_tests++'
     test_status=`echo $line | awk -F '-' '{print $1}'`
     test_number=`echo $line | awk -F '-' '{print $2}'`
     test_description=`echo $line | awk -F '-' '{print $3}'`
 
     case $test_status in
         "Error")
+        let 'num_tests++'
         # is it a known bug ?
         if check_test $KNOWN_BUGS_FILES $test_description
         then
-            echo "ok - $num_tests - $test_number $test_description - KNOWN BUG" >> $TAP_FILE
+            echo "ok $num_tests - $test_number $test_description - KNOWN BUG" >> $TAP_FILE
         else
         #otherwise log an error in tap report
-            echo "not ok - $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
+            echo "not ok $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
         fi
         ;;
 
         "Warning")
-        echo "ok - $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
+        let 'num_tests++'
+        echo "ok $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
         ;;
 
         "Not implemented")
+        let 'num_tests++'
         # is it a skipped test ?
         if check_test $SKIPPED_TESTS_FILE $test_description
         then
-            echo "ok - $num_tests - $test_number $test_description - SKIPPED TEST" >> $TAP_FILE
+            echo "ok $num_tests - $test_number $test_description - SKIPPED TEST" >> $TAP_FILE
         else
         # otherwise log an error in tap report
-            echo "not ok - $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
+            echo "not ok $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
         fi
         ;;
 
         "Skipped")
+        let 'num_tests++'
         # is it a skipped test ?
         if check_test $SKIPPED_TESTS_FILE $test_description
         then
-            echo "ok - $num_tests - $test_number $test_description - SKIPPED TEST" >> $TAP_FILE
+            echo "ok $num_tests - $test_number $test_description - SKIPPED TEST" >> $TAP_FILE
         else
         # otherwise log an error in tap report
-            echo "not ok - $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
+            echo "not ok $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
         fi
         ;;
 
         "Not supported")
+        let 'num_tests++'
         # is it a skipped test ?
         if check_test $SKIPPED_TESTS_FILE $test_description
         then
-            echo "ok - $num_tests - $test_number $test_description - SKIPPED TEST" >> $TAP_FILE
+            echo "ok $num_tests - $test_number $test_description - SKIPPED TEST" >> $TAP_FILE
         else
         # otherwise log an error in tap report
-            echo "not ok - $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
+            echo "not ok $num_tests - $test_number $test_description - $test_status" >> $TAP_FILE
         fi
         ;;
 
         "Ok")
+        let 'num_tests++'
         # was it a known bug ?
         if check_test $KNOWN_BUGS_FILES $test_description
         then
-            echo "ok - $num_tests - $test_number $test_description - FIXED KNOWN BUG" >> $TAP_FILE
+            echo "ok $num_tests - $test_number $test_description - FIXED KNOWN BUG" >> $TAP_FILE
         else
         #otherwise log ok in tap report
-            echo "ok - $num_tests - $test_number $test_description - " >> $TAP_FILE
+            echo "ok $num_tests - $test_number $test_description - " >> $TAP_FILE
         fi
         ;;
-        \?)
-        abort "Invalid status: $test_status";;
 
     esac
 
 done < $TMP_FILE
+
+# add number of tests at the beginning of TAP file
+sed -i "1s/^/1..$num_tests\n/" $TAP_FILE
 
 rm -f $LOG_FILE
 rm -f $TMP_FILE
