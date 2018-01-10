@@ -51,7 +51,7 @@ function check_test {
 rm -f $LOG_FILE $TAP_FILE
 echo -e "Launching server"
 pushd ../bin
-./toolkit_test_server 200000&
+./toolkit_test_server 100000&
 popd
 
 echo -e "Launching Acceptance Test Tool"
@@ -152,5 +152,7 @@ done < $TMP_FILE
 
 rm -f $LOG_FILE
 rm -f $TMP_FILE
+
+mv $TAP_FILE ../bin/
 
 echo -e "Test report generated"
