@@ -1,12 +1,12 @@
 # Note: use only non commented lines for nominal use
 
 # E.g.: gen key (encrypted output with AES 128 for a 1024 bit asymmetric key)
-# openssl genrsa -aes128 -out client.key 1024
+# openssl genrsa -aes128 -out client_1k.key 1024
 
 # OR gen key without encryption for a 2048 bit asymmetric key the key and certificate request
-openssl req -config clientssl.cnf -newkey rsa:2048 -sha256 -nodes -out client.csr -outform PEM
+openssl req -config clientssl_2k.cnf -newkey rsa:2048 -sha256 -nodes -out client_2k.csr -outform PEM
 # then sign the request with certificate
-openssl ca -config cassl.cnf -policy signing_policy -days 365 -in client.csr -out client.crt
+openssl ca -config cassl.cnf -policy signing_policy -days 365 -in client_2k.csr -out client_2k.crt
 
 #gen certificate format parsed by UA stack
-openssl x509 -in client.crt -out client.der -outform DER
+openssl x509 -in client_2k.crt -out client_2k.der -outform DER

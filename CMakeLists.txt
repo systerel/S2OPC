@@ -181,11 +181,16 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/client_public
     COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/server_public
     COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/cacert.der ${CMAKE_SOURCE_DIR}/bin/trusted/
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client.key ${CMAKE_SOURCE_DIR}/bin/client_private/
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client.key ${CMAKE_SOURCE_DIR}/bin/client_private/client.pem
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client.der ${CMAKE_SOURCE_DIR}/bin/client_public/
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server.key ${CMAKE_SOURCE_DIR}/bin/server_private/
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server.der ${CMAKE_SOURCE_DIR}/bin/server_public/)
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_2k.key ${CMAKE_SOURCE_DIR}/bin/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_2k.key ${CMAKE_SOURCE_DIR}/bin/client_private/client_2k.pem
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_2k.der ${CMAKE_SOURCE_DIR}/bin/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server_2k.key ${CMAKE_SOURCE_DIR}/bin/server_private/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server_2k.der ${CMAKE_SOURCE_DIR}/bin/server_public/
+    # Add 4096 client / server keys
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_4k.key ${CMAKE_SOURCE_DIR}/bin/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_4k.der ${CMAKE_SOURCE_DIR}/bin/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server_4k.key ${CMAKE_SOURCE_DIR}/bin/server_private/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server_4k.der ${CMAKE_SOURCE_DIR}/bin/server_public/)
 
 # Read service test
 add_executable(toolkit_test_read "tests/services/toolkit_test_read.c"

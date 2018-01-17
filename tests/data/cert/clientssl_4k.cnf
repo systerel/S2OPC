@@ -3,14 +3,14 @@ RANDFILE        = $ENV::HOME/.rnd
 
 ####################################################################
 [ req ]
-default_bits        = 2048
-default_keyfile     = server.key
-distinguished_name  = server_distinguished_name
-req_extensions      = server_extensions
+default_bits        = 4096
+default_keyfile     = client_4k.key
+distinguished_name  = client_distinguished_name
+req_extensions      = client_extensions
 string_mask         = utf8only
 
 ####################################################################
-[ server_distinguished_name ]
+[ client_distinguished_name ]
 countryName         = Country Name (2 letter code)
 countryName_default     = FR
 
@@ -27,13 +27,13 @@ organizationalUnitName  = Organizational Unit (eg, division)
 organizationalUnitName_default  = INGOPCS
 
 commonName          = Common Name (e.g. server FQDN or YOUR name)
-commonName_default      = INGOPCS SERVER
+commonName_default      = INGOPCS CLIENT
 
 emailAddress            = Email Address
 emailAddress_default        = ingopcs@systerel.fr
 
 ####################################################################
-[ server_extensions ]
+[ client_extensions ]
 subjectKeyIdentifier = hash
 basicConstraints     = CA:FALSE
 keyUsage             = digitalSignature, keyEncipherment

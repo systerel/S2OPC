@@ -1,0 +1,110 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 7 (0x7)
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=FR, ST=IDF, L=PARIS, O=INGOPCS, OU=INGOPCS, CN=INGOPCS CA/emailAddress=ingopcs@systerel.fr
+        Validity
+            Not Before: Jan 17 16:38:43 2018 GMT
+            Not After : Jan 17 16:38:43 2019 GMT
+        Subject: C=FR, ST=IDF, L=PARIS, O=INGOPCS, OU=INGOPCS, CN=INGOPCS CLIENT
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (4096 bit)
+                Modulus:
+                    00:cb:ca:eb:e8:56:24:a0:d3:18:d4:f0:8e:ed:6d:
+                    ce:e5:12:c1:f7:70:9e:b9:25:9c:c7:a5:70:1e:c3:
+                    9f:a6:6e:f3:84:88:ff:ab:33:c9:e3:9d:1b:90:82:
+                    73:be:ec:f1:b4:d1:27:cd:72:c5:7d:2f:00:8c:7a:
+                    75:29:05:cc:8d:7d:61:2a:ae:40:fc:be:fc:36:2b:
+                    7b:cc:e2:c6:e0:04:73:2c:b2:75:8c:2b:a2:82:45:
+                    c6:2c:73:f8:56:f2:10:63:79:dc:19:ff:8f:62:6c:
+                    aa:ad:d9:25:0a:91:1f:56:74:2b:fd:c2:9e:c6:3a:
+                    66:77:dd:eb:90:7a:58:5f:06:14:48:fc:de:bc:c3:
+                    bf:86:74:16:49:50:40:db:de:c8:24:e0:bf:89:0b:
+                    39:e1:39:06:f4:d4:63:72:7a:a5:86:14:f6:48:ac:
+                    90:89:d1:d8:ed:e4:fe:f8:a3:bd:98:e7:b0:60:a3:
+                    3f:5c:72:05:18:79:66:01:d3:bc:0d:af:d1:b1:d1:
+                    a5:33:f9:1e:17:ee:96:73:75:5f:4e:a5:50:59:f4:
+                    cb:56:03:e1:6c:fc:5c:dc:97:29:c5:3a:22:a1:45:
+                    4f:7d:60:64:0c:34:00:bc:80:b3:1b:ed:30:74:ae:
+                    c8:76:00:bb:86:ec:35:89:1c:6d:90:74:23:a8:e1:
+                    10:f6:ae:07:d3:00:58:83:3a:d0:be:76:44:ba:bf:
+                    bc:ca:d8:78:83:dd:a9:de:f2:66:18:dd:e9:99:a7:
+                    a1:cf:df:e8:d9:f5:d7:6f:d2:94:3a:96:bd:59:34:
+                    29:76:53:d4:fd:17:6f:bd:a0:09:8a:2d:3e:cf:c5:
+                    c4:44:d9:50:9f:b6:5a:ca:b7:79:77:d2:37:89:9e:
+                    31:29:78:51:4d:55:bd:4a:6a:25:15:8c:ce:94:77:
+                    ae:a7:a8:81:2e:c4:f0:ef:4f:a4:41:01:14:f4:05:
+                    fe:3c:1e:4f:c3:33:08:d3:47:17:7c:1d:07:37:dd:
+                    bd:35:15:53:25:dc:7b:65:b7:99:f7:e3:20:e0:0e:
+                    8c:c9:7e:fe:16:67:30:31:d4:e5:cf:c9:cd:ed:18:
+                    50:02:95:89:94:cf:11:4b:e4:5d:d5:95:c0:4d:cc:
+                    bb:b0:0c:19:78:aa:b2:df:ba:b1:ad:25:7b:ca:d7:
+                    08:c3:3d:04:c5:1a:37:12:aa:d9:45:f4:e5:7d:f3:
+                    0f:6e:ee:4b:1f:43:dc:ff:95:82:67:e4:50:ad:17:
+                    68:c9:dd:ab:a3:cd:c6:42:03:f3:8f:38:ce:08:b9:
+                    cb:12:35:d4:d2:47:49:c7:ae:bf:6a:0a:ce:de:11:
+                    30:76:d8:4d:44:aa:6b:ce:f7:68:94:72:31:6a:75:
+                    86:60:89
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Subject Key Identifier: 
+                0E:DE:9B:FA:AD:01:6E:0C:75:8B:74:4A:BC:B8:F3:6A:AF:5D:92:A2
+            X509v3 Authority Key Identifier: 
+                keyid:31:AE:8E:65:33:64:06:E4:37:9B:51:8F:C3:37:9D:CE:45:9B:B6:1F
+
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+            X509v3 Key Usage: 
+                Certificate Sign, CRL Sign
+            X509v3 Subject Alternative Name: 
+                URI:urn:INGOPCS:localhost, DNS:localhost
+            Netscape Comment: 
+                OpenSSL Generated Certificate
+    Signature Algorithm: sha256WithRSAEncryption
+         82:bc:8f:fc:0f:8c:aa:18:f9:e9:c1:5b:2a:7e:89:1b:5c:e5:
+         e4:7b:e3:c1:83:db:6e:64:4a:56:91:5a:96:17:e7:bf:eb:97:
+         ad:99:3a:3f:18:f5:4e:76:0b:2f:c9:b6:3e:0e:be:5c:d0:b3:
+         f1:d1:2d:9c:e9:ba:a6:12:b5:b0:9c:5f:64:44:5c:10:6f:9a:
+         e2:62:ac:2b:64:7b:50:41:f2:bc:74:3e:2e:bc:6b:2f:13:6b:
+         f9:b0:07:82:9d:3e:87:4a:dc:97:23:0f:1c:d9:cf:36:be:a8:
+         0e:ff:37:b3:9d:39:12:8c:31:ae:6f:2d:ef:98:6a:cd:d7:74:
+         eb:49:03:ab:2b:b0:ea:a6:3b:a4:82:43:2a:94:4b:64:ec:be:
+         6f:ec:9a:9c:52:8d:3b:a0:16:5a:26:c8:35:3d:af:00:98:28:
+         a4:d4:e3:4b:68:d5:98:4b:12:85:65:cd:ac:f5:4c:52:44:6a:
+         06:56:fe:09:53:62:1a:9d:10:48:f2:c6:2a:37:82:99:6c:b7:
+         5e:19:11:90:6a:a2:81:ce:da:7e:3a:d9:98:15:19:56:61:8c:
+         7d:df:3a:59:e8:9f:09:54:19:22:43:44:e6:de:58:dc:e8:59:
+         de:51:78:f4:b9:9a:40:3a:f8:69:c6:c9:93:b9:66:97:d7:cf:
+         fd:4d:5d:08
+-----BEGIN CERTIFICATE-----
+MIIFKTCCBBGgAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBiDELMAkGA1UEBhMCRlIx
+DDAKBgNVBAgMA0lERjEOMAwGA1UEBwwFUEFSSVMxEDAOBgNVBAoMB0lOR09QQ1Mx
+EDAOBgNVBAsMB0lOR09QQ1MxEzARBgNVBAMMCklOR09QQ1MgQ0ExIjAgBgkqhkiG
+9w0BCQEWE2luZ29wY3NAc3lzdGVyZWwuZnIwHhcNMTgwMTE3MTYzODQzWhcNMTkw
+MTE3MTYzODQzWjBoMQswCQYDVQQGEwJGUjEMMAoGA1UECAwDSURGMQ4wDAYDVQQH
+DAVQQVJJUzEQMA4GA1UECgwHSU5HT1BDUzEQMA4GA1UECwwHSU5HT1BDUzEXMBUG
+A1UEAwwOSU5HT1BDUyBDTElFTlQwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIK
+AoICAQDLyuvoViSg0xjU8I7tbc7lEsH3cJ65JZzHpXAew5+mbvOEiP+rM8njnRuQ
+gnO+7PG00SfNcsV9LwCMenUpBcyNfWEqrkD8vvw2K3vM4sbgBHMssnWMK6KCRcYs
+c/hW8hBjedwZ/49ibKqt2SUKkR9WdCv9wp7GOmZ33euQelhfBhRI/N68w7+GdBZJ
+UEDb3sgk4L+JCznhOQb01GNyeqWGFPZIrJCJ0djt5P74o72Y57Bgoz9ccgUYeWYB
+07wNr9Gx0aUz+R4X7pZzdV9OpVBZ9MtWA+Fs/FzclynFOiKhRU99YGQMNAC8gLMb
+7TB0rsh2ALuG7DWJHG2QdCOo4RD2rgfTAFiDOtC+dkS6v7zK2HiD3ane8mYY3emZ
+p6HP3+jZ9ddv0pQ6lr1ZNCl2U9T9F2+9oAmKLT7PxcRE2VCftlrKt3l30jeJnjEp
+eFFNVb1KaiUVjM6Ud66nqIEuxPDvT6RBART0Bf48Hk/DMwjTRxd8HQc33b01FVMl
+3Htlt5n34yDgDozJfv4WZzAx1OXPyc3tGFAClYmUzxFL5F3VlcBNzLuwDBl4qrLf
+urGtJXvK1wjDPQTFGjcSqtlF9OV98w9u7ksfQ9z/lYJn5FCtF2jJ3aujzcZCA/OP
+OM4IucsSNdTSR0nHrr9qCs7eETB22E1EqmvO92iUcjFqdYZgiQIDAQABo4G8MIG5
+MB0GA1UdDgQWBBQO3pv6rQFuDHWLdEq8uPNqr12SojAfBgNVHSMEGDAWgBQxro5l
+M2QG5DebUY/DN53ORZu2HzAPBgNVHRMBAf8EBTADAQH/MAsGA1UdDwQEAwIBBjAr
+BgNVHREEJDAihhV1cm46SU5HT1BDUzpsb2NhbGhvc3SCCWxvY2FsaG9zdDAsBglg
+hkgBhvhCAQ0EHxYdT3BlblNTTCBHZW5lcmF0ZWQgQ2VydGlmaWNhdGUwDQYJKoZI
+hvcNAQELBQADggEBAIK8j/wPjKoY+enBWyp+iRtc5eR748GD225kSlaRWpYX57/r
+l62ZOj8Y9U52Cy/Jtj4OvlzQs/HRLZzpuqYStbCcX2REXBBvmuJirCtke1BB8rx0
+Pi68ay8Ta/mwB4KdPodK3JcjDxzZzza+qA7/N7OdORKMMa5vLe+Yas3XdOtJA6sr
+sOqmO6SCQyqUS2Tsvm/smpxSjTugFlomyDU9rwCYKKTU40to1ZhLEoVlzaz1TFJE
+agZW/glTYhqdEEjyxio3gplst14ZEZBqooHO2n462ZgVGVZhjH3fOlnonwlUGSJD
+RObeWNzoWd5RePS5mkA6+GnGyZO5ZpfXz/1NXQg=
+-----END CERTIFICATE-----
