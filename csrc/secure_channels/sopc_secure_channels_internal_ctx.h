@@ -172,10 +172,10 @@ typedef struct SOPC_SecureListener
 } SOPC_SecureListener;
 
 /** @brief Array containing all listeners that can be used */
-extern SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
+extern SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1];
 
 /** @brief Array containing all connections that can be used */
-extern SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS];
+extern SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS + 1];
 extern uint32_t lastSecureConnectionArrayIdx; // last secure connection index used for a new secure connection
 
 /** @brief Initialize the array of secure listeners/connections */

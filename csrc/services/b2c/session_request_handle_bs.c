@@ -33,7 +33,7 @@
 static constants__t_session_i client_requests[SOPC_MAX_PENDING_REQUESTS];
 
 /* Store number of pending requests remaining for session */
-static uint32_t session_pending_requests_nb[SOPC_MAX_SESSIONS];
+static uint32_t session_pending_requests_nb[SOPC_MAX_SESSIONS + 1];
 
 /*------------------------
    INITIALISATION Clause
@@ -41,7 +41,7 @@ static uint32_t session_pending_requests_nb[SOPC_MAX_SESSIONS];
 void session_request_handle_bs__INITIALISATION()
 {
     memset(client_requests, constants__c_session_indet, SOPC_MAX_PENDING_REQUESTS * sizeof(constants__t_session_i));
-    memset(session_pending_requests_nb, 0, SOPC_MAX_SESSIONS * sizeof(uint32_t));
+    memset(session_pending_requests_nb, 0, (SOPC_MAX_SESSIONS + 1) * sizeof(uint32_t));
 }
 
 /*--------------------

@@ -36,7 +36,7 @@ static bool SOPC_SecureListenerStateMgr_OpeningListener(uint32_t endpointConfigI
 {
     bool result = false;
     SOPC_SecureListener* scListener = NULL;
-    if (endpointConfigIdx < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+    if (endpointConfigIdx > 0 && endpointConfigIdx <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
     {
         scListener = &(secureListenersArray[endpointConfigIdx]);
         if (scListener->state == SECURE_LISTENER_STATE_CLOSED)
@@ -54,7 +54,7 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
     SOPC_SecureListener* scListener = NULL;
     bool result = false;
     uint32_t idx = 0;
-    if (endpointConfigIdx < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+    if (endpointConfigIdx > 0 && endpointConfigIdx <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
     {
         result = true;
         scListener = &(secureListenersArray[endpointConfigIdx]);
@@ -86,7 +86,7 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
 static SOPC_SecureListener* SOPC_SecureListenerStateMgr_GetListener(uint32_t endpointConfigIdx)
 {
     SOPC_SecureListener* scListener = NULL;
-    if (endpointConfigIdx < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+    if (endpointConfigIdx > 0 && endpointConfigIdx <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
     {
         scListener = &(secureListenersArray[endpointConfigIdx]);
     }

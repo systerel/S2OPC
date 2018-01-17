@@ -42,27 +42,27 @@ static bool SC_InitNewConnection(uint32_t* newConnectionIdx)
 {
     bool result = false;
     SOPC_SecureConnection* scConnection = NULL;
-    uint32_t lastConnectionIdx = 0;
 
-    uint32_t connectionIdx = (lastSecureConnectionArrayIdx + 1) % SOPC_MAX_SECURE_CONNECTIONS;
+    uint32_t connectionIdx = lastSecureConnectionArrayIdx;
     do
     {
-        if (connectionIdx == 0)
+        if (connectionIdx < SOPC_MAX_SECURE_CONNECTIONS)
         {
-            // forbidden index => reserved as invalid index
-            connectionIdx = 1;
+            connectionIdx++; // Minimum used == 1 && Maximum used == MAX + 1
+            if (secureConnectionsArray[connectionIdx].state == SECURE_CONNECTION_STATE_SC_CLOSED)
+            {
+                result = true;
+            }
         }
-        lastConnectionIdx = connectionIdx;
-        if (secureConnectionsArray[connectionIdx].state == SECURE_CONNECTION_STATE_SC_CLOSED)
+        else
         {
-            result = true;
+            connectionIdx = 0; // 0 is reserved for indet => connectionIdx++ == 1 will be tested next time
         }
-        connectionIdx = (connectionIdx + 1) % SOPC_MAX_SECURE_CONNECTIONS;
     } while (connectionIdx != lastSecureConnectionArrayIdx && false == result);
 
     if (result != false)
     {
-        scConnection = &(secureConnectionsArray[lastConnectionIdx]);
+        scConnection = &(secureConnectionsArray[connectionIdx]);
 
         // Initialize TCP message properties
         scConnection->tcpMsgProperties.protocolVersion = SOPC_PROTOCOL_VERSION;
@@ -88,8 +88,8 @@ static bool SC_InitNewConnection(uint32_t* newConnectionIdx)
 
     if (result != false)
     {
-        lastSecureConnectionArrayIdx = lastConnectionIdx;
-        *newConnectionIdx = lastConnectionIdx;
+        lastSecureConnectionArrayIdx = connectionIdx;
+        *newConnectionIdx = connectionIdx;
     }
 
     return result;
@@ -100,7 +100,7 @@ static bool SC_CloseConnection(uint32_t connectionIdx)
     SOPC_SecureConnection* scConnection = NULL;
     bool result = false;
     bool configRes = false;
-    if (connectionIdx < SOPC_MAX_SECURE_CONNECTIONS)
+    if (connectionIdx > 0 && connectionIdx < SOPC_MAX_SECURE_CONNECTIONS)
     {
         scConnection = &(secureConnectionsArray[connectionIdx]);
         if (scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)

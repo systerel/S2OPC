@@ -20,20 +20,20 @@
 
 #include "sopc_secure_channels_internal_ctx.h"
 
-SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
-SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS];
+SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1];
+SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS + 1];
 uint32_t lastSecureConnectionArrayIdx = 0;
 
 void SOPC_SecureChannelsInternalContext_Initialize()
 {
-    memset(secureListenersArray, 0, sizeof(SOPC_SecureListener) * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS);
-    memset(secureConnectionsArray, 0, sizeof(SOPC_SecureConnection) * SOPC_MAX_SECURE_CONNECTIONS);
+    memset(secureListenersArray, 0, sizeof(SOPC_SecureListener) * (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1));
+    memset(secureConnectionsArray, 0, sizeof(SOPC_SecureConnection) * (SOPC_MAX_SECURE_CONNECTIONS + 1));
 }
 
 SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx)
 {
     SOPC_SecureConnection* scConnection = NULL;
-    if (connectionIdx < SOPC_MAX_SECURE_CONNECTIONS)
+    if (connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS)
     {
         scConnection = &(secureConnectionsArray[connectionIdx]);
     }

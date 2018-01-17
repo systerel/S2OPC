@@ -45,9 +45,9 @@ static struct
     uint8_t initDone;
     uint8_t locked;
     Mutex mut;
-    SOPC_SecureChannel_Config* scConfigs[SOPC_MAX_SECURE_CONNECTIONS];
-    SOPC_SecureChannel_Config* serverScConfigs[SOPC_MAX_SECURE_CONNECTIONS];
-    SOPC_Endpoint_Config* epConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
+    SOPC_SecureChannel_Config* scConfigs[SOPC_MAX_SECURE_CONNECTIONS + 1];
+    SOPC_SecureChannel_Config* serverScConfigs[SOPC_MAX_SECURE_CONNECTIONS + 1];
+    SOPC_Endpoint_Config* epConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1]; // index 0 reserved
     uint32_t scConfigIdxMax;
     uint32_t serverScLastConfigIdx;
     uint32_t epConfigIdxMax;
@@ -142,17 +142,18 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         SOPC_Helper_EndiannessCfg_Initialize();
         SOPC_Namespace_Initialize(tConfig.nsTable);
 
-        if (SIZE_MAX / SOPC_MAX_SECURE_CONNECTIONS < sizeof(SOPC_SecureChannel_Config*) ||
-            SIZE_MAX / SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS < sizeof(SOPC_Endpoint_Config*))
+        if (SIZE_MAX / (SOPC_MAX_SECURE_CONNECTIONS + 1) < sizeof(SOPC_SecureChannel_Config*) ||
+            SIZE_MAX / (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) < sizeof(SOPC_Endpoint_Config*))
         {
             status = SOPC_STATUS_NOK;
         }
 
         if (SOPC_STATUS_OK == status)
         {
-            memset(tConfig.scConfigs, 0, SOPC_MAX_SECURE_CONNECTIONS * sizeof(SOPC_SecureChannel_Config*));
-            memset(tConfig.serverScConfigs, 0, SOPC_MAX_SECURE_CONNECTIONS * sizeof(SOPC_SecureChannel_Config*));
-            memset(tConfig.epConfigs, 0, SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS * sizeof(SOPC_Endpoint_Config*));
+            memset(tConfig.scConfigs, 0, (SOPC_MAX_SECURE_CONNECTIONS + 1) * sizeof(SOPC_SecureChannel_Config*));
+            memset(tConfig.serverScConfigs, 0, (SOPC_MAX_SECURE_CONNECTIONS + 1) * sizeof(SOPC_SecureChannel_Config*));
+            memset(tConfig.epConfigs, 0,
+                   (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) * sizeof(SOPC_Endpoint_Config*));
             SOPC_EventTimer_Initialize();
             SOPC_Sockets_Initialize();
             SOPC_SecureChannels_Initialize();
@@ -202,6 +203,7 @@ static void SOPC_ToolkitServer_ClearScConfig_WithoutLock(uint32_t serverScConfig
 // Deallocate fields allocated on server side only and free all the SC configs
 static void SOPC_Toolkit_ClearServerScConfigs_WithoutLock(void)
 {
+    // Index 0 reserved for indet, index = MAX valid
     for (uint32_t i = 1; i <= SOPC_MAX_SECURE_CONNECTIONS; i++)
     {
         SOPC_ToolkitServer_ClearScConfig_WithoutLock(i);
@@ -251,7 +253,7 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
             Mutex_Lock(&tConfig.mut);
             if (tConfig.scConfigIdxMax < SOPC_MAX_SECURE_CONNECTIONS)
             {
-                tConfig.scConfigIdxMax++;
+                tConfig.scConfigIdxMax++; // Minimum used == 1 && Maximum used == MAX + 1
                 assert(NULL == tConfig.scConfigs[tConfig.scConfigIdxMax]);
                 tConfig.scConfigs[tConfig.scConfigIdxMax] = scConfig;
                 result = tConfig.scConfigIdxMax;
@@ -292,7 +294,7 @@ uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
             {
                 if (lastScIdx < SOPC_MAX_SECURE_CONNECTIONS)
                 {
-                    lastScIdx++;
+                    lastScIdx++; // Minimum used == 1 && Maximum used == MAX + 1
                     if (NULL == tConfig.serverScConfigs[lastScIdx])
                     {
                         tConfig.serverScLastConfigIdx = lastScIdx;
@@ -303,7 +305,7 @@ uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
                 }
                 else
                 {
-                    lastScIdx = 1;
+                    lastScIdx = 0; // lastScIdx++ <=> lastScIdx = 1 will be tested next time
                 }
             } while (0 == idxWithServerOffset && lastScIdx != tConfig.serverScLastConfigIdx);
             Mutex_Unlock(&tConfig.mut);
