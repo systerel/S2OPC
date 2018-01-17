@@ -944,7 +944,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
     // Check buffer length
     if (SOPC_CryptoProvider_AsymmetricGetLength_Encryption(pProvider, pKey, lenInput, &lenOutCalc) != SOPC_STATUS_OK)
         return SOPC_STATUS_INVALID_PARAMETERS;
-    if (lenOutput < lenOutCalc)
+    if (lenOutput != lenOutCalc)
         return SOPC_STATUS_INVALID_PARAMETERS;
 
     // Check key length
@@ -991,7 +991,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
     // Check buffer length
     if (SOPC_CryptoProvider_AsymmetricGetLength_Decryption(pProvider, pKey, lenInput, &lenOutCalc) != SOPC_STATUS_OK)
         return SOPC_STATUS_INVALID_PARAMETERS;
-    if (lenOutput < lenOutCalc)
+    if (lenOutput != lenOutCalc)
         return SOPC_STATUS_INVALID_PARAMETERS;
 
     // Check key length
@@ -1044,7 +1044,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
     // Check lengths
     if (SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKeyPrivateLocal, &lenSigCalc) != SOPC_STATUS_OK)
         return SOPC_STATUS_INVALID_PARAMETERS;
-    if (lenSignature < lenSigCalc)
+    if (lenSignature != lenSigCalc)
         return SOPC_STATUS_INVALID_PARAMETERS;
     if (SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKeyPrivateLocal, &lenKey) != SOPC_STATUS_OK)
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1087,7 +1087,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
     // Check lengths
     if (SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKeyRemotePublic, &lenSigCalc) != SOPC_STATUS_OK)
         return SOPC_STATUS_INVALID_PARAMETERS;
-    if (lenSignature < lenSigCalc)
+    if (lenSignature != lenSigCalc)
         return SOPC_STATUS_INVALID_PARAMETERS;
     if (SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKeyRemotePublic, &lenKey) != SOPC_STATUS_OK)
         return SOPC_STATUS_INVALID_PARAMETERS;
