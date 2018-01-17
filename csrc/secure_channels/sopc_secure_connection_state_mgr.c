@@ -114,6 +114,7 @@ static bool SC_CloseConnection(uint32_t connectionIdx)
 
             // Clear TCP sequence properties
             assert(scConnection->tcpSeqProperties.sentRequestIds != NULL);
+            SOPC_SLinkedList_Apply(scConnection->tcpSeqProperties.sentRequestIds, SOPC_SLinkedList_EltGenericFree);
             SOPC_SLinkedList_Delete(scConnection->tcpSeqProperties.sentRequestIds);
             scConnection->tcpSeqProperties.sentRequestIds = NULL;
 
@@ -2561,6 +2562,10 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         SC_CloseSecureConnection(scConnection, eltId,
                                  true, // consider socket is closed since server should have closed now
                                  OpcUa_BadSecureChannelClosed, "ERR message received");
+        if (false == result)
+        {
+            SOPC_Buffer_Delete((SOPC_Buffer*) params);
+        }
         break;
     case INT_EP_SC_CLOSE:
         if (SOPC_DEBUG_PRINTING != false)
