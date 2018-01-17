@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "opcua_statuscodes.h"
 #include "sopc_crypto_profiles.h"
@@ -36,7 +37,7 @@
 
 static bool cryptoDeactivated = false;
 
-int main(void)
+int main(int argc, char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_PKIProvider* pki = NULL;
@@ -53,12 +54,13 @@ int main(void)
     SOPC_Certificate* crt_ca = NULL;
 
     // Number of the secu policy configuration
-    uint32_t nbOfSecurityPolicyConfigurations = 2;
+    uint32_t nbOfSecurityPolicyConfigurations = 3;
 
     // Secu policy configuration: empty
     SOPC_SecurityPolicy secuConfig[nbOfSecurityPolicyConfigurations];
     SOPC_String_Initialize(&secuConfig[0].securityPolicy);
     SOPC_String_Initialize(&secuConfig[1].securityPolicy);
+    SOPC_String_Initialize(&secuConfig[2].securityPolicy);
 
     // Services side stub code
     SOPC_Endpoint_Config epConfig;
@@ -72,12 +74,32 @@ int main(void)
 
     // Paths to client certificate/key and server certificate
     // Server certificate name
-    char* certificateSrvLocation = "./server_public/server.der";
+    char* certificateSrvLocation = "./server_public/server_2k.der";
     // Server private key
-    char* keyLocation = "./server_private/server.key";
+    char* keyLocation = "./server_private/server_2k.key";
+
+    if (argc >= 2)
+    {
+        if (strlen(argv[1]) == strlen("2048") && 0 == memcmp(argv[1], "2048", strlen("2048")))
+        {
+            certificateSrvLocation = "./server_public/server_2k.der";
+            keyLocation = "./server_private/server_2k.key";
+        }
+        else if (strlen(argv[1]) == strlen("4096") && 0 == memcmp(argv[1], "4096", strlen("4096")))
+        {
+            certificateSrvLocation = "./server_public/server_4k.der";
+            keyLocation = "./server_private/server_4k.key";
+        }
+        else
+        {
+            printf("<Stub_Server: Error invalid 1st argument'\n");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    printf("<Stub_Server: used paths for keys and certificates = '%s' and '%s'\n", keyLocation, certificateSrvLocation);
 
     // The certificates: load
-    if (cryptoDeactivated == false)
+    if (SOPC_STATUS_OK == status && cryptoDeactivated == false)
     {
         status = SOPC_KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
 
@@ -135,10 +157,12 @@ int main(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy, SOPC_SecurityPolicy_Basic256Sha256_URI);
+        status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy, SOPC_SecurityPolicy_Basic256_URI);
         secuConfig[0].securityModes = SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
-        status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy, SOPC_SecurityPolicy_None_URI);
-        secuConfig[1].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
+        status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy, SOPC_SecurityPolicy_Basic256Sha256_URI);
+        secuConfig[1].securityModes = SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+        status = SOPC_String_AttachFromCstring(&secuConfig[2].securityPolicy, SOPC_SecurityPolicy_None_URI);
+        secuConfig[2].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
     }
 
     // Init PKI provider and parse certificate and private key

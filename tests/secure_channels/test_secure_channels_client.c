@@ -36,6 +36,13 @@
 
 #include "sopc_time.h"
 
+/*
+ * Expected arguments (based on arguments order, last arguments can be unused (default value used)):
+ * 1) Security mode (default encrypt): "none", "sign" or "encrypt"
+ * 2) Security policy  (default Basic256Sha256 or None if Security mode == None): "B256", "B256Sha256"
+ * 3) Client (and Server default) key size(s) (default 2048 for both): "2048" or "4096"
+ * 4) Server key size (default based on precedent argument):  "2048" or "4096"
+ * */
 int main(int argc, char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -68,8 +75,8 @@ int main(int argc, char* argv[])
     // Message security mode: None
     OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
 
-    // Manage change of security policy and mode (none = None, None | sign = Basic256Sha256)
-    if (argc == 2)
+    // Manage change of security policy mode (none, sign or encrypt)
+    if (argc >= 2)
     {
         if (strlen(argv[1]) == strlen("none") && 0 == memcmp(argv[1], "none", strlen("none")))
         {
@@ -82,7 +89,7 @@ int main(int argc, char* argv[])
             messageSecurityMode = OpcUa_MessageSecurityMode_Sign;
             printf(">>Stub_Client: Security mode ='Sign'\n");
         }
-        else
+        else if (strlen(argv[1]) == strlen("encrypt") && 0 == memcmp(argv[1], "encrypt", strlen("encrypt")))
         {
             printf(">>Stub_Client: Security mode ='SignAndEncrypt'\n");
         }
@@ -91,18 +98,79 @@ int main(int argc, char* argv[])
     {
         printf(">>Stub_Client: Security mode ='SignAndEncrypt'\n");
     }
+
+    // Manage security policy URI (B256 or B256Sha256)
+    if (argc >= 3)
+    {
+        if (strlen(argv[2]) == strlen("B256") && 0 == memcmp(argv[2], "B256", strlen("B256")))
+        {
+            pRequestedSecurityPolicyUri = SOPC_SecurityPolicy_Basic256_URI;
+        }
+        else if (strlen(argv[2]) == strlen("B256Sha256") && 0 == memcmp(argv[2], "B256Sha256", strlen("B256Sha256")))
+        {
+            pRequestedSecurityPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI;
+        }
+        else
+        {
+            printf(">>Stub_Client: Error invalid 2nd argument'\n");
+            status = SOPC_STATUS_NOK;
+        }
+    }
     printf(">>Stub_Client: Security policy ='%s'\n", pRequestedSecurityPolicyUri);
 
     // Paths to client certificate/key and server certificate
     // Client certificate name
-    char* certificateLocation = "./client_public/client.der";
+    char* certificateLocation = "./client_public/client_2k.der";
     // Server certificate name
-    char* certificateSrvLocation = "./server_public/server.der";
+    char* certificateSrvLocation = "./server_public/server_2k.der";
     // Client private key
-    char* keyLocation = "./client_private/client.key";
+    char* keyLocation = "./client_private/client_2k.key";
 
-    if (messageSecurityMode != OpcUa_MessageSecurityMode_None)
+    // Manage key length used for the client (and default for server) 2048 or 4096
+    if (argc >= 4)
     {
+        if (strlen(argv[3]) == strlen("2048") && 0 == memcmp(argv[3], "2048", strlen("2048")))
+        {
+            certificateLocation = "./client_public/client_2k.der";
+            certificateSrvLocation = "./server_public/server_2k.der";
+            keyLocation = "./client_private/client_2k.key";
+        }
+        else if (strlen(argv[3]) == strlen("4096") && 0 == memcmp(argv[3], "4096", strlen("4096")))
+        {
+            certificateLocation = "./client_public/client_4k.der";
+            certificateSrvLocation = "./server_public/server_4k.der";
+            keyLocation = "./client_private/client_4k.key";
+        }
+        else
+        {
+            printf(">>Stub_Client: Error invalid 3rd argument'\n");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    // Manage key length used for the client (and default for server) 2048 or 4096
+    if (argc >= 5)
+    {
+        if (strlen(argv[4]) == strlen("2048") && 0 == memcmp(argv[4], "2048", strlen("2048")))
+        {
+            certificateSrvLocation = "./server_public/server_2k.der";
+        }
+        else if (strlen(argv[4]) == strlen("4096") && 0 == memcmp(argv[4], "4096", strlen("4096")))
+        {
+            certificateSrvLocation = "./server_public/server_4k.der";
+        }
+        else
+        {
+            printf(">>Stub_Client: Error invalid 4th argument'\n");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
+    {
+        printf(">>Stub_Client: used paths for keys and certificates ='%s', '%s' and '%s'\n", keyLocation,
+               certificateLocation, certificateSrvLocation);
+
         // The certificates: load
         status = SOPC_KeyManager_Certificate_CreateFromFile(certificateLocation, &crt_cli);
         if (SOPC_STATUS_OK != status)
@@ -145,7 +213,8 @@ int main(int argc, char* argv[])
     if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
         // Certificate Authority: load
-        if (SOPC_STATUS_OK != SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca))
+        status = SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca);
+        if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to load CA\n");
         }
@@ -157,9 +226,10 @@ int main(int argc, char* argv[])
 
     // Init PKI provider and parse certificate and private key
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
-    if (SOPC_STATUS_OK == status)
+    if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
-        if (SOPC_STATUS_OK != SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki))
+        status = SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki);
+        if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to create PKI\n");
         }
