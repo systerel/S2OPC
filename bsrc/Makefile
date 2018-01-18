@@ -42,8 +42,9 @@ $(TARGET_GENERATED_FILES): $(SOURCE_FILES)
 	m -tr | tee tr.log
 	grep -iEc '(warning|error)' tr.log | xargs test 0 -eq
 	$(RM) tr.log
+#	# Copy files and prepend them with copyright
 	mkdir $(PATHTRAD)
-	cp $(PATHGENTRAD)/*.c $(PATHGENTRAD)/*.h $(PATHTRAD)
+	cd $(PATHGENTRAD); find . -name "*.[hc]" -exec ../prependcopyright.sh {} ../$(PATHTRAD)/{} \;
 #	# Renames unwanted files, such as the ones that define a void * to a t_entier4
 	for i in constants_bs.h; do \
 	    mv $(PATHTRAD)/"$$i" $(PATHTRAD)/"$$i"_; \
