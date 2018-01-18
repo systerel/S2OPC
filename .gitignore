@@ -3,6 +3,7 @@
 .*.sw?
 *~
 build/
+install/
 out/
 apidoc/
 bdp/
