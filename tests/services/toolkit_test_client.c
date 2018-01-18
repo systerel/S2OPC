@@ -131,11 +131,11 @@ int main(void)
 
     // Paths to client certificate/key and server certificate
     // Client certificate name
-    char* certificateLocation = "./client_public/client.der";
+    char* certificateLocation = "./client_public/client_2k.der";
     // Server certificate name
-    char* certificateSrvLocation = "./server_public/server.der";
+    char* certificateSrvLocation = "./server_public/server_2k.der";
     // Client private key
-    char* keyLocation = "./client_private/client.key";
+    char* keyLocation = "./client_private/client_2k.key";
 
     // If security mode is set, load certificates and key
 

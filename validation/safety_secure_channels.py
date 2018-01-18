@@ -23,9 +23,9 @@ def secure_channels_connect(client, security_policy):
 
     if (security_policy == security_policies.SecurityPolicyBasic256):
         client.set_security(security_policy,
-        '../bin/client_public/client.der',
-        '../bin/client_private/client.pem',
-        server_certificate_path='../bin/server_public/server.der',
+        '../bin/client_public/client_2k.der',
+        '../bin/client_private/client_2k.pem',
+        server_certificate_path='../bin/server_public/server_2k.der',
         mode=ua.MessageSecurityMode.Sign)
 
     client.connect()
