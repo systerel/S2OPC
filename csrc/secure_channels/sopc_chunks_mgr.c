@@ -1967,14 +1967,14 @@ static uint32_t SC_Chunks_ComputeMaxBodySize(uint32_t nonEncryptedHeadersSize,
     return result;
 }
 
-static bool SC_Chunks_GetCryptoSizes(SOPC_SecureConnection* scConnection,
-                                     SOPC_SecureChannel_Config* scConfig,
-                                     bool isSymmetricAlgo,
-                                     bool* toEncrypt,
-                                     bool* toSign,
-                                     uint32_t* signatureSize,
-                                     uint32_t* cipherTextBlockSize,
-                                     uint32_t* plainTextBlockSize)
+static bool SC_Chunks_GetSendingCryptoSizes(SOPC_SecureConnection* scConnection,
+                                            SOPC_SecureChannel_Config* scConfig,
+                                            bool isSymmetricAlgo,
+                                            bool* toEncrypt,
+                                            bool* toSign,
+                                            uint32_t* signatureSize,
+                                            uint32_t* cipherTextBlockSize,
+                                            uint32_t* plainTextBlockSize)
 {
     assert(scConnection != NULL);
     assert(scConfig != NULL);
@@ -1992,8 +1992,10 @@ static bool SC_Chunks_GetCryptoSizes(SOPC_SecureConnection* scConnection,
 
         if (scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None)
         {
-            SOPC_AsymmetricKey* publicKey = NULL;
-            const SOPC_Certificate* otherAppCertificate = NULL;
+            SOPC_AsymmetricKey* receiverPublicKey = NULL;
+            SOPC_AsymmetricKey* senderPublicKey = NULL;
+            const SOPC_Certificate* receiverAppCertificate = NULL;
+            const SOPC_Certificate* senderAppCertificate = NULL;
 
             // Asymmetric case: used only for opening channel, signature AND encryption mandatory in this case
             *toEncrypt = true;
@@ -2002,15 +2004,17 @@ static bool SC_Chunks_GetCryptoSizes(SOPC_SecureConnection* scConnection,
             if (false == scConnection->isServerConnection)
             {
                 // Client side
-                otherAppCertificate = scConfig->crt_srv;
+                senderAppCertificate = scConfig->crt_cli;
+                receiverAppCertificate = scConfig->crt_srv;
             }
             else
             {
                 // Server side
-                otherAppCertificate = scConfig->crt_cli;
+                senderAppCertificate = scConfig->crt_srv;
+                receiverAppCertificate = scConfig->crt_cli;
             }
 
-            status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate, &publicKey);
+            status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(senderAppCertificate, &senderPublicKey);
             if (SOPC_STATUS_OK != status)
             {
                 result = false;
@@ -2018,8 +2022,18 @@ static bool SC_Chunks_GetCryptoSizes(SOPC_SecureConnection* scConnection,
 
             if (result != false)
             {
-                // Compute block sizes
-                status = SOPC_CryptoProvider_AsymmetricGetLength_Msgs(scConnection->cryptoProvider, publicKey,
+                status =
+                    SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(receiverAppCertificate, &receiverPublicKey);
+                if (SOPC_STATUS_OK != status)
+                {
+                    result = false;
+                }
+            }
+
+            if (result != false)
+            {
+                // Compute block sizes (using receiver key => encryption with other application public key)
+                status = SOPC_CryptoProvider_AsymmetricGetLength_Msgs(scConnection->cryptoProvider, receiverPublicKey,
                                                                       cipherTextBlockSize, plainTextBlockSize);
                 if (SOPC_STATUS_OK != status)
                 {
@@ -2028,16 +2042,17 @@ static bool SC_Chunks_GetCryptoSizes(SOPC_SecureConnection* scConnection,
             }
             if (result != false)
             {
-                // Compute signature size
-                status = SOPC_CryptoProvider_AsymmetricGetLength_Signature(scConnection->cryptoProvider, publicKey,
-                                                                           signatureSize);
+                // Compute signature size (using sender key => signature with sender application private key)
+                status = SOPC_CryptoProvider_AsymmetricGetLength_Signature(scConnection->cryptoProvider,
+                                                                           senderPublicKey, signatureSize);
                 if (SOPC_STATUS_OK != status)
                 {
                     result = false;
                 }
             }
 
-            SOPC_KeyManager_AsymmetricKey_Free(publicKey);
+            SOPC_KeyManager_AsymmetricKey_Free(senderPublicKey);
+            SOPC_KeyManager_AsymmetricKey_Free(receiverPublicKey);
         }
         else
         {
@@ -2047,7 +2062,7 @@ static bool SC_Chunks_GetCryptoSizes(SOPC_SecureConnection* scConnection,
     }
     else
     {
-        // ASYMMETRIC CASE
+        // SYMMETRIC CASE
 
         if (scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None)
         {
@@ -2090,11 +2105,11 @@ static bool SC_Chunks_GetCryptoSizes(SOPC_SecureConnection* scConnection,
     return result;
 }
 
-static uint32_t SC_Chunks_GetMaxBodySize(SOPC_SecureConnection* scConnection,
-                                         SOPC_SecureChannel_Config* scConfig,
-                                         uint32_t chunkSize,
-                                         uint32_t nonEncryptedHeadersSize,
-                                         bool isSymmetric)
+static uint32_t SC_Chunks_GetSendingMaxBodySize(SOPC_SecureConnection* scConnection,
+                                                SOPC_SecureChannel_Config* scConfig,
+                                                uint32_t chunkSize,
+                                                uint32_t nonEncryptedHeadersSize,
+                                                bool isSymmetric)
 {
     assert(scConnection != NULL);
     assert(scConfig != NULL);
@@ -2107,8 +2122,8 @@ static uint32_t SC_Chunks_GetMaxBodySize(SOPC_SecureConnection* scConnection,
     bool toSign = false;
     uint32_t signatureSize = 0;
 
-    result = SC_Chunks_GetCryptoSizes(scConnection, scConfig, isSymmetric, &toEncrypt, &toSign, &signatureSize,
-                                      &cipherBlockSize, &plainBlockSize);
+    result = SC_Chunks_GetSendingCryptoSizes(scConnection, scConfig, isSymmetric, &toEncrypt, &toSign, &signatureSize,
+                                             &cipherBlockSize, &plainBlockSize);
 
     // Compute the max body size regarding encryption and signature use
     if (result != false)
@@ -2158,8 +2173,8 @@ static bool SOPC_Chunks_EncodePadding(SOPC_SecureConnection* scConnection,
     bool toSign = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    result = SC_Chunks_GetCryptoSizes(scConnection, scConfig, isSymmetricAlgo, &toEncrypt, &toSign, signatureSize,
-                                      &cipherBlockSize, &plainTextBlockSize);
+    result = SC_Chunks_GetSendingCryptoSizes(scConnection, scConfig, isSymmetricAlgo, &toEncrypt, &toSign,
+                                             signatureSize, &cipherBlockSize, &plainTextBlockSize);
 
     if (result != false && toEncrypt != false)
     {
@@ -2705,9 +2720,9 @@ static bool SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnection,
 
                     if (scConnection->asymmSecuMaxBodySize == 0 && scConnection->symmSecuMaxBodySize == 0)
                     {
-                        scConnection->asymmSecuMaxBodySize = SC_Chunks_GetMaxBodySize(
+                        scConnection->asymmSecuMaxBodySize = SC_Chunks_GetSendingMaxBodySize(
                             scConnection, scConfig, nonEncryptedBuffer->max_size, sequenceNumberPosition, false);
-                        scConnection->symmSecuMaxBodySize = SC_Chunks_GetMaxBodySize(
+                        scConnection->symmSecuMaxBodySize = SC_Chunks_GetSendingMaxBodySize(
                             scConnection, scConfig, nonEncryptedBuffer->max_size,
                             // sequenceNumber position for symmetric case:
                             (SOPC_UA_HEADER_LENGTH_POSITION + SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH), true);
@@ -2786,8 +2801,8 @@ static bool SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnection,
                     bool tmpBool;
                     uint32_t tmpInt;
                     // TODO: avoid to compute non necessary crypto values
-                    SC_Chunks_GetCryptoSizes(scConnection, scConfig, false == isOPN, &tmpBool, &tmpBool, &signatureSize,
-                                             &tmpInt, &tmpInt);
+                    result = SC_Chunks_GetSendingCryptoSizes(scConnection, scConfig, false == isOPN, &tmpBool, &tmpBool,
+                                                             &signatureSize, &tmpInt, &tmpInt);
                 }
                 else
                 {
