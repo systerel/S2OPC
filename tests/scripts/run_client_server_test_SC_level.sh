@@ -143,8 +143,59 @@ else
     echo "not ok 5 - test: test_secure_channels_client encrypt B256Sha256 4096 / test_secure_channels_server 4096 exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" >> client_server_result.tap
 fi
 
+echo ""
+echo "======================================================================"
+echo "Secure channels tests level: SignAndEncrypt B256Sha256 4096 server vs 2048 client"
+echo "======================================================================"
 
-echo "1..5" >> client_server_result.tap
+## SC tests: SignAndEncrypt B256Sha256 4096 key length
+# remove precedent exit code file
+rm -f server.exitcode
+# Execute server side of the test
+./test_server.sh 4096 &
+sleep 1 # Wait server started
+
+# Execute client side of the test and retrieve exit code
+./test_secure_channels_client encrypt B256Sha256 2048 4096
+CLIENT_EXITCODE="$?"
+# Wait end of server side execution and retrieve exit code
+wait
+SERVER_EXITCODE=`cat server.exitcode`
+
+# Fullfil TAP result
+if [[ $CLIENT_EXITCODE -eq 0 && $SERVER_EXITCODE -eq 0 ]]; then
+    echo "ok 6 - test: test_secure_channels_client encrypt B256Sha256 2048 / test_secure_channels_server 4096: Passed" >> client_server_result.tap
+else
+    echo "not ok 6 - test: test_secure_channels_client encrypt B256Sha256 2048 / test_secure_channels_server 4096 exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" >> client_server_result.tap
+fi
+
+echo ""
+echo "======================================================================"
+echo "Secure channels tests level: SignAndEncrypt B256Sha256 2048 server vs 4096 client"
+echo "======================================================================"
+
+## SC tests: SignAndEncrypt B256Sha256 4096 key length
+# remove precedent exit code file
+rm -f server.exitcode
+# Execute server side of the test
+./test_server.sh 2048 &
+sleep 1 # Wait server started
+
+# Execute client side of the test and retrieve exit code
+./test_secure_channels_client encrypt B256Sha256 4096 2048
+CLIENT_EXITCODE="$?"
+# Wait end of server side execution and retrieve exit code
+wait
+SERVER_EXITCODE=`cat server.exitcode`
+
+# Fullfil TAP result
+if [[ $CLIENT_EXITCODE -eq 0 && $SERVER_EXITCODE -eq 0 ]]; then
+    echo "ok 7 - test: test_secure_channels_client encrypt B256Sha256 4096 / test_secure_channels_server 2048: Passed" >> client_server_result.tap
+else
+    echo "not ok 7 - test: test_secure_channels_client encrypt B256Sha256 4096 / test_secure_channels_server 2048 exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" >> client_server_result.tap
+fi
+
+echo "1..7" >> client_server_result.tap
 
 # Clean created files
 rm -f server.exitcode test_server.sh
