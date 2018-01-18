@@ -1348,6 +1348,10 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         assert(opnReq != NULL);
         if (scConnection->tcpMsgProperties.protocolVersion != opnReq->ClientProtocolVersion)
         {
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ScStateMgr OPN error: different protocol version\n");
+            }
             // Note: since property was already adapted to server on HEL, it shall be the same
             //*errorStatus = OpcUa_BadProtocolVersionUnsupported; => not a TCP error message authorized error
             *errorStatus = OpcUa_BadTcpInternalError;
@@ -1355,6 +1359,10 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         }
         if (result != false && opnReq->RequestType != OpcUa_SecurityTokenRequestType_Issue)
         {
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ScStateMgr OPN error: invalid request type\n");
+            }
             // Cannot renew in SC_Init state
             *errorStatus = OpcUa_BadTcpSecureChannelUnknown;
             result = false;
@@ -1383,6 +1391,10 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         // Check the valid security mode requested is the one guessed based on asymmetric security header content
         if (false == validSecurityRequested)
         {
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ScStateMgr OPN error: invalid security parameters requested\n");
+            }
             result = false;
             //*errorStatus = OpcUa_BadSecurityModeRejected; => not a TCP error message authorized error
             *errorStatus = OpcUa_BadSecurityChecksFailed;
@@ -1390,6 +1402,10 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         else if (false == scConnection->serverAsymmSecuInfo.isSecureModeActive &&
                  opnReq->SecurityMode != OpcUa_MessageSecurityMode_None)
         {
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ScStateMgr OPN error: certificates expected \n");
+            }
             // Certificates were absent in asym. header and it is not compatible with the security mode requested
             *errorStatus = OpcUa_BadSecurityChecksFailed;
             result = false;
@@ -1411,6 +1427,10 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                 if (opnReq->ClientNonce.Length > 0)
                 {
                     // Nonce unexpected
+                    if (SOPC_DEBUG_PRINTING != false)
+                    {
+                        printf("ScStateMgr OPN warning: unexpected Nonce presence for None security mode\n");
+                    }
                     // TODO: log
                 }
             }
@@ -1431,6 +1451,10 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                 else
                 {
                     // Nonce expected
+                    if (SOPC_DEBUG_PRINTING != false)
+                    {
+                        printf("ScStateMgr OPN error: unexpected Nonce length\n");
+                    }
                     result = false;
                     *errorStatus = OpcUa_BadSecurityChecksFailed;
                 }

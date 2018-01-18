@@ -305,10 +305,14 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ByteString_Read(&senderCertificate, scConnection->chunksCtx.chunkInputBuffer);
-    }
-    else
-    {
-        *errorStatus = OpcUa_BadTcpInternalError;
+
+        if (SOPC_STATUS_OK != status)
+        {
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error:(asym cert) sender certificate decoding error\n");
+            }
+        }
     }
 
     if (SOPC_STATUS_OK == status)
@@ -319,6 +323,11 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
             // Table 27 part 6: "field shall be null if the Message is not signed"
             *errorStatus = OpcUa_BadCertificateUseNotAllowed;
             *senderCertificatePresence = true;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error:(asym cert) sender certificate presence not expected\n");
+            }
         }
         else if (toSign != false && senderCertificate.Length > 0)
         {
@@ -334,6 +343,11 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                 if (status != SOPC_STATUS_OK || otherAppCertComparison != 0)
                 {
                     *errorStatus = OpcUa_BadCertificateInvalid;
+
+                    if (SOPC_DEBUG_PRINTING != false)
+                    {
+                        printf("ChunksMgr error:(asym cert) sender certificate is not the one expected\n");
+                    }
                 }
             }
 
@@ -349,6 +363,11 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                 if (SOPC_STATUS_OK != status)
                 {
                     *errorStatus = OpcUa_BadTcpInternalError;
+
+                    if (SOPC_DEBUG_PRINTING != false)
+                    {
+                        printf("ChunksMgr error:(asym cert) sender certificate validation failed\n");
+                    }
                 }
 
                 if (false == scConnection->isServerConnection)
@@ -368,7 +387,9 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                     {
                         // Error case
                         if (NULL != cert)
+                        {
                             SOPC_KeyManager_Certificate_Free(cert);
+                        }
                     }
                 }
             }
@@ -383,12 +404,22 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
             status = SOPC_STATUS_NOK;
             // Sender certificate was expected
             *errorStatus = OpcUa_BadCertificateInvalid;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error:(asym cert) sender certificate presence expected\n");
+            }
         }
     }
     else
     {
         // status == STATUS_NOK
         *errorStatus = OpcUa_BadTcpInternalError;
+
+        if (SOPC_DEBUG_PRINTING != false)
+        {
+            printf("ChunksMgr error:(asym cert) certificate copy error\n");
+        }
     }
 
     // Receiver Certificate Thumbprint:
@@ -403,6 +434,11 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                 // Table 27 part 6: "field shall be null if the Message is not encrypted"
                 *errorStatus = OpcUa_BadCertificateUseNotAllowed;
                 *receiverCertificatePresence = true;
+
+                if (SOPC_DEBUG_PRINTING != false)
+                {
+                    printf("ChunksMgr error:(asym cert) receiver thumbprint presence not expected\n");
+                }
             }
             else if (toEncrypt != false && receiverCertThumb.Length > 0)
             {
@@ -446,11 +482,21 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                                 {
                                     status = SOPC_STATUS_NOK;
                                     *errorStatus = OpcUa_BadCertificateInvalid;
+
+                                    if (SOPC_DEBUG_PRINTING != false)
+                                    {
+                                        printf("ChunksMgr error:(asym cert) invalid receiver thumbprint\n");
+                                    }
                                 }
                             }
                             else
                             {
                                 *errorStatus = OpcUa_BadTcpInternalError;
+
+                                if (SOPC_DEBUG_PRINTING != false)
+                                {
+                                    printf("ChunksMgr error:(asym cert) thumbprint computation failed\n");
+                                }
                             }
                         }
                         else
@@ -462,6 +508,11 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                     {
                         status = SOPC_STATUS_NOK;
                         *errorStatus = OpcUa_BadCertificateInvalid;
+
+                        if (SOPC_DEBUG_PRINTING != false)
+                        {
+                            printf("ChunksMgr error:(asym cert) invalid thumbprint size\n");
+                        }
                     }
                 } // if thumbprint length correctly computed
 
@@ -477,11 +528,21 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                 status = SOPC_STATUS_NOK;
                 // absence was not expected
                 *errorStatus = OpcUa_BadCertificateInvalid;
+
+                if (SOPC_DEBUG_PRINTING != false)
+                {
+                    printf("ChunksMgr error:(asym cert) thumbprint presence expected\n");
+                }
             }
         }
         else
         { // if decoded thumbprint
             *errorStatus = OpcUa_BadTcpInternalError;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error:(asym cert) receiver thumbprint decoding error \n");
+            }
         }
     }
 
@@ -531,6 +592,11 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
         {
             result = false;
             *errorStatus = OpcUa_BadInvalidState;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error:(asym header) SC configuration not found\n");
+            }
         }
     }
     else
@@ -551,6 +617,11 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
             {
                 result = false;
                 *errorStatus = OpcUa_BadInvalidState;
+
+                if (SOPC_DEBUG_PRINTING != false)
+                {
+                    printf("ChunksMgr error:(asym header) SC configuration not found\n");
+                }
             }
         }
     }
@@ -563,6 +634,11 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
         {
             result = false;
             *errorStatus = OpcUa_BadDecodingError;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error:(asym header) security policy decoding failed\n");
+            }
         }
     }
 
@@ -580,6 +656,11 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
             {
                 result = false;
                 *errorStatus = OpcUa_BadDecodingError;
+
+                if (SOPC_DEBUG_PRINTING != false)
+                {
+                    printf("ChunksMgr error:(asym header) security policy value unexpected\n");
+                }
             }
             else
             {
@@ -610,6 +691,11 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
         {
             result = false;
             *errorStatus = OpcUa_BadSecurityPolicyRejected;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error:(asym header) security policy rejected\n");
+            }
         }
     }
 
@@ -618,9 +704,14 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
         scConnection->cryptoProvider = SOPC_CryptoProvider_Create(validSecuPolicy);
         if (NULL == scConnection->cryptoProvider)
         {
-            // Rejected by the cryptographic componenent
+            // Rejected by the cryptographic component
             result = false;
             *errorStatus = OpcUa_BadSecurityPolicyRejected;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error:(asym header) security policy invalid\n");
+            }
         }
     }
 
@@ -629,6 +720,14 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
         result = SC_Chunks_DecodeAsymSecurityHeader_Certificates(scConnection, serverConfig, clientConfig,
                                                                  &senderCertifPresence, &clientCertificate,
                                                                  &receiverCertifThumbprintPresence, errorStatus);
+
+        if (result == false)
+        {
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error:(asym header) certificates decoding failed\n");
+            }
+        }
     }
 
     if (false != result)
@@ -647,6 +746,11 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
         {
             result = false;
             *errorStatus = OpcUa_BadCertificateInvalid;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error:(asym header) certificates presence constraints not verified\n");
+            }
         }
 
         // In case secure channel config is already done (RENEW), check it is correct
@@ -667,6 +771,11 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
                 // Incompatible parameters with already configured security mode
                 result = false;
                 *errorStatus = OpcUa_BadSecurityChecksFailed;
+
+                if (SOPC_DEBUG_PRINTING != false)
+                {
+                    printf("ChunksMgr error:(asym header) security mode constraints not verified\n");
+                }
             }
         }
     }
@@ -1226,6 +1335,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             // or HELLO message chunk shall be final
             result = false;
             *errorStatus = OpcUa_BadTcpMessageTypeInvalid;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error : invalid message HEL received \n");
+            }
         }
         // Nothing to do: whole payload to transmit to the secure connection state manager
         break;
@@ -1236,6 +1350,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             // or ACK message chunk shall be final
             result = false;
             *errorStatus = OpcUa_BadTcpMessageTypeInvalid;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error : invalid message ACK received \n");
+            }
         }
         // Nothing to do: whole payload to transmit to the secure connection state manager
         break;
@@ -1246,6 +1365,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             // or ERR message chunk shall be final
             result = false;
             *errorStatus = OpcUa_BadTcpMessageTypeInvalid;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error : invalid message ERR received \n");
+            }
         }
         // Nothing to do: whole payload to transmit to the secure connection state manager
         break;
@@ -1255,6 +1379,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             // OPN message chunk shall be final
             result = false;
             *errorStatus = OpcUa_BadTcpMessageTypeInvalid;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error : invalid message OPN received \n");
+            }
         }
         else
         {
@@ -1269,6 +1398,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
         {
             result = false;
             *errorStatus = OpcUa_BadTcpMessageTypeInvalid;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error : invalid message CLO received \n");
+            }
         }
         else
         {
@@ -1315,6 +1449,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                         // The server shall always provide a secure channel Id != 0
                         result = false;
                         *errorStatus = OpcUa_BadSecurityChecksFailed;
+
+                        if (SOPC_DEBUG_PRINTING != false)
+                        {
+                            printf("ChunksMgr error: server provided invalid initial secure channel Id\n");
+                        }
                     }
                 }
                 else
@@ -1330,6 +1469,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                          */
                         result = false;
                         *errorStatus = OpcUa_BadSecurityChecksFailed;
+
+                        if (SOPC_DEBUG_PRINTING != false)
+                        {
+                            printf("ChunksMgr error: client provided invalid initial secure channel Id\n");
+                        }
                     } // else: secure channel Id == 0 from client expected, then new Id set by server in OPN response
                 }
             }
@@ -1338,6 +1482,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                 // Error: it shall be the expected secure channel Id
                 result = false;
                 *errorStatus = OpcUa_BadTcpSecureChannelUnknown;
+
+                if (SOPC_DEBUG_PRINTING != false)
+                {
+                    printf("ChunksMgr error: invalid secure channel Id\n");
+                }
             }
         }
         else
@@ -1347,6 +1496,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                 // Error: it shall be the expected secure channel Id when not an OPN
                 result = false;
                 *errorStatus = OpcUa_BadTcpSecureChannelUnknown;
+
+                if (SOPC_DEBUG_PRINTING != false)
+                {
+                    printf("ChunksMgr error: invalid secure channel Id\n");
+                }
             }
         }
     }
@@ -1361,6 +1515,13 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             toDecrypt = isSecurityActive;
             toCheckSignature = isSecurityActive;
             isPrecCryptoData = false; // asymmetric => unused parameter in decrypt / check sign
+        }
+        else
+        {
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error: asymmetric security header verification failed\n");
+            }
         }
     }
 
@@ -1380,6 +1541,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
         {
             result = false;
             *errorStatus = OpcUa_BadSecurityChecksFailed;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error : SC configuration not found \n");
+            }
         }
         else
         {
@@ -1388,6 +1554,13 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             {
                 toDecrypt = SC_Chunks_IsMsgEncrypted(scConfig->msgSecurityMode, isOPN);
                 toCheckSignature = SC_Chunks_IsMsgSigned(scConfig->msgSecurityMode);
+            }
+            else
+            {
+                if (SOPC_DEBUG_PRINTING != false)
+                {
+                    printf("ChunksMgr error: symmetric security header verification failed\n");
+                }
             }
         }
     }
@@ -1401,6 +1574,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
         if (false == result)
         {
             *errorStatus = OpcUa_BadSecurityChecksFailed;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error: decryption failed\n");
+            }
         }
     }
 
@@ -1413,6 +1591,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
         if (false == result)
         {
             *errorStatus = OpcUa_BadApplicationSignatureInvalid;
+
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error: signature verification failed\n");
+            }
         }
     }
 
@@ -1425,6 +1608,20 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             result = SC_Chunks_CheckSequenceHeaderRequestId(scConnection,
                                                             false == scConnection->isServerConnection, // isClient
                                                             chunkCtx->currentMsgType, requestId, errorStatus);
+            if (result == false)
+            {
+                if (SOPC_DEBUG_PRINTING != false)
+                {
+                    printf("ChunksMgr error: request Id verification failed\n");
+                }
+            }
+        }
+        else
+        {
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error: SN verification failed\n");
+            }
         }
     }
 
@@ -1485,6 +1682,11 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                     if (false == result)
                     {
                         errorStatus = OpcUa_BadTcpMessageTooLarge;
+
+                        if (SOPC_DEBUG_PRINTING != false)
+                        {
+                            printf("ChunksMgr error : message (header) too large for buffer \n");
+                        }
                     }
                     else
                     {
@@ -1501,6 +1703,11 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                     if (false == result)
                     {
                         errorStatus = OpcUa_BadTcpMessageTooLarge;
+
+                        if (SOPC_DEBUG_PRINTING != false)
+                        {
+                            printf("ChunksMgr error: message (header) too large for buffer \n");
+                        }
                     }
                 }
             }
@@ -1512,6 +1719,10 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                 if (false == result)
                 {
                     errorStatus = OpcUa_BadTcpMessageTypeInvalid;
+                    if (SOPC_DEBUG_PRINTING != false)
+                    {
+                        printf("ChunksMgr error: message type invalid \n");
+                    }
                 }
                 else
                 {
@@ -1549,6 +1760,11 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                     // Size provided by message seems invalid
                     result = false;
                     errorStatus = OpcUa_BadTcpInternalError; // not really internal no error corresponding
+
+                    if (SOPC_DEBUG_PRINTING != false)
+                    {
+                        printf("ChunksMgr error : message size invalid \n");
+                    }
                 }
 
                 if (result != false)
@@ -1561,6 +1777,11 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                         if (false == result)
                         {
                             errorStatus = OpcUa_BadTcpMessageTooLarge;
+
+                            if (SOPC_DEBUG_PRINTING != false)
+                            {
+                                printf("ChunksMgr error : message too large for buffer \n");
+                            }
                         }
 
                         // Enough data to read complete message
@@ -1574,6 +1795,11 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                         if (false == result)
                         {
                             errorStatus = OpcUa_BadTcpMessageTooLarge;
+
+                            if (SOPC_DEBUG_PRINTING != false)
+                            {
+                                printf("ChunksMgr error: message too large for buffer \n");
+                            }
                         }
                     }
                 }
@@ -1599,18 +1825,19 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                                                                  (void*) chunkCtx->chunkInputBuffer, requestId);
                     }
                     chunkCtx->chunkInputBuffer = NULL;
-                    // reset chunk context (buffer not deallocated since provided to secure connection state manager)
+                    // reset chunk context (buffer not deallocated since provided to secure connection state
+                    // manager)
                     memset(&scConnection->chunksCtx, 0, sizeof(SOPC_SecureConnection_ChunkMgrCtx));
-                }
-                else
-                {
-                    result = false;
                 }
             }
         } /* END OF OPC UA TCP MESSAGE PAYLOAD TREATMENT */
 
         if (false == result)
         {
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("ChunksMgr error: INT_SC_RCV_FAILURE: %x\n", errorStatus);
+            }
             // Treat as prio events
             SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, scConnectionIdx, NULL, errorStatus);
             SOPC_Buffer_Delete(chunkCtx->chunkInputBuffer);
@@ -2585,7 +2812,8 @@ static bool SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnection,
 
     /* PRE-CONFIG PHASE */
 
-    // Set the position at the beginning of the buffer (to be read or to could encode header for which space was left)
+    // Set the position at the beginning of the buffer (to be read or to could encode header for which space was
+    // left)
     status = SOPC_Buffer_SetPosition(inputBuffer, 0);
     assert(SOPC_STATUS_OK == status);
 
@@ -2613,7 +2841,8 @@ static bool SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnection,
         {
             /* ENCODE OPC UA SECURE CONVERSATION MESSAGE PHASE*/
 
-            // Note: when sending a secure conversation message, the secure connection configuration shall be defined
+            // Note: when sending a secure conversation message, the secure connection configuration shall be
+            // defined
             if (false == scConnection->isServerConnection)
             {
                 scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
@@ -2970,7 +3199,8 @@ static bool SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnection,
                     }
                     else
                     {
-                        // TODO: return status message too large ? => is there any guarantee due to plain buffer size ?
+                        // TODO: return status message too large ? => is there any guarantee due to plain buffer
+                        // size ?
                     }
 
                     if (encryptedBuffer != NULL)
