@@ -1,14 +1,5 @@
-/** \file
- *
- * Gathers the sources of the lib-specific and crypto-related functions.
- * Should be split in the future to provide finer grained linking options
- *  (https://www.ingopcs.net/trac/ingopcs.projects/ticket/187).
- *
- * \warning     These functions should only be called through the stack API, as they don't verify
- *              nor sanitize their arguments.
- */
 /*
- *  Copyright (C) 2016 Systerel and others.
+ *  Copyright (C) 2018 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -22,6 +13,16 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** \file
+ *
+ * Gathers the sources of the lib-specific and crypto-related functions.
+ * Should be split in the future to provide finer grained linking options
+ *  (https://www.ingopcs.net/trac/ingopcs.projects/ticket/187).
+ *
+ * \warning     These functions should only be called through the stack API, as they don't verify
+ *              nor sanitize their arguments.
  */
 
 #include <stdlib.h>

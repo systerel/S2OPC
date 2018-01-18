@@ -1,12 +1,5 @@
-/** \file pki_stack.c
- *
- * The minimal PKI implementation provided by the stack. It is lib-specific.
- *
- * This is not the role of the stack to provide a full-blown configurable PKI.
- * The stack provides only a minimal, always safe validating PKI.
- */
 /*
- *  Copyright (C) 2016 Systerel and others.
+ *  Copyright (C) 2018 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,6 +13,14 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** \file pki_stack.c
+ *
+ * The minimal PKI implementation provided by the stack. It is lib-specific.
+ *
+ * This is not the role of the stack to provide a full-blown configurable PKI.
+ * The stack provides only a minimal, always safe validating PKI.
  */
 
 #include <stdlib.h>

@@ -1,11 +1,5 @@
-/** \file
- *
- * Defines the cryptographic profiles: the set of functions associated to each cryptographic profiles.
- * These profiles are defined as struct of pointers. These immutable struct are extern and const, so that a profile
- * could not be modified before execution time.
- */
 /*
- *  Copyright (C) 2016 Systerel and others.
+ *  Copyright (C) 2018 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,6 +13,13 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** \file
+ *
+ * Defines the cryptographic profiles: the set of functions associated to each cryptographic profiles.
+ * These profiles are defined as struct of pointers. These immutable struct are extern and const, so that a profile
+ * could not be modified before execution time.
  */
 
 #include <stddef.h>

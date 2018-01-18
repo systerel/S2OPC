@@ -1,13 +1,5 @@
-/** \file sopc_key_manager.c
- *
- * KeyManager provides functions for Asymmetric Key Management such as loading a signed public key,
- *  the corresponding private key, and provides the ability to verify signatures with x509 certificates.
- * KeyManager replaces the old concept of PKIProvider. PrivateKey should not be in the PublicKeyInfrastructure...
- *
- * Most of the functions are lib-dependent. This file defines the others.
- */
 /*
- *  Copyright (C) 2016 Systerel and others.
+ *  Copyright (C) 2018 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -21,6 +13,15 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** \file sopc_key_manager.c
+ *
+ * KeyManager provides functions for Asymmetric Key Management such as loading a signed public key,
+ *  the corresponding private key, and provides the ability to verify signatures with x509 certificates.
+ * KeyManager replaces the old concept of PKIProvider. PrivateKey should not be in the PublicKeyInfrastructure...
+ *
+ * Most of the functions are lib-dependent. This file defines the others.
  */
 
 #include <stdlib.h>

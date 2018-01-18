@@ -1,8 +1,5 @@
 /*
- * Tests suites are gathered here.
- * Inspired from https://github.com/libcheck/check/blob/master/tests/check_check.h
- *
- *  Copyright (C) 2016 Systerel and others.
+ *  Copyright (C) 2018 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,6 +13,12 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** \file
+ *
+ * \brief Tests suites are gathered here.
+ * Inspired from https://github.com/libcheck/check/blob/master/tests/check_check.h
  */
 
 #ifndef CHECK_HELPERS_H

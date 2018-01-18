@@ -1,9 +1,5 @@
-/** \file key_manager_lib.h
- *
- * Implementations for AsymmetricKey and Certificate are mainly lib-specific.
- */
 /*
- *  Copyright (C) 2016 Systerel and others.
+ *  Copyright (C) 2018 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,6 +13,11 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/** \file key_manager_lib.h
+ *
+ * Implementations for AsymmetricKey and Certificate are mainly lib-specific.
  */
 
 #ifndef SOPC_KEY_MANAGER_LIB_H_
