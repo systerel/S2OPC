@@ -1,4 +1,7 @@
-# Copyright (C) 2017 Systerel and others.
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2018 Systerel and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -8,9 +11,6 @@
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#!/usr/bin/python3.4
-#-*-coding:Utf-8 -*
-
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
