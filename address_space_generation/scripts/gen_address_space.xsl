@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 Copyright (C) 2018 Systerel and others.
 
@@ -15,7 +16,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 version="2.0" xmlns:ua="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd"  xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd"  xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sys="http://www.systerel.fr" >
     <xsl:output method="text"  encoding="UTF-8" />
@@ -102,9 +102,8 @@ classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
 <!-- Variable containing variable and variabletype nodes -->
 <xsl:variable name="var_vartype" select="$ua_nodes/ua:UAVariable|$ua_nodes/ua:UAVariableType"/>
 
-<xsl:template match="/">
-/*
- *  Copyright (C) 2017 Systerel and others.
+<xsl:template match="/">/*
+ *  Copyright (C) 2018 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as

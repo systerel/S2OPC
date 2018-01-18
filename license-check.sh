@@ -102,7 +102,10 @@ echo '#!/bin/bash
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ' > $HEADER_SH
-echo '<!--
+
+# XSL header
+echo '<?xml version="1.0" encoding="UTF-8"?>
+<!--
 Copyright (C) 2018 Systerel and others.
 
 This program is free software: you can redistribute it and/or modify
