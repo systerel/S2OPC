@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,9 +40,10 @@
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 
-static bool sessionActivated = false;
-static bool sessionClosed = false;
+static uint8_t sessionsActivated = 0;
+static uint8_t sessionsClosed = 0;
 static int32_t session = 0;
+static int32_t session2 = 0;
 
 static uint32_t cptReadResps = 0;
 
@@ -78,12 +80,19 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, void* param, SOPC_StatusC
     }
     else if (event == SE_ACTIVATED_SESSION)
     {
-        sessionActivated = true;
-        session = *(int32_t*) param;
+        sessionsActivated++;
+        if (sessionsActivated == 1)
+        {
+            session = *(int32_t*) param;
+        }
+        else
+        {
+            session2 = *(int32_t*) param;
+        }
     }
     else if (event == SE_SESSION_ACTIVATION_FAILURE || event == SE_CLOSED_SESSION)
     {
-        sessionClosed = true;
+        sessionsClosed++;
     }
 }
 
@@ -99,6 +108,7 @@ static void* getReadRequest_verif_message(void)
     return tlibw_new_ReadRequest_check();
 }
 
+// A Secure channel connection configuration
 SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
                                       .url = ENDPOINT_URL,
                                       .crt_cli = NULL,
@@ -108,6 +118,17 @@ SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
                                       .reqSecuPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI,
                                       .requestedLifetime = 20000,
                                       .msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt};
+
+// A second configuration to could connect in parallel 2 secure channels and sessions
+SOPC_SecureChannel_Config scConfig2 = {.isClientSc = true,
+                                       .url = ENDPOINT_URL,
+                                       .crt_cli = NULL,
+                                       .key_priv_cli = NULL,
+                                       .crt_srv = NULL,
+                                       .pki = NULL,
+                                       .reqSecuPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI,
+                                       .requestedLifetime = 60000,
+                                       .msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt};
 
 int main(void)
 {
@@ -124,6 +145,7 @@ int main(void)
     SOPC_AsymmetricKey* priv_cli = NULL;
 
     uint32_t channel_config_idx = 0;
+    uint32_t channel_config_idx2 = 0;
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -139,6 +161,9 @@ int main(void)
 
     // If security mode is set, load certificates and key
 
+    // Note: Same security config for both secure channels are considered then
+    assert(scConfig.msgSecurityMode == scConfig2.msgSecurityMode);
+
     if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None)
     {
         // The certificates: load
@@ -151,6 +176,7 @@ int main(void)
         {
             printf(">>Stub_Client: Client certificate loaded\n");
             scConfig.crt_cli = crt_cli;
+            scConfig2.crt_cli = crt_cli;
         }
     }
 
@@ -165,6 +191,7 @@ int main(void)
         {
             printf(">>Stub_Client: Server certificate loaded\n");
             scConfig.crt_srv = crt_srv;
+            scConfig2.crt_srv = crt_srv;
         }
     }
 
@@ -180,6 +207,7 @@ int main(void)
         {
             printf(">>Stub_Client: Client private key loaded\n");
             scConfig.key_priv_cli = priv_cli;
+            scConfig2.key_priv_cli = priv_cli;
         }
     }
 
@@ -207,6 +235,7 @@ int main(void)
         {
             printf(">>Stub_Client: PKI created\n");
             scConfig.pki = pki;
+            scConfig2.pki = pki;
         }
     }
 
@@ -239,11 +268,12 @@ int main(void)
         }
     }
 
-    // Configure the secure channel connection to use and retrieve channel configuration index
+    // Configure the 2 secure channel connections to use and retrieve channel configuration index
     if (SOPC_STATUS_OK == status)
     {
         channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
-        if (channel_config_idx != 0)
+        channel_config_idx2 = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
+        if (channel_config_idx != 0 && channel_config_idx2 != 0)
         {
             status = SOPC_Toolkit_Configured();
         }
@@ -253,7 +283,7 @@ int main(void)
         }
         if (SOPC_STATUS_OK != status)
         {
-            printf(">>Test_Client_Toolkit: Failed to configure the secure channel\n");
+            printf(">>Test_Client_Toolkit: Failed to configure the secure channel connections\n");
         }
         else
         {
@@ -261,16 +291,17 @@ int main(void)
         }
     }
 
-    /* Asynchronous request to create a session (and underlying secure channel if necessary). */
+    /* Asynchronous request to create 2 sessions (and underlying secure channel connections if necessary). */
     if (SOPC_STATUS_OK == status)
     {
         SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx);
-        printf(">>Test_Client_Toolkit: Creating/Activating session: OK\n");
+        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx2);
+        printf(">>Test_Client_Toolkit: Creating/Activating 2 sessions: OK\n");
     }
 
     /* Wait until session is activated or timeout */
     loopCpt = 0;
-    while (SOPC_STATUS_OK == status && sessionActivated == false && sessionClosed == false &&
+    while (SOPC_STATUS_OK == status && (sessionsActivated + sessionsClosed) < 2 &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
@@ -283,18 +314,18 @@ int main(void)
         status = SOPC_STATUS_TIMEOUT;
     }
 
-    if (sessionClosed == true)
+    if (sessionsClosed != 0)
     {
         status = SOPC_STATUS_NOK;
     }
 
-    if (SOPC_STATUS_OK == status && sessionActivated != false)
+    if (SOPC_STATUS_OK == status && sessionsActivated == 2)
     {
-        printf(">>Test_Client_Toolkit: Session activated: OK'\n");
+        printf(">>Test_Client_Toolkit: Sessions activated: OK'\n");
     }
     else
     {
-        printf(">>Test_Client_Toolkit: Session activated: NOK'\n");
+        printf(">>Test_Client_Toolkit: Sessions activated: NOK'\n");
     }
 
     if (SOPC_STATUS_OK == status)
@@ -387,13 +418,18 @@ int main(void)
         SOPC_ToolkitClient_AsyncCloseSession(session);
     }
 
+    if (0 != session2)
+    {
+        SOPC_ToolkitClient_AsyncCloseSession(session2);
+    }
+
     /* Wait until session is closed or timeout */
     loopCpt = 0;
     do
     {
         loopCpt++;
         SOPC_Sleep(100);
-    } while (SOPC_STATUS_OK == status && sessionClosed == false && loopCpt * sleepTimeout <= loopTimeout);
+    } while (SOPC_STATUS_OK == status && sessionsClosed < 2 && loopCpt * sleepTimeout <= loopTimeout);
 
     SOPC_Toolkit_Clear();
 
