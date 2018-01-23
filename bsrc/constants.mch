@@ -91,7 +91,6 @@ SETS
     t_BrowseResult_i;
 
     t_byte_buffer_i;
-    t_UserId_i;
     t_LocalizedText_i;
     t_QualifiedName_i;
 
@@ -242,7 +241,6 @@ CONCRETE_CONSTANTS
     c_BrowseValue_indet,
     c_BrowseResult_indet,
     c_byte_buffer_indet,
-    c_UserId_indet,
     c_LocalizedText_indet,
     c_QualifiedName_indet,
 
@@ -281,7 +279,6 @@ ABSTRACT_CONSTANTS
     t_BrowseResult,
     t_RefIndex,
     t_byte_buffer,
-    t_UserId,
     t_LocalizedText,
     t_QualifiedName,
 
@@ -409,10 +406,6 @@ PROPERTIES
     t_byte_buffer <: t_byte_buffer_i &
     c_byte_buffer_indet : t_byte_buffer_i &
     c_byte_buffer_indet /: t_byte_buffer &
-
-    t_UserId <: t_UserId_i &
-    c_UserId_indet : t_UserId_i &
-    c_UserId_indet /: t_UserId &
 
     t_LocalizedText <: t_LocalizedText_i &
     c_LocalizedText_indet : t_LocalizedText_i &

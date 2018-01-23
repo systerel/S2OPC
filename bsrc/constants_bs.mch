@@ -49,7 +49,6 @@ CONCRETE_CONSTANTS
     c_Node_indet,
     c_NodeId_indet,
     c_byte_buffer_indet,
-    c_UserId_indet,
 
     c_channel_indet,
     c_user_indet,
@@ -73,7 +72,6 @@ ABSTRACT_CONSTANTS
     t_Node,
     t_NodeId,
     t_byte_buffer,
-    t_UserId,
 
     t_channel,
     cast_t_channel,    
@@ -113,10 +111,6 @@ PROPERTIES
     t_byte_buffer <: t_byte_buffer_i &
     c_byte_buffer_indet : t_byte_buffer_i &
     c_byte_buffer_indet /: t_byte_buffer &
-
-    t_UserId <: t_UserId_i &
-    c_UserId_indet : t_UserId_i &
-    c_UserId_indet /: t_UserId &
 
     t_channel <: t_channel_i &
     c_channel_indet : t_channel_i &

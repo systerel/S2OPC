@@ -27,13 +27,15 @@ SEES
 
 DEFINITIONS
     d_variables ==
+    a_client_to_activate,
     a_client_token,
     a_server_token,
     a_user,
     a_NonceServer,
     a_NonceClient;
 
-    d_typing ==
+d_typing ==
+	a_client_to_activate : t_session +-> t_user &
     a_client_token : t_session       +-> t_session_token &
     a_server_token : t_session_token +-> t_session       &
     a_user         : t_session       +-> t_user          &
@@ -431,5 +433,81 @@ OPERATIONS
     THEN
         skip
     END
+    ;
+    
+    set_session_to_activate(p_session, p_user) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session   &
+        p_user    : t_user_i    &
+        p_user    : t_user
+    THEN
+        a_client_to_activate(p_session) := p_user
+    END
+    ;
+    
+    p_dom, p_user <-- getall_to_activate(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        p_dom := bool(p_session : dom(a_client_to_activate)) ||
+        IF  p_session /: dom(a_client_to_activate) THEN
+            p_user := c_user_indet
+        ELSE
+            p_user := a_client_to_activate(p_session)
+        END
+    END
+    ;
+    
+    reset_session_to_activate(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        a_client_to_activate := {p_session} <<| a_client_to_activate
+    END
+    ;
+    
+    /* Generate internal event to create given session on event treatment.
+       Used to transform multiple sessions treatment into single session treatment
+    */
+    client_gen_create_session_internal_event (session, channel_config_idx) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    ;
+    
+    /* Generate internal event to activate given orphaned session on event treatment.
+       Used to transform multiple sessions treatment into single session treatment
+    */
+    client_gen_activate_orphaned_session_internal_event (session, channel_config_idx) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    ;
+    
+    /* Generate internal event to activate given session on event treatment.
+       Used to transform multiple sessions treatment into single session treatment
+    */
+    client_gen_activate_user_session_internal_event (session, user) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        user : t_user_i &
+        user : t_user
+    THEN
+        skip
+    END    
 
 END

@@ -36,10 +36,19 @@ PROMOTES
     client_get_token_from_session,
     getall_session_channel,
     get_session_channel,
+    set_session_to_create,
+    set_session_to_activate,
+    getall_to_create,
+    getall_to_activate,
     getall_orphaned,
+    reset_session_to_create,
+    reset_session_to_activate,
     is_valid_session,
     is_valid_user,
-    delete_session
+    delete_session,
+    client_gen_create_session_internal_event,
+    client_gen_activate_orphaned_session_internal_event,
+    client_gen_activate_user_session_internal_event
 
 LOCAL_OPERATIONS
 

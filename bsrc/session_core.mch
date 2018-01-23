@@ -29,6 +29,8 @@ DEFINITIONS
     s_session,
     a_state,
     a_channel,
+    a_client_to_create,
+    a_client_to_activate,
     a_orphaned,
     a_client_token,
     a_server_token,
@@ -46,6 +48,8 @@ DEFINITIONS
     s_session <: t_session &
     a_state : s_session --> t_sessionState & // a session shall be associated to a state
     a_channel : s_session +-> t_channel & // a session may be associated to a valid channel
+    a_client_to_create : s_session +-> t_channel_config_idx_i & // a client session may be waiting to be created on a channel (not yet established)
+    a_client_to_activate : s_session +-> t_user & // a client session may be waiting to be activated (session not yet created)
     a_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)
     a_client_token : s_session +-> t_session_token & // a client session has an associated session token once create response received
     a_server_token : t_session_token >+> s_session & // a server session has a unique authentication token in server once create response sent
@@ -86,6 +90,12 @@ INVARIANT
 
     // All sessions not (created or creating or closed or init) have a user associated and only those sessions
     dom(a_state |>> {e_session_created, e_session_creating, e_session_closed, e_session_init}) = dom(a_user) &
+    
+    // All sessions to be created are included in session in init state
+    dom(a_client_to_create) <: dom(a_state |> {e_session_init}) &
+    
+    // All sessions to be activated are included in session in init, creating or created state
+    dom(a_client_to_activate) <: dom(a_state |> {e_session_init, e_session_creating, e_session_created}) &
 
     // All sessions have a token (except when in state creating, init or closed (since it creating can be predecessor))
     dom(a_state |>> {e_session_creating, e_session_closed, e_session_init}) = ran(a_server_token) \/ dom(a_client_token) &
@@ -106,6 +116,8 @@ INITIALISATION
     s_session := {}          ||
     a_state := {}            ||
     a_channel := {}          ||
+    a_client_to_create := {} ||
+    a_client_to_activate := {} ||
     a_orphaned := {}         ||
     a_client_token := {}     ||
     a_server_token := {}     ||
@@ -622,7 +634,53 @@ OPERATIONS
             channel :(channel : t_channel_i & channel = a_channel(session))
     END
     ;
-
+    
+    reset_session_to_create(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        a_client_to_create := {p_session} <<| a_client_to_create
+    END
+    ;
+    
+    reset_session_to_activate(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        a_client_to_activate := {p_session} <<| a_client_to_activate
+    END
+    ;
+    
+    p_dom, p_channel_config_idx <-- getall_to_create(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        p_dom := bool(p_session : dom(a_client_to_create)) ||
+        IF  p_session /: dom(a_client_to_create) THEN
+            p_channel_config_idx := c_channel_config_idx_indet
+        ELSE
+            p_channel_config_idx := a_client_to_create(p_session)
+        END
+    END
+    ;
+    
+    p_dom, p_user <-- getall_to_activate(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        p_dom := bool(p_session : dom(a_client_to_activate)) ||
+        IF  p_session /: dom(a_client_to_activate) THEN
+            p_user := c_user_indet
+        ELSE
+            p_user := a_client_to_activate(p_session)
+        END
+    END
+    ;
+    
     p_dom, p_channel_config_idx <-- getall_orphaned(p_session) =
     PRE
         p_session : t_session_i &
@@ -636,7 +694,29 @@ OPERATIONS
         END
     END
     ;
-
+    
+    set_session_to_create(p_session, p_channel_config_idx) =
+    PRE
+        p_session            : t_session_i            &
+        p_session            : s_session              &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx
+    THEN
+        a_client_to_create(p_session) := p_channel_config_idx
+    END
+    ;
+    
+    set_session_to_activate(p_session, p_user) =
+    PRE
+        p_session : t_session_i            &
+        p_session : s_session              &
+        p_user    : t_user_i &
+        p_user    : t_user
+    THEN
+        a_client_to_activate(p_session) := p_user
+    END
+    ;
+    
     ret <-- is_valid_session (session) =
     PRE
         session : t_session_i
@@ -666,6 +746,38 @@ OPERATIONS
         a_server_token := a_server_token |>> {session} ||
         a_orphaned := {session} <<| a_orphaned
     END
+    ;
 
+    client_gen_create_session_internal_event (session, channel_config_idx) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    ;
+    
+    client_gen_activate_orphaned_session_internal_event (session, channel_config_idx) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    ;
+    
+    client_gen_activate_user_session_internal_event (session, user) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        user : t_user_i &
+        user : t_user
+    THEN
+        skip
+    END
 
 END

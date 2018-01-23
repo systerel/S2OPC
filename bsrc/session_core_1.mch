@@ -30,6 +30,8 @@ DEFINITIONS
     s_session,
     a_state,
     a_channel,
+    a_client_to_create,
+    a_client_to_activate,
     a_orphaned,
     a_client_token,
     a_server_token,
@@ -41,6 +43,8 @@ DEFINITIONS
     s_session <: t_session &
     a_state : s_session --> t_sessionState & /* a session shall be associated to a state */
     a_channel : s_session +-> t_channel & /* a session may be associated to a valid channel */
+    a_client_to_create : s_session +-> t_channel_config_idx_i & /* a client session may be waiting to be created on a channel (not yet established) */
+    a_client_to_activate : s_session +-> t_user & /* a client session may be waiting to be activated (session not yet created) */
     a_orphaned : s_session +-> t_channel_config_idx_i & /* a client session may be orphaned of a channel (precedently lost) */
 
     a_client_token : s_session +-> t_session_token & /* a client session has an associated session token once create response received */
@@ -182,6 +186,24 @@ OPERATIONS
         a_channel := {session} <<| a_channel ||
         a_state (session) := e_session_init
     END;
+        
+    reset_session_to_create(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        a_client_to_create := {p_session} <<| a_client_to_create
+    END
+    ;
+    
+    reset_session_to_activate(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        a_client_to_activate := {p_session} <<| a_client_to_activate
+    END
+    ;
 
     ret <-- is_valid_session (session) =
     PRE
@@ -210,7 +232,6 @@ OPERATIONS
     THEN
         a_state (session) := state
         /* + notify  user app when session activated */
-        /* TODO FBA dans un premier temps appeler une fct C */
     END
     ;
 
@@ -218,7 +239,7 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : s_session &
-        is_client : BOOL /* TODO FBA à garder pour appeler du code C */
+        is_client : BOOL
     THEN
         a_channel := {session} <<| a_channel           || /* If session had a channel, remove this relation */
         a_orphaned := {session} <<| a_orphaned         || /* If session was orphaned, remove this relation */
@@ -262,7 +283,36 @@ OPERATIONS
             channel :(channel : t_channel_i & channel = a_channel(session))
     END
     ;
-
+    
+        
+    p_dom, p_channel_config_idx <-- getall_to_create(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        p_dom := bool(p_session : dom(a_client_to_create)) ||
+        IF  p_session /: dom(a_client_to_create) THEN
+            p_channel_config_idx := c_channel_config_idx_indet
+        ELSE
+            p_channel_config_idx := a_client_to_create(p_session)
+        END
+    END
+    ;
+    
+    p_dom, p_user <-- getall_to_activate(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        p_dom := bool(p_session : dom(a_client_to_activate)) ||
+        IF  p_session /: dom(a_client_to_activate) THEN
+            p_user := c_user_indet
+        ELSE
+            p_user := a_client_to_activate(p_session)
+        END
+    END
+    ;
+    
     p_dom, p_channel_config_idx <-- getall_orphaned(p_session) =
     PRE
         p_session : t_session_i &
@@ -276,8 +326,30 @@ OPERATIONS
         END
     END
     ;
+    
+    set_session_to_create(p_session, p_channel_config_idx) =
+    PRE
+        p_session            : t_session_i            &
+        p_session            : s_session              &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx
+    THEN
+        a_client_to_create(p_session) := p_channel_config_idx
+    END
+    ;
+    
+    set_session_to_activate(p_session, p_user) =
+    PRE
+        p_session : t_session_i &
+        p_session : s_session   &
+        p_user    : t_user_i    &
+        p_user    : t_user
+    THEN
+        a_client_to_activate(p_session) := p_user
+    END
+    ;
 
-    // new_channel is channel on which connection is awaited to re-associate session
+    /* new_channel is channel on which connection is awaited to re-associate session */
     set_session_orphaned (session, channel_config_idx) =
     PRE
         session : t_session_i &
@@ -569,5 +641,38 @@ OPERATIONS
     THEN
         skip
     END
+    ;
     
+    client_gen_create_session_internal_event (session, channel_config_idx) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    ;
+    
+    client_gen_activate_orphaned_session_internal_event (session, channel_config_idx) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    ;
+    
+    client_gen_activate_user_session_internal_event (session, user) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        user : t_user_i &
+        user : t_user
+    THEN
+        skip
+    END
+
 END

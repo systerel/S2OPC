@@ -30,8 +30,7 @@ SEES
 IMPORTS
     session_core,
     session_mgr_it,
-    session_request_handle_bs,
-    session_async_bs
+    session_request_handle_bs
     
 PROMOTES
     get_session_user_or_indet,
@@ -41,7 +40,7 @@ PROMOTES
     
 LOCAL_OPERATIONS
 
-    local_sc_activate_orphaned_sessions (channel_config_idx) =
+    local_sc_activate_sessions_on_SC_connection (channel_config_idx) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx
@@ -51,8 +50,7 @@ LOCAL_OPERATIONS
     
 OPERATIONS
     
-    /* TODO: generate events to activate sessions in session mgr */
-    local_sc_activate_orphaned_sessions (channel_config_idx) =
+    local_sc_activate_sessions_on_SC_connection (channel_config_idx) =
     VAR
         l_continue,
         l_session,
@@ -67,6 +65,13 @@ OPERATIONS
                 l_channel_config_idx = channel_config_idx
             THEN
                 client_gen_activate_orphaned_session_internal_event (l_session, channel_config_idx)
+            END;
+            l_dom, l_channel_config_idx <-- getall_to_create(l_session);
+            IF  l_dom = TRUE &
+                l_channel_config_idx = channel_config_idx
+            THEN
+                reset_session_to_create(l_session);
+                client_gen_create_session_internal_event (l_session, channel_config_idx)
             END
         INVARIANT
             sessions_to_iterate <: t_session &
@@ -86,7 +91,7 @@ OPERATIONS
         l_session,
         l_session_token,
         l_session_state,
-        l_session_channel,
+        l_session_channel,      
         l_resp_status,
         l_session_user,
         l_bret
@@ -109,12 +114,13 @@ OPERATIONS
                             l_session_state <-- get_session_state_or_closed (l_session);
                             IF l_session_state = e_session_created
                             THEN
-                                l_session_user <-- get_and_remove_session_user_to_activate (l_session);
-                                IF l_session_user /= c_user_indet
+                                l_bret, l_session_user <-- getall_to_activate (l_session);
+                                IF l_bret = TRUE &
+                                    l_session_user /= c_user_indet
                                 THEN
+                                    reset_session_to_activate (l_session);
                                     client_gen_activate_user_session_internal_event (l_session, l_session_user)
-                                END;
-                                l_bret := TRUE
+                                END
                             ELSE
                                 /* The session may be not e_session_created when Nonce generation failed */
                                 l_bret := FALSE
@@ -424,25 +430,16 @@ OPERATIONS
     bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user) =
     VAR
         l_session,
-        l_valid_session
+        l_session_state
     IN
         l_session <-- client_init_session_sm;
-        l_valid_session <-- is_valid_session (l_session);
-        IF l_valid_session = TRUE 
+	    l_session_state <-- get_session_state_or_closed (l_session); // Note: state != closed => session is valid
+        IF l_session_state = e_session_init
         THEN
+            bres := TRUE;
             /* channel did not exist or is not connected anymore: add async session creation on SC connection */
-            bres <-- add_session_to_create (l_session, channel_config_idx);
-            IF bres = TRUE
-            THEN
-                bres <-- add_session_to_activate (l_session, user)
-            END;
-            IF bres = FALSE
-            THEN
-                /* Remove session from sessions to create */
-                l_session <-- get_and_remove_session_to_create (channel_config_idx);
-                /* Delete session */
-                delete_session (l_session)
-            END  
+            set_session_to_create(l_session, channel_config_idx);
+            set_session_to_activate(l_session, user)
         ELSE
             bres := FALSE
         END
@@ -452,24 +449,18 @@ OPERATIONS
     bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, user) =
     VAR
         l_session,
-        l_valid_session
+        l_session_state
     IN
         // PRE guarantee channel is connected
         channel_do_nothing(channel);
         l_session <-- client_init_session_sm;
-        l_valid_session <-- is_valid_session (l_session);
-        IF l_valid_session = TRUE THEN
-            bres <-- add_session_to_activate (l_session, user);
-            IF bres = TRUE
-            THEN
-                /* Generate event to create the session next and then waiting to be activated */
-                client_gen_create_session_internal_event (l_session, channel_config_idx)
-            ELSE
-                /* Remove session from sessions to create */
-                l_session <-- get_and_remove_session_to_create (channel_config_idx);
-                /* Delete session */
-                delete_session (l_session)
-            END
+        l_session_state <-- get_session_state_or_closed (l_session); // Note: state != closed => session is valid
+        IF l_session_state = e_session_init
+        THEN
+            bres := TRUE;
+            /* Generate event to create the session next and then waiting to be activated */
+            client_gen_create_session_internal_event (l_session, channel_config_idx);
+            set_session_to_activate(l_session, user)
         ELSE
             bres := FALSE
         END
@@ -546,19 +537,11 @@ OPERATIONS
     ;
     
     client_channel_connected_event_session (channel_config_idx, channel) =
-    VAR
-        l_session_to_create
-    IN
+    BEGIN
         // PRE guarantee channel is connected
         channel_do_nothing(channel);
-        // Re-associate orphaned sessions waiting for sc (if there are some)
-        local_sc_activate_orphaned_sessions (channel_config_idx);
-        // Create session waiting for sc
-        l_session_to_create <-- get_and_remove_session_to_create (channel_config_idx);
-        IF l_session_to_create /= c_session_indet
-        THEN
-            client_gen_create_session_internal_event (l_session_to_create, channel_config_idx)
-        END
+        // Associate sessions waiting for sc connection (orphaned or waiting for creation)
+        local_sc_activate_sessions_on_SC_connection (channel_config_idx)
     END    
     ;
     
