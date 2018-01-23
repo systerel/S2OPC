@@ -459,10 +459,12 @@ OPERATIONS
         l_session <-- client_init_session_sm;
         l_valid_session <-- is_valid_session (l_session);
         IF l_valid_session = TRUE THEN
-            client_gen_create_session_internal_event (l_session, channel_config_idx);
             bres <-- add_session_to_activate (l_session, user);
-            IF bres = FALSE
+            IF bres = TRUE
             THEN
+                /* Generate event to create the session next and then waiting to be activated */
+                client_gen_create_session_internal_event (l_session, channel_config_idx)
+            ELSE
                 /* Remove session from sessions to create */
                 l_session <-- get_and_remove_session_to_create (channel_config_idx);
                 /* Delete session */

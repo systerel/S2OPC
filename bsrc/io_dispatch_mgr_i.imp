@@ -350,6 +350,7 @@ OPERATIONS
         l_bres
     IN
         l_bres <-- cli_set_connection_timeout_channel (channel_config_idx)
+        // TODO: remove sessions waiting to be created (and activated) on this channel
     END
     ;
 
