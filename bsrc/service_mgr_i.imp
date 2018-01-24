@@ -106,6 +106,23 @@ LOCAL_OPERATIONS
             StatusCode_service : t_StatusCode
         )
     END
+    ;
+    
+    StatusCode_service <-- treat_session_service_req (req_typ, req_msg, resp_msg) =
+    PRE
+        req_typ : t_msg_type_i &
+        req_typ = a_msg_in_type &
+        a_msg_in_type : s_service_on_session_reqs &
+        req_msg : t_msg_i &
+        req_msg = c_msg_in &
+        resp_msg : t_msg_i &
+        resp_msg = c_msg_out
+    THEN
+        StatusCode_service
+        :(  StatusCode_service : t_StatusCode_i &
+            StatusCode_service : t_StatusCode
+        )
+    END
 
 OPERATIONS
 
@@ -229,6 +246,47 @@ OPERATIONS
         free_write_request
     END
     ;
+    
+    StatusCode_service <-- treat_session_service_req (req_typ, req_msg, resp_msg) =
+    VAR
+        l_bret
+    IN
+        CASE req_typ OF
+            EITHER e_msg_attribute_read_req THEN
+                l_bret <-- treat_read_request (req_msg, resp_msg);
+                IF l_bret = TRUE
+                THEN
+                    StatusCode_service := e_sc_ok
+                ELSE
+                    StatusCode_service := e_sc_bad_unexpected_error
+                END
+            OR e_msg_attribute_write_req THEN
+                // Write request case
+                StatusCode_service <-- treat_write_request (req_msg);
+                /* TODO: the following may fail (malloc) */
+                write_WriteResponse_msg_out(resp_msg);
+                dealloc_write_request_responses
+            OR e_msg_view_browse_req THEN
+                /* TODO: l_req_msg is the decoded struct */
+                StatusCode_service <-- decode_browse_request(req_msg);
+                IF StatusCode_service = e_sc_ok THEN
+                    StatusCode_service <-- treat_browse_request_BrowseValues;
+                    IF StatusCode_service = e_sc_ok THEN
+                        l_bret <-- write_BrowseResponse_msg_out(resp_msg);
+                        IF l_bret /= TRUE THEN
+                            StatusCode_service := e_sc_bad_out_of_memory
+                        END
+                    END
+                END;
+                free_browse_result
+            ELSE
+                /* service is not supported */
+                StatusCode_service := e_sc_bad_service_unsupported
+            END
+        END
+    END
+    ;
+    
     /* END OF LOCAL OPERATIONS */
 
     buffer_out <-- server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
@@ -367,10 +425,8 @@ OPERATIONS
         l_resp_msg_header,
         l_valid_resp_header,
         l_ret,
-        l_bret,
         l_is_valid_resp,
-        l_buffer_out,
-        l_isvalid_write
+        l_buffer_out
     IN
         l_buffer_out := c_byte_buffer_indet;
         l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
@@ -400,39 +456,9 @@ OPERATIONS
                         IF l_valid_msg = TRUE &
                             l_valid_resp_header = TRUE
                         THEN
-                            CASE req_typ OF
-                                EITHER e_msg_attribute_read_req THEN
-                                    l_bret <-- treat_read_request (l_req_msg, l_resp_msg);
-                                    IF l_bret = TRUE
-                                    THEN
-                                        l_ret := e_sc_ok
-                                    ELSE
-                                        l_ret := e_sc_bad_unexpected_error
-                                    END
-                                OR e_msg_attribute_write_req THEN
-                                    // Write request case
-                                    l_ret <-- treat_write_request (l_req_msg);
-                                    /* TODO: the following may fail (malloc) */
-                                    write_WriteResponse_msg_out(l_resp_msg);
-                                    dealloc_write_request_responses
-                                OR e_msg_view_browse_req THEN
-                                    /* TODO: l_req_msg is the decoded struct */
-                                    l_ret <-- decode_browse_request(l_req_msg);
-                                    IF l_ret = e_sc_ok THEN
-                                        l_ret <-- treat_browse_request_BrowseValues;
-                                        IF l_ret = e_sc_ok THEN
-                                            l_isvalid_write <-- write_BrowseResponse_msg_out(l_resp_msg);
-                                            IF l_isvalid_write /= TRUE THEN
-                                                l_ret := e_sc_bad_out_of_memory
-                                            END
-                                        END
-                                    END;
-                                    free_browse_result
-                                ELSE
-                                    /* service is not supported */
-                                    l_ret := e_sc_bad_service_unsupported
-                                END
-                            END;
+                            // Call local operation to dispatch the service request on right service
+                            l_ret <-- treat_session_service_req (req_typ, l_req_msg, l_resp_msg);
+                            // Write service result status into response header
                             write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
                             l_is_valid_resp, l_snd_session_err <-- server_validate_session_service_resp (channel, l_session, l_request_handle);
                             IF l_is_valid_resp = TRUE THEN
