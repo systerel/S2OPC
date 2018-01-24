@@ -124,6 +124,7 @@ OPERATIONS
 
     bres <-- cli_open_secure_channel (config_idx) =
     VAR
+        l_already_connecting,
         l_dom,
         l_channel,
         l_card_connecting,
@@ -131,21 +132,26 @@ OPERATIONS
         l_sum,
         l_card_channel
     IN
-        prepare_cli_open_secure_channel(config_idx);
-        l_dom, l_channel <-- getall_config_inv(config_idx);
-        IF  l_dom = FALSE THEN
-            l_card_connecting <-- get_card_cli_channel_connecting;
-            l_card_connected  <-- get_card_channel_connected;
-            l_sum := l_card_connecting + l_card_connected;
-            l_card_channel <-- get_card_t_channel;
-            IF  l_sum /= l_card_channel THEN
-                add_cli_channel_connecting(config_idx);
-                bres := TRUE
+        l_already_connecting <-- is_cli_channel_connecting(config_idx);
+        IF l_already_connecting = TRUE THEN
+            bres := TRUE /* Connection already requested: nothing to do */
+        ELSE
+            l_dom, l_channel <-- getall_config_inv(config_idx);
+            IF  l_dom = FALSE THEN
+                l_card_connecting <-- get_card_cli_channel_connecting;
+                l_card_connected  <-- get_card_channel_connected;
+                l_sum := l_card_connecting + l_card_connected;
+                l_card_channel <-- get_card_t_channel;
+                IF  l_sum /= l_card_channel THEN
+                    add_cli_channel_connecting(config_idx);
+                    prepare_cli_open_secure_channel(config_idx);
+                    bres := TRUE
+                ELSE
+                    bres := FALSE
+                END
             ELSE
                 bres := FALSE
             END
-        ELSE
-           bres := FALSE
         END
     END
     ;
