@@ -897,7 +897,8 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTING);
     assert(false == scConnection->isServerConnection);
     assert(opnRespBuffer != NULL);
-    SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnectionIdx);
+    SOPC_SecureChannel_Config* scConfig =
+        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(scConfig != NULL);
 
     bool result = false;
