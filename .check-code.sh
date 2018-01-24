@@ -114,4 +114,22 @@ else
     echo "Completed with ERRORS" | tee -a $LOGPATH
 fi
 
+#### Check license in files ####
+
+echo "License in files verification" | tee -a $LOGPATH
+./.license-check.sh >> $LOGPATH
+
+if [[ $? != 0 ]]; then
+    echo "ERROR: license in files verification failed, see $LOGPATH" | tee -a $LOGPATH
+    EXITCODE=1
+fi
+
+#### Check final result:
+
+if [[ $EXITCODE -eq 0 ]]; then
+    echo "Completed with SUCCESS" | tee -a $LOGPATH
+else
+    echo "Completed with ERRORS" | tee -a $LOGPATH
+fi
+
 exit $EXITCODE
