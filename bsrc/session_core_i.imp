@@ -432,6 +432,7 @@ OPERATIONS
                 l_state <-- get_session_state (l_session);
                 IF l_state = e_session_userActivated
                 THEN
+                    set_session_orphaned (l_session, c_channel_config_idx_indet);
                     set_session_state (l_session, e_session_scOrphaned)
                 ELSE
                     set_session_state_closed (l_session, FALSE)
