@@ -30,21 +30,21 @@ ABSTRACT_VARIABLES
     a_state,
     a_channel,
     a_client_to_create,
-    a_orphaned
+    a_client_orphaned
 
 INVARIANT
     s_session <: t_session                    &
     a_state    : t_session +-> t_sessionState &
     a_channel  : t_session +-> t_channel      &
     a_client_to_create : s_session +-> t_channel_config_idx_i &
-    a_orphaned : t_session +-> t_channel_config_idx_i
+    a_client_orphaned : t_session +-> t_channel_config_idx_i
 
 INITIALISATION
     s_session  := {}                             ||
     a_state    := t_session * {e_session_closed} ||
     a_channel  := {}                             ||
     a_client_to_create := {}                     ||
-    a_orphaned := {}
+    a_client_orphaned := {}
 
 OPERATIONS
 
@@ -89,7 +89,7 @@ OPERATIONS
         p_session : t_session_i &
         p_session : t_session
     THEN
-        a_orphaned := {p_session} <<| a_orphaned
+        a_client_orphaned := {p_session} <<| a_client_orphaned
     END
     ;
    
@@ -176,11 +176,11 @@ OPERATIONS
         p_session : t_session_i &
         p_session : t_session
     THEN
-        p_dom := bool(p_session : dom(a_orphaned)) ||
-        IF  p_session /: dom(a_orphaned) THEN
+        p_dom := bool(p_session : dom(a_client_orphaned)) ||
+        IF  p_session /: dom(a_client_orphaned) THEN
             p_channel_config_idx := c_channel_config_idx_indet
         ELSE
-            p_channel_config_idx := a_orphaned(p_session)
+            p_channel_config_idx := a_client_orphaned(p_session)
         END
     END
     ;
@@ -203,7 +203,7 @@ OPERATIONS
         p_channel_config_idx : t_channel_config_idx_i &
         p_channel_config_idx : t_channel_config_idx
     THEN
-        a_orphaned(p_session) := p_channel_config_idx
+        a_client_orphaned(p_session) := p_channel_config_idx
     END
 
 END

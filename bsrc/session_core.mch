@@ -31,7 +31,7 @@ DEFINITIONS
     a_channel,
     a_client_to_create,
     a_client_to_activate,
-    a_orphaned,
+    a_client_orphaned,
     a_client_token,
     a_server_token,
     a_user,
@@ -50,7 +50,7 @@ DEFINITIONS
     a_channel : s_session +-> t_channel & // a session may be associated to a valid channel
     a_client_to_create : s_session +-> t_channel_config_idx_i & // a client session may be waiting to be created on a channel (not yet established)
     a_client_to_activate : s_session +-> t_user & // a client session may be waiting to be activated (session not yet created)
-    a_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)
+    a_client_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)
     a_client_token : s_session +-> t_session_token & // a client session has an associated session token once create response received
     a_server_token : t_session_token >+> s_session & // a server session has a unique authentication token in server once create response sent
     a_user : s_session +-> t_user & // a session may be associated to a valid user
@@ -67,7 +67,7 @@ DEFINITIONS
 
     d_close_session (session) ==
     a_channel := {session} <<| a_channel               || // If session had a channel, remove this relation
-    a_orphaned := {session} <<| a_orphaned             || // If session was orphaned, remove this relation
+    a_client_orphaned := {session} <<| a_client_orphaned             || // If session was orphaned, remove this relation
     a_user := {session} <<| a_user                     || // If session had a user, remove this relation
     a_client_token := {session} <<| a_client_token     || // If session had a token, remove this relation
     a_server_token := a_server_token |>> {session}     || // If session had a token, remove this relation
@@ -101,7 +101,7 @@ INVARIANT
     dom(a_state |>> {e_session_creating, e_session_closed, e_session_init}) = ran(a_server_token) \/ dom(a_client_token) &
     
     // Client orphaned sessions are included in orphaned sessions
-    dom(a_orphaned) <: dom(a_state |> {e_session_scOrphaned}) &
+    dom(a_client_orphaned) <: dom(a_state |> {e_session_scOrphaned}) &
     
     /* Sessions not (init or creating or closed) have a Nonce when their security policy is not None*/
     /* The security policy part cannot be modeled in this invariant, but is in the operations */
@@ -118,7 +118,7 @@ INITIALISATION
     a_channel := {}          ||
     a_client_to_create := {} ||
     a_client_to_activate := {} ||
-    a_orphaned := {}         ||
+    a_client_orphaned := {}         ||
     a_client_token := {}     ||
     a_server_token := {}     ||
     a_user := {}             ||
@@ -317,7 +317,7 @@ OPERATIONS
     THEN
         a_channel(session) := channel ||
         a_state(session) := e_session_scActivating ||
-        a_orphaned := {session} <<| a_orphaned ||
+        a_client_orphaned := {session} <<| a_client_orphaned ||
         session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
     END
     ;
@@ -361,7 +361,7 @@ OPERATIONS
         THEN
             /* ScActivateReq */
             CHOICE
-                a_orphaned := {session} <<| a_orphaned ||
+                a_client_orphaned := {session} <<| a_client_orphaned ||
                 a_channel(session) := channel         ||
                 a_state(session) := e_session_userActivated ||
                 ret := e_sc_ok
@@ -421,7 +421,7 @@ OPERATIONS
             // channel is not the channel of any session
             a_user := inactive_sessions <<| a_user ||
             // sessions CLOSED due to channel loss do not have user anymore
-            a_orphaned := a_orphaned <+ active_sessions*{channel_config_idx}
+            a_client_orphaned := a_client_orphaned <+ active_sessions*{channel_config_idx}
             // sessions ORPHANED of a channel are recorded
         END
     END
@@ -686,11 +686,11 @@ OPERATIONS
         p_session : t_session_i &
         p_session : t_session
     THEN
-        p_dom := bool(p_session : dom(a_orphaned)) ||
-        IF  p_session /: dom(a_orphaned) THEN
+        p_dom := bool(p_session : dom(a_client_orphaned)) ||
+        IF  p_session /: dom(a_client_orphaned) THEN
             p_channel_config_idx := c_channel_config_idx_indet
         ELSE
-            p_channel_config_idx := a_orphaned(p_session)
+            p_channel_config_idx := a_client_orphaned(p_session)
         END
     END
     ;
@@ -744,7 +744,7 @@ OPERATIONS
         a_user := {session} <<| a_user ||
         a_client_token := {session} <<| a_client_token ||
         a_server_token := a_server_token |>> {session} ||
-        a_orphaned := {session} <<| a_orphaned
+        a_client_orphaned := {session} <<| a_client_orphaned
     END
     ;
 
