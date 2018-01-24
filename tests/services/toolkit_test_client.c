@@ -44,6 +44,9 @@ static uint8_t sessionsActivated = 0;
 static uint8_t sessionsClosed = 0;
 static int32_t session = 0;
 static int32_t session2 = 0;
+static int32_t session3 = 0;
+
+#define NB_SESSIONS 3
 
 static uint32_t cptReadResps = 0;
 
@@ -85,9 +88,17 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, void* param, SOPC_StatusC
         {
             session = *(int32_t*) param;
         }
-        else
+        else if (sessionsActivated == 2)
         {
             session2 = *(int32_t*) param;
+        }
+        else if (sessionsActivated == 3)
+        {
+            session3 = *(int32_t*) param;
+        }
+        else
+        {
+            assert(false);
         }
     }
     else if (event == SE_SESSION_ACTIVATION_FAILURE || event == SE_CLOSED_SESSION)
@@ -291,17 +302,19 @@ int main(void)
         }
     }
 
-    /* Asynchronous request to create 2 sessions (and underlying secure channel connections if necessary). */
+    /* Asynchronous request to create 3 sessions on 2 secure channels
+     * (and underlying secure channel connections if necessary). */
     if (SOPC_STATUS_OK == status)
     {
         SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx);
+        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx);
         SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx2);
-        printf(">>Test_Client_Toolkit: Creating/Activating 2 sessions: OK\n");
+        printf(">>Test_Client_Toolkit: Creating/Activating 3 sessions on 2 SC: OK\n");
     }
 
     /* Wait until session is activated or timeout */
     loopCpt = 0;
-    while (SOPC_STATUS_OK == status && (sessionsActivated + sessionsClosed) < 2 &&
+    while (SOPC_STATUS_OK == status && (sessionsActivated + sessionsClosed) < NB_SESSIONS &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
@@ -319,7 +332,7 @@ int main(void)
         status = SOPC_STATUS_NOK;
     }
 
-    if (SOPC_STATUS_OK == status && sessionsActivated == 2)
+    if (SOPC_STATUS_OK == status && sessionsActivated == NB_SESSIONS)
     {
         printf(">>Test_Client_Toolkit: Sessions activated: OK'\n");
     }
@@ -423,13 +436,18 @@ int main(void)
         SOPC_ToolkitClient_AsyncCloseSession(session2);
     }
 
+    if (0 != session3)
+    {
+        SOPC_ToolkitClient_AsyncCloseSession(session3);
+    }
+
     /* Wait until session is closed or timeout */
     loopCpt = 0;
     do
     {
         loopCpt++;
         SOPC_Sleep(100);
-    } while (SOPC_STATUS_OK == status && sessionsClosed < 2 && loopCpt * sleepTimeout <= loopTimeout);
+    } while (SOPC_STATUS_OK == status && sessionsClosed < NB_SESSIONS && loopCpt * sleepTimeout <= loopTimeout);
 
     SOPC_Toolkit_Clear();
 
