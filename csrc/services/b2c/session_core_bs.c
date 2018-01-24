@@ -53,6 +53,8 @@ typedef struct SessionData
 
 static SessionData sessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
 
+static constants__t_user_i session_to_activate_user[SOPC_MAX_SESSIONS + 1];
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -68,6 +70,10 @@ void session_core_bs__INITIALISATION(void)
         OpcUa_SignatureData_Initialize(&sData->signatureData);
         sData->user = constants__c_user_indet;
     }
+
+    assert(SOPC_MAX_SESSIONS + 1 <= SIZE_MAX / sizeof(constants__t_user_i));
+    memset(session_to_activate_user, (int) constants__c_user_indet,
+           sizeof(constants__t_user_i) * (SOPC_MAX_SESSIONS + 1));
 }
 
 /*--------------------
@@ -844,4 +850,55 @@ void session_core_bs__server_close_session_check_req(const constants__t_msg_i se
 void session_core_bs__session_do_nothing(const constants__t_session_i session_core_bs__session)
 {
     (void) session_core_bs__session;
+}
+
+void session_core_bs__set_session_to_activate(const constants__t_session_i session_core_bs__p_session,
+                                              const constants__t_user_i session_core_bs__p_user)
+{
+    session_to_activate_user[session_core_bs__p_session] = session_core_bs__p_user;
+}
+
+void session_core_bs__getall_to_activate(const constants__t_session_i session_core_bs__p_session,
+                                         t_bool* const session_core_bs__p_dom,
+                                         constants__t_user_i* const session_core_bs__p_user)
+{
+    if (session_to_activate_user[session_core_bs__p_session] != constants__c_user_indet)
+    {
+        *session_core_bs__p_dom = true;
+        *session_core_bs__p_user = session_to_activate_user[session_core_bs__p_session];
+    }
+    else
+    {
+        *session_core_bs__p_dom = false;
+        *session_core_bs__p_user = constants__c_user_indet;
+    }
+}
+
+void session_core_bs__reset_session_to_activate(const constants__t_session_i session_core_bs__p_session)
+{
+    session_to_activate_user[session_core_bs__p_session] = constants__c_user_indet;
+}
+
+void session_core_bs__client_gen_activate_orphaned_session_internal_event(
+    const constants__t_session_i session_core_bs__session,
+    const constants__t_channel_config_idx_i session_core_bs__channel_config_idx)
+{
+    SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_ORPHANED_SESSION, (uint32_t) session_core_bs__session, NULL,
+                               (uint32_t) session_core_bs__channel_config_idx);
+}
+
+void session_core_bs__client_gen_activate_user_session_internal_event(
+    const constants__t_session_i session_core_bs__session,
+    const constants__t_user_i session_core_bs__user)
+{
+    SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_SESSION, (uint32_t) session_core_bs__session, NULL,
+                               (uint32_t) session_core_bs__user);
+}
+
+void session_core_bs__client_gen_create_session_internal_event(
+    const constants__t_session_i session_core_bs__session,
+    const constants__t_channel_config_idx_i session_core_bs__channel_config_idx)
+{
+    SOPC_Services_EnqueueEvent(SE_TO_SE_CREATE_SESSION, (uint32_t) session_core_bs__session, NULL,
+                               (uint32_t) session_core_bs__channel_config_idx);
 }
