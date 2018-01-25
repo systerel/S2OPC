@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 
-#include "sopc_async_queue.h"
+#include "sopc_toolkit_constants.h"
 
 typedef struct SOPC_EventDispatcherManager SOPC_EventDispatcherManager;
 

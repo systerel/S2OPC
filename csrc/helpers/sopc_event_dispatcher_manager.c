@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "sopc_async_queue.h"
 #include "sopc_threads.h"
 
 struct SOPC_EventDispatcherManager
