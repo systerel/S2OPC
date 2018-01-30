@@ -74,4 +74,7 @@ extern bool* address_space_bs__refs_IsForward;
 extern int32_t* address_space_bs__RefIndexBegin;
 extern int32_t* address_space_bs__RefIndexEnd;
 
+/* Address space configured */
+extern bool sopc_addressSpace_configured;
+
 #endif // address_space_impl_h_

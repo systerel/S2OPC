@@ -174,9 +174,18 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
         Mutex_Lock(&tConfig.mut);
         if (false == tConfig.locked)
         {
-            tConfig.locked = true;
-            SOPC_Services_ToolkitConfigured();
-            status = SOPC_STATUS_OK;
+            // Check an address space is defined in case a endpoint configuration exists
+            if (tConfig.epConfigIdxMax == 0 || (tConfig.epConfigIdxMax > 0 && sopc_addressSpace_configured != false))
+            {
+                tConfig.locked = true;
+                SOPC_Services_ToolkitConfigured();
+                status = SOPC_STATUS_OK;
+            }
+            else
+            {
+                // No address space defined whereas a server configuration exists
+                status = SOPC_STATUS_INVALID_PARAMETERS;
+            }
         }
         Mutex_Unlock(&tConfig.mut);
     }
@@ -604,6 +613,8 @@ void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addres
     address_space_bs__refs_IsForward = addressSpace->referenceIsForwardArray;
     address_space_bs__RefIndexBegin = addressSpace->referenceIdxArray_begin;
     address_space_bs__RefIndexEnd = addressSpace->referenceIdxArray_end;
+
+    sopc_addressSpace_configured = true;
 }
 
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)

@@ -116,36 +116,40 @@ bool* address_space_bs__refs_IsForward = NULL;
 int32_t* address_space_bs__RefIndexBegin = NULL;
 int32_t* address_space_bs__RefIndexEnd = NULL;
 
+/* Indicates if the address space was configured */
+bool sopc_addressSpace_configured = false;
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void address_space_bs__INITIALISATION(void)
 {
-    /* TODO: handle more correctly the assert, provide log, and adequate exit */
-    /* TODO: cleints must be able to not fail here */
-    assert(0 != address_space_bs__nNodeIds);
-    assert(NULL != address_space_bs__a_NodeId);
-    assert(NULL != address_space_bs__a_NodeClass);
-    assert(NULL != address_space_bs__a_BrowseName);
-    assert(NULL != address_space_bs__a_DisplayName);
-    assert(NULL != address_space_bs__a_DisplayName_begin);
-    assert(NULL != address_space_bs__a_DisplayName_end);
-    assert(NULL != address_space_bs__a_Value);
-    assert(NULL != address_space_bs__a_Value_StatusCode);
-    /*assert(NULL != address_space_bs__HasTypeDefinition);*/
-    assert(NULL != address_space_bs__refs_ReferenceType);
-    assert(NULL != address_space_bs__refs_TargetNode);
-    assert(NULL != address_space_bs__refs_IsForward);
-    assert(NULL != address_space_bs__RefIndexBegin);
-    assert(NULL != address_space_bs__RefIndexEnd);
+    if (sopc_addressSpace_configured != false)
+    {
+        assert(0 != address_space_bs__nNodeIds);
+        assert(NULL != address_space_bs__a_NodeId);
+        assert(NULL != address_space_bs__a_NodeClass);
+        assert(NULL != address_space_bs__a_BrowseName);
+        assert(NULL != address_space_bs__a_DisplayName);
+        assert(NULL != address_space_bs__a_DisplayName_begin);
+        assert(NULL != address_space_bs__a_DisplayName_end);
+        assert(NULL != address_space_bs__a_Value);
+        assert(NULL != address_space_bs__a_Value_StatusCode);
+        /*assert(NULL != address_space_bs__HasTypeDefinition);*/
+        assert(NULL != address_space_bs__refs_ReferenceType);
+        assert(NULL != address_space_bs__refs_TargetNode);
+        assert(NULL != address_space_bs__refs_IsForward);
+        assert(NULL != address_space_bs__RefIndexBegin);
+        assert(NULL != address_space_bs__RefIndexEnd);
 
-    /* Compute offsets */
-    offHasTypeDefs = address_space_bs__nViews;
-    offVars = offHasTypeDefs + address_space_bs__nObjects;
-    offVarsTypes = offVars;
-    offTypes = offVars + address_space_bs__nVariables;
-    offRefTypes = offTypes + address_space_bs__nVariableTypes + address_space_bs__nObjectTypes;
-    offMethods = offRefTypes + address_space_bs__nReferenceTypes + address_space_bs__nDataTypes;
+        /* Compute offsets */
+        offHasTypeDefs = address_space_bs__nViews;
+        offVars = offHasTypeDefs + address_space_bs__nObjects;
+        offVarsTypes = offVars;
+        offTypes = offVars + address_space_bs__nVariables;
+        offRefTypes = offTypes + address_space_bs__nVariableTypes + address_space_bs__nObjectTypes;
+        offMethods = offRefTypes + address_space_bs__nReferenceTypes + address_space_bs__nDataTypes;
+    }
 }
 
 /*--------------------
