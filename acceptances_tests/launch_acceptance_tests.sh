@@ -169,7 +169,6 @@ done < $TMP_FILE
 # add number of tests at the beginning of TAP file
 sed -i "1s/^/1..$num_tests\n/" $TAP_FILE
 
-rm -f $LOG_FILE
 rm -f $TMP_FILE
 
 mv $TAP_FILE ../bin/
