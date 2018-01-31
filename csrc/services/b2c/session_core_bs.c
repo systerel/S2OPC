@@ -133,10 +133,10 @@ void session_core_bs__server_get_session_from_token(const constants__t_session_t
     constants__t_session_i result = constants__c_session_indet;
     SOPC_NodeId* requestedToken = (SOPC_NodeId*) session_core_bs__session_token;
 
-    if (requestedToken->IdentifierType == SOPC_IdentifierType_Numeric && requestedToken->Data.Numeric > 0)
+    if (requestedToken->IdentifierType == SOPC_IdentifierType_Numeric && requestedToken->Data.Numeric > 0 &&
+        requestedToken->Data.Numeric <= INT32_MAX)
     {
         // Note: on server side, token <=> session index
-        assert(requestedToken->Data.Numeric <= INT32_MAX);
         result = (int32_t) requestedToken->Data.Numeric;
     }
 
