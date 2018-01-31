@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy, SOPC_SecurityPolicy_Basic256_URI);
-            secuConfig[1].securityModes = SOPC_SECURITY_MODE_SIGN_MASK;
+            secuConfig[1].securityModes = SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
         }
         if (SOPC_STATUS_OK == status)
         {
