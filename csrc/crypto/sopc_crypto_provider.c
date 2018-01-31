@@ -676,22 +676,38 @@ SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomBytes(const SOPC_CryptoProvi
                                                           SOPC_ExposedBuffer** ppBuffer)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ExposedBuffer* pExp;
+    SOPC_ExposedBuffer* pExp = NULL;
 
     if (NULL == pProvider || nBytes == 0 || NULL == ppBuffer || NULL == pProvider->pProfile ||
         NULL == pProvider->pProfile->pFnGenRnd)
-        return SOPC_STATUS_INVALID_PARAMETERS;
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    /* Empties pointer in case an error occurs after that point. */
-    *ppBuffer = NULL;
-
-    pExp = (SOPC_ExposedBuffer*) malloc(nBytes);
-    if (NULL == pExp)
-        return SOPC_STATUS_NOK;
-
-    status = pProvider->pProfile->pFnGenRnd(pProvider, pExp, nBytes);
     if (SOPC_STATUS_OK == status)
-        *ppBuffer = pExp;
+    {
+        /* Empties pointer in case an error occurs after that point. */
+        *ppBuffer = NULL;
+
+        pExp = (SOPC_ExposedBuffer*) malloc(nBytes);
+        if (NULL == pExp)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = pProvider->pProfile->pFnGenRnd(pProvider, pExp, nBytes);
+        if (SOPC_STATUS_OK == status)
+        {
+            *ppBuffer = pExp;
+        }
+        else
+        {
+            free(pExp);
+        }
+    }
 
     return status;
 }
