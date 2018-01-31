@@ -92,15 +92,15 @@ saxonb-xslt -xsl:analyse_log.xsl -s:$LOG_FILE -o:$TMP_FILE
 num_tests=0
 
 while read line; do
-    test_status=`echo $line | awk -F '-' '{print $1}'`
-    test_number=`echo $line | awk -F '-' '{print $2}'`
-    test_description=`echo $line | awk -F '-' '{print $3}'`
+    test_status=`echo $line | awk -F '|' '{print $1}'`
+    test_number=`echo $line | awk -F '|' '{print $2}'`
+    test_description=`echo $line | awk -F '|' '{print $3}'`
 
     case $test_status in
         "Error")
         let 'num_tests++'
         # is it a known bug ?
-        if check_test $KNOWN_BUGS_FILES "${test_number}-${test_description}"
+        if check_test $KNOWN_BUGS_FILES "${test_number}|${test_description}"
         then
             echo "ok $num_tests $test_number $test_description # TODO Known bug" >> $TAP_FILE
         else
@@ -117,7 +117,7 @@ while read line; do
         "Not implemented")
         let 'num_tests++'
         # is it a skipped test ?
-        if check_test $SKIPPED_TESTS_FILE "${test_number}-${test_description}"
+        if check_test $SKIPPED_TESTS_FILE "${test_number}|${test_description}"
         then
             echo "ok $num_tests $test_number $test_description # skip Known bug" >> $TAP_FILE
         else
@@ -129,7 +129,7 @@ while read line; do
         "Skipped")
         let 'num_tests++'
         # is it a skipped test ?
-        if check_test $SKIPPED_TESTS_FILE "${test_number}-${test_description}"
+        if check_test $SKIPPED_TESTS_FILE "${test_number}|${test_description}"
         then
             echo "ok $num_tests $test_number $test_description # skip Known bug" >> $TAP_FILE
         else
@@ -141,7 +141,7 @@ while read line; do
         "Not supported")
         let 'num_tests++'
         # is it a skipped test ?
-        if check_test $SKIPPED_TESTS_FILE "${test_number}-${test_description}"
+        if check_test $SKIPPED_TESTS_FILE "${test_number}|${test_description}"
         then
             echo "ok $num_tests $test_number $test_description # skip Known bug" >> $TAP_FILE
         else
@@ -153,7 +153,7 @@ while read line; do
         "Ok")
         let 'num_tests++'
         # was it a known bug ?
-        if check_test $KNOWN_BUGS_FILES "${test_number}-${test_description}"
+        if check_test $KNOWN_BUGS_FILES "${test_number}|${test_description}"
         then
             echo "ok $num_tests $test_number $test_description - FIXED KNOWN BUG" >> $TAP_FILE
         else
