@@ -2115,7 +2115,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         scConnection = SC_GetConnection(eltId);
         if (scConnection != NULL)
         {
-            SC_CloseSecureConnection(scConnection, eltId, false, 0,
+            // Since there was a socket failure, consider the socket close now
+            SC_CloseSecureConnection(scConnection, eltId, true, 0,
                                      "SecureConnection: disconnected (SOCKET_FAILURE event)");
         }
         break;
