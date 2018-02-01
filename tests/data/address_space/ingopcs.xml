@@ -654,7 +654,6 @@
     <Description>NoName</Description>
     <Description Locale="en">NoName</Description>
     <References>
-      <Reference ReferenceType="Organizes">i=85</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
       <Reference ReferenceType="Organizes">ns=261;s=Objects.15361.SIGNALs</Reference>
       <Reference ReferenceType="Organizes">ns=261;s=Objects.15361.SWITCHs</Reference>
