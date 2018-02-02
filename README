@@ -3,123 +3,124 @@ INGOPCS OPC UA Toolkit
 
 This OPC UA Toolkit project provides a C source code implementation
 including an OPC UA communication stack, B model and C source code
-implementation for a minimal set of services and a cryptographic
-library adaptation for OPC UA needs (using mbedtls).
+implementation for a minimal set of services and a cryptographic library
+adaptation for OPC UA needs (using mbedtls).
 
-This project contains the following elements:
-- address_space_generation: address space XML description to C source file generator to configure server Toolkit
-- address_space_generation/genc: already generated C source files for the Toolkit tests
-- apidoc: generated HTML documentation of the C source code with doxygen
-- bin: built binaries tests of the toolkit for Linux platform (64 bits)
-- bin_windows: built binaries tests and DLL of the toolkit for Windows platform (32 bits)
-- bsrc: B model of the Toolkit used to generate C source files for services management layer
-- build: compiled files during CMake and make execution
-- csrc: root directory for C source files of the INGOPCS project OPC UA Toolkit
-- csrc/api_toolkit: user application API to request server/client treatments once Toolkit configured
-- csrc/configuration: user application API and shared configuration of the Toolkit server/client
-- csrc/crypto: cryptographic API and generic layer for managing certificates and keys
-- csrc/crypto/mbedtls: adaptation layer between crypotgraphic generic layer and mbedtls library
-- csrc/helpers: independant helpers used by Toolkit
-- csrc/helpers_platform_dep: independant helpers dependent on platform (linux and windows) used by Toolkit
-- csrc/opcua_types: opcua types implementation, encoder and helpers
-- csrc/secure_channels: secure channels services management layer based on I/O event dispatcher
-- csrc/services: services (except secure channels) management layer based on I/O event dispatcher
-- csrc/services/b2c: adaptation layer between generated C source files from B model and C source code
-- csrc/services/bgenc: generated C source files from B model
-- csrc/sockets: sockets management layer base on I/O event dispatcher
-- doxygen: doxygen configuration file for HTML documentation generation
-- installation_linux: library (static and shared) and headers to install the toolkit as a library
-- installation_windows: shared library and headers to install the toolkit as a library
-- tests: tests source code and data for the Toolkit library
+This project contains the following elements: -
+address\_space\_generation: address space XML description to C source
+file generator to configure server Toolkit -
+address\_space\_generation/genc: already generated C source files for
+the Toolkit tests - apidoc: generated HTML documentation of the C source
+code with doxygen - bin: built binaries tests of the toolkit for Linux
+platform (64 bits) - bin\_windows: built binaries tests and DLL of the
+toolkit for Windows platform (32 bits) - bsrc: B model of the Toolkit
+used to generate C source files for services management layer - build:
+compiled files during CMake and make execution - csrc: root directory
+for C source files of the INGOPCS project OPC UA Toolkit -
+csrc/api\_toolkit: user application API to request server/client
+treatments once Toolkit configured - csrc/configuration: user
+application API and shared configuration of the Toolkit server/client -
+csrc/crypto: cryptographic API and generic layer for managing
+certificates and keys - csrc/crypto/mbedtls: adaptation layer between
+crypotgraphic generic layer and mbedtls library - csrc/helpers:
+independant helpers used by Toolkit - csrc/helpers\_platform\_dep:
+independant helpers dependent on platform (linux and windows) used by
+Toolkit - csrc/opcua\_types: opcua types implementation, encoder and
+helpers - csrc/secure\_channels: secure channels services management
+layer based on I/O event dispatcher - csrc/services: services (except
+secure channels) management layer based on I/O event dispatcher -
+csrc/services/b2c: adaptation layer between generated C source files
+from B model and C source code - csrc/services/bgenc: generated C source
+files from B model - csrc/sockets: sockets management layer base on I/O
+event dispatcher - doxygen: doxygen configuration file for HTML
+documentation generation - installation\_linux: library (static and
+shared) and headers to install the toolkit as a library -
+installation\_windows: shared library and headers to install the toolkit
+as a library - tests: tests source code and data for the Toolkit library
 - validation: client validation tool using FreeOpcUa python library
 
+Compilation (Linux, tested under Ubuntu 14.04 and Debian 7): -
+Pre-requesites: \* gcc (tested with GCC version \>= 4.8.4) \* CMake
+(tested with CMake version \>= 2.8.12.2) \* make (tested with GNU Make
+version \>= 3.81) \* mbedtls (\>= 2.6.0): <https://tls.mbed.org/> \*
+check (\>= 0.10): <https://libcheck.github.io/check/> - To build the
+Toolkit library and tests: \* ./build.sh OR \* see README.cmake to do it
+manually
 
-Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
-- Pre-requesites:
-  * gcc (tested with GCC version >= 4.8.4)
-  * CMake (tested with CMake version >= 2.8.12.2)
-  * make (tested with GNU Make version >= 3.81)
-  * mbedtls (>= 2.6.0): https://tls.mbed.org/
-  * check (>= 0.10): https://libcheck.github.io/check/
-- To build the Toolkit library and tests:
-  * ./build.sh
-  OR
-  * see README.cmake to do it manually
+Address space generation: - see address\_space\_generation/README file
+for generator dependencies - XML file provided complying with schema
+<https://opcfoundation.org/UA/schemas/1.03/UANodeSet.xsd> with
+limitations (see tests/data/address\_space/\*.xml files for examples)
 
-Address space generation:
-- see address_space_generation/README file for generator dependencies
-- XML file provided complying with schema https://opcfoundation.org/UA/schemas/1.03/UANodeSet.xsd with limitations
-  (see tests/data/address_space/*.xml files for examples)
+Licenses: - Unless specifically indicated otherwise in a file, INGOPCS
+files are licensed under the GNU AFFERO GPL v3 license, as can be found
+in: agpl-3.0.txt - OPC UA Stack code generated with the OPC foundation
+code generator tool (UA-ModelCompiler) is distributed under the OPC
+Foundation MIT License 1.00 - The mbedtls library is also distributed
+under the Apache 2.0 license
 
-Licenses:
-- Unless specifically indicated otherwise in a file, INGOPCS files are
-licensed under the GNU AFFERO GPL v3 license, as can be found in:
-agpl-3.0.txt
-- OPC UA Stack code generated with the OPC foundation code generator
-  tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT
-  License 1.00
-- The mbedtls library is also distributed under the Apache 2.0 license
-
-Current status:
-- Security policies available: None, Basic256 and Basic256Sha256
-- Security mode available: None, Sign and SignAndEncrypt
-- Server instantiation: several endpoint descriptions, 1 address space, multiple secure channel instances and session instances
-- Server services: getEndpoints, read (no index), write (no index) and simplified browse (no continuation point)
-- Client instantiation: multiple secure channel instances and session instances
-- Client services requests: read, write and browse
-- Address space with following attributes: NodeId, NodeClass, BrowseName, Value (with single value Variants),
-  References, Access Level (R/W default value only)
+Current status: - Security policies available: None, Basic256 and
+Basic256Sha256 - Security mode available: None, Sign and SignAndEncrypt
+- Server instantiation: several endpoint descriptions, 1 address space,
+multiple secure channel instances and session instances - Server
+services: getEndpoints, read (no index), write (no index) and simplified
+browse (no continuation point) - Client instantiation: multiple secure
+channel instances and session instances - Client services requests:
+read, write and browse - Address space with following attributes:
+NodeId, NodeClass, BrowseName, Value (with single value Variants),
+References, Access Level (R/W default value only)
 
 INGOPCS OPC UA Toolkit features
 ===============================
-- Common features:
-  * Asynchronous user application API
-  * Available security policy (encryption schemes) with any security mode:
-    > http://opcfoundation.org/UA/SecurityPolicy#None,
-    > http://opcfoundation.org/UA/SecurityPolicy#Basic256,
-    > http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256.
 
-- Client side (e.g.: tests/services/toolkit_test_client.c):
-  * Secure Channel configurations on Toolkit initialization
-  * Activate a session with an anonymous user
-  * Send a read request
-  * Send a write request
-  * Send a browse request
+-   Common features:
+    -   Asynchronous user application API
+    -   Available security policy (encryption schemes) with any security
+        mode: \> <http://opcfoundation.org/UA/SecurityPolicy#None>, \>
+        <http://opcfoundation.org/UA/SecurityPolicy#Basic256>, \>
+        <http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256>.
+-   Client side (e.g.: tests/services/toolkit\_test\_client.c):
+    -   Secure Channel configurations on Toolkit initialization
+    -   Activate a session with an anonymous user
+    -   Send a read request
+    -   Send a write request
+    -   Send a browse request
 
-- Server side (e.g.: tests/services/toolkit_test_server.c):
- * Endpoint descriptions configuration on Toolkit initialization
- * 1 address space configuration on Toolkit intialization
- * Checks and accepts several instances of secure channel
- * Checks and accepts activation of several sessions with an anonymous user
- * Accepts to treat one service request at the same time:
-   > Read service
-   > Write service
-   > Browse service (simplified: no continuation point)
-   > GetEndpoints service (restriction: locale Ids and profile URIs ignored)
+- Server side (e.g.: tests/services/toolkit\_test\_server.c):
+
+:   -   Endpoint descriptions configuration on Toolkit initialization
+    -   1 address space configuration on Toolkit intialization
+    -   Checks and accepts several instances of secure channel
+    -   Checks and accepts activation of several sessions with an
+        anonymous user
+    -   Accepts to treat one service request at the same time: \> Read
+        service \> Write service \> Browse service (simplified: no
+        continuation point) \> GetEndpoints service (restriction: locale
+        Ids and profile URIs ignored)
 
 INGOPCS OPC UA Toolkit tests
 ============================
-Prerequesites (validation based on FreeOpcUa python client only):
-- Python 3
-- Python cryptography
 
-Run all tests:
-- To run the INGOPCS OPC UA Toolkit tests: execute the test-all.sh script: "./test-all.sh"
-- Tests results are provided in bin/*.tap files and shall indicate "ok" status for each test
+Prerequesites (validation based on FreeOpcUa python client only): -
+Python 3 - Python cryptography
 
-Run a particular test (bin/ directory):
-- Toolkit helpers unit tests: execute ./check_helpers
-- Toolkit sockets management layer test: execute ./check_sockets
-- Toolkit secure channel (+sockets) management layer: ./test_secure_channels_server and ./test_secure_channels_client in parallel
-- Toolkit read service test: execute ./toolkit_test_read
-- Toolkit write service test: execute ./toolkit_test_write
-- Toolkit client/server session and read/write service example:
-  execute ./toolkit_test_server and then ./toolkit_test_client in parallel
-- Toolkit server and read / write / browse service validation:
-  execute ./toolkit_test_server in bin/ directory and python3 client.py in validation/ directory
-  (depends on FreeOpcUa python client available on github)
-- Toolkit server and secure channel security token renewal validation:
-  execute ./toolkit_test_server in bin/ directory and python3
-  client_sc_renew.py in validation/ directory (depends on FreeOpcUa
-  python client available on github)
+Run all tests: - To run the INGOPCS OPC UA Toolkit tests: execute the
+test-all.sh script: \"./test-all.sh\" - Tests results are provided in
+bin/\*.tap files and shall indicate \"ok\" status for each test
 
+Run a particular test (bin/ directory): - Toolkit helpers unit tests:
+execute ./check\_helpers - Toolkit sockets management layer test:
+execute ./check\_sockets - Toolkit secure channel (+sockets) management
+layer: ./test\_secure\_channels\_server and
+./test\_secure\_channels\_client in parallel - Toolkit read service
+test: execute ./toolkit\_test\_read - Toolkit write service test:
+execute ./toolkit\_test\_write - Toolkit client/server session and
+read/write service example: execute ./toolkit\_test\_server and then
+./toolkit\_test\_client in parallel - Toolkit server and read / write /
+browse service validation: execute ./toolkit\_test\_server in bin/
+directory and python3 client.py in validation/ directory (depends on
+FreeOpcUa python client available on github) - Toolkit server and secure
+channel security token renewal validation: execute
+./toolkit\_test\_server in bin/ directory and python3
+client\_sc\_renew.py in validation/ directory (depends on FreeOpcUa
+python client available on github)
