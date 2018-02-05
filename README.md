@@ -99,9 +99,10 @@ Current status:
 
 # INGOPCS OPC UA Toolkit tests
 
-Prerequisites (validation based on FreeOpcUa python client only):
+Prerequisites (only for validation based on FreeOpcUa python client):
 - Python 3
 - Python cryptography
+- FreeOpcUa (tested with version 0.90.6)
 
 Run all tests:
 - To run the INGOPCS OPC UA Toolkit tests: execute the test-all.sh script: "./test-all.sh"
@@ -123,6 +124,6 @@ Run a particular test (bin/ directory):
   client_sc_renew.py in validation/ directory (depends on FreeOpcUa
   python client available on github)
 
-Run OPC UA Compliance Test Tool (UACTT: tool accessible for OPC foundation corporate members only):
+Run OPC UA Compliance Test Tool (UACTT: tool available for OPC foundation corporate members only):
 - Run toolkit server example with long timeout parameter in bin/ directory: ./toolkit_test_server 100000
 - Run the UACTT tests using the UACTT project configuration file acceptances_tests/Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml
