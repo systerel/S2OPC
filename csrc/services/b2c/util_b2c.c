@@ -644,6 +644,9 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_session_closed:
         *status = OpcUa_BadSessionClosed;
         break;
+    case constants__e_sc_bad_session_not_activated:
+        *status = OpcUa_BadSessionNotActivated;
+        break;
     case constants__e_sc_bad_identity_token_invalid:
         *status = OpcUa_BadIdentityTokenInvalid;
         break;
@@ -712,6 +715,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         break;
     case OpcUa_BadSessionClosed:
         *bstatus = constants__e_sc_bad_session_closed;
+        break;
+    case OpcUa_BadSessionNotActivated:
+        *bstatus = constants__e_sc_bad_session_not_activated;
         break;
     case OpcUa_BadIdentityTokenInvalid:
         *bstatus = constants__e_sc_bad_identity_token_invalid;

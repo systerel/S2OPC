@@ -166,7 +166,8 @@ OPERATIONS
             status_code_err := e_sc_ok
         OR
             is_valid_res := FALSE ||
-            status_code_err :: {e_sc_bad_session_id_invalid, e_sc_bad_invalid_state, e_sc_bad_secure_channel_id_invalid} ||
+            status_code_err :: {e_sc_bad_session_id_invalid, e_sc_bad_session_not_activated, 
+                                e_sc_bad_invalid_state, e_sc_bad_secure_channel_id_invalid} ||
             session := c_session_indet
         END
     END

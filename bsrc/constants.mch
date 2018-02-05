@@ -54,6 +54,7 @@ SETS
                       e_sc_bad_invalid_state,
                       e_sc_bad_session_id_invalid,
                       e_sc_bad_session_closed,
+                      e_sc_bad_session_not_activated,
                       e_sc_bad_identity_token_invalid,
                       e_sc_bad_encoding_error,
                       e_sc_bad_decoding_error,

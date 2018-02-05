@@ -354,11 +354,14 @@ OPERATIONS
                 // Unexpected access to session (wrong state or channel): close it
                 server_close_session_sm (l_session);
                 is_valid_res := FALSE;
-                IF l_session_channel = channel THEN
-                    /* Invalid session state */
-                    status_code_err := e_sc_bad_invalid_state
-                ELSE
+                IF l_session_channel /= channel THEN
                     status_code_err := e_sc_bad_secure_channel_id_invalid
+                ELSE
+                    IF l_session_state =  e_session_created THEN
+                        status_code_err := e_sc_bad_session_not_activated
+                    ELSE
+                        status_code_err := e_sc_bad_invalid_state
+                    END
                 END
             END
         ELSE
