@@ -341,7 +341,7 @@ OPERATIONS
                     l_ret := e_sc_bad_unexpected_error
                 END
             ELSE
-                l_ret := e_sc_bad_invalid_argument
+                l_ret := e_sc_bad_invalid_state
             END
         ELSIF l_state = e_session_scOrphaned
         THEN
@@ -357,7 +357,7 @@ OPERATIONS
                     l_ret := e_sc_bad_unexpected_error
                 END
             ELSE
-                l_ret := e_sc_bad_invalid_argument
+                l_ret := e_sc_bad_invalid_state
             END
         ELSE
             l_ret := e_sc_bad_invalid_state
