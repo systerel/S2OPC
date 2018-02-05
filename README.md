@@ -19,8 +19,8 @@ This project contains the following elements:
 - csrc/configuration: user application API and shared configuration of the Toolkit server/client
 - csrc/crypto: cryptographic API and generic layer for managing certificates and keys
 - csrc/crypto/mbedtls: adaptation layer between crypotgraphic generic layer and mbedtls library
-- csrc/helpers: independant helpers used by Toolkit
-- csrc/helpers_platform_dep: independant helpers dependent on platform (linux and windows) used by Toolkit
+- csrc/helpers: independent helpers used by Toolkit
+- csrc/helpers_platform_dep: independent helpers dependent on platform (Linux and Windows) used by Toolkit
 - csrc/opcua_types: opcua types implementation, encoder and helpers
 - csrc/secure_channels: secure channels services management layer based on I/O event dispatcher
 - csrc/services: services (except secure channels) management layer based on I/O event dispatcher
@@ -35,12 +35,12 @@ This project contains the following elements:
 
 
 Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
-- Pre-requesites:
+- Prerequisites:
   * gcc (tested with GCC version >= 4.8.4)
   * CMake (tested with CMake version >= 2.8.12.2)
   * make (tested with GNU Make version >= 3.81)
   * mbedtls (>= 2.6.0): https://tls.mbed.org/
-  * check (>= 0.10): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=false)
+  * check (>= 0.10): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=no)
 - To build the Toolkit library and tests:
   * ./build.sh
   OR
@@ -88,7 +88,7 @@ Current status:
 
  Server side (e.g.: tests/services/toolkit_test_server.c):
 * Endpoint descriptions configuration on Toolkit initialization
-* 1 address space configuration on Toolkit intialization
+* 1 address space configuration on Toolkit initialization
 * Checks and accepts several instances of secure channel
 * Checks and accepts activation of several sessions with an anonymous user
 * Accepts to treat one service request at the same time:
@@ -99,7 +99,7 @@ Current status:
 
 # INGOPCS OPC UA Toolkit tests
 
-Prerequesites (validation based on FreeOpcUa python client only):
+Prerequisites (validation based on FreeOpcUa python client only):
 - Python 3
 - Python cryptography
 
@@ -124,4 +124,5 @@ Run a particular test (bin/ directory):
   python client available on github)
 
 Run OPC UA Compliance Test Tool (UACTT: tool accessible for OPC foundation corporate members only):
-- Run launch_acceptance_tests.sh script into ./acceptances_tests directory (UACTT tool shall be installed in /opt/opcfoundation/uactt/)
+- Run toolkit server example with long timeout parameter in bin/ directory: ./toolkit_test_server 100000
+- Run the UACTT tests using the UACTT project configuration file acceptances_tests/Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml
