@@ -6,6 +6,7 @@ implementation for a minimal set of services and a cryptographic
 library adaptation for OPC UA needs (using mbedtls).
 
 This project contains the following elements:
+- acceptances_tests: OPC UA Compliance Test Tool configuration and launch script
 - address_space_generation: address space XML description to C source file generator to configure server Toolkit
 - address_space_generation/genc: already generated C source files for the Toolkit tests
 - apidoc: generated HTML documentation of the C source code with doxygen
@@ -39,7 +40,7 @@ Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
   * CMake (tested with CMake version >= 2.8.12.2)
   * make (tested with GNU Make version >= 3.81)
   * mbedtls (>= 2.6.0): https://tls.mbed.org/
-  * check (>= 0.10): https://libcheck.github.io/check/
+  * check (>= 0.10): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=false)
 - To build the Toolkit library and tests:
   * ./build.sh
   OR
@@ -48,7 +49,7 @@ Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
 Address space generation:
 - see address_space_generation/README file for generator dependencies
 - XML file provided complying with schema https://opcfoundation.org/UA/schemas/1.03/UANodeSet.xsd with limitations
-  (see tests/data/address_space/*.xml files for examples)
+  (see tests/data/address_space/parts/User_Address_Space.xml files for example)
 
 Licenses:
 - Unless specifically indicated otherwise in a file, INGOPCS files are
@@ -71,30 +72,30 @@ Current status:
 
 # INGOPCS OPC UA Toolkit features
 
-- Common features:
-  * Asynchronous user application API
-  * Available security policy (encryption schemes) with any security mode:
-    > http://opcfoundation.org/UA/SecurityPolicy#None,
-    > http://opcfoundation.org/UA/SecurityPolicy#Basic256,
-    > http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256.
+ Common features:
+ * Asynchronous user application API
+ * Available security policy (encryption schemes) with any security mode:
+   + http://opcfoundation.org/UA/SecurityPolicy#None,
+   + http://opcfoundation.org/UA/SecurityPolicy#Basic256,
+   + http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256.
 
-- Client side (e.g.: tests/services/toolkit_test_client.c):
-  * Secure Channel configurations on Toolkit initialization
-  * Activate a session with an anonymous user
-  * Send a read request
-  * Send a write request
-  * Send a browse request
+ Client side (e.g.: tests/services/toolkit_test_client.c):
+ * Secure Channel configurations on Toolkit initialization
+ * Activate a session with an anonymous user
+ * Send a read request
+ * Send a write request
+ * Send a browse request
 
-- Server side (e.g.: tests/services/toolkit_test_server.c):
- * Endpoint descriptions configuration on Toolkit initialization
- * 1 address space configuration on Toolkit intialization
- * Checks and accepts several instances of secure channel
- * Checks and accepts activation of several sessions with an anonymous user
- * Accepts to treat one service request at the same time:
-   > Read service
-   > Write service
-   > Browse service (simplified: no continuation point)
-   > GetEndpoints service (restriction: locale Ids and profile URIs ignored)
+ Server side (e.g.: tests/services/toolkit_test_server.c):
+* Endpoint descriptions configuration on Toolkit initialization
+* 1 address space configuration on Toolkit intialization
+* Checks and accepts several instances of secure channel
+* Checks and accepts activation of several sessions with an anonymous user
+* Accepts to treat one service request at the same time:
+  + Read service
+  + Write service
+  + Browse service (simplified: no continuation point)
+  + GetEndpoints service (restriction: locale Ids and profile URIs ignored)
 
 # INGOPCS OPC UA Toolkit tests
 
@@ -122,3 +123,5 @@ Run a particular test (bin/ directory):
   client_sc_renew.py in validation/ directory (depends on FreeOpcUa
   python client available on github)
 
+Run OPC UA Compliance Test Tool (UACTT: tool accessible for OPC foundation corporate members only):
+- Run launch_acceptance_tests.sh script into ./acceptances_tests directory (UACTT tool shall be installed in /opt/opcfoundation/uactt/)
