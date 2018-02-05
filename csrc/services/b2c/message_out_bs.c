@@ -59,7 +59,7 @@ void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message_out_bs
     t_bool isReq = false;
     util_message__get_encodeable_type(message_out_bs__msg_type, &reqEncTyp, &respEncTyp, &isReq);
 
-    if (NULL != reqEncTyp && NULL != respEncTyp)
+    if (NULL != reqEncTyp || NULL != respEncTyp)
     {
         if (isReq != false)
         {

@@ -416,18 +416,25 @@ OPERATIONS
         l_session_token,
         l_is_valid_req,
         l_session,
-        l_snd_session_err,
         l_req_msg,
         l_valid_req,
+        l_resp_msg_allocated,
         l_resp_msg_typ,
         l_resp_msg,
         l_valid_msg,
         l_resp_msg_header,
         l_valid_resp_header,
         l_ret,
+        l_ret2,
         l_is_valid_resp,
         l_buffer_out
     IN
+        l_resp_msg_typ := c_msg_type_indet;
+        l_resp_msg_header := c_msg_header_indet;
+        l_resp_msg := c_msg_indet;
+       	l_valid_msg := FALSE;
+        l_valid_resp_header := FALSE;
+        l_resp_msg_allocated := FALSE;
         l_buffer_out := c_byte_buffer_indet;
         l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
         l_valid_req_header <-- is_valid_msg_in_header (l_req_msg_header);
@@ -440,7 +447,7 @@ OPERATIONS
             THEN
                 /* Check valid session token used */
                 l_session_token <-- read_msg_req_header_session_token (l_req_msg_header);
-                l_is_valid_req, l_session, l_snd_session_err <-- server_validate_session_service_req (channel, l_request_handle, l_session_token);
+                l_is_valid_req, l_session, l_ret <-- server_validate_session_service_req (channel, l_request_handle, l_session_token);
                 IF l_is_valid_req = TRUE
                 THEN
                     /* Decode message */
@@ -453,32 +460,53 @@ OPERATIONS
                         l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
                         l_valid_msg <-- is_valid_msg_out (l_resp_msg);
                         l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header);
+                        l_resp_msg_allocated := TRUE;
                         IF l_valid_msg = TRUE &
                             l_valid_resp_header = TRUE
                         THEN
                             // Call local operation to dispatch the service request on right service
                             l_ret <-- treat_session_service_req (req_typ, l_req_msg, l_resp_msg);
                             // Write service result status into response header
-                            write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
-                            l_is_valid_resp, l_snd_session_err <-- server_validate_session_service_resp (channel, l_session, l_request_handle);
-                            IF l_is_valid_resp = TRUE THEN
-                                IF l_ret /= e_sc_ok
-                                THEN
-                                    /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */
-                                    l_resp_msg_typ := e_msg_service_fault_resp
-                                END;
-                                write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
-                                /* Response message encoded */
-                                l_buffer_out <-- encode_msg (l_resp_msg_typ, l_resp_msg_header, l_resp_msg)
-                            END;
-                            /* response message structures not necessary anymore */
-                            dealloc_msg_header_out (l_resp_msg_header);
-                            dealloc_msg_out (l_resp_msg)
+                            l_is_valid_resp, l_ret2 <-- server_validate_session_service_resp (channel, l_session, l_request_handle);
+                            IF l_ret2 /= e_sc_ok
+                            THEN
+                                /* In case there is an issue with the session, it overwrites the possible service issue */
+                                l_ret := l_ret2
+                            END
                         END;
                         /* request message not necessary anymore */
                         dealloc_msg_in (l_req_msg)
+                    ELSE
+                        l_ret := e_sc_bad_decoding_error
                     END /* DECODE REQ CHECK */
-                END /* VALID SESSION REQ CHECK */
+                END; /* VALID SESSION REQ CHECK */
+                IF l_resp_msg_allocated = FALSE THEN
+                    /* Allocate error response message if not allocated (degraded case) */
+                    l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (e_msg_service_fault_resp);
+                    l_valid_msg <-- is_valid_msg_out (l_resp_msg);
+                    l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header)
+                END;
+                /* Encode the message (nominal and degraded cases) */
+                IF l_valid_msg = TRUE &
+                    l_valid_resp_header = TRUE
+                THEN
+                    IF l_ret /= e_sc_ok
+                    THEN
+                        /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */
+                        l_resp_msg_typ := e_msg_service_fault_resp
+                    END;
+                    write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
+                    write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
+                    /* Response message encoded */
+                    l_buffer_out <-- encode_msg (l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
+                    /* response message structures not necessary anymore */
+                    dealloc_msg_header_out (l_resp_msg_header);
+                    dealloc_msg_out (l_resp_msg)
+                ELSE 
+                    IF l_valid_resp_header = TRUE THEN
+                        dealloc_msg_header_out (l_resp_msg_header)
+                    END
+                END                
             END /* VALID REQ HEADER CHECK */
         END; /* DECODE REQ HEADER CHECK */
         IF l_valid_req_header = TRUE

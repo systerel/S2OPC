@@ -327,7 +327,7 @@ OPERATIONS
         END
     END;
 
-    is_valid_res, session, snd_err <-- server_validate_session_service_req (channel, req_handle, session_token) =
+    is_valid_res, session, status_code_err <-- server_validate_session_service_req (channel, req_handle, session_token) =
     VAR
         l_session,
         l_valid_session,
@@ -348,22 +348,27 @@ OPERATIONS
             THEN
                 // Returns always TRUE if compliant with PRE (proved)
                 is_valid_res <-- is_session_valid_for_service (channel, l_session);
-                snd_err := FALSE;
+                status_code_err := e_sc_ok;
                 session := l_session
             ELSE
                 // Unexpected access to session (wrong state or channel): close it
                 server_close_session_sm (l_session);
                 is_valid_res := FALSE;
-                snd_err := TRUE
+                IF l_session_channel = channel THEN
+                    /* Invalid session state */
+                    status_code_err := e_sc_bad_invalid_state
+                ELSE
+                    status_code_err := e_sc_bad_secure_channel_id_invalid
+                END
             END
         ELSE
             is_valid_res := FALSE;
-            snd_err := TRUE
+            status_code_err := e_sc_bad_session_id_invalid
         END
     END
     ;
     
-    is_valid_res, snd_err <-- server_validate_session_service_resp (channel, session, req_handle) =
+    is_valid_res, status_code_err <-- server_validate_session_service_resp (channel, session, req_handle) =
     VAR
         l_valid_session,
         l_session_state,
@@ -382,14 +387,19 @@ OPERATIONS
             THEN
                 // Returns always TRUE if compliant with PRE (proved)
                 is_valid_res <-- is_session_valid_for_service (channel, session);
-                snd_err := FALSE
+                status_code_err := e_sc_ok
             ELSE
                 is_valid_res := FALSE;
-                snd_err := TRUE
+                IF l_session_channel = channel THEN
+                    /* Invalid session state */
+                    status_code_err := e_sc_bad_invalid_state
+                ELSE
+                    status_code_err := e_sc_bad_secure_channel_id_invalid
+                END
             END
         ELSE
             is_valid_res := FALSE;
-            snd_err := TRUE
+            status_code_err := e_sc_bad_session_id_invalid
         END
     END
     ;

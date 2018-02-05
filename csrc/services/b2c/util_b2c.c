@@ -650,6 +650,9 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_encoding_error:
         *status = OpcUa_BadEncodingError;
         break;
+    case constants__e_sc_bad_decoding_error:
+        *status = OpcUa_BadDecodingError;
+        break;
     case constants__e_sc_bad_invalid_argument:
         *status = OpcUa_BadInvalidArgument;
         break;
@@ -715,6 +718,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         break;
     case OpcUa_BadEncodingError:
         *bstatus = constants__e_sc_bad_encoding_error;
+        break;
+    case OpcUa_BadDecodingError:
+        *bstatus = constants__e_sc_bad_decoding_error;
         break;
     case OpcUa_BadInvalidArgument:
         *bstatus = constants__e_sc_bad_invalid_argument;
