@@ -83,6 +83,17 @@ void message_in_bs__decode_msg_type(const constants__t_byte_buffer_i message_in_
     SOPC_ReturnStatus status = SOPC_MsgBodyType_Read((SOPC_Buffer*) message_in_bs__msg_buffer, &encType);
     if (SOPC_STATUS_OK == status && encType != NULL)
     {
+        if (SOPC_DEBUG_PRINTING != false)
+        {
+            if (encType->TypeName != NULL)
+            {
+                printf("Services: decoded input message type = '%s'\n", encType->TypeName);
+            }
+            else
+            {
+                printf("Services: decoded input message type = '%d'\n", encType->TypeId);
+            }
+        }
         util_message__get_message_type(encType, message_in_bs__msg_type);
     }
 }
