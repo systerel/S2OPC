@@ -48,7 +48,7 @@ OPERATIONS
 
     /* Makes the ReadRequest available to the machine (if possible)
      * This "read" does not have the meaning of the other reads, which are accessors... */
-    p_read_ok, p_nb_ReadValue, p_tsToReturn <-- check_ReadRequest(p_msg) =
+    p_read_ok, p_nb_ReadValue, p_tsToReturn, p_statusCode <-- check_ReadRequest(p_msg) =
     PRE
         p_msg  : t_msg_i &
         p_msg  = c_msg_in &
@@ -58,17 +58,20 @@ OPERATIONS
         p_read_ok,
         p_nb_ReadValue,
         p_tsToReturn,
+        p_statusCode,
         nb_ReadValue,
         ReadValue_NodeId,
         ReadValue_AttributeId
         :(  p_read_ok      : BOOL & /* Error code, for now a simple bool */
             p_nb_ReadValue : INT  &
             p_tsToReturn   : t_TimestampsToReturn_i &
+            p_statusCode   : t_StatusCode &
             d_inv          &
             (p_read_ok = TRUE
              =>
              p_nb_ReadValue = nb_ReadValue &
-             p_tsToReturn : t_TimestampsToReturn)
+             p_tsToReturn : t_TimestampsToReturn &
+             p_statusCode = e_sc_ok)
         )
     END
     ;

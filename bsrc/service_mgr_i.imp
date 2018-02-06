@@ -67,7 +67,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    bres <-- treat_read_request(p_request_msg, p_response_msg) =
+    StatusCode_service <-- treat_read_request(p_request_msg, p_response_msg) =
     PRE
         p_request_msg  : t_msg_i   &
         p_request_msg  = c_msg_in  &
@@ -79,7 +79,7 @@ LOCAL_OPERATIONS
         ReadValue_AttributeId,
         data_Value_Value,
         data_Value_StatusCode,
-        bres
+        StatusCode_service
         :(
           nb_ReadValue          : NAT                           &
           nb_ReadValue         <= k_n_read_resp_max             &
@@ -87,7 +87,7 @@ LOCAL_OPERATIONS
           ReadValue_AttributeId : t_ReadValue +-> t_AttributeId &
           data_Value_Value      : t_ReadValue +-> t_Variant     &
           data_Value_StatusCode : t_ReadValue +-> t_StatusCode  &
-          bres                  : BOOL
+          StatusCode_service    : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops}
          )
     END
     ;
@@ -209,20 +209,21 @@ OPERATIONS
     END
     ;
 
-    bres <-- treat_read_request(p_request_msg, p_response_msg) =
+    StatusCode_service <-- treat_read_request(p_request_msg, p_response_msg) =
     VAR
         l_nb_ReadValue,
         l_is_valid,
         l_TimestampsToReturn
     IN
-        l_is_valid, l_nb_ReadValue, l_TimestampsToReturn <-- check_ReadRequest(p_request_msg);
+        l_is_valid, l_nb_ReadValue, l_TimestampsToReturn, StatusCode_service <-- check_ReadRequest(p_request_msg);
         IF  l_is_valid = TRUE THEN
             l_is_valid <-- alloc_read_response(l_nb_ReadValue, l_TimestampsToReturn, p_response_msg);
             IF  l_is_valid = TRUE THEN
                 fill_read_response(p_request_msg, p_response_msg)
+            ELSE
+                StatusCode_service := e_sc_bad_out_of_memory
             END
-        END;
-        bres := l_is_valid
+        END
     END
     ;
 
@@ -253,13 +254,7 @@ OPERATIONS
     IN
         CASE req_typ OF
             EITHER e_msg_attribute_read_req THEN
-                l_bret <-- treat_read_request (req_msg, resp_msg);
-                IF l_bret = TRUE
-                THEN
-                    StatusCode_service := e_sc_ok
-                ELSE
-                    StatusCode_service := e_sc_bad_unexpected_error
-                END
+                StatusCode_service <-- treat_read_request (req_msg, resp_msg)
             OR e_msg_attribute_write_req THEN
                 // Write request case
                 StatusCode_service <-- treat_write_request (req_msg);

@@ -36,17 +36,33 @@ INITIALISATION
     nb_ReadValue := 0
 
 OPERATIONS
-    p_read_ok, p_nb_ReadValue, p_tsToReturn <-- check_ReadRequest(p_msg) =
+    p_read_ok, p_nb_ReadValue, p_tsToReturn, p_statusCode <-- check_ReadRequest(p_msg) =
     BEGIN
         p_nb_ReadValue <-- read_req_nb_ReadValue(p_msg);
-        p_read_ok := bool(0              <= p_nb_ReadValue &
+        p_read_ok := bool(0              < p_nb_ReadValue &
                           p_nb_ReadValue <= k_n_read_resp_max);
         p_tsToReturn := c_TimestampsToReturn_indet;
+        p_statusCode := c_StatusCode_indet;
         IF  p_read_ok = TRUE THEN
             nb_ReadValue := p_nb_ReadValue;
             p_tsToReturn <-- read_req_TimestampsToReturn(p_msg);
             IF  p_tsToReturn = c_TimestampsToReturn_indet THEN
-                p_read_ok := FALSE
+                p_read_ok := FALSE;
+                p_statusCode := e_sc_bad_timestamps_to_return_invalid
+            ELSE
+                /* Note: manage max age parameter for valid values but best effort valid when it is not invalid */
+                p_read_ok <-- read_req_MaxAge(p_msg);
+                IF  p_read_ok = FALSE THEN
+                    p_statusCode := e_sc_bad_max_age_invalid
+                ELSE
+                    p_statusCode := e_sc_ok
+                END
+            END
+        ELSE
+            IF p_nb_ReadValue <= 0 THEN
+                p_statusCode := e_sc_bad_nothing_to_do
+            ELSIF p_nb_ReadValue > k_n_read_resp_max THEN
+                p_statusCode := e_sc_bad_too_many_ops
             END
         END
     END

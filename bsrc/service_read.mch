@@ -60,7 +60,7 @@ INITIALISATION
 
 OPERATIONS
 
-    p_read_ok, p_nb_ReadValue, p_tsToReturn <-- check_ReadRequest(p_msg) =
+    p_read_ok, p_nb_ReadValue, p_tsToReturn, p_statusCode <-- check_ReadRequest(p_msg) =
     PRE
         p_msg    : t_msg_i  &
         p_msg    = c_msg_in &
@@ -70,12 +70,15 @@ OPERATIONS
         p_read_ok,
         p_nb_ReadValue,
         p_tsToReturn,
+        p_statusCode,
         nb_ReadValue,
         ReadValue_NodeId,
         ReadValue_AttributeId
         :(  p_read_ok             : BOOL                         &
             p_nb_ReadValue        : INT                          &
             p_tsToReturn          : t_TimestampsToReturn_i       &
+            p_statusCode          : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, 
+                                     e_sc_bad_max_age_invalid, e_sc_bad_timestamps_to_return_invalid} &
             data_Value_Value      : t_ReadValue +-> t_Variant    &
             data_Value_StatusCode : t_ReadValue +-> t_StatusCode
         )

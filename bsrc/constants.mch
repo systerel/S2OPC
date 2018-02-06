@@ -63,6 +63,8 @@ SETS
                       e_sc_bad_out_of_memory,
                       e_sc_bad_nothing_to_do,
                       e_sc_bad_too_many_ops,
+                      e_sc_bad_timestamps_to_return_invalid,
+                      e_sc_bad_max_age_invalid,
                       e_sc_bad_node_id_unknown,
                       e_sc_bad_node_id_invalid,
                       e_sc_bad_attribute_id_invalid,
