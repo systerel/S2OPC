@@ -257,6 +257,13 @@
     <Description>The abstract base type for all references.</Description>
     <References />
   </UAReferenceType>
+  <UADataType NodeId="i=295" BrowseName="LocaleId">
+    <DisplayName>LocaleId</DisplayName>
+    <Description>An identifier for a user locale.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=12</Reference>
+    </References>
+  </UADataType>
   <UADataType NodeId="i=121" BrowseName="Decimal128">
     <DisplayName>Decimal128</DisplayName>
     <Description>Describes a 128-bit decimal value.</Description>
@@ -384,6 +391,14 @@
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
   </UAObject>
+  <UAVariable NodeId="i=2271" BrowseName="LocaleIdArray" ParentNodeId="i=2268" DataType="i=295" ValueRank="1">
+    <DisplayName>LocaleIdArray</DisplayName>
+    <Description>A list of locales supported by the server.</Description>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
+    </References>
+  </UAVariable>
   <UAVariable BrowseName="0:State" NodeId="i=2259" ParentNodeId="i=1000" DataType="Int32">
     <DisplayName>State</DisplayName>
     <References>
