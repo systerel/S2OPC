@@ -2,7 +2,9 @@ cmake_minimum_required (VERSION 2.8)
 project (INGOPCS)
 
 # Define runtime output directory
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+endif()
 
 # Compiler options (C99 compliant)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -pedantic")

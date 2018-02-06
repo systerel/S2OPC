@@ -49,11 +49,12 @@ fi
 
 #### Compile C sources with clang ####
 echo "Compilation of project with Clang compiler to check specific CERT rules" | tee -a $LOGPATH
-CLANG_BUILD_DIR=clang_build
+CLANG_BUILD_DIR=build_clang
+CLANG_BIN_DIR=$PWD/bin_clang
 \rm -fr $CLANG_BUILD_DIR
 \mkdir -p $CLANG_BUILD_DIR
 cd $CLANG_BUILD_DIR
-CC=clang cmake .. >> $LOGPATH | tee -a $LOGPATH
+CC=clang cmake -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=$CLANG_BIN_DIR .. >> $LOGPATH | tee -a $LOGPATH
 make all >> $LOGPATH
 if [[ $? != 0 ]]; then
     cd - >> $LOGPATH
@@ -62,6 +63,7 @@ if [[ $? != 0 ]]; then
 else
     cd - >> $LOGPATH
     \rm -fr $CLANG_BUILD_DIR
+    \rm -fr $CLANG_BIN_DIR
 fi
 
 #### Analyze C sources with clang-tidy ####
