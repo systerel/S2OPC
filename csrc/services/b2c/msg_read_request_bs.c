@@ -112,6 +112,18 @@ void msg_read_request_bs__read_req_TimestampsToReturn(
     }
 }
 
+void msg_read_request_bs__read_req_MaxAge(const constants__t_msg_i msg_read_request_bs__p_msg,
+                                          t_bool* const msg_read_request_bs__p_maxAge_valid)
+{
+    OpcUa_ReadRequest* msg_read_req = (OpcUa_ReadRequest*) msg_read_request_bs__p_msg;
+    *msg_read_request_bs__p_maxAge_valid = false;
+
+    if (NULL != msg_read_req)
+    {
+        *msg_read_request_bs__p_maxAge_valid = msg_read_req->MaxAge >= 0;
+    }
+}
+
 void msg_read_request_bs__read_req_nb_ReadValue(const constants__t_msg_i msg_read_request_bs__msg,
                                                 t_entier4* const msg_read_request_bs__nb)
 {

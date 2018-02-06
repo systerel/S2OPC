@@ -671,6 +671,12 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_too_many_ops:
         *status = OpcUa_BadTooManyOperations;
         break;
+    case constants__e_sc_bad_max_age_invalid:
+        *status = OpcUa_BadMaxAgeInvalid;
+        break;
+    case constants__e_sc_bad_timestamps_to_return_invalid:
+        *status = OpcUa_BadTimestampsToReturnInvalid;
+        break;
     case constants__e_sc_bad_node_id_unknown:
         *status = OpcUa_BadNodeIdUnknown;
         break;
@@ -742,6 +748,12 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         break;
     case OpcUa_BadTooManyOperations:
         *bstatus = constants__e_sc_bad_too_many_ops;
+        break;
+    case OpcUa_BadMaxAgeInvalid:
+        *bstatus = constants__e_sc_bad_max_age_invalid;
+        break;
+    case OpcUa_BadTimestampsToReturnInvalid:
+        *bstatus = constants__e_sc_bad_timestamps_to_return_invalid;
         break;
     case OpcUa_BadNodeIdUnknown:
         *bstatus = constants__e_sc_bad_node_id_unknown;
