@@ -93,7 +93,6 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
     SOPC_Endpoint_Config* sopcEndpointConfig = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_String configEndPointURL;
-    int32_t endPointURLComparison = 0;
     uint8_t nbSecuConfigs = 0;
     SOPC_SecurityPolicy* tabSecurityPolicy = NULL;
 
@@ -106,20 +105,13 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
         status = SOPC_String_AttachFromCstring(&configEndPointURL, sopcEndpointConfig->endpointURL);
         assert(SOPC_STATUS_OK == status);
 
-        /* We check that the endPointURL provided by the request matches
-         * the configuration endPointURL */
-        status = SOPC_String_Compare(requestEndpointUrl, &configEndPointURL, 1, &endPointURLComparison);
+        /* Note: comparison with requested URL is not necessary since we have to return a default URL in any case */
+        (void) requestEndpointUrl;
         serviceResult = constants__e_sc_ok;
     }
     else
     {
         serviceResult = constants__e_sc_bad_unexpected_error;
-    }
-
-    if (constants__e_sc_ok == serviceResult && (status != SOPC_STATUS_OK || endPointURLComparison != 0))
-    {
-        *nbOfEndpointDescriptions = 0;
-        serviceResult = constants__e_sc_bad_invalid_argument;
     }
 
     if (constants__e_sc_ok == serviceResult)
