@@ -52,11 +52,22 @@ void service_write_decode_bs__decode_write_request(
     {
         OpcUa_WriteRequest* req = (OpcUa_WriteRequest*) service_write_decode_bs__write_msg;
 
-        if (0 != req->NoOfNodesToWrite && req->NoOfNodesToWrite <= constants__k_n_WriteResponse_max)
+        if (0 < req->NoOfNodesToWrite && req->NoOfNodesToWrite <= constants__k_n_WriteResponse_max)
         {
             /* TODO: req shall not be freed before request is null... */
             request = req;
             *service_write_decode_bs__StatusCode_service = constants__e_sc_ok;
+        }
+        else
+        {
+            if (req->NoOfNodesToWrite <= 0)
+            {
+                *service_write_decode_bs__StatusCode_service = constants__e_sc_bad_nothing_to_do;
+            }
+            else if (req->NoOfNodesToWrite > constants__k_n_WriteResponse_max)
+            {
+                *service_write_decode_bs__StatusCode_service = constants__e_sc_bad_too_many_ops;
+            }
         }
     }
 }
