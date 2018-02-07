@@ -22,6 +22,8 @@
 #include "sopc_builtintypes.h"
 #include "sopc_types.h"
 
+bool SOPC_Discovery_ContainsBinaryProfileURI(uint32_t nbOfProfileURI, SOPC_String* profileUris);
+
 constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
     const constants__t_endpoint_config_idx_i endpoint_config_idx,
     bool isCreateSessionResponse,

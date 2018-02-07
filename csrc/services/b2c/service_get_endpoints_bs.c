@@ -43,11 +43,31 @@ void service_get_endpoints_bs__treat_get_endpoints_request(
     const constants__t_endpoint_config_idx_i service_get_endpoints_bs__endpoint_config_idx,
     constants__t_StatusCode_i* const service_get_endpoints_bs__ret)
 {
+    bool getEndpoints = false;
     OpcUa_GetEndpointsRequest* getEndpointsReq = (OpcUa_GetEndpointsRequest*) service_get_endpoints_bs__req_msg;
     OpcUa_GetEndpointsResponse* getEndpointsResp = (OpcUa_GetEndpointsResponse*) service_get_endpoints_bs__resp_msg;
     uint32_t configIdx = (uint32_t) service_get_endpoints_bs__endpoint_config_idx;
 
-    *service_get_endpoints_bs__ret = SOPC_Discovery_GetEndPointsDescriptions(
-        configIdx, false, &getEndpointsReq->EndpointUrl, (uint32_t*) &getEndpointsResp->NoOfEndpoints,
-        &getEndpointsResp->Endpoints);
+    if (getEndpointsReq->NoOfProfileUris > 0)
+    {
+        // Check if profile URI TCP UA binary is requested, we de not provide any other
+        getEndpoints =
+            SOPC_Discovery_ContainsBinaryProfileURI(getEndpointsReq->NoOfProfileUris, getEndpointsReq->ProfileUris);
+    }
+    else
+    {
+        getEndpoints = true;
+    }
+    if (true == getEndpoints)
+    {
+        *service_get_endpoints_bs__ret = SOPC_Discovery_GetEndPointsDescriptions(
+            configIdx, false, &getEndpointsReq->EndpointUrl, (uint32_t*) &getEndpointsResp->NoOfEndpoints,
+            &getEndpointsResp->Endpoints);
+    }
+    else
+    {
+        // No endpoint to return in case incompatible profile URI provided
+        *service_get_endpoints_bs__ret = constants__e_sc_ok;
+        getEndpointsResp->NoOfEndpoints = 0;
+    }
 }

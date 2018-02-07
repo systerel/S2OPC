@@ -283,3 +283,14 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
 
     return serviceResult;
 }
+
+bool SOPC_Discovery_ContainsBinaryProfileURI(uint32_t nbOfProfileURI, SOPC_String* profileUris)
+{
+    bool result = false;
+    uint32_t i = 0;
+    for (i = 0; i < nbOfProfileURI && false == result; i++)
+    {
+        result = SOPC_String_Equal(&tcpUaTransportProfileURI, &profileUris[i]);
+    }
+    return result;
+}
