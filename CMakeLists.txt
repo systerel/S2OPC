@@ -143,7 +143,7 @@ target_include_directories(check_ingopcs_addspace PRIVATE ${INGOPCS_PUBLIC_INCLU
 
 # Allow to test the generated addspace with "make test" since some tests are built using it
 enable_testing()
-add_test(check_addspace ${CMAKE_CURRENT_SOURCE_DIR}/bin/check_ingopcs_addspace)
+add_test(check_addspace ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/check_ingopcs_addspace)
 set_tests_properties(check_addspace PROPERTIES DEPENDS check_ingopcs_addspace)
 
 # Helpers unit tests
@@ -175,24 +175,24 @@ target_include_directories(toolkit_test_server PRIVATE "${ADDSPACEGEN_DIR}/inclu
 ## COPY ALL CERTIFICATES TO BIN/ DIRECTORY
 add_custom_command(
     TARGET toolkit_test_server POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/revoked
-    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/untrusted
-    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/trusted
-    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/client_private
-    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/server_private
-    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/client_public
-    COMMAND ${CMAKE_COMMAND} -E make_directory $(CMAKE_SOURCE_DIR)/bin/server_public
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/cacert.der ${CMAKE_SOURCE_DIR}/bin/trusted/
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_2k.key ${CMAKE_SOURCE_DIR}/bin/client_private/
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_2k.key ${CMAKE_SOURCE_DIR}/bin/client_private/client_2k.pem
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_2k.der ${CMAKE_SOURCE_DIR}/bin/client_public/
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server_2k.key ${CMAKE_SOURCE_DIR}/bin/server_private/
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server_2k.der ${CMAKE_SOURCE_DIR}/bin/server_public/
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/untrusted
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_2k.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_2k.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/client_2k.pem
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_2k.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server_2k.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server_2k.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
     # Add 4096 client / server keys
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_4k.key ${CMAKE_SOURCE_DIR}/bin/client_private/
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_4k.der ${CMAKE_SOURCE_DIR}/bin/client_public/
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server_4k.key ${CMAKE_SOURCE_DIR}/bin/server_private/
-    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server_4k.der ${CMAKE_SOURCE_DIR}/bin/server_public/)
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_4k.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/client_4k.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server_4k.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/cert/server_4k.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/)
 
 # Read service test
 add_executable(toolkit_test_read "tests/services/toolkit_test_read.c"
