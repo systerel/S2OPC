@@ -188,6 +188,7 @@ OPERATIONS
         l_valid_session,
         l_session_state,
         l_session_channel,
+        l_is_valid_user_token,
         l_user,
         l_valid_user
     IN
@@ -210,14 +211,19 @@ OPERATIONS
                         l_session_state =  e_session_scOrphaned or
                         l_session_state = e_session_userActivated
                     THEN
-                        l_user <-- read_activate_msg_user (req_msg);
-                        l_valid_user <-- is_valid_user (l_user);
-                        IF l_valid_user = TRUE
-                        THEN
-                            // TODO: differentiate sc_activate from user_activate directly here
-                            service_ret <-- server_activate_session_req_and_resp_sm (channel, session, l_user, req_msg, resp_msg)
+                        l_is_valid_user_token, l_user <-- read_activate_req_msg_user (req_msg);
+                        IF l_is_valid_user_token = TRUE THEN
+                            l_valid_user <-- is_valid_user (l_user);
+                            IF l_valid_user = TRUE
+                            THEN
+                                // TODO: differentiate sc_activate from user_activate directly here
+                                service_ret <-- server_activate_session_req_and_resp_sm (channel, session, l_user, req_msg, resp_msg)
+                            ELSE
+                                // invalid user in token
+                                service_ret := e_sc_bad_identity_token_invalid
+                            END
                         ELSE
-                            // invalid user in msg => no session change
+                            // invalid user token type
                             service_ret := e_sc_bad_identity_token_invalid
                         END;
                         IF service_ret /= e_sc_ok

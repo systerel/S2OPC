@@ -217,13 +217,14 @@ OPERATIONS
     END
     ;
     
-    user <-- read_activate_msg_user (msg) =
+    valid_user_token, user <-- read_activate_req_msg_user (msg) =
     PRE
         msg : t_msg_i &
         msg = c_msg_in &
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_activate_req
     THEN
+        valid_user_token :: BOOL ||
         user :: t_user_i
     END
     ;

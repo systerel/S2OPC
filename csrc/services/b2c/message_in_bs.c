@@ -31,7 +31,9 @@
 
 #include "constants_bs.h"
 
+#include "opcua_identifiers.h"
 #include "sopc_encoder.h"
+#include "sopc_namespace_table.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -185,13 +187,46 @@ void message_in_bs__msg_in_memory_changed(void)
     ;
 }
 
-void message_in_bs__read_activate_msg_user(const constants__t_msg_i message_in_bs__msg,
-                                           constants__t_user_i* const message_in_bs__user)
+void message_in_bs__read_activate_req_msg_user(const constants__t_msg_i message_in_bs__msg,
+                                               t_bool* const message_in_bs__valid_user_token,
+                                               constants__t_user_i* const message_in_bs__user)
 {
-    (void) message_in_bs__msg;
-    (void) message_in_bs__user;
+    bool isValid = false;
     // TODO: define anonymous user in B ? Still 1 in C implem for anym
-    *message_in_bs__user = 1;
+    OpcUa_ActivateSessionRequest* activateSessionReq = (OpcUa_ActivateSessionRequest*) message_in_bs__msg;
+
+    if (activateSessionReq->UserIdentityToken.Length > 0)
+    {
+        if (activateSessionReq->UserIdentityToken.TypeId.NodeId.IdentifierType == SOPC_IdentifierType_Numeric &&
+            activateSessionReq->UserIdentityToken.TypeId.NodeId.Namespace == OPCUA_NAMESPACE_INDEX)
+        {
+            if (OpcUaId_AnonymousIdentityToken == activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric ||
+                OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary ==
+                    activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric ||
+                OpcUaId_AnonymousIdentityToken_Encoding_DefaultXml ==
+                    activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric)
+            {
+                // It is anonymous user token which is the only supported now
+                // Note: we do not check the policy Id since it is not relevant nor configurable for the endpoint
+                isValid = true;
+            }
+        }
+    }
+    else
+    {
+        // NULL value indicates anonymous user token which is the only supported for now
+        isValid = true;
+    }
+
+    if (isValid != false)
+    {
+        *message_in_bs__user = 1;
+    }
+    else
+    {
+        *message_in_bs__user = constants__c_user_indet;
+    }
+    *message_in_bs__valid_user_token = isValid;
 }
 
 void message_in_bs__read_create_session_msg_session_token(
