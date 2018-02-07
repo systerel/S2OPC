@@ -156,6 +156,9 @@ while read line; do
         if check_test $KNOWN_BUGS_FILES "${test_number}|${test_description}"
         then
             echo "ok $num_tests $test_number $test_description - FIXED KNOWN BUG" >> $TAP_FILE
+        elif check_test $SKIPPED_TESTS_FILE "${test_number}|${test_description}"
+        then
+            echo "ok $num_tests $test_number $test_description - NEW SUPPORTED / NEW NO SKIP" >> $TAP_FILE
         else
         #otherwise log ok in tap report
             echo "ok $num_tests $test_number $test_description" >> $TAP_FILE
