@@ -61,5 +61,17 @@ OPERATIONS
     BEGIN
         skip
     END
+    ;
+
+    /* Promoted from msg_browse_response_bs */
+    set_ResponseBrowse_BrowseStatus(p_bvi, p_sc) =
+    PRE
+        p_bvi  : t_BrowseValue_i &
+        p_bvi  : t_BrowseValue   &
+        p_sc : t_StatusCode_i &
+        p_sc : t_StatusCode
+    THEN
+        skip
+    END
 
 END

@@ -60,7 +60,7 @@ INITIALISATION
 
 OPERATIONS
 
-    p_isvalid, p_nb_ref, p_src_node <-- get_SourceNode_NbRef(p_src_nodeid) =
+    p_isvalid, p_nb_ref, p_src_node <-- getall_SourceNode_NbRef(p_src_nodeid) =
     PRE
         p_src_nodeid : t_NodeId_i &
         p_src_nodeid : t_NodeId
@@ -165,6 +165,18 @@ OPERATIONS
     /* Promoted */
     free_browse_result =
     BEGIN
+        skip
+    END
+    ;
+
+    /* Promoted from msg_browse_response_bs */
+    set_ResponseBrowse_BrowseStatus(p_bvi, p_sc) =
+    PRE
+        p_bvi  : t_BrowseValue_i &
+        p_bvi  : t_BrowseValue   &
+        p_sc : t_StatusCode_i &
+        p_sc : t_StatusCode
+    THEN
         skip
     END
 

@@ -30,11 +30,12 @@ IMPORTS
 
 PROMOTES
     write_BrowseResponse_msg_out,
-    free_browse_result
+    free_browse_result,
+    set_ResponseBrowse_BrowseStatus
 
 OPERATIONS
 
-    p_isvalid, p_nb_ref, p_src_node <-- get_SourceNode_NbRef(p_src_nodeid) =
+    p_isvalid, p_nb_ref, p_src_node <-- getall_SourceNode_NbRef(p_src_nodeid) =
     VAR
         l_ref_index_begin,
         l_ref_index_end
