@@ -225,20 +225,24 @@ OPERATIONS
     IN
         l_nb_target_max <-- get_nb_BrowseTargetMax;
         l_nb_bvi <-- get_nb_BrowseValue;
-        l_isallocated <-- alloc_browse_response(l_nb_bvi);
-        IF l_isallocated = TRUE THEN
-            StatusCode_service := e_sc_ok;
-            l_continue <-- init_iter_browse_request(l_nb_bvi);
-            WHILE l_continue = TRUE DO
-                l_continue, l_bvi <-- continue_iter_browse_request;
-                treat_browse_request_BrowseValue_1(l_bvi, l_nb_target_max)
-            INVARIANT
-                0=0
-            VARIANT
-                0
+        IF l_nb_bvi > 0 THEN
+            l_isallocated <-- alloc_browse_response(l_nb_bvi);
+            IF l_isallocated = TRUE THEN
+                StatusCode_service := e_sc_ok;
+                l_continue <-- init_iter_browse_request(l_nb_bvi);
+                WHILE l_continue = TRUE DO
+                    l_continue, l_bvi <-- continue_iter_browse_request;
+                    treat_browse_request_BrowseValue_1(l_bvi, l_nb_target_max)
+                INVARIANT
+                    0=0
+                VARIANT
+                    0
+                END
+            ELSE
+                StatusCode_service := e_sc_bad_out_of_memory
             END
         ELSE
-            StatusCode_service := e_sc_bad_out_of_memory
+            StatusCode_service := e_sc_bad_nothing_to_do
         END
     END
 
