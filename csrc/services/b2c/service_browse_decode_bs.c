@@ -117,8 +117,8 @@ request->NoOfNodesToBrowse) These are already verified by PRE */
     {
         pBwseDesc = &request->NodesToBrowse[service_browse_decode_bs__p_bvi - 1];
         *service_browse_decode_bs__p_NodeId = (constants__t_NodeId_i) &pBwseDesc->NodeId;
-        if (false == util_BrowseDirection__C_to_B(pBwseDesc->BrowseDirection, service_browse_decode_bs__p_dir))
-            return;
+        /* Invalid direction is tested by the B, so it's is not a reason to unset p_isvalid */
+        util_BrowseDirection__C_to_B(pBwseDesc->BrowseDirection, service_browse_decode_bs__p_dir);
 
         /* TODO: Have a clearer definition of what a "not specified ReferenceType" is... */
         pNid = &pBwseDesc->ReferenceTypeId;

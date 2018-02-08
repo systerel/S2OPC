@@ -68,6 +68,7 @@ SETS
                       e_sc_bad_node_id_unknown,
                       e_sc_bad_node_id_invalid,
                       e_sc_bad_attribute_id_invalid,
+                      e_sc_bad_browse_direction_invalid,
                       e_sc_bad_service_unsupported,
                       e_sc_bad_write_not_supported};
 
