@@ -683,6 +683,9 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_node_id_invalid:
         *status = OpcUa_BadNodeIdInvalid;
         break;
+    case constants__e_sc_bad_view_id_unknown:
+        *status = OpcUa_BadViewIdUnknown;
+        break;
     case constants__e_sc_bad_attribute_id_invalid:
         *status = OpcUa_BadAttributeIdInvalid;
         break;
@@ -763,6 +766,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         break;
     case OpcUa_BadNodeIdInvalid:
         *bstatus = constants__e_sc_bad_node_id_invalid;
+        break;
+    case OpcUa_BadViewIdUnknown:
+        *bstatus = constants__e_sc_bad_view_id_unknown;
         break;
     case OpcUa_BadAttributeIdInvalid:
         *bstatus = constants__e_sc_bad_attribute_id_invalid;

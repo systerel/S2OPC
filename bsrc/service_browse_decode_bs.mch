@@ -26,6 +26,7 @@ DEFINITIONS
     d_variables ==
         nb_BrowseValue,
         nb_BrowseTargetMax, /* requestedMaxReferencesPerNode */
+        BrowseView,
         BrowseValue_NodeId,
         BrowseValue_BrowseDirection,
         BrowseValue_ReferenceTypeId,
@@ -35,6 +36,7 @@ DEFINITIONS
         nb_BrowseValue                : NAT                                 &
         nb_BrowseValue               <= k_n_BrowseResponse_max              &
         nb_BrowseTargetMax            : NAT                                 &
+        BrowseView                    : t_NodeId_i                          &
         BrowseValue_NodeId            : t_BrowseValue +-> t_NodeId          &
         BrowseValue_BrowseDirection   : t_BrowseValue +-> t_BrowseDirection &
         BrowseValue_ReferenceTypeId   : t_BrowseValue +-> t_NodeId          &
@@ -45,6 +47,7 @@ DEFINITIONS
         :(
             nb_BrowseValue               = 0  &
             nb_BrowseTargetMax           = 0  &
+            BrowseView                   = c_NodeId_indet &
             BrowseValue_NodeId           = {} &
             BrowseValue_BrowseDirection  = {} &
             BrowseValue_ReferenceTypeId  = {} &
@@ -81,6 +84,12 @@ OPERATIONS
     free_browse_request =
     BEGIN
         d_init
+    END
+    ;
+
+    p_nid_view <-- get_BrowseView =
+    BEGIN
+        p_nid_view := BrowseView
     END
     ;
 

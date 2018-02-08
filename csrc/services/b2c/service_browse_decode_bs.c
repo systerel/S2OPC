@@ -92,6 +92,22 @@ void service_browse_decode_bs__get_nb_BrowseTargetMax(t_entier4* const service_b
     }
 }
 
+extern void service_browse_decode_bs__get_BrowseView(constants__t_NodeId_i* const service_browse_decode_bs__p_nid_view)
+{
+    SOPC_NodeId* pVid = NULL;
+
+    *service_browse_decode_bs__p_nid_view = constants__c_NodeId_indet;
+
+    if (request != NULL)
+    {
+        pVid = &(request->View.ViewId);
+        if (pVid->IdentifierType != SOPC_IdentifierType_Numeric || pVid->Data.Numeric != 0)
+        {
+            *service_browse_decode_bs__p_nid_view = (constants__t_NodeId_i) pVid;
+        }
+    }
+}
+
 void service_browse_decode_bs__getall_BrowseValue(const constants__t_BrowseValue_i service_browse_decode_bs__p_bvi,
                                                   t_bool* const service_browse_decode_bs__p_isvalid,
                                                   constants__t_NodeId_i* const service_browse_decode_bs__p_NodeId,
