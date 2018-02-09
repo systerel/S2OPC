@@ -174,6 +174,8 @@ sed -i "1s/^/1..$num_tests\n/" $TAP_FILE
 
 rm -f $TMP_FILE
 
+n_err=$(grep "^not ok" $TAP_FILE | wc -l)
 mv $TAP_FILE ../bin/
 
 echo -e "Test report generated"
+echo -e "There were $n_err not oks"
