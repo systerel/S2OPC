@@ -328,6 +328,14 @@
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
   </UAObject>
+  <UAObject NodeId="i=87" BrowseName="Views" SymbolicName="ViewsFolder">
+    <DisplayName>Views</DisplayName>
+    <Description>The browse entry point when looking for views in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=84</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
  <UAObject NodeId="i=88" BrowseName="ObjectTypes" SymbolicName="ObjectTypesFolder">
     <DisplayName>ObjectTypes</DisplayName>
     <Description>The browse entry point when looking for object types in the server address space.</Description>
