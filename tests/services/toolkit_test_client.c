@@ -26,6 +26,7 @@
 #include "test_results.h"
 
 #include "opcua_statuscodes.h"
+#include "sopc_encodeable.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
@@ -45,6 +46,7 @@ static uint8_t sessionsClosed = 0;
 static int32_t session = 0;
 static int32_t session2 = 0;
 static int32_t session3 = 0;
+static bool getEndpointsReceived = false;
 
 #define NB_SESSIONS 3
 
@@ -78,6 +80,36 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, void* param, SOPC_StatusC
                 printf(">>Test_Client_Toolkit: received WriteResponse \n");
                 OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) param;
                 test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
+            }
+        }
+    }
+    else if (event == SE_RCV_DISCOVERY_RESPONSE)
+    {
+        if (NULL != param)
+        {
+            SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) param;
+            if (encType == &OpcUa_GetEndpointsResponse_EncodeableType)
+            {
+                printf(">>Test_Client_Toolkit: received GetEndpointsResponse \n");
+                SOPC_String endpointUrl;
+                SOPC_String_Initialize(&endpointUrl);
+                SOPC_ReturnStatus testStatus = SOPC_String_AttachFromCstring(&endpointUrl, ENDPOINT_URL);
+                bool validEndpoints = true;
+                OpcUa_GetEndpointsResponse* getEndpointsResp = (OpcUa_GetEndpointsResponse*) param;
+
+                if (testStatus != SOPC_STATUS_OK || getEndpointsResp->NoOfEndpoints <= 0)
+                {
+                    // At least one endpoint shall be described with the correct endpoint URL
+                    validEndpoints = false;
+                }
+
+                for (int32_t idx = 0; idx < getEndpointsResp->NoOfEndpoints && validEndpoints != false; idx++)
+                {
+                    validEndpoints = SOPC_String_Equal(&getEndpointsResp->Endpoints[idx].EndpointUrl, &endpointUrl);
+                }
+                SOPC_Encodeable_Delete(&OpcUa_GetEndpointsResponse_EncodeableType, (void**) &getEndpointsResp);
+
+                getEndpointsReceived = validEndpoints;
             }
         }
     }
@@ -117,6 +149,19 @@ static void* getReadRequest_message(void)
 static void* getReadRequest_verif_message(void)
 {
     return tlibw_new_ReadRequest_check();
+}
+
+/* Function to build the getEndpoints service request message */
+static void* getGetEndpoints_message(void)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    OpcUa_GetEndpointsRequest* getEndpointReq = NULL;
+    status = SOPC_Encodeable_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &getEndpointReq);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_AttachFromCstring(&getEndpointReq->EndpointUrl, ENDPOINT_URL);
+    }
+    return getEndpointReq;
 }
 
 // A Secure channel connection configuration
@@ -300,6 +345,32 @@ int main(void)
         {
             printf(">>Test_Client_Toolkit: Client configured\n");
         }
+    }
+
+    /* Asynchronous request to get endpoints */
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(channel_config_idx2, getGetEndpoints_message());
+        printf(">>Test_Client_Toolkit: Get endpoints on 1 SC without session: OK\n");
+    }
+
+    /* Wait until get endpoints response or timeout */
+    loopCpt = 0;
+    while (SOPC_STATUS_OK == status && getEndpointsReceived == false && loopCpt * sleepTimeout <= loopTimeout)
+    {
+        loopCpt++;
+        // Retrieve received messages on socket
+        SOPC_Sleep(sleepTimeout);
+    }
+
+    if (getEndpointsReceived == false)
+    {
+        printf(">>Test_Client_Toolkit: GetEndpoints Response received: NOK\n");
+        status = SOPC_STATUS_NOK;
+    }
+    else
+    {
+        printf(">>Test_Client_Toolkit: GetEndpoints Response received: OK\n");
     }
 
     /* Asynchronous request to create 3 sessions on 2 secure channels
