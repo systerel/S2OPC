@@ -27,6 +27,7 @@ SEES
 IMPORTS
     message_in_bs,
     message_out_bs,
+    service_mgr_bs,
     session_mgr,
     service_read,
     request_handle_bs,
@@ -51,6 +52,8 @@ PROMOTES
     client_async_activate_new_session_without_channel,
     client_async_activate_new_session_with_channel,
     client_channel_connected_event_session,
+    client_async_discovery_request_without_channel,
+    client_channel_connected_event_discovery,
     client_close_session
 
 LOCAL_OPERATIONS
@@ -902,11 +905,44 @@ OPERATIONS
         l_valid_msg <-- is_valid_msg_out (req_msg);
         IF l_valid_msg = TRUE
         THEN
-            l_req_typ <-- get_msg_in_type (req_msg);
+            l_req_typ <-- get_msg_out_type (req_msg);
             CASE l_req_typ OF
-                EITHER e_msg_attribute_read_req,
-                       e_msg_attribute_write_req,
-                       e_msg_view_browse_req
+                /* Only checks the type is a request (<=> not invalid & not a response) */
+                EITHER e_msg_node_add_nodes_req,
+                    e_msg_node_add_references_req,
+                    e_msg_node_delete_nodes_req,
+                    e_msg_node_delete_references_req,
+                    e_msg_view_browse_req,
+                    e_msg_view_browse_next_req,
+                    e_msg_view_translate_browse_paths_to_node_ids_req,
+                    e_msg_view_register_nodes_req,
+                    e_msg_view_unregister_nodes_req,
+                    e_msg_query_first_req,
+                    e_msg_query_next_req,
+                    e_msg_attribute_read_req,
+                    e_msg_attribute_history_read_req,
+                    e_msg_attribute_write_req,
+                    e_msg_attribute_history_update_req,
+                    e_msg_method_call_req,
+                    e_msg_monitored_items_create_req,
+                    e_msg_monitored_items_modify_req,
+                    e_msg_monitored_items_set_monitoring_mode_req,
+                    e_msg_monitored_items_set_monitoring_mode_resp,
+                    e_msg_monitored_items_set_triggering_req,
+                    e_msg_monitored_items_delete_req,
+                    e_msg_subscription_create_req,
+                    e_msg_subscription_modify_req,
+                    e_msg_subscription_set_publishing_mode_req,
+                    e_msg_subscription_publish_req,
+                    e_msg_subscription_republish_req,
+                    e_msg_subscription_transfer_subscriptions_req,
+                    e_msg_subscription_delete_subscriptions_req,
+                    /* discovery services */
+                    e_msg_discovery_find_servers_req,
+                    e_msg_discovery_find_servers_on_network_req,
+                    e_msg_discovery_get_endpoints_req,
+                    e_msg_discovery_register_server_req,
+                    e_msg_discovery_register_server2_req
                 THEN
                     l_resp_typ <-- get_response_type (l_req_typ);
                     l_msg_header <-- alloc_app_req_msg_header;
@@ -946,6 +982,69 @@ OPERATIONS
             ret := e_sc_bad_invalid_argument
         END;
         channel := l_channel;
+        buffer_out := l_buffer
+    END
+    ;
+    
+    ret, buffer_out <-- client_discovery_service_request (req_msg) =
+    VAR
+        l_msg_header,
+        l_valid_msg_header,
+        l_req_typ,
+        l_resp_typ,
+        l_valid_msg,
+        l_req_handle,
+        l_valid_req_handle,
+        l_buffer,
+        l_valid_buffer
+    IN
+        l_buffer := c_byte_buffer_indet;
+        l_valid_msg <-- is_valid_msg_out (req_msg);
+        IF l_valid_msg = TRUE
+        THEN
+            l_req_typ <-- get_msg_out_type (req_msg);
+            CASE l_req_typ OF
+                /* Checks the type is a discovery request */
+                EITHER e_msg_discovery_find_servers_req,
+                    e_msg_discovery_find_servers_on_network_req,
+                    e_msg_discovery_get_endpoints_req,
+                    e_msg_discovery_register_server_req,
+                    e_msg_discovery_register_server2_req
+                THEN
+                    l_resp_typ <-- get_response_type (l_req_typ);
+                    l_msg_header <-- alloc_app_req_msg_header;
+                    l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
+                    l_req_handle <-- client_fresh_req_handle (l_resp_typ);
+                    l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+                    IF l_valid_req_handle = TRUE &
+                        l_valid_msg_header = TRUE
+                    THEN
+                        bless_msg_out (l_req_typ, l_msg_header, req_msg);
+                        
+                        write_msg_out_header_req_handle (l_msg_header, l_req_handle);
+                        l_buffer <-- encode_msg (e_msg_session_close_req, l_msg_header, req_msg);
+                        l_valid_buffer <-- is_valid_buffer_out (l_buffer);
+                        IF l_valid_buffer = FALSE
+                        THEN
+                            ret := e_sc_bad_encoding_error
+                        ELSE
+                            ret := e_sc_ok
+                        END
+                    ELSE
+                        ret := e_sc_bad_out_of_memory
+                    END;
+                    IF l_valid_msg_header = TRUE
+                    THEN
+                        dealloc_msg_header_out (l_msg_header)
+                    END;
+                    dealloc_msg_out (req_msg)
+                ELSE
+                    ret := e_sc_bad_invalid_argument
+                END
+            END
+        ELSE
+            ret := e_sc_bad_invalid_argument
+        END;
         buffer_out := l_buffer
     END
 

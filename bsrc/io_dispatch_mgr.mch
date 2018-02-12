@@ -214,6 +214,28 @@ OPERATIONS
             e_sc_bad_encoding_error}
     END
     ;
+    
+    
+    ret <-- client_send_discovery_request (channel_config_idx, req_msg) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        req_msg         : t_msg_i &
+        req_msg         : t_msg &
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
+    THEN
+        ret :: {e_sc_ok,
+            e_sc_bad_out_of_memory,
+            e_sc_bad_invalid_argument, /* message has not expected type */
+            e_sc_bad_encoding_error,
+            e_sc_bad_too_many_ops, /* An operation is already recorded to be sen when SC will be connected */
+            e_sc_bad_generic}
+    END
+    ;
 
     internal_client_create_session (session, channel_config_idx) =
     PRE

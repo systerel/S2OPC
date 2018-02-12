@@ -338,9 +338,54 @@ OPERATIONS
         END
     END
     ;
+    
+    ret, buffer_out <-- client_discovery_service_request (req_msg) =
+    PRE
+        req_msg         : t_msg_i &
+        req_msg         : t_msg &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
+    THEN
+        CHOICE
+            ret :: {e_sc_bad_out_of_memory,
+                e_sc_bad_invalid_argument, /* message has not expected type */
+                e_sc_bad_encoding_error} ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+        OR
+            ret := e_sc_ok ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+        END
+    END
+    ;
 
     /* PROMOTES */
-        /* New session: creation and activation async */
+
+    bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        req_msg            : t_msg_i &
+        req_msg            : t_msg
+    THEN
+        bres :: BOOL
+    END
+    ;
+    
+    /* Generates an event to send the discovery request */
+    client_channel_connected_event_discovery (channel_config_idx, channel) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        channel : t_channel_i &
+        channel : s_channel_connected
+    THEN
+        skip
+    END
+    ;
+
+    /* New session: creation and activation async */
     bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
