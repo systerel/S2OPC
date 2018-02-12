@@ -32,11 +32,11 @@
 typedef uint64_t SOPC_TimeReference;
 
 /**
- *  \brief Suspend current thread execution for (at least) a microsecond interval
+ *  \brief Suspend current thread execution for (at least) a millisecond interval
  *
- *  \param microsecs  The microsecond interval value for which execution must be suspended
+ *  \param milliseconds  The milliseconds interval value for which execution must be suspended
  */
-void SOPC_Sleep(unsigned int microsecs);
+void SOPC_Sleep(unsigned int milliseconds);
 
 /**
  * \brief return the current time in DateTime format which is nanoseconds from 1601/01/01 00:00:00 UTC
