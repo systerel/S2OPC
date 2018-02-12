@@ -61,23 +61,25 @@ typedef enum SOPC_Services_Event {
                                            auxParam = user (index ?)
                                         */
     /* App to Services events */
-    APP_TO_SE_OPEN_ENDPOINT,         /* id = endpoint description config index
-                                      */
-    APP_TO_SE_CLOSE_ENDPOINT,        /* id = endpoint description config index
-                                      */
-    APP_TO_SE_ACTIVATE_SESSION,      /* Connect SC + Create Session + Activate session */
-                                     /* id = endpoint connection config index,
-                                        auxParam = user (index ?)
-                                      */
-    APP_TO_SE_SEND_SESSION_REQUEST,  // TODO: manage buffer when session with channel lost ? Or return a send failure in
-                                     // this case
-                                     /* id = session id,
-                                        params = (OpcUa_<MessageStruct>*) OPC UA message payload structure
-                                      */
-    APP_TO_SE_CLOSE_SESSION,         /* id = session id
-                                      */
-    APP_TO_SE_CLOSE_ALL_CONNECTIONS, // Automatically called by toolkit clear (no params)
-    //  SE_SEND_PUBLIC_REQUEST, => discovery services /* Connect SC */
+    APP_TO_SE_OPEN_ENDPOINT,        /* id = endpoint description config index
+                                     */
+    APP_TO_SE_CLOSE_ENDPOINT,       /* id = endpoint description config index
+                                     */
+    APP_TO_SE_ACTIVATE_SESSION,     /* Connect SC + Create Session + Activate session */
+                                    /* id = endpoint connection config index,
+                                       auxParam = user (index ?)
+                                     */
+    APP_TO_SE_SEND_SESSION_REQUEST, // TODO: manage buffer when session with channel lost ? Or return a send failure in
+                                    // this case
+                                    /* id = session id,
+                                       params = (OpcUa_<MessageStruct>*) OPC UA message payload structure
+                                     */
+    APP_TO_SE_SEND_DISCOVERY_REQUEST, /* id = endpoint connection config index,
+                                         params = (OpcUa_<MessageStruct>*) OPC UA message payload structure
+                                       */
+    APP_TO_SE_CLOSE_SESSION,          /* id = session id
+                                       */
+    APP_TO_SE_CLOSE_ALL_CONNECTIONS,  // Automatically called by toolkit clear (no params)
 
     /* App to Services: local services events */
     APP_TO_SE_LOCAL_READ, // TBD

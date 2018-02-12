@@ -45,3 +45,8 @@ void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId)
 {
     SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SESSION, sessionId, NULL, 0);
 }
+
+void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx, void* discoveryReqStruct)
+{
+    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, endpointConnectionIdx, discoveryReqStruct, 0);
+}

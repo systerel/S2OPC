@@ -31,6 +31,7 @@
 #include "sopc_user_app_itf.h"
 
 #include "io_dispatch_mgr.h"
+#include "service_mgr_bs.h"
 #include "toolkit_header_init.h"
 
 static SOPC_EventDispatcherManager* servicesEventDispatcherMgr = NULL;
@@ -264,6 +265,19 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
             printf("WARNING: Problem while closing the session on client demand\n");
         }
         break;
+    case APP_TO_SE_SEND_DISCOVERY_REQUEST:
+        if (SOPC_DEBUG_PRINTING != false)
+        {
+            printf("APP_TO_SE_SEND_DISCOVERY_REQUEST\n");
+        }
+        // id == endpoint connection config idx
+        // params = request
+        io_dispatch_mgr__client_send_discovery_request(id, params, &sCode);
+        if (sCode != constants__e_sc_ok)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        break;
     case APP_TO_SE_CLOSE_ALL_CONNECTIONS:
         if (SOPC_DEBUG_PRINTING != false)
         {
@@ -340,6 +354,7 @@ void SOPC_Services_PreClear()
 void SOPC_Services_Clear()
 {
     address_space_bs__UNINITIALISATION();
+    service_mgr_bs__UNINITIALISATION();
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);

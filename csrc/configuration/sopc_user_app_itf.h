@@ -81,13 +81,14 @@ typedef enum SOPC_App_Com_Event {
                                    /* id = session id
                                       (auxParam = user index ?)
                                    */
-    SE_RCV_SESSION_RESPONSE,       /* (id = session id ?)
+    SE_RCV_SESSION_RESPONSE,       /* id = session id
                                       params = (OpcUa_<MessageStruct>*) OPC UA message payload structure
                                       auxParam = status code
                                    */
     SE_CLOSED_SESSION,             /* id = session id
                                     */
-    //  SE_RCV_PUBLIC_RESPONSE, => discovery services
+    SE_RCV_DISCOVERY_RESPONSE,     /* params = (OpcUa_<MessageStruct>*) OPC UA discovery message payload structure
+                                    */
 
     /* Server application events */
     SE_CLOSED_ENDPOINT, /* id = endpoint configuration index,

@@ -93,7 +93,14 @@ void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requ
  */
 void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId);
 
-/*void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx,
-                                                  void*    requestStruct);*/
+/**
+ * \brief Request to send a discovery service request without using session.
+ *        In case of service response received, the SE_RCV_SESSION_RESPONSE event will be triggered to
+ * SOPC_ComEvent_Fct().
+ *
+ * \param endpointConnectionIdx  Endpoint connection configuration index provided by
+ * \param requestStruct          OPC UA Discovery message request payload structure pointer (OpcUa_<MessageStruct>*)
+ */
+void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx, void* discoveryReqStruct);
 
 #endif /* SOPC_TOOLKIT_ASYNC_API_H */

@@ -39,6 +39,7 @@ void service_response_cli_cb_bs__cli_service_response(
     }
     else
     {
-        // TODO: SE_RCV_PUBLIC_RESPONSE
+        SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_RCV_DISCOVERY_RESPONSE), 0,
+                                        service_response_cli_cb_bs__resp_msg, service_response_cli_cb_bs__status);
     }
 }
