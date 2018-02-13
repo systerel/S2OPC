@@ -35,6 +35,12 @@
 static SOPC_SLinkedList*
     discovery_reqs_to_send[constants_bs__t_channel_config_idx_i_max + 1]; // index 0 is undet channel config
 
+typedef struct SOPC_DiscoveryRequest_ToSend
+{
+    constants__t_msg_i msgToSend;
+    constants__t_application_context_i msgAppContext;
+} SOPC_DiscoveryRequest_ToSend;
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -49,10 +55,12 @@ void service_mgr_bs__INITIALISATION(void)
 void service_mgr_bs__client_async_discovery_request_without_channel(
     const constants__t_channel_config_idx_i service_mgr_bs__channel_config_idx,
     const constants__t_msg_i service_mgr_bs__req_msg,
+    const constants__t_application_context_i service_mgr_bs__app_context,
     t_bool* const service_mgr_bs__bres)
 {
-    constants__t_msg_i* addedMsg = NULL;
+    void* addedMsg = NULL;
     SOPC_SLinkedList* sLinkedList = NULL;
+    SOPC_DiscoveryRequest_ToSend* elt = NULL;
     *service_mgr_bs__bres = false;
     if (service_mgr_bs__channel_config_idx > 0 &&
         service_mgr_bs__channel_config_idx <= constants_bs__t_channel_config_idx_i_max)
@@ -65,9 +73,15 @@ void service_mgr_bs__client_async_discovery_request_without_channel(
         }
         if (NULL != sLinkedList)
         {
-            addedMsg = SOPC_SLinkedList_Append(sLinkedList, 0, service_mgr_bs__req_msg);
+            elt = malloc(sizeof(SOPC_DiscoveryRequest_ToSend));
         }
-        if (addedMsg == service_mgr_bs__req_msg)
+        if (NULL != sLinkedList && NULL != elt)
+        {
+            elt->msgToSend = service_mgr_bs__req_msg;
+            elt->msgAppContext = service_mgr_bs__app_context;
+            addedMsg = SOPC_SLinkedList_Append(sLinkedList, 0, elt);
+        }
+        if (NULL != elt && addedMsg == (void*) elt)
         {
             *service_mgr_bs__bres = true;
         }
@@ -81,7 +95,8 @@ void service_mgr_bs__client_channel_connected_event_discovery(
     (void) service_mgr_bs__channel;
     SOPC_SLinkedList* sLinkedList = NULL;
     SOPC_SLinkedListIterator listIt = NULL;
-    constants__t_msg_i msgToSend = NULL;
+    SOPC_DiscoveryRequest_ToSend* elt = NULL;
+
     if (service_mgr_bs__channel_config_idx > 0 &&
         service_mgr_bs__channel_config_idx <= constants_bs__t_channel_config_idx_i_max)
     {
@@ -93,12 +108,13 @@ void service_mgr_bs__client_channel_connected_event_discovery(
             {
                 while (NULL != listIt)
                 {
-                    msgToSend = SOPC_SLinkedList_Next(&listIt);
-                    if (msgToSend != NULL)
+                    elt = SOPC_SLinkedList_Next(&listIt);
+                    if (elt != NULL)
                     {
                         SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, service_mgr_bs__channel_config_idx,
-                                                   msgToSend, 0);
+                                                   elt->msgToSend, elt->msgAppContext);
                     }
+                    free(elt);
                 }
                 SOPC_SLinkedList_Clear(sLinkedList);
             }
@@ -109,7 +125,12 @@ void service_mgr_bs__client_channel_connected_event_discovery(
 void SOPC_ServiceMgrBs_DeallocateMsgs(uint32_t id, void* val)
 {
     (void) id;
-    message_out_bs__dealloc_msg_out((const constants__t_msg_i) val);
+    SOPC_DiscoveryRequest_ToSend* elt = val;
+    if (NULL != elt)
+    {
+        message_out_bs__dealloc_msg_out(elt->msgToSend);
+        free(elt);
+    }
 }
 
 void service_mgr_bs__UNINITIALISATION(void)

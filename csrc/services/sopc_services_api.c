@@ -267,7 +267,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         }
         // id == session id
         // params = request
-        io_dispatch_mgr__client_send_service_request(id, params, &sCode);
+        io_dispatch_mgr__client_send_service_request(id, params, auxParam, &sCode);
         if (sCode != constants__e_sc_ok)
         {
             status = SOPC_STATUS_NOK;
@@ -292,7 +292,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         }
         // id == endpoint connection config idx
         // params = request
-        io_dispatch_mgr__client_send_discovery_request(id, params, &sCode);
+        io_dispatch_mgr__client_send_discovery_request(id, params, auxParam, &sCode);
         if (sCode != constants__e_sc_ok)
         {
             status = SOPC_STATUS_NOK;

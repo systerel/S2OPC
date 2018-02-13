@@ -104,6 +104,7 @@ typedef void* constants_bs__t_session_token_i;
 #define constants_bs__c_endpoint_config_idx_indet 0
 #define constants_bs__c_msg_header_indet 0
 #define constants_bs__c_msg_indet 0
+#define constants_bs__c_no_application_context 0
 #define constants_bs__c_request_context_indet 0
 #define constants_bs__c_request_handle_indet 0
 #define constants_bs__c_session_indet 0

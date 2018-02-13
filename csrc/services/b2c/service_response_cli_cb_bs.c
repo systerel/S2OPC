@@ -29,17 +29,17 @@ void service_response_cli_cb_bs__INITIALISATION(void) {}
 void service_response_cli_cb_bs__cli_service_response(
     const constants__t_session_i service_response_cli_cb_bs__session,
     const constants__t_msg_i service_response_cli_cb_bs__resp_msg,
-    const constants__t_StatusCode_i service_response_cli_cb_bs__status)
+    const constants__t_application_context_i service_response_cli_cb_bs__app_context)
 {
     if (constants__c_session_indet != service_response_cli_cb_bs__session)
     {
         SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_RCV_SESSION_RESPONSE),
                                         service_response_cli_cb_bs__session, service_response_cli_cb_bs__resp_msg,
-                                        service_response_cli_cb_bs__status);
+                                        service_response_cli_cb_bs__app_context);
     }
     else
     {
         SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_RCV_DISCOVERY_RESPONSE), 0,
-                                        service_response_cli_cb_bs__resp_msg, service_response_cli_cb_bs__status);
+                                        service_response_cli_cb_bs__resp_msg, service_response_cli_cb_bs__app_context);
     }
 }
