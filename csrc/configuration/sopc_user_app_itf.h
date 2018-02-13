@@ -72,22 +72,24 @@ typedef struct SOPC_Endpoint_Config
 typedef enum SOPC_App_Com_Event {
     /* Client application events */
     SE_SESSION_ACTIVATION_FAILURE, /* id = session id (or 0 if not yet defined)
-                                      auxParam = endpoint connection config index
+                                      auxParam = user application session context
                                    */
     SE_ACTIVATED_SESSION,          /* id = session id
-                                      auxParam = endpoint connection config index
+                                      auxParam = user application session context
                                    */
     SE_SESSION_REACTIVATING,       /* automatic new SC or manual new user on same SC */
                                    /* id = session id
-                                      (auxParam = user index ?)
+                                      auxParam = user application session context
                                    */
     SE_RCV_SESSION_RESPONSE,       /* id = session id
-                                      params = (OpcUa_<MessageStruct>*) OPC UA message payload structure
-                                      auxParam = status code
+                                      params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
+                                      auxParam = user application request context
                                    */
     SE_CLOSED_SESSION,             /* id = session id
+                                      auxParam = user application session context
                                     */
     SE_RCV_DISCOVERY_RESPONSE,     /* params = (OpcUa_<MessageStruct>*) OPC UA discovery message payload structure
+                                      auxParam = user application request context
                                     */
 
     /* Server application events */

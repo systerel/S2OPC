@@ -27,7 +27,7 @@
 
 static SOPC_EventDispatcherManager* socketsEventDispatcherMgr = NULL;
 
-void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id, void* params, int32_t auxParam)
+void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
     if (NULL != socketsEventDispatcherMgr)
     {

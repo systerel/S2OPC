@@ -20,6 +20,6 @@
 
 #include <stdint.h>
 
-void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params, uint32_t auxParam);
+void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam);
 
 #endif /* SOPC_SOCKETS_EVENT_MGR_H_ */

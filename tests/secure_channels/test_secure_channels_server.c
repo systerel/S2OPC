@@ -360,7 +360,8 @@ int main(int argc, char* argv[])
         {
             if (serviceEvent->eltId == scConnectionId)
             {
-                printf("<Stub_Server: Secure connection disconnected with status '%x'\n", serviceEvent->auxParam);
+                printf("<Stub_Server: Secure connection disconnected with status '%lx'\n",
+                       (uint64_t) serviceEvent->auxParam);
             }
             else
             {

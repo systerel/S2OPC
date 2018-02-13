@@ -431,7 +431,7 @@ static void SOPC_SocketsEventMgr_SetInternalEventAsTreated_Lock(SOPC_Socket* soc
     Mutex_Unlock(&socketsMutex);
 }
 
-void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params, uint32_t auxParam)
+void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
     bool result = false;
     SOPC_Sockets_InputEvent socketEvent = (SOPC_Sockets_InputEvent) event;
@@ -471,18 +471,21 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
         /* id = socket index,
          * auxParam = secure channel connection index associated to accepted connection */
-        Mutex_Lock(&socketsMutex);
-        socketElt = &socketsArray[eltId];
-        if (socketElt->state == SOCKET_STATE_ACCEPTED)
+        if (auxParam <= UINT32_MAX)
         {
-            socketElt->connectionId = auxParam;
-            socketElt->state = SOCKET_STATE_CONNECTED;
+            Mutex_Lock(&socketsMutex);
+            socketElt = &socketsArray[eltId];
+            if (socketElt->state == SOCKET_STATE_ACCEPTED)
+            {
+                socketElt->connectionId = auxParam;
+                socketElt->state = SOCKET_STATE_CONNECTED;
+            }
+            else
+            {
+                SOPC_SocketsInternalContext_CloseSocketNoLock(eltId);
+            }
+            Mutex_Unlock(&socketsMutex);
         }
-        else
-        {
-            SOPC_SocketsInternalContext_CloseSocketNoLock(eltId);
-        }
-        Mutex_Unlock(&socketsMutex);
         break;
     case SOCKET_CREATE_CLIENT:
         if (SOPC_DEBUG_PRINTING != false)

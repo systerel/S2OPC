@@ -52,33 +52,35 @@ typedef enum SOPC_Services_Event {
     /* Services to services events */
     SE_TO_SE_SC_ALL_DISCONNECTED,       // special event sent by services mgr itself (no parameters)
     SE_TO_SE_ACTIVATE_ORPHANED_SESSION, /* id = session id
-                                           auxParam = endpoint conneciton config index
+                                           auxParam = endpoint connection config index
                                         */
     SE_TO_SE_CREATE_SESSION,            /* id = session id
-                                           auxParam = endpoint conneciton config index
+                                           auxParam = endpoint connection config index
                                         */
     SE_TO_SE_ACTIVATE_SESSION,          /* id = session id
-                                           auxParam = user (index ?)
-                                        */
+                                         * params = (user token structure)
+                                         */
     /* App to Services events */
-    APP_TO_SE_OPEN_ENDPOINT,        /* id = endpoint description config index
-                                     */
-    APP_TO_SE_CLOSE_ENDPOINT,       /* id = endpoint description config index
-                                     */
-    APP_TO_SE_ACTIVATE_SESSION,     /* Connect SC + Create Session + Activate session */
-                                    /* id = endpoint connection config index,
-                                       auxParam = user (index ?)
-                                     */
-    APP_TO_SE_SEND_SESSION_REQUEST, // TODO: manage buffer when session with channel lost ? Or return a send failure in
-                                    // this case
-                                    /* id = session id,
-                                       params = (OpcUa_<MessageStruct>*) OPC UA message payload structure
-                                     */
+    APP_TO_SE_OPEN_ENDPOINT,          /* id = endpoint description config index
+                                       */
+    APP_TO_SE_CLOSE_ENDPOINT,         /* id = endpoint description config index
+                                       */
+    APP_TO_SE_ACTIVATE_SESSION,       /* Connect SC + Create Session + Activate session */
+                                      /* id = endpoint connection config index,
+                                       * params = (user token structure)
+                                         auxParam = user application session context
+                                       */
+    APP_TO_SE_SEND_SESSION_REQUEST,   /* id = session id,
+                                         params = (OpcUa_<MessageStruct>*) OPC UA message payload structure (header
+                                         ignored)
+                                         auxParam = user application request context
+                                      */
     APP_TO_SE_SEND_DISCOVERY_REQUEST, /* id = endpoint connection config index,
-                                         params = (OpcUa_<MessageStruct>*) OPC UA message payload structure
+                                         params = (OpcUa_<MessageStruct>*) OPC UA message payload structure (header
+                                         ignored)
+                                         auxParam = user application request context
                                        */
-    APP_TO_SE_CLOSE_SESSION,          /* id = session id
-                                       */
+    APP_TO_SE_CLOSE_SESSION,          // id = session id
     APP_TO_SE_CLOSE_ALL_CONNECTIONS,  // Automatically called by toolkit clear (no params)
 
     /* App to Services: local services events */
@@ -87,10 +89,10 @@ typedef enum SOPC_Services_Event {
 } SOPC_Services_Event;
 
 /* API to enqueue an event for services */
-void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uint32_t auxParam);
+void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uintptr_t auxParam);
 
 /* API to enqueue an event for application */
-void SOPC_ServicesToApp_EnqueueEvent(SOPC_App_Com_Event appEvent, uint32_t eventType, void* params, uint32_t auxParam);
+void SOPC_ServicesToApp_EnqueueEvent(SOPC_App_Com_Event appEvent, uint32_t eventType, void* params, uintptr_t auxParam);
 
 /**
  *  \brief Initializes the services and application event dispatcher threads

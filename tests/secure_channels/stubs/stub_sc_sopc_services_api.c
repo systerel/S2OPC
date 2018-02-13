@@ -23,7 +23,7 @@
 
 SOPC_AsyncQueue* servicesEvents = NULL;
 
-void SOPC_Services_EnqueueEvent(SOPC_Services_Event scEvent, uint32_t id, void* params, uint32_t auxParam)
+void SOPC_Services_EnqueueEvent(SOPC_Services_Event scEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
     SOPC_StubSC_ServicesEventParams* scParams = calloc(1, sizeof(SOPC_StubSC_ServicesEventParams));
     assert(scParams != NULL && servicesEvents != NULL);

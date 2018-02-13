@@ -3284,7 +3284,7 @@ static bool SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnection,
     return result;
 }
 
-void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t eltId, void* params, int32_t auxParam)
+void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
     SOPC_Msg_Type sendMsgType = SOPC_MSG_TYPE_INVALID;
     SOPC_Buffer* buffer = (SOPC_Buffer*) params;
@@ -3384,6 +3384,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
 
         if (isSendCase != false)
         {
+            assert(auxParam <= UINT32_MAX);
             result = SC_Chunks_TreatSendBuffer(scConnection, auxParam, sendMsgType, isSendTcpOnly, isOPN, buffer,
                                                &outputBuffer, &errorStatus);
             if (false == result)

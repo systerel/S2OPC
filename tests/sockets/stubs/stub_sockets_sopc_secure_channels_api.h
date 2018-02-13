@@ -25,7 +25,7 @@ typedef struct SOPC_StubSockets_SecureChannelsEventParams
     int32_t event;
     uint32_t eltId;
     void* params;
-    uint32_t auxParam;
+    uintptr_t auxParam;
 } SOPC_StubSockets_SecureChannelsEventParams;
 
 // Async queue simulating the secure channel dispatcher and containing SOPC_StubSockets_SecureChannelsEventParams

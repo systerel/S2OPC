@@ -104,7 +104,7 @@ static SOPC_ReturnStatus SOPC_EventDispatcherManager_AddEventInternal(SOPC_Event
                                                                       int32_t event,
                                                                       uint32_t eltId,
                                                                       void* params,
-                                                                      uint32_t auxParam,
+                                                                      uintptr_t auxParam,
                                                                       const char* debugName,
                                                                       bool enqueueAsFirstOut)
 {
@@ -146,7 +146,7 @@ SOPC_ReturnStatus SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManag
                                                        int32_t event,
                                                        uint32_t eltId,
                                                        void* params,
-                                                       uint32_t auxParam,
+                                                       uintptr_t auxParam,
                                                        const char* debugName)
 {
     return SOPC_EventDispatcherManager_AddEventInternal(eventMgr, event, eltId, params, auxParam, debugName, false);
@@ -156,7 +156,7 @@ SOPC_ReturnStatus SOPC_EventDispatcherManager_AddEventAsNext(SOPC_EventDispatche
                                                              int32_t event,
                                                              uint32_t eltId,
                                                              void* params,
-                                                             uint32_t auxParam,
+                                                             uintptr_t auxParam,
                                                              const char* debugName)
 {
     return SOPC_EventDispatcherManager_AddEventInternal(eventMgr, event, eltId, params, auxParam, debugName, true);

@@ -52,7 +52,7 @@ static SOPC_DateTime dateTimeResultsWithCancel[NB_TIMERS_WITH_CANCEL] = {0, 0, 0
 
 uint8_t timersId[NB_TIMERS];
 
-void timeout_event(int32_t event, uint32_t eltId, void* params, uint32_t auxParam)
+void timeout_event(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
     ck_assert(EVENT == event);
     ck_assert(eltId < NB_TIMERS);
@@ -109,7 +109,7 @@ START_TEST(test_timers)
 }
 END_TEST
 
-void canceled_timeout_event(int32_t event, uint32_t eltId, void* params, uint32_t auxParam)
+void canceled_timeout_event(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
     ck_assert(EVENT == event);
     ck_assert(eltId < NB_TIMERS);

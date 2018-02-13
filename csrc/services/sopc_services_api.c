@@ -59,12 +59,12 @@ static void SOPC_Internal_AllClientSecureChannelsDisconnected(void)
     Mutex_Unlock(&closeAllConnectionsSync.mutex);
 }
 
-void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, uint32_t auxParam)
+void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
     if (SOPC_DEBUG_PRINTING != false)
     {
-        printf("Services event dispatcher: event='%d', id='%d', params='%p', auxParam='%d'\n", scEvent, id, params,
-               auxParam);
+        printf("Services event dispatcher: event='%d', id='%d', params='%p', auxParam='%ld'\n", scEvent, id, params,
+               (uint64_t) auxParam);
     }
     SOPC_Services_Event event = (SOPC_Services_Event) scEvent;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -82,7 +82,10 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // id ==  endpoint configuration index
         // params = channel configuration index POINTER
         // auxParam == connection Id
-        io_dispatch_mgr__server_channel_connected_event(id, *(uint32_t*) params, auxParam, &bres);
+        if (auxParam <= INT32_MAX)
+        {
+            io_dispatch_mgr__server_channel_connected_event(id, *(uint32_t*) params, auxParam, &bres);
+        }
         if (bres == false)
         {
             // TODO: log error: not coherent between B expectations and C code state
@@ -110,7 +113,10 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // id == connection Id
         // auxParam == secure channel configuration index
         // => B model entry point to add
-        io_dispatch_mgr__client_channel_connected_event(auxParam, id);
+        if (auxParam <= INT32_MAX)
+        {
+            io_dispatch_mgr__client_channel_connected_event(auxParam, id);
+        }
         break;
     case SC_TO_SE_SC_CONNECTION_TIMEOUT:
         if (SOPC_DEBUG_PRINTING != false)
@@ -148,8 +154,11 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         {
             printf("SE_TO_SE_ACTIVATE_ORPHANED_SESSION\n");
         }
-        io_dispatch_mgr__internal_client_activate_orphaned_session((constants__t_session_i) id,
-                                                                   (constants__t_channel_config_idx_i) auxParam);
+        if (auxParam <= INT32_MAX)
+        {
+            io_dispatch_mgr__internal_client_activate_orphaned_session((constants__t_session_i) id,
+                                                                       (constants__t_channel_config_idx_i) auxParam);
+        }
         break;
     case SE_TO_SE_ACTIVATE_SESSION:
         if (SOPC_DEBUG_PRINTING != false)
@@ -168,8 +177,11 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         {
             printf("SE_TO_SE_CREATE_SESSION\n");
         }
-        io_dispatch_mgr__internal_client_create_session((constants__t_session_i) id,
-                                                        (constants__t_channel_config_idx_i) auxParam);
+        if (auxParam <= INT32_MAX)
+        {
+            io_dispatch_mgr__internal_client_create_session((constants__t_session_i) id,
+                                                            (constants__t_channel_config_idx_i) auxParam);
+        }
         break;
 
     case SC_TO_SE_SC_SERVICE_RCV_MSG:
@@ -180,7 +192,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // id ==  connection Id
         // params = message content (byte buffer)
         // auxParam == context (request id)
-        assert(NULL != params);
+        assert(NULL != params && INT32_MAX >= auxParam);
         io_dispatch_mgr__receive_msg_buffer((constants__t_channel_i) id, (constants__t_byte_buffer_i) params,
                                             (constants__t_request_context_i) auxParam);
         // params is freed by services manager
@@ -231,9 +243,9 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
             printf("APP_TO_SE_ACTIVATE_SESSION\n");
         }
         // id == secure channel configuration
-        // params = TODO: user authentication
-        // auxParam = TMP: user integer
-        io_dispatch_mgr__client_activate_new_session(id, auxParam, &bres);
+        // params = user authentication
+        // auxParam = user application session context
+        io_dispatch_mgr__client_activate_new_session(id, *(uint32_t*) params, &bres);
         if (bres == false)
         {
             // TODO: check activation failure always triggered if bres == false
@@ -302,7 +314,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
     }
 }
 
-void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uint32_t auxParam)
+void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
     if (servicesEventDispatcherMgr != NULL)
     {
@@ -310,7 +322,7 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* 
     }
 }
 
-void SOPC_ServicesToApp_EnqueueEvent(SOPC_App_Com_Event appEvent, uint32_t id, void* params, uint32_t auxParam)
+void SOPC_ServicesToApp_EnqueueEvent(SOPC_App_Com_Event appEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
     if (applicationEventDispatcherMgr != NULL)
     {

@@ -31,7 +31,7 @@
 typedef struct SOPC_EventDispatcherManager SOPC_EventDispatcherManager;
 
 // Function is always in charge to deallocate params in case it is not NULL
-typedef void SOPC_EventDispatcherFct(int32_t event, uint32_t eltId, void* params, uint32_t auxParam);
+typedef void SOPC_EventDispatcherFct(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam);
 
 /**
  *  \brief Create and start the event dispatcher manager treatment, then event can be added in the event queue and
@@ -64,7 +64,7 @@ SOPC_ReturnStatus SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManag
                                                        int32_t event,
                                                        uint32_t eltId,
                                                        void* params,
-                                                       uint32_t auxParam,
+                                                       uintptr_t auxParam,
                                                        const char* debugName);
 
 /**
@@ -86,7 +86,7 @@ SOPC_ReturnStatus SOPC_EventDispatcherManager_AddEventAsNext(SOPC_EventDispatche
                                                              int32_t event,
                                                              uint32_t eltId,
                                                              void* params,
-                                                             uint32_t auxParam,
+                                                             uintptr_t auxParam,
                                                              const char* debugName);
 
 /**
@@ -108,7 +108,7 @@ typedef struct SOPC_EventDispatcherParams
     int32_t event;
     uint32_t eltId;
     void* params;
-    uint32_t auxParam;
+    uintptr_t auxParam;
     const char* debugName;
 } SOPC_EventDispatcherParams;
 

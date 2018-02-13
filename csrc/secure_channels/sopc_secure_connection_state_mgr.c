@@ -301,7 +301,7 @@ static void SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnectio
             // CLO will be treated before INT_SC_CLOSE since both added as next event
             // IMPORTANT NOTE: will be 1st event to be treated regarding INT_SC_CLOSE
             SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_CLO, scConnectionIdx, (void*) msgBuffer,
-                                                           -1); // no request Id context in request
+                                                           0); // no request Id context in request
         }
         else if (msgBuffer != NULL)
         {
@@ -2057,7 +2057,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
 void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                               uint32_t eltId,
                                               void* params,
-                                              int32_t auxParam)
+                                              uintptr_t auxParam)
 {
     bool result = false;
     bool isExpectedType = false;
@@ -2079,30 +2079,33 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         // CLIENT side only
         /* id = secure channel connection index,
            auxParam = socket index */
-        scConnection = SC_GetConnection(eltId);
-        if (scConnection != NULL)
+        if (auxParam <= UINT32_MAX)
         {
-            if (scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT)
+            scConnection = SC_GetConnection(eltId);
+            if (scConnection != NULL)
             {
-                result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId, auxParam);
-                if (false == result)
+                if (scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT)
                 {
-                    // Error case: close the secure connection if invalid state or unexpected error.
-                    //  (client case only on SOCKET_CONNECTION event)
-                    SC_CloseSecureConnection(scConnection, eltId, false, 0,
-                                             "SecureConnection: closed on SOCKET_CONNECTION");
+                    result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId, auxParam);
+                    if (false == result)
+                    {
+                        // Error case: close the secure connection if invalid state or unexpected error.
+                        //  (client case only on SOCKET_CONNECTION event)
+                        SC_CloseSecureConnection(scConnection, eltId, false, 0,
+                                                 "SecureConnection: closed on SOCKET_CONNECTION");
+                    }
+                }
+                else
+                {
+                    // No socket connection expected just close the socket
+                    SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, auxParam, NULL, 0);
                 }
             }
             else
             {
-                // No socket connection expected just close the socket
+                // In case of unidentified secure connection problem, close the socket just connected
                 SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, auxParam, NULL, 0);
             }
-        }
-        else
-        {
-            // In case of unidentified secure connection problem, close the socket just connected
-            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, auxParam, NULL, 0);
         }
         break;
     case SOCKET_FAILURE:

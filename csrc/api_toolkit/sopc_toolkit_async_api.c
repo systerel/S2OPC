@@ -19,6 +19,8 @@
 
 #include "sopc_services_api.h"
 
+uint32_t uniqueUserId = 1;
+
 void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointDescriptionIdx)
 {
     // TODO: check valid config and return bool
@@ -32,8 +34,7 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointDescriptionIdx)
 
 void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, NULL,
-                               1); // TODO: adapt B model to manage no user value at all since we treat only anonymous
+    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, &uniqueUserId, 0);
 }
 
 void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requestStruct)

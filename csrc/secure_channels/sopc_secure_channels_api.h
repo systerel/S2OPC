@@ -117,7 +117,7 @@ typedef enum {
 void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
                                       uint32_t id,
                                       void* params,
-                                      uint32_t auxParam);
+                                      uintptr_t auxParam);
 
 void SOPC_SecureChannels_Initialize(void);
 

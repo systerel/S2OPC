@@ -29,7 +29,7 @@
 
 static SOPC_EventDispatcherManager* secureChannelsEventDispatcherMgr = NULL;
 
-static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params, uint32_t auxParam)
+static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
     SOPC_SecureChannels_InputEvent scEvent = event;
     switch (scEvent)
@@ -108,7 +108,7 @@ static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t event, uint32_t eltId
 void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
                                       uint32_t id,
                                       void* params,
-                                      uint32_t auxParam)
+                                      uintptr_t auxParam)
 {
     if (NULL != secureChannelsEventDispatcherMgr)
     {
@@ -158,7 +158,7 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
 void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InputEvent scEvent,
                                               uint32_t id,
                                               void* params,
-                                              uint32_t auxParam)
+                                              uintptr_t auxParam)
 {
     if (NULL != secureChannelsEventDispatcherMgr)
     {
@@ -208,7 +208,7 @@ void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InputEvent scE
 void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InputEvent scEvent,
                                                     uint32_t id,
                                                     void* params,
-                                                    uint32_t auxParam)
+                                                    uintptr_t auxParam)
 {
     if (NULL != secureChannelsEventDispatcherMgr)
     {
