@@ -523,6 +523,7 @@ OPERATIONS
         l_valid_resp_header,
         l_request_handle,
         l_validated_req_handle,
+        l_user_app_context,
         l_is_valid_session_resp,
         l_session,
         l_resp_msg,
@@ -537,6 +538,7 @@ OPERATIONS
             l_validated_req_handle <-- client_validate_response_request_handle (l_request_handle, resp_typ);
             IF l_validated_req_handle = TRUE
             THEN
+                l_user_app_context <-- get_req_handle_app_context (l_request_handle);
                 l_is_valid_session_resp, l_session <-- client_validate_session_service_resp (channel, l_request_handle);
                 IF l_is_valid_session_resp = TRUE
                 THEN
@@ -545,7 +547,7 @@ OPERATIONS
                     IF l_valid_resp_msg = TRUE
                     THEN
                         l_status <-- read_msg_resp_header_service_status (l_resp_msg_header);
-                        cli_service_response (l_session, l_resp_msg, l_status)
+                        cli_service_response (l_session, l_resp_msg, l_user_app_context)
                     END /* DECODE RESP CHECK */
                 END; /* VALID REQ HANDLE ASSOCIATED TO A VALID SESSION */
                 client_remove_req_handle (l_request_handle)
@@ -647,6 +649,7 @@ OPERATIONS
         l_valid_resp_header,
         l_request_handle,
         l_validated_req_handle,
+        l_user_app_context,
         l_resp_msg,
         l_valid_resp_msg,
         l_status
@@ -659,12 +662,13 @@ OPERATIONS
             l_validated_req_handle <-- client_validate_response_request_handle (l_request_handle, resp_typ);
             IF l_validated_req_handle = TRUE
             THEN
+                l_user_app_context <-- get_req_handle_app_context (l_request_handle);
                 l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
                 l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
                 IF l_valid_resp_msg = TRUE
                 THEN
                     l_status <-- read_msg_resp_header_service_status (l_resp_msg_header);
-                    cli_service_response (c_session_indet, l_resp_msg, l_status)
+                    cli_service_response (c_session_indet, l_resp_msg, l_user_app_context)
                 END; /* DECODE RESP CHECK */
                 client_remove_req_handle (l_request_handle)
             END; /* VALID REQ HANDLE */
@@ -699,7 +703,7 @@ OPERATIONS
         IF l_valid_msg_header = TRUE &
             l_valid_msg = TRUE
         THEN
-            l_req_handle <-- client_fresh_req_handle (e_msg_session_create_resp);
+            l_req_handle <-- client_fresh_req_handle (e_msg_session_create_resp, c_no_application_context);
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle  = TRUE
             THEN
@@ -749,7 +753,7 @@ OPERATIONS
         IF l_valid_msg = TRUE &
             l_valid_msg_header = TRUE
         THEN
-            l_req_handle <-- client_fresh_req_handle (e_msg_session_activate_resp);
+            l_req_handle <-- client_fresh_req_handle (e_msg_session_activate_resp, c_no_application_context);
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle = TRUE
             THEN
@@ -797,7 +801,7 @@ OPERATIONS
         IF l_valid_msg = TRUE &
             l_valid_msg_header = TRUE
         THEN
-            l_req_handle <-- client_fresh_req_handle (e_msg_session_activate_resp);
+            l_req_handle <-- client_fresh_req_handle (e_msg_session_activate_resp, c_no_application_context);
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle = TRUE
             THEN
@@ -853,7 +857,7 @@ OPERATIONS
         IF l_valid_msg = TRUE &
             l_valid_msg_header = TRUE
         THEN
-            l_req_handle <-- client_fresh_req_handle (e_msg_session_close_resp);
+            l_req_handle <-- client_fresh_req_handle (e_msg_session_close_resp, c_no_application_context);
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle = TRUE
             THEN
@@ -886,7 +890,7 @@ OPERATIONS
     END
     ;
 
-    ret, channel, buffer_out <-- client_service_request (session, req_msg) =
+    ret, channel, buffer_out <-- client_service_request (session, req_msg, app_context) =
     VAR
         l_msg_header,
         l_valid_msg_header,
@@ -947,7 +951,7 @@ OPERATIONS
                     l_resp_typ <-- get_response_type (l_req_typ);
                     l_msg_header <-- alloc_app_req_msg_header;
                     l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
-                    l_req_handle <-- client_fresh_req_handle (l_resp_typ);
+                    l_req_handle <-- client_fresh_req_handle (l_resp_typ, app_context);
                     l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
                     IF l_valid_req_handle = TRUE &
                         l_valid_msg_header = TRUE
@@ -986,7 +990,7 @@ OPERATIONS
     END
     ;
     
-    ret, buffer_out <-- client_discovery_service_request (req_msg) =
+    ret, buffer_out <-- client_discovery_service_request (req_msg, app_context) =
     VAR
         l_msg_header,
         l_valid_msg_header,
@@ -1014,7 +1018,7 @@ OPERATIONS
                     l_resp_typ <-- get_response_type (l_req_typ);
                     l_msg_header <-- alloc_app_req_msg_header;
                     l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
-                    l_req_handle <-- client_fresh_req_handle (l_resp_typ);
+                    l_req_handle <-- client_fresh_req_handle (l_resp_typ, app_context);
                     l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
                     IF l_valid_req_handle = TRUE &
                         l_valid_msg_header = TRUE

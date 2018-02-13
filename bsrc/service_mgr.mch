@@ -309,12 +309,13 @@ OPERATIONS
     END
     ;
 
-    ret, channel, buffer_out <-- client_service_request (session, req_msg) =
+    ret, channel, buffer_out <-- client_service_request (session, req_msg, app_context) =
     PRE
         session         : t_session_i &
         session         : t_session &
         req_msg         : t_msg_i &
         req_msg         : t_msg &
+        app_context : t_application_context_i &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
@@ -339,10 +340,11 @@ OPERATIONS
     END
     ;
     
-    ret, buffer_out <-- client_discovery_service_request (req_msg) =
+    ret, buffer_out <-- client_discovery_service_request (req_msg, app_context) =
     PRE
         req_msg         : t_msg_i &
         req_msg         : t_msg &
+        app_context : t_application_context_i &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
@@ -362,12 +364,13 @@ OPERATIONS
 
     /* PROMOTES */
 
-    bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg) =
+    bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         req_msg            : t_msg_i &
-        req_msg            : t_msg
+        req_msg            : t_msg &
+        app_context        : t_application_context_i
     THEN
         bres :: BOOL
     END

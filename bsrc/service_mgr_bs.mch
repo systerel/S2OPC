@@ -49,12 +49,13 @@ OPERATIONS
     ;
     
     /* Discovery request without connected channel: keep request to send it later */
-    bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg) =
+    bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         req_msg            : t_msg_i &
-        req_msg            : t_msg
+        req_msg            : t_msg &
+        app_context        : t_application_context_i        
     THEN
         bres :: BOOL
     END

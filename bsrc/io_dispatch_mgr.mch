@@ -192,12 +192,13 @@ OPERATIONS
     END
     ;
 
-    ret <-- client_send_service_request (session, req_msg) =
+    ret <-- client_send_service_request (session, req_msg, app_context) =
     PRE
         session         : t_session_i &
         session         : t_session &
         req_msg         : t_msg_i &
         req_msg         : t_msg &
+        app_context : t_application_context_i &
         a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
@@ -217,12 +218,13 @@ OPERATIONS
     ;
     
     
-    ret <-- client_send_discovery_request (channel_config_idx, req_msg) =
+    ret <-- client_send_discovery_request (channel_config_idx, req_msg, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         req_msg         : t_msg_i &
         req_msg         : t_msg &
+        app_context : t_application_context_i &
         a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &

@@ -24,14 +24,13 @@ SEES
     
 OPERATIONS
     
-    cli_service_response (session, resp_msg, status) = 
+    cli_service_response (session, resp_msg, app_context) = 
     PRE
         session : t_session_i &
         resp_msg   : t_msg_i &
         resp_msg   = c_msg_in &
         c_msg_in : t_msg &
-        status : t_StatusCode_i &
-        status : t_StatusCode
+        app_context : t_application_context_i
     THEN
         skip
     END

@@ -63,6 +63,7 @@ CONCRETE_CONSTANTS
     c_channel_config_idx_indet,
     c_endpoint_config_idx_indet,
     c_request_handle_indet,
+    c_no_application_context,
     c_ExpandedNodeId_indet,
     c_Reference_indet,
     c_LocalizedText_indet,
@@ -156,6 +157,8 @@ PROPERTIES
     t_request_handle <: t_request_handle_i &
     c_request_handle_indet : t_request_handle_i &
     c_request_handle_indet /: t_request_handle &
+    
+    c_no_application_context : t_application_context_i &
 
     t_channel_config_idx <: t_channel_config_idx_i &
     c_channel_config_idx_indet : t_channel_config_idx_i &

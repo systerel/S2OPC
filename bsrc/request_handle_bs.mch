@@ -23,23 +23,27 @@ SEES
     
 ABSTRACT_VARIABLES
     s_request_handle,
-    a_client_request
+    a_client_request,
+    a_client_request_context
     
 INVARIANT
     s_request_handle <: t_request_handle &
     /* Associate the request handle of a client request with its response */
-    a_client_request : s_request_handle --> s_service_resps
+    a_client_request : s_request_handle --> s_service_resps &
+    a_client_request_context : s_request_handle --> t_application_context_i
     
 INITIALISATION
     s_request_handle :: {{}} ||
-    a_client_request :: {{}}
+    a_client_request :: {{}} ||
+    a_client_request_context :: {{}}
     
 OPERATIONS  
     
-    request_handle <-- client_fresh_req_handle (resp_typ) =
+    request_handle <-- client_fresh_req_handle (resp_typ, app_context) =
     PRE
         resp_typ : t_msg_type_i &
-        resp_typ : s_service_resps
+        resp_typ : s_service_resps &
+        app_context : t_application_context_i
     THEN
         IF s_request_handle = t_request_handle
         THEN
@@ -52,7 +56,8 @@ OPERATIONS
             THEN 
                 request_handle := l_request_handle ||
                 s_request_handle := s_request_handle \/ {l_request_handle} ||
-                a_client_request (l_request_handle) := resp_typ
+                a_client_request (l_request_handle) := resp_typ ||
+                a_client_request_context (l_request_handle) := app_context
             END
         END
     END
@@ -66,16 +71,22 @@ OPERATIONS
     END
     ;
     
+    app_context <-- get_req_handle_app_context (req_handle) =
+    PRE
+        req_handle : t_request_handle_i &
+        req_handle : s_request_handle
+    THEN
+        app_context := a_client_request_context (req_handle)
+    END;
+    
     client_remove_req_handle (req_handle) =
     PRE
         req_handle : t_request_handle_i &
         req_handle : s_request_handle
     THEN
-        IF req_handle : t_request_handle
-        THEN
-            s_request_handle := s_request_handle - {req_handle} ||
-            a_client_request := {req_handle} <<| a_client_request
-        END
+        s_request_handle := s_request_handle - {req_handle} ||
+        a_client_request := {req_handle} <<| a_client_request ||
+        a_client_request_context := {req_handle} <<| a_client_request_context
     END
     ;
     
