@@ -386,12 +386,13 @@ OPERATIONS
     ;
 
     /* New session: creation and activation async */
-    bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user) =
+    bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         user : t_user_i &
         user : t_user &
+        app_context : t_application_context_i &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
@@ -402,7 +403,7 @@ OPERATIONS
     ;
 
     /* New session: creation sync and activation async */
-    bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, user) =
+    bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, user, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
@@ -410,6 +411,7 @@ OPERATIONS
         channel : s_channel_connected &
         user : t_user_i &
         user : t_user &
+        app_context : t_application_context_i &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &

@@ -31,6 +31,7 @@ DEFINITIONS
     a_channel,
     a_client_to_create,
     a_client_to_activate,
+    a_client_to_activate_context,
     a_client_orphaned,
     a_client_token,
     a_server_token,
@@ -50,6 +51,7 @@ DEFINITIONS
     a_channel : s_session +-> t_channel & // a session may be associated to a valid channel
     a_client_to_create : s_session +-> t_channel_config_idx_i & // a client session may be waiting to be created on a channel (not yet established)
     a_client_to_activate : s_session +-> t_user & // a client session may be waiting to be activated (session not yet created)
+    a_client_to_activate_context : s_session +-> t_application_context_i & // a client session has an application context associated
     a_client_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)
     a_client_token : s_session +-> t_session_token & // a client session has an associated session token once create response received
     a_server_token : t_session_token >+> s_session & // a server session has a unique authentication token in server once create response sent
@@ -96,6 +98,9 @@ INVARIANT
     
     // All sessions to be activated are included in session in init, creating or created state
     dom(a_client_to_activate) <: dom(a_state |> {e_session_init, e_session_creating, e_session_created}) &
+    
+    // All sessions to be activated keep application context for notifications until session closed (since re-activation can occur)
+    dom(a_client_to_activate_context) <: dom(a_state |>> {e_session_closed}) &
 
     // All sessions have a token (except when in state creating, init or closed (since it creating can be predecessor))
     dom(a_state |>> {e_session_creating, e_session_closed, e_session_init}) = ran(a_server_token) \/ dom(a_client_token) &
@@ -113,17 +118,18 @@ INVARIANT
 
 
 INITIALISATION
-    s_session := {}          ||
-    a_state := {}            ||
-    a_channel := {}          ||
-    a_client_to_create := {} ||
-    a_client_to_activate := {} ||
-    a_client_orphaned := {}         ||
-    a_client_token := {}     ||
-    a_server_token := {}     ||
-    a_user := {}             ||
-    a_NonceServer := {}      ||
-    a_NonceClient := {}      ||
+    s_session := {}                    ||
+    a_state := {}                      ||
+    a_channel := {}                    ||
+    a_client_to_create := {}           ||
+    a_client_to_activate := {}         ||
+    a_client_to_activate_context := {} ||
+    a_client_orphaned := {}            ||
+    a_client_token := {}               ||
+    a_server_token := {}               ||
+    a_user := {}                       ||
+    a_NonceServer := {}                ||
+    a_NonceClient := {}                ||
 
     /* it */
     av_sessions_to_iterate,
@@ -706,14 +712,16 @@ OPERATIONS
     END
     ;
     
-    set_session_to_activate(p_session, p_user) =
+    set_session_to_activate(p_session, p_user, p_app_context) =
     PRE
-        p_session : t_session_i            &
-        p_session : s_session              &
-        p_user    : t_user_i &
-        p_user    : t_user
+        p_session : t_session_i &
+        p_session : s_session   &
+        p_user    : t_user_i    &
+        p_user    : t_user      &
+        p_app_context : t_application_context_i
     THEN
-        a_client_to_activate(p_session) := p_user
+        a_client_to_activate(p_session) := p_user ||
+        a_client_to_activate_context(p_session) := p_app_context
     END
     ;
     

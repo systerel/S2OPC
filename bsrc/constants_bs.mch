@@ -40,7 +40,8 @@ SETS
     t_ExpandedNodeId_i;
     t_Reference_i;
     t_LocalizedText_i;
-    t_QualifiedName_i
+    t_QualifiedName_i;
+    t_application_context_i
 
 CONCRETE_CONSTANTS
     k_n_Nodes,

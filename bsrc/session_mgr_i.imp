@@ -446,7 +446,7 @@ OPERATIONS
         bret := l_bret
     END;
     
-    bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user) =
+    bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user, app_context) =
     VAR
         l_session,
         l_session_state
@@ -458,14 +458,14 @@ OPERATIONS
             bres := TRUE;
             /* channel did not exist or is not connected anymore: add async session creation on SC connection */
             set_session_to_create(l_session, channel_config_idx);
-            set_session_to_activate(l_session, user)
+            set_session_to_activate(l_session, user, app_context)
         ELSE
             bres := FALSE
         END
     END
     ;
 
-    bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, user) =
+    bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, user, app_context) =
     VAR
         l_session,
         l_session_state
@@ -479,7 +479,7 @@ OPERATIONS
             bres := TRUE;
             /* Generate event to create the session next and then waiting to be activated */
             client_gen_create_session_internal_event (l_session, channel_config_idx);
-            set_session_to_activate(l_session, user)
+            set_session_to_activate(l_session, user, app_context)
         ELSE
             bres := FALSE
         END

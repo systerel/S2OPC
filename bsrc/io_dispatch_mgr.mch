@@ -114,12 +114,13 @@ OPERATIONS
     ;
 
     /* Only one session could be in activation until the first session is notified as activated */
-    bres <-- client_activate_new_session (channel_config_idx, user) =
+    bres <-- client_activate_new_session (channel_config_idx, user, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         user : t_user_i &
         user : t_user &
+        app_context : t_application_context_i &
         a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &

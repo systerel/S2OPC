@@ -227,7 +227,10 @@ SETS
         e_msg_session_service_class,
         e_msg_discovery_service_class,
         e_msg_service_fault_class
-    }
+    };
+    
+    /* Context provided by application on request and to provide with notifications */
+    t_application_context_i
 
 CONCRETE_CONSTANTS
     /*AddS,*/

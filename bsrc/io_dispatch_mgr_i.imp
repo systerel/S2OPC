@@ -361,7 +361,7 @@ OPERATIONS
     END
     ;
 
-    bres <-- client_activate_new_session (channel_config_idx, user) =
+    bres <-- client_activate_new_session (channel_config_idx, user, app_context) =
     VAR
         l_channel,
         l_connected_channel
@@ -375,12 +375,12 @@ OPERATIONS
             IF bres = TRUE
             THEN
                 /* No connected channel: will trigger create session and then activate session events asynchronously */
-                bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user)
+                bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user, app_context)
             END
         ELSE
             /* Already connected channel: will trigger a create session event synchronously
                and then activate session event asynchronously */
-            bres <-- client_async_activate_new_session_with_channel (channel_config_idx, l_channel, user)
+            bres <-- client_async_activate_new_session_with_channel (channel_config_idx, l_channel, user, app_context)
         END
     END
     ;

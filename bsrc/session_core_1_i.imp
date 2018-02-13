@@ -177,6 +177,7 @@ OPERATIONS
         l_prec_state <-- get_session_state(session);
         prepare_close_session(session, l_prec_state, is_client);
         l_set_session_state(session, e_session_closed);
+        delete_session_application_context(session);
         delete_session_token(session)
     END
     ;

@@ -32,6 +32,7 @@ DEFINITIONS
     a_channel,
     a_client_to_create,
     a_client_to_activate,
+    a_client_to_activate_context,
     a_client_orphaned,
     a_client_token,
     a_server_token,
@@ -45,6 +46,7 @@ DEFINITIONS
     a_channel : s_session +-> t_channel & /* a session may be associated to a valid channel */
     a_client_to_create : s_session +-> t_channel_config_idx_i & /* a client session may be waiting to be created on a channel (not yet established) */
     a_client_to_activate : s_session +-> t_user & /* a client session may be waiting to be activated (session not yet created) */
+    a_client_to_activate_context : s_session +-> t_application_context_i & // a client session has an application context associated
     a_client_orphaned : s_session +-> t_channel_config_idx_i & /* a client session may be orphaned of a channel (precedently lost) */
 
     a_client_token : s_session +-> t_session_token & /* a client session has an associated session token once create response received */
@@ -245,7 +247,8 @@ OPERATIONS
         a_client_orphaned := {session} <<| a_client_orphaned         || /* If session was orphaned, remove this relation */
         a_user := {session} <<| a_user                 || /* If session had a user, remove this relation */
         a_server_token := a_server_token |>> {session} || /* If session had token, remove this relation */
-        a_client_token := {session} <<| a_client_token
+        a_client_token := {session} <<| a_client_token ||
+        a_client_to_activate_context := {session} <<| a_client_to_activate_context
     END
     ;
 
@@ -338,14 +341,16 @@ OPERATIONS
     END
     ;
     
-    set_session_to_activate(p_session, p_user) =
+    set_session_to_activate(p_session, p_user, p_app_context) =
     PRE
         p_session : t_session_i &
         p_session : s_session   &
         p_user    : t_user_i    &
-        p_user    : t_user
+        p_user    : t_user      &
+        p_app_context : t_application_context_i
     THEN
-        a_client_to_activate(p_session) := p_user
+        a_client_to_activate(p_session) := p_user ||
+        a_client_to_activate_context(p_session) := p_app_context
     END
     ;
 

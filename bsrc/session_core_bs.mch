@@ -28,6 +28,7 @@ SEES
 DEFINITIONS
     d_variables ==
     a_client_to_activate,
+    a_client_to_activate_context,
     a_client_token,
     a_server_token,
     a_user,
@@ -36,6 +37,7 @@ DEFINITIONS
 
 d_typing ==
 	a_client_to_activate : t_session +-> t_user &
+    a_client_to_activate_context : t_session +-> t_application_context_i &
     a_client_token : t_session       +-> t_session_token &
     a_server_token : t_session_token +-> t_session       &
     a_user         : t_session       +-> t_user          &
@@ -63,7 +65,16 @@ OPERATIONS
         a_client_token := {p_session} <<| a_client_token
     END
     ;
-
+    
+    delete_session_application_context(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        a_client_to_activate_context := {p_session} <<| a_client_to_activate_context
+    END
+    ;
+    
     session <-- server_get_session_from_token (session_token) =
     PRE
         session_token : t_session_token_i
@@ -435,14 +446,16 @@ OPERATIONS
     END
     ;
     
-    set_session_to_activate(p_session, p_user) =
+    set_session_to_activate(p_session, p_user, p_app_context) =
     PRE
         p_session : t_session_i &
         p_session : t_session   &
         p_user    : t_user_i    &
-        p_user    : t_user
+        p_user    : t_user      &
+        p_app_context : t_application_context_i
     THEN
-        a_client_to_activate(p_session) := p_user
+        a_client_to_activate(p_session) := p_user ||
+        a_client_to_activate_context(p_session) := p_app_context
     END
     ;
     
