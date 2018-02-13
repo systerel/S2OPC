@@ -527,8 +527,7 @@ OPERATIONS
         l_is_valid_session_resp,
         l_session,
         l_resp_msg,
-        l_valid_resp_msg,
-        l_status
+        l_valid_resp_msg
     IN
         l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
         l_valid_resp_header <-- is_valid_msg_in_header (l_resp_msg_header);
@@ -546,17 +545,22 @@ OPERATIONS
                     l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
                     IF l_valid_resp_msg = TRUE
                     THEN
-                        l_status <-- read_msg_resp_header_service_status (l_resp_msg_header);
-                        cli_service_response (l_session, l_resp_msg, l_user_app_context)
+                        copy_msg_resp_header_into_msg (l_resp_msg_header, l_resp_msg);
+                        /* For services on session IN response messages is provided to applicative */
+                        cli_service_response (l_session, l_resp_msg, l_user_app_context);
+                        forget_resp_msg_in (l_resp_msg_header, l_resp_msg)
+                    ELSE
+                        dealloc_msg_in_header (l_resp_msg_header)
                     END /* DECODE RESP CHECK */
+                ELSE
+                    dealloc_msg_in_header (l_resp_msg_header)
                 END; /* VALID REQ HANDLE ASSOCIATED TO A VALID SESSION */
                 client_remove_req_handle (l_request_handle)
-            END; /* VALID REQ HANDLE */
-            dealloc_msg_in_header (l_resp_msg_header)
+            ELSE
+                dealloc_msg_in_header (l_resp_msg_header)
+            END /* VALID REQ HANDLE */
         END; /* DECODE RESP HEADER CHECK */
-        /* For services on session IN response messages will be provided to applicative
 
-        TODOnow: unreference header/msg as current header/msg IN */
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer)
     END
@@ -651,8 +655,7 @@ OPERATIONS
         l_validated_req_handle,
         l_user_app_context,
         l_resp_msg,
-        l_valid_resp_msg,
-        l_status
+        l_valid_resp_msg
     IN
         l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
         l_valid_resp_header <-- is_valid_msg_in_header (l_resp_msg_header);
@@ -667,16 +670,18 @@ OPERATIONS
                 l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
                 IF l_valid_resp_msg = TRUE
                 THEN
-                    l_status <-- read_msg_resp_header_service_status (l_resp_msg_header);
-                    cli_service_response (c_session_indet, l_resp_msg, l_user_app_context)
+                    copy_msg_resp_header_into_msg (l_resp_msg_header, l_resp_msg);
+                    /* For services on session IN response messages is provided to applicative */
+                    cli_service_response (c_session_indet, l_resp_msg, l_user_app_context);
+                    forget_resp_msg_in (l_resp_msg_header, l_resp_msg)
+                ELSE
+                    dealloc_msg_in_header (l_resp_msg_header)
                 END; /* DECODE RESP CHECK */
                 client_remove_req_handle (l_request_handle)
-            END; /* VALID REQ HANDLE */
-            dealloc_msg_in_header (l_resp_msg_header)
+            ELSE
+                dealloc_msg_in_header (l_resp_msg_header)
+            END /* VALID REQ HANDLE */
         END; /* DECODE RESP HEADER CHECK */
-        /* For services on session IN response messages will be provided to applicative
-        TODO: unreference header/msg as current header/msg IN */
-        skip;
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer)
     END

@@ -142,6 +142,23 @@ OPERATIONS
         a_buffer_in_state := c_buffer_in_state_indet
     END
     ;
+    
+    /* Consider response message as deallocated since responsibility was forwarded to application */
+    forget_resp_msg_in (msg_header, msg) =
+    PRE
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_in_header &
+        msg : t_msg_i &
+        msg = c_msg_in &
+        c_msg_in : t_msg &
+        c_msg_in_header : t_msg_header &
+        a_msg_in_type : s_service_resps
+    THEN
+        c_msg_in := c_msg_indet ||
+        a_msg_in_type := c_msg_type_indet ||
+        c_msg_in_header := c_msg_header_indet
+    END
+    ;
         
     bres <-- is_valid_msg_in_header (msg_header) =
     PRE
@@ -237,6 +254,22 @@ OPERATIONS
         a_msg_in_type : s_service_resps
     THEN
         status :( status : t_StatusCode_i & status : t_StatusCode)
+    END
+    ;
+    
+    /* Operation to copy header content in response message 
+       in order to be provided to client user application */
+    copy_msg_resp_header_into_msg (msg_header, msg) =
+    PRE
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_in_header &
+        msg : t_msg_i &
+        msg = c_msg_in &
+        c_msg_in : t_msg &
+        c_msg_in_header : t_msg_header &
+        a_msg_in_type : s_service_resps
+    THEN
+        skip
     END
     
 END
