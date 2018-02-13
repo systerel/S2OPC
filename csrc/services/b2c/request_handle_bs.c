@@ -27,14 +27,15 @@
 #include "sopc_toolkit_constants.h"
 
 static uint16_t cpt = 0;
-static constants__t_msg_type_i client_requests[SOPC_MAX_PENDING_REQUESTS];
+static constants__t_msg_type_i client_requests[SOPC_MAX_PENDING_REQUESTS + 1];
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void request_handle_bs__INITIALISATION(void)
 {
-    memset(client_requests, constants__c_msg_type_indet, SOPC_MAX_PENDING_REQUESTS * sizeof(constants__t_msg_type_i));
+    memset(client_requests, constants__c_msg_type_indet,
+           (SOPC_MAX_PENDING_REQUESTS + 1) * sizeof(constants__t_msg_type_i));
 }
 
 /*--------------------
@@ -68,13 +69,13 @@ void request_handle_bs__client_fresh_req_handle(const constants__t_msg_type_i re
     {
         while (false == noHandleAvailable && *request_handle_bs__request_handle == constants__c_request_handle_indet)
         {
-            cpt = (cpt + 1) % SOPC_MAX_PENDING_REQUESTS;
+            cpt = (cpt + 1) % (SOPC_MAX_PENDING_REQUESTS + 1);
             if (cpt == startedIdx)
             {
                 // Note: startedIdx content is never tested (simplest implem)
                 noHandleAvailable = true;
             }
-            else
+            else if (cpt != constants__c_request_handle_indet) // avoid 0 which is undetermined in B model
             {
                 if (client_requests[cpt] == constants__c_msg_type_indet)
                 {
