@@ -70,9 +70,11 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointDescriptionIdx);
  *
  * \param endpointConnectionIdx  Endpoint connection configuration index provided by
  * SOPC_ToolkitClient_AddSecureChannelConfig()
+ *  * \param sessionContext      A context value, it will be provided in case of session activation or failure
+ * notification
  *
  */
-void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx);
+void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx, uintptr_t sessionContext);
 
 /**
  * \brief Request to send a service request on given active session.
@@ -80,10 +82,13 @@ void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx);
  * SOPC_ComEvent_Fct().
  *
  * \param sessionId      Session Id (provided by event SE_ACTIVATED_SESSION) on which the service request shall be sent
- * \param requestStruct  OPC UA message payload structure pointer (OpcUa_<MessageStruct>*)
+ * \param requestStruct  OPC UA message payload structure pointer (OpcUa_<MessageStruct>*). Deallocated by toolkit.
+ * \param requestContext A context value, it will be provided with corresponding response or in case of sending error
+ * notification
  *
+ * Note: the provided request message structure and its content is automatically deallocated by the toolkit
  */
-void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requestStruct);
+void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requestStruct, uintptr_t requestContext);
 
 /**
  * \brief Request to close the given session.
@@ -95,12 +100,19 @@ void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId);
 
 /**
  * \brief Request to send a discovery service request without using session.
- *        In case of service response received, the SE_RCV_SESSION_RESPONSE event will be triggered to
+ *        In case of service response received, the SE_RCV_DISCOVERY_RESPONSE event will be triggered to
  * SOPC_ComEvent_Fct().
  *
  * \param endpointConnectionIdx  Endpoint connection configuration index provided by
- * \param requestStruct          OPC UA Discovery message request payload structure pointer (OpcUa_<MessageStruct>*)
+ * \param discoveryReqStruct     OPC UA Discovery message request payload structure pointer (OpcUa_<MessageStruct>*).
+ * Deallocated by toolkit.
+ * \param requestContext         A context value, it will be provided with corresponding response or in case of sending
+ * error notification
+ *
+ * Note: the provided request message structure and its content is automatically deallocated by the toolkit
  */
-void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx, void* discoveryReqStruct);
+void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx,
+                                                  void* discoveryReqStruct,
+                                                  uintptr_t requestContext);
 
 #endif /* SOPC_TOOLKIT_ASYNC_API_H */

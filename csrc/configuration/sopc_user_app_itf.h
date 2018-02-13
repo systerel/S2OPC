@@ -161,7 +161,7 @@ typedef enum SOPC_App_AddSpace_LocalService_Result {
 } SOPC_App_AddSpace_LocalService_Result;
 
 // TODO: define parameter for each type of event
-typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event, void* param, SOPC_ReturnStatus status);
+typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event, void* param, uintptr_t appContext);
 
 // TODO: define parameter for each type of event
 typedef void SOPC_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* param, uintptr_t appContext);

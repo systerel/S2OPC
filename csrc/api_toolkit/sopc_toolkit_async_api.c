@@ -32,14 +32,14 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointDescriptionIdx)
     SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT, endpointDescriptionIdx, NULL, 0);
 }
 
-void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx)
+void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx, uintptr_t sessionContext)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, &uniqueUserId, 0);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, &uniqueUserId, sessionContext);
 }
 
-void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requestStruct)
+void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requestStruct, uintptr_t requestContext)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_SESSION_REQUEST, sessionId, requestStruct, 0);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_SESSION_REQUEST, sessionId, requestStruct, requestContext);
 }
 
 void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId)
@@ -47,7 +47,10 @@ void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId)
     SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SESSION, sessionId, NULL, 0);
 }
 
-void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx, void* discoveryReqStruct)
+void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx,
+                                                  void* discoveryReqStruct,
+                                                  uintptr_t requestContext)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, endpointConnectionIdx, discoveryReqStruct, 0);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, endpointConnectionIdx, discoveryReqStruct,
+                               requestContext);
 }

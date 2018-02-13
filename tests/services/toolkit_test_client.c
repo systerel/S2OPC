@@ -52,7 +52,7 @@ static bool getEndpointsReceived = false;
 
 static uint32_t cptReadResps = 0;
 
-void Test_ComEvent_FctClient(SOPC_App_Com_Event event, void* param, SOPC_StatusCode status)
+void Test_ComEvent_FctClient(SOPC_App_Com_Event event, void* param, uintptr_t appContext)
 {
     if (event == SE_RCV_SESSION_RESPONSE)
     {
@@ -64,9 +64,12 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, void* param, SOPC_StatusC
                 printf(">>Test_Client_Toolkit: received ReadResponse \n");
                 OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) param;
                 cptReadResps++;
+                // Check context value is same as those provided with request
+                assert(cptReadResps == appContext);
                 if (cptReadResps <= 1)
                 {
-                    test_results_set_service_result(test_read_request_response(readResp, status, 0) ? true : false);
+                    test_results_set_service_result(
+                        test_read_request_response(readResp, readResp->ResponseHeader.ServiceResult, 0) ? true : false);
                 }
                 else
                 {
@@ -77,6 +80,8 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, void* param, SOPC_StatusC
             }
             else if (encType == &OpcUa_WriteResponse_EncodeableType)
             {
+                // Check context value is same as one provided with request
+                assert(1 == appContext);
                 printf(">>Test_Client_Toolkit: received WriteResponse \n");
                 OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) param;
                 test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
@@ -87,6 +92,9 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, void* param, SOPC_StatusC
     {
         if (NULL != param)
         {
+            // Check context value is same as one provided with request
+            assert(1 == appContext);
+
             SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) param;
             if (encType == &OpcUa_GetEndpointsResponse_EncodeableType)
             {
@@ -116,6 +124,8 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, void* param, SOPC_StatusC
     else if (event == SE_ACTIVATED_SESSION)
     {
         sessionsActivated++;
+        // Check context value is same as one provided with activation request
+        assert(sessionsActivated == 1 || sessionsActivated == 2 || sessionsActivated == 3);
         if (sessionsActivated == 1)
         {
             session = *(int32_t*) param;
@@ -175,17 +185,6 @@ SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
                                       .requestedLifetime = 20000,
                                       .msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt};
 
-// A second configuration to could connect in parallel 2 secure channels and sessions
-SOPC_SecureChannel_Config scConfig2 = {.isClientSc = true,
-                                       .url = ENDPOINT_URL,
-                                       .crt_cli = NULL,
-                                       .key_priv_cli = NULL,
-                                       .crt_srv = NULL,
-                                       .pki = NULL,
-                                       .reqSecuPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI,
-                                       .requestedLifetime = 60000,
-                                       .msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt};
-
 int main(void)
 {
     // Sleep timeout in milliseconds
@@ -202,6 +201,7 @@ int main(void)
 
     uint32_t channel_config_idx = 0;
     uint32_t channel_config_idx2 = 0;
+    uint32_t channel_config_idx3 = 0;
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -217,9 +217,6 @@ int main(void)
 
     // If security mode is set, load certificates and key
 
-    // Note: Same security config for both secure channels are considered then
-    assert(scConfig.msgSecurityMode == scConfig2.msgSecurityMode);
-
     if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None)
     {
         // The certificates: load
@@ -232,7 +229,6 @@ int main(void)
         {
             printf(">>Stub_Client: Client certificate loaded\n");
             scConfig.crt_cli = crt_cli;
-            scConfig2.crt_cli = crt_cli;
         }
     }
 
@@ -247,7 +243,6 @@ int main(void)
         {
             printf(">>Stub_Client: Server certificate loaded\n");
             scConfig.crt_srv = crt_srv;
-            scConfig2.crt_srv = crt_srv;
         }
     }
 
@@ -263,7 +258,6 @@ int main(void)
         {
             printf(">>Stub_Client: Client private key loaded\n");
             scConfig.key_priv_cli = priv_cli;
-            scConfig2.key_priv_cli = priv_cli;
         }
     }
 
@@ -291,7 +285,6 @@ int main(void)
         {
             printf(">>Stub_Client: PKI created\n");
             scConfig.pki = pki;
-            scConfig2.pki = pki;
         }
     }
 
@@ -329,7 +322,8 @@ int main(void)
     {
         channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
         channel_config_idx2 = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
-        if (channel_config_idx != 0 && channel_config_idx2 != 0)
+        channel_config_idx3 = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
+        if (channel_config_idx != 0 && channel_config_idx2 != 0 && channel_config_idx3 != 0)
         {
             status = SOPC_Toolkit_Configured();
         }
@@ -350,7 +344,8 @@ int main(void)
     /* Asynchronous request to get endpoints */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(channel_config_idx2, getGetEndpoints_message());
+        // Use 1 as getEndpoints request context
+        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(channel_config_idx3, getGetEndpoints_message(), 1);
         printf(">>Test_Client_Toolkit: Get endpoints on 1 SC without session: OK\n");
     }
 
@@ -377,9 +372,10 @@ int main(void)
      * (and underlying secure channel connections if necessary). */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx);
-        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx);
-        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx2);
+        // Use 1, 2, 3 as session contexts
+        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx, 1);
+        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx, 2);
+        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx2, 3);
         printf(">>Test_Client_Toolkit: Creating/Activating 3 sessions on 2 SC: OK\n");
     }
 
@@ -416,7 +412,8 @@ int main(void)
     {
         /* Create a service request message and send it through session (read service)*/
         // msg freed when sent
-        SOPC_ToolkitClient_AsyncSendRequestOnSession(session, getReadRequest_message());
+        // Use 1 as read request context
+        SOPC_ToolkitClient_AsyncSendRequestOnSession(session, getReadRequest_message(), 1);
         printf(">>Test_Client_Toolkit: read request sending\n");
     }
 
@@ -442,7 +439,8 @@ int main(void)
         pWriteReq = tlibw_new_WriteRequest();
         test_results_set_WriteRequest(pWriteReq);
         // msg freed when sent
-        SOPC_ToolkitClient_AsyncSendRequestOnSession(session, pWriteReq);
+        // Use 1 as write request context
+        SOPC_ToolkitClient_AsyncSendRequestOnSession(session, pWriteReq, 1);
 
         /* Same data must be provided to verify result, since request will be freed on sending allocate a new (same
          * content) */
@@ -473,7 +471,8 @@ int main(void)
         /* Sends another ReadRequest, to verify that the AddS has changed */
         /* The callback will call the verification */
         // msg freed when sent
-        SOPC_ToolkitClient_AsyncSendRequestOnSession(session, getReadRequest_verif_message());
+        // Use 2 as read request context
+        SOPC_ToolkitClient_AsyncSendRequestOnSession(session, getReadRequest_verif_message(), 2);
 
         printf(">>Test_Client_Toolkit: read request sending\n");
     }

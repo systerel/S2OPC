@@ -83,7 +83,7 @@ static bool get_rvi(SOPC_NodeId** pnids, SOPC_NodeId* target_nid, int32_t* prvi)
     return true;
 }
 
-bool test_read_request_response(OpcUa_ReadResponse* pReadResp, constants__t_StatusCode_i status_code, int verbose)
+bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode statusCode, int verbose)
 {
     printf("--> ReadRequest test result: ");
     if (verbose > 0)
@@ -96,8 +96,8 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, constants__t_Stat
 
     /* Check the service StatusCode */
     if (verbose > 0)
-        printf("Service status code: %d (should be %d)\n", status_code, constants__e_sc_ok);
-    bTestOk = constants__e_sc_ok == status_code;
+        printf("Service status code: %d (should be %d)\n", statusCode, SOPC_STATUS_OK);
+    bTestOk = SOPC_STATUS_OK == statusCode;
 
     /* Creates a Request */
     OpcUa_ReadRequest* pReadReq = read_new_read_request();
