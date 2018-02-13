@@ -82,13 +82,13 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
             {
                 appFct(SOPC_AppEvent_ComEvent_Get(eventAndType),
                        (void*) &id, // session id
-                       (SOPC_ReturnStatus) auxParam);
+                       auxParam);   // session context
             }
             else
             {
                 appFct(SOPC_AppEvent_ComEvent_Get(eventAndType),
-                       params,                        // TBD
-                       (SOPC_ReturnStatus) auxParam); // TBD
+                       params,    // see event definition of params
+                       auxParam); // application context
             }
             if (SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_RCV_SESSION_RESPONSE)
             {

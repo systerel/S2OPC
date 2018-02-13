@@ -165,8 +165,16 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         {
             printf("SE_TO_SE_ACTIVATE_SESSION\n");
         }
-        io_dispatch_mgr__client_reactivate_session_new_user((constants__t_session_i) id, (constants__t_user_i) auxParam,
-                                                            &sCode);
+        if (NULL != params)
+        {
+            io_dispatch_mgr__client_reactivate_session_new_user((constants__t_session_i) id,
+                                                                *(constants__t_user_i*) params, &sCode);
+            free(params);
+        }
+        else
+        {
+            sCode = constants__e_sc_bad_generic;
+        }
         if (sCode != constants__e_sc_ok)
         {
             // TODO: log error
@@ -245,7 +253,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // id == secure channel configuration
         // params = user authentication
         // auxParam = user application session context
-        io_dispatch_mgr__client_activate_new_session(id, *(uint32_t*) params, &bres);
+        io_dispatch_mgr__client_activate_new_session(id, *(uint32_t*) params, auxParam, &bres);
         if (bres == false)
         {
             // TODO: check activation failure always triggered if bres == false

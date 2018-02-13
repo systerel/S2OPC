@@ -55,6 +55,8 @@ static SessionData sessionDataArray[constants__t_session_i_max + 1]; // index 0 
 
 static constants__t_user_i session_to_activate_user[SOPC_MAX_SESSIONS + 1];
 
+static constants__t_application_context_i session_to_activate_context[SOPC_MAX_SESSIONS + 1];
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -74,6 +76,7 @@ void session_core_bs__INITIALISATION(void)
     assert(SOPC_MAX_SESSIONS + 1 <= SIZE_MAX / sizeof(constants__t_user_i));
     memset(session_to_activate_user, (int) constants__c_user_indet,
            sizeof(constants__t_user_i) * (SOPC_MAX_SESSIONS + 1));
+    memset(session_to_activate_context, (int) 0, sizeof(constants__t_application_context_i) * (SOPC_MAX_SESSIONS + 1));
 }
 
 /*--------------------
@@ -86,20 +89,19 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
 {
     constants__t_channel_i channel = constants__c_channel_indet;
     bool is_client_channel = false;
-    uint32_t scConfigIdx = 0;
 
     session_core_1__get_session_channel(session_core_bs__session, &channel);
 
     if (constants__c_channel_indet != channel)
     {
         channel_mgr_1__is_client_channel(channel, &is_client_channel);
-        channel_mgr_1__get_channel_info(channel, (int32_t*) &scConfigIdx);
         if (is_client_channel != false)
         {
             if (session_core_bs__state == constants__e_session_userActivated)
             {
                 SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
-                                                session_core_bs__session, NULL, scConfigIdx);
+                                                session_core_bs__session, NULL,
+                                                session_to_activate_context[session_core_bs__session]);
             }
             else if (session_core_bs__state == constants__e_session_scOrphaned ||
                      session_core_bs__state == constants__e_session_userActivating ||
@@ -110,7 +112,7 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
                 // application
                 SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_REACTIVATING),
                                                 session_core_bs__session, NULL,
-                                                0); // unused
+                                                session_to_activate_context[session_core_bs__session]);
             }
         }
     }
@@ -211,18 +213,20 @@ void session_core_bs__prepare_close_session(const constants__t_session_i session
         {
             // If session not in closing state or already activated, it is in activation state regarding user app
             // => notify activation failed
-            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
-                                            session_core_bs__session, // session id
-                                            NULL,                     // user ?
-                                            0);                       // TBD: status
+            SOPC_ServicesToApp_EnqueueEvent(
+                SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
+                session_core_bs__session,                               // session id
+                NULL,                                                   // user ?
+                session_to_activate_context[session_core_bs__session]); // user application session context
         }
         else
         {
             // Activated session closing
-            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
-                                            session_core_bs__session, // session id
-                                            NULL,
-                                            0); // TBD: status
+            SOPC_ServicesToApp_EnqueueEvent(
+                SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
+                session_core_bs__session, // session id
+                NULL,
+                session_to_activate_context[session_core_bs__session]); // user application session context
         }
     }
 }
@@ -231,6 +235,11 @@ void session_core_bs__delete_session_token(const constants__t_session_i session_
 {
     // TODO: clear session token
     (void) session_core_bs__p_session;
+}
+
+void session_core_bs__delete_session_application_context(const constants__t_session_i session_core_bs__p_session)
+{
+    session_to_activate_context[session_core_bs__p_session] = 0;
 }
 
 void session_core_bs__is_valid_user(const constants__t_user_i session_core_bs__user, t_bool* const session_core_bs__ret)
@@ -853,9 +862,11 @@ void session_core_bs__session_do_nothing(const constants__t_session_i session_co
 }
 
 void session_core_bs__set_session_to_activate(const constants__t_session_i session_core_bs__p_session,
-                                              const constants__t_user_i session_core_bs__p_user)
+                                              const constants__t_user_i session_core_bs__p_user,
+                                              const constants__t_application_context_i session_core_bs__p_app_context)
 {
     session_to_activate_user[session_core_bs__p_session] = session_core_bs__p_user;
+    session_to_activate_context[session_core_bs__p_session] = session_core_bs__p_app_context;
 }
 
 void session_core_bs__getall_to_activate(const constants__t_session_i session_core_bs__p_session,
@@ -891,8 +902,12 @@ void session_core_bs__client_gen_activate_user_session_internal_event(
     const constants__t_session_i session_core_bs__session,
     const constants__t_user_i session_core_bs__user)
 {
-    SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_SESSION, (uint32_t) session_core_bs__session, NULL,
-                               (uint32_t) session_core_bs__user);
+    constants__t_user_i* user = malloc(sizeof(constants__t_user_i));
+    if (user != NULL)
+    {
+        *user = session_core_bs__user;
+        SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_SESSION, (uint32_t) session_core_bs__session, (void*) user, 0);
+    }
 }
 
 void session_core_bs__client_gen_create_session_internal_event(

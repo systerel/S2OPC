@@ -23,6 +23,7 @@
 #ifndef CONSTANTS_BS_H_
 #define CONSTANTS_BS_H_
 
+#include <stdint.h>
 #include <stdlib.h>
 
 /*--------------------------
@@ -46,6 +47,7 @@ typedef void* constants_bs__t_QualifiedName_i;
 typedef void* constants_bs__t_SignatureData_i;
 #define constants_bs__t_UserId_i t_entier4
 typedef SOPC_Variant* constants_bs__t_Variant_i;
+typedef uintptr_t constants_bs__t_application_context_i;
 typedef void* constants_bs__t_byte_buffer_i;
 #define constants_bs__t_channel_config_idx_i t_entier4
 #define constants_bs__t_channel_i t_entier4
@@ -71,6 +73,7 @@ typedef void* constants_bs__t_session_token_i;
 #define constants_bs__t_SignatureData_i_max (-1)
 #define constants_bs__t_UserId_i_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
+#define constants_bs__t_application_context_i_max (-1)
 #define constants_bs__t_byte_buffer_i_max (-1)
 #define constants_bs__t_channel_config_idx_i_max (2 * SOPC_MAX_SECURE_CONNECTIONS)
 #define constants_bs__t_channel_i_max SOPC_MAX_SECURE_CONNECTIONS
@@ -94,7 +97,6 @@ typedef void* constants_bs__t_session_token_i;
 #define constants_bs__c_QualifiedName_indet 0
 #define constants_bs__c_Reference_indet 0
 #define constants_bs__c_SignatureData_indet 0
-#define constants_bs__c_UserId_indet 0
 #define constants_bs__c_Variant_indet 0
 #define constants_bs__c_byte_buffer_indet 0
 #define constants_bs__c_channel_config_idx_indet 0
