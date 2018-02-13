@@ -104,10 +104,13 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
                                                 session_to_activate_context[session_core_bs__session]);
             }
             else if (session_core_bs__state == constants__e_session_scOrphaned ||
-                     session_core_bs__state == constants__e_session_userActivating ||
-                     (session_core_bs__state == constants__e_session_scActivating &&
-                      session_core_bs__prec_state != constants__e_session_scOrphaned))
+                     ((session_core_bs__state == constants__e_session_userActivating ||
+                       session_core_bs__state == constants__e_session_scActivating) &&
+                      session_core_bs__prec_state == constants__e_session_userActivated))
             {
+                // Session became orphaned OR
+                // Already activated session is activating again on a new user or SC
+
                 // if orphaned will be reactivated or closed => notify as reactivating to avoid use of session by
                 // application
                 SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_REACTIVATING),
