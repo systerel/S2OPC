@@ -35,6 +35,12 @@
 #include "sopc_encoder.h"
 #include "sopc_namespace_table.h"
 
+typedef struct SOPC_OpcUaResponseMsgStructureStart
+{
+    SOPC_EncodeableType* encodeableType;
+    OpcUa_ResponseHeader ResponseHeader;
+} SOPC_OpcUaResponseMsgStructureStart;
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -43,6 +49,13 @@ void message_in_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void message_in_bs__copy_msg_resp_header_into_msg(const constants__t_msg_header_i message_in_bs__msg_header,
+                                                  const constants__t_msg_i message_in_bs__msg)
+{
+    SOPC_OpcUaResponseMsgStructureStart* respMsg = (SOPC_OpcUaResponseMsgStructureStart*) message_in_bs__msg;
+    OpcUa_ResponseHeader* respHeader = (OpcUa_ResponseHeader*) message_in_bs__msg_header;
+    respMsg->ResponseHeader = *respHeader;
+}
 
 void message_in_bs__dealloc_msg_in_header(const constants__t_msg_header_i message_in_bs__msg_header)
 {
@@ -98,6 +111,15 @@ void message_in_bs__decode_msg_type(const constants__t_byte_buffer_i message_in_
         }
         util_message__get_message_type(encType, message_in_bs__msg_type);
     }
+}
+
+void message_in_bs__forget_resp_msg_in(const constants__t_msg_header_i message_in_bs__msg_header,
+                                       const constants__t_msg_i message_in_bs__msg)
+{
+    (void) message_in_bs__msg;
+    // In this case the message header shall have been copied into msg, we should free the header structure since then
+    // Message structure dealloaction is now responsibility of the user application
+    free(message_in_bs__msg_header);
 }
 
 void message_in_bs__decode_msg_header(const t_bool message_in_bs__is_request,
