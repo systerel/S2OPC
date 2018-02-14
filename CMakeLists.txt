@@ -11,10 +11,14 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -pedantic")
 
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   # Specific flags for CERT rules
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wimplicit -Wreturn-type -Wsequence-point -Wcast-qual -Wuninitialized -Wcast-align -Wstrict-prototypes -Wchar-subscripts -Wformat-security -Wformat")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wimplicit -Wreturn-type -Wsequence-point -Wcast-qual\
+                     -Wuninitialized -Wcast-align -Wstrict-prototypes -Wchar-subscripts -Wformat-security -Wformat")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
   # Specific flags for CERT rules
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wunicode -Wimplicit-int -Wreserved-id-macro -Wsometimes-uninitialized -Wunsequenced -Wincompatible-pointer-types-discards-qualifiers -Wunevaluated-expression -Wparentheses -Wint-conversion -Wint-to-pointer-cast -Wincompatible-pointer-types")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wunicode -Wimplicit-int -Wreserved-id-macro\
+                     -Wsometimes-uninitialized -Wunsequenced -Wincompatible-pointer-types-discards-qualifiers\
+                     -Wunevaluated-expression -Wparentheses -Wint-conversion -Wint-to-pointer-cast\
+                     -Wincompatible-pointer-types")
 else()
   message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
