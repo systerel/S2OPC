@@ -91,7 +91,8 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
                        params,    // see event definition of params
                        auxParam); // application context
             }
-            if (SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_RCV_SESSION_RESPONSE)
+            if (SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_RCV_SESSION_RESPONSE ||
+                SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_RCV_DISCOVERY_RESPONSE)
             {
                 // Message to deallocate ? => if not application shall deallocate !
                 SOPC_Encodeable_Delete(*(SOPC_EncodeableType**) params, &params);

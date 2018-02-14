@@ -83,12 +83,14 @@ typedef enum SOPC_App_Com_Event {
                                    */
     SE_RCV_SESSION_RESPONSE,       /* id = session id
                                       params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
+                                      (deallocated by toolkit after callback call is terminated)
                                       auxParam = user application request context
                                    */
     SE_CLOSED_SESSION,             /* id = session id
                                       auxParam = user application session context
                                     */
     SE_RCV_DISCOVERY_RESPONSE, /* params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload structure
+                                  (deallocated by toolkit after callback call is terminated)
                                   auxParam = user application request context
                                 */
 

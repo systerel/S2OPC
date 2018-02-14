@@ -115,7 +115,6 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void
                 {
                     validEndpoints = SOPC_String_Equal(&getEndpointsResp->Endpoints[idx].EndpointUrl, &endpointUrl);
                 }
-                SOPC_Encodeable_Delete(&OpcUa_GetEndpointsResponse_EncodeableType, (void**) &getEndpointsResp);
 
                 getEndpointsReceived = validEndpoints;
             }
