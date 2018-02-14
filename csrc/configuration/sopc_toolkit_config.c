@@ -276,14 +276,17 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
 SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx)
 {
     SOPC_SecureChannel_Config* res = NULL;
-    if (tConfig.initDone != false)
+    if (scConfigIdx > 0 && scConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS)
     {
-        Mutex_Lock(&tConfig.mut);
-        if (tConfig.locked != false)
+        if (tConfig.initDone != false)
         {
-            res = tConfig.scConfigs[scConfigIdx];
+            Mutex_Lock(&tConfig.mut);
+            if (tConfig.locked != false)
+            {
+                res = tConfig.scConfigs[scConfigIdx];
+            }
+            Mutex_Unlock(&tConfig.mut);
         }
-        Mutex_Unlock(&tConfig.mut);
     }
     return res;
 }
