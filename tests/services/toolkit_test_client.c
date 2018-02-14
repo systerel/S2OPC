@@ -43,16 +43,16 @@
 
 static uint8_t sessionsActivated = 0;
 static uint8_t sessionsClosed = 0;
-static int32_t session = 0;
-static int32_t session2 = 0;
-static int32_t session3 = 0;
+static uint32_t session = 0;
+static uint32_t session2 = 0;
+static uint32_t session3 = 0;
 static bool getEndpointsReceived = false;
 
 #define NB_SESSIONS 3
 
 static uint32_t cptReadResps = 0;
 
-void Test_ComEvent_FctClient(SOPC_App_Com_Event event, void* param, uintptr_t appContext)
+void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
     if (event == SE_RCV_SESSION_RESPONSE)
     {
@@ -128,15 +128,15 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, void* param, uintptr_t ap
         assert(sessionsActivated == 1 || sessionsActivated == 2 || sessionsActivated == 3);
         if (sessionsActivated == 1)
         {
-            session = *(int32_t*) param;
+            session = idOrStatus;
         }
         else if (sessionsActivated == 2)
         {
-            session2 = *(int32_t*) param;
+            session2 = idOrStatus;
         }
         else if (sessionsActivated == 3)
         {
-            session3 = *(int32_t*) param;
+            session3 = idOrStatus;
         }
         else
         {
@@ -190,7 +190,7 @@ int main(void)
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
     // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 2000;
+    const uint32_t loopTimeout = 3000;
     // Counter to stop waiting on timeout
     uint32_t loopCpt = 0;
 

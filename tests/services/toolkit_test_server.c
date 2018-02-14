@@ -39,8 +39,9 @@
 static int endpointClosed = false;
 static bool secuActive = !false;
 
-void Test_ComEvent_FctServer(SOPC_App_Com_Event event, void* param, uintptr_t appContext)
+void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
+    (void) idOrStatus;
     (void) param;
     (void) appContext;
     if (event == SE_CLOSED_ENDPOINT)
