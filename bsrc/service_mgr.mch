@@ -505,6 +505,28 @@ OPERATIONS
         bres := bool(a_buffer_out_state = e_buffer_out_msg_written & buffer : t_byte_buffer)
     END
     ;
+    
+    bless_msg_out (msg) =
+    PRE
+        msg : t_msg_i &
+        msg : t_msg
+    THEN
+        c_msg_out := msg ||
+        a_msg_out_type :: t_msg_type
+    END
+    ;
+    
+    dealloc_msg_out (msg) =
+    PRE
+        msg : t_msg_i &
+        msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type : t_msg_type
+    THEN
+        c_msg_out := c_msg_indet ||
+        a_msg_out_type := c_msg_type_indet
+    END
+    ;
 
     bres <-- is_valid_request_context (req_context) =
     PRE

@@ -441,7 +441,13 @@ OPERATIONS
                 END
             END
         ELSE
-            ret := e_sc_bad_invalid_argument
+            ret := e_sc_bad_invalid_argument;
+            IF l_valid_msg = TRUE
+            THEN
+                /* Guarantee deallocation in error case */
+                bless_msg_out (req_msg);
+                dealloc_msg_out (req_msg)
+            END
         END
     END
     ;
@@ -472,6 +478,9 @@ OPERATIONS
                     THEN 
                         ret := e_sc_ok
                     ELSE
+                        /* Guarantee deallocation in error case */
+                        bless_msg_out (req_msg);
+                        dealloc_msg_out (req_msg);
                         ret := e_sc_bad_too_many_ops /* Too many requests already recorded to be sent when SC will be connected */
                     END
                 ELSE
@@ -487,7 +496,13 @@ OPERATIONS
                 END
             END
         ELSE
-            ret := e_sc_bad_invalid_argument
+            ret := e_sc_bad_invalid_argument;
+            IF l_valid_msg = TRUE
+            THEN
+                /* Guarantee deallocation in error case */
+                bless_msg_out (req_msg);
+                dealloc_msg_out (req_msg)
+            END
         END
     END
     ;

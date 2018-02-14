@@ -46,6 +46,8 @@ PROMOTES
     /* message_out_bs */
     is_valid_app_msg_out,
     is_valid_buffer_out,
+    bless_msg_out,
+    dealloc_msg_out,
 
     /* session_mgr */
     is_valid_session,
@@ -988,8 +990,7 @@ OPERATIONS
                     IF l_valid_msg_header = TRUE
                     THEN
                         dealloc_msg_header_out (l_msg_header)
-                    END;
-                    dealloc_msg_out (req_msg)
+                    END
                 ELSE
                     ret := e_sc_bad_invalid_argument
                 END
@@ -997,6 +998,7 @@ OPERATIONS
         ELSE
             ret := e_sc_bad_invalid_argument
         END;
+        dealloc_msg_out (req_msg);
         channel := l_channel;
         buffer_out := l_buffer
     END
@@ -1052,8 +1054,7 @@ OPERATIONS
                     IF l_valid_msg_header = TRUE
                     THEN
                         dealloc_msg_header_out (l_msg_header)
-                    END;
-                    dealloc_msg_out (req_msg)
+                    END
                 ELSE
                     ret := e_sc_bad_invalid_argument
                 END
@@ -1061,6 +1062,7 @@ OPERATIONS
         ELSE
             ret := e_sc_bad_invalid_argument
         END;
+        dealloc_msg_out (req_msg);
         buffer_out := l_buffer
     END
 

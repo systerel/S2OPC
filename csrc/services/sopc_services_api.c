@@ -32,6 +32,7 @@
 #include "io_dispatch_mgr.h"
 #include "service_mgr_bs.h"
 #include "toolkit_header_init.h"
+#include "util_b2c.h"
 
 static SOPC_EventDispatcherManager* servicesEventDispatcherMgr = NULL;
 
@@ -273,6 +274,8 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         io_dispatch_mgr__client_send_service_request(id, params, auxParam, &sCode);
         if (sCode != constants__e_sc_ok)
         {
+            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
+                                            util_status_code__B_to_return_status_C(sCode), NULL, auxParam);
             status = SOPC_STATUS_NOK;
         }
         break;
@@ -298,6 +301,8 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         io_dispatch_mgr__client_send_discovery_request(id, params, auxParam, &sCode);
         if (sCode != constants__e_sc_ok)
         {
+            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
+                                            util_status_code__B_to_return_status_C(sCode), NULL, auxParam);
             status = SOPC_STATUS_NOK;
         }
         break;

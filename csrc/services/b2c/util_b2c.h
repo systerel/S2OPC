@@ -37,6 +37,8 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
 
 void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i* bstatus);
 
+SOPC_ReturnStatus util_status_code__B_to_return_status_C(constants__t_StatusCode_i bstatus);
+
 bool util_channel__SecurityPolicy_C_to_B(const char* uri, constants__t_SecurityPolicy* secpol);
 
 /* Returns true or false upon failure (e_bd_indet or invalid cdir) */

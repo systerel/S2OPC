@@ -83,16 +83,19 @@ typedef enum SOPC_App_Com_Event {
                                    */
     SE_RCV_SESSION_RESPONSE,       /* id = session id
                                       params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
-                                      (to be deallocate with its content by application code)
                                       auxParam = user application request context
                                    */
     SE_CLOSED_SESSION,             /* id = session id
                                       auxParam = user application session context
                                     */
     SE_RCV_DISCOVERY_RESPONSE, /* params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload structure
-                                  (to be deallocate with its content by application code)
                                   auxParam = user application request context
                                 */
+
+    SE_SND_REQUEST_FAILED, /* idOrStatus = status,
+                              params = NULL (do not reuse original request, it has been deallocated)
+                              auxParam = user application request context
+                            */
 
     /* Server application events */
     SE_CLOSED_ENDPOINT, /* id = endpoint configuration index,
