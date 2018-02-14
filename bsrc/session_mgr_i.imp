@@ -501,18 +501,9 @@ OPERATIONS
                 l_session_state = e_session_userActivated
             THEN
                 l_ret, channel, session_token <-- client_user_activate_session_req_sm (session, user, activate_req_msg);
-                IF l_ret /= e_sc_ok
+                IF l_ret = e_sc_ok
                 THEN
-                    /* Unexpected case: associated channel shall be connected for those session states */
-                    client_close_session_sm (session);
-                    l_ret := e_sc_bad_unexpected_error
-                ELSE
-                    IF l_ret = e_sc_ok
-                    THEN
-                        client_add_session_request_handle (session, req_handle)
-                    ELSE
-                        client_close_session_sm (session)
-                    END
+                    client_add_session_request_handle (session, req_handle)
                 END
             ELSE
                 l_ret := e_sc_bad_invalid_state;

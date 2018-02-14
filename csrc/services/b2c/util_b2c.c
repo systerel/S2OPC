@@ -703,6 +703,68 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     }
 }
 
+SOPC_ReturnStatus util_status_code__B_to_return_status_C(constants__t_StatusCode_i bstatus)
+{
+    SOPC_ReturnStatus result = SOPC_STATUS_NOK;
+    switch (bstatus)
+    {
+    case constants__e_sc_ok:
+        result = SOPC_STATUS_OK;
+        break;
+    case constants__e_sc_bad_generic:
+        result = SOPC_STATUS_NOK;
+        break;
+    case constants__e_sc_uncertain_generic:
+        result = SOPC_STATUS_NOK;
+        break;
+    case constants__e_sc_bad_internal_error:
+        result = SOPC_STATUS_NOK;
+        break;
+    case constants__e_sc_bad_secure_channel_id_invalid:
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+        break;
+    case constants__e_sc_bad_secure_channel_closed:
+        result = SOPC_STATUS_CLOSED;
+        break;
+    case constants__e_sc_bad_connection_closed:
+        result = SOPC_STATUS_CLOSED;
+        break;
+    case constants__e_sc_bad_invalid_state:
+        result = SOPC_STATUS_INVALID_STATE;
+        break;
+    case constants__e_sc_bad_session_id_invalid:
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+        break;
+    case constants__e_sc_bad_session_closed:
+        result = SOPC_STATUS_INVALID_STATE;
+        break;
+    case constants__e_sc_bad_session_not_activated:
+        result = SOPC_STATUS_INVALID_STATE;
+        break;
+    case constants__e_sc_bad_identity_token_invalid:
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+        break;
+    case constants__e_sc_bad_encoding_error:
+        result = SOPC_STATUS_ENCODING_ERROR;
+        break;
+    case constants__e_sc_bad_decoding_error:
+        result = SOPC_STATUS_ENCODING_ERROR;
+        break;
+    case constants__e_sc_bad_invalid_argument:
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+        break;
+    case constants__e_sc_bad_out_of_memory:
+        result = SOPC_STATUS_OUT_OF_MEMORY;
+        break;
+    case constants__e_sc_bad_too_many_ops:
+        result = SOPC_STATUS_OUT_OF_MEMORY;
+        break;
+    default:
+        result = SOPC_STATUS_NOK;
+    }
+    return result;
+}
+
 void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i* bstatus)
 {
     switch (status)

@@ -388,9 +388,10 @@ OPERATIONS
     END
     ;
 
-    ret <-- client_reactivate_session_new_user (session, user) =
+    client_reactivate_session_new_user (session, user) =
     VAR
         l_valid_session,
+        l_ret,
         l_channel,
         l_connected_channel,
         l_buffer_out,
@@ -399,8 +400,8 @@ OPERATIONS
         l_valid_session <-- is_valid_session (session);
         IF l_valid_session = TRUE
         THEN
-            ret, l_channel, l_buffer_out <-- client_service_activate_session (session, user);
-            IF ret = e_sc_ok
+            l_ret, l_channel, l_buffer_out <-- client_service_activate_session (session, user);
+            IF l_ret = e_sc_ok
             THEN
                 l_connected_channel <-- is_connected_channel (l_channel);
                 l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
@@ -409,9 +410,7 @@ OPERATIONS
                 THEN
                     send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
                 END
-            END
-        ELSE
-            ret := e_sc_bad_invalid_argument
+            END // ELSE: session closed by client_service_activate_session in case of error
         END
     END
     ;

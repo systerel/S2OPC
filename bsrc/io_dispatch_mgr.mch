@@ -131,7 +131,7 @@ OPERATIONS
     ;
 
     /* Only to change user on an active channel */
-    ret <-- client_reactivate_session_new_user (session, user) =
+    client_reactivate_session_new_user (session, user) =
     PRE
         session : t_session_i &
         user : t_user_i &
@@ -142,16 +142,7 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        ret :: {e_sc_ok,
-            e_sc_bad_out_of_memory,
-            e_sc_bad_invalid_argument,
-            e_sc_bad_invalid_state,          /* session not in a valid state to activate a user on it */
-            e_sc_bad_unexpected_error,
-            e_sc_bad_identity_token_invalid, /* user identity invalid */
-            e_sc_bad_encoding_error,
-            e_sc_bad_secure_channel_closed,
-            e_sc_bad_connection_closed,
-            e_sc_bad_encoding_error}
+        skip
     END
     ;
 

@@ -23,7 +23,6 @@
 #include "sopc_secure_channels_api.h"
 #include "sopc_toolkit_constants.h"
 
-#include "io_dispatch_mgr.h"
 #include "sopc_mutexes.h"
 #include "sopc_services_api.h"
 #include "sopc_toolkit_config.h"
@@ -168,16 +167,13 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         if (NULL != params)
         {
             io_dispatch_mgr__client_reactivate_session_new_user((constants__t_session_i) id,
-                                                                *(constants__t_user_i*) params, &sCode);
+                                                                *(constants__t_user_i*) params);
             free(params);
         }
         else
         {
-            sCode = constants__e_sc_bad_generic;
-        }
-        if (sCode != constants__e_sc_ok)
-        {
             // TODO: log error
+            sCode = constants__e_sc_bad_generic;
         }
         break;
     case SE_TO_SE_CREATE_SESSION:
@@ -260,7 +256,10 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         io_dispatch_mgr__client_activate_new_session(id, *(uint32_t*) params, auxParam, &bres);
         if (bres == false)
         {
-            // TODO: check activation failure always triggered if bres == false
+            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
+                                            0,         // session id (not yet defined)
+                                            NULL,      // user ?
+                                            auxParam); // user application session context
             // TODO: log
         }
         break;

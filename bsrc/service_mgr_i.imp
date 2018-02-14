@@ -781,6 +781,8 @@ OPERATIONS
             END;
             dealloc_msg_header_out (l_msg_header);
             dealloc_msg_out (l_req_msg)
+        ELSE
+            client_close_session (session)
         END;
         buffer_out := l_buffer
     END
@@ -824,17 +826,19 @@ OPERATIONS
                         client_remove_req_handle (l_req_handle);
                         l_ret := e_sc_bad_encoding_error;
                         l_channel := c_channel_indet;
-                        /* TODO: do not close session in case of failure ?
-                         => in this case specific event to be trigger for activate new user failure */
                         client_close_session (session)
                     END
+                ELSE
+                    client_close_session (session)
                 END
             ELSE
+                client_close_session (session);
                 l_ret := e_sc_bad_out_of_memory
             END;
             dealloc_msg_header_out (l_msg_header);
             dealloc_msg_out (l_req_msg)
         ELSE
+            client_close_session (session);
             l_ret := e_sc_bad_out_of_memory
         END;
         ret := l_ret;
