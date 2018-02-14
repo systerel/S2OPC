@@ -83,14 +83,16 @@ typedef enum SOPC_App_Com_Event {
                                    */
     SE_RCV_SESSION_RESPONSE,       /* id = session id
                                       params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
+                                      (to be deallocate with its content by application code)
                                       auxParam = user application request context
                                    */
     SE_CLOSED_SESSION,             /* id = session id
                                       auxParam = user application session context
                                     */
-    SE_RCV_DISCOVERY_RESPONSE,     /* params = (OpcUa_<MessageStruct>*) OPC UA discovery message payload structure
-                                      auxParam = user application request context
-                                    */
+    SE_RCV_DISCOVERY_RESPONSE, /* params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload structure
+                                  (to be deallocate with its content by application code)
+                                  auxParam = user application request context
+                                */
 
     /* Server application events */
     SE_CLOSED_ENDPOINT, /* id = endpoint configuration index,
@@ -160,8 +162,7 @@ typedef enum SOPC_App_AddSpace_LocalService_Result {
     AS_LOCAL_WRITE_RESULT,
 } SOPC_App_AddSpace_LocalService_Result;
 
-// TODO: define parameter for each type of event
-typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event, void* param, uintptr_t appContext);
+typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
 
 // TODO: define parameter for each type of event
 typedef void SOPC_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* param, uintptr_t appContext);

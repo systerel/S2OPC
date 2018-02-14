@@ -81,12 +81,13 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
             if (SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_ACTIVATED_SESSION)
             {
                 appFct(SOPC_AppEvent_ComEvent_Get(eventAndType),
-                       (void*) &id, // session id
-                       auxParam);   // session context
+                       id, // session id
+                       NULL,
+                       auxParam); // session context
             }
             else
             {
-                appFct(SOPC_AppEvent_ComEvent_Get(eventAndType),
+                appFct(SOPC_AppEvent_ComEvent_Get(eventAndType), id,
                        params,    // see event definition of params
                        auxParam); // application context
             }
@@ -94,8 +95,6 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
             {
                 // Message to deallocate ? => if not application shall deallocate !
                 SOPC_Encodeable_Delete(*(SOPC_EncodeableType**) params, &params);
-                // TBD: free only in this case ?
-                free(params);
             }
         }
         break;
