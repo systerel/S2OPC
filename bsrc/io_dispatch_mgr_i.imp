@@ -366,122 +366,157 @@ OPERATIONS
         l_channel,
         l_connected_channel
     IN
-        bres := FALSE;
-        l_channel <-- get_connected_channel (channel_config_idx);
-        l_connected_channel <-- is_connected_channel (l_channel);
-        IF l_connected_channel = FALSE
+        bres <-- is_valid_channel_config_idx (channel_config_idx);
+        IF bres = TRUE
         THEN
-            bres <-- cli_open_secure_channel (channel_config_idx);
-            IF bres = TRUE
+            l_channel <-- get_connected_channel (channel_config_idx);
+            l_connected_channel <-- is_connected_channel (l_channel);
+            IF l_connected_channel = FALSE
             THEN
-                /* No connected channel: will trigger create session and then activate session events asynchronously */
-                bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user, app_context)
+                bres <-- cli_open_secure_channel (channel_config_idx);
+                IF bres = TRUE
+                THEN
+                    /* No connected channel: will trigger create session and then activate session events asynchronously */
+                    bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user, app_context)
+                END
+            ELSE
+                /* Already connected channel: will trigger a create session event synchronously
+                and then activate session event asynchronously */
+                bres <-- client_async_activate_new_session_with_channel (channel_config_idx, l_channel, user, app_context)
             END
-        ELSE
-            /* Already connected channel: will trigger a create session event synchronously
-               and then activate session event asynchronously */
-            bres <-- client_async_activate_new_session_with_channel (channel_config_idx, l_channel, user, app_context)
         END
     END
     ;
 
     ret <-- client_reactivate_session_new_user (session, user) =
     VAR
+        l_valid_session,
         l_channel,
         l_connected_channel,
         l_buffer_out,
         l_valid_buffer_out
     IN
-        ret, l_channel, l_buffer_out <-- client_service_activate_session (session, user);
-        IF ret = e_sc_ok
+        l_valid_session <-- is_valid_session (session);
+        IF l_valid_session = TRUE
         THEN
-            l_connected_channel <-- is_connected_channel (l_channel);
-            l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
-            IF l_connected_channel = TRUE &
-                l_valid_buffer_out = TRUE
+            ret, l_channel, l_buffer_out <-- client_service_activate_session (session, user);
+            IF ret = e_sc_ok
             THEN
-                send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                l_connected_channel <-- is_connected_channel (l_channel);
+                l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
+                IF l_connected_channel = TRUE &
+                    l_valid_buffer_out = TRUE
+                THEN
+                    send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                END
             END
+        ELSE
+            ret := e_sc_bad_invalid_argument
         END
     END
     ;
 
     ret <-- client_send_service_request (session, req_msg, app_context) =
     VAR
+        l_valid_session,
+        l_valid_msg,
         l_channel,
         l_connected_channel,
         l_buffer_out,
         l_valid_buffer_out
     IN
-        ret, l_channel, l_buffer_out <-- client_service_request (session, req_msg, app_context);
-        IF ret = e_sc_ok
+        l_valid_session <-- is_valid_session (session);
+        l_valid_msg <-- is_valid_app_msg_out (req_msg);
+        IF l_valid_session = TRUE & l_valid_msg = TRUE
         THEN
-            l_connected_channel <-- is_connected_channel (l_channel);
-            l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
-            IF l_connected_channel = TRUE &
-                l_valid_buffer_out = TRUE
+            ret, l_channel, l_buffer_out <-- client_service_request (session, req_msg, app_context);
+            IF ret = e_sc_ok
             THEN
-                send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                /* TODO: remove since it is guaranteed by obligation proof of client_service_request result (ret = ok) ? */
+                l_connected_channel <-- is_connected_channel (l_channel);
+                l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
+                IF l_connected_channel = TRUE &
+                    l_valid_buffer_out = TRUE
+                THEN
+                    send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                END
             END
+        ELSE
+            ret := e_sc_bad_invalid_argument
         END
     END
     ;
     
     ret <-- client_send_discovery_request (channel_config_idx, req_msg, app_context) =
     VAR
+        l_valid_msg,
+        l_valid_channel_config,
         l_bres,
         l_channel,
         l_connected_channel,
         l_buffer_out
     IN
-        l_bres := FALSE;
-        l_channel <-- get_connected_channel (channel_config_idx);
-        l_connected_channel <-- is_connected_channel (l_channel);
-        IF l_connected_channel = FALSE
+        l_valid_msg <-- is_valid_app_msg_out (req_msg);
+        l_valid_channel_config <-- is_valid_channel_config_idx (channel_config_idx);
+        IF l_valid_msg = TRUE & l_valid_channel_config = TRUE
         THEN
-            l_bres <-- cli_open_secure_channel (channel_config_idx);
-            IF l_bres = TRUE
+            l_channel <-- get_connected_channel (channel_config_idx);
+            l_connected_channel <-- is_connected_channel (l_channel);
+            IF l_connected_channel = FALSE
             THEN
-                /* No connected channel: will trigger to send discovery request on channel connection event */
-                l_bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg, app_context);
+                l_bres <-- cli_open_secure_channel (channel_config_idx);
                 IF l_bres = TRUE
-                THEN 
-                    ret := e_sc_ok
+                THEN
+                    /* No connected channel: will trigger to send discovery request on channel connection event */
+                    l_bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg, app_context);
+                    IF l_bres = TRUE
+                    THEN 
+                        ret := e_sc_ok
+                    ELSE
+                        ret := e_sc_bad_too_many_ops /* Too many requests already recorded to be sent when SC will be connected */
+                    END
                 ELSE
-                    ret := e_sc_bad_too_many_ops /* An operation is already recorded to be sen when SC will be connected */
+                    ret := e_sc_bad_generic /* Invalid channel config idx OR maximum channels opened reached */
                 END
             ELSE
-                ret := e_sc_bad_generic /* Invalid channel config idx OR maximum channels opened reached */
+                /* Already connected channel: will trigger a create session event synchronously
+                and then activate session event asynchronously */
+                ret, l_buffer_out <-- client_discovery_service_request (req_msg, app_context);
+                IF ret = e_sc_ok
+                THEN
+                    send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                END
             END
         ELSE
-            /* Already connected channel: will trigger a create session event synchronously
-               and then activate session event asynchronously */
-            ret, l_buffer_out <-- client_discovery_service_request (req_msg, app_context);
-            IF ret = e_sc_ok
-            THEN
-                send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
-            END
+            ret := e_sc_bad_invalid_argument
         END
     END
     ;
 
     ret <-- client_send_close_session_request (session) =
     VAR
+        l_valid_session,
         l_channel,
         l_connected_channel,
         l_buffer_out,
         l_valid_buffer_out
     IN
-        ret, l_channel, l_buffer_out <-- client_service_close_session (session);
-        IF ret = e_sc_ok
+        l_valid_session <-- is_valid_session (session);
+        IF l_valid_session = TRUE
         THEN
-            l_connected_channel <-- is_connected_channel (l_channel);
-            l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
-            IF l_connected_channel = TRUE &
-                l_valid_buffer_out = TRUE
+            ret, l_channel, l_buffer_out <-- client_service_close_session (session);
+            IF ret = e_sc_ok
             THEN
-                send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                l_connected_channel <-- is_connected_channel (l_channel);
+                l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
+                IF l_connected_channel = TRUE &
+                    l_valid_buffer_out = TRUE
+                THEN
+                    send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                END
             END
+        ELSE
+            ret := e_sc_bad_invalid_argument
         END
     END
     ;

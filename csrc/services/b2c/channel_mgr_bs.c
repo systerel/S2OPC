@@ -45,6 +45,17 @@ void channel_mgr_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void channel_mgr_bs__is_valid_channel_config_idx(const constants__t_channel_config_idx_i channel_mgr_bs__p_config_idx,
+                                                 t_bool* const channel_mgr_bs__bres)
+{
+    bool res = SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
+    if (res == false)
+    {
+        res = SOPC_ToolkitServer_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
+    }
+    *channel_mgr_bs__bres = res;
+}
+
 void channel_mgr_bs__prepare_cli_open_secure_channel(
     const constants__t_channel_config_idx_i channel_mgr_bs__p_config_idx)
 {

@@ -314,9 +314,8 @@ OPERATIONS
         session         : t_session_i &
         session         : t_session &
         req_msg         : t_msg_i &
-        req_msg         : t_msg &
-        app_context : t_application_context_i &
-        /* No message allocation before and remaining after operation */
+        app_context     : t_application_context_i &
+        /* message is not yet set as output before call and deallocated after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
@@ -345,7 +344,7 @@ OPERATIONS
         req_msg         : t_msg_i &
         req_msg         : t_msg &
         app_context : t_application_context_i &
-        /* No message allocation before and remaining after operation */
+        /* message is not yet set as output before call and deallocated after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
@@ -434,7 +433,15 @@ OPERATIONS
         skip
     END
     ;
-
+    
+    ret <-- is_valid_session (session) =
+    PRE
+        session : t_session_i
+    THEN
+        ret :=  bool(session : t_session)
+    END
+    ;
+    
     client_secure_channel_lost_session_sm (lost_channel, channel_config_idx) =
     PRE
         lost_channel : t_channel_i &
@@ -482,7 +489,15 @@ OPERATIONS
         bres := bool(msg_typ = a_msg_in_type & a_msg_in_type : t_msg_type)
     END
     ;
-
+    
+    bres <-- is_valid_app_msg_out (msg) =
+    PRE
+        msg : t_msg_i
+    THEN
+        bres := bool(msg : t_msg)
+    END
+    ;
+    
     bres <-- is_valid_buffer_out (buffer) =
     PRE
         buffer : t_byte_buffer_i

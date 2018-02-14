@@ -31,7 +31,16 @@ INITIALISATION
     a_SecurityPolicy :: {{}}
 
 OPERATIONS
-
+    
+    bres <-- is_valid_channel_config_idx (p_config_idx) =
+    PRE
+        p_config_idx : t_channel_config_idx_i
+    THEN
+        /* Check a config index from application is non undetermined and has a configuration associated */
+        bres := bool(p_config_idx : t_channel_config_idx)
+    END
+    ;
+    
     send_channel_msg_buffer (channel, buffer, request_context) =
     PRE
         channel         : t_channel_i &

@@ -128,13 +128,9 @@ void message_out_bs__alloc_resp_msg(const constants__t_msg_type_i message_out_bs
     util_message_out_bs__alloc_msg(message_out_bs__msg_type, message_out_bs__nmsg_header, message_out_bs__nmsg);
 }
 
-void message_out_bs__bless_msg_out(const constants__t_msg_type_i message_out_bs__msg_type,
-                                   const constants__t_msg_header_i message_out_bs__msg_header,
-                                   const constants__t_msg_i message_out_bs__msg)
+void message_out_bs__bless_msg_out(const constants__t_msg_i message_out_bs__msg)
 {
     /* NOTHING TO DO: in B model now message_out_bs__msg = c_msg_out now */
-    (void) message_out_bs__msg_type;
-    (void) message_out_bs__msg_header;
     (void) message_out_bs__msg;
 }
 
@@ -257,6 +253,22 @@ void message_out_bs__get_msg_out_type(const constants__t_msg_i message_out_bs__m
     util_message__get_message_type(encType, message_out_bs__msgtype);
 }
 
+void message_out_bs__is_valid_app_msg_out(const constants__t_msg_i message_out_bs__msg,
+                                          t_bool* const message_out_bs__bres)
+{
+    // Since message is provided from application, we have to check it is non NULL and the message type is known
+    constants__t_msg_type_i message_out_bs__msgtype = constants__c_msg_type_indet;
+    *message_out_bs__bres = false;
+    if (message_out_bs__msg != constants__c_msg_indet)
+    {
+        message_out_bs__get_msg_out_type(message_out_bs__msg, &message_out_bs__msgtype);
+        if (message_out_bs__msgtype != constants__c_msg_type_indet)
+        {
+            *message_out_bs__bres = true;
+        }
+    }
+}
+
 void message_out_bs__is_valid_buffer_out(const constants__t_byte_buffer_i message_out_bs__buffer,
                                          t_bool* const message_out_bs__bres)
 {
@@ -265,6 +277,7 @@ void message_out_bs__is_valid_buffer_out(const constants__t_byte_buffer_i messag
 
 void message_out_bs__is_valid_msg_out(const constants__t_msg_i message_out_bs__msg, t_bool* const message_out_bs__bres)
 {
+    // It is sufficient since we only set non undet value when it is a correct structure message
     *message_out_bs__bres = message_out_bs__msg != constants__c_msg_indet;
 }
 

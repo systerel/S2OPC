@@ -117,7 +117,6 @@ OPERATIONS
     bres <-- client_activate_new_session (channel_config_idx, user, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
-        channel_config_idx : t_channel_config_idx &
         user : t_user_i &
         user : t_user &
         app_context : t_application_context_i &
@@ -135,7 +134,6 @@ OPERATIONS
     ret <-- client_reactivate_session_new_user (session, user) =
     PRE
         session : t_session_i &
-        session : t_session &
         user : t_user_i &
         user : t_user &
         a_buffer_out_state = c_buffer_out_state_indet &
@@ -160,7 +158,6 @@ OPERATIONS
     ret <-- client_send_close_session_request (session) =
     PRE
         session : t_session_i &
-        session : t_session &
         a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
@@ -195,12 +192,10 @@ OPERATIONS
     ret <-- client_send_service_request (session, req_msg, app_context) =
     PRE
         session         : t_session_i &
-        session         : t_session &
         req_msg         : t_msg_i &
-        req_msg         : t_msg &
         app_context : t_application_context_i &
         a_buffer_out_state = c_buffer_out_state_indet &
-        /* No message allocation before and remaining after operation */
+        /* message is unkown before call and deallocated after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
@@ -221,12 +216,10 @@ OPERATIONS
     ret <-- client_send_discovery_request (channel_config_idx, req_msg, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
-        channel_config_idx : t_channel_config_idx &
-        req_msg         : t_msg_i &
-        req_msg         : t_msg &
-        app_context : t_application_context_i &
+        req_msg            : t_msg_i &
+        app_context        : t_application_context_i &
         a_buffer_out_state = c_buffer_out_state_indet &
-        /* No message allocation before and remaining after operation */
+        /* message is unkown before call and deallocated after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet

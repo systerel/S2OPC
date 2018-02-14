@@ -39,6 +39,7 @@ INITIALISATION
     all_channel_closing := FALSE
 
 PROMOTES
+    is_valid_channel_config_idx,
     send_channel_msg_buffer,
     server_get_endpoint_config,
     is_client_channel,

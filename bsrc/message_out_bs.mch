@@ -57,20 +57,24 @@ OPERATIONS
         END
     END
     ;
-
-    /* Accept a message that was allocated by another part of the program */
-    bless_msg_out (msg_type, msg_header, msg) =
+    
+    bres <-- is_valid_app_msg_out (msg) =
     PRE
-        msg_type : t_msg_type_i &
-        msg_type : t_msg_type &
-        msg_header : t_msg_header_i &
-        msg_header : t_msg_header &
-        msg      : t_msg_i &
-        msg      : t_msg
+        msg : t_msg_i
     THEN
-        c_msg_out_header := msg_header ||
+        /* Validates message from application is not null and has a known type */
+        bres := bool(msg : t_msg)
+    END
+    ;
+    
+    /* Accept a message that was allocated by another part of the program */
+    bless_msg_out (msg) =
+    PRE
+        msg : t_msg_i &
+        msg : t_msg
+    THEN
         c_msg_out := msg ||
-        a_msg_out_type := msg_type
+        a_msg_out_type :: t_msg_type
     END
     ;
 

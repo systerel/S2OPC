@@ -338,7 +338,15 @@ OPERATIONS
     END
     ;
     
-    /*PROMOTES*/    
+    /*PROMOTES*/
+    ret <-- is_valid_session (session) =
+    PRE
+        session : t_session_i
+    THEN
+        ret :=  bool(session : t_session)
+    END
+    ;
+    
     client_secure_channel_lost_session_sm (lost_channel, channel_config_idx) =
     PRE
         lost_channel : t_channel_i &

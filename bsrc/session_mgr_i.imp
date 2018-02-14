@@ -33,6 +33,7 @@ IMPORTS
     session_request_handle_bs
     
 PROMOTES
+    is_valid_session,
     get_session_user_or_indet,
     client_secure_channel_lost_session_sm,
     server_secure_channel_lost_session_sm,
