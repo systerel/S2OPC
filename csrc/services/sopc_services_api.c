@@ -217,7 +217,9 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(id);
         if (NULL == epConfig)
         {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
+            status = SOPC_EventDispatcherManager_AddEvent(
+                applicationEventDispatcherMgr, SOPC_AppEvent_ComEvent_Create(SE_CLOSED_ENDPOINT), id, NULL,
+                SOPC_STATUS_INVALID_PARAMETERS, "Endpoint configuration is invalid !");
         }
         else
         {
@@ -237,7 +239,9 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(id);
         if (NULL == epConfig)
         {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
+            status = SOPC_EventDispatcherManager_AddEvent(
+                applicationEventDispatcherMgr, SOPC_AppEvent_ComEvent_Create(SE_CLOSED_ENDPOINT), id, NULL,
+                SOPC_STATUS_INVALID_PARAMETERS, "Endpoint configuration is invalid !");
         }
         else
         {

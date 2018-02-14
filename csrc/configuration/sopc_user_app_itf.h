@@ -96,7 +96,7 @@ typedef enum SOPC_App_Com_Event {
 
     /* Server application events */
     SE_CLOSED_ENDPOINT, /* id = endpoint configuration index,
-                           auxParam = status code
+                           auxParam = SOPC_ReturnStatus
                         */
 } SOPC_App_Com_Event;
 

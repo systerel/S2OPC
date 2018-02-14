@@ -146,6 +146,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
     bool result = false;
     SOPC_Endpoint_Config* epConfig = NULL;
     SOPC_SecureListener* scListener = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     switch (event)
     {
     /* Sockets events: */
@@ -206,7 +207,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
             SOPC_SecureListenerStateMgr_CloseListener(eltId);
         }
         // Notify Services layer that EP_OPEN failed
-        SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED, eltId, NULL, 0);
+        SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED, eltId, NULL, SOPC_STATUS_CLOSED);
         break;
     /* Services events: */
     /* Services manager -> SC listener state manager */
@@ -246,9 +247,17 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         if (epConfig != NULL)
         {
             result = SOPC_SecureListenerStateMgr_CloseListener(eltId);
+            if (result == false)
+            {
+                status = SOPC_STATUS_INVALID_PARAMETERS;
+            }
+            else
+            {
+                status = SOPC_STATUS_OK;
+            }
         }
         // Notify Services layer that EP_OPEN failed
-        SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED, eltId, NULL, result);
+        SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED, eltId, NULL, status);
         break;
     /* Internal events: */
     /* SC connection manager -> SC listener state manager */

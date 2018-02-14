@@ -37,6 +37,7 @@ typedef enum SOPC_Services_Event {
                                        auxParams = secure channel connection index
                                     */
     SC_TO_SE_EP_CLOSED,             /* id = endpoint description config index,
+                                       auxParams = SOPC_ReturnStatus
                                      */
     SC_TO_SE_SC_CONNECTED,          /* id = secure channel connection index,
                                        auxParams = secure channel connection index
