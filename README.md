@@ -63,9 +63,9 @@ Current status:
 - Security policies available: None, Basic256 and Basic256Sha256
 - Security mode available: None, Sign and SignAndEncrypt
 - Server instantiation: several endpoint descriptions, 1 address space, multiple secure channel instances and session instances
-- Server services: getEndpoints, read (no index), write (no index) and simplified browse (no continuation point)
+- Server services: getEndpoints, read (no index), write (no index) and simplified browse (no filtering, no continuation point)
 - Client instantiation: multiple secure channel instances and session instances
-- Client services requests: read, write and browse
+- Client services requests: any discovery service or service on session request. Requests are only forwarded to server (no functional behavior)
 - Address space with following attributes: NodeId, NodeClass, BrowseName, Value (with single value Variants),
   References, Access Level (R/W default value only)
 
@@ -81,9 +81,8 @@ Current status:
  Client side (e.g.: tests/services/toolkit_test_client.c):
  * Secure Channel configurations on Toolkit initialization
  * Activate a session with an anonymous user
- * Send a read request
- * Send a write request
- * Send a browse request
+ * Send a service on session request (read, write, browse, etc.)
+ * Send a discovery service request (getEndpoints, etc.)
 
  Server side (e.g.: tests/services/toolkit_test_server.c):
 * Endpoint descriptions configuration on Toolkit initialization
