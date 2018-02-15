@@ -9,3 +9,7 @@ openssl x509 -in cacert.pem -out cacert.der -outform DER
 
 ## Signing a "client" certificate:
 openssl ca -config cassl.cnf -policy signing_policy -days 365 -in client.csr -out client.crt
+
+## Generate an empty Certificate Revocation List
+openssl ca -config cassl.cnf -gencrl -out cacrl.pem
+openssl crl -in cacrl.pem -outform DER -out cacrl.der
