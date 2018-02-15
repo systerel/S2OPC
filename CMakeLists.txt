@@ -18,7 +18,7 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wunicode -Wimplicit-int -Wreserved-id-macro\
                      -Wsometimes-uninitialized -Wunsequenced -Wincompatible-pointer-types-discards-qualifiers\
                      -Wunevaluated-expression -Wparentheses -Wint-conversion -Wint-to-pointer-cast\
-                     -Wincompatible-pointer-types")
+                     -Wincompatible-pointer-types -Wvla")
 else()
   message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}")
 endif()

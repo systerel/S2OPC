@@ -94,7 +94,9 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_String configEndPointURL;
     uint8_t nbSecuConfigs = 0;
+    int nbEndpointDescription = 0;
     SOPC_SecurityPolicy* tabSecurityPolicy = NULL;
+    OpcUa_EndpointDescription* currentConfig_EndpointDescription = NULL;
 
     SOPC_String_Initialize(&configEndPointURL);
 
@@ -125,132 +127,141 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
          * and securityLevel with all other parameters set to null. */
 
         // TODO: this code section can probably be optimized
-        OpcUa_EndpointDescription currentConfig_EndpointDescription[3 * nbSecuConfigs];
-        int nbEndpointDescription = 0;
+        assert(nbSecuConfigs <= UINT8_MAX); // Just to show explicitly allocated value is reasonable
+        currentConfig_EndpointDescription = malloc(sizeof(OpcUa_EndpointDescription) * 3 * nbSecuConfigs);
+        nbEndpointDescription = 0;
         OpcUa_EndpointDescription newEndPointDescription;
         OpcUa_EndpointDescription_Initialize(&newEndPointDescription);
 
-        // Set endpointUrl
-        newEndPointDescription.EndpointUrl = configEndPointURL;
-
-        /* Note: current server only support anonymous user authentication */
-
-        // Set transport profile URI
-        newEndPointDescription.TransportProfileUri = tcpUaTransportProfileURI;
-
-        for (int iSecuConfig = 0; iSecuConfig < nbSecuConfigs; iSecuConfig++)
+        if (currentConfig_EndpointDescription != NULL)
         {
-            SOPC_SecurityPolicy currentSecurityPolicy = tabSecurityPolicy[iSecuConfig];
-            uint16_t securityModes = currentSecurityPolicy.securityModes;
+            // Set endpointUrl
+            newEndPointDescription.EndpointUrl = configEndPointURL;
 
-            // Set securityPolicyUri
-            SOPC_String_AttachFrom(&newEndPointDescription.SecurityPolicyUri, &currentSecurityPolicy.securityPolicy);
+            /* Note: current server only support anonymous user authentication */
 
-            // Add an EndpointDescription per security mode
-            if ((SOPC_SECURITY_MODE_NONE_MASK & securityModes) != 0)
+            // Set transport profile URI
+            newEndPointDescription.TransportProfileUri = tcpUaTransportProfileURI;
+
+            for (int iSecuConfig = 0; iSecuConfig < nbSecuConfigs; iSecuConfig++)
             {
-                // Set securityMode
-                newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_None;
+                SOPC_SecurityPolicy currentSecurityPolicy = tabSecurityPolicy[iSecuConfig];
+                uint16_t securityModes = currentSecurityPolicy.securityModes;
 
-                // Set userIdentityTokens
-                newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
-                if (NULL != newEndPointDescription.UserIdentityTokens)
+                // Set securityPolicyUri
+                SOPC_String_AttachFrom(&newEndPointDescription.SecurityPolicyUri,
+                                       &currentSecurityPolicy.securityPolicy);
+
+                // Add an EndpointDescription per security mode
+                if ((SOPC_SECURITY_MODE_NONE_MASK & securityModes) != 0)
                 {
-                    newEndPointDescription.NoOfUserIdentityTokens = 1;
-                    newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
+                    // Set securityMode
+                    newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_None;
+
+                    // Set userIdentityTokens
+                    newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
+                    if (NULL != newEndPointDescription.UserIdentityTokens)
+                    {
+                        newEndPointDescription.NoOfUserIdentityTokens = 1;
+                        newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
+                    }
+
+                    // Set securityLevel
+                    /* see §7.10 Part4 - Value 0 is for not recommended endPoint.
+                       Others values corresponds to more secured endPoints.*/
+                    newEndPointDescription.SecurityLevel = 0;
+
+                    OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
+                    if (false == isCreateSessionResponse)
+                    {
+                        // Set ApplicationDescription
+                        SOPC_SetServerApplicationDescription(sopcEndpointConfig, &newEndPointDescription.Server);
+                    }
+                    else
+                    {
+                        // Set Server.ApplicationUri only (see mantis #3578 + part 4 v1.04 RC)
+                        SOPC_String_AttachFrom(&newEndPointDescription.Server.ApplicationUri,
+                                               &sopcEndpointConfig->serverDescription.ApplicationUri);
+                    }
+
+                    currentConfig_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
+                    nbEndpointDescription++;
                 }
 
-                // Set securityLevel
-                /* see §7.10 Part4 - Value 0 is for not recommended endPoint.
-                   Others values corresponds to more secured endPoints.*/
-                newEndPointDescription.SecurityLevel = 0;
-
-                OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
-                if (false == isCreateSessionResponse)
+                if ((SOPC_SECURITY_MODE_SIGN_MASK & securityModes) != 0)
                 {
-                    // Set ApplicationDescription
-                    SOPC_SetServerApplicationDescription(sopcEndpointConfig, &newEndPointDescription.Server);
-                }
-                else
-                {
-                    // Set Server.ApplicationUri only (see mantis #3578 + part 4 v1.04 RC)
-                    SOPC_String_AttachFrom(&newEndPointDescription.Server.ApplicationUri,
-                                           &sopcEndpointConfig->serverDescription.ApplicationUri);
+                    // Set securityMode
+                    newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_Sign;
+
+                    // Set userIdentityTokens
+                    newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
+                    if (NULL != newEndPointDescription.UserIdentityTokens)
+                    {
+                        newEndPointDescription.NoOfUserIdentityTokens = 1;
+                        newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
+                    }
+
+                    // Set securityLevel
+                    newEndPointDescription.SecurityLevel = 1;
+
+                    OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
+                    if (false == isCreateSessionResponse)
+                    {
+                        // Set serverCertificate
+                        SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription);
+                        // Set ApplicationDescription
+                        SOPC_SetServerApplicationDescription(sopcEndpointConfig, &newEndPointDescription.Server);
+                    }
+                    else
+                    {
+                        // Set Server.ApplicationUri only (see mantis #3578 + part 4 v1.04 RC)
+                        SOPC_String_AttachFrom(&newEndPointDescription.Server.ApplicationUri,
+                                               &sopcEndpointConfig->serverDescription.ApplicationUri);
+                    }
+
+                    currentConfig_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
+                    nbEndpointDescription++;
                 }
 
-                currentConfig_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
-                nbEndpointDescription++;
+                if ((SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK & securityModes) != 0)
+                {
+                    // Set securityMode
+                    newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
+
+                    // Set userIdentityTokens
+                    newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
+                    if (NULL != newEndPointDescription.UserIdentityTokens)
+                    {
+                        newEndPointDescription.NoOfUserIdentityTokens = 1;
+                        newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
+                    }
+
+                    // Set securityLevel
+                    newEndPointDescription.SecurityLevel = 1;
+
+                    OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
+                    if (false == isCreateSessionResponse)
+                    {
+                        // Set serverCertificate
+                        SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription);
+                        // Set ApplicationDescription
+                        SOPC_SetServerApplicationDescription(sopcEndpointConfig, &newEndPointDescription.Server);
+                    }
+                    else
+                    {
+                        // Set Server.ApplicationUri only (see mantis #3578 + part 4 v1.04 RC)
+                        SOPC_String_AttachFrom(&newEndPointDescription.Server.ApplicationUri,
+                                               &sopcEndpointConfig->serverDescription.ApplicationUri);
+                    }
+
+                    currentConfig_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
+                    nbEndpointDescription++;
+                }
             }
-
-            if ((SOPC_SECURITY_MODE_SIGN_MASK & securityModes) != 0)
-            {
-                // Set securityMode
-                newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_Sign;
-
-                // Set userIdentityTokens
-                newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
-                if (NULL != newEndPointDescription.UserIdentityTokens)
-                {
-                    newEndPointDescription.NoOfUserIdentityTokens = 1;
-                    newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
-                }
-
-                // Set securityLevel
-                newEndPointDescription.SecurityLevel = 1;
-
-                OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
-                if (false == isCreateSessionResponse)
-                {
-                    // Set serverCertificate
-                    SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription);
-                    // Set ApplicationDescription
-                    SOPC_SetServerApplicationDescription(sopcEndpointConfig, &newEndPointDescription.Server);
-                }
-                else
-                {
-                    // Set Server.ApplicationUri only (see mantis #3578 + part 4 v1.04 RC)
-                    SOPC_String_AttachFrom(&newEndPointDescription.Server.ApplicationUri,
-                                           &sopcEndpointConfig->serverDescription.ApplicationUri);
-                }
-
-                currentConfig_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
-                nbEndpointDescription++;
-            }
-
-            if ((SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK & securityModes) != 0)
-            {
-                // Set securityMode
-                newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
-
-                // Set userIdentityTokens
-                newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
-                if (NULL != newEndPointDescription.UserIdentityTokens)
-                {
-                    newEndPointDescription.NoOfUserIdentityTokens = 1;
-                    newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
-                }
-
-                // Set securityLevel
-                newEndPointDescription.SecurityLevel = 1;
-
-                OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
-                if (false == isCreateSessionResponse)
-                {
-                    // Set serverCertificate
-                    SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription);
-                    // Set ApplicationDescription
-                    SOPC_SetServerApplicationDescription(sopcEndpointConfig, &newEndPointDescription.Server);
-                }
-                else
-                {
-                    // Set Server.ApplicationUri only (see mantis #3578 + part 4 v1.04 RC)
-                    SOPC_String_AttachFrom(&newEndPointDescription.Server.ApplicationUri,
-                                           &sopcEndpointConfig->serverDescription.ApplicationUri);
-                }
-
-                currentConfig_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
-                nbEndpointDescription++;
-            }
+        }
+        else
+        {
+            serviceResult = constants__e_sc_bad_out_of_memory;
         }
 
         OpcUa_EndpointDescription* final_OpcUa_EndpointDescription = NULL;
@@ -271,6 +282,11 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
         }
         *nbOfEndpointDescriptions = nbEndpointDescription;
         *endpointDescriptions = final_OpcUa_EndpointDescription;
+
+        if (currentConfig_EndpointDescription != NULL)
+        {
+            free(currentConfig_EndpointDescription);
+        }
     }
 
     return serviceResult;

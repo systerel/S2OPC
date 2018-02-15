@@ -37,6 +37,8 @@
 
 static bool cryptoDeactivated = false;
 
+#define NB_SECU_POLICY_CONFIGS 3
+
 int main(int argc, char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -53,11 +55,8 @@ int main(int argc, char* argv[])
     SOPC_AsymmetricKey* priv_srv = NULL;
     SOPC_Certificate* crt_ca = NULL;
 
-    // Number of the secu policy configuration
-    uint32_t nbOfSecurityPolicyConfigurations = 3;
-
     // Secu policy configuration: empty
-    SOPC_SecurityPolicy secuConfig[nbOfSecurityPolicyConfigurations];
+    SOPC_SecurityPolicy secuConfig[NB_SECU_POLICY_CONFIGS];
     SOPC_String_Initialize(&secuConfig[0].securityPolicy);
     SOPC_String_Initialize(&secuConfig[1].securityPolicy);
     SOPC_String_Initialize(&secuConfig[2].securityPolicy);
@@ -183,7 +182,7 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         epConfig.endpointURL = endpointUrl;
-        epConfig.nbSecuConfigs = nbOfSecurityPolicyConfigurations;
+        epConfig.nbSecuConfigs = NB_SECU_POLICY_CONFIGS;
         epConfig.secuConfigurations = secuConfig;
         epConfig.serverCertificate = crt_srv;
         epConfig.serverKey = priv_srv;
