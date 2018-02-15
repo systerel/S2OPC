@@ -127,7 +127,6 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
          * and securityLevel with all other parameters set to null. */
 
         // TODO: this code section can probably be optimized
-        assert(nbSecuConfigs <= UINT8_MAX); // Just to show explicitly allocated value is reasonable
         currentConfig_EndpointDescription = malloc(sizeof(OpcUa_EndpointDescription) * 3 * nbSecuConfigs);
         nbEndpointDescription = 0;
         OpcUa_EndpointDescription newEndPointDescription;
