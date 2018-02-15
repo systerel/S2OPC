@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['int_5fep_5fsc_5fclose',['INT_EP_SC_CLOSE',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409a808b33b914061e2818573c84651f9dbf',1,'sopc_secure_channels_api.h']]],
+  ['int_5fep_5fsc_5fcreate',['INT_EP_SC_CREATE',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409a9779206a49382a0ce929d508a9009c0c',1,'sopc_secure_channels_api.h']]],
+  ['int_5fep_5fsc_5fcreated',['INT_EP_SC_CREATED',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409a59a6e420485807660b281fcf2c1036ef',1,'sopc_secure_channels_api.h']]],
+  ['int_5fep_5fsc_5fdisconnected',['INT_EP_SC_DISCONNECTED',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409af90ec0c262d1db2be731243d9ee7cd69',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5fclose',['INT_SC_CLOSE',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409a1a30475c248415db3c08dff61eb6ecb1',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5frcv_5fack',['INT_SC_RCV_ACK',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409adf8509f23f4b9fa4be7de8f5e6dd74ca',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5frcv_5fclo',['INT_SC_RCV_CLO',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409a16afd63572940bde76be4dbc4ed0f2b0',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5frcv_5ferr',['INT_SC_RCV_ERR',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409a1f0faa92e2afe550a6845049ade22a99',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5frcv_5ffailure',['INT_SC_RCV_FAILURE',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409a1ae3e91d039833c8c41dfc9448c8c717',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5frcv_5fhel',['INT_SC_RCV_HEL',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409ab0ba860dcaacba77b7b3420a5e62210d',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5frcv_5fmsg_5fchunks',['INT_SC_RCV_MSG_CHUNKS',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409a0f6149d2c29168a7599fd10b9c758c96',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5frcv_5fopn',['INT_SC_RCV_OPN',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409a5be3e310d715d08dc01445dc3b1278be',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5fsnd_5fack',['INT_SC_SND_ACK',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409abf34d47ca81dd3c6043f36af7d270b80',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5fsnd_5fclo',['INT_SC_SND_CLO',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409a94fed0f8a0b8524672cd9d5ba9fbce67',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5fsnd_5ferr',['INT_SC_SND_ERR',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409a6c9a1db12cafbbdf0fa33101c1d2a610',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5fsnd_5ffailure',['INT_SC_SND_FAILURE',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409ad37ac9d612402c742adb0406c1ee3df1',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5fsnd_5fhel',['INT_SC_SND_HEL',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409af22b0c72de2a79df4fa99eb9f187672f',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5fsnd_5fmsg_5fchunks',['INT_SC_SND_MSG_CHUNKS',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409a89cc8caac51fec77df95cae538b34872',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsc_5fsnd_5fopn',['INT_SC_SND_OPN',['../sopc__secure__channels__api_8h.html#acd5f9bab9e8f8c79f624aa4ef33fd409aece7146b35a303b98356e47962152051',1,'sopc_secure_channels_api.h']]],
+  ['int_5fsocket_5fclose',['INT_SOCKET_CLOSE',['../sopc__sockets__api_8h.html#adf2629a0a6ea3f6ee6976121dc98f023a617d5b8f89337c30d57ef5e07f64e3b6',1,'sopc_sockets_api.h']]],
+  ['int_5fsocket_5fconnected',['INT_SOCKET_CONNECTED',['../sopc__sockets__api_8h.html#adf2629a0a6ea3f6ee6976121dc98f023a55f63a16807a4d8b70d9f6a6be7ba469',1,'sopc_sockets_api.h']]],
+  ['int_5fsocket_5fconnection_5fattempt_5ffailed',['INT_SOCKET_CONNECTION_ATTEMPT_FAILED',['../sopc__sockets__api_8h.html#adf2629a0a6ea3f6ee6976121dc98f023a3ed4b3c007437ec7081b2e62a7aed86b',1,'sopc_sockets_api.h']]],
+  ['int_5fsocket_5flistener_5fconnection_5fattempt',['INT_SOCKET_LISTENER_CONNECTION_ATTEMPT',['../sopc__sockets__api_8h.html#adf2629a0a6ea3f6ee6976121dc98f023acb103003899979d18eadf6df93585884',1,'sopc_sockets_api.h']]],
+  ['int_5fsocket_5fready_5fto_5fread',['INT_SOCKET_READY_TO_READ',['../sopc__sockets__api_8h.html#adf2629a0a6ea3f6ee6976121dc98f023a47ea03e9312b00fcd27e14824066f00d',1,'sopc_sockets_api.h']]],
+  ['int_5fsocket_5fready_5fto_5fwrite',['INT_SOCKET_READY_TO_WRITE',['../sopc__sockets__api_8h.html#adf2629a0a6ea3f6ee6976121dc98f023a18eaf2d07811237c8baf8b29260d005a',1,'sopc_sockets_api.h']]]
+];
