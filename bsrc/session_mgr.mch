@@ -24,43 +24,6 @@ SEES
     message_out_bs,
     channel_mgr,
     request_handle_bs
-    
-DEFINITIONS
-   d_var_it ==
-   	/* sessions to auto activate on session created state obtained */
-   	a_session_async_activate_session,
-   	/* sessions to auto create on secure channel connection */
-    a_session_async_create_session,
-    /* iter */
-    av_sessions_to_iterate,
-    av_sessions_iterated,
-    av_sessions_orphaned;
-    
-    d_typing_it ==
-    a_session_async_create_session : t_channel_config_idx +-> t_session  &
-    a_session_async_activate_session : t_session +-> t_user &
-	/* iter */
-    av_sessions_orphaned <: t_session &
-    av_sessions_to_iterate <: av_sessions_orphaned &
-    av_sessions_iterated <: av_sessions_orphaned &
-    av_sessions_to_iterate /\ av_sessions_iterated = {}
-    
-ABSTRACT_VARIABLES
-    d_var_it
-    
-INVARIANT
-    d_typing_it
-    
-INITIALISATION
-    a_session_async_activate_session :: {} ||
-    a_session_async_create_session :: {} ||
-    /* it */
-    av_sessions_to_iterate,
-    av_sessions_iterated,
-    av_sessions_orphaned :(av_sessions_orphaned <: t_session &
-        av_sessions_to_iterate <: av_sessions_orphaned &
-        av_sessions_iterated <: av_sessions_orphaned &
-        av_sessions_to_iterate /\ av_sessions_iterated = {})
 
 OPERATIONS
     
