@@ -13,7 +13,6 @@ This project contains the following elements:
 - bin: built binaries tests of the toolkit for Linux platform (64 bits)
 - bin_windows: built binaries tests and DLL of the toolkit for Windows platform (32 bits)
 - bsrc: B model of the Toolkit used to generate C source files for services management layer
-- build: compiled files during CMake and make execution
 - csrc: root directory for C source files of the INGOPCS project OPC UA Toolkit
 - csrc/api_toolkit: user application API to request server/client treatments once Toolkit configured
 - csrc/configuration: user application API and shared configuration of the Toolkit server/client
@@ -28,8 +27,8 @@ This project contains the following elements:
 - csrc/services/bgenc: generated C source files from B model
 - csrc/sockets: sockets management layer base on I/O event dispatcher
 - doxygen: doxygen configuration file for HTML documentation generation
-- installation_linux: library (static and shared) and headers to install the toolkit as a library
-- installation_windows: shared library and headers to install the toolkit as a library
+- install_linux: library (static and shared) and headers to install the toolkit as a library
+- install_windows: shared library and headers to install the toolkit as a library
 - tests: tests source code and data for the Toolkit library
 - validation: client validation tool using FreeOpcUa python library
 
@@ -42,9 +41,10 @@ Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
   * mbedtls (>= 2.6.0): https://tls.mbed.org/
   * check (>= 0.10): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=no)
 - To build the Toolkit library and tests:
-  * ./build.sh
-  OR
-  * see README.cmake to do it manually
+```
+  ./build.sh
+```
+  OR see README.cmake to do it manually
 
 Address space generation:
 - see address_space_generation/README file for generator dependencies
@@ -53,8 +53,7 @@ Address space generation:
 
 Licenses:
 - Unless specifically indicated otherwise in a file, INGOPCS files are
-licensed under the GNU AFFERO GPL v3 license, as can be found in:
-agpl-3.0.txt
+licensed under the GNU AFFERO GPL v3 license, as can be found in `agpl-3.0.txt`
 - OPC UA Stack code generated with the OPC foundation code generator
   tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT
   License 1.00
@@ -91,7 +90,7 @@ Current status:
 * 1 address space configuration on Toolkit initialization
 * Checks and accepts several instances of secure channel
 * Checks and accepts activation of several sessions with an anonymous user
-* Accepts to treat one service request at the same time:
+* Supported services:
   + Read service
   + Write service
   + Browse service (simplified: no continuation point)
@@ -105,7 +104,7 @@ Prerequisites (only for validation based on FreeOpcUa python client):
 - FreeOpcUa (tested with version 0.90.6)
 
 Run all tests:
-- To run the INGOPCS OPC UA Toolkit tests: execute the test-all.sh script: "./test-all.sh"
+- To run the INGOPCS OPC UA Toolkit tests: execute the test-all.sh script: `./test-all.sh`
 - Tests results are provided in bin/*.tap files and shall indicate "ok" status for each test
 
 Run a particular test (bin/ directory):
