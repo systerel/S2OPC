@@ -41,4 +41,9 @@
 #error "Max number of sessions cannot be more than INT32_MAX"
 #endif
 
+/* Check use of uintptr_t is not an issue on the current platform */
+#if UINTPTR_MAX < UINT32_MAX
+#error "UINTPTR_MAX < UINT32_MAX whereas uintptr_t are used to store uint32_t values"
+#endif
+
 #endif
