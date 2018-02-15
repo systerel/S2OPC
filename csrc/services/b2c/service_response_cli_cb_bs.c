@@ -21,6 +21,8 @@
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
 
+#include "util_b2c.h"
+
 void service_response_cli_cb_bs__INITIALISATION(void) {}
 
 /*--------------------
@@ -42,4 +44,13 @@ void service_response_cli_cb_bs__cli_service_response(
         SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_RCV_DISCOVERY_RESPONSE), 0,
                                         service_response_cli_cb_bs__resp_msg, service_response_cli_cb_bs__app_context);
     }
+}
+
+void service_response_cli_cb_bs__cli_snd_failure(
+    const constants__t_application_context_i service_response_cli_cb_bs__app_context,
+    const constants__t_StatusCode_i service_response_cli_cb_bs__error_status)
+{
+    SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
+                                    util_status_code__B_to_return_status_C(service_response_cli_cb_bs__error_status),
+                                    NULL, service_response_cli_cb_bs__app_context);
 }

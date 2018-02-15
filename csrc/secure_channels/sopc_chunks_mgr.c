@@ -3297,6 +3297,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
     // True if socket will be closed after sending this message (ERR, CLO)
     bool socketWillClose = false;
     SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+    uint32_t* requestIdForSendFailure = NULL;
 
     assert(buffer != NULL);
 
@@ -3392,7 +3393,13 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
                 if (false == socketWillClose)
                 {
                     // Treat as prio events
-                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FAILURE, eltId, params, errorStatus);
+                    requestIdForSendFailure = malloc(sizeof(uint32_t));
+                    if (requestIdForSendFailure != NULL)
+                    {
+                        *requestIdForSendFailure = (uint32_t) auxParam;
+                    }
+                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FAILURE, eltId, requestIdForSendFailure,
+                                                                   errorStatus);
                 }
                 else
                 {

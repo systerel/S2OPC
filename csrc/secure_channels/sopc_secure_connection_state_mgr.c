@@ -2064,6 +2064,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     uint32_t idx;
     SOPC_SecureChannel_Config* scConfig = NULL;
     SOPC_SecureConnection* scConnection = NULL;
+    uint32_t* requestIdForSndFailure = NULL;
     uint32_t requestHandle = 0;
     uint32_t requestedLifetime = 0;
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
@@ -2201,8 +2202,27 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         if (NULL == scConnection || (scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
                                      scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW))
         {
+            if (NULL == scConnection)
+            {
+                errorStatus = OpcUa_BadSecureChannelIdInvalid;
+            }
+            else
+            {
+                errorStatus = OpcUa_BadSecureChannelClosed;
+            }
             // Error case:
-            // TODO: add event to services to notify it
+            requestIdForSndFailure = malloc(sizeof(uint32_t));
+            if (requestIdForSndFailure != NULL)
+            {
+                *requestIdForSndFailure = (uint32_t) auxParam;
+                SOPC_Services_EnqueueEvent(SC_TO_SE_SND_FAILURE,
+                                           eltId,                  // secure connection id
+                                           requestIdForSndFailure, // request Id
+                                           errorStatus);           // error status
+            }
+            // else: without request Id, nothing can be treated for the failure
+
+            SOPC_Buffer_Delete((SOPC_Buffer*) params);
         }
         else
         {
@@ -2570,6 +2590,14 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         {
             printf("ScStateMgr: INT_SC_SND_FAILURE\n");
         }
+        if (params != NULL)
+        {
+            SOPC_Services_EnqueueEvent(SC_TO_SE_SND_FAILURE,
+                                       eltId,     // secure connection id
+                                       params,    // request Id
+                                       auxParam); // error status
+        }
+        // else: without request Id, nothing can be treated for the failure
         scConnection = SC_GetConnection(eltId);
         if (scConnection != NULL)
         {

@@ -79,6 +79,14 @@ OPERATIONS
         app_context := a_client_request_context (req_handle)
     END;
     
+    resp_typ <-- get_req_handle_resp_typ (req_handle) =
+    PRE
+        req_handle : t_request_handle_i &
+        req_handle : s_request_handle
+    THEN
+        resp_typ :(resp_typ : t_msg_type_i & a_client_request (req_handle) = resp_typ)
+    END;
+    
     client_remove_req_handle (req_handle) =
     PRE
         req_handle : t_request_handle_i &
@@ -106,5 +114,25 @@ OPERATIONS
     THEN
         skip
     END
-
+    ;
+    
+    /* Operation used to could provide request handle to SC layer
+    (instead of requestId which is not used for client) */
+    request_id <-- client_req_handle_to_request_id (req_handle) =
+    PRE
+        req_handle : t_request_handle_i
+    THEN
+        request_id :: t_request_context_i
+    END
+    ;
+    
+    /* Operation used to could retrieve request handle from SC layer
+    (stored in place of requestId which is not used for client) */
+    request_handle <-- client_request_id_to_req_handle (request_id) =
+    PRE
+        request_id : t_request_context_i
+    THEN
+        request_handle :: t_request_handle_i
+    END
+    
 END

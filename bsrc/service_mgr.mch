@@ -203,7 +203,7 @@ OPERATIONS
     ;
 
     /* Only called through an internal event sent by session mgr itself */
-    buffer_out <-- client_service_create_session (session, channel) =
+    buffer_out, req_handle <-- client_service_create_session (session, channel) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -218,16 +218,18 @@ OPERATIONS
     THEN
         CHOICE
             a_buffer_out_state := c_buffer_out_state_indet ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            req_handle := c_request_handle_indet
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
         END
     END
     ;
 
     /* Only to change user on an active channel */
-    ret, channel, buffer_out <-- client_service_activate_session (session, user) =
+    ret, channel, buffer_out, req_handle <-- client_service_activate_session (session, user) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -249,17 +251,19 @@ OPERATIONS
                 e_sc_bad_connection_closed,
                 e_sc_bad_encoding_error} ||
             channel :(channel : t_channel_i & channel = c_channel_indet) ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            req_handle := c_request_handle_indet
         OR
             ret := e_sc_ok ||
             channel :(channel : t_channel_i & channel : s_channel_connected) ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
         END
     END
     ;
 
     /* Only to set new channel on an orphaned session: called through internal event sent by session mgr itself */
-    buffer_out <-- client_service_activate_orphaned_session (session, channel) =
+    buffer_out, req_handle  <-- client_service_activate_orphaned_session (session, channel) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -273,15 +277,17 @@ OPERATIONS
     THEN
         CHOICE
             a_buffer_out_state := c_buffer_out_state_indet ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            req_handle := c_request_handle_indet
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
         END
     END
     ;
 
-    ret, channel, buffer_out <-- client_service_close_session (session) =
+    ret, channel, buffer_out, req_handle <-- client_service_close_session (session) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -300,16 +306,18 @@ OPERATIONS
                 e_sc_bad_secure_channel_closed,
                 e_sc_bad_connection_closed} ||
             channel :(channel : t_channel_i & channel = c_channel_indet) ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            req_handle := c_request_handle_indet
         OR
             ret := e_sc_ok ||
             channel :(channel : t_channel_i & channel : s_channel_connected) ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
         END
     END
     ;
 
-    ret, channel, buffer_out <-- client_service_request (session, req_msg, app_context) =
+    ret, channel, buffer_out, req_handle <-- client_service_request (session, req_msg, app_context) =
     PRE
         session         : t_session_i &
         session         : t_session &
@@ -330,16 +338,18 @@ OPERATIONS
                 e_sc_bad_invalid_argument, /* message has not expected type */
                 e_sc_bad_encoding_error} ||
             channel :(channel : t_channel_i & channel = c_channel_indet) ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            req_handle := c_request_handle_indet
         OR
             ret := e_sc_ok ||
             channel :(channel : t_channel_i & channel : s_channel_connected) ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
         END
     END
     ;
     
-    ret, buffer_out <-- client_discovery_service_request (req_msg, app_context) =
+    ret, buffer_out, req_handle <-- client_discovery_service_request (req_msg, app_context) =
     PRE
         req_msg         : t_msg_i &
         req_msg         : t_msg &
@@ -353,11 +363,24 @@ OPERATIONS
             ret :: {e_sc_bad_out_of_memory,
                 e_sc_bad_invalid_argument, /* message has not expected type */
                 e_sc_bad_encoding_error} ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            req_handle := c_request_handle_indet
         OR
             ret := e_sc_ok ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
         END
+    END
+    ;
+    
+    client_snd_msg_failure (channel, request_handle, error_status) =
+    PRE
+        channel  : t_channel_i &
+        channel  : t_channel &
+        request_handle : t_request_handle_i &
+        error_status : t_StatusCode_i
+    THEN
+        skip
     END
     ;
 
@@ -533,6 +556,22 @@ OPERATIONS
         req_context : t_request_context_i
     THEN
         bres := bool(req_context : t_request_context)
+    END
+    ;
+    
+    request_id <-- client_req_handle_to_request_id (req_handle) =
+    PRE
+        req_handle : t_request_handle_i
+    THEN
+        request_id :: t_request_context_i
+    END
+    ;
+    
+    request_handle <-- client_request_id_to_req_handle (request_id) =
+    PRE
+        request_id : t_request_context_i
+    THEN
+        request_handle :: t_request_handle_i
     END
     ;
 

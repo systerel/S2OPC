@@ -48,7 +48,11 @@ PROMOTES
     is_valid_buffer_out,
     bless_msg_out,
     dealloc_msg_out,
-
+    
+    /* request_handle_bs */
+    client_req_handle_to_request_id,
+    client_request_id_to_req_handle,
+    
     /* session_mgr */
     is_valid_session,
     client_secure_channel_lost_session_sm,
@@ -693,7 +697,7 @@ OPERATIONS
 
     /* CLIENT APP EVENTS (or internally generated events for async activation) */
 
-    buffer_out <-- client_service_create_session (session, channel) =
+    buffer_out, req_handle <-- client_service_create_session (session, channel) =
     VAR
         l_msg_header,
         l_valid_msg_header,
@@ -706,6 +710,7 @@ OPERATIONS
         l_bret
     IN
         l_buffer := c_byte_buffer_indet;
+        l_req_handle := c_request_handle_indet;
         l_msg_header, l_req_msg <-- alloc_req_msg (e_msg_session_create_req);
         l_valid_msg <-- is_valid_msg_out (l_req_msg);
         l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
@@ -738,11 +743,12 @@ OPERATIONS
             dealloc_msg_header_out (l_msg_header);
             dealloc_msg_out (l_req_msg)
         END;
-        buffer_out := l_buffer
+        buffer_out := l_buffer;
+        req_handle := l_req_handle
     END
     ;
 
-    buffer_out <-- client_service_activate_orphaned_session (session, channel) =
+    buffer_out, req_handle <-- client_service_activate_orphaned_session (session, channel) =
     VAR
         l_msg_header,
         l_req_msg,
@@ -756,6 +762,7 @@ OPERATIONS
         l_valid_buffer
     IN
         l_buffer := c_byte_buffer_indet;
+        l_req_handle := c_request_handle_indet;
         l_msg_header, l_req_msg <-- alloc_req_msg (e_msg_session_activate_req);
         l_valid_msg <-- is_valid_msg_out (l_req_msg);
         l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
@@ -786,11 +793,12 @@ OPERATIONS
         ELSE
             client_close_session (session)
         END;
-        buffer_out := l_buffer
+        buffer_out := l_buffer;
+        req_handle := l_req_handle
     END
     ;
 
-    ret, channel, buffer_out <-- client_service_activate_session (session, user) =
+    ret, channel, buffer_out, req_handle <-- client_service_activate_session (session, user) =
     VAR
         l_msg_header,
         l_valid_msg_header,
@@ -806,6 +814,7 @@ OPERATIONS
     IN
         l_channel := c_channel_indet;
         l_buffer := c_byte_buffer_indet;
+        l_req_handle := c_request_handle_indet;
         l_msg_header, l_req_msg <-- alloc_req_msg (e_msg_session_activate_req);
         l_valid_msg <-- is_valid_msg_out (l_req_msg);
         l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
@@ -845,11 +854,12 @@ OPERATIONS
         END;
         ret := l_ret;
         channel := l_channel;
+        req_handle := l_req_handle;
         buffer_out := l_buffer
     END
     ;
 
-    ret, channel, buffer_out <-- client_service_close_session (session) =
+    ret, channel, buffer_out, req_handle <-- client_service_close_session (session) =
     VAR
         l_msg_header,
         l_valid_msg_header,
@@ -864,6 +874,7 @@ OPERATIONS
     IN
         l_channel := c_channel_indet;
         l_buffer := c_byte_buffer_indet;
+        l_req_handle := c_request_handle_indet;
         l_msg_header, l_req_msg <-- alloc_req_msg (e_msg_session_close_req);
         l_valid_msg <-- is_valid_msg_out (l_req_msg);
         l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
@@ -899,11 +910,12 @@ OPERATIONS
             ret := e_sc_bad_out_of_memory
         END;
         channel := l_channel;
-        buffer_out := l_buffer
+        buffer_out := l_buffer;
+        req_handle := l_req_handle
     END
     ;
 
-    ret, channel, buffer_out <-- client_service_request (session, req_msg, app_context) =
+    ret, channel, buffer_out, req_handle <-- client_service_request (session, req_msg, app_context) =
     VAR
         l_msg_header,
         l_valid_msg_header,
@@ -919,6 +931,7 @@ OPERATIONS
     IN
         l_channel := c_channel_indet;
         l_buffer := c_byte_buffer_indet;
+        l_req_handle := c_request_handle_indet;
         /* Set application message as output message */
         bless_msg_out (req_msg);
         l_valid_msg <-- is_valid_msg_out (req_msg);
@@ -1000,11 +1013,12 @@ OPERATIONS
         END;
         dealloc_msg_out (req_msg);
         channel := l_channel;
+        req_handle := l_req_handle;
         buffer_out := l_buffer
     END
     ;
     
-    ret, buffer_out <-- client_discovery_service_request (req_msg, app_context) =
+    ret, buffer_out, req_handle <-- client_discovery_service_request (req_msg, app_context) =
     VAR
         l_msg_header,
         l_valid_msg_header,
@@ -1017,6 +1031,7 @@ OPERATIONS
         l_valid_buffer
     IN
         l_buffer := c_byte_buffer_indet;
+        l_req_handle := c_request_handle_indet;
         /* Set application message as output message */
         bless_msg_out (req_msg);
         l_valid_msg <-- is_valid_msg_out (req_msg);
@@ -1063,7 +1078,45 @@ OPERATIONS
             ret := e_sc_bad_invalid_argument
         END;
         dealloc_msg_out (req_msg);
-        buffer_out := l_buffer
+        buffer_out := l_buffer;
+        req_handle := l_req_handle
+    END
+    ;
+    
+    client_snd_msg_failure (channel, request_handle, error_status) =
+    VAR
+        l_valid_req_handle,
+        l_app_context,
+        l_exp_resp_msg_typ,
+        l_bres,
+        l_session
+    IN
+        l_valid_req_handle <-- is_valid_req_handle (request_handle);
+        IF l_valid_req_handle = TRUE
+        THEN
+            l_exp_resp_msg_typ <-- get_req_handle_resp_typ (request_handle);
+            CASE l_exp_resp_msg_typ OF
+                EITHER
+                    e_msg_session_create_resp,
+                    e_msg_session_activate_resp,
+                    e_msg_session_close_resp,
+                    e_msg_session_cancel_resp
+                THEN
+                    /* It was session treatment sending which failed */
+                    l_bres, l_session <-- client_validate_session_service_resp (channel, request_handle);
+                    IF l_bres = TRUE
+                    THEN
+                        /* Close session since state is now invalid (req message not sent) */
+                        client_close_session (l_session)
+                    END
+                ELSE
+                    /*It means it's application request and we have an app context that can be used*/
+                    l_app_context <-- get_req_handle_app_context (request_handle);
+                    client_remove_req_handle (request_handle);
+                    cli_snd_failure (l_app_context, error_status)
+                END
+            END
+        END
     END
 
 END

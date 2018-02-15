@@ -332,7 +332,32 @@ OPERATIONS
         END
     END
     ;
-
+    
+    snd_msg_failure (channel, request_id, error_status) =
+    VAR
+        l_connected_channel,
+        l_is_client_channel,
+        l_request_handle
+    IN
+        l_connected_channel <-- is_connected_channel (channel);
+        IF l_connected_channel = TRUE
+        THEN
+            l_is_client_channel <-- is_client_channel (channel);
+            IF l_is_client_channel = TRUE
+            THEN
+                /* In this cas the request id was a request handle: allow to convert it */
+                l_request_handle <-- client_request_id_to_req_handle (request_id);
+                client_snd_msg_failure (channel, l_request_handle, error_status)
+            END
+            /* ELSE 
+            Note: in case of server message not sent, session state could be inconsistent with sent message.
+            But it is necessary to have session id to could close it 
+            => reqId / reqHandle is not necessary unique on server side since client provided it
+            */
+        END
+    END
+    ;
+    
     client_channel_connected_event (channel_config_idx, channel) =
     VAR
         l_bres
@@ -395,12 +420,14 @@ OPERATIONS
         l_channel,
         l_connected_channel,
         l_buffer_out,
-        l_valid_buffer_out
+        l_valid_buffer_out,
+        l_req_handle,
+        l_req_handle_in_req_id
     IN
         l_valid_session <-- is_valid_session (session);
         IF l_valid_session = TRUE
         THEN
-            l_ret, l_channel, l_buffer_out <-- client_service_activate_session (session, user);
+            l_ret, l_channel, l_buffer_out, l_req_handle <-- client_service_activate_session (session, user);
             IF l_ret = e_sc_ok
             THEN
                 l_connected_channel <-- is_connected_channel (l_channel);
@@ -408,7 +435,9 @@ OPERATIONS
                 IF l_connected_channel = TRUE &
                     l_valid_buffer_out = TRUE
                 THEN
-                    send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                    /* Since request Id is not used on client side, store req handle for context in case of snd failure */
+                    l_req_handle_in_req_id <-- client_req_handle_to_request_id (l_req_handle);
+                    send_channel_msg_buffer (l_channel, l_buffer_out, l_req_handle_in_req_id)
                 END
             END // ELSE: session closed by client_service_activate_session in case of error
         END
@@ -422,13 +451,15 @@ OPERATIONS
         l_channel,
         l_connected_channel,
         l_buffer_out,
-        l_valid_buffer_out
+        l_valid_buffer_out,
+        l_req_handle,
+        l_req_handle_in_req_id
     IN
         l_valid_session <-- is_valid_session (session);
         l_valid_msg <-- is_valid_app_msg_out (req_msg);
         IF l_valid_session = TRUE & l_valid_msg = TRUE
         THEN
-            ret, l_channel, l_buffer_out <-- client_service_request (session, req_msg, app_context);
+            ret, l_channel, l_buffer_out, l_req_handle <-- client_service_request (session, req_msg, app_context);
             IF ret = e_sc_ok
             THEN
                 /* TODO: remove since it is guaranteed by obligation proof of client_service_request result (ret = ok) ? */
@@ -437,7 +468,9 @@ OPERATIONS
                 IF l_connected_channel = TRUE &
                     l_valid_buffer_out = TRUE
                 THEN
-                    send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                    /* Since request Id is not used on client side, store req handle for context in case of snd failure */
+                    l_req_handle_in_req_id <-- client_req_handle_to_request_id (l_req_handle);
+                    send_channel_msg_buffer (l_channel, l_buffer_out, l_req_handle_in_req_id)
                 END
             END
         ELSE
@@ -459,7 +492,9 @@ OPERATIONS
         l_bres,
         l_channel,
         l_connected_channel,
-        l_buffer_out
+        l_buffer_out,
+        l_req_handle,
+        l_req_handle_in_req_id
     IN
         l_valid_msg <-- is_valid_app_msg_out (req_msg);
         l_valid_channel_config <-- is_valid_channel_config_idx (channel_config_idx);
@@ -489,10 +524,12 @@ OPERATIONS
             ELSE
                 /* Already connected channel: will trigger a create session event synchronously
                 and then activate session event asynchronously */
-                ret, l_buffer_out <-- client_discovery_service_request (req_msg, app_context);
+                ret, l_buffer_out, l_req_handle <-- client_discovery_service_request (req_msg, app_context);
                 IF ret = e_sc_ok
                 THEN
-                    send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                    /* Since request Id is not used on client side, store req handle for context in case of snd failure */
+                    l_req_handle_in_req_id <-- client_req_handle_to_request_id (l_req_handle);
+                    send_channel_msg_buffer (l_channel, l_buffer_out, l_req_handle_in_req_id)
                 END
             END
         ELSE
@@ -513,12 +550,14 @@ OPERATIONS
         l_channel,
         l_connected_channel,
         l_buffer_out,
-        l_valid_buffer_out
+        l_valid_buffer_out,
+        l_req_handle,
+        l_req_handle_in_req_id
     IN
         l_valid_session <-- is_valid_session (session);
         IF l_valid_session = TRUE
         THEN
-            ret, l_channel, l_buffer_out <-- client_service_close_session (session);
+            ret, l_channel, l_buffer_out, l_req_handle <-- client_service_close_session (session);
             IF ret = e_sc_ok
             THEN
                 l_connected_channel <-- is_connected_channel (l_channel);
@@ -526,7 +565,9 @@ OPERATIONS
                 IF l_connected_channel = TRUE &
                     l_valid_buffer_out = TRUE
                 THEN
-                    send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                    /* Since request Id is not used on client side, store req handle for context in case of snd failure */
+                    l_req_handle_in_req_id <-- client_req_handle_to_request_id (l_req_handle);
+                    send_channel_msg_buffer (l_channel, l_buffer_out, l_req_handle_in_req_id)
                 END
             END
         ELSE
@@ -540,7 +581,9 @@ OPERATIONS
         l_channel,
         l_connected_channel,
         l_buffer_out,
-        l_valid_buffer_out
+        l_valid_buffer_out,
+        l_req_handle,
+        l_req_handle_in_req_id
     IN
         l_channel <-- get_connected_channel (channel_config_idx);
         l_connected_channel <-- is_connected_channel (l_channel);
@@ -549,12 +592,14 @@ OPERATIONS
             /* In case internal event to create session cannot be done => close session */
             client_close_session (session)
         ELSE
-            l_buffer_out <-- client_service_create_session (session, l_channel);
+            l_buffer_out, l_req_handle <-- client_service_create_session (session, l_channel);
             /* Send the response message on secure channel if available */
             l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
             IF l_valid_buffer_out = TRUE
             THEN
-                send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                /* Since request Id is not used on client side, store req handle for context in case of snd failure */
+                l_req_handle_in_req_id <-- client_req_handle_to_request_id (l_req_handle);
+                send_channel_msg_buffer (l_channel, l_buffer_out, l_req_handle_in_req_id)
             END
         END
     END
@@ -565,17 +610,21 @@ OPERATIONS
         l_channel,
         l_connected_channel,
         l_buffer_out,
-        l_valid_buffer_out
+        l_valid_buffer_out,
+        l_req_handle,
+        l_req_handle_in_req_id
     IN
         l_channel <-- get_connected_channel (channel_config_idx);
         l_connected_channel <-- is_connected_channel (l_channel);
         IF l_connected_channel = FALSE
         THEN
-            l_buffer_out <-- client_service_activate_orphaned_session (session, l_channel);
+            l_buffer_out, l_req_handle <-- client_service_activate_orphaned_session (session, l_channel);
             l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
             IF l_valid_buffer_out = TRUE
             THEN
-                send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
+                /* Since request Id is not used on client side, store req handle for context in case of snd failure */
+                l_req_handle_in_req_id <-- client_req_handle_to_request_id (l_req_handle);
+                send_channel_msg_buffer (l_channel, l_buffer_out, l_req_handle_in_req_id)
             END
         END
     END

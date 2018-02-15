@@ -74,6 +74,17 @@ OPERATIONS
         /* c_msg_in instance could be provided to app but should be not referenced anymore in c_msg_in */
     END
     ;
+    
+    snd_msg_failure (channel, request_id, error_status) =
+    PRE
+        channel  : t_channel_i &
+        channel  : t_channel &
+        request_id : t_request_context_i &
+        error_status : t_StatusCode_i
+    THEN
+        skip
+    END
+    ;
 
     client_channel_connected_event (channel_config_idx, channel) =
     PRE

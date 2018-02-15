@@ -203,7 +203,21 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // params is freed by services manager
         break;
 
-        /* App to Services events */
+    case SC_TO_SE_SND_FAILURE:
+        if (SOPC_DEBUG_PRINTING != false)
+        {
+            printf("SC_TO_SE_SND_FAILURE\n");
+        }
+        if (NULL != params)
+        {
+            util_status_code__C_to_B(auxParam, &sCode);
+            io_dispatch_mgr__snd_msg_failure((constants__t_channel_i) id,
+                                             (constants__t_request_handle_i) * (uint32_t*) params, sCode);
+            free(params);
+        } // else: without request Id, it cannot be treated
+        break;
+
+    /* App to Services events */
     case APP_TO_SE_OPEN_ENDPOINT:
         if (SOPC_DEBUG_PRINTING != false)
         {

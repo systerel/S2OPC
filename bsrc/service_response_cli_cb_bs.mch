@@ -34,5 +34,14 @@ OPERATIONS
     THEN
         skip
     END
+    ;
     
+    cli_snd_failure (app_context, error_status) =
+    PRE
+        app_context : t_application_context_i &
+        error_status : t_StatusCode_i
+    THEN
+        skip
+    END
+
 END

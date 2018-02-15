@@ -90,7 +90,7 @@ typedef enum {
     INT_SC_RCV_FAILURE, /* id = secure channel connection index,
                            auxParam = error status */
     INT_SC_SND_FAILURE, /* id = secure channel connection index,
-                           params = (SOPC_Buffer*) buffer provided for encoding,
+                           params = (uint32_t *) requestId,
                            auxParam = error status in case of client */
 
     /* SC connection manager -> OPC UA chunks message manager */
