@@ -62,6 +62,15 @@ function check_test {
 
 }
 
+# check if all known bugs and skipped tests are disjoint
+both_skipped_known_bugs=$(cat <(cut -d "|" -f 2- $KNOWN_BUGS_FILES) <(cut -d "|" -f 2- $SKIPPED_TESTS_FILE) | sort | uniq -d)
+if [[ $both_skipped_known_bugs ]]
+then
+    echo "ERROR, the following lines are both in $KNOWN_BUGS_FILES and $SKIPPED_TESTS_FILE:"
+    echo $both_skipped_known_bugs
+    exit 1
+fi
+
 # main script
 
 rm -f $LOG_FILE $TAP_FILE
