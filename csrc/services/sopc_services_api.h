@@ -50,6 +50,11 @@ typedef enum SOPC_Services_Event {
                                        params = (SOPC_Buffer*) OPC UA message payload buffer,
                                        auxParam = request Id context (server side only)
                                     */
+    SC_TO_SE_SND_FAILURE,           /* id = secure channel connection index,
+                                       params = (uint32_t*) requestId,
+                                       auxParam = SOPC_StatusCode
+                                     */
+
     /* Services to services events */
     SE_TO_SE_SC_ALL_DISCONNECTED,       // special event sent by services mgr itself (no parameters)
     SE_TO_SE_ACTIVATE_ORPHANED_SESSION, /* id = session id
@@ -61,11 +66,6 @@ typedef enum SOPC_Services_Event {
     SE_TO_SE_ACTIVATE_SESSION,          /* id = session id
                                          * params = (user token structure)
                                          */
-    SC_TO_SE_SND_FAILURE,               /* id = secure channel connection index,
-                                           params = (uint32_t*) requestId,
-                                           auxParam = SOPC_StatusCode
-                                         */
-
     /* App to Services events */
     APP_TO_SE_OPEN_ENDPOINT,          /* id = endpoint description config index
                                        */
