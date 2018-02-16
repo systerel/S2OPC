@@ -146,6 +146,10 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void
     {
         sessionsClosed++;
     }
+    else
+    {
+        assert(false);
+    }
 }
 
 /* Function to build the read service request message */
