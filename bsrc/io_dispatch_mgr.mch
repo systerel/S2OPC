@@ -235,7 +235,7 @@ OPERATIONS
     END
     ;
     
-    bres <-- server_treat_local_service_request (endpoint_config_idx, req_msg, app_context) =
+    ret <-- server_treat_local_service_request (endpoint_config_idx, req_msg, app_context) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
         req_msg         : t_msg_i &
@@ -249,7 +249,9 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        bres :: BOOL
+        ret :: {e_sc_ok,
+                e_sc_bad_out_of_memory,
+                e_sc_bad_invalid_argument}
     END
     ;
 

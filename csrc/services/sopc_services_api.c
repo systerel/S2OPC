@@ -270,14 +270,14 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // id =  endpoint configuration index
         // params = local service request
         // auxParam = user application session context
-        io_dispatch_mgr__server_treat_local_service_request(id, params, auxParam, &bres);
-        if (false == bres)
+        io_dispatch_mgr__server_treat_local_service_request(id, params, auxParam, &sCode);
+        if (constants__e_sc_ok != sCode)
         {
             // Error case
             status = SOPC_Encodeable_Create(&OpcUa_ServiceFault_EncodeableType, &msg);
             if (SOPC_STATUS_OK == status && NULL != msg)
             {
-                ((OpcUa_ServiceFault*) msg)->ResponseHeader.ServiceResult = SOPC_BadStatusMask;
+                util_status_code__B_to_C(sCode, &((OpcUa_ServiceFault*) msg)->ResponseHeader.ServiceResult);
             }
             else
             {
