@@ -3458,6 +3458,18 @@ SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src)
     return status;
 }
 
+SOPC_ReturnStatus SOPC_Variant_ShallowCopy(SOPC_Variant* dest, const SOPC_Variant* src)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (dest != NULL && src != NULL)
+    {
+        *dest = *src;
+        dest->DoNotClear = true;
+        status = SOPC_STATUS_OK;
+    }
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_Variant_Compare(const SOPC_Variant* left, const SOPC_Variant* right, int32_t* comparison)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -3588,48 +3600,51 @@ void SOPC_Variant_Clear(SOPC_Variant* variant)
     int32_t idx = 0;
     if (variant != NULL)
     {
-        SOPC_EncodeableObject_PfnClear* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeId);
-        if (NULL == clearFunction)
-            return;
-
-        switch (variant->ArrayType)
+        if (false == variant->DoNotClear)
         {
-        case SOPC_VariantArrayType_SingleValue:
-            ApplyToVariantNonArrayBuiltInType(variant->BuiltInTypeId, &variant->Value, clearFunction);
-            FreeVariantNonArrayBuiltInType(variant->BuiltInTypeId, &variant->Value);
-            break;
-        case SOPC_VariantArrayType_Array:
-            ClearToVariantArrayBuiltInType(variant->BuiltInTypeId, &variant->Value.Array.Content,
-                                           &variant->Value.Array.Length, clearFunction);
-            break;
-        case SOPC_VariantArrayType_Matrix:
-            if (variant->Value.Matrix.Dimensions == 0)
+            SOPC_EncodeableObject_PfnClear* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeId);
+            if (NULL == clearFunction)
+                return;
+
+            switch (variant->ArrayType)
             {
-                matrixLength = 0;
-            }
-            for (idx = 0; idx < variant->Value.Matrix.Dimensions && false == error; idx++)
-            {
-                if (variant->Value.Matrix.ArrayDimensions[idx] > 0 &&
-                    matrixLength * variant->Value.Matrix.ArrayDimensions[idx] <= INT32_MAX)
+            case SOPC_VariantArrayType_SingleValue:
+                ApplyToVariantNonArrayBuiltInType(variant->BuiltInTypeId, &variant->Value, clearFunction);
+                FreeVariantNonArrayBuiltInType(variant->BuiltInTypeId, &variant->Value);
+                break;
+            case SOPC_VariantArrayType_Array:
+                ClearToVariantArrayBuiltInType(variant->BuiltInTypeId, &variant->Value.Array.Content,
+                                               &variant->Value.Array.Length, clearFunction);
+                break;
+            case SOPC_VariantArrayType_Matrix:
+                if (variant->Value.Matrix.Dimensions == 0)
                 {
-                    matrixLength *= variant->Value.Matrix.ArrayDimensions[idx];
+                    matrixLength = 0;
                 }
-                else
+                for (idx = 0; idx < variant->Value.Matrix.Dimensions && false == error; idx++)
                 {
-                    error = true;
+                    if (variant->Value.Matrix.ArrayDimensions[idx] > 0 &&
+                        matrixLength * variant->Value.Matrix.ArrayDimensions[idx] <= INT32_MAX)
+                    {
+                        matrixLength *= variant->Value.Matrix.ArrayDimensions[idx];
+                    }
+                    else
+                    {
+                        error = true;
+                    }
                 }
+                if (false == error)
+                {
+                    free(variant->Value.Matrix.ArrayDimensions);
+                    variant->Value.Matrix.ArrayDimensions = NULL;
+                    ClearToVariantArrayBuiltInType(variant->BuiltInTypeId, &variant->Value.Matrix.Content,
+                                                   (int32_t*) &matrixLength, clearFunction);
+                    variant->Value.Matrix.Dimensions = 0;
+                }
+                break;
+            default:
+                break;
             }
-            if (false == error)
-            {
-                free(variant->Value.Matrix.ArrayDimensions);
-                variant->Value.Matrix.ArrayDimensions = NULL;
-                ClearToVariantArrayBuiltInType(variant->BuiltInTypeId, &variant->Value.Matrix.Content,
-                                               (int32_t*) &matrixLength, clearFunction);
-                variant->Value.Matrix.Dimensions = 0;
-            }
-            break;
-        default:
-            break;
         }
 
         // Reset internal properties

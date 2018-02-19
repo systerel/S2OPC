@@ -85,23 +85,29 @@ void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_r
 {
     OpcUa_ReadResponse* pMsgReadResp = (OpcUa_ReadResponse*) msg_read_response_bs__resp_msg;
     SOPC_DataValue* pDataValue = NULL;
+    SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
 
     if (msg_read_response_bs__rvi > 0)
     {
         /* rvi is castable, it's one of its properties, but it starts at 1 */
         pDataValue = &pMsgReadResp->Results[msg_read_response_bs__rvi - 1];
 
+        SOPC_Variant_Initialize(&pDataValue->Value);
+
         if (constants__c_Variant_indet != msg_read_response_bs__val)
         {
             /* Note: the following only copies the context of the Variant, not the entire Variant */
-            memcpy((void*) &pDataValue->Value, msg_read_response_bs__val, sizeof(SOPC_Variant));
+            retStatus = SOPC_Variant_ShallowCopy(&pDataValue->Value, (SOPC_Variant*) msg_read_response_bs__val);
+        }
+
+        if (retStatus == SOPC_STATUS_OK)
+        {
+            util_status_code__B_to_C(msg_read_response_bs__sc, &pDataValue->Status);
         }
         else
         {
-            SOPC_Variant_InitializeAux((void*) &pDataValue->Value);
+            util_status_code__B_to_C(constants__e_sc_bad_unexpected_error, &pDataValue->Status);
         }
-
-        util_status_code__B_to_C(msg_read_response_bs__sc, &pDataValue->Status);
 
         if (msg_read_response_bs__aid == constants__e_aid_Value &&
             (constants__e_ttr_both == ttrRequested || constants__e_ttr_source == ttrRequested))

@@ -85,7 +85,7 @@ extern SOPC_AddressSpace addressSpace;
 #define Description addressSpace.descriptionArray
 #define Description_begin addressSpace.descriptionIdxArray_begin
 #define Description_end addressSpace.descriptionIdxArray_end
-#define DEFAULT_VARIANT  {SOPC_Null_Id, SOPC_VariantArrayType_SingleValue,{0}}
+#define DEFAULT_VARIANT  {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue,{0}}
 
 bool test_browsename(void){
     bool bres = true;

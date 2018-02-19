@@ -266,6 +266,7 @@ typedef union SOPC_VariantValue {
 
 typedef struct SOPC_Variant
 {
+    bool DoNotClear; // flag indicating if variant content must be freed
     SOPC_BuiltinId BuiltInTypeId;
     SOPC_VariantArrayType ArrayType;
     SOPC_VariantValue Value;
@@ -512,6 +513,9 @@ void SOPC_Variant_Initialize(SOPC_Variant* variant);
 void SOPC_Variant_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src);
 SOPC_ReturnStatus SOPC_Variant_CopyAux(void* dest, const void* src);
+
+// Raw copy of structure content without new allocation: destination variant content will not be freed on clear
+SOPC_ReturnStatus SOPC_Variant_ShallowCopy(SOPC_Variant* dest, const SOPC_Variant* src);
 
 // Compare only single value for some basic types (integers, statuses, nodeId, string): otherwise
 // SOPC_STATUS_NOT_SUPPORTED

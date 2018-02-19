@@ -98,6 +98,7 @@ constants__t_Variant_i util_variant__new_Variant_from_Indet(void)
 
 constants__t_Variant_i util_variant__new_Variant_from_Variant(SOPC_Variant* pvara)
 {
+    SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
     SOPC_Variant* pvar;
     if (NULL == pvara)
         return util_variant__new_Variant_from_Indet();
@@ -107,7 +108,16 @@ constants__t_Variant_i util_variant__new_Variant_from_Variant(SOPC_Variant* pvar
     if (NULL == pvar)
         return NULL;
 
-    memcpy(pvar, pvara, sizeof(SOPC_Variant));
+    retStatus = SOPC_Variant_ShallowCopy(pvar, pvara);
+
+    if (retStatus != SOPC_STATUS_OK)
+    {
+        if (pvar != NULL)
+        {
+            free(pvar);
+        }
+        pvar = NULL;
+    }
 
     return pvar;
 }

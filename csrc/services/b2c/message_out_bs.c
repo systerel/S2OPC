@@ -166,16 +166,6 @@ void message_out_bs__dealloc_msg_out(const constants__t_msg_i message_out_bs__ms
     if (message_out_bs__msg != constants__c_msg_indet)
     {
         encType = *(SOPC_EncodeableType**) message_out_bs__msg;
-        if (&OpcUa_ReadResponse_EncodeableType == encType)
-        {
-            /* Current implementation share the variants of the address space in the response,
-               avoid deallocation of those variants */
-            OpcUa_ReadResponse* readMsg = (OpcUa_ReadResponse*) message_out_bs__msg;
-            // NULL != readMsg <=> message_out_bs__msg != constants__c_msg_indet
-            free(readMsg->Results);
-            readMsg->Results = NULL;
-            readMsg->NoOfResults = 0;
-        }
         // TODO: status returned ?
         // TODO: const parameter modified !
 

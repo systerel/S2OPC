@@ -138,7 +138,7 @@ classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
 
 #define toSOPC_String(s) ((SOPC_Byte*)s)
 
-#define DEFAULT_VARIANT  {SOPC_Null_Id, SOPC_VariantArrayType_SingleValue,{0}}
+#define DEFAULT_VARIANT  {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue,{0}}
 
 <!-- check if address space contains duplicated nodes ids -->
 <xsl:for-each-group select="$ua_nodes//@NodeId" group-by=".">
@@ -237,20 +237,20 @@ SOPC_AddressSpace addressSpace = {
 
 
 % for s in ['Boolean', 'Byte', 'Int16', 'Int32', 'Int64', 'Guid', 'NodeId']:
-<xsl:template match="uax:${s}" mode="value">,{SOPC_${s}_Id, SOPC_VariantArrayType_SingleValue, {.${s}=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:${s}" mode="value">,{true, SOPC_${s}_Id, SOPC_VariantArrayType_SingleValue, {.${s}=<xsl:value-of select="."/>}}</xsl:template>
 % endfor
 
-<xsl:template match="uax:SByte" mode="value">,{SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.Sbyte=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:UInt16" mode="value">,{SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:UInt32" mode="value">,{SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:UInt64" mode="value">,{SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:Float" mode="value">,{SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:Double" mode="value">,{SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:String" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_String_Id, SOPC_VariantArrayType_SingleValue, {.String=${write_string("$st")}}}</xsl:template>
-<xsl:template match="uax:ByteString" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {.Bstring=${write_string("$st")}}}</xsl:template>
-<xsl:template match="uax:XmlElement" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_XmlElement_Id, SOPC_VariantArrayType_SingleValue, {.XmlElt=${write_string("$st")}}}</xsl:template>
-<xsl:template match="uax:NodeId" mode="value">,{SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {.NodeId=<xsl:value-of select="."/>}}</xsl:template>
-<xsl:template match="uax:DateTime" mode="value">,{SOPC_DateTime_Id, SOPC_VariantArrayType_SingleValue, {.Date.Low32=<xsl:value-of select="."/>,.Date.High32=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:SByte" mode="value">,{true, SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.Sbyte=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:UInt16" mode="value">,{true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:UInt32" mode="value">,{true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:UInt64" mode="value">,{true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:Float" mode="value">,{true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:Double" mode="value">,{true, SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:String" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{true, SOPC_String_Id, SOPC_VariantArrayType_SingleValue, {.String=${write_string("$st")}}}</xsl:template>
+<xsl:template match="uax:ByteString" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{true, SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {.Bstring=${write_string("$st")}}}</xsl:template>
+<xsl:template match="uax:XmlElement" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{true, SOPC_XmlElement_Id, SOPC_VariantArrayType_SingleValue, {.XmlElt=${write_string("$st")}}}</xsl:template>
+<xsl:template match="uax:NodeId" mode="value">,{true, SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {.NodeId=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:DateTime" mode="value">,{true, SOPC_DateTime_Id, SOPC_VariantArrayType_SingleValue, {.Date.Low32=<xsl:value-of select="."/>,.Date.High32=<xsl:value-of select="."/>}}</xsl:template>
 
 <xsl:template match="*" mode="value">
 <xsl:message terminate="yes"> unknown type <xsl:value-of select="local-name(.)"/>
