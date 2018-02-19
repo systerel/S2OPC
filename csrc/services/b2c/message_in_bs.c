@@ -35,12 +35,6 @@
 #include "sopc_encoder.h"
 #include "sopc_namespace_table.h"
 
-typedef struct SOPC_OpcUaResponseMsgStructureStart
-{
-    SOPC_EncodeableType* encodeableType;
-    OpcUa_ResponseHeader ResponseHeader;
-} SOPC_OpcUaResponseMsgStructureStart;
-
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -49,12 +43,16 @@ void message_in_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void message_in_bs__bless_msg_in(const constants__t_msg_i message_in_bs__msg)
+{
+    /* NOTHING TO DO: in B model now message_in_bs__msg = c_msg_in now */
+    (void) message_in_bs__msg;
+}
+
 void message_in_bs__copy_msg_resp_header_into_msg(const constants__t_msg_header_i message_in_bs__msg_header,
                                                   const constants__t_msg_i message_in_bs__msg)
 {
-    SOPC_OpcUaResponseMsgStructureStart* respMsg = (SOPC_OpcUaResponseMsgStructureStart*) message_in_bs__msg;
-    OpcUa_ResponseHeader* respHeader = (OpcUa_ResponseHeader*) message_in_bs__msg_header;
-    respMsg->ResponseHeader = *respHeader;
+    message_out_bs__copy_msg_resp_header_into_msg_out(message_in_bs__msg_header, message_in_bs__msg);
 }
 
 void message_in_bs__dealloc_msg_in_header(const constants__t_msg_header_i message_in_bs__msg_header)
@@ -200,6 +198,23 @@ void message_in_bs__is_valid_request_context(const constants__t_request_context_
                                              t_bool* const message_in_bs__bres)
 {
     *message_in_bs__bres = (message_in_bs__req_context != constants__c_request_context_indet);
+}
+
+void message_in_bs__is_valid_app_msg_in(const constants__t_msg_i message_in_bs__msg,
+                                        t_bool* const message_in_bs__bres,
+                                        constants__t_msg_type_i* const message_in_bs__msg_typ)
+{
+    // Since message is provided from application, we have to check it is non NULL and the message type is known
+    *message_in_bs__msg_typ = constants__c_msg_type_indet;
+    *message_in_bs__bres = false;
+    if (message_in_bs__msg != constants__c_msg_indet)
+    {
+        message_in_bs__get_msg_in_type(message_in_bs__msg, message_in_bs__msg_typ);
+        if (*message_in_bs__msg_typ != constants__c_msg_type_indet)
+        {
+            *message_in_bs__bres = true;
+        }
+    }
 }
 
 void message_in_bs__msg_in_memory_changed(void)

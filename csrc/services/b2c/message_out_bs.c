@@ -37,6 +37,12 @@
 #include "sopc_toolkit_config_internal.h"
 #include "util_discovery_services.h"
 
+typedef struct SOPC_OpcUaResponseMsgStructureStart
+{
+    SOPC_EncodeableType* encodeableType;
+    OpcUa_ResponseHeader ResponseHeader;
+} SOPC_OpcUaResponseMsgStructureStart;
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -244,6 +250,23 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
     {
         *message_out_bs__buffer = (constants__t_byte_buffer_i) buffer;
     }
+}
+
+void message_out_bs__forget_resp_msg_out(const constants__t_msg_header_i message_out_bs__msg_header,
+                                         const constants__t_msg_i message_out_bs__msg)
+{
+    (void) message_out_bs__msg;
+    // In this case the message header shall have been copied into msg, we should free the header structure since then
+    // Message structure dealloaction is now responsibility of the user application
+    free(message_out_bs__msg_header);
+}
+
+void message_out_bs__copy_msg_resp_header_into_msg_out(const constants__t_msg_header_i message_out_bs__msg_header,
+                                                       const constants__t_msg_i message_out_bs__msg)
+{
+    SOPC_OpcUaResponseMsgStructureStart* respMsg = (SOPC_OpcUaResponseMsgStructureStart*) message_out_bs__msg;
+    OpcUa_ResponseHeader* respHeader = (OpcUa_ResponseHeader*) message_out_bs__msg_header;
+    respMsg->ResponseHeader = *respHeader;
 }
 
 void message_out_bs__get_msg_out_type(const constants__t_msg_i message_out_bs__msg,

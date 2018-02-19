@@ -143,6 +143,17 @@ OPERATIONS
     END
     ;
     
+    /* Accept a message that was allocated by another part of the program */
+    bless_msg_in (msg) =
+    PRE
+        msg : t_msg_i &
+        msg : t_msg
+    THEN
+        c_msg_in := msg ||
+        a_msg_in_type :: t_msg_type
+    END
+    ;
+    
     /* Consider response message as deallocated since responsibility was forwarded to application */
     forget_resp_msg_in (msg_header, msg) =
     PRE
@@ -165,6 +176,20 @@ OPERATIONS
         msg_header : t_msg_header_i
     THEN
         bres := bool(msg_header = c_msg_in_header & c_msg_in_header : t_msg_header)
+    END
+    ;
+    
+    bres, msg_typ <-- is_valid_app_msg_in (msg) =
+    PRE
+        msg : t_msg_i
+    THEN
+        CHOICE
+            bres := TRUE ||
+            msg_typ :( msg_typ : t_msg_type_i & msg_typ : t_msg_type )
+        OR
+            bres := TRUE ||
+            msg_typ := c_msg_type_indet
+        END
     END
     ;
     

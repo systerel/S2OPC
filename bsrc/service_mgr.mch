@@ -202,6 +202,27 @@ OPERATIONS
     END
     ;
 
+    /* Local services on server side: bres <=> out of memory case / unexpected case */
+    bres <-- server_receive_local_service_req (endpoint_config_idx, req_class, req_typ, req_msg, app_context) =
+    PRE
+        endpoint_config_idx : t_endpoint_config_idx_i &
+        endpoint_config_idx : t_endpoint_config_idx &
+        req_class : t_msg_service_class_i &
+        req_class : t_msg_service_class &
+        req_typ : t_msg_type_i &
+        req_typ = a_msg_in_type &
+        a_msg_in_type : s_service_on_session_reqs \/ s_discovery_service_reqs &
+        req_msg : t_msg_i &
+        req_msg : t_msg &
+        app_context : t_application_context_i &
+        /* No message allocation before and remaining after operation */
+        c_msg_in = c_msg_indet &
+        c_msg_in_header = c_msg_header_indet
+    THEN
+        bres :: BOOL
+    END
+    ;
+
     /* Only called through an internal event sent by session mgr itself */
     buffer_out, req_handle <-- client_service_create_session (session, channel) =
     PRE
@@ -518,6 +539,20 @@ OPERATIONS
         msg : t_msg_i
     THEN
         bres := bool(msg : t_msg)
+    END
+    ;
+    
+    bres, msg_typ <-- is_valid_app_msg_in (msg) =
+    PRE
+        msg : t_msg_i
+    THEN
+        CHOICE
+            bres := TRUE ||
+            msg_typ :( msg_typ : t_msg_type_i & msg_typ : t_msg_type )
+        OR
+            bres := TRUE ||
+            msg_typ := c_msg_type_indet
+        END
     END
     ;
     

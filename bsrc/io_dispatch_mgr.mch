@@ -234,6 +234,24 @@ OPERATIONS
             e_sc_bad_generic}
     END
     ;
+    
+    bres <-- server_treat_local_service_request (endpoint_config_idx, req_msg, app_context) =
+    PRE
+        endpoint_config_idx : t_endpoint_config_idx_i &
+        req_msg         : t_msg_i &
+        app_context : t_application_context_i &
+        /* in message (request) is unkown before call and deallocated after operation */
+        c_msg_in = c_msg_indet &
+        c_msg_in_header = c_msg_header_indet &
+        a_msg_in_type = c_msg_type_indet &
+        /* out message (response) is unkown before call and deallocated after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
+    THEN
+        bres :: BOOL
+    END
+    ;
 
     internal_client_create_session (session, channel_config_idx) =
     PRE

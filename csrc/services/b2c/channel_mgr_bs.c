@@ -48,12 +48,33 @@ void channel_mgr_bs__INITIALISATION(void) {}
 void channel_mgr_bs__is_valid_channel_config_idx(const constants__t_channel_config_idx_i channel_mgr_bs__p_config_idx,
                                                  t_bool* const channel_mgr_bs__bres)
 {
-    bool res = SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
-    if (res == false)
+    SOPC_SecureChannel_Config* res = SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
+    if (NULL == res)
     {
         res = SOPC_ToolkitServer_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
     }
-    *channel_mgr_bs__bres = res;
+    if (NULL == res)
+    {
+        *channel_mgr_bs__bres = false;
+    }
+    else
+    {
+        *channel_mgr_bs__bres = true;
+    }
+}
+
+void channel_mgr_bs__is_valid_endpoint_config_idx(const constants__t_endpoint_config_idx_i channel_mgr_bs__p_config_idx,
+                                                  t_bool* const channel_mgr_bs__bres)
+{
+    SOPC_Endpoint_Config* res = SOPC_ToolkitServer_GetEndpointConfig(channel_mgr_bs__p_config_idx);
+    if (NULL == res)
+    {
+        *channel_mgr_bs__bres = false;
+    }
+    else
+    {
+        *channel_mgr_bs__bres = true;
+    }
 }
 
 void channel_mgr_bs__prepare_cli_open_secure_channel(

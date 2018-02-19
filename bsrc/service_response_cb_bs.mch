@@ -16,11 +16,12 @@
  */
 
 MACHINE
-    service_response_cli_cb_bs
+    service_response_cb_bs
     
 SEES
     constants,
-    message_in_bs
+    message_in_bs,
+    message_out_bs
     
 OPERATIONS
     
@@ -30,6 +31,7 @@ OPERATIONS
         resp_msg   : t_msg_i &
         resp_msg   = c_msg_in &
         c_msg_in : t_msg &
+        a_msg_in_type : s_service_on_session_resps \/ s_discovery_service_resps &
         app_context : t_application_context_i
     THEN
         skip
@@ -40,6 +42,20 @@ OPERATIONS
     PRE
         app_context : t_application_context_i &
         error_status : t_StatusCode_i
+    THEN
+        skip
+    END
+    ;
+    
+    srv_service_response (endpoint_config_idx, resp_msg, app_context) = 
+    PRE
+        endpoint_config_idx : t_endpoint_config_idx_i &
+        endpoint_config_idx : t_endpoint_config_idx &
+        resp_msg   : t_msg_i &
+        resp_msg   = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type : s_service_on_session_resps \/ s_discovery_service_resps &
+        app_context : t_application_context_i
     THEN
         skip
     END

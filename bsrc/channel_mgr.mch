@@ -133,6 +133,14 @@ OPERATIONS
     END
     ;
     
+    bres <-- is_valid_endpoint_config_idx (p_config_idx) =
+    PRE
+        p_config_idx : t_endpoint_config_idx_i
+    THEN
+        bres := bool(p_config_idx : t_endpoint_config_idx)
+    END
+    ;
+    
     send_channel_msg_buffer (channel, buffer, request_context) =
     PRE
         channel         : t_channel_i &

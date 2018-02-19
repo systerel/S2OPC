@@ -31,7 +31,7 @@ IMPORTS
     session_mgr,
     service_read,
     request_handle_bs,
-    service_response_cli_cb_bs,
+    service_response_cb_bs,
     address_space,
     service_write_decode_bs,
     service_get_endpoints_bs,
@@ -42,6 +42,7 @@ PROMOTES
     decode_msg_type,
     is_valid_msg_in_type,
     is_valid_request_context,
+    is_valid_app_msg_in,
 
     /* message_out_bs */
     is_valid_app_msg_out,
@@ -719,6 +720,55 @@ OPERATIONS
         END; /* DECODE RESP HEADER CHECK */
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer)
+    END
+    ;
+    
+    /* SERVER local services */
+    
+    bres <-- server_receive_local_service_req (endpoint_config_idx, req_class, req_typ, req_msg, app_context) =
+    VAR
+        l_resp_msg_typ,
+        l_resp_msg_header,
+        l_resp_msg,
+        l_valid_msg,
+        l_valid_resp_header,
+        l_ret
+    IN
+        bres := FALSE;
+        CASE req_class OF
+            EITHER e_msg_session_service_class,
+                e_msg_discovery_service_class 
+            THEN
+                l_resp_msg_typ <-- get_response_type (req_typ);
+                l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
+                l_valid_msg <-- is_valid_msg_out (l_resp_msg);
+                l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header)
+            ELSE
+                l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (e_msg_service_fault_resp);
+                l_valid_msg <-- is_valid_msg_out (l_resp_msg);
+                l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header)
+            END
+        END;
+        IF l_valid_msg = TRUE &
+            l_valid_resp_header = TRUE
+        THEN
+            bres := TRUE;
+            bless_msg_in (req_msg);
+            CASE req_class OF
+                EITHER e_msg_session_service_class THEN
+                    l_ret <-- treat_session_service_req (req_typ, req_msg, l_resp_msg)
+                OR e_msg_discovery_service_class THEN
+                    l_ret <-- treat_discovery_service_req (endpoint_config_idx, req_typ, req_msg, l_resp_msg)
+                ELSE
+                    l_ret := e_sc_bad_service_unsupported
+                END
+            END;
+            write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
+            copy_msg_resp_header_into_msg_out (l_resp_msg_header, l_resp_msg);
+            srv_service_response (endpoint_config_idx, l_resp_msg, app_context);
+            forget_resp_msg_out (l_resp_msg_header, l_resp_msg);
+            dealloc_msg_in (req_msg)
+        END
     END
     ;
 
