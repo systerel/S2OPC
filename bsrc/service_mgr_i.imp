@@ -134,6 +134,25 @@ LOCAL_OPERATIONS
             StatusCode_service : t_StatusCode
         )
     END
+    ;
+    
+    StatusCode_service <-- treat_discovery_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
+    PRE
+        endpoint_config_idx : t_endpoint_config_idx_i &
+        endpoint_config_idx : t_endpoint_config_idx &
+        req_typ : t_msg_type_i &
+        req_typ = a_msg_in_type &
+        a_msg_in_type : s_discovery_service_reqs &
+        req_msg : t_msg_i &
+        req_msg = c_msg_in &
+        resp_msg : t_msg_i &
+        resp_msg = c_msg_out
+    THEN
+        StatusCode_service
+        :(  StatusCode_service : t_StatusCode_i &
+            StatusCode_service : t_StatusCode
+        )
+    END
 
 OPERATIONS
 
@@ -292,6 +311,23 @@ OPERATIONS
         END
     END
     ;
+    
+    StatusCode_service <-- treat_discovery_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
+    VAR
+        l_ret
+    IN
+        CASE req_typ OF
+            EITHER e_msg_discovery_get_endpoints_req THEN
+                l_ret <-- treat_get_endpoints_request (req_msg, resp_msg, endpoint_config_idx);
+                /* TODO: set a returned status code result from read request */
+                l_ret := e_sc_ok
+            ELSE
+                /* Cases shall cover all session services req types */
+                l_ret := e_sc_bad_service_unsupported
+            END
+        END;
+        StatusCode_service := l_ret
+    END;
     
     /* END OF LOCAL OPERATIONS */
 
@@ -587,9 +623,9 @@ OPERATIONS
         l_valid_msg,
         l_resp_msg_header,
         l_valid_resp_header,
+        l_endpoint_config_idx,
         l_ret,
-        l_buffer_out,
-        l_endpoint_config_idx
+        l_buffer_out
     IN
         l_buffer_out := c_byte_buffer_indet;
         l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
@@ -614,17 +650,8 @@ OPERATIONS
                     IF l_valid_msg = TRUE &
                         l_valid_resp_header = TRUE
                     THEN
-                        CASE req_typ OF
-                            EITHER e_msg_discovery_get_endpoints_req THEN
-                                l_endpoint_config_idx <-- server_get_endpoint_config (channel);
-                                l_ret <-- treat_get_endpoints_request (l_req_msg, l_resp_msg, l_endpoint_config_idx);
-                                /* TODO: set a returned status code result from read request */
-                                l_ret := e_sc_ok
-                            ELSE
-                                /* Cases shall cover all session services req types */
-                                l_ret := e_sc_bad_service_unsupported
-                            END
-                        END;
+                        l_endpoint_config_idx <-- server_get_endpoint_config (channel);
+                        l_ret <-- treat_discovery_service_req (l_endpoint_config_idx, req_typ, l_req_msg, l_resp_msg);
                         write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
                         IF l_ret /= e_sc_ok
                         THEN
