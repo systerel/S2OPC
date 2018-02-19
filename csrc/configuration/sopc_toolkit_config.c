@@ -73,6 +73,8 @@ static SOPC_AddressSpaceNotif_Fct* pAddSpaceFct = NULL;
 
 void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id, void* params, uintptr_t auxParam)
 {
+    SOPC_EncodeableType* encType = NULL;
+
     switch (SOPC_AppEvent_AppEventType_Get(eventAndType))
     {
     case SOPC_APP_COM_EVENT:
@@ -94,6 +96,23 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
             if (SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_RCV_SESSION_RESPONSE ||
                 SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_RCV_DISCOVERY_RESPONSE)
             {
+                // Message to deallocate ? => if not application shall deallocate !
+                SOPC_Encodeable_Delete(*(SOPC_EncodeableType**) params, &params);
+            }
+            else if (SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_LOCAL_SERVICE_RESPONSE)
+            {
+                // Treat specific case of read
+                encType = *(SOPC_EncodeableType**) params;
+                if (&OpcUa_ReadResponse_EncodeableType == encType)
+                {
+                    /* Current implementation share the variants of the address space in the response,
+                       avoid deallocation of those variants */
+                    OpcUa_ReadResponse* readMsg = (OpcUa_ReadResponse*) params;
+                    // NULL != readMsg <=> message_out_bs__msg != constants__c_msg_indet
+                    free(readMsg->Results);
+                    readMsg->Results = NULL;
+                    readMsg->NoOfResults = 0;
+                }
                 // Message to deallocate ? => if not application shall deallocate !
                 SOPC_Encodeable_Delete(*(SOPC_EncodeableType**) params, &params);
             }

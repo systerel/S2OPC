@@ -66,11 +66,17 @@ typedef enum SOPC_Services_Event {
     SE_TO_SE_ACTIVATE_SESSION,          /* id = session id
                                          * params = (user token structure)
                                          */
-    /* App to Services events */
-    APP_TO_SE_OPEN_ENDPOINT,          /* id = endpoint description config index
-                                       */
-    APP_TO_SE_CLOSE_ENDPOINT,         /* id = endpoint description config index
-                                       */
+    /* App to Services events : server side */
+    APP_TO_SE_OPEN_ENDPOINT,         /* id = endpoint description config index
+                                      */
+    APP_TO_SE_CLOSE_ENDPOINT,        /* id = endpoint description config index
+                                      */
+    APP_TO_SE_LOCAL_SERVICE_REQUEST, /* id = endpoint connection config index,
+                                        params = (OpcUa_<MessageStruct>*) OPC UA message payload structure (header
+                                         ignored)
+                                        auxParam = user application session context
+                                      */
+    /* App to Services events : client side */
     APP_TO_SE_ACTIVATE_SESSION,       /* Connect SC + Create Session + Activate session */
                                       /* id = endpoint connection config index,
                                        * params = (user token structure)
@@ -88,10 +94,6 @@ typedef enum SOPC_Services_Event {
                                        */
     APP_TO_SE_CLOSE_SESSION,          // id = session id
     APP_TO_SE_CLOSE_ALL_CONNECTIONS,  // Automatically called by toolkit clear (no params)
-
-    /* App to Services: local services events */
-    APP_TO_SE_LOCAL_READ, // TBD
-    APP_TO_SE_LOCAL_WRITE // TBD
 } SOPC_Services_Event;
 
 /* API to enqueue an event for services */

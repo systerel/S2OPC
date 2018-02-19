@@ -71,6 +71,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
     SOPC_Endpoint_Config* epConfig = NULL;
     constants__t_StatusCode_i sCode = constants__e_sc_ok;
     bool bres = false;
+    void* msg = NULL;
     switch (event)
     {
     /* SC to Services events */
@@ -258,6 +259,32 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         {
             SOPC_SecureChannels_EnqueueEvent(EP_CLOSE, id, NULL, 0);
             status = SOPC_STATUS_OK;
+        }
+        break;
+
+    case APP_TO_SE_LOCAL_SERVICE_REQUEST:
+        if (SOPC_DEBUG_PRINTING != false)
+        {
+            printf("APP_TO_SE_LOCAL_SERVICE_REQUEST\n");
+        }
+        // id =  endpoint configuration index
+        // params = local service request
+        // auxParam = user application session context
+        io_dispatch_mgr__server_treat_local_service_request(id, params, auxParam, &bres);
+        if (false == bres)
+        {
+            // Error case
+            status = SOPC_Encodeable_Create(&OpcUa_ServiceFault_EncodeableType, &msg);
+            if (SOPC_STATUS_OK == status && NULL != msg)
+            {
+                ((OpcUa_ServiceFault*) msg)->ResponseHeader.ServiceResult = SOPC_BadStatusMask;
+            }
+            else
+            {
+                msg = NULL;
+            }
+            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_LOCAL_SERVICE_RESPONSE), id, msg,
+                                            auxParam);
         }
         break;
     case APP_TO_SE_ACTIVATE_SESSION:

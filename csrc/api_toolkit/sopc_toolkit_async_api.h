@@ -55,6 +55,22 @@ void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointDescriptionIdx);
 void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointDescriptionIdx);
 
 /**
+ * \brief Request to execute locally the given service request on server and receive response.
+ *        The SE_LOCAL_SERVICE_RESPONSE event will be triggered to SOPC_ComEvent_Fct(),
+ *        once service request evaluated.
+ *
+ * \param endpointDescriptionIdx  Endpoint description configuration index provided to
+ * \param requestStruct           OPC UA message payload structure pointer (OpcUa_<MessageStruct>*). Deallocated by
+ * toolkit.
+ * \param requestContext          A context value, it will be provided with corresponding response
+ *
+ * Note: the provided request message structure and its content is automatically deallocated by the toolkit
+ */
+void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConnectionIdx,
+                                                 void* requestStruct,
+                                                 uintptr_t requestContext);
+
+/**
  * \brief Request to activate a new session for the given endpoint connection configuration as client.
  *        When requesting activation of a session the following steps are automatically done:
  *        - Establish a new secure channel for the endpoint connection configuration provided if not existing

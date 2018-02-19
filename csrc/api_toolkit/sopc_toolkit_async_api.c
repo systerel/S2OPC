@@ -32,6 +32,13 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointDescriptionIdx)
     SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT, endpointDescriptionIdx, NULL, 0);
 }
 
+void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConnectionIdx,
+                                                 void* requestStruct,
+                                                 uintptr_t requestContext)
+{
+    SOPC_Services_EnqueueEvent(APP_TO_SE_LOCAL_SERVICE_REQUEST, endpointConnectionIdx, requestStruct, requestContext);
+}
+
 void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx, uintptr_t sessionContext)
 {
     SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, &uniqueUserId, sessionContext);

@@ -100,9 +100,14 @@ typedef enum SOPC_App_Com_Event {
                             */
 
     /* Server application events */
-    SE_CLOSED_ENDPOINT, /* id = endpoint configuration index,
-                           auxParam = SOPC_ReturnStatus
-                        */
+    SE_CLOSED_ENDPOINT,       /* id = endpoint configuration index,
+                                 auxParam = SOPC_ReturnStatus
+                              */
+    SE_LOCAL_SERVICE_RESPONSE /* id = endpoint configuration index,
+                                 params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
+                                 (deallocated by toolkit after callback call is terminated)
+                                 auxParam = user application request context
+                               */
 } SOPC_App_Com_Event;
 
 /* Server only interfaces */
