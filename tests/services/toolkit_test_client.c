@@ -191,7 +191,7 @@ SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
 int main(void)
 {
     // Sleep timeout in milliseconds
-    const uint32_t sleepTimeout = 500;
+    const uint32_t sleepTimeout = 200;
     // Loop timeout in milliseconds
     const uint32_t loopTimeout = 3000;
     // Counter to stop waiting on timeout
@@ -426,7 +426,7 @@ int main(void)
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
-        SOPC_Sleep(100);
+        SOPC_Sleep(sleepTimeout);
     }
 
     if (loopCpt * sleepTimeout > loopTimeout)
@@ -459,7 +459,7 @@ int main(void)
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
-        SOPC_Sleep(100);
+        SOPC_Sleep(sleepTimeout);
     }
 
     if (loopCpt * sleepTimeout > loopTimeout)
@@ -486,7 +486,7 @@ int main(void)
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
-        SOPC_Sleep(100);
+        SOPC_Sleep(sleepTimeout);
     }
 
     if (loopCpt * sleepTimeout > loopTimeout)
@@ -519,7 +519,7 @@ int main(void)
     do
     {
         loopCpt++;
-        SOPC_Sleep(100);
+        SOPC_Sleep(sleepTimeout);
     } while (SOPC_STATUS_OK == status && sessionsClosed < NB_SESSIONS && loopCpt * sleepTimeout <= loopTimeout);
 
     SOPC_Toolkit_Clear();
