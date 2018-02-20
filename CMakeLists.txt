@@ -156,6 +156,17 @@ add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
 target_include_directories(check_helpers PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
 target_link_libraries(check_helpers PRIVATE ingopcs ${LIBCHECK_DEP_LIB})
 
+# Server test: local services
+add_executable(toolkit_test_server_local_service "tests/services/toolkit_test_server_local_service.c"
+                                                 "tests/services/wrap_read.c"
+                                                 "tests/services/testlib_write.c"
+                                                 "tests/services/test_results.c"
+                                                 "tests/services/testlib_read_response.c"
+                                                 "address_space_generation/genc/ingopcs_addspace.c")
+target_link_libraries(toolkit_test_server_local_service PRIVATE ingopcs)
+target_include_directories(toolkit_test_server_local_service PRIVATE "${ADDSPACEGEN_DIR}/include"
+                                                             ${INGOPCS_PUBLIC_INCLUDES} 
+                                                             ${INGOPCS_PRIVATE_INCLUDES})
 # Client test
 add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/wrap_read.c"

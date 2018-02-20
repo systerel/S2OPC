@@ -29,6 +29,7 @@ if [ -f "$BIN_DIR/check_helpers" ] &&
    [ -f "$BIN_DIR/test_secure_channels_client" ] &&
    [ -f "$BIN_DIR/toolkit_test_read" ] &&
    [ -f "$BIN_DIR/toolkit_test_write" ] &&
+   [ -f "$BIN_DIR/toolkit_test_server_local_service" ] &&
    [ -f "$BIN_DIR/toolkit_test_server" ] &&
    [ -f "$BIN_DIR/toolkit_test_client" ]
 then
@@ -47,7 +48,7 @@ $TEST_SCRIPTS/run_client_server_test_SC_level.sh
 
 # run services tests
 ## unitary service tests
-./bin/toolkit_test_read
+$BIN_DIR/toolkit_test_read
 if [[ $? -eq 0 ]]; then
     echo "ok 1 - test: read service test: Passed" > $BIN_DIR/service_read.tap
 else
@@ -55,7 +56,7 @@ else
 fi
 echo "1..1" >> $BIN_DIR/service_read.tap
 
-./bin/toolkit_test_write
+$BIN_DIR/toolkit_test_write
 if [[ $? -eq 0 ]]; then
     echo "ok 1 - test: write service test: Passed" > $BIN_DIR/service_write.tap
 else
@@ -63,11 +64,21 @@ else
 fi
 echo "1..1" >> $BIN_DIR/service_write.tap
 
+pushd $BIN_DIR
+./toolkit_test_server_local_service
+if [[ $? -eq 0 ]]; then
+    echo "ok 1 - test: server local service test: Passed" > ./server_local_service.tap
+else
+    echo "not ok 1 - test: server local service test: $?" > ./server_local_service.tap
+fi
+echo "1..1" >> ./server_local_service.tap
+popd
+
 ## run toolkit client / server test
 $TEST_SCRIPTS/run_client_server_test.sh
 
 ## run validation tests
-pushd bin
+pushd $BIN_DIR
 ./toolkit_test_server&
 popd
 pushd validation
@@ -77,7 +88,7 @@ wait
 mv validation/validation.tap bin/
 
 ## run validation tests
-pushd bin
+pushd $BIN_DIR
 ./toolkit_test_server 20000&
 popd
 pushd validation
