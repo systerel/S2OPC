@@ -59,5 +59,15 @@ OPERATIONS
     THEN
         skip
     END
+    ;
+    
+    srv_write_notification (write_request_pointer, write_status) =
+    PRE
+        write_request_pointer : t_WriteValuePointer_i &
+        write_status : t_StatusCode_i &
+        write_status : t_StatusCode
+    THEN
+        skip
+    END
 
 END

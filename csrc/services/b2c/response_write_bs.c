@@ -27,6 +27,8 @@
 #include "response_write_bs.h"
 #include "util_b2c.h"
 
+#include "sopc_services_api.h"
+#include "sopc_toolkit_config_internal.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
 

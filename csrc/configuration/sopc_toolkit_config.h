@@ -77,6 +77,19 @@ void SOPC_Toolkit_Clear(void);
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
 
 /**
+ *  \brief Set the given Address Space modification notification callback
+ *  for the current toolkit server (SOPC_ToolkitServer_Initialize required, !SOPC_Toolkit_Configured required).
+ *  Note: only one callback can be set, further call will be refused.
+ *
+ *  \param pAddSpaceNotifFct  The address space notification event callback definition
+ *
+ *  \return SOPC_STATUS_OK if configuration succeeded,
+ *  SOPC_STATUS_INVALID_STATE if toolkit is not initialized, already
+ *  configured or address space is already set, SOPC_STATUS_NOK otherwise
+ */
+SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNotif_Fct* pAddSpaceNotifFct);
+
+/**
  *  \brief Record the given secure channel configuration in returned index
  *  (SOPC_ToolkitClient_Initialize required, !SOPC_Toolkit_Configured required)
  *

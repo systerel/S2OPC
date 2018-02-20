@@ -161,25 +161,15 @@ typedef struct SOPC_AddressSpace
 /* Server address space access/modification notifications to applicative code */
 typedef enum SOPC_App_AddSpace_Event {
     /* Server application events */
-    AS_READ_EVENT,
-    AS_WRITE_EVENT,
+    AS_WRITE_EVENT, /* opParam = (OpcUa_WriteValue*) single write value operation
+                       opStatus = status of the write operation
+                     */
 } SOPC_App_AddSpace_Event;
 
-/* Server address space local modifications */
-typedef enum SOPC_App_AddSpace_LocalService_Result {
-    /* Server application local service results */
-    AS_LOCAL_READ_RESULT,
-    AS_LOCAL_WRITE_RESULT,
-} SOPC_App_AddSpace_LocalService_Result;
-
+/* Toolkit communication events application callback type */
 typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
 
-// TODO: define parameter for each type of event
-typedef void SOPC_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* param, uintptr_t appContext);
-
-// TODO: define parameter for each type of event
-typedef void SOPC_AddressSpaceLocalService_Fct(SOPC_App_AddSpace_LocalService_Result resultType,
-                                               void* param,
-                                               SOPC_StatusCode status);
+/* Toolkit address space notification events callback type */
+typedef void SOPC_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus);
 
 #endif // SOPC_USER_APP_ITF_H_

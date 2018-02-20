@@ -27,6 +27,7 @@ SEES
 IMPORTS
     message_in_bs,
     message_out_bs,
+    service_mgr_1,
     service_mgr_bs,
     session_mgr,
     service_read,
@@ -734,6 +735,7 @@ OPERATIONS
         l_valid_resp_header,
         l_ret
     IN
+        set_local_service_treatment;
         CASE req_class OF
             EITHER e_msg_session_service_class,
                 e_msg_discovery_service_class 
@@ -769,7 +771,8 @@ OPERATIONS
             dealloc_msg_in (req_msg)
         ELSE
             ret := e_sc_bad_out_of_memory
-        END
+        END;
+        set_local_service_treatment
     END
     ;
 

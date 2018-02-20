@@ -91,6 +91,7 @@ SETS
 
     /* A WriteValue of a WriteRequest. */
     t_WriteValue_i;
+    t_WriteValuePointer_i;
 
     /* A BrowseValue of a BrowseRequest. */
     t_BrowseValue_i;
@@ -398,7 +399,7 @@ PROPERTIES
     c_WriteValue_indet /: t_WriteValue &
     cast_t_WriteValue : NAT +-> t_WriteValue_i &
     cast_t_WriteValue : perm(t_WriteValue) &
-
+    
     t_BrowseValue <: t_BrowseValue_i &
     c_BrowseValue_indet : t_BrowseValue_i &
     c_BrowseValue_indet /: t_BrowseValue &

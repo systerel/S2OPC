@@ -23,7 +23,9 @@ REFINES
 
 SEES
     constants,
-    service_write_decode_bs
+    service_write_decode_bs,
+    service_mgr_1,
+    service_response_cb_bs
 
 IMPORTS
     address_space_bs,
@@ -163,7 +165,9 @@ OPERATIONS
         l_wvi,
         l_status1,
         l_status2,
-        l_isvalid
+        l_isvalid,
+        l_local_treatment,
+        l_wv
     IN
         StatusCode_service := e_sc_ok;
         l_nb_req <-- get_nb_WriteValue;
@@ -176,7 +180,13 @@ OPERATIONS
                re-used in another context (e.g. write request from the Application) */
 
             l_status2 <-- treat_write_1(l_isvalid, l_status1, l_nid, l_aid, l_value);
-            set_ResponseWrite_StatusCode(l_wvi, l_status2)
+            set_ResponseWrite_StatusCode(l_wvi, l_status2);
+            l_local_treatment <-- is_local_service_treatment;
+            IF l_local_treatment = FALSE
+            THEN
+                l_wv <-- getAndClean_WriteValuePointer(l_wvi);
+                srv_write_notification (l_wv, l_status2)
+            END
         INVARIANT
             wreqs_to_iterate <: t_WriteValue &
             wreqs_iterated <: t_WriteValue &

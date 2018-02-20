@@ -64,3 +64,18 @@ void service_response_cb_bs__srv_service_response(
                                     (uint32_t) service_response_cb_bs__endpoint_config_idx,
                                     service_response_cb_bs__resp_msg, service_response_cb_bs__app_context);
 }
+
+void service_response_cb_bs__srv_write_notification(
+    const constants__t_WriteValuePointer_i service_response_cb_bs__write_request_pointer,
+    const constants__t_StatusCode_i service_response_cb_bs__write_status)
+{
+    SOPC_StatusCode sc;
+    OpcUa_WriteValue* wv = service_response_cb_bs__write_request_pointer;
+    if (NULL != wv)
+    {
+        util_status_code__B_to_C(service_response_cb_bs__write_status, &sc);
+        // Trigger notification event
+        SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_AddSpaceEvent_Create(AS_WRITE_EVENT), 0, (void*) wv,
+                                        (uintptr_t) sc);
+    } // else: TODO: log
+}

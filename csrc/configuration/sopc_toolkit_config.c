@@ -101,11 +101,21 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
         }
         break;
     case SOPC_APP_ADDRESS_SPACE_NOTIF:
-        if (NULL != pAddSpaceFct)
+        switch (SOPC_AppEvent_AddSpaceEvent_Get(eventAndType))
         {
-            pAddSpaceFct(SOPC_AppEvent_AddSpaceEvent_Get(eventAndType),
-                         params,                      // TBD
-                         (SOPC_StatusCode) auxParam); // TBD
+        case AS_WRITE_EVENT:
+            if (NULL != pAddSpaceFct)
+            {
+                pAddSpaceFct(SOPC_AppEvent_AddSpaceEvent_Get(eventAndType), params, (SOPC_StatusCode) auxParam);
+            }
+            if (NULL != params)
+            {
+                OpcUa_WriteValue_Clear((OpcUa_WriteValue*) params);
+                free(params);
+            }
+            break;
+        default:
+            break;
         }
         break;
     default:
@@ -134,11 +144,11 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 
     if (SOPC_STATUS_OK == status && false == tConfig.initDone)
     {
-        appFct = pAppFct;
-
         Mutex_Initialization(&tConfig.mut);
         Mutex_Lock(&tConfig.mut);
         tConfig.initDone = true;
+
+        appFct = pAppFct;
 
         SOPC_Helper_EndiannessCfg_Initialize();
         SOPC_Namespace_Initialize(tConfig.nsTable);
@@ -630,10 +640,30 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* ad
         if (tConfig.initDone != false)
         {
             Mutex_Lock(&tConfig.mut);
-            if (false == tConfig.locked)
+            if (false == tConfig.locked && sopc_addressSpace_configured == false)
             {
                 status = SOPC_STATUS_OK;
                 SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(addressSpace);
+            }
+            Mutex_Unlock(&tConfig.mut);
+        }
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNotif_Fct* pAddSpaceNotifFct)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (pAddSpaceNotifFct != NULL)
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+        if (tConfig.initDone != false)
+        {
+            Mutex_Lock(&tConfig.mut);
+            if (false == tConfig.locked && pAddSpaceFct == NULL)
+            {
+                status = SOPC_STATUS_OK;
+                pAddSpaceFct = pAddSpaceNotifFct;
             }
             Mutex_Unlock(&tConfig.mut);
         }

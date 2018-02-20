@@ -139,3 +139,22 @@ void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i 
         *service_write_decode_bs__status = constants__e_sc_bad_internal_error;
     }
 }
+
+void service_write_decode_bs__getAndClean_WriteValuePointer(
+    const constants__t_WriteValue_i service_write_decode_bs__wvi,
+    constants__t_WriteValuePointer_i* const service_write_decode_bs__wvPointer)
+{
+    OpcUa_WriteValue* wv = NULL;
+
+    if (NULL != request && service_write_decode_bs__wvi <= request->NoOfNodesToWrite)
+    {
+        wv = malloc(sizeof(OpcUa_WriteValue));
+        if (NULL != wv)
+        {
+            *wv = request->NodesToWrite[service_write_decode_bs__wvi - 1];
+            /* Re-Init the WriteValue to avoid deallocation of its content now copied in new WriteValue */
+            OpcUa_WriteValue_Initialize(&request->NodesToWrite[service_write_decode_bs__wvi - 1]);
+        }
+    }
+    *service_write_decode_bs__wvPointer = wv;
+}
