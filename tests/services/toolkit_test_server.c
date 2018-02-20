@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -52,6 +53,38 @@ void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void
     else
     {
         printf("<Test_Server_Toolkit: unexpected endpoint event %d : NOK\n", event);
+    }
+}
+
+void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus)
+{
+    OpcUa_WriteValue* wv = NULL;
+    if (event == AS_WRITE_EVENT)
+    {
+        printf("<Test_Server_Toolkit: address space WRITE event: OK\n");
+        wv = (OpcUa_WriteValue*) opParam;
+        if (wv != NULL)
+        {
+            switch (wv->NodeId.IdentifierType)
+            {
+            case SOPC_IdentifierType_Numeric:
+                printf("  NodeId: Namespace %" PRIu16 ", ID %" PRIu32 "\n", wv->NodeId.Namespace,
+                       wv->NodeId.Data.Numeric);
+                break;
+            case SOPC_IdentifierType_String:
+                printf("  NodeId: Namespace %" PRIu16 ", ID %s\n", wv->NodeId.Namespace,
+                       SOPC_String_GetRawCString(&wv->NodeId.Data.String));
+                break;
+            default:
+                break;
+            }
+            printf("  AttributeId: %" PRIu32 "\n", wv->AttributeId);
+            printf("  Write status: %X\n", opStatus);
+        }
+    }
+    else
+    {
+        printf("<Test_Server_Toolkit: unexpected address space event %d : NOK\n", event);
     }
 }
 
@@ -195,6 +228,20 @@ int main(int argc, char* argv[])
         }
     }
 
+    // Define address space modification notification callback
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitServer_SetAddressSpaceNotifCb(&Test_AddressSpaceNotif_Fct);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("<Test_Server_Toolkit: Failed to configure the @ space modification notification callback \n");
+        }
+        else
+        {
+            printf("<Test_Server_Toolkit: @ space modification notification callback configured\n");
+        }
+    }
+
     // Add endpoint description configuration
     if (SOPC_STATUS_OK == status)
     {
@@ -260,7 +307,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        printf("<Test_Server_Toolkit final result: NOK with status = '%X'\n", status);
+        printf("<Test_Server_Toolkit final result: NOK with status = '%d'\n", status);
     }
 
     // Deallocate locally allocated data

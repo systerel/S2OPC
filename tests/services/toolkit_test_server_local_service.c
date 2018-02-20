@@ -16,6 +16,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,6 +37,7 @@
 #include "test_results.h"
 #include "testlib_read_response.h"
 #include "testlib_write.h"
+#include "util_variant.h"
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 #define APPLICATION_URI "urn:INGOPCS:localhost"
@@ -115,6 +117,15 @@ void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void
     {
         printf("<Test_Server_Local_Service: unexpected endpoint event %d : NOK\n", event);
     }
+}
+
+void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus)
+{
+    // No notification shall be received when using local services
+    (void) event;
+    (void) opParam;
+    (void) opStatus;
+    assert(false);
 }
 
 /* Function to build the getEndpoints service request message */
@@ -239,6 +250,20 @@ int main(int argc, char* argv[])
         else
         {
             printf("<Test_Server_Local_Service: @ space configured\n");
+        }
+    }
+
+    // Define address space modification notification callback
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitServer_SetAddressSpaceNotifCb(&Test_AddressSpaceNotif_Fct);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("<Test_Server_Toolkit: Failed to configure the @ space modification notification callback \n");
+        }
+        else
+        {
+            printf("<Test_Server_Toolkit: @ space modification notification callback configured\n");
         }
     }
 
@@ -407,7 +432,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        printf("<Test_Server_Local_Service: final result NOK with status = '%X'\n", status);
+        printf("<Test_Server_Local_Service: final result NOK with status = '%d'\n", status);
     }
 
     // Deallocate locally allocated data

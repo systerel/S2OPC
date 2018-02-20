@@ -210,9 +210,9 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest* pWriteReq)
     OpcUa_WriteValue* lwv;
     int32_t i;
     t_bool isvalid;
-    constants__t_StatusCode_i sc;
+    constants__t_StatusCode_i sc = constants__e_sc_bad_generic;
     constants__t_Node_i node;
-    SOPC_Variant* pVariant;
+    SOPC_Variant* pVariant = NULL;
     bool bVerif = true;
     int32_t cmp;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -240,8 +240,11 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest* pWriteReq)
             printf("Cannot find NodeId[wvi = %" PRIi32 "]\n", i + 1);
             bVerif = false;
         }
-        address_space_bs__read_AddressSpace_Attribute_value(node, constants__e_ncl_Variable, constants__e_aid_Value,
-                                                            &sc, (constants__t_Variant_i*) &pVariant);
+        else
+        {
+            address_space_bs__read_AddressSpace_Attribute_value(node, constants__e_ncl_Variable, constants__e_aid_Value,
+                                                                &sc, (constants__t_Variant_i*) &pVariant);
+        }
 
         if (sc == constants__e_sc_ok)
         {
@@ -263,7 +266,10 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest* pWriteReq)
             util_variant__print_SOPC_Variant(pVariant);
             bVerif = false;
         }
-        free(pVariant);
+        if (NULL != pVariant)
+        {
+            free(pVariant);
+        }
     }
 
     /* Free the response's internals */

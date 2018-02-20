@@ -45,21 +45,24 @@ int main(void)
 
     /* Creates a WriteRequest and the message */
     OpcUa_WriteRequest* pWriteReq = tlibw_new_WriteRequest();
-    if (NULL == pWriteReq)
+    OpcUa_WriteRequest* pWriteReq2 = tlibw_new_WriteRequest(); // Keep exact copy for verification
+    if (NULL == pWriteReq || NULL == pWriteReq2)
         exit(1);
 
     /* Main service test.
      * The Write differs from the Read: the response cache will be checked instead of the OpcUa_*Response,
      *  as the B model does it in two steps.
      */
-    tlibw_stimulateB_with_message(pWriteReq);
-    bTest = tlibw_verify_effects_local(pWriteReq);
+    tlibw_stimulateB_with_message(pWriteReq); // Request is modified for server local notification needs
+    tlibw_free_WriteRequest(&pWriteReq);
+
+    bTest = tlibw_verify_effects_local(pWriteReq2);
 
     /* Uninit the address space */
     address_space_bs__UNINITIALISATION();
 
     /* Free the request */
-    tlibw_free_WriteRequest(&pWriteReq);
+    tlibw_free_WriteRequest(&pWriteReq2);
 
     if (bTest)
     {
