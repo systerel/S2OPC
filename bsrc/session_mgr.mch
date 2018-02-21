@@ -293,6 +293,15 @@ OPERATIONS
     END
     ;
     
+    client_close_sessions_on_final_connection_failure (channel_config_idx) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END    
+    ;
+    
     client_close_session (session) =
     PRE
         session : t_session_i

@@ -64,6 +64,7 @@ PROMOTES
     client_channel_connected_event_session,
     client_async_discovery_request_without_channel,
     client_channel_connected_event_discovery,
+    client_close_sessions_on_final_connection_failure,
     client_close_session
 
 LOCAL_OPERATIONS

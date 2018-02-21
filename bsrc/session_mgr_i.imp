@@ -651,6 +651,13 @@ OPERATIONS
     END
     ;
     
+    client_close_sessions_on_final_connection_failure (channel_config_idx) =
+    BEGIN
+        // Close all sessions waiting for this channel config to be connected since its final failure
+        local_client_close_sessions_on_SC_final_connection_failure (channel_config_idx)
+    END    
+    ;
+    
     client_close_session (session) =
     BEGIN
         local_client_close_session (session)
