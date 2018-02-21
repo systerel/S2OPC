@@ -48,6 +48,16 @@ static struct
     bool requestedFlag;
 } closeAllConnectionsSync = {.requestedFlag = false, .allDisconnectedFlag = false};
 
+SOPC_EventDispatcherManager* SOPC_Services_GetEventDispatcher()
+{
+    return servicesEventDispatcherMgr;
+}
+
+SOPC_EventDispatcherManager* SOPC_ApplicationCallback_GetEventDispatcher()
+{
+    return applicationEventDispatcherMgr;
+}
+
 static void SOPC_Internal_AllClientSecureChannelsDisconnected(void)
 {
     Mutex_Lock(&closeAllConnectionsSync.mutex);

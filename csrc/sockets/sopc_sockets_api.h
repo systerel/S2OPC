@@ -28,6 +28,8 @@
 
 #include <stdint.h>
 
+#include "sopc_event_dispatcher_manager.h"
+
 /* Sockets input events */
 typedef enum {
     /* External events */
@@ -61,5 +63,8 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id,
 void SOPC_Sockets_Initialize(void);
 
 void SOPC_Sockets_Clear(void);
+
+// Internal use only (timers)
+SOPC_EventDispatcherManager* SOPC_Sockets_GetEventDispatcher(void);
 
 #endif /* SOPC_SOCKETS_API_H_ */

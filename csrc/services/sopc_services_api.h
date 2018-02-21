@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 
+#include "sopc_event_dispatcher_manager.h"
 #include "sopc_user_app_itf.h"
 
 typedef enum SOPC_Services_Event {
@@ -122,5 +123,11 @@ void SOPC_Services_PreClear(void);
  *  \brief Stop and clear the services and application event dispatcher threads
  */
 void SOPC_Services_Clear(void);
+
+// Internal use only (timers)
+SOPC_EventDispatcherManager* SOPC_Services_GetEventDispatcher(void);
+
+// Internal use only (timers)
+SOPC_EventDispatcherManager* SOPC_ApplicationCallback_GetEventDispatcher(void);
 
 #endif /* SOPC_SERVICES_API_H */

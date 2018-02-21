@@ -19,13 +19,17 @@
 
 #include <assert.h>
 
-#include "sopc_event_dispatcher_manager.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_sockets_event_mgr.h"
 #include "sopc_sockets_internal_ctx.h"
 #include "sopc_sockets_network_event_mgr.h"
 
 static SOPC_EventDispatcherManager* socketsEventDispatcherMgr = NULL;
+
+SOPC_EventDispatcherManager* SOPC_Sockets_GetEventDispatcher()
+{
+    return socketsEventDispatcherMgr;
+}
 
 void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
