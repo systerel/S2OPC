@@ -51,7 +51,7 @@ void SOPC_EventTimer_Clear(void);
  * \param eventParams the event parameters that will be provided on timeout to the event dispatch manager
  * \param msDelay     the delay from current time before timeout in milliseconds
  *
- * \return the timer identifier
+ * \return the timer identifier (or value 0 if operation failed)
  *
  * */
 uint32_t SOPC_EventTimer_Create(SOPC_EventDispatcherManager* eventMgr,

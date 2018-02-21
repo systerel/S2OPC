@@ -33,7 +33,7 @@ typedef struct SOPC_EventTimer
 
 #define SOPC_MAX_TIMERS UINT16_MAX
 
-static bool usedTimerIds[SOPC_MAX_TIMERS];
+static bool usedTimerIds[SOPC_MAX_TIMERS + 1]; // 0 idx value is invalid (max idx = MAX + 1)
 static uint32_t latestTimerId = 0;
 
 static SOPC_SLinkedList* timers = NULL;
@@ -50,7 +50,7 @@ static uint32_t SOPC_Internal_GetFreshTimerId_WithoutLock(void)
     uint32_t idx = latestTimerId;
     if (SOPC_SLinkedList_GetLength(timers) < SOPC_MAX_TIMERS)
     {
-        if (result < SOPC_MAX_TIMERS)
+        if (result < SOPC_MAX_TIMERS + 1) // 0 idx value is invalid (max idx = MAX + 1)
         {
             idx = latestTimerId + 1;
         }
@@ -69,13 +69,17 @@ static uint32_t SOPC_Internal_GetFreshTimerId_WithoutLock(void)
         }
         else
         {
-            if (idx < SOPC_MAX_TIMERS)
+            if (idx < SOPC_MAX_TIMERS + 1) // 0 idx value is invalid (max idx = MAX + 1)
             {
                 idx = idx + 1;
             }
             else
             {
-                idx = 1; // 0 is invalid value
+                idx = 1;                // 0 is invalid value
+                if (latestTimerId == 0) // deal with case of init to guarantee no infinite loop
+                {
+                    latestTimerId = 1;
+                }
             }
         }
     }
@@ -93,7 +97,7 @@ void SOPC_EventTimer_Initialize()
     if (false == initialized)
     {
         Mutex_Initialization(&timersMutex);
-        memset(usedTimerIds, false, sizeof(bool) * SOPC_MAX_TIMERS);
+        memset(usedTimerIds, false, sizeof(bool) * (SOPC_MAX_TIMERS + 1)); // 0 idx value is invalid (max idx = MAX + 1)
         timers = SOPC_SLinkedList_Create(SOPC_MAX_TIMERS);
         initialized = true;
     }
