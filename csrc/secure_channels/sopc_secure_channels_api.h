@@ -61,10 +61,7 @@ typedef enum {
 
     /* Timer events */
     TIMER_SC_CONNECTION_TIMEOUT, /* id = secure channel connection index */
-
-    /* Internal debug events */
-    // Could be used to force an OPN RENEW (on a CONNECTED SC only)
-    DEBUG_SC_FORCE_OPN_RENEW, /* id = secure channel connection index */
+    TIMER_SC_CLIENT_OPN_RENEW,   /* id = secure channel connection index */
 
     /* Internal events */
     /* SC listener manager -> SC connection manager */

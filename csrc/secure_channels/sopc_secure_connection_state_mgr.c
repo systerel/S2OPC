@@ -2271,10 +2271,10 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         break;
 
     /* Test events: */
-    case DEBUG_SC_FORCE_OPN_RENEW:
+    case TIMER_SC_CLIENT_OPN_RENEW:
         if (SOPC_DEBUG_PRINTING != false)
         {
-            printf("ScStateMgr: DEBUG_SC_FORCE_OPN_RENEW\n");
+            printf("ScStateMgr: TIMER_SC_CLIENT_OPN_RENEW\n");
         }
         scConnection = SC_GetConnection(eltId);
         if (scConnection != NULL)
