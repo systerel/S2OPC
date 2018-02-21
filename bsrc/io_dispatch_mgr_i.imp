@@ -375,6 +375,7 @@ OPERATIONS
     VAR
         l_bres
     IN
+        client_discovery_req_failures_on_final_connection_failure (channel_config_idx);
         client_close_sessions_on_final_connection_failure (channel_config_idx);
         l_bres <-- cli_set_connection_timeout_channel (channel_config_idx)
         // No new (auto) attempt will be made to connect with this secure channel confix => close sessions waiting for it

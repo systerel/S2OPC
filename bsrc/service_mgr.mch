@@ -434,6 +434,16 @@ OPERATIONS
     END
     ;
 
+    /* Generates events of discovery request sending failures if connection failed definitely */
+    client_discovery_req_failures_on_final_connection_failure (channel_config_idx) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    ;
+    
     /* New session: creation and activation async */
     bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user, app_context) =
     PRE

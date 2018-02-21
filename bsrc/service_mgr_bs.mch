@@ -71,5 +71,14 @@ OPERATIONS
     THEN
         skip
     END
-
+    ;
+    
+    client_discovery_req_failures_on_final_connection_failure (channel_config_idx) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    
 END

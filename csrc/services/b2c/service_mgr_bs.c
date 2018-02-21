@@ -29,6 +29,7 @@
 
 #include "sopc_services_api.h"
 #include "sopc_singly_linked_list.h"
+#include "sopc_toolkit_config_internal.h"
 
 #define SOPC_MAX_WAITING_DISCOVERY_REQUESTS 5
 
@@ -122,7 +123,34 @@ void service_mgr_bs__client_channel_connected_event_discovery(
     }
 }
 
-void SOPC_ServiceMgrBs_DeallocateMsgs(uint32_t id, void* val)
+static void SOPC_ServiceMgrBs_DicoveryReqSendingFailure(uint32_t id, void* val)
+{
+    (void) id;
+    SOPC_DiscoveryRequest_ToSend* elt = val;
+    if (NULL != elt)
+    {
+        SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED), SOPC_STATUS_CLOSED, NULL,
+                                        elt->msgAppContext);
+        message_out_bs__dealloc_msg_out(elt->msgToSend);
+        free(elt);
+    }
+}
+
+void service_mgr_bs__client_discovery_req_failures_on_final_connection_failure(
+    const constants__t_channel_config_idx_i service_mgr_bs__channel_config_idx)
+{
+    SOPC_SLinkedList* sLinkedList = NULL;
+    sLinkedList = discovery_reqs_to_send[service_mgr_bs__channel_config_idx];
+    if (NULL != sLinkedList)
+    {
+        // Generate a send request failure event for each discovery message waiting to be sent
+        SOPC_SLinkedList_Apply(sLinkedList, SOPC_ServiceMgrBs_DicoveryReqSendingFailure);
+        SOPC_SLinkedList_Delete(sLinkedList);
+        discovery_reqs_to_send[service_mgr_bs__channel_config_idx] = NULL;
+    }
+}
+
+static void SOPC_ServiceMgrBs_DeallocateMsgs(uint32_t id, void* val)
 {
     (void) id;
     SOPC_DiscoveryRequest_ToSend* elt = val;
