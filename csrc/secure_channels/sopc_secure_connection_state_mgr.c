@@ -27,6 +27,7 @@
 
 #include "sopc_encodeable.h"
 #include "sopc_encoder.h"
+#include "sopc_event_timer_manager.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_secure_channels_api_internal.h"
 #include "sopc_secure_channels_internal_ctx.h"
@@ -337,6 +338,11 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
     uint32_t scConfigIdx = scConnection->endpointConnectionConfigIdx;
     const bool isScConnected = (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
                                 scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
+    if (isScConnected == false)
+    {
+        // De-activate of SC connection timeout
+        SOPC_EventTimer_Cancel(scConnection->connectionTimeoutTimerId);
+    }
     if (false == scConnection->isServerConnection)
     {
         // CLIENT case
@@ -2055,6 +2061,18 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     return result;
 }
 
+static uint32_t SC_StartConnectionEstablishTimer(uint32_t connectionIdx)
+{
+    assert(connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS);
+    SOPC_EventDispatcherParams eventParams;
+    eventParams.eltId = connectionIdx;
+    eventParams.event = TIMER_SC_CONNECTION_TIMEOUT;
+    eventParams.params = NULL;
+    eventParams.auxParam = 0;
+    eventParams.debugName = NULL;
+    return SOPC_EventTimer_Create(SOPC_SecureChannels_GetEventDispatcher(), eventParams, SOPC_SC_CONNECTION_TIMEOUT_MS);
+}
+
 void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                               uint32_t eltId,
                                               void* params,
@@ -2162,6 +2180,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
             SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, idx, (void*) scConfig->url, 0);
             SOPC_GCC_DIAGNOSTIC_RESTORE
+
+            // Activate SC connection timeout (client side)
+            scConnection->connectionTimeoutTimerId = SC_StartConnectionEstablishTimer(idx);
         }
         break;
     case SC_DISCONNECT:
@@ -2230,6 +2251,25 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_MSG_CHUNKS, eltId, params, auxParam);
         }
         break;
+    /* Timer events */
+    case TIMER_SC_CONNECTION_TIMEOUT:
+        if (SOPC_DEBUG_PRINTING != false)
+        {
+            printf("ScStateMgr: TIMER_SC_CONNECTION_TIMEOUT\n");
+        }
+        /* id = secure channel connection index*/
+        scConnection = SC_GetConnection(eltId);
+
+        // Check SC valid + avoid to close a secure channel established just after timeout
+        if (scConnection != NULL && scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
+            scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
+        {
+            // SC_TO_SE_SC_CONNECTION_TIMEOUT will be generated in close SC function fpr client side
+            SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadTimeout,
+                                     "SecureConnection: disconnected (TIMER_SC_CONNECTION_TIMEOUT event)");
+        }
+        break;
+
     /* Test events: */
     case DEBUG_SC_FORCE_OPN_RENEW:
         if (SOPC_DEBUG_PRINTING != false)
@@ -2280,6 +2320,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, auxParam, NULL, idx);
             // notify secure listener that connection is accepted
             SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATED, eltId, NULL, idx);
+
+            // Activate SC connection timeout (server side)
+            scConnection->connectionTimeoutTimerId = SC_StartConnectionEstablishTimer(idx);
         }
         else
         {
@@ -2379,27 +2422,32 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                         // transition: Connecting => Connected
                         result =
                             SC_ClientTransition_ScConnecting_To_ScConnected(scConnection, eltId, (SOPC_Buffer*) params);
+
+                        if (false == result)
+                        {
+                            SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadInvalidArgument,
+                                                     "Failure during OpenSecureChannel response treatment");
+                        }
+                        else
+                        {
+                            // De-activate SC connection timeout (client side)
+                            SOPC_EventTimer_Cancel(scConnection->connectionTimeoutTimerId);
+
+                            SOPC_Services_EnqueueEvent(SC_TO_SE_SC_CONNECTED, eltId, NULL,
+                                                       scConnection->endpointConnectionConfigIdx);
+                        }
                     }
                     else if (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
                     {
                         // transition: Connected_Renew => Connected
                         result = SC_ClientTransition_ScConnectedRenew_To_ScConnected(scConnection, eltId,
                                                                                      (SOPC_Buffer*) params);
+
+                        // Manage renew failure ? => nothing can be done since secu token will be expire
                     }
                     else
                     {
                         assert(false);
-                    }
-
-                    if (false == result)
-                    {
-                        SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadInvalidArgument,
-                                                 "Failure during OpenSecureChannel response treatment");
-                    }
-                    else
-                    {
-                        SOPC_Services_EnqueueEvent(SC_TO_SE_SC_CONNECTED, eltId, NULL,
-                                                   scConnection->endpointConnectionConfigIdx);
                     }
                 }
                 else
@@ -2442,6 +2490,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                         }
                         else
                         {
+                            // De-activate SC connection timeout (server side)
+                            SOPC_EventTimer_Cancel(scConnection->connectionTimeoutTimerId);
+
                             SOPC_Services_EnqueueEvent(SC_TO_SE_EP_SC_CONNECTED, scConnection->serverEndpointConfigIdx,
                                                        (void*) &scConnection->endpointConnectionConfigIdx, eltId);
                         }
@@ -2651,7 +2702,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         if (scConnection != NULL)
         {
             SC_CloseSecureConnection(scConnection, eltId,
-                                     true, // consider socket is closed since it shall be closed immediatly now
+                                     true, // consider socket is closed since it shall be closed immediately now
                                      auxParam, (char*) params);
         }
         break;

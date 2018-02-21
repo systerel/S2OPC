@@ -138,6 +138,9 @@ typedef struct SOPC_SecureConnection
     uint32_t endpointConnectionConfigIdx;
     uint32_t socketIndex; // associated TCP socket index (defined when state != TCP_INIT or SC_CLOSED)
 
+    // SC connection timeout management
+    uint32_t connectionTimeoutTimerId;
+
     // Message body content dependent properties
     SOPC_SecureConnection_TcpProperties tcpMsgProperties;
     SOPC_CryptoProvider* cryptoProvider; // defined once security policy id define (OPN req)

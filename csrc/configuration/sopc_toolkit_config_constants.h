@@ -92,7 +92,14 @@
 /** @brief Maximum number of requests sent by client pending */
 #ifndef SOPC_MAX_PENDING_REQUESTS
 #define SOPC_MAX_PENDING_REQUESTS UINT16_MAX
-#endif /* SOPC_MAX_PENDING_REQUESTS */
+#endif
+
+/** @brief Elapsed time after which SC connection establishment is considered timeout
+ * (elapsed time between socket connection and OPN response message)
+ * */
+#ifndef SOPC_SC_CONNECTION_TIMEOUT_MS
+#define SOPC_SC_CONNECTION_TIMEOUT_MS 10000
+#endif
 
 /* SESSION CONFIGURATION */
 
