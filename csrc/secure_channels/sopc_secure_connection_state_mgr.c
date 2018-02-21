@@ -334,6 +334,7 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
     assert(scConnection != NULL);
     bool immediateClose = false;
     uint32_t serverEndpointConfigIdx = 0;
+    uint32_t scConfigIdx = scConnection->endpointConnectionConfigIdx;
     const bool isScConnected = (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
                                 scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
     if (false == scConnection->isServerConnection)
@@ -367,7 +368,7 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
         { // => Immediate close
             // Notify services in case of successful closure
             SOPC_Services_EnqueueEvent(SC_TO_SE_SC_CONNECTION_TIMEOUT,
-                                       scConnection->endpointConnectionConfigIdx, // SC config idx
+                                       scConfigIdx, // SC config idx
                                        NULL, 0);
         }
     }
@@ -2132,7 +2133,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         {
             printf("ScStateMgr: SC_CONNECT\n");
         }
-        /* id = secure channel connection index */
+        /* id = secure channel connection configuration index */
 
         /* Define INIT state of a client */
         scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(eltId);
