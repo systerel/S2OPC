@@ -21,6 +21,7 @@
 #include "sopc_user_app_itf.h"
 
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -76,6 +77,42 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
     switch (SOPC_AppEvent_AppEventType_Get(eventAndType))
     {
     case SOPC_APP_COM_EVENT:
+        if (SOPC_DEBUG_PRINTING != false)
+        {
+            switch (SOPC_AppEvent_ComEvent_Get(eventAndType))
+            {
+            case SE_SESSION_ACTIVATION_FAILURE:
+                printf("App: SE_SESSION_ACTIVATION_FAILURE\n");
+                break;
+            case SE_ACTIVATED_SESSION:
+                printf("App: SE_ACTIVATED_SESSION\n");
+                break;
+            case SE_SESSION_REACTIVATING:
+                printf("App: SE_SESSION_REACTIVATING\n");
+                break;
+            case SE_RCV_SESSION_RESPONSE:
+                printf("App: SE_RCV_SESSION_RESPONSE\n");
+                break;
+            case SE_CLOSED_SESSION:
+                printf("App: SE_CLOSED_SESSION\n");
+                break;
+            case SE_RCV_DISCOVERY_RESPONSE:
+                printf("App: SE_RCV_DISCOVERY_RESPONSE\n");
+                break;
+            case SE_SND_REQUEST_FAILED:
+                printf("App: SE_SND_REQUEST_FAILED\n");
+                break;
+            case SE_CLOSED_ENDPOINT:
+                printf("App: SE_CLOSED_ENDPOINT\n");
+                break;
+            case SE_LOCAL_SERVICE_RESPONSE:
+                printf("App: SE_LOCAL_SERVICE_RESPONSE\n");
+                break;
+            default:
+                printf("App: UNKOWN EVENT\n");
+                break;
+            }
+        }
         if (NULL != appFct)
         {
             if (SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_ACTIVATED_SESSION)
@@ -104,6 +141,10 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
         switch (SOPC_AppEvent_AddSpaceEvent_Get(eventAndType))
         {
         case AS_WRITE_EVENT:
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("App: AS_WRITE_EVENT\n");
+            }
             if (NULL != pAddSpaceFct)
             {
                 pAddSpaceFct(SOPC_AppEvent_AddSpaceEvent_Get(eventAndType), params, (SOPC_StatusCode) auxParam);
@@ -115,6 +156,10 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
             }
             break;
         default:
+            if (SOPC_DEBUG_PRINTING != false)
+            {
+                printf("App: UNKOWN AS EVENT\n");
+            }
             break;
         }
         break;
