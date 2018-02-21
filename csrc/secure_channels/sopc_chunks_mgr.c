@@ -856,16 +856,37 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
         if (false == scConnection->isServerConnection)
         {
             // CLIENT side: should accept expired security token up to 25% of the token lifetime
-            // TODO: manage time and OPN RENEW => do not accept precedent token for now since it cannot be renewed by
-            // client anyway
-            if (scConnection->currentSecurityToken.tokenId != tokenId)
+            if (scConnection->currentSecurityToken.tokenId == tokenId)
+            {
+                *isPrecCryptoData = false;
+
+                // Check token expiration
+                isTokenValid =
+                    SC_Chunks_IsSecuTokenValid(scConnection->isServerConnection, scConnection->currentSecurityToken);
+            }
+            else if (scConnection->precedentSecurityToken.tokenId ==
+                         tokenId && // security token is the precedent one
+                                    // check precedent security token is defined
+                     scConnection->precedentSecurityToken.secureChannelId != 0 &&
+                     scConnection->precedentSecurityToken.tokenId != 0)
+            {
+                // Still valid with old security token => OK
+                *isPrecCryptoData = true;
+
+                // Check token expiration
+                isTokenValid =
+                    SC_Chunks_IsSecuTokenValid(scConnection->isServerConnection, scConnection->currentSecurityToken);
+            }
+            else
             {
                 result = false;
                 *errorStatus = OpcUa_BadSecureChannelTokenUnknown;
             }
-            else
+
+            if (true == result && isTokenValid == false)
             {
-                *isPrecCryptoData = false;
+                result = false;
+                *errorStatus = OpcUa_BadSecureChannelTokenUnknown;
             }
         }
         else

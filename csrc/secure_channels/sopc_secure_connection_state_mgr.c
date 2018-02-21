@@ -1013,7 +1013,8 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
         scConnection->currentSecurityToken.tokenId = opnResp->SecurityToken.TokenId;
         scConnection->currentSecurityToken.createdAt = opnResp->SecurityToken.CreatedAt;
         scConnection->currentSecurityToken.revisedLifetime = opnResp->SecurityToken.RevisedLifetime;
-        scConnection->serverNewSecuTokenActive = true; // There is no precedent security token on establishment
+        scConnection->currentSecurityToken.lifetimeEndTimeRef = SOPC_TimeReference_AddMilliseconds(
+            SOPC_TimeReference_GetCurrent(), scConnection->currentSecurityToken.revisedLifetime);
     }
 
     if (result != false)
@@ -1694,6 +1695,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
         scConnection->currentSecurityToken.createdAt = SOPC_Time_GetCurrentTimeUTC();
         scConnection->currentSecurityToken.lifetimeEndTimeRef = SOPC_TimeReference_AddMilliseconds(
             SOPC_TimeReference_GetCurrent(), scConnection->currentSecurityToken.revisedLifetime);
+        scConnection->serverNewSecuTokenActive = true; // There is no precedent security token on establishment
     }
 
     // Fill response header
