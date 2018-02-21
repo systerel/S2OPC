@@ -896,18 +896,12 @@ static bool SC_ClientTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
     return result;
 }
 
-static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnection* scConnection,
-                                                            uint32_t scConnectionIdx,
-                                                            SOPC_Buffer* opnRespBuffer)
+static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnection,
+                                                 SOPC_SecureChannel_Config* scConfig,
+                                                 uint32_t scConnectionIdx,
+                                                 SOPC_Buffer* opnRespBuffer,
+                                                 bool isOPNrenew)
 {
-    assert(scConnection != NULL);
-    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTING);
-    assert(false == scConnection->isServerConnection);
-    assert(opnRespBuffer != NULL);
-    SOPC_SecureChannel_Config* scConfig =
-        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
-    assert(scConfig != NULL);
-
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_ResponseHeader* respHeader = NULL;
@@ -1008,18 +1002,29 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
 
     if (result != false)
     {
-        // Define the current security token properties
-        scConnection->currentSecurityToken.secureChannelId = opnResp->SecurityToken.ChannelId;
-        scConnection->currentSecurityToken.tokenId = opnResp->SecurityToken.TokenId;
-        scConnection->currentSecurityToken.createdAt = opnResp->SecurityToken.CreatedAt;
-        scConnection->currentSecurityToken.revisedLifetime = opnResp->SecurityToken.RevisedLifetime;
-        scConnection->currentSecurityToken.lifetimeEndTimeRef = SOPC_TimeReference_AddMilliseconds(
-            SOPC_TimeReference_GetCurrent(), scConnection->currentSecurityToken.revisedLifetime);
-    }
+        if (isOPNrenew == false)
+        {
+            // Define the current security token properties
+            scConnection->currentSecurityToken.secureChannelId = opnResp->SecurityToken.ChannelId;
+            scConnection->currentSecurityToken.tokenId = opnResp->SecurityToken.TokenId;
+            scConnection->currentSecurityToken.createdAt = opnResp->SecurityToken.CreatedAt;
+            scConnection->currentSecurityToken.revisedLifetime = opnResp->SecurityToken.RevisedLifetime;
+            scConnection->currentSecurityToken.lifetimeEndTimeRef = SOPC_TimeReference_AddMilliseconds(
+                SOPC_TimeReference_GetCurrent(), scConnection->currentSecurityToken.revisedLifetime);
+        }
+        else
+        {
+            // Set current security token properties as previous one
+            scConnection->precedentSecurityToken = scConnection->currentSecurityToken;
 
-    if (result != false)
-    {
-        scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTED;
+            // Set new current security token
+            scConnection->currentSecurityToken.secureChannelId = opnResp->SecurityToken.ChannelId;
+            scConnection->currentSecurityToken.tokenId = opnResp->SecurityToken.TokenId;
+            scConnection->currentSecurityToken.createdAt = opnResp->SecurityToken.CreatedAt;
+            scConnection->currentSecurityToken.revisedLifetime = opnResp->SecurityToken.RevisedLifetime;
+            scConnection->currentSecurityToken.lifetimeEndTimeRef = SOPC_TimeReference_AddMilliseconds(
+                SOPC_TimeReference_GetCurrent(), scConnection->currentSecurityToken.revisedLifetime);
+        }
     }
 
     SOPC_Encodeable_Delete(&OpcUa_ResponseHeader_EncodeableType, (void**) &respHeader);
@@ -1028,16 +1033,50 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     return result;
 }
 
+static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnection* scConnection,
+                                                            uint32_t scConnectionIdx,
+                                                            SOPC_Buffer* opnRespBuffer)
+{
+    assert(scConnection != NULL);
+    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTING);
+    assert(false == scConnection->isServerConnection);
+    assert(opnRespBuffer != NULL);
+    SOPC_SecureChannel_Config* scConfig =
+        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    assert(scConfig != NULL);
+    bool result = false;
+
+    result = SC_ClientTransitionHelper_ReceiveOPN(scConnection, scConfig, scConnectionIdx, opnRespBuffer, false);
+
+    if (result != false)
+    {
+        scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTED;
+    }
+
+    return result;
+}
+
 static bool SC_ClientTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConnection* scConnection,
                                                                 uint32_t scConnectionIdx,
                                                                 SOPC_Buffer* opnRespBuffer)
 {
-    (void) scConnection;
-    (void) scConnectionIdx;
-    (void) opnRespBuffer;
-    // TODO: to be managed when timers will be added to renew the security token (current => prec, current = with new
-    // OPN resp)
-    return false;
+    assert(scConnection != NULL);
+    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
+    assert(false == scConnection->isServerConnection);
+    assert(opnRespBuffer != NULL);
+    SOPC_SecureChannel_Config* scConfig =
+        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    assert(scConfig != NULL);
+    bool result = false;
+
+    result = SC_ClientTransitionHelper_ReceiveOPN(scConnection, scConfig, scConnectionIdx, opnRespBuffer, false);
+
+    if (result != false)
+    {
+        scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTED;
+    }
+
+    return result;
 }
 
 static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* scConnection,
