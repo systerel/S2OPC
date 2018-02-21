@@ -40,8 +40,24 @@ PROMOTES
     server_close_session_sm
     
 LOCAL_OPERATIONS
-
-    local_sc_activate_sessions_on_SC_connection (channel_config_idx) =
+    
+    local_client_close_session (session) = 
+    PRE
+        session : t_session_i
+    THEN
+        skip
+    END;
+    
+    local_client_activate_sessions_on_SC_connection (channel_config_idx) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    ;
+    
+    local_client_close_sessions_on_SC_final_connection_failure (channel_config_idx) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx
@@ -51,7 +67,13 @@ LOCAL_OPERATIONS
     
 OPERATIONS
     
-    local_sc_activate_sessions_on_SC_connection (channel_config_idx) =
+    local_client_close_session (session) =
+    BEGIN
+        client_remove_all_request_handles (session);
+        client_close_session_sm (session)
+    END;
+    
+    local_client_activate_sessions_on_SC_connection (channel_config_idx) =
     VAR
         l_continue,
         l_session,
@@ -73,6 +95,40 @@ OPERATIONS
             THEN
                 reset_session_to_create(l_session);
                 client_gen_create_session_internal_event (l_session, channel_config_idx)
+            END
+        INVARIANT
+            sessions_to_iterate <: t_session &
+            sessions_iterated   <: t_session &
+            sessions_to_iterate /\ sessions_iterated = {} &
+            sessions_to_iterate \/ sessions_iterated = t_session
+        VARIANT
+            card(sessions_to_iterate)
+        END
+    END
+    ;
+    
+        
+    local_client_close_sessions_on_SC_final_connection_failure (channel_config_idx) =
+    VAR
+        l_continue,
+        l_session,
+        l_dom,
+        l_channel_config_idx
+    IN
+        l_continue <-- init_iter_session;
+        WHILE l_continue = TRUE DO
+            l_continue, l_session <-- continue_iter_session;
+            l_dom, l_channel_config_idx <-- getall_orphaned(l_session);
+            IF  l_dom = TRUE &
+                l_channel_config_idx = channel_config_idx
+            THEN
+                local_client_close_session(l_session)
+            END;
+            l_dom, l_channel_config_idx <-- getall_to_create(l_session);
+            IF  l_dom = TRUE &
+                l_channel_config_idx = channel_config_idx
+            THEN
+                local_client_close_session(l_session)
             END
         INVARIANT
             sessions_to_iterate <: t_session &
@@ -178,7 +234,7 @@ OPERATIONS
             skip
         END;
         IF l_bret = FALSE THEN
-            client_close_session_sm (session)
+            local_client_close_session (session)
         END;
         session := l_session
     END
@@ -325,7 +381,7 @@ OPERATIONS
             IF bres = FALSE
             THEN
                 // session in invalid state or invalid channel used => close session
-                client_close_session_sm (l_session)
+                local_client_close_session (l_session)
             ELSE
                 session := l_session
             END
@@ -552,7 +608,7 @@ OPERATIONS
         // PRE guarantee channel is connected
         channel_do_nothing(channel);
         // Associate sessions waiting for sc connection (orphaned or waiting for creation)
-        local_sc_activate_sessions_on_SC_connection (channel_config_idx)
+        local_client_activate_sessions_on_SC_connection (channel_config_idx)
     END    
     ;
     
@@ -574,7 +630,7 @@ OPERATIONS
                 IF l_ret /= e_sc_ok
                 THEN
                     /* Unexpected case: associated channel shall be connected for those session states */
-                    client_close_session_sm (session);
+                    local_client_close_session (session);
                     l_ret := e_sc_bad_unexpected_error
                 END;
                 IF l_ret = e_sc_ok
@@ -597,8 +653,7 @@ OPERATIONS
     
     client_close_session (session) =
     BEGIN
-        client_remove_all_request_handles (session);
-        client_close_session_sm (session)
+        local_client_close_session (session)
     END
  
 END
