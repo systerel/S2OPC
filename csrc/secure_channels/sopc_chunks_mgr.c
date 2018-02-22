@@ -335,14 +335,19 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
             *senderCertificatePresence = true;
             if (scConfig != NULL)
             {
-                // Check certificate is the same as the one in memory (CLIENT side or SERVER side with already
-                // established channel)
+                // Check certificate is the same as the one in memory
+                // (CLIENT side or SERVER side with already established channel)
+                // SERVER side: part 6 v1.03 §6.7.4:
+                // Part 6 §6.7.4 aussi il me semble :
+                // "The Server shall reject renew requests if the SenderCertificate is not the same as the one used to
+                // create the SecureChannel or if there is a problem decrypting or verifying the signature."
                 int32_t otherAppCertComparison = 0;
                 status = SOPC_ByteString_Compare(&otherBsAppCert, &senderCertificate, &otherAppCertComparison);
 
                 if (status != SOPC_STATUS_OK || otherAppCertComparison != 0)
                 {
                     *errorStatus = OpcUa_BadCertificateInvalid;
+                    status = OpcUa_BadCertificateInvalid;
 
                     if (SOPC_DEBUG_PRINTING != false)
                     {
@@ -646,7 +651,8 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
     {
         if (clientConfig != NULL)
         {
-            // CLIENT side (expected same as requested) / SERVER side (expected same as initial one)
+            // CLIENT side (expected same as requested)
+            // SERVER side (clientConfig != NULL => expected same as initial one)
             status = SOPC_String_CopyFromCString(&tmpStr, clientConfig->reqSecuPolicyUri);
             if (SOPC_STATUS_OK == status)
             {
@@ -788,9 +794,9 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
         *isSecurityActive = isSecureModeActive;
         if (NULL == clientConfig && scConnection->isServerConnection != false)
         {
-            // SERVER side (fill temporary secu data necessary to terminate OPN treatment)
+            // SERVER side and only for a new secure channel (<= NULL == clientConfig):
+            // - fill temporary secu data necessary to terminate OPN treatment
 
-            // TODO: Check if it is the same certificate when connection already established ?
             scConnection->serverAsymmSecuInfo.clientCertificate = clientCertificate;
             scConnection->serverAsymmSecuInfo.securityPolicyUri = validSecuPolicy;
             scConnection->serverAsymmSecuInfo.validSecurityModes = validSecuModes;
@@ -827,7 +833,7 @@ static bool SC_Chunks_IsSecuTokenValid(bool isServerConnection, SOPC_SecureConne
              */
             // Number of milliseconds since token expiration
             expiredMs = currentTimeRef - secuToken.lifetimeEndTimeRef;
-            if (expiredMs <= secuToken.revisedLifetime * 0.25)
+            if (expiredMs <= secuToken.revisedLifetime / 4)
             {
                 result = true;
             }
