@@ -862,6 +862,15 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
         if (false == scConnection->isServerConnection)
         {
             // CLIENT side: should accept expired security token up to 25% of the token lifetime
+            /* Note:
+             * From part 6: The Client shall continue to accept the old SecurityToken until it receives the
+             * OpenSecureChannel response.
+             * => does not imply that old one is refused after that
+             * => the server need to send messages with old one until it received a new message from client
+             * From part 4: Clients should accept Messages secured by an expired SecurityToken for up to 25 % of the
+             * token lifetime.
+             * => no indication on old or new security token provided
+             */
             if (scConnection->currentSecurityToken.tokenId == tokenId)
             {
                 *isPrecCryptoData = false;
@@ -898,8 +907,13 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
         else
         {
             /* SERVER side:
-             * - accepts precedent token even if a new one is defined until token expiration
-             * - accepts the current or new token, if first use of new token set the flag to use the new one to send MSG
+             * - accepts precedent token, even if a new one is defined, until token expiration
+             * - accepts the current or new token. If first use of new token set the flag to use the new one to send MSG
+             */
+            /* Note:
+             * From part 6: The Server has to accept requests secured with the old SecurityToken until that
+             * SecurityToken expires or until it receives a Message from the Client secured with the new SecurityToken.
+             * => does not clearly imply that old one is refused after Client sent a message with new one
              */
             if (scConnection->currentSecurityToken.tokenId == tokenId)
             {
@@ -916,9 +930,9 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
                 isTokenValid =
                     SC_Chunks_IsSecuTokenValid(scConnection->isServerConnection, scConnection->currentSecurityToken);
             }
-            else if (false == scConnection->serverNewSecuTokenActive && // new security token never used by client
-                     scConnection->precedentSecurityToken.tokenId == tokenId && // security token is the precedent one
-                     // check precedent security token is defined
+            else if (scConnection->precedentSecurityToken.tokenId ==
+                         tokenId && // security token is the precedent one
+                                    // check precedent security token is defined
                      scConnection->precedentSecurityToken.secureChannelId != 0 &&
                      scConnection->precedentSecurityToken.tokenId != 0)
             {
