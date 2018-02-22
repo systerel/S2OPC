@@ -881,7 +881,7 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
 
                 // Check token expiration
                 isTokenValid =
-                    SC_Chunks_IsSecuTokenValid(scConnection->isServerConnection, scConnection->currentSecurityToken);
+                    SC_Chunks_IsSecuTokenValid(scConnection->isServerConnection, scConnection->precedentSecurityToken);
             }
             else
             {
@@ -927,7 +927,7 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
 
                 // Check token expiration
                 isTokenValid =
-                    SC_Chunks_IsSecuTokenValid(scConnection->isServerConnection, scConnection->currentSecurityToken);
+                    SC_Chunks_IsSecuTokenValid(scConnection->isServerConnection, scConnection->precedentSecurityToken);
             }
             else
             {
