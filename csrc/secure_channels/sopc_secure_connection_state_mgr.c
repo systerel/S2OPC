@@ -189,6 +189,30 @@ static bool SC_CloseConnection(uint32_t connectionIdx)
     return result;
 }
 
+static uint32_t SC_StartConnectionEstablishTimer(uint32_t connectionIdx)
+{
+    assert(connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS);
+    SOPC_EventDispatcherParams eventParams;
+    eventParams.eltId = connectionIdx;
+    eventParams.event = TIMER_SC_CONNECTION_TIMEOUT;
+    eventParams.params = NULL;
+    eventParams.auxParam = 0;
+    eventParams.debugName = NULL;
+    return SOPC_EventTimer_Create(SOPC_SecureChannels_GetEventDispatcher(), eventParams, SOPC_SC_CONNECTION_TIMEOUT_MS);
+}
+
+static uint32_t SC_Client_StartOPNrenewTimer(uint32_t connectionIdx, uint32_t timeoutMs)
+{
+    assert(connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS);
+    SOPC_EventDispatcherParams eventParams;
+    eventParams.eltId = connectionIdx;
+    eventParams.event = TIMER_SC_CLIENT_OPN_RENEW;
+    eventParams.params = NULL;
+    eventParams.auxParam = 0;
+    eventParams.debugName = NULL;
+    return SOPC_EventTimer_Create(SOPC_SecureChannels_GetEventDispatcher(), eventParams, timeoutMs);
+}
+
 static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_StatusCode errorStatus, char* reason)
 {
     bool result = false;
@@ -348,6 +372,9 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
         // CLIENT case
         if (isScConnected != false)
         {
+            // De-activate of security token renew timeout
+            SOPC_EventTimer_Cancel(scConnection->secuTokenRenewTimerId);
+
             // Client shall alway send a close secure channel message request before closing socket
 
             if (false == isSocketClosed)
@@ -946,15 +973,30 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
             // Note: since property was already adapted to server on ACK, it shall be the same
             result = false;
         }
-        // Check chanel Id and security token provided by the server
-        if (0 == opnResp->SecurityToken.ChannelId ||
-            scConnection->clientSecureChannelId != opnResp->SecurityToken.ChannelId || // same Id at TCP level
-            0 == opnResp->SecurityToken.TokenId)
+
+        if (isOPNrenew == false)
         {
-            result = false;
+            // Check chanel Id and security token provided by the server
+            if (0 == opnResp->SecurityToken.ChannelId ||
+                scConnection->clientSecureChannelId != opnResp->SecurityToken.ChannelId || // same Id at TCP level
+                0 == opnResp->SecurityToken.TokenId)
+            {
+                result = false;
+            }
+            // Clear temporary context
+            scConnection->clientSecureChannelId = 0;
         }
-        // Clear temporary context
-        scConnection->clientSecureChannelId = 0;
+        else
+        {
+            // Check channel Id provided by the server is the same
+            // and security token is defined and different from the current one
+            if (opnResp->SecurityToken.ChannelId != scConnection->currentSecurityToken.secureChannelId ||
+                0 == opnResp->SecurityToken.TokenId ||
+                opnResp->SecurityToken.TokenId == scConnection->currentSecurityToken.tokenId)
+            {
+                result = false;
+            }
+        }
     }
 
     if (result != false)
@@ -1025,6 +1067,11 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
             scConnection->currentSecurityToken.lifetimeEndTimeRef = SOPC_TimeReference_AddMilliseconds(
                 SOPC_TimeReference_GetCurrent(), scConnection->currentSecurityToken.revisedLifetime);
         }
+
+        // Add timer to renew the secure channel security token before expiration
+        // Part 4 1.03: "Clients should request a new SecurityToken after 75% of its lifetime elapsed"
+        scConnection->secuTokenRenewTimerId =
+            SC_Client_StartOPNrenewTimer(scConnectionIdx, scConnection->currentSecurityToken.revisedLifetime * 3 / 4);
     }
 
     SOPC_Encodeable_Delete(&OpcUa_ResponseHeader_EncodeableType, (void**) &respHeader);
@@ -1069,7 +1116,7 @@ static bool SC_ClientTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     assert(scConfig != NULL);
     bool result = false;
 
-    result = SC_ClientTransitionHelper_ReceiveOPN(scConnection, scConfig, scConnectionIdx, opnRespBuffer, false);
+    result = SC_ClientTransitionHelper_ReceiveOPN(scConnection, scConfig, scConnectionIdx, opnRespBuffer, true);
 
     if (result != false)
     {
@@ -1907,6 +1954,7 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
 
         if (result != false)
         {
+            // Check security mode is the same as the original one
             if (scConfig->msgSecurityMode == OpcUa_MessageSecurityMode_None)
             {
                 if (opnReq->ClientNonce.Length > 0)
@@ -2100,18 +2148,6 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     OpcUa_OpenSecureChannelResponse_Clear(&opnResp);
 
     return result;
-}
-
-static uint32_t SC_StartConnectionEstablishTimer(uint32_t connectionIdx)
-{
-    assert(connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS);
-    SOPC_EventDispatcherParams eventParams;
-    eventParams.eltId = connectionIdx;
-    eventParams.event = TIMER_SC_CONNECTION_TIMEOUT;
-    eventParams.params = NULL;
-    eventParams.auxParam = 0;
-    eventParams.debugName = NULL;
-    return SOPC_EventTimer_Create(SOPC_SecureChannels_GetEventDispatcher(), eventParams, SOPC_SC_CONNECTION_TIMEOUT_MS);
 }
 
 void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
@@ -2485,6 +2521,11 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                                                                      (SOPC_Buffer*) params);
 
                         // Manage renew failure ? => nothing can be done since secu token will be expire
+                        if (false == result)
+                        {
+                            SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadInvalidArgument,
+                                                     "Failure during OpenSecureChannel RENEW response treatment");
+                        }
                     }
                     else
                     {

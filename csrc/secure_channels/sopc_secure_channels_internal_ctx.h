@@ -151,6 +151,9 @@ typedef struct SOPC_SecureConnection
     // (Server side specific)
     SOPC_SecretBuffer* clientNonce; // client nonce used to create symmetric key
 
+    // (Client side specific)
+    uint32_t secuTokenRenewTimerId;
+
     // (Server side specific)
     // flag indicating if the new (current) security token shall be used to send MSG otherwise use precedent until
     // new one activated by client (reception of MSG with new token)
