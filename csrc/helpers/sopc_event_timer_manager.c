@@ -144,36 +144,37 @@ uint32_t SOPC_EventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
     uint32_t result = 0;
     void* insertResult = NULL;
 
-    assert(false != initialized);
-
-    // Create target time reference
-    targetTime = SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference_GetCurrent(), msDelay);
-    // Allocate new timer
-    newTimer = calloc(1, sizeof(SOPC_EventTimer));
-
-    if (NULL != newTimer)
+    if (false != initialized)
     {
-        // Configure timeout parameters
-        newTimer->endTime = targetTime;
-        newTimer->eventMgr = eventMgr;
-        newTimer->eventParams = eventParams;
+        // Create target time reference
+        targetTime = SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference_GetCurrent(), msDelay);
+        // Allocate new timer
+        newTimer = calloc(1, sizeof(SOPC_EventTimer));
 
-        // Set timer
-        Mutex_Lock(&timersMutex);
-        result = SOPC_Internal_GetFreshTimerId_WithoutLock();
-        if (result != 0)
+        if (NULL != newTimer)
         {
-            newTimer->id = result;
-            // valid timer Id
-            insertResult =
-                SOPC_SLinkedList_SortedInsert(timers, result, newTimer, SOPC_Internal_SLinkedList_EventTimerCompare);
-            if (insertResult == NULL)
+            // Configure timeout parameters
+            newTimer->endTime = targetTime;
+            newTimer->eventMgr = eventMgr;
+            newTimer->eventParams = eventParams;
+
+            // Set timer
+            Mutex_Lock(&timersMutex);
+            result = SOPC_Internal_GetFreshTimerId_WithoutLock();
+            if (result != 0)
             {
-                result = 0;
-                free(newTimer);
-            }
-        } // else 0 is invalid value => no timer available
-        Mutex_Unlock(&timersMutex);
+                newTimer->id = result;
+                // valid timer Id
+                insertResult = SOPC_SLinkedList_SortedInsert(timers, result, newTimer,
+                                                             SOPC_Internal_SLinkedList_EventTimerCompare);
+                if (insertResult == NULL)
+                {
+                    result = 0;
+                    free(newTimer);
+                }
+            } // else 0 is invalid value => no timer available
+            Mutex_Unlock(&timersMutex);
+        }
     }
     return result;
 }
@@ -194,11 +195,12 @@ static void SOPC_Internal_EventTimer_Cancel_WithoutLock(uint32_t timerId)
 
 void SOPC_EventTimer_Cancel(uint32_t timerId)
 {
-    assert(false != initialized);
-
-    Mutex_Lock(&timersMutex);
-    SOPC_Internal_EventTimer_Cancel_WithoutLock(timerId);
-    Mutex_Unlock(&timersMutex);
+    if (false != initialized)
+    {
+        Mutex_Lock(&timersMutex);
+        SOPC_Internal_EventTimer_Cancel_WithoutLock(timerId);
+        Mutex_Unlock(&timersMutex);
+    }
 }
 
 void SOPC_EventTimer_CyclicTimersEvaluation()
@@ -209,34 +211,35 @@ void SOPC_EventTimer_CyclicTimersEvaluation()
     int8_t compareResult = 0;
     uint32_t timerId = 0;
 
-    assert(false != initialized);
-
-    Mutex_Lock(&timersMutex);
-    timerIt = SOPC_SLinkedList_GetIterator(timers);
-    timer = (SOPC_EventTimer*) SOPC_SLinkedList_Next(&timerIt);
-    currentTimeRef = SOPC_TimeReference_GetCurrent();
-    if (timer != NULL)
+    if (false != initialized)
     {
-        compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
-    } // else ignore and keep precedent result >= 0
-
-    // Trigger timeout if currentTime >= timeoutTime
-    while (timer != NULL && compareResult >= 0)
-    {
-        // Trigger timeout event to dispatch event manager
-        timerId = timer->id;
-        SOPC_EventDispatcherManager_AddEvent(timer->eventMgr, timer->eventParams.event, timer->eventParams.eltId,
-                                             timer->eventParams.params, timer->eventParams.auxParam,
-                                             timer->eventParams.debugName);
-        // Remove the triggered timer (possible during iteration since we remove already iterated item)
-        SOPC_Internal_EventTimer_Cancel_WithoutLock(timerId);
-
-        // Prepare next timeout evaluation
+        Mutex_Lock(&timersMutex);
+        timerIt = SOPC_SLinkedList_GetIterator(timers);
         timer = (SOPC_EventTimer*) SOPC_SLinkedList_Next(&timerIt);
+        currentTimeRef = SOPC_TimeReference_GetCurrent();
         if (timer != NULL)
         {
             compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
+        } // else ignore and keep precedent result >= 0
+
+        // Trigger timeout if currentTime >= timeoutTime
+        while (timer != NULL && compareResult >= 0)
+        {
+            // Trigger timeout event to dispatch event manager
+            timerId = timer->id;
+            SOPC_EventDispatcherManager_AddEvent(timer->eventMgr, timer->eventParams.event, timer->eventParams.eltId,
+                                                 timer->eventParams.params, timer->eventParams.auxParam,
+                                                 timer->eventParams.debugName);
+            // Remove the triggered timer (possible during iteration since we remove already iterated item)
+            SOPC_Internal_EventTimer_Cancel_WithoutLock(timerId);
+
+            // Prepare next timeout evaluation
+            timer = (SOPC_EventTimer*) SOPC_SLinkedList_Next(&timerIt);
+            if (timer != NULL)
+            {
+                compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
+            }
         }
+        Mutex_Unlock(&timersMutex);
     }
-    Mutex_Unlock(&timersMutex);
 }
