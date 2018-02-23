@@ -254,7 +254,11 @@ OPERATIONS
         CASE req_typ OF
             EITHER e_msg_session_create_req THEN
                 // SESSION CREATION REQUEST
-                session, service_ret <-- server_create_session_req_and_resp_sm (channel, req_msg, resp_msg)
+                session, service_ret <-- server_create_session_req_and_resp_sm (channel, req_msg, resp_msg);
+                IF service_ret = e_sc_ok
+                THEN
+                    server_session_timeout_start_timer (session, resp_msg)
+                END
             OR e_msg_session_activate_req THEN
                 // SESSION ACTIVATION REQUEST
                 // TODO: add a local operation for rest
@@ -287,6 +291,8 @@ OPERATIONS
                         THEN
                             // Invalid user or parameters in received request: choice is to close the session in this case (not specified)
                             server_close_session_sm (session)
+                        ELSE                            
+                            server_session_timeout_msg_received (session)
                         END
                     ELSE
                         // if session is not in a correct state to be activated => close session
@@ -412,7 +418,11 @@ OPERATIONS
                 // Returns always TRUE if compliant with PRE (proved)
                 is_valid_res <-- is_session_valid_for_service (channel, l_session);
                 status_code_err := e_sc_ok;
-                session := l_session
+                session := l_session;
+                IF is_valid_res = TRUE
+                THEN
+                    server_session_timeout_msg_received (l_session)
+                END
             ELSE
                 // Unexpected access to session (wrong state or channel): close it
                 server_close_session_sm (l_session);
@@ -661,6 +671,18 @@ OPERATIONS
     client_close_session (session) =
     BEGIN
         local_client_close_session (session)
+    END
+    ;
+    
+    server_evaluate_session_timeout (session) =
+    VAR
+        l_session_expired
+    IN
+        l_session_expired <-- server_session_timeout_evaluation (session);
+        IF l_session_expired = TRUE
+        THEN
+            server_close_session_sm (session)
+        END
     END
  
 END

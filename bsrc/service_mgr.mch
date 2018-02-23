@@ -407,6 +407,15 @@ OPERATIONS
         skip
     END
     ;
+    
+    server_evaluate_session_timeout (session) =
+    PRE
+        session : t_session_i &
+        session : t_session
+    THEN
+        skip
+    END
+    ;
 
     /* PROMOTES */
 

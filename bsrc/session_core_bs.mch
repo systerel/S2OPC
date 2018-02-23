@@ -521,6 +521,58 @@ OPERATIONS
         user : t_user
     THEN
         skip
-    END    
-
+    END
+    ;
+    
+    server_session_timeout_start_timer (session, resp_msg) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        resp_msg : t_msg_i &
+        resp_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_resp
+    THEN
+        /* Use resp message to retrieve revised session timeout and activate first timer:
+           - trigger TIMER_SE_EVAL_SESSION_TIMEOUT*/
+        skip
+    END
+    ;
+    
+    server_session_timeout_stop_timer (session) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_resp
+    THEN
+        /* To be called when session closed */
+        skip
+    END
+    ;
+    
+    expired <-- server_session_timeout_evaluation (session) =
+    PRE
+        session : t_session_i &
+        session : t_session
+    THEN
+        /* Evaluate if session timeout occured:
+        - Evaluate timeout: Current timeref - Latest message timeref = Elapsed time without message 
+          * if > session lifetime => expired := TRUE
+          * otherwise             => expired := FALSE
+        - Otherwise: re-activate timer for: revised session timeout - elapsed time since latest message
+        */
+        expired :: BOOL
+    END
+    ;
+    
+    server_session_timeout_msg_received (session) =
+    PRE
+        session : t_session_i &
+        session : t_session
+    THEN
+        /* Record TimeReference of the latest received message */
+        skip
+    END
+    
 END

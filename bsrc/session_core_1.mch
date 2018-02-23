@@ -679,5 +679,36 @@ OPERATIONS
     THEN
         skip
     END
+    ;
+    
+    server_session_timeout_start_timer (session, resp_msg) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        resp_msg : t_msg_i &
+        resp_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_resp
+    THEN
+        skip
+    END
+    ;
+    
+    expired <-- server_session_timeout_evaluation (session) =
+    PRE
+        session : t_session_i &
+        session : t_session
+    THEN
+        expired :: BOOL
+    END
+    ;
+    
+    server_session_timeout_msg_received (session) =
+    PRE
+        session : t_session_i &
+        session : t_session
+    THEN
+        skip
+    END
 
 END

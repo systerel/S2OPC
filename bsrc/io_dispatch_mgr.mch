@@ -286,6 +286,14 @@ OPERATIONS
         skip
     END
     ;
+    
+    internal_server_evaluate_session_timeout (session) =
+    PRE
+        session : t_session_i
+    THEN
+        skip
+    END
+    ;
 
     bres <-- close_all_active_connections =
     BEGIN

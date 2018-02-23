@@ -66,7 +66,8 @@ PROMOTES
     client_discovery_req_failures_on_final_connection_failure,
     client_channel_connected_event_discovery,
     client_close_sessions_on_final_connection_failure,
-    client_close_session
+    client_close_session,
+    server_evaluate_session_timeout
 
 LOCAL_OPERATIONS
 

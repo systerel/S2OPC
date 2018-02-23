@@ -310,6 +310,15 @@ OPERATIONS
     END
     ;
     
+    server_evaluate_session_timeout (session) =
+    PRE
+        session : t_session_i &
+        session : t_session
+    THEN
+        skip
+    END
+    ;
+    
     /*PROMOTES*/
     ret <-- is_valid_session (session) =
     PRE
@@ -353,5 +362,5 @@ OPERATIONS
     THEN
         user :: t_user_i
     END
-    
+
 END
