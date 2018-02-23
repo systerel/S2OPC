@@ -239,6 +239,17 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
     if (SOPC_STATUS_OK == status)
     {
         *message_out_bs__buffer = (constants__t_byte_buffer_i) buffer;
+        if (SOPC_DEBUG_PRINTING != false)
+        {
+            if (encType->TypeName != NULL)
+            {
+                printf("Services: encoded output message type = '%s'\n", encType->TypeName);
+            }
+            else
+            {
+                printf("Services: encoded output message type = '%d'\n", encType->TypeId);
+            }
+        }
     }
 }
 
