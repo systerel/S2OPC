@@ -41,6 +41,16 @@
 #error "Max number of sessions cannot be more than INT32_MAX"
 #endif
 
+/* Maximum session timeout accepted */
+#if SOPC_SESSION_TIMEOUT > UINT32_MAX
+#error "Maximum session timeout is > UINT32_MAX"
+#endif
+
+/* Minimum session timeout accepted: 10 seconds */
+#if SOPC_SESSION_TIMEOUT < 10000
+#error "Minimum session timeout is < 10000"
+#endif
+
 /* Check use of uintptr_t is not an issue on the current platform */
 #if UINTPTR_MAX < UINT32_MAX
 #error "UINTPTR_MAX < UINT32_MAX whereas uintptr_t are used to store uint32_t values"

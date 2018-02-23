@@ -24,9 +24,14 @@
 #include <string.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_crypto_provider.h"
 #include "sopc_encodeable.h"
+#include "sopc_event_timer_manager.h"
+#include "sopc_key_manager.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_services_api.h"
+#include "sopc_time.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
@@ -34,9 +39,6 @@
 #include "session_core_bs.h"
 
 #include "channel_mgr_bs.h"
-#include "sopc_crypto_profiles.h"
-#include "sopc_crypto_provider.h"
-#include "sopc_key_manager.h"
 
 #include "session_core_1.h"
 
@@ -56,6 +58,10 @@ static SessionData sessionDataArray[constants__t_session_i_max + 1]; // index 0 
 static constants__t_user_i session_to_activate_user[SOPC_MAX_SESSIONS + 1];
 
 static constants__t_application_context_i session_to_activate_context[SOPC_MAX_SESSIONS + 1];
+
+static uint32_t session_expiration_timer[SOPC_MAX_SESSIONS + 1];
+static uint32_t session_RevisedSessionTimeout[SOPC_MAX_SESSIONS + 1];
+static SOPC_TimeReference server_session_latest_msg_receveived[SOPC_MAX_SESSIONS + 1];
 
 /*------------------------
    INITIALISATION Clause
@@ -77,6 +83,9 @@ void session_core_bs__INITIALISATION(void)
     memset(session_to_activate_user, (int) constants__c_user_indet,
            sizeof(constants__t_user_i) * (SOPC_MAX_SESSIONS + 1));
     memset(session_to_activate_context, (int) 0, sizeof(constants__t_application_context_i) * (SOPC_MAX_SESSIONS + 1));
+    memset(session_expiration_timer, (int) 0, sizeof(uint32_t) * (SOPC_MAX_SESSIONS + 1));
+    memset(session_RevisedSessionTimeout, (int) 0, sizeof(uint32_t) * (SOPC_MAX_SESSIONS + 1));
+    memset(server_session_latest_msg_receveived, (int) 0, sizeof(SOPC_TimeReference) * (SOPC_MAX_SESSIONS + 1));
 }
 
 /*--------------------
@@ -919,4 +928,91 @@ void session_core_bs__client_gen_create_session_internal_event(
 {
     SOPC_Services_EnqueueEvent(SE_TO_SE_CREATE_SESSION, (uint32_t) session_core_bs__session, NULL,
                                (uint32_t) session_core_bs__channel_config_idx);
+}
+
+void session_core_bs__server_session_timeout_evaluation(const constants__t_session_i session_core_bs__session,
+                                                        t_bool* const session_core_bs__expired)
+{
+    *session_core_bs__expired = true;
+    SOPC_TimeReference current = 0;
+    SOPC_TimeReference latestMsg = 0;
+    SOPC_TimeReference elapsedSinceLatestMsg = 0;
+    SOPC_EventDispatcherParams eventParams;
+    uint32_t timerId = 0;
+
+    if (constants__c_session_indet != session_core_bs__session)
+    {
+        current = SOPC_TimeReference_GetCurrent();
+        latestMsg = server_session_latest_msg_receveived[session_core_bs__session];
+        if (current >= latestMsg)
+        {
+            elapsedSinceLatestMsg = current - latestMsg;
+            if (elapsedSinceLatestMsg < session_RevisedSessionTimeout[session_core_bs__session])
+            {
+                // Session is not expired
+                *session_core_bs__expired = false;
+                // Re-activate timer for next verification
+                eventParams.eltId = session_core_bs__session;
+                eventParams.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
+                eventParams.params = NULL;
+                eventParams.auxParam = 0;
+                eventParams.debugName = NULL;
+                // Note: next timer is not revised session timeout but revised timeout - latest msg received time
+                timerId = SOPC_EventTimer_Create(
+                    SOPC_Services_GetEventDispatcher(), eventParams,
+                    session_RevisedSessionTimeout[session_core_bs__session] - elapsedSinceLatestMsg);
+                session_expiration_timer[session_core_bs__session] = timerId;
+                // TODO: log if timerId == 0
+            } // else: TODO: log expired session
+        }     // else: TODO: log
+    }         // else: TODO: log
+}
+
+void session_core_bs__server_session_timeout_msg_received(const constants__t_session_i session_core_bs__session)
+{
+    if (constants__c_session_indet != session_core_bs__session)
+    {
+        server_session_latest_msg_receveived[session_core_bs__session] = SOPC_TimeReference_GetCurrent();
+    }
+}
+
+void session_core_bs__server_session_timeout_start_timer(const constants__t_session_i session_core_bs__session,
+                                                         const constants__t_msg_i session_core_bs__resp_msg)
+{
+    const OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) session_core_bs__resp_msg;
+    uint32_t timerId = 0;
+    SOPC_EventDispatcherParams eventParams;
+    if (constants__c_session_indet != session_core_bs__session)
+    {
+        if (NULL == pResp || pResp->RevisedSessionTimeout < SOPC_SESSION_TIMEOUT)
+        {
+            session_RevisedSessionTimeout[session_core_bs__session] = SOPC_SESSION_TIMEOUT;
+        }
+        else
+        {
+            // Guaranteed by verification of toolkit constant parameters
+            assert(pResp->RevisedSessionTimeout <= UINT32_MAX && pResp->RevisedSessionTimeout >= 10000);
+            session_RevisedSessionTimeout[session_core_bs__session] = pResp->RevisedSessionTimeout;
+        }
+        eventParams.eltId = session_core_bs__session;
+        eventParams.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
+        eventParams.params = NULL;
+        eventParams.auxParam = 0;
+        eventParams.debugName = NULL;
+        timerId = SOPC_EventTimer_Create(SOPC_Services_GetEventDispatcher(), eventParams,
+                                         session_RevisedSessionTimeout[session_core_bs__session]);
+        session_expiration_timer[session_core_bs__session] = timerId;
+        // TODO: log if timerId == 0
+    }
+}
+
+void session_core_bs__server_session_timeout_stop_timer(const constants__t_session_i session_core_bs__session)
+{
+    if (constants__c_session_indet != session_core_bs__session)
+    {
+        SOPC_EventTimer_Cancel(session_expiration_timer[session_core_bs__session]);
+        session_expiration_timer[session_core_bs__session] = 0;
+        session_RevisedSessionTimeout[session_core_bs__session] = 0;
+        server_session_latest_msg_receveived[session_core_bs__session] = 0;
+    }
 }

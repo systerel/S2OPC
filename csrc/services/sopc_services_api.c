@@ -200,6 +200,14 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         }
         break;
 
+    case TIMER_SE_EVAL_SESSION_TIMEOUT:
+        if (SOPC_DEBUG_PRINTING != false)
+        {
+            printf("TIMER_SE_EVAL_SESSION_TIMEOUT\n");
+        }
+        io_dispatch_mgr__internal_server_evaluate_session_timeout((constants__t_session_i) id);
+        break;
+
     case SC_TO_SE_SC_SERVICE_RCV_MSG:
         if (SOPC_DEBUG_PRINTING != false)
         {

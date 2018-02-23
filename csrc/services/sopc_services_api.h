@@ -67,6 +67,9 @@ typedef enum SOPC_Services_Event {
     SE_TO_SE_ACTIVATE_SESSION,          /* id = session id
                                          * params = (user token structure)
                                          */
+    /* Timer to services events */
+    TIMER_SE_EVAL_SESSION_TIMEOUT, /* id = session id */
+
     /* App to Services events : server side */
     APP_TO_SE_OPEN_ENDPOINT,         /* id = endpoint description config index
                                       */
