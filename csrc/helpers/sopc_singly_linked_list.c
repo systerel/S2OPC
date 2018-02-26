@@ -374,7 +374,7 @@ SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list)
     return list->first;
 }
 
-void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it)
+void* SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* pId)
 {
     SOPC_SLinkedList_Elt* elt = NULL;
     void* value = NULL;
@@ -382,9 +382,18 @@ void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it)
     {
         elt = *it;
         value = elt->value;
+        if (NULL != pId)
+        {
+            *pId = elt->id;
+        }
         *it = elt->next;
     }
     return value;
+}
+
+void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it)
+{
+    return SOPC_SLinkedList_NextWithId(it, NULL);
 }
 
 uint32_t SOPC_SLinkedList_GetLength(SOPC_SLinkedList* list)

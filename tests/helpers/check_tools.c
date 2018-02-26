@@ -508,6 +508,7 @@ START_TEST(test_linked_list)
     float value2 = 1.0;
     float value3 = 1.0;
     void* value = NULL;
+    uint32_t id = 0;
 
     SOPC_SLinkedList* list = NULL;
     SOPC_SLinkedListIterator it = NULL;
@@ -544,13 +545,15 @@ START_TEST(test_linked_list)
     /// Test iterator nominal case
     it = SOPC_SLinkedList_GetIterator(list);
     ck_assert(it != NULL);
-    value = SOPC_SLinkedList_Next(&it);
+    value = SOPC_SLinkedList_NextWithId(&it, &id);
     ck_assert(value == &value2);
+    ck_assert(id == 2);
     value = SOPC_SLinkedList_Next(&it);
     ck_assert(value == &value1);
-    value = SOPC_SLinkedList_Next(&it);
+    value = SOPC_SLinkedList_NextWithId(&it, &id);
     ck_assert(value == &value3);
-    value = SOPC_SLinkedList_Next(&it);
+    ck_assert(id == 3);
+    value = SOPC_SLinkedList_NextWithId(&it, &id);
     ck_assert(value == NULL);
 
     //// Test degraded case: add in full linked list
@@ -719,6 +722,7 @@ START_TEST(test_sorted_linked_list)
 {
     uint8_t values[11] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     void* value = NULL;
+    uint32_t id = 0;
 
     SOPC_SLinkedList* list = NULL;
     SOPC_SLinkedListIterator it = NULL;
@@ -778,9 +782,10 @@ START_TEST(test_sorted_linked_list)
     it = SOPC_SLinkedList_GetIterator(list);
     for (uint8_t i = 1; i < 10; i++)
     {
-        value = SOPC_SLinkedList_Next(&it);
+        value = SOPC_SLinkedList_NextWithId(&it, &id);
         ck_assert(value != NULL);
         ck_assert(*(uint8_t*) value == i);
+        ck_assert(id == i);
 
         // Remove iterated value (possible during iteration since we remove already iterated item)
         value = SOPC_SLinkedList_RemoveFromId(list, i);

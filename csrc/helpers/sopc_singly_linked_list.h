@@ -162,8 +162,20 @@ SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list);
  * \brief           Return the next element pointed by iterator in the linked list  (LIFO behavior)
  *
  * \param it        An iterator on a linked list
+ *
+ * \return          Pointer on the next value of the linked list
  */
 void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it);
+
+/**
+ * \brief           Return the next element pointed by iterator in the linked list  (LIFO behavior)
+ *
+ * \param it        An iterator on a linked list
+ * \param pId       Pointer in which the next element id of the linked list is set
+ *
+ * \return          Pointer on the next value of the linked list
+ */
+void* SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* id);
 
 /**
  * \brief           Get then number of elements in the linked list
