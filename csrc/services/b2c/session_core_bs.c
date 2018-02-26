@@ -942,6 +942,7 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
 
     if (constants__c_session_indet != session_core_bs__session)
     {
+        session_expiration_timer[session_core_bs__session] = 0; // Do not keep reference on timer that expired
         current = SOPC_TimeReference_GetCurrent();
         latestMsg = server_session_latest_msg_receveived[session_core_bs__session];
         if (current >= latestMsg)
