@@ -60,6 +60,17 @@ typedef enum {
 } SOPC_Msg_Type;
 
 /**
+ * \brief Structure containing the context of a sent request message at SC layer level
+ */
+typedef struct
+{
+    uint32_t scConnectionIdx;
+    uint32_t requestHandle;
+    SOPC_Msg_Type msgType;
+    uint32_t timerId;
+} SOPC_SentRequestMsg_Context;
+
+/**
  *  \brief UA Message Chunk IsFinal type
  */
 typedef enum {

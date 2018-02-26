@@ -23,26 +23,35 @@ SEES
     
 ABSTRACT_VARIABLES
     s_request_handle,
-    a_client_request,
+    a_client_request_type,
+    a_client_request_resp_type,
+    a_client_request_channel,
     a_client_request_context
     
 INVARIANT
     s_request_handle <: t_request_handle &
     /* Associate the request handle of a client request with its response */
-    a_client_request : s_request_handle --> s_service_resps &
+    a_client_request_type : s_request_handle --> s_service_reqs &
+    a_client_request_resp_type : s_request_handle --> s_service_resps &
+    a_client_request_channel : s_request_handle --> t_channel &
     a_client_request_context : s_request_handle --> t_application_context_i
     
 INITIALISATION
     s_request_handle :: {{}} ||
-    a_client_request :: {{}} ||
+    a_client_request_type :: {{}} ||
+    a_client_request_resp_type :: {{}} ||
+    a_client_request_channel :: {{}} ||
     a_client_request_context :: {{}}
     
 OPERATIONS  
     
-    request_handle <-- client_fresh_req_handle (resp_typ, app_context) =
+    request_handle <-- client_fresh_req_handle (req_typ, resp_typ, is_applicative, app_context) =
     PRE
+        req_typ : t_msg_type_i &
+        req_typ : s_service_reqs &
         resp_typ : t_msg_type_i &
         resp_typ : s_service_resps &
+        is_applicative : BOOL &
         app_context : t_application_context_i
     THEN
         IF s_request_handle = t_request_handle
@@ -56,10 +65,25 @@ OPERATIONS
             THEN 
                 request_handle := l_request_handle ||
                 s_request_handle := s_request_handle \/ {l_request_handle} ||
-                a_client_request (l_request_handle) := resp_typ ||
-                a_client_request_context (l_request_handle) := app_context
+                a_client_request_type (l_request_handle) := req_typ ||
+                a_client_request_resp_type (l_request_handle) := resp_typ ||
+                IF is_applicative = TRUE
+                THEN
+                    a_client_request_context (l_request_handle) := app_context
+                END
             END
         END
+    END
+    ;
+    
+    set_req_handle_channel (req_handle, channel) =
+    PRE
+        req_handle : t_request_handle_i &
+        req_handle : s_request_handle &
+        channel : t_channel_i &
+        channel : t_channel
+    THEN
+        a_client_request_channel (req_handle) := channel
     END
     ;
     
@@ -71,12 +95,32 @@ OPERATIONS
     END
     ;
     
-    app_context <-- get_req_handle_app_context (req_handle) =
+    channel <-- get_req_handle_channel (req_handle) =
+    PRE
+        req_handle : t_request_handle_i
+    THEN
+        IF req_handle /: s_request_handle
+        THEN
+            channel := c_channel_indet
+        ELSE
+            channel := a_client_request_channel (req_handle)
+        END
+    END
+    ;
+    
+    is_applicative, app_context <-- get_req_handle_app_context (req_handle) =
     PRE
         req_handle : t_request_handle_i &
         req_handle : s_request_handle
     THEN
-        app_context := a_client_request_context (req_handle)
+        IF req_handle : dom(a_client_request_context)
+        THEN
+            is_applicative := TRUE ||
+            app_context := a_client_request_context (req_handle)
+        ELSE
+            is_applicative := FALSE ||
+            app_context := c_no_application_context
+        END
     END;
     
     resp_typ <-- get_req_handle_resp_typ (req_handle) =
@@ -84,7 +128,15 @@ OPERATIONS
         req_handle : t_request_handle_i &
         req_handle : s_request_handle
     THEN
-        resp_typ :(resp_typ : t_msg_type_i & a_client_request (req_handle) = resp_typ)
+        resp_typ :(resp_typ : t_msg_type_i & a_client_request_resp_type (req_handle) = resp_typ)
+    END;
+    
+    req_typ <-- get_req_handle_req_typ (req_handle) =
+    PRE
+        req_handle : t_request_handle_i &
+        req_handle : s_request_handle
+    THEN
+        req_typ :(req_typ : t_msg_type_i & a_client_request_type (req_handle) = req_typ)
     END;
     
     client_remove_req_handle (req_handle) =
@@ -93,18 +145,24 @@ OPERATIONS
         req_handle : s_request_handle
     THEN
         s_request_handle := s_request_handle - {req_handle} ||
-        a_client_request := {req_handle} <<| a_client_request ||
-        a_client_request_context := {req_handle} <<| a_client_request_context
+        a_client_request_type := {req_handle} <<| a_client_request_type ||
+        a_client_request_resp_type := {req_handle} <<| a_client_request_resp_type ||
+        a_client_request_context := {req_handle} <<| a_client_request_context ||
+        a_client_request_channel := {req_handle} <<| a_client_request_channel
     END
     ;
     
-    ret <-- client_validate_response_request_handle (req_handle, resp_typ) =
+    ret <-- client_validate_response_request_handle (channel, req_handle, resp_typ) =
     PRE
+        channel : t_channel_i &
+        channel : t_channel &
         req_handle : t_request_handle_i &
         resp_typ : t_msg_type_i &
         resp_typ : s_service_resps
     THEN
-        ret := bool(req_handle : s_request_handle & a_client_request (req_handle) = resp_typ)
+        ret := bool(req_handle : s_request_handle & 
+            a_client_request_resp_type (req_handle) = resp_typ &
+            a_client_request_channel (req_handle) = channel)
     END
     ;
     

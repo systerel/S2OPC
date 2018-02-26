@@ -96,6 +96,26 @@ static bool SC_InitNewConnection(uint32_t* newConnectionIdx)
     return result;
 }
 
+static void SC_Client_ClearPendingRequest(uint32_t id, void* val)
+{
+    (void) (id);
+    SOPC_SentRequestMsg_Context* msgCtx = val;
+    if (NULL != msgCtx)
+    {
+        switch (msgCtx->msgType)
+        {
+        case SOPC_MSG_TYPE_SC_MSG:
+            // Notifies the upper layer
+            SOPC_Services_EnqueueEvent(SC_TO_SE_REQUEST_TIMEOUT, msgCtx->scConnectionIdx, NULL, msgCtx->requestHandle);
+            break;
+        default:
+            // Other cases are SC level requests pending: nothing to do
+            break;
+        }
+        free(msgCtx);
+    }
+}
+
 static bool SC_CloseConnection(uint32_t connectionIdx)
 {
     SOPC_SecureConnection* scConnection = NULL;
@@ -115,7 +135,8 @@ static bool SC_CloseConnection(uint32_t connectionIdx)
 
             // Clear TCP sequence properties
             assert(scConnection->tcpSeqProperties.sentRequestIds != NULL);
-            SOPC_SLinkedList_Apply(scConnection->tcpSeqProperties.sentRequestIds, SOPC_SLinkedList_EltGenericFree);
+
+            SOPC_SLinkedList_Apply(scConnection->tcpSeqProperties.sentRequestIds, SC_Client_ClearPendingRequest);
             SOPC_SLinkedList_Delete(scConnection->tcpSeqProperties.sentRequestIds);
             scConnection->tcpSeqProperties.sentRequestIds = NULL;
 
@@ -2296,7 +2317,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         }
         /* id = secure channel connection index,
            params = (SOPC_Buffer*) received buffer,
-           auxParam = request Id context (optional: defined if  >= 0) */
+           auxParam = request Id context if response (server) / request Handle context if request (client) */
         scConnection = SC_GetConnection(eltId);
         if (NULL == scConnection || (scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
                                      scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW))
@@ -2337,17 +2358,20 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         /* id = secure channel connection index*/
         scConnection = SC_GetConnection(eltId);
 
-        // Check SC valid + avoid to close a secure channel established just after timeout
-        if (scConnection != NULL && scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
-            scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
+        if (scConnection != NULL)
         {
-            // SC_TO_SE_SC_CONNECTION_TIMEOUT will be generated in close SC function fpr client side
-            SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadTimeout,
-                                     "SecureConnection: disconnected (TIMER_SC_CONNECTION_TIMEOUT event)");
+            scConnection->connectionTimeoutTimerId = 0; // Timer is expired, do not keep reference on it
+            // Check SC valid + avoid to close a secure channel established just after timeout
+            if (scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
+                scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
+            {
+                // SC_TO_SE_SC_CONNECTION_TIMEOUT will be generated in close SC function fpr client side
+                SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadTimeout,
+                                         "SecureConnection: disconnected (TIMER_SC_CONNECTION_TIMEOUT event)");
+            }
         }
         break;
 
-    /* Test events: */
     case TIMER_SC_CLIENT_OPN_RENEW:
         if (SOPC_DEBUG_PRINTING != false)
         {
@@ -2356,6 +2380,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         scConnection = SC_GetConnection(eltId);
         if (scConnection != NULL)
         {
+            scConnection->secuTokenRenewTimerId = 0; // Timer is expired, do not keep reference on it
             if (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED &&
                 false == scConnection->isServerConnection)
             {
@@ -2371,6 +2396,35 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         }
         break;
 
+    case TIMER_SC_REQUEST_TIMEOUT:
+        if (SOPC_DEBUG_PRINTING != false)
+        {
+            printf("ScStateMgr: TIMER_SC_REQUEST_TIMEOUT\n");
+        }
+        scConnection = SC_GetConnection(eltId);
+        if (scConnection != NULL)
+        {
+            SOPC_SentRequestMsg_Context* msgCtx = NULL;
+            msgCtx = SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, auxParam);
+            if (NULL != msgCtx)
+            {
+                switch (msgCtx->msgType)
+                {
+                case SOPC_MSG_TYPE_SC_MSG:
+                    // Notifies the upper layer
+                    SOPC_Services_EnqueueEvent(SC_TO_SE_REQUEST_TIMEOUT, eltId, NULL, msgCtx->requestHandle);
+                    break;
+                case SOPC_MSG_TYPE_SC_OPN:
+                    // TODO: log in case of RENEW state ?
+                    // The secure channel will then stay in RENEW if no response received
+                    break;
+                default:
+                    // Other cases are also covered by the SC establishment timeout: no other action to do
+                    break;
+                }
+            }
+        }
+        break;
     /* Internal events: */
     /* SC listener manager -> SC connection manager */
     case INT_EP_SC_CREATE:

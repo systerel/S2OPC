@@ -38,10 +38,22 @@ OPERATIONS
     END
     ;
     
-    cli_snd_failure (app_context, error_status) =
+    cli_snd_failure (req_typ, app_context, error_status) =
     PRE
+        req_typ : t_msg_type_i &
+        req_typ : s_service_reqs &
         app_context : t_application_context_i &
         error_status : t_StatusCode_i
+    THEN
+        skip
+    END
+    ;
+    
+    cli_request_timeout (req_typ, app_context) =
+    PRE
+        req_typ : t_msg_type_i &
+        req_typ : s_service_reqs &
+        app_context : t_application_context_i
     THEN
         skip
     END

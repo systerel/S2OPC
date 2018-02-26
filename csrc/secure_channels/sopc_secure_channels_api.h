@@ -57,11 +57,14 @@ typedef enum {
     SC_DISCONNECT,      /* id = secure channel connection index */
     SC_SERVICE_SND_MSG, /* id = secure channel connection index,
                           params = (SOPC_Buffer*) send buffer,
-                          auxParam = request Id context (optional: defined if server) */
+                          request Id context if response (server) / request Handle context if request (client) */
 
     /* Timer events */
     TIMER_SC_CONNECTION_TIMEOUT, /* id = secure channel connection index */
     TIMER_SC_CLIENT_OPN_RENEW,   /* id = secure channel connection index */
+    TIMER_SC_REQUEST_TIMEOUT,    /* id = secure channel connection index
+                                    auxParam = requestId
+                                  */
 
     /* Internal events */
     /* SC listener manager -> SC connection manager */
@@ -92,7 +95,6 @@ typedef enum {
     INT_SC_SND_FAILURE, /* id = secure channel connection index,
                            params = (uint32_t *) requestId,
                            auxParam = error status in case of client */
-
     /* SC connection manager -> OPC UA chunks message manager */
     INT_SC_SND_HEL, /* >------------------------- */
     INT_SC_SND_ACK, // id = secure channel connection index,
@@ -102,7 +104,7 @@ typedef enum {
     INT_SC_SND_OPN,        /* >------------------------- */
                            // id = secure channel connection index,
                            // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_SND_CLO,        // auxParam = request Id context if response
+    INT_SC_SND_CLO,        // auxParam = request Id context if response / request Handle if request when MSG
     INT_SC_SND_MSG_CHUNKS, /* -------------------------< */
 
     /* SC connection manager -> SC connection manager */

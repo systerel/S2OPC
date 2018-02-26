@@ -94,8 +94,8 @@ typedef enum SOPC_App_Com_Event {
                                   auxParam = user application request context
                                 */
 
-    SE_SND_REQUEST_FAILED, /* idOrStatus = status,
-                              params = NULL (do not reuse original request, it has been deallocated)
+    SE_SND_REQUEST_FAILED, /* idOrStatus = (SOPC_ReturnStatus) status,
+                              params = (SOPC_EncodeableType*) request type (shall not be deallocated)
                               auxParam = user application request context
                             */
 

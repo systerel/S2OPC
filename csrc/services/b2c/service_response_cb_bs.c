@@ -28,6 +28,22 @@ void service_response_cb_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void service_response_cb_bs__cli_request_timeout(
+    const constants__t_msg_type_i service_response_cb_bs__req_typ,
+    const constants__t_application_context_i service_response_cb_bs__app_context)
+{
+    SOPC_EncodeableType* reqEncType = NULL;
+    SOPC_EncodeableType* respEncType = NULL;
+    bool isReq = false;
+    util_message__get_encodeable_type(service_response_cb_bs__req_typ, &reqEncType, &respEncType, &isReq);
+    if (isReq == false)
+    {
+        reqEncType = NULL; // request type expected
+    }
+    SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED), SOPC_STATUS_TIMEOUT,
+                                    reqEncType, service_response_cb_bs__app_context);
+}
+
 void service_response_cb_bs__cli_service_response(
     const constants__t_session_i service_response_cb_bs__session,
     const constants__t_msg_i service_response_cb_bs__resp_msg,
@@ -47,12 +63,21 @@ void service_response_cb_bs__cli_service_response(
 }
 
 void service_response_cb_bs__cli_snd_failure(
+    const constants__t_msg_type_i service_response_cb_bs__req_typ,
     const constants__t_application_context_i service_response_cb_bs__app_context,
     const constants__t_StatusCode_i service_response_cb_bs__error_status)
 {
+    SOPC_EncodeableType* reqEncType = NULL;
+    SOPC_EncodeableType* respEncType = NULL;
+    bool isReq = false;
+    util_message__get_encodeable_type(service_response_cb_bs__req_typ, &reqEncType, &respEncType, &isReq);
+    if (isReq == false)
+    {
+        reqEncType = NULL; // request type expected
+    }
     SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
-                                    util_status_code__B_to_return_status_C(service_response_cb_bs__error_status), NULL,
-                                    service_response_cb_bs__app_context);
+                                    util_status_code__B_to_return_status_C(service_response_cb_bs__error_status),
+                                    reqEncType, service_response_cb_bs__app_context);
 }
 
 void service_response_cb_bs__srv_service_response(

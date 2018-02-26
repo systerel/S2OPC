@@ -80,6 +80,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Endpoint_Config* epConfig = NULL;
     constants__t_StatusCode_i sCode = constants__e_sc_ok;
+    SOPC_EncodeableType* encType = NULL;
     bool bres = false;
     void* msg = NULL;
     switch (event)
@@ -207,7 +208,6 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         }
         io_dispatch_mgr__internal_server_evaluate_session_timeout((constants__t_session_i) id);
         break;
-
     case SC_TO_SE_SC_SERVICE_RCV_MSG:
         if (SOPC_DEBUG_PRINTING != false)
         {
@@ -234,6 +234,15 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
                                              (constants__t_request_handle_i) * (uint32_t*) params, sCode);
             free(params);
         } // else: without request Id, it cannot be treated
+        break;
+    case SC_TO_SE_REQUEST_TIMEOUT:
+        if (SOPC_DEBUG_PRINTING != false)
+        {
+            printf("SC_TO_SE_REQUEST_TIMEOUT\n");
+        }
+        /* id = secure channel connection index,
+           auxParam = request handle */
+        io_dispatch_mgr__internal_client_request_timeout(id, auxParam);
         break;
 
     /* App to Services events */
@@ -333,8 +342,12 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         io_dispatch_mgr__client_send_service_request(id, params, auxParam, &sCode);
         if (sCode != constants__e_sc_ok)
         {
+            if (params != NULL)
+            {
+                encType = *(SOPC_EncodeableType**) params;
+            }
             SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
-                                            util_status_code__B_to_return_status_C(sCode), NULL, auxParam);
+                                            util_status_code__B_to_return_status_C(sCode), encType, auxParam);
             status = SOPC_STATUS_NOK;
         }
         break;
@@ -360,8 +373,12 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         io_dispatch_mgr__client_send_discovery_request(id, params, auxParam, &sCode);
         if (sCode != constants__e_sc_ok)
         {
+            if (params != NULL)
+            {
+                encType = *(SOPC_EncodeableType**) params;
+            }
             SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
-                                            util_status_code__B_to_return_status_C(sCode), NULL, auxParam);
+                                            util_status_code__B_to_return_status_C(sCode), encType, auxParam);
             status = SOPC_STATUS_NOK;
         }
         break;

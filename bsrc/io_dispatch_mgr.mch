@@ -294,6 +294,16 @@ OPERATIONS
         skip
     END
     ;
+    
+    internal_client_request_timeout (channel, request_handle) =
+    PRE
+        channel : t_channel_i &
+        channel : t_channel &
+        request_handle : t_request_handle_i
+    THEN
+        skip
+    END
+    ;
 
     bres <-- close_all_active_connections =
     BEGIN

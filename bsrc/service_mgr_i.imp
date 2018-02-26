@@ -160,10 +160,12 @@ LOCAL_OPERATIONS
     END
     ;
     
-    ret, buffer_out, req_handle <-- local_client_discovery_service_request (req_msg, app_context) =
+    ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_msg, app_context) =
     PRE
-        req_msg         : t_msg_i &
-        req_msg         : t_msg &
+        channel     : t_channel_i &
+        channel     : t_channel &
+        req_msg     : t_msg_i &
+        req_msg     : t_msg &
         app_context : t_application_context_i &
         /* message is not yet set as output before call and deallocated after operation */
         c_msg_out = c_msg_indet &
@@ -358,7 +360,7 @@ OPERATIONS
         StatusCode_service := l_ret
     END;
     
-    ret, buffer_out, req_handle <-- local_client_discovery_service_request (req_msg, app_context) =
+    ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_msg, app_context) =
     VAR
         l_msg_header,
         l_valid_msg_header,
@@ -389,11 +391,12 @@ OPERATIONS
                     l_resp_typ <-- get_response_type (l_req_typ);
                     l_msg_header <-- alloc_app_req_msg_header;
                     l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
-                    l_req_handle <-- client_fresh_req_handle (l_resp_typ, app_context);
+                    l_req_handle <-- client_fresh_req_handle (l_req_typ, l_resp_typ, TRUE, app_context);
                     l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
                     IF l_valid_req_handle = TRUE &
                         l_valid_msg_header = TRUE
-                    THEN                      
+                    THEN
+                        set_req_handle_channel (l_req_handle, channel);
                         write_msg_out_header_req_handle (l_msg_header, l_req_handle);
                         l_buffer <-- encode_msg (e_msg_session_close_req, l_msg_header, req_msg);
                         l_valid_buffer <-- is_valid_buffer_out (l_buffer);
@@ -516,7 +519,7 @@ OPERATIONS
         IF l_valid_resp_header = TRUE
         THEN
             l_request_handle <-- read_msg_header_req_handle (l_resp_msg_header);
-            l_validated_req_handle <-- client_validate_response_request_handle (l_request_handle, resp_typ);
+            l_validated_req_handle <-- client_validate_response_request_handle (channel, l_request_handle, resp_typ);
             IF l_validated_req_handle = TRUE
             THEN
                 l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
@@ -662,6 +665,7 @@ OPERATIONS
         l_request_handle,
         l_validated_req_handle,
         l_user_app_context,
+        l_is_applicative_response,
         l_is_valid_session_resp,
         l_session,
         l_resp_msg,
@@ -672,16 +676,17 @@ OPERATIONS
         IF l_valid_resp_header = TRUE
         THEN
             l_request_handle <-- read_msg_header_req_handle (l_resp_msg_header);
-            l_validated_req_handle <-- client_validate_response_request_handle (l_request_handle, resp_typ);
+            l_validated_req_handle <-- client_validate_response_request_handle (channel, l_request_handle, resp_typ);
             IF l_validated_req_handle = TRUE
             THEN
-                l_user_app_context <-- get_req_handle_app_context (l_request_handle);
+                l_is_applicative_response, l_user_app_context <-- get_req_handle_app_context (l_request_handle);
                 l_is_valid_session_resp, l_session <-- client_validate_session_service_resp (channel, l_request_handle);
                 IF l_is_valid_session_resp = TRUE
                 THEN
                     l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
                     l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
-                    IF l_valid_resp_msg = TRUE
+                    IF l_valid_resp_msg = TRUE &
+                        l_is_applicative_response = TRUE
                     THEN
                         copy_msg_resp_header_into_msg (l_resp_msg_header, l_resp_msg);
                         /* For services on session IN response messages is provided to applicative */
@@ -776,12 +781,13 @@ OPERATIONS
     END
     ;
 
-    client_receive_discovery_service_resp (resp_typ, msg_buffer) =
+    client_receive_discovery_service_resp (channel, resp_typ, msg_buffer) =
     VAR
         l_resp_msg_header,
         l_valid_resp_header,
         l_request_handle,
         l_validated_req_handle,
+        l_is_applicative_response,
         l_user_app_context,
         l_resp_msg,
         l_valid_resp_msg
@@ -791,13 +797,14 @@ OPERATIONS
         IF l_valid_resp_header = TRUE
         THEN
             l_request_handle <-- read_msg_header_req_handle (l_resp_msg_header);
-            l_validated_req_handle <-- client_validate_response_request_handle (l_request_handle, resp_typ);
+            l_validated_req_handle <-- client_validate_response_request_handle (channel, l_request_handle, resp_typ);
             IF l_validated_req_handle = TRUE
             THEN
-                l_user_app_context <-- get_req_handle_app_context (l_request_handle);
+                l_is_applicative_response, l_user_app_context <-- get_req_handle_app_context (l_request_handle);
                 l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
                 l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
-                IF l_valid_resp_msg = TRUE
+                IF l_valid_resp_msg = TRUE &
+                    l_is_applicative_response = TRUE
                 THEN
                     copy_msg_resp_header_into_msg (l_resp_msg_header, l_resp_msg);
                     /* For services on session IN response messages is provided to applicative */
@@ -890,10 +897,14 @@ OPERATIONS
         IF l_valid_msg_header = TRUE &
             l_valid_msg = TRUE
         THEN
-            l_req_handle <-- client_fresh_req_handle (e_msg_session_create_resp, c_no_application_context);
+            l_req_handle <-- client_fresh_req_handle (e_msg_session_create_req, 
+                                                      e_msg_session_create_resp,
+                                                      FALSE,
+                                                      c_no_application_context);
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle  = TRUE
             THEN
+                set_req_handle_channel (l_req_handle, channel);
                 l_bret <-- client_create_session_req (session, channel, l_req_handle, l_req_msg);
                 IF l_bret = TRUE
                 THEN
@@ -942,10 +953,14 @@ OPERATIONS
         IF l_valid_msg = TRUE &
             l_valid_msg_header = TRUE
         THEN
-            l_req_handle <-- client_fresh_req_handle (e_msg_session_activate_resp, c_no_application_context);
+            l_req_handle <-- client_fresh_req_handle (e_msg_session_activate_req, 
+                                                      e_msg_session_activate_resp,
+                                                      FALSE,
+                                                      c_no_application_context);
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle = TRUE
             THEN
+                set_req_handle_channel (l_req_handle, channel);
                 l_ret, l_session_token <-- client_sc_activate_session_req (session, l_req_handle, channel, l_req_msg);
                 IF l_ret = e_sc_ok
                 THEN
@@ -994,13 +1009,17 @@ OPERATIONS
         IF l_valid_msg = TRUE &
             l_valid_msg_header = TRUE
         THEN
-            l_req_handle <-- client_fresh_req_handle (e_msg_session_activate_resp, c_no_application_context);
+            l_req_handle <-- client_fresh_req_handle (e_msg_session_activate_req, 
+                                                      e_msg_session_activate_resp,
+                                                      FALSE,
+                                                      c_no_application_context);
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle = TRUE
             THEN
                 l_ret, l_channel, l_session_token <-- client_user_activate_session_req (session, l_req_handle, user, l_req_msg);
                 IF l_ret = e_sc_ok
                 THEN
+                    set_req_handle_channel (l_req_handle, l_channel);
                     write_msg_out_header_req_handle(l_msg_header, l_req_handle);
                     write_msg_out_header_session_token(l_msg_header, l_session_token);
                     l_buffer <-- encode_msg (e_msg_session_activate_req, l_msg_header, l_req_msg);
@@ -1054,7 +1073,10 @@ OPERATIONS
         IF l_valid_msg = TRUE &
             l_valid_msg_header = TRUE
         THEN
-            l_req_handle <-- client_fresh_req_handle (e_msg_session_close_resp, c_no_application_context);
+            l_req_handle <-- client_fresh_req_handle (e_msg_session_close_req, 
+                                                      e_msg_session_close_resp,
+                                                      FALSE,
+                                                      c_no_application_context);
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle = TRUE
             THEN
@@ -1062,6 +1084,7 @@ OPERATIONS
                 ret, l_channel, l_session_token <-- client_close_session_req (session, l_req_handle, l_req_msg);
                 IF ret = e_sc_ok
                 THEN
+                    set_req_handle_channel (l_req_handle, l_channel);
                     write_msg_out_header_req_handle(l_msg_header, l_req_handle);
                     write_msg_out_header_session_token(l_msg_header, l_session_token);
                     l_buffer <-- encode_msg (e_msg_session_close_req, l_msg_header, l_req_msg);
@@ -1146,7 +1169,7 @@ OPERATIONS
                     l_resp_typ <-- get_response_type (l_req_typ);
                     l_msg_header <-- alloc_app_req_msg_header;
                     l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
-                    l_req_handle <-- client_fresh_req_handle (l_resp_typ, app_context);
+                    l_req_handle <-- client_fresh_req_handle (l_req_typ, l_resp_typ, TRUE, app_context);
                     l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
                     IF l_valid_req_handle = TRUE &
                         l_valid_msg_header = TRUE
@@ -1154,6 +1177,7 @@ OPERATIONS
                         ret, l_channel, l_session_token <-- client_validate_session_service_req (session, l_req_handle);
                         IF ret = e_sc_ok
                         THEN
+                            set_req_handle_channel (l_req_handle, l_channel);
                             write_msg_out_header_req_handle (l_msg_header, l_req_handle);
                             write_msg_out_header_session_token (l_msg_header, l_session_token);
                             l_buffer <-- encode_msg (e_msg_session_close_req, l_msg_header, req_msg);
@@ -1180,7 +1204,7 @@ OPERATIONS
                     e_msg_discovery_register_server2_req
                 THEN
                     /* Use discovery operation since header shall not contain session information (see part 4) */
-                    ret, l_buffer, l_req_handle <-- local_client_discovery_service_request (req_msg, app_context);
+                    ret, l_buffer, l_req_handle <-- local_client_discovery_service_request (l_channel, req_msg, app_context);
                     l_valid_buffer <-- is_valid_buffer_out (l_buffer);
                     IF l_valid_buffer = FALSE
                     THEN
@@ -1201,15 +1225,17 @@ OPERATIONS
     END
     ;
     
-    ret, buffer_out, req_handle <-- client_discovery_service_request (req_msg, app_context) =
+    ret, buffer_out, req_handle <-- client_discovery_service_request (channel, req_msg, app_context) =
     BEGIN
-        ret, buffer_out, req_handle <-- local_client_discovery_service_request (req_msg, app_context)
+        ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_msg, app_context)
     END
     ;
     
     client_snd_msg_failure (channel, request_handle, error_status) =
     VAR
         l_valid_req_handle,
+        l_req_typ,
+        l_is_applicative,
         l_app_context,
         l_exp_resp_msg_typ,
         l_bres,
@@ -1235,10 +1261,38 @@ OPERATIONS
                     END
                 ELSE
                     /*It means it's application request and we have an app context that can be used*/
-                    l_app_context <-- get_req_handle_app_context (request_handle);
+                    l_is_applicative, l_app_context <-- get_req_handle_app_context (request_handle);
+                    l_req_typ <-- get_req_handle_req_typ (request_handle);
                     client_remove_req_handle (request_handle);
-                    cli_snd_failure (l_app_context, error_status)
+                    IF l_is_applicative = TRUE
+                    THEN
+                        cli_snd_failure (l_req_typ, l_app_context, error_status)
+                    END
                 END
+            END
+        END
+    END
+    ;
+    
+    internal_client_request_timeout (channel, request_handle) =
+    VAR
+        l_valid_req_handle,
+        l_req_handle_channel,
+        l_req_typ,
+        l_is_applicative,
+        l_app_context
+    IN
+        l_valid_req_handle <-- is_valid_req_handle (request_handle);
+        l_req_handle_channel <-- get_req_handle_channel (request_handle);
+        IF l_valid_req_handle = TRUE &
+            l_req_handle_channel = channel
+        THEN
+            l_is_applicative, l_app_context <-- get_req_handle_app_context (request_handle);
+            l_req_typ <-- get_req_handle_req_typ (request_handle);
+            client_remove_req_handle (request_handle);
+            IF l_is_applicative = TRUE
+            THEN
+                cli_request_timeout (l_req_typ, l_app_context)
             END
         END
     END

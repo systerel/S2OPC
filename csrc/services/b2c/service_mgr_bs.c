@@ -26,6 +26,7 @@
 #include "constants.h"
 #include "message_out_bs.h"
 #include "service_mgr_bs.h"
+#include "util_b2c.h"
 
 #include "sopc_services_api.h"
 #include "sopc_singly_linked_list.h"
@@ -39,6 +40,7 @@ static SOPC_SLinkedList*
 typedef struct SOPC_DiscoveryRequest_ToSend
 {
     constants__t_msg_i msgToSend;
+    constants__t_msg_type_i msgType;
     constants__t_application_context_i msgAppContext;
 } SOPC_DiscoveryRequest_ToSend;
 
@@ -79,6 +81,7 @@ void service_mgr_bs__client_async_discovery_request_without_channel(
         if (NULL != sLinkedList && NULL != elt)
         {
             elt->msgToSend = service_mgr_bs__req_msg;
+            message_out_bs__get_msg_out_type(service_mgr_bs__req_msg, &elt->msgType);
             elt->msgAppContext = service_mgr_bs__app_context;
             addedMsg = SOPC_SLinkedList_Append(sLinkedList, 0, elt);
         }
@@ -127,8 +130,16 @@ static void SOPC_ServiceMgrBs_DicoveryReqSendingFailure(uint32_t id, void* val)
 {
     (void) id;
     SOPC_DiscoveryRequest_ToSend* elt = val;
+    SOPC_EncodeableType* reqEncType = NULL;
+    SOPC_EncodeableType* respEncType = NULL;
+    bool isReq = false;
     if (NULL != elt)
     {
+        util_message__get_encodeable_type(elt->msgType, &reqEncType, &respEncType, &isReq);
+        if (isReq == false)
+        {
+            reqEncType = NULL; // request type expected
+        }
         SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED), SOPC_STATUS_CLOSED, NULL,
                                         elt->msgAppContext);
         message_out_bs__dealloc_msg_out(elt->msgToSend);

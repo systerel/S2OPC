@@ -94,6 +94,11 @@
 #define SOPC_MAX_PENDING_REQUESTS UINT16_MAX
 #endif
 
+/** @brief Maximum time before a response shall be received after sending a request */
+#ifndef SOPC_REQUEST_TIMEOUT_MS
+#define SOPC_REQUEST_TIMEOUT_MS 5000
+#endif
+
 /** @brief Elapsed time after which SC connection establishment is considered timeout
  * (elapsed time between socket connection and OPN response message)
  * */

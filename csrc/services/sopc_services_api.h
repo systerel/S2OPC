@@ -55,6 +55,8 @@ typedef enum SOPC_Services_Event {
                                        params = (uint32_t*) requestId,
                                        auxParam = SOPC_StatusCode
                                      */
+    SC_TO_SE_REQUEST_TIMEOUT,       /* id = secure channel connection index,
+                                       auxParam = request handle */
 
     /* Services to services events */
     SE_TO_SE_SC_ALL_DISCONNECTED,       // special event sent by services mgr itself (no parameters)
@@ -69,7 +71,6 @@ typedef enum SOPC_Services_Event {
                                          */
     /* Timer to services events */
     TIMER_SE_EVAL_SESSION_TIMEOUT, /* id = session id */
-
     /* App to Services events : server side */
     APP_TO_SE_OPEN_ENDPOINT,         /* id = endpoint description config index
                                       */

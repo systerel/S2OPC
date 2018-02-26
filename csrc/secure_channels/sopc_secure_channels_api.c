@@ -66,6 +66,7 @@ static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t event, uint32_t eltId
     case SC_CONNECT:
     case TIMER_SC_CONNECTION_TIMEOUT:
     case TIMER_SC_CLIENT_OPN_RENEW:
+    case TIMER_SC_REQUEST_TIMEOUT:
     case SC_DISCONNECT:
     case SC_SERVICE_SND_MSG:
         SOPC_SecureConnectionStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
@@ -205,6 +206,7 @@ void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InputEvent scE
         case SC_CONNECT:
         case TIMER_SC_CONNECTION_TIMEOUT:
         case TIMER_SC_CLIENT_OPN_RENEW:
+        case TIMER_SC_REQUEST_TIMEOUT:
         case SC_DISCONNECT:
         case SC_SERVICE_SND_MSG:
         default:
@@ -257,6 +259,7 @@ void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InputEve
         case SC_CONNECT:
         case TIMER_SC_CONNECTION_TIMEOUT:
         case TIMER_SC_CLIENT_OPN_RENEW:
+        case TIMER_SC_REQUEST_TIMEOUT:
         case SC_DISCONNECT:
         case SC_SERVICE_SND_MSG:
         default:

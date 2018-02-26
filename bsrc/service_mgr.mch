@@ -185,8 +185,10 @@ OPERATIONS
     END
     ;
 
-    client_receive_discovery_service_resp (resp_typ, msg_buffer) =
+    client_receive_discovery_service_resp (channel, resp_typ, msg_buffer) =
     PRE
+        channel  : t_channel_i &
+        channel  : t_channel &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
         a_msg_in_type : s_discovery_service_resps &
@@ -373,10 +375,12 @@ OPERATIONS
     END
     ;
     
-    ret, buffer_out, req_handle <-- client_discovery_service_request (req_msg, app_context) =
+    ret, buffer_out, req_handle <-- client_discovery_service_request (channel, req_msg, app_context) =
     PRE
-        req_msg         : t_msg_i &
-        req_msg         : t_msg &
+        channel     : t_channel_i &
+        channel     : t_channel &
+        req_msg     : t_msg_i &
+        req_msg     : t_msg &
         app_context : t_application_context_i &
         /* message is not yet set as output before call and deallocated after operation */
         c_msg_out = c_msg_indet &
@@ -412,6 +416,16 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : t_session
+    THEN
+        skip
+    END
+    ;
+    
+    internal_client_request_timeout (channel, request_handle) =
+    PRE
+        channel : t_channel_i &
+        channel : t_channel &
+        request_handle : t_request_handle_i
     THEN
         skip
     END

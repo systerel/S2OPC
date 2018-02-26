@@ -26,6 +26,7 @@
 #include "sopc_crypto_provider.h"
 
 #include "sopc_encoder.h"
+#include "sopc_event_timer_manager.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_secure_channels_api_internal.h"
 #include "sopc_secure_channels_internal_ctx.h"
@@ -40,6 +41,17 @@ static const uint8_t SOPC_ERR[3] = {'E', 'R', 'R'};
 static const uint8_t SOPC_MSG[3] = {'M', 'S', 'G'};
 static const uint8_t SOPC_OPN[3] = {'O', 'P', 'N'};
 static const uint8_t SOPC_CLO[3] = {'C', 'L', 'O'};
+
+static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t requestId)
+{
+    SOPC_EventDispatcherParams eventParams;
+    eventParams.event = TIMER_SC_REQUEST_TIMEOUT;
+    eventParams.eltId = connectionIdx;
+    eventParams.params = NULL;
+    eventParams.auxParam = requestId;
+    eventParams.debugName = NULL;
+    return SOPC_EventTimer_Create(SOPC_SecureChannels_GetEventDispatcher(), eventParams, SOPC_REQUEST_TIMEOUT_MS);
+}
 
 static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx)
 {
@@ -1043,7 +1055,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
     bool result = true;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
 
-    SOPC_Msg_Type* recordedMsgType = NULL;
+    SOPC_SentRequestMsg_Context* recordedMsgCtx = NULL;
 
     // Retrieve request id
     status = SOPC_UInt32_Read(requestId, chunkCtx->chunkInputBuffer);
@@ -1052,15 +1064,16 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
         if (isClient != false)
         {
             // Check received request Id was expected for the received message type
-            recordedMsgType = SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, *requestId);
-            if (recordedMsgType != NULL)
+            recordedMsgCtx = SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, *requestId);
+            if (recordedMsgCtx != NULL)
             {
-                if (*recordedMsgType != receivedMsgType)
+                SOPC_EventTimer_Cancel(recordedMsgCtx->timerId); // Deactivate timer for this request
+                if (recordedMsgCtx->msgType != receivedMsgType)
                 {
                     result = false;
                     *errorStatus = OpcUa_BadSecurityChecksFailed;
                 }
-                free(recordedMsgType);
+                free(recordedMsgCtx);
             }
             else
             {
@@ -2823,14 +2836,16 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
     return result;
 }
 
-static bool SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnection,
-                                      uint32_t optRequestId,
-                                      SOPC_Msg_Type sendMsgType,
-                                      bool isSendTcpOnly,
-                                      bool isOPN,
-                                      SOPC_Buffer* inputBuffer,
-                                      SOPC_Buffer** outputBuffer,
-                                      SOPC_StatusCode* errorStatus)
+static bool SC_Chunks_TreatSendBuffer(
+    uint32_t scConnectionIdx,
+    SOPC_SecureConnection* scConnection,
+    uint32_t requestIdOrHandle, // requestId when sender is server / requestHandle when client
+    SOPC_Msg_Type sendMsgType,
+    bool isSendTcpOnly,
+    bool isOPN,
+    SOPC_Buffer* inputBuffer,
+    SOPC_Buffer** outputBuffer,
+    SOPC_StatusCode* errorStatus)
 {
     assert(scConnection != NULL);
     assert(inputBuffer != NULL);
@@ -3193,6 +3208,7 @@ static bool SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnection,
 
                 if (false == scConnection->isServerConnection)
                 {
+                    // Client case: generate new request Id
                     requestId = (scConnection->clientLastReqId + 1) % UINT32_MAX;
                     if (requestId == 0)
                     {
@@ -3202,7 +3218,8 @@ static bool SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnection,
                 }
                 else
                 {
-                    requestId = optRequestId;
+                    // Server case: return requestId provided by client
+                    requestId = requestIdOrHandle;
                 }
 
                 status = SOPC_UInt32_Write(&requestId, nonEncryptedBuffer);
@@ -3278,18 +3295,23 @@ static bool SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnection,
 
             if (result != false && false == scConnection->isServerConnection)
             {
-                SOPC_Msg_Type* msgType = NULL;
+                SOPC_SentRequestMsg_Context* msgCtx = NULL;
+                SOPC_SentRequestMsg_Context* msgCtxRes = NULL;
                 switch (sendMsgType)
                 {
                 case SOPC_MSG_TYPE_SC_OPN:
                 case SOPC_MSG_TYPE_SC_MSG:
                     /* CLIENT SIDE: RECORD REQUEST SENT (response expected)*/
-                    msgType = calloc(1, sizeof(SOPC_Msg_Type));
-                    if (msgType != NULL)
+                    msgCtx = calloc(1, sizeof(SOPC_SentRequestMsg_Context));
+                    if (msgCtx != NULL)
                     {
-                        *msgType = sendMsgType;
-                        if (msgType != SOPC_SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, requestId,
-                                                               (void*) msgType))
+                        msgCtx->scConnectionIdx = scConnectionIdx;
+                        msgCtx->requestHandle = requestIdOrHandle; // Client side: it contains request handle
+                        msgCtx->msgType = sendMsgType;
+                        msgCtx->timerId = SC_Client_StartRequestTimeout(scConnectionIdx, requestId);
+                        msgCtxRes = SOPC_SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, requestId,
+                                                            (void*) msgCtx);
+                        if (msgCtx != msgCtxRes)
                         {
                             result = false;
                         }
@@ -3427,7 +3449,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
         if (isSendCase != false)
         {
             assert(auxParam <= UINT32_MAX);
-            result = SC_Chunks_TreatSendBuffer(scConnection, auxParam, sendMsgType, isSendTcpOnly, isOPN, buffer,
+            result = SC_Chunks_TreatSendBuffer(eltId, scConnection, auxParam, sendMsgType, isSendTcpOnly, isOPN, buffer,
                                                &outputBuffer, &errorStatus);
             if (false == result)
             {
