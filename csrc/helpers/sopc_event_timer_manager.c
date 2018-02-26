@@ -195,7 +195,7 @@ static void SOPC_Internal_EventTimer_Cancel_WithoutLock(uint32_t timerId)
 
 void SOPC_EventTimer_Cancel(uint32_t timerId)
 {
-    if (false != initialized)
+    if (false != initialized && timerId > 0)
     {
         Mutex_Lock(&timersMutex);
         SOPC_Internal_EventTimer_Cancel_WithoutLock(timerId);
