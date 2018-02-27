@@ -76,7 +76,7 @@ fi
 rm -f $LOG_FILE $TAP_FILE
 echo -e "Launching server"
 pushd ../bin
-./toolkit_test_server 100000&
+./toolkit_test_server 200000&
 popd
 
 echo -e "Launching Acceptance Test Tool"
