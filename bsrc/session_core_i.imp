@@ -126,12 +126,13 @@ OPERATIONS
         l_channel_config_idx <-- get_channel_info (channel);
         valid, l_nonce_needed <-- client_create_session_req_do_crypto(session, channel, l_channel_config_idx);
         IF valid = TRUE THEN
+            write_create_session_req_msg_sessionTimeout (create_req_msg);
             write_create_session_req_msg_endpointUrl (create_req_msg, l_channel_config_idx);
             IF l_nonce_needed = TRUE THEN
                 l_nonce <-- get_NonceClient(session);
                 write_create_session_req_msg_crypto(create_req_msg, l_channel_config_idx, l_nonce)
             END
-            /* TODO: Fill remaining parameters: sessionName, timeout, maxResponseSize */
+            /* TODO: Fill remaining parameters: sessionName, maxResponseSize (keep 0 => unused ?)*/
             /*write_create_session_req_msg_fill(create_req_msg, l_channel_config_idx) */
         END
     END

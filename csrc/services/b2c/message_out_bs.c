@@ -339,6 +339,13 @@ void message_out_bs__write_create_session_req_msg_endpointUrl(
     assert(SOPC_STATUS_OK == status);
 }
 
+void message_out_bs__write_create_session_req_msg_sessionTimeout(
+    const constants__t_msg_i message_out_bs__create_req_msg)
+{
+    OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) message_out_bs__create_req_msg;
+    createSessionReq->RequestedSessionTimeout = SOPC_REQUESTED_SESSION_TIMEOUT;
+}
+
 void message_out_bs__write_create_session_req_msg_crypto(
     const constants__t_msg_i message_out_bs__p_req_msg,
     const constants__t_channel_config_idx_i message_out_bs__p_channel_config_idx,

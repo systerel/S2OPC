@@ -257,6 +257,18 @@ OPERATIONS
 
 
     /* SESSION MESSAGES */
+
+    write_create_session_req_msg_sessionTimeout (create_req_msg) =
+    PRE
+        create_req_msg : t_msg_i &
+        create_req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_create_req
+    THEN
+        skip
+    END
+    ;
+    
     write_create_session_req_msg_endpointUrl (msg, channel_config_idx) =
     PRE
         msg : t_msg_i &
