@@ -42,13 +42,19 @@
 #endif
 
 /* Maximum session timeout accepted */
-#if SOPC_SESSION_TIMEOUT > UINT32_MAX
-#error "Maximum session timeout is > UINT32_MAX"
+#if SOPC_MAX_SESSION_TIMEOUT > UINT32_MAX
+#error "Maximum requested session timeout is > UINT32_MAX"
+#endif
+#if SOPC_MAX_SESSION_TIMEOUT < SOPC_MIN_SESSION_TIMEOUT
+#error "Maximum requested session timeout is < MIN"
 #endif
 
-/* Minimum session timeout accepted: 10 seconds */
-#if SOPC_SESSION_TIMEOUT < 10000
-#error "Minimum session timeout is < 10000"
+/* Minimum session timeout accepted */
+#if SOPC_MIN_SESSION_TIMEOUT < 10000
+#error "Minimum requested session timeout is < 10000"
+#endif
+#if SOPC_MIN_SESSION_TIMEOUT > SOPC_MAX_SESSION_TIMEOUT
+#error "Minimum requested session timeout is > MAX"
 #endif
 
 /* Check use of uintptr_t is not an issue on the current platform */

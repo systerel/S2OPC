@@ -985,14 +985,12 @@ void session_core_bs__server_session_timeout_start_timer(const constants__t_sess
     SOPC_EventDispatcherParams eventParams;
     if (constants__c_session_indet != session_core_bs__session)
     {
-        if (NULL == pResp || pResp->RevisedSessionTimeout < SOPC_SESSION_TIMEOUT)
+        if (NULL == pResp || pResp->RevisedSessionTimeout < SOPC_MIN_SESSION_TIMEOUT)
         {
-            session_RevisedSessionTimeout[session_core_bs__session] = SOPC_SESSION_TIMEOUT;
+            session_RevisedSessionTimeout[session_core_bs__session] = SOPC_MIN_SESSION_TIMEOUT;
         }
         else
         {
-            // Guaranteed by verification of toolkit constant parameters
-            assert(pResp->RevisedSessionTimeout <= UINT32_MAX && pResp->RevisedSessionTimeout >= 10000);
             session_RevisedSessionTimeout[session_core_bs__session] = pResp->RevisedSessionTimeout;
         }
         eventParams.eltId = session_core_bs__session;

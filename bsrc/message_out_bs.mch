@@ -301,6 +301,20 @@ OPERATIONS
         ret :(ret : t_StatusCode_i & ret : t_StatusCode)
     END
     ;
+    
+    write_create_session_msg_session_revised_timeout (req_msg, resp_msg) =
+    PRE
+        req_msg : t_msg_i &
+        req_msg = c_msg_in &
+        a_msg_in_type = e_msg_session_create_req &
+        resp_msg : t_msg_i &
+        resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_create_resp
+    THEN
+        skip
+    END
+    ;
 
     bret <-- write_create_session_resp_msg_crypto(p_msg, p_channel_config_idx, p_nonce, p_signature) =
     PRE

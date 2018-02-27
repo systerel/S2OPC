@@ -108,9 +108,19 @@
 #define SOPC_MAX_SESSIONS 20
 #endif /* SOPC_MAX_SESSIONS */
 
-/* Maximum number of milliseconds that a session shall remain open without activity */
-#ifndef SOPC_SESSION_TIMEOUT
-#define SOPC_SESSION_TIMEOUT 10000
+/* @brief Client requested timeout for which a session shall remain open without activity */
+#ifndef SOPC_REQUESTED_SESSION_TIMEOUT
+#define SOPC_REQUESTED_SESSION_TIMEOUT 60000 // 60 seconds
+#endif
+
+/* @brief Minimum session timeout accepted by server */
+#ifndef SOPC_MIN_SESSION_TIMEOUT
+#define SOPC_MIN_SESSION_TIMEOUT 10000 // 10 seconds
+#endif
+
+/* @brief Maximum session timeout accepted by server */
+#ifndef SOPC_MAX_SESSION_TIMEOUT
+#define SOPC_MAX_SESSION_TIMEOUT 43200000 // 12 hours
 #endif
 
 /* DEBUG CONFIGURATION */

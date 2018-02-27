@@ -388,6 +388,26 @@ void message_out_bs__write_create_session_msg_session_token(
     assert(SOPC_STATUS_OK == status);
 }
 
+void message_out_bs__write_create_session_msg_session_revised_timeout(const constants__t_msg_i message_out_bs__req_msg,
+                                                                      const constants__t_msg_i message_out_bs__resp_msg)
+{
+    OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) message_out_bs__req_msg;
+    OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) message_out_bs__resp_msg;
+
+    if (createSessionReq->RequestedSessionTimeout < SOPC_MIN_SESSION_TIMEOUT)
+    {
+        createSessionResp->RevisedSessionTimeout = SOPC_MIN_SESSION_TIMEOUT;
+    }
+    else if (createSessionReq->RequestedSessionTimeout > SOPC_MAX_SESSION_TIMEOUT)
+    {
+        createSessionResp->RevisedSessionTimeout = SOPC_MAX_SESSION_TIMEOUT;
+    }
+    else
+    {
+        createSessionResp->RevisedSessionTimeout = createSessionReq->RequestedSessionTimeout;
+    }
+}
+
 void message_out_bs__write_create_session_msg_server_endpoints(
     const constants__t_msg_i message_out_bs__req_msg,
     const constants__t_msg_i message_out_bs__resp_msg,
@@ -395,10 +415,7 @@ void message_out_bs__write_create_session_msg_server_endpoints(
     constants__t_StatusCode_i* const message_out_bs__ret)
 {
     OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) message_out_bs__req_msg;
-
     OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) message_out_bs__resp_msg;
-
-    createSessionResp->RevisedSessionTimeout = SOPC_SESSION_TIMEOUT;
 
     *message_out_bs__ret = SOPC_Discovery_GetEndPointsDescriptions(
         message_out_bs__endpoint_config_idx, true, &createSessionReq->EndpointUrl,

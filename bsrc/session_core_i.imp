@@ -157,16 +157,16 @@ OPERATIONS
         l_valid_session <-- is_valid_session (l_nsession);
         IF l_valid_session = TRUE THEN
             create_session(l_nsession, channel, e_session_created);
-            /* TODO: check request parameters: client certificate, endpointURL*/
+            /* TODO: check request parameters: client certificate */
             /*l_valid_req <-- server_create_session_valid_req(create_req_msg) */
             l_nsession_token <-- server_get_fresh_session_token (l_nsession);
             l_valid_session_token <-- server_is_valid_session_token (l_nsession_token);
             IF l_valid_session_token = TRUE /*& l_valid_req = TRUE */
             THEN
                 l_endpoint_config_idx <-- server_get_endpoint_config (channel);
-                /* No need to store the handle since we will send response in same step */
                 write_create_session_msg_session_token (create_resp_msg, l_nsession_token);
-                /* TODO: this one also populates RevisedSessionTimeout */
+                /* Set revised timeout to : MIN <= requested timeout <= MAX */
+                write_create_session_msg_session_revised_timeout (create_req_msg, create_resp_msg);
                 service_ret <-- write_create_session_msg_server_endpoints (create_req_msg, create_resp_msg, l_endpoint_config_idx);
                 /* TODO: populate msg with remaining parameters: MaxRequestSize, RevisedSessionTimeout, CertServer, ... */
                 IF service_ret = e_sc_ok THEN
