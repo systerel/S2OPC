@@ -99,7 +99,7 @@ mv validation/sc_renew.tap bin/
 
 ## run validation tests
 pushd $BIN_DIR
-./toolkit_test_server&
+./toolkit_test_server 25000&
 popd
 pushd validation
 ./client_session_timeout.py&
