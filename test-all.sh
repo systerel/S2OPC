@@ -97,3 +97,12 @@ popd
 wait
 mv validation/sc_renew.tap bin/
 
+## run validation tests
+pushd $BIN_DIR
+./toolkit_test_server&
+popd
+pushd validation
+./client_session_timeout.py&
+popd
+wait
+mv validation/session_timeout.tap bin/
