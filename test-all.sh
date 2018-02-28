@@ -106,3 +106,13 @@ pushd validation
 popd
 wait
 mv validation/session_timeout.tap bin/
+
+## run validation tests
+pushd $BIN_DIR
+./toolkit_test_server 25000&
+popd
+pushd validation
+./client_sc_establish_timeout.py&
+popd
+wait
+mv validation/sc_establish_timeout.tap bin/
