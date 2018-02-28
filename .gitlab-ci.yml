@@ -1,0 +1,112 @@
+# Continuous Integration configuration with gitlab.com
+# See https://gitlab.com/help/ci/yaml/README.md
+
+stages:
+  - gen
+  - build
+  - test
+
+generation:
+  stage: gen
+  image: com2.systerel.fr:5000/c765/gen-ext@sha256:b303ef8934eb99d3023243d05129a463b3f25be310cc1d6e1ea7abd621695465  # gen-ext:1.0
+  script:
+    - ./pre-build-ext.sh
+  # only:
+  #   - master
+  tags:
+    - docker
+    - linux
+  artifacts:
+    name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'address_space_generation/genc'
+      - 'csrc/services/bgenc'
+    expire_in: '1 month'
+
+build-linux64:
+  stage: build
+  image: com2.systerel.fr:5000/c765/build@sha256:b0e98780e06746973aaddee7407cc9ece6d1a523a7710f02d8e74bbb23762f7a  # build:1.2
+  script:
+    - ./build.sh
+  # only:
+  #   - master
+  tags:
+    - docker
+    - linux
+  artifacts:
+    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'bin/'
+    expire_in: '1 month'
+
+build-win32:
+  stage: build
+  image: com2.systerel.fr:5000/c765/mingw_build@sha256:2eb4d2177f167b2820d1e888468a922e9ec8aee6684cbdd860ae75fb21e366bd  # mingw_buil:1.2
+  script:
+    - 'CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true ./build.sh'
+  # only:
+  #   - master
+  tags:
+    - docker
+    - linux
+  artifacts:
+    name: 'bin-w32-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'bin/'
+    expire_in: '1 month'
+
+build-win64:
+  stage: build
+  image: com2.systerel.fr:5000/c765/mingw_build@sha256:2eb4d2177f167b2820d1e888468a922e9ec8aee6684cbdd860ae75fb21e366bd  # mingw_buil:1.2
+  script:
+    - 'CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64_x86_64.cmake BUILD_SHARED_LIBS=true ./build.sh'
+  # only:
+  #   - master
+  tags:
+    - docker
+    - linux
+  artifacts:
+    name: 'bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'bin/'
+    expire_in: '1 month'
+
+# Test check belongs to the test part, however it does not depend on linux build.
+test-check:
+  stage: test
+  image: com2.systerel.fr:5000/c765/check@sha256:76e11aaf485bdbbb8f48bc75d5e423370b9c71b0842f3b35de41f85c8aa21530  # check:1.0
+  script:
+    - ./.check-code.sh
+  # only:
+  #   - master
+  tags:
+    - docker
+    - linux
+  dependencies:
+    - generation
+
+test-unit:
+  stage: test
+  image: com2.systerel.fr:5000/c765/test@sha256:6a364199c571e62a32d121232729a371a082fc1430941cfd305d0f85817e4518  # test:1.0
+  script:
+    - ./test-all.sh
+  # only:
+  #   - master
+  tags:
+    - docker
+    - linux
+  dependencies:
+    - build-linux64
+
+test-uactt:
+  stage: test
+  image: com2.systerel.fr:5000/c765/uactt@sha256:baf2dd81823abe2b4c5777f7a80b1357812c6e4d52c69e295a476630cc2086d7  # uactt:1.0
+  script:
+    - 'cd acceptances_tests/ && ./launch_acceptance_tests.sh'
+  # only:
+  #   - master
+  tags:
+    - docker
+    - linux
+  dependencies:
+    - build-linux64
