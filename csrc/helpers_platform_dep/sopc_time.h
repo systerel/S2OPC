@@ -39,7 +39,7 @@ typedef uint64_t SOPC_TimeReference;
 void SOPC_Sleep(unsigned int milliseconds);
 
 /**
- * \brief return the current time in DateTime format which is nanoseconds from 1601/01/01 00:00:00 UTC
+ * \brief return the current time in DateTime format which is 100 nanoseconds from 1601/01/01 00:00:00 UTC
  *
  * Note: since the clock is not monotonic, it should not be used to measure elapsed time
  *
@@ -47,6 +47,28 @@ void SOPC_Sleep(unsigned int milliseconds);
  *
  */
 SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void);
+
+/**
+ * \brief return the current local time as a C String, e.g.:
+ * - compact == false: "2018/01/30 13:15:52.694\0"
+ * - compact == true: "20180130_131552_694\0"
+ *
+ * \param compact  provides compact version when flag is set
+ *
+ * \return the current local time as C string (to be deallocated after use)
+ */
+char* SOPC_Time_GetStringOfCurrentLocalTime(bool compact);
+
+/**
+ * \brief return the current UTC time as a C String, e.g.:
+ * - compact == false: "2018/01/30 13:15:52.694\0"
+ * - compact == true: "20180130_131552_694\0"
+ *
+ * \param compact  provides compact version when flag is set
+ *
+ * \return the current UTC time as C string (to be deallocated after use)
+ */
+char* SOPC_Time_GetStringOfCurrentTimeUTC(bool compact);
 
 /**
  * \brief return the current time reference
