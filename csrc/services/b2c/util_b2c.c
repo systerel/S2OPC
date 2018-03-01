@@ -370,9 +370,12 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
         *respEncType = &OpcUa_ServiceFault_EncodeableType;
         break;
     default:
-        printf("util_message__get_encodeable_type: not implemented message type required\n");
-        exit(1);
-        ;
+        if (SOPC_DEBUG_PRINTING != false)
+        {
+            printf("util_message__get_encodeable_type: not implemented message type required\n");
+        }
+        *reqEncType = NULL;
+        *respEncType = NULL;
     }
 }
 

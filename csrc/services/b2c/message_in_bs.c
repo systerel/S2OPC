@@ -217,13 +217,6 @@ void message_in_bs__is_valid_app_msg_in(const constants__t_msg_i message_in_bs__
     }
 }
 
-void message_in_bs__msg_in_memory_changed(void)
-{
-    printf("message_in_bs__msgs_memory_changed\n");
-    exit(1);
-    ;
-}
-
 void message_in_bs__read_activate_req_msg_user(const constants__t_msg_i message_in_bs__msg,
                                                t_bool* const message_in_bs__valid_user_token,
                                                constants__t_user_i* const message_in_bs__user)

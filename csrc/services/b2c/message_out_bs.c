@@ -311,13 +311,6 @@ void message_out_bs__is_valid_msg_out_header(const constants__t_msg_header_i mes
     *message_out_bs__bres = message_out_bs__msg_header != constants__c_msg_header_indet;
 }
 
-void message_out_bs__msg_out_memory_changed(void)
-{
-    printf("message_out_bs__msg_out_memory_changed\n");
-    exit(1);
-    ;
-}
-
 void message_out_bs__write_activate_msg_user(const constants__t_msg_i message_out_bs__msg,
                                              const constants__t_user_i message_out_bs__user)
 {
