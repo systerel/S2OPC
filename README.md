@@ -40,11 +40,11 @@ Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
   * make (tested with GNU Make version >= 3.81)
   * mbedtls (>= 2.6.0): https://tls.mbed.org/
   * check (>= 0.10): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=no)
-- To build the Toolkit library and tests:
+- To build the Toolkit library and tests with default configuration:
 ```
   ./build.sh
 ```
-  OR see README.cmake to do it manually
+- For more information, please refer to the wiki.
 
 Address space generation:
 - see address_space_generation/README file for generator dependencies
