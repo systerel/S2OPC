@@ -40,7 +40,10 @@ else
 fi
 
 # run helpers tests
-export CK_TAP_LOG_FILE_NAME=$BIN_DIR/helpers.tap && $BIN_DIR/check_helpers
+pushd $BIN_DIR
+export CK_TAP_LOG_FILE_NAME=helpers.tap && ./check_helpers
+popd
+
 # run sockets test
 export CK_TAP_LOG_FILE_NAME=$BIN_DIR/sockets.tap && $BIN_DIR/check_sockets
 # run secure channels client / server test

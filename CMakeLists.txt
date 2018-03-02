@@ -152,6 +152,16 @@ add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
 target_include_directories(check_helpers PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
 target_link_libraries(check_helpers PRIVATE ingopcs ${LIBCHECK_DEP_LIB})
 
+## Copy reference logs files to bin/ directory
+add_custom_command(
+    TARGET check_helpers POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/logger/logAnother.ref ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/logger/logCircular.ref1 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/logger/logCircular.ref2 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/logger/logTest.ref1 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/logger/logTest.ref2 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND ${CMAKE_COMMAND} -E copy $(CMAKE_SOURCE_DIR)/tests/data/logger/logTest.ref3 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
 # Server test: local services
 add_executable(toolkit_test_server_local_service "tests/services/toolkit_test_server_local_service.c"
                                                  "tests/services/wrap_read.c"

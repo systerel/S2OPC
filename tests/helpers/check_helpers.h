@@ -38,4 +38,6 @@ Suite* tests_make_suite_time(void);
 
 Suite* tests_make_suite_timers(void);
 
+Suite* tests_make_suite_logger(void);
+
 #endif // CHECK_HELPERS_H
