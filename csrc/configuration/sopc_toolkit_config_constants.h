@@ -91,7 +91,7 @@
 
 /** @brief Maximum number of requests sent by client pending */
 #ifndef SOPC_MAX_PENDING_REQUESTS
-#define SOPC_MAX_PENDING_REQUESTS UINT16_MAX
+#define SOPC_MAX_PENDING_REQUESTS 128
 #endif
 
 /** @brief Maximum time before a response shall be received after sending a request */
