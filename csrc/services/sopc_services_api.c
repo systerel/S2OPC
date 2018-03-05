@@ -23,6 +23,7 @@
 #include "sopc_secure_channels_api.h"
 #include "sopc_toolkit_constants.h"
 
+#include "sopc_logger.h"
 #include "sopc_mutexes.h"
 #include "sopc_services_api.h"
 #include "sopc_toolkit_config.h"
@@ -71,11 +72,6 @@ static void SOPC_Internal_AllClientSecureChannelsDisconnected(void)
 
 void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
-    if (SOPC_DEBUG_PRINTING != false)
-    {
-        printf("Services event dispatcher: event='%d', id='%d', params='%p', auxParam='%ld'\n", scEvent, id, params,
-               (uint64_t) auxParam);
-    }
     SOPC_Services_Event event = (SOPC_Services_Event) scEvent;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Endpoint_Config* epConfig = NULL;
@@ -87,10 +83,9 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
     {
     /* SC to Services events */
     case SC_TO_SE_EP_SC_CONNECTED:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("SC_TO_SE_EP_SC_CONNECTED\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_EP_SC_CONNECTED epCfgIdx=%u scCfgIdx=%u scIdx=%u", id,
+                               params == NULL ? 0 : *(uint32_t*) params, auxParam);
+
         // id ==  endpoint configuration index
         // params = channel configuration index POINTER
         // auxParam == connection Id
@@ -105,10 +100,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         }
         break;
     case SC_TO_SE_EP_CLOSED:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("SC_TO_SE_EPCLOSED\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_EP_CLOSED epCfgIdx=%u returnStatus=%X", id, auxParam);
         // id == endpoint configuration index
         // params = NULL
         // auxParam == status
@@ -118,10 +110,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
                                                       auxParam, "Endpoint is closed !");
         break;
     case SC_TO_SE_SC_CONNECTED:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("SC_TO_SE_SC_CONNECTED\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_CONNECTED scIdx=%u scCfgIdx=%u", id, auxParam);
         // id == connection Id
         // auxParam == secure channel configuration index
         // => B model entry point to add
@@ -131,21 +120,14 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         }
         break;
     case SC_TO_SE_SC_CONNECTION_TIMEOUT:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("SC_TO_SE_SC_CONNECTION_TIMEOUT\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_CONNECTION_TIMEOUT scCfgIdx=%u", id);
+
         // id == secure channel configuration index
         // => B model entry point to add
-        // TODO: treat with a timer reconnection attempt (limited attempts ?) => no change of state (connecting)
-        // until all attempts terminated
         io_dispatch_mgr__client_secure_channel_timeout(id);
         break;
     case SC_TO_SE_SC_DISCONNECTED:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("SC_TO_SE_SC_DISCONNECTED\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_DISCONNECTED scIdx=%u", id);
         // id == connection Id ==> TMP: secure channel config idx
         // auxParam = status
         // => B model entry point to add
@@ -153,19 +135,14 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         io_dispatch_mgr__secure_channel_lost((constants__t_channel_i) id);
         break;
     case SE_TO_SE_SC_ALL_DISCONNECTED:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("SE_TO_SE_SC_ALL_DISCONNECTED\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_SC_ALL_DISCONNECTED");
         // Call directly toolkit configuration callback
         SOPC_Internal_AllClientSecureChannelsDisconnected();
         break;
 
     case SE_TO_SE_ACTIVATE_ORPHANED_SESSION:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("SE_TO_SE_ACTIVATE_ORPHANED_SESSION\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_ACTIVATE_ORPHANED_SESSION session=%u scCfgIdx=%u", id, auxParam);
+
         if (auxParam <= INT32_MAX)
         {
             io_dispatch_mgr__internal_client_activate_orphaned_session((constants__t_session_i) id,
@@ -173,10 +150,8 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         }
         break;
     case SE_TO_SE_ACTIVATE_SESSION:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("SE_TO_SE_ACTIVATE_SESSION\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_ACTIVATE_SESSION session=%u", id);
+
         if (NULL != params)
         {
             io_dispatch_mgr__client_reactivate_session_new_user((constants__t_session_i) id,
@@ -190,10 +165,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         }
         break;
     case SE_TO_SE_CREATE_SESSION:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("SE_TO_SE_CREATE_SESSION\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_CREATE_SESSION session=%u scCfgIdx=%u", id, auxParam);
         if (auxParam <= INT32_MAX)
         {
             io_dispatch_mgr__internal_client_create_session((constants__t_session_i) id,
@@ -202,17 +174,13 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         break;
 
     case TIMER_SE_EVAL_SESSION_TIMEOUT:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("TIMER_SE_EVAL_SESSION_TIMEOUT\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_CREATE_SESSION session=%u", id);
+
         io_dispatch_mgr__internal_server_evaluate_session_timeout((constants__t_session_i) id);
         break;
     case SC_TO_SE_SC_SERVICE_RCV_MSG:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("SC_TO_SE_SC_SERVICE_RCV_MSG\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_SERVICE_RCV_MSG scIdx=%u reqId=%u", id, auxParam);
+
         // id ==  connection Id
         // params = message content (byte buffer)
         // auxParam == context (request id)
@@ -223,10 +191,9 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         break;
 
     case SC_TO_SE_SND_FAILURE:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("SC_TO_SE_SND_FAILURE\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SND_FAILURE scIdx=%u reqId=%u statusCode=%X", id,
+                               params == NULL ? 0 : *(uint32_t*) params, auxParam);
+
         if (NULL != params)
         {
             util_status_code__C_to_B(auxParam, &sCode);
@@ -236,10 +203,8 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         } // else: without request Id, it cannot be treated
         break;
     case SC_TO_SE_REQUEST_TIMEOUT:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("SC_TO_SE_REQUEST_TIMEOUT\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_REQUEST_TIMEOUT scIdx=%u reqHandle=%u", id, auxParam);
+
         /* id = secure channel connection index,
            auxParam = request handle */
         io_dispatch_mgr__internal_client_request_timeout(id, auxParam);
@@ -247,10 +212,8 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
 
     /* App to Services events */
     case APP_TO_SE_OPEN_ENDPOINT:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("APP_TO_SE_OPEN_ENDPOINT\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: APP_TO_SE_OPEN_ENDPOINT epCfgIdx=%u", id);
+
         // id ==  endpoint configuration index
         // => B model entry point to add
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(id);
@@ -269,10 +232,8 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         }
         break;
     case APP_TO_SE_CLOSE_ENDPOINT:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("APP_TO_SE_CLOSE_ENDPOINT\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: APP_TO_SE_CLOSE_ENDPOINT epCfgIdx=%u", id);
+
         // id ==  endpoint configuration index
         // => B model entry point to add
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(id);
@@ -290,10 +251,13 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         break;
 
     case APP_TO_SE_LOCAL_SERVICE_REQUEST:
-        if (SOPC_DEBUG_PRINTING != false)
+        if (params != NULL)
         {
-            printf("APP_TO_SE_LOCAL_SERVICE_REQUEST\n");
+            encType = *(SOPC_EncodeableType**) params;
         }
+        SOPC_Logger_TraceDebug("ServicesMgr: APP_TO_SE_LOCAL_SERVICE_REQUEST epCfgIdx=%u msgType=%s ctx=%u", id,
+                               SOPC_EncodeableType_GetName(encType), auxParam);
+
         // id =  endpoint configuration index
         // params = local service request
         // auxParam = user application session context
@@ -312,13 +276,14 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
             }
             SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_LOCAL_SERVICE_RESPONSE), id, msg,
                                             auxParam);
+            SOPC_Logger_TraceWarning(
+                "ServicesMgr: APP_TO_SE_LOCAL_SERVICE_REQUEST failed epCfgIdx=%u msgType=%s ctx=%u", id,
+                SOPC_EncodeableType_GetName(encType), auxParam);
         }
         break;
     case APP_TO_SE_ACTIVATE_SESSION:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("APP_TO_SE_ACTIVATE_SESSION\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: APP_TO_SE_ACTIVATE_SESSION scCfgIdx=%u ctx=%u", id, auxParam);
+
         // id == secure channel configuration
         // params = user authentication
         // auxParam = user application session context
@@ -329,64 +294,64 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
                                             0,         // session id (not yet defined)
                                             NULL,      // user ?
                                             auxParam); // user application session context
-            // TODO: log
+            SOPC_Logger_TraceWarning("ServicesMgr: APP_TO_SE_ACTIVATE_SESSION failed scCfgIdx=%u ctx=%u", id, auxParam);
         }
         break;
     case APP_TO_SE_SEND_SESSION_REQUEST:
-        if (SOPC_DEBUG_PRINTING != false)
+        if (params != NULL)
         {
-            printf("APP_TO_SE_SEND_SESSION_REQUEST\n");
+            encType = *(SOPC_EncodeableType**) params;
         }
+        SOPC_Logger_TraceDebug("ServicesMgr: APP_TO_SE_SEND_SESSION_REQUEST  session=%u msgType=%s ctx=%u", id,
+                               SOPC_EncodeableType_GetName(encType), auxParam);
+
         // id == session id
         // params = request
         io_dispatch_mgr__client_send_service_request(id, params, auxParam, &sCode);
         if (sCode != constants__e_sc_ok)
         {
-            if (params != NULL)
-            {
-                encType = *(SOPC_EncodeableType**) params;
-            }
             SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
                                             util_status_code__B_to_return_status_C(sCode), encType, auxParam);
             status = SOPC_STATUS_NOK;
+
+            SOPC_Logger_TraceWarning("ServicesMgr: APP_TO_SE_SEND_SESSION_REQUEST failed session=%u msgType=%s ctx=%u",
+                                     id, SOPC_EncodeableType_GetName(encType), auxParam);
         }
         break;
     case APP_TO_SE_CLOSE_SESSION:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("APP_TO_SE_CLOSE_SESSION\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: APP_TO_SE_CLOSE_SESSION  session=%u", id);
+
         // id == session id
         io_dispatch_mgr__client_send_close_session_request(id, &sCode);
         if (sCode != constants__e_sc_ok)
         {
-            printf("WARNING: Problem while closing the session on client demand\n");
+            SOPC_Logger_TraceError("ServicesMgr: APP_TO_SE_CLOSE_SESSION failed session=%u", id);
         }
         break;
     case APP_TO_SE_SEND_DISCOVERY_REQUEST:
-        if (SOPC_DEBUG_PRINTING != false)
+        if (params != NULL)
         {
-            printf("APP_TO_SE_SEND_DISCOVERY_REQUEST\n");
+            encType = *(SOPC_EncodeableType**) params;
         }
+        SOPC_Logger_TraceDebug("ServicesMgr: APP_TO_SE_SEND_DISCOVERY_REQUEST scCfgIdx=%u msgType=%s ctx=%u", id,
+                               SOPC_EncodeableType_GetName(encType), auxParam);
+
         // id == endpoint connection config idx
         // params = request
         io_dispatch_mgr__client_send_discovery_request(id, params, auxParam, &sCode);
         if (sCode != constants__e_sc_ok)
         {
-            if (params != NULL)
-            {
-                encType = *(SOPC_EncodeableType**) params;
-            }
             SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
                                             util_status_code__B_to_return_status_C(sCode), encType, auxParam);
             status = SOPC_STATUS_NOK;
+
+            SOPC_Logger_TraceWarning("ServicesMgr: APP_TO_SE_SEND_SESSION_REQUEST failed session=%u msgType=%s ctx=%u",
+                                     id, SOPC_EncodeableType_GetName(encType), auxParam);
         }
         break;
     case APP_TO_SE_CLOSE_ALL_CONNECTIONS:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("APP_TO_SE_CLOSE_ALL_CONNECTIONS\n");
-        }
+        SOPC_Logger_TraceDebug("ServicesMgr: APP_TO_SE_CLOSE_ALL_CONNECTIONS");
+
         io_dispatch_mgr__close_all_active_connections(&bres);
         if (bres == false)
         {
@@ -396,13 +361,6 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         break;
     default:
         assert(false);
-    }
-    if (SOPC_STATUS_OK != status)
-    {
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("Invalid status on SOPC_ServicesEventDispatcher exit: %x\n", status);
-        }
     }
 }
 

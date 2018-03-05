@@ -24,6 +24,7 @@
 
 #include "opcua_identifiers.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_logger.h"
 
 void util_message__get_encodeable_type(const constants__t_msg_type_i message__msg_type,
                                        SOPC_EncodeableType** reqEncType,
@@ -370,10 +371,7 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
         *respEncType = &OpcUa_ServiceFault_EncodeableType;
         break;
     default:
-        if (SOPC_DEBUG_PRINTING != false)
-        {
-            printf("util_message__get_encodeable_type: not implemented message type required\n");
-        }
+        SOPC_Logger_TraceError("util_message__get_encodeable_type: unknown type %d", message__msg_type);
         *reqEncType = NULL;
         *respEncType = NULL;
     }

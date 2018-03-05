@@ -88,4 +88,6 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(SOPC_EncodeableType**
                                                            const char* namespac,
                                                            uint32_t typeId);
 
+const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType);
+
 #endif /* SOPC_ENCODEABLETYPE_H_ */

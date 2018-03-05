@@ -25,7 +25,7 @@ bool SOPC_IEEE_Check()
 
     if (false == bStatus)
     {
-        printf("Compiler floating point support is not IEEE-754 compliant\n");
+        printf("ERROR: Compiler floating point support is not IEEE-754 compliant\n");
     }
 
     return bStatus;

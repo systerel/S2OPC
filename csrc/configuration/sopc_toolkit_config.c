@@ -31,6 +31,7 @@
 
 #include "sopc_encodeable.h"
 #include "sopc_event_timer_manager.h"
+#include "sopc_logger.h"
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_time.h"
@@ -58,60 +59,86 @@ static struct
     SOPC_EncodeableType** encTypesTable;
     uint32_t nbEncTypesTable;
 
-} tConfig = {
-    .initDone = false,
-    .locked = false,
-    .scConfigIdxMax = 0,
-    .serverScLastConfigIdx = 0,
-    .epConfigIdxMax = 0,
-    .nsTable = NULL,
-    .encTypesTable = NULL,
-    .nbEncTypesTable = 0,
-};
+    /* Log configuration */
+    const char* logDirPath;
+    uint32_t logMaxBytes;
+    uint16_t logMaxFiles;
+    SOPC_Log_Level logLevel;
+
+} tConfig = {.initDone = false,
+             .locked = false,
+             .scConfigIdxMax = 0,
+             .serverScLastConfigIdx = 0,
+             .epConfigIdxMax = 0,
+             .nsTable = NULL,
+             .encTypesTable = NULL,
+             .nbEncTypesTable = 0,
+             .logDirPath = "",
+             .logMaxBytes = 1048576, // 1 MB
+             .logMaxFiles = 50,
+             .logLevel = SOPC_LOG_LEVEL_ERROR};
 
 static SOPC_ComEvent_Fct* appFct = NULL;
 static SOPC_AddressSpaceNotif_Fct* pAddSpaceFct = NULL;
 
 void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id, void* params, uintptr_t auxParam)
 {
+    SOPC_EncodeableType* encType = NULL;
     switch (SOPC_AppEvent_AppEventType_Get(eventAndType))
     {
     case SOPC_APP_COM_EVENT:
-        if (SOPC_DEBUG_PRINTING != false)
+        switch (SOPC_AppEvent_ComEvent_Get(eventAndType))
         {
-            switch (SOPC_AppEvent_ComEvent_Get(eventAndType))
+        case SE_SESSION_ACTIVATION_FAILURE:
+            SOPC_Logger_TraceDebug("App: SE_SESSION_ACTIVATION_FAILURE session=%u context=%u", id, auxParam);
+            break;
+        case SE_ACTIVATED_SESSION:
+            SOPC_Logger_TraceDebug("App: SE_ACTIVATED_SESSION session=%u context=%u", id, auxParam);
+            break;
+        case SE_SESSION_REACTIVATING:
+            SOPC_Logger_TraceDebug("App: SE_SESSION_REACTIVATING session=%u context=%u", id, auxParam);
+            break;
+        case SE_RCV_SESSION_RESPONSE:
+            if (params != NULL)
             {
-            case SE_SESSION_ACTIVATION_FAILURE:
-                printf("App: SE_SESSION_ACTIVATION_FAILURE\n");
-                break;
-            case SE_ACTIVATED_SESSION:
-                printf("App: SE_ACTIVATED_SESSION\n");
-                break;
-            case SE_SESSION_REACTIVATING:
-                printf("App: SE_SESSION_REACTIVATING\n");
-                break;
-            case SE_RCV_SESSION_RESPONSE:
-                printf("App: SE_RCV_SESSION_RESPONSE\n");
-                break;
-            case SE_CLOSED_SESSION:
-                printf("App: SE_CLOSED_SESSION\n");
-                break;
-            case SE_RCV_DISCOVERY_RESPONSE:
-                printf("App: SE_RCV_DISCOVERY_RESPONSE\n");
-                break;
-            case SE_SND_REQUEST_FAILED:
-                printf("App: SE_SND_REQUEST_FAILED\n");
-                break;
-            case SE_CLOSED_ENDPOINT:
-                printf("App: SE_CLOSED_ENDPOINT\n");
-                break;
-            case SE_LOCAL_SERVICE_RESPONSE:
-                printf("App: SE_LOCAL_SERVICE_RESPONSE\n");
-                break;
-            default:
-                printf("App: UNKOWN EVENT\n");
-                break;
+                encType = *(SOPC_EncodeableType**) params;
             }
+            SOPC_Logger_TraceDebug("App: SE_RCV_SESSION_RESPONSE  session=%u msgTyp=%s context=%u", id,
+                                   SOPC_EncodeableType_GetName(encType), auxParam);
+            break;
+        case SE_CLOSED_SESSION:
+            SOPC_Logger_TraceDebug("App: SE_CLOSED_SESSION session=%u context=%u", id, auxParam);
+            break;
+        case SE_RCV_DISCOVERY_RESPONSE:
+            if (params != NULL)
+            {
+                encType = *(SOPC_EncodeableType**) params;
+            }
+            SOPC_Logger_TraceDebug("App: SE_RCV_DISCOVERY_RESPONSE msgTyp=%s context=%u",
+                                   SOPC_EncodeableType_GetName(encType), auxParam);
+            break;
+        case SE_SND_REQUEST_FAILED:
+            if (params != NULL)
+            {
+                encType = *(SOPC_EncodeableType**) params;
+            }
+            SOPC_Logger_TraceDebug("App: SE_SND_REQUEST_FAILED retStatus=%u msgTyp=%s context=%u", id,
+                                   SOPC_EncodeableType_GetName(encType), auxParam);
+            break;
+        case SE_CLOSED_ENDPOINT:
+            SOPC_Logger_TraceDebug("App: SE_CLOSED_ENDPOINT idx=%u retStatus=%u", id, auxParam);
+            break;
+        case SE_LOCAL_SERVICE_RESPONSE:
+            if (params != NULL)
+            {
+                encType = *(SOPC_EncodeableType**) params;
+            }
+            SOPC_Logger_TraceDebug("App: SE_LOCAL_SERVICE_RESPONSE  idx=%u msgTyp=%s context=%u", id,
+                                   SOPC_EncodeableType_GetName(encType), auxParam);
+            break;
+        default:
+            SOPC_Logger_TraceDebug("App: UNKOWN EVENT");
+            break;
         }
         if (NULL != appFct)
         {
@@ -141,10 +168,7 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
         switch (SOPC_AppEvent_AddSpaceEvent_Get(eventAndType))
         {
         case AS_WRITE_EVENT:
-            if (SOPC_DEBUG_PRINTING != false)
-            {
-                printf("App: AS_WRITE_EVENT\n");
-            }
+            SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT"); // TODO: display nodeId / value
             if (NULL != pAddSpaceFct)
             {
                 pAddSpaceFct(SOPC_AppEvent_AddSpaceEvent_Get(eventAndType), params, (SOPC_StatusCode) auxParam);
@@ -156,10 +180,7 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
             }
             break;
         default:
-            if (SOPC_DEBUG_PRINTING != false)
-            {
-                printf("App: UNKOWN AS EVENT\n");
-            }
+            SOPC_Logger_TraceDebug("App: UNKOWN AS EVENT");
             break;
         }
         break;
@@ -235,6 +256,8 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
             {
                 tConfig.locked = true;
                 SOPC_Services_ToolkitConfigured();
+                SOPC_Logger_Initialize(tConfig.logDirPath, tConfig.logMaxBytes, tConfig.logMaxFiles);
+                SOPC_Logger_SetTraceLogLevel(tConfig.logLevel);
                 status = SOPC_STATUS_OK;
             }
             else
@@ -298,6 +321,7 @@ void SOPC_Toolkit_Clear()
         tConfig.nbEncTypesTable = 0;
 
         SOPC_Toolkit_ClearServerScConfigs_WithoutLock();
+        SOPC_Logger_Clear();
         appFct = NULL;
         pAddSpaceFct = NULL;
         tConfig.locked = false;
@@ -714,4 +738,66 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNot
         }
     }
     return status;
+}
+
+SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogPath(const char* logDirPath, uint32_t maxBytes, uint16_t maxFiles)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (logDirPath != NULL && maxBytes > 100 && maxFiles > 0)
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+        if (tConfig.initDone != false)
+        {
+            Mutex_Lock(&tConfig.mut);
+            if (false == tConfig.locked)
+            {
+                tConfig.logDirPath = logDirPath;
+                tConfig.logMaxBytes = maxBytes;
+                tConfig.logMaxFiles = maxFiles;
+                status = SOPC_STATUS_OK;
+            }
+            Mutex_Unlock(&tConfig.mut);
+        }
+    }
+    return status;
+}
+
+SOPC_Toolkit_Log_Level SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level level)
+{
+    SOPC_Toolkit_Log_Level extRes = level;
+    SOPC_Log_Level result = SOPC_LOG_LEVEL_ERROR;
+    if (tConfig.initDone != false)
+    {
+        Mutex_Lock(&tConfig.mut);
+        switch (level)
+        {
+        case SOPC_TOOLKIT_LOG_LEVEL_ERROR:
+            result = SOPC_LOG_LEVEL_ERROR;
+            break;
+        case SOPC_TOOLKIT_LOG_LEVEL_WARNING:
+            result = SOPC_LOG_LEVEL_WARNING;
+            break;
+        case SOPC_TOOLKIT_LOG_LEVEL_INFO:
+            result = SOPC_LOG_LEVEL_INFO;
+            break;
+        case SOPC_TOOLKIT_LOG_LEVEL_DEBUG:
+            result = SOPC_LOG_LEVEL_DEBUG;
+            break;
+        default:
+            extRes = SOPC_TOOLKIT_LOG_LEVEL_DEBUG;
+            result = SOPC_LOG_LEVEL_DEBUG;
+        }
+        if (false == tConfig.locked)
+        {
+            // Only record level for init
+            tConfig.logLevel = result;
+        }
+        else
+        {
+            // Change the log level
+            SOPC_Logger_SetTraceLogLevel(result);
+        }
+        Mutex_Unlock(&tConfig.mut);
+    }
+    return extRes;
 }

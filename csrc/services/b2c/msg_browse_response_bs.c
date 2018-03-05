@@ -27,6 +27,7 @@
 #include "msg_browse_response_bs.h"
 #include "util_b2c.h"
 
+#include "sopc_logger.h"
 #include "sopc_types.h"
 
 /* Message elements */
@@ -83,7 +84,7 @@ void msg_browse_response_bs__set_ResponseBrowse_ContinuationPoint(
     static bool bWarned = false;
     if (!bWarned)
     {
-        printf("Not implemented: msg_browse_response_bs__set_ResponseBrowse_ContinuationPoint\n");
+        SOPC_Logger_TraceWarning("Not implemented: msg_browse_response_bs__set_ResponseBrowse_ContinuationPoint");
         bWarned = true;
     }
 }
@@ -95,7 +96,7 @@ void msg_browse_response_bs__reset_ResponseBrowse_ContinuationPoint(
     static bool bWarned = false;
     if (!bWarned)
     {
-        printf("Not implemented: msg_browse_response_bs__RESET_ResponseBrowse_ContinuationPoint\n");
+        SOPC_Logger_TraceWarning("Not implemented: msg_browse_response_bs__RESET_ResponseBrowse_ContinuationPoint");
         bWarned = true;
     }
 }

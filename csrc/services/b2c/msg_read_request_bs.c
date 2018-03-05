@@ -27,6 +27,7 @@
 #include "util_b2c.h"
 
 #include "address_space_impl.h"
+#include "sopc_logger.h"
 #include "sopc_types.h"
 
 /*------------------------
@@ -64,7 +65,7 @@ void msg_read_request_bs__getall_req_ReadValue_AttributeId(const constants__t_ms
     }
     if (!isvalid && !bWarned)
     {
-        printf("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id\n");
+        SOPC_Logger_TraceWarning("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id");
         bWarned = true;
     }
 

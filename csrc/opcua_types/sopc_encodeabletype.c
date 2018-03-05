@@ -23,6 +23,9 @@
 #include "sopc_helper_string.h"
 #include "sopc_namespace_table.h"
 
+const char* nullType = "NULL";
+const char* noNameType = "NoName";
+
 SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(SOPC_EncodeableType** encTypesTable,
                                                            const char* namespace,
                                                            uint32_t typeId)
@@ -75,6 +78,24 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(SOPC_EncodeableType**
                 current = NULL;
             }
         }
+    }
+    return result;
+}
+
+const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType)
+{
+    const char* result = NULL;
+    if (encType == NULL)
+    {
+        result = nullType;
+    }
+    else if (encType->TypeName == NULL)
+    {
+        result = noNameType;
+    }
+    else
+    {
+        result = encType->TypeName;
     }
     return result;
 }

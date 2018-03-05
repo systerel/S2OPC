@@ -137,4 +137,28 @@ SOPC_ReturnStatus SOPC_ToolkitConfig_SetNamespaceUris(SOPC_NamespaceTable* nsTab
  */
 SOPC_ReturnStatus SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTable, uint32_t nbTypes);
 
+/**
+ * \brief Configure the toolkit log generation properties (SOPC_Toolkit_Initialize required,
+ * !SOPC_Toolkit_Configured required)
+ *
+ * \param logDirPath   Absolute or relative path of the directory to be used for logs (shall exist and terminate with
+ * directory separator). Default value is execution directory (same as "" value provided).
+ *
+ * \param maxBytes     A maximum amount of bytes (> 100) by log file before opening a new file incrementing the integer
+ * suffix. It is a best effort value (amount verified after each print). Default value is 1024.
+ *
+ * \param maxFiles     A maximum number of files (> 0) to be used, when reached the older log file is overwritten
+ * (starting with *_00001.log). Default value is 50.
+ */
+SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogPath(const char* logDirPath, uint32_t maxBytes, uint16_t maxFiles);
+
+/**
+ * \brief Configure the toolkit log traces level (SOPC_TOOLKIT_LOG_LEVEL_ERROR/WARNING/INFO/DEBUG)
+ *
+ * \param logLevel  Minimum level of log traces to be printed in the log files (default ERROR)
+ *
+ * \return          The level applied to the log traces
+ */
+SOPC_Toolkit_Log_Level SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level level);
+
 #endif /* SOPC_TOOLKIT_CONFIG_H_ */
