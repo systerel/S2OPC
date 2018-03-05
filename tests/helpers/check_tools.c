@@ -793,6 +793,8 @@ START_TEST(test_sorted_linked_list)
         ck_assert((uint8_t)(9 - i) == SOPC_SLinkedList_GetLength(list));
     }
     ck_assert(0 == SOPC_SLinkedList_GetLength(list));
+
+    SOPC_SLinkedList_Delete(list);
 }
 END_TEST
 
@@ -2903,6 +2905,9 @@ START_TEST(test_ua_string_type)
     ck_assert(comp_res == 0);
     result = SOPC_String_Compare(&s1, &s2, false, &comp_res);
     ck_assert(comp_res == 0);
+
+    SOPC_String_Clear(&s1);
+    SOPC_String_Clear(&s2);
 }
 END_TEST
 
