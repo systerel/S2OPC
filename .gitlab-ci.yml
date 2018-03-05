@@ -27,7 +27,7 @@ build-linux64:
   stage: build
   image: com2.systerel.fr:5000/c765/build@sha256:b0e98780e06746973aaddee7407cc9ece6d1a523a7710f02d8e74bbb23762f7a  # build:1.2
   script:
-    - ./build.sh
+    - 'CMAKE_INSTALL_PREFIX=../install_linux64 ./build.sh && cd build && cmake --build . --target install'
   # only:
   #   - master
   tags:
@@ -37,13 +37,14 @@ build-linux64:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
       - 'bin/'
+      - 'install_linux64/'
     expire_in: '1 month'
 
 build-win32:
   stage: build
   image: com2.systerel.fr:5000/c765/mingw_build@sha256:2eb4d2177f167b2820d1e888468a922e9ec8aee6684cbdd860ae75fb21e366bd  # mingw_buil:1.2
   script:
-    - 'CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true ./build.sh'
+    - 'CMAKE_INSTALL_PREFIX=../install_win32 CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true ./build.sh && cd build_toolchain && cmake --build . --target install'
   # only:
   #   - master
   tags:
@@ -53,13 +54,14 @@ build-win32:
     name: 'bin-w32-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
       - 'bin/'
+      - 'install_win32/'
     expire_in: '1 month'
 
 build-win64:
   stage: build
   image: com2.systerel.fr:5000/c765/mingw_build@sha256:2eb4d2177f167b2820d1e888468a922e9ec8aee6684cbdd860ae75fb21e366bd  # mingw_buil:1.2
   script:
-    - 'CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64_x86_64.cmake BUILD_SHARED_LIBS=true ./build.sh'
+    - 'CMAKE_INSTALL_PREFIX=../install_win64 CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64_x86_64.cmake BUILD_SHARED_LIBS=true ./build.sh && cd build_toolchain && cmake --build . --target install'
   # only:
   #   - master
   tags:
@@ -69,6 +71,7 @@ build-win64:
     name: 'bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
       - 'bin/'
+      - 'install_win64/'
     expire_in: '1 month'
 
 # Test check belongs to the test part, however it does not depend on linux build.
