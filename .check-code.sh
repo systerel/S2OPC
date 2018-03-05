@@ -38,7 +38,7 @@ echo "Pre-build-check log" > $LOGPATH
 
 #### Check absence of functions / includes ####
 
-CHECK_ABSENCE="(restrict|fgets|fgetws|getc|putc|getwc|putwc|fsetpos|rand|readlink|vfork|putenv|lstat|setuid|setgid|getuid|getgid|seteuid|geteuid|fork|pthread_kill|pthread_cancel|pthread_exit|signal.h|stdarg.h)"
+CHECK_ABSENCE="(restrict|fgets|fgetws|getc|putc|getwc|putwc|fsetpos|rand|readlink|vfork|putenv|lstat|setuid|setgid|getuid|getgid|seteuid|geteuid|fork|pthread_kill|pthread_cancel|pthread_exit|signal.h)"
 
 echo "Checking specific functions or headers not used in code" | tee -a $LOGPATH
 find $CSRC -name "*.c" -or -name "*.h" | xargs grep -wiEc $CHECK_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
