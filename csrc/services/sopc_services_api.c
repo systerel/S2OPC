@@ -95,7 +95,8 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         }
         if (bres == false)
         {
-            // TODO: log error: not coherent between B expectations and C code state
+            SOPC_Logger_TraceError("Services: channel state incoherent epCfgIdx=%d scIdx=%d", id, auxParam);
+
             SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, auxParam, NULL, 0);
         }
         break;
@@ -160,7 +161,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         }
         else
         {
-            // TODO: log error
+            SOPC_Logger_TraceError("ServicesMgr: SE_TO_SE_ACTIVATE_SESSION session=%u user parameter is NULL", id);
             sCode = constants__e_sc_bad_generic;
         }
         break;
@@ -420,7 +421,13 @@ void SOPC_Services_Clear()
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);
-    (void) status; // log
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError("Services event mgr: error status when stopping '%d'", status);
+    }
     status = SOPC_EventDispatcherManager_StopAndDelete(&applicationEventDispatcherMgr);
-    (void) status; // log
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError("Application event mgr: error status when stopping '%d'", status);
+    }
 }

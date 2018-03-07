@@ -575,7 +575,9 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
         if (NULL == acceptSock)
         {
-            // TODO: log refusing new sockets due to limit
+            SOPC_Logger_TraceWarning(
+                "SocketsMgr: refusing new connection since maximum number of socket reached (%u/%u)",
+                socketElt->listenerConnections, SOPC_MAX_SOCKETS_CONNECTIONS);
         }
         else
         {
@@ -714,8 +716,6 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
             {
                 SOPC_Buffer_Delete(buffer);
                 buffer = NULL;
-                // Failure during read operation or out of memory
-                // TODO: log
                 SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
                 SOPC_SocketsInternalContext_CloseSocketLock(eltId);
             }

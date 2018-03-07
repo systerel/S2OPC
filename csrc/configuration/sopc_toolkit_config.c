@@ -84,6 +84,7 @@ static SOPC_AddressSpaceNotif_Fct* pAddSpaceFct = NULL;
 void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id, void* params, uintptr_t auxParam)
 {
     SOPC_EncodeableType* encType = NULL;
+    char* nodeId = NULL;
     switch (SOPC_AppEvent_AppEventType_Get(eventAndType))
     {
     case SOPC_APP_COM_EVENT:
@@ -168,7 +169,19 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
         switch (SOPC_AppEvent_AddSpaceEvent_Get(eventAndType))
         {
         case AS_WRITE_EVENT:
-            SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT"); // TODO: display nodeId / value
+            if (params != NULL)
+            {
+                nodeId = SOPC_NodeId_ToCString(&((OpcUa_WriteValue*) params)->NodeId);
+            }
+            if (nodeId != NULL)
+            {
+                SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT on nodeId '%s'", nodeId);
+                free(nodeId);
+            }
+            else
+            {
+                SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT (WriteValue or NodeId string invalid)");
+            }
             if (NULL != pAddSpaceFct)
             {
                 pAddSpaceFct(SOPC_AppEvent_AddSpaceEvent_Get(eventAndType), params, (SOPC_StatusCode) auxParam);

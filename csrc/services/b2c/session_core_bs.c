@@ -29,6 +29,7 @@
 #include "sopc_encodeable.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_key_manager.h"
+#include "sopc_logger.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_services_api.h"
 #include "sopc_time.h"
@@ -963,10 +964,18 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
                     SOPC_Services_GetEventDispatcher(), eventParams,
                     session_RevisedSessionTimeout[session_core_bs__session] - elapsedSinceLatestMsg);
                 session_expiration_timer[session_core_bs__session] = timerId;
-                // TODO: log if timerId == 0
-            } // else: TODO: log expired session
-        }     // else: TODO: log
-    }         // else: TODO: log
+                if (0 == timerId)
+                {
+                    SOPC_Logger_TraceError("Services: session=%d expiration timer renew failed",
+                                           session_core_bs__session);
+                }
+            }
+        }
+        if (*session_core_bs__expired != false)
+        {
+            SOPC_Logger_TraceDebug("Services: session=%d expired on timeout evaluation", session_core_bs__session);
+        }
+    }
 }
 
 void session_core_bs__server_session_timeout_msg_received(const constants__t_session_i session_core_bs__session)
@@ -1001,7 +1010,10 @@ void session_core_bs__server_session_timeout_start_timer(const constants__t_sess
         timerId = SOPC_EventTimer_Create(SOPC_Services_GetEventDispatcher(), eventParams,
                                          session_RevisedSessionTimeout[session_core_bs__session]);
         session_expiration_timer[session_core_bs__session] = timerId;
-        // TODO: log if timerId == 0
+        if (0 == timerId)
+        {
+            SOPC_Logger_TraceError("Services: session=%d expiration timer creation failed", session_core_bs__session);
+        }
     }
 }
 

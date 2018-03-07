@@ -200,7 +200,8 @@ static bool SC_CloseConnection(uint32_t connectionIdx)
                 configRes = SOPC_ToolkitServer_RemoveSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
                 if (configRes == false)
                 {
-                    // TODO: log error
+                    SOPC_Logger_TraceError("ScStateMgr: SC_CloseConnection: scCfgIdx=%d not found",
+                                           scConnection->endpointConnectionConfigIdx);
                 }
             }
 
@@ -233,6 +234,29 @@ static uint32_t SC_Client_StartOPNrenewTimer(uint32_t connectionIdx, uint32_t ti
     eventParams.auxParam = 0;
     eventParams.debugName = NULL;
     return SOPC_EventTimer_Create(SOPC_SecureChannels_GetEventDispatcher(), eventParams, timeoutMs);
+}
+
+static char* SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBuffer, SOPC_StatusCode* errorStatus)
+{
+    assert(errBuffer != NULL);
+    assert(errorStatus != NULL);
+    char* result = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_String reason;
+    SOPC_String_Initialize(&reason);
+
+    // Read error code
+    status = SOPC_UInt32_Read(errorStatus, errBuffer);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_Read(&reason, errBuffer);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        result = SOPC_String_GetCString(&reason);
+    }
+    SOPC_String_Clear(&reason);
+    return result;
 }
 
 static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_StatusCode errorStatus, char* reason)
@@ -886,7 +910,8 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
         }
         else
         {
-            // TODO: log modified requested lifetime
+            SOPC_Logger_TraceWarning("ScStateMgr: OPN requested lifetime set to minimum value %d instead of %d",
+                                     SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME, config->requestedLifetime);
             opnReq.RequestedLifetime = SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME;
         }
 
@@ -1031,7 +1056,7 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
             if (opnResp->ServerNonce.Length > 0)
             {
                 // Unexpected token
-                // TODO: log
+                SOPC_Logger_TraceWarning("ScStateMgr: OPN resp decoding: unexpected token in None security mode");
             }
         }
         else
@@ -1541,7 +1566,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                 {
                     // Nonce unexpected
                     SOPC_Logger_TraceWarning(
-                        "ScStateMgr OPN: unexpected Nonce presence for None security mode epCfgIdx=%u scCfgIdx=%u",
+                        "ScStateMgr: Nonce unexpected in OPN req for None security mode epCfgIdx=%u scCfgIdx=%u",
                         scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
                 }
             }
@@ -1975,7 +2000,9 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
                 if (opnReq->ClientNonce.Length > 0)
                 {
                     // Nonce unexpected
-                    // TODO: log
+                    SOPC_Logger_TraceWarning(
+                        "ScStateMgr: Nonce unexpected in OPN req for None security mode epCfgIdx=%u scCfgIdx=%u",
+                        scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
                 }
             }
             else
@@ -2179,6 +2206,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     uint32_t requestHandle = 0;
     uint32_t requestedLifetime = 0;
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
+    char* errorReason = NULL;
     switch (event)
     {
     /* Sockets events: */
@@ -2396,7 +2424,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                     SOPC_Services_EnqueueEvent(SC_TO_SE_REQUEST_TIMEOUT, eltId, NULL, msgCtx->requestHandle);
                     break;
                 case SOPC_MSG_TYPE_SC_OPN:
-                    // TODO: log in case of RENEW state ?
+                    SOPC_Logger_TraceError("ScStateMgr: OPN request timeout for response on scId=%d", eltId);
                     // The secure channel will then stay in RENEW if no response received
                     break;
                 default:
@@ -2766,11 +2794,30 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
            auxParam = params = (SOPC_Buffer*) buffer */
         scConnection = SC_GetConnection(eltId);
 
-        // TODO: log: Decode ERR message and use reason/error code (received on client side only ! => guaranteed by
-        // chunks manager filtering)
-        SC_CloseSecureConnection(scConnection, eltId,
-                                 true, // consider socket is closed since server should have closed now
-                                 OpcUa_BadSecureChannelClosed, "ERR message received");
+        if (params != NULL)
+        {
+            errorReason = SC_ClientTransition_ReceivedErrorMsg((SOPC_Buffer*) params, &errorStatus);
+        }
+
+        if (errorReason != NULL)
+        {
+            SOPC_Logger_TraceError("ScStateMgr: ERR message received with status=%X and reason=%s (scIdx=%u)",
+                                   errorStatus, errorReason, eltId);
+            SC_CloseSecureConnection(scConnection, eltId,
+                                     true, // consider socket is closed since server should have closed now
+                                     errorStatus, errorReason);
+            free(errorReason);
+        }
+        else
+        {
+            // Uncertain errorStatus value printed here:
+            SOPC_Logger_TraceError("ScStateMgr: ERR message received: error decoding status (%X) / reason (scIdx=%u)",
+                                   errorStatus, eltId);
+            SC_CloseSecureConnection(scConnection, eltId,
+                                     true, // consider socket is closed since server should have closed now
+                                     OpcUa_BadSecureChannelClosed, "ERR message received");
+        }
+
         if (false == result)
         {
             SOPC_Buffer_Delete((SOPC_Buffer*) params);

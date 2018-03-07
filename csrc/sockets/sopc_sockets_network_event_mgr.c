@@ -26,6 +26,7 @@
 #include "sopc_sockets_internal_ctx.h"
 
 #include "sopc_event_timer_manager.h"
+#include "sopc_logger.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
@@ -158,7 +159,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                         }
                         else
                         {
-                            // TODO: log an error
+                            SOPC_Logger_TraceError("SocketNetworkMgr: unexpected read event on socketIdx=%d", idx);
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                         }
                     }
@@ -170,7 +171,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                         }
                         else
                         {
-                            // TODO: log an error
+                            SOPC_Logger_TraceError("SocketNetworkMgr: unexpected write event on socketIdx=%d", idx);
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                         }
                     }
@@ -179,7 +180,8 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                 // In any state check EXCEPT events
                 if (SocketSet_IsPresent(uaSock->sock, &exceptSet) != false)
                 {
-                    // TODO: retrieve exception and log an error
+                    // TODO: retrieve exception code
+                    SOPC_Logger_TraceError("SocketNetworkMgr: exception event on socketIdx=%d", idx);
                     SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                 }
             }

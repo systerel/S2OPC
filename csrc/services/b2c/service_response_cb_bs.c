@@ -17,6 +17,7 @@
 
 #include "service_response_cb_bs.h"
 
+#include "sopc_logger.h"
 #include "sopc_services_api.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
@@ -102,5 +103,9 @@ void service_response_cb_bs__srv_write_notification(
         // Trigger notification event
         SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_AddSpaceEvent_Create(AS_WRITE_EVENT), 0, (void*) wv,
                                         (uintptr_t) sc);
-    } // else: TODO: log
+    }
+    else
+    {
+        SOPC_Logger_TraceError("AddressSpace write notification: unexpected NULL pointer avoids notification");
+    }
 }
