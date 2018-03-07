@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -1531,6 +1532,128 @@ SOPC_ReturnStatus SOPC_NodeId_Compare(const SOPC_NodeId* left, const SOPC_NodeId
 SOPC_ReturnStatus SOPC_NodeId_CompareAux(const void* left, const void* right, int32_t* comparison)
 {
     return SOPC_NodeId_Compare((const SOPC_NodeId*) left, (const SOPC_NodeId*) right, comparison);
+}
+
+char* SOPC_NodeId_ToCString(SOPC_NodeId* nodeId)
+{
+    // format part 6 §5.3.1.10
+    char* result = NULL;
+    int res = 0;
+    size_t maxSize = 0;
+    if (nodeId != NULL)
+    {
+        if (nodeId->Namespace != 0)
+        {
+            // with <nsId> = 5 digits max: "ns=<nsId>;"
+            maxSize = 9;
+        }
+        switch (nodeId->IdentifierType)
+        {
+        case SOPC_IdentifierType_Numeric:
+            // with <id> = 10 digits max: "i=<id>\0"
+            maxSize += 13;
+            break;
+        case SOPC_IdentifierType_String:
+            // "s=<string>\0"
+            if (nodeId->Data.String.Length > 0)
+            {
+                maxSize += (uint32_t) nodeId->Data.String.Length + 3;
+            }
+            else
+            {
+                maxSize += 3;
+            }
+            break;
+        case SOPC_IdentifierType_Guid:
+            // ex: "g=09087e75-8e5e-499b-954f-f2a9603db28a\0"
+            if (nodeId->Data.Guid != NULL)
+            {
+                maxSize += 39;
+            }
+            else
+            {
+                maxSize += 3;
+            }
+            break;
+        case SOPC_IdentifierType_ByteString:
+            // "b=<bstring>\0"
+            if (nodeId->Data.Bstring.Length > 0)
+            {
+                maxSize += (uint32_t) nodeId->Data.Bstring.Length + 3;
+            }
+            else
+            {
+                maxSize += 3;
+            }
+            break;
+        default:
+            break;
+        }
+        result = malloc(sizeof(char) * maxSize);
+        if (result != NULL)
+        {
+            if (nodeId->Namespace != 0)
+            {
+                res = sprintf(result, "ns=%u;", nodeId->Namespace);
+            }
+            if (res >= 0)
+            {
+                switch (nodeId->IdentifierType)
+                {
+                case SOPC_IdentifierType_Numeric:
+                    // with <id> = 10 digits max: "i=<id>\0"
+                    res = sprintf(&result[res], "i=%u", nodeId->Data.Numeric);
+                    break;
+                case SOPC_IdentifierType_String:
+                    // "s=<string>\0"
+                    if (nodeId->Data.String.Length > 0)
+                    {
+                        res = sprintf(&result[res], "s=%s", SOPC_String_GetRawCString(&nodeId->Data.String));
+                    }
+                    else
+                    {
+                        res = sprintf(&result[res], "s=");
+                    }
+                    break;
+                case SOPC_IdentifierType_Guid:
+                    // ex: "g=09087e75-8e5e-499b-954f-f2a9603db28a\0"
+                    if (nodeId->Data.Guid != NULL)
+                    {
+                        res = sprintf(&result[res], "g=%08x-%04x-%04x-%04x-%04x%08x", nodeId->Data.Guid->Data1,
+                                      nodeId->Data.Guid->Data2, nodeId->Data.Guid->Data3,
+                                      *(uint16_t*) &nodeId->Data.Guid->Data4[0],
+                                      *(uint16_t*) &nodeId->Data.Guid->Data4[2],
+                                      *(uint32_t*) &nodeId->Data.Guid->Data4[4]);
+                    }
+                    else
+                    {
+                        res = sprintf(&result[res], "g=");
+                    }
+                    break;
+                case SOPC_IdentifierType_ByteString:
+                    // "b=<bstring>\0"
+                    if (nodeId->Data.Bstring.Length > 0)
+                    {
+                        res = sprintf(&result[res], "b=%s",
+                                      SOPC_String_GetRawCString((SOPC_String*) &nodeId->Data.Bstring));
+                    }
+                    else
+                    {
+                        res = sprintf(&result[res], "b=");
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            else
+            {
+                free(result);
+                result = NULL;
+            }
+        }
+    }
+    return result;
 }
 
 void SOPC_ExpandedNodeId_InitializeAux(void* value)
