@@ -130,11 +130,20 @@ SOPC_ReturnStatus SOPC_Byte_WriteAux(const void* value, SOPC_Buffer* buf)
 
 SOPC_ReturnStatus SOPC_Byte_Write(const SOPC_Byte* value, SOPC_Buffer* buf)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL == value || NULL == buf)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
-    return SOPC_Buffer_Write(buf, value, 1);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Buffer_Write(buf, value, 1);
+        if (SOPC_STATUS_OK != status)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
+    }
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_Byte_ReadAux(void* value, SOPC_Buffer* buf)
@@ -144,11 +153,20 @@ SOPC_ReturnStatus SOPC_Byte_ReadAux(void* value, SOPC_Buffer* buf)
 
 SOPC_ReturnStatus SOPC_Byte_Read(SOPC_Byte* value, SOPC_Buffer* buf)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL == value || NULL == buf)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
-    return SOPC_Buffer_Read(value, buf, 1);
+    if (status == SOPC_STATUS_OK)
+    {
+        status = SOPC_Buffer_Read(value, buf, 1);
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
+    }
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_Boolean_WriteAux(const void* value, SOPC_Buffer* buf)
@@ -158,23 +176,26 @@ SOPC_ReturnStatus SOPC_Boolean_WriteAux(const void* value, SOPC_Buffer* buf)
 
 SOPC_ReturnStatus SOPC_Boolean_Write(const SOPC_Boolean* value, SOPC_Buffer* buf)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Byte encodedValue;
-    if (NULL == value)
+    if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-
-    if (false == *value)
+    if (SOPC_STATUS_OK == status)
     {
-        encodedValue = *value;
+        if (false == *value)
+        {
+            encodedValue = *value;
+        }
+        else
+        {
+            // Encoder should use 1 as True value
+            encodedValue = 1;
+        }
+        status = SOPC_Byte_Write(&encodedValue, buf);
     }
-    else
-    {
-        // Encoder should use 1 as True value
-        encodedValue = 1;
-    }
-
-    return SOPC_Byte_Write(&encodedValue, buf);
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_Boolean_ReadAux(void* value, SOPC_Buffer* buf)
@@ -211,11 +232,21 @@ SOPC_ReturnStatus SOPC_SByte_WriteAux(const void* value, SOPC_Buffer* buf)
 
 SOPC_ReturnStatus SOPC_SByte_Write(const SOPC_SByte* value, SOPC_Buffer* buf)
 {
-    if (NULL == value)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == value || NULL == buf)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
-    return SOPC_Buffer_Write(buf, (const SOPC_Byte*) value, 1);
+    if (status == SOPC_STATUS_OK)
+    {
+        status = SOPC_Buffer_Write(buf, (const SOPC_Byte*) value, 1);
+
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
+    }
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_SByte_ReadAux(void* value, SOPC_Buffer* buf)
@@ -225,12 +256,21 @@ SOPC_ReturnStatus SOPC_SByte_ReadAux(void* value, SOPC_Buffer* buf)
 
 SOPC_ReturnStatus SOPC_SByte_Read(SOPC_SByte* value, SOPC_Buffer* buf)
 {
-    if (NULL == value)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == value || NULL == buf)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
+    if (status == SOPC_STATUS_OK)
+    {
+        status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 1);
 
-    return SOPC_Buffer_Read((SOPC_Byte*) value, buf, 1);
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
+    }
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_Int16_WriteAux(const void* value, SOPC_Buffer* buf)
@@ -241,11 +281,16 @@ SOPC_ReturnStatus SOPC_Int16_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_Int16_Write(const int16_t* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         int16_t encodedValue = *value;
         SOPC_EncodeDecode_Int16(&encodedValue);
         status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 2);
+
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -259,7 +304,7 @@ SOPC_ReturnStatus SOPC_Int16_Read(int16_t* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int16_t readValue;
-    if (NULL == value)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -270,6 +315,10 @@ SOPC_ReturnStatus SOPC_Int16_Read(int16_t* value, SOPC_Buffer* buf)
         {
             SOPC_EncodeDecode_Int16(&readValue);
             *value = readValue;
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -283,11 +332,16 @@ SOPC_ReturnStatus SOPC_UInt16_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_UInt16_Write(const uint16_t* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         uint16_t encodedValue = *value;
         SOPC_EncodeDecode_UInt16(&encodedValue);
         status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 2);
+
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -300,7 +354,7 @@ SOPC_ReturnStatus SOPC_UInt16_ReadAux(void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_UInt16_Read(uint16_t* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (NULL == value)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -310,6 +364,10 @@ SOPC_ReturnStatus SOPC_UInt16_Read(uint16_t* value, SOPC_Buffer* buf)
         if (SOPC_STATUS_OK == status)
         {
             SOPC_EncodeDecode_UInt16(value);
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -323,11 +381,16 @@ SOPC_ReturnStatus SOPC_Int32_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_Int32_Write(const int32_t* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         int32_t encodedValue = *value;
         SOPC_EncodeDecode_Int32(&encodedValue);
         status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
+
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -340,12 +403,16 @@ SOPC_ReturnStatus SOPC_Int32_ReadAux(void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_Int32_Read(int32_t* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
         if (SOPC_STATUS_OK == status)
         {
             SOPC_EncodeDecode_Int32(value);
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -359,11 +426,16 @@ SOPC_ReturnStatus SOPC_UInt32_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_UInt32_Write(const uint32_t* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         uint32_t encodedValue = *value;
         SOPC_EncodeDecode_UInt32(&encodedValue);
         status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
+
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -376,12 +448,16 @@ SOPC_ReturnStatus SOPC_UInt32_ReadAux(void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_UInt32_Read(uint32_t* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
         if (SOPC_STATUS_OK == status)
         {
             SOPC_EncodeDecode_UInt32(value);
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -395,11 +471,16 @@ SOPC_ReturnStatus SOPC_Int64_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_Int64_Write(const int64_t* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         int64_t encodedValue = *value;
         SOPC_EncodeDecode_Int64(&encodedValue);
         status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
+
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -412,12 +493,16 @@ SOPC_ReturnStatus SOPC_Int64_ReadAux(void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_Int64_Read(int64_t* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
         if (SOPC_STATUS_OK == status)
         {
             SOPC_EncodeDecode_Int64(value);
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -431,11 +516,16 @@ SOPC_ReturnStatus SOPC_UInt64_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_UInt64_Write(const uint64_t* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         uint64_t encodedValue = *value;
         SOPC_EncodeDecode_UInt64(&encodedValue);
         status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
+
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -448,12 +538,16 @@ SOPC_ReturnStatus SOPC_UInt64_ReadAux(void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_UInt64_Read(uint64_t* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
         if (SOPC_STATUS_OK == status)
         {
             SOPC_EncodeDecode_UInt64(value);
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -467,11 +561,16 @@ SOPC_ReturnStatus SOPC_Float_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_Float_Write(const float* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         float encodedValue = *value;
         SOPC_EncodeDecode_Float(&encodedValue);
         status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
+
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -484,12 +583,16 @@ SOPC_ReturnStatus SOPC_Float_ReadAux(void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_Float_Read(float* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
         if (SOPC_STATUS_OK == status)
         {
             SOPC_EncodeDecode_Float(value);
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -503,11 +606,16 @@ SOPC_ReturnStatus SOPC_Double_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_Double_Write(const double* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         double encodedValue = *value;
         SOPC_EncodeDecode_Double(&encodedValue);
         status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
+
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -520,12 +628,16 @@ SOPC_ReturnStatus SOPC_Double_ReadAux(void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_Double_Read(double* value, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value != NULL)
+    if (value != NULL && buf != NULL)
     {
         status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
         if (SOPC_STATUS_OK == status)
         {
             SOPC_EncodeDecode_Double(value);
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -539,7 +651,7 @@ SOPC_ReturnStatus SOPC_ByteString_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (NULL == str)
+    if (NULL == str || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -558,6 +670,15 @@ SOPC_ReturnStatus SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_Buffer*
         if (SOPC_STATUS_OK == status && str->Length > 0)
         {
             status = SOPC_Buffer_Write(buf, str->Data, str->Length);
+
+            if (status != SOPC_STATUS_OK)
+            {
+                status = SOPC_STATUS_ENCODING_ERROR;
+            }
+        }
+        else if (SOPC_STATUS_OK != status)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -572,7 +693,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
-    if (NULL == str || str->Data != NULL)
+    if (NULL == str || str->Data != NULL || buf == NULL)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -592,7 +713,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
                         status = SOPC_Buffer_Read(str->Data, buf, length);
                         if (status != SOPC_STATUS_OK)
                         {
-                            status = SOPC_STATUS_INVALID_STATE;
+                            status = SOPC_STATUS_ENCODING_ERROR;
                             free(str->Data);
                             str->Data = NULL;
                             str->Length = -1;
@@ -601,7 +722,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
                 }
                 else
                 {
-                    status = SOPC_STATUS_ENCODING_ERROR;
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
                 }
             }
             else
@@ -621,7 +742,7 @@ SOPC_ReturnStatus SOPC_String_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_String_Write(const SOPC_String* str, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (NULL == str)
+    if (NULL == str || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -640,6 +761,11 @@ SOPC_ReturnStatus SOPC_String_Write(const SOPC_String* str, SOPC_Buffer* buf)
         if (SOPC_STATUS_OK == status && str->Length > 0)
         {
             status = SOPC_Buffer_Write(buf, str->Data, str->Length);
+
+            if (status != SOPC_STATUS_OK)
+            {
+                status = SOPC_STATUS_ENCODING_ERROR;
+            }
         }
     }
     return status;
@@ -654,7 +780,7 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
-    if (NULL == str || str->Data != NULL)
+    if (NULL == str || str->Data != NULL || buf == NULL)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -675,7 +801,7 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
                         status = SOPC_Buffer_Read(str->Data, buf, length);
                         if (status != SOPC_STATUS_OK)
                         {
-                            status = SOPC_STATUS_INVALID_STATE;
+                            status = SOPC_STATUS_ENCODING_ERROR;
                             free(str->Data);
                             str->Data = NULL;
                             str->Length = -1;
@@ -689,7 +815,7 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
                 }
                 else
                 {
-                    status = SOPC_STATUS_ENCODING_ERROR;
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
                 }
             }
             else
@@ -731,7 +857,7 @@ SOPC_ReturnStatus SOPC_DateTime_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_DateTime_Write(const SOPC_DateTime* date, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL != date)
+    if (NULL != date && NULL != buf)
     {
         status = SOPC_Int64_Write(date, buf);
     }
@@ -761,21 +887,25 @@ SOPC_ReturnStatus SOPC_Guid_WriteAux(const void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (guid != NULL)
+    if (guid != NULL && buf != NULL)
     {
         status = SOPC_UInt32_Write(&guid->Data1, buf);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_UInt16_Write(&guid->Data2, buf);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_UInt16_Write(&guid->Data3, buf);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Buffer_Write(buf, &(guid->Data4[0]), 8);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_UInt16_Write(&guid->Data2, buf);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_UInt16_Write(&guid->Data3, buf);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_Buffer_Write(buf, &(guid->Data4[0]), 8);
+        }
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -788,30 +918,31 @@ SOPC_ReturnStatus SOPC_Guid_ReadAux(void* value, SOPC_Buffer* buf)
 SOPC_ReturnStatus SOPC_Guid_Read(SOPC_Guid* guid, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (guid != NULL)
+    if (guid != NULL && buf != NULL)
     {
         status = SOPC_UInt32_Read(&guid->Data1, buf);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_UInt16_Read(&guid->Data2, buf);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_UInt16_Read(&guid->Data3, buf);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Buffer_Read(&(guid->Data4[0]), buf, 8);
-    }
 
-    if (status != SOPC_STATUS_OK && guid != NULL)
-    {
-        SOPC_UInt32_Clear(&guid->Data1);
-        SOPC_UInt16_Clear(&guid->Data2);
-        SOPC_UInt16_Clear(&guid->Data3);
-    }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_UInt16_Read(&guid->Data2, buf);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_UInt16_Read(&guid->Data3, buf);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_Buffer_Read(&(guid->Data4[0]), buf, 8);
+        }
 
+        if (status != SOPC_STATUS_OK)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+            SOPC_UInt32_Clear(&guid->Data1);
+            SOPC_UInt16_Clear(&guid->Data2);
+            SOPC_UInt16_Clear(&guid->Data3);
+        }
+    }
     return status;
 }
 
@@ -1591,7 +1722,8 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
             status = SOPC_Int32_Read(&extObj->Length, buf);
             if (SOPC_STATUS_OK == status)
             {
-                /* Allocation size value comes from types defined in Toolkit and is considered as not excessive value */
+                /* Allocation size value comes from types defined in Toolkit and is considered as not excessive
+                 * value */
                 extObj->Body.Object.Value = malloc(extObj->Body.Object.ObjType->AllocationSize);
                 if (extObj->Body.Object.Value != NULL)
                 {
@@ -2497,7 +2629,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
                 (variant->Value.Matrix.Dimensions < 0 || variant->Value.Matrix.Dimensions > SOPC_MAX_ARRAY_LENGTH ||
                  (uint64_t) variant->Value.Matrix.Dimensions * 1 > SIZE_MAX))
             {
-                status = SOPC_STATUS_ENCODING_ERROR;
+                status = SOPC_STATUS_OUT_OF_MEMORY;
             }
 
             if (SOPC_STATUS_OK == status)
