@@ -2292,6 +2292,574 @@ START_TEST(test_ua_encoder_other_types)
 }
 END_TEST
 
+START_TEST(test_ua_decoder_allocation_limit)
+{
+    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize endianness configuration
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_String s;
+    SOPC_String_Initialize(&s);
+    SOPC_ByteString bs;
+    SOPC_ByteString_Initialize(&bs);
+    SOPC_XmlElement xml;
+    SOPC_XmlElement_Initialize(&xml);
+    int32_t length = 0;
+    SOPC_Variant v;
+    SOPC_Variant_Initialize(&v);
+    SOPC_Variant* pvar = NULL;
+    uint32_t idx = 0;
+    SOPC_Byte encodingByte = 0;
+    SOPC_Boolean boolVal = false;
+    SOPC_DiagnosticInfo diag;
+    SOPC_DiagnosticInfo_Initialize(&diag);
+    SOPC_DiagnosticInfo* pDiag = NULL;
+    int32_t symbolicId = 0;
+
+    SOPC_Buffer* buffer = SOPC_Buffer_Create(1024);
+
+    status = SOPC_String_AttachFromCstring(&s, "An example of string !!! ");
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Write in buffer the string and clear string
+    status = SOPC_String_Write(&s, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_String_Clear(&s);
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Nominal read of the string and clear string
+    status = SOPC_String_Read(&s, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_String_Clear(&s);
+
+    /* LIMIT SIZE OF A STRING */
+
+    // Reset position to write to buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    // Change string length artificially in buffer
+    length = SOPC_MAX_STRING_LENGTH;
+    SOPC_Int32_Write(&length, buffer);
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Degraded read of the string (buffer too short for the string length)
+    status = SOPC_String_Read(&s, buffer);
+    // Expected buffer invalid state: not enough bytes
+    ck_assert(SOPC_STATUS_ENCODING_ERROR == status);
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Degraded read of the bytestring and clear bytestring
+    status = SOPC_ByteString_Read(&bs, buffer);
+    ck_assert(SOPC_STATUS_ENCODING_ERROR == status);
+    SOPC_ByteString_Clear(&bs);
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Degraded read of the bytestring and clear bytestring
+    status = SOPC_XmlElement_Read(&xml, buffer);
+    ck_assert(SOPC_STATUS_ENCODING_ERROR == status);
+    SOPC_XmlElement_Clear(&xml);
+
+    /* LIMIT SIZE + 1 OF A STRING */
+
+    // Reset position to write to buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Change string length artificially in buffer
+    length = SOPC_MAX_STRING_LENGTH + 1;
+    SOPC_Int32_Write(&length, buffer);
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Degraded read of the string (string too long)
+    status = SOPC_String_Read(&s, buffer);
+    // Expected decoding error: string too long
+    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Nominal read of the bytestring and clear bytestring
+    status = SOPC_ByteString_Read(&bs, buffer);
+    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Nominal read of the bytestring and clear bytestring
+    status = SOPC_XmlElement_Read(&xml, buffer);
+    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+
+    // Reset buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    /* NOMINAL VARIANT ARRAY ELEMENTS */
+
+    v.BuiltInTypeId = SOPC_Boolean_Id;
+    v.ArrayType = SOPC_VariantArrayType_Array;
+    v.Value.Array.Length = 10;
+    v.Value.Array.Content.BooleanArr = calloc(v.Value.Array.Length, sizeof(SOPC_Boolean));
+    status = SOPC_Variant_Write(&v, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_Variant_Clear(&v);
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    status = SOPC_Variant_Read(&v, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_Variant_Clear(&v);
+
+    /* LIMIT SIZE OF A VARIANT ARRAY ELEMENTS */
+
+    // Set position to write to buffer: position 1 to write array length
+    status = SOPC_Buffer_SetPosition(buffer, 1);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Overwrite with limit length value
+    length = SOPC_MAX_ARRAY_LENGTH;
+    status = SOPC_Int32_Write(&length, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Read variant
+    status = SOPC_Variant_Read(&v, buffer);
+    ck_assert(SOPC_STATUS_ENCODING_ERROR == status);
+
+    /* LIMIT SIZE + 1 OF A VARIANT ARRAY ELEMENTS */
+    // Set position to write to buffer: position 1 to write array length
+    status = SOPC_Buffer_SetPosition(buffer, 1);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Overwrite with limit+1 length value
+    length = SOPC_MAX_ARRAY_LENGTH + 1;
+    status = SOPC_Int32_Write(&length, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Read variant
+    status = SOPC_Variant_Read(&v, buffer);
+    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+
+    // Reset buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    /* LIMIT SIZE + 1 OF A VARIANT MATRIX ELEMENTS */
+    v.BuiltInTypeId = SOPC_Boolean_Id;
+    v.ArrayType = SOPC_VariantArrayType_Matrix;
+    v.Value.Matrix.Dimensions = 3;
+    v.Value.Matrix.ArrayDimensions = malloc(sizeof(int32_t) * v.Value.Matrix.Dimensions);
+    ck_assert(v.Value.Matrix.ArrayDimensions != NULL);
+    v.Value.Matrix.ArrayDimensions[0] = 3;
+    v.Value.Matrix.ArrayDimensions[1] = 3;
+    v.Value.Matrix.ArrayDimensions[2] = 1;
+    v.Value.Matrix.Content.BooleanArr = calloc(
+        v.Value.Matrix.ArrayDimensions[0] * v.Value.Matrix.ArrayDimensions[1] * v.Value.Matrix.ArrayDimensions[2],
+        sizeof(SOPC_Boolean));
+    status = SOPC_Variant_Write(&v, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_Variant_Clear(&v);
+
+    // Set position to write to buffer: position 1 to write array length
+    status = SOPC_Buffer_SetPosition(buffer, 1);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Overwrite with limit+1 length value
+    length = SOPC_MAX_ARRAY_LENGTH + 1;
+    status = SOPC_Int32_Write(&length, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Read variant
+    status = SOPC_Variant_Read(&v, buffer);
+    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+
+    // Reset buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    /* LIMIT SIZE + 1 OF A VARIANT MATRIX DIMENSIONS */
+    v.BuiltInTypeId = SOPC_Boolean_Id;
+    v.ArrayType = SOPC_VariantArrayType_Matrix;
+    v.Value.Matrix.Dimensions = 3;
+    v.Value.Matrix.ArrayDimensions = malloc(sizeof(int32_t) * v.Value.Matrix.Dimensions);
+    ck_assert(v.Value.Matrix.ArrayDimensions != NULL);
+    v.Value.Matrix.ArrayDimensions[0] = 3;
+    v.Value.Matrix.ArrayDimensions[1] = 3;
+    v.Value.Matrix.ArrayDimensions[2] = 1;
+    v.Value.Matrix.Content.BooleanArr = calloc(
+        v.Value.Matrix.ArrayDimensions[0] * v.Value.Matrix.ArrayDimensions[1] * v.Value.Matrix.ArrayDimensions[2],
+        sizeof(SOPC_Boolean));
+    status = SOPC_Variant_Write(&v, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_Variant_Clear(&v);
+
+    // Set position to write to buffer: position = position - 4 * 4 bytes to write array dimensions length
+    status = SOPC_Buffer_SetPosition(buffer, buffer->position - 4 * 4);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Overwrite with limit+1 length value
+    length = SOPC_MAX_ARRAY_LENGTH + 1;
+    status = SOPC_Int32_Write(&length, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Read variant
+    status = SOPC_Variant_Read(&v, buffer);
+    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+
+    // Reset position of buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+
+    ck_assert(SOPC_STATUS_OK == status);
+
+    /* LIMIT SIZE + 1 OF A VARIANT ARRAY ELEMENTS (TEST NESTED VERSION OF CODE) */
+    v.BuiltInTypeId = SOPC_Variant_Id;
+    v.ArrayType = SOPC_VariantArrayType_Array;
+    v.Value.Array.Length = 1;
+    v.Value.Array.Content.VariantArr = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant_Initialize(&v.Value.Array.Content.VariantArr[0]);
+    v.Value.Array.Content.VariantArr[0].BuiltInTypeId = SOPC_Boolean_Id;
+    v.Value.Array.Content.VariantArr[0].ArrayType = SOPC_VariantArrayType_SingleValue;
+    v.Value.Array.Content.VariantArr[0].Value.Boolean = true;
+    status = SOPC_Variant_Write(&v, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_Variant_Clear(&v);
+
+    status = SOPC_Buffer_SetPosition(buffer, 1);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Overwrite with limit+1 length value
+    length = SOPC_MAX_ARRAY_LENGTH + 1;
+    status = SOPC_Int32_Write(&length, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Read variant
+    status = SOPC_Variant_Read(&v, buffer);
+    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+
+    // Reset position of buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    /* LIMIT OF NESTED VARIANT ELEMENTS */
+
+    // ENCODING A VARIANT WITH SOPC_MAX_VARIANT_NESTED_LEVEL nested levels
+    pvar = &v;
+    for (idx = 1; idx <= SOPC_MAX_VARIANT_NESTED_LEVEL; idx++)
+    {
+        pvar->BuiltInTypeId = SOPC_Variant_Id;
+        pvar->ArrayType = SOPC_VariantArrayType_Array;
+        pvar->Value.Array.Length = 1;
+        pvar->Value.Array.Content.VariantArr = malloc(sizeof(SOPC_Variant));
+        ck_assert(pvar->Value.Array.Content.VariantArr != NULL);
+        SOPC_Variant_Initialize(&pvar->Value.Array.Content.VariantArr[0]);
+        pvar = pvar->Value.Array.Content.VariantArr;
+    }
+    pvar->BuiltInTypeId = SOPC_Boolean_Id;
+    pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
+    pvar->Value.Boolean = true;
+
+    status = SOPC_Variant_Write(&v, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_Variant_Clear(&v);
+
+    // MANUAL ENCODING FOR THE SAME BELOW
+    /*encodingByte = SOPC_Variant_Id | SOPC_VariantArrayValueFlag;
+    length = 1;
+    for (idx = 1; idx <= SOPC_MAX_VARIANT_NESTED_LEVEL; idx++)
+    {
+        // EncodingMask byte
+        status = SOPC_Byte_Write(&encodingByte, buffer);
+        ck_assert(SOPC_STATUS_OK == status);
+        // ArrayLength
+        status = SOPC_Int32_Write(&length, buffer);
+        ck_assert(SOPC_STATUS_OK == status);
+        // Then next variant !
+    }
+     encodingByte = SOPC_Boolean_Id; // Boolean Id
+    // EncodingMask byte
+     status = SOPC_Byte_Write(&encodingByte, buffer);
+     ck_assert(SOPC_STATUS_OK == status);
+    // Boolean value
+     boolVal = true;
+     status = SOPC_Boolean_Write(&boolVal, buffer);
+     ck_assert(SOPC_STATUS_OK == status);*/
+    // END OF ENCODING
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Read variant
+    status = SOPC_Variant_Read(&v, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_Variant_Clear(&v);
+
+    // Reset position of buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // ENCODING A DATAVALUE WITH SOPC_MAX_VARIANT_NESTED_LEVEL Variant nested levels
+    pvar = &v;
+    for (idx = 1; idx <= SOPC_MAX_VARIANT_NESTED_LEVEL; idx++)
+    {
+        pvar->BuiltInTypeId = SOPC_DataValue_Id;
+        pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
+        pvar->Value.DataValue = malloc(sizeof(SOPC_DataValue));
+        ck_assert(pvar->Value.DataValue != NULL);
+        SOPC_DataValue_Initialize(pvar->Value.DataValue);
+        SOPC_Variant_Initialize(&pvar->Value.DataValue->Value);
+        pvar = &pvar->Value.DataValue->Value;
+    }
+    pvar->BuiltInTypeId = SOPC_Boolean_Id;
+    pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
+    pvar->Value.Boolean = true;
+
+    status = SOPC_Variant_Write(&v, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_Variant_Clear(&v);
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Read variant
+    status = SOPC_Variant_Read(&v, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_Variant_Clear(&v);
+
+    // Reset position of buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    /* LIMIT + 1 OF NESTED VARIANT ELEMENTS */
+
+    // TEST ENCODER FAILURE OF A VARIANT WITH SOPC_MAX_VARIANT_NESTED_LEVEL + 1 nested levels
+    pvar = &v;
+    for (idx = 1; idx <= SOPC_MAX_VARIANT_NESTED_LEVEL + 1; idx++)
+    {
+        pvar->BuiltInTypeId = SOPC_DataValue_Id;
+        pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
+        pvar->Value.DataValue = malloc(sizeof(SOPC_DataValue));
+        ck_assert(pvar->Value.DataValue != NULL);
+        SOPC_DataValue_Initialize(pvar->Value.DataValue);
+        SOPC_Variant_Initialize(&pvar->Value.DataValue->Value);
+        pvar = &pvar->Value.DataValue->Value;
+    }
+    pvar->BuiltInTypeId = SOPC_Boolean_Id;
+    pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
+    pvar->Value.Boolean = true;
+
+    status = SOPC_Variant_Write(&v, buffer);
+    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+    SOPC_Variant_Clear(&v);
+
+    // Reset position of buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // MANUAL ENCODING A VARIANT WITH SOPC_MAX_VARIANT_NESTED_LEVEL + 1 nested levels
+    encodingByte = 152; // Variant Id + 2^7 bit to indicate an array
+    length = 1;
+    for (idx = 1; idx <= SOPC_MAX_VARIANT_NESTED_LEVEL + 1; idx++)
+    {
+        // EncodingMask byte
+        status = SOPC_Byte_Write(&encodingByte, buffer);
+        ck_assert(SOPC_STATUS_OK == status);
+        // ArrayLength
+        status = SOPC_Int32_Write(&length, buffer);
+        ck_assert(SOPC_STATUS_OK == status);
+        // Then next variant !
+    }
+    encodingByte = 1; // Boolean Id
+    // EncodingMask byte
+    status = SOPC_Byte_Write(&encodingByte, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Boolean value
+    boolVal = true;
+    status = SOPC_Boolean_Write(&boolVal, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    // END OF ENCODING
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Read variant
+    status = SOPC_Variant_Read(&v, buffer);
+    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+
+    // Reset position of buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // TEST ENCODER FAILURE OF A DATAVALUE WITH SOPC_MAX_VARIANT_NESTED_LEVEL + 1 Variant nested levels
+    pvar = &v;
+    for (idx = 1; idx <= SOPC_MAX_VARIANT_NESTED_LEVEL + 1; idx++)
+    {
+        pvar->BuiltInTypeId = SOPC_DataValue_Id;
+        pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
+        pvar->Value.DataValue = malloc(sizeof(SOPC_DataValue));
+        ck_assert(pvar->Value.DataValue != NULL);
+        SOPC_DataValue_Initialize(pvar->Value.DataValue);
+        SOPC_Variant_Initialize(&pvar->Value.DataValue->Value);
+        pvar = &pvar->Value.DataValue->Value;
+    }
+    pvar->BuiltInTypeId = SOPC_Boolean_Id;
+    pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
+    pvar->Value.Boolean = true;
+
+    status = SOPC_Variant_Write(&v, buffer);
+    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+    SOPC_Variant_Clear(&v);
+
+    // Reset position of buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    // MANUAL ENCODING OF A DATAVALUE WITH SOPC_MAX_VARIANT_NESTED_LEVEL + 1 Variant nested levels
+    length = 1;
+    for (idx = 1; idx <= SOPC_MAX_VARIANT_NESTED_LEVEL + 1; idx++)
+    {
+        encodingByte = SOPC_DataValue_Id; // DataValue Id
+        // EncodingMask byte
+        status = SOPC_Byte_Write(&encodingByte, buffer);
+        ck_assert(SOPC_STATUS_OK == status);
+        // DataValue
+        encodingByte = SOPC_DataValue_NotNullValue; // It indicates there is a value and nothing else in DataValue
+        // EncodingMask byte
+        status = SOPC_Byte_Write(&encodingByte, buffer);
+        ck_assert(SOPC_STATUS_OK == status);
+
+        // Then next data value !
+    }
+    encodingByte = 1; // Boolean Id
+    // EncodingMask byte
+    status = SOPC_Byte_Write(&encodingByte, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Boolean value
+    boolVal = true;
+    status = SOPC_Boolean_Write(&boolVal, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    // END OF ENCODING
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Read variant
+    status = SOPC_Variant_Read(&v, buffer);
+    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+
+    // Reset position of buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    /* LIMIT OF NESTED DIAG INFO */
+
+    // ENCODING A DIAG INFO WITH SOPC_MAX_DIAG_INFO_NESTED_LEVEL nested levels
+    pDiag = &diag;
+    for (idx = 1; idx <= SOPC_MAX_DIAG_INFO_NESTED_LEVEL; idx++)
+    {
+        pDiag->InnerDiagnosticInfo = malloc(sizeof(SOPC_DiagnosticInfo));
+        ck_assert(pDiag->InnerDiagnosticInfo != NULL);
+        SOPC_DiagnosticInfo_Initialize(pDiag->InnerDiagnosticInfo);
+        pDiag = pDiag->InnerDiagnosticInfo;
+    }
+    pDiag->SymbolicId = 1000;
+
+    status = SOPC_DiagnosticInfo_Write(&diag, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_DiagnosticInfo_Clear(&diag);
+
+    // MANUAL ENCODING FOR THE SAME BELOW (~ avoiding not necessary fields)
+    /*
+    encodingByte = SOPC_DiagInfoEncoding_InnerDianosticInfo;
+    length = 1;
+    for (idx = 1; idx <= SOPC_MAX_DIAG_INFO_NESTED_LEVEL; idx++)
+    {
+        // EncodingMask byte
+        status = SOPC_Byte_Write(&encodingByte, buffer);
+        ck_assert(SOPC_STATUS_OK == status);
+        // Then next diag info !
+    }
+    encodingByte = SOPC_DiagInfoEncoding_SymbolicId;
+    // EncodingMask byte
+    status = SOPC_Byte_Write(&encodingByte, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Int32 value
+    symbolicId = 1000;
+    status = SOPC_Int32_Write(&symbolicId, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    */
+    // END OF ENCODING
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Read diag info
+    status = SOPC_DiagnosticInfo_Read(&diag, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_DiagnosticInfo_Clear(&diag);
+
+    // Reset position of buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    /* LIMIT+1 OF NESTED DIAG INFO */
+
+    // ENCODING A DIAG INFO WITH SOPC_MAX_DIAG_INFO_NESTED_LEVEL+1 nested levels
+    encodingByte = SOPC_DiagInfoEncoding_InnerDianosticInfo;
+    length = 1;
+    for (idx = 1; idx <= SOPC_MAX_DIAG_INFO_NESTED_LEVEL + 1; idx++)
+    {
+        // EncodingMask byte
+        status = SOPC_Byte_Write(&encodingByte, buffer);
+        ck_assert(SOPC_STATUS_OK == status);
+        // Then next diag info !
+    }
+    encodingByte = SOPC_DiagInfoEncoding_SymbolicId;
+    // EncodingMask byte
+    status = SOPC_Byte_Write(&encodingByte, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Int32 value
+    symbolicId = 1000;
+    status = SOPC_Int32_Write(&symbolicId, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    // END OF ENCODING
+
+    // Reset position to read from buffer
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    // Read diag info
+    status = SOPC_DiagnosticInfo_Read(&diag, buffer);
+    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+
+    // Reset position of buffer
+    status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    //
+    SOPC_Buffer_Delete(buffer);
+}
+END_TEST
+
 START_TEST(test_ua_string_type)
 {
     // Non regression test on string copy
@@ -2373,6 +2941,7 @@ Suite* tests_make_suite_tools(void)
     tcase_add_test(tc_encoder, test_ua_encoder_endianness_mgt);
     tcase_add_test(tc_encoder, test_ua_encoder_basic_types);
     tcase_add_test(tc_encoder, test_ua_encoder_other_types);
+    tcase_add_test(tc_encoder, test_ua_decoder_allocation_limit);
     suite_add_tcase(s, tc_encoder);
 
     tc_ua_types = tcase_create("UA Types");
