@@ -1591,6 +1591,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
             status = SOPC_Int32_Read(&extObj->Length, buf);
             if (SOPC_STATUS_OK == status)
             {
+                /* Allocation size value comes from types defined in Toolkit and is considered as not excessive value */
                 extObj->Body.Object.Value = malloc(extObj->Body.Object.ObjType->AllocationSize);
                 if (extObj->Body.Object.Value != NULL)
                 {
@@ -1645,10 +1646,28 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Byte* byteArray = NULL;
 
-    if (buf != NULL && noOfElts != NULL && *noOfElts >= 0 && *noOfElts <= SOPC_MAX_ARRAY_LENGTH && eltsArray != NULL &&
-        (uint64_t) *noOfElts <= SIZE_MAX && NULL == *eltsArray && decodeFct != NULL)
+    if (buf != NULL && noOfElts != NULL && eltsArray != NULL && NULL == *eltsArray && decodeFct != NULL)
     {
         status = SOPC_STATUS_OK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Int32_Read(noOfElts, buf);
+    }
+
+    if (*noOfElts >= 0 && *noOfElts <= SOPC_MAX_ARRAY_LENGTH && (uint64_t) *noOfElts * sizeOfElt <= SIZE_MAX)
+    {
+        // OK: number of elements valid
+    }
+    else if (*noOfElts < 0)
+    {
+        // Normalize with 0 length value
+        *noOfElts = 0;
+    }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     if (SOPC_STATUS_OK == status)
@@ -2753,8 +2772,7 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Byte* byteArray = NULL;
 
-    if (buf != NULL && noOfElts != NULL && *noOfElts >= 0 && *noOfElts <= SOPC_MAX_ARRAY_LENGTH &&
-        (uint64_t) *noOfElts * sizeOfElt <= SIZE_MAX && eltsArray != NULL && NULL == *eltsArray && decodeFct != NULL)
+    if (buf != NULL && noOfElts != NULL && eltsArray != NULL && NULL == *eltsArray && decodeFct != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2762,6 +2780,20 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Int32_Read(noOfElts, buf);
+    }
+
+    if (*noOfElts >= 0 && *noOfElts <= SOPC_MAX_ARRAY_LENGTH && (uint64_t) *noOfElts * sizeOfElt <= SIZE_MAX)
+    {
+        // OK: number of elements valid
+    }
+    else if (*noOfElts < 0)
+    {
+        // Normalize with 0 length value
+        *noOfElts = 0;
+    }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     if (SOPC_STATUS_OK == status && *noOfElts > 0)
