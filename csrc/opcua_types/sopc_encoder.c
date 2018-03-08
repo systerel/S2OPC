@@ -1899,7 +1899,8 @@ static SOPC_Byte GetVariantEncodingMask(const SOPC_Variant* variant)
     SOPC_Byte encodingByte = variant->BuiltInTypeId;
     if (variant->ArrayType == SOPC_VariantArrayType_Matrix)
     {
-        encodingByte |= SOPC_VariantArrayMatrixFlag;
+        encodingByte |= SOPC_VariantArrayValueFlag;
+        encodingByte |= SOPC_VariantArrayDimensionsFlag;
     }
     if (variant->ArrayType == SOPC_VariantArrayType_Array)
     {
@@ -2579,7 +2580,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
         // Retrieve array flags
         if ((encodingByte & SOPC_VariantArrayValueFlag) != 0)
         {
-            if ((encodingByte & SOPC_VariantArrayMatrixFlag) != 0)
+            if ((encodingByte & SOPC_VariantArrayDimensionsFlag) != 0)
             {
                 variant->ArrayType = SOPC_VariantArrayType_Matrix;
             }
@@ -2589,7 +2590,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
             }
             // Note array length read in ReadVariantArrayBuiltInType
         }
-        else if ((encodingByte & SOPC_VariantArrayMatrixFlag) != 0)
+        else if ((encodingByte & SOPC_VariantArrayDimensionsFlag) != 0)
         {
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }

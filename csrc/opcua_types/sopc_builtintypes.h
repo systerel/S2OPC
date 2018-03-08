@@ -182,8 +182,8 @@ typedef struct SOPC_ExtensionObject
 } SOPC_ExtensionObject;
 
 typedef enum SOPC_VariantArrayTypeFlag {
-    SOPC_VariantArrayMatrixFlag = 64, // 2^6 => bit 6
-    SOPC_VariantArrayValueFlag = 128  // 2^7 => bit 7
+    SOPC_VariantArrayValueFlag = 128,    // 2^7 => bit 7
+    SOPC_VariantArrayDimensionsFlag = 64 // 2^6 => bit 6
 } SOPC_VariantArrayTypeFlag;
 
 // Binary compatible types
