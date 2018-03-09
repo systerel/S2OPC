@@ -2599,6 +2599,10 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
         {
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }
+        else
+        {
+            variant->ArrayType = SOPC_VariantArrayType_SingleValue;
+        }
         // Retrieve builtin type id: avoid 2^7 and 2^6 which are array flags
         variant->BuiltInTypeId = 0x3F & encodingByte;
     }
