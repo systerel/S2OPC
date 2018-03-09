@@ -202,6 +202,7 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
     size_t i;
     uint8_t c;
     printf("Variant @%p", (void*) pvar);
+    char* s = NULL;
 
     if (NULL == pvar)
         return;
@@ -265,16 +266,10 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
         printf("\"\n");
         break;
     case SOPC_NodeId_Id:
-        switch (pvar->Value.NodeId->IdentifierType)
-        {
-        case SOPC_IdentifierType_Numeric:
-            printf("NodeId-Numeric\n  Value: Namespace %" PRIu16 ", ID %" PRIu32 "\n", pvar->Value.NodeId->Namespace,
-                   pvar->Value.NodeId->Data.Numeric);
-            break;
-        default:
-            printf("NodeId (not numeric)\n");
-            break;
-        }
+        s = SOPC_NodeId_ToCString(pvar->Value.NodeId);
+        printf("NodeId\n  Value: %s\n", s);
+        free(s);
+        s = NULL;
         break;
     case SOPC_StatusCode_Id:
         printf("StatusCode\n  Value: %" PRIu32 "\n", pvar->Value.Status);
