@@ -1668,6 +1668,7 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
     uint16_t ns = 0;
     uint32_t iid = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Guid* pGuid = NULL;
 
     /* Copy the string in a safe place and sscanf it */
     if (NULL != cString && len > 0)
@@ -1722,6 +1723,11 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             case 'g':
                 type = SOPC_IdentifierType_Guid;
                 p += 2;
+                pGuid = (SOPC_Guid*) malloc(sizeof(SOPC_Guid));
+                if (NULL == pGuid)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
                 break;
             case 'b':
                 type = SOPC_IdentifierType_ByteString;
@@ -1752,7 +1758,16 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             status = SOPC_String_CopyFromCString(&pNid->Data.String, p);
             break;
         case SOPC_IdentifierType_Guid:
-            assert(false);
+            pNid->Data.Guid = pGuid;
+            if (sscanf(p, "%08x-%04x-%04x-%04x-%04x%08x", &pGuid->Data1, &pGuid->Data2, &pGuid->Data3,
+                       (uint16_t*) (&pGuid->Data4[0]), (uint16_t*) (&pGuid->Data4[2]),
+                       (uint16_t*) (&pGuid->Data4[4])) < 6)
+            {
+                /* Failed, but pGuid is allocated */
+                free(pGuid);
+                pGuid = NULL;
+                status = SOPC_STATUS_NOK;
+            }
             break;
         case SOPC_IdentifierType_ByteString:
             status = SOPC_ByteString_CopyFromBytes(&pNid->Data.Bstring, (SOPC_Byte*) p, len - (p - sz));
