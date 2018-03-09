@@ -446,6 +446,7 @@ SOPC_ReturnStatus SOPC_NodeId_Compare(const SOPC_NodeId* left, const SOPC_NodeId
 SOPC_ReturnStatus SOPC_NodeId_CompareAux(const void* left, const void* right, int32_t* comparison);
 
 char* SOPC_NodeId_ToCString(SOPC_NodeId* nodeId);
+SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len);
 
 void SOPC_ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId);
 void SOPC_ExpandedNodeId_InitializeAux(void* value);

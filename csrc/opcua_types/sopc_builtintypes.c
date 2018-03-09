@@ -18,7 +18,9 @@
 #include "sopc_builtintypes.h"
 
 #include <assert.h>
+#include <inttypes.h>
 #include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1654,6 +1656,120 @@ char* SOPC_NodeId_ToCString(SOPC_NodeId* nodeId)
         }
     }
     return result;
+}
+
+SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
+{
+    /* Creates a new NodeId (and guid/string) */
+    SOPC_NodeId* pNid = NULL;
+    char* sz = NULL; /* Safe copy of the cString */
+    char* p = NULL;
+    SOPC_IdentifierType type = SOPC_IdentifierType_Numeric;
+    uint16_t ns = 0;
+    uint32_t iid = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    /* Copy the string in a safe place and sscanf it */
+    if (NULL != cString && len > 0)
+    {
+        assert(1 * (uint32_t) len < SIZE_MAX - 1);
+        sz = (char*) calloc(len + 1, sizeof(char));
+    }
+    if (NULL != sz)
+    {
+        strncpy(sz, cString, len);
+        /* Search for namespace, defaults to 0 */
+        p = strchr(sz, ';');
+        if (NULL != p)
+        {
+            if (sscanf(sz, "ns=%" SCNu16, &ns) == 0)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+            p += 1;
+        }
+        else
+        {
+            p = sz;
+        }
+
+        /* Search for identifier, followed by '=' */
+        if (SOPC_STATUS_OK == status && len - (p - sz) < 2)
+        {
+            /* There is less than 2 chars left to read */
+            status = SOPC_STATUS_NOK;
+        }
+        if (SOPC_STATUS_OK == status && p[1] != '=')
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            switch (p[0])
+            {
+            case 'i':
+                type = SOPC_IdentifierType_Numeric;
+                p += 2;
+                if (sscanf(p, "%" SCNu32, &iid) == 0)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+                break;
+            case 's':
+                type = SOPC_IdentifierType_String;
+                p += 2;
+                break;
+            case 'g':
+                type = SOPC_IdentifierType_Guid;
+                p += 2;
+                break;
+            case 'b':
+                type = SOPC_IdentifierType_ByteString;
+                p += 2;
+                break;
+            default:
+                status = SOPC_STATUS_NOK;
+                break;
+            }
+        }
+    }
+
+    /* Now that it is valid and we now where to find the string/guid/bstring, create the NodeId */
+    if (SOPC_STATUS_OK == status)
+    {
+        pNid = (SOPC_NodeId*) malloc(sizeof(SOPC_NodeId));
+    }
+    if (NULL != pNid)
+    {
+        pNid->IdentifierType = type;
+        pNid->Namespace = ns;
+        switch (type)
+        {
+        case SOPC_IdentifierType_Numeric:
+            pNid->Data.Numeric = iid;
+            break;
+        case SOPC_IdentifierType_String:
+            status = SOPC_String_CopyFromCString(&pNid->Data.String, p);
+            break;
+        case SOPC_IdentifierType_Guid:
+            assert(false);
+            break;
+        case SOPC_IdentifierType_ByteString:
+            status = SOPC_ByteString_CopyFromBytes(&pNid->Data.Bstring, (SOPC_Byte*) p, len - (p - sz));
+            break;
+        default:
+            break;
+        }
+
+        /* Something could have failed but the NodeId is already allocated */
+        if (SOPC_STATUS_OK != status)
+        {
+            free(pNid);
+            pNid = NULL;
+        }
+    }
+
+    return pNid;
 }
 
 void SOPC_ExpandedNodeId_InitializeAux(void* value)
