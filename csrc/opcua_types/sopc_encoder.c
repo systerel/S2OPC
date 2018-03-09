@@ -1342,13 +1342,13 @@ static SOPC_ReturnStatus SOPC_DiagnosticInfo_Write_Internal(const SOPC_Diagnosti
     }
     if (SOPC_STATUS_OK == status && (encodingByte & SOPC_DiagInfoEncoding_InnerDianosticInfo) != 0x00)
     {
+        nestedLevel++;
         if (nestedLevel > SOPC_MAX_DIAG_INFO_NESTED_LEVEL)
         {
             status = SOPC_STATUS_ENCODING_ERROR;
         }
         else
         {
-            nestedLevel++;
             status = SOPC_DiagnosticInfo_Write_Internal(diagInfo->InnerDiagnosticInfo, buf, nestedLevel);
         }
     }
@@ -1402,14 +1402,30 @@ static SOPC_ReturnStatus SOPC_DiagnosticInfo_Read_Internal(SOPC_DiagnosticInfo* 
     }
     if (SOPC_STATUS_OK == status && (encodingByte & SOPC_DiagInfoEncoding_InnerDianosticInfo) != 0x00)
     {
+        nestedLevel++;
         if (nestedLevel > SOPC_MAX_DIAG_INFO_NESTED_LEVEL)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
         {
-            nestedLevel++;
-            status = SOPC_DiagnosticInfo_Read_Internal(diagInfo->InnerDiagnosticInfo, buf, nestedLevel);
+            diagInfo->InnerDiagnosticInfo = malloc(sizeof(SOPC_DiagnosticInfo));
+            if (NULL == diagInfo->InnerDiagnosticInfo)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+                free(diagInfo->InnerDiagnosticInfo);
+                diagInfo->InnerDiagnosticInfo = NULL;
+            }
+            else
+            {
+                SOPC_DiagnosticInfo_Initialize(diagInfo->InnerDiagnosticInfo);
+                status = SOPC_DiagnosticInfo_Read_Internal(diagInfo->InnerDiagnosticInfo, buf, nestedLevel);
+                if (SOPC_STATUS_OK != status)
+                {
+                    free(diagInfo->InnerDiagnosticInfo);
+                    diagInfo->InnerDiagnosticInfo = NULL;
+                }
+            }
         }
     }
     if (status != SOPC_STATUS_OK && diagInfo != NULL)
