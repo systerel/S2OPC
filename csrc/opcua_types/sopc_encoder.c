@@ -2680,6 +2680,12 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
                 status = SOPC_STATUS_ENCODING_ERROR;
             }
 
+            if (SOPC_STATUS_OK != status && variant->Value.Matrix.Content.BooleanArr != NULL)
+            {
+                free((void*) variant->Value.Matrix.Content.BooleanArr);
+                variant->Value.Matrix.Content.BooleanArr = NULL;
+            }
+
             break;
         default:
             status = SOPC_STATUS_ENCODING_ERROR;
