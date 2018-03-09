@@ -18,7 +18,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "sopc_builtintypes.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
@@ -33,6 +35,8 @@
  * It should be protected by a Mutex.
  */
 StateMachine_Machine* g_pSM = NULL;
+/* The start NodeId is global, so that it is accessible to the Print function in the other thread. */
+SOPC_NodeId* g_pNid = NULL;
 
 /* Event handler of the Browse */
 void EventDispatcher_Browse(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t appCtx);
@@ -45,10 +49,34 @@ int main(int argc, char* argv[])
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t iWait = 0;
 
-    /* Init */
     printf("INGOPCS browse demo.\n");
-    status = SOPC_Toolkit_Initialize(EventDispatcher_Browse);
-    g_pSM = StateMachine_Create();
+    /* Read the start node id from the command line */
+    if (argc != 2)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        /* argv are always null-terminated */
+        g_pNid = SOPC_NodeId_FromCString(argv[1], strlen(argv[1]));
+        if (NULL == g_pNid)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("# Error: Expects exactly 1 argument, the node id as the XML format\n");
+        printf("    [ns=<digits>;]<i, s, g or b>=<nodeid>\n");
+    }
+
+    /* Init */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Toolkit_Initialize(EventDispatcher_Browse);
+        g_pSM = StateMachine_Create();
+    }
     if (SOPC_STATUS_OK == status && NULL == g_pSM)
     {
         status = SOPC_STATUS_NOK;
@@ -73,7 +101,7 @@ int main(int argc, char* argv[])
     SOPC_Toolkit_Clear();
     StateMachine_Delete(&g_pSM);
 
-    return 0;
+    return status;
 }
 
 void EventDispatcher_Browse(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t appCtx)
@@ -91,6 +119,8 @@ void EventDispatcher_Browse(SOPC_App_Com_Event event, uint32_t arg, void* pParam
         /* It can be long, as the thread is joined by Toolkit_Clear(), it should not be interrupted. */
         PrintBrowseResponse((OpcUa_BrowseResponse*) pParam);
         break;
+    default:
+        break;
     }
 }
 
@@ -98,35 +128,52 @@ SOPC_ReturnStatus SendBrowseRequest(StateMachine_Machine* pSM)
 {
     OpcUa_BrowseRequest* pReq = NULL;
     OpcUa_BrowseDescription* pDesc = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     if (NULL == pSM)
-        return SOPC_STATUS_INVALID_PARAMETERS;
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    pReq = malloc(sizeof(OpcUa_BrowseRequest));
-    pDesc = malloc(1 * sizeof(OpcUa_BrowseDescription));
-    if (NULL == pReq || NULL == pDesc)
-        return SOPC_STATUS_NOK;
+    if (SOPC_STATUS_OK == status)
+    {
+        pReq = malloc(sizeof(OpcUa_BrowseRequest));
+        pDesc = malloc(1 * sizeof(OpcUa_BrowseDescription));
+        if (NULL == pReq || NULL == pDesc)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
 
-    printf("# Info: Sending BrowseRequest.\n");
+    if (SOPC_STATUS_OK == status)
+    {
+        printf("# Info: Sending BrowseRequest.\n");
 
-    /* Fill the Request */
-    pReq->encodeableType = &OpcUa_BrowseRequest_EncodeableType;
-    pReq->RequestedMaxReferencesPerNode = 100;
-    pReq->NoOfNodesToBrowse = 1;
-    pReq->NodesToBrowse = pDesc;
-    pDesc[0].NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
-    pDesc[0].NodeId.Namespace = 0;
-    pDesc[0].NodeId.Data.Numeric = 84;
-    pDesc[0].BrowseDirection = OpcUa_BrowseDirection_Both;
-    /* pDesc[0].ReferenceTypeId */
-    /* pDesc[0].IncludeSubtypes */
-    pDesc[0].NodeClassMask = 255; /* First 8 bits set -> all classes */
-    pDesc[0].ResultMask = OpcUa_BrowseResultMask_All;
+        /* Fill the Request */
+        pReq->encodeableType = &OpcUa_BrowseRequest_EncodeableType;
+        pReq->RequestedMaxReferencesPerNode = 100;
+        pReq->NoOfNodesToBrowse = 1;
+        pReq->NodesToBrowse = pDesc;
+        status = SOPC_NodeId_Copy(&pDesc[0].NodeId, g_pNid);
+        pDesc[0].BrowseDirection = OpcUa_BrowseDirection_Both;
+        /* pDesc[0].ReferenceTypeId */
+        /* pDesc[0].IncludeSubtypes */
+        pDesc[0].NodeClassMask = 255; /* First 8 bits set -> all classes */
+        pDesc[0].ResultMask = OpcUa_BrowseResultMask_All;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Send the Request */
+        SOPC_ToolkitClient_AsyncSendRequestOnSession(pSM->iSessionID, pReq, 42);
+    }
 
-    /* Send the Request */
-    SOPC_ToolkitClient_AsyncSendRequestOnSession(pSM->iSessionID, pReq, 42);
+    if (SOPC_STATUS_NOK == status)
+    {
+        printf("# Error: Send request creation failed. Abort.\n");
+        g_pSM->state = stAbort;
+    }
 
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 void PrintBrowseResponse(OpcUa_BrowseResponse* pResp)
@@ -135,22 +182,33 @@ void PrintBrowseResponse(OpcUa_BrowseResponse* pResp)
     int32_t j = 0;
     OpcUa_BrowseResult* pBwse = NULL;
     OpcUa_ReferenceDescription* pRefe = NULL;
+    char* sNidA = NULL;
+    char* sNidB = NULL;
 
-    printf("Browsed nodes:\n");
+    sNidA = SOPC_NodeId_ToCString(g_pNid);
+
+    if (SOPC_GoodGenericStatus != pResp->ResponseHeader.ServiceResult)
+    {
+        printf("# Error: Browse failed with status code %i.\n", pResp->ResponseHeader.ServiceResult);
+    }
+    else
+    {
+        printf("Browsed nodes:\n");
+    }
+
     for (i = 0; i < pResp->NoOfResults; ++i)
     {
         pBwse = &pResp->Results[i];
         if (SOPC_GoodGenericStatus != pBwse->StatusCode)
         {
-            printf("# Error: Browse result %i has status code %i\n", i, pBwse->StatusCode);
+            printf("# Error: Browse result %i has status code %i.\n", i, pBwse->StatusCode);
         }
         else
         {
             for (j = 0; j < pBwse->NoOfReferences; ++j)
             {
                 pRefe = &pBwse->References[j];
-                printf("- ");
-                printf("Start Node");
+                printf("- %s", sNidA);
                 if (pRefe->IsForward)
                 {
                     printf(" -> ");
@@ -159,7 +217,9 @@ void PrintBrowseResponse(OpcUa_BrowseResponse* pResp)
                 {
                     printf(" <- ");
                 }
-                printf("End Node, \"%s\"\n", SOPC_String_GetRawCString(&pRefe->BrowseName.Name));
+                sNidB = SOPC_NodeId_ToCString(&pRefe->NodeId.NodeId);
+                printf("%s \"%s\"\n", sNidB, SOPC_String_GetRawCString(&pRefe->BrowseName.Name));
+                free(sNidB);
             }
 
             if (pBwse->ContinuationPoint.Length <= 0)
@@ -172,4 +232,6 @@ void PrintBrowseResponse(OpcUa_BrowseResponse* pResp)
             }
         }
     }
+
+    free(sNidA);
 }
