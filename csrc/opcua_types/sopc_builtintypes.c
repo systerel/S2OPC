@@ -1759,9 +1759,9 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             break;
         case SOPC_IdentifierType_Guid:
             pNid->Data.Guid = pGuid;
-            if (sscanf(p, "%08x-%04x-%04x-%04x-%04x%08x", &pGuid->Data1, &pGuid->Data2, &pGuid->Data3,
-                       (uint16_t*) (&pGuid->Data4[0]), (uint16_t*) (&pGuid->Data4[2]),
-                       (uint16_t*) (&pGuid->Data4[4])) < 6)
+            if (sscanf(p, "%08" SCNx32 "-%04" SCNx16 "-%04" SCNx16 "-%04" SCNx16 "-%04" SCNx16 "%08" SCNx32,
+                       &pGuid->Data1, &pGuid->Data2, &pGuid->Data3, (uint16_t*) (&pGuid->Data4[0]),
+                       (uint16_t*) (&pGuid->Data4[2]), (uint32_t*) (&pGuid->Data4[4])) < 6)
             {
                 /* Failed, but pGuid is allocated */
                 free(pGuid);
