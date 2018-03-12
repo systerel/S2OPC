@@ -260,11 +260,13 @@ file(GLOB_RECURSE SECURE_CHANNELS_SRC
 
 file(GLOB_RECURSE SECURE_CHANNELS_CLIENT_TEST
      "tests/secure_channels/test_secure_channels_client.c"
-     "tests/secure_channels/stubs/*.c")
+     "tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
+     "tests/secure_channels/stubs/stub_sc_sopc_services_api.c")
      
 file(GLOB_RECURSE SECURE_CHANNELS_SERVER_TEST
      "tests/secure_channels/test_secure_channels_server.c"
-     "tests/secure_channels/stubs/*.c")
+     "tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
+     "tests/secure_channels/stubs/stub_sc_sopc_services_api.c")
 
 # Secure channels tests: CLIENT executable
 add_executable(test_secure_channels_client ${SOCKETS_SRC}
@@ -285,3 +287,20 @@ target_link_libraries(test_secure_channels_server PRIVATE ${INGOPCS_DEP_LIBS})
 target_include_directories(test_secure_channels_server PRIVATE "tests/secure_channels/stubs" 
                                                                ${INGOPCS_PUBLIC_INCLUDES} 
                                                                ${INGOPCS_PRIVATE_INCLUDES})
+
+# Secure channels tests: tests on receveived buffer
+file(GLOB_RECURSE SECURE_CHANNELS_BUFFER_TEST
+     ${PLATFORM_SRCS}
+     "csrc/helpers/*.c"
+     "tests/secure_channels/check_sc_rcv_buffer.c"
+     "tests/helpers/hexlify.c"
+     "tests/secure_channels/stubs/*.c")
+
+add_executable(check_sc_rcv_buffer ${SECURE_CHANNELS_SRC}
+                                               ${SECURE_CHANNELS_BUFFER_TEST})
+target_link_libraries(check_sc_rcv_buffer PRIVATE ${LIBCHECK_DEP_LIB} ${INGOPCS_DEP_LIBS})
+
+target_include_directories(check_sc_rcv_buffer PRIVATE "tests/secure_channels/stubs" 
+                                                       "tests/helpers"
+                                                       ${INGOPCS_PUBLIC_INCLUDES} 
+                                                       ${INGOPCS_PRIVATE_INCLUDES})

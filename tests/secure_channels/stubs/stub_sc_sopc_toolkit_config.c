@@ -23,6 +23,7 @@
 
 #include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
+#include "sopc_logger.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_sockets_api.h"
@@ -46,6 +47,8 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 
 SOPC_ReturnStatus SOPC_Toolkit_Configured()
 {
+    SOPC_Logger_Initialize("", 1048576, 3);
+    SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_DEBUG);
     return SOPC_STATUS_OK;
 }
 
@@ -69,6 +72,7 @@ void SOPC_Toolkit_Clear()
     SOPC_EventTimer_Clear();
     SOPC_SecureChannels_Clear();
     SOPC_Services_Clear();
+    SOPC_Logger_Clear();
     SOPC_Toolkit_ClearScConfigElt(scConfigSingleton);
     scConfigSingleton = NULL;
     epConfigSingleton = NULL;
