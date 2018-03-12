@@ -117,6 +117,7 @@ START_TEST(test_sockets)
         SOPC_Buffer_Write(sendBuffer, &byte, 1);
     }
     SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (void*) sendBuffer, 0);
+    sendBuffer = NULL; // deallocated by Socket event manager
 
     /* SERVER SIDE: receive a msg buffer through connection */
     // Accumulate received bytes in a unique buffer
@@ -164,6 +165,7 @@ START_TEST(test_sockets)
         SOPC_Buffer_Write(sendBuffer, &byte, 1);
     }
     SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, serverSocketIdx, (void*) sendBuffer, 0);
+    sendBuffer = NULL; // deallocated by Socket event manager
 
     /* CLIENT SIDE: receive a msg buffer through connection */
     // Accumulate received bytes in a unique buffer
@@ -196,6 +198,58 @@ START_TEST(test_sockets)
 
     // Check acc buffer content
     for (idx = 0; idx < 1000; idx++)
+    {
+        SOPC_Buffer_Read(&byte, accBuffer, 1);
+        ck_assert(byte == (idx % 256));
+    }
+
+    SOPC_Buffer_Delete(accBuffer);
+
+    /* CLIENT SIDE: send a msg buffer through connection with a length greater than maximum message size
+     * => the socket layer shall provide it in several buffers  */
+    sendBuffer = SOPC_Buffer_Create(2 * SOPC_MAX_MESSAGE_LENGTH);
+    accBuffer = SOPC_Buffer_Create(2 * SOPC_MAX_MESSAGE_LENGTH);
+
+    for (idx = 0; idx < 2 * SOPC_MAX_MESSAGE_LENGTH; idx++)
+    {
+        byte = (idx % 256);
+        SOPC_Buffer_Write(sendBuffer, &byte, 1);
+    }
+    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (void*) sendBuffer, 0);
+    sendBuffer = NULL; // deallocated by Socket event manager
+
+    /* SERVER SIDE: receive a msg buffer through connection */
+    // Accumulate received bytes in a unique buffer
+    receivedBytes = 0;
+    // Let 5 attempts to retrieve all the bytes
+    attempts = 0;
+    while (receivedBytes < 2 * SOPC_MAX_MESSAGE_LENGTH && attempts < 5)
+    {
+        SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
+        // Check event
+        ck_assert(scEventParams->event == SOCKET_RCV_BYTES);
+        // Check configuration index is preserved
+        ck_assert(scEventParams->eltId == serverSecureChannelConnectionId);
+        receivedBuffer = (SOPC_Buffer*) scEventParams->params;
+
+        free(scEventParams);
+        scEventParams = NULL;
+
+        ck_assert(receivedBuffer->length <= 2 * SOPC_MAX_MESSAGE_LENGTH);
+        receivedBytes = receivedBytes + receivedBuffer->length;
+        SOPC_Buffer_Write(accBuffer, receivedBuffer->data, receivedBuffer->length);
+        SOPC_Buffer_Delete(receivedBuffer);
+
+        attempts++;
+    }
+
+    ck_assert(receivedBytes == 2 * SOPC_MAX_MESSAGE_LENGTH && accBuffer->length == 2 * SOPC_MAX_MESSAGE_LENGTH);
+    ck_assert(attempts > 1);
+    receivedBuffer = NULL;
+    SOPC_Buffer_SetPosition(accBuffer, 0);
+
+    // Check acc buffer content
+    for (idx = 0; idx < 2 * SOPC_MAX_MESSAGE_LENGTH; idx++)
     {
         SOPC_Buffer_Read(&byte, accBuffer, 1);
         ck_assert(byte == (idx % 256));
