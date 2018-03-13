@@ -18,6 +18,8 @@
 #include "sopc_helper_string.h"
 
 #include <ctype.h>
+#include <errno.h>
+#include <limits.h>
 
 int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size)
 {
@@ -47,4 +49,89 @@ int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size)
         }
     }
     return res;
+}
+
+SOPC_ReturnStatus SOPC_strtouint8_t(const char* sz, uint8_t* n, int base)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    char* pEnd = NULL;
+    /* ULONG_MAX is at least 2^32 - 1, so it will always be possible to store an uint8_t inside */
+    unsigned long int value = 0;
+
+    if (NULL == sz || NULL == n)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        value = strtoul(sz, &pEnd, base);
+        if (pEnd <= sz || value > UINT8_MAX)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            *n = value;
+        }
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    char* pEnd = NULL;
+    /* ULONG_MAX is at least 2^32 - 1, so it will always be possible to store an uint16_t inside */
+    unsigned long int value = 0;
+
+    if (NULL == sz || NULL == n)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        value = strtoul(sz, &pEnd, base);
+        if (pEnd <= sz || value > UINT16_MAX)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            *n = value;
+        }
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    char* pEnd = NULL;
+    /* ULONG_MAX is at least 2^32 - 1, so it will always be possible to store an uint32_t inside */
+    unsigned long int value = 0;
+
+    if (NULL == sz || NULL == n)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        errno = 0;
+        value = strtoul(sz, &pEnd, base);
+        if (pEnd <= sz || value > UINT32_MAX || (ULONG_MAX == value && ERANGE == errno))
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            *n = value;
+        }
+    }
+
+    return status;
 }

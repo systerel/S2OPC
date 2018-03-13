@@ -18,7 +18,10 @@
 #ifndef SOPC_HELPER_STRING_H_
 #define SOPC_HELPER_STRING_H_
 
+#include <inttypes.h>
 #include <stdlib.h>
+
+#include "sopc_toolkit_constants.h"
 
 /**
  *  \brief Compare 2 string in a case-insensitive manner.
@@ -33,5 +36,38 @@
  *              (based on first lower case character value comparison).
  */
 int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size);
+
+/**
+ * \brief      Read a uint8_t from the string with strtoul.
+ *
+ * \param sz   A pointer to the CString containing the number.
+ * \param n    A pointer to the uint8_t.
+ * \param base The base in which the number is written. See strtoul for more about /p base.
+ *
+ * \return     SOPC_STATUS_OK if read was done successfully, in which case *n is modified.
+ */
+SOPC_ReturnStatus SOPC_strtouint8_t(const char* sz, uint8_t* n, int base);
+
+/**
+ * \brief      Read a uint16_t from the string with strtoul.
+ *
+ * \param sz   A pointer to the CString containing the number.
+ * \param n    A pointer to the uint16_t.
+ * \param base The base in which the number is written. See strtoul for more about /p base.
+ *
+ * \return     SOPC_STATUS_OK if read was done successfully, in which case *n is modified.
+ */
+SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base);
+
+/**
+ * \brief      Read a uint32_t from the string with strtoul.
+ *
+ * \param sz   A pointer to the CString containing the number.
+ * \param n    A pointer to the uint32_t.
+ * \param base The base in which the number is written. See strtoul for more about /p base.
+ *
+ * \return     SOPC_STATUS_OK if read was done successfully, in which case *n is modified.
+ */
+SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base);
 
 #endif /* SOPC_HELPER_STRING_H_ */
