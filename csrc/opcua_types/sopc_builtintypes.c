@@ -1669,6 +1669,8 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
     uint32_t iid = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Guid* pGuid = NULL;
+    char sData4[3];
+    int i;
 
     /* Copy the string in a safe place and sscanf it */
     if (NULL != cString && len > 0)
@@ -1683,9 +1685,13 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
         p = strchr(sz, ';');
         if (NULL != p)
         {
-            if (sscanf(sz, "ns=%" SCNu16, &ns) == 0)
+            if (memcmp(sz, "ns=", 3 * sizeof(char)) != 0)
             {
                 status = SOPC_STATUS_NOK;
+            }
+            else
+            {
+                status = SOPC_strtouint16_t(&sz[3], &ns, 10);
             }
             p += 1;
         }
@@ -1711,10 +1717,7 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             case 'i':
                 type = SOPC_IdentifierType_Numeric;
                 p += 2;
-                if (sscanf(p, "%" SCNu32, &iid) == 0)
-                {
-                    status = SOPC_STATUS_NOK;
-                }
+                status = SOPC_strtouint32_t(p, &iid, 10);
                 break;
             case 's':
                 type = SOPC_IdentifierType_String;
@@ -1744,6 +1747,7 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
     if (SOPC_STATUS_OK == status)
     {
         pNid = (SOPC_NodeId*) malloc(sizeof(SOPC_NodeId));
+        SOPC_NodeId_Initialize(pNid);
     }
     if (NULL != pNid)
     {
@@ -1755,21 +1759,58 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             pNid->Data.Numeric = iid;
             break;
         case SOPC_IdentifierType_String:
-            status = SOPC_String_CopyFromCString(&pNid->Data.String, p);
+            status = SOPC_String_InitializeFromCString(&pNid->Data.String, p);
             break;
         case SOPC_IdentifierType_Guid:
             pNid->Data.Guid = pGuid;
-            if (sscanf(p, "%08" SCNx32 "-%04" SCNx16 "-%04" SCNx16 "-%04" SCNx16 "-%04" SCNx16 "%08" SCNx32,
-                       &pGuid->Data1, &pGuid->Data2, &pGuid->Data3, (uint16_t*) (&pGuid->Data4[0]),
-                       (uint16_t*) (&pGuid->Data4[2]), (uint32_t*) (&pGuid->Data4[4])) < 6)
+            /* Check the length of the string, and assert the positions of the dashes
+             * 01020304-0506-0708-090A-0B0C0D0E0F10
+             */
+            if (len - (p - sz) != 36)
             {
-                /* Failed, but pGuid is allocated */
+                status = SOPC_STATUS_NOK;
+            }
+            if (SOPC_STATUS_OK == status && ('-' != p[8] || '-' != p[13] || '-' != p[18] || '-' != p[23]))
+            {
+                status = SOPC_STATUS_NOK;
+            }
+            /* Read the fields */
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_strtouint32_t(p, &pGuid->Data1, 16);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_strtouint16_t(&p[9], &pGuid->Data2, 16);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_strtouint16_t(&p[14], &pGuid->Data3, 16);
+            }
+            /* The last fields must be split before being sent to strtoul, as the latter is greedy. */
+            memset(sData4, 0, sizeof(sData4));
+            for (i = 0; i < 2 && SOPC_STATUS_OK == status; ++i)
+            {
+                sData4[0] = p[19 + 2 * i];
+                sData4[1] = p[20 + 2 * i];
+                status = SOPC_strtouint8_t(sData4, &pGuid->Data4[i], 16);
+            }
+            for (i = 0; i < 6 && SOPC_STATUS_OK == status; ++i)
+            {
+                sData4[0] = p[24 + 2 * i];
+                sData4[1] = p[25 + 2 * i];
+                status = SOPC_strtouint8_t(sData4, &pGuid->Data4[2 + i], 16);
+            }
+            /* May be failed, but pGuid is allocated */
+            if (SOPC_STATUS_OK != status)
+            {
                 free(pGuid);
                 pGuid = NULL;
                 status = SOPC_STATUS_NOK;
             }
             break;
         case SOPC_IdentifierType_ByteString:
+            SOPC_ByteString_Initialize(&pNid->Data.Bstring);
             status = SOPC_ByteString_CopyFromBytes(&pNid->Data.Bstring, (SOPC_Byte*) p, len - (p - sz));
             break;
         default:
