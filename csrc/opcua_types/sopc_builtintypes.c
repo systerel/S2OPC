@@ -1621,11 +1621,12 @@ char* SOPC_NodeId_ToCString(SOPC_NodeId* nodeId)
                     // ex: "g=09087e75-8e5e-499b-954f-f2a9603db28a\0"
                     if (nodeId->Data.Guid != NULL)
                     {
-                        res = sprintf(&result[res], "g=%08x-%04x-%04x-%04x-%04x%08x", nodeId->Data.Guid->Data1,
-                                      nodeId->Data.Guid->Data2, nodeId->Data.Guid->Data3,
-                                      *(uint16_t*) &nodeId->Data.Guid->Data4[0],
-                                      *(uint16_t*) &nodeId->Data.Guid->Data4[2],
-                                      *(uint32_t*) &nodeId->Data.Guid->Data4[4]);
+                        res = sprintf(&result[res], "g=%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+                                      nodeId->Data.Guid->Data1, nodeId->Data.Guid->Data2, nodeId->Data.Guid->Data3,
+                                      nodeId->Data.Guid->Data4[0], nodeId->Data.Guid->Data4[1],
+                                      nodeId->Data.Guid->Data4[2], nodeId->Data.Guid->Data4[3],
+                                      nodeId->Data.Guid->Data4[4], nodeId->Data.Guid->Data4[5],
+                                      nodeId->Data.Guid->Data4[6], nodeId->Data.Guid->Data4[7]);
                     }
                     else
                     {
@@ -1636,8 +1637,8 @@ char* SOPC_NodeId_ToCString(SOPC_NodeId* nodeId)
                     // "b=<bstring>\0"
                     if (nodeId->Data.Bstring.Length > 0)
                     {
-                        res = sprintf(&result[res], "b=%s",
-                                      SOPC_String_GetRawCString((SOPC_String*) &nodeId->Data.Bstring));
+                        memcpy(&result[res], "b=", 2 * sizeof(char));
+                        memcpy(&result[res + 2], nodeId->Data.Bstring.Data, nodeId->Data.Bstring.Length);
                     }
                     else
                     {
