@@ -45,6 +45,17 @@
 #include "sopc_threads.h"
 #include "sopc_time.h"
 
+#define NODEID_NS 58942
+#define NODEID_NSS "58942"
+#define NODEID_I 126042
+#define NODEID_IS "126042"
+#define NODEID_S "ingopcs.foo/bar"
+#define NODEID_G                                                                       \
+    {                                                                                  \
+        0xC496578A, 0x0DFE, 0x4B8F, { 0x87, 0x0A, 0x74, 0x52, 0x38, 0xC6, 0xAE, 0xAE } \
+    }
+#define NODEID_GS "C496578A-0DFE-4b8f-870A-745238C6AEAE"
+
 START_TEST(test_hexlify)
 {
     unsigned char buf[33], c, d = 0;
@@ -919,6 +930,158 @@ START_TEST(test_helper_uri)
     ck_assert(26 == hostLength);
     ck_assert(10 + hostLength + 1 == portIdx);
     ck_assert(5 == portLength);
+}
+END_TEST
+
+START_TEST(test_strtouint)
+{
+    uint16_t a = 0;
+    uint32_t b = 0;
+
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("0", &a, 10));
+    ck_assert(0 == a);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("42", &a, 10));
+    ck_assert(42 == a);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("42", &a, 16));
+    ck_assert(0x42 == a);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("42;3", &a, 10));
+    ck_assert(42 == a);
+
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("", &a, 10));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t(NULL, &a, 10));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("42", NULL, 10));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("42", &a, 1));
+
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("65535", &a, 10));
+    ck_assert(0xFFFF == a);
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("65536", &a, 10));
+
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("0", &b, 10));
+    ck_assert(0 == b);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("42", &b, 10));
+    ck_assert(42 == b);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("42", &b, 16));
+    ck_assert(0x42 == b);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("42;3", &b, 10));
+    ck_assert(42 == b);
+
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("", &b, 10));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t(NULL, &b, 10));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("42", NULL, 10));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("42", &b, 1));
+
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("65535", &b, 10));
+    ck_assert(0xFFFF == b);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("65536", &b, 10));
+    ck_assert(0x10000 == b);
+
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("4294967295", &b, 10));
+    ck_assert(0xFFFFFFFF == b);
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("4294967296", &b, 10));
+}
+END_TEST
+
+START_TEST(test_string_nodeid)
+{
+    SOPC_NodeId nid;
+    SOPC_Guid guid = NODEID_G;
+    SOPC_NodeId* pNid;
+    char* sNid = NULL;
+    int32_t cmp = 0;
+
+    /* Integer nid */
+    SOPC_NodeId_Initialize(&nid);
+    nid.IdentifierType = SOPC_IdentifierType_Numeric;
+    nid.Namespace = 0;
+    nid.Data.Numeric = NODEID_I;
+
+    pNid = SOPC_NodeId_FromCString("i=" NODEID_IS, strlen("i=" NODEID_IS));
+    ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
+    ck_assert(0 == cmp);
+    sNid = SOPC_NodeId_ToCString(pNid);
+    ck_assert(strncmp(sNid, "i=" NODEID_IS, strlen("i=" NODEID_IS)) == 0);
+    free(sNid);
+    SOPC_NodeId_Clear(pNid);
+
+    nid.Namespace = NODEID_NS;
+    pNid = SOPC_NodeId_FromCString("ns=" NODEID_NSS ";i=" NODEID_IS, strlen("ns=" NODEID_NSS ";i=" NODEID_IS));
+    ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
+    ck_assert(0 == cmp);
+    sNid = SOPC_NodeId_ToCString(pNid);
+    ck_assert(strncmp(sNid, "ns=" NODEID_NSS ";i=" NODEID_IS, strlen("ns=" NODEID_NSS ";i=" NODEID_IS)) == 0);
+    free(sNid);
+    SOPC_NodeId_Clear(pNid);
+
+    /* String nid */
+    SOPC_NodeId_Initialize(&nid);
+    nid.IdentifierType = SOPC_IdentifierType_String;
+    nid.Namespace = 0;
+    ck_assert(SOPC_STATUS_OK == SOPC_String_CopyFromCString(&nid.Data.String, NODEID_S));
+
+    pNid = SOPC_NodeId_FromCString("s=" NODEID_S, strlen("s=" NODEID_S));
+    ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
+    ck_assert(0 == cmp);
+    sNid = SOPC_NodeId_ToCString(pNid);
+    ck_assert(strncmp(sNid, "s=" NODEID_S, strlen("s=" NODEID_S)) == 0);
+    free(sNid);
+    SOPC_NodeId_Clear(pNid);
+
+    nid.Namespace = NODEID_NS;
+    pNid = SOPC_NodeId_FromCString("ns=" NODEID_NSS ";s=" NODEID_S, strlen("ns=" NODEID_NSS ";s=" NODEID_S));
+    ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
+    ck_assert(0 == cmp);
+    sNid = SOPC_NodeId_ToCString(pNid);
+    ck_assert(strncmp(sNid, "ns=" NODEID_NSS ";s=" NODEID_S, strlen("ns=" NODEID_NSS ";s=" NODEID_S)) == 0);
+    free(sNid);
+    SOPC_NodeId_Clear(pNid);
+
+    /* GUID nid */
+    SOPC_NodeId_Initialize(&nid);
+    nid.IdentifierType = SOPC_IdentifierType_Guid;
+    nid.Namespace = 0;
+    nid.Data.Guid = &guid;
+
+    pNid = SOPC_NodeId_FromCString("g=" NODEID_GS, strlen("g=" NODEID_GS));
+    ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
+    ck_assert(0 == cmp);
+    sNid = SOPC_NodeId_ToCString(pNid);
+    ck_assert(SOPC_strncmp_ignore_case(sNid, "g=" NODEID_GS, strlen("g=" NODEID_GS)) == 0);
+    free(sNid);
+    SOPC_NodeId_Clear(pNid);
+
+    nid.Namespace = NODEID_NS;
+    pNid = SOPC_NodeId_FromCString("ns=" NODEID_NSS ";g=" NODEID_GS, strlen("ns=" NODEID_NSS ";g=" NODEID_GS));
+    ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
+    ck_assert(0 == cmp);
+    sNid = SOPC_NodeId_ToCString(pNid);
+    ck_assert(SOPC_strncmp_ignore_case(sNid, "ns=" NODEID_NSS ";g=" NODEID_GS,
+                                       strlen("ns=" NODEID_NSS ";g=" NODEID_GS)) == 0);
+    free(sNid);
+    SOPC_NodeId_Clear(pNid);
+
+    /* ByteString nid */
+    SOPC_NodeId_Initialize(&nid);
+    nid.IdentifierType = SOPC_IdentifierType_ByteString;
+    nid.Namespace = 0;
+    ck_assert(SOPC_STATUS_OK ==
+              SOPC_ByteString_CopyFromBytes(&nid.Data.Bstring, (SOPC_Byte*) NODEID_S, strlen(NODEID_S)));
+
+    pNid = SOPC_NodeId_FromCString("b=" NODEID_S, strlen("b=" NODEID_S));
+    ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
+    ck_assert(0 == cmp);
+    sNid = SOPC_NodeId_ToCString(pNid);
+    ck_assert(strncmp(sNid, "b=" NODEID_S, strlen("b=" NODEID_S)) == 0);
+    free(sNid);
+    SOPC_NodeId_Clear(pNid);
+
+    nid.Namespace = NODEID_NS;
+    pNid = SOPC_NodeId_FromCString("ns=" NODEID_NSS ";b=" NODEID_S, strlen("ns=" NODEID_NSS ";b=" NODEID_S));
+    ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
+    ck_assert(0 == cmp);
+    sNid = SOPC_NodeId_ToCString(pNid);
+    ck_assert(strncmp(sNid, "ns=" NODEID_NSS ";b=" NODEID_S, strlen("ns=" NODEID_NSS ";b=" NODEID_S)) == 0);
+    free(sNid);
+    SOPC_NodeId_Clear(pNid);
 }
 END_TEST
 
@@ -2920,6 +3083,8 @@ Suite* tests_make_suite_tools(void)
     tc_basetools = tcase_create("String tools");
     tcase_add_test(tc_basetools, test_base_tools);
     tcase_add_test(tc_basetools, test_helper_uri);
+    tcase_add_test(tc_basetools, test_strtouint);
+    tcase_add_test(tc_basetools, test_string_nodeid);
     suite_add_tcase(s, tc_basetools);
     tc_buffer = tcase_create("Buffer");
     tcase_add_test(tc_buffer, test_buffer_create);
