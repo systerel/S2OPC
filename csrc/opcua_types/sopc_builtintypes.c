@@ -1674,9 +1674,8 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
     int i;
 
     /* Copy the string in a safe place and sscanf it */
-    if (NULL != cString && len > 0)
+    if (NULL != cString && len > 0 && (uint64_t) len < SIZE_MAX - 1)
     {
-        assert(1 * (uint32_t) len < SIZE_MAX - 1);
         sz = (char*) calloc(len + 1, sizeof(char));
     }
     if (NULL != sz)
