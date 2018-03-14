@@ -2495,7 +2495,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             }
             else
             {
-                SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadTcpInternalError,
+                SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadTcpMessageTypeInvalid,
                                          "Hello message received not expected");
             }
         }
@@ -2520,13 +2520,22 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 {
                     result = SC_ClientTransition_ScInit_To_ScConnecting(scConnection, eltId);
                 }
-            }
 
-            if (false == result)
+                if (false == result)
+                {
+                    // Error case: close the connection
+                    SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadInvalidArgument,
+                                             "Invalid Hello message received");
+                }
+            }
+            else
             {
-                // Error case: close the connection
-                SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadTcpInternalError,
-                                         "Invalid or unexpected Hello message received");
+                if (false == result)
+                {
+                    // Error case: close the connection
+                    SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadTcpMessageTypeInvalid,
+                                             "Unexpected Hello message received");
+                }
             }
         }
         // else: nothing to do (=> socket should already be required to close)
