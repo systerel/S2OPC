@@ -28,6 +28,7 @@ void SOPC_SecureChannelsInternalContext_Initialize()
 {
     memset(secureListenersArray, 0, sizeof(SOPC_SecureListener) * (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1));
     memset(secureConnectionsArray, 0, sizeof(SOPC_SecureConnection) * (SOPC_MAX_SECURE_CONNECTIONS + 1));
+    lastSecureConnectionArrayIdx = 0;
 }
 
 SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx)
