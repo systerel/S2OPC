@@ -1084,10 +1084,16 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
                 SOPC_EventTimer_Cancel(recordedMsgCtx->timerId); // Deactivate timer for this request
                 if (recordedMsgCtx->msgType != receivedMsgType)
                 {
+                    // Re-enqueue the request id in order application receive the request timeout on SC closure
+                    SOPC_SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, *requestId,
+                                            (void*) recordedMsgCtx);
                     result = false;
                     *errorStatus = OpcUa_BadSecurityChecksFailed;
                 }
-                free(recordedMsgCtx);
+                else
+                {
+                    free(recordedMsgCtx);
+                }
             }
             else
             {
@@ -1662,9 +1668,9 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                                                             chunkCtx->currentMsgType, requestId, errorStatus);
             if (result == false)
             {
-                SOPC_Logger_TraceError("ChunksMgr: request Id=%u verification failed (epCfgIdx=%u, scCfgIdx=%u)",
-                                       requestId, scConnection->serverEndpointConfigIdx,
-                                       scConnection->endpointConnectionConfigIdx);
+                SOPC_Logger_TraceError(
+                    "ChunksMgr: request Id=%u (or associated type) verification failed (epCfgIdx=%u, scCfgIdx=%u)",
+                    requestId, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
             }
         }
         else
