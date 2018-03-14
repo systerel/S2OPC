@@ -51,7 +51,7 @@ int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size)
     return res;
 }
 
-SOPC_ReturnStatus SOPC_strtouint8_t(const char* sz, uint8_t* n, int base)
+SOPC_ReturnStatus SOPC_strtouint8_t(const char* sz, uint8_t* n, int base, char cEnd)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     char* pEnd = NULL;
@@ -65,8 +65,10 @@ SOPC_ReturnStatus SOPC_strtouint8_t(const char* sz, uint8_t* n, int base)
 
     if (SOPC_STATUS_OK == status)
     {
+        /* ULONG_MAX is at least 2^32 - 1 (see C99 §5.2.4.2.1 Sizes of integer types)
+         *  so it will always be possible to store an uint8_t inside value */
         value = strtoul(sz, &pEnd, base);
-        if (pEnd <= sz || value > UINT8_MAX)
+        if (NULL == pEnd || pEnd == sz || *pEnd != cEnd || value > UINT8_MAX)
         {
             status = SOPC_STATUS_NOK;
         }
@@ -79,11 +81,10 @@ SOPC_ReturnStatus SOPC_strtouint8_t(const char* sz, uint8_t* n, int base)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base)
+SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base, char cEnd)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     char* pEnd = NULL;
-    /* ULONG_MAX is at least 2^32 - 1, so it will always be possible to store an uint16_t inside */
     unsigned long int value = 0;
 
     if (NULL == sz || NULL == n)
@@ -93,8 +94,10 @@ SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base)
 
     if (SOPC_STATUS_OK == status)
     {
+        /* ULONG_MAX is at least 2^32 - 1 (see C99 §5.2.4.2.1 Sizes of integer types)
+         *  so it will always be possible to store an uint16_t inside value */
         value = strtoul(sz, &pEnd, base);
-        if (pEnd <= sz || value > UINT16_MAX)
+        if (NULL == pEnd || pEnd == sz || *pEnd != cEnd || value > UINT16_MAX)
         {
             status = SOPC_STATUS_NOK;
         }
@@ -107,11 +110,10 @@ SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base)
+SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base, char cEnd)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     char* pEnd = NULL;
-    /* ULONG_MAX is at least 2^32 - 1, so it will always be possible to store an uint32_t inside */
     unsigned long int value = 0;
 
     if (NULL == sz || NULL == n)
@@ -121,9 +123,12 @@ SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base)
 
     if (SOPC_STATUS_OK == status)
     {
+        /* ULONG_MAX is at least 2^32 - 1 (see C99 §5.2.4.2.1 Sizes of integer types)
+         *  so it will always be possible to store an uint32_t inside value */
         errno = 0;
         value = strtoul(sz, &pEnd, base);
-        if (pEnd <= sz || value > UINT32_MAX || (ULONG_MAX == value && ERANGE == errno))
+        if (NULL == pEnd || pEnd == sz || *pEnd != cEnd || value > UINT32_MAX ||
+            (ULONG_MAX == value && ERANGE == errno))
         {
             status = SOPC_STATUS_NOK;
         }

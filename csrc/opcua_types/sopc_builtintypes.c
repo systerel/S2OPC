@@ -1691,7 +1691,7 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             }
             else
             {
-                status = SOPC_strtouint16_t(&sz[3], &ns, 10);
+                status = SOPC_strtouint16_t(&sz[3], &ns, 10, ';');
             }
             p += 1;
         }
@@ -1717,7 +1717,7 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             case 'i':
                 type = SOPC_IdentifierType_Numeric;
                 p += 2;
-                status = SOPC_strtouint32_t(p, &iid, 10);
+                status = SOPC_strtouint32_t(p, &iid, 10, '\0');
                 break;
             case 's':
                 type = SOPC_IdentifierType_String;
@@ -1777,15 +1777,15 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             /* Read the fields */
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_strtouint32_t(p, &pGuid->Data1, 16);
+                status = SOPC_strtouint32_t(p, &pGuid->Data1, 16, '-');
             }
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_strtouint16_t(&p[9], &pGuid->Data2, 16);
+                status = SOPC_strtouint16_t(&p[9], &pGuid->Data2, 16, '-');
             }
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_strtouint16_t(&p[14], &pGuid->Data3, 16);
+                status = SOPC_strtouint16_t(&p[14], &pGuid->Data3, 16, '-');
             }
             /* The last fields must be split before being sent to strtoul, as the latter is greedy. */
             memset(sData4, 0, sizeof(sData4));
@@ -1793,13 +1793,13 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             {
                 sData4[0] = p[19 + 2 * i];
                 sData4[1] = p[20 + 2 * i];
-                status = SOPC_strtouint8_t(sData4, &pGuid->Data4[i], 16);
+                status = SOPC_strtouint8_t(sData4, &pGuid->Data4[i], 16, '\0');
             }
             for (i = 0; i < 6 && SOPC_STATUS_OK == status; ++i)
             {
                 sData4[0] = p[24 + 2 * i];
                 sData4[1] = p[25 + 2 * i];
-                status = SOPC_strtouint8_t(sData4, &pGuid->Data4[2 + i], 16);
+                status = SOPC_strtouint8_t(sData4, &pGuid->Data4[2 + i], 16, '\0');
             }
             /* May be failed, but pGuid is allocated */
             if (SOPC_STATUS_OK != status)

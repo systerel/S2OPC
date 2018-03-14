@@ -935,49 +935,87 @@ END_TEST
 
 START_TEST(test_strtouint)
 {
-    uint16_t a = 0;
-    uint32_t b = 0;
+    uint8_t a = 0;
+    uint16_t b = 0;
+    uint32_t c = 0;
 
-    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("0", &a, 10));
+    /* 8 */
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint8_t("0", &a, 10, '\0'));
     ck_assert(0 == a);
-    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("42", &a, 10));
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint8_t("42", &a, 10, '\0'));
     ck_assert(42 == a);
-    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("42", &a, 16));
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint8_t("42", &a, 16, '\0'));
     ck_assert(0x42 == a);
-    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("42;3", &a, 10));
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint8_t("42;3", &a, 10, ';'));
     ck_assert(42 == a);
 
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("", &a, 10));
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t(NULL, &a, 10));
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("42", NULL, 10));
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("42", &a, 1));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t("", &a, 10, '\0'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t(NULL, &a, 10, '\0'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t("42", NULL, 10, '\0'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t("42", &a, 1, '\0'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t("42", &a, 10, ';'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t("42zz-24", &a, 10, '-'));
 
-    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("65535", &a, 10));
-    ck_assert(0xFFFF == a);
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("65536", &a, 10));
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint8_t("255", &a, 10, '\0'));
+    ck_assert(0xFF == a);
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t("256", &a, 10, '\0'));
 
-    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("0", &b, 10));
+    /* 16 */
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("0", &b, 10, '\0'));
     ck_assert(0 == b);
-    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("42", &b, 10));
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("42", &b, 10, '\0'));
     ck_assert(42 == b);
-    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("42", &b, 16));
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("42", &b, 16, '\0'));
     ck_assert(0x42 == b);
-    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("42;3", &b, 10));
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("42;3", &b, 10, ';'));
     ck_assert(42 == b);
 
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("", &b, 10));
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t(NULL, &b, 10));
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("42", NULL, 10));
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("42", &b, 1));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("", &b, 10, '\0'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t(NULL, &b, 10, '\0'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("42", NULL, 10, '\0'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("42", &b, 1, '\0'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("42", &b, 10, ';'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("42zz-24", &b, 10, '-'));
 
-    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("65535", &b, 10));
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("255", &b, 10, '\0'));
+    ck_assert(0xFF == b);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("256", &b, 10, '\0'));
+    ck_assert(0x100 == b);
+
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint16_t("65535", &b, 10, '\0'));
     ck_assert(0xFFFF == b);
-    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("65536", &b, 10));
-    ck_assert(0x10000 == b);
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("65536", &b, 10, '\0'));
 
-    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("4294967295", &b, 10));
-    ck_assert(0xFFFFFFFF == b);
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("4294967296", &b, 10));
+    /* 32 */
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("0", &c, 10, '\0'));
+    ck_assert(0 == c);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("42", &c, 10, '\0'));
+    ck_assert(42 == c);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("42", &c, 16, '\0'));
+    ck_assert(0x42 == c);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("42;3", &c, 10, ';'));
+    ck_assert(42 == c);
+
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("", &c, 10, '\0'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t(NULL, &c, 10, '\0'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("42", NULL, 10, '\0'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("42", &c, 1, '\0'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("42", &c, 10, ';'));
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("42zz-24", &c, 10, '-'));
+
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("255", &c, 10, '\0'));
+    ck_assert(0xFF == c);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("256", &c, 10, '\0'));
+    ck_assert(0x100 == c);
+
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("65535", &c, 10, '\0'));
+    ck_assert(0xFFFF == c);
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("65536", &c, 10, '\0'));
+    ck_assert(0x10000 == c);
+
+    ck_assert(SOPC_STATUS_OK == SOPC_strtouint32_t("4294967295", &c, 10, '\0'));
+    ck_assert(0xFFFFFFFF == c);
+    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("4294967296", &c, 10, '\0'));
 }
 END_TEST
 

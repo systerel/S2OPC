@@ -43,10 +43,12 @@ int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size);
  * \param sz   A pointer to the CString containing the number.
  * \param n    A pointer to the uint8_t.
  * \param base The base in which the number is written. See strtoul for more about /p base.
+ * \param cEnd Termination char. The first char of the unconsumed part of sz shall be this.
+ *             May be '\0'.
  *
  * \return     SOPC_STATUS_OK if read was done successfully, in which case *n is modified.
  */
-SOPC_ReturnStatus SOPC_strtouint8_t(const char* sz, uint8_t* n, int base);
+SOPC_ReturnStatus SOPC_strtouint8_t(const char* sz, uint8_t* n, int base, char cEnd);
 
 /**
  * \brief      Read a uint16_t from the string with strtoul.
@@ -54,10 +56,12 @@ SOPC_ReturnStatus SOPC_strtouint8_t(const char* sz, uint8_t* n, int base);
  * \param sz   A pointer to the CString containing the number.
  * \param n    A pointer to the uint16_t.
  * \param base The base in which the number is written. See strtoul for more about /p base.
+ * \param cEnd Termination char. The first char of the unconsumed part of sz shall be this.
+ *             May be '\0'.
  *
  * \return     SOPC_STATUS_OK if read was done successfully, in which case *n is modified.
  */
-SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base);
+SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base, char cEnd);
 
 /**
  * \brief      Read a uint32_t from the string with strtoul.
@@ -65,9 +69,11 @@ SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base);
  * \param sz   A pointer to the CString containing the number.
  * \param n    A pointer to the uint32_t.
  * \param base The base in which the number is written. See strtoul for more about /p base.
+ * \param cEnd Termination char. The first char of the unconsumed part of sz shall be this.
+ *             May be '\0'.
  *
  * \return     SOPC_STATUS_OK if read was done successfully, in which case *n is modified.
  */
-SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base);
+SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base, char cEnd);
 
 #endif /* SOPC_HELPER_STRING_H_ */
