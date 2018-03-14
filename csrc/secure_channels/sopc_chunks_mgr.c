@@ -54,7 +54,7 @@ static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t r
     return SOPC_EventTimer_Create(SOPC_SecureChannels_GetEventDispatcher(), eventParams, SOPC_REQUEST_TIMEOUT_MS);
 }
 
-static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx)
+static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx, SOPC_StatusCode* errorStatus)
 {
     assert(chunkCtx != NULL);
     assert(chunkCtx->chunkInputBuffer != NULL);
@@ -62,6 +62,7 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
     assert(chunkCtx->currentMsgType == SOPC_MSG_TYPE_INVALID);
     assert(chunkCtx->currentMsgIsFinal == SOPC_MSG_ISFINAL_INVALID);
     assert(chunkCtx->currentMsgSize == 0);
+    assert(errorStatus != NULL);
 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     bool result = false;
@@ -100,6 +101,9 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
         else
         {
             // unchanged current msg type => error case
+            SOPC_Logger_TraceError("ChunksMgr: decoding TCP UA header: invalid msg type='%c%c%c'", (char) msgType[0],
+                                   (char) msgType[1], (char) msgType[2]);
+            *errorStatus = OpcUa_BadTcpMessageTypeInvalid;
             result = false;
         }
     }
@@ -124,6 +128,7 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
             default:
                 // unchanged current isFinal value => error case
                 result = false;
+                *errorStatus = OpcUa_BadTcpMessageTypeInvalid;
                 break;
             }
 
@@ -132,6 +137,25 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
             {
                 if (chunkCtx->currentMsgIsFinal != SOPC_MSG_ISFINAL_FINAL)
                 {
+                    SOPC_Logger_TraceError(
+                        "ChunksMgr: decoding TCP UA header: invalid isFinal='%c' for given msg type='%c%c%c'",
+                        (char) isFinal, (char) msgType[0], (char) msgType[1], (char) msgType[2]);
+                    *errorStatus = OpcUa_BadTcpMessageTypeInvalid;
+                    result = false;
+                }
+            }
+            else
+            {
+                /* Limitation of the current version: does not support multi-chunk messages and shall not receive some
+                 * since it was indicated on connection configuration
+                 */
+                if (chunkCtx->currentMsgIsFinal != SOPC_MSG_ISFINAL_FINAL)
+                {
+                    SOPC_Logger_TraceError(
+                        "ChunksMgr: decoding TCP UA header: unexpected isFinal='%c' value for given msg type 'MSG', "
+                        "multi-chunk was indicated as not active on connection",
+                        (char) isFinal);
+                    *errorStatus = OpcUa_BadTcpMessageTypeInvalid;
                     result = false;
                 }
             }
@@ -145,6 +169,15 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
         if (SOPC_STATUS_OK != status || chunkCtx->currentMsgSize <= SOPC_TCP_UA_HEADER_LENGTH)
         {
             // Message size cannot be less or equal to the TCP UA header length
+            *errorStatus = OpcUa_BadEncodingError;
+            result = false;
+        }
+        else if (chunkCtx->currentMsgSize > chunkCtx->chunkInputBuffer->max_size)
+        {
+            SOPC_Logger_TraceError(
+                "ChunksMgr: decoding TCP UA header: message size=%u indicated greater than receiveBufferSize=%u",
+                chunkCtx->currentMsgSize, chunkCtx->chunkInputBuffer->max_size);
+            *errorStatus = OpcUa_BadTcpMessageTooLarge;
             result = false;
         }
     }
@@ -1729,14 +1762,12 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
             if (result != false && decodeHeader != false)
             {
                 // Decode the received OPC UA TCP message header
-                result = SC_Chunks_DecodeTcpMsgHeader(&scConnection->chunksCtx);
+                result = SC_Chunks_DecodeTcpMsgHeader(&scConnection->chunksCtx, &errorStatus);
                 if (false == result)
                 {
-                    errorStatus = OpcUa_BadTcpMessageTypeInvalid;
-
-                    SOPC_Logger_TraceError("ChunksMgr: message type invalid (epCfgIdx=%u, scCfgIdx=%u)",
-                                           scConnection->serverEndpointConfigIdx,
-                                           scConnection->endpointConnectionConfigIdx);
+                    SOPC_Logger_TraceError(
+                        "ChunksMgr: TCP UA header decoding failed with statusCode=%X (epCfgIdx=%u, scCfgIdx=%u)",
+                        errorStatus, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
                 }
                 else
                 {
