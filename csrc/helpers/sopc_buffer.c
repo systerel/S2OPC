@@ -51,12 +51,8 @@ SOPC_ReturnStatus SOPC_Buffer_Init(SOPC_Buffer* buffer, uint32_t size)
         buffer->position = 0;
         buffer->length = 0;
         buffer->max_size = size;
-        buffer->data = (uint8_t*) malloc(sizeof(uint8_t) * (size_t) size);
-        if (buffer->data != NULL)
-        {
-            memset(buffer->data, 0, sizeof(uint8_t) * (size_t) size);
-        }
-        else
+        buffer->data = (uint8_t*) calloc((size_t) size, sizeof(uint8_t));
+        if (buffer->data == NULL)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
