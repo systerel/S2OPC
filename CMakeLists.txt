@@ -288,7 +288,7 @@ target_include_directories(test_secure_channels_server PRIVATE "tests/secure_cha
                                                                ${INGOPCS_PUBLIC_INCLUDES} 
                                                                ${INGOPCS_PRIVATE_INCLUDES})
 
-# Secure channels tests: tests on receveived buffer
+# Secure channels tests: tests on received buffer
 file(GLOB_RECURSE SECURE_CHANNELS_BUFFER_TEST
      ${PLATFORM_SRCS}
      "csrc/helpers/*.c"
@@ -304,3 +304,20 @@ target_include_directories(check_sc_rcv_buffer PRIVATE "tests/secure_channels/st
                                                        "tests/helpers"
                                                        ${INGOPCS_PUBLIC_INCLUDES} 
                                                        ${INGOPCS_PRIVATE_INCLUDES})
+
+# Secure channels tests: tests on received encrypted buffer
+file(GLOB_RECURSE SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST
+     ${PLATFORM_SRCS}
+     "csrc/helpers/*.c"
+     "tests/secure_channels/check_sc_rcv_encrypted_buffer.c"
+     "tests/helpers/hexlify.c"
+     "tests/secure_channels/stubs/*.c")
+
+add_executable(check_sc_rcv_encrypted_buffer ${SECURE_CHANNELS_SRC}
+                                             ${SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST})
+target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE ${LIBCHECK_DEP_LIB} ${INGOPCS_DEP_LIBS})
+
+target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "tests/secure_channels/stubs" 
+                                                                 "tests/helpers"
+                                                                 ${INGOPCS_PUBLIC_INCLUDES} 
+                                                                 ${INGOPCS_PRIVATE_INCLUDES})
