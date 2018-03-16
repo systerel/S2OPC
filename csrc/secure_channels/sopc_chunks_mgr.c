@@ -1650,7 +1650,7 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                                               isPrecCryptoData);
         if (false == result)
         {
-            *errorStatus = OpcUa_BadApplicationSignatureInvalid;
+            *errorStatus = OpcUa_BadSecurityChecksFailed;
 
             SOPC_Logger_TraceError("ChunksMgr: signature verification failed (epCfgIdx=%u, scCfgIdx=%u)",
                                    scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
