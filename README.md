@@ -38,13 +38,14 @@ Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
   * gcc (tested with GCC version >= 4.8.4)
   * CMake (tested with CMake version >= 2.8.12.2)
   * make (tested with GNU Make version >= 3.81)
-  * mbedtls (>= 2.6.0): https://tls.mbed.org/
+  * mbedtls (>= 2.7.0): https://tls.mbed.org/
   * check (>= 0.10): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=no)
-- To build the Toolkit library and tests with default configuration:
+- To build the Toolkit library and tests with default configuration on current stable release:
 ```
+  git checkout INGOPCS_Toolkit_0.4.0
   ./build.sh
 ```
-- For more information, please refer to the wiki.
+- For more information, or to compile the master branch on its latest commit, please refer to the wiki.
 
 Address space generation:
 - see address_space_generation/README file for generator dependencies
