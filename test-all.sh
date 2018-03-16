@@ -46,7 +46,14 @@ popd
 
 # run sockets test
 export CK_TAP_LOG_FILE_NAME=$BIN_DIR/sockets.tap && $BIN_DIR/check_sockets
-# run secure channels client / server test
+
+# run secure channels tests
+## msg buffer fields validity limit tests
+pushd $BIN_DIR
+export CK_TAP_LOG_FILE_NAME=sc_rcv_buffer.tap && ./check_sc_rcv_buffer
+export CK_TAP_LOG_FILE_NAME=sc_rcv_encrypted_buffer.tap && ./check_sc_rcv_encrypted_buffer
+popd
+## client / server test
 $TEST_SCRIPTS/run_client_server_test_SC_level.sh
 
 # run services tests
