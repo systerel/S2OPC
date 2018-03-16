@@ -3347,6 +3347,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
     SOPC_Buffer* buffer = (SOPC_Buffer*) params;
     SOPC_Buffer* outputBuffer = NULL;
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
+    SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
     bool isSendCase = false;
     bool isSendTcpOnly = false;
     bool isOPN = false;
@@ -3369,11 +3370,25 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
             {
                 if (NULL != buffer)
                 {
-                    SC_Chunks_TreatReceivedBuffer(scConnection, eltId, buffer);
-                    buffer = NULL;
+                    // Ensure the buffer position is 0 to treat it
+                    retStatus = SOPC_Buffer_SetPosition(buffer, 0);
+                    if (SOPC_STATUS_OK != retStatus)
+                    {
+                        result = false;
+                    }
+                    else
+                    {
+                        result = true;
+                        SC_Chunks_TreatReceivedBuffer(scConnection, eltId, buffer);
+                        buffer = NULL;
+                    }
                 }
-                else
+
+                if (result == false)
                 {
+                    SOPC_Logger_TraceError("ChunksMgr: raised INT_SC_RCV_FAILURE: %X: (epCfgIdx=%u, scCfgIdx=%u)",
+                                           OpcUa_BadInvalidArgument, scConnection->serverEndpointConfigIdx,
+                                           scConnection->endpointConnectionConfigIdx);
                     SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, eltId, NULL,
                                                                    OpcUa_BadInvalidArgument);
                 }
