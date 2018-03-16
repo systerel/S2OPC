@@ -3356,8 +3356,6 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
     SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
     uint32_t* requestIdForSendFailure = NULL;
 
-    assert(buffer != NULL);
-
     if (scConnection != NULL && scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
     {
         switch (event)
@@ -3369,7 +3367,16 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
            params = (SOPC_Buffer*) received buffer */
             if (scConnection != NULL)
             {
-                SC_Chunks_TreatReceivedBuffer(scConnection, eltId, buffer);
+                if (NULL != buffer)
+                {
+                    SC_Chunks_TreatReceivedBuffer(scConnection, eltId, buffer);
+                    buffer = NULL;
+                }
+                else
+                {
+                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, eltId, NULL,
+                                                                   OpcUa_BadInvalidArgument);
+                }
             } // else: socket should already receive close request
             break;
             /* SC connection manager -> OPC UA chunks message manager */
@@ -3427,9 +3434,17 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
 
         if (isSendCase != false)
         {
-            assert(auxParam <= UINT32_MAX);
-            result = SC_Chunks_TreatSendBuffer(eltId, scConnection, auxParam, sendMsgType, isSendTcpOnly, isOPN, buffer,
-                                               &outputBuffer, &errorStatus);
+            if (NULL != buffer && auxParam <= UINT32_MAX)
+            {
+                result = SC_Chunks_TreatSendBuffer(eltId, scConnection, auxParam, sendMsgType, isSendTcpOnly, isOPN,
+                                                   buffer, &outputBuffer, &errorStatus);
+            }
+            else
+            {
+                SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, eltId, NULL,
+                                                               OpcUa_BadInvalidArgument);
+            }
+
             if (false == result)
             {
                 if (false == socketWillClose)
@@ -3449,8 +3464,6 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
                         "ScChunksMgr: Failed sending message type SOPC_Msg_Type=%d before socket closed scIdx=%u",
                         sendMsgType, eltId);
                 }
-                // If buffer not reused for sending on socket: delete it
-                SOPC_Buffer_Delete(buffer);
             }
             else
             {
@@ -3461,12 +3474,20 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
                 {
                     // If buffer not reused for sending on socket: delete it
                     SOPC_Buffer_Delete(buffer);
+                    buffer = NULL;
+                }
+                else
+                {
+                    // If buffer reused for sending on socket: set pointer to NULL to avoid final deallocation
+                    buffer = NULL;
                 }
             }
         }
-    }
-    else
-    { // SC not connected: ignore event and delete buffer data
+    } // else SC not connected: ignore event
+
+    if (NULL != buffer)
+    {
         SOPC_Buffer_Delete(buffer);
+        buffer = NULL;
     }
 }
