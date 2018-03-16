@@ -48,7 +48,7 @@ typedef enum {
     SOCKET_FAILURE,   /* id = secure channel connection index,
                          auxParam = socket index */
     SOCKET_RCV_BYTES, /* id = secure channel connection index,
-                         params = (SOPC_Buffer*) received buffer
+                         params = (SOPC_Buffer*) received buffer containing complete TCP UA chunk
                        */
     /* Services events */
     EP_OPEN,            /* id = endpoint description configuration index */
@@ -56,8 +56,10 @@ typedef enum {
     SC_CONNECT,         /* id = secure channel connection configuration index */
     SC_DISCONNECT,      /* id = secure channel connection index */
     SC_SERVICE_SND_MSG, /* id = secure channel connection index,
-                          params = (SOPC_Buffer*) send buffer,
-                          request Id context if response (server) / request Handle context if request (client) */
+                          params = (SOPC_Buffer*) buffer to send containing empty space for TCP UA header (24 bytes)
+                          followed by encoded OpcUa message,
+                          auxParam = request Id context if response (server) / request Handle context if request
+                          (client) */
 
     /* Timer events */
     TIMER_SC_CONNECTION_TIMEOUT, /* id = secure channel connection index */
