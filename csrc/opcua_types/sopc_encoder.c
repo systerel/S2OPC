@@ -693,7 +693,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
-    if (NULL == str || str->Data != NULL || buf == NULL)
+    if (NULL == str || str->Data != NULL || str->Length > 0 || buf == NULL)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -718,6 +718,11 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
                             str->Data = NULL;
                             str->Length = -1;
                         }
+                    }
+                    else
+                    {
+                        status = SOPC_STATUS_OUT_OF_MEMORY;
+                        str->Length = -1;
                     }
                 }
                 else
@@ -780,7 +785,7 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
-    if (NULL == str || str->Data != NULL || buf == NULL)
+    if (NULL == str || str->Data != NULL || str->Length > 0 || buf == NULL)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -811,6 +816,11 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
                             // Add '\0' character for CString compatibility
                             str->Data[str->Length] = '\0';
                         }
+                    }
+                    else
+                    {
+                        str->Length = -1;
+                        status = SOPC_STATUS_OUT_OF_MEMORY;
                     }
                 }
                 else
