@@ -111,6 +111,13 @@ int main(int argc, char* argv[])
     SOPC_String_Initialize(&secuConfig[1].securityPolicy);
     SOPC_String_Initialize(&secuConfig[2].securityPolicy);
 
+    // Get Toolkit Configuration
+    SOPC_Build_Info build_info = SOPC_ToolkitConfig_GetBuildInfo();
+    printf("toolkitVersion: %s\n", build_info.toolkitVersion);
+    printf("toolkitSrcSignature: %s\n", build_info.toolkitSrcSignature);
+    printf("toolkitDockerId: %s\n", build_info.toolkitDockerId);
+    printf("toolkitBuildDate: %s\n", build_info.toolkitBuildDate);
+
     if (argc == 2)
     {
         int parsedInt = atoi(argv[1]);

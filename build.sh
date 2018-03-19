@@ -24,6 +24,7 @@
 # - Variable CMAKE_INSTALL_PREFIX set to configure the install prefix of cmake
 #
 # Steps:
+# - generate build information
 # - configure build with cmake
 # - build the library and tests
 # - prepare test execution
@@ -31,6 +32,8 @@
 CURDIR=`pwd`
 EXEC_DIR=bin
 CERT_DIR=tests/data/cert
+BUILD_INFO_DIR=csrc/services/b2c/
+BUILD_INFO_FILE=$BUILD_INFO_DIR/toolkit_build_info.c
 
 if [[ $CMAKE_TOOLCHAIN_FILE ]]; then
     BUILD_DIR=build_toolchain
@@ -38,6 +41,29 @@ else
     BUILD_DIR=build
 fi
 
+GITID=$(git log -1 --format='%H')
+echo "Commit id : $GITID";
+DATE=`date +%Y-%m-%d`
+
+is_dirty() {
+   test -n "$(git status --porcelain)"
+}
+
+if is_dirty; then
+   DIRTY="*";
+fi
+
+VERSION="$GITID$DIRTY"
+echo "Building S2OPC-$VERSION"
+
+echo '#include "toolkit_build_info.h"' > $BUILD_INFO_FILE
+echo -e '#include "sopc_toolkit_constants.h"\n' >> $BUILD_INFO_FILE
+echo 'const SOPC_Build_Info toolkit_build_info = {' >> $BUILD_INFO_FILE
+echo '.toolkitVersion = TOOLKIT_VERSION,' >> $BUILD_INFO_FILE
+echo '.toolkitSrcSignature ="'$VERSION'",' >> $BUILD_INFO_FILE
+echo '.toolkitDockerId = "'$DOCKER_IMAGE'",' >> $BUILD_INFO_FILE
+echo '.toolkitBuildDate = "'$DATE'"' >> $BUILD_INFO_FILE
+echo '};' >> $BUILD_INFO_FILE
 
 echo "Build log" > $CURDIR/build.log
 

@@ -162,4 +162,12 @@ SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogPath(const char* logDirPath, uint32_t
  */
 SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level level);
 
+/**
+ * \brief Get Toolkit build information
+ *
+ *
+ * \return          Toolkit build information
+ */
+SOPC_Build_Info SOPC_ToolkitConfig_GetBuildInfo(void);
+
 #endif /* SOPC_TOOLKIT_CONFIG_H_ */

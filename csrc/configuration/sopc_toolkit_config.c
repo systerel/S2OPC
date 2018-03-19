@@ -29,6 +29,7 @@
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_sockets_api.h"
+#include "toolkit_build_info.h"
 
 #include "sopc_encodeable.h"
 #include "sopc_event_timer_manager.h"
@@ -815,4 +816,9 @@ SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level level)
         Mutex_Unlock(&tConfig.mut);
     }
     return status;
+}
+
+SOPC_Build_Info SOPC_ToolkitConfig_GetBuildInfo(void)
+{
+    return toolkit_build_info;
 }

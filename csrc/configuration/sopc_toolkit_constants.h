@@ -34,6 +34,8 @@
 #define SOPC_TOOLKIT_VERSION_MEDIUM 4
 #define SOPC_TOOLKIT_VERSION_MINOR 0
 
+#define TOOLKIT_VERSION "0.4.0*"
+
 /* OPC UA SPECIFICATION CONFIGURATION */
 
 /** @brief Version of the used protocol */

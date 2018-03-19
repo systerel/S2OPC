@@ -179,4 +179,13 @@ typedef enum {
     SOPC_TOOLKIT_LOG_LEVEL_DEBUG
 } SOPC_Toolkit_Log_Level;
 
+/* Toolkit build information */
+typedef struct
+{
+    char* toolkitVersion;
+    char* toolkitSrcSignature;
+    char* toolkitDockerId;
+    char* toolkitBuildDate;
+} SOPC_Build_Info;
+
 #endif // SOPC_USER_APP_ITF_H_

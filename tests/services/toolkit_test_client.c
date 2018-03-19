@@ -223,6 +223,13 @@ int main(void)
     // Client private key
     char* keyLocation = "./client_private/client_2k.key";
 
+    // Get Toolkit Configuration
+    SOPC_Build_Info build_info = SOPC_ToolkitConfig_GetBuildInfo();
+    printf("toolkitVersion: %s\n", build_info.toolkitVersion);
+    printf("toolkitSrcSignature: %s\n", build_info.toolkitSrcSignature);
+    printf("toolkitDockerId: %s\n", build_info.toolkitDockerId);
+    printf("toolkitBuildDate: %s\n", build_info.toolkitBuildDate);
+
     // If security mode is set, load certificates and key
 
     if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None)
