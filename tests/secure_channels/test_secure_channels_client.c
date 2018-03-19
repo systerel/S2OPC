@@ -16,6 +16,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -468,7 +469,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    printf(">>Stub_Client: Final status: %x\n", status);
+    printf(">>Stub_Client: Final status: %" PRIu32 "\n", status);
     SOPC_Toolkit_Clear();
 
     SOPC_PKIProviderStack_Free(pki);

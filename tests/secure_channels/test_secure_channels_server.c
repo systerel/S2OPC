@@ -16,6 +16,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -426,7 +427,7 @@ int main(int argc, char* argv[])
         serviceEvent = NULL;
     }
 
-    printf("<Stub_Server: Final status: %x\n", status);
+    printf("<Stub_Server: Final status: %" PRIu32 "\n", status);
     SOPC_Toolkit_Clear();
     SOPC_PKIProviderStack_Free(pki);
     SOPC_KeyManager_Certificate_Free(crt_srv);

@@ -96,7 +96,7 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode s
 
     /* Check the service StatusCode */
     if (verbose > 0)
-        printf("Service status code: %d (should be %d)\n", statusCode, SOPC_STATUS_OK);
+        printf("Service status code: %" PRIX32 " (should be %d)\n", statusCode, SOPC_STATUS_OK);
     bTestOk = SOPC_STATUS_OK == statusCode;
 
     /* Creates a Request */
@@ -105,11 +105,11 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode s
     /* Prints the Response */
     if (verbose > 0)
     {
-        printf("pReadResp->NoOfResults: %d\n", pReadResp->NoOfResults);
+        printf("pReadResp->NoOfResults: %" PRIi32 "\n", pReadResp->NoOfResults);
         for (i = 0; i < pReadResp->NoOfResults; ++i)
         {
             /* Note: Status is a B-StatusCode */
-            printf("pReadResp->Results[%" PRIi32 "].Status: 0x%08X\n", i, pReadResp->Results[i].Status);
+            printf("pReadResp->Results[%" PRIi32 "].Status: 0x%08" PRIX32 "\n", i, pReadResp->Results[i].Status);
             util_variant__print_SOPC_Variant(&pReadResp->Results[i].Value);
         }
     }

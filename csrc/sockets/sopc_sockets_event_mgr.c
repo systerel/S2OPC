@@ -16,6 +16,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -445,8 +446,8 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
     switch (socketEvent)
     {
     case SOCKET_CREATE_SERVER:
-        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CREATE_SERVER epCfgIdx=%u URI=%s allItfs=%s", eltId, (char*) params,
-                               auxParam ? "true" : "false");
+        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CREATE_SERVER epCfgIdx=%" PRIu32 " URI=%s allItfs=%s", eltId,
+                               (char*) params, auxParam ? "true" : "false");
         /*
         id = endpoint description config index,
         params = (const char*) URI,
@@ -464,7 +465,8 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
         break;
     case SOCKET_ACCEPTED_CONNECTION:
-        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_ACCEPTED_CONNECTION socketIdx=%u scIdx=%u", eltId, auxParam);
+        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_ACCEPTED_CONNECTION socketIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
+                               auxParam);
 
         /* id = socket index,
          * auxParam = secure channel connection index associated to accepted connection */
@@ -485,7 +487,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
         break;
     case SOCKET_CREATE_CLIENT:
-        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CREATE_CLIENT scIdx=%u URI=%s", eltId, (char*) params);
+        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CREATE_CLIENT scIdx=%" PRIu32 " URI=%s", eltId, (char*) params);
         /*
         id = secure channel connection index,
         params = (const char*) URI
@@ -501,7 +503,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
         break;
     case SOCKET_CLOSE:
-        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CLOSE socketIdx=%u", eltId);
+        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CLOSE socketIdx=%" PRIu32, eltId);
         /* id = socket index */
         socketElt = &socketsArray[eltId];
 
@@ -518,7 +520,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         SOPC_SocketsInternalContext_CloseSocketLock(eltId);
         break;
     case SOCKET_WRITE:
-        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_WRITE socketIdx=%u", eltId);
+        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_WRITE socketIdx=%" PRIu32, eltId);
         /*
         id = socket index,
         params = (SOPC_Buffer*) msg buffer
@@ -562,7 +564,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         break;
     case INT_SOCKET_LISTENER_CONNECTION_ATTEMPT:
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_LISTENER_CONNECTION_ATTEMPT socketIdx=%u", eltId);
+        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_LISTENER_CONNECTION_ATTEMPT socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
 
         // State was set to accepted by network event manager
@@ -576,7 +578,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         if (NULL == acceptSock)
         {
             SOPC_Logger_TraceWarning(
-                "SocketsMgr: refusing new connection since maximum number of socket reached (%u/%u)",
+                "SocketsMgr: refusing new connection since maximum number of socket reached (" PRIu32 "/%u)",
                 socketElt->listenerConnections, SOPC_MAX_SOCKETS_CONNECTIONS);
         }
         else
@@ -612,7 +614,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         break;
     case INT_SOCKET_CONNECTION_ATTEMPT_FAILED:
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_CONNECTION_ATTEMPT_FAILED socketIdx=%u", eltId);
+        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_CONNECTION_ATTEMPT_FAILED socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
         // State is connecting
         assert(socketElt->state == SOCKET_STATE_CONNECTING);
@@ -635,7 +637,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         break;
     case INT_SOCKET_CONNECTED:
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_CONNECTED socketIdx=%u", eltId);
+        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_CONNECTED socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
         // State was set to connected by network manager
         assert(socketElt->state == SOCKET_STATE_CONNECTING);
@@ -661,7 +663,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         break;
     case INT_SOCKET_CLOSE:
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_CLOSE socketIdx=%u", eltId);
+        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_CLOSE socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
 
         if (socketElt->state == SOCKET_STATE_LISTENING)
@@ -685,7 +687,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         SOPC_SocketsInternalContext_CloseSocketLock(eltId);
         break;
     case INT_SOCKET_READY_TO_READ:
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_READY_TO_READ socketIdx=%u", eltId);
+        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_READY_TO_READ socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
 
         if (socketElt->state == SOCKET_STATE_CONNECTED)
@@ -725,7 +727,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         break;
     case INT_SOCKET_READY_TO_WRITE:
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_READY_TO_WRITE socketIdx=%u", eltId);
+        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_READY_TO_WRITE socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
 
         // Socket is connected

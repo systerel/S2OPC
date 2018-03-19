@@ -19,6 +19,7 @@
    Exported Declarations
   ------------------------*/
 #include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -966,14 +967,15 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
                 session_expiration_timer[session_core_bs__session] = timerId;
                 if (0 == timerId)
                 {
-                    SOPC_Logger_TraceError("Services: session=%d expiration timer renew failed",
+                    SOPC_Logger_TraceError("Services: session=%" PRId32 " expiration timer renew failed",
                                            session_core_bs__session);
                 }
             }
         }
         if (*session_core_bs__expired != false)
         {
-            SOPC_Logger_TraceDebug("Services: session=%d expired on timeout evaluation", session_core_bs__session);
+            SOPC_Logger_TraceDebug("Services: session=%" PRId32 " expired on timeout evaluation",
+                                   session_core_bs__session);
         }
     }
 }
@@ -1012,7 +1014,8 @@ void session_core_bs__server_session_timeout_start_timer(const constants__t_sess
         session_expiration_timer[session_core_bs__session] = timerId;
         if (0 == timerId)
         {
-            SOPC_Logger_TraceError("Services: session=%d expiration timer creation failed", session_core_bs__session);
+            SOPC_Logger_TraceError("Services: session=%" PRId32 " expiration timer creation failed",
+                                   session_core_bs__session);
         }
     }
 }

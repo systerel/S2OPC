@@ -16,6 +16,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -159,7 +160,8 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                         }
                         else
                         {
-                            SOPC_Logger_TraceError("SocketNetworkMgr: unexpected read event on socketIdx=%d", idx);
+                            SOPC_Logger_TraceError("SocketNetworkMgr: unexpected read event on socketIdx=%" PRIu32,
+                                                   idx);
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                         }
                     }
@@ -171,7 +173,8 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                         }
                         else
                         {
-                            SOPC_Logger_TraceError("SocketNetworkMgr: unexpected write event on socketIdx=%d", idx);
+                            SOPC_Logger_TraceError("SocketNetworkMgr: unexpected write event on socketIdx=%" PRIu32,
+                                                   idx);
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                         }
                     }
@@ -181,7 +184,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                 if (SocketSet_IsPresent(uaSock->sock, &exceptSet) != false)
                 {
                     // TODO: retrieve exception code
-                    SOPC_Logger_TraceError("SocketNetworkMgr: exception event on socketIdx=%d", idx);
+                    SOPC_Logger_TraceError("SocketNetworkMgr: exception event on socketIdx=%" PRIu32, idx);
                     SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                 }
             }

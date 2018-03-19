@@ -21,6 +21,7 @@
 #include "sopc_user_app_itf.h"
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -91,31 +92,32 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
         switch (SOPC_AppEvent_ComEvent_Get(eventAndType))
         {
         case SE_SESSION_ACTIVATION_FAILURE:
-            SOPC_Logger_TraceDebug("App: SE_SESSION_ACTIVATION_FAILURE session=%u context=%u", id, auxParam);
+            SOPC_Logger_TraceDebug("App: SE_SESSION_ACTIVATION_FAILURE session=%" PRIu32 " context=%" PRIuPTR, id,
+                                   auxParam);
             break;
         case SE_ACTIVATED_SESSION:
-            SOPC_Logger_TraceDebug("App: SE_ACTIVATED_SESSION session=%u context=%u", id, auxParam);
+            SOPC_Logger_TraceDebug("App: SE_ACTIVATED_SESSION session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
             break;
         case SE_SESSION_REACTIVATING:
-            SOPC_Logger_TraceDebug("App: SE_SESSION_REACTIVATING session=%u context=%u", id, auxParam);
+            SOPC_Logger_TraceDebug("App: SE_SESSION_REACTIVATING session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
             break;
         case SE_RCV_SESSION_RESPONSE:
             if (params != NULL)
             {
                 encType = *(SOPC_EncodeableType**) params;
             }
-            SOPC_Logger_TraceDebug("App: SE_RCV_SESSION_RESPONSE  session=%u msgTyp=%s context=%u", id,
+            SOPC_Logger_TraceDebug("App: SE_RCV_SESSION_RESPONSE  session=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
                                    SOPC_EncodeableType_GetName(encType), auxParam);
             break;
         case SE_CLOSED_SESSION:
-            SOPC_Logger_TraceDebug("App: SE_CLOSED_SESSION session=%u context=%u", id, auxParam);
+            SOPC_Logger_TraceDebug("App: SE_CLOSED_SESSION session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
             break;
         case SE_RCV_DISCOVERY_RESPONSE:
             if (params != NULL)
             {
                 encType = *(SOPC_EncodeableType**) params;
             }
-            SOPC_Logger_TraceDebug("App: SE_RCV_DISCOVERY_RESPONSE msgTyp=%s context=%u",
+            SOPC_Logger_TraceDebug("App: SE_RCV_DISCOVERY_RESPONSE msgTyp=%s context=%" PRIuPTR,
                                    SOPC_EncodeableType_GetName(encType), auxParam);
             break;
         case SE_SND_REQUEST_FAILED:
@@ -123,18 +125,18 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
             {
                 encType = *(SOPC_EncodeableType**) params;
             }
-            SOPC_Logger_TraceDebug("App: SE_SND_REQUEST_FAILED retStatus=%u msgTyp=%s context=%u", id,
+            SOPC_Logger_TraceDebug("App: SE_SND_REQUEST_FAILED retStatus=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
                                    SOPC_EncodeableType_GetName(encType), auxParam);
             break;
         case SE_CLOSED_ENDPOINT:
-            SOPC_Logger_TraceDebug("App: SE_CLOSED_ENDPOINT idx=%u retStatus=%u", id, auxParam);
+            SOPC_Logger_TraceDebug("App: SE_CLOSED_ENDPOINT idx=%" PRIu32 " retStatus=%" PRIuPTR, id, auxParam);
             break;
         case SE_LOCAL_SERVICE_RESPONSE:
             if (params != NULL)
             {
                 encType = *(SOPC_EncodeableType**) params;
             }
-            SOPC_Logger_TraceDebug("App: SE_LOCAL_SERVICE_RESPONSE  idx=%u msgTyp=%s context=%u", id,
+            SOPC_Logger_TraceDebug("App: SE_LOCAL_SERVICE_RESPONSE  idx=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
                                    SOPC_EncodeableType_GetName(encType), auxParam);
             break;
         default:

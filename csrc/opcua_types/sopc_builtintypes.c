@@ -1596,7 +1596,7 @@ char* SOPC_NodeId_ToCString(SOPC_NodeId* nodeId)
         {
             if (nodeId->Namespace != 0)
             {
-                res = sprintf(result, "ns=%u;", nodeId->Namespace);
+                res = sprintf(result, "ns=%" PRIu16 ";", nodeId->Namespace);
             }
             if (res >= 0)
             {
@@ -1604,7 +1604,7 @@ char* SOPC_NodeId_ToCString(SOPC_NodeId* nodeId)
                 {
                 case SOPC_IdentifierType_Numeric:
                     // with <id> = 10 digits max: "i=<id>\0"
-                    res = sprintf(&result[res], "i=%u", nodeId->Data.Numeric);
+                    res = sprintf(&result[res], "i=%" PRIu32, nodeId->Data.Numeric);
                     break;
                 case SOPC_IdentifierType_String:
                     // "s=<string>\0"

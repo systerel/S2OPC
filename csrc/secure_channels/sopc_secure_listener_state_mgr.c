@@ -18,6 +18,7 @@
 #include "sopc_secure_listener_state_mgr.h"
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -153,7 +154,8 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
     /* Sockets events: */
     /* Sockets manager -> SC listener state manager */
     case SOCKET_LISTENER_OPENED:
-        SOPC_Logger_TraceDebug("ScListenerMgr: SOCKET_LISTENER_OPENED epCfgIdx=%u socketIdx=%u", eltId, auxParam);
+        SOPC_Logger_TraceDebug("ScListenerMgr: SOCKET_LISTENER_OPENED epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId,
+                               auxParam);
         /* id = endpoint description config index,
            auxParam = socket index */
         if (auxParam <= UINT32_MAX)
@@ -172,7 +174,8 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         }
         break;
     case SOCKET_LISTENER_CONNECTION:
-        SOPC_Logger_TraceDebug("ScListenerMgr: SOCKET_LISTENER_CONNECTION epCfgIdx=%u socketIdx=%u", eltId, auxParam);
+        SOPC_Logger_TraceDebug("ScListenerMgr: SOCKET_LISTENER_CONNECTION epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR,
+                               eltId, auxParam);
         /* id = endpoint description config index,
            auxParam = new connection socket index */
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
@@ -191,7 +194,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         }
         break;
     case SOCKET_LISTENER_FAILURE:
-        SOPC_Logger_TraceDebug("ScListenerMgr: SOCKET_LISTENER_FAILURE epCfgIdx=%u", eltId);
+        SOPC_Logger_TraceDebug("ScListenerMgr: SOCKET_LISTENER_FAILURE epCfgIdx=%" PRIu32, eltId);
         /* id = endpoint description configuration index */
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
         if (epConfig != NULL)
@@ -204,7 +207,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
     /* Services events: */
     /* Services manager -> SC listener state manager */
     case EP_OPEN:
-        SOPC_Logger_TraceDebug("ScListenerMgr: EP_OPEN epCfgIdx=%u", eltId);
+        SOPC_Logger_TraceDebug("ScListenerMgr: EP_OPEN epCfgIdx=%" PRIu32, eltId);
         /* id = endpoint description configuration index */
         // Retrieve EP configuration
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
@@ -227,7 +230,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         }
         break;
     case EP_CLOSE:
-        SOPC_Logger_TraceDebug("ScListenerMgr: EP_CLOSE epCfgIdx=%u", eltId);
+        SOPC_Logger_TraceDebug("ScListenerMgr: EP_CLOSE epCfgIdx=%" PRIu32, eltId);
         /* id = endpoint description configuration index */
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
         if (epConfig != NULL)
@@ -248,7 +251,8 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
     /* Internal events: */
     /* SC connection manager -> SC listener state manager */
     case INT_EP_SC_CREATED:
-        SOPC_Logger_TraceDebug("ScListenerMgr: INT_EP_SC_CREATED epCfgIdx=%u scIdx=%u", eltId, auxParam);
+        SOPC_Logger_TraceDebug("ScListenerMgr: INT_EP_SC_CREATED epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
+                               auxParam);
         /* id = endpoint description configuration index,
            auxParam = socket index for connection */
         if (auxParam <= UINT32_MAX)
@@ -272,7 +276,8 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         }
         break;
     case INT_EP_SC_DISCONNECTED:
-        SOPC_Logger_TraceDebug("ScListenerMgr: INT_EP_SC_DISCONNECTED epCfgIdx=%u scIdx=%u", eltId, auxParam);
+        SOPC_Logger_TraceDebug("ScListenerMgr: INT_EP_SC_DISCONNECTED epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
+                               auxParam);
 
         /* id = endpoint description configuration index,
            auxParam = secure channel connection index */

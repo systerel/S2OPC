@@ -16,6 +16,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -542,7 +543,7 @@ int main(void)
     }
     else
     {
-        printf(">>Test_Client_Toolkit: read request not received or BAD status (%X) ! \n", status);
+        printf(">>Test_Client_Toolkit: read request not received or BAD status (%" PRIu32 ") ! \n", status);
         printf(">>Test_Client_Toolkit final result: NOK\n");
         return status;
     }

@@ -214,7 +214,7 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
         printf("Null\n");
         break;
     case SOPC_Boolean_Id:
-        printf("Boolean\n  Value: %i\n", pvar->Value.Boolean);
+        printf("Boolean\n  Value: %" PRIu8 "\n", pvar->Value.Boolean);
         break;
     case SOPC_Int32_Id:
         printf("Int32\n  Value: %" PRIi32 "\n", pvar->Value.Int32);
@@ -246,7 +246,7 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
                 printf("%c", c);
             else
                 /* Special char */
-                printf("\\x%02X", c);
+                printf("\\x%02" PRIX8, c);
         }
         printf("\"\n");
         break;
@@ -261,7 +261,7 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
                 printf("%c", c);
             else
                 /* Special char */
-                printf("\\x%02X", c);
+                printf("\\x%02" PRIX8, c);
         }
         printf("\"\n");
         break;

@@ -79,7 +79,7 @@ void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SO
                 break;
             }
             printf("  AttributeId: %" PRIu32 "\n", wv->AttributeId);
-            printf("  Write status: %X\n", opStatus);
+            printf("  Write status: %" PRIX32 "\n", opStatus);
         }
     }
     else
