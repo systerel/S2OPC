@@ -173,7 +173,7 @@ void message_out_bs__dealloc_msg_out(const constants__t_msg_i message_out_bs__ms
         // To could keep generated prototype
         // Generated header, parameter not really a const. TODO: Check if message should not be a / in a global variable
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        SOPC_Encodeable_Delete(encType, (void*) &message_out_bs__msg);
+        SOPC_Encodeable_Delete(encType, (void**) &message_out_bs__msg);
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 }
@@ -373,9 +373,10 @@ void message_out_bs__write_create_session_msg_session_token(
 {
     OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) message_out_bs__msg;
     SOPC_ReturnStatus status;
-    status = SOPC_NodeId_Copy(&createSessionResp->AuthenticationToken, message_out_bs__session_token);
+    const SOPC_NodeId* nodeId = (const SOPC_NodeId*) message_out_bs__session_token;
+    status = SOPC_NodeId_Copy(&createSessionResp->AuthenticationToken, nodeId);
     assert(SOPC_STATUS_OK == status);
-    status = SOPC_NodeId_Copy(&createSessionResp->SessionId, message_out_bs__session_token);
+    status = SOPC_NodeId_Copy(&createSessionResp->SessionId, nodeId);
     createSessionResp->SessionId.Data.Numeric += 10000;
     assert(SOPC_STATUS_OK == status);
 }
@@ -546,7 +547,7 @@ void message_out_bs__write_msg_out_header_session_token(
 void message_out_bs__write_msg_resp_header_service_status(const constants__t_msg_header_i message_out_bs__msg_header,
                                                           const constants__t_StatusCode_i message_out_bs__status_code)
 {
-    SOPC_ReturnStatus status = OpcUa_BadInternalError;
+    SOPC_StatusCode status = OpcUa_BadInternalError;
     util_status_code__B_to_C(message_out_bs__status_code, &status);
     ((OpcUa_ResponseHeader*) message_out_bs__msg_header)->ServiceResult = status;
 }
