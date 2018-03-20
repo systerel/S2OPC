@@ -37,6 +37,7 @@ const char* SOPC_CSTRING_LEVEL_INFO = "";
 const char* SOPC_CSTRING_LEVEL_DEBUG = "(Debug) ";
 const char* SOPC_CSTRING_LEVEL_UNKNOWN = "(?) ";
 
+static bool uniquePrefixSet = false;
 static char* SOPC_CSTRING_UNIQUE_LOG_PREFIX = "UNINIT_LOG";
 
 typedef struct SOPC_Log_File
@@ -64,6 +65,7 @@ struct SOPC_Log_Instance
 void SOPC_Log_Initialize()
 {
     SOPC_CSTRING_UNIQUE_LOG_PREFIX = SOPC_Time_GetStringOfCurrentTimeUTC(true);
+    uniquePrefixSet = true;
 }
 
 static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
@@ -520,8 +522,9 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
 
 void SOPC_Log_Clear(void)
 {
-    if (SOPC_CSTRING_UNIQUE_LOG_PREFIX != NULL)
+    if (uniquePrefixSet != false)
     {
         free(SOPC_CSTRING_UNIQUE_LOG_PREFIX);
+        uniquePrefixSet = false;
     }
 }

@@ -183,4 +183,5 @@ void SOPC_Logger_Clear(void)
     {
         SOPC_Log_ClearInstance(&opcUaAudit);
     }
+    SOPC_Log_Clear();
 }
