@@ -25,6 +25,7 @@ ISALL=$1
 
 # Clean pre-build, build and bin dirs
 echo "Cleaning pre-build/, build/ and bin/ directories"
+\rm -f csrc/services/b2c/toolkit_build_info.h
 \rm -f pre-build-check.log pre-build.log build.log
 \rm -fr pre-build build build_toolchain build_clang bin bin_clang
 

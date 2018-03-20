@@ -48,6 +48,14 @@ else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
+add_custom_command(OUTPUT csrc/services/b2c/toolkit_build_info.h
+                   COMMAND ./gen_build_info_file.sh ${CMAKE_CURRENT_SOURCE_DIR}
+                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+add_custom_target(build_info ALL
+                  DEPENDS csrc/services/b2c/toolkit_build_info.h
+                  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
 # Define non-platform dependent source files
 file(GLOB_RECURSE INGOPCS_SRCS
     "csrc/api_toolkit/*.c"
@@ -58,13 +66,16 @@ file(GLOB_RECURSE INGOPCS_SRCS
     "csrc/sockets/*.c"
     "csrc/secure_channels/*.c"
     "csrc/services/*.c"
+    "csrc/services/b2c/toolkit_build_info.c"
 )
 
 # Define INGOPCS library (static or shared based on BUILD_SHARED_LIBS)
 add_library(ingopcs ${PLATFORM_SRCS} ${INGOPCS_SRCS})
+add_dependencies(ingopcs build_info)
 
 # Define INGOPCS library includes
 file(GLOB INGOPCS_INCLUDE_FILES
+    "csrc/services/b2c/toolkit_build_info.h"
     "csrc/api_toolkit/*.h"
     "csrc/configuration/*.h"
     "csrc/helpers/*.h"
