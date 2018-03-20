@@ -777,12 +777,13 @@ SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogPath(const char* logDirPath, uint32_t
     return status;
 }
 
-SOPC_Toolkit_Log_Level SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level level)
+SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level level)
 {
-    SOPC_Toolkit_Log_Level extRes = level;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     SOPC_Log_Level result = SOPC_LOG_LEVEL_ERROR;
     if (tConfig.initDone != false)
     {
+        status = SOPC_STATUS_OK;
         Mutex_Lock(&tConfig.mut);
         switch (level)
         {
@@ -799,7 +800,6 @@ SOPC_Toolkit_Log_Level SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level lev
             result = SOPC_LOG_LEVEL_DEBUG;
             break;
         default:
-            extRes = SOPC_TOOLKIT_LOG_LEVEL_DEBUG;
             result = SOPC_LOG_LEVEL_DEBUG;
         }
         if (false == tConfig.locked)
@@ -814,5 +814,5 @@ SOPC_Toolkit_Log_Level SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level lev
         }
         Mutex_Unlock(&tConfig.mut);
     }
-    return extRes;
+    return status;
 }

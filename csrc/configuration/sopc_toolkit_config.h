@@ -153,12 +153,13 @@ SOPC_ReturnStatus SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTabl
 SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogPath(const char* logDirPath, uint32_t maxBytes, uint16_t maxFiles);
 
 /**
- * \brief Configure the toolkit log traces level (SOPC_TOOLKIT_LOG_LEVEL_ERROR/WARNING/INFO/DEBUG)
+ * \brief Configure the toolkit log traces level SOPC_TOOLKIT_LOG_LEVEL_ERROR/WARNING/INFO/DEBUG
+ * (SOPC_Toolkit_Initialize required)
  *
  * \param logLevel  Minimum level of log traces to be printed in the log files (default ERROR)
  *
- * \return          The level applied to the log traces
+ * \return          SOPC_STATUS_INVALID state if toolkit not initialized, SOPC_STATUS_OK otherwise
  */
-SOPC_Toolkit_Log_Level SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level level);
+SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level level);
 
 #endif /* SOPC_TOOLKIT_CONFIG_H_ */
