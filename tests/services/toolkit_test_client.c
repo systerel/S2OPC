@@ -44,6 +44,7 @@
 
 static uint8_t sessionsActivated = 0;
 static uint8_t sessionsClosed = 0;
+static uint8_t sendFailures = 0;
 static uint32_t session = 0;
 static uint32_t session2 = 0;
 static uint32_t session3 = 0;
@@ -125,7 +126,6 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void
     {
         sessionsActivated++;
         // Check context value is same as one provided with activation request
-        assert(sessionsActivated == 1 || sessionsActivated == 2 || sessionsActivated == 3);
         if (sessionsActivated == 1)
         {
             session = idOrStatus;
@@ -146,6 +146,10 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void
     else if (event == SE_SESSION_ACTIVATION_FAILURE || event == SE_CLOSED_SESSION)
     {
         sessionsClosed++;
+    }
+    else if (event == SE_SND_REQUEST_FAILED)
+    {
+        sendFailures++;
     }
     else
     {
@@ -362,7 +366,7 @@ int main(void)
         SOPC_Sleep(sleepTimeout);
     }
 
-    if (getEndpointsReceived == false)
+    if (getEndpointsReceived == false || sendFailures > 0)
     {
         printf(">>Test_Client_Toolkit: GetEndpoints Response received: NOK\n");
         status = SOPC_STATUS_NOK;
@@ -398,7 +402,7 @@ int main(void)
         status = SOPC_STATUS_TIMEOUT;
     }
 
-    if (sessionsClosed != 0)
+    if (sessionsClosed != 0 || sendFailures > 0)
     {
         status = SOPC_STATUS_NOK;
     }
@@ -434,6 +438,10 @@ int main(void)
     {
         status = SOPC_STATUS_TIMEOUT;
     }
+    else if (sendFailures > 0)
+    {
+        status = SOPC_STATUS_NOK;
+    }
 
     if (SOPC_STATUS_OK == status)
     {
@@ -467,6 +475,10 @@ int main(void)
     {
         status = SOPC_STATUS_TIMEOUT;
     }
+    else if (sendFailures > 0)
+    {
+        status = SOPC_STATUS_NOK;
+    }
 
     if (SOPC_STATUS_OK == status)
     {
@@ -493,6 +505,10 @@ int main(void)
     if (loopCpt * sleepTimeout > loopTimeout)
     {
         status = SOPC_STATUS_TIMEOUT;
+    }
+    else if (sendFailures > 0)
+    {
+        status = SOPC_STATUS_NOK;
     }
 
     /* Now the request can be freed */
