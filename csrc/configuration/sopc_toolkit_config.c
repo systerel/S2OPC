@@ -262,6 +262,8 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 SOPC_ReturnStatus SOPC_Toolkit_Configured()
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
+    SOPC_Build_Info buildInfo;
+    bool result = false;
     if (tConfig.initDone != false)
     {
         Mutex_Lock(&tConfig.mut);
@@ -272,8 +274,15 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
             {
                 tConfig.locked = true;
                 SOPC_Services_ToolkitConfigured();
-                SOPC_Logger_Initialize(tConfig.logDirPath, tConfig.logMaxBytes, tConfig.logMaxFiles);
-                SOPC_Logger_SetTraceLogLevel(tConfig.logLevel);
+                result = SOPC_Logger_Initialize(tConfig.logDirPath, tConfig.logMaxBytes, tConfig.logMaxFiles);
+                if (result != false)
+                {
+                    buildInfo = SOPC_ToolkitConfig_GetBuildInfo();
+                    SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
+                    SOPC_Logger_TraceInfo("DATE='%s' VERSION='%s' SIGNATURE='%s'", buildInfo.toolkitBuildDate,
+                                          buildInfo.toolkitVersion, buildInfo.toolkitSrcSignature);
+                    SOPC_Logger_SetTraceLogLevel(tConfig.logLevel);
+                }
                 status = SOPC_STATUS_OK;
             }
             else
