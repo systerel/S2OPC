@@ -201,6 +201,10 @@ SOPC_Log_Instance* SOPC_Log_CreateInstance(const char* logDirPath,
                 free(file);
                 file = NULL;
             }
+            else
+            {
+                setvbuf(file->pFile, NULL, _IOLBF, BUFSIZ);
+            }
         }
         if (NULL != file && NULL != file->pFile)
         {
