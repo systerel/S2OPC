@@ -15,37 +15,47 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sopc_pki_stack.h"
 
 #include "config.h"
 
 /* Only supports one set of certificates at a time. They are all shared by the configs. */
-int nCrtCreated = 0; /* Number of created configs with certificates, to remember when to release certificates */
+int nCreated = 0; /* Number of created configs with certificates, to remember when to release certificates */
 SOPC_Certificate* pCrtCli = NULL;
 SOPC_Certificate* pCrtSrv = NULL;
 SOPC_AsymmetricKey* pKeyCli = NULL;
 SOPC_Certificate* pCrtCAu = NULL;
-int nPkiCreated = 0;
 SOPC_PKIProvider* pPki = NULL;
 
 SOPC_ReturnStatus Config_LoadCertificates(void);
-SOPC_ReturnStatus Config_LoadPki(void);
 
 SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcUa_MessageSecurityMode msgSecurityMode)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_SecureChannel_Config* pscConfig = NULL;
-    /* It is hoped that this function is not called with inconsistent secPolicy and secMode (None <=> None) */
+    bool bInconsistentPolicyMode = false;
+
+    /* Check that SecuPolicy None <=> SecuMode None */
+    bInconsistentPolicyMode =
+        strncmp(reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0;
+    bInconsistentPolicyMode ^= OpcUa_MessageSecurityMode_None == msgSecurityMode;
+    if (bInconsistentPolicyMode)
+    {
+        printf(
+            "# Error: inconsistent security mode, message security mode may be None if and only if security policy is "
+            "None.\n");
+        status = SOPC_STATUS_NOK;
+    }
 
     /* Try to load the certificates before the creation of the config */
-    if (OpcUa_MessageSecurityMode_None != msgSecurityMode)
+    if (SOPC_STATUS_OK == status && OpcUa_MessageSecurityMode_None != msgSecurityMode)
     {
-        /* TODO: it was useless to split these, should merge them... */
         status = Config_LoadCertificates();
-        status = Config_LoadPki();
     }
 
     /* Create the configuration */
@@ -84,33 +94,24 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
 
     if (NULL != (*ppscConfig)->crt_cli)
     {
-        nCrtCreated -= 1;
+        nCreated -= 1;
     }
 
     free(*ppscConfig);
     *ppscConfig = NULL;
 
     /* Garbage collect, if needed */
-    if (0 == nCrtCreated)
+    if (0 == nCreated)
     {
         SOPC_KeyManager_Certificate_Free(pCrtCli);
         SOPC_KeyManager_Certificate_Free(pCrtSrv);
         SOPC_KeyManager_AsymmetricKey_Free(pKeyCli);
+        SOPC_PKIProviderStack_Free(pPki);
+        SOPC_KeyManager_Certificate_Free(pCrtCAu);
         pCrtCli = NULL;
         pCrtSrv = NULL;
         pKeyCli = NULL;
-    }
-
-    nPkiCreated -= 1;
-    if (0 == nPkiCreated)
-    {
-        SOPC_PKIProviderStack_Free(pPki);
         pPki = NULL;
-    }
-
-    if (NULL == pPki && NULL == pCrtCli)
-    {
-        SOPC_KeyManager_Certificate_Free(pCrtCAu);
         pCrtCAu = NULL;
     }
 }
@@ -119,14 +120,7 @@ SOPC_ReturnStatus Config_LoadCertificates(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    if (0 == nCrtCreated && nPkiCreated > 0)
-    {
-        printf("# Error: PKI was created without CA Cert.\n");
-        printf("  Please create scConfigs for secured Sc before unsecured ones.\n");
-        status = SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    if (SOPC_STATUS_OK == status && 0 == nCrtCreated)
+    if (0 == nCreated)
     {
         status = SOPC_KeyManager_Certificate_CreateFromFile(PATH_CLIENT_PUBL, &pCrtCli);
         if (SOPC_STATUS_OK != status)
@@ -160,27 +154,18 @@ SOPC_ReturnStatus Config_LoadCertificates(void)
                 printf(">>Stub_Client: Failed to load CA\n");
             }
         }
-    }
 
-    nCrtCreated += 1; /* If it failed once, do not try again */
-
-    return status;
-}
-
-SOPC_ReturnStatus Config_LoadPki(void)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    if (0 == nPkiCreated)
-    {
-        status = SOPC_PKIProviderStack_Create(pCrtCAu, NULL, &pPki);
-        if (SOPC_STATUS_OK != status)
+        if (SOPC_STATUS_OK == status)
         {
-            printf("# Error: Failed to create PKI\n");
+            status = SOPC_PKIProviderStack_Create(pCrtCAu, NULL, &pPki);
+            if (SOPC_STATUS_OK != status)
+            {
+                printf("# Error: Failed to create PKI\n");
+            }
         }
     }
 
-    nPkiCreated += 1; /* If it failed once, do not try again */
+    nCreated += 1; /* If it failed once, do not try again */
 
     return status;
 }
