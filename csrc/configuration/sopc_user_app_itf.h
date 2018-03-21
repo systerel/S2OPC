@@ -26,7 +26,6 @@
 
 #include <stdbool.h>
 
-#include "sopc_event_dispatcher_manager.h"
 #include "sopc_key_manager.h"
 #include "sopc_types.h"
 
