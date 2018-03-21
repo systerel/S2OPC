@@ -264,6 +264,7 @@ target_link_libraries(check_sockets PRIVATE ${LIBCHECK_DEP_LIB} ${INGOPCS_DEP_LI
 
 # Secure channels (stubbed on services side) tests
 file(GLOB_RECURSE SECURE_CHANNELS_SRC
+    "csrc/configuration/sopc_ieee_check.c"
     "csrc/secure_channels/*.c"
     "csrc/opcua_types/*.c"
     "csrc/crypto/*.c"

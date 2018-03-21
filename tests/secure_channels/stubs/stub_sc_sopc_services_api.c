@@ -40,6 +40,10 @@ void SOPC_Services_Initialize()
     assert(SOPC_STATUS_OK == SOPC_AsyncQueue_Init(&servicesEvents, "StubsSC_ServicesEventQueue"));
 }
 
+void SOPC_Services_ToolkitConfigured() {}
+
+void SOPC_Services_PreClear() {}
+
 void SOPC_Services_Clear()
 {
     SOPC_AsyncQueue_Free(&servicesEvents);
