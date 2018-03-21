@@ -25,7 +25,7 @@
 #include "config.h"
 
 /* Only supports one set of certificates at a time. They are all shared by the configs. */
-int nCreated = 0; /* Number of created configs with certificates, to remember when to release certificates */
+int nCfgCreated = 0; /* Number of created configs with certificates, to remember when to release certificates */
 SOPC_Certificate* pCrtCli = NULL;
 SOPC_Certificate* pCrtSrv = NULL;
 SOPC_AsymmetricKey* pKeyCli = NULL;
@@ -94,14 +94,14 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
 
     if (NULL != (*ppscConfig)->crt_cli)
     {
-        nCreated -= 1;
+        nCfgCreated -= 1;
     }
 
     free(*ppscConfig);
     *ppscConfig = NULL;
 
     /* Garbage collect, if needed */
-    if (0 == nCreated)
+    if (0 == nCfgCreated)
     {
         SOPC_KeyManager_Certificate_Free(pCrtCli);
         SOPC_KeyManager_Certificate_Free(pCrtSrv);
@@ -120,7 +120,7 @@ SOPC_ReturnStatus Config_LoadCertificates(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    if (0 == nCreated)
+    if (0 == nCfgCreated)
     {
         status = SOPC_KeyManager_Certificate_CreateFromFile(PATH_CLIENT_PUBL, &pCrtCli);
         if (SOPC_STATUS_OK != status)
@@ -165,7 +165,7 @@ SOPC_ReturnStatus Config_LoadCertificates(void)
         }
     }
 
-    nCreated += 1; /* If it failed once, do not try again */
+    nCfgCreated += 1; /* If it failed once, do not try again */
 
     return status;
 }

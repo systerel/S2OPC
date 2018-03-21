@@ -15,14 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "sopc_encodeable.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_types.h"
 
 #include "config.h"
 #include "state_machine.h"
+
+uintptr_t nSMCreated = 0; /* Number of created machines, used for session context. */
+uintptr_t nDiscovery = 0; /* Number of sent discovery requests, used as UID for requestContext */
 
 StateMachine_Machine* StateMachine_Create(void)
 {
@@ -30,17 +37,20 @@ StateMachine_Machine* StateMachine_Create(void)
 
     if (NULL != pSM)
     {
+        /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX opened sessions */
+        ++nSMCreated;
         pSM->state = stInit;
         pSM->pscConfig = NULL;
         pSM->iscConfig = 0;
-        pSM->iSession = 1;
+        pSM->iSessionCtx = nSMCreated;
         pSM->iSessionID = 0;
+        pSM->iRequestCtx = 0;
     }
 
     return pSM;
 }
 
-SOPC_ReturnStatus StateMachine_ConfigureToolkit(StateMachine_Machine* pSM)
+SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -49,7 +59,7 @@ SOPC_ReturnStatus StateMachine_ConfigureToolkit(StateMachine_Machine* pSM)
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    /* Configure the Toolkit */
+    /* Add the SecureChannel configuration */
     if (SOPC_STATUS_OK == status)
     {
         pSM->pscConfig = Config_NewSCConfig(SECURITY_POLICY, SECURITY_MODE);
@@ -71,46 +81,156 @@ SOPC_ReturnStatus StateMachine_ConfigureToolkit(StateMachine_Machine* pSM)
 
     if (SOPC_STATUS_OK == status)
     {
-        pSM->state = stWaitActivation;
-        status = SOPC_Toolkit_Configured();
-        if (SOPC_STATUS_OK == status)
-        {
-            printf("# Info: Toolkit configuration done.\n");
-            printf("# Info: Opening Session.\n");
-        }
-        else
-        {
-            printf("# Error: Toolkit configuration failed.\n");
-        }
+        pSM->state = stConfigured;
     }
-
-    /* Starts the async mode */
-    if (SOPC_STATUS_OK == status)
+    else
     {
-        SOPC_ToolkitClient_AsyncActivateSession(pSM->iscConfig, pSM->iSession);
+        pSM->state = stError;
     }
 
     return status;
 }
 
-bool StateMachine_IsOver(StateMachine_Machine* pSM)
+SOPC_ReturnStatus StateMachine_StartSession(StateMachine_Machine* pSM)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (pSM->state != stConfigured)
+    {
+        status = SOPC_STATUS_NOK;
+        printf("# Error: The state machine shall be in stConfigured state to start a session.\n");
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ToolkitClient_AsyncActivateSession(pSM->iscConfig, pSM->iSessionCtx);
+        pSM->state = stActivating;
+    }
+    else
+    {
+        pSM->state = stError;
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus StateMachine_StopSession(StateMachine_Machine* pSM)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (!StateMachine_IsConnected(pSM))
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ToolkitClient_AsyncCloseSession(pSM->iSessionID);
+        pSM->state = stClosing;
+    }
+    else
+    {
+        printf("# Error: StopSession on a disconnected machine.\n");
+        pSM->state = stError;
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_GetEndpointsRequest* pReq = NULL;
+
+    if (pSM->state != stConfigured)
+    {
+        status = SOPC_STATUS_NOK;
+        printf("# Error: The state machine shall be in stConfigured state to send a discovery request.\n");
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Encodeable_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &pReq);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_String_AttachFromCstring(&pReq->EndpointUrl, ENDPOINT_URL);
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("# Error: Could not create the GetEndpointsRequest.\n");
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX pending discoveries */
+        ++nDiscovery;
+        pSM->iRequestCtx = nDiscovery;
+        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(pSM->iscConfig, pReq, nDiscovery);
+        pSM->state = stDiscovering;
+    }
+    else
+    {
+        pSM->state = stError;
+        if (NULL != pReq)
+        {
+            free(pReq);
+        }
+    }
+
+    return status;
+}
+
+bool StateMachine_IsConnectable(StateMachine_Machine* pSM)
+{
+    return NULL != pSM && stConfigured == pSM->state;
+}
+
+bool StateMachine_IsConnected(StateMachine_Machine* pSM)
+{
+    bool bConnected = false;
+
+    if (NULL != pSM)
+    {
+        switch (pSM->state)
+        {
+        case stActivating:
+        case stActivated:
+        case stClosing:
+            bConnected = true;
+            break;
+        default:
+            break;
+        }
+    }
+
+    return bConnected;
+}
+
+bool StateMachine_IsDiscovering(StateMachine_Machine* pSM)
+{
+    return NULL != pSM && stDiscovering == pSM->state;
+}
+
+bool StateMachine_IsIdle(StateMachine_Machine* pSM)
+{
+    bool bIdle = false;
+
     if (NULL != pSM)
     {
         switch (pSM->state)
         {
         case stInit:
-        case stWaitActivation:
-        case stWaitResponse:
-            return false;
-        case stWaitFinished:
-        case stAbort:
+        case stConfigured:
+        case stError:
+            bIdle = true;
+            break;
         default:
-            return true;
+            break;
         }
     }
 
-    return true;
+    return bIdle;
 }
 
 void StateMachine_Delete(StateMachine_Machine** ppSM)
@@ -126,69 +246,142 @@ void StateMachine_Delete(StateMachine_Machine** ppSM)
     *ppSM = NULL;
 }
 
-void StateMachine_EventDispatcher(StateMachine_Machine* pSM,
+bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
                                   SOPC_App_Com_Event event,
                                   uint32_t arg,
                                   void* pParam,
                                   uintptr_t appCtx)
 {
     (void) pParam;
-    (void) appCtx;
+    bool bProcess = true;
+
     if (NULL == pSM)
     {
-        return;
+        bProcess = false;
     }
 
-    switch (pSM->state)
+    /* Is this event targeted to the machine? */
+    if (bProcess)
     {
-    case stInit:
-        printf("# Warning: Dispatching in init state machine state.\n");
-        break;
-    case stWaitActivation:
         switch (event)
         {
-        case SE_ACTIVATED_SESSION:
-            pSM->state = stWaitResponse;
-            pSM->iSessionID = arg;
-            printf("# Info: Session activated.\n");
-            break;
+        /* appCtx is session context */
         case SE_SESSION_ACTIVATION_FAILURE:
-            pSM->state = stAbort;
-            printf("# Error: Failed session activation.\n");
+        case SE_ACTIVATED_SESSION:
+        case SE_SESSION_REACTIVATING:
+        case SE_CLOSED_SESSION:
+            if (pSM->iSessionCtx != appCtx)
+            {
+                bProcess = false;
+            }
             break;
-        default:
-            pSM->state = stAbort;
-            printf("# Error: In state Activation, unexpected event %i.\n", event);
-            break;
-        }
-        break;
-    case stWaitResponse:
-        switch (event)
-        {
+        /* arg is session id */
         case SE_RCV_SESSION_RESPONSE:
-            pSM->state = stWaitFinished;
-            printf("# Info: Response received.\n");
+            if (pSM->iSessionID != arg)
+            {
+                bProcess = false;
+            }
             break;
+        /* appCtx is request context */
+        case SE_RCV_DISCOVERY_RESPONSE:
         case SE_SND_REQUEST_FAILED:
-            pSM->state = stAbort;
-            printf("# Error: Send request failed.\n");
+            if (pSM->iRequestCtx != appCtx)
+            {
+                bProcess = false;
+            }
             break;
         default:
-            pSM->state = stAbort;
-            printf("# Error: In state WaitResponse, unexpected event %i.\n", event);
+            printf("# Error: Unexpected event received by a machine.\n");
+            bProcess = false;
             break;
         }
-        break;
-        break;
-    case stWaitFinished:
-        printf("# Warning: Receiving event in wait finish state, ignoring.\n");
-        break;
-    case stAbort:
-        printf("# Warning: Receiving event in abort state, ignoring.\n");
-        break;
-    default:
-        pSM->state = stAbort;
-        printf("# Error: Dispatching in unknown state %i, event %i.\n", pSM->state, event);
-        break;
     }
+
+    /* Process the event, when it is targeted to this machine */
+    if (bProcess)
+    {
+        switch (pSM->state)
+        {
+        /* Session states */
+        case stActivating:
+            switch (event)
+            {
+            case SE_ACTIVATED_SESSION:
+                pSM->state = stActivated;
+                pSM->iSessionID = arg;
+                printf("# Info: Session activated.\n");
+                break;
+            case SE_SESSION_ACTIVATION_FAILURE:
+                pSM->state = stError;
+                printf("# Error: Failed session activation.\n");
+                break;
+            default:
+                pSM->state = stError;
+                printf("# Error: In state Activation, unexpected event %i.\n", event);
+                break;
+            }
+            break;
+        case stActivated:
+            switch (event)
+            {
+            case SE_RCV_SESSION_RESPONSE:
+                printf("# Info: Response received.\n");
+                break;
+            case SE_SND_REQUEST_FAILED:
+                pSM->state = stError;
+                printf("# Error: Send request %" PRIuPTR " failed.\n", pSM->iRequestCtx);
+                break;
+            default:
+                pSM->state = stError;
+                printf("# Error: In state stActivated, unexpected event %i.\n", event);
+                break;
+            }
+            break;
+        case stClosing:
+            switch (event)
+            {
+            case SE_CLOSED_SESSION:
+                pSM->state = stConfigured;
+                break;
+            default:
+                /* This might be a response to a pending request, so this might not an error */
+                printf("# Warning: Unexpected event in stClosing state, ignoring.\n");
+                break;
+            }
+            break;
+        /* Discovery state */
+        case stDiscovering:
+            switch (event)
+            {
+            case SE_RCV_DISCOVERY_RESPONSE:
+                /* This assert is ok because of the test that would otherwise set bProcess to false */
+                assert(pSM->iRequestCtx == appCtx);
+                pSM->state = stConfigured;
+                break;
+            default:
+                printf("# Error: Unexpected event %i in stDiscovering state.\n", event);
+                pSM->state = stError;
+                break;
+            }
+            break;
+        /* Invalid states */
+        case stInit:
+            pSM->state = stError;
+            printf("# Error: Event received in stInit state.\n");
+            break;
+        case stConfigured:
+            pSM->state = stError;
+            printf("# Error: Event received in stConfigured state.\n");
+            break;
+        case stError:
+            printf("# Warning: Receiving event in stError state, ignoring.\n");
+            break;
+        default:
+            pSM->state = stError;
+            printf("# Error: Dispatching in unknown state %i, event %i.\n", pSM->state, event);
+            break;
+        }
+    }
+
+    return bProcess;
 }

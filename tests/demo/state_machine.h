@@ -32,25 +32,85 @@
 
 #include "sopc_user_app_itf.h"
 
-typedef enum { stInit, stWaitActivation, stWaitResponse, stWaitFinished, stAbort } StateMachine_State;
+typedef enum { stInit, stConfigured, stActivating, stActivated, stClosing, stDiscovering, stError } StateMachine_State;
 
 typedef struct
 {
     StateMachine_State state;
     SOPC_SecureChannel_Config* pscConfig;
-    uint32_t iscConfig;  /* Internal scConfig ID */
-    uintptr_t iSession;  /* Internal ID */
-    uint32_t iSessionID; /* OPC UA Session ID */
+    uint32_t iscConfig;    /* Internal scConfig ID */
+    uintptr_t iSessionCtx; /* Internal Session context */
+    uint32_t iSessionID;   /* OPC UA Session ID */
+    uintptr_t iRequestCtx; /* Internal request context used for discovery requests */
 } StateMachine_Machine;
 
 /* Machine lifecycle */
+
+/**
+ * \brief Creates a new state machine, initialized in state stInit.
+ */
 StateMachine_Machine* StateMachine_Create(void);
-SOPC_ReturnStatus StateMachine_ConfigureToolkit(StateMachine_Machine* pSM);
-bool StateMachine_IsOver(StateMachine_Machine* pSM);
+
+/**
+ * \brief Creates a secure channel configuration and add it to the toolkit.
+ *  State machines shall be configured before the call to SOPC_Toolkit_Configured().
+ */
+SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM);
+
+/**
+ * \brief Creates a session. See SOPC_ToolkitClient_AsyncActivateSession().
+ * You shall call StateMachine_StopSession() to close the connection gracefully.
+ */
+SOPC_ReturnStatus StateMachine_StartSession(StateMachine_Machine* pSM);
+
+/**
+ * \brief Send a GetEndpointRequest.
+ */
+SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM);
+
+/**
+ * \brief Close the session. If not StateMachine_IsConnected(), the machine is put in state stError.
+ */
+SOPC_ReturnStatus StateMachine_StopSession(StateMachine_Machine* pSM);
+
+/**
+ * \brief Returns a bool whether the machine is configured and ready for a new SecureChannel.
+ *  For now, it is the stConfigured state.
+ */
+bool StateMachine_IsConnectable(StateMachine_Machine* pSM);
+
+/**
+ * \brief Returns a bool whether the machine is in a connected state or not.
+ *  Connected states are: stActivating, stActivated, stClosing.
+ */
+bool StateMachine_IsConnected(StateMachine_Machine* pSM);
+
+/**
+ * \brief Returns a bool whether the machine is discovering or not.
+ *  For now, it is the stDiscovering states.
+ */
+bool StateMachine_IsDiscovering(StateMachine_Machine* pSM);
+
+/**
+ * \brief Returns a bool whether the machine is idle or not.
+ *  Idle states are stInit, stConfigured (not yet started or finished), and stError.
+ */
+bool StateMachine_IsIdle(StateMachine_Machine* pSM);
+
+/**
+ * \brief Deletes the machine and the created secure channel configuration, if any.
+ */
 void StateMachine_Delete(StateMachine_Machine** ppSM);
 
-/* Handles machine events */
-void StateMachine_EventDispatcher(StateMachine_Machine* pSM,
+/**
+ * \brief Handles the events from the Toolkit and change the state machine state.
+ *  This function shall be called upon each event raised by the Toolkit.
+ *
+ * This function can be called even if the message is not destined to this particular machine.
+ *
+ * \return True if the event is targeted to the machine. False otherwise, or when pSM is NULL.
+ */
+bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
                                   SOPC_App_Com_Event event,
                                   uint32_t arg,
                                   void* pParam,
