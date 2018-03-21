@@ -122,13 +122,41 @@ int main(int argc, char* argv[])
     /* Configuration, which include Secure Channel configuration. */
     if (SOPC_STATUS_OK == status)
     {
-        status = StateMachine_ConfigureToolkit(g_pSM);
+        status = StateMachine_ConfigureMachine(g_pSM);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Toolkit_Configured();
+        if (SOPC_STATUS_OK == status)
+        {
+            printf("# Info: Toolkit configuration done.\n");
+            printf("# Info: Opening Session.\n");
+        }
+        else
+        {
+            printf("# Error: Toolkit configuration failed.\n");
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Toolkit_Configured();
+        if (SOPC_STATUS_OK == status)
+        {
+            printf("# Info: Toolkit configuration done.\n");
+            printf("# Info: Opening Session.\n");
+        }
+        else
+        {
+            printf("# Error: Toolkit configuration failed.\n");
+        }
     }
 
     /* Secure Channel and Session creation */
 
     /* Active wait */
-    while (SOPC_STATUS_OK == status && !StateMachine_IsOver(g_pSM) && iWait * SLEEP_LENGTH <= SC_LIFETIME)
+    while (SOPC_STATUS_OK == status && !StateMachine_IsIdle(g_pSM) && iWait * SLEEP_LENGTH <= SC_LIFETIME)
     {
         iWait += 1;
         SOPC_Sleep(SLEEP_LENGTH);
@@ -143,21 +171,28 @@ int main(int argc, char* argv[])
 
 void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t appCtx)
 {
-    StateMachine_EventDispatcher(g_pSM, event, arg, pParam, appCtx);
-
-    switch (event)
+    if (StateMachine_EventDispatcher(g_pSM, event, arg, pParam, appCtx))
     {
-    case SE_ACTIVATED_SESSION:
-        /* Send message */
-        SendReadRequest(g_pSM);
-        break;
-    case SE_RCV_SESSION_RESPONSE:
-        /* Prints */
-        /* It can be long, as the thread is joined by Toolkit_Clear(), it should not be interrupted. */
-        PrintReadResponse((OpcUa_ReadResponse*) pParam);
-        break;
-    default:
-        break;
+        switch (event)
+        {
+        case SE_ACTIVATED_SESSION:
+            /* Send message */
+            SendReadRequest(g_pSM);
+            break;
+        case SE_RCV_SESSION_RESPONSE:
+            /* Prints */
+            /* It can be long, as the thread is joined by Toolkit_Clear(), it should not be interrupted. */
+            PrintReadResponse((OpcUa_ReadResponse*) pParam);
+            StateMachine_StopSession(g_pSM);
+            break;
+        default:
+            break;
+        }
+    }
+    else
+    {
+        printf("# Error: Received event %i not processed by the machine.\n", event);
+        g_pSM->state = stError;
     }
 }
 
@@ -206,7 +241,7 @@ SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM)
     if (SOPC_STATUS_NOK == status)
     {
         printf("# Error: Send request creation failed. Abort.\n");
-        g_pSM->state = stAbort;
+        g_pSM->state = stError;
     }
 
     return status;

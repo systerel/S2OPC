@@ -236,6 +236,15 @@ target_include_directories(ingopcs_write PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                   ${INGOPCS_PUBLIC_INCLUDES}
                                                   ${INGOPCS_PRIVATE_INCLUDES})
 
+add_executable(ingopcs_discovery "tests/demo/ingopcs_discovery.c"
+                                 "tests/demo/state_machine.c"
+                                 "tests/demo/config.c"
+                                 )
+target_link_libraries(ingopcs_discovery PRIVATE ingopcs)
+target_include_directories(ingopcs_discovery PRIVATE "${ADDSPACEGEN_DIR}/include"
+                                                      ${INGOPCS_PUBLIC_INCLUDES}
+                                                      ${INGOPCS_PRIVATE_INCLUDES})
+
 ## COPY ALL CERTIFICATES TO BIN/ DIRECTORY
 add_custom_command(
     TARGET toolkit_test_server POST_BUILD

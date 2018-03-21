@@ -31,9 +31,9 @@
 /* Secure Channel configuration */
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 /* Security Policy is None or Basic256 or Basic256Sha256 */
-#define SECURITY_POLICY SOPC_SecurityPolicy_Basic256Sha256_URI
+#define SECURITY_POLICY SOPC_SecurityPolicy_None_URI
 /* Security Mode is None or Sign or SignAndEncrypt */
-#define SECURITY_MODE OpcUa_MessageSecurityMode_SignAndEncrypt
+#define SECURITY_MODE OpcUa_MessageSecurityMode_None
 
 /* Secure Channel lifetime */
 #define SC_LIFETIME 60000
