@@ -279,8 +279,9 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
                 {
                     buildInfo = SOPC_ToolkitConfig_GetBuildInfo();
                     SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
-                    SOPC_Logger_TraceInfo("DATE='%s' VERSION='%s' SIGNATURE='%s'", buildInfo.toolkitBuildDate,
-                                          buildInfo.toolkitVersion, buildInfo.toolkitSrcSignature);
+                    SOPC_Logger_TraceInfo("DATE='%s' VERSION='%s' SIGNATURE='%s' 'DOCKER'=%s",
+                                          buildInfo.toolkitBuildDate, buildInfo.toolkitVersion,
+                                          buildInfo.toolkitSrcSignature, buildInfo.toolkitDockerId);
                     SOPC_Logger_SetTraceLogLevel(tConfig.logLevel);
                 }
                 status = SOPC_STATUS_OK;

@@ -20,10 +20,10 @@
 #
 set -e
 
-DOCKER_IMAGE=ed2d22733470
+DOCKER_IMAGE=sha256:ed2d22733470f050c03edc72f5ff68a364c392523599df5661337f689f19516d
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
-    /etc/scripts/run-in-docker $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true "$@"
+    /etc/scripts/run-in-docker $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true DOCKER_IMAGE=$DOCKER_IMAGE"$@"
 else
-    sudo /etc/scripts/run-in-docker $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true "$@"
+    sudo /etc/scripts/run-in-docker $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true DOCKER_IMAGE=$DOCKER_IMAGE "$@"
 fi

@@ -20,10 +20,10 @@
 #
 set -e
 
-DOCKER_IMAGE=e6ef818bf9d8
+DOCKER_IMAGE=sha256:e6ef818bf9d8a244afdf2558bac405719a2b73ca1e154de635502988ab48f49c
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
-    /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
+    /etc/scripts/run-in-docker $DOCKER_IMAGE DOCKER_IMAGE=$DOCKER_IMAGE "$@"
 else
-    sudo /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
+    sudo /etc/scripts/run-in-docker $DOCKER_IMAGE DOCKER_IMAGE=$DOCKER_IMAGE "$@"
 fi
