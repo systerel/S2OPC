@@ -39,12 +39,6 @@ DEFINITIONS
     a_NonceServer,
     a_NonceClient;
 
-    d_var_it ==
-    /* iter */
-    av_sessions_to_iterate,
-    av_sessions_iterated,
-    av_sessions_orphaned;
-
     d_typing ==
     s_session <: t_session &
     a_state : s_session --> t_sessionState & // a session shall be associated to a state
@@ -61,31 +55,22 @@ DEFINITIONS
     /* The NonceClient is remembered by the client in Sess_Creating */
     a_NonceClient : s_session +-> t_Nonce;
 
-    d_typing_it ==
-    av_sessions_orphaned <: t_session &
-    av_sessions_to_iterate <: av_sessions_orphaned &
-    av_sessions_iterated <: av_sessions_orphaned &
-    av_sessions_to_iterate /\ av_sessions_iterated = {};
-
     d_close_session (session) ==
-    a_channel := {session} <<| a_channel               || // If session had a channel, remove this relation
-    a_client_orphaned := {session} <<| a_client_orphaned             || // If session was orphaned, remove this relation
-    a_user := {session} <<| a_user                     || // If session had a user, remove this relation
-    a_client_token := {session} <<| a_client_token     || // If session had a token, remove this relation
-    a_server_token := a_server_token |>> {session}     || // If session had a token, remove this relation
-    a_state(session) := e_session_closed               || // keep session token as used
-    a_NonceServer := {session} <<| a_NonceServer       || /* If session had a server nonce, remove it */
-    a_NonceClient := {session} <<| a_NonceClient          /* If session had a client nonce, remove it */
+    a_channel := {session} <<| a_channel                 || // If session had a channel, remove this relation
+    a_client_orphaned := {session} <<| a_client_orphaned || // If session was orphaned, remove this relation
+    a_user := {session} <<| a_user                       || // If session had a user, remove this relation
+    a_client_token := {session} <<| a_client_token       || // If session had a token, remove this relation
+    a_server_token := a_server_token |>> {session}       || // If session had a token, remove this relation
+    a_state(session) := e_session_closed                 || // keep session token as used
+    a_NonceServer := {session} <<| a_NonceServer         || /* If session had a server nonce, remove it */
+    a_NonceClient := {session} <<| a_NonceClient            /* If session had a client nonce, remove it */
 
 
 ABSTRACT_VARIABLES
-    d_variables,
-    d_var_it
+    d_variables
 
 INVARIANT
     d_typing &
-
-    d_typing_it &
 
     // All sessions not (orphaned or closed or init) have a channel associated and only those sessions
     dom(a_state |>> {e_session_scOrphaned, e_session_closed, e_session_init}) = dom(a_channel) &
@@ -118,30 +103,22 @@ INVARIANT
 
 
 INITIALISATION
-    s_session := {}                    ||
-    a_state := {}                      ||
-    a_channel := {}                    ||
-    a_client_to_create := {}           ||
-    a_client_to_activate := {}         ||
+    s_session                    := {} ||
+    a_state                      := {} ||
+    a_channel                    := {} ||
+    a_client_to_create           := {} ||
+    a_client_to_activate         := {} ||
     a_client_to_activate_context := {} ||
-    a_client_orphaned := {}            ||
-    a_client_token := {}               ||
-    a_server_token := {}               ||
-    a_user := {}                       ||
-    a_NonceServer := {}                ||
-    a_NonceClient := {}                ||
-
-    /* it */
-    av_sessions_to_iterate,
-    av_sessions_iterated,
-    av_sessions_orphaned :(av_sessions_orphaned <: t_session &
-        av_sessions_to_iterate <: av_sessions_orphaned &
-        av_sessions_iterated <: av_sessions_orphaned &
-        av_sessions_to_iterate /\ av_sessions_iterated = {})
+    a_client_orphaned            := {} ||
+    a_client_token               := {} ||
+    a_server_token               := {} ||
+    a_user                       := {} ||
+    a_NonceServer                := {} ||
+    a_NonceClient                := {}
 
 OPERATIONS
 
-    /* Note: _sm suffix is for (sesion) State Machine, to indicate a transition */
+    /* Note: _sm suffix is for (session) State Machine, to indicate a transition */
 
     // Initialize a session to be created
     nsession <-- client_init_session_sm =
@@ -623,10 +600,13 @@ OPERATIONS
         p_session : t_session
     THEN
         p_dom := bool(p_session : dom(a_channel)) ||
-        IF  p_session /: dom(a_channel) THEN
-            p_channel := c_channel_indet
+        IF  p_session : dom(a_channel) THEN
+            p_channel
+            :(  p_channel : t_channel_i &
+                p_channel = a_channel(p_session)
+            )
         ELSE
-            p_channel := a_channel(p_session)
+            p_channel :: t_channel_i
         END
     END
     ;
@@ -665,10 +645,13 @@ OPERATIONS
         p_session : t_session
     THEN
         p_dom := bool(p_session : dom(a_client_to_create)) ||
-        IF  p_session /: dom(a_client_to_create) THEN
-            p_channel_config_idx := c_channel_config_idx_indet
+        IF  p_session : dom(a_client_to_create) THEN
+            p_channel_config_idx
+            :(  p_channel_config_idx : t_channel_config_idx_i &
+                p_channel_config_idx = a_client_to_create(p_session)
+            )
         ELSE
-            p_channel_config_idx := a_client_to_create(p_session)
+            p_channel_config_idx :: t_channel_config_idx_i
         END
     END
     ;
@@ -693,10 +676,13 @@ OPERATIONS
         p_session : t_session
     THEN
         p_dom := bool(p_session : dom(a_client_orphaned)) ||
-        IF  p_session /: dom(a_client_orphaned) THEN
-            p_channel_config_idx := c_channel_config_idx_indet
+        IF  p_session : dom(a_client_orphaned) THEN
+            p_channel_config_idx
+            :(  p_channel_config_idx : t_channel_config_idx_i &
+                p_channel_config_idx = a_client_orphaned(p_session)
+            )
         ELSE
-            p_channel_config_idx := a_client_orphaned(p_session)
+            p_channel_config_idx :: t_channel_config_idx_i
         END
     END
     ;
@@ -738,21 +724,6 @@ OPERATIONS
         user : t_user_i
     THEN
         ret := bool(user : t_user)
-    END
-    ;
-
-    delete_session (session) =
-    PRE
-        session : t_session_i &
-        session : s_session
-    THEN
-        s_session := s_session - {session} ||
-        a_channel := {session} <<| a_channel ||
-        a_state := {session} <<| a_state ||
-        a_user := {session} <<| a_user ||
-        a_client_token := {session} <<| a_client_token ||
-        a_server_token := a_server_token |>> {session} ||
-        a_client_orphaned := {session} <<| a_client_orphaned
     END
     ;
 

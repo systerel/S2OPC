@@ -16,8 +16,30 @@
  */
 
 THEORY User_Pass IS
+ff(0) & ar(th_eh_hyp_loc; SUB; th_simp) & dd & pr(Tac(th_eh_loc; th_simp_img));
+ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+ff(0) & dd & pr(Tac(th_variant));
+ff(0) & dd & pr(Tac(th_invariant));
+ff(0) & dd & pr(Tac(th_eh_loc; th_simp_img))
+END
+&
 
-    Pattern(a_msg_in_type$1: L) &
-      ff(0) & dc(a_msg_in_type$1,t_msg_type) & bb(pr)
+THEORY th_eh_loc IS
 
+    binhyp(c = dom(b)) &
+    a: c
+    =>
+    a: dom(b)
+    
+END
+&
+
+THEORY th_simp_img IS
+
+    binhyp(b(a) = d) &
+    blvar(Q) &
+    Q\ (a,b,c)
+    =>
+    (a: b~[c]) == (d: c)
+    
 END

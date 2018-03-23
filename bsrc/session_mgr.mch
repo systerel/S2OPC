@@ -40,6 +40,7 @@ OPERATIONS
         resp_header = c_msg_in_header &
         c_msg_in_header : t_msg_header &
         resp_msg : t_msg_i &
+        resp_msg : t_msg &
         resp_msg = c_msg_in
     THEN
         session :: t_session_i
@@ -247,12 +248,20 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_activate_req
     THEN
-        ret :: {e_sc_ok, e_sc_bad_invalid_state,
-            e_sc_bad_invalid_argument,
-            e_sc_bad_identity_token_invalid,
-            e_sc_bad_unexpected_error,
-            e_sc_bad_out_of_memory} ||
-        session_token :: t_session_token_i
+        ret,
+        session_token
+        :(  ret : t_StatusCode_i &
+            ret : {e_sc_ok,
+                   e_sc_bad_invalid_state,
+                   e_sc_bad_invalid_argument,
+                   e_sc_bad_identity_token_invalid,
+                   e_sc_bad_unexpected_error,
+                   e_sc_bad_out_of_memory} &
+            session_token : t_session_token_i &
+            (ret = e_sc_ok
+             =>
+             session_token : t_session_token)
+        )
     END
     ;
     

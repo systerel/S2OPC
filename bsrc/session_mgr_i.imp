@@ -43,9 +43,53 @@ LOCAL_OPERATIONS
     
     local_client_close_session (session) = 
     PRE
-        session : t_session_i
+        session : t_session_i &
+        session : s_session
     THEN
-        skip
+        a_cli_pending_requests,
+        a_state,
+        a_channel,
+        a_client_orphaned,
+        a_client_token,
+        a_user,
+        a_NonceServer,
+        a_NonceClient
+        :(  a_cli_pending_requests : t_request_handle +-> t_session              &
+            a_state                : s_session        --> t_sessionState         &
+            a_channel              : s_session        +-> t_channel              &
+            a_client_orphaned      : s_session        +-> t_channel_config_idx_i &
+            a_client_token         : s_session        +-> t_session_token        &
+            a_server_token         : t_session_token  >+> s_session              &
+            a_user                 : s_session        +-> t_user                 &
+            a_NonceServer          : s_session        +-> t_Nonce                &
+            a_NonceClient          : s_session        +-> t_Nonce
+        )
+    END;
+    
+    local_client_close_session_if_needed (cond, session) = 
+    PRE
+        cond    : BOOL &
+        session : t_session_i &
+        session : s_session
+    THEN
+        a_cli_pending_requests,
+        a_state,
+        a_channel,
+        a_client_orphaned,
+        a_client_token,
+        a_user,
+        a_NonceServer,
+        a_NonceClient
+        :(  a_cli_pending_requests : t_request_handle +-> t_session              &
+            a_state                : s_session        --> t_sessionState         &
+            a_channel              : s_session        +-> t_channel              &
+            a_client_orphaned      : s_session        +-> t_channel_config_idx_i &
+            a_client_token         : s_session        +-> t_session_token        &
+            a_server_token         : t_session_token  >+> s_session              &
+            a_user                 : s_session        +-> t_user                 &
+            a_NonceServer          : s_session        +-> t_Nonce                &
+            a_NonceClient          : s_session        +-> t_Nonce
+        )
     END;
     
     local_client_activate_sessions_on_SC_connection (channel_config_idx) =
@@ -53,7 +97,14 @@ LOCAL_OPERATIONS
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx
     THEN
-        skip
+        a_client_to_create,
+        sessions_to_iterate,
+        sessions_iterated
+        :(
+            a_client_to_create : s_session +-> t_channel_config_idx_i &
+            sessions_to_iterate <: t_session &
+            sessions_iterated   <: t_session
+        )
     END
     ;
     
@@ -62,7 +113,30 @@ LOCAL_OPERATIONS
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx
     THEN
-        skip
+        a_cli_pending_requests,
+        a_state,
+        a_channel,
+        a_client_orphaned,
+        a_client_token,
+        a_user,
+        a_NonceServer,
+        a_NonceClient,
+        sessions_to_iterate,
+        sessions_iterated
+        :(
+            a_cli_pending_requests : t_request_handle +-> t_session              &
+            a_state                : s_session        --> t_sessionState         &
+            a_channel              : s_session        +-> t_channel              &
+            a_client_orphaned      : s_session        +-> t_channel_config_idx_i &
+            a_client_token         : s_session        +-> t_session_token        &
+            a_server_token         : t_session_token  >+> s_session              &
+            a_user                 : s_session        +-> t_user                 &
+            a_NonceServer          : s_session        +-> t_Nonce                &
+            a_NonceClient          : s_session        +-> t_Nonce                &
+            sessions_to_iterate   <: t_session                                   &
+            sessions_iterated     <: t_session &
+            sessions_to_iterate /\ sessions_iterated = {}
+        )
     END
     
 OPERATIONS
@@ -72,6 +146,12 @@ OPERATIONS
         client_remove_all_request_handles (session);
         client_close_session_sm (session)
     END;
+
+    local_client_close_session_if_needed (cond, session) = 
+    IF cond = FALSE THEN
+        local_client_close_session (session)
+    END
+    ;
     
     local_client_activate_sessions_on_SC_connection (channel_config_idx) =
     VAR
@@ -81,28 +161,30 @@ OPERATIONS
         l_channel_config_idx
     IN
         l_continue <-- init_iter_session;
-        WHILE l_continue = TRUE DO
-            l_continue, l_session <-- continue_iter_session;
-            l_dom, l_channel_config_idx <-- getall_orphaned(l_session);
-            IF  l_dom = TRUE &
-                l_channel_config_idx = channel_config_idx
-            THEN
-                client_gen_activate_orphaned_session_internal_event (l_session, channel_config_idx)
-            END;
-            l_dom, l_channel_config_idx <-- getall_to_create(l_session);
-            IF  l_dom = TRUE &
-                l_channel_config_idx = channel_config_idx
-            THEN
-                reset_session_to_create(l_session);
-                client_gen_create_session_internal_event (l_session, channel_config_idx)
+        IF  l_continue = TRUE THEN /* only for proving */
+            WHILE l_continue = TRUE DO
+                l_continue, l_session <-- continue_iter_session;
+                l_dom, l_channel_config_idx <-- getall_orphaned(l_session);
+                IF  l_dom = TRUE &
+                    l_channel_config_idx = channel_config_idx
+                THEN
+                    client_gen_activate_orphaned_session_internal_event (l_session, channel_config_idx)
+                END;
+                l_dom, l_channel_config_idx <-- getall_to_create(l_session);
+                IF  l_dom = TRUE &
+                    l_channel_config_idx = channel_config_idx
+                THEN
+                    reset_session_to_create(l_session);
+                    client_gen_create_session_internal_event (l_session, channel_config_idx)
+                END
+            INVARIANT
+                sessions_to_iterate <: t_session &
+                sessions_iterated   <: t_session &
+                sessions_to_iterate /\ sessions_iterated = {} &
+                sessions_to_iterate \/ sessions_iterated = t_session
+            VARIANT
+                card(sessions_to_iterate)
             END
-        INVARIANT
-            sessions_to_iterate <: t_session &
-            sessions_iterated   <: t_session &
-            sessions_to_iterate /\ sessions_iterated = {} &
-            sessions_to_iterate \/ sessions_iterated = t_session
-        VARIANT
-            card(sessions_to_iterate)
         END
     END
     ;
@@ -116,27 +198,29 @@ OPERATIONS
         l_channel_config_idx
     IN
         l_continue <-- init_iter_session;
-        WHILE l_continue = TRUE DO
-            l_continue, l_session <-- continue_iter_session;
-            l_dom, l_channel_config_idx <-- getall_orphaned(l_session);
-            IF  l_dom = TRUE &
-                l_channel_config_idx = channel_config_idx
-            THEN
-                local_client_close_session(l_session)
-            END;
-            l_dom, l_channel_config_idx <-- getall_to_create(l_session);
-            IF  l_dom = TRUE &
-                l_channel_config_idx = channel_config_idx
-            THEN
-                local_client_close_session(l_session)
+        IF  l_continue = TRUE THEN /* only for proving */
+            WHILE l_continue = TRUE DO
+                l_continue, l_session <-- continue_iter_session;
+                l_dom, l_channel_config_idx <-- getall_orphaned(l_session);
+                IF  l_dom = TRUE &
+                    l_channel_config_idx = channel_config_idx
+                THEN
+                    local_client_close_session(l_session)
+                END;
+                l_dom, l_channel_config_idx <-- getall_to_create(l_session);
+                IF  l_dom = TRUE &
+                    l_channel_config_idx = channel_config_idx
+                THEN
+                    local_client_close_session(l_session)
+                END
+            INVARIANT
+                sessions_to_iterate <: t_session &
+                sessions_iterated   <: t_session &
+                sessions_to_iterate /\ sessions_iterated = {} &
+                sessions_to_iterate \/ sessions_iterated = t_session
+            VARIANT
+                card(sessions_to_iterate)
             END
-        INVARIANT
-            sessions_to_iterate <: t_session &
-            sessions_iterated   <: t_session &
-            sessions_to_iterate /\ sessions_iterated = {} &
-            sessions_to_iterate \/ sessions_iterated = t_session
-        VARIANT
-            card(sessions_to_iterate)
         END
     END
     ;
@@ -145,7 +229,6 @@ OPERATIONS
     
     session <-- client_receive_session_resp (channel, req_handle, resp_typ, resp_header, resp_msg) =
     VAR
-        l_session,
         l_session_token,
         l_session_state,
         l_session_channel,      
@@ -154,29 +237,30 @@ OPERATIONS
         l_bret
     IN
         l_bret := FALSE;
-        l_session <-- client_get_session_and_remove_request_handle (req_handle);
-        l_session_state <-- get_session_state_or_closed (l_session); // Note: state != closed => session is valid
+        session <-- client_get_session_and_remove_request_handle (req_handle);
+        l_session_state <-- get_session_state_or_closed (session); // Note: state != closed => session is valid
         l_resp_status <-- read_msg_resp_header_service_status (resp_header);
-        IF l_resp_status = e_sc_ok
+        IF  l_session_state /= e_session_closed &
+            l_resp_status = e_sc_ok
         THEN         
             CASE resp_typ OF
                 EITHER e_msg_session_create_resp THEN
                     IF l_session_state = e_session_creating THEN
-                        l_session_channel <-- get_session_channel (l_session);
+                        l_session_channel <-- get_session_channel (session);
                         IF l_session_channel = channel THEN
                             l_session_token <-- read_create_session_msg_session_token (resp_msg);
-                            l_bret <-- client_create_session_resp_sm (channel, l_session, l_session_token, resp_msg);
+                            l_bret <-- client_create_session_resp_sm (channel, session, l_session_token, resp_msg);
                             /* TODO: react if error: must drop the nonce, but do we close the connexion? */
                             // If session is created, trigger event for activation of session with async data
-                            l_session_state <-- get_session_state_or_closed (l_session);
+                            l_session_state <-- get_session_state_or_closed (session);
                             IF l_session_state = e_session_created
                             THEN
-                                l_bret, l_session_user <-- getall_to_activate (l_session);
+                                l_bret, l_session_user <-- getall_to_activate (session);
                                 IF l_bret = TRUE &
                                     l_session_user /= c_user_indet
                                 THEN
-                                    reset_session_to_activate (l_session);
-                                    client_gen_activate_user_session_internal_event (l_session, l_session_user)
+                                    reset_session_to_activate (session);
+                                    client_gen_activate_user_session_internal_event (session, l_session_user)
                                 END
                             ELSE
                                 /* The session may be not e_session_created when Nonce generation failed */
@@ -194,9 +278,9 @@ OPERATIONS
                     IF l_session_state = e_session_userActivating or
                         l_session_state = e_session_scActivating
                     THEN
-                        l_session_channel <-- get_session_channel (l_session);
+                        l_session_channel <-- get_session_channel (session);
                         IF l_session_channel = channel THEN	
-                            l_bret <-- client_activate_session_resp_sm (channel, l_session, resp_msg)
+                            l_bret <-- client_activate_session_resp_sm (channel, session, resp_msg)
                         ELSE
                             /* Bad secure channel */
                             skip
@@ -208,10 +292,10 @@ OPERATIONS
                 OR e_msg_session_close_resp THEN
                     IF l_session_state = e_session_closing
                     THEN
-                        l_session_channel <-- get_session_channel (l_session);
+                        l_session_channel <-- get_session_channel (session);
                         IF l_session_channel = channel THEN
-                            client_remove_all_request_handles (l_session);
-                            client_close_session_resp_sm (channel, l_session, resp_msg);
+                            client_remove_all_request_handles (session);
+                            client_close_session_resp_sm (channel, session, resp_msg);
                             l_bret := TRUE
                         ELSE
                             /* Bad secure channel */
@@ -228,15 +312,12 @@ OPERATIONS
                     /* Service unknown */
                     skip
                 END
-            END
+            END;
+            local_client_close_session_if_needed (l_bret, session)
         ELSE
-            // Reponse error => session will be closed
+            // Response error => session will be closed
             skip
-        END;
-        IF l_bret = FALSE THEN
-            local_client_close_session (l_session)
-        END;
-        session := l_session
+        END
     END
     ;
     

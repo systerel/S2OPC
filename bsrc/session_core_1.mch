@@ -41,21 +41,18 @@ DEFINITIONS
     a_NonceClient;
 
     d_typing ==
-    s_session <: t_session &
-    a_state : s_session --> t_sessionState & /* a session shall be associated to a state */
-    a_channel : s_session +-> t_channel & /* a session may be associated to a valid channel */
-    a_client_to_create : s_session +-> t_channel_config_idx_i & /* a client session may be waiting to be created on a channel (not yet established) */
-    a_client_to_activate : s_session +-> t_user & /* a client session may be waiting to be activated (session not yet created) */
-    a_client_to_activate_context : s_session +-> t_application_context_i & // a client session has an application context associated
-    a_client_orphaned : s_session +-> t_channel_config_idx_i & /* a client session may be orphaned of a channel (precedently lost) */
-
-    a_client_token : s_session +-> t_session_token & /* a client session has an associated session token once create response received */
-    a_server_token : t_session_token >+> s_session & /* a server session has a unique authentication token in server once create response sent */
-    a_user : s_session +-> t_user & /* a session may be associated to a valid user */
-    /* The NonceServer negotiated for a session in CreateSession or ActivateSession */
-    a_NonceServer : s_session +-> t_Nonce &
-    /* The NonceClient is remembered by the client in Sess_Creating */
-    a_NonceClient : s_session +-> t_Nonce
+    s_session                   <: t_session                             &
+    a_state                      : t_session +-> t_sessionState          &
+    a_channel                    : t_session +-> t_channel               &
+    a_client_to_create           : t_session +-> t_channel_config_idx_i  &
+    a_client_to_activate         : t_session +-> t_user                  &
+    a_client_to_activate_context : t_session +-> t_application_context_i & 
+    a_client_orphaned            : t_session +-> t_channel_config_idx_i  &
+    a_client_token               : t_session +-> t_session_token         &
+    a_server_token               : t_session_token +-> t_session         &
+    a_user                       : t_session +-> t_user                  &
+    a_NonceServer                : t_session +-> t_Nonce                 &
+    a_NonceClient                : t_session +-> t_Nonce
 
 ABSTRACT_VARIABLES
     d_variables
@@ -64,7 +61,18 @@ INVARIANT
     d_typing
 
 INITIALISATION
-    d_variables :(d_typing)
+    s_session                    := {} ||
+    a_state                      := {} ||
+    a_channel                    := {} ||
+    a_client_to_create           := {} ||
+    a_client_to_activate         := {} ||
+    a_client_to_activate_context := {} ||
+    a_client_orphaned            := {} ||
+    a_client_token               := {} ||
+    a_server_token               := {} ||
+    a_user                       := {} ||
+    a_NonceServer                := {} ||
+    a_NonceClient                := {}
 
 OPERATIONS
 
@@ -96,7 +104,7 @@ OPERATIONS
     token <-- server_get_fresh_session_token (session) =
     PRE
         session : t_session_i &
-        session : s_session &
+        session : t_session &
         session /: ran(a_server_token)
     THEN
         IF t_session_token = dom(a_server_token)
@@ -133,20 +141,6 @@ OPERATIONS
     END
     ;
 
-    delete_session (session) =
-    PRE
-        session : t_session_i &
-        session : s_session
-    THEN
-        s_session := s_session - {session} ||
-        a_channel := {session} <<| a_channel ||
-        a_state := {session} <<| a_state ||
-        a_user := {session} <<| a_user ||
-        a_server_token := a_server_token |>> {session} ||
-        a_client_token := {session} <<| a_client_token ||
-        a_client_orphaned := {session} <<| a_client_orphaned
-    END;
-
     p_session <-- init_new_session =
     BEGIN
         IF s_session = t_session
@@ -168,14 +162,14 @@ OPERATIONS
 
     create_session (session, channel, state) =
     PRE
-        session : t_session_i &
-        session : s_session &
-        channel    : t_channel_i &
-        channel    : t_channel &
-        state : {e_session_created, e_session_creating}
+        session : t_session_i  &
+        session : dom(a_state) &
+        channel : t_channel_i  &
+        channel : t_channel    &
+        state   : {e_session_created, e_session_creating}
     THEN
         a_channel (session) := channel ||
-        a_state (session) := state
+        a_state   (session) := state
     END
     ;
 
@@ -199,8 +193,7 @@ OPERATIONS
 
     ret <-- is_valid_session (session) =
     PRE
-        session : t_session_i &
-        session : t_session
+        session : t_session_i
     THEN
         ret :=  bool(session : s_session)
     END
@@ -209,7 +202,7 @@ OPERATIONS
     state <-- get_session_state (session) =
     PRE
         session : t_session_i &
-        session : s_session
+        session : dom(a_state)
     THEN
         state := a_state(session)
     END
@@ -217,10 +210,10 @@ OPERATIONS
 
     set_session_state (session, state) =
     PRE
-        session : t_session_i &
-        session : s_session &
-        state : t_sessionState &
-        state /: {e_session_closed}
+        session : t_session_i    &
+        session : dom(a_state)   &
+        state   : t_sessionState &
+        state  /: {e_session_closed}
     THEN
         a_state (session) := state
         /* + notify  user app when session activated */
@@ -229,17 +222,22 @@ OPERATIONS
 
     set_session_state_closed (session, is_client) =
     PRE
-        session : t_session_i &
-        session : s_session &
+        session   : t_session_i  &
+        session   : dom(a_state) &
         is_client : BOOL
     THEN
-        a_channel := {session} <<| a_channel           || /* If session had a channel, remove this relation */
-        a_client_orphaned := {session} <<| a_client_orphaned         || /* If session was orphaned, remove this relation */
-        a_user := {session} <<| a_user                 || /* If session had a user, remove this relation */
-        a_server_token := a_server_token |>> {session} || /* If session had token, remove this relation */
-        a_client_token := {session} <<| a_client_token ||
+        s_session                    := s_session - {session}                      ||
+        a_state                      := {session} <<| a_state                      ||
+        a_channel                    := {session} <<| a_channel                    || /* If session had a channel, remove this relation */
+        a_client_to_create           := {session} <<| a_client_to_create           ||
+        a_client_to_activate         := {session} <<| a_client_to_activate         ||
         a_client_to_activate_context := {session} <<| a_client_to_activate_context ||
-        a_state (session) := e_session_closed
+        a_client_orphaned            := {session} <<| a_client_orphaned            || /* If session was orphaned, remove this relation */
+        a_user                       := {session} <<| a_user                       || /* If session had a user, remove this relation */
+        a_server_token               := a_server_token |>> {session}               || /* If session had token, remove this relation */
+        a_client_token               := {session} <<| a_client_token               ||
+        a_NonceServer                := {session} <<| a_NonceServer                ||
+        a_NonceClient                := {session} <<| a_NonceClient
     END
     ;
 
@@ -260,10 +258,13 @@ OPERATIONS
         p_session : t_session
     THEN
         p_dom := bool(p_session : dom(a_channel)) ||
-        IF  p_session /: dom(a_channel) THEN
-            p_channel := c_channel_indet
+        IF  p_session : dom(a_channel) THEN
+            p_channel
+            :(  p_channel : t_channel_i &
+                p_channel = a_channel(p_session)
+            )
         ELSE
-            p_channel := a_channel(p_session)
+            p_channel :: t_channel_i
         END
     END
     ;
@@ -274,7 +275,7 @@ OPERATIONS
         session : s_session &
         session : dom(a_channel)
     THEN
-            channel :(channel : t_channel_i & channel = a_channel(session))
+        channel :(channel : t_channel_i & channel = a_channel(session))
     END
     ;
     
@@ -285,10 +286,13 @@ OPERATIONS
         p_session : t_session
     THEN
         p_dom := bool(p_session : dom(a_client_to_create)) ||
-        IF  p_session /: dom(a_client_to_create) THEN
-            p_channel_config_idx := c_channel_config_idx_indet
+        IF  p_session : dom(a_client_to_create) THEN
+            p_channel_config_idx
+            :(  p_channel_config_idx : t_channel_config_idx_i &
+                p_channel_config_idx = a_client_to_create(p_session)
+            )
         ELSE
-            p_channel_config_idx := a_client_to_create(p_session)
+            p_channel_config_idx :: t_channel_config_idx_i
         END
     END
     ;
@@ -313,10 +317,13 @@ OPERATIONS
         p_session : t_session
     THEN
         p_dom := bool(p_session : dom(a_client_orphaned)) ||
-        IF  p_session /: dom(a_client_orphaned) THEN
-            p_channel_config_idx := c_channel_config_idx_indet
+        IF  p_session : dom(a_client_orphaned) THEN
+            p_channel_config_idx
+            :(  p_channel_config_idx : t_channel_config_idx_i &
+                p_channel_config_idx = a_client_orphaned(p_session)
+            )
         ELSE
-            p_channel_config_idx := a_client_orphaned(p_session)
+            p_channel_config_idx :: t_channel_config_idx_i
         END
     END
     ;
@@ -409,8 +416,9 @@ OPERATIONS
         signature,
         a_NonceServer
         :(
-            valid : BOOL &
-            signature : t_SignatureData_i &
+            valid         : BOOL                  &
+            signature     : t_SignatureData_i     &
+            a_NonceServer : t_session +-> t_Nonce &
 
             (valid = TRUE
              =>
@@ -438,8 +446,9 @@ OPERATIONS
         signature,
         a_NonceClient
         :(
-            valid : BOOL &
-            signature : t_SignatureData_i &
+            valid         : BOOL                  &
+            signature     : t_SignatureData_i     &
+            a_NonceClient : t_session +-> t_Nonce &
 
             (valid = TRUE
              =>
@@ -483,7 +492,7 @@ OPERATIONS
             a_NonceClient
             :(
                 valid : BOOL &
-                a_NonceClient : s_session +-> t_Nonce &
+                a_NonceClient : t_session +-> t_Nonce &
 
                 (valid = TRUE
                  =>
@@ -537,9 +546,9 @@ OPERATIONS
             valid := TRUE ||
             a_NonceServer
             :(
-                a_NonceServer : s_session +-> t_Nonce &
+                a_NonceServer : t_session +-> t_Nonce &
                 {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
-                a_NonceServer(p_session) : t_Nonce
+                p_session : dom(a_NonceServer)
             )
         OR
             valid := FALSE
@@ -566,9 +575,9 @@ OPERATIONS
             valid := TRUE ||
             a_NonceServer
             :(
-                a_NonceServer : s_session +-> t_Nonce &
+                a_NonceServer : t_session +-> t_Nonce &
                 {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
-                a_NonceServer(session) : t_Nonce
+                session : dom(a_NonceServer)
             )
         OR
             valid := FALSE
@@ -587,11 +596,7 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_activate_resp
     THEN
-        CHOICE
-            valid := TRUE
-        OR
-            valid := FALSE
-        END
+        valid :: BOOL
     END
     ;
     

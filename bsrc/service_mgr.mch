@@ -74,6 +74,7 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
+        c_msg_in_header   :: t_msg_header_i ||
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read} ||
         CHOICE
             a_buffer_out_state := c_buffer_out_state_indet ||
@@ -102,6 +103,7 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
+        c_msg_in_header   :: t_msg_header_i ||
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
     END
     ;
@@ -125,6 +127,7 @@ OPERATIONS
         a_msg_out_type = c_msg_type_indet
     THEN
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read} ||
+        c_msg_in_header   :: t_msg_header_i ||
         CHOICE
             a_buffer_out_state := c_buffer_out_state_indet ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
@@ -152,6 +155,7 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
+        c_msg_in_header   :: t_msg_header_i ||
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
     END
     ;
@@ -174,6 +178,7 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
+        c_msg_in_header   :: t_msg_header_i ||
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read} ||
         CHOICE
             a_buffer_out_state := c_buffer_out_state_indet ||
@@ -202,6 +207,7 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
+        c_msg_in_header   :: t_msg_header_i ||
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
     END
     ;
@@ -223,8 +229,11 @@ OPERATIONS
         c_msg_in = c_msg_indet &
         c_msg_in_header = c_msg_header_indet
     THEN
-        ret :: {e_sc_ok,
-                e_sc_bad_out_of_memory}
+        a_msg_in_type    :: t_msg_type_i   ||
+        c_msg_out_header :: t_msg_header_i ||
+        c_msg_out        :: t_msg_i        ||
+        ret              :: {e_sc_ok,
+                             e_sc_bad_out_of_memory}
     END
     ;
 
@@ -244,12 +253,12 @@ OPERATIONS
     THEN
         CHOICE
             a_buffer_out_state := c_buffer_out_state_indet ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            buffer_out := c_byte_buffer_indet ||
             req_handle := c_request_handle_indet
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
+            buffer_out :: t_byte_buffer ||
+            req_handle :: t_request_handle
         END
     END
     ;
@@ -303,12 +312,12 @@ OPERATIONS
     THEN
         CHOICE
             a_buffer_out_state := c_buffer_out_state_indet ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            buffer_out := c_byte_buffer_indet ||
             req_handle := c_request_handle_indet
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
+            buffer_out :: t_byte_buffer ||
+            req_handle :: t_request_handle
         END
     END
     ;
@@ -331,14 +340,14 @@ OPERATIONS
                 e_sc_bad_invalid_state,
                 e_sc_bad_secure_channel_closed,
                 e_sc_bad_connection_closed} ||
-            channel :(channel : t_channel_i & channel = c_channel_indet) ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            channel    := c_channel_indet ||
+            buffer_out := c_byte_buffer_indet ||
             req_handle := c_request_handle_indet
         OR
-            ret := e_sc_ok ||
-            channel :(channel : t_channel_i & channel : s_channel_connected) ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
+            ret        := e_sc_ok ||
+            channel    :: s_channel_connected ||
+            buffer_out :: t_byte_buffer ||
+            req_handle :: t_request_handle
         END
     END
     ;
@@ -350,9 +359,9 @@ OPERATIONS
         req_msg         : t_msg_i &
         app_context     : t_application_context_i &
         /* message is not yet set as output before call and deallocated after operation */
-        c_msg_out = c_msg_indet &
+        c_msg_out        = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
+        a_msg_out_type   = c_msg_type_indet
     THEN
         CHOICE
             ret :: {e_sc_bad_invalid_state,  /* session is not in a valid state */
@@ -363,14 +372,14 @@ OPERATIONS
                 e_sc_bad_connection_closed,
                 e_sc_bad_invalid_argument, /* message has not expected type */
                 e_sc_bad_encoding_error} ||
-            channel :(channel : t_channel_i & channel = c_channel_indet) ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            channel    := c_channel_indet ||
+            buffer_out := c_byte_buffer_indet ||
             req_handle := c_request_handle_indet
         OR
-            ret := e_sc_ok ||
-            channel :(channel : t_channel_i & channel : s_channel_connected) ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
+            ret        := e_sc_ok ||
+            channel    :: s_channel_connected ||
+            buffer_out :: t_byte_buffer ||
+            req_handle :: t_request_handle
         END
     END
     ;
@@ -391,12 +400,12 @@ OPERATIONS
             ret :: {e_sc_bad_out_of_memory,
                 e_sc_bad_invalid_argument, /* message has not expected type */
                 e_sc_bad_encoding_error} ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            buffer_out := c_byte_buffer_indet ||
             req_handle := c_request_handle_indet
         OR
-            ret := e_sc_ok ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
+            ret        := e_sc_ok ||
+            buffer_out :: t_byte_buffer ||
+            req_handle :: t_request_handle
         END
     END
     ;
@@ -583,11 +592,11 @@ OPERATIONS
         msg : t_msg_i
     THEN
         CHOICE
-            bres := TRUE ||
-            msg_typ :( msg_typ : t_msg_type_i & msg_typ : t_msg_type )
+            bres := FALSE ||
+            msg_typ := c_msg_type_indet
         OR
             bres := TRUE ||
-            msg_typ := c_msg_type_indet
+            msg_typ :: t_msg_type
         END
     END
     ;

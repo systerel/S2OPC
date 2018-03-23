@@ -187,7 +187,7 @@ OPERATIONS
             bres := TRUE ||
             msg_typ :( msg_typ : t_msg_type_i & msg_typ : t_msg_type )
         OR
-            bres := TRUE ||
+            bres := FALSE ||
             msg_typ := c_msg_type_indet
         END
     END

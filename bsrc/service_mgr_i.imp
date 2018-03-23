@@ -103,7 +103,8 @@ LOCAL_OPERATIONS
           ReadValue_AttributeId : t_ReadValue +-> t_AttributeId &
           data_Value_Value      : t_ReadValue +-> t_Variant     &
           data_Value_StatusCode : t_ReadValue +-> t_StatusCode  &
-          StatusCode_service    : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops}
+          StatusCode_service    : t_StatusCode_i &
+          StatusCode_service    : t_StatusCode /* {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops} */
          )
     END
     ;
@@ -117,9 +118,27 @@ LOCAL_OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_attribute_write_req
     THEN
-        StatusCode_service
-        :(  StatusCode_service : t_StatusCode_i &
-            StatusCode_service : t_StatusCode
+        nb_WriteValue,
+        WriteValue_NodeId,
+        WriteValue_AttributeId,
+        WriteValue_Value,
+        StatusCode_service,
+        a_Value,
+        ResponseWrite_StatusCode,
+        ResponseWrite_allocated
+        :(
+            nb_WriteValue            : NAT &
+            nb_WriteValue <= k_n_WriteResponse_max &
+            WriteValue_NodeId        : t_WriteValue +-> t_NodeId &
+            WriteValue_AttributeId   : t_WriteValue +-> t_AttributeId &
+            WriteValue_Value         : t_WriteValue +-> t_Variant &
+            StatusCode_service       : t_StatusCode_i &
+            StatusCode_service       : t_StatusCode &
+            a_Value                  : t_Node +-> t_Variant &
+            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
+            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
+            ResponseWrite_allocated  : BOOL
         )
     END
     ;
@@ -134,9 +153,41 @@ LOCAL_OPERATIONS
         resp_msg : t_msg_i &
         resp_msg = c_msg_out
     THEN
-        StatusCode_service
-        :(  StatusCode_service : t_StatusCode_i &
-            StatusCode_service : t_StatusCode
+        a_Value,
+        nb_WriteValue,
+        WriteValue_NodeId,
+        WriteValue_AttributeId,
+        WriteValue_Value,
+        
+        nb_ReadValue,
+        ReadValue_NodeId,
+        ReadValue_AttributeId,
+        data_Value_Value,
+        data_Value_StatusCode,
+        StatusCode_service,
+        ResponseWrite_allocated,
+        ResponseWrite_StatusCode
+        :(
+            a_Value                  : t_Node +-> t_Variant          &
+            nb_ReadValue             : NAT                           &
+            nb_ReadValue            <= k_n_read_resp_max             &
+            ReadValue_NodeId         : t_ReadValue +-> t_NodeId      &
+            ReadValue_AttributeId    : t_ReadValue +-> t_AttributeId &
+            data_Value_Value         : t_ReadValue +-> t_Variant     &
+            data_Value_StatusCode    : t_ReadValue +-> t_StatusCode  &
+            StatusCode_service       : t_StatusCode_i                &
+            StatusCode_service       : t_StatusCode                  &
+            ResponseWrite_allocated  : BOOL                          &
+            nb_WriteValue            : NAT                           &
+            nb_WriteValue <= k_n_WriteResponse_max                   &
+            WriteValue_NodeId        : t_WriteValue +-> t_NodeId     &
+            WriteValue_AttributeId   : t_WriteValue +-> t_AttributeId &
+            WriteValue_Value         : t_WriteValue +-> t_Variant    &
+            a_Value                  : t_Node +-> t_Variant          &
+            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value)       &
+            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
+            ResponseWrite_allocated  : BOOL
         )
     END
     ;
@@ -172,6 +223,20 @@ LOCAL_OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
+        s_request_handle,
+        a_client_request_type,
+        a_client_request_resp_type,
+        a_client_request_channel,
+        a_client_request_context,
+        a_buffer_out_state
+        :(
+            s_request_handle          <: t_request_handle                             &
+            a_client_request_type      : s_request_handle --> s_service_reqs          &
+            a_client_request_resp_type : s_request_handle --> s_service_resps         &
+            a_client_request_channel   : s_request_handle --> t_channel               &
+            a_client_request_context   : s_request_handle --> t_application_context_i &
+            a_buffer_out_state         : t_buffer_out_state_i
+        ) ||
         CHOICE
             ret :: {e_sc_bad_out_of_memory,
                 e_sc_bad_invalid_argument, /* message has not expected type */
@@ -184,6 +249,20 @@ LOCAL_OPERATIONS
             req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
         END
     END
+    ;
+
+    dealloc_msg_in_header_if_cond(p_cond, p_req_msg_header) =
+    PRE
+        p_cond           : BOOL &
+        p_req_msg_header : t_msg_header_i &
+        (   p_cond = TRUE
+            =>
+            p_req_msg_header = c_msg_in_header &
+            c_msg_in_header : t_msg_header)
+    THEN
+        c_msg_in_header :: t_msg_header_i
+    END
+
 
 OPERATIONS
 
@@ -426,6 +505,15 @@ OPERATIONS
         req_handle := l_req_handle
     END
     ;
+
+    dealloc_msg_in_header_if_cond (p_cond, p_req_msg_header) =
+    IF  p_cond = TRUE
+    THEN
+        dealloc_msg_in_header (p_req_msg_header)
+    END
+    ;
+
+
     
     /* END OF LOCAL OPERATIONS */
 

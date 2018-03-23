@@ -1,0 +1,6 @@
+THEORY User_Pass IS
+Operation(refinement_of_get_response_type) & ff(0) & ar(th_eh_hyp_loc; SUB; th_simp) & dd & mp(Tac(th_eh_ident; th_typage));
+Operation(refinement_of_treat_session_service_req) & ff(0) & dd & pp(rt.1);
+Operation(client_discovery_service_request) & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+Operation(refinement_of_local_client_discovery_service_request) & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp))
+END 

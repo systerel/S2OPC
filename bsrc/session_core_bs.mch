@@ -25,37 +25,36 @@ SEES
     message_in_bs,
     channel_mgr
 
-DEFINITIONS
-    d_variables ==
+ABSTRACT_VARIABLES
     a_client_to_activate,
     a_client_to_activate_context,
     a_client_token,
     a_server_token,
     a_user,
     a_NonceServer,
-    a_NonceClient;
-
-d_typing ==
-	a_client_to_activate : t_session +-> t_user &
-    a_client_to_activate_context : t_session +-> t_application_context_i &
-    a_client_token : t_session       +-> t_session_token &
-    a_server_token : t_session_token +-> t_session       &
-    a_user         : t_session       +-> t_user          &
-    a_NonceServer  : t_session       +-> t_Nonce         &
-    a_NonceClient  : t_session       +-> t_Nonce
-
-ABSTRACT_VARIABLES
-    d_variables
+    a_NonceClient
 
 INVARIANT
-    d_typing
+    a_client_to_activate         : t_session       +-> t_user                  &
+    a_client_to_activate_context : t_session       +-> t_application_context_i &
+    a_client_token               : t_session       +-> t_session_token         &
+    a_server_token               : t_session_token +-> t_session               &
+    a_user                       : t_session       +-> t_user                  &
+    a_NonceServer                : t_session       +-> t_Nonce                 &
+    a_NonceClient                : t_session       +-> t_Nonce
 
 INITIALISATION
-    d_variables :(d_typing)
+    a_client_to_activate         := {} ||
+    a_client_to_activate_context := {} ||
+    a_client_token               := {} ||
+    a_server_token               := {} ||
+    a_user                       := {} ||
+    a_NonceServer                := {} ||
+    a_NonceClient                := {}
 
 OPERATIONS
 
-    delete_session_token(p_session) =
+    delete_session_token(p_session) = /* PROOF to delete */
     PRE
         p_session : t_session_i &
         p_session : t_session
@@ -146,7 +145,7 @@ OPERATIONS
         session    : t_session      &
         prec_state : t_sessionState &
         state      : t_sessionState &
-        state     /: {e_session_closed}
+        state     /= e_session_closed
     THEN
         /* notify  user app when session activated */
         skip
@@ -217,8 +216,9 @@ OPERATIONS
         signature,
         a_NonceServer
         :(
-            valid : BOOL &
-            signature : t_SignatureData_i &
+            valid         : BOOL                  &
+            signature     : t_SignatureData_i     &
+            a_NonceServer : t_session +-> t_Nonce &
 
             (valid = TRUE
              =>
@@ -248,6 +248,7 @@ OPERATIONS
         :(
             valid : BOOL &
             signature : t_SignatureData_i &
+            a_NonceClient : t_session +-> t_Nonce & /* PROOF added, how is it modified? */
 
             (valid = TRUE
              =>
@@ -321,10 +322,19 @@ OPERATIONS
     drop_NonceClient(p_session) =
     PRE
         p_session : t_session_i &
-        p_session : t_session   &
-        p_session : dom(a_NonceClient)
+        p_session : t_session /* PROOF  &
+        p_session : dom(a_NonceClient) */
     THEN
         a_NonceClient := {p_session} <<| a_NonceClient
+    END
+    ;
+
+    remove_NonceServer(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        a_NonceServer := {p_session} <<| a_NonceServer
     END
     ;
 

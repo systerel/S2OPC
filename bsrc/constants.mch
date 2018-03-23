@@ -575,6 +575,7 @@ PROPERTIES
     s_service_reqs  = s_session_treatment_reqs \/ s_service_on_session_reqs \/ s_discovery_service_reqs &
     s_service_resps = s_session_treatment_resps \/ s_service_on_session_resps \/ s_discovery_service_resps \/ {e_msg_service_fault_resp} &
 
+    t_msg_type <: t_msg_type_i &
     t_msg_type = s_service_reqs \/ s_service_resps &
 
     t_msg_header_type <: t_msg_header_type_i &

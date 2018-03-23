@@ -36,17 +36,17 @@ CONCRETE_VARIABLES
     a_client_orphaned_i
     
 INVARIANT
-    s_session_i  : t_session_i --> BOOL                   &
-    a_state_i    : t_session_i --> t_sessionState         &
-    a_channel_i  : t_session_i --> t_channel_i            &
-    a_client_to_create_i : t_session_i --> t_channel_config_idx_i &
-    a_client_orphaned_i : t_session_i --> t_channel_config_idx_i &
-
-    s_session   = t_session /\ s_session_i~[{TRUE}]       &
-    a_state     = t_session <| a_state_i                  &
-    a_channel   = t_session <| a_channel_i  |> t_channel  &
-    a_client_to_create  = t_session <| a_client_to_create_i |> t_channel_config_idx &
-    a_client_orphaned  = t_session <| a_client_orphaned_i |> t_channel_config_idx
+    s_session_i          : t_session_i --> BOOL                                      &
+    a_state_i            : t_session_i --> t_sessionState                            &
+    a_channel_i          : t_session_i --> t_channel_i                               &
+    a_client_to_create_i : t_session_i --> t_channel_config_idx_i                    &
+    a_client_orphaned_i  : t_session_i --> t_channel_config_idx_i                    &
+    s_session            = s_session_i~[{TRUE}]                                      &
+    dom(a_state)         = s_session                                                 &
+    a_state             <: a_state_i                                                 &
+    a_channel            = t_session <| a_channel_i |> t_channel                     &
+    a_client_to_create   = t_session <| a_client_to_create_i |> t_channel_config_idx &
+    a_client_orphaned    = t_session <| a_client_orphaned_i |> t_channel_config_idx
 
 INITIALISATION
     s_session_i  := t_session_i * {FALSE};
@@ -57,9 +57,10 @@ INITIALISATION
 
 OPERATIONS
 
-    add_session(p_session) =
+    add_session(p_session, p_state) =
     BEGIN
-        s_session_i(p_session) := TRUE
+        s_session_i(p_session) := TRUE;
+        a_state_i  (p_session) := p_state
     END
     ;
 

@@ -16,26 +16,12 @@
  */
 
 THEORY User_Pass IS
-    Pattern(dom(s<+r|>>L) = A) &
-        ff(0) & dd(0) & ar(LinkedRelations) & mp & ar(LinkedRelations) & mp & pr
-;
-    Pattern(dom(s<+r|>L) = A) &
-        ff(0) & dd(0) & ar(LinkedRelations) & mp & ar(LinkedRelations) & mp & pr
-;
-    Pattern(dom(s<+r|>>L) = A) &
-	ff(0) & dd(0) & ar(LinkedRelations) & mp & mp & eh(dom(a_channel)) & pr
-;
-    Pattern(dom(s<+r|>>L) = A) &
-	ff(0) & dd(0) & ar(LinkedRelations) & mp & mp & eh(dom(a_user)) & pr
-;
-    Pattern(dom(s<+r|>L) = A) &
-	ff(0) & dd(0) & ar(LinkedRelations) & mp & mp & eh(dom(a_orphaned)) & pr
-;
-    Pattern(dom(s<+r|>L) = A) &
-	ff(0) & dd(0) & ar(LinkedRelations) & mp & mp & eh(ran(a_request_handle)) & pr
-;
-    Pattern(dom(s<+r|>>L) = A) &
-	ff(0) & dd(0) & ar(LinkedRelations) & mp & mp & eh(ran(a_token)) & pr
+ff(0) & dd(0) & pr(Tac(LinkedRelations; InPOWTryXY));
+ff(0) & d0 & pr(Tac(th_simp_overload; InPOWLeavesXY));
+ff(0) & dd(0) & ar(th_simp_overload) & ar(SimplifyRelDomXY.15,Goal) & ar(InPOWTryXY);
+ff(0) & dd(0) & ar(LinkedRelations) & mp & mp & eh(dom(a_channel)) & pr;
+ff(0) & dd(0) & ar(LinkedRelations) & mp & mp & eh(dom(a_user)) & pr;
+ff(0) & mp & pp(rt.1)
 END
 
 &
@@ -114,3 +100,20 @@ THEORY LinkedRelations IS
     =>
     dom(s<+{x|->y}|>L) == dom(s|>L) \/ {x}
 END
+
+&
+
+THEORY th_simp_overload IS
+    
+    dom(r<+s) == dom(r)\/dom(s)
+/*    ;
+    a<+{b|->c}|>>{d,e} == */
+    ;
+    bnum(c) &
+    bnum(e) &
+    bnot(btest(c = e))
+    =>
+    a<+{b|->(c|->E)}|>{e|->E} == a|>{e|->E} <+ {b|->(c|->E)}
+    
+END
+

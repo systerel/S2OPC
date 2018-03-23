@@ -1,0 +1,19 @@
+THEORY User_Pass IS
+ff(0) & dd & pr(Tac(th_se));
+ff(0) & dd & pr(Tac(th_raf_var));
+ff(0) & mp & pp(rt.1);
+ff(0) & mp & pp(rp.1);
+ff(0) & dd & pp(rt.1);
+ff(0) & dd(0) & pp(rt.1)
+END 
+&
+
+THEORY th_se IS
+    
+    a\ (b,c,d,e) &
+    b <: d &
+    e : c
+    =>
+    #(a).(a: b +-> c & a <: d*{e})    
+    
+END

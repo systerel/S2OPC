@@ -78,10 +78,10 @@ LOCAL_OPERATIONS
 
     l_set_session_state(p_session, p_state) =
     PRE
-        p_session : t_session_i &
-        p_session : s_session &
-        p_state : t_sessionState &
-        p_state /: {e_session_closed}
+        p_session : t_session_i    &
+        p_session : dom(a_state)   &
+        p_state   : t_sessionState &
+        p_state  /= e_session_closed
     THEN
         a_state(p_session) := p_state
     END
@@ -103,15 +103,6 @@ OPERATIONS
 
     /* Global operations */
 
-    delete_session (session) =
-    BEGIN
-        remove_session(session);
-        reset_session_channel(session);
-        l_set_session_state(session, e_session_closed);
-        reset_session_orphaned(session);
-        delete_session_token(session)
-    END;
-
     p_session <-- init_new_session =
     VAR
         l_is_session,
@@ -120,32 +111,33 @@ OPERATIONS
         p_session := c_session_indet;
         l_is_session := TRUE;
         l_continue <-- init_iter_session;
-        WHILE
-            l_continue   = TRUE &
-            l_is_session = TRUE
-        DO
-            l_continue, p_session <-- continue_iter_session;
-            l_is_session <-- is_valid_session(p_session)
-        INVARIANT
-            sessions_to_iterate <: t_session &
-            sessions_iterated   <: t_session &
-            sessions_to_iterate /\ sessions_iterated = {} &
-            sessions_to_iterate \/ sessions_iterated = t_session &
-            l_is_session = bool(p_session : s_session) &
-            (l_is_session = TRUE
-             =>
-             sessions_iterated <: s_session) &
-            (l_is_session = FALSE
-             =>
-             p_session /: s_session)
-        VARIANT
-            card(sessions_to_iterate)
+        IF  l_continue = TRUE  /* Only for the proof */
+        THEN
+            WHILE
+                l_continue   = TRUE &
+                l_is_session = TRUE
+            DO
+                l_continue, p_session <-- continue_iter_session;
+                l_is_session <-- is_valid_session(p_session)
+            INVARIANT
+                l_continue = bool(sessions_to_iterate /= {}) &
+                sessions_to_iterate /\ sessions_iterated = {} &
+                sessions_to_iterate \/ sessions_iterated = t_session &
+                (   l_is_session = TRUE
+                    =>
+                    sessions_iterated <: s_session) &
+                (   l_is_session = FALSE
+                    =>
+                    p_session  : t_session &
+                    p_session /: s_session)
+            VARIANT
+                card(sessions_to_iterate)
+            END
         END;
         IF  l_is_session = TRUE THEN
             p_session := c_session_indet
         ELSE
-            add_session(p_session);
-            l_set_session_state(p_session, e_session_init)
+            add_session(p_session, e_session_init)
         END
     END
     ;
@@ -167,20 +159,30 @@ OPERATIONS
     VAR
         l_prec_state
     IN
-        // TODO: make delete_session local, call prepare_close_session and use local delete_session
-        remove_session(session);
         reset_session_channel(session);
+        // a_channel
         l_prec_state <-- get_session_state(session);
         prepare_close_session(session, l_prec_state, is_client);
-        l_set_session_state(session, e_session_closed);
-        delete_session_token(session);
-        IF is_client = TRUE
+        // a_user
+        // a_server_token
+        // a_client_token
+        reset_session_to_create(session);
+        // a_client_to_create
+        reset_session_to_activate(session);
+        // a_client_to_activate
+        delete_session_application_context(session);
+        // a_client_to_activate_context
+        reset_session_orphaned(session);
+        // a_client_orphaned
+        drop_NonceClient(session);
+        // a_NonceClient
+        remove_NonceServer(session);
+        // a_NonceServer
+        remove_session(session);
+        // s_session
+        // a_state
+        IF is_client = FALSE
         THEN
-            reset_session_to_create(session);
-            reset_session_to_activate(session);
-            delete_session_application_context(session);
-            reset_session_orphaned(session)
-        ELSE
             server_session_timeout_stop_timer(session)
         END
     END

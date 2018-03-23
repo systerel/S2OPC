@@ -1,0 +1,5 @@
+THEORY User_Pass IS
+Operation(init_new_session) & ff(0) & pp(rt.1);
+Operation(init_new_session) & ff(0) & dd & pr(Tac(th_variant));
+Operation(init_new_session) & ff(0) & dd & pr(Tac(th_invariant))
+END 
