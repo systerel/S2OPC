@@ -449,80 +449,15 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider*
 /**
  * (Internal) Allocates and compute SHA-256 of \p pInput. You must free it.
  */
-static inline SOPC_ReturnStatus RSASSA_PSS_hash(const uint8_t* pInput,
-                                                uint32_t lenInput,
-                                                const mbedtls_md_info_t* pmd_info_hash,
-                                                uint8_t** ppHash);
+static inline SOPC_ReturnStatus NewMsgDigestBuffer(const uint8_t* pInput,
+                                                   uint32_t lenInput,
+                                                   const mbedtls_md_info_t* pmd_info_hash,
+                                                   uint8_t** ppHash);
 
-// Unused
-SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PSS(const SOPC_CryptoProvider* pProvider,
-                                                     const uint8_t* pInput,
-                                                     uint32_t lenInput,
-                                                     const SOPC_AsymmetricKey* pKey,
-                                                     uint8_t* pSignature)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    uint8_t* hash = NULL;
-    mbedtls_rsa_context* prsa = NULL;
-    const mbedtls_md_info_t* pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256); // Hash the message with SHA-256
-
-    if (RSASSA_PSS_hash(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
-    {
-        // Sets the appropriate padding mode (SHA-1 for encryption/decryption but SHA-256 for signing/verifying)
-        prsa = mbedtls_pk_rsa(pKey->pk);
-        mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
-
-        if (mbedtls_rsa_rsassa_pss_sign(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
-                                        MBEDTLS_RSA_PRIVATE, MBEDTLS_MD_SHA256,
-                                        32,                     // hashlen is optional, as md_alg is not MD_NONE
-                                        hash, pSignature) != 0) // signature is as long as the key
-            status = SOPC_STATUS_NOK;
-        else
-            status = SOPC_STATUS_OK;
-    }
-
-    if (NULL != hash)
-        free(hash);
-    return status;
-}
-
-// Unused
-SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PSS(const SOPC_CryptoProvider* pProvider,
-                                                       const uint8_t* pInput,
-                                                       uint32_t lenInput,
-                                                       const SOPC_AsymmetricKey* pKey,
-                                                       const uint8_t* pSignature)
-{
-    (void) (pProvider);
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    uint8_t* hash = NULL;
-    mbedtls_rsa_context* prsa = NULL;
-    const mbedtls_md_info_t* pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256); // Hash the message with SHA-256
-
-    if (RSASSA_PSS_hash(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
-    {
-        // Sets the appropriate padding mode (SHA-1 for encryption/decryption but SHA-256 for signing/verifying)
-        prsa = mbedtls_pk_rsa(pKey->pk);
-        mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
-
-        if (mbedtls_rsa_rsassa_pss_verify(prsa, NULL, NULL,
-                                          MBEDTLS_RSA_PUBLIC,     // Random functions are optional for verification
-                                          MBEDTLS_MD_SHA256, 32,  // hashlen is optional, as md_alg is not MD_NONE
-                                          hash, pSignature) != 0) // signature is as long as the key
-            status = SOPC_STATUS_NOK;
-        else
-            status = SOPC_STATUS_OK;
-    }
-
-    if (NULL != hash)
-        free(hash);
-    return status;
-}
-
-static inline SOPC_ReturnStatus RSASSA_PSS_hash(const uint8_t* pInput,
-                                                uint32_t lenInput,
-                                                const mbedtls_md_info_t* pmd_info_hash,
-                                                uint8_t** ppHash)
+static inline SOPC_ReturnStatus NewMsgDigestBuffer(const uint8_t* pInput,
+                                                   uint32_t lenInput,
+                                                   const mbedtls_md_info_t* pmd_info_hash,
+                                                   uint8_t** ppHash)
 {
     uint8_t* hash = NULL;
     uint32_t lenHash = 0;
@@ -558,7 +493,7 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const SOPC_C
     mbedtls_rsa_context* prsa = NULL;
     const mbedtls_md_info_t* pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256); // Hash the message with SHA-256
 
-    if (RSASSA_PSS_hash(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
+    if (NewMsgDigestBuffer(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
     {
         // Sets the appropriate padding mode (no hash-id for PKCS_V15)
         prsa = mbedtls_pk_rsa(pKey->pk);
@@ -590,7 +525,7 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256(const SOPC
     mbedtls_rsa_context* prsa = NULL;
     const mbedtls_md_info_t* pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
 
-    if (RSASSA_PSS_hash(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
+    if (NewMsgDigestBuffer(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
     {
         // Sets the appropriate padding mode (no hash-id for PKCS_V15)
         prsa = mbedtls_pk_rsa(pKey->pk);
@@ -766,7 +701,7 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1(const SOPC_Cry
     mbedtls_rsa_context* prsa = NULL;
     const mbedtls_md_info_t* pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
 
-    if (RSASSA_PSS_hash(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
+    if (NewMsgDigestBuffer(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
     {
         // Sets the appropriate padding mode (no hash-id for PKCS_V15)
         prsa = mbedtls_pk_rsa(pKey->pk);
@@ -798,7 +733,7 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1(const SOPC_C
     mbedtls_rsa_context* prsa = NULL;
     const mbedtls_md_info_t* pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
 
-    if (RSASSA_PSS_hash(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
+    if (NewMsgDigestBuffer(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
     {
         // Sets the appropriate padding mode (no hash-id for PKCS_V15)
         prsa = mbedtls_pk_rsa(pKey->pk);

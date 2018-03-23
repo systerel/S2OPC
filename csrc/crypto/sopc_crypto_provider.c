@@ -299,30 +299,6 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(const S
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_PSSHashLength(const SOPC_CryptoProvider* pProvider,
-                                                                        uint32_t* length)
-{
-    if (NULL == pProvider || NULL == pProvider->pProfile ||
-        SOPC_SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID || NULL == length)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    switch (pProvider->pProfile->SecurityPolicyID)
-    {
-    case SOPC_SecurityPolicy_Invalid_ID:
-    case SOPC_SecurityPolicy_None_ID:
-    default:
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    case SOPC_SecurityPolicy_Basic256Sha256_ID:
-        *length = SOPC_SecurityPolicy_Basic256Sha256_AsymLen_PSS_Hash;
-        break;
-    case SOPC_SecurityPolicy_Basic256_ID:
-        *length = SOPC_SecurityPolicy_Basic256_AsymLen_PSS_Hash;
-        break;
-    }
-
-    return SOPC_STATUS_OK;
-}
-
 SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_Msgs(const SOPC_CryptoProvider* pProvider,
                                                                const SOPC_AsymmetricKey* pKey,
                                                                uint32_t* pCipherTextBlockSize,

@@ -890,8 +890,6 @@ START_TEST(test_crypto_asym_lengths_B256)
     ck_assert(688 == len);
     ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(crypto, &len) == SOPC_STATUS_OK);
     ck_assert(20 == len); // SHA-1
-    ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_PSSHashLength(crypto, &len) == SOPC_STATUS_OK);
-    ck_assert(20 == len); // SHA-1
     ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_Signature(crypto, key_pub, &len) == SOPC_STATUS_OK);
     ck_assert(128 == len); // One block
     ck_assert(SOPC_CryptoProvider_AsymmetricGetLength_Signature(crypto, key_priv, &len) == SOPC_STATUS_OK);
