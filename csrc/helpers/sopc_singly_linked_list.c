@@ -245,20 +245,6 @@ SOPC_SLinkedList_Elt* SOPC_SLinkedList_InternalFind(SOPC_SLinkedList* list, uint
     return elt;
 }
 
-SOPC_SLinkedList_Elt* SOPC_SLinkedList_InternalFindPrec(SOPC_SLinkedList* list, uint32_t id)
-{
-    SOPC_SLinkedList_Elt* elt = NULL;
-    if (list != NULL && list->first != NULL)
-    {
-        elt = list->first;
-        while (elt->next != NULL && elt->next->id != id)
-        {
-            elt = elt->next;
-        }
-    }
-    return elt;
-}
-
 // Returns null => Not found, otherwise => elt pointer
 void* SOPC_SLinkedList_FindFromId(SOPC_SLinkedList* list, uint32_t id)
 {
