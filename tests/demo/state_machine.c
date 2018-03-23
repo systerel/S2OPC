@@ -30,21 +30,25 @@
 
 uintptr_t nSMCreated = 0; /* Number of created machines, used for session context. */
 uintptr_t nDiscovery = 0; /* Number of sent discovery requests, used as UID for requestContext */
+uintptr_t nReqSent = 0;   /* Number of other requests sent through the wrapper, used as UID for requestContext */
 
 StateMachine_Machine* StateMachine_Create(void)
 {
     StateMachine_Machine* pSM = malloc(sizeof(StateMachine_Machine));
+    StateMachine_RequestContext* pCtxSess = malloc(sizeof(StateMachine_RequestContext));
 
-    if (NULL != pSM)
+    if (NULL != pSM && NULL != pCtxSess)
     {
         /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX opened sessions */
         ++nSMCreated;
+        pCtxSess->uid = nSMCreated;
+        pCtxSess->appCtx = 0;
         pSM->state = stInit;
         pSM->pscConfig = NULL;
         pSM->iscConfig = 0;
-        pSM->iSessionCtx = nSMCreated;
+        pSM->pCtxSession = pCtxSess;
         pSM->iSessionID = 0;
-        pSM->iRequestCtx = 0;
+        pSM->pCtxRequest = NULL;
     }
 
     return pSM;
@@ -103,7 +107,7 @@ SOPC_ReturnStatus StateMachine_StartSession(StateMachine_Machine* pSM)
 
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ToolkitClient_AsyncActivateSession(pSM->iscConfig, pSM->iSessionCtx);
+        SOPC_ToolkitClient_AsyncActivateSession(pSM->iscConfig, (uintptr_t) pSM->pCtxSession);
         pSM->state = stActivating;
     }
     else
@@ -165,16 +169,31 @@ SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM)
     {
         /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX pending discoveries */
         ++nDiscovery;
-        pSM->iRequestCtx = nDiscovery;
-        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(pSM->iscConfig, pReq, nDiscovery);
-        pSM->state = stDiscovering;
+        pSM->pCtxRequest = malloc(sizeof(StateMachine_RequestContext));
+        if (NULL == pSM->pCtxRequest)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            pSM->pCtxRequest->uid = nDiscovery;
+            pSM->pCtxRequest->appCtx = 0;
+            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(pSM->iscConfig, pReq, (uintptr_t) pSM->pCtxRequest);
+            pSM->state = stDiscovering;
+        }
     }
-    else
+
+    if (SOPC_STATUS_OK != status)
     {
         pSM->state = stError;
         if (NULL != pReq)
         {
             free(pReq);
+        }
+        if (NULL != pSM->pCtxRequest)
+        {
+            free(pSM->pCtxRequest);
+            pSM->pCtxRequest = NULL;
         }
     }
 
@@ -235,9 +254,24 @@ bool StateMachine_IsIdle(StateMachine_Machine* pSM)
 
 void StateMachine_Delete(StateMachine_Machine** ppSM)
 {
+    StateMachine_Machine* pSM = NULL;
+
     if (NULL == ppSM || NULL == *ppSM)
     {
         return;
+    }
+
+    pSM = *ppSM;
+
+    if (NULL != pSM->pCtxSession)
+    {
+        free(pSM->pCtxSession);
+        pSM->pCtxSession = NULL;
+    }
+    if (NULL != pSM->pCtxRequest)
+    {
+        free(pSM->pCtxRequest);
+        pSM->pCtxRequest = NULL;
     }
 
     Config_DeleteSCConfig(&((*ppSM)->pscConfig));
@@ -247,6 +281,7 @@ void StateMachine_Delete(StateMachine_Machine** ppSM)
 }
 
 bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
+                                  uintptr_t* pAppCtx,
                                   SOPC_App_Com_Event event,
                                   uint32_t arg,
                                   void* pParam,
@@ -270,7 +305,7 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
         case SE_ACTIVATED_SESSION:
         case SE_SESSION_REACTIVATING:
         case SE_CLOSED_SESSION:
-            if (pSM->iSessionCtx != appCtx)
+            if ((uintptr_t) pSM->pCtxSession != appCtx)
             {
                 bProcess = false;
             }
@@ -285,7 +320,7 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
         /* appCtx is request context */
         case SE_RCV_DISCOVERY_RESPONSE:
         case SE_SND_REQUEST_FAILED:
-            if (pSM->iRequestCtx != appCtx)
+            if ((uintptr_t) pSM->pCtxRequest != appCtx)
             {
                 bProcess = false;
             }
@@ -329,7 +364,7 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
                 break;
             case SE_SND_REQUEST_FAILED:
                 pSM->state = stError;
-                printf("# Error: Send request %" PRIuPTR " failed.\n", pSM->iRequestCtx);
+                printf("# Error: Send request 0x%" PRIxPTR " failed.\n", (uintptr_t) pSM->pCtxRequest);
                 break;
             default:
                 pSM->state = stError;
@@ -355,7 +390,7 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
             {
             case SE_RCV_DISCOVERY_RESPONSE:
                 /* This assert is ok because of the test that would otherwise set bProcess to false */
-                assert(pSM->iRequestCtx == appCtx);
+                assert((uintptr_t) pSM->pCtxRequest == appCtx);
                 pSM->state = stConfigured;
                 break;
             default:
@@ -380,6 +415,18 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
             pSM->state = stError;
             printf("# Error: Dispatching in unknown state %i, event %i.\n", pSM->state, event);
             break;
+        }
+
+        /* Whatever the state, a response with a known pCtxRequest shall free it,
+         * and return the appCtx to the caller */
+        if (NULL != pSM->pCtxRequest && (uintptr_t) pSM->pCtxRequest == appCtx)
+        {
+            if (NULL != pAppCtx)
+            {
+                *pAppCtx = pSM->pCtxRequest->appCtx;
+            }
+            free(pSM->pCtxRequest);
+            pSM->pCtxRequest = NULL;
         }
     }
 

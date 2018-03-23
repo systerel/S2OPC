@@ -43,7 +43,7 @@ SOPC_NodeId* g_pNid = NULL;
 uint32_t g_iAttr = 0;
 
 /* Event handler of the Read */
-void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t appCtx);
+void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
 
 SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM);
 void PrintReadResponse(OpcUa_ReadResponse* pReadResp);
@@ -169,9 +169,11 @@ int main(int argc, char* argv[])
     return status;
 }
 
-void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t appCtx)
+void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
 {
-    if (StateMachine_EventDispatcher(g_pSM, event, arg, pParam, appCtx))
+    uintptr_t appCtx = 0;
+
+    if (StateMachine_EventDispatcher(g_pSM, &appCtx, event, arg, pParam, smCtx))
     {
         switch (event)
         {

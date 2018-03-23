@@ -44,7 +44,7 @@ uint32_t g_iAttr = 13;
 SOPC_DataValue g_dv;
 
 /* Event handler of the Write */
-void EventDispatcher_Write(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t appCtx);
+void EventDispatcher_Write(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
 
 SOPC_ReturnStatus SendWriteRequest(StateMachine_Machine* pSM);
 void PrintWriteResponse(OpcUa_WriteResponse* pReadResp);
@@ -168,9 +168,11 @@ int main(int argc, char* argv[])
     return status;
 }
 
-void EventDispatcher_Write(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t appCtx)
+void EventDispatcher_Write(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
 {
-    if (StateMachine_EventDispatcher(g_pSM, event, arg, pParam, appCtx))
+    uintptr_t appCtx = 0;
+
+    if (StateMachine_EventDispatcher(g_pSM, &appCtx, event, arg, pParam, smCtx))
     {
         switch (event)
         {

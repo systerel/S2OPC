@@ -36,12 +36,18 @@ typedef enum { stInit, stConfigured, stActivating, stActivated, stClosing, stDis
 
 typedef struct
 {
+    uint32_t uid;
+    uintptr_t appCtx;
+} StateMachine_RequestContext;
+
+typedef struct
+{
     StateMachine_State state;
     SOPC_SecureChannel_Config* pscConfig;
-    uint32_t iscConfig;    /* Internal scConfig ID */
-    uintptr_t iSessionCtx; /* Internal Session context */
-    uint32_t iSessionID;   /* OPC UA Session ID */
-    uintptr_t iRequestCtx; /* Internal request context used for discovery requests */
+    uint32_t iscConfig;                       /* Internal scConfig ID */
+    StateMachine_RequestContext* pCtxSession; /* Internal Session context */
+    uint32_t iSessionID;                      /* OPC UA Session ID */
+    StateMachine_RequestContext* pCtxRequest; /* Internal request context used for discovery requests */
 } StateMachine_Machine;
 
 /* Machine lifecycle */
@@ -72,6 +78,21 @@ SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM);
  * \brief Close the session. If not StateMachine_IsConnected(), the machine is put in state stError.
  */
 SOPC_ReturnStatus StateMachine_StopSession(StateMachine_Machine* pSM);
+
+/**
+ * \brief Sends a request, wraps SOPC_ToolkitClient_AsyncSendRequestOnSession().
+ *
+ * The machine must be activated.
+ *
+ * \warning Every client request should be sent with this wrapper, so that the machine
+ *  can recognize the response from the server.
+ * \warning Only one request can be sent at a time.
+ *
+ * \param requestStruct The structure of the request, see SOPC_ToolkitClient_AsyncSendRequestOnSession()
+ * \param appCtx        An ID that will be given back through the call to the event handler.
+                        The value 0 indicates "no ID".
+ */
+SOPC_ReturnStatus StateMachine_SendRequest(StateMachine_Machine* pSM, void* requestStruct, uintptr_t appCtx);
 
 /**
  * \brief Returns a bool whether the machine is configured and ready for a new SecureChannel.
@@ -108,9 +129,13 @@ void StateMachine_Delete(StateMachine_Machine** ppSM);
  *
  * This function can be called even if the message is not destined to this particular machine.
  *
+ * \param pAppCtx   A pointer to an uintptr_t which will contain the appCtx given to
+                    StateMachine_SendRequest(). NULL is valid. 0 indicates "appID unavailable".
+ *
  * \return True if the event is targeted to the machine. False otherwise, or when pSM is NULL.
  */
 bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
+                                  uintptr_t* pAppCtx,
                                   SOPC_App_Com_Event event,
                                   uint32_t arg,
                                   void* pParam,
