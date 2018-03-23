@@ -293,14 +293,32 @@ void message_out_bs__is_valid_buffer_out(const constants__t_byte_buffer_i messag
 
 void message_out_bs__is_valid_msg_out(const constants__t_msg_i message_out_bs__msg, t_bool* const message_out_bs__bres)
 {
-    // It is sufficient since we only set non undet value when it is a correct structure message
-    *message_out_bs__bres = message_out_bs__msg != constants__c_msg_indet;
+    constants__t_msg_type_i message__msg_type = constants__c_msg_type_indet;
+    *message_out_bs__bres = false;
+    if (message_out_bs__msg != constants__c_msg_indet && *(SOPC_EncodeableType**) message_out_bs__msg != NULL)
+    {
+        util_message__get_message_type(*(SOPC_EncodeableType**) message_out_bs__msg, &message__msg_type);
+        // The message type shall be identifiable
+        if (message__msg_type != constants__c_msg_type_indet)
+        {
+            *message_out_bs__bres = true;
+        }
+    }
 }
 
 void message_out_bs__is_valid_msg_out_header(const constants__t_msg_header_i message_out_bs__msg_header,
                                              t_bool* const message_out_bs__bres)
 {
-    *message_out_bs__bres = message_out_bs__msg_header != constants__c_msg_header_indet;
+    *message_out_bs__bres = false;
+    if (message_out_bs__msg_header != constants__c_msg_header_indet &&
+        *(SOPC_EncodeableType**) message_out_bs__msg_header != NULL)
+    {
+        if (&OpcUa_ResponseHeader_EncodeableType == *(SOPC_EncodeableType**) message_out_bs__msg_header ||
+            &OpcUa_RequestHeader_EncodeableType == *(SOPC_EncodeableType**) message_out_bs__msg_header)
+        {
+            *message_out_bs__bres = true;
+        }
+    }
 }
 
 void message_out_bs__write_activate_msg_user(const constants__t_msg_i message_out_bs__msg,

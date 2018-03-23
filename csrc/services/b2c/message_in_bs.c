@@ -177,7 +177,7 @@ void message_in_bs__is_valid_msg_in(const constants__t_msg_i message_in_bs__msg,
 void message_in_bs__is_valid_msg_in_header(const constants__t_msg_header_i message_in_bs__msg_header,
                                            t_bool* const message_in_bs__bres)
 {
-    message_in_bs__is_valid_msg_in((constants__t_msg_i) message_in_bs__msg_header, message_in_bs__bres);
+    message_out_bs__is_valid_msg_out_header((constants__t_msg_i) message_in_bs__msg_header, message_in_bs__bres);
 }
 
 void message_in_bs__is_valid_msg_in_type(const constants__t_msg_type_i message_in_bs__msg_typ,

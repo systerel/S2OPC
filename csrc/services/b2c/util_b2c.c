@@ -379,235 +379,242 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
 
 void util_message__get_message_type(SOPC_EncodeableType* encType, constants__t_msg_type_i* message__msg_type)
 {
-    switch (encType->TypeId)
+    if (NULL == encType)
     {
-    case OpcUaId_FindServersRequest:
-        *message__msg_type = constants__e_msg_discovery_find_servers_req;
-        break;
-    case OpcUaId_FindServersResponse:
-        *message__msg_type = constants__e_msg_discovery_find_servers_resp;
-        break;
-    case OpcUaId_FindServersOnNetworkRequest:
-        *message__msg_type = constants__e_msg_discovery_find_servers_on_network_req;
-        break;
-    case OpcUaId_FindServersOnNetworkResponse:
-        *message__msg_type = constants__e_msg_discovery_find_servers_on_network_resp;
-        break;
-    case OpcUaId_GetEndpointsRequest:
-        *message__msg_type = constants__e_msg_discovery_get_endpoints_req;
-        break;
-    case OpcUaId_GetEndpointsResponse:
-        *message__msg_type = constants__e_msg_discovery_get_endpoints_resp;
-        break;
-    case OpcUaId_RegisterServerRequest:
-        *message__msg_type = constants__e_msg_discovery_register_server_req;
-        break;
-    case OpcUaId_RegisterServerResponse:
-        *message__msg_type = constants__e_msg_discovery_register_server_resp;
-        break;
-    case OpcUaId_RegisterServer2Request:
-        *message__msg_type = constants__e_msg_discovery_register_server2_req;
-        break;
-    case OpcUaId_RegisterServer2Response:
-        *message__msg_type = constants__e_msg_discovery_register_server2_resp;
-        break;
-    case OpcUaId_CreateSessionRequest:
-        *message__msg_type = constants__e_msg_session_create_req;
-        break;
-    case OpcUaId_CreateSessionResponse:
-        *message__msg_type = constants__e_msg_session_create_resp;
-        break;
-    case OpcUaId_ActivateSessionRequest:
-        *message__msg_type = constants__e_msg_session_activate_req;
-        break;
-    case OpcUaId_ActivateSessionResponse:
-        *message__msg_type = constants__e_msg_session_activate_resp;
-        break;
-    case OpcUaId_CloseSessionRequest:
-        *message__msg_type = constants__e_msg_session_close_req;
-        break;
-    case OpcUaId_CloseSessionResponse:
-        *message__msg_type = constants__e_msg_session_close_resp;
-        break;
-    case OpcUaId_CancelRequest:
-        *message__msg_type = constants__e_msg_session_cancel_req;
-        break;
-    case OpcUaId_CancelResponse:
-        *message__msg_type = constants__e_msg_session_cancel_resp;
-        break;
-    case OpcUaId_AddNodesRequest:
-        *message__msg_type = constants__e_msg_node_add_nodes_req;
-        break;
-    case OpcUaId_AddNodesResponse:
-        *message__msg_type = constants__e_msg_node_add_nodes_resp;
-        break;
-    case OpcUaId_AddReferencesRequest:
-        *message__msg_type = constants__e_msg_node_add_references_req;
-        break;
-    case OpcUaId_AddReferencesResponse:
-        *message__msg_type = constants__e_msg_node_add_references_resp;
-        break;
-    case OpcUaId_DeleteNodesRequest:
-        *message__msg_type = constants__e_msg_node_delete_nodes_req;
-        break;
-    case OpcUaId_DeleteNodesResponse:
-        *message__msg_type = constants__e_msg_node_delete_nodes_resp;
-        break;
-    case OpcUaId_DeleteReferencesRequest:
-        *message__msg_type = constants__e_msg_node_delete_references_req;
-        break;
-    case OpcUaId_DeleteReferencesResponse:
-        *message__msg_type = constants__e_msg_node_delete_references_resp;
-        break;
-    case OpcUaId_BrowseRequest:
-        *message__msg_type = constants__e_msg_view_browse_req;
-        break;
-    case OpcUaId_BrowseResponse:
-        *message__msg_type = constants__e_msg_view_browse_resp;
-        break;
-    case OpcUaId_BrowseNextRequest:
-        *message__msg_type = constants__e_msg_view_browse_next_req;
-        break;
-    case OpcUaId_BrowseNextResponse:
-        *message__msg_type = constants__e_msg_view_browse_next_resp;
-        break;
-    case OpcUaId_TranslateBrowsePathsToNodeIdsRequest:
-        *message__msg_type = constants__e_msg_view_translate_browse_paths_to_node_ids_req;
-        break;
-    case OpcUaId_TranslateBrowsePathsToNodeIdsResponse:
-        *message__msg_type = constants__e_msg_view_translate_browse_paths_to_node_ids_resp;
-        break;
-    case OpcUaId_RegisterNodesRequest:
-        *message__msg_type = constants__e_msg_view_register_nodes_req;
-        break;
-    case OpcUaId_RegisterNodesResponse:
-        *message__msg_type = constants__e_msg_view_register_nodes_resp;
-        break;
-    case OpcUaId_UnregisterNodesRequest:
-        *message__msg_type = constants__e_msg_view_unregister_nodes_req;
-        break;
-    case OpcUaId_UnregisterNodesResponse:
-        *message__msg_type = constants__e_msg_view_unregister_nodes_resp;
-        break;
-    case OpcUaId_QueryFirstRequest:
-        *message__msg_type = constants__e_msg_query_first_req;
-        break;
-    case OpcUaId_QueryFirstResponse:
-        *message__msg_type = constants__e_msg_query_first_resp;
-        break;
-    case OpcUaId_QueryNextRequest:
-        *message__msg_type = constants__e_msg_query_next_req;
-        break;
-    case OpcUaId_QueryNextResponse:
-        *message__msg_type = constants__e_msg_query_next_resp;
-        break;
-    case OpcUaId_ReadRequest:
-        *message__msg_type = constants__e_msg_attribute_read_req;
-        break;
-    case OpcUaId_ReadResponse:
-        *message__msg_type = constants__e_msg_attribute_read_resp;
-        break;
-    case OpcUaId_HistoryReadRequest:
-        *message__msg_type = constants__e_msg_attribute_history_read_req;
-        break;
-    case OpcUaId_HistoryReadResponse:
-        *message__msg_type = constants__e_msg_attribute_history_read_resp;
-        break;
-    case OpcUaId_WriteRequest:
-        *message__msg_type = constants__e_msg_attribute_write_req;
-        break;
-    case OpcUaId_WriteResponse:
-        *message__msg_type = constants__e_msg_attribute_write_resp;
-        break;
-    case OpcUaId_HistoryUpdateRequest:
-        *message__msg_type = constants__e_msg_attribute_history_update_req;
-        break;
-    case OpcUaId_HistoryUpdateResponse:
-        *message__msg_type = constants__e_msg_attribute_history_update_resp;
-        break;
-    case OpcUaId_CallRequest:
-        *message__msg_type = constants__e_msg_method_call_req;
-        break;
-    case OpcUaId_CallResponse:
-        *message__msg_type = constants__e_msg_method_call_resp;
-        break;
-    case OpcUaId_CreateMonitoredItemsRequest:
-        *message__msg_type = constants__e_msg_monitored_items_create_req;
-        break;
-    case OpcUaId_CreateMonitoredItemsResponse:
-        *message__msg_type = constants__e_msg_monitored_items_create_resp;
-        break;
-    case OpcUaId_ModifyMonitoredItemsRequest:
-        *message__msg_type = constants__e_msg_monitored_items_modify_req;
-        break;
-    case OpcUaId_ModifyMonitoredItemsResponse:
-        *message__msg_type = constants__e_msg_monitored_items_modify_resp;
-        break;
-    case OpcUaId_SetMonitoringModeRequest:
-        *message__msg_type = constants__e_msg_monitored_items_set_monitoring_mode_req;
-        break;
-    case OpcUaId_SetMonitoringModeResponse:
-        *message__msg_type = constants__e_msg_monitored_items_set_monitoring_mode_resp;
-        break;
-    case OpcUaId_SetTriggeringRequest:
-        *message__msg_type = constants__e_msg_monitored_items_set_triggering_req;
-        break;
-    case OpcUaId_SetTriggeringResponse:
-        *message__msg_type = constants__e_msg_monitored_items_set_triggering_resp;
-        break;
-    case OpcUaId_DeleteMonitoredItemsRequest:
-        *message__msg_type = constants__e_msg_monitored_items_delete_req;
-        break;
-    case OpcUaId_DeleteMonitoredItemsResponse:
-        *message__msg_type = constants__e_msg_monitored_items_delete_resp;
-        break;
-    case OpcUaId_CreateSubscriptionRequest:
-        *message__msg_type = constants__e_msg_subscription_create_req;
-        break;
-    case OpcUaId_CreateSubscriptionResponse:
-        *message__msg_type = constants__e_msg_subscription_create_resp;
-        break;
-    case OpcUaId_ModifySubscriptionRequest:
-        *message__msg_type = constants__e_msg_subscription_modify_req;
-        break;
-    case OpcUaId_ModifySubscriptionResponse:
-        *message__msg_type = constants__e_msg_subscription_modify_resp;
-        break;
-    case OpcUaId_SetPublishingModeRequest:
-        *message__msg_type = constants__e_msg_subscription_set_publishing_mode_req;
-        break;
-    case OpcUaId_SetPublishingModeResponse:
-        *message__msg_type = constants__e_msg_subscription_set_publishing_mode_resp;
-        break;
-    case OpcUaId_PublishRequest:
-        *message__msg_type = constants__e_msg_subscription_publish_req;
-        break;
-    case OpcUaId_PublishResponse:
-        *message__msg_type = constants__e_msg_subscription_publish_resp;
-        break;
-    case OpcUaId_RepublishRequest:
-        *message__msg_type = constants__e_msg_subscription_republish_req;
-        break;
-    case OpcUaId_RepublishResponse:
-        *message__msg_type = constants__e_msg_subscription_republish_resp;
-        break;
-    case OpcUaId_TransferSubscriptionsRequest:
-        *message__msg_type = constants__e_msg_subscription_transfer_subscriptions_req;
-        break;
-    case OpcUaId_TransferSubscriptionsResponse:
-        *message__msg_type = constants__e_msg_subscription_transfer_subscriptions_resp;
-        break;
-    case OpcUaId_DeleteSubscriptionsRequest:
-        *message__msg_type = constants__e_msg_subscription_delete_subscriptions_req;
-        break;
-    case OpcUaId_DeleteSubscriptionsResponse:
-        *message__msg_type = constants__e_msg_subscription_delete_subscriptions_resp;
-        break;
-    case OpcUaId_ServiceFault:
-        *message__msg_type = constants__e_msg_service_fault_resp;
-        break;
-    default:
         *message__msg_type = constants__c_msg_type_indet;
+    }
+    else
+    {
+        switch (encType->TypeId)
+        {
+        case OpcUaId_FindServersRequest:
+            *message__msg_type = constants__e_msg_discovery_find_servers_req;
+            break;
+        case OpcUaId_FindServersResponse:
+            *message__msg_type = constants__e_msg_discovery_find_servers_resp;
+            break;
+        case OpcUaId_FindServersOnNetworkRequest:
+            *message__msg_type = constants__e_msg_discovery_find_servers_on_network_req;
+            break;
+        case OpcUaId_FindServersOnNetworkResponse:
+            *message__msg_type = constants__e_msg_discovery_find_servers_on_network_resp;
+            break;
+        case OpcUaId_GetEndpointsRequest:
+            *message__msg_type = constants__e_msg_discovery_get_endpoints_req;
+            break;
+        case OpcUaId_GetEndpointsResponse:
+            *message__msg_type = constants__e_msg_discovery_get_endpoints_resp;
+            break;
+        case OpcUaId_RegisterServerRequest:
+            *message__msg_type = constants__e_msg_discovery_register_server_req;
+            break;
+        case OpcUaId_RegisterServerResponse:
+            *message__msg_type = constants__e_msg_discovery_register_server_resp;
+            break;
+        case OpcUaId_RegisterServer2Request:
+            *message__msg_type = constants__e_msg_discovery_register_server2_req;
+            break;
+        case OpcUaId_RegisterServer2Response:
+            *message__msg_type = constants__e_msg_discovery_register_server2_resp;
+            break;
+        case OpcUaId_CreateSessionRequest:
+            *message__msg_type = constants__e_msg_session_create_req;
+            break;
+        case OpcUaId_CreateSessionResponse:
+            *message__msg_type = constants__e_msg_session_create_resp;
+            break;
+        case OpcUaId_ActivateSessionRequest:
+            *message__msg_type = constants__e_msg_session_activate_req;
+            break;
+        case OpcUaId_ActivateSessionResponse:
+            *message__msg_type = constants__e_msg_session_activate_resp;
+            break;
+        case OpcUaId_CloseSessionRequest:
+            *message__msg_type = constants__e_msg_session_close_req;
+            break;
+        case OpcUaId_CloseSessionResponse:
+            *message__msg_type = constants__e_msg_session_close_resp;
+            break;
+        case OpcUaId_CancelRequest:
+            *message__msg_type = constants__e_msg_session_cancel_req;
+            break;
+        case OpcUaId_CancelResponse:
+            *message__msg_type = constants__e_msg_session_cancel_resp;
+            break;
+        case OpcUaId_AddNodesRequest:
+            *message__msg_type = constants__e_msg_node_add_nodes_req;
+            break;
+        case OpcUaId_AddNodesResponse:
+            *message__msg_type = constants__e_msg_node_add_nodes_resp;
+            break;
+        case OpcUaId_AddReferencesRequest:
+            *message__msg_type = constants__e_msg_node_add_references_req;
+            break;
+        case OpcUaId_AddReferencesResponse:
+            *message__msg_type = constants__e_msg_node_add_references_resp;
+            break;
+        case OpcUaId_DeleteNodesRequest:
+            *message__msg_type = constants__e_msg_node_delete_nodes_req;
+            break;
+        case OpcUaId_DeleteNodesResponse:
+            *message__msg_type = constants__e_msg_node_delete_nodes_resp;
+            break;
+        case OpcUaId_DeleteReferencesRequest:
+            *message__msg_type = constants__e_msg_node_delete_references_req;
+            break;
+        case OpcUaId_DeleteReferencesResponse:
+            *message__msg_type = constants__e_msg_node_delete_references_resp;
+            break;
+        case OpcUaId_BrowseRequest:
+            *message__msg_type = constants__e_msg_view_browse_req;
+            break;
+        case OpcUaId_BrowseResponse:
+            *message__msg_type = constants__e_msg_view_browse_resp;
+            break;
+        case OpcUaId_BrowseNextRequest:
+            *message__msg_type = constants__e_msg_view_browse_next_req;
+            break;
+        case OpcUaId_BrowseNextResponse:
+            *message__msg_type = constants__e_msg_view_browse_next_resp;
+            break;
+        case OpcUaId_TranslateBrowsePathsToNodeIdsRequest:
+            *message__msg_type = constants__e_msg_view_translate_browse_paths_to_node_ids_req;
+            break;
+        case OpcUaId_TranslateBrowsePathsToNodeIdsResponse:
+            *message__msg_type = constants__e_msg_view_translate_browse_paths_to_node_ids_resp;
+            break;
+        case OpcUaId_RegisterNodesRequest:
+            *message__msg_type = constants__e_msg_view_register_nodes_req;
+            break;
+        case OpcUaId_RegisterNodesResponse:
+            *message__msg_type = constants__e_msg_view_register_nodes_resp;
+            break;
+        case OpcUaId_UnregisterNodesRequest:
+            *message__msg_type = constants__e_msg_view_unregister_nodes_req;
+            break;
+        case OpcUaId_UnregisterNodesResponse:
+            *message__msg_type = constants__e_msg_view_unregister_nodes_resp;
+            break;
+        case OpcUaId_QueryFirstRequest:
+            *message__msg_type = constants__e_msg_query_first_req;
+            break;
+        case OpcUaId_QueryFirstResponse:
+            *message__msg_type = constants__e_msg_query_first_resp;
+            break;
+        case OpcUaId_QueryNextRequest:
+            *message__msg_type = constants__e_msg_query_next_req;
+            break;
+        case OpcUaId_QueryNextResponse:
+            *message__msg_type = constants__e_msg_query_next_resp;
+            break;
+        case OpcUaId_ReadRequest:
+            *message__msg_type = constants__e_msg_attribute_read_req;
+            break;
+        case OpcUaId_ReadResponse:
+            *message__msg_type = constants__e_msg_attribute_read_resp;
+            break;
+        case OpcUaId_HistoryReadRequest:
+            *message__msg_type = constants__e_msg_attribute_history_read_req;
+            break;
+        case OpcUaId_HistoryReadResponse:
+            *message__msg_type = constants__e_msg_attribute_history_read_resp;
+            break;
+        case OpcUaId_WriteRequest:
+            *message__msg_type = constants__e_msg_attribute_write_req;
+            break;
+        case OpcUaId_WriteResponse:
+            *message__msg_type = constants__e_msg_attribute_write_resp;
+            break;
+        case OpcUaId_HistoryUpdateRequest:
+            *message__msg_type = constants__e_msg_attribute_history_update_req;
+            break;
+        case OpcUaId_HistoryUpdateResponse:
+            *message__msg_type = constants__e_msg_attribute_history_update_resp;
+            break;
+        case OpcUaId_CallRequest:
+            *message__msg_type = constants__e_msg_method_call_req;
+            break;
+        case OpcUaId_CallResponse:
+            *message__msg_type = constants__e_msg_method_call_resp;
+            break;
+        case OpcUaId_CreateMonitoredItemsRequest:
+            *message__msg_type = constants__e_msg_monitored_items_create_req;
+            break;
+        case OpcUaId_CreateMonitoredItemsResponse:
+            *message__msg_type = constants__e_msg_monitored_items_create_resp;
+            break;
+        case OpcUaId_ModifyMonitoredItemsRequest:
+            *message__msg_type = constants__e_msg_monitored_items_modify_req;
+            break;
+        case OpcUaId_ModifyMonitoredItemsResponse:
+            *message__msg_type = constants__e_msg_monitored_items_modify_resp;
+            break;
+        case OpcUaId_SetMonitoringModeRequest:
+            *message__msg_type = constants__e_msg_monitored_items_set_monitoring_mode_req;
+            break;
+        case OpcUaId_SetMonitoringModeResponse:
+            *message__msg_type = constants__e_msg_monitored_items_set_monitoring_mode_resp;
+            break;
+        case OpcUaId_SetTriggeringRequest:
+            *message__msg_type = constants__e_msg_monitored_items_set_triggering_req;
+            break;
+        case OpcUaId_SetTriggeringResponse:
+            *message__msg_type = constants__e_msg_monitored_items_set_triggering_resp;
+            break;
+        case OpcUaId_DeleteMonitoredItemsRequest:
+            *message__msg_type = constants__e_msg_monitored_items_delete_req;
+            break;
+        case OpcUaId_DeleteMonitoredItemsResponse:
+            *message__msg_type = constants__e_msg_monitored_items_delete_resp;
+            break;
+        case OpcUaId_CreateSubscriptionRequest:
+            *message__msg_type = constants__e_msg_subscription_create_req;
+            break;
+        case OpcUaId_CreateSubscriptionResponse:
+            *message__msg_type = constants__e_msg_subscription_create_resp;
+            break;
+        case OpcUaId_ModifySubscriptionRequest:
+            *message__msg_type = constants__e_msg_subscription_modify_req;
+            break;
+        case OpcUaId_ModifySubscriptionResponse:
+            *message__msg_type = constants__e_msg_subscription_modify_resp;
+            break;
+        case OpcUaId_SetPublishingModeRequest:
+            *message__msg_type = constants__e_msg_subscription_set_publishing_mode_req;
+            break;
+        case OpcUaId_SetPublishingModeResponse:
+            *message__msg_type = constants__e_msg_subscription_set_publishing_mode_resp;
+            break;
+        case OpcUaId_PublishRequest:
+            *message__msg_type = constants__e_msg_subscription_publish_req;
+            break;
+        case OpcUaId_PublishResponse:
+            *message__msg_type = constants__e_msg_subscription_publish_resp;
+            break;
+        case OpcUaId_RepublishRequest:
+            *message__msg_type = constants__e_msg_subscription_republish_req;
+            break;
+        case OpcUaId_RepublishResponse:
+            *message__msg_type = constants__e_msg_subscription_republish_resp;
+            break;
+        case OpcUaId_TransferSubscriptionsRequest:
+            *message__msg_type = constants__e_msg_subscription_transfer_subscriptions_req;
+            break;
+        case OpcUaId_TransferSubscriptionsResponse:
+            *message__msg_type = constants__e_msg_subscription_transfer_subscriptions_resp;
+            break;
+        case OpcUaId_DeleteSubscriptionsRequest:
+            *message__msg_type = constants__e_msg_subscription_delete_subscriptions_req;
+            break;
+        case OpcUaId_DeleteSubscriptionsResponse:
+            *message__msg_type = constants__e_msg_subscription_delete_subscriptions_resp;
+            break;
+        case OpcUaId_ServiceFault:
+            *message__msg_type = constants__e_msg_service_fault_resp;
+            break;
+        default:
+            *message__msg_type = constants__c_msg_type_indet;
+        }
     }
 }
 
