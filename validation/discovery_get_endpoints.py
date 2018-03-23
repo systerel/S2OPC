@@ -32,19 +32,42 @@ def discovery_get_endpoints_tests(client, logger):
     for (i, ep) in enumerate(endPoints):
         logger.add_test('Discovery Get Endpoints Test - endPoint {:01d} URL'.format(i),  ep.EndpointUrl == sUri)
 
-    endPointNone = [ep for ep in endPoints if (ep.SecurityPolicyUri == securityPolicyNoneURI)][0]
-    endPointBasic256 = [ep for ep in endPoints if (ep.SecurityPolicyUri == securityPolicyBasic256URI)][0]
-    endPointBasic256Sha256 = [ep for ep in endPoints if (ep.SecurityPolicyUri ==securityPolicyBasic256Sha256URI)][0]
+    # check endpoints security mode and security level (TODO: Spec TBC)
+    # None
+    for ep in endPoints:
+        if ep.SecurityPolicyUri == securityPolicyNoneURI:
+            logger.add_test('Discovery Get Endpoints Test - None endPoint exists', True)
+            logger.add_test('Discovery Get Endpoints Test - None endPoint security mode', ep.SecurityMode == ua.MessageSecurityMode.None_)
+            logger.add_test('Discovery Get Endpoints Test - None endPoint security level', ep.SecurityLevel == 0)
+            break
+    else:
+        logger.add_test('Discovery Get Endpoints Test - None endPoint exists', False)
+        logger.add_test('Discovery Get Endpoints Test - None endPoint security mode', False)
+        logger.add_test('Discovery Get Endpoints Test - None endPoint security level', False)
 
-    # check endpoints security mode
-    logger.add_test('Discovery Get Endpoints Test - None endPoint security mode', endPointNone.SecurityMode == ua.MessageSecurityMode.None_)
-    logger.add_test('Discovery Get Endpoints Test - Basic256 endPoint security mode', endPointBasic256.SecurityMode == ua.MessageSecurityMode.Sign)
-    logger.add_test('Discovery Get Endpoints Test - Basic256 endPoint security mode', endPointBasic256Sha256.SecurityMode == ua.MessageSecurityMode.SignAndEncrypt)
+    # Basic256
+    for ep in endPoints:
+        if ep.SecurityPolicyUri == securityPolicyBasic256URI:
+            logger.add_test('Discovery Get Endpoints Test - Basic256 endPoint exists', True)
+            logger.add_test('Discovery Get Endpoints Test - Basic256 endPoint security mode', ep.SecurityMode in (ua.MessageSecurityMode.Sign, ua.MessageSecurityMode.SignAndEncrypt))
+            logger.add_test('Discovery Get Endpoints Test - Basic256 endPoint security level', ep.SecurityLevel > 0)
+            break
+    else:
+        logger.add_test('Discovery Get Endpoints Test - Basic256 endPoint exists', False)
+        logger.add_test('Discovery Get Endpoints Test - Basic256 endPoint security mode', False)
+        logger.add_test('Discovery Get Endpoints Test - Basic256 endPoint security level', False)
 
-    # check security level (TODO: Spec TBC)
-    logger.add_test('Discovery Get Endpoints Test - None endPoint security level', endPointNone.SecurityLevel == 0)
-    logger.add_test('Discovery Get Endpoints Test - Basic256 endPoint security level', endPointBasic256.SecurityLevel == 1)
-    logger.add_test('Discovery Get Endpoints Test - Basic256 endPoint security level', endPointBasic256Sha256.SecurityLevel == 1)
+    # Basic256Sha256
+    for ep in endPoints:
+        if ep.SecurityPolicyUri == securityPolicyBasic256Sha256URI:
+            logger.add_test('Discovery Get Endpoints Test - Basic256Sha256 endPoint exists', True)
+            logger.add_test('Discovery Get Endpoints Test - Basic256Sha256 endPoint security mode', ep.SecurityMode in (ua.MessageSecurityMode.Sign, ua.MessageSecurityMode.SignAndEncrypt))
+            logger.add_test('Discovery Get Endpoints Test - Basic256Sha256 endPoint security level', ep.SecurityLevel > 0)
+            break
+    else:
+        logger.add_test('Discovery Get Endpoints Test - Basic256Sha256 endPoint exists', False)
+        logger.add_test('Discovery Get Endpoints Test - Basic256Sha256 endPoint security mode', False)
+        logger.add_test('Discovery Get Endpoints Test - Basic256Sha256 endPoint security level', False)
 
     # TODO: check transportProfileURI
 
