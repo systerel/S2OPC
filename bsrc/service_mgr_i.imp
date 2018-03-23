@@ -334,6 +334,7 @@ OPERATIONS
                         END
                     END
                 END;
+                free_browse_request;
                 free_browse_result
             ELSE
                 /* service is not supported */

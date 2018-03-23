@@ -179,16 +179,6 @@ OPERATIONS
     END
     ;
 
-    create_session_failure (session) =
-    PRE
-        session : t_session_i &
-        session : s_session &
-        a_state (session) : {e_session_created, e_session_creating}
-    THEN
-        a_channel := {session} <<| a_channel ||
-        a_state (session) := e_session_init
-    END;
-        
     reset_session_to_create(p_session) =
     PRE
         p_session : t_session_i &
@@ -248,7 +238,8 @@ OPERATIONS
         a_user := {session} <<| a_user                 || /* If session had a user, remove this relation */
         a_server_token := a_server_token |>> {session} || /* If session had token, remove this relation */
         a_client_token := {session} <<| a_client_token ||
-        a_client_to_activate_context := {session} <<| a_client_to_activate_context
+        a_client_to_activate_context := {session} <<| a_client_to_activate_context ||
+        a_state (session) := e_session_closed
     END
     ;
 

@@ -45,6 +45,13 @@ OPERATIONS
         )
     END
     ;
+    
+    /* Browse request cannot be used anymore */
+    free_browse_request =
+    BEGIN
+        skip
+    END
+    ;
 
     /* Promoted from msg_browse_response_bs */
     p_isvalid <-- write_BrowseResponse_msg_out(p_msg_out) =

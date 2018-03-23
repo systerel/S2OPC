@@ -157,12 +157,6 @@ OPERATIONS
     END
     ;
 
-    create_session_failure (session) =
-    BEGIN
-        reset_session_channel(session);
-        l_set_session_state(session, e_session_init)
-    END;
-
     set_session_state (session, state) =
     BEGIN
         l_set_session_state (session, state)
