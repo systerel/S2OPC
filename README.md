@@ -30,6 +30,13 @@ This project contains the following elements:
 - install_linux: library (static and shared) and headers to install the toolkit as a library
 - install_windows: shared library and headers to install the toolkit as a library
 - tests: tests source code and data for the Toolkit library
+- tests/data: data used in the different tests (certificates, address space config, reference logs, etc.)
+- tests/demo: command line client demonstration examples using a state machine to manage connections
+- tests/helpers: unit tests of toolkit helpers (data structures, crypto, etc.)
+- tests/scripts: shell scripts used to run automatic tests
+- tests/secure_channels: secure channel layer component tests
+- tests/services: services layer component tests
+- tests/sockets: sockets layer component tests
 - validation: client validation tool using FreeOpcUa python library
 
 
@@ -42,7 +49,7 @@ Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
   * check (>= 0.10): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=no)
 - To build the Toolkit library and tests with default configuration on current stable release:
 ```
-  git checkout INGOPCS_Toolkit_0.4.0
+  git checkout INGOPCS_Toolkit_0.5.0
   ./build.sh
 ```
 - For more information, or to compile the master branch on its latest commit, please refer to the wiki.
@@ -65,6 +72,8 @@ Current status:
 - Security mode available: None, Sign and SignAndEncrypt
 - Server instantiation: several endpoint descriptions, 1 address space, multiple secure channel instances and session instances
 - Server services: getEndpoints, read (no index), write (no index) and simplified browse (no filtering, no continuation point)
+- Server local services: server services are locally accessibles through application API
+- Server address space modification notification: write notification events are reported through application API
 - Client instantiation: multiple secure channel instances and session instances
 - Client services requests: any discovery service or service on session request. Requests are only forwarded to server (no functional behavior)
 - Address space with following attributes: NodeId, NodeClass, BrowseName, Value (with single value Variants),
