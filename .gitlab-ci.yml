@@ -11,7 +11,7 @@ generation:
   stage: gen
   image: com2.systerel.fr:5000/c765/gen-ext@sha256:b303ef8934eb99d3023243d05129a463b3f25be310cc1d6e1ea7abd621695465  # gen-ext:1.0
   script:
-    - ./pre-build-ext.sh
+    - ./.pre-build-ext.sh
   # only:
   #   - master
   tags:
