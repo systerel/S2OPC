@@ -201,7 +201,7 @@ static bool SC_CloseConnection(uint32_t connectionIdx)
                 configRes = SOPC_ToolkitServer_RemoveSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
                 if (configRes == false)
                 {
-                    SOPC_Logger_TraceError("ScStateMgr: SC_CloseConnection: scCfgIdx=" PRIu32 " not found",
+                    SOPC_Logger_TraceError("ScStateMgr: SC_CloseConnection: scCfgIdx=%" PRIu32 " not found",
                                            scConnection->endpointConnectionConfigIdx);
                 }
             }

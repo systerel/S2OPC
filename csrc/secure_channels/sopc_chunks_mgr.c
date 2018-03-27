@@ -1696,7 +1696,7 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                 SOPC_Logger_TraceError(
                     "ChunksMgr: request Id=%" PRIu32 " (or associated type) verification failed (epCfgIdx=%" PRIu32
                     ", scCfgIdx=%" PRIu32 ")",
-                    requestId, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                    *requestId, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
             }
         }
         else

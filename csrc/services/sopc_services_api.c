@@ -172,7 +172,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         }
         break;
     case SE_TO_SE_CREATE_SESSION:
-        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_CREATE_SESSION session=%" PRIu32 " scCfgIdx=" PRIuPTR, id,
+        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_CREATE_SESSION session=%" PRIu32 " scCfgIdx=%" PRIuPTR, id,
                                auxParam);
         if (auxParam <= INT32_MAX)
         {
