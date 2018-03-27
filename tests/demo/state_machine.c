@@ -28,9 +28,9 @@
 #include "config.h"
 #include "state_machine.h"
 
-uintptr_t nSMCreated = 0; /* Number of created machines, used for session context. */
-uintptr_t nDiscovery = 0; /* Number of sent discovery requests, used as UID for requestContext */
-uintptr_t nReqSent = 0;   /* Number of other requests sent through the wrapper, used as UID for requestContext */
+static uintptr_t nSMCreated = 0; /* Number of created machines, used for session context. */
+static uintptr_t nDiscovery = 0; /* Number of sent discovery requests, used as UID for requestContext */
+static uintptr_t nReqSent = 0;   /* Number of other requests sent through the wrapper, used as UID for requestContext */
 
 StateMachine_Machine* StateMachine_Create(void)
 {

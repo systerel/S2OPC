@@ -38,6 +38,8 @@ if __name__=='__main__':
     print('Configuring FreeOpcUa test server')
     server = Server()
     server.set_endpoint(sUri)
+    server.load_certificate('../bin/server_public/server_2k.der')
+    server.load_private_key('../bin/server_private/server_2k.pem')
 
     # Nodes are created under the Objects node
     objects = server.get_objects_node()

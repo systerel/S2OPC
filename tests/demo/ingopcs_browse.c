@@ -27,16 +27,15 @@
 #include "sopc_types.h"
 
 #include "config.h"
-#include "ingopcs_browse.h"
 #include "state_machine.h"
 
 /* The state machine which handles async events.
  * It is shared between the main thread and the Toolkit event thread.
  * It should be protected by a Mutex.
  */
-StateMachine_Machine* g_pSM = NULL;
+static StateMachine_Machine* g_pSM = NULL;
 /* The start NodeId is global, so that it is accessible to the Print function in the other thread. */
-SOPC_NodeId* g_pNid = NULL;
+static SOPC_NodeId* g_pNid = NULL;
 
 /* Event handler of the Browse */
 void EventDispatcher_Browse(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
@@ -116,6 +115,10 @@ int main(int argc, char* argv[])
     }
 
     /* Finish it */
+    if (NULL != g_pNid)
+    {
+        free(g_pNid);
+    }
     SOPC_Toolkit_Clear();
     StateMachine_Delete(&g_pSM);
 

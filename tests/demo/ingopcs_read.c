@@ -29,18 +29,17 @@
 #include "util_variant.h"
 
 #include "config.h"
-#include "ingopcs_browse.h"
 #include "state_machine.h"
 
 /* The state machine which handles async events.
  * It is shared between the main thread and the Toolkit event thread.
  * It should be protected by a Mutex.
  */
-StateMachine_Machine* g_pSM = NULL;
+static StateMachine_Machine* g_pSM = NULL;
 /* The start NodeId is global, so that it is accessible to the Print function in the other thread. */
-SOPC_NodeId* g_pNid = NULL;
+static SOPC_NodeId* g_pNid = NULL;
 /* So is the Attribute to read */
-uint32_t g_iAttr = 0;
+static uint32_t g_iAttr = 0;
 
 /* Event handler of the Read */
 void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
@@ -139,21 +138,11 @@ int main(int argc, char* argv[])
         }
     }
 
+    /* Secure Channel and Session creation */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Toolkit_Configured();
-        if (SOPC_STATUS_OK == status)
-        {
-            printf("# Info: Toolkit configuration done.\n");
-            printf("# Info: Opening Session.\n");
-        }
-        else
-        {
-            printf("# Error: Toolkit configuration failed.\n");
-        }
+        status = StateMachine_StartSession(g_pSM);
     }
-
-    /* Secure Channel and Session creation */
 
     /* Active wait */
     while (SOPC_STATUS_OK == status && !StateMachine_IsIdle(g_pSM) && iWait * SLEEP_LENGTH <= SC_LIFETIME)
@@ -163,6 +152,10 @@ int main(int argc, char* argv[])
     }
 
     /* Finish it */
+    if (NULL != g_pNid)
+    {
+        free(g_pNid);
+    }
     SOPC_Toolkit_Clear();
     StateMachine_Delete(&g_pSM);
 

@@ -29,14 +29,13 @@
 #include "sopc_types.h"
 
 #include "config.h"
-#include "ingopcs_browse.h"
 #include "state_machine.h"
 
 /* The state machine which handles async events.
  * It is shared between the main thread and the Toolkit event thread.
  * It should be protected by a Mutex.
  */
-StateMachine_Machine* g_pSM = NULL;
+static StateMachine_Machine* g_pSM = NULL;
 
 /* Event handler of the Discovery */
 void EventDispatcher_Discovery(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
