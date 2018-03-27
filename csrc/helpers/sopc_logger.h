@@ -26,6 +26,14 @@
 
 #include "sopc_log_manager.h"
 
+#ifdef __GNUC__
+#define ATTR_FORMAT(archetype, string_index, first) __attribute__((format(archetype, string_index, first)))
+#else
+#define ATTR_FORMAT(archetype, string_index, first)
+#endif
+
+#define LOGGER_FUNC_FORMAT ATTR_FORMAT(printf, 1, 2)
+
 /*
  * \brief Initializes the logger and create the necessary log file(s)
  *
@@ -62,56 +70,56 @@ void SOPC_Logger_SetConsoleOutput(bool activate);
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceError(const char* format, ...);
+void SOPC_Logger_TraceError(const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /*
  * \brief Log a trace with the warning level
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceWarning(const char* format, ...);
+void SOPC_Logger_TraceWarning(const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /*
  * \brief Log a trace with the info level
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceInfo(const char* format, ...);
+void SOPC_Logger_TraceInfo(const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /*
  * \brief Log a trace with the debug level
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceDebug(const char* format, ...);
+void SOPC_Logger_TraceDebug(const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /*
  * \brief Log a trace for the security audit log
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceSecurityAudit(const char* format, ...);
+void SOPC_Logger_TraceSecurityAudit(const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /*
  * \brief Log a warning trace for the security audit log
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceSecurityAuditWarning(const char* format, ...);
+void SOPC_Logger_TraceSecurityAuditWarning(const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /*
  * \brief Log a trace for the OPC UA audit log
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceOpcUaAudit(const char* format, ...);
+void SOPC_Logger_TraceOpcUaAudit(const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /*
  * \brief Log a warning trace for the OPC UA audit log
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceOpcUaAuditWarning(const char* format, ...);
+void SOPC_Logger_TraceOpcUaAuditWarning(const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /*
  * \brief Clears the logger and close the current log files
