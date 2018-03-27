@@ -189,7 +189,7 @@ target_link_libraries(toolkit_test_server_local_service PRIVATE ingopcs)
 target_include_directories(toolkit_test_server_local_service PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                              ${INGOPCS_PUBLIC_INCLUDES}
                                                              ${INGOPCS_PRIVATE_INCLUDES})
-# Client test
+# Client tests
 add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/wrap_read.c"
                                    "tests/services/testlib_write.c"
@@ -200,6 +200,13 @@ target_link_libraries(toolkit_test_client PRIVATE ingopcs)
 target_include_directories(toolkit_test_client PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                        ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
+add_executable(toolkit_test_suite_client "tests/demo/test_suite_client.c"
+                                         "tests/demo/test_discovery.c"
+                                         "tests/demo/config.c"
+                                         "tests/demo/state_machine.c")
+target_link_libraries(toolkit_test_suite_client PRIVATE ingopcs ${LIBCHECK_DEP_LIB})
+target_include_directories(toolkit_test_suite_client PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
+                                                             ${INGOPCS_PRIVATE_INCLUDES})
 
 # Server test
 add_executable(toolkit_test_server "tests/services/toolkit_test_server.c"
@@ -260,6 +267,7 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/client_2k.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/client_2k.pem
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/client_2k.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/server_2k.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/server_2k.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/server_2k.pem
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/server_2k.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
     # Add 4096 client / server keys
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/client_4k.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/

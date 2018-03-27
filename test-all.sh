@@ -18,8 +18,8 @@
 
 #  Check toolkit tests binaries are present and run them
 set -e
-BIN_DIR=./bin
-TEST_SCRIPTS=./tests/scripts
+BIN_DIR=$(pwd)/bin
+TEST_SCRIPTS=$(pwd)/tests/scripts
 
 # Check binaries are present Build
 echo "Check test binaries are present"
@@ -31,7 +31,8 @@ if [ -f "$BIN_DIR/check_helpers" ] &&
    [ -f "$BIN_DIR/toolkit_test_write" ] &&
    [ -f "$BIN_DIR/toolkit_test_server_local_service" ] &&
    [ -f "$BIN_DIR/toolkit_test_server" ] &&
-   [ -f "$BIN_DIR/toolkit_test_client" ]
+   [ -f "$BIN_DIR/toolkit_test_client" ] &&
+   [ -f "$BIN_DIR/toolkit_test_suite_client" ]
 then
     echo "Test binaries found"
 else
@@ -126,3 +127,13 @@ pushd validation
 popd
 wait
 mv validation/sc_establish_timeout.tap bin/
+
+# run client test suite against validation server
+pushd validation
+./server.py 25000&
+$TEST_SCRIPTS/wait_server.py
+popd
+pushd $BIN_DIR
+CK_TAP_LOG_FILE_NAME=client_test_suite.tap ./toolkit_test_suite_client
+popd
+wait
