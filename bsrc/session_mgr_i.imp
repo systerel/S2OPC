@@ -234,7 +234,7 @@ OPERATIONS
             skip
         END;
         IF l_bret = FALSE THEN
-            local_client_close_session (session)
+            local_client_close_session (l_session)
         END;
         session := l_session
     END
