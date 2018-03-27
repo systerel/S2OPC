@@ -182,7 +182,7 @@ typedef enum {
 typedef struct
 {
     char* toolkitVersion;
-    char* toolkitSrcSignature;
+    char* toolkitSrcCommit;
     char* toolkitDockerId;
     char* toolkitBuildDate;
 } SOPC_Build_Info;

@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
     // Get Toolkit Configuration
     SOPC_Build_Info build_info = SOPC_ToolkitConfig_GetBuildInfo();
     printf("toolkitVersion: %s\n", build_info.toolkitVersion);
-    printf("toolkitSrcSignature: %s\n", build_info.toolkitSrcSignature);
+    printf("toolkitSrcCommit: %s\n", build_info.toolkitSrcCommit);
     printf("toolkitDockerId: %s\n", build_info.toolkitDockerId);
     printf("toolkitBuildDate: %s\n", build_info.toolkitBuildDate);
 

@@ -48,13 +48,20 @@ else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-add_custom_command(OUTPUT csrc/services/b2c/toolkit_build_info.h
-                   COMMAND ./gen_build_info_file.sh ${CMAKE_CURRENT_SOURCE_DIR}
-                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+if(CMAKE_HOST_UNIX)
+  add_custom_command(OUTPUT csrc/configuration/sopc_toolkit_build_info.h
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h_ ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h
+                     COMMAND ./gen_build_info_file.sh ${CMAKE_SOURCE_DIR} 
+                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+else()
+  add_custom_command(OUTPUT csrc/configuration/sopc_toolkit_build_info.h
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h_ ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h
+                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+endif()
 
 add_custom_target(build_info ALL
-                  DEPENDS csrc/services/b2c/toolkit_build_info.h
-                  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+                   DEPENDS csrc/configuration/sopc_toolkit_build_info.h
+                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 # Define non-platform dependent source files
 file(GLOB_RECURSE INGOPCS_SRCS
@@ -66,7 +73,6 @@ file(GLOB_RECURSE INGOPCS_SRCS
     "csrc/sockets/*.c"
     "csrc/secure_channels/*.c"
     "csrc/services/*.c"
-    "csrc/services/b2c/toolkit_build_info.c"
 )
 
 # Define INGOPCS library (static or shared based on BUILD_SHARED_LIBS)
@@ -75,7 +81,6 @@ add_dependencies(ingopcs build_info)
 
 # Define INGOPCS library includes
 file(GLOB INGOPCS_INCLUDE_FILES
-    "csrc/services/b2c/toolkit_build_info.h"
     "csrc/api_toolkit/*.h"
     "csrc/configuration/*.h"
     "csrc/helpers/*.h"
@@ -101,7 +106,7 @@ set(INGOPCS_PRIVATE_INCLUDES
     "csrc/crypto/mbedtls"
     "csrc/helpers_platform_dep/${PLATFORM_DIR}"
     "csrc/services/bgenc"
-) 
+)
 target_include_directories(ingopcs BEFORE
     PUBLIC  ${INGOPCS_PUBLIC_INCLUDES}
     PRIVATE ${INGOPCS_PRIVATE_INCLUDES}
@@ -182,7 +187,7 @@ add_executable(toolkit_test_server_local_service "tests/services/toolkit_test_se
                                                  "address_space_generation/genc/ingopcs_addspace.c")
 target_link_libraries(toolkit_test_server_local_service PRIVATE ingopcs)
 target_include_directories(toolkit_test_server_local_service PRIVATE "${ADDSPACEGEN_DIR}/include"
-                                                             ${INGOPCS_PUBLIC_INCLUDES} 
+                                                             ${INGOPCS_PUBLIC_INCLUDES}
                                                              ${INGOPCS_PRIVATE_INCLUDES})
 # Client test
 add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
@@ -193,7 +198,7 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "address_space_generation/genc/ingopcs_addspace.c")
 target_link_libraries(toolkit_test_client PRIVATE ingopcs)
 target_include_directories(toolkit_test_client PRIVATE "${ADDSPACEGEN_DIR}/include"
-                                                       ${INGOPCS_PUBLIC_INCLUDES} 
+                                                       ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
 # Server test
@@ -201,7 +206,7 @@ add_executable(toolkit_test_server "tests/services/toolkit_test_server.c"
                                    "address_space_generation/genc/ingopcs_addspace.c")
 target_link_libraries(toolkit_test_server PRIVATE ingopcs)
 target_include_directories(toolkit_test_server PRIVATE "${ADDSPACEGEN_DIR}/include"
-                                                       ${INGOPCS_PUBLIC_INCLUDES} 
+                                                       ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
 ## COPY ALL CERTIFICATES TO BIN/ DIRECTORY
@@ -233,7 +238,7 @@ add_executable(toolkit_test_read "tests/services/toolkit_test_read.c"
                                  "address_space_generation/genc/ingopcs_addspace.c")
 target_link_libraries(toolkit_test_read PRIVATE ingopcs)
 target_include_directories(toolkit_test_read PRIVATE "${ADDSPACEGEN_DIR}/include"
-                                                     ${INGOPCS_PUBLIC_INCLUDES} 
+                                                     ${INGOPCS_PUBLIC_INCLUDES}
                                                      ${INGOPCS_PRIVATE_INCLUDES})
 
 # Write service test
@@ -242,7 +247,7 @@ add_executable(toolkit_test_write "tests/services/toolkit_test_write.c"
                                   "address_space_generation/genc/ingopcs_addspace.c")
 target_link_libraries(toolkit_test_write PRIVATE ingopcs)
 target_include_directories(toolkit_test_write PRIVATE "${ADDSPACEGEN_DIR}/include"
-                                                      ${INGOPCS_PUBLIC_INCLUDES} 
+                                                      ${INGOPCS_PUBLIC_INCLUDES}
                                                       ${INGOPCS_PRIVATE_INCLUDES})
 
 # Sockets layer (stubbed) tests
@@ -257,8 +262,8 @@ file(GLOB_RECURSE SOCKETS_TEST
 
 add_executable(check_sockets ${SOCKETS_SRC}
                              ${SOCKETS_TEST})
-target_include_directories(check_sockets PRIVATE "tests/sockets/stubs" 
-                                                 ${INGOPCS_PUBLIC_INCLUDES} 
+target_include_directories(check_sockets PRIVATE "tests/sockets/stubs"
+                                                 ${INGOPCS_PUBLIC_INCLUDES}
                                                  ${INGOPCS_PRIVATE_INCLUDES})
 target_link_libraries(check_sockets PRIVATE ${LIBCHECK_DEP_LIB} ${INGOPCS_DEP_LIBS})
 
@@ -274,7 +279,7 @@ file(GLOB_RECURSE SECURE_CHANNELS_CLIENT_TEST
      "tests/secure_channels/test_secure_channels_client.c"
      "tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
      "tests/secure_channels/stubs/stub_sc_sopc_services_api.c")
-     
+
 file(GLOB_RECURSE SECURE_CHANNELS_SERVER_TEST
      "tests/secure_channels/test_secure_channels_server.c"
      "tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
@@ -285,8 +290,8 @@ add_executable(test_secure_channels_client ${SOCKETS_SRC}
                                            ${SECURE_CHANNELS_SRC}
                                            ${SECURE_CHANNELS_CLIENT_TEST})
 
-target_include_directories(test_secure_channels_client PRIVATE "tests/secure_channels/stubs" 
-                                                               ${INGOPCS_PUBLIC_INCLUDES} 
+target_include_directories(test_secure_channels_client PRIVATE "tests/secure_channels/stubs"
+                                                               ${INGOPCS_PUBLIC_INCLUDES}
                                                                ${INGOPCS_PRIVATE_INCLUDES})
 target_link_libraries(test_secure_channels_client PRIVATE ${INGOPCS_DEP_LIBS})
 
@@ -296,8 +301,8 @@ add_executable(test_secure_channels_server ${SOCKETS_SRC}
                                            ${SECURE_CHANNELS_SERVER_TEST})
 target_link_libraries(test_secure_channels_server PRIVATE ${INGOPCS_DEP_LIBS})
 
-target_include_directories(test_secure_channels_server PRIVATE "tests/secure_channels/stubs" 
-                                                               ${INGOPCS_PUBLIC_INCLUDES} 
+target_include_directories(test_secure_channels_server PRIVATE "tests/secure_channels/stubs"
+                                                               ${INGOPCS_PUBLIC_INCLUDES}
                                                                ${INGOPCS_PRIVATE_INCLUDES})
 
 # Secure channels tests: tests on received buffer
@@ -312,9 +317,9 @@ add_executable(check_sc_rcv_buffer ${SECURE_CHANNELS_SRC}
                                                ${SECURE_CHANNELS_BUFFER_TEST})
 target_link_libraries(check_sc_rcv_buffer PRIVATE ${LIBCHECK_DEP_LIB} ${INGOPCS_DEP_LIBS})
 
-target_include_directories(check_sc_rcv_buffer PRIVATE "tests/secure_channels/stubs" 
+target_include_directories(check_sc_rcv_buffer PRIVATE "tests/secure_channels/stubs"
                                                        "tests/helpers"
-                                                       ${INGOPCS_PUBLIC_INCLUDES} 
+                                                       ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
 # Secure channels tests: tests on received encrypted buffer
@@ -329,7 +334,7 @@ add_executable(check_sc_rcv_encrypted_buffer ${SECURE_CHANNELS_SRC}
                                              ${SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST})
 target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE ${LIBCHECK_DEP_LIB} ${INGOPCS_DEP_LIBS})
 
-target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "tests/secure_channels/stubs" 
+target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "tests/secure_channels/stubs"
                                                                  "tests/helpers"
-                                                                 ${INGOPCS_PUBLIC_INCLUDES} 
+                                                                 ${INGOPCS_PUBLIC_INCLUDES}
                                                                  ${INGOPCS_PRIVATE_INCLUDES})

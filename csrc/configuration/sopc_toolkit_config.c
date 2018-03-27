@@ -29,7 +29,7 @@
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_sockets_api.h"
-#include "toolkit_build_info.h"
+#include "sopc_toolkit_build_info.h"
 
 #include "sopc_encodeable.h"
 #include "sopc_event_timer_manager.h"
@@ -281,7 +281,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
                     SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
                     SOPC_Logger_TraceInfo("DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
                                           buildInfo.toolkitBuildDate, buildInfo.toolkitVersion,
-                                          buildInfo.toolkitSrcSignature, buildInfo.toolkitDockerId);
+                                          buildInfo.toolkitSrcCommit, buildInfo.toolkitDockerId);
                     SOPC_Logger_SetTraceLogLevel(tConfig.logLevel);
                 }
                 status = SOPC_STATUS_OK;
