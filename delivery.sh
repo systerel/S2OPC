@@ -17,28 +17,41 @@
 
 
 #  Script to produce toolkit delivery archive
-#  $1 must be the branch/commit to use for generating the delivery
-#  $2 must be the delivery version number (e.g.: 1.0.0)
+#  $1 must be the delivery version number (e.g.: 1.0.0)
+#  $2 must be the current minor modification issue number
 
-echo "Check branch name is valid (1st param): $1"
-git show-ref refs/heads/$1 &> /dev/null
+echo "Check master branch name is valid"
+BRANCH_COMMIT=master
+VERSION_HEADER=./csrc/configuration/sopc_toolkit_constants.h
+
+git show-ref refs/heads/$BRANCH_COMMIT &> /dev/null
 if [[ $? != 0 ]]; then
-    echo "Provide the LOCAL branch name or commit reference to use for generating the delivery"
+    echo "master branch invalid for generating the delivery"
     exit 1
 fi
-BRANCH_COMMIT=$1
 
 if [[ -z $BRANCH_COMMIT ]]; then
     exit 1
 fi
 
-echo "Check version number is correct: $2"
-regexp='^[0-9]+\.[0-9]+.[0-9]+$'
+echo "Check version number is correct: $1"
+regexp='^([0-9]+)\.([0-9]+).([0-9]+)$'
+if ! [[ $1 =~ $regexp ]] ; then
+   echo "Error: '$1' is not a correct version number X.Y.Z";
+   exit 1
+else
+   major=${BASH_REMATCH[1]}
+   medium=${BASH_REMATCH[2]}
+   minor=${BASH_REMATCH[3]}
+fi
+DELIVERY_NAME=INGOPCS_Toolkit_$1
+
+echo "Check minor modification issue number is correct: $2"
+regexp='^[0-9]+$'
 if ! [[ $2 =~ $regexp ]] ; then
-   echo "Error: '$2' is not correct version number X.Y.Z";
+   echo "Error: '$2' is not a correct ticket number";
    exit 1
 fi
-DELIVERY_NAME=INGOPCS_Toolkit_$2
 
 echo "Check branch and tag does not exist: $DELIVERY_NAME"
 git show-ref refs/heads/$DELIVERY_NAME &> /dev/null
@@ -63,8 +76,30 @@ echo "Checking out $BRANCH_COMMIT"
 git co $BRANCH_COMMIT &> /dev/null || exit 1
 echo "Creation of $DELIVERY_NAME branch"
 git co -b $DELIVERY_NAME || exit 1
-echo "Generate and commit version file 'VERSION' with '$2' content"
-echo "$2" > VERSION
+
+echo "Checking out $BRANCH_COMMIT"
+git co $BRANCH_COMMIT &> /dev/null || exit 1
+echo "Update to $1* version in sopc_toolkit_constants.h in $BRANCH_COMMIT"
+sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJOR '"$major"'/' $VERSION_HEADER || exit 1
+sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
+sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
+sed -i "s/#define SOPC_TOOLKIT_VERSION .*/#define SOPC_TOOLKIT_VERSION \"$major.$medium.$minor*\"/" $VERSION_HEADER || exit 1
+echo "Commit updated current version in $BRANCH_COMMIT: it shall be pushed on gitlab ASAP"
+git commit $VERSION_HEADER -S -m "Ticket #$2: Update current version in $BRANCH_COMMIT" &> /dev/null || exit 1
+
+echo "Checking out $DELIVERY_NAME"
+git co $DELIVERY_NAME || exit 1
+
+echo "Update to $1 version in sopc_toolkit_constants.h in $DELIVERY_NAME"
+sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJOR '"$major"'/' $VERSION_HEADER || exit 1
+sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
+sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
+sed -i "s/#define SOPC_TOOLKIT_VERSION .*/#define SOPC_TOOLKIT_VERSION \"$major.$medium.$minor\"/" $VERSION_HEADER || exit 1
+echo "Commit updated current version in $BRANCH_COMMIT: it shall be pushed on gitlab ASAP"
+git commit $VERSION_HEADER -S -m "Update tagged $1 version information" &> /dev/null || exit 1
+
+echo "Generate and commit version file 'VERSION' with '$1' content"
+echo "$1" > VERSION
 git add VERSION &> /dev/null || exit 1
 git commit -S -m "Add VERSION file" &> /dev/null || exit 1
 echo "Generate C source files"
@@ -128,7 +163,7 @@ fi
 echo "Add Toolkit binaries"
 git add -f bin bin_windows &>/dev/null || exit 1
 git add -f install_linux install_windows &>/dev/null || exit 1
-./clean.sh || exit 1
+git commit -S -m "Add toolkit binaries for version $DELIVERY_NAME" &> /dev/null || exit 1
 echo "Generate documentation with doxygen"
 doxygen doxygen/ingopcs-toolkit.doxyfile &> /dev/null || exit 1
 echo "Add documentation in delivery branch"
@@ -143,6 +178,7 @@ git archive --prefix=$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME || 
 if [ $? -eq 0 ]; then
     echo "=============================================================="
     echo "Creation of delivery archive '$DELIVERY_NAME.tar.gz' succeeded"
+    echo "Please push the master branch on gitlab ASAP and close the issue #$2"
     echo "Please tag the $DELIVERY_NAME branch on bare repository"
 else
     echo "==========================================================="
