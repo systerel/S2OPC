@@ -455,18 +455,7 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
     else
     {
         // SERVER case
-        if (scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT)
-        {
-            // No correct hello message received: just close without error message
-            if (SC_CloseConnection(scConnectionIdx) != false)
-            { // => Immediate close
-                // Do not notify services since SC was not connected yet (and services not aware of SC then)
-                // Notify secure listener:
-                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_DISCONNECTED, scConnection->serverEndpointConfigIdx,
-                                                         NULL, scConnectionIdx);
-            }
-        }
-        else if (scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
+        if (scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
         {
             // Secure Channel is NOT closed nor in init state
             if (false == isSocketClosed)
