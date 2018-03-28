@@ -18,11 +18,11 @@
 /* A simple state machine that handles:
  * - Toolkit configuration
  * - SecureChannel and Session creation
- * Starts in the init state. Shall be configured with a call to StateMachine_ConfigureToolkit(),
- *  which configures the Toolkit with parameters from config.h and calls Toolkit_Configured(),
- *  and starts the Async processus.
- * The StateMachine_EventDispatcher shall be called on the state machine from the callback
- *  given to Toolkit_Initialize().
+ * Starts in the init state. Shall be configured with a call to StateMachine_ConfigureMachine(), which configures the
+ * configure Toolkit with parameters from config.h. Then SOPC_Toolkit_Configured() shall be called  and the Async
+ * processus shall be started using StateMachine_StartSession() or StateMachine_StartDiscovery() function. The
+ * StateMachine_EventDispatcher() shall be called on the state machine from the callback given to
+ * SOPC_Toolkit_Initialize().
  */
 
 #ifndef STATE_MACHINE_H_

@@ -16,19 +16,11 @@
  */
 
 #include <check.h>
-//#include <inttypes.h>
-#include <stdbool.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
-//#include "sopc_builtintypes.h"
-//#include "sopc_crypto_provider.h"
 #include "sopc_time.h"
-//#include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
-//#include "sopc_types.h"
 
 #include "config.h"
 #include "state_machine.h"
