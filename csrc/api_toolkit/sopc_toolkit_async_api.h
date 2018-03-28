@@ -37,36 +37,36 @@
  *        In case of failure the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
  *        otherwise the listener could be considered as opened.
  *
- * \param endpointDescriptionIdx  Endpoint description configuration index provided by
+ * \param endpointConfigIdx  Endpoint description configuration index provided by
  * SOPC_ToolkitServer_AddEndpointConfig()
  *
  */
-void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointDescriptionIdx);
+void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointConfigIdx);
 
 /**
  * \brief Request to close a connection listener for the given endpoint description configuration.
  *        In any case the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
  *        once triggered if the listener was opened it could be now considered closed.
  *
- * \param endpointDescriptionIdx  Endpoint description configuration index provided to
+ * \param endpointConfigIdx  Endpoint description configuration index provided to
  * SOPC_ToolkitServer_AsyncOpenEndpoint()
  *
  */
-void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointDescriptionIdx);
+void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointConfigIdx);
 
 /**
  * \brief Request to execute locally the given service request on server and receive response.
  *        The SE_LOCAL_SERVICE_RESPONSE event will be triggered to SOPC_ComEvent_Fct(),
  *        once service request evaluated.
  *
- * \param endpointDescriptionIdx  Endpoint description configuration index provided to
+ * \param endpointConfigIdx  Endpoint description configuration index provided to
  * \param requestStruct           OPC UA message payload structure pointer (OpcUa_<MessageStruct>*). Deallocated by
  * toolkit.
  * \param requestContext          A context value, it will be provided with corresponding response
  *
  * Note: the provided request message structure and its content is automatically deallocated by the toolkit
  */
-void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConnectionIdx,
+void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
                                                  void* requestStruct,
                                                  uintptr_t requestContext);
 

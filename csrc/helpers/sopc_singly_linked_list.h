@@ -175,7 +175,7 @@ void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it);
  *
  * \return          Pointer on the next value of the linked list
  */
-void* SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* id);
+void* SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* pId);
 
 /**
  * \brief           Get then number of elements in the linked list

@@ -21,22 +21,22 @@
 
 uint32_t uniqueUserId = 1;
 
-void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointDescriptionIdx)
+void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointConfigIdx)
 {
     // TODO: check valid config and return bool
-    SOPC_Services_EnqueueEvent(APP_TO_SE_OPEN_ENDPOINT, endpointDescriptionIdx, NULL, 0);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_OPEN_ENDPOINT, endpointConfigIdx, NULL, 0);
 }
 
-void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointDescriptionIdx)
+void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointConfigIdx)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT, endpointDescriptionIdx, NULL, 0);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT, endpointConfigIdx, NULL, 0);
 }
 
-void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConnectionIdx,
+void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
                                                  void* requestStruct,
                                                  uintptr_t requestContext)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_LOCAL_SERVICE_REQUEST, endpointConnectionIdx, requestStruct, requestContext);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_LOCAL_SERVICE_REQUEST, endpointConfigIdx, requestStruct, requestContext);
 }
 
 void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx, uintptr_t sessionContext)

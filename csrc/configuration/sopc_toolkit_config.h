@@ -156,9 +156,9 @@ SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogPath(const char* logDirPath, uint32_t
  * \brief Configure the toolkit log traces level SOPC_TOOLKIT_LOG_LEVEL_ERROR/WARNING/INFO/DEBUG
  * (SOPC_Toolkit_Initialize required)
  *
- * \param logLevel  Minimum level of log traces to be printed in the log files (default ERROR)
+ * \param level  Minimum level of log traces to be printed in the log files (default ERROR)
  *
- * \return          SOPC_STATUS_INVALID state if toolkit not initialized, SOPC_STATUS_OK otherwise
+ * \return       SOPC_STATUS_INVALID state if toolkit not initialized, SOPC_STATUS_OK otherwise
  */
 SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level level);
 
