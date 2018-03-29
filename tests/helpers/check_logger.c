@@ -412,9 +412,7 @@ Suite* tests_make_suite_logger(void)
     tc_logger = tcase_create("Logger");
     tcase_add_unchecked_fixture(tc_logger, init, clear);
     tcase_add_test(tc_logger, test_logger_levels);
-    suite_add_tcase(s, tc_logger);
     tcase_add_test(tc_logger, test_logger_categories_and_files);
-    suite_add_tcase(s, tc_logger);
     tcase_add_test(tc_logger, test_logger_circular);
     suite_add_tcase(s, tc_logger);
 
