@@ -64,6 +64,11 @@ if [[ $? == 0 ]]; then
     echo "Error: refs/tags/$DELIVERY_NAME already exists";
     exit 1
 fi
+git show-ref refs/heads/$2-update-tagged-version &> /dev/null
+if [[ $? == 0 ]]; then
+    echo "Error: refs/heads/$2-update-tagged-version already exists";
+    exit 1
+fi
 
 echo "Check archive does not exist: $DELIVERY_NAME.tar.gz"
 ls $DELIVERY_NAME.tar.gz &> /dev/null
@@ -75,17 +80,17 @@ fi
 echo "Checking out $BRANCH_COMMIT"
 git co $BRANCH_COMMIT &> /dev/null || exit 1
 echo "Creation of $DELIVERY_NAME branch"
-git co -b $DELIVERY_NAME || exit 1
+git co -b $DELIVERY_NAME &> /dev/null || exit 1
 
-echo "Checking out $BRANCH_COMMIT"
-git co $BRANCH_COMMIT &> /dev/null || exit 1
-echo "Update to $1* version in sopc_toolkit_constants.h in $BRANCH_COMMIT"
+echo "Checking out $2-update-tagged-version"
+git co -b $2-update-tagged-version &> /dev/null || exit 1
+echo "Update to $1* version in sopc_toolkit_constants.h in $2-update-tagged-version"
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJOR '"$major"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
 sed -i "s/#define SOPC_TOOLKIT_VERSION .*/#define SOPC_TOOLKIT_VERSION \"$major.$medium.$minor*\"/" $VERSION_HEADER || exit 1
-echo "Commit updated current version in $BRANCH_COMMIT: it shall be pushed on gitlab ASAP"
-git commit $VERSION_HEADER -S -m "Ticket #$2: Update current version in $BRANCH_COMMIT" &> /dev/null || exit 1
+echo "Commit updated current version in $2-update-tagged-version: it shall be pushed as MR on gitlab ASAP"
+git commit $VERSION_HEADER -S -m "Ticket #$2: Update current version of Toolkit" &> /dev/null || exit 1
 
 echo "Checking out $DELIVERY_NAME"
 git co $DELIVERY_NAME || exit 1
@@ -95,7 +100,6 @@ sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJ
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
 sed -i "s/#define SOPC_TOOLKIT_VERSION .*/#define SOPC_TOOLKIT_VERSION \"$major.$medium.$minor\"/" $VERSION_HEADER || exit 1
-echo "Commit updated current version in $BRANCH_COMMIT: it shall be pushed on gitlab ASAP"
 git commit $VERSION_HEADER -S -m "Update tagged $1 version information" &> /dev/null || exit 1
 
 echo "Generate and commit version file 'VERSION' with '$1' content"
@@ -178,7 +182,7 @@ git archive --prefix=$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME || 
 if [ $? -eq 0 ]; then
     echo "=============================================================="
     echo "Creation of delivery archive '$DELIVERY_NAME.tar.gz' succeeded"
-    echo "Please push the master branch on gitlab ASAP and close the issue #$2"
+    echo "Please push the $2-update-tagged-version branch as MR on gitlab closing issue #$2"
     echo "Please tag the $DELIVERY_NAME branch on bare repository"
 else
     echo "==========================================================="

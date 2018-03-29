@@ -26,7 +26,12 @@ DATE=`date +%Y-%m-%d`
 IS_GIT_REPO=$?
 
 is_dirty() {
-    test -n "$(git status --porcelain)"
+    git diff-index --quiet HEAD &> /dev/null
+    if [[ $? == 0 ]]; then
+        return 1
+    else
+        return 0
+    fi
 }
 
 if [ $IS_GIT_REPO -eq 0 ]
