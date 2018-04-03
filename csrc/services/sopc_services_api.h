@@ -35,13 +35,13 @@ typedef enum SOPC_Services_Event {
     /* SC to Services events */
     SC_TO_SE_EP_SC_CONNECTED,       /* id = endpoint description config index,
                                        params = endpoint connection config index pointer,
-                                       auxParams = secure channel connection index
+                                       auxParams = (uint32_t) secure channel connection index
                                     */
     SC_TO_SE_EP_CLOSED,             /* id = endpoint description config index,
                                        auxParams = SOPC_ReturnStatus
                                      */
     SC_TO_SE_SC_CONNECTED,          /* id = secure channel connection index,
-                                       auxParams = secure channel configuration index
+                                       auxParams = (uint32_t) secure channel configuration index
                                     */
     SC_TO_SE_SC_CONNECTION_TIMEOUT, /* id = endpoint connection config index
                                      */
@@ -49,22 +49,22 @@ typedef enum SOPC_Services_Event {
                                      */
     SC_TO_SE_SC_SERVICE_RCV_MSG,    /* id = secure channel connection index,
                                        params = (SOPC_Buffer*) OPC UA message payload buffer,
-                                       auxParam = request Id context (server side only)
+                                       auxParam = (uint32_t) request Id context (server side only)
                                     */
     SC_TO_SE_SND_FAILURE,           /* id = secure channel connection index,
                                        params = (uint32_t*) requestId,
                                        auxParam = SOPC_StatusCode
                                      */
     SC_TO_SE_REQUEST_TIMEOUT,       /* id = secure channel connection index,
-                                       auxParam = request handle */
+                                       auxParam = (uint32_t) request handle */
 
     /* Services to services events */
     SE_TO_SE_SC_ALL_DISCONNECTED,       // special event sent by services mgr itself (no parameters)
     SE_TO_SE_ACTIVATE_ORPHANED_SESSION, /* id = session id
-                                           auxParam = endpoint connection config index
+                                           auxParam = (uint32_t) endpoint connection config index
                                         */
     SE_TO_SE_CREATE_SESSION,            /* id = session id
-                                           auxParam = endpoint connection config index
+                                           auxParam = (uint32_t) endpoint connection config index
                                         */
     SE_TO_SE_ACTIVATE_SESSION,          /* id = session id
                                          * params = (user token structure)
@@ -105,7 +105,8 @@ typedef enum SOPC_Services_Event {
 void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uintptr_t auxParam);
 
 /* API to enqueue an event for application */
-void SOPC_ServicesToApp_EnqueueEvent(SOPC_App_Com_Event appEvent, uint32_t eventType, void* params, uintptr_t auxParam);
+// Note: appEvent value shall be created using SOPC_AppEvent_*Event_Create functions
+void SOPC_ServicesToApp_EnqueueEvent(int32_t appEvent, uint32_t eventType, void* params, uintptr_t auxParam);
 
 /**
  *  \brief Initializes the services and application event dispatcher threads

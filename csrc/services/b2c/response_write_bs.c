@@ -105,11 +105,11 @@ void response_write_bs__write_WriteResponse_msg_out(const constants__t_msg_i res
     OpcUa_WriteResponse* msg_write_resp = (OpcUa_WriteResponse*) response_write_bs__msg_out;
     SOPC_StatusCode* lsc = NULL;
 
-    if ((uint64_t) SIZE_MAX / sizeof(SOPC_StatusCode) >= (uint64_t) nb_req)
+    if (nb_req > 0 && (uint64_t) SIZE_MAX / sizeof(SOPC_StatusCode) >= (uint64_t) nb_req)
     {
-        lsc = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * nb_req);
+        lsc = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * (size_t) nb_req);
 
-        memcpy((void*) lsc, (void*) (arr_StatusCode + 1), sizeof(SOPC_StatusCode) * nb_req);
+        memcpy((void*) lsc, (void*) (arr_StatusCode + 1), sizeof(SOPC_StatusCode) * (size_t) nb_req);
     }
 
     if (NULL == lsc)

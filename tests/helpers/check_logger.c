@@ -169,7 +169,7 @@ START_TEST(test_logger_categories_and_files)
     char* refLogLineBis = NULL;
     char genLogLine[MAX_LINE_LENGTH];
     char* genLogLineBis = NULL;
-    uint8_t idx = 0;
+    char idx = 0;
 
     testLog = SOPC_Log_CreateInstance("./not_existing_path/", "testLogFile", "Category1", 340, 3);
     ck_assert(testLog == NULL);
@@ -227,10 +227,10 @@ START_TEST(test_logger_categories_and_files)
     for (idx = 1; idx <= 3; idx++)
     {
         // Open the generated log and reference log files
-        refFilePath[11] = 48 + idx; // 48 => '0'
+        refFilePath[11] = (char) (48 + idx); // 48 => '0'
         refLogFile = fopen(refFilePath, "r");
         ck_assert(refLogFile != NULL);
-        filePath[strlen(filePathPrefix) + 4] = 48 + idx; // 48 => '0'
+        filePath[strlen(filePathPrefix) + 4] = (char) (48 + idx); // 48 => '0'
         genLogFile = fopen(filePath, "r");
         ck_assert(genLogFile != NULL);
 
@@ -297,7 +297,7 @@ START_TEST(test_logger_circular)
     char* refLogLineBis = NULL;
     char genLogLine[MAX_LINE_LENGTH];
     char* genLogLineBis = NULL;
-    uint8_t idx = 0;
+    char idx = 0;
 
     circularLog = SOPC_Log_CreateInstance("", "CircularLogFile", "Circular1",
                                           340, // Same as testLog
@@ -346,10 +346,10 @@ START_TEST(test_logger_circular)
     for (idx = 1; idx <= 2; idx++)
     {
         // Open the generated log and reference log files
-        refFilePath[15] = 48 + idx; // 48 => '0'
+        refFilePath[15] = (char) (48 + idx); // 48 => '0'
         refLogFile = fopen(refFilePath, "r");
         ck_assert(refLogFile != NULL);
-        filePath[strlen(filePathPrefix) + 4] = 48 + idx; // 48 => '0'
+        filePath[strlen(filePathPrefix) + 4] = (char) (48 + idx); // 48 => '0'
         genLogFile = fopen(filePath, "r");
         ck_assert(genLogFile != NULL);
 

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -63,8 +64,10 @@ int main(int argc, char* argv[])
     }
     if (SOPC_STATUS_OK == status)
     {
+        assert(strlen(argv[1]) <= INT32_MAX);
+
         /* argv are always null-terminated */
-        g_pNid = SOPC_NodeId_FromCString(argv[1], strlen(argv[1]));
+        g_pNid = SOPC_NodeId_FromCString(argv[1], (int32_t) strlen(argv[1]));
         if (NULL == g_pNid)
         {
             printf("# Error: nodeid not recognized: \"%s\"\n", argv[1]);

@@ -89,7 +89,7 @@ START_TEST(test_sockets)
     ck_assert(scEventParams->event == SOCKET_LISTENER_CONNECTION);
     // Check configuration index is preserved
     ck_assert(scEventParams->eltId == endpointDescConfigId);
-    serverSocketIdx = scEventParams->auxParam;
+    serverSocketIdx = (uint32_t) scEventParams->auxParam;
 
     free(scEventParams);
     scEventParams = NULL;
@@ -100,7 +100,7 @@ START_TEST(test_sockets)
     ck_assert(scEventParams->event == SOCKET_CONNECTION);
     // Check configuration index is preserved
     ck_assert(scEventParams->eltId == clientSecureChannelConnectionId);
-    clientSocketIdx = scEventParams->auxParam;
+    clientSocketIdx = (uint32_t) scEventParams->auxParam;
 
     free(scEventParams);
     scEventParams = NULL;
@@ -113,7 +113,7 @@ START_TEST(test_sockets)
     /* CLIENT SIDE: send a msg buffer through connection */
     for (idx = 0; idx < 1000; idx++)
     {
-        byte = (idx % 256);
+        byte = (uint8_t)(idx % 256);
         SOPC_Buffer_Write(sendBuffer, &byte, 1);
     }
     SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (void*) sendBuffer, 0);
@@ -161,7 +161,7 @@ START_TEST(test_sockets)
 
     for (idx = 0; idx < 1000; idx++)
     {
-        byte = (idx % 256);
+        byte = (uint8_t)(idx % 256);
         SOPC_Buffer_Write(sendBuffer, &byte, 1);
     }
     SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, serverSocketIdx, (void*) sendBuffer, 0);
@@ -212,7 +212,7 @@ START_TEST(test_sockets)
 
     for (idx = 0; idx < 2 * SOPC_MAX_MESSAGE_LENGTH; idx++)
     {
-        byte = (idx % 256);
+        byte = (uint8_t)(idx % 256);
         SOPC_Buffer_Write(sendBuffer, &byte, 1);
     }
     SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (void*) sendBuffer, 0);

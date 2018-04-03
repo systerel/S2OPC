@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
             { // SC connection index
 
                 scConfigIdx = *(uint32_t*) serviceEvent->params;
-                scConnectionId = serviceEvent->auxParam;
+                scConnectionId = (uint32_t) serviceEvent->auxParam;
                 (void) scConfigIdx;
                 printf("<Stub_Server: Connection established from a client\n");
             }

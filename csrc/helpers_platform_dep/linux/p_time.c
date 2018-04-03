@@ -47,7 +47,14 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
     gettimeResult = clock_gettime(CLOCK_REALTIME, &currentTime);
     if (gettimeResult == 0)
     {
-        intermediateResult = currentTime.tv_sec;
+        if (currentTime.tv_sec > 0)
+        {
+            intermediateResult = (uint64_t) currentTime.tv_sec;
+        }
+        else
+        {
+            intermediateResult = 0;
+        }
         if (UINT64_MAX - SOPC_SECONDS_BETWEEN_EPOCHS > intermediateResult)
         {
             intermediateResult += SOPC_SECONDS_BETWEEN_EPOCHS;
@@ -57,7 +64,7 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
                 result = currentTime.tv_nsec / 100; // set nanosecs in 100 nanosecs
                 if ((uint64_t) INT64_MAX >= intermediateResult + (uint64_t) result)
                 {
-                    result += intermediateResult;
+                    result += (int64_t) intermediateResult;
                 }
                 else
                 {

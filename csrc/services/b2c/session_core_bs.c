@@ -62,7 +62,7 @@ static constants__t_user_i session_to_activate_user[SOPC_MAX_SESSIONS + 1];
 static constants__t_application_context_i session_to_activate_context[SOPC_MAX_SESSIONS + 1];
 
 static uint32_t session_expiration_timer[SOPC_MAX_SESSIONS + 1];
-static uint32_t session_RevisedSessionTimeout[SOPC_MAX_SESSIONS + 1];
+static uint64_t session_RevisedSessionTimeout[SOPC_MAX_SESSIONS + 1];
 static SOPC_TimeReference server_session_latest_msg_receveived[SOPC_MAX_SESSIONS + 1];
 
 /*------------------------
@@ -86,7 +86,7 @@ void session_core_bs__INITIALISATION(void)
            sizeof(constants__t_user_i) * (SOPC_MAX_SESSIONS + 1));
     memset(session_to_activate_context, (int) 0, sizeof(constants__t_application_context_i) * (SOPC_MAX_SESSIONS + 1));
     memset(session_expiration_timer, (int) 0, sizeof(uint32_t) * (SOPC_MAX_SESSIONS + 1));
-    memset(session_RevisedSessionTimeout, (int) 0, sizeof(uint32_t) * (SOPC_MAX_SESSIONS + 1));
+    memset(session_RevisedSessionTimeout, (int) 0, sizeof(uint64_t) * (SOPC_MAX_SESSIONS + 1));
     memset(server_session_latest_msg_receveived, (int) 0, sizeof(SOPC_TimeReference) * (SOPC_MAX_SESSIONS + 1));
 }
 
@@ -111,7 +111,7 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
             if (session_core_bs__state == constants__e_session_userActivated)
             {
                 SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
-                                                session_core_bs__session, NULL,
+                                                (uint32_t) session_core_bs__session, NULL,
                                                 session_to_activate_context[session_core_bs__session]);
             }
             else if (session_core_bs__state == constants__e_session_scOrphaned ||
@@ -125,7 +125,7 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
                 // if orphaned will be reactivated or closed => notify as reactivating to avoid use of session by
                 // application
                 SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_REACTIVATING),
-                                                session_core_bs__session, NULL,
+                                                (uint32_t) session_core_bs__session, NULL,
                                                 session_to_activate_context[session_core_bs__session]);
             }
         }
@@ -180,7 +180,7 @@ void session_core_bs__server_get_fresh_session_token(const constants__t_session_
     {
         // Note: Namespace = 0 for session token ?
         sessionDataArray[session_core_bs__session].sessionToken.IdentifierType = SOPC_IdentifierType_Numeric;
-        sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric = session_core_bs__session;
+        sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric = (uint32_t) session_core_bs__session;
         *session_core_bs__token = &(sessionDataArray[session_core_bs__session].sessionToken);
     }
     else
@@ -229,7 +229,7 @@ void session_core_bs__prepare_close_session(const constants__t_session_i session
             // => notify activation failed
             SOPC_ServicesToApp_EnqueueEvent(
                 SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
-                session_core_bs__session,                               // session id
+                (uint32_t) session_core_bs__session,                    // session id
                 NULL,                                                   // user ?
                 session_to_activate_context[session_core_bs__session]); // user application session context
         }
@@ -238,7 +238,7 @@ void session_core_bs__prepare_close_session(const constants__t_session_i session
             // Activated session closing
             SOPC_ServicesToApp_EnqueueEvent(
                 SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
-                session_core_bs__session, // session id
+                (uint32_t) session_core_bs__session, // session id
                 NULL,
                 session_to_activate_context[session_core_bs__session]); // user application session context
         }
@@ -337,7 +337,7 @@ void session_core_bs__server_create_session_req_do_crypto(
             SOPC_ByteString_Clear(pNonce);
             pNonce->Length = LENGTH_NONCE;
 
-            status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data);
+            status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, LENGTH_NONCE, &pNonce->Data);
             if (SOPC_STATUS_OK != status)
                 /* TODO: Should we clean half allocated things? */
                 return;
@@ -349,9 +349,10 @@ void session_core_bs__server_create_session_req_do_crypto(
                 // client Nonce is not present
                 return;
             if (pReq->ClientCertificate.Length >= 0 && pReq->ClientNonce.Length > 0 &&
-                (uint64_t) pReq->ClientCertificate.Length + pReq->ClientNonce.Length <= SIZE_MAX / sizeof(uint8_t))
+                (uint64_t) pReq->ClientCertificate.Length + (uint64_t) pReq->ClientNonce.Length <=
+                    SIZE_MAX / sizeof(uint8_t))
             {
-                lenToSign = pReq->ClientCertificate.Length + pReq->ClientNonce.Length;
+                lenToSign = (uint32_t) pReq->ClientCertificate.Length + (uint32_t) pReq->ClientNonce.Length;
                 pToSign = malloc(sizeof(uint8_t) * (size_t) lenToSign);
             }
             else
@@ -381,11 +382,11 @@ void session_core_bs__server_create_session_req_do_crypto(
             {
                 pSign->Signature.Data = NULL;
             }
-            if (NULL == pSign->Signature.Data)
+            if (NULL == pSign->Signature.Data || pSign->Signature.Length <= 0)
                 return;
 
             status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pECfg->serverKey,
-                                                        pSign->Signature.Data, pSign->Signature.Length);
+                                                        pSign->Signature.Data, (uint32_t) pSign->Signature.Length);
             if (SOPC_STATUS_OK != status)
             {
                 free(pToSign);
@@ -480,9 +481,9 @@ void session_core_bs__client_activate_session_req_do_crypto(
                 }
             }
             if (serverCert.Length >= 0 && serverNonce->Length >= 0 &&
-                (uint64_t) serverCert.Length + serverNonce->Length <= SIZE_MAX / sizeof(uint8_t))
+                (uint64_t) serverCert.Length + (uint64_t) serverNonce->Length <= SIZE_MAX / sizeof(uint8_t))
             {
-                lenToSign = serverCert.Length + serverNonce->Length;
+                lenToSign = (uint32_t) serverCert.Length + (uint32_t) serverNonce->Length;
                 pToSign = malloc(sizeof(uint8_t) * (size_t) lenToSign);
             }
             else
@@ -511,11 +512,11 @@ void session_core_bs__client_activate_session_req_do_crypto(
             {
                 pSign->Signature.Data = NULL;
             }
-            if (NULL == pSign->Signature.Data)
+            if (NULL == pSign->Signature.Data || pSign->Signature.Length <= 0)
                 return;
 
             status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pSCCfg->key_priv_cli,
-                                                        pSign->Signature.Data, pSign->Signature.Length);
+                                                        pSign->Signature.Data, (uint32_t) pSign->Signature.Length);
             if (SOPC_STATUS_OK != status)
             {
                 free(pToSign);
@@ -598,7 +599,7 @@ void session_core_bs__client_create_session_req_do_crypto(
             SOPC_ByteString_Clear(pNonce);
             pNonce->Length = LENGTH_NONCE;
 
-            status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data);
+            status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, LENGTH_NONCE, &pNonce->Data);
             if (SOPC_STATUS_OK != status)
                 /* TODO: Should we clean half allocated things? */
                 return;
@@ -705,21 +706,21 @@ void session_core_bs__client_create_session_check_crypto(
                 /* b) Concat Nonce */
                 lenToVerify = lenDerCli + LENGTH_NONCE;
                 pToVerify = (uint8_t*) malloc(sizeof(uint8_t) * lenToVerify);
-                if (NULL != pToVerify)
+                if (NULL != pToVerify && pNonce->Length > 0)
                 {
                     /* TODO: The KeyManager API should be changed to avoid these useless copies */
                     memcpy(pToVerify, pDerCli, lenDerCli);
-                    memcpy(pToVerify + lenDerCli, pNonce->Data, pNonce->Length);
+                    memcpy(pToVerify + lenDerCli, pNonce->Data, (size_t) pNonce->Length);
 
                     /* Verify given signature */
                     /* a) Retrieve public key from certificate */
                     status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtSrv, &pKeyCrtSrv);
-                    if (SOPC_STATUS_OK == status)
+                    if (SOPC_STATUS_OK == status && pSignCandid->Signature.Length > 0)
                     {
                         /* b) Call AsymVerify */
                         status = SOPC_CryptoProvider_AsymmetricVerify(pProvider, pToVerify, lenToVerify, pKeyCrtSrv,
                                                                       pSignCandid->Signature.Data,
-                                                                      pSignCandid->Signature.Length);
+                                                                      (uint32_t) pSignCandid->Signature.Length);
                         if (SOPC_STATUS_OK == status)
                         {
                             *session_core_bs__valid = true;
@@ -799,21 +800,21 @@ void session_core_bs__server_activate_session_check_crypto(
                 /* b) Concat Nonce */
                 lenToVerify = lenDerSrv + LENGTH_NONCE;
                 pToVerify = (uint8_t*) malloc(sizeof(uint8_t) * lenToVerify);
-                if (NULL != pToVerify)
+                if (NULL != pToVerify && pNonce->Length > 0)
                 {
                     /* TODO: The KeyManager API should be changed to avoid these useless copies */
                     memcpy(pToVerify, pDerSrv, lenDerSrv);
-                    memcpy(pToVerify + lenDerSrv, pNonce->Data, pNonce->Length);
+                    memcpy(pToVerify + lenDerSrv, pNonce->Data, (size_t) pNonce->Length);
 
                     /* Verify given signature */
                     /* a) Retrieve public key from certificate */
                     status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtCli, &pKeyCrtCli);
-                    if (SOPC_STATUS_OK == status)
+                    if (SOPC_STATUS_OK == status && pSignCandid->Signature.Length > 0)
                     {
                         /* b) Call AsymVerify */
                         status = SOPC_CryptoProvider_AsymmetricVerify(pProvider, pToVerify, lenToVerify, pKeyCrtCli,
                                                                       pSignCandid->Signature.Data,
-                                                                      pSignCandid->Signature.Length);
+                                                                      (uint32_t) pSignCandid->Signature.Length);
                         if (SOPC_STATUS_OK == status)
                         {
                             *session_core_bs__valid = true;
@@ -823,12 +824,12 @@ void session_core_bs__server_activate_session_check_crypto(
             }
         }
 
-        if (*session_core_bs__valid != false)
+        if (*session_core_bs__valid != false && pNonce->Length > 0)
         {
             // renew the server Nonce
             free(pNonce->Data);
             pNonce->Data = NULL;
-            status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data);
+            status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, (uint32_t) pNonce->Length, &pNonce->Data);
             assert(SOPC_STATUS_OK == status);
         }
 
@@ -955,7 +956,7 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
                 // Session is not expired
                 *session_core_bs__expired = false;
                 // Re-activate timer for next verification
-                eventParams.eltId = session_core_bs__session;
+                eventParams.eltId = (uint32_t) session_core_bs__session;
                 eventParams.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
                 eventParams.params = NULL;
                 eventParams.auxParam = 0;
@@ -1002,9 +1003,10 @@ void session_core_bs__server_session_timeout_start_timer(const constants__t_sess
         }
         else
         {
-            session_RevisedSessionTimeout[session_core_bs__session] = pResp->RevisedSessionTimeout;
+            session_RevisedSessionTimeout[session_core_bs__session] =
+                (uint64_t) pResp->RevisedSessionTimeout; // nb milliseconds
         }
-        eventParams.eltId = session_core_bs__session;
+        eventParams.eltId = (uint32_t) session_core_bs__session;
         eventParams.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
         eventParams.params = NULL;
         eventParams.auxParam = 0;

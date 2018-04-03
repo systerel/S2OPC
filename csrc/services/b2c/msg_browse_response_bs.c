@@ -273,55 +273,55 @@ void msg_browse_response_bs__malloc_browse_response(const t_entier4 msg_browse_r
 
         /* 1D arrays */
         /* pBrowseStatus */
-        pBrowseStatus = calloc(nBrowseResult + 1, sizeof(SOPC_StatusCode));
+        pBrowseStatus = calloc((size_t) nBrowseResult + 1, sizeof(SOPC_StatusCode));
         if (NULL == pBrowseStatus)
             *msg_browse_response_bs__p_isallocated = false;
 
         /* pnAllocReferenceDescription */
-        pnAllocReferenceDescription = calloc(nBrowseResult + 1, sizeof(int32_t));
+        pnAllocReferenceDescription = calloc((size_t) nBrowseResult + 1, sizeof(int32_t));
         if (NULL == pnAllocReferenceDescription)
             *msg_browse_response_bs__p_isallocated = false;
 
         /* pnReferenceDescription */
         /* Note: pnReferenceDescription must be initialized to 0 for each response */
-        pnReferenceDescription = calloc(nBrowseResult + 1, sizeof(int32_t));
+        pnReferenceDescription = calloc((size_t) nBrowseResult + 1, sizeof(int32_t));
         if (NULL == pnReferenceDescription)
             *msg_browse_response_bs__p_isallocated = false;
 
         /* 2D arrays */
         /* 2D arrays are calloced, so that free is doable after partly failed alloc */
         /* ppResRefTypeId */
-        ppResRefTypeId = calloc(nBrowseResult + 1, sizeof(SOPC_NodeId*));
+        ppResRefTypeId = calloc((size_t) nBrowseResult + 1, sizeof(SOPC_NodeId*));
         if (NULL == ppResRefTypeId)
             *msg_browse_response_bs__p_isallocated = false;
 
         /* ppResForwards */
-        ppResForwards = calloc(nBrowseResult + 1, sizeof(bool*));
+        ppResForwards = calloc((size_t) nBrowseResult + 1, sizeof(bool*));
         if (NULL == ppResForwards)
             *msg_browse_response_bs__p_isallocated = false;
 
         /* ppResNodeId */
-        ppResNodeId = calloc(nBrowseResult + 1, sizeof(SOPC_ExpandedNodeId*));
+        ppResNodeId = calloc((size_t) nBrowseResult + 1, sizeof(SOPC_ExpandedNodeId*));
         if (NULL == ppResNodeId)
             *msg_browse_response_bs__p_isallocated = false;
 
         /* ppResBrowseName */
-        ppResBrowseName = calloc(nBrowseResult + 1, sizeof(SOPC_QualifiedName*));
+        ppResBrowseName = calloc((size_t) nBrowseResult + 1, sizeof(SOPC_QualifiedName*));
         if (NULL == ppResBrowseName)
             *msg_browse_response_bs__p_isallocated = false;
 
         /* ppResDisplayName */
-        ppResDisplayName = calloc(nBrowseResult + 1, sizeof(SOPC_LocalizedText*));
+        ppResDisplayName = calloc((size_t) nBrowseResult + 1, sizeof(SOPC_LocalizedText*));
         if (NULL == ppResDisplayName)
             *msg_browse_response_bs__p_isallocated = false;
 
         /* ppResNodeClass */
-        ppResNodeClass = calloc(nBrowseResult + 1, sizeof(OpcUa_NodeClass*));
+        ppResNodeClass = calloc((size_t) nBrowseResult + 1, sizeof(OpcUa_NodeClass*));
         if (NULL == ppResNodeClass)
             *msg_browse_response_bs__p_isallocated = false;
 
         /* ppResTypeDefinition */
-        ppResTypeDefinition = calloc(nBrowseResult + 1, sizeof(SOPC_ExpandedNodeId*));
+        ppResTypeDefinition = calloc((size_t) nBrowseResult + 1, sizeof(SOPC_ExpandedNodeId*));
         if (NULL == ppResTypeDefinition)
             *msg_browse_response_bs__p_isallocated = false;
 
@@ -358,7 +358,7 @@ void msg_browse_response_bs__malloc_browse_result(const constants__t_BrowseValue
         (uint64_t)(nbri + 1) * sizeof(SOPC_LocalizedText) <= SIZE_MAX &&
         (uint64_t)(nbri + 1) * sizeof(OpcUa_NodeClass) <= SIZE_MAX)
     {
-        ppResRefTypeId[bvi] = malloc(sizeof(SOPC_NodeId) * (nbri + 1));
+        ppResRefTypeId[bvi] = malloc(sizeof(SOPC_NodeId) * ((size_t) nbri + 1));
         if (NULL == ppResRefTypeId[bvi])
             *msg_browse_response_bs__p_isallocated = false;
         for (j = 0; NULL != ppResRefTypeId[bvi] && j <= nbri; ++j)
@@ -485,7 +485,7 @@ void msg_browse_response_bs__write_BrowseResponse_msg_out(const constants__t_msg
     pResp->NoOfResults = nBrowseResult;
     if (nBrowseResult >= 0 && (uint64_t) SIZE_MAX / sizeof(OpcUa_BrowseResult) >= (uint64_t) nBrowseResult)
     {
-        lbr = (OpcUa_BrowseResult*) malloc(sizeof(OpcUa_BrowseResult) * nBrowseResult);
+        lbr = (OpcUa_BrowseResult*) malloc(sizeof(OpcUa_BrowseResult) * (size_t) nBrowseResult);
     }
     else
     {
@@ -507,7 +507,7 @@ void msg_browse_response_bs__write_BrowseResponse_msg_out(const constants__t_msg
         lbr[i].NoOfReferences = nRefs;
         if (nRefs >= 0 && (uint64_t) SIZE_MAX / sizeof(OpcUa_ReferenceDescription) >= (uint64_t) nRefs)
         {
-            lrd = (OpcUa_ReferenceDescription*) malloc(sizeof(OpcUa_ReferenceDescription) * nRefs);
+            lrd = (OpcUa_ReferenceDescription*) malloc(sizeof(OpcUa_ReferenceDescription) * (size_t) nRefs);
         }
         else
         {

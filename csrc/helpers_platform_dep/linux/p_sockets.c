@@ -326,7 +326,7 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketS
 SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint32_t* sentBytes)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    int res = 0;
+    ssize_t res = 0;
     if (sock != SOPC_INVALID_SOCKET && data != NULL && count <= INT32_MAX && sentBytes != NULL)
     {
         status = SOPC_STATUS_NOK;
@@ -349,12 +349,13 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
     return status;
 }
 
-SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int32_t* readCount)
+SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int64_t* readCount)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    ssize_t sReadCount = 0;
     if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0)
     {
-        *readCount = recv(sock, data, dataSize, 0);
+        sReadCount = recv(sock, data, dataSize, 0);
 
         /* Extract of man recv (release 3.54 of the Linux man-pages project):
          * RETURN VALUE
@@ -362,16 +363,20 @@ SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int
          * errno is set to indicate the error.  The return value will be 0 when the peer has performed  an orderly
          * shutdown. */
 
-        if (*readCount > 0)
+        if (sReadCount > 0)
         {
+            *readCount = (int32_t) sReadCount;
             status = SOPC_STATUS_OK;
         }
-        else if (*readCount == 0)
+        else if (sReadCount == 0)
         {
+            *readCount = 0;
             status = SOPC_STATUS_CLOSED;
         }
-        else if (*readCount == -1)
+        else if (sReadCount == -1)
         {
+            *readCount = -1;
+
             /* Extract of man recv (release 3.54 of the Linux man-pages project):
              * If  no  messages  are available at the socket, the receive calls wait for a message to arrive, unless the
              * socket is onblocking (see fcntl(2)), in which case the value -1 is returned and the external variable

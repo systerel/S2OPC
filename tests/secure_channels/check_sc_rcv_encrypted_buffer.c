@@ -23,6 +23,7 @@
  * http://check.sourceforge.net/doc/check_html/check_4.html#No-Fork-Mode
  */
 
+#include <assert.h>
 #include <check.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -217,14 +218,16 @@ static SOPC_ReturnStatus Check_Expected_Sent_Message(uint32_t socketIdx,
 
 static SOPC_ReturnStatus Simulate_Received_Message(uint32_t scIdx, char* hexInputMsg)
 {
+    assert(strlen(hexInputMsg) <= UINT32_MAX);
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Buffer* buffer = SOPC_Buffer_Create(strlen(hexInputMsg) / 2);
+    SOPC_Buffer* buffer = SOPC_Buffer_Create((uint32_t) strlen(hexInputMsg) / 2);
 
     int res = 0;
 
     if (buffer != NULL)
     {
-        status = SOPC_Buffer_SetDataLength(buffer, strlen(hexInputMsg) / 2);
+        status = SOPC_Buffer_SetDataLength(buffer, (uint32_t) strlen(hexInputMsg) / 2);
 
         if (SOPC_STATUS_OK == status)
         {

@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -24,6 +26,7 @@
 // Returns n the number of translated chars (< 0 for errors)
 int hexlify(const unsigned char* src, char* dst, size_t n)
 {
+    assert(n <= INT32_MAX);
     size_t i;
     char buffer[3];
 
@@ -36,13 +39,14 @@ int hexlify(const unsigned char* src, char* dst, size_t n)
         memcpy(dst + 2 * i, buffer, 2);
     }
 
-    return n;
+    return (int) n;
 }
 
 // You should allocate strlen(src)/2 in dst. n is strlen(dst)
 // Returns n the number of translated couples (< 0 for errors)
 int unhexlify(const char* src, unsigned char* dst, size_t n)
 {
+    assert(n <= INT32_MAX);
     static unsigned int buf;
     size_t i;
 
@@ -53,13 +57,13 @@ int unhexlify(const char* src, unsigned char* dst, size_t n)
     {
         if (sscanf(&src[2 * i], "%02x", &buf) < 1)
         {
-            return i;
+            return (int) i;
         }
         else
         {
-            dst[i] = (char) buf;
+            dst[i] = (unsigned char) buf;
         }
     }
 
-    return n;
+    return (int) n;
 }

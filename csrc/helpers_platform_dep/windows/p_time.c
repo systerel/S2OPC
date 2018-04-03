@@ -30,7 +30,14 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
     currentTime.LowPart = fileCurrentTime.dwLowDateTime;
     currentTime.HighPart = fileCurrentTime.dwHighDateTime;
 
-    result = currentTime.QuadPart;
+    if (currentTime.QuadPart < INT64_MAX)
+    {
+        result = (int64_t) currentTime.QuadPart;
+    }
+    else
+    {
+        result = INT64_MAX;
+    }
 
     return result;
 }

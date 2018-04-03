@@ -164,12 +164,12 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
             if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENING)
             {
                 // Error case: require socket closure
-                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, auxParam, NULL, 0);
+                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
             }
             else
             {
                 scListener->state = SECURE_LISTENER_STATE_OPENED;
-                scListener->socketIndex = auxParam;
+                scListener->socketIndex = (uint32_t) auxParam;
             }
         }
         break;
@@ -184,7 +184,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
             if (auxParam <= UINT32_MAX)
             {
                 // Error case: require socket closure
-                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, auxParam, NULL, 0);
+                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
             }
         }
         else
@@ -261,16 +261,16 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
             if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENED)
             {
                 // Error case: require secure channel closure
-                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, auxParam, NULL, eltId);
+                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, NULL, eltId);
             }
             else
             {
                 // Associates the secure channel connection to the secure listener
-                result = SOPC_SecureListenerStateMgr_AddConnection(scListener, auxParam);
+                result = SOPC_SecureListenerStateMgr_AddConnection(scListener, (uint32_t) auxParam);
                 if (false == result)
                 {
                     // Error case: require secure channel closure
-                    SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, auxParam, NULL, eltId);
+                    SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, NULL, eltId);
                 }
             }
         }
@@ -284,7 +284,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
         if (scListener != NULL && scListener->state == SECURE_LISTENER_STATE_OPENED && auxParam <= UINT32_MAX)
         {
-            SOPC_SecureListenerStateMgr_RemoveConnection(scListener, auxParam);
+            SOPC_SecureListenerStateMgr_RemoveConnection(scListener, (uint32_t) auxParam);
         }
         break;
     default:

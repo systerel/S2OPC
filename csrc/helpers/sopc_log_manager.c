@@ -116,7 +116,14 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
         }
         if (res > 0)
         {
-            pLogInst->file->nbBytes += res;
+            if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
+            {
+                pLogInst->file->nbBytes += (uint32_t) res;
+            }
+            else
+            {
+                pLogInst->file->nbBytes = UINT32_MAX;
+            }
         }
         else
         {
@@ -143,7 +150,14 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
             res = fprintf(pLogInst->file->pFile, "LOG START\n");
             if (res > 0)
             {
-                pLogInst->file->nbBytes += res;
+                if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
+                {
+                    pLogInst->file->nbBytes += (uint32_t) res;
+                }
+                else
+                {
+                    pLogInst->file->nbBytes = UINT32_MAX;
+                }
                 result = true;
             }
             else
@@ -172,6 +186,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstance(const char* logDirPath,
 
     // Check parameters valid
     if (logDirPath != NULL && logFileName != NULL && strlen(logFileName) > 0 &&
+        strlen(logDirPath) + strlen(SOPC_CSTRING_UNIQUE_LOG_PREFIX) + strlen(logFileName) + 2 <= UINT8_MAX &&
         maxBytes > RESERVED_BYTES_PRINT_FILE_CHANGE && maxFiles > 0)
     {
         result = calloc(1, sizeof(SOPC_Log_Instance));
@@ -184,10 +199,11 @@ SOPC_Log_Instance* SOPC_Log_CreateInstance(const char* logDirPath,
         {
             file->pFile = NULL;
             // + 2 for the 2 '_'
-            file->fileNumberPos = strlen(logDirPath) + strlen(SOPC_CSTRING_UNIQUE_LOG_PREFIX) + strlen(logFileName) + 2;
+            file->fileNumberPos =
+                (uint8_t)(strlen(logDirPath) + strlen(SOPC_CSTRING_UNIQUE_LOG_PREFIX) + strlen(logFileName) + 2);
             // Attempt to create first log file:
             // 5 for file number + 4 for file extension +1 for '\0' terminating character => 10
-            filePath = malloc((file->fileNumberPos + 10) * sizeof(char));
+            filePath = malloc((file->fileNumberPos + (size_t) 10) * sizeof(char));
             if (filePath != NULL)
             {
                 res = sprintf(filePath, "%s%s_%s_00001.log", logDirPath, SOPC_CSTRING_UNIQUE_LOG_PREFIX, logFileName);
@@ -351,7 +367,14 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
             }
             if (res > 0)
             {
-                pLogInst->file->nbBytes += res;
+                if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
+                {
+                    pLogInst->file->nbBytes += (uint32_t) res;
+                }
+                else
+                {
+                    pLogInst->file->nbBytes = UINT32_MAX;
+                }
             }
         }
         Mutex_Unlock(&pLogInst->file->fileMutex);
@@ -375,7 +398,14 @@ bool SOPC_Log_SetConsoleOutput(SOPC_Log_Instance* pLogInst, bool activate)
             res = fprintf(pLogInst->file->pFile, "LOG CONSOLE OUTPUT SET TO '%s'\n", activate ? "TRUE" : "FALSE");
             if (res > 0)
             {
-                pLogInst->file->nbBytes += res;
+                if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
+                {
+                    pLogInst->file->nbBytes += (uint32_t) res;
+                }
+                else
+                {
+                    pLogInst->file->nbBytes = UINT32_MAX;
+                }
             }
         }
         Mutex_Unlock(&pLogInst->file->fileMutex);
@@ -388,7 +418,7 @@ char* SOPC_Log_GetFilePathPrefix(SOPC_Log_Instance* pLogInst)
     char* filePathPrefix = NULL;
     if (NULL != pLogInst && NULL != pLogInst->file->filePath)
     {
-        filePathPrefix = malloc(sizeof(char) * (pLogInst->file->fileNumberPos + 1));
+        filePathPrefix = malloc((pLogInst->file->fileNumberPos + (size_t) 1) * sizeof(char));
         if (NULL != filePathPrefix)
         {
             memcpy(filePathPrefix, pLogInst->file->filePath, (size_t) pLogInst->file->fileNumberPos);
@@ -453,9 +483,9 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
             }
             if (res > 0 && res2 > 0)
             {
-                if (UINT32_MAX - pLogInst->file->nbBytes > (uint64_t) res + res2)
+                if (UINT32_MAX - pLogInst->file->nbBytes > (uint64_t) res + (uint64_t) res2)
                 {
-                    pLogInst->file->nbBytes += res + res2;
+                    pLogInst->file->nbBytes += (uint32_t)(res + res2);
                 }
                 else
                 {

@@ -53,7 +53,7 @@ void service_response_cb_bs__cli_service_response(
     if (constants__c_session_indet != service_response_cb_bs__session)
     {
         SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_RCV_SESSION_RESPONSE),
-                                        service_response_cb_bs__session, service_response_cb_bs__resp_msg,
+                                        (uint32_t) service_response_cb_bs__session, service_response_cb_bs__resp_msg,
                                         service_response_cb_bs__app_context);
     }
     else

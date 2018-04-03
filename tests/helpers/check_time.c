@@ -87,7 +87,9 @@ START_TEST(test_elapsed_time)
         tref = SOPC_TimeReference_GetCurrent();
     }
     tdate2 = SOPC_Time_GetCurrentTimeUTC();
-    elapsedMs = (tdate2 - tdate) / 10000; // 100 nanoseconds to milliseconds
+
+    ck_assert(tdate >= 0 && tdate2 >= 0 && tdate2 >= tdate);
+    elapsedMs = ((uint64_t) tdate2 - (uint64_t) tdate) / 10000; // 100 nanoseconds to milliseconds
 
     // Check computed elapsed time value (on non monotonic clock) is 1000ms +/- 100ms
     ck_assert(1000 - 100 < elapsedMs && elapsedMs < 1000 + 100);

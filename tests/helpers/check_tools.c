@@ -2613,7 +2613,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     v.BuiltInTypeId = SOPC_Boolean_Id;
     v.ArrayType = SOPC_VariantArrayType_Array;
     v.Value.Array.Length = 10;
-    v.Value.Array.Content.BooleanArr = calloc(v.Value.Array.Length, sizeof(SOPC_Boolean));
+    v.Value.Array.Content.BooleanArr = calloc((size_t) v.Value.Array.Length, sizeof(SOPC_Boolean));
     status = SOPC_Variant_Write(&v, buffer);
     ck_assert(SOPC_STATUS_OK == status);
     SOPC_Variant_Clear(&v);
@@ -2665,14 +2665,15 @@ START_TEST(test_ua_decoder_allocation_limit)
     v.BuiltInTypeId = SOPC_Boolean_Id;
     v.ArrayType = SOPC_VariantArrayType_Matrix;
     v.Value.Matrix.Dimensions = 3;
-    v.Value.Matrix.ArrayDimensions = malloc(sizeof(int32_t) * v.Value.Matrix.Dimensions);
+    v.Value.Matrix.ArrayDimensions = malloc(sizeof(int32_t) * (size_t) v.Value.Matrix.Dimensions);
     ck_assert(v.Value.Matrix.ArrayDimensions != NULL);
     v.Value.Matrix.ArrayDimensions[0] = 3;
     v.Value.Matrix.ArrayDimensions[1] = 3;
     v.Value.Matrix.ArrayDimensions[2] = 1;
-    v.Value.Matrix.Content.BooleanArr = calloc(
-        v.Value.Matrix.ArrayDimensions[0] * v.Value.Matrix.ArrayDimensions[1] * v.Value.Matrix.ArrayDimensions[2],
-        sizeof(SOPC_Boolean));
+    v.Value.Matrix.Content.BooleanArr =
+        calloc((size_t) v.Value.Matrix.ArrayDimensions[0] * (size_t) v.Value.Matrix.ArrayDimensions[1] *
+                   (size_t) v.Value.Matrix.ArrayDimensions[2],
+               sizeof(SOPC_Boolean));
     status = SOPC_Variant_Write(&v, buffer);
     ck_assert(SOPC_STATUS_OK == status);
     SOPC_Variant_Clear(&v);
@@ -2700,14 +2701,15 @@ START_TEST(test_ua_decoder_allocation_limit)
     v.BuiltInTypeId = SOPC_Boolean_Id;
     v.ArrayType = SOPC_VariantArrayType_Matrix;
     v.Value.Matrix.Dimensions = 3;
-    v.Value.Matrix.ArrayDimensions = malloc(sizeof(int32_t) * v.Value.Matrix.Dimensions);
+    v.Value.Matrix.ArrayDimensions = malloc(sizeof(int32_t) * (size_t) v.Value.Matrix.Dimensions);
     ck_assert(v.Value.Matrix.ArrayDimensions != NULL);
     v.Value.Matrix.ArrayDimensions[0] = 3;
     v.Value.Matrix.ArrayDimensions[1] = 3;
     v.Value.Matrix.ArrayDimensions[2] = 1;
-    v.Value.Matrix.Content.BooleanArr = calloc(
-        v.Value.Matrix.ArrayDimensions[0] * v.Value.Matrix.ArrayDimensions[1] * v.Value.Matrix.ArrayDimensions[2],
-        sizeof(SOPC_Boolean));
+    v.Value.Matrix.Content.BooleanArr =
+        calloc((size_t) v.Value.Matrix.ArrayDimensions[0] * (size_t) v.Value.Matrix.ArrayDimensions[1] *
+                   (size_t) v.Value.Matrix.ArrayDimensions[2],
+               sizeof(SOPC_Boolean));
     status = SOPC_Variant_Write(&v, buffer);
     ck_assert(SOPC_STATUS_OK == status);
     SOPC_Variant_Clear(&v);

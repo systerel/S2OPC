@@ -50,7 +50,7 @@ const uint64_t timersDelayWithCancel[NB_TIMERS] = {250, 400, 800, 550, 1000};
 // position of (not canceled) timers ordered by increasing delay regarding timersDelay array
 static SOPC_DateTime dateTimeResultsWithCancel[NB_TIMERS_WITH_CANCEL] = {0, 0, 0};
 
-uint8_t timersId[NB_TIMERS];
+uint32_t timersId[NB_TIMERS];
 
 void timeout_event(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
@@ -99,7 +99,8 @@ START_TEST(test_timers)
 
     for (i = 0; i < NB_TIMERS; i++)
     {
-        elapsedMs = (dateTimeResults[i] - startTime) / 10000; // 100 nanoseconds to milliseconds
+        ck_assert(dateTimeResults[i] >= 0 && startTime >= 0 && dateTimeResults[i] >= startTime);
+        elapsedMs = ((uint64_t) dateTimeResults[i] - (uint64_t) startTime) / 10000; // 100 nanoseconds to milliseconds
         // Check computed elapsed time value (on non monotonic clock) is delayMs +/- 50ms
         ck_assert(timersDelay[i] - 50 < elapsedMs && elapsedMs < timersDelay[i] + 50);
     }
@@ -163,7 +164,9 @@ START_TEST(test_timers_with_cancellation)
 
     for (i = 0; i < NB_TIMERS_WITH_CANCEL; i++)
     {
-        elapsedMs = (dateTimeResultsWithCancel[i] - startTime) / 10000; // 100 nanoseconds to milliseconds
+        ck_assert(dateTimeResultsWithCancel[i] >= 0 && startTime >= 0 && dateTimeResultsWithCancel[i] >= startTime);
+        elapsedMs =
+            ((uint64_t) dateTimeResultsWithCancel[i] - (uint64_t) startTime) / 10000; // 100 nanoseconds to milliseconds
         // Check computed elapsed time value (on non monotonic clock) is delayMs +/- 50ms
         ck_assert(timersDelayWithCancel[i] - 50 < elapsedMs && elapsedMs < timersDelayWithCancel[i] + 50);
     }

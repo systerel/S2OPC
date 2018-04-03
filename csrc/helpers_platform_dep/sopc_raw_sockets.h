@@ -209,7 +209,7 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
  *  \return         GOOD if operation succeeded, SOPC_STATUS_CLOSED in case of disconnection and SOPC_STATUS_NOK
  * otherwise.
  */
-SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int32_t* readCount);
+SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int64_t* readCount);
 
 /**
  *  \brief Close the socket connection and/or clear the socket

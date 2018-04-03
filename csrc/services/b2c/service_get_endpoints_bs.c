@@ -46,13 +46,12 @@ void service_get_endpoints_bs__treat_get_endpoints_request(
     bool getEndpoints = false;
     OpcUa_GetEndpointsRequest* getEndpointsReq = (OpcUa_GetEndpointsRequest*) service_get_endpoints_bs__req_msg;
     OpcUa_GetEndpointsResponse* getEndpointsResp = (OpcUa_GetEndpointsResponse*) service_get_endpoints_bs__resp_msg;
-    uint32_t configIdx = (uint32_t) service_get_endpoints_bs__endpoint_config_idx;
 
     if (getEndpointsReq->NoOfProfileUris > 0)
     {
         // Check if profile URI TCP UA binary is requested, we de not provide any other
-        getEndpoints =
-            SOPC_Discovery_ContainsBinaryProfileURI(getEndpointsReq->NoOfProfileUris, getEndpointsReq->ProfileUris);
+        getEndpoints = SOPC_Discovery_ContainsBinaryProfileURI((uint32_t) getEndpointsReq->NoOfProfileUris,
+                                                               getEndpointsReq->ProfileUris);
     }
     else
     {
@@ -61,8 +60,8 @@ void service_get_endpoints_bs__treat_get_endpoints_request(
     if (true == getEndpoints)
     {
         *service_get_endpoints_bs__ret = SOPC_Discovery_GetEndPointsDescriptions(
-            configIdx, false, &getEndpointsReq->EndpointUrl, (uint32_t*) &getEndpointsResp->NoOfEndpoints,
-            &getEndpointsResp->Endpoints);
+            service_get_endpoints_bs__endpoint_config_idx, false, &getEndpointsReq->EndpointUrl,
+            (uint32_t*) &getEndpointsResp->NoOfEndpoints, &getEndpointsResp->Endpoints);
     }
     else
     {

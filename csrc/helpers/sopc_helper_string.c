@@ -74,7 +74,7 @@ SOPC_ReturnStatus SOPC_strtouint8_t(const char* sz, uint8_t* n, int base, char c
         }
         else
         {
-            *n = value;
+            *n = (uint8_t) value;
         }
     }
 
@@ -103,7 +103,7 @@ SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base, char
         }
         else
         {
-            *n = value;
+            *n = (uint16_t) value;
         }
     }
 
@@ -134,7 +134,7 @@ SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base, char
         }
         else
         {
-            *n = value;
+            *n = (uint32_t) value;
         }
     }
 

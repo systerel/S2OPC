@@ -65,7 +65,8 @@ static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpo
 
     if (sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls >= 0)
     {
-        appDesc->DiscoveryUrls = calloc(sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls, sizeof(SOPC_String));
+        appDesc->DiscoveryUrls =
+            calloc((size_t) sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls, sizeof(SOPC_String));
     }
     else
     {
@@ -94,13 +95,13 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_String configEndPointURL;
     uint8_t nbSecuConfigs = 0;
-    int nbEndpointDescription = 0;
+    uint32_t nbEndpointDescription = 0;
     SOPC_SecurityPolicy* tabSecurityPolicy = NULL;
     OpcUa_EndpointDescription* currentConfig_EndpointDescription = NULL;
 
     SOPC_String_Initialize(&configEndPointURL);
 
-    sopcEndpointConfig = SOPC_ToolkitServer_GetEndpointConfig(endpoint_config_idx);
+    sopcEndpointConfig = SOPC_ToolkitServer_GetEndpointConfig((uint32_t) endpoint_config_idx);
 
     if (NULL != sopcEndpointConfig)
     {
@@ -266,10 +267,10 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
         OpcUa_EndpointDescription* final_OpcUa_EndpointDescription = NULL;
         if (nbEndpointDescription > 0)
         {
-            final_OpcUa_EndpointDescription = calloc(nbEndpointDescription, sizeof(OpcUa_EndpointDescription));
+            final_OpcUa_EndpointDescription = calloc((size_t) nbEndpointDescription, sizeof(OpcUa_EndpointDescription));
             if (final_OpcUa_EndpointDescription != NULL)
             {
-                for (int i = 0; i < nbEndpointDescription; i++)
+                for (uint32_t i = 0; i < nbEndpointDescription; i++)
                 {
                     final_OpcUa_EndpointDescription[i] = currentConfig_EndpointDescription[i];
                 }

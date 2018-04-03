@@ -669,7 +669,7 @@ SOPC_ReturnStatus SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_Buffer*
         status = SOPC_Int32_Write(&length, buf);
         if (SOPC_STATUS_OK == status && str->Length > 0)
         {
-            status = SOPC_Buffer_Write(buf, str->Data, str->Length);
+            status = SOPC_Buffer_Write(buf, str->Data, (uint32_t) str->Length);
 
             if (status != SOPC_STATUS_OK)
             {
@@ -710,7 +710,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
                     str->Data = malloc(sizeof(SOPC_Byte) * (size_t) length);
                     if (str->Data != NULL)
                     {
-                        status = SOPC_Buffer_Read(str->Data, buf, length);
+                        status = SOPC_Buffer_Read(str->Data, buf, (uint32_t) length);
                         if (status != SOPC_STATUS_OK)
                         {
                             status = SOPC_STATUS_ENCODING_ERROR;
@@ -765,7 +765,7 @@ SOPC_ReturnStatus SOPC_String_Write(const SOPC_String* str, SOPC_Buffer* buf)
         status = SOPC_Int32_Write(&length, buf);
         if (SOPC_STATUS_OK == status && str->Length > 0)
         {
-            status = SOPC_Buffer_Write(buf, str->Data, str->Length);
+            status = SOPC_Buffer_Write(buf, str->Data, (uint32_t) str->Length);
 
             if (status != SOPC_STATUS_OK)
             {
@@ -803,7 +803,7 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
                     str->Data = malloc(sizeof(SOPC_Byte) * (size_t)(length + 1));
                     if (str->Data != NULL)
                     {
-                        status = SOPC_Buffer_Read(str->Data, buf, length);
+                        status = SOPC_Buffer_Read(str->Data, buf, (uint32_t) length);
                         if (status != SOPC_STATUS_OK)
                         {
                             status = SOPC_STATUS_ENCODING_ERROR;
@@ -1644,12 +1644,15 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
             }
             if (SOPC_STATUS_OK == status)
             {
-                // Go backward to write correct length value
                 curPos = buf->position;
-                length = curPos - (lengthPos + 4);
-                SOPC_Buffer_SetPosition(buf, lengthPos);
-                SOPC_Int32_Write(&length, buf);
-                SOPC_Buffer_SetPosition(buf, curPos);
+                if (INT32_MAX >= curPos - (lengthPos + 4))
+                {
+                    // Go backward to write correct length value
+                    length = (int32_t)(curPos - (lengthPos + 4));
+                    SOPC_Buffer_SetPosition(buf, lengthPos);
+                    SOPC_Int32_Write(&length, buf);
+                    SOPC_Buffer_SetPosition(buf, curPos);
+                }
             }
             break;
         }

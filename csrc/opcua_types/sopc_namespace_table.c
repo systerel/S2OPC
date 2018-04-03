@@ -41,11 +41,11 @@ void SOPC_Namespace_Initialize(SOPC_NamespaceTable* nsTable)
 SOPC_ReturnStatus SOPC_Namespace_AllocateTable(SOPC_NamespaceTable* nsTable, uint32_t length)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (nsTable != NULL)
+    if (nsTable != NULL && length > 0 && length <= UINT16_MAX)
     {
         status = SOPC_STATUS_OK;
         nsTable->clearTable = 1; // True
-        nsTable->lastIdx = length - 1;
+        nsTable->lastIdx = (uint16_t)(length - 1);
         nsTable->namespaceArray = malloc(sizeof(SOPC_Namespace) * (size_t) length);
         if (NULL == nsTable->namespaceArray)
         {

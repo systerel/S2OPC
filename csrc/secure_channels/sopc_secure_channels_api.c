@@ -36,7 +36,7 @@ SOPC_EventDispatcherManager* SOPC_SecureChannels_GetEventDispatcher()
 
 static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
-    SOPC_SecureChannels_InputEvent scEvent = event;
+    SOPC_SecureChannels_InputEvent scEvent = (SOPC_SecureChannels_InputEvent) event;
     switch (scEvent)
     {
     /* Sockets events: */

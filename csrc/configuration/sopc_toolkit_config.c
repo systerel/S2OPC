@@ -661,30 +661,30 @@ SOPC_NamespaceTable* SOPC_ToolkitConfig_GetNamespaces()
 
 int32_t SOPC_AppEvent_ComEvent_Create(SOPC_App_Com_Event event)
 {
-    return SOPC_APP_COM_EVENT + (event << 8);
+    return (int32_t)(SOPC_APP_COM_EVENT + (event << 8));
 }
 
 int32_t SOPC_AppEvent_AddSpaceEvent_Create(SOPC_App_AddSpace_Event event)
 {
-    return SOPC_APP_ADDRESS_SPACE_NOTIF + (event << 8);
+    return (int32_t)(SOPC_APP_ADDRESS_SPACE_NOTIF + (event << 8));
 }
 
 SOPC_App_EventType SOPC_AppEvent_AppEventType_Get(int32_t iEvent)
 {
     assert(iEvent >= 0); // Ensure bitwise operation is not implem defined (it is the case on signed values)
-    return ((uint64_t) iEvent & 0xFF);
+    return (SOPC_App_EventType)((uint32_t) iEvent & 0xFF);
 }
 
 SOPC_App_Com_Event SOPC_AppEvent_ComEvent_Get(int32_t iEvent)
 {
     assert(iEvent >= 0); // Ensure bitwise operation is not implem defined (it is the case on signed values)
-    return ((uint64_t) iEvent >> 8);
+    return (SOPC_App_Com_Event)((uint32_t) iEvent >> 8);
 }
 
 SOPC_App_AddSpace_Event SOPC_AppEvent_AddSpaceEvent_Get(int32_t iEvent)
 {
     assert(iEvent >= 0); // Ensure bitwise operation is not implem defined (it is the case on signed values)
-    return ((uint64_t) iEvent >> 8);
+    return (SOPC_App_AddSpace_Event)((uint32_t) iEvent >> 8);
 }
 
 void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
@@ -692,16 +692,16 @@ void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addres
     /* Glue the address_space_bs machine content to the generated address space content */
 
     /* Number of nodes by nodeclass */
-    assert(addressSpace->nbNodesTotal <= INT32_MAX);
-    address_space_bs__nNodeIds = addressSpace->nbNodesTotal;
-    address_space_bs__nVariables = addressSpace->nbVariables;
-    address_space_bs__nVariableTypes = addressSpace->nbVariableTypes;
-    address_space_bs__nObjectTypes = addressSpace->nbObjectTypes;
-    address_space_bs__nReferenceTypes = addressSpace->nbReferenceTypes;
-    address_space_bs__nDataTypes = addressSpace->nbDataTypes;
-    address_space_bs__nMethods = addressSpace->nbMethods;
-    address_space_bs__nObjects = addressSpace->nbObjects;
-    address_space_bs__nViews = addressSpace->nbViews;
+    assert(addressSpace->nbNodesTotal <= INT32_MAX); // guaranteed by caller, it is sum of other fields
+    address_space_bs__nNodeIds = (int32_t) addressSpace->nbNodesTotal;
+    address_space_bs__nVariables = (int32_t) addressSpace->nbVariables;
+    address_space_bs__nVariableTypes = (int32_t) addressSpace->nbVariableTypes;
+    address_space_bs__nObjectTypes = (int32_t) addressSpace->nbObjectTypes;
+    address_space_bs__nReferenceTypes = (int32_t) addressSpace->nbReferenceTypes;
+    address_space_bs__nDataTypes = (int32_t) addressSpace->nbDataTypes;
+    address_space_bs__nMethods = (int32_t) addressSpace->nbMethods;
+    address_space_bs__nObjects = (int32_t) addressSpace->nbObjects;
+    address_space_bs__nViews = (int32_t) addressSpace->nbViews;
 
     /* Attributes */
     address_space_bs__a_NodeId = addressSpace->nodeIdArray;
@@ -737,8 +737,19 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* ad
             Mutex_Lock(&tConfig.mut);
             if (false == tConfig.locked && sopc_addressSpace_configured == false)
             {
-                status = SOPC_STATUS_OK;
-                SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(addressSpace);
+                if (addressSpace->nbNodesTotal <= INT32_MAX &&
+                    addressSpace->nbNodesTotal == addressSpace->nbDataTypes + addressSpace->nbMethods +
+                                                      addressSpace->nbObjectTypes + addressSpace->nbObjects +
+                                                      addressSpace->nbReferenceTypes + addressSpace->nbVariableTypes +
+                                                      addressSpace->nbVariables + addressSpace->nbViews)
+                {
+                    status = SOPC_STATUS_OK;
+                    SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(addressSpace);
+                }
+                else
+                {
+                    status = SOPC_STATUS_INVALID_PARAMETERS;
+                }
             }
             Mutex_Unlock(&tConfig.mut);
         }

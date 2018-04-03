@@ -40,11 +40,16 @@ struct SOPC_SLinkedList
 
 SOPC_SLinkedList* SOPC_SLinkedList_Create(size_t sizeMax)
 {
-    SOPC_SLinkedList* result = malloc(sizeof(SOPC_SLinkedList));
-    if (result != NULL)
+    SOPC_SLinkedList* result = NULL;
+
+    if (sizeMax <= UINT32_MAX)
     {
-        memset(result, 0, sizeof(SOPC_SLinkedList));
-        result->maxLength = sizeMax;
+        result = malloc(sizeof(SOPC_SLinkedList));
+        if (result != NULL)
+        {
+            memset(result, 0, sizeof(SOPC_SLinkedList));
+            result->maxLength = (uint32_t) sizeMax;
+        }
     }
     return result;
 }

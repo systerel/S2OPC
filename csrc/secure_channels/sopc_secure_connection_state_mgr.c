@@ -826,6 +826,8 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
     OpcUa_RequestHeader_Initialize(&reqHeader);
     OpcUa_OpenSecureChannelRequest opnReq;
     OpcUa_OpenSecureChannelRequest_Initialize(&opnReq);
+    uint8_t* bytes = NULL;
+    uint32_t length = 0;
 
     config = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(config != NULL);
@@ -882,10 +884,16 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
 
             if (SOPC_STATUS_OK == status)
             {
-                uint8_t* bytes = NULL;
-                bytes = SOPC_SecretBuffer_Expose(scConnection->clientNonce);
-                status = SOPC_ByteString_CopyFromBytes(&opnReq.ClientNonce, bytes,
-                                                       SOPC_SecretBuffer_GetLength(scConnection->clientNonce));
+                length = SOPC_SecretBuffer_GetLength(scConnection->clientNonce);
+                if (length <= INT32_MAX)
+                {
+                    bytes = SOPC_SecretBuffer_Expose(scConnection->clientNonce);
+                    status = SOPC_ByteString_CopyFromBytes(&opnReq.ClientNonce, bytes, (int32_t) length);
+                }
+                else
+                {
+                    status = SOPC_STATUS_NOK;
+                }
             }
 
             if (status != SOPC_STATUS_OK)
@@ -1060,8 +1068,8 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
 
             if (result != false)
             {
-                SOPC_SecretBuffer* secretServerNonce =
-                    SOPC_SecretBuffer_NewFromExposedBuffer(opnResp->ServerNonce.Data, opnResp->ServerNonce.Length);
+                SOPC_SecretBuffer* secretServerNonce = SOPC_SecretBuffer_NewFromExposedBuffer(
+                    opnResp->ServerNonce.Data, (uint32_t) opnResp->ServerNonce.Length);
                 if (secretServerNonce != NULL)
                 {
                     result = SC_DeriveSymmetricKeySets(false, scConnection->cryptoProvider, scConnection->clientNonce,
@@ -1567,8 +1575,8 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                        opnReq->SecurityMode == OpcUa_MessageSecurityMode_SignAndEncrypt);
                 if (opnReq->ClientNonce.Length > 0)
                 {
-                    scConnection->clientNonce =
-                        SOPC_SecretBuffer_NewFromExposedBuffer(opnReq->ClientNonce.Data, opnReq->ClientNonce.Length);
+                    scConnection->clientNonce = SOPC_SecretBuffer_NewFromExposedBuffer(
+                        opnReq->ClientNonce.Data, (uint32_t) opnReq->ClientNonce.Length);
                     if (NULL == scConnection->clientNonce)
                     {
                         *errorStatus = OpcUa_BadTcpInternalError;
@@ -1789,6 +1797,8 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     OpcUa_OpenSecureChannelResponse_Initialize(&opnResp);
     SOPC_Buffer* opnRespBuffer = NULL;
     SOPC_SecureChannel_Config* scConfig = NULL;
+    uint8_t* bytes = NULL;
+    uint32_t length = 0;
 
     scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(scConfig != NULL);
@@ -1841,10 +1851,16 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
             {
                 if (SOPC_STATUS_OK == status)
                 {
-                    uint8_t* bytes = NULL;
-                    bytes = SOPC_SecretBuffer_Expose(serverNonce);
-                    status = SOPC_ByteString_CopyFromBytes(&opnResp.ServerNonce, bytes,
-                                                           SOPC_SecretBuffer_GetLength(serverNonce));
+                    length = SOPC_SecretBuffer_GetLength(serverNonce);
+                    if (length <= INT32_MAX)
+                    {
+                        bytes = SOPC_SecretBuffer_Expose(serverNonce);
+                        status = SOPC_ByteString_CopyFromBytes(&opnResp.ServerNonce, bytes, (int32_t) length);
+                    }
+                    else
+                    {
+                        status = SOPC_STATUS_NOK;
+                    }
                 }
 
                 if (status != SOPC_STATUS_OK)
@@ -2003,8 +2019,8 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
                        scConfig->msgSecurityMode == OpcUa_MessageSecurityMode_SignAndEncrypt);
                 if (opnReq->ClientNonce.Length > 0)
                 {
-                    scConnection->clientNonce =
-                        SOPC_SecretBuffer_NewFromExposedBuffer(opnReq->ClientNonce.Data, opnReq->ClientNonce.Length);
+                    scConnection->clientNonce = SOPC_SecretBuffer_NewFromExposedBuffer(
+                        opnReq->ClientNonce.Data, (uint32_t) opnReq->ClientNonce.Length);
                     if (NULL == scConnection->clientNonce)
                     {
                         *errorStatus = OpcUa_BadTcpInternalError;
@@ -2052,6 +2068,9 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     SOPC_SecureChannel_Config* scConfig = NULL;
     SOPC_SecureConnection_SecurityToken newSecuToken;
     SOPC_SC_SecurityKeySets newSecuKeySets;
+    uint8_t* bytes = NULL;
+    uint32_t length = 0;
+
     memset(&newSecuKeySets, 0, sizeof(SOPC_SC_SecurityKeySets));
 
     scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
@@ -2109,10 +2128,16 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
             {
                 if (SOPC_STATUS_OK == status)
                 {
-                    uint8_t* bytes = NULL;
-                    bytes = SOPC_SecretBuffer_Expose(serverNonce);
-                    status = SOPC_ByteString_CopyFromBytes(&opnResp.ServerNonce, bytes,
-                                                           SOPC_SecretBuffer_GetLength(serverNonce));
+                    length = SOPC_SecretBuffer_GetLength(serverNonce);
+                    if (length <= INT32_MAX)
+                    {
+                        bytes = SOPC_SecretBuffer_Expose(serverNonce);
+                        status = SOPC_ByteString_CopyFromBytes(&opnResp.ServerNonce, bytes, (int32_t) length);
+                    }
+                    else
+                    {
+                        status = SOPC_STATUS_NOK;
+                    }
                 }
 
                 if (status != SOPC_STATUS_OK)
@@ -2216,7 +2241,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             {
                 if (scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT)
                 {
-                    result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId, auxParam);
+                    result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId, (uint32_t) auxParam);
                     if (false == result)
                     {
                         // Error case: close the secure connection if invalid state or unexpected error.
@@ -2228,13 +2253,13 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 else
                 {
                     // No socket connection expected just close the socket
-                    SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, auxParam, NULL, 0);
+                    SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
                 }
             }
             else
             {
                 // In case of unidentified secure connection problem, close the socket just connected
-                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, auxParam, NULL, 0);
+                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
             }
         }
         break;
@@ -2406,10 +2431,10 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                auxParam);
 
         scConnection = SC_GetConnection(eltId);
-        if (scConnection != NULL)
+        if (scConnection != NULL && auxParam <= UINT32_MAX)
         {
             SOPC_SentRequestMsg_Context* msgCtx = NULL;
-            msgCtx = SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, auxParam);
+            msgCtx = SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, (uint32_t) auxParam);
             if (NULL != msgCtx)
             {
                 switch (msgCtx->msgType)
@@ -2437,33 +2462,36 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
 
         /* id = endpoint description configuration index,
            auxParam = socket index */
-        result = SC_InitNewConnection(&idx);
-        if (result != false)
+        if (auxParam <= UINT32_MAX)
         {
-            scConnection = SC_GetConnection(idx);
-            assert(scConnection != NULL);
+            result = SC_InitNewConnection(&idx);
+            if (result != false)
+            {
+                scConnection = SC_GetConnection(idx);
+                assert(scConnection != NULL);
 
-            // set the socket index associated
-            scConnection->socketIndex = auxParam;
-            // record the endpoint description configuration
-            scConnection->serverEndpointConfigIdx = eltId;
-            // set connection as a server side connection
-            scConnection->isServerConnection = true;
+                // set the socket index associated
+                scConnection->socketIndex = (uint32_t) auxParam;
+                // record the endpoint description configuration
+                scConnection->serverEndpointConfigIdx = eltId;
+                // set connection as a server side connection
+                scConnection->isServerConnection = true;
 
-            // notify socket that connection is accepted
-            SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, auxParam, NULL, idx);
-            // notify secure listener that connection is accepted
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATED, eltId, NULL, idx);
+                // notify socket that connection is accepted
+                SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, (uint32_t) auxParam, NULL, idx);
+                // notify secure listener that connection is accepted
+                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATED, eltId, NULL, idx);
 
-            // Activate SC connection timeout (server side)
-            scConnection->connectionTimeoutTimerId = SC_StartConnectionEstablishTimer(idx);
-        }
-        else
-        {
-            // Error case: request to close the socket newly created
-            //             / nothing to send to SC listener state manager (no record of new connection in it for
-            //             now)
-            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, auxParam, NULL, 0);
+                // Activate SC connection timeout (server side)
+                scConnection->connectionTimeoutTimerId = SC_StartConnectionEstablishTimer(idx);
+            }
+            else
+            {
+                // Error case: request to close the socket newly created
+                //             / nothing to send to SC listener state manager (no record of new connection in it for
+                //             now)
+                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
+            }
         }
         break;
 
@@ -2614,9 +2642,16 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                                                             &requestHandle, &errorStatus);
                         if (result != false)
                         {
-                            // transition: Connecting => Connected
-                            result = SC_ServerTransition_ScConnecting_To_ScConnected(scConnection, eltId, auxParam,
-                                                                                     requestHandle);
+                            if (auxParam <= UINT32_MAX)
+                            {
+                                // transition: Connecting => Connected
+                                result = SC_ServerTransition_ScConnecting_To_ScConnected(
+                                    scConnection, eltId, (uint32_t) auxParam, requestHandle);
+                            }
+                            else
+                            {
+                                result = false;
+                            }
                             if (false == result)
                             {
                                 // since security verifications were done before, it should be an internal error
@@ -2646,9 +2681,16 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                             scConnection, (SOPC_Buffer*) params, &requestHandle, &requestedLifetime, &errorStatus);
                         if (result != false)
                         {
-                            // transition: ConnectedRenew => Connected
-                            result = SC_ServerTransition_ScConnectedRenew_To_ScConnected(
-                                scConnection, eltId, auxParam, requestHandle, requestedLifetime);
+                            if (auxParam <= UINT32_MAX)
+                            {
+                                // transition: ConnectedRenew => Connected
+                                result = SC_ServerTransition_ScConnectedRenew_To_ScConnected(
+                                    scConnection, eltId, (uint32_t) auxParam, requestHandle, requestedLifetime);
+                            }
+                            else
+                            {
+                                result = false;
+                            }
                             // used only if false == result
                             errorStatus = OpcUa_BadTcpInternalError;
                         }
@@ -2770,7 +2812,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         scConnection = SC_GetConnection(eltId);
         if (scConnection != NULL)
         {
-            SC_CloseSecureConnection(scConnection, eltId, false, auxParam,
+            SC_CloseSecureConnection(scConnection, eltId, false, (SOPC_StatusCode) auxParam,
                                      "Failure when receiving a message on the secure connection");
         } // else: nothing to do (=> socket should already be required to close)
         break;
@@ -2790,7 +2832,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         scConnection = SC_GetConnection(eltId);
         if (scConnection != NULL)
         {
-            SC_CloseSecureConnection(scConnection, eltId, false, auxParam,
+            SC_CloseSecureConnection(scConnection, eltId, false, (SOPC_StatusCode) auxParam,
                                      "Failure when encoding a message to send on the secure connection");
         } // else: nothing to do (=> socket should already be required to close)
         break;
@@ -2856,7 +2898,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         {
             SC_CloseSecureConnection(scConnection, eltId,
                                      true, // consider socket is closed since it shall be closed immediately now
-                                     auxParam, (char*) params);
+                                     (SOPC_StatusCode) auxParam, (char*) params);
         }
         break;
     default:

@@ -48,10 +48,10 @@ void channel_mgr_bs__INITIALISATION(void) {}
 void channel_mgr_bs__is_valid_channel_config_idx(const constants__t_channel_config_idx_i channel_mgr_bs__p_config_idx,
                                                  t_bool* const channel_mgr_bs__bres)
 {
-    SOPC_SecureChannel_Config* res = SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
+    SOPC_SecureChannel_Config* res = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) channel_mgr_bs__p_config_idx);
     if (NULL == res)
     {
-        res = SOPC_ToolkitServer_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
+        res = SOPC_ToolkitServer_GetSecureChannelConfig((uint32_t) channel_mgr_bs__p_config_idx);
     }
     if (NULL == res)
     {
@@ -66,7 +66,7 @@ void channel_mgr_bs__is_valid_channel_config_idx(const constants__t_channel_conf
 void channel_mgr_bs__is_valid_endpoint_config_idx(const constants__t_endpoint_config_idx_i channel_mgr_bs__p_config_idx,
                                                   t_bool* const channel_mgr_bs__bres)
 {
-    SOPC_Endpoint_Config* res = SOPC_ToolkitServer_GetEndpointConfig(channel_mgr_bs__p_config_idx);
+    SOPC_Endpoint_Config* res = SOPC_ToolkitServer_GetEndpointConfig((uint32_t) channel_mgr_bs__p_config_idx);
     if (NULL == res)
     {
         *channel_mgr_bs__bres = false;
@@ -80,17 +80,18 @@ void channel_mgr_bs__is_valid_endpoint_config_idx(const constants__t_endpoint_co
 void channel_mgr_bs__prepare_cli_open_secure_channel(
     const constants__t_channel_config_idx_i channel_mgr_bs__p_config_idx)
 {
-    SOPC_SecureChannel_Config* config = SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
+    SOPC_SecureChannel_Config* config =
+        SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) channel_mgr_bs__p_config_idx);
     if (NULL != config)
     {
-        SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, channel_mgr_bs__p_config_idx, NULL, 0);
+        SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, (uint32_t) channel_mgr_bs__p_config_idx, NULL, 0);
     }
     // else: will be checked in B model in next instruction and open avoided
 }
 
 void channel_mgr_bs__finalize_close_secure_channel(const constants__t_channel_i channel_mgr_bs__channel)
 {
-    SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, channel_mgr_bs__channel, NULL, 0);
+    SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, (uint32_t) channel_mgr_bs__channel, NULL, 0);
 }
 
 void channel_mgr_bs__last_connected_channel_lost()
@@ -102,7 +103,7 @@ void channel_mgr_bs__send_channel_msg_buffer(const constants__t_channel_i channe
                                              const constants__t_byte_buffer_i channel_mgr_bs__buffer,
                                              const constants__t_request_context_i channel_mgr_bs__request_context)
 {
-    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, channel_mgr_bs__channel, channel_mgr_bs__buffer,
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, (uint32_t) channel_mgr_bs__channel, channel_mgr_bs__buffer,
                                      channel_mgr_bs__request_context);
 }
 

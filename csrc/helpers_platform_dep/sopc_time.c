@@ -38,7 +38,14 @@ char* SOPC_Time_GetStringOfCurrentLocalTime(bool compact)
             // Max size = 19 characters for date + '\0' terminating => 20
             strftime(stime, 20, "%Y/%m/%d %H:%M:%S", localtime(&timer)); // => 19 used
             dt = SOPC_Time_GetCurrentTimeUTC();
-            ms = (dt / 10000) % 1000; // 100 nanosecs => millisecs
+            if (dt > 0)
+            {
+                ms = (uint16_t)(dt / 10000) % 1000; // 100 nanosecs => millisecs
+            }
+            else
+            {
+                ms = 0;
+            }
             // . + 3 digits = 19 + 4 => 23 used
             sprintf(&stime[19], ".%03u", ms);
             // '\0' terminating => 24 used
@@ -49,7 +56,14 @@ char* SOPC_Time_GetStringOfCurrentLocalTime(bool compact)
             // Max size = 15 characters for date + '\0' terminating => 16
             strftime(stime, 16, "%Y%m%d_%H%M%S", localtime(&timer)); // => 15 used
             dt = SOPC_Time_GetCurrentTimeUTC();
-            ms = (dt / 10000) % 1000; // 100 nanosecs => millisecs
+            if (dt > 0)
+            {
+                ms = (uint16_t)(dt / 10000) % 1000; // 100 nanosecs => millisecs
+            }
+            else
+            {
+                ms = 0;
+            }
             // . + 3 digits = 15 + 4 => 19 used
             sprintf(&stime[15], "_%03u", ms);
             // '\0' terminating => 20 used
@@ -74,7 +88,14 @@ char* SOPC_Time_GetStringOfCurrentTimeUTC(bool compact)
             // Max size = 19 characters for date + '\0' terminating => 20
             strftime(stime, 20, "%Y/%m/%d %H:%M:%S", gmtime(&timer)); // => 19 used
             dt = SOPC_Time_GetCurrentTimeUTC();
-            ms = (dt / 10000) % 1000; // 100 nanosecs => millisecs
+            if (dt > 0)
+            {
+                ms = (uint16_t)(dt / 10000) % 1000; // 100 nanosecs => millisecs
+            }
+            else
+            {
+                ms = 0;
+            }
             // . + 3 digits = 19 + 4 => 23 used
             sprintf(&stime[19], ".%03u", ms);
             // '\0' terminating => 24 used
@@ -85,7 +106,14 @@ char* SOPC_Time_GetStringOfCurrentTimeUTC(bool compact)
             // Max size = 15 characters for date + '\0' terminating => 16
             strftime(stime, 16, "%Y%m%d_%H%M%S", gmtime(&timer)); // => 15 used
             dt = SOPC_Time_GetCurrentTimeUTC();
-            ms = (dt / 10000) % 1000; // 100 nanosecs => millisecs
+            if (dt > 0)
+            {
+                ms = (uint16_t)(dt / 10000) % 1000; // 100 nanosecs => millisecs
+            }
+            else
+            {
+                ms = 0;
+            }
             // . + 3 digits = 15 + 4 => 19 used
             sprintf(&stime[15], "_%03u", ms);
             // '\0' terminating => 20 used

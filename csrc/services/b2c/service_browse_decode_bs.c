@@ -85,7 +85,14 @@ void service_browse_decode_bs__get_nb_BrowseTargetMax(t_entier4* const service_b
         *service_browse_decode_bs__p_nb_BrowseTargetMax = 0;
     else
     {
-        *service_browse_decode_bs__p_nb_BrowseTargetMax = request->RequestedMaxReferencesPerNode;
+        if (request->RequestedMaxReferencesPerNode < INT32_MAX)
+        {
+            *service_browse_decode_bs__p_nb_BrowseTargetMax = (int32_t) request->RequestedMaxReferencesPerNode;
+        }
+        else
+        {
+            *service_browse_decode_bs__p_nb_BrowseTargetMax = INT32_MAX;
+        }
         if (0 == *service_browse_decode_bs__p_nb_BrowseTargetMax ||
             *service_browse_decode_bs__p_nb_BrowseTargetMax > constants__k_n_BrowseTarget_max)
             *service_browse_decode_bs__p_nb_BrowseTargetMax = constants__k_n_BrowseTarget_max;

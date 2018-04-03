@@ -409,8 +409,8 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
             if (SOPC_STATUS_OK == status)
             {
                 SOPC_Certificate* cert = NULL;
-                status =
-                    SOPC_KeyManager_Certificate_CreateFromDER(senderCertificate.Data, senderCertificate.Length, &cert);
+                status = SOPC_KeyManager_Certificate_CreateFromDER(senderCertificate.Data,
+                                                                   (uint32_t) senderCertificate.Length, &cert);
                 if (SOPC_STATUS_OK == status)
                 {
                     status = SOPC_CryptoProvider_Certificate_Validate(scConnection->cryptoProvider, pkiProvider, cert);
@@ -519,7 +519,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                 {
                     if ((int32_t) thumbprintLength == receiverCertThumb.Length)
                     {
-                        status = SOPC_ByteString_InitializeFixedSize(&curAppCertThumbprint, (int32_t) thumbprintLength);
+                        status = SOPC_ByteString_InitializeFixedSize(&curAppCertThumbprint, thumbprintLength);
                         if (SOPC_STATUS_OK == status)
                         {
                             status =
@@ -2020,8 +2020,8 @@ static bool SC_Chunks_EncodeTcpMsgHeader(SOPC_SecureConnection* scConnection,
 static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection* scConnection,
                                                SOPC_SecureChannel_Config* scConfig,
                                                SOPC_Buffer* buffer,
-                                               uint32_t* securityPolicyLength,
-                                               uint32_t* senderCertificateSize,
+                                               int32_t* securityPolicyLength,
+                                               int32_t* senderCertificateSize,
                                                SOPC_StatusCode* errorStatus)
 {
     assert(scConnection != NULL);
@@ -2052,7 +2052,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection* scConnecti
     }
     else
     {
-        *securityPolicyLength = (uint32_t) strSecuPolicy.Length;
+        *securityPolicyLength = strSecuPolicy.Length;
     }
 
     if (result != false)
@@ -2086,7 +2086,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection* scConnecti
             if (SOPC_STATUS_OK == status && length <= INT32_MAX)
             {
                 bsSenderCert.Length = (int32_t) length;
-                *senderCertificateSize = length;
+                *senderCertificateSize = (int32_t) length;
             }
             else
             {
@@ -2447,13 +2447,24 @@ static uint16_t SC_Chunks_GetPaddingSize(
     uint32_t plainBlockSize,
     uint32_t signatureSize)
 {
+    uint32_t lresult = 0;
+    uint16_t result = 0;
     // By default only 1 padding size field + 1 if extra padding
     uint8_t paddingSizeFields = 1;
     if (SC_Chunks_Is_ExtraPaddingSizePresent(plainBlockSize))
     {
-        paddingSizeFields += 1;
+        paddingSizeFields++;
     }
-    return plainBlockSize - ((bytesToEncrypt + signatureSize + paddingSizeFields) % plainBlockSize);
+    lresult = plainBlockSize - ((bytesToEncrypt + signatureSize + paddingSizeFields) % plainBlockSize);
+    if (lresult <= UINT16_MAX)
+    {
+        result = (uint16_t) lresult;
+    }
+    else
+    {
+        SOPC_Logger_TraceError("ScChunksMgr: Unexpected padding size '%" PRIu32 "' > UINT16_MAX", lresult);
+    }
+    return result;
 }
 
 static bool SOPC_Chunks_EncodePadding(SOPC_SecureConnection* scConnection,
@@ -2498,7 +2509,7 @@ static bool SOPC_Chunks_EncodePadding(SOPC_SecureConnection* scConnection,
         if (result != false)
         {
             uint8_t paddingSizeField = 0;
-            paddingSizeField = 0xFF & *realPaddingLength;
+            paddingSizeField = (uint8_t)(0xFF & *realPaddingLength);
             // The value of each byte of the padding is equal to paddingSize:
             SOPC_Byte* paddingBytes = malloc(sizeof(SOPC_Byte) * (*realPaddingLength));
             if (paddingBytes != NULL)
@@ -2522,7 +2533,7 @@ static bool SOPC_Chunks_EncodePadding(SOPC_SecureConnection* scConnection,
         {
             *hasExtraPadding = 1; // True
             // extra padding = most significant byte of 2 bytes padding size
-            SOPC_Byte extraPadding = 0x00FF & *realPaddingLength;
+            SOPC_Byte extraPadding = (SOPC_Byte)(0x00FF & *realPaddingLength);
             status = SOPC_Buffer_Write(buffer, &extraPadding, 1);
             if (SOPC_STATUS_OK != status)
             {
@@ -2538,37 +2549,55 @@ static bool SOPC_Chunks_EncodePadding(SOPC_SecureConnection* scConnection,
     return result;
 }
 
-static bool SC_Chunks_CheckMaxSenderCertificateSize(uint32_t senderCertificateSize,
+static bool SC_Chunks_CheckMaxSenderCertificateSize(int32_t senderCertificateSize,
                                                     uint32_t messageChunkSize,
-                                                    uint32_t securityPolicyUriLength,
+                                                    int32_t securityPolicyUriLength,
                                                     bool hasPadding,
-                                                    uint32_t realPaddingLength,
+                                                    uint16_t realPaddingLength,
                                                     bool hasExtraPadding,
                                                     uint32_t asymmetricSignatureSize)
 {
     bool result = false;
-    int32_t maxSize = // Fit in a single message chunk with at least 1 byte of body
-        messageChunkSize - SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH - 4 - // URI length field size
-        securityPolicyUriLength - 4 -                                 // Sender certificate length field
-        4 -                                                           // Receiver certificate thumbprint length field
-        20 -                                                          // Receiver certificate thumbprint length
-        8;                                                            // Sequence header size
-    if (hasPadding != false)
+    int32_t maxSize = 0;
+
+    if (messageChunkSize <= INT32_MAX)
+    {
+        result = true;
+        maxSize = // Fit in a single message chunk with at least 1 byte of body
+            (int32_t) messageChunkSize - SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH - 4 - // URI length field size
+            securityPolicyUriLength - 4 -                                           // Sender certificate length field
+            4 -  // Receiver certificate thumbprint length field
+            20 - // Receiver certificate thumbprint length
+            8;
+    }
+
+    if (result != false && hasPadding != false)
     {
         maxSize = maxSize - 1 - // padding length field size
-                  realPaddingLength;
-        if (hasExtraPadding)
+                  (int32_t) realPaddingLength;
+        if (hasExtraPadding != false)
         {
             // ExtraPaddingSize field size to remove
             maxSize = maxSize - 1;
         }
     }
-    maxSize = maxSize - asymmetricSignatureSize;
-
-    if (senderCertificateSize <= (uint32_t) maxSize)
+    if (result != false)
     {
-        result = true;
+        if (asymmetricSignatureSize <= INT32_MAX)
+        {
+            maxSize = maxSize - (int32_t) asymmetricSignatureSize;
+        }
+        else
+        {
+            result = false;
+        }
     }
+
+    if (senderCertificateSize > maxSize)
+    {
+        result = false;
+    }
+
     return result;
 }
 
@@ -2680,13 +2709,21 @@ static bool SC_Chunks_EncodeSignature(SOPC_SecureConnection* scConnection,
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_CryptoProvider_AsymmetricSign(scConnection->cryptoProvider, buffer->data, buffer->length,
-                                                        runningAppPrivateKey, signedData.Data, signedData.Length);
+            if (signedData.Length > 0)
+            {
+                status = SOPC_CryptoProvider_AsymmetricSign(scConnection->cryptoProvider, buffer->data, buffer->length,
+                                                            runningAppPrivateKey, signedData.Data,
+                                                            (uint32_t) signedData.Length);
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
+            }
         }
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_Buffer_Write(buffer, signedData.Data, signedData.Length);
+            status = SOPC_Buffer_Write(buffer, signedData.Data, (uint32_t) signedData.Length);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -2706,14 +2743,22 @@ static bool SC_Chunks_EncodeSignature(SOPC_SecureConnection* scConnection,
             status = SOPC_ByteString_InitializeFixedSize(&signedData, signatureSize);
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_CryptoProvider_SymmetricSign(scConnection->cryptoProvider, buffer->data, buffer->length,
-                                                           scConnection->currentSecuKeySets.senderKeySet->signKey,
-                                                           signedData.Data, signedData.Length);
+                if (signedData.Length > 0)
+                {
+                    status =
+                        SOPC_CryptoProvider_SymmetricSign(scConnection->cryptoProvider, buffer->data, buffer->length,
+                                                          scConnection->currentSecuKeySets.senderKeySet->signKey,
+                                                          signedData.Data, (uint32_t) signedData.Length);
+                }
+                else
+                {
+                    status = SOPC_STATUS_NOK;
+                }
             }
 
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_Buffer_Write(buffer, signedData.Data, signedData.Length);
+                status = SOPC_Buffer_Write(buffer, signedData.Data, (uint32_t) signedData.Length);
             }
             if (SOPC_STATUS_OK == status)
             {
@@ -2884,8 +2929,8 @@ static bool SC_Chunks_TreatSendBuffer(
     uint32_t bodySize = 0;
     uint32_t sequenceNumberPosition = 0; // Position from which encryption start
     uint32_t tokenId = 0;
-    uint32_t senderCertificateSize = 0;
-    uint32_t securityPolicyLength = 0;
+    int32_t senderCertificateSize = 0;
+    int32_t securityPolicyLength = 0;
     uint32_t signatureSize = 0;
     bool hasPadding = false;
     uint16_t realPaddingLength = 0; // padding + extra total size
@@ -3483,8 +3528,8 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
         {
             if (NULL != buffer && auxParam <= UINT32_MAX)
             {
-                result = SC_Chunks_TreatSendBuffer(eltId, scConnection, auxParam, sendMsgType, isSendTcpOnly, isOPN,
-                                                   buffer, &outputBuffer, &errorStatus);
+                result = SC_Chunks_TreatSendBuffer(eltId, scConnection, (uint32_t) auxParam, sendMsgType, isSendTcpOnly,
+                                                   isOPN, buffer, &outputBuffer, &errorStatus);
             }
             else
             {

@@ -62,4 +62,14 @@
 #error "UINTPTR_MAX < UINT32_MAX whereas uintptr_t are used to store uint32_t values"
 #endif
 
+/* Check use of int64_t to store ssize_t values is valid */
+#if SSIZE_MAX > INT64_MAX
+#error "SSIZE_MAX > INT64_MAX whereas int64_t are used to store ssize_t values"
+#endif
+
+/* Check casts from uint32_t / int32_t to size_t are valid without verification */
+#if SIZE_MAX < UINT32_MAX
+#error "SIZE_MAX < UINT32_MAX whereas uint32_t are casted to size_t values"
+#endif
+
 #endif

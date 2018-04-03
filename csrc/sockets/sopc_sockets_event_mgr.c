@@ -440,7 +440,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
     SOPC_Socket* socketElt = NULL;
     SOPC_Socket* acceptSock = NULL;
     SOPC_Buffer* buffer = NULL;
-    int32_t readBytes = 0;
+    int64_t readBytes = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     switch (socketEvent)
@@ -476,7 +476,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
             socketElt = &socketsArray[eltId];
             if (socketElt->state == SOCKET_STATE_ACCEPTED)
             {
-                socketElt->connectionId = auxParam;
+                socketElt->connectionId = (uint32_t) auxParam;
                 socketElt->state = SOCKET_STATE_CONNECTED;
             }
             else
@@ -707,10 +707,10 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
                 buffer = NULL;
                 // wait next ready to read event
             }
-            else if (SOPC_STATUS_OK == status && readBytes >= 0)
+            else if (SOPC_STATUS_OK == status && readBytes >= 0 && readBytes <= UINT32_MAX)
             {
                 // Update buffer lengtn
-                SOPC_Buffer_SetDataLength(buffer, readBytes);
+                SOPC_Buffer_SetDataLength(buffer, (uint32_t) readBytes);
                 // Transmit to secure channel connection associated
                 SOPC_SecureChannels_EnqueueEvent(SOCKET_RCV_BYTES, socketElt->connectionId, (void*) buffer, eltId);
             }

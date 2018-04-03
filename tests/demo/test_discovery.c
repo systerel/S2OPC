@@ -114,26 +114,28 @@ void EventDispatcher_ValidateDiscovery(SOPC_App_Com_Event event, uint32_t arg, v
 
             /* Check the received certificate: it shall be present */
             if (strncmp(SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri), SOPC_SecurityPolicy_Basic256_URI,
-                        strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) == 0)
+                        strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) == 0 &&
+                pEndp->ServerCertificate.Length > 0)
             {
                 bB256Checked = true;
                 iSecLevelB256 = pEndp->SecurityLevel;
                 pBufCert = &pEndp->ServerCertificate;
-                ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(pBufCert->Data, pBufCert->Length, &pCert) ==
-                          SOPC_STATUS_OK);
+                ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
+                                                                    &pCert) == SOPC_STATUS_OK);
                 SOPC_KeyManager_Certificate_Free(pCert);
                 pCert = NULL;
                 pBufCert = NULL;
             }
 
             if (strncmp(SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri), SOPC_SecurityPolicy_Basic256Sha256_URI,
-                        strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0)
+                        strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0 &&
+                pEndp->ServerCertificate.Length > 0)
             {
                 bB256S256Checked = true;
                 iSecLevelB256S256 = pEndp->SecurityLevel;
                 pBufCert = &pEndp->ServerCertificate;
-                ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(pBufCert->Data, pBufCert->Length, &pCert) ==
-                          SOPC_STATUS_OK);
+                ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
+                                                                    &pCert) == SOPC_STATUS_OK);
                 SOPC_KeyManager_Certificate_Free(pCert);
                 pCert = NULL;
                 pBufCert = NULL;

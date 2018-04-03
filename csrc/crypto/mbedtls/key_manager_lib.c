@@ -142,6 +142,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     uint8_t* buffer = NULL;
+    int lengthWritten = 0;
 
     if (NULL == pKey || NULL == pDest || 0 == lenDest || NULL == pLenWritten)
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -151,10 +152,11 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
         return SOPC_STATUS_NOK;
     // Asymmetric key should be const in mbedtls
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    *pLenWritten = mbedtls_pk_write_key_der(&((SOPC_AsymmetricKey*) pKey)->pk, buffer, lenDest);
+    lengthWritten = mbedtls_pk_write_key_der(&((SOPC_AsymmetricKey*) pKey)->pk, buffer, lenDest);
     SOPC_GCC_DIAGNOSTIC_RESTORE
-    if (*pLenWritten > 0 && *pLenWritten <= lenDest)
+    if (lengthWritten > 0 && (uint32_t) lengthWritten <= lenDest)
     {
+        *pLenWritten = (uint32_t) lengthWritten;
         memcpy(pDest, buffer + lenDest - *pLenWritten, *pLenWritten);
         status = SOPC_STATUS_OK;
     }

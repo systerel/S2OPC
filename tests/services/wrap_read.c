@@ -88,7 +88,7 @@ OpcUa_ReadRequest* read_new_read_request(void)
 
     OpcUa_ReadRequest* pReadReq = DESIGNATE_NEW(OpcUa_ReadRequest, .encodeableType = &OpcUa_ReadRequest_EncodeableType,
                                                 .MaxAge = 0., .TimestampsToReturn = OpcUa_TimestampsToReturn_Neither,
-                                                .NoOfNodesToRead = N_REQUESTS, .NodesToRead = lrv);
+                                                .NoOfNodesToRead = (int32_t) N_REQUESTS, .NodesToRead = lrv);
     if (NULL == pReadReq)
         exit(1);
 

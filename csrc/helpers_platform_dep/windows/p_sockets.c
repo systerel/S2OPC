@@ -121,7 +121,7 @@ SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
 
         if (setOptStatus != SOCKET_ERROR && setNonBlocking != false)
         {
-            setOptStatus = ioctlsocket(sock, FIONBIO, &ltrue); // True => Non blocking
+            setOptStatus = ioctlsocket(sock, (long) FIONBIO, &ltrue); // True => Non blocking
         }
 
         if (setOptStatus == SOCKET_ERROR)
@@ -293,8 +293,22 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketS
     }
     else
     {
-        timeout.tv_sec = (waitMs / 1000);
-        timeout.tv_usec = 1000 * (waitMs % 1000);
+        if (waitMs / 1000 > LONG_MAX)
+        {
+            timeout.tv_sec = LONG_MAX;
+        }
+        else
+        {
+            timeout.tv_sec = (long) (waitMs / 1000);
+        }
+        if (1000 * (waitMs % 1000) > LONG_MAX)
+        {
+            timeout.tv_usec = LONG_MAX;
+        }
+        else
+        {
+            timeout.tv_usec = (long) (1000 * (waitMs % 1000));
+        }
         val = &timeout;
     }
     nbReady = select(ignored, readSet, writeSet, exceptSet, val);
@@ -311,7 +325,7 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
     if (sock != SOPC_INVALID_SOCKET && data != NULL && count <= INT32_MAX && sentBytes != NULL)
     {
         status = SOPC_STATUS_NOK;
-        res = send(sock, (char*) data, count, 0);
+        res = send(sock, (char*) data, (int) count, 0);
         *sentBytes = (uint32_t) res;
         if (res == SOCKET_ERROR)
         {
@@ -331,12 +345,12 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
     return status;
 }
 
-SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int32_t* readCount)
+SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int64_t* readCount)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0)
+    if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0 && dataSize <= INT32_MAX)
     {
-        *readCount = recv(sock, (char*) data, dataSize, 0);
+        *readCount = recv(sock, (char*) data, (int) dataSize, 0);
         if (*readCount > 0)
         {
             status = SOPC_STATUS_OK;
@@ -366,7 +380,7 @@ void Socket_Close(Socket* sock)
     {
         if (closesocket(*sock) != SOCKET_ERROR)
         {
-            *sock = -1;
+            *sock = SOPC_INVALID_SOCKET;
         }
     }
 }
