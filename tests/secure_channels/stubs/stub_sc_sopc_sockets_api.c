@@ -25,6 +25,7 @@ SOPC_AsyncQueue* socketsEvents = NULL;
 
 void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent scEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StubSC_SocketsEventParams* scParams = calloc(1, sizeof(SOPC_StubSC_SocketsEventParams));
     assert(scParams != NULL && socketsEvents != NULL);
     scParams->event = scEvent;
@@ -32,12 +33,16 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent scEvent, uint32_t id, voi
     scParams->params = params;
     scParams->auxParam = auxParam;
 
-    assert(SOPC_STATUS_OK == SOPC_AsyncQueue_BlockingEnqueue(socketsEvents, (void*) scParams));
+    status = SOPC_AsyncQueue_BlockingEnqueue(socketsEvents, (void*) scParams);
+    (void)status; // status is not used if asserts are not compiled in
+    assert(status == SOPC_STATUS_OK );
 }
 
 void SOPC_Sockets_Initialize()
 {
-    assert(SOPC_STATUS_OK == SOPC_AsyncQueue_Init(&socketsEvents, "StubsSC_SocketsEventQueue"));
+    SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&socketsEvents, "StubsSC_SocketsEventQueue");
+    (void)status; // status is not used if asserts are not compiled in
+    assert(status == SOPC_STATUS_OK);
 }
 
 void SOPC_Sockets_Clear()

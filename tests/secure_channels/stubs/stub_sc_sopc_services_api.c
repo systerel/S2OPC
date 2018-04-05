@@ -25,6 +25,7 @@ SOPC_AsyncQueue* servicesEvents = NULL;
 
 void SOPC_Services_EnqueueEvent(SOPC_Services_Event scEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StubSC_ServicesEventParams* scParams = calloc(1, sizeof(SOPC_StubSC_ServicesEventParams));
     assert(scParams != NULL && servicesEvents != NULL);
     scParams->event = scEvent;
@@ -32,12 +33,16 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event scEvent, uint32_t id, void* 
     scParams->params = params;
     scParams->auxParam = auxParam;
 
-    assert(SOPC_STATUS_OK == SOPC_AsyncQueue_BlockingEnqueue(servicesEvents, (void*) scParams));
+    status = SOPC_AsyncQueue_BlockingEnqueue(servicesEvents, (void*) scParams);
+    (void)status; // status is not used if asserts are not compiled in
+    assert(status == SOPC_STATUS_OK );
 }
 
 void SOPC_Services_Initialize()
 {
-    assert(SOPC_STATUS_OK == SOPC_AsyncQueue_Init(&servicesEvents, "StubsSC_ServicesEventQueue"));
+    SOPC_StatusCode status = SOPC_AsyncQueue_Init(&servicesEvents, "StubsSC_ServicesEventQueue");
+    (void)status; // status is not used if asserts are not compiled in
+    assert(status == SOPC_STATUS_OK);
 }
 
 void SOPC_Services_ToolkitConfigured() {}

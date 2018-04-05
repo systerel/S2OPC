@@ -269,7 +269,8 @@ int main(int argc, char* argv[])
 
         scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
         assert(scConfigIdx != 0);
-        assert(SOPC_STATUS_OK == SOPC_Toolkit_Configured());
+        status = SOPC_Toolkit_Configured();
+        assert(status == SOPC_STATUS_OK);
 
         SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, scConfigIdx, NULL, 0);
         printf(">>Stub_Client: Establishing connection to server...\n");

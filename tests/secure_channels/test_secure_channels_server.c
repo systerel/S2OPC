@@ -192,7 +192,8 @@ int main(int argc, char* argv[])
         epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);
 
         assert(epConfigIdx != 0);
-        assert(SOPC_STATUS_OK == SOPC_Toolkit_Configured());
+        status = SOPC_Toolkit_Configured();
+        assert(status == SOPC_STATUS_OK);
 
         SOPC_SecureChannels_EnqueueEvent(EP_OPEN, epConfigIdx, NULL, 0);
 
@@ -281,7 +282,8 @@ int main(int argc, char* argv[])
                 serviceEvent->auxParam != 0) // request context
             {
                 SOPC_EncodeableType* encType = NULL;
-                assert(SOPC_STATUS_OK == SOPC_MsgBodyType_Read((SOPC_Buffer*) serviceEvent->params, &encType));
+                status = SOPC_MsgBodyType_Read((SOPC_Buffer*) serviceEvent->params, &encType);
+                assert(status == SOPC_STATUS_OK);
                 SOPC_Buffer_Delete((SOPC_Buffer*) serviceEvent->params);
                 serviceEvent->params = NULL;
                 if (encType == &OpcUa_GetEndpointsRequest_EncodeableType)

@@ -28,6 +28,7 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
                                       void* params,
                                       uintptr_t auxParam)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StubSockets_SecureChannelsEventParams* scParams =
         calloc(1, sizeof(SOPC_StubSockets_SecureChannelsEventParams));
     assert(scParams != NULL && secureChannelsEvents != NULL);
@@ -36,12 +37,16 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
     scParams->params = params;
     scParams->auxParam = auxParam;
 
-    assert(SOPC_STATUS_OK == SOPC_AsyncQueue_BlockingEnqueue(secureChannelsEvents, (void*) scParams));
+    status = SOPC_AsyncQueue_BlockingEnqueue(secureChannelsEvents, (void*) scParams);
+    (void)status; // status is not used if asserts are not compiled in
+    assert(status == SOPC_STATUS_OK );
 }
 
 void SOPC_SecureChannels_Initialize()
 {
-    assert(SOPC_STATUS_OK == SOPC_AsyncQueue_Init(&secureChannelsEvents, "StubsSockets_SecureChannelEventQueue"));
+    SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&secureChannelsEvents, "StubsSockets_SecureChannelEventQueue");
+    (void)status; // status is not used if asserts are not compiled in
+    assert(status == SOPC_STATUS_OK);
 }
 
 void SOPC_SecureChannels_Clear()
