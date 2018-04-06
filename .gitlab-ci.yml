@@ -112,13 +112,16 @@ test-unit:
   tags:
     - docker
     - linux
-  dependencies:
-    - build-linux64
   artifacts:
     name: 'test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
+      - 'bin/*.tap'
+      - 'bin/*.log'
       - 'bin/Testing'
-    expire_in: '3 month'
+    when: always
+    expire_in: '1 month'
+  dependencies:
+    - build-linux64
 
 test-uactt:
   stage: test
@@ -130,5 +133,11 @@ test-uactt:
   tags:
     - docker
     - linux
+  artifacts:
+    name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'bin/*.tap'
+      - 'bin/*.log'
+    when: on_failure
   dependencies:
     - build-linux64
