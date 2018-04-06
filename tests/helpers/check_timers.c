@@ -138,7 +138,7 @@ START_TEST(test_timers_with_cancellation)
     // Set start time reference
     startTime = SOPC_Time_GetCurrentTimeUTC();
 
-    for (i = 0; i < NB_TIMERS; i++)
+    for (i = 0; i < NB_TIMERS_WITH_CANCEL; i++)
     {
         eventParams.eltId = i;
         eventParams.auxParam = i;
