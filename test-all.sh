@@ -17,123 +17,28 @@
 
 
 #  Check toolkit tests binaries are present and run them
-set -e
-BIN_DIR=$(pwd)/bin
-TEST_SCRIPTS=$(pwd)/tests/scripts
 
-# Check binaries are present Build
-echo "Check test binaries are present"
-if [ -f "$BIN_DIR/check_helpers" ] &&
-   [ -f "$BIN_DIR/check_sockets" ] &&
-   [ -f "$BIN_DIR/test_secure_channels_server" ] &&
-   [ -f "$BIN_DIR/test_secure_channels_client" ] &&
-   [ -f "$BIN_DIR/toolkit_test_read" ] &&
-   [ -f "$BIN_DIR/toolkit_test_write" ] &&
-   [ -f "$BIN_DIR/toolkit_test_server_local_service" ] &&
-   [ -f "$BIN_DIR/toolkit_test_server" ] &&
-   [ -f "$BIN_DIR/toolkit_test_client" ] &&
-   [ -f "$BIN_DIR/toolkit_test_suite_client" ]
-then
-    echo "Test binaries found"
-else
-    echo "Test binary missing"
-    exit 1
+MY_DIR=$(cd $(dirname $0) && pwd)
+BIN_DIR="${MY_DIR}/bin"
+BUILD_DIR="${MY_DIR}/build"
+VALIDATION_DIR="${MY_DIR}/validation"
+TEST_DIR=${BUILD_DIR}
+CTEST_FILE="${TEST_DIR}/CTestTestfile.cmake"
+
+if [ ! -f "${CTEST_FILE}" ]; then
+	TEST_DIR=${BIN_DIR}
+	CTEST_FILE="${TEST_DIR}/CTestTestfile.cmake"
 fi
 
-# run helpers tests
-pushd $BIN_DIR
-export CK_TAP_LOG_FILE_NAME=helpers.tap && ./check_helpers
-popd
-
-# run sockets test
-export CK_TAP_LOG_FILE_NAME=$BIN_DIR/sockets.tap && $BIN_DIR/check_sockets
-
-# run secure channels tests
-## msg buffer fields validity limit tests
-pushd $BIN_DIR
-export CK_TAP_LOG_FILE_NAME=sc_rcv_buffer.tap && ./check_sc_rcv_buffer
-export CK_TAP_LOG_FILE_NAME=sc_rcv_encrypted_buffer.tap && ./check_sc_rcv_encrypted_buffer
-popd
-## client / server test
-$TEST_SCRIPTS/run_client_server_test_SC_level.sh
-
-# run services tests
-## unitary service tests
-$BIN_DIR/toolkit_test_read
-if [[ $? -eq 0 ]]; then
-    echo "ok 1 - test: read service test: Passed" > $BIN_DIR/service_read.tap
-else
-    echo "not ok 1 - test: read service test: $?" > $BIN_DIR/service_read.tap
+if [ ! -f "${CTEST_FILE}" ]; then
+	echo "No CTestTestfile in ${BIN_DIR} or ${BUILD_DIR}"
+	echo "Is this a tagged release, or has CMake been run?"
+	exit 1
 fi
-echo "1..1" >> $BIN_DIR/service_read.tap
 
-$BIN_DIR/toolkit_test_write
-if [[ $? -eq 0 ]]; then
-    echo "ok 1 - test: write service test: Passed" > $BIN_DIR/service_write.tap
-else
-    echo "not ok 1 - test: write service test: $?" > $BIN_DIR/service_write.tap
-fi
-echo "1..1" >> $BIN_DIR/service_write.tap
+cd "${TEST_DIR}" && ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
+CTEST_RET=$?
 
-pushd $BIN_DIR
-./toolkit_test_server_local_service
-if [[ $? -eq 0 ]]; then
-    echo "ok 1 - test: server local service test: Passed" > ./server_local_service.tap
-else
-    echo "not ok 1 - test: server local service test: $?" > ./server_local_service.tap
-fi
-echo "1..1" >> ./server_local_service.tap
-popd
+ls "${VALIDATION_DIR}"/*.tap >/dev/null 2>&1 && mv "${VALIDATION_DIR}"/*.tap "${BIN_DIR}"/
 
-## run toolkit client / server test
-$TEST_SCRIPTS/run_client_server_test.sh
-
-## run validation tests
-pushd $BIN_DIR
-./toolkit_test_server&
-popd
-pushd validation
-./client.py&
-popd
-wait
-mv validation/validation.tap bin/
-
-## run validation tests
-pushd $BIN_DIR
-./toolkit_test_server 20000&
-popd
-pushd validation
-./client_sc_renew.py&
-popd
-wait
-mv validation/sc_renew.tap bin/
-
-## run validation tests
-pushd $BIN_DIR
-./toolkit_test_server 25000&
-popd
-pushd validation
-./client_session_timeout.py&
-popd
-wait
-mv validation/session_timeout.tap bin/
-
-## run validation tests
-pushd $BIN_DIR
-./toolkit_test_server 25000&
-popd
-pushd validation
-./client_sc_establish_timeout.py&
-popd
-wait
-mv validation/sc_establish_timeout.tap bin/
-
-# run client test suite against validation server
-pushd validation
-./server.py 25000&
-$TEST_SCRIPTS/wait_server.py
-popd
-pushd $BIN_DIR
-CK_TAP_LOG_FILE_NAME=client_test_suite.tap ./toolkit_test_suite_client
-popd
-wait
+exit $CTEST_RET

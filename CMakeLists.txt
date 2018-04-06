@@ -148,6 +148,30 @@ else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
+if(UNIX)
+  set(PYTHON_BIN python3)
+elseif(WIN32)
+  set(PYTHON_BIN python3.exe)
+else()
+  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
+
+function(s2opc_unit_test binary_name)
+	set(test_name "unit::${binary_name}")
+	set(test_cmd ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${binary_name})
+
+	foreach(arg ${ARGN})
+		if("${arg}" STREQUAL "GENERATE_TAP")
+			set(test_cmd "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap" "${test_cmd}")
+		else()
+			message(FATAL_ERROR "Unknown parameter for s2opc_unit_test: ${arg}")
+		endif()
+	endforeach()
+
+	add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND ${test_cmd})
+	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${binary_name}.tap")
+endfunction()
+
 # Check generated address space for tests
 set(ADDSPACEGEN_DIR "address_space_generation")
 
@@ -157,16 +181,16 @@ target_link_libraries(check_ingopcs_addspace PRIVATE)
 target_include_directories(check_ingopcs_addspace PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
                                                           "${ADDSPACEGEN_DIR}/include")
 
-# Allow to test the generated addspace with "make test" since some tests are built using it
 enable_testing()
-add_test(check_addspace ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/check_ingopcs_addspace)
-set_tests_properties(check_addspace PROPERTIES DEPENDS check_ingopcs_addspace)
+
+s2opc_unit_test(check_ingopcs_addspace GENERATE_TAP)
 
 # Helpers unit tests
 file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
 add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
 target_include_directories(check_helpers PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
 target_link_libraries(check_helpers PRIVATE ingopcs ${LIBCHECK_DEP_LIB})
+s2opc_unit_test(check_helpers)
 
 ## Copy reference logs files to bin/ directory
 add_custom_command(
@@ -189,6 +213,8 @@ target_link_libraries(toolkit_test_server_local_service PRIVATE ingopcs)
 target_include_directories(toolkit_test_server_local_service PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                              ${INGOPCS_PUBLIC_INCLUDES}
                                                              ${INGOPCS_PRIVATE_INCLUDES})
+s2opc_unit_test(toolkit_test_server_local_service GENERATE_TAP)
+
 # Client tests
 add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/wrap_read.c"
@@ -215,6 +241,8 @@ target_link_libraries(toolkit_test_server PRIVATE ingopcs)
 target_include_directories(toolkit_test_server PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                        ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
+
+add_test(NAME client_server_test COMMAND ${CMAKE_SOURCE_DIR}/tests/scripts/run_client_server_test.sh WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # Demo clients
 add_executable(ingopcs_browse "tests/demo/ingopcs_browse.c"
@@ -284,6 +312,7 @@ target_link_libraries(toolkit_test_read PRIVATE ingopcs)
 target_include_directories(toolkit_test_read PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                      ${INGOPCS_PUBLIC_INCLUDES}
                                                      ${INGOPCS_PRIVATE_INCLUDES})
+s2opc_unit_test(toolkit_test_read GENERATE_TAP)
 
 # Write service test
 add_executable(toolkit_test_write "tests/services/toolkit_test_write.c"
@@ -293,6 +322,7 @@ target_link_libraries(toolkit_test_write PRIVATE ingopcs)
 target_include_directories(toolkit_test_write PRIVATE "${ADDSPACEGEN_DIR}/include"
                                                       ${INGOPCS_PUBLIC_INCLUDES}
                                                       ${INGOPCS_PRIVATE_INCLUDES})
+s2opc_unit_test(toolkit_test_write GENERATE_TAP)
 
 # Sockets layer (stubbed) tests
 file(GLOB_RECURSE SOCKETS_SRC
@@ -310,6 +340,7 @@ target_include_directories(check_sockets PRIVATE "tests/sockets/stubs"
                                                  ${INGOPCS_PUBLIC_INCLUDES}
                                                  ${INGOPCS_PRIVATE_INCLUDES})
 target_link_libraries(check_sockets PRIVATE ${LIBCHECK_DEP_LIB} ${INGOPCS_DEP_LIBS})
+s2opc_unit_test(check_sockets)
 
 # Secure channels (stubbed on services side) tests
 file(GLOB_RECURSE SECURE_CHANNELS_SRC
@@ -365,6 +396,7 @@ target_include_directories(check_sc_rcv_buffer PRIVATE "tests/secure_channels/st
                                                        "tests/helpers"
                                                        ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
+s2opc_unit_test(check_sc_rcv_buffer)
 
 # Secure channels tests: tests on received encrypted buffer
 file(GLOB_RECURSE SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST
@@ -382,3 +414,22 @@ target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "tests/secure_c
                                                                  "tests/helpers"
                                                                  ${INGOPCS_PUBLIC_INCLUDES}
                                                                  ${INGOPCS_PRIVATE_INCLUDES})
+s2opc_unit_test(check_sc_rcv_encrypted_buffer)
+
+# Validation tests
+
+function(s2opc_server_validation_test name)
+	add_test(NAME "validation::${name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "../tests/scripts/with-toolkit-test-server" "./${name}")
+endfunction()
+
+function(s2opc_client_validation_test name)
+	set(test_name "validation::${name}")
+	add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "../tests/scripts/with-freeopcua-server" "./${name}")
+	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${name}.tap")
+endfunction()
+
+s2opc_server_validation_test("client.py")
+s2opc_server_validation_test("client_sc_renew.py")
+s2opc_server_validation_test("client_session_timeout.py")
+s2opc_server_validation_test("client_sc_establish_timeout.py")
+s2opc_client_validation_test("toolkit_test_suite_client")

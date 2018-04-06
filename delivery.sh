@@ -168,6 +168,12 @@ echo "Add Toolkit binaries"
 git add -f bin bin_windows &>/dev/null || exit 1
 git add -f install_linux install_windows &>/dev/null || exit 1
 git commit -S -m "Add toolkit binaries for version $DELIVERY_NAME" &> /dev/null || exit 1
+
+echo "Generate test script"
+./tests/scripts/make-ctestfile-relative build/CTestTestfile.cmake > bin/CTestTestfile.cmake
+git add -f bin/CTestTestfile.cmake &>/dev/null || exit 1
+git commit -S -m "Add CTest test file for version $DELIVERY_NAME" &> /dev/null || exit 1
+
 echo "Generate documentation with doxygen"
 doxygen doxygen/ingopcs-toolkit.doxyfile &> /dev/null || exit 1
 echo "Add documentation in delivery branch"

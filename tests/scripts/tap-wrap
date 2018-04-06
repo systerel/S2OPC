@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2018 Systerel and others.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import os
+import subprocess
+import sys
+
+def usage():
+    sys.stderr.write('''Usage: %s CMD [ARGUMENTS...]
+
+Runs the given command, logging the result to a TAP file. The path to the TAP
+file is specified using the CK_TAP_LOG_FILE_NAME environment variable.
+''' % sys.argv[0])
+
+if __name__ == '__main__':
+    tap_filename = os.getenv('CK_TAP_LOG_FILE_NAME')
+
+    if tap_filename is None:
+        sys.stderr.write('Missing environment variable: CK_TAP_LOG_FILE_NAME\n')
+        sys.exit(1)
+
+    cmd = sys.argv[1:]
+
+    if not cmd:
+        usage()
+        sys.exit(1)
+
+    with open(tap_filename, 'w') as fd:
+        fd.write('1..1\n')
+
+        try:
+            subprocess.check_call(cmd)
+            fd.write('ok 1 - %s: Passed\n' % ' '.join(cmd))
+        except subprocess.CalledProcessError as e:
+            fd.write('not ok 1 - %s: Exited with code %d\n' % (' '.join(cmd), e.returncode))
+
+# vim: set et ts=4 sw=4:

@@ -15,15 +15,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+CTEST_FILE=$1
 
-#  Run the script given parameters in the docker
-#
-set -e
-
-DOCKER_IMAGE=14052a5e0fb8
-
-if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
-    /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
-else
-    sudo /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
+if [ -z "$CTEST_FILE" ]; then
+    echo "Usage: $1 CTestTestfile.cmake"
+    echo
+    echo "Transforms a CTestTestfile.cmake test plan so that all paths are"
+    echo "relative, and outputs it on STDOUT."
+    exit 1
 fi
+
+src_dir=$(grep 'Source directory: ' $CTEST_FILE | awk '{print $4}')
+sed "s|${src_dir}|..|g" $CTEST_FILE

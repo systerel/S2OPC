@@ -28,7 +28,7 @@ build-linux64:
   stage: build
   image: registry.gitlab.com/systerel/s2opc/build@sha256:8e139a7e9077ef150639b7d772e2b6caf41a34c9c10d97d194140c2588665c81  # build:1.3
   script:
-    - './build.sh && cd build && cmake --build . --target install'
+    - './build.sh && cd build && cmake --build . --target install && ../tests/scripts/make-ctestfile-relative CTestTestfile.cmake > ../bin/CTestTestfile.cmake'
   variables:
     CMAKE_INSTALL_PREFIX: '../install_linux64'
     DOCKER_IMAGE: 'sha256:e6ef818bf9d8a244afdf2558bac405719a2b73ca1e154de635502988ab48f49c'
@@ -104,7 +104,7 @@ test-check:
 
 test-unit:
   stage: test
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:6a364199c571e62a32d121232729a371a082fc1430941cfd305d0f85817e4518  # test:1.0
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:423c36a0a2de2a0b265f022a63b3c93dbdfc31397e6887da7030fd2bd71e5408  # test:2.0
   script:
     - ./test-all.sh
   # only:
@@ -114,6 +114,11 @@ test-unit:
     - linux
   dependencies:
     - build-linux64
+  artifacts:
+    name: 'test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'bin/Testing'
+    expire_in: '3 month'
 
 test-uactt:
   stage: test
