@@ -34,14 +34,14 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event scEvent, uint32_t id, void* 
     scParams->auxParam = auxParam;
 
     status = SOPC_AsyncQueue_BlockingEnqueue(servicesEvents, (void*) scParams);
-    (void)status; // status is not used if asserts are not compiled in
-    assert(status == SOPC_STATUS_OK );
+    (void) status; // status is not used if asserts are not compiled in
+    assert(status == SOPC_STATUS_OK);
 }
 
 void SOPC_Services_Initialize()
 {
     SOPC_StatusCode status = SOPC_AsyncQueue_Init(&servicesEvents, "StubsSC_ServicesEventQueue");
-    (void)status; // status is not used if asserts are not compiled in
+    (void) status; // status is not used if asserts are not compiled in
     assert(status == SOPC_STATUS_OK);
 }
 

@@ -38,14 +38,14 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
     scParams->auxParam = auxParam;
 
     status = SOPC_AsyncQueue_BlockingEnqueue(secureChannelsEvents, (void*) scParams);
-    (void)status; // status is not used if asserts are not compiled in
-    assert(status == SOPC_STATUS_OK );
+    (void) status; // status is not used if asserts are not compiled in
+    assert(status == SOPC_STATUS_OK);
 }
 
 void SOPC_SecureChannels_Initialize()
 {
     SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&secureChannelsEvents, "StubsSockets_SecureChannelEventQueue");
-    (void)status; // status is not used if asserts are not compiled in
+    (void) status; // status is not used if asserts are not compiled in
     assert(status == SOPC_STATUS_OK);
 }
 

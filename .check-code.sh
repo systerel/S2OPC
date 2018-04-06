@@ -28,6 +28,7 @@
 ISADVANCED=$1
 
 CSRC=csrc
+TST=tests
 
 EXITCODE=0
 LOGPATH=$(pwd)/pre-build-check.log
@@ -86,7 +87,7 @@ SRC_INCL=${SRC_DIRS[@]/#/-I}
 CLANG_TIDY_LOG=clang_tidy.log
 # Run clang-tidy removing default checks (-*) and adding CERT rules verification
 find $CSRC -not -path "*windows*" -name "*.c" -exec clang-tidy {} -checks=$REMOVE_DEFAULT_RULES$CERT_RULES -- $SRC_INCL \; &> $CLANG_TIDY_LOG
-# Check if resulting log contains error or warnings 
+# Check if resulting log contains error or warnings
 grep -wiEc "(error|warning)" $CLANG_TIDY_LOG | xargs test 0 -eq
 if [[ $? != 0 ]]; then
     echo "ERROR: checking CERT rules $CERT_RULES with clang-tidy: see log $CLANG_TIDY_LOG" | tee -a $LOGPATH
@@ -101,7 +102,7 @@ fi
 
 echo "Clang automatic formatting check" | tee -a $LOGPATH
 ./.format.sh >> $LOGPATH
-ALREADY_FORMAT=`git ls-files -m $CSRC`
+ALREADY_FORMAT=`git ls-files -m $CSRC $TST`
 
 if [[ -z $ALREADY_FORMAT ]]; then
     echo "C source code formatting already done" | tee -a $LOGPATH
