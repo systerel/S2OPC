@@ -21,6 +21,28 @@ endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Wextra -O0")
 
+option(WITH_ASAN "build with ASAN" OFF)
+if(WITH_ASAN)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
+endif()
+
+option(WITH_TSAN "build with TSAN" OFF)
+if(WITH_TSAN)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=thread -pie")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread -fPIC")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=thread -fPIC")
+endif()
+
+option(WITH_UBSAN "build with UBSAN" OFF)
+if(WITH_UBSAN)
+  add_definitions(-DROCKSDB_UBSAN_RUN)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=undefined")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
+endif()
+
 # Source files of INGOPCS library
 
 # Define platform dependent source files
