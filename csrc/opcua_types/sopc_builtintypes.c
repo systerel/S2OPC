@@ -1817,6 +1817,8 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             break;
         }
 
+        free(sz);
+
         /* Something could have failed but the NodeId is already allocated */
         if (SOPC_STATUS_OK != status)
         {
