@@ -28,6 +28,22 @@ from urllib.parse import urlparse
 TIMEOUT = 20.
 DEFAULT_URL = 'opc.tcp://localhost:4841'
 
+def wait_server(url, timeout):
+    # Parse url to find the endpoint IP, connects while not TIMEOUT
+    pr = urlparse(url)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(timeout)
+    t0 = time.time()
+    while 'Waiting for succesful connection':
+        try:
+            sock.connect((pr.hostname, pr.port))
+            sock.close()
+            return True
+        except ConnectionError:
+            pass
+        if time.time()-t0 >= TIMEOUT:
+            return False
+
 if __name__ == '__main__':
     # Check args
     if len(sys.argv) == 1:
@@ -38,17 +54,4 @@ if __name__ == '__main__':
         print('Usage:', sys.argv[0], '[ENDPOINT_URL]')
         sys.exit(1)
 
-    # Parse url to find the endpoint IP, connects while not TIMEOUT
-    pr = urlparse(sUrl)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(TIMEOUT)
-    t0 = time.time()
-    while 'Waiting for succesful connection':
-        try:
-            sock.connect((pr.hostname, pr.port))
-            sock.close()
-            break
-        except ConnectionError:
-            pass
-        if time.time()-t0 >= TIMEOUT:
-            sys.exit(1)  # Unsuccessful connection
+    sys.exit(0 if wait_server(sUrl, TIMEOUT) else 1)
