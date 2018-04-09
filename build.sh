@@ -75,17 +75,6 @@ else
     echo "Built library and tests with success" | tee -a $CURDIR/build.log
 fi
 
-if [[ $CMAKE_TOOLCHAIN_FILE ]]; then
-    echo "- Do not run make test when cross compiling"
-else
-    echo "- Run make test" | tee -a $CURDIR/build.log
-    make -j $(nproc) -C $BUILD_DIR test >> $CURDIR/build.log
-    if [[ $? != 0 ]]; then
-        echo "Error: test failed" | tee -a $CURDIR/build.log
-        exit 1
-    fi
-fi
-
 if [[ $? == 0 ]]; then
     echo "Completed with SUCCESS" | tee -a $CURDIR/build.log
     exit 0
