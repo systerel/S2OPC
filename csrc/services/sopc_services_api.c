@@ -187,7 +187,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         break;
 
     case TIMER_SE_EVAL_SESSION_TIMEOUT:
-        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_CREATE_SESSION session=%" PRIu32, id);
+        SOPC_Logger_TraceDebug("ServicesMgr: TIMER_SE_EVAL_SESSION_TIMEOUT session=%" PRIu32, id);
 
         io_dispatch_mgr__internal_server_evaluate_session_timeout((constants__t_session_i) id);
         break;

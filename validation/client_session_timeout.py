@@ -139,7 +139,7 @@ if __name__=='__main__':
             value = node.get_value()
 
             print(headerString.format("Wait session timeout (10 seconds)"))
-            sleep(session_timeout / 1000)
+            sleep((session_timeout / 1000) + 1) # add 1 seconde to timeout
 
             # read tests attempt on session after timeout
             print(headerString.format("Read: error excepted since session timeout"))

@@ -49,7 +49,7 @@ if __name__=='__main__':
     client.connect_socket()
 
     print(headerString.format("Wait SC establishment timeout (10 seconds)"))
-    sleep(10)
+    sleep(11)
 
     print(headerString.format("Attempt to send HEL after timeout"))
     try:
@@ -65,7 +65,7 @@ if __name__=='__main__':
     client.send_hello()
 
     print(headerString.format("Wait SC establishment timeout (10 seconds)"))
-    sleep(10)
+    sleep(11)
 
     print(headerString.format("Attempt to send OPN after timeout"))
     try:
