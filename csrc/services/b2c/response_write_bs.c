@@ -113,10 +113,15 @@ void response_write_bs__write_WriteResponse_msg_out(const constants__t_msg_i res
     }
 
     if (NULL == lsc)
-        /* TODO: unreasonnable behavior */
-        exit(1);
+    {
+        // TODO: report memory error
+        msg_write_resp->NoOfResults = 0;
+    }
+    else
+    {
+        msg_write_resp->NoOfResults = nb_req;
+    }
 
-    msg_write_resp->NoOfResults = nb_req;
     msg_write_resp->Results = lsc;
     msg_write_resp->NoOfDiagnosticInfos = 0;
     msg_write_resp->DiagnosticInfos = NULL;
