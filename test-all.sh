@@ -36,9 +36,42 @@ if [ ! -f "${CTEST_FILE}" ]; then
 	exit 1
 fi
 
+rm -f "${TEST_DIR}"/*.tap
+
 cd "${TEST_DIR}" && ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
 CTEST_RET=$?
 
 ls "${VALIDATION_DIR}"/*.tap >/dev/null 2>&1 && mv "${VALIDATION_DIR}"/*.tap "${BIN_DIR}"/
+
+EXPECTED_TAP_FILES="check_helpers.tap
+check_ingopcs_addspace.tap
+check_sc_rcv_buffer.tap
+check_sc_rcv_encrypted_buffer.tap
+check_sockets.tap
+client_server_toolkit_result.tap
+sc_establish_timeout.tap
+sc_renew.tap
+session_timeout.tap
+toolkit_test_read.tap
+toolkit_test_server_local_service.tap
+toolkit_test_suite_client.tap
+toolkit_test_write.tap
+validation.tap"
+
+ACTUAL_TAP_FILES=$(ls "${BIN_DIR}"/*.tap | sed "s|${BIN_DIR}/||")
+
+if [ "$ACTUAL_TAP_FILES" != "$EXPECTED_TAP_FILES" ]; then
+	echo "Missing or extra TAP files detected"
+	echo
+	echo "List of expected TAP files:"
+	echo "$EXPECTED_TAP_FILES"
+	echo
+	echo "Actual list of TAP files:"
+	echo "$ACTUAL_TAP_FILES"
+
+	exit 1
+fi
+
+${MY_DIR}/tests/scripts/check-tap ${BIN_DIR}/*.tap && echo "All TAP files are well formed and free of failed tests"
 
 exit $CTEST_RET
