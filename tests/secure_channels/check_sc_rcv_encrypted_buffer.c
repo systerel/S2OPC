@@ -205,7 +205,7 @@ static SOPC_ReturnStatus Check_Expected_Sent_Message(uint32_t socketIdx,
                 }
             }
         }
-        free(buffer);
+        SOPC_Buffer_Delete(buffer);
         free(socketEvent);
         socketEvent = NULL;
     }
@@ -279,7 +279,10 @@ static SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx, uint32_t socketI
         {
             status = SOPC_STATUS_NOK;
         }
+        SOPC_Buffer_Delete(buffer);
     }
+
+    free(socketEvent);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -300,6 +303,8 @@ static SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx, uint32_t socketI
         {
             status = SOPC_STATUS_NOK;
         }
+
+        free(socketEvent);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -310,6 +315,8 @@ static SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx, uint32_t socketI
         {
             status = SOPC_STATUS_NOK;
         }
+
+        free(serviceEvent);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -320,6 +327,8 @@ static SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx, uint32_t socketI
         {
             status = SOPC_STATUS_NOK;
         }
+
+        free(serviceEvent);
     }
 
     return status;
