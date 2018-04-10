@@ -72,6 +72,6 @@ if [ "$ACTUAL_TAP_FILES" != "$EXPECTED_TAP_FILES" ]; then
 	exit 1
 fi
 
-${MY_DIR}/tests/scripts/check-tap ${BIN_DIR}/*.tap && echo "All TAP files are well formed and free of failed tests"
+${MY_DIR}/tests/scripts/check-tap ${BIN_DIR}/*.tap && echo "All TAP files are well formed and free of failed tests" || exit 1
 
 exit $CTEST_RET
