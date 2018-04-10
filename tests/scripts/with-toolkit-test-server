@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import shlex
 import subprocess
 import sys
 
@@ -23,7 +24,10 @@ def usage():
     sys.stderr.write('''Usage: %s SERVER_TEST_NAME
 
 Runs the given test against a toolkit test server running in the background.
-SERVER_TEST_NAME should be the name of a script in the validation/ directory.
+SERVER_TEST_NAME should be the path to the test script.
+
+The command to launch the server is set using the TEST_SERVER_CMD environment
+variable. This command will be run from the bin/ folder.
 ''' % sys.argv[0])
 
 if __name__ == '__main__':
@@ -35,22 +39,24 @@ if __name__ == '__main__':
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     test_server_dir = os.path.join(script_dir, '..', '..', 'bin')
-    test_server_bin = os.path.join(test_server_dir, 'toolkit_test_server')
-    validation_tests_dir = os.path.join(script_dir, '..', '..', 'validation')
-    validation_test_bin = os.path.join(validation_tests_dir, cmd[0])
+    test_server_cmd = os.getenv('TEST_SERVER_CMD')
+
+    if test_server_cmd is None:
+        sys.stderr.write('Missing server command. Set the TEST_SERVER_CMD environment variable.\n')
+        sys.exit(1)
 
     print('Starting server')
-    server_process = subprocess.Popen([test_server_bin, '25000'], cwd=test_server_dir)
+    server_process = subprocess.Popen(shlex.split(test_server_cmd), cwd=test_server_dir)
 
     print('Starting test %s' % ' '.join(cmd))
 
     try:
-        subprocess.check_call(cmd, cwd=validation_tests_dir)
+        subprocess.check_call(cmd)
         test_ret = 0
     except subprocess.CalledProcessError as e:
         test_ret = e.returncode
-    except FileNotFoundError:
-        sys.stderr.write('%s: Not such file or directory\n' % validation_test_bin)
+    except FileNotFoundError as e:
+        sys.stderr.write('%s: Not such file or directory\n' % e.filename)
         test_ret = 127
 
     print('Test finished, killing server')
