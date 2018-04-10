@@ -58,7 +58,7 @@ void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_Expan
 
 void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel)
 {
-    *constants_bs__p_card_channel = constants_bs__t_channel_config_idx_i_max;
+    *constants_bs__p_card_channel = constants_bs__t_channel_i_max;
 }
 
 void constants_bs__get_card_t_session(t_entier4* const constants_bs__p_card_session)
