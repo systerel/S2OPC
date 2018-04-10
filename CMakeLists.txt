@@ -242,8 +242,8 @@ target_include_directories(toolkit_test_server PRIVATE "${ADDSPACEGEN_DIR}/inclu
                                                        ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
-add_test(NAME "validation::client_server_test" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "./toolkit_test_client")
-set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./toolkit_test_server")
+add_test(NAME "validation::client_server_test" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap" "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "./toolkit_test_client")
+set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./toolkit_test_server;CK_TAP_LOG_FILE_NAME=client_server_test.tap")
 
 # Demo clients
 add_executable(ingopcs_browse "tests/demo/ingopcs_browse.c"

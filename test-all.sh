@@ -48,6 +48,7 @@ check_ingopcs_addspace.tap
 check_sc_rcv_buffer.tap
 check_sc_rcv_encrypted_buffer.tap
 check_sockets.tap
+client_server_test.tap
 sc_establish_timeout.tap
 sc_renew.tap
 secure_channel_level_None.tap
