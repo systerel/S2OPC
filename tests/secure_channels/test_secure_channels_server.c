@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
     SOPC_StubSC_ServicesEventParams* serviceEvent = NULL;
 
     // Endpoint URL
-    char* endpointUrl = "opc.tcp://localhost:8888/myEndPoint";
+    char* endpointUrl = "opc.tcp://localhost:4841/myEndPoint";
 
     // Paths to client certificate/key and server certificate
     // Server certificate name

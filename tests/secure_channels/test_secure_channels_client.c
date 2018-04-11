@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
     // Endpoint URL
     SOPC_String stEndpointUrl;
     SOPC_String_Initialize(&stEndpointUrl);
-    char* sEndpointUrl = "opc.tcp://localhost:8888/myEndPoint";
+    char* sEndpointUrl = "opc.tcp://localhost:4841/myEndPoint";
 
     // Policy security:
     char* pRequestedSecurityPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI;

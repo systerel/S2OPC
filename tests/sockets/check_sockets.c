@@ -35,7 +35,7 @@
 #include "sopc_sockets_api.h"
 #include "stub_sockets_sopc_secure_channels_api.h"
 
-const char* uri = "opc.tcp://localhost:8888/myEndPoint";
+const char* uri = "opc.tcp://localhost:4841/myEndPoint";
 const uint32_t endpointDescConfigId = 10;
 const uint32_t serverSecureChannelConnectionId = 100;
 const uint32_t clientSecureChannelConnectionId = 200;
