@@ -16,6 +16,7 @@
  */
 
 #include <inttypes.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -39,6 +40,21 @@
 
 static int endpointClosed = false;
 static bool secuActive = !false;
+
+volatile sig_atomic_t stopServer = 0;
+
+void Test_StopSignal(int sig)
+{
+    (void) sig;
+    if (stopServer != 0)
+    {
+        exit(1);
+    }
+    else
+    {
+        stopServer = 1;
+    }
+}
 
 void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
@@ -90,6 +106,10 @@ void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SO
 
 int main(int argc, char* argv[])
 {
+    // Install signal handler to close the server gracefully when server needs to stop
+    signal(SIGINT, Test_StopSignal);
+    signal(SIGTERM, Test_StopSignal);
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t epConfigIdx = 0;
     SOPC_Endpoint_Config epConfig;
@@ -280,7 +300,8 @@ int main(int argc, char* argv[])
 
     // Run the server until timeout or notification that endpoint is closed
     loopCpt = 0;
-    while (SOPC_STATUS_OK == status && endpointClosed == false && loopCpt * sleepTimeout <= loopTimeout)
+    while (SOPC_STATUS_OK == status && stopServer == 0 && endpointClosed == false &&
+           loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
@@ -293,7 +314,8 @@ int main(int argc, char* argv[])
     // Wait until endpoint is closed
     loopCpt = 0;
     loopTimeout = 1000;
-    while (SOPC_STATUS_OK == status && endpointClosed == false && loopCpt * sleepTimeout <= loopTimeout)
+    while (SOPC_STATUS_OK == status && stopServer == 0 && endpointClosed == false &&
+           loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
