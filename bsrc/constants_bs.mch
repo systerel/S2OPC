@@ -46,7 +46,8 @@ SETS
     t_Reference_i;
     t_LocalizedText_i;
     t_QualifiedName_i;
-    t_application_context_i
+    t_application_context_i;
+    t_subscription_i
 
 CONCRETE_CONSTANTS
     k_n_read_resp_max,
@@ -76,7 +77,9 @@ CONCRETE_CONSTANTS
     c_ExpandedNodeId_indet,
     c_Reference_indet,
     c_LocalizedText_indet,
-    c_QualifiedName_indet
+    c_QualifiedName_indet,
+    c_subscription_indet,
+    c_WriteValuePointer_indet
 
 ABSTRACT_CONSTANTS
     t_Variant,
@@ -103,7 +106,9 @@ ABSTRACT_CONSTANTS
     t_RefIndex,
     t_Reference,
     t_LocalizedText,
-    t_QualifiedName
+    t_QualifiedName,
+    t_subscription,
+    t_WriteValuePointer
 
 PROPERTIES
     k_n_read_resp_max : NAT &
@@ -159,6 +164,10 @@ PROPERTIES
     c_SignatureData_indet : t_SignatureData_i &
     c_SignatureData_indet /: t_SignatureData &
 
+    t_subscription <: t_subscription_i &
+    c_subscription_indet : t_subscription_i &
+    c_subscription_indet /: t_subscription &
+
     t_msg_header <: t_msg_header_i &
     c_msg_header_indet : t_msg_header_i &
     c_msg_header_indet /: t_msg_header &
@@ -201,7 +210,11 @@ PROPERTIES
 
     t_QualifiedName <: t_QualifiedName_i &
     c_QualifiedName_indet : t_QualifiedName_i &
-    c_QualifiedName_indet /: t_QualifiedName
+    c_QualifiedName_indet /: t_QualifiedName &
+
+    t_WriteValuePointer <: t_WriteValuePointer_i &
+    c_WriteValuePointer_indet : t_WriteValuePointer_i &
+    c_WriteValuePointer_indet /: t_WriteValuePointer
 
 OPERATIONS
 

@@ -47,8 +47,8 @@ INITIALISATION
     d_variables :( d_typing )
 
 OPERATIONS
-
-    nmsg_header <-- alloc_app_req_msg_header =
+    
+    nmsg_header <-- alloc_msg_header =
     PRE
         c_msg_out_header = c_msg_header_indet
     THEN
@@ -61,12 +61,24 @@ OPERATIONS
     END
     ;
 
-    bres <-- is_valid_app_msg_out (msg) =
+    bres, msg_typ <-- is_valid_app_msg_out (msg) =
     PRE
         msg : t_msg_i
     THEN
-        /* Validates message from application is not null and has a known type */
-        bres := bool(msg : t_msg)
+        /* Validates message is not null and has a known type */
+        IF msg : t_msg
+        THEN
+            CHOICE
+                bres := TRUE ||
+                msg_typ :( msg_typ : t_msg_type_i & msg_typ : t_msg_type)
+            OR
+                bres := FALSE ||
+                msg_typ := c_msg_type_indet
+            END
+        ELSE
+            bres := FALSE ||
+            msg_typ := c_msg_type_indet
+        END
     END
     ;
 
@@ -80,17 +92,17 @@ OPERATIONS
         a_msg_out_type :: t_msg_type
     END
     ;
-
-    /* Consider response message as deallocated since responsibility was forwarded to application */
+    
+    /* Consider response message as deallocated since responsibility was forwarded to application or postponed */
     forget_resp_msg_out (msg_header, msg) =
     PRE
         msg_header : t_msg_header_i &
-        msg_header = c_msg_in_header &
+        msg_header = c_msg_out_header &
         msg : t_msg_i &
-        msg = c_msg_in &
-        c_msg_in : t_msg &
-        c_msg_in_header : t_msg_header &
-        a_msg_in_type : s_service_resps
+        msg = c_msg_out &
+        c_msg_out : t_msg &
+        c_msg_out_header : t_msg_header &
+        a_msg_out_type : s_service_resps
     THEN
         c_msg_out := c_msg_indet ||
         a_msg_out_type := c_msg_type_indet ||

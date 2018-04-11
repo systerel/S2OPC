@@ -21,7 +21,8 @@ IMPLEMENTATION io_dispatch_mgr_i
 REFINES io_dispatch_mgr
 
 SEES
-    constants
+    constants,
+    write_value_pointer_bs
 
 IMPORTS
     service_mgr,
@@ -293,7 +294,7 @@ OPERATIONS
                             EITHER e_msg_session_treatment_class THEN
                                 l_buffer_out <-- server_receive_session_treatment_req (channel, l_msg_type, buffer)
                             OR e_msg_session_service_class THEN
-                                l_buffer_out <-- server_receive_session_service_req (channel, l_msg_type, buffer)
+                                l_buffer_out <-- server_receive_session_service_req (channel, l_msg_type, request_context, buffer)
                             OR e_msg_discovery_service_class THEN
                                 l_buffer_out <-- server_receive_discovery_service_req (channel, l_msg_type, buffer)
                             ELSE /* INCLUDES e_msg_service_fault_class => unexpected response type */
@@ -475,6 +476,7 @@ OPERATIONS
     VAR
         l_valid_session,
         l_valid_msg,
+        l_msg_typ,
         l_channel,
         l_connected_channel,
         l_buffer_out,
@@ -483,7 +485,7 @@ OPERATIONS
         l_req_handle_in_req_id
     IN
         l_valid_session <-- is_valid_session (session);
-        l_valid_msg <-- is_valid_app_msg_out (req_msg);
+        l_valid_msg, l_msg_typ <-- is_valid_app_msg_out (req_msg);
         IF l_valid_session = TRUE & l_valid_msg = TRUE
         THEN
             ret, l_channel, l_buffer_out, l_req_handle <-- client_service_request (session, req_msg, app_context);
@@ -515,6 +517,7 @@ OPERATIONS
     ret <-- client_send_discovery_request (channel_config_idx, req_msg, app_context) =
     VAR
         l_valid_msg,
+        l_msg_typ,
         l_valid_channel_config,
         l_bres,
         l_channel,
@@ -523,7 +526,7 @@ OPERATIONS
         l_req_handle,
         l_req_handle_in_req_id
     IN
-        l_valid_msg <-- is_valid_app_msg_out (req_msg);
+        l_valid_msg, l_msg_typ <-- is_valid_app_msg_out (req_msg);
         l_valid_channel_config <-- is_valid_channel_config_idx (channel_config_idx);
         IF l_valid_msg = TRUE & l_valid_channel_config = TRUE
         THEN
@@ -731,6 +734,77 @@ OPERATIONS
             END;
             channel_lost (channel)
         END
+    END
+    ;
+    
+    bres <-- internal_server_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
+    VAR
+        l_old_valid_pointer,
+        l_new_valid_pointer
+    IN
+        l_old_valid_pointer <-- write_value_pointer_is_valid (p_old_write_value_pointer);
+        l_new_valid_pointer <-- write_value_pointer_is_valid (p_new_write_value_pointer);
+        IF l_old_valid_pointer = TRUE & l_new_valid_pointer = TRUE
+        THEN
+            server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer);
+            bres := TRUE
+        ELSE
+            bres := FALSE
+        END
+    END;
+    
+    bres <-- internal_server_subscription_publish_timeout (p_subscription) =
+    VAR
+        l_valid_subscription
+    IN
+        l_valid_subscription <-- is_valid_subscription (p_subscription);
+        IF l_valid_subscription = TRUE
+        THEN
+            server_subscription_publish_timeout (p_subscription);
+            bres := TRUE
+        ELSE
+            bres := FALSE
+        END
+    END;
+    
+    bres <-- internal_server_send_timed_out_publish_request (p_session, p_req_handle, p_req_context, p_publish_resp_msg) =
+    VAR
+        l_valid_session,
+        l_valid_msg,
+        l_msg_typ,
+        l_valid_req_context,
+        l_buffer_out,
+        l_valid_buffer_out,
+        l_channel,
+        l_connected_channel
+    IN
+        l_valid_session <-- is_valid_session (p_session);
+        l_valid_msg, l_msg_typ <-- is_valid_app_msg_out (p_publish_resp_msg);
+        l_valid_req_context <-- is_valid_request_context (p_req_context);
+        IF l_valid_session = TRUE & l_valid_msg = TRUE & l_msg_typ = e_msg_subscription_publish_resp & 
+            l_valid_req_context = TRUE
+        THEN
+            bres, l_buffer_out, l_channel <-- server_send_timed_out_publish_request (p_session, p_req_handle, l_msg_typ, p_publish_resp_msg);
+            IF bres = TRUE
+            THEN
+                l_connected_channel <-- is_connected_channel (l_channel);
+                l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
+                IF l_connected_channel = TRUE &
+                    l_valid_buffer_out = TRUE
+                THEN
+                    send_channel_msg_buffer (l_channel, l_buffer_out, p_req_context)
+                END
+            END
+        ELSE
+	        bres := FALSE
+        END
+    END
+    ;
+    
+    bres <-- internal_client_publish_request_timeout (p_session) =
+    BEGIN
+        /* TODO: only allocate a publish request and send it / check if keep alive necessary ? */
+        bres := FALSE
     END
     ;
 

@@ -136,11 +136,9 @@ OPERATIONS
         END
     END
     ;
-
-    is_valid_res, status_code_err <-- server_validate_session_service_resp (channel, session) =
+    
+    is_valid_res, status_code_err, channel <-- server_validate_session_service_resp (session) =
     PRE
-        channel : t_channel_i &
-        channel : s_channel_connected   &
         session  : t_session_i &
         c_msg_in : t_msg &
         c_msg_out : t_msg  &
@@ -149,10 +147,12 @@ OPERATIONS
     THEN
         CHOICE
             is_valid_res := TRUE ||
-            status_code_err := e_sc_ok
+            status_code_err := e_sc_ok ||
+            channel :(channel : t_channel_i & channel : s_channel_connected)
         OR
             is_valid_res := FALSE ||
-            status_code_err :: {e_sc_bad_session_id_invalid, e_sc_bad_invalid_state, e_sc_bad_secure_channel_id_invalid}
+            status_code_err :: {e_sc_bad_session_id_invalid, e_sc_bad_invalid_state, e_sc_bad_secure_channel_id_invalid} ||
+            channel :(channel : t_channel_i  & channel = c_channel_indet)
         END
     END
     ;

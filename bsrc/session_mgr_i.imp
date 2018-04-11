@@ -528,24 +528,25 @@ OPERATIONS
     END
     ;
 
-    is_valid_res, status_code_err <-- server_validate_session_service_resp (channel, session) =
+    is_valid_res, status_code_err, channel <-- server_validate_session_service_resp (session) =
     VAR
         l_valid_session,
         l_session_state,
         l_session_channel
     IN
+        channel := c_channel_indet;
         /* Coherency of messages types done in PRE for now */
         l_valid_session <-- is_valid_session (session);
         l_session_state <-- get_session_state_or_closed (session);
         IF l_valid_session = TRUE
         THEN
             l_session_channel <-- get_session_channel (session);
-            IF l_session_state = e_session_userActivated &
-                l_session_channel = channel
+            IF l_session_state = e_session_userActivated
             THEN
                 // Returns always TRUE if compliant with PRE (proved)
-                is_valid_res <-- is_session_valid_for_service (channel, session);
-                status_code_err := e_sc_ok
+                is_valid_res <-- is_session_valid_for_service (l_session_channel, session);
+                status_code_err := e_sc_ok;
+                channel := l_session_channel
             ELSE
                 is_valid_res := FALSE;
                 IF l_session_channel = channel THEN

@@ -185,10 +185,16 @@ OPERATIONS
     PRE
         msg : t_msg_i
     THEN
+        IF msg : t_msg
+        THEN
         CHOICE
             bres := TRUE ||
-            msg_typ :( msg_typ : t_msg_type_i & msg_typ : t_msg_type )
+                msg_typ :( msg_typ : t_msg_type_i & msg_typ : t_msg_type)
         OR
+            bres := FALSE ||
+            msg_typ := c_msg_type_indet
+        END
+        ELSE
             bres := FALSE ||
             msg_typ := c_msg_type_indet
         END

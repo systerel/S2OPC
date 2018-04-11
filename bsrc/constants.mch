@@ -74,8 +74,8 @@ SETS
                       e_sc_bad_browse_direction_invalid,
                       e_sc_bad_service_unsupported,
                       e_sc_bad_write_not_supported,
-                      e_sc_bad_index_range_invalid,
-                      e_sc_bad_timeout};
+                      e_sc_bad_timeout,
+                      e_sc_bad_index_range_invalid};
 
     t_BrowseDirection_i = {e_bd_indet,
                            e_bd_forward,
@@ -130,6 +130,16 @@ SETS
         e_session_scOrphaned,
         e_session_closing,
         e_session_closed};
+
+    t_subscription_i;
+    
+    t_subscriptionState = {
+        c_subsrciption_indet,
+        e_subscription_creating,
+        e_subscription_normal,
+        e_subscription_late,
+        e_subscription_keepAlive
+    };
 
     t_SecurityPolicy = {
         e_secpol_None,
@@ -253,6 +263,7 @@ CONCRETE_CONSTANTS
     c_Node_indet,
     c_ReadValue_indet,
     c_WriteValue_indet,
+    c_WriteValuePointer_indet,
     c_BrowseValue_indet,
     c_BrowseResult_indet,
     c_byte_buffer_indet,
@@ -266,6 +277,7 @@ CONCRETE_CONSTANTS
     c_session_token_indet,
     c_Nonce_indet,
     c_SignatureData_indet,
+    c_subscription_indet,
     c_msg_header_indet,
     c_msg_indet,
     c_request_context_indet,
@@ -292,6 +304,7 @@ ABSTRACT_CONSTANTS
     t_Node,
     t_ReadValue,
     t_WriteValue,
+    t_WriteValuePointer,
     t_BrowseValue,
     t_BrowseResult,
     t_RefIndex,
@@ -301,6 +314,7 @@ ABSTRACT_CONSTANTS
 
     cast_t_session,
     cast_t_channel,
+    cast_t_subscription,
     cast_t_ReadValue,
     cast_t_WriteValue,
     cast_t_BrowseValue,
@@ -313,6 +327,7 @@ ABSTRACT_CONSTANTS
     t_user_token,
     t_Nonce,
     t_SignatureData,
+    t_subscription,
     t_buffer_in_state,
     t_msg_header,
     t_msg,
@@ -406,7 +421,11 @@ PROPERTIES
     c_WriteValue_indet /: t_WriteValue &
     cast_t_WriteValue : NAT +-> t_WriteValue_i &
     cast_t_WriteValue : perm(t_WriteValue) &
-
+    
+    t_WriteValuePointer <: t_WriteValuePointer_i &
+    c_WriteValuePointer_indet : t_WriteValuePointer_i &
+    c_WriteValuePointer_indet /: t_WriteValuePointer &
+    
     t_BrowseValue <: t_BrowseValue_i &
     c_BrowseValue_indet : t_BrowseValue_i &
     c_BrowseValue_indet /: t_BrowseValue &
@@ -465,9 +484,16 @@ PROPERTIES
     c_user_indet : t_user_i &
     c_user_indet /: t_user &
 
+
     t_user_token <: t_user_token_i &
     c_user_token_indet : t_user_token_i &
     c_user_token_indet /: t_user_token &
+    
+    t_subscription <: t_subscription_i &
+    c_subscription_indet : t_subscription_i &
+    c_subscription_indet /: t_subscription &
+    cast_t_subscription : NAT +-> t_subscription_i &
+    cast_t_subscription : perm(t_subscription) &
 
     t_msg_header <: t_msg_header_i &
     c_msg_header_indet : t_msg_header_i &

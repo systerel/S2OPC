@@ -110,13 +110,15 @@ OPERATIONS
     END
     ;
 
-    buffer_out <-- server_receive_session_service_req (channel, req_typ, msg_buffer) =
+    buffer_out <-- server_receive_session_service_req (channel, req_typ, req_context, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
         req_typ : t_msg_type_i &
         req_typ = a_msg_in_type &
         a_msg_in_type : s_service_on_session_reqs &
+        req_context : t_request_context_i &
+        req_context : t_request_context &
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer  &
         a_buffer_in_state = e_buffer_in_msg_type_read &
@@ -432,6 +434,32 @@ OPERATIONS
     END
     ;
 
+    bres, buffer_out, channel <-- server_send_timed_out_publish_request (session, req_handle, req_typ, publish_resp_msg) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        req_handle : t_server_request_handle_i &
+        publish_resp_msg : t_msg_i &
+        publish_resp_msg : t_msg &
+        req_typ = e_msg_subscription_publish_resp &
+        c_msg_in = c_msg_indet &
+        c_msg_in_header = c_msg_header_indet &
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
+    THEN
+        CHOICE
+            bres := TRUE ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            channel :(channel : t_channel_i & channel : s_channel_connected)
+        OR
+            bres := FALSE ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            channel :(channel : t_channel_i & channel = c_channel_indet)
+        END
+    END
+    ;
+
     /* PROMOTES */
 
     bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg, app_context) =
@@ -570,12 +598,25 @@ OPERATIONS
         bres := bool(msg_typ = a_msg_in_type & a_msg_in_type : t_msg_type)
     END
     ;
-
-    bres <-- is_valid_app_msg_out (msg) =
+    
+    bres, msg_typ <-- is_valid_app_msg_out (msg) =
     PRE
         msg : t_msg_i
     THEN
-        bres := bool(msg : t_msg)
+        /* Validates message is not null and has a known type */
+        IF msg : t_msg
+        THEN
+            CHOICE
+                bres := TRUE ||
+                msg_typ :( msg_typ : t_msg_type_i & msg_typ : t_msg_type)
+            OR
+                bres := FALSE ||
+                msg_typ := c_msg_type_indet
+            END
+        ELSE
+            bres := FALSE ||
+            msg_typ := c_msg_type_indet
+        END
     END
     ;
 
@@ -659,6 +700,35 @@ OPERATIONS
     client_close_session (session) =
     PRE
         session : t_session_i
+    THEN
+        skip
+    END;
+    
+    /* SUBSCRIPTION PROMOTED */
+    
+    is_valid <-- is_valid_subscription (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i
+    THEN
+        is_valid := bool(p_subscription : t_subscription)
+    END
+    ;
+    
+    server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
+    PRE
+        p_old_write_value_pointer : t_WriteValuePointer_i &
+        p_old_write_value_pointer : t_WriteValuePointer &
+        p_new_write_value_pointer : t_WriteValuePointer_i &
+        p_new_write_value_pointer : t_WriteValuePointer
+    THEN
+        skip
+    END
+    ;
+    
+    server_subscription_publish_timeout (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : t_subscription
     THEN
         skip
     END
