@@ -37,6 +37,10 @@ for the server to exit indefinitely. Else, it sends it a SIGTERM signal once the
 client is done and waits for the server to exit.
 ''' % sys.argv[0])
 
+def log(msg):
+    print(msg)
+    sys.stdout.flush()
+
 if __name__ == '__main__':
     cmd = sys.argv[1:]
 
@@ -53,16 +57,16 @@ if __name__ == '__main__':
         sys.stderr.write('Missing server command. Set the TEST_SERVER_CMD environment variable.\n')
         sys.exit(1)
 
-    print('Starting server')
+    log('Starting server')
     server_process = subprocess.Popen(shlex.split(test_server_cmd), cwd=test_server_dir)
 
     if not wait_server.wait_server(wait_server.DEFAULT_URL, wait_server.TIMEOUT):
-        print('Timeout for starting server')
+        log('Timeout for starting server')
         server_process.kill()
         server_process.wait()
         sys.exit(1)
 
-    print('Starting test %s' % ' '.join(cmd))
+    log('Starting test %s' % ' '.join(cmd))
 
     try:
         subprocess.check_call(cmd)
@@ -74,13 +78,13 @@ if __name__ == '__main__':
         test_ret = 127
 
     if kill_server:
-        print('Test finished, killing server')
+        log('Test finished, killing server')
         server_process.terminate()
 
-    print('Waiting for server to exit')
+    log('Waiting for server to exit')
     server_ret = server_process.wait()
 
-    print('Done')
+    log('Done')
     sys.exit(test_ret)
 
 # vim: set et ts=4 sw=4:
