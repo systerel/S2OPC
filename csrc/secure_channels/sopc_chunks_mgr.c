@@ -3347,6 +3347,12 @@ static bool SC_Chunks_TreatSendBuffer(
                     {
                         *outputBuffer = encryptedBuffer;
                     }
+                    else if (encryptedBuffer != NULL)
+                    {
+                        // Deallocate internal buffer (not set as outputBuffer since result == false)
+                        SOPC_Buffer_Delete(encryptedBuffer);
+                        encryptedBuffer = NULL;
+                    }
 
                     if (inputBuffer != nonEncryptedBuffer)
                     {
@@ -3414,6 +3420,17 @@ static bool SC_Chunks_TreatSendBuffer(
         *errorStatus = OpcUa_BadEncodingError;
     }
 
+    if (result == false)
+    {
+        *outputBuffer = NULL;
+        if (inputBuffer != nonEncryptedBuffer)
+        {
+            // If it is only an internal buffer, it shall be freed here
+            // otherwise it is the input buffer freed by caller
+            SOPC_Buffer_Delete(nonEncryptedBuffer);
+            nonEncryptedBuffer = NULL;
+        }
+    }
     return result;
 }
 
@@ -3553,7 +3570,8 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
                 else
                 {
                     SOPC_Logger_TraceError(
-                        "ScChunksMgr: Failed sending message type SOPC_Msg_Type=%d before socket closed scIdx=%" PRIu32,
+                        "ScChunksMgr: Failed sending message type SOPC_Msg_Type=%d before socket closed "
+                        "scIdx=%" PRIu32,
                         sendMsgType, eltId);
                 }
             }
