@@ -440,7 +440,7 @@ s2opc_client_validation_test("toolkit_test_suite_client")
 function(s2opc_sc_level_test name server_key_size)
 	set(test_name "validation::secure_channel_level::${name}")
 	add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap" "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "./test_secure_channels_client" ${ARGN})
-	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./test_secure_channels_server ${server_key_size};CK_TAP_LOG_FILE_NAME=secure_channel_level_${name}.tap")
+	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./test_secure_channels_server ${server_key_size};CK_TAP_LOG_FILE_NAME=secure_channel_level_${name}.tap;TEST_SERVER_EXITS_ALONE=1")
 endfunction()
 
 s2opc_sc_level_test("SignAndEncrypt_B256Sha256_2048bit" "2048")

@@ -31,6 +31,10 @@ SERVER_TEST_NAME should be the path to the test script.
 The command to launch the server is set using the TEST_SERVER_CMD environment
 variable. This command will be run from the bin/ folder. The server should
 listen on port 4841 to be detected by the script.
+
+If the TEST_SERVER_EXITS_ALONE environment variable is set, this script waits
+for the server to exit indefinitely. Else, it sends it a SIGTERM signal once the
+client is done and waits for the server to exit.
 ''' % sys.argv[0])
 
 if __name__ == '__main__':
@@ -43,6 +47,7 @@ if __name__ == '__main__':
     script_dir = os.path.dirname(os.path.abspath(__file__))
     test_server_dir = os.path.join(script_dir, '..', '..', 'bin')
     test_server_cmd = os.getenv('TEST_SERVER_CMD')
+    kill_server = (os.getenv('TEST_SERVER_EXITS_ALONE') is None)
 
     if test_server_cmd is None:
         sys.stderr.write('Missing server command. Set the TEST_SERVER_CMD environment variable.\n')
@@ -68,9 +73,11 @@ if __name__ == '__main__':
         sys.stderr.write('%s: Not such file or directory\n' % e.filename)
         test_ret = 127
 
-    print('Test finished, killing server')
+    if kill_server:
+        print('Test finished, killing server')
+        server_process.terminate()
 
-    server_process.terminate()
+    print('Waiting for server to exit')
     server_ret = server_process.wait()
 
     print('Done')
