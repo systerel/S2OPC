@@ -444,7 +444,7 @@ s2opc_unit_test(check_sc_rcv_encrypted_buffer)
 function(s2opc_server_validation_test name)
 	set(test_name "validation::${name}")
 	add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "../validation/${name}")
-	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./toolkit_test_server 25000")
+	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./toolkit_test_server")
 endfunction()
 
 function(s2opc_client_validation_test name)

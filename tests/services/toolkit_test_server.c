@@ -106,6 +106,9 @@ void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SO
 
 int main(int argc, char* argv[])
 {
+    (void) argc;
+    (void) argv;
+
     // Install signal handler to close the server gracefully when server needs to stop
     signal(SIGINT, Test_StopSignal);
     signal(SIGTERM, Test_StopSignal);
@@ -115,10 +118,6 @@ int main(int argc, char* argv[])
     SOPC_Endpoint_Config epConfig;
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
-    // Loop timeout in milliseconds
-    uint32_t loopTimeout = 5000;
-    // Counter to stop waiting on timeout
-    uint32_t loopCpt = 0;
 
     // Secu policy configuration:
     static SOPC_Certificate* serverCertificate = NULL;
@@ -137,21 +136,6 @@ int main(int argc, char* argv[])
     printf("toolkitSrcCommit: %s\n", build_info.toolkitSrcCommit);
     printf("toolkitDockerId: %s\n", build_info.toolkitDockerId);
     printf("toolkitBuildDate: %s\n", build_info.toolkitBuildDate);
-
-    if (argc == 2)
-    {
-        int parsedInt = atoi(argv[1]);
-        if (parsedInt > 5000 && parsedInt <= INT32_MAX)
-        {
-            loopTimeout = (uint32_t) parsedInt;
-            printf("<Test_Server_Toolkit: server termination timeout modified to %d milliseconds\n", parsedInt);
-        }
-        else
-        {
-            printf("<Test_Server_Toolkit: Error: server termination timeout argument invalid\n");
-            return 1;
-        }
-    }
 
     if (SOPC_STATUS_OK == status)
     {
@@ -298,33 +282,23 @@ int main(int argc, char* argv[])
         SOPC_ToolkitServer_AsyncOpenEndpoint(epConfigIdx);
     }
 
-    // Run the server until timeout or notification that endpoint is closed
-    loopCpt = 0;
-    while (SOPC_STATUS_OK == status && stopServer == 0 && endpointClosed == false &&
-           loopCpt * sleepTimeout <= loopTimeout)
+    // Run the server until notification that endpoint is closed or stop server signal
+    while (SOPC_STATUS_OK == status && stopServer == 0 && endpointClosed == false)
     {
-        loopCpt++;
-        // Retrieve received messages on socket
         SOPC_Sleep(sleepTimeout);
     }
 
-    // Asynchronous request to close the endpoint
-    SOPC_ToolkitServer_AsyncCloseEndpoint(epConfigIdx);
-
-    // Wait until endpoint is closed
-    loopCpt = 0;
-    loopTimeout = 1000;
-    while (SOPC_STATUS_OK == status && stopServer == 0 && endpointClosed == false &&
-           loopCpt * sleepTimeout <= loopTimeout)
+    if (SOPC_STATUS_OK == status && endpointClosed == false)
     {
-        loopCpt++;
-        // Retrieve received messages on socket
-        SOPC_Sleep(sleepTimeout);
+        // Asynchronous request to close the endpoint
+        SOPC_ToolkitServer_AsyncCloseEndpoint(epConfigIdx);
     }
 
-    if (loopCpt * sleepTimeout > loopTimeout)
+    // Wait until endpoint is closed or stop server signal
+    while (SOPC_STATUS_OK == status && stopServer == 0 && endpointClosed == false)
     {
-        status = SOPC_STATUS_TIMEOUT;
+        // Retrieve received messages on socket
+        SOPC_Sleep(sleepTimeout);
     }
 
     // Clear the toolkit configuration and stop toolkit threads

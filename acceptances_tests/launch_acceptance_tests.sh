@@ -76,7 +76,8 @@ fi
 rm -f $LOG_FILE $TAP_FILE
 echo -e "Launching server"
 pushd ../bin
-./toolkit_test_server 200000&
+./toolkit_test_server &
+SERVER_PID=$!
 popd
 
 echo -e "Launching Acceptance Test Tool"
@@ -85,6 +86,8 @@ echo -e "Launching Acceptance Test Tool"
 
 # kill virtual display since not necessary anymore
 kill -9 $XVFB_PID
+# kill server not necessary anymore
+kill $SERVER_PID
 
 # test that log file is available
 if [ ! -f $LOG_FILE ];then
