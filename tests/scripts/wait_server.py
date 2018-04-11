@@ -40,7 +40,7 @@ def wait_server(url, timeout):
             sock.close()
             return True
         except ConnectionError:
-            pass
+            time.sleep(0.1)
         if time.time()-t0 >= TIMEOUT:
             return False
 
