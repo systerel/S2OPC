@@ -20,6 +20,8 @@ import shlex
 import subprocess
 import sys
 
+import wait_server
+
 def usage():
     sys.stderr.write('''Usage: %s SERVER_TEST_NAME
 
@@ -27,7 +29,8 @@ Runs the given test against a toolkit test server running in the background.
 SERVER_TEST_NAME should be the path to the test script.
 
 The command to launch the server is set using the TEST_SERVER_CMD environment
-variable. This command will be run from the bin/ folder.
+variable. This command will be run from the bin/ folder. The server should
+listen on port 4841 to be detected by the script.
 ''' % sys.argv[0])
 
 if __name__ == '__main__':
@@ -47,6 +50,12 @@ if __name__ == '__main__':
 
     print('Starting server')
     server_process = subprocess.Popen(shlex.split(test_server_cmd), cwd=test_server_dir)
+
+    if not wait_server.wait_server(wait_server.DEFAULT_URL, wait_server.TIMEOUT):
+        print('Timeout for starting server')
+        server_process.kill()
+        server_process.wait()
+        sys.exit(1)
 
     print('Starting test %s' % ' '.join(cmd))
 
