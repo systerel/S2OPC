@@ -189,18 +189,18 @@ static bool SC_CloseConnection(uint32_t connectionIdx)
                 scConnection->clientNonce = NULL;
             }
 
-            if (scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT)
-            {
-                // Close the underlying socket
-                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, scConnection->socketIndex, NULL, 0);
-            }
+            // Close the underlying socket
+            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, scConnection->socketIndex, NULL, 0);
 
             if (scConnection->isServerConnection != false)
             {
                 // Remove the connection configuration created on connection establishment
                 configRes = SOPC_ToolkitServer_RemoveSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
-                if (configRes == false)
+                if (configRes == false && scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT &&
+                    scConnection->state != SECURE_CONNECTION_STATE_TCP_NEGOTIATE &&
+                    scConnection->state != SECURE_CONNECTION_STATE_SC_INIT)
                 {
+                    // Note: configuration is only added after treatment of OPN request: do not consider previous states
                     SOPC_Logger_TraceError("ScStateMgr: SC_CloseConnection: scCfgIdx=%" PRIu32 " not found",
                                            scConnection->endpointConnectionConfigIdx);
                 }
