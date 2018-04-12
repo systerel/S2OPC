@@ -25,6 +25,7 @@
 
 #include <assert.h>
 #include <check.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -96,8 +97,10 @@ static SOPC_StubSC_SocketsEventParams* Check_Socket_Event_Received(SOPC_Sockets_
         }
         else
         {
-            printf("SC_Rcv_Buffer: ERROR unexpected Sockets event received event=%d, eltId=%u, auxParam=%u\n",
-                   socketEvent->event, socketEvent->eltId, (uint32_t) socketEvent->auxParam);
+            printf("SC_Rcv_Buffer: ERROR unexpected Sockets event received event=%d (expected %d), eltId=%" PRIu32
+                   " (expected "
+                   "%" PRIu32 "), auxParam=%" PRIuPTR " (expected %" PRIuPTR ")\n",
+                   socketEvent->event, event, socketEvent->eltId, eltId, socketEvent->auxParam, auxParam);
             free(socketEvent);
             socketEvent = NULL;
         }
@@ -146,8 +149,10 @@ static SOPC_StubSC_ServicesEventParams* Check_Service_Event_Received(SOPC_Servic
         }
         else
         {
-            printf("SC_Rcv_Buffer: ERROR unexpected Services event received event=%d, eltId=%u, auxParam=%u\n",
-                   serviceEvent->event, serviceEvent->eltId, (uint32_t) serviceEvent->auxParam);
+            printf("SC_Rcv_Buffer: ERROR unexpected Services event received event=%d (expected %d), eltId=%" PRIu32
+                   " (expected "
+                   "%" PRIu32 "), auxParam=%" PRIuPTR " (expected %" PRIuPTR ")\n",
+                   serviceEvent->event, event, serviceEvent->eltId, eltId, serviceEvent->auxParam, auxParam);
             free(serviceEvent);
             serviceEvent = NULL;
         }
