@@ -39,6 +39,15 @@ else
     BUILD_DIR=build
 fi
 
+# Check if the option which name is $1 is defined in env,
+#  and adds it and its value to CMAKE_OPTIONS
+append_cmake_option ()
+{
+    if [[ $1 ]]; then
+        CMAKE_OPTIONS="$CMAKE_OPTIONS -D$1=${!1}"
+    fi
+}
+
 echo "Build log" > $CURDIR/build.log
 
 echo "Build the library and tests with CMake" | tee -a $CURDIR/build.log
@@ -49,15 +58,11 @@ else
     mkdir -p $BUILD_DIR || exit 1
     cd $BUILD_DIR  > /dev/null || exit 1
     echo "- Run CMake" | tee -a $CURDIR/build.log
-    if [[ $CMAKE_TOOLCHAIN_FILE ]]; then
-        CMAKE_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../$CMAKE_TOOLCHAIN_FILE"
-    fi
-    if [[ $BUILD_SHARED_LIBS ]]; then
-        CMAKE_OPTIONS="$CMAKE_OPTIONS -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS"
-    fi
-    if [[ $CMAKE_INSTALL_PREFIX ]]; then
-        CMAKE_OPTIONS="$CMAKE_OPTIONS -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX"
-    fi
+    append_cmake_option CMAKE_TOOLCHAIN_FILE
+    append_cmake_option BUILD_SHARED_LIBS
+    append_cmake_option CMAKE_INSTALL_PREFIX
+    append_cmake_option WITH_ASAN
+    append_cmake_option WITH_UBSAN
     cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
     cd - > /dev/null || exit 1
 fi
