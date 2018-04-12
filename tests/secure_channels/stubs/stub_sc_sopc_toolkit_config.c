@@ -65,18 +65,19 @@ static struct
     uint16_t logMaxFiles;
     SOPC_Log_Level logLevel;
 
-} tConfig = {.initDone = false,
-             .locked = false,
-             .scConfigIdxMax = 0,
-             .serverScLastConfigIdx = 0,
-             .epConfigIdxMax = 0,
-             .nsTable = NULL,
-             .encTypesTable = NULL,
-             .nbEncTypesTable = 0,
-             .logDirPath = "",
-             .logMaxBytes = 1048576, // 1 MB
-             .logMaxFiles = 50,
-             .logLevel = SOPC_LOG_LEVEL_ERROR};
+} // Any change in values below shall be also done in SOPC_Toolkit_Clear
+tConfig = {.initDone = false,
+           .locked = false,
+           .scConfigIdxMax = 0,
+           .serverScLastConfigIdx = 0,
+           .epConfigIdxMax = 0,
+           .nsTable = NULL,
+           .encTypesTable = NULL,
+           .nbEncTypesTable = 0,
+           .logDirPath = "",
+           .logMaxBytes = 1048576, // 1 MB
+           .logMaxFiles = 50,
+           .logLevel = SOPC_LOG_LEVEL_ERROR};
 
 SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 {
@@ -203,14 +204,22 @@ void SOPC_Toolkit_Clear()
         {
             free(tConfig.encTypesTable);
         }
-        tConfig.nsTable = NULL;
-        tConfig.encTypesTable = NULL;
-        tConfig.nbEncTypesTable = 0;
 
         SOPC_Toolkit_ClearServerScConfigs_WithoutLock();
         SOPC_Logger_Clear();
-        tConfig.locked = false;
+        // Reset values to init value
         tConfig.initDone = false;
+        tConfig.locked = false;
+        tConfig.scConfigIdxMax = 0;
+        tConfig.serverScLastConfigIdx = 0;
+        tConfig.epConfigIdxMax = 0;
+        tConfig.nsTable = NULL;
+        tConfig.encTypesTable = NULL;
+        tConfig.nbEncTypesTable = 0;
+        tConfig.logDirPath = "";
+        tConfig.logMaxBytes = 1048576; // 1 MB
+        tConfig.logMaxFiles = 50;
+        tConfig.logLevel = SOPC_LOG_LEVEL_ERROR;
         Mutex_Unlock(&tConfig.mut);
         Mutex_Clear(&tConfig.mut);
     }
