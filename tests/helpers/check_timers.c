@@ -92,7 +92,6 @@ START_TEST(test_timers)
 
     while (timersTriggered < NB_TIMERS)
     {
-        SOPC_Sleep(50);
         // Manually trigger the timers evaluation
         SOPC_EventTimer_CyclicTimersEvaluation();
     }
@@ -150,7 +149,6 @@ START_TEST(test_timers_with_cancellation)
     i = 0;
     while (timersTriggeredWithCancel < NB_TIMERS_WITH_CANCEL)
     {
-        SOPC_Sleep(50);
         // Manually trigger the timers evaluation
         SOPC_EventTimer_CyclicTimersEvaluation();
         // Delete two last timers
