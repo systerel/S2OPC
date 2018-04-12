@@ -337,12 +337,11 @@ OPERATIONS
     END
     ;
     
-    client_secure_channel_lost_session_sm (lost_channel, channel_config_idx) =
+    client_secure_channel_lost_session_sm (p_lost_channel, p_channel_config_idx) =
     PRE
-        lost_channel : t_channel_i &
-        lost_channel : s_channel_connected &
-        channel_config_idx : t_channel_config_idx_i &
-        channel_config_idx : t_channel_config_idx
+        p_lost_channel : t_channel_i &
+        p_lost_channel : s_channel_connected &
+        p_channel_config_idx : t_channel_config_idx_i
     THEN
         skip
     END

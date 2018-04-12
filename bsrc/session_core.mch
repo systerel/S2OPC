@@ -384,28 +384,34 @@ OPERATIONS
     ;
 
     // Client channel lost
-    client_secure_channel_lost_session_sm (lost_channel, channel_config_idx) =
+    client_secure_channel_lost_session_sm (p_lost_channel, p_channel_config_idx) =
     PRE
-        lost_channel : t_channel_i &
-        lost_channel : s_channel_connected &
-        channel_config_idx : t_channel_config_idx_i &
-        channel_config_idx : t_channel_config_idx
+        p_lost_channel       : t_channel_i         &
+        p_lost_channel       : s_channel_connected &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx
     THEN
         // We have a new channel to provide (waiting for connection)
         LET active_sessions, inactive_sessions BE
-            active_sessions = dom(a_channel |> {lost_channel}) /\ dom(a_state |>  {e_session_userActivated}) &
-            inactive_sessions = dom(a_channel |> {lost_channel}) /\ dom(a_state |>>  {e_session_userActivated})
+            active_sessions   = {session | session : t_session                            &
+                                           session : a_channel~[{p_lost_channel}]         &
+                                           session : a_state  ~[{e_session_userActivated}]} &
+            inactive_sessions = {session | session : t_session                            &
+                                           session : a_channel~[{p_lost_channel}]         &
+                                           session /: a_state ~[{e_session_userActivated}]}
         IN
-            a_state := a_state <+ (active_sessions*{e_session_scOrphaned})
-            // sessions on lost channel that were in activated state are now channel orphaned,
-            // other created sessions on channel are closed
-            <+ (inactive_sessions *{e_session_closed}) ||
-            a_channel := a_channel |>> {lost_channel} ||
-            // channel is not the channel of any session
-            a_user := inactive_sessions <<| a_user ||
-            // sessions CLOSED due to channel loss do not have user anymore
-            a_client_orphaned := a_client_orphaned <+ active_sessions*{channel_config_idx}
-            // sessions ORPHANED of a channel are recorded
+            s_session                    := s_session - inactive_sessions                                                       ||
+            a_state                      := inactive_sessions <<| a_state <+ (active_sessions * {e_session_scOrphaned})         ||
+            a_channel                    := inactive_sessions <<| a_channel |>> {p_lost_channel}                                ||
+            a_client_to_create           := inactive_sessions <<| a_client_to_create                                            ||
+            a_client_to_activate         := inactive_sessions <<| a_client_to_activate                                          ||
+            a_client_to_activate_context := inactive_sessions <<| a_client_to_activate_context                                  ||
+            a_client_orphaned            := inactive_sessions <<| a_client_orphaned <+ active_sessions * {p_channel_config_idx} ||
+            a_user                       := inactive_sessions <<| a_user                                                        ||
+            a_server_token               := a_server_token |>> inactive_sessions                                                ||
+            a_client_token               := inactive_sessions <<| a_client_token                                                ||
+            a_NonceServer                := inactive_sessions <<| a_NonceServer                                                 ||
+            a_NonceClient                := inactive_sessions <<| a_NonceClient
         END
     END
     ;

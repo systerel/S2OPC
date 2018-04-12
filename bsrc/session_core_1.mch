@@ -530,7 +530,7 @@ OPERATIONS
     ;
 
     /* This function is not called when there is no client nonce (ie SC:Sec_pol is None) */
-    valid <-- client_create_session_check_crypto(p_session, p_channel_config_idx, p_resp_msg) =
+    p_valid <-- client_create_session_check_crypto(p_session, p_channel_config_idx, p_resp_msg) =
     PRE
         p_session : t_session_i &
         p_session : s_session &
@@ -542,46 +542,54 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_create_resp
     THEN
-        CHOICE
-            valid := TRUE ||
-            a_NonceServer
-            :(
-                a_NonceServer : t_session +-> t_Nonce &
+        p_valid,
+        a_NonceServer
+        :(  p_valid : BOOL &
+            a_NonceServer : t_session +-> t_Nonce &
+            
+            (   p_valid = TRUE
+                =>
                 {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
                 p_session : dom(a_NonceServer)
+            ) &
+            (   p_valid = FALSE
+                =>
+                a_NonceServer = a_NonceServer$0
             )
-        OR
-            valid := FALSE
-        END
+        )
     END
     ;
     
-    valid <-- server_activate_session_check_crypto(session, channel, channel_config_idx, activate_req_msg) =
+    p_valid <-- server_activate_session_check_crypto(p_session, p_channel, p_channel_config_idx, p_activate_req_msg) =
     PRE
-        session : t_session_i &
-        session : s_session &
-        session : dom(a_NonceClient) &
-        channel : t_channel_i &
-        channel : s_channel_connected &
-        a_SecurityPolicy(channel) /= e_secpol_None &
-        channel_config_idx : t_channel_config_idx_i &
-        channel_config_idx : t_channel_config_idx &
-        activate_req_msg : t_msg_i &
-        activate_req_msg = c_msg_in &
+        p_session : t_session_i &
+        p_session : s_session &
+        p_session : dom(a_NonceClient) &
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected &
+        a_SecurityPolicy(p_channel) /= e_secpol_None &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_activate_req_msg : t_msg_i &
+        p_activate_req_msg = c_msg_in &
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_activate_req
     THEN
-        CHOICE
-            valid := TRUE ||
-            a_NonceServer
-            :(
-                a_NonceServer : t_session +-> t_Nonce &
-                {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
-                session : dom(a_NonceServer)
+        p_valid,
+        a_NonceServer
+        :(  p_valid : BOOL &
+            a_NonceServer : t_session +-> t_Nonce &
+            
+            (   p_valid = TRUE
+                =>
+                {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
+                p_session : dom(a_NonceServer)
+            ) &
+            (   p_valid = FALSE
+                =>
+                a_NonceServer = a_NonceServer$0
             )
-        OR
-            valid := FALSE
-        END
+        )
     END
     ;
     

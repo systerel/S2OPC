@@ -681,23 +681,26 @@ OPERATIONS
             IF l_is_client = TRUE
             THEN
                 l_channel_config_idx <-- get_channel_info (channel);
-                l_disconnecting_channel <-- is_disconnecting_channel (l_channel_config_idx);
-                client_secure_channel_lost_session_sm (channel, l_channel_config_idx);
-                IF l_disconnecting_channel = FALSE
+                ASSERT l_channel_config_idx : t_channel_config_idx
                 THEN
-                    // attempt to reconnect channel
-                    l_new_channel <-- get_connected_channel (l_channel_config_idx);
-                    IF l_new_channel = c_channel_indet
+                    l_disconnecting_channel <-- is_disconnecting_channel (l_channel_config_idx);
+                    client_secure_channel_lost_session_sm (channel, l_channel_config_idx);
+                    IF l_disconnecting_channel = FALSE
                     THEN
-                        l_bres <-- cli_open_secure_channel (l_channel_config_idx)
-                        // async operation => cannot use channel until connection is effective ?
-                    END;
-
-                    l_valid_new_channel <-- is_connected_channel (l_new_channel);
-
-                    IF l_valid_new_channel = TRUE
-                    THEN
-                        client_channel_connected_event_session (l_channel_config_idx, l_new_channel)
+                        // attempt to reconnect channel
+                        l_new_channel <-- get_connected_channel (l_channel_config_idx);
+                        IF l_new_channel = c_channel_indet
+                        THEN
+                            l_bres <-- cli_open_secure_channel (l_channel_config_idx)
+                            // async operation => cannot use channel until connection is effective ?
+                        END;
+                        
+                        l_valid_new_channel <-- is_connected_channel (l_new_channel);
+                        
+                        IF l_valid_new_channel = TRUE
+                        THEN
+                            client_channel_connected_event_session (l_channel_config_idx, l_new_channel)
+                        END
                     END
                 END
             ELSE

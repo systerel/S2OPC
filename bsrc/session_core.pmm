@@ -16,12 +16,14 @@
  */
 
 THEORY User_Pass IS
+
+ff(0) & dd(0) & ar(th_simp_overload) & ar(InPOWTryXY);
 ff(0) & dd(0) & pr(Tac(LinkedRelations; InPOWTryXY));
-ff(0) & d0 & pr(Tac(th_simp_overload; InPOWLeavesXY));
-ff(0) & dd(0) & ar(th_simp_overload) & ar(SimplifyRelDomXY.15,Goal) & ar(InPOWTryXY);
 ff(0) & dd(0) & ar(LinkedRelations) & mp & mp & eh(dom(a_channel)) & pr;
+ff(0) & d0 & pr(Tac(th_simp_overload; InPOWLeavesXY));
 ff(0) & dd(0) & ar(LinkedRelations) & mp & mp & eh(dom(a_user)) & pr;
-ff(0) & mp & pp(rt.1)
+ff(0) & mp & pp(rt.1);
+ff(0) & dd & pp(rt.1)
 END
 
 &
