@@ -65,7 +65,7 @@ toolkit_test_suite_client.tap
 toolkit_test_write.tap
 validation.tap"
 
-ACTUAL_TAP_FILES=$(ls "${BIN_DIR}"/*.tap | sed "s|${BIN_DIR}/||")
+ACTUAL_TAP_FILES=$(LANG=C ls "${BIN_DIR}"/*.tap | sed "s|${BIN_DIR}/||")
 
 if [ "$ACTUAL_TAP_FILES" != "$EXPECTED_TAP_FILES" ]; then
 	echo "Missing or extra TAP files detected"
