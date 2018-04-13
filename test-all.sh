@@ -59,10 +59,8 @@ secure_channel_level_SignAndEncrypt_B256Sha256_4096bit_server_vs_2048bit_client.
 secure_channel_level_Sign_B256Sha256_2048bit.tap
 secure_channel_level_Sign_B256_2048bit.tap
 session_timeout.tap
-toolkit_test_read.tap
 toolkit_test_server_local_service.tap
 toolkit_test_suite_client.tap
-toolkit_test_write.tap
 validation.tap"
 
 ACTUAL_TAP_FILES=$(LANG=C ls "${BIN_DIR}"/*.tap | sed "s|${BIN_DIR}/||")

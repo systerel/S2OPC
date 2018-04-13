@@ -120,8 +120,6 @@ Run a particular test (bin/ directory):
 - Toolkit helpers unit tests: execute ./check_helpers
 - Toolkit sockets management layer test: execute ./check_sockets
 - Toolkit secure channel (+sockets) management layer: ./test_secure_channels_server and ./test_secure_channels_client in parallel
-- Toolkit read service test: execute ./toolkit_test_read
-- Toolkit write service test: execute ./toolkit_test_write
 - Toolkit client/server session and read/write service example:
   execute ./toolkit_test_server and then ./toolkit_test_client in parallel
 - Toolkit server and read / write / browse service validation:

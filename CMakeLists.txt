@@ -330,27 +330,6 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/server_4k.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/server_4k.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/)
 
-# Read service test
-add_executable(toolkit_test_read "tests/services/toolkit_test_read.c"
-                                 "tests/services/wrap_read.c"
-                                 "tests/services/testlib_read_response.c"
-                                 "address_space_generation/genc/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_read PRIVATE ingopcs)
-target_include_directories(toolkit_test_read PRIVATE "${ADDSPACEGEN_DIR}/include"
-                                                     ${INGOPCS_PUBLIC_INCLUDES}
-                                                     ${INGOPCS_PRIVATE_INCLUDES})
-s2opc_unit_test(toolkit_test_read GENERATE_TAP)
-
-# Write service test
-add_executable(toolkit_test_write "tests/services/toolkit_test_write.c"
-                                  "tests/services/testlib_write.c"
-                                  "address_space_generation/genc/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_write PRIVATE ingopcs)
-target_include_directories(toolkit_test_write PRIVATE "${ADDSPACEGEN_DIR}/include"
-                                                      ${INGOPCS_PUBLIC_INCLUDES}
-                                                      ${INGOPCS_PRIVATE_INCLUDES})
-s2opc_unit_test(toolkit_test_write GENERATE_TAP)
-
 # Sockets layer (stubbed) tests
 file(GLOB_RECURSE SOCKETS_SRC
     ${PLATFORM_SRCS}
