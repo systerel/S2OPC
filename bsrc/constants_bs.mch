@@ -47,7 +47,17 @@ SETS
     t_LocalizedText_i;
     t_QualifiedName_i;
     t_application_context_i;
-    t_subscription_i
+    t_subscription_i;
+    t_notif_msg_i;
+    t_sub_seq_num_i;
+    t_timeref_i;
+    t_counter_i;
+    t_opcua_duration_i;
+    t_notificationQueue_i;
+    t_publishReqQueue_i;
+    t_monitoredItemQueue_i;
+    t_monitoredItem_i;
+    t_client_handle_i
 
 CONCRETE_CONSTANTS
     k_n_read_resp_max,
@@ -79,6 +89,13 @@ CONCRETE_CONSTANTS
     c_LocalizedText_indet,
     c_QualifiedName_indet,
     c_subscription_indet,
+    c_notif_msg_indet,
+    c_sub_seq_num_indet,
+    c_timeref_indet,
+    c_notificationQueue_indet,
+    c_publishReqQueue_indet,
+    c_monitoredItemQueue_indet,
+    c_monitoredItem_indet,
     c_WriteValuePointer_indet
 
 ABSTRACT_CONSTANTS
@@ -108,6 +125,13 @@ ABSTRACT_CONSTANTS
     t_LocalizedText,
     t_QualifiedName,
     t_subscription,
+    t_notif_msg,
+    t_sub_seq_num,
+    t_timeref,
+    t_notificationQueue,
+    t_publishReqQueue,
+    t_monitoredItemQueue,
+    t_monitoredItem,
     t_WriteValuePointer
 
 PROPERTIES
@@ -168,6 +192,34 @@ PROPERTIES
     c_subscription_indet : t_subscription_i &
     c_subscription_indet /: t_subscription &
 
+    t_notif_msg <: t_notif_msg_i &
+    c_notif_msg_indet : t_notif_msg_i &
+    c_notif_msg_indet /: t_notif_msg &
+    
+    t_sub_seq_num <: t_sub_seq_num_i &
+    c_sub_seq_num_indet : t_sub_seq_num_i &
+    c_sub_seq_num_indet /: t_sub_seq_num &
+    
+    t_timeref <: t_timeref_i &
+    c_timeref_indet : t_timeref_i &
+    c_timeref_indet /: t_timeref &
+    
+    t_notificationQueue <: t_notificationQueue_i &
+    c_notificationQueue_indet : t_notificationQueue_i &
+    c_notificationQueue_indet /: t_notificationQueue &
+    
+    t_publishReqQueue <: t_publishReqQueue_i &
+    c_publishReqQueue_indet : t_publishReqQueue_i &
+    c_publishReqQueue_indet /: t_publishReqQueue &
+
+    t_monitoredItemQueue <: t_monitoredItemQueue_i &
+    c_monitoredItemQueue_indet : t_monitoredItemQueue_i &
+    c_monitoredItemQueue_indet /: t_monitoredItemQueue &
+    
+    t_monitoredItem <: t_monitoredItem_i &
+    c_monitoredItem_indet : t_monitoredItem_i &
+    c_monitoredItem_indet /: t_monitoredItem &
+    
     t_msg_header <: t_msg_header_i &
     c_msg_header_indet : t_msg_header_i &
     c_msg_header_indet /: t_msg_header &

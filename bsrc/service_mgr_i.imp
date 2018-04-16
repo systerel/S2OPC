@@ -487,7 +487,7 @@ OPERATIONS
             OR e_msg_subscription_publish_req THEN
                 StatusCode_service, async_resp_msg <-- treat_subscription_publish_request (session, req_header, req_msg, req_ctx, resp_msg)
             OR e_msg_monitored_items_create_req THEN
-                StatusCode_service <-- treat_subscription_create_monitored_item_req (session, req_msg, resp_msg)
+                StatusCode_service <-- treat_subscription_create_monitored_items_req (session, req_msg, resp_msg)
             ELSE
                 /* service is not supported */
                 StatusCode_service := e_sc_bad_service_unsupported

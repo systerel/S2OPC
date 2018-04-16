@@ -19,7 +19,7 @@
 
 /** \file
  *
- * Hand-modified _bs.h to specify my own # defines
+ * Hand-modified _bs.h to specify some types
  */
 
 #ifndef CONSTANTS_BS_H_
@@ -34,7 +34,9 @@
 #include "b2c.h"
 
 #include "sopc_address_space.h"
+#include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
+#include "sopc_time.h"
 #include "sopc_types.h"
 
 /*-----------------------------
@@ -43,25 +45,40 @@
 typedef SOPC_ExpandedNodeId* constants_bs__t_ExpandedNodeId_i;
 typedef SOPC_LocalizedText* constants_bs__t_LocalizedText_i;
 typedef SOPC_NodeId* constants_bs__t_NodeId_i;
+
 typedef SOPC_AddressSpace_Item* constants_bs__t_Node_i;
 typedef SOPC_ByteString* constants_bs__t_Nonce_i;
 typedef SOPC_QualifiedName* constants_bs__t_QualifiedName_i;
 typedef OpcUa_ReferenceNode* constants_bs__t_Reference_i;
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
+#define constants_bs__t_UserId_i t_entier4
+
 typedef SOPC_Variant* constants_bs__t_Variant_i;
 typedef OpcUa_WriteValue* constants_bs__t_WriteValuePointer_i;
 typedef uintptr_t constants_bs__t_application_context_i;
 typedef SOPC_Buffer* constants_bs__t_byte_buffer_i;
+
 typedef uint32_t constants_bs__t_channel_config_idx_i;
 typedef uint32_t constants_bs__t_channel_i;
 typedef uint32_t constants_bs__t_client_request_handle_i;
+typedef uint32_t constants_bs__t_client_handle_i;
+#define constants_bs__t_counter_i t_entier4
 typedef uint32_t constants_bs__t_endpoint_config_idx_i;
-typedef void* constants_bs__t_msg_header_i;
-typedef void* constants_bs__t_msg_i;
+typedef void* constants_bs__t_monitoredItemQueue_i;
+#define constants_bs__t_monitoredItem_i t_entier4
+typedef void* constants_bs__t_msg_header_i; /* OpcUa_RequestHeader OR OpcUa_ResponseHeader */
+typedef void* constants_bs__t_msg_i;        /* OpcUa_* message */
+typedef OpcUa_NotificationMessage* constants_bs__t_notif_msg_i;
+typedef void* constants_bs__t_notificationQueue_i;
+typedef double constants_bs__t_opcua_duration_i;
+typedef void* constants_bs__t_publishReqQueue_i;
 typedef uint32_t constants_bs__t_request_context_i;
 typedef uint32_t constants_bs__t_server_request_handle_i;
 typedef uint32_t constants_bs__t_session_i;
 typedef SOPC_NodeId* constants_bs__t_session_token_i;
+typedef uint32_t constants_bs__t_sub_seq_num_i;
+#define constants_bs__t_subscription_i t_entier4
+typedef SOPC_TimeReference constants_bs__t_timeref_i;
 #define constants_bs__t_user_i t_entier4
 typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 
@@ -77,18 +94,30 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__t_Reference_i_max (-1)
 #define constants_bs__t_SignatureData_i_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
+#define constants_bs__t_WriteValuePointer_i_max (-1)
 #define constants_bs__t_application_context_i_max (-1)
 #define constants_bs__t_byte_buffer_i_max (-1)
 #define constants_bs__t_channel_config_idx_i_max (2 * SOPC_MAX_SECURE_CONNECTIONS)
 #define constants_bs__t_channel_i_max SOPC_MAX_SECURE_CONNECTIONS
 #define constants_bs__t_client_request_handle_i_max (-1)
+#define constants_bs__t_client_handle_i_max (-1)
+#define constants_bs__t_counter_i_max (-1)
 #define constants_bs__t_endpoint_config_idx_i_max SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
+#define constants_bs__t_monitoredItemQueue_i_max (-1)
+#define constants_bs__t_monitoredItem_i_max (-1)
 #define constants_bs__t_msg_header_i_max (-1)
 #define constants_bs__t_msg_i_max (-1)
+#define constants_bs__t_notif_msg_i_max (-1)
+#define constants_bs__t_notificationQueue_i_max (-1)
+#define constants_bs__t_opcua_duration_i_max (-1)
+#define constants_bs__t_publishReqQueue_i_max (-1)
 #define constants_bs__t_request_context_i_max (-1)
 #define constants_bs__t_server_request_handle_i_max (-1)
 #define constants_bs__t_session_i_max SOPC_MAX_SESSIONS
 #define constants_bs__t_session_token_i_max (-1)
+#define constants_bs__t_sub_seq_num_i_max (-1)
+#define constants_bs__t_subscription_i_max (-1)
+#define constants_bs__t_timeref_i_max (-1)
 #define constants_bs__t_user_i_max (-1)
 #define constants_bs__t_user_token_i_max (-1)
 
@@ -104,17 +133,26 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__c_Reference_indet 0
 #define constants_bs__c_SignatureData_indet 0
 #define constants_bs__c_Variant_indet 0
+#define constants_bs__c_WriteValuePointer_indet 0
 #define constants_bs__c_byte_buffer_indet 0
 #define constants_bs__c_channel_config_idx_indet 0
 #define constants_bs__c_channel_indet 0
 #define constants_bs__c_client_request_handle_indet 0
 #define constants_bs__c_endpoint_config_idx_indet 0
+#define constants_bs__c_monitoredItemQueue_indet 0
+#define constants_bs__c_monitoredItem_indet 0
 #define constants_bs__c_msg_header_indet 0
 #define constants_bs__c_msg_indet 0
 #define constants_bs__c_no_application_context 0
+#define constants_bs__c_notif_msg_indet 0
+#define constants_bs__c_notificationQueue_indet 0
+#define constants_bs__c_publishReqQueue_indet 0
 #define constants_bs__c_request_context_indet 0
 #define constants_bs__c_session_indet 0
 #define constants_bs__c_session_token_indet 0
+#define constants_bs__c_sub_seq_num_indet 0
+#define constants_bs__c_subscription_indet 0
+#define constants_bs__c_timeref_indet 0
 #define constants_bs__c_user_indet 0
 #define constants_bs__c_user_token_indet 0
 #define constants_bs__k_n_BrowseResponse_max SOPC_MAX_OPERATIONS_PER_MSG

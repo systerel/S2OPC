@@ -1,0 +1,187 @@
+/*
+ *  Copyright (C) 2018 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION
+    subscription_mgr_i
+REFINES
+    subscription_mgr
+    
+SEES
+    constants,
+    message_in_bs,
+    message_out_bs
+    
+IMPORTS
+    subscription_core,
+    msg_subscription_service_bs
+    
+PROMOTES
+    is_valid_subscription,
+    server_subscription_publish_timeout
+    
+OPERATIONS
+    
+    StatusCode_service <-- treat_create_subscription_request (p_session, p_req_msg, p_resp_msg) =
+    VAR
+        l_session_has_subscription,
+        l_reqPublishInterval,
+        l_reqLifetimeCount,
+        l_reqMaxKeepAlive,
+        l_maxNotificationsPerPublish,
+        l_publishEnabled,
+        l_subscription,
+        l_revisedPublishInterval,
+        l_revisedLifetimeCount,
+        l_revisedMaxKeepAlive
+    IN
+        l_session_has_subscription <-- has_subscription (p_session);
+        IF l_session_has_subscription = FALSE
+        THEN
+            /* Extract create subscription parameters */
+            l_reqPublishInterval, l_reqLifetimeCount, l_reqMaxKeepAlive, l_maxNotificationsPerPublish, l_publishEnabled
+              <-- get_msg_create_subscription_req_params (p_req_msg);
+            /* TODO: refuse publishEnabled = FALSE ? */
+            
+            /* Compute revised parameters */
+            l_revisedPublishInterval, l_revisedLifetimeCount, l_revisedMaxKeepAlive 
+              <-- compute_create_subscription_revised_params (p_session,
+                                                              l_reqPublishInterval,
+                                                              l_reqLifetimeCount,
+                                                              l_reqMaxKeepAlive);
+                                                          
+            /* Create subscription */
+            StatusCode_service, l_subscription <-- create_subscription (p_session,
+                                                                        l_revisedPublishInterval,
+                                                                        l_revisedLifetimeCount,
+                                                                        l_revisedMaxKeepAlive,
+                                                                        l_maxNotificationsPerPublish,
+                                                                        l_publishEnabled);
+                                   
+            IF StatusCode_service = e_sc_ok THEN
+                /* Fill values to response message */
+                set_msg_create_subscription_resp_params (p_resp_msg,
+                                                         l_subscription, 
+                                                         l_revisedPublishInterval,
+                                                         l_revisedLifetimeCount,
+                                                         l_revisedMaxKeepAlive)
+            END
+        ELSE
+            StatusCode_service := e_sc_bad_too_many_subscriptions
+        END
+    END
+    ;
+    
+    StatusCode_service, async_resp_msg <-- treat_subscription_publish_request (p_session, p_req_header, p_req_msg, p_req_ctx, p_resp_msg) =
+    VAR
+        l_session_has_subscription,
+        l_req_exp_time,
+        /*l_nb_subsciptionAcks,
+        l_nb_avail_seq_nums,*/
+        l_subscription,
+        l_notifMsg
+    IN
+        async_resp_msg := FALSE;
+        l_session_has_subscription <-- has_subscription (p_session);
+        IF l_session_has_subscription = TRUE
+        THEN
+            /* Extract values from header: expiration time for Publish Request */
+            l_req_exp_time <-- get_msg_header_expiration_time (p_req_header);
+            
+            /* TODO: Extract values from message: l_nb_subsciptionAcks <-- get_msg_publish_request_params (p_req_msg); */            
+            /* TODO: allocate acks results array of response message */
+            /* TODO: iter on sub_acks in LOCAL OP and ack it using acknowledge_publish_response (sub_id, seq_num) + fill results[] in resp :           
+            <=> fill_read_response */
+            
+            StatusCode_service, async_resp_msg, l_subscription, l_notifMsg 
+              <-- receive_publish_request (p_session, l_req_exp_time, p_req_ctx, p_resp_msg);
+
+            IF StatusCode_service = e_sc_ok &
+                async_resp_msg = FALSE
+            THEN
+                /* TODO => SET ALL THOSE ACTIONS IN LOCAL OP: reuse case on SM transition */
+                set_msg_publish_resp_subscription (p_resp_msg, l_subscription);
+                /* TODO: fill the availableSeqNum of message: */
+                /* - allocate availableSequenceNumbers
+                   - iter on seq nums based on nb_avail_seq_nums */
+                set_msg_publish_resp_notificationMsg (p_resp_msg, l_notifMsg)
+            END
+        ELSE
+            StatusCode_service := e_sc_bad_no_subscription
+        END
+    END
+    ;
+    
+    StatusCode_service <-- treat_subscription_create_monitored_items_req (p_session, p_req_msg, p_resp_msg) =
+    VAR
+        l_req_valid,
+        l_subscription,
+        l_valid_subscription,
+        l_timestampToRet,
+        l_nb_monitored_items
+    IN
+        l_req_valid, l_subscription, l_timestampToRet, l_nb_monitored_items <-- getall_msg_create_monitored_items_req_params (p_req_msg);
+        l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
+        IF l_req_valid = TRUE
+        THEN
+            IF l_valid_subscription = TRUE &
+                l_nb_monitored_items > 0
+            THEN
+                /* TODO: allocate response results array (alloc_msg_create_monitored_items_resp_results): check not outOfMemory */
+                
+                /* TODO: iterate on req message monitored items, for each:
+                - get monitored item req from req message (getall_monitored_item_req_params): check monitoringMode / nodeId validity / ...                
+                - retrieve node (index) from nodeId (readall_AddressSpace_Node): check if nodeIdUnkown
+                - check attribute validity using from node + aid (read_AddressSpace_Attribute_value): check if attributeIdInvalid
+                - compute revised parameters (compute_create_montitored_item_revised_params)
+                - add monitored item to subscription and retrieve status + Id (create_monitored_item)
+                - add result to response (setall_msg_monitored_item_resp_params)
+                */
+                
+                StatusCode_service := e_sc_ok
+            ELSIF l_valid_subscription = FALSE
+            THEN
+                StatusCode_service := e_sc_bad_subscription_id_invalid
+            ELSE
+                StatusCode_service := e_sc_bad_nothing_to_do
+            END
+        ELSIF l_timestampToRet = c_TimestampsToReturn_indet
+        THEN
+            
+            StatusCode_service := e_sc_bad_timestamps_to_return_invalid
+        ELSE
+            /* TODO: not really appropriated, it is normally a global property (here it is in request only) */
+            StatusCode_service := e_sc_bad_too_many_monitored_items
+        END
+    END
+    ;
+    
+    server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
+    /*VAR
+        l_node,
+        l_aid
+    IN*/
+    BEGIN
+        /* TODO: retrieve node + aid from write value pointer */
+        /* TODO: retrieve monitoredItemQueue from node */
+        /* TODO: iterate on each monitoredItem, for each:
+        - check regarding MI properties / aid / old value / new value if notification necessary
+        - add notification to subscription
+        */
+        skip
+    END
+    
+END

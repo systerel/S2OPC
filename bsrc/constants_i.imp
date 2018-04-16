@@ -46,7 +46,9 @@ VALUES
     c_ReadValue_indet = 0;
     c_WriteValue_indet = 0;
     c_BrowseValue_indet = 0;
-    c_BrowseResult_indet = 0
+    c_BrowseResult_indet = 0;
+    
+    t_counter = NAT
 
 PROMOTES
     is_t_channel_config_idx,

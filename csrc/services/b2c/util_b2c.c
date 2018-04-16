@@ -711,6 +711,18 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_timeout:
         *status = OpcUa_BadTimeout;
         break;
+    case constants__e_sc_bad_too_many_subscriptions:
+        *status = OpcUa_BadTooManySubscriptions;
+        break;
+    case constants__e_sc_bad_no_subscription:
+        *status = OpcUa_BadNoSubscription;
+        break;
+    case constants__e_sc_bad_subscription_id_invalid:
+        *status = OpcUa_BadSubscriptionIdInvalid;
+        break;
+    case constants__e_sc_bad_too_many_monitored_items:
+        *status = OpcUa_BadTooManyMonitoredItems;
+        break;
     case constants__e_sc_bad_index_range_invalid:
         *status = OpcUa_BadIndexRangeInvalid;
         break;
@@ -865,6 +877,18 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         break;
     case OpcUa_BadTimeout:
         *bstatus = constants__e_sc_bad_timeout;
+        break;
+    case OpcUa_BadTooManySubscriptions:
+        *bstatus = constants__e_sc_bad_too_many_subscriptions;
+        break;
+    case OpcUa_BadNoSubscription:
+        *bstatus = constants__e_sc_bad_no_subscription;
+        break;
+    case OpcUa_BadSubscriptionIdInvalid:
+        *bstatus = constants__e_sc_bad_subscription_id_invalid;
+        break;
+    case OpcUa_BadTooManyMonitoredItems:
+        *bstatus = constants__e_sc_bad_too_many_monitored_items;
         break;
     case OpcUa_BadIndexRangeInvalid:
         *bstatus = constants__e_sc_bad_index_range_invalid;

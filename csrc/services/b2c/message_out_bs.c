@@ -276,15 +276,16 @@ void message_out_bs__get_msg_out_type(const constants__t_msg_i message_out_bs__m
 }
 
 void message_out_bs__is_valid_app_msg_out(const constants__t_msg_i message_out_bs__msg,
-                                          t_bool* const message_out_bs__bres)
+                                          t_bool* const message_out_bs__bres,
+                                          constants__t_msg_type_i* const message_out_bs__msg_typ)
 {
     // Since message is provided from application, we have to check it is non NULL and the message type is known
-    constants__t_msg_type_i message_out_bs__msgtype = constants__c_msg_type_indet;
+    *message_out_bs__msg_typ = constants__c_msg_type_indet;
     *message_out_bs__bres = false;
     if (message_out_bs__msg != constants__c_msg_indet)
     {
-        message_out_bs__get_msg_out_type(message_out_bs__msg, &message_out_bs__msgtype);
-        if (message_out_bs__msgtype != constants__c_msg_type_indet)
+        message_out_bs__get_msg_out_type(message_out_bs__msg, message_out_bs__msg_typ);
+        if (*message_out_bs__msg_typ != constants__c_msg_type_indet)
         {
             *message_out_bs__bres = true;
         }

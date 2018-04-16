@@ -85,14 +85,14 @@ OPERATIONS
             StatusCode_service,
             async_resp_msg
             :(  StatusCode_service : t_StatusCode_i &
-                StatusCode_service : t_StatusCode &
                 StatusCode_service = e_sc_ok &
                 async_resp_msg : BOOL
             )            
         END
-    END;
+    END
+    ;
     
-    StatusCode_service <-- treat_subscription_create_monitored_item_req (p_session, p_req_msg, p_resp_msg) =
+    StatusCode_service <-- treat_subscription_create_monitored_items_req (p_session, p_req_msg, p_resp_msg) =
     PRE
         p_session : t_session_i &
         p_session : t_session &

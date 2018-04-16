@@ -24,10 +24,10 @@ SETS
     /* The nodes of the Address Space \/ {indet} */
     t_Node_i;
     /* The node IDs. There might not be a NODE behind a node ID. */
-    t_NodeId_i;
+    t_NodeId_i; /* (SOPC_NodeId*) */
 
     /* Expanded Nodes Id : nodes ID local the the address space server or from distant address spaces */
-    t_ExpandedNodeId_i;
+    t_ExpandedNodeId_i; /* (SOPC_ExpandedNodeId*) */
 
     /* Address space references */
     t_Reference_i;
@@ -37,7 +37,7 @@ SETS
                      e_ncl_Object, e_ncl_Variable, e_ncl_Method,
                      e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType,
                      e_ncl_View};
-    t_Variant_i;
+    t_Variant_i; /* (SOPC_Variant*) */
     t_AttributeId_i = {c_AttributeId_indet,
                        e_aid_NodeId,
                        e_aid_NodeClass,
@@ -75,6 +75,10 @@ SETS
                       e_sc_bad_service_unsupported,
                       e_sc_bad_write_not_supported,
                       e_sc_bad_timeout,
+                      e_sc_bad_too_many_subscriptions,
+                      e_sc_bad_no_subscription,
+                      e_sc_bad_subscription_id_invalid,
+                      e_sc_bad_too_many_monitored_items,
                       e_sc_bad_index_range_invalid};
 
     t_BrowseDirection_i = {e_bd_indet,
@@ -95,27 +99,27 @@ SETS
 
     /* A WriteValue of a WriteRequest. */
     t_WriteValue_i;
-    t_WriteValuePointer_i;
+    t_WriteValuePointer_i; /* (OpcUa_WriteValue*) */
 
     /* A BrowseValue of a BrowseRequest. */
     t_BrowseValue_i;
     t_BrowseResult_i;
 
-    t_byte_buffer_i;
-    t_LocalizedText_i;
-    t_QualifiedName_i;
+    t_byte_buffer_i; /* (SOPC_Buffer*) */
+    t_LocalizedText_i; /* (SOPC_LocalizedText*) */
+    t_QualifiedName_i; /* (SOPC_QualifiedName*) */
 
     t_session_i;
-    t_session_token_i;
+    t_session_token_i; /* (SOPC_NodeId*) */
     t_user_i; /* Server-side user */
     t_user_token_i; /* Client-side user */
-    t_Nonce_i; /* void* */
-    t_SignatureData_i; /* void* */
-    t_msg_header_i;
-    t_msg_i;
-    t_request_context_i;
-    t_client_request_handle_i;
-    t_server_request_handle_i;
+    t_Nonce_i; /* (SOPC_ByteString*) */
+    t_SignatureData_i; /* (OpcUa_SignatureData*) */
+    t_msg_header_i; /* (OpcUa_RequestHeader*) OR (OpcUa_ResponseHeader*) */
+    t_msg_i;        /* (OpcUa_<message>*) */
+    t_request_context_i; /* uint32_t */
+    t_client_request_handle_i; /* uint32_t */
+    t_server_request_handle_i; /* uint32_t */
     t_channel_config_idx_i;
     t_channel_i;
     t_endpoint_config_idx_i;
@@ -131,15 +135,38 @@ SETS
         e_session_closing,
         e_session_closed};
 
+    
+    /* SUBSCRIPTION TYPES */
     t_subscription_i;
     
     t_subscriptionState = {
-        c_subsrciption_indet,
-        e_subscription_creating,
+        c_subsrciption_indet, /* includes e_subscription_closed */
+        /* e_subscription_creating, => not necesssary */
         e_subscription_normal,
         e_subscription_late,
         e_subscription_keepAlive
     };
+
+    /* Subscription (creation) */
+    t_notif_msg_i;         /* (OpcUa_NotificationMessage*) */
+    t_sub_seq_num_i;       /* uint32_t */
+    t_timeref_i;           /* SOPC_TimeReference */
+    t_opcua_duration_i;    /* double */
+    t_notificationQueue_i; /* (void*) */
+    t_publishReqQueue_i;   /* (void*) */
+    t_monitoredItemQueue_i;  /* (void*) */
+    
+    /* Subscription (monitored item) */   
+    t_monitoringMode_i = {
+        c_monitoringMode_indet,
+        e_monitoringMode_disabled,
+        e_monitoringMode_sampling,
+        e_monitoringMode_reporting
+    };
+    
+    t_monitoredItem_i;
+    
+    t_client_handle_i; /* uint32_t */
 
     t_SecurityPolicy = {
         e_secpol_None,
@@ -247,7 +274,7 @@ SETS
     };
 
     /* Context provided by application on request and to provide with notifications */
-    t_application_context_i
+    t_application_context_i /* uintptr_t */
 
 CONCRETE_CONSTANTS
     /*AddS,*/
@@ -278,13 +305,22 @@ CONCRETE_CONSTANTS
     c_Nonce_indet,
     c_SignatureData_indet,
     c_subscription_indet,
+    c_notif_msg_indet,
+    c_sub_seq_num_indet,
+    c_timeref_indet,
+    c_notificationQueue_indet,
+    c_publishReqQueue_indet,
+    c_monitoredItemQueue_indet,
+    c_monitoredItem_indet,
     c_msg_header_indet,
     c_msg_indet,
     c_request_context_indet,
     c_channel_config_idx_indet,
     c_channel_indet,
     c_client_request_handle_indet,
-    c_no_application_context
+    c_no_application_context,
+    
+    t_counter
 
 ABSTRACT_CONSTANTS
     conv_NodeId_Variant,
@@ -328,6 +364,14 @@ ABSTRACT_CONSTANTS
     t_Nonce,
     t_SignatureData,
     t_subscription,
+    t_notif_msg,
+    t_sub_seq_num,
+    t_timeref,
+    t_notificationQueue,
+    t_publishReqQueue,
+    t_monitoredItemQueue,
+    t_monitoringMode,
+    t_monitoredItem,
     t_buffer_in_state,
     t_msg_header,
     t_msg,
@@ -380,8 +424,7 @@ PROPERTIES
                          e_bd_inverse,
                          e_bd_both} &
 
-    t_TimestampsToReturn = {c_TimestampsToReturn_indet,
-                            e_ttr_source,
+    t_TimestampsToReturn = {e_ttr_source,
                             e_ttr_server,
                             e_ttr_both,
                             e_ttr_neither} &
@@ -495,6 +538,42 @@ PROPERTIES
     cast_t_subscription : NAT +-> t_subscription_i &
     cast_t_subscription : perm(t_subscription) &
 
+    t_counter = NAT &
+    
+    t_notif_msg <: t_notif_msg_i &
+    c_notif_msg_indet : t_notif_msg_i &
+    c_notif_msg_indet /: t_notif_msg &
+    
+    t_sub_seq_num <: t_sub_seq_num_i &
+    c_sub_seq_num_indet : t_sub_seq_num_i &
+    c_sub_seq_num_indet /: t_sub_seq_num &
+    
+    t_timeref <: t_timeref_i &
+    c_timeref_indet : t_timeref_i &
+    c_timeref_indet /: t_timeref &
+    
+    t_notificationQueue <: t_notificationQueue_i &
+    c_notificationQueue_indet : t_notificationQueue_i &
+    c_notificationQueue_indet /: t_notificationQueue &
+    
+    t_publishReqQueue <: t_publishReqQueue_i &
+    c_publishReqQueue_indet : t_publishReqQueue_i &
+    c_publishReqQueue_indet /: t_publishReqQueue &
+
+    t_monitoredItemQueue <: t_monitoredItemQueue_i &
+    c_monitoredItemQueue_indet : t_monitoredItemQueue_i &
+    c_monitoredItemQueue_indet /: t_monitoredItemQueue &
+    
+    t_monitoringMode = {
+        e_monitoringMode_disabled,
+        e_monitoringMode_sampling,
+        e_monitoringMode_reporting
+    } &
+    
+    t_monitoredItem <: t_monitoredItem_i &
+    c_monitoredItem_indet : t_monitoredItem_i &
+    c_monitoredItem_indet /: t_monitoredItem &
+    
     t_msg_header <: t_msg_header_i &
     c_msg_header_indet : t_msg_header_i &
     c_msg_header_indet /: t_msg_header &
