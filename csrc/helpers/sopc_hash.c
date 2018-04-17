@@ -15,31 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** \file
- *
- * \brief Tests suites are gathered here.
- * Inspired from https://github.com/libcheck/check/blob/master/tests/check_check.h
- */
+#include "sopc_hash.h"
 
-#ifndef CHECK_HELPERS_H
-#define CHECK_HELPERS_H
+uint64_t SOPC_DJBHash(const uint8_t* data, size_t len)
+{
+    return SOPC_DJBHash_Step(5381, data, len);
+}
 
-#include <check.h>
+uint64_t SOPC_DJBHash_Step(uint64_t current, const uint8_t* data, size_t len)
+{
+    for (size_t i = 0; i < len; ++i)
+    {
+        current = (current << 5) + current + data[i];
+    }
 
-Suite* tests_make_suite_crypto_B256S256(void);
-Suite* tests_make_suite_crypto_B256(void);
-Suite* tests_make_suite_crypto_None(void);
-
-Suite* tests_make_suite_tools(void);
-
-Suite* tests_make_suite_threads(void);
-
-Suite* tests_make_suite_time(void);
-
-Suite* tests_make_suite_timers(void);
-
-Suite* tests_make_suite_logger(void);
-
-Suite* tests_make_suite_dict(void);
-
-#endif // CHECK_HELPERS_H
+    return current;
+}
