@@ -1,0 +1,22 @@
+THEORY User_Pass IS
+ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+ff(0) & ar(th_false_last_hyp_loc.1,Once) & pr(Tac(th_eh_loc))
+END &
+
+THEORY th_false_last_hyp_loc IS
+
+    (a => not(b))
+    =>
+    (a & b & c => d)
+
+END
+&
+
+THEORY th_eh_loc IS
+
+    binhyp(b = c) &
+    not(a : c)
+    =>
+    not(a : b)
+
+END

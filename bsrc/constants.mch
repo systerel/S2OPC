@@ -585,6 +585,7 @@ PROPERTIES
     t_msg_service_class <: t_msg_service_class_i &
     c_msg_service_class_indet : t_msg_service_class_i &
     c_msg_service_class_indet /: t_msg_service_class &
+    t_msg_service_class = t_msg_service_class_i - {c_msg_service_class_indet} &
 
     Is_SubType : t_NodeId * t_NodeId --> BOOL &
 

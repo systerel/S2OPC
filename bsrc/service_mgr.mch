@@ -542,10 +542,10 @@ OPERATIONS
     END
     ;
 
-    server_secure_channel_lost_session_sm (channel) =
+    server_secure_channel_lost_session_sm (p_lost_channel) =
     PRE
-        channel : t_channel_i &
-        channel : s_channel_connected
+        p_lost_channel : t_channel_i &
+        p_lost_channel : s_channel_connected
     THEN
         skip
     END

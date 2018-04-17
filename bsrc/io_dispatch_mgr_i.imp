@@ -35,15 +35,20 @@ LOCAL_OPERATIONS
         msg_typ : t_msg_type_i &
         msg_typ : t_msg_type
     THEN
-        IF msg_typ : s_service_reqs
-        THEN
-            header_type := e_msg_request_type
-        ELSIF msg_typ : s_service_resps
-        THEN
-            header_type := e_msg_response_type
-        ELSE
-            header_type := c_msg_header_type_indet
-        END
+        header_type
+        :(  header_type : t_msg_header_type_i &
+        
+            (   msg_typ : s_service_reqs
+                =>
+                header_type = e_msg_request_type) &
+            (   msg_typ : s_service_resps
+                =>
+                header_type = e_msg_response_type) &
+            (   not(msg_typ : s_service_reqs) &
+                not(msg_typ : s_service_resps)
+                =>
+                header_type = c_msg_header_type_indet)
+        )
     END
     ;
 
@@ -52,21 +57,25 @@ LOCAL_OPERATIONS
         msg_typ : t_msg_type_i &
         msg_typ : t_msg_type
     THEN
-        IF msg_typ : s_discovery_service_reqs \/ s_discovery_service_resps
-        THEN
-            service_class := e_msg_discovery_service_class
-        ELSIF msg_typ : s_service_on_session_reqs \/ s_service_on_session_resps
-        THEN
-            service_class := e_msg_session_service_class
-        ELSIF msg_typ : s_session_treatment_reqs \/ s_session_treatment_resps
-        THEN
-            service_class := e_msg_session_treatment_class
-        ELSIF msg_typ = e_msg_service_fault_resp
-        THEN
-            service_class := e_msg_service_fault_class
-        ELSE
-            service_class := c_msg_service_class_indet
-        END
+        service_class
+        :(  service_class : t_msg_service_class_i &
+            service_class : t_msg_service_class   &
+            
+            (   msg_typ : s_discovery_service_reqs \/ s_discovery_service_resps
+                =>
+                service_class = e_msg_discovery_service_class) &
+            (   msg_typ : s_service_on_session_reqs \/ s_service_on_session_resps
+                =>
+                service_class = e_msg_session_service_class) &
+            (   msg_typ : s_session_treatment_reqs \/ s_session_treatment_resps
+                =>
+                service_class = e_msg_session_treatment_class) &
+            (   not(msg_typ : s_discovery_service_reqs  \/ s_discovery_service_resps)  &
+                not(msg_typ : s_service_on_session_reqs \/ s_service_on_session_resps) &
+                not(msg_typ : s_session_treatment_reqs  \/ s_session_treatment_resps)
+                =>
+                service_class = e_msg_service_fault_class)
+        )
     END
 
 OPERATIONS
@@ -243,11 +252,8 @@ OPERATIONS
                 e_msg_subscription_delete_subscriptions_resp
             THEN
                 service_class := e_msg_session_service_class
-            OR e_msg_service_fault_resp
-            THEN
-                service_class := e_msg_service_fault_class
             ELSE
-                service_class := c_msg_service_class_indet
+                service_class := e_msg_service_fault_class
             END
         END
     END

@@ -132,7 +132,7 @@ OPERATIONS
     client_set_session_token (session, token) =
     PRE
         session : t_session_i &
-        session : s_session &
+        session : t_session &
         session /: dom(a_client_token) &
         token : t_session_token_i &
         token : t_session_token
@@ -244,7 +244,7 @@ OPERATIONS
     set_session_channel (session, channel) =
     PRE
         session : t_session_i &
-        session : s_session &
+        session : t_session &
         channel : t_channel_i &
         channel : t_channel
     THEN
@@ -272,7 +272,7 @@ OPERATIONS
     channel <-- get_session_channel (session) =
     PRE
         session : t_session_i &
-        session : s_session &
+        session : t_session &
         session : dom(a_channel)
     THEN
         channel :(channel : t_channel_i & channel = a_channel(session))
@@ -331,7 +331,7 @@ OPERATIONS
     set_session_to_create(p_session, p_channel_config_idx) =
     PRE
         p_session            : t_session_i            &
-        p_session            : s_session              &
+        p_session            : t_session              &
         p_channel_config_idx : t_channel_config_idx_i &
         p_channel_config_idx : t_channel_config_idx
     THEN
@@ -342,7 +342,7 @@ OPERATIONS
     set_session_to_activate(p_session, p_user, p_app_context) =
     PRE
         p_session : t_session_i &
-        p_session : s_session   &
+        p_session : t_session   &
         p_user    : t_user_i    &
         p_user    : t_user      &
         p_app_context : t_application_context_i
@@ -356,7 +356,7 @@ OPERATIONS
     set_session_orphaned (session, channel_config_idx) =
     PRE
         session : t_session_i &
-        session : s_session   &
+        session : t_session   &
         channel_config_idx : t_channel_config_idx_i
     THEN
         a_channel := {session} <<| a_channel ||
@@ -377,7 +377,7 @@ OPERATIONS
     set_session_user (session, user) =
     PRE
         session : t_session_i &
-        session : s_session &
+        session : t_session &
         user : t_user_i &
         user : t_user
     THEN
@@ -388,7 +388,7 @@ OPERATIONS
     user <-- get_session_user (session) =
     PRE
         session : t_session_i &
-        session : s_session &
+        session : t_session &
         session : dom(a_user)
     THEN
         user :(user : t_user_i & user = a_user (session))
@@ -402,7 +402,7 @@ OPERATIONS
     valid, signature <-- server_create_session_req_do_crypto(p_session, p_req_msg, p_endpoint_config_idx, p_channel_config_idx) =
     PRE
         p_session : t_session_i &
-        p_session : s_session &
+        p_session : t_session &
         p_req_msg : t_msg_i &
         p_req_msg = c_msg_in &
         c_msg_in : t_msg &
@@ -435,7 +435,7 @@ OPERATIONS
     valid, signature <-- client_activate_session_req_do_crypto(session, channel_config_idx, server_nonce) = 
     PRE
         session : t_session_i &
-        session : s_session &
+        session : t_session &
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         server_nonce : t_Nonce_i &
@@ -464,7 +464,7 @@ OPERATIONS
     nonce <-- get_NonceServer(p_session) =
     PRE
         p_session : t_session_i &
-        p_session : s_session &
+        p_session : t_session &
         p_session : dom(a_NonceServer)
     THEN
         nonce :(
@@ -477,7 +477,7 @@ OPERATIONS
     valid, nonce_needed <-- client_create_session_req_do_crypto(p_session, p_channel, p_channel_config_idx) =
     PRE
         p_session : t_session_i &
-        p_session : s_session &
+        p_session : t_session &
         p_channel : t_channel_i &
         p_channel : s_channel_connected &
         p_channel_config_idx : t_channel_config_idx_i &
@@ -509,7 +509,7 @@ OPERATIONS
     nonce <-- get_NonceClient(p_session) =
     PRE
         p_session : t_session_i &
-        p_session : s_session &
+        p_session : t_session &
         p_session : dom(a_NonceClient)
     THEN
         nonce :(
@@ -522,7 +522,7 @@ OPERATIONS
     drop_NonceClient(p_session) =
     PRE
         p_session : t_session_i &
-        p_session : s_session &
+        p_session : t_session &
         p_session : dom(a_NonceClient)
     THEN
         a_NonceClient := {p_session} <<| a_NonceClient
@@ -533,7 +533,7 @@ OPERATIONS
     p_valid <-- client_create_session_check_crypto(p_session, p_channel_config_idx, p_resp_msg) =
     PRE
         p_session : t_session_i &
-        p_session : s_session &
+        p_session : t_session &
         p_session : dom(a_NonceClient) &
         p_channel_config_idx : t_channel_config_idx_i &
         p_channel_config_idx : t_channel_config_idx &
@@ -563,7 +563,7 @@ OPERATIONS
     p_valid <-- server_activate_session_check_crypto(p_session, p_channel, p_channel_config_idx, p_activate_req_msg) =
     PRE
         p_session : t_session_i &
-        p_session : s_session &
+        p_session : t_session &
         p_session : dom(a_NonceClient) &
         p_channel : t_channel_i &
         p_channel : s_channel_connected &
