@@ -47,7 +47,7 @@ INVARIANT
     s_cli_channel_connecting      = s_cli_channel_connecting_i~[{TRUE}] /\ t_channel_config_idx    &
     card_cli_channel_connecting_i = card(s_cli_channel_connecting)                                 &
     s_cli_channel_disconnecting   = s_cli_channel_disconnecting_i~[{TRUE}] /\ t_channel_config_idx &
-    s_channel_connected           = s_channel_connected_i~[{TRUE}] /\ t_channel                    &
+    s_channel_connected           = s_channel_connected_i~[{TRUE}]                                 &
     card_channel_connected_i      = card(s_channel_connected)                                      &
     a_config                      = t_channel            <| a_config_i     |> t_channel_config_idx &
     a_config~                     = t_channel_config_idx <| a_config_inv_i |> t_channel

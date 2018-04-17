@@ -54,8 +54,7 @@ OPERATIONS
 
     bres <-- is_connected_channel (channel) =
     PRE
-        channel : t_channel_i &
-        channel : t_channel
+        channel : t_channel_i
     THEN
         bres := bool(channel : s_channel_connected)
     END

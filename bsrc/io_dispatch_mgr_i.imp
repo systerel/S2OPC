@@ -644,7 +644,7 @@ OPERATIONS
     IN
         l_channel <-- get_connected_channel (channel_config_idx);
         l_connected_channel <-- is_connected_channel (l_channel);
-        IF l_connected_channel = FALSE
+        IF l_connected_channel = TRUE
         THEN
             l_buffer_out, l_req_handle <-- client_service_activate_orphaned_session (session, l_channel);
             l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
