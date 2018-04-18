@@ -173,6 +173,10 @@ uint32_t SOPC_EventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
                     free(newTimer);
                 }
             } // else 0 is invalid value => no timer available
+            else
+            {
+                free(newTimer);
+            }
             Mutex_Unlock(&timersMutex);
         }
     }
