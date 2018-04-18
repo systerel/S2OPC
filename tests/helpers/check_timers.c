@@ -77,6 +77,7 @@ START_TEST(test_timers)
     // Initialize event timers
     SOPC_EventTimer_Initialize();
     // Set event value
+    memset(&eventParams, 0, sizeof(SOPC_EventDispatcherParams));
     eventParams.event = EVENT;
     // Set start time reference
     startTime = SOPC_Time_GetCurrentTimeUTC();
@@ -133,6 +134,7 @@ START_TEST(test_timers_with_cancellation)
     // Initialize event timers
     SOPC_EventTimer_Initialize();
     // Set event value
+    memset(&eventParams, 0, sizeof(SOPC_EventDispatcherParams));
     eventParams.event = EVENT;
     // Set start time reference
     startTime = SOPC_Time_GetCurrentTimeUTC();
