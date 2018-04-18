@@ -107,7 +107,7 @@ test-check:
 
 test-unit:
   stage: test
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:423c36a0a2de2a0b265f022a63b3c93dbdfc31397e6887da7030fd2bd71e5408  # test:2.0
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:e10957c4e1ea14cc2c1fe2d8b8eec4e923d85cc9c168e6aebe3418eaec4b8ace  # test:2.1
   script:
     - ./test-all.sh
   # only:
