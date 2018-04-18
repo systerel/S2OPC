@@ -1245,6 +1245,7 @@ START_TEST(test_async_queue_threads)
     uint8_t four = 4;
     uint8_t five = 5;
     SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&queue, NULL);
+    ck_assert(status == SOPC_STATUS_OK);
     params.success = false;
     params.blockingDequeue = false;
     params.nbMsgs = 5;
