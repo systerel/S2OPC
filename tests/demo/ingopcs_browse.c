@@ -181,8 +181,10 @@ SOPC_ReturnStatus SendBrowseRequest(StateMachine_Machine* pSM)
     {
         printf("# Info: Sending BrowseRequest.\n");
 
+        OpcUa_BrowseRequest_Initialize(pReq);
+        OpcUa_BrowseDescription_Initialize(pDesc);
+
         /* Fill the Request */
-        pReq->encodeableType = &OpcUa_BrowseRequest_EncodeableType;
         pReq->RequestedMaxReferencesPerNode = 100;
         pReq->NoOfNodesToBrowse = 1;
         pReq->NodesToBrowse = pDesc;
@@ -203,6 +205,10 @@ SOPC_ReturnStatus SendBrowseRequest(StateMachine_Machine* pSM)
     {
         printf("# Error: Send request creation failed. Abort.\n");
         g_pSM->state = stError;
+
+        OpcUa_BrowseRequest_Clear(pReq);
+        free(pDesc);
+        free(pReq);
     }
 
     return status;
