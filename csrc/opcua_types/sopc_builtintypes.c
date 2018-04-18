@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "sopc_hash.h"
 #include "sopc_helper_string.h"
 
 void SOPC_Boolean_InitializeAux(void* value)
@@ -1534,6 +1535,40 @@ SOPC_ReturnStatus SOPC_NodeId_Compare(const SOPC_NodeId* left, const SOPC_NodeId
 SOPC_ReturnStatus SOPC_NodeId_CompareAux(const void* left, const void* right, int32_t* comparison)
 {
     return SOPC_NodeId_Compare((const SOPC_NodeId*) left, (const SOPC_NodeId*) right, comparison);
+}
+
+void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash)
+{
+    uint64_t h;
+
+    assert(nodeId != NULL);
+
+    h = SOPC_DJBHash((const uint8_t*) &nodeId->IdentifierType, sizeof(SOPC_IdentifierType));
+    h = SOPC_DJBHash_Step(h, (const uint8_t*) &nodeId->Namespace, sizeof(uint16_t));
+
+    switch (nodeId->IdentifierType)
+    {
+    case SOPC_IdentifierType_Numeric:
+        h = SOPC_DJBHash_Step(h, (const uint8_t*) &nodeId->Data.Numeric, sizeof(uint32_t));
+        break;
+    case SOPC_IdentifierType_ByteString:
+    case SOPC_IdentifierType_String:
+        if (nodeId->Data.String.Length > 0)
+        {
+            h = SOPC_DJBHash_Step(h, nodeId->Data.String.Data, (size_t) nodeId->Data.String.Length);
+        }
+        break;
+    case SOPC_IdentifierType_Guid:
+        if (nodeId->Data.Guid != NULL)
+        {
+            h = SOPC_DJBHash_Step(h, (const uint8_t*) nodeId->Data.Guid, sizeof(SOPC_Guid));
+        }
+        break;
+    default:
+        assert(false && "Unknown IdentifierType");
+    }
+
+    *hash = h;
 }
 
 char* SOPC_NodeId_ToCString(SOPC_NodeId* nodeId)
