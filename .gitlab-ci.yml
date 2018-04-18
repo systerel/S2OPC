@@ -70,6 +70,10 @@ build-linux64:
     variables:
       - $WITH_COVERAGE
       - $CROSS_COMPILE
+  cache:  # build dir is used by tests to store gcov files
+    key: '${CI_PIPELINE_ID}_${CI_COMMIT_REF_SLUG}'
+    paths:
+      - 'build/'
 
 build-win64: &build_win64
   <<: *docker_job
@@ -144,6 +148,10 @@ test-unit:
       - 'bin/Testing'
     when: always
     expire_in: '1 month'
+  cache:  # build dir is used by tests to store gcov files
+    key: '${CI_PIPELINE_ID}_${CI_COMMIT_REF_SLUG}'
+    paths:
+      - 'build/'
 
 test-uactt:
   <<: *test_linux
@@ -157,4 +165,31 @@ test-uactt:
       - 'bin/*.log'
     when: on_failure
     expire_in: '1 month'
+  cache:  # build dir is used by tests to store gcov files
+    key: '${CI_PIPELINE_ID}_${CI_COMMIT_REF_SLUG}'
+    paths:
+      - 'build/'
 
+###
+# Analysis jobs
+###
+
+coverage-analysis:
+  <<: *docker_job
+  stage: analyses
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:e10957c4e1ea14cc2c1fe2d8b8eec4e923d85cc9c168e6aebe3418eaec4b8ace  # test:2.1
+  script:
+    - ./.gen_coverage.sh
+  artifacts:
+    name: 'coverage-report-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'report'
+    expire_in: '1 month'
+  only:
+    variables:
+      - $WITH_COVERAGE
+  cache:
+    key: '${CI_PIPELINE_ID}_${CI_COMMIT_REF_SLUG}'
+    paths:
+      - 'build/'
+    policy: pull
