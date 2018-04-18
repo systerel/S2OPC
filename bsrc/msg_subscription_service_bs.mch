@@ -27,7 +27,8 @@ ABSTRACT_VARIABLES
     nb_monitored_items
     
 INVARIANT
-    nb_monitored_items : NAT
+    nb_monitored_items : NAT &
+    nb_monitored_items <= k_n_monitoredItem_max
     
 INITIALISATION
     nb_monitored_items := 0
@@ -118,26 +119,38 @@ OPERATIONS
     
     /* CreateMonitoredItem messages */
     
-    p_bres, p_subscription, p_timestampToRet, p_nb_monitored_items <-- getall_msg_create_monitored_items_req_params (p_req_msg) =
+    p_sc, p_subscription, p_timestampToRet, p_nb_monitored_items, p_monitored_items_not_null <-- getall_msg_create_monitored_items_req_params (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
         a_msg_in_type = e_msg_monitored_items_create_req
     THEN
-        p_bres,
+        p_sc,
         p_subscription,
         p_timestampToRet,
         p_nb_monitored_items,
-        nb_monitored_items
-        :(  p_bres               : BOOL &
+        nb_monitored_items,
+        p_monitored_items_not_null
+        :(  p_sc                 : t_StatusCode &
             p_subscription       : t_subscription_i &
             p_timestampToRet     : t_TimestampsToReturn_i &
-            p_nb_monitored_items : INT &
-            (p_bres = TRUE
-             =>
-             nb_monitored_items = p_nb_monitored_items &
-             p_timestampToRet : t_TimestampsToReturn)
+            p_nb_monitored_items : NAT &
+            p_monitored_items_not_null : BOOL &
+            (p_sc = e_sc_ok
+                =>
+                p_nb_monitored_items <= k_n_monitoredItem_max &
+                nb_monitored_items = p_nb_monitored_items &
+                p_timestampToRet : t_TimestampsToReturn &
+                p_monitored_items_not_null = TRUE) &
+            (p_sc = e_sc_bad_decoding_error
+                => p_monitored_items_not_null = FALSE) &
+            (p_sc = e_sc_bad_nothing_to_do
+                => p_nb_monitored_items = 0) &
+            (p_sc = e_sc_bad_too_many_ops
+                => p_nb_monitored_items > k_n_monitoredItem_max) &
+            (p_sc /= e_sc_ok
+                => p_sc : {e_sc_bad_decoding_error, e_sc_bad_nothing_to_do, e_sc_bad_timestamps_to_return_invalid, e_sc_bad_too_many_ops})
         )
     END
     ;
@@ -149,8 +162,8 @@ OPERATIONS
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
         a_msg_in_type = e_msg_monitored_items_create_req &
-        p_index : INT &
-        p_index <= nb_monitored_items
+        p_index : t_monitoredItemReqIndex_i &
+        p_index : t_monitoredItemReqIndex
     THEN
         p_bres, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize
         :(p_bres : BOOL &
@@ -173,7 +186,8 @@ OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_monitored_items_create_resp &
-        p_nb_results : INT &
+        p_nb_results : NAT &
+        p_nb_results > 0 &
         p_nb_results = nb_monitored_items
     THEN
         bres :: BOOL
@@ -186,8 +200,8 @@ OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_monitored_items_create_resp &
-        p_index : INT &
-        p_index < nb_monitored_items &
+        p_index : t_monitoredItemReqIndex_i &
+        p_index : t_monitoredItemReqIndex &
         p_sc : t_StatusCode_i &
         p_sc : t_StatusCode &
         p_monitored_item : t_monitoredItem_i &

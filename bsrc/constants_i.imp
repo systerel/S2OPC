@@ -34,6 +34,9 @@ PROPERTIES
     cast_t_WriteValue = id(t_WriteValue) &
 
     t_BrowseValue = 1..k_n_BrowseResponse_max &
+    cast_t_BrowseValue = id(t_BrowseValue) &
+    
+    t_monitoredItemReqIndex = 1..k_n_monitoredItem_max &
     cast_t_BrowseValue = id(t_BrowseValue)
 
 VALUES
@@ -42,11 +45,13 @@ VALUES
     t_WriteValue_i = 0..k_n_WriteResponse_max;
     t_BrowseValue_i = 0..k_n_BrowseResponse_max;
     t_BrowseResult_i = 0..k_n_BrowseTarget_max;
+    t_monitoredItemReqIndex_i = 0..k_n_monitoredItem_max;
 
     c_ReadValue_indet = 0;
     c_WriteValue_indet = 0;
     c_BrowseValue_indet = 0;
     c_BrowseResult_indet = 0;
+    c_monitoredItemReqIndex_indet = 0;
     
     t_counter = NAT
 

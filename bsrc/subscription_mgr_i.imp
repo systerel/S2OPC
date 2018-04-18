@@ -127,44 +127,41 @@ OPERATIONS
     
     StatusCode_service <-- treat_subscription_create_monitored_items_req (p_session, p_req_msg, p_resp_msg) =
     VAR
-        l_req_valid,
+        l_sc,
         l_subscription,
         l_valid_subscription,
         l_timestampToRet,
-        l_nb_monitored_items
+        l_nb_monitored_items,
+        l_monItems_notNull,
+        l_bres
     IN
-        l_req_valid, l_subscription, l_timestampToRet, l_nb_monitored_items <-- getall_msg_create_monitored_items_req_params (p_req_msg);
-        l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
-        IF l_req_valid = TRUE
+        l_sc, l_subscription, l_timestampToRet, l_nb_monitored_items, l_monItems_notNull <-- getall_msg_create_monitored_items_req_params (p_req_msg);
+        IF l_sc = e_sc_ok
         THEN
-            IF l_valid_subscription = TRUE &
-                l_nb_monitored_items > 0
+            l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
+            IF l_valid_subscription = TRUE
             THEN
                 /* TODO: allocate response results array (alloc_msg_create_monitored_items_resp_results): check not outOfMemory */
-                
-                /* TODO: iterate on req message monitored items, for each:
-                - get monitored item req from req message (getall_monitored_item_req_params): check monitoringMode / nodeId validity / ...                
-                - retrieve node (index) from nodeId (readall_AddressSpace_Node): check if nodeIdUnkown
-                - check attribute validity using from node + aid (read_AddressSpace_Attribute_value): check if attributeIdInvalid
-                - compute revised parameters (compute_create_montitored_item_revised_params)
-                - add monitored item to subscription and retrieve status + Id (create_monitored_item)
-                - add result to response (setall_msg_monitored_item_resp_params)
-                */
-                
-                StatusCode_service := e_sc_ok
-            ELSIF l_valid_subscription = FALSE
-            THEN
-                StatusCode_service := e_sc_bad_subscription_id_invalid
+                l_bres <-- alloc_msg_create_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);    
+                IF l_bres = TRUE
+                THEN
+                    /* TODO: iterate on req message monitored items, for each:
+                    - get monitored item req from req message (getall_monitored_item_req_params): check monitoringMode / nodeId validity / ...                
+                    - retrieve node (index) from nodeId (readall_AddressSpace_Node): check if nodeIdUnkown
+                    - check attribute validity using from node + aid (read_AddressSpace_Attribute_value): check if attributeIdInvalid
+                    - compute revised parameters (compute_create_montitored_item_revised_params)
+                    - add monitored item to subscription and retrieve status + Id (create_monitored_item)
+                    - add result to response (setall_msg_monitored_item_resp_params)
+                    */
+                    StatusCode_service := e_sc_ok
+                ELSE
+                    StatusCode_service := e_sc_bad_out_of_memory
+                END                
             ELSE
-                StatusCode_service := e_sc_bad_nothing_to_do
+                StatusCode_service := e_sc_bad_subscription_id_invalid
             END
-        ELSIF l_timestampToRet = c_TimestampsToReturn_indet
-        THEN
-            
-            StatusCode_service := e_sc_bad_timestamps_to_return_invalid
         ELSE
-            /* TODO: not really appropriated, it is normally a global property (here it is in request only) */
-            StatusCode_service := e_sc_bad_too_many_monitored_items
+            StatusCode_service := l_sc
         END
     END
     ;

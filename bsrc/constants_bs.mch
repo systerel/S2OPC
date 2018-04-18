@@ -64,6 +64,7 @@ CONCRETE_CONSTANTS
     k_n_WriteResponse_max,
     k_n_BrowseResponse_max,
     k_n_BrowseTarget_max,
+    k_n_monitoredItem_max,
 
     c_Variant_indet,
     c_Node_indet,
@@ -139,6 +140,7 @@ PROPERTIES
     k_n_WriteResponse_max : NAT &
     k_n_BrowseResponse_max : NAT &
     k_n_BrowseTarget_max : NAT &
+    k_n_monitoredItem_max : NAT &
 
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &

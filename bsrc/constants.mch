@@ -94,6 +94,8 @@ SETS
                               e_ttr_both,
                               e_ttr_neither};
 
+    /* INDEXES */
+         
     /* A ReadValue of a ReadRequest. The size of that will define the nb_max_read_value. */
     t_ReadValue_i;
 
@@ -105,6 +107,9 @@ SETS
     t_BrowseValue_i;
     t_BrowseResult_i;
 
+    t_monitoredItemReqIndex_i;
+
+    
     t_byte_buffer_i; /* (SOPC_Buffer*) */
     t_LocalizedText_i; /* (SOPC_LocalizedText*) */
     t_QualifiedName_i; /* (SOPC_QualifiedName*) */
@@ -282,6 +287,7 @@ CONCRETE_CONSTANTS
     k_n_WriteResponse_max,
     k_n_BrowseResponse_max,
     k_n_BrowseTarget_max,
+    k_n_monitoredItem_max,
 
     c_Variant_indet,
     c_NodeId_indet,
@@ -311,6 +317,7 @@ CONCRETE_CONSTANTS
     c_notificationQueue_indet,
     c_publishReqQueue_indet,
     c_monitoredItemQueue_indet,
+    c_monitoredItemReqIndex_indet,
     c_monitoredItem_indet,
     c_msg_header_indet,
     c_msg_indet,
@@ -355,6 +362,7 @@ ABSTRACT_CONSTANTS
     cast_t_WriteValue,
     cast_t_BrowseValue,
     cast_t_BrowseResult,
+    cast_t_monitoredItemReqIndex,
 
     t_endpoint_config_idx,
     t_session,
@@ -371,6 +379,7 @@ ABSTRACT_CONSTANTS
     t_publishReqQueue,
     t_monitoredItemQueue,
     t_monitoringMode,
+    t_monitoredItemReqIndex,
     t_monitoredItem,
     t_buffer_in_state,
     t_msg_header,
@@ -448,6 +457,7 @@ PROPERTIES
     k_n_WriteResponse_max : NAT &
     k_n_BrowseResponse_max : NAT &
     k_n_BrowseTarget_max : NAT &
+    k_n_monitoredItem_max : NAT &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
@@ -480,6 +490,12 @@ PROPERTIES
     c_BrowseResult_indet /: t_BrowseResult &
     cast_t_BrowseResult : NAT +-> t_BrowseResult_i &
     cast_t_BrowseResult : perm(t_BrowseResult) &
+
+    t_monitoredItemReqIndex <: t_monitoredItemReqIndex_i &
+    c_monitoredItemReqIndex_indet : t_monitoredItemReqIndex_i &
+    c_monitoredItemReqIndex_indet /: t_monitoredItemReqIndex &
+    cast_t_monitoredItemReqIndex : NAT +-> t_monitoredItemReqIndex_i &
+    cast_t_monitoredItemReqIndex : perm(t_monitoredItemReqIndex) &
 
     t_RefIndex <: NAT &
 
