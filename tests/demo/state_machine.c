@@ -87,7 +87,7 @@ SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM)
     {
         pSM->state = stConfigured;
     }
-    else
+    else if (pSM != NULL)
     {
         pSM->state = stError;
     }
