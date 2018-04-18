@@ -1,0 +1,31 @@
+environment:
+  matrix:
+    - PYTHON: "C:\\Python36-x64"
+
+# to display VM information for debug purpose
+#init:
+#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+install:
+  # Prepend chosen Python to the PATH of this build
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  # Check that we have the expected version and architecture for Python
+  - "python --version"
+  - "pip install cryptography==2.0.3 pycparser==2.18 six==1.11.0 asn1crypto==0.23.0 cffi==1.11.2 python_dateutil==2.6.1 argparse==1.4.0 pytz==2017.2 idna==2.6 lxml==4.0.0"
+  - "pip install freeopcua==0.90.6"
+
+build: off
+
+test_script:
+ - "echo %JOB_ID%"
+ - "appveyor.exe DownloadFile  https://gitlab.com/systerel/S2OPC/-/jobs/%JOB_ID%/artifacts/download?job=build-win64 -FileName artifacts.zip"
+ - "unzip artifacts.zip"
+ - "cd bin"
+ - "ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536"
+
+on_failure:
+ - ps: $root = Resolve-Path .\Testing\; [IO.Directory]::GetFiles($root.Path, '*.*', 'AllDirectories') | % { Push-AppveyorArtifact $_ -FileName $_.Substring($root.Path.Length + 1) -DeploymentName to-publish }
+
