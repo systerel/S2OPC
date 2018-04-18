@@ -50,6 +50,14 @@ StateMachine_Machine* StateMachine_Create(void)
         pSM->iSessionID = 0;
         pSM->pCtxRequest = NULL;
     }
+    else
+    {
+        free(pSM);
+        pSM = NULL;
+
+        free(pCtxSess);
+        pCtxSess = NULL;
+    }
 
     return pSM;
 }
