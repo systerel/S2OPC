@@ -182,14 +182,18 @@ endif()
 if(UNIX)
   set(PYTHON_BIN python3)
 elseif(WIN32)
-  set(PYTHON_BIN python3.exe)
+  set(PYTHON_BIN python)
 else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
+if(WIN32)
+    set(FILE_EXT .exe)
+endif()
+
 function(s2opc_unit_test binary_name)
 	set(test_name "unit::${binary_name}")
-	set(test_cmd ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${binary_name})
+	set(test_cmd ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${binary_name}${FILE_EXT})
 
 	foreach(arg ${ARGN})
 		if("${arg}" STREQUAL "GENERATE_TAP")
@@ -273,8 +277,8 @@ target_include_directories(toolkit_test_server PRIVATE "${ADDSPACEGEN_DIR}/inclu
                                                        ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
-add_test(NAME "validation::client_server_test" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap" "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "./toolkit_test_client")
-set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./toolkit_test_server;CK_TAP_LOG_FILE_NAME=client_server_test.tap")
+add_test(NAME "validation::client_server_test" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap" "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "./toolkit_test_client${FILE_EXT}")
+set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./toolkit_test_server${FILE_EXT};CK_TAP_LOG_FILE_NAME=client_server_test.tap")
 
 # Demo clients
 add_executable(ingopcs_browse "tests/demo/ingopcs_browse.c"
@@ -431,8 +435,8 @@ s2opc_unit_test(check_sc_rcv_encrypted_buffer)
 
 function(s2opc_server_validation_test name)
 	set(test_name "validation::${name}")
-	add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "../validation/${name}")
-	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./toolkit_test_server")
+	add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "${PYTHON_BIN}" "../validation/${name}")
+	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./toolkit_test_server${FILE_EXT}")
 endfunction()
 
 function(s2opc_client_validation_test name)
@@ -449,7 +453,7 @@ s2opc_client_validation_test("toolkit_test_suite_client")
 
 function(s2opc_sc_level_test name server_key_size)
 	set(test_name "validation::secure_channel_level::${name}")
-	add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap" "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "./test_secure_channels_client" ${ARGN})
+	add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap" "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "./test_secure_channels_client${FILE_EXT}" ${ARGN})
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./test_secure_channels_server ${server_key_size};CK_TAP_LOG_FILE_NAME=secure_channel_level_${name}.tap;TEST_SERVER_EXITS_ALONE=1")
 endfunction()
 
