@@ -45,7 +45,10 @@ SETS
     t_application_context_i
 
 CONCRETE_CONSTANTS
-    k_n_Nodes,
+    k_n_read_resp_max,
+    k_n_WriteResponse_max,
+    k_n_BrowseResponse_max,
+    k_n_BrowseTarget_max,
 
     c_Variant_indet,
     c_Node_indet,
@@ -97,7 +100,10 @@ ABSTRACT_CONSTANTS
     t_QualifiedName
 
 PROPERTIES
-    k_n_Nodes : NAT &
+    k_n_read_resp_max : NAT &
+    k_n_WriteResponse_max : NAT &
+    k_n_BrowseResponse_max : NAT &
+    k_n_BrowseTarget_max : NAT &
 
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &

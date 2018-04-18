@@ -128,4 +128,9 @@
 #define SOPC_MAX_SESSION_TIMEOUT 43200000 // 12 hours
 #endif
 
+/* @brief Maximum number of operations in a request accepted by server (Read, Write, etc.) */
+#ifndef SOPC_MAX_OPERATIONS_PER_MSG
+#define SOPC_MAX_OPERATIONS_PER_MSG 100000
+#endif
+
 #endif /* SOPC_TOOLKIT_CONFIG_CONSTANTS_H_ */

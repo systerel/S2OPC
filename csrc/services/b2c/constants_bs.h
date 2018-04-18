@@ -110,7 +110,10 @@ typedef void* constants_bs__t_session_token_i;
 #define constants_bs__c_session_indet 0
 #define constants_bs__c_session_token_indet 0
 #define constants_bs__c_user_indet 0
-#define constants_bs__k_n_Nodes 0
+#define constants_bs__k_n_BrowseResponse_max SOPC_MAX_OPERATIONS_PER_MSG
+#define constants_bs__k_n_BrowseTarget_max SOPC_MAX_OPERATIONS_PER_MSG
+#define constants_bs__k_n_WriteResponse_max SOPC_MAX_OPERATIONS_PER_MSG
+#define constants_bs__k_n_read_resp_max SOPC_MAX_OPERATIONS_PER_MSG
 
 /*------------------------
    INITIALISATION Clause

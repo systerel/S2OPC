@@ -235,7 +235,6 @@ SETS
 
 CONCRETE_CONSTANTS
     /*AddS,*/
-    k_n_Nodes,
     k_n_read_resp_max,
     k_n_WriteResponse_max,
     k_n_BrowseResponse_max,
@@ -330,6 +329,7 @@ ABSTRACT_CONSTANTS
     Is_Dir_Forward_Compatible
 
 PROPERTIES
+
     /*AddS <: t_Node &*/
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &
@@ -378,7 +378,6 @@ PROPERTIES
 
     conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId &
 
-    k_n_Nodes : NAT &
     k_n_read_resp_max : NAT &
     k_n_WriteResponse_max : NAT &
     k_n_BrowseResponse_max : NAT &

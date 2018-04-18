@@ -57,6 +57,11 @@
 #error "Minimum requested session timeout is > MAX"
 #endif
 
+/* Maximum number of operations representable */
+#if SOPC_MAX_OPERATIONS_PER_MSG > INT32_MAX
+#error "Maximum number of operations per message cannot be > INT32_MAX"
+#endif
+
 /* Check use of uintptr_t is not an issue on the current platform */
 #if UINTPTR_MAX < UINT32_MAX
 #error "UINTPTR_MAX < UINT32_MAX whereas uintptr_t are used to store uint32_t values"
