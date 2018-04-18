@@ -219,9 +219,10 @@ SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM)
     {
         printf("# Info: Sending ReadRequest.\n");
 
+        OpcUa_ReadRequest_Initialize(pReq);
+        OpcUa_ReadValueId_Initialize(lrv);
+
         /* Fill the Request */
-        pReq->encodeableType = &OpcUa_ReadRequest_EncodeableType;
-        pReq->MaxAge = 0.;
         pReq->TimestampsToReturn = OpcUa_TimestampsToReturn_Neither;
         pReq->NoOfNodesToRead = 1;
         pReq->NodesToRead = lrv;
@@ -240,6 +241,10 @@ SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM)
     {
         printf("# Error: Send request creation failed. Abort.\n");
         g_pSM->state = stError;
+
+        OpcUa_ReadRequest_Clear(pReq);
+        free(lrv);
+        free(pReq);
     }
 
     return status;
