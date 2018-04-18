@@ -232,8 +232,10 @@ SOPC_ReturnStatus SendWriteRequest(StateMachine_Machine* pSM)
     {
         printf("# Info: Sending WriteRequest.\n");
 
+        OpcUa_WriteRequest_Initialize(pReq);
+        OpcUa_WriteValue_Initialize(lwv);
+
         /* Fill the Request */
-        pReq->encodeableType = &OpcUa_WriteRequest_EncodeableType;
         pReq->NoOfNodesToWrite = 1;
         pReq->NodesToWrite = lwv;
         status = SOPC_NodeId_Copy(&lwv[0].NodeId, g_pNid);
@@ -254,6 +256,10 @@ SOPC_ReturnStatus SendWriteRequest(StateMachine_Machine* pSM)
     {
         printf("# Error: Send request creation failed. Abort.\n");
         g_pSM->state = stError;
+
+        OpcUa_WriteRequest_Clear(pReq);
+        free(lwv);
+        free(pReq);
     }
 
     return status;
