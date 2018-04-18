@@ -5,18 +5,26 @@ stages:
   - gen
   - build
   - test
-  - build-cc
+  - build-others
+  - analyses
+
+.docker-job: &docker_job
+  tags:
+    - docker
+    - linux
+  # only:
+  #   - master
+
+###
+# Generation jobs
+###
 
 generation:
+  <<: *docker_job
   stage: gen
   image: com2.systerel.fr:5000/c765/gen-ext@sha256:b303ef8934eb99d3023243d05129a463b3f25be310cc1d6e1ea7abd621695465  # gen-ext:1.0
   script:
     - ./.pre-build-ext.sh
-  # only:
-  #   - master
-  tags:
-    - docker
-    - linux
   artifacts:
     name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
@@ -24,20 +32,20 @@ generation:
       - 'csrc/services/bgenc'
     expire_in: '1 month'
 
-build-linux64:
+###
+# Compilation jobs
+###
+
+.build-linux: &build_linux
+  <<: *docker_job
   stage: build
   image: registry.gitlab.com/systerel/s2opc/build@sha256:8e139a7e9077ef150639b7d772e2b6caf41a34c9c10d97d194140c2588665c81  # build:1.3
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install && ../tests/scripts/make-ctestfile-relative CTestTestfile.cmake > ../bin/CTestTestfile.cmake'
-  variables:
+  variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
     DOCKER_IMAGE: 'sha256:e6ef818bf9d8a244afdf2558bac405719a2b73ca1e154de635502988ab48f49c'
     BUILD_DIR: build
-  # only:
-  #   - master
-  tags:
-    - docker
-    - linux
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
@@ -45,76 +53,89 @@ build-linux64:
       - 'install_linux64/'
     expire_in: '1 month'
 
-build-win32:
-  stage: build-cc
-  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:749abd06fac07c9fbc3e3e4b2dd18ff5e3c974371d1a2094252432ea6fe2d6af  # mingw_build:1.3
-  script:
-    - *build_command_line
+# Used by "normal" pipeline
+build-linux64-ASan:
+  <<: *build_linux
   variables:
-    CMAKE_INSTALL_PREFIX: '../install_win32'
-    DOCKER_IMAGE: 'sha256:ed2d22733470f050c03edc72f5ff68a364c392523599df5661337f689f19516d'
-    CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64.cmake'
-    BUILD_SHARED_LIBS: 'true'
-    BUILD_DIR: build_toolchain
-  # only:
-  #   - master
-  tags:
-    - docker
-    - linux
-  artifacts:
-    name: 'bin-w32-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
-    paths:
-      - 'bin/'
-      - 'install_win32/'
-    expire_in: '1 month'
+    <<: *build_linux_variables
+    WITH_ASAN: 1
+  except:
+    variables:
+      - $NO_ASAN
 
-build-win64:
-  stage: build-cc
+# Used by coverage
+build-linux64:
+  <<: *build_linux
+  only:
+    variables:
+      - $WITH_COVERAGE
+      - $CROSS_COMPILE
+
+build-win64: &build_win64
+  <<: *docker_job
+  stage: build-others
   image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:749abd06fac07c9fbc3e3e4b2dd18ff5e3c974371d1a2094252432ea6fe2d6af  # mingw_build:1.3
   script:
     - *build_command_line
-  variables:
+  variables: &build_win64_variables
     CMAKE_INSTALL_PREFIX: '../install_win64'
-    DOCKER_IMAGE: 'sha256:ed2d22733470f050c03edc72f5ff68a364c392523599df5661337f689f19516d'
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
+    DOCKER_IMAGE: 'sha256:ed2d22733470f050c03edc72f5ff68a364c392523599df5661337f689f19516d'
     BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
-  # only:
-  #   - master
-  tags:
-    - docker
-    - linux
   artifacts:
     name: 'bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
       - 'bin/'
       - 'install_win64/'
     expire_in: '1 month'
+  only:
+    variables:
+      - $CROSS_COMPILE
+      - $WINDOWS_TEST
+
+build-win32:
+  <<: *build_win64
+  variables:
+    <<: *build_win64_variables
+    CMAKE_INSTALL_PREFIX: '../install_win32'
+    CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64.cmake'
+  artifacts:
+    name: 'bin-w32-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'bin/'
+      - 'install_win32/'
+    expire_in: '1 month'
+  only:
+    variables:
+      - $CROSS_COMPILE
+
+###
+# Test jobs
+###
+
+.test-linux: &test_linux
+  <<: *docker_job
+  stage: test
+  except:
+    variables:
+      - $CROSS_COMPILE
+      - $WINDOWS_TEST
 
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
-  stage: test
+  <<: *test_linux
   image: registry.gitlab.com/systerel/s2opc/check@sha256:76e11aaf485bdbbb8f48bc75d5e423370b9c71b0842f3b35de41f85c8aa21530  # check:1.0
   script:
     - ./.check-code.sh
-  # only:
-  #   - master
-  tags:
-    - docker
-    - linux
   dependencies:
     - generation
 
 test-unit:
-  stage: test
+  <<: *test_linux
   image: registry.gitlab.com/systerel/s2opc/test@sha256:e10957c4e1ea14cc2c1fe2d8b8eec4e923d85cc9c168e6aebe3418eaec4b8ace  # test:2.1
   script:
     - ./test-all.sh
-  # only:
-  #   - master
-  tags:
-    - docker
-    - linux
   artifacts:
     name: 'test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
@@ -123,24 +144,17 @@ test-unit:
       - 'bin/Testing'
     when: always
     expire_in: '1 month'
-  dependencies:
-    - build-linux64
 
 test-uactt:
-  stage: test
+  <<: *test_linux
   image: com2.systerel.fr:5000/c765/uactt@sha256:baf2dd81823abe2b4c5777f7a80b1357812c6e4d52c69e295a476630cc2086d7  # uactt:1.0
   script:
     - 'cd acceptances_tests/ && ./launch_acceptance_tests.sh'
-  # only:
-  #   - master
-  tags:
-    - docker
-    - linux
   artifacts:
     name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
       - 'bin/*.tap'
       - 'bin/*.log'
     when: on_failure
-  dependencies:
-    - build-linux64
+    expire_in: '1 month'
+
