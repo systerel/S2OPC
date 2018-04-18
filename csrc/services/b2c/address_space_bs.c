@@ -29,6 +29,7 @@
 #include "b2c.h"
 
 #include "address_space_impl.h"
+#include "sopc_dict.h"
 #include "util_b2c.h"
 #include "util_variant.h"
 
@@ -119,11 +120,65 @@ int32_t* address_space_bs__RefIndexEnd = NULL;
 /* Indicates if the address space was configured */
 bool sopc_addressSpace_configured = false;
 
+static SOPC_Dict* node_id_dict = NULL;
+
+static uint64_t node_id_hash(const void* data)
+{
+    uint64_t hash;
+    SOPC_NodeId_Hash((const SOPC_NodeId*) data, &hash);
+    return hash;
+}
+
+static bool node_id_equal(const void* a, const void* b)
+{
+    int32_t cmp;
+    SOPC_StatusCode status;
+
+    assert(a != NULL && b != NULL);
+    status = SOPC_NodeId_Compare((const SOPC_NodeId*) a, (const SOPC_NodeId*) b, &cmp);
+    assert(status == SOPC_STATUS_OK);
+
+    return cmp == 0;
+}
+
+static bool populate_node_id_dict(SOPC_Dict* dict, SOPC_NodeId** ids, int32_t n_ids)
+{
+    bool ok = (n_ids >= 0);
+
+    if (ok)
+    {
+        ok = SOPC_Dict_Reserve(dict, (uint64_t) n_ids);
+    }
+
+    if (ok)
+    {
+        for (int32_t i = 0; i < n_ids; ++i)
+        {
+            SOPC_NodeId* id = ids[i];
+
+            if (id == NULL)
+            {
+                continue;
+            }
+
+            if (SOPC_Dict_Insert(dict, id, (void*) (uintptr_t) i) == false)
+            {
+                ok = false;
+                break;
+            }
+        }
+    }
+
+    return ok;
+}
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void address_space_bs__INITIALISATION(void)
 {
+    bool populated = false;
+
     if (sopc_addressSpace_configured != false)
     {
         assert(0 != address_space_bs__nNodeIds);
@@ -149,6 +204,12 @@ void address_space_bs__INITIALISATION(void)
         offTypes = offVars + address_space_bs__nVariables;
         offRefTypes = offTypes + address_space_bs__nVariableTypes + address_space_bs__nObjectTypes;
         offMethods = offRefTypes + address_space_bs__nReferenceTypes + address_space_bs__nDataTypes;
+
+        node_id_dict = SOPC_Dict_Create(NULL, node_id_hash, node_id_equal, NULL, NULL);
+        assert(node_id_dict != NULL);
+
+        populated = populate_node_id_dict(node_id_dict, address_space_bs__a_NodeId, address_space_bs__nNodeIds);
+        assert(populated);
     }
 }
 
@@ -160,6 +221,10 @@ void address_space_bs__INITIALISATION(void)
 void address_space_bs__UNINITIALISATION(void)
 {
     int32_t i = 0;
+
+    SOPC_Dict_Delete(node_id_dict);
+    node_id_dict = NULL;
+
     // Clear address space values if present (to free the values allocated on write service execution)
     if (address_space_bs__a_Value != NULL)
     {
@@ -175,34 +240,23 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
                                                  t_bool* const address_space_bs__nid_valid,
                                                  constants__t_Node_i* const address_space_bs__node)
 {
-    constants__t_Node_i i;
-    SOPC_NodeId *pnid_req, *pnid;
-    int nid_cmp;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_NodeId* pnid_req;
+    bool val_found = false;
+    void* val;
 
     *address_space_bs__nid_valid = false;
 
     pnid_req = (SOPC_NodeId*) address_space_bs__nid;
+
     if (NULL == pnid_req)
         return;
 
-    /* Very impressive hashmap with a single entry, and time to compute hash is 0! */
-    for (i = 1; i <= address_space_bs__nNodeIds; ++i)
+    val = SOPC_Dict_Get(node_id_dict, pnid_req, &val_found);
+
+    if (val_found)
     {
-        pnid = (SOPC_NodeId*) address_space_bs__a_NodeId[i];
-        if (NULL == pnid)
-            continue;
-
-        status = SOPC_NodeId_Compare(pnid_req, pnid, &nid_cmp);
-        if (SOPC_STATUS_OK != status)
-            continue; /* That should be an error */
-
-        if (nid_cmp == 0)
-        {
-            *address_space_bs__nid_valid = true;
-            *address_space_bs__node = i;
-            return;
-        }
+        *address_space_bs__nid_valid = true;
+        *address_space_bs__node = (int) (uintptr_t) val;
     }
 }
 
