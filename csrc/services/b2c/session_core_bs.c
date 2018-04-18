@@ -369,7 +369,10 @@ void session_core_bs__server_create_session_req_do_crypto(
             assert(sigLength <= INT32_MAX);
             pSign->Signature.Length = (int32_t) sigLength;
             if (SOPC_STATUS_OK != status)
+            {
+                free(pToSign);
                 return;
+            }
 
             if (pSign->Signature.Length >= 0 && (uint64_t) pSign->Signature.Length * sizeof(SOPC_Byte) <= SIZE_MAX)
             {
@@ -383,17 +386,21 @@ void session_core_bs__server_create_session_req_do_crypto(
                 pSign->Signature.Data = NULL;
             }
             if (NULL == pSign->Signature.Data || pSign->Signature.Length <= 0)
-                return;
-
-            status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pECfg->serverKey,
-                                                        pSign->Signature.Data, (uint32_t) pSign->Signature.Length);
-            if (SOPC_STATUS_OK != status)
             {
                 free(pToSign);
                 return;
             }
 
+            status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pECfg->serverKey,
+                                                        pSign->Signature.Data, (uint32_t) pSign->Signature.Length);
+
             free(pToSign);
+
+            if (SOPC_STATUS_OK != status)
+            {
+                return;
+            }
+
             /* c) Prepare the OpcUa_SignatureData */
             SOPC_String_Clear(&pSign->Algorithm);
 
@@ -500,7 +507,10 @@ void session_core_bs__client_activate_session_req_do_crypto(
             status = SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pSCCfg->key_priv_cli,
                                                                        (uint32_t*) &pSign->Signature.Length);
             if (SOPC_STATUS_OK != status)
+            {
+                free(pToSign);
                 return;
+            }
 
             if (pSign->Signature.Length >= 0 && (uint64_t) pSign->Signature.Length * sizeof(SOPC_Byte) <= SIZE_MAX)
             {
@@ -513,17 +523,21 @@ void session_core_bs__client_activate_session_req_do_crypto(
                 pSign->Signature.Data = NULL;
             }
             if (NULL == pSign->Signature.Data || pSign->Signature.Length <= 0)
-                return;
-
-            status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pSCCfg->key_priv_cli,
-                                                        pSign->Signature.Data, (uint32_t) pSign->Signature.Length);
-            if (SOPC_STATUS_OK != status)
             {
                 free(pToSign);
                 return;
             }
 
+            status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pSCCfg->key_priv_cli,
+                                                        pSign->Signature.Data, (uint32_t) pSign->Signature.Length);
+
             free(pToSign);
+
+            if (SOPC_STATUS_OK != status)
+            {
+                return;
+            }
+
             /* c) Prepare the OpcUa_SignatureData */
             SOPC_String_Clear(&pSign->Algorithm);
             status = SOPC_String_CopyFromCString(&pSign->Algorithm,
