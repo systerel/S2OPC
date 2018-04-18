@@ -27,7 +27,9 @@ SEES
     
 IMPORTS
     subscription_core,
-    msg_subscription_service_bs
+    msg_subscription_create_bs,
+    msg_subscription_publish_bs,
+    msg_subscription_create_monitored_item
     
 PROMOTES
     is_valid_subscription,
@@ -132,10 +134,9 @@ OPERATIONS
         l_valid_subscription,
         l_timestampToRet,
         l_nb_monitored_items,
-        l_monItems_notNull,
         l_bres
     IN
-        l_sc, l_subscription, l_timestampToRet, l_nb_monitored_items, l_monItems_notNull <-- getall_msg_create_monitored_items_req_params (p_req_msg);
+        l_sc, l_subscription, l_timestampToRet, l_nb_monitored_items <-- getall_msg_create_monitored_items_req_params (p_req_msg);
         IF l_sc = e_sc_ok
         THEN
             l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);

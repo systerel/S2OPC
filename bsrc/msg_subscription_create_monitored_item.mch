@@ -16,7 +16,7 @@
  */
 
 MACHINE
-    msg_subscription_service_bs
+    msg_subscription_create_monitored_item
 
 SEES
     constants,
@@ -33,93 +33,9 @@ INVARIANT
 INITIALISATION
     nb_monitored_items := 0
 
-OPERATIONS
+OPERATIONS  
     
-    /* TODO: move into message_in_bs: + need type for header ? */
-    req_expiration_time <-- get_msg_header_expiration_time (p_req_header) =
-    PRE
-        p_req_header : t_msg_header_i &
-        p_req_header = c_msg_in_header &
-        c_msg_in_header : t_msg_header &
-        a_msg_in_type = e_msg_subscription_publish_req
-    THEN
-        req_expiration_time :(req_expiration_time : t_timeref_i & req_expiration_time : t_timeref)
-    END
-    ;
-    
-    
-    /* CreateSubscription messages */
-    
-    reqPublishInterval, reqLifetimeCount, reqMaxKeepAlive, maxNotificationsPerPublish, publishEnabled
-      <-- get_msg_create_subscription_req_params (p_req_msg) =
-    PRE
-        p_req_msg : t_msg_i &
-        p_req_msg : t_msg &
-        p_req_msg = c_msg_in &
-        a_msg_in_type = e_msg_subscription_create_req
-    THEN
-        reqPublishInterval,
-        reqLifetimeCount,
-        reqMaxKeepAlive,
-        maxNotificationsPerPublish,
-        publishEnabled
-        :(reqPublishInterval : t_opcua_duration_i &
-          reqLifetimeCount : t_counter &
-          reqMaxKeepAlive : t_counter &
-          maxNotificationsPerPublish : t_counter &
-          publishEnabled : BOOL)
-    END
-    ;
-  
-    set_msg_create_subscription_resp_params (p_resp_msg,
-                                             p_subscription, 
-                                             p_revisedPublishInterval,
-                                             p_revisedLifetimeCount,
-                                             p_revisedMaxKeepAlive) =
-    PRE
-        p_resp_msg : t_msg_i &
-        p_resp_msg : t_msg &
-        p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_subscription_create_resp &
-        p_subscription : t_subscription_i &
-        p_subscription : t_subscription &
-        p_revisedPublishInterval : t_opcua_duration_i &
-        p_revisedLifetimeCount : t_counter &
-        p_revisedMaxKeepAlive : t_counter &
-        p_revisedLifetimeCount >= 3 * p_revisedMaxKeepAlive /* part 4 table 86 */ 
-    THEN
-        skip
-    END;
-    
-    set_msg_publish_resp_subscription (p_resp_msg, p_subscription) =
-    PRE
-        p_resp_msg : t_msg_i &
-        p_resp_msg : t_msg &
-        p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_subscription_publish_resp &
-        p_subscription : t_subscription_i &
-        p_subscription : t_subscription
-    THEN
-        skip
-    END
-    ;
-    
-    set_msg_publish_resp_notificationMsg (p_resp_msg, p_notifMsg) =
-    PRE
-        p_resp_msg : t_msg_i &
-        p_resp_msg : t_msg &
-        p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_subscription_publish_resp &
-        p_notifMsg : t_notif_msg_i &
-        p_notifMsg : t_notif_msg
-    THEN
-        skip
-    END
-    ;
-    
-    /* CreateMonitoredItem messages */
-    
-    p_sc, p_subscription, p_timestampToRet, p_nb_monitored_items, p_monitored_items_not_null <-- getall_msg_create_monitored_items_req_params (p_req_msg) =
+    p_sc, p_subscription, p_timestampToRet, p_nb_monitored_items <-- getall_msg_create_monitored_items_req_params (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
@@ -130,25 +46,17 @@ OPERATIONS
         p_subscription,
         p_timestampToRet,
         p_nb_monitored_items,
-        nb_monitored_items,
-        p_monitored_items_not_null
+        nb_monitored_items
         :(  p_sc                 : t_StatusCode &
             p_subscription       : t_subscription_i &
             p_timestampToRet     : t_TimestampsToReturn_i &
             p_nb_monitored_items : NAT &
-            p_monitored_items_not_null : BOOL &
             (p_sc = e_sc_ok
                 =>
+                p_nb_monitored_items > 0 &
                 p_nb_monitored_items <= k_n_monitoredItem_max &
                 nb_monitored_items = p_nb_monitored_items &
-                p_timestampToRet : t_TimestampsToReturn &
-                p_monitored_items_not_null = TRUE) &
-            (p_sc = e_sc_bad_decoding_error
-                => p_monitored_items_not_null = FALSE) &
-            (p_sc = e_sc_bad_nothing_to_do
-                => p_nb_monitored_items = 0) &
-            (p_sc = e_sc_bad_too_many_ops
-                => p_nb_monitored_items > k_n_monitoredItem_max) &
+                p_timestampToRet : t_TimestampsToReturn) &
             (p_sc /= e_sc_ok
                 => p_sc : {e_sc_bad_decoding_error, e_sc_bad_nothing_to_do, e_sc_bad_timestamps_to_return_invalid, e_sc_bad_too_many_ops})
         )
@@ -210,6 +118,6 @@ OPERATIONS
         p_revQueueSize : t_counter
     THEN
         skip
-    END  
+    END
 
 END
