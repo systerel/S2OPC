@@ -17,6 +17,7 @@
 
 MACHINE
     subscription_core
+
 SEES
     constants,
     message_out_bs
@@ -24,6 +25,7 @@ SEES
 DEFINITIONS
     d_variables ==
     s_subscription,
+    s_monitoredItem,
     a_session,
     a_publishInterval,
     a_lifetimeExpCount,
@@ -45,6 +47,7 @@ DEFINITIONS
     
     d_typing ==
     s_subscription <: t_subscription &
+    s_monitoredItem <: t_monitoredItem &
     /* Subscription configuration record */
     a_session : s_subscription +-> t_session &                  // a subscription may be associated to a session
     a_publishInterval : s_subscription --> t_opcua_duration_i & // a subscription shall have a publishing interval value
@@ -70,10 +73,14 @@ DEFINITIONS
     
     /* Subscription Implementation variables */
     a_pendingNotificationQueue : s_subscription --> t_notificationQueue &
-    a_publishRequestQueue :  s_subscription --> t_publishReqQueue &
     /* a_retransmissionQueue : s_subscription --> t_notificationMsgQueue */ /* not implemented */
     a_monitoredItemQueue : s_subscription --> t_monitoredItemQueue &
-    a_nodeToMonitoredItemQueue : t_Node --> t_monitoredItemQueue
+    a_nodeToMonitoredItemQueue : t_Node --> t_monitoredItemQueue &
+    
+    /* (Session) Implementation variables */
+    
+    /* Note: kept on subscription for now since 1 subs / session + no transfer. Otherwise could be cleared on session close ! */
+    a_publishRequestQueue :  s_subscription --> t_publishReqQueue
     
 ABSTRACT_VARIABLES
     d_variables
@@ -83,6 +90,7 @@ INVARIANT
 
 INITIALISATION
     s_subscription := {}        ||
+    s_monitoredItem := {}       ||
     a_session := {}             ||
     a_publishInterval := {}     ||
     a_lifetimeExpCount := {}    ||
@@ -112,7 +120,7 @@ OPERATIONS
         p_session : t_session &
         p_subscription : t_subscription_i
     THEN
-        is_valid := bool(p_subscription : t_subscription & a_session(p_subscription) = p_session)
+        is_valid := bool(p_subscription : s_subscription & a_session(p_subscription) = p_session)
     END
     ;
     
@@ -120,7 +128,7 @@ OPERATIONS
     PRE
         p_subscription : t_subscription_i
     THEN
-        is_valid := bool(p_subscription : t_subscription)
+        is_valid := bool(p_subscription : s_subscription)
     END
     ;
         
@@ -184,6 +192,7 @@ OPERATIONS
         p_maxNotificationsPerPublish : t_counter &
         p_publishEnabled : BOOL
     THEN
+        /* State table evaluation case (CreateSubscription event: #1, #2, #3) */
         /* TODO: CREATE PUBLISH TIMER */
         IF t_subscription = s_subscription
         THEN
@@ -255,6 +264,7 @@ OPERATIONS
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_subscription_publish_resp
     THEN
+         /* State table evaluation case (PublishRequest event: #4, #5, #10, #11, #13) */
         CHOICE
             /* if service failed, response is synchronous */
             StatusCode_service,
@@ -302,7 +312,7 @@ OPERATIONS
                                                                  p_clientHandle) =
     PRE
         p_subscription : t_subscription_i &
-        p_subscription : t_subscription &
+        p_subscription : s_subscription &
         p_node : t_Node_i &
         p_node : t_Node &
         p_aid : t_AttributeId_i &
@@ -313,13 +323,25 @@ OPERATIONS
         p_monitoringMode : t_monitoringMode &
         p_clientHandle : t_client_handle_i
     THEN
-        /* TODO: add monitored item to both queues + generate a notification ! */
-        CHOICE
-            StatusCode_service := e_sc_ok ||
-            monitoredItem :(monitoredItem : t_monitoredItem_i & monitoredItem : t_monitoredItem)
-        OR
+        IF t_subscription = s_subscription
+        THEN
             StatusCode_service := e_sc_bad_too_many_monitored_items ||
-            monitoredItem :(monitoredItem : t_monitoredItem_i)
+            monitoredItem := c_monitoredItem_indet
+        ELSE
+            ANY l_monitoredItem WHERE
+                l_monitoredItem : t_monitoredItem - s_monitoredItem
+            THEN
+                /* TODO: add monitored item to both queues + generate a notification ! */
+                CHOICE
+                    StatusCode_service := e_sc_ok ||
+                    monitoredItem :(monitoredItem : t_monitoredItem_i & monitoredItem : t_monitoredItem) ||
+                    s_monitoredItem := s_monitoredItem \/ {l_monitoredItem}
+                OR
+                    /* add to queue failure (out of memory) */
+                    StatusCode_service := e_sc_bad_too_many_monitored_items ||
+                    monitoredItem := c_monitoredItem_indet
+                END
+            END
         END
     END
     ;
@@ -327,10 +349,19 @@ OPERATIONS
     server_subscription_publish_timeout (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
-        p_subscription : t_subscription
+        p_subscription : s_subscription
     THEN
-        /* State table evaluation case (Publish Timer Expires) */
+        /* State table evaluation case (Publish Timer Expires: #6, #7, #8, #9, #12, #14, #15, #16, #17, #27) */
         skip
+    END
+    ;
+    
+    monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node
+    THEN
+        monitoredItemQueue :( monitoredItemQueue : t_monitoredItemQueue_i & monitoredItemQueue = a_nodeToMonitoredItemQueue (p_node))
     END
     
 END

@@ -36,6 +36,7 @@
 #include "sopc_address_space.h"
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
+#include "sopc_singly_linked_list.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
 
@@ -64,14 +65,17 @@ typedef uint32_t constants_bs__t_client_request_handle_i;
 typedef uint32_t constants_bs__t_client_handle_i;
 #define constants_bs__t_counter_i t_entier4
 typedef uint32_t constants_bs__t_endpoint_config_idx_i;
-typedef void* constants_bs__t_monitoredItemQueue_i;
+typedef SOPC_SLinkedListIterator* constants_bs__t_monitoredItemQueueIterator_i;
+typedef SOPC_SLinkedList* constants_bs__t_monitoredItemQueue_i;
 #define constants_bs__t_monitoredItem_i t_entier4
 typedef void* constants_bs__t_msg_header_i; /* OpcUa_RequestHeader OR OpcUa_ResponseHeader */
 typedef void* constants_bs__t_msg_i;        /* OpcUa_* message */
 typedef OpcUa_NotificationMessage* constants_bs__t_notif_msg_i;
-typedef void* constants_bs__t_notificationQueue_i;
+typedef SOPC_SLinkedListIterator* constants_bs__t_notificationQueueIterator_i;
+typedef SOPC_SLinkedList* constants_bs__t_notificationQueue_i;
 typedef double constants_bs__t_opcua_duration_i;
-typedef void* constants_bs__t_publishReqQueue_i;
+typedef SOPC_SLinkedListIterator* constants_bs__t_publishReqQueueIterator_i;
+typedef SOPC_SLinkedList* constants_bs__t_publishReqQueue_i;
 typedef uint32_t constants_bs__t_request_context_i;
 typedef uint32_t constants_bs__t_server_request_handle_i;
 typedef uint32_t constants_bs__t_session_i;
@@ -103,13 +107,16 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__t_client_handle_i_max (-1)
 #define constants_bs__t_counter_i_max (-1)
 #define constants_bs__t_endpoint_config_idx_i_max SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
+#define constants_bs__t_monitoredItemQueueIterator_i_max (-1)
 #define constants_bs__t_monitoredItemQueue_i_max (-1)
 #define constants_bs__t_monitoredItem_i_max (-1)
 #define constants_bs__t_msg_header_i_max (-1)
 #define constants_bs__t_msg_i_max (-1)
 #define constants_bs__t_notif_msg_i_max (-1)
+#define constants_bs__t_notificationQueueIterator_i_max (-1)
 #define constants_bs__t_notificationQueue_i_max (-1)
 #define constants_bs__t_opcua_duration_i_max (-1)
+#define constants_bs__t_publishReqQueueIterator_i_max (-1)
 #define constants_bs__t_publishReqQueue_i_max (-1)
 #define constants_bs__t_request_context_i_max (-1)
 #define constants_bs__t_server_request_handle_i_max (-1)
@@ -139,13 +146,16 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__c_channel_indet 0
 #define constants_bs__c_client_request_handle_indet 0
 #define constants_bs__c_endpoint_config_idx_indet 0
+#define constants_bs__c_monitoredItemQueueIterator_indet 0
 #define constants_bs__c_monitoredItemQueue_indet 0
 #define constants_bs__c_monitoredItem_indet 0
 #define constants_bs__c_msg_header_indet 0
 #define constants_bs__c_msg_indet 0
 #define constants_bs__c_no_application_context 0
 #define constants_bs__c_notif_msg_indet 0
+#define constants_bs__c_notificationQueueIterator_indet 0
 #define constants_bs__c_notificationQueue_indet 0
+#define constants_bs__c_publishReqQueueIterator_indet 0
 #define constants_bs__c_publishReqQueue_indet 0
 #define constants_bs__c_request_context_indet 0
 #define constants_bs__c_session_indet 0

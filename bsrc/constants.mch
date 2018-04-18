@@ -157,9 +157,12 @@ SETS
     t_sub_seq_num_i;       /* uint32_t */
     t_timeref_i;           /* SOPC_TimeReference */
     t_opcua_duration_i;    /* double */
-    t_notificationQueue_i; /* (void*) */
-    t_publishReqQueue_i;   /* (void*) */
-    t_monitoredItemQueue_i;  /* (void*) */
+    t_notificationQueue_i; /* (SOPC_SLinkedList*) */
+    t_notificationQueueIterator_i; /* (SOPC_SLinkedListIterator*) */
+    t_publishReqQueue_i;   /* (SOPC_SLinkedList*) */
+    t_publishReqQueueIterator_i; /* (SOPC_SLinkedListIterator*) */
+    t_monitoredItemQueue_i;  /* (SOPC_SLinkedList*) */
+    t_monitoredItemQueueIterator_i; /* (SOPC_SLinkedListIterator*) */
     
     /* Subscription (monitored item) */   
     t_monitoringMode_i = {
@@ -315,8 +318,11 @@ CONCRETE_CONSTANTS
     c_sub_seq_num_indet,
     c_timeref_indet,
     c_notificationQueue_indet,
+    c_notificationQueueIterator_indet,
     c_publishReqQueue_indet,
+    c_publishReqQueueIterator_indet,
     c_monitoredItemQueue_indet,
+    c_monitoredItemQueueIterator_indet,
     c_monitoredItemReqIndex_indet,
     c_monitoredItem_indet,
     c_msg_header_indet,
@@ -376,8 +382,11 @@ ABSTRACT_CONSTANTS
     t_sub_seq_num,
     t_timeref,
     t_notificationQueue,
+    t_notificationQueueIterator,
     t_publishReqQueue,
+    t_publishReqQueueIterator,
     t_monitoredItemQueue,
+    t_monitoredItemQueueIterator,
     t_monitoringMode,
     t_monitoredItemReqIndex,
     t_monitoredItem,
@@ -572,13 +581,25 @@ PROPERTIES
     c_notificationQueue_indet : t_notificationQueue_i &
     c_notificationQueue_indet /: t_notificationQueue &
     
+    t_notificationQueueIterator <: t_notificationQueueIterator_i &
+    c_notificationQueueIterator_indet : t_notificationQueueIterator_i &
+    c_notificationQueueIterator_indet /: t_notificationQueueIterator &
+    
     t_publishReqQueue <: t_publishReqQueue_i &
     c_publishReqQueue_indet : t_publishReqQueue_i &
     c_publishReqQueue_indet /: t_publishReqQueue &
 
+    t_publishReqQueueIterator <: t_publishReqQueueIterator_i &
+    c_publishReqQueueIterator_indet : t_publishReqQueueIterator_i &
+    c_publishReqQueueIterator_indet /: t_publishReqQueueIterator &
+    
     t_monitoredItemQueue <: t_monitoredItemQueue_i &
     c_monitoredItemQueue_indet : t_monitoredItemQueue_i &
     c_monitoredItemQueue_indet /: t_monitoredItemQueue &
+    
+    t_monitoredItemQueueIterator <: t_monitoredItemQueueIterator_i &
+    c_monitoredItemQueueIterator_indet : t_monitoredItemQueueIterator_i &
+    c_monitoredItemQueueIterator_indet /: t_monitoredItemQueueIterator &
     
     t_monitoringMode = {
         e_monitoringMode_disabled,

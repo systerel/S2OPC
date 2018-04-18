@@ -23,7 +23,9 @@ REFINES
 SEES
     constants,
     message_in_bs,
-    message_out_bs
+    message_out_bs,
+    write_value_pointer_bs,
+    address_space_bs
     
 IMPORTS
     subscription_core,
@@ -168,18 +170,23 @@ OPERATIONS
     ;
     
     server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
-    /*VAR
+    VAR
+        l_nid,
+        l_aid,
+        l_nid_valid,
         l_node,
-        l_aid
-    IN*/
-    BEGIN
-        /* TODO: retrieve node + aid from write value pointer */
-        /* TODO: retrieve monitoredItemQueue from node */
-        /* TODO: iterate on each monitoredItem, for each:
-        - check regarding MI properties / aid / old value / new value if notification necessary
-        - add notification to subscription
-        */
-        skip
+        l_monitoredItemQueue
+    IN
+        l_nid, l_aid <-- get_write_value_pointer_NodeId_AttributeId (p_new_write_value_pointer);
+        l_nid_valid, l_node <-- readall_AddressSpace_Node (l_nid);
+        IF l_nid_valid = TRUE
+        THEN
+            l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (l_node)
+            /* TODO: iterate on each monitoredItem, for each:
+            - check regarding MI properties / aid / old value / new value if notification necessary
+            - add notification to subscription
+            */
+        END
     END
-    
+
 END
