@@ -43,6 +43,11 @@ if(WITH_UBSAN)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
 endif()
 
+option(WITH_COVERAGE "build with COVERAGE" OFF)
+if(WITH_COVERAGE)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
+endif()
+
 # Re-enable asserts for Release and RelWithDebInfo builds
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
@@ -77,7 +82,7 @@ endif()
 if(CMAKE_HOST_UNIX)
   add_custom_command(OUTPUT csrc/configuration/sopc_toolkit_build_info.h
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h_ ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h
-                     COMMAND ./gen_build_info_file.sh ${CMAKE_SOURCE_DIR} 
+                     COMMAND ./gen_build_info_file.sh ${CMAKE_SOURCE_DIR}
                      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 else()
   add_custom_command(OUTPUT csrc/configuration/sopc_toolkit_build_info.h
