@@ -1784,6 +1784,7 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
         pNid = (SOPC_NodeId*) malloc(sizeof(SOPC_NodeId));
         SOPC_NodeId_Initialize(pNid);
     }
+
     if (NULL != pNid)
     {
         pNid->IdentifierType = type;
@@ -1852,8 +1853,6 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             break;
         }
 
-        free(sz);
-
         /* Something could have failed but the NodeId is already allocated */
         if (SOPC_STATUS_OK != status)
         {
@@ -1861,6 +1860,12 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             pNid = NULL;
         }
     }
+    else
+    {
+        free(pGuid);
+    }
+
+    free(sz);
 
     return pNid;
 }
