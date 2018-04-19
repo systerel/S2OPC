@@ -59,6 +59,8 @@ endif()
 SET(ADDSPACEGEN_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/address_space_generation/include")
 SET(ADDSPACEGEN_DIR "${CMAKE_SOURCE_DIR}/address_space_generation/genc" CACHE
     FILEPATH "Directory where the address spaces files are")
+SET(DISABLE_CHECK_ADDSPACE FALSE CACHE
+    BOOL "Disable the compilation of the address space check")
 
 # Re-enable asserts for Release and RelWithDebInfo builds
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
@@ -221,11 +223,13 @@ endfunction()
 
 # Check generated address space for tests
 
+if (NOT DISABLE_CHECK_ADDSPACE)
 add_executable(check_ingopcs_addspace "${ADDSPACEGEN_DIR}/check_ingopcs_addspace.c"
                                       "${ADDSPACEGEN_DIR}/ingopcs_addspace.c")
 target_link_libraries(check_ingopcs_addspace PRIVATE)
 target_include_directories(check_ingopcs_addspace PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
                                                           "${ADDSPACEGEN_INCLUDE_DIR}")
+endif()
 
 enable_testing()
 
