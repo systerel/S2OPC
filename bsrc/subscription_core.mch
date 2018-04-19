@@ -32,13 +32,15 @@ DEFINITIONS
     a_lifetimeExpCount,
     a_keepAliveExpCount,
     a_maxNotifsPerPublish,
-    a_state,
+    a_subscription_state,
     a_MoreNotifications,
     a_LatePublishRequest,
     a_LifetimeCounter,
     a_KeepAliveCounter,
     a_MessageSent,
+    a_NotificationAvailable,
     a_PublishingEnabled,
+    a_PublishingReqQueued,
     a_SeqNum,
     a_pendingNotificationQueue,
     a_publishRequestQueue,
@@ -50,14 +52,14 @@ DEFINITIONS
     s_subscription <: t_subscription &
     s_monitoredItem <: t_monitoredItem &
     /* Subscription configuration record */
-    a_session : s_subscription +-> t_session &                  // a subscription may be associated to a session
+    a_session : s_subscription >+> t_session &                  // a subscription may be associated to a session (=> 1 subscription / session)
     a_publishInterval : s_subscription --> t_opcua_duration_i & // a subscription shall have a publishing interval value
     a_lifetimeExpCount : s_subscription --> t_counter &       // a subscription shall have a lifetime expiration count value
     a_keepAliveExpCount : s_subscription --> t_counter &      // a subscription shall have a keepAlive expiration count value
     a_maxNotifsPerPublish : s_subscription --> t_counter &    // a subscription shall have a maximum notifications per publish response
     
     /* Subscription State Machine : state shall be defined (part 4 table 82) */
-    a_state : s_subscription --> t_subscriptionState &
+    a_subscription_state : s_subscription --> t_subscriptionState &
     
     /* Subscription State Machine : variables shall be defined (part 4 table 84) */
     a_MoreNotifications <: s_subscription &
@@ -65,9 +67,9 @@ DEFINITIONS
     a_LifetimeCounter : s_subscription --> t_counter &
     a_KeepAliveCounter : s_subscription --> t_counter & /* missing in table 84 */
     a_MessageSent <: s_subscription &
-    /* a_NotificationAvailable <: s_subscription */ /* <=> a_pendingNotificationQueue[subscription] empty */
+    a_NotificationAvailable <: s_subscription &
     a_PublishingEnabled <: s_subscription &
-    /* a_PublishingReqQueued <: s_subscription */   /* <=> a_publishRequestQueue[subscription] empty */
+    a_PublishingReqQueued <: s_subscription &
     /* a_RequestedMessageFound <: s_subscription */   /* <=> seqNum in a_retransmissionQueue[subscription] */
     a_SeqNum : s_subscription --> t_sub_seq_num_i &
     /* a_SubscriptionAssignedToClient <: s_subscription */             /* Not really a state machine variable: local variable or function */
@@ -98,14 +100,16 @@ INITIALISATION
     a_keepAliveExpCount := {}   ||
     a_maxNotifsPerPublish := {} ||
 
-    a_state := {}                 ||
+    a_subscription_state := {}                 ||
 
     a_MoreNotifications := {}     ||
     a_LatePublishRequest := {}    ||
     a_LifetimeCounter := {}       ||
     a_KeepAliveCounter := {}      ||
     a_MessageSent := {}           ||
+    a_NotificationAvailable := {} ||
     a_PublishingEnabled := {}     ||
+    a_PublishingReqQueued := {}   ||
     a_SeqNum              := {}   ||
     
     a_pendingNotificationQueue := {} ||
@@ -138,17 +142,7 @@ OPERATIONS
         p_session : t_session_i &
         p_session : t_session
     THEN
-        l_has_subscription := bool(a_session |> {p_session} /= {})
-    END
-    ;
-    
-    acknowledge_publish_response (p_sub, p_seq_num) = 
-    PRE
-        p_sub : t_subscription_i &
-        p_sub : t_subscription &
-        p_seq_num : t_counter
-    THEN
-        skip
+        l_has_subscription := bool(p_session : ran(a_session))
     END
     ;
     
@@ -191,7 +185,7 @@ OPERATIONS
         p_revMaxKeepAlive : t_counter &
         p_revLifetimeCount >= 3 * p_revMaxKeepAlive & /* part 4 table 86 */
         p_maxNotificationsPerPublish : t_counter &
-        p_publishEnabled : BOOL
+        p_publishEnabled = TRUE /* => no subscription modification for now => refuse publishDisabled */
     THEN
         /* State table evaluation case (CreateSubscription event: #1, #2, #3) */
         /* TODO: CREATE PUBLISH TIMER */
@@ -204,9 +198,11 @@ OPERATIONS
                 l_subscription : t_subscription - s_subscription
             THEN
                 CHOICE
+                    /* Transition #1 + #2 */
                     StatusCode_service := e_sc_bad_out_of_memory ||
                     subscription := c_subscription_indet
                 OR
+                    /* Transition #1 + #3 */
                     StatusCode_service := e_sc_ok ||
                     
                     subscription := l_subscription ||
@@ -218,8 +214,7 @@ OPERATIONS
                     a_keepAliveExpCount (l_subscription) := p_revMaxKeepAlive  ||
                     a_maxNotifsPerPublish (l_subscription) := p_maxNotificationsPerPublish ||
                     
-                    a_state (l_subscription) := e_subscription_normal                ||
-                    a_MoreNotifications := a_MoreNotifications \/ {l_subscription}   ||
+                    a_subscription_state (l_subscription) := e_subscription_normal                ||
                     a_LatePublishRequest := a_LatePublishRequest \/ {l_subscription} ||
                     a_LifetimeCounter (l_subscription) := p_revLifetimeCount         ||
                     a_KeepAliveCounter (l_subscription) := p_revMaxKeepAlive         ||
@@ -256,6 +251,7 @@ OPERATIONS
     PRE
         p_session : t_session_i &
         p_session : t_session &
+        p_session : ran(a_session) &
         p_req_exp_time : t_timeref_i &
         p_req_exp_time : t_timeref &
         p_req_handle : t_server_request_handle_i &
@@ -267,32 +263,89 @@ OPERATIONS
         a_msg_out_type = e_msg_subscription_publish_resp
     THEN
          /* State table evaluation case (PublishRequest event: #4, #5, #10, #11, #13) */
-        CHOICE
-            /* if service failed, response is synchronous */
-            StatusCode_service,
-            async_resp_msg,
-            subscription,
-            notifMsg
-            :(  StatusCode_service : t_StatusCode_i &
-                StatusCode_service : t_StatusCode &
-                StatusCode_service /= e_sc_ok &
-                async_resp_msg = FALSE &
-                subscription : t_subscription_i &
-                notifMsg = c_notif_msg_indet
-            )
-        OR
-            /* if service succeeded, response is synchronous or asynchronous */
-            StatusCode_service,
-            async_resp_msg,
-            subscription,
-            notifMsg
-            :(  StatusCode_service : t_StatusCode_i &
-                StatusCode_service = e_sc_ok &
-                async_resp_msg : BOOL &
-                subscription : t_subscription_i & subscription : t_subscription &
-                notifMsg : t_notif_msg_i & notifMsg : t_notif_msg
-            )            
-        END
+            LET l_subscription BE
+                l_subscription = a_session~(p_session)
+            IN
+            LET l_PublishingEnabled, l_MoreNotifications, l_NotificationAvailable BE
+                    l_PublishingEnabled = bool (l_subscription : a_PublishingEnabled) &
+                l_MoreNotifications = bool (l_subscription : a_MoreNotifications) &
+                l_NotificationAvailable = bool (l_subscription : a_NotificationAvailable)
+                IN                
+                    IF a_subscription_state (l_subscription) = e_subscription_normal &
+                        (l_PublishingEnabled = FALSE or
+                         (l_PublishingEnabled = TRUE & l_MoreNotifications = FALSE))
+                    THEN
+                        /* #4 transition */
+                        /* TODO: enqueue publish request */
+                    a_PublishingReqQueued := a_PublishingReqQueued \/ {l_subscription} ||
+                        StatusCode_service := e_sc_ok ||
+                        async_resp_msg := TRUE ||
+                        subscription := c_subscription_indet ||
+                        notifMsg := c_notif_msg_indet
+                    ELSIF a_subscription_state (l_subscription) = e_subscription_normal &
+                          l_PublishingEnabled = TRUE & l_MoreNotifications = TRUE
+                    THEN
+                        /* #5 transition */
+                        a_MessageSent := a_MessageSent \/ {l_subscription} ||
+                        a_LifetimeCounter (l_subscription) := a_lifetimeExpCount (l_subscription) || /* reset lifetime counter */
+                        /* TODO ?: return notifications (dequeue) */
+                        StatusCode_service := e_sc_ok ||
+                        async_resp_msg := FALSE ||
+                        subscription := l_subscription ||
+                    notifMsg :(notifMsg : t_notif_msg_i & notifMsg : t_notif_msg) ||
+                    /* a_NotificationAvailable & a_MoreNotifications state may change for subscription */
+                    a_NotificationAvailable, 
+                    a_MoreNotifications 
+                    :(a_NotificationAvailable <: s_subscription &
+                      a_NotificationAvailable - {l_subscription} = a_NotificationAvailable$0 - {l_subscription} &
+                      a_MoreNotifications <: s_subscription &
+                      a_MoreNotifications - {l_subscription} = a_MoreNotifications$0 - {l_subscription}
+                    )
+                ELSIF a_subscription_state (l_subscription) = e_subscription_late & l_PublishingEnabled = TRUE &
+                      (l_NotificationAvailable = TRUE or l_MoreNotifications = TRUE)
+                    THEN
+                        /* #10 transition */
+                    a_subscription_state (l_subscription) := e_subscription_normal ||
+                        a_MessageSent := a_MessageSent \/ {l_subscription} ||
+                        a_LifetimeCounter (l_subscription) := a_lifetimeExpCount (l_subscription) || /* reset lifetime counter */
+                        /* TODO ?: return notifications (dequeue) */
+                        StatusCode_service := e_sc_ok ||
+                        async_resp_msg := FALSE ||
+                        subscription := l_subscription ||
+                    notifMsg :(notifMsg : t_notif_msg_i & notifMsg : t_notif_msg) ||
+                    /* a_NotificationAvailable & a_MoreNotifications state may change for subscription */
+                    a_NotificationAvailable, 
+                    a_MoreNotifications 
+                    :(a_NotificationAvailable <: s_subscription &
+                      a_NotificationAvailable - {l_subscription} = a_NotificationAvailable$0 - {l_subscription} &
+                      a_MoreNotifications <: s_subscription &
+                      a_MoreNotifications - {l_subscription} = a_MoreNotifications$0 - {l_subscription}
+                    )
+                    ELSIF a_subscription_state (l_subscription) = e_subscription_late &
+                    (l_PublishingEnabled = FALSE 
+                     or
+                         (l_PublishingEnabled = TRUE &
+                      l_NotificationAvailable = FALSE &
+                      l_MoreNotifications = FALSE)
+                    )
+                    THEN
+                        /* #11 transition */
+                    a_subscription_state (l_subscription) := e_subscription_keepAlive ||
+                        a_MessageSent := a_MessageSent \/ {l_subscription} ||
+                        a_LifetimeCounter (l_subscription) := a_lifetimeExpCount (l_subscription) || /* reset lifetime counter */
+                        /* TODO ?: return notifications (dequeue) */
+                        StatusCode_service := e_sc_ok ||
+                        async_resp_msg := FALSE ||
+                        subscription := l_subscription ||
+                        notifMsg := c_notif_msg_indet /* KeepAlive => no notification */
+                ELSE
+                    StatusCode_service := e_sc_bad_invalid_state ||
+                    async_resp_msg := FALSE ||
+                    subscription := c_subscription_indet ||
+                    notifMsg := c_notif_msg_indet
+                    END
+                END 
+            END
     END
     ;
     
@@ -325,7 +378,7 @@ OPERATIONS
         p_monitoringMode : t_monitoringMode &
         p_clientHandle : t_client_handle_i
     THEN
-        IF t_subscription = s_subscription
+        IF t_monitoredItem = s_monitoredItem
         THEN
             StatusCode_service := e_sc_bad_too_many_monitored_items ||
             monitoredItem := c_monitoredItem_indet
@@ -337,7 +390,9 @@ OPERATIONS
                 CHOICE
                     StatusCode_service := e_sc_ok ||
                     monitoredItem :(monitoredItem : t_monitoredItem_i & monitoredItem : t_monitoredItem) ||
-                    s_monitoredItem := s_monitoredItem \/ {l_monitoredItem}
+                    s_monitoredItem := s_monitoredItem \/ {l_monitoredItem} ||
+                    /* TODO: a notification shall be generated with current value of monitored item */
+                    a_NotificationAvailable := a_NotificationAvailable \/ {p_subscription}
                 OR
                     /* add to queue failure (out of memory) */
                     StatusCode_service := e_sc_bad_too_many_monitored_items ||
@@ -372,6 +427,7 @@ OPERATIONS
             p_publish_resp_msg : t_msg &
             p_notifMsg : t_notif_msg)
         )
+         /* a_publishRequestQueue, a_NotificationAvailable, a_MoreNotifications */
     END
     ;
     
@@ -394,7 +450,7 @@ OPERATIONS
         p_writeValuePointer : t_WriteValuePointer
     THEN
         /* TODO: add to notification queue */
-        skip
+        a_NotificationAvailable := a_NotificationAvailable \/ {p_subscription}
     END
         
     

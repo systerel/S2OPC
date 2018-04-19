@@ -28,10 +28,10 @@ ABSTRACT_VARIABLES
     a_publish_responses
     
 INVARIANT
-    a_publish_responses : t_msg +->> t_publishReqQueue
+    a_publish_responses : t_msg +-> t_publishReqQueue
     
 INITIALISATION
-    a_publish_responses :(a_publish_responses : t_msg +->> t_publishReqQueue)
+    a_publish_responses :(a_publish_responses = {})
 
 OPERATIONS
     
@@ -55,13 +55,7 @@ OPERATIONS
             bres := FALSE
         OR 
             bres := TRUE ||
-            a_publish_responses
-            :(
-                a_publish_responses : t_msg +-> t_publishReqQueue &
-                a_publish_responses |>> {p_queue} = a_publish_responses$0 |>> {p_queue} &
-                {p_resp_msg} <<| a_publish_responses = {p_resp_msg} <<| a_publish_responses$0 &
-                p_resp_msg : dom(a_publish_responses |> {p_queue})
-            )
+            a_publish_responses := a_publish_responses \/ {p_resp_msg |-> p_queue}
         END
     END
     ;
@@ -90,30 +84,34 @@ OPERATIONS
         p_queue : t_publishReqQueue_i &
         p_queue : t_publishReqQueue
     THEN
-        CHOICE
+        IF p_queue : ran(a_publish_responses)
+        THEN
+            ANY l_resp_msg WHERE
+                l_resp_msg : t_msg_i &
+                l_resp_msg : t_msg &
+                l_resp_msg |-> p_queue : a_publish_responses
+            THEN
+                p_continue := TRUE ||
+                    a_publish_responses := a_publish_responses - {l_resp_msg |-> p_queue} ||
+                    p_resp_msg := l_resp_msg ||
+                    p_session, p_req_exp_time, p_req_handle, p_req_ctx
+                :(
+                    p_session : t_session_i &
+                    p_session : t_session &
+                    p_req_exp_time : t_timeref_i &
+                    p_req_exp_time : t_timeref &
+                    p_req_handle : t_server_request_handle_i &
+                    p_req_ctx : t_request_context_i &
+                    p_req_ctx : t_request_context
+                )
+            END
+        ELSE
             p_continue := FALSE ||
             p_session := c_session_indet ||
             p_req_exp_time := c_timeref_indet ||
             p_req_handle :(p_req_handle : t_server_request_handle_i) ||
             p_req_ctx := c_request_context_indet ||
             p_resp_msg := c_msg_indet
-        OR 
-            p_continue := TRUE ||
-            a_publish_responses,
-            p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg
-            :(
-                a_publish_responses : t_msg +-> t_publishReqQueue &
-                a_publish_responses |>> {p_queue} = a_publish_responses$0 |>> {p_queue} &
-                a_publish_responses = {p_resp_msg} <<| a_publish_responses$0 &
-                a_publish_responses \/ {p_resp_msg |-> p_queue} = a_publish_responses$0 &
-                p_session : t_session_i &
-                p_session : t_session &
-                p_req_exp_time : t_timeref_i &
-                p_req_exp_time : t_timeref &
-                p_req_handle : t_server_request_handle_i &
-                p_req_ctx : t_request_context_i &
-                p_req_ctx : t_request_context
-            )
         END
     END
     

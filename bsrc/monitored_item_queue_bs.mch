@@ -29,7 +29,7 @@ INVARIANT
     a_defined_monitored_items : t_monitoredItemQueue <-> t_monitoredItem
     
 INITIALISATION
-    a_defined_monitored_items :(a_defined_monitored_items : t_monitoredItemQueue <-> t_monitoredItem)
+    a_defined_monitored_items :(a_defined_monitored_items = {})
 
 OPERATIONS
     
@@ -62,13 +62,7 @@ OPERATIONS
             bres := FALSE
         OR 
             bres := TRUE ||
-            a_defined_monitored_items
-            :(
-                a_defined_monitored_items : t_monitoredItemQueue <-> t_monitoredItem &
-                {p_queue} <<| a_defined_monitored_items = {p_queue} <<| a_defined_monitored_items$0 &
-                {p_queue} <| a_defined_monitored_items |>> {p_monitoredItem} = {p_queue} <| a_defined_monitored_items$0 |>> {p_monitoredItem}  &
-                p_monitoredItem : ran({p_queue} <| a_defined_monitored_items)
-            )
+            a_defined_monitored_items := a_defined_monitored_items \/ {p_queue |-> p_monitoredItem}
         END
     END
     ;
@@ -108,7 +102,7 @@ OPERATIONS
               p_aid : t_AttributeId &
               p_timestampToReturn : t_TimestampsToReturn &
               p_monitoringMode : t_monitoringMode) &
-            (p_monitoredItem : ran({p_queue} <| a_defined_monitored_items) => 
+            (p_monitoredItem /: ran({p_queue} <| a_defined_monitored_items) => 
               p_bres = FALSE)
         )
     END
@@ -125,13 +119,7 @@ OPERATIONS
             bres := FALSE
         OR 
             bres := TRUE ||
-            a_defined_monitored_items
-            :(
-                a_defined_monitored_items : t_monitoredItemQueue <-> t_monitoredItem &
-                {p_queue} <<| a_defined_monitored_items = {p_queue} <<| a_defined_monitored_items$0 &
-                a_defined_monitored_items - {p_queue |-> p_monitoredItem} = a_defined_monitored_items$0 - {p_queue |-> p_monitoredItem}  &
-                p_monitoredItem /: ran({p_queue} <| a_defined_monitored_items)
-            )
+            a_defined_monitored_items := a_defined_monitored_items - {p_queue |-> p_monitoredItem}
         END
     END
     ;

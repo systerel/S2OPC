@@ -26,10 +26,10 @@ ABSTRACT_VARIABLES
     a_monitored_item_notifications
     
 INVARIANT
-    a_monitored_item_notifications : t_notificationQueue <-> (t_monitoredItem <-> t_WriteValuePointer)
+    a_monitored_item_notifications : t_notificationQueue <-> t_monitoredItem
     
 INITIALISATION
-    a_monitored_item_notifications :(a_monitored_item_notifications : t_notificationQueue <-> (t_monitoredItem <-> t_WriteValuePointer))
+    a_monitored_item_notifications :(a_monitored_item_notifications = {})
 
 OPERATIONS
     
@@ -48,14 +48,7 @@ OPERATIONS
             bres := FALSE
         OR 
             bres := TRUE ||
-            a_monitored_item_notifications
-            :(
-                a_monitored_item_notifications : t_notificationQueue <-> (t_monitoredItem <-> t_WriteValuePointer) &
-                {p_queue} <<| a_monitored_item_notifications = {p_queue} <<| a_monitored_item_notifications$0 &
-                a_monitored_item_notifications - {p_queue |-> {p_monitoredItem |-> p_writeValuePointer}} =
-                a_monitored_item_notifications$0 - {p_queue |-> {p_monitoredItem |-> p_writeValuePointer}} &
-                {p_monitoredItem |-> p_writeValuePointer} : ran({p_queue} <| a_monitored_item_notifications)
-            )
+            a_monitored_item_notifications := a_monitored_item_notifications \/ {p_queue |-> p_monitoredItem}
         END
     END
     ;
@@ -85,23 +78,23 @@ OPERATIONS
         p_queue : t_notificationQueue_i &
         p_queue : t_notificationQueue
     THEN
-        CHOICE
+        IF p_queue : dom(a_monitored_item_notifications)
+        THEN
+            ANY l_monitoredItem WHERE
+                l_monitoredItem : t_monitoredItem_i &
+                l_monitoredItem : t_monitoredItem &
+                l_monitoredItem : a_monitored_item_notifications[{p_queue}]
+            THEN
+                p_continue := TRUE ||
+                a_monitored_item_notifications := a_monitored_item_notifications - {p_queue |-> l_monitoredItem} ||                 
+                p_monitoredItem := l_monitoredItem ||
+                p_writeValuePointer :(p_writeValuePointer : t_WriteValuePointer_i & p_writeValuePointer : t_WriteValuePointer)
+            END
+        ELSE
             p_continue := FALSE ||
             p_monitoredItem := c_monitoredItem_indet ||
             p_writeValuePointer := c_WriteValuePointer_indet
-        OR 
-            p_continue := TRUE ||
-            p_monitoredItem,
-            p_writeValuePointer,
-            a_monitored_item_notifications
-            :(
-                a_monitored_item_notifications : t_notificationQueue <-> (t_monitoredItem <-> t_WriteValuePointer) &
-                a_monitored_item_notifications - {p_queue |-> {p_monitoredItem |-> p_writeValuePointer}} =
-                 a_monitored_item_notifications$0 - {p_queue |-> {p_monitoredItem |-> p_writeValuePointer}} &
-                a_monitored_item_notifications = a_monitored_item_notifications$0 - {p_queue |-> {p_monitoredItem |-> p_writeValuePointer}} &
-                a_monitored_item_notifications \/ {p_queue |-> {p_monitoredItem |-> p_writeValuePointer}} = a_monitored_item_notifications$0
-            )
         END
     END
-    
+
 END
