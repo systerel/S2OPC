@@ -56,6 +56,10 @@ if(WITH_COVERAGE)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
 endif()
 
+SET(ADDSPACEGEN_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/address_space_generation/include")
+SET(ADDSPACEGEN_DIR "${CMAKE_SOURCE_DIR}/address_space_generation/genc" CACHE
+    FILEPATH "Directory where the address spaces files are")
+
 # Re-enable asserts for Release and RelWithDebInfo builds
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
@@ -216,13 +220,12 @@ function(s2opc_unit_test binary_name)
 endfunction()
 
 # Check generated address space for tests
-set(ADDSPACEGEN_DIR "address_space_generation")
 
-add_executable(check_ingopcs_addspace "${ADDSPACEGEN_DIR}/genc/check_ingopcs_addspace.c"
-                                      "${ADDSPACEGEN_DIR}/genc/ingopcs_addspace.c")
+add_executable(check_ingopcs_addspace "${ADDSPACEGEN_DIR}/check_ingopcs_addspace.c"
+                                      "${ADDSPACEGEN_DIR}/ingopcs_addspace.c")
 target_link_libraries(check_ingopcs_addspace PRIVATE)
 target_include_directories(check_ingopcs_addspace PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                          "${ADDSPACEGEN_DIR}/include")
+                                                          "${ADDSPACEGEN_INCLUDE_DIR}")
 
 enable_testing()
 
@@ -251,9 +254,9 @@ add_executable(toolkit_test_server_local_service "tests/services/toolkit_test_se
                                                  "tests/services/testlib_write.c"
                                                  "tests/services/test_results.c"
                                                  "tests/services/testlib_read_response.c"
-                                                 "address_space_generation/genc/ingopcs_addspace.c")
+                                                 "${ADDSPACEGEN_DIR}/ingopcs_addspace.c")
 target_link_libraries(toolkit_test_server_local_service PRIVATE ingopcs)
-target_include_directories(toolkit_test_server_local_service PRIVATE "${ADDSPACEGEN_DIR}/include"
+target_include_directories(toolkit_test_server_local_service PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                              ${INGOPCS_PUBLIC_INCLUDES}
                                                              ${INGOPCS_PRIVATE_INCLUDES})
 s2opc_unit_test(toolkit_test_server_local_service GENERATE_TAP)
@@ -264,9 +267,9 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/testlib_write.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
-                                   "address_space_generation/genc/ingopcs_addspace.c")
+                                   "${ADDSPACEGEN_DIR}/ingopcs_addspace.c")
 target_link_libraries(toolkit_test_client PRIVATE ingopcs)
-target_include_directories(toolkit_test_client PRIVATE "${ADDSPACEGEN_DIR}/include"
+target_include_directories(toolkit_test_client PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                        ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 add_executable(toolkit_test_suite_client "tests/demo/test_suite_client.c"
@@ -279,9 +282,9 @@ target_include_directories(toolkit_test_suite_client PRIVATE ${INGOPCS_PUBLIC_IN
 
 # Server test
 add_executable(toolkit_test_server "tests/services/toolkit_test_server.c"
-                                   "address_space_generation/genc/ingopcs_addspace.c")
+                                   "${ADDSPACEGEN_DIR}/ingopcs_addspace.c")
 target_link_libraries(toolkit_test_server PRIVATE ingopcs)
-target_include_directories(toolkit_test_server PRIVATE "${ADDSPACEGEN_DIR}/include"
+target_include_directories(toolkit_test_server PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                        ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
@@ -294,7 +297,7 @@ add_executable(ingopcs_browse "tests/demo/ingopcs_browse.c"
                               "tests/demo/config.c"
                               )
 target_link_libraries(ingopcs_browse PRIVATE ingopcs)
-target_include_directories(ingopcs_browse PRIVATE "${ADDSPACEGEN_DIR}/include"
+target_include_directories(ingopcs_browse PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                    ${INGOPCS_PUBLIC_INCLUDES}
                                                    ${INGOPCS_PRIVATE_INCLUDES})
 
@@ -303,7 +306,7 @@ add_executable(ingopcs_read "tests/demo/ingopcs_read.c"
                             "tests/demo/config.c"
                             )
 target_link_libraries(ingopcs_read PRIVATE ingopcs)
-target_include_directories(ingopcs_read PRIVATE "${ADDSPACEGEN_DIR}/include"
+target_include_directories(ingopcs_read PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                  ${INGOPCS_PUBLIC_INCLUDES}
                                                  ${INGOPCS_PRIVATE_INCLUDES})
 add_executable(ingopcs_write "tests/demo/ingopcs_write.c"
@@ -311,7 +314,7 @@ add_executable(ingopcs_write "tests/demo/ingopcs_write.c"
                              "tests/demo/config.c"
                              )
 target_link_libraries(ingopcs_write PRIVATE ingopcs)
-target_include_directories(ingopcs_write PRIVATE "${ADDSPACEGEN_DIR}/include"
+target_include_directories(ingopcs_write PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                   ${INGOPCS_PUBLIC_INCLUDES}
                                                   ${INGOPCS_PRIVATE_INCLUDES})
 
@@ -320,7 +323,7 @@ add_executable(ingopcs_discovery "tests/demo/ingopcs_discovery.c"
                                  "tests/demo/config.c"
                                  )
 target_link_libraries(ingopcs_discovery PRIVATE ingopcs)
-target_include_directories(ingopcs_discovery PRIVATE "${ADDSPACEGEN_DIR}/include"
+target_include_directories(ingopcs_discovery PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                       ${INGOPCS_PUBLIC_INCLUDES}
                                                       ${INGOPCS_PRIVATE_INCLUDES})
 
