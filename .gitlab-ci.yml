@@ -186,7 +186,7 @@ coverage-analysis:
     variables:
       - $WITH_COVERAGE
 
-.windows-appveyor:
+windows-appveyor:
   stage: analyses
   script:
     - 'export JOB_ID=$(cat job.txt)'
@@ -194,3 +194,6 @@ coverage-analysis:
     - 'curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''", "environmentVariables": {"JOB_ID": "''$JOB_ID''"}}'' https://ci.appveyor.com/api/builds'
   tags:
     - linux
+  only:
+    variables:
+      - $WINDOWS_TEST
