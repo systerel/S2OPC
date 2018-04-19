@@ -94,6 +94,8 @@ build-win64: &build_win64
     variables:
       - $CROSS_COMPILE
       - $WINDOWS_TEST
+  dependencies:
+    - generation
 
 build-win32:
   <<: *build_win64
