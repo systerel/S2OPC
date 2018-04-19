@@ -215,7 +215,7 @@ OPERATIONS
     THEN
         IF config_idx /: dom(a_config~)
         THEN
-            channel := c_channel_indet
+            channel :(channel : t_channel_i & channel = c_channel_indet)
         ELSE
             channel := a_config~(config_idx)
         END

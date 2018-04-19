@@ -44,13 +44,13 @@ INVARIANT
     a_NonceClient                : t_session       +-> t_Nonce
 
 INITIALISATION
-    a_client_to_activate         := {} ||
-    a_client_to_activate_context := {} ||
-    a_client_token               := {} ||
-    a_server_token               := {} ||
-    a_user                       := {} ||
-    a_NonceServer                := {} ||
-    a_NonceClient                := {}
+    a_client_to_activate         :: {{}} ||
+    a_client_to_activate_context :: {{}} ||
+    a_client_token               :: {{}} ||
+    a_server_token               :: {{}} ||
+    a_user                       :: {{}} ||
+    a_NonceServer                :: {{}} ||
+    a_NonceClient                :: {{}}
 
 OPERATIONS
 

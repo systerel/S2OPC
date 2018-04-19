@@ -257,8 +257,8 @@ OPERATIONS
             req_handle := c_request_handle_indet
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
-            buffer_out :: t_byte_buffer ||
-            req_handle :: t_request_handle
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
         END
     END
     ;
@@ -316,8 +316,8 @@ OPERATIONS
             req_handle := c_request_handle_indet
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
-            buffer_out :: t_byte_buffer ||
-            req_handle :: t_request_handle
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
         END
     END
     ;
@@ -345,9 +345,9 @@ OPERATIONS
             req_handle := c_request_handle_indet
         OR
             ret        := e_sc_ok ||
-            channel    :: s_channel_connected ||
-            buffer_out :: t_byte_buffer ||
-            req_handle :: t_request_handle
+            channel    :(channel : t_channel_i & channel : s_channel_connected) ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
         END
     END
     ;
@@ -377,9 +377,9 @@ OPERATIONS
             req_handle := c_request_handle_indet
         OR
             ret        := e_sc_ok ||
-            channel    :: s_channel_connected ||
-            buffer_out :: t_byte_buffer ||
-            req_handle :: t_request_handle
+            channel    :(channel : t_channel_i & channel : s_channel_connected) ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
         END
     END
     ;
@@ -404,8 +404,8 @@ OPERATIONS
             req_handle := c_request_handle_indet
         OR
             ret        := e_sc_ok ||
-            buffer_out :: t_byte_buffer ||
-            req_handle :: t_request_handle
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
         END
     END
     ;
@@ -596,7 +596,7 @@ OPERATIONS
             msg_typ := c_msg_type_indet
         OR
             bres := TRUE ||
-            msg_typ :: t_msg_type
+            msg_typ :(msg_typ : t_msg_type_i & msg_typ : t_msg_type)
         END
     END
     ;

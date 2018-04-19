@@ -568,7 +568,7 @@ OPERATIONS
         THEN
             l_msg_service_class <-- get_msg_service_class (l_msg_typ);
             ret <-- server_receive_local_service_req  (endpoint_config_idx, l_msg_service_class, l_msg_typ, req_msg, app_context)
-        END        
+        END
     END
     ;
 
