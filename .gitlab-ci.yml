@@ -78,6 +78,7 @@ build-win64: &build_win64
   image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:749abd06fac07c9fbc3e3e4b2dd18ff5e3c974371d1a2094252432ea6fe2d6af  # mingw_build:1.3
   script:
     - *build_command_line
+    - 'echo $CI_JOB_ID > ../job.txt'
   variables: &build_win64_variables
     CMAKE_INSTALL_PREFIX: '../install_win64'
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
@@ -89,6 +90,7 @@ build-win64: &build_win64
     paths:
       - 'bin/'
       - 'install_win64/'
+      - 'job.txt'
     expire_in: '1 month'
   only:
     variables:
@@ -183,3 +185,12 @@ coverage-analysis:
   only:
     variables:
       - $WITH_COVERAGE
+
+.windows-appveyor:
+  stage: analyses
+  script:
+    - 'export JOB_ID=$(cat job.txt)'
+    - 'echo $JOB_ID'
+    - 'curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''", "environmentVariables": {"JOB_ID": "''$JOB_ID''"}}'' https://ci.appveyor.com/api/builds'
+  tags:
+    - linux
