@@ -242,6 +242,7 @@ int main(int argc, char* argv[])
     // Define server address space
     if (SOPC_STATUS_OK == status)
     {
+        assert(SOPC_STATUS_OK == SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG));
         status = SOPC_ToolkitServer_SetAddressSpaceConfig(&addressSpace);
         if (SOPC_STATUS_OK != status)
         {
