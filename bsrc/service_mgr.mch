@@ -434,14 +434,14 @@ OPERATIONS
     END
     ;
 
-    bres, buffer_out, channel <-- server_send_timed_out_publish_request (session, req_handle, req_typ, publish_resp_msg) =
+    bres, buffer_out, channel <-- server_send_timed_out_publish_request (session, req_handle, resp_typ, publish_resp_msg) =
     PRE
         session : t_session_i &
         session : t_session &
         req_handle : t_server_request_handle_i &
         publish_resp_msg : t_msg_i &
         publish_resp_msg : t_msg &
-        req_typ = e_msg_subscription_publish_resp &
+        resp_typ = e_msg_subscription_publish_resp &
         c_msg_in = c_msg_indet &
         c_msg_in_header = c_msg_header_indet &
         c_msg_out = c_msg_indet &
@@ -725,12 +725,21 @@ OPERATIONS
     END
     ;
     
-    server_subscription_publish_timeout (p_subscription) =
+    bsend_msg, req_context, buffer_out, channel <-- server_service_subscription_publish_timeout (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : t_subscription
     THEN
-        skip
+        bsend_msg, req_context, buffer_out, channel
+        :(bsend_msg : BOOL &
+          req_context : t_request_context_i &
+          buffer_out : t_byte_buffer_i &
+          channel : t_channel_i &
+          (bsend_msg = TRUE => 
+            req_context : t_request_context &
+            buffer_out : t_byte_buffer &
+            channel : s_channel_connected)
+        )
     END
 
 END

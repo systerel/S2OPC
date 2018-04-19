@@ -20,7 +20,8 @@ MACHINE
 
 SEES
     constants,
-    message_out_bs
+    message_out_bs,
+    request_handle_bs
     
 ABSTRACT_VARIABLES
 
@@ -34,7 +35,7 @@ INITIALISATION
 
 OPERATIONS
     
-    bres <-- add_publish_request_to_queue (p_queue, p_session, p_req_exp_time, p_req_ctx, p_resp_msg) =
+    bres <-- add_publish_request_to_queue (p_queue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg) =
     PRE
         p_queue : t_publishReqQueue_i &
         p_queue : t_publishReqQueue &
@@ -42,6 +43,7 @@ OPERATIONS
         p_session : t_session &
         p_req_exp_time : t_timeref_i &
         p_req_exp_time : t_timeref &
+        p_req_handle : t_server_request_handle_i &
         p_req_ctx : t_request_context_i &
         p_req_ctx : t_request_context &
         p_resp_msg : t_msg_i &
@@ -80,7 +82,7 @@ OPERATIONS
     END
     ;
 
-    p_continue, p_session, p_req_exp_time, p_req_ctx, p_resp_msg
+    p_continue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg
       <-- continue_pop_iter_monitor_item_notification (p_iterator, p_queue) =
     PRE
         p_iterator : t_notificationQueueIterator_i &
@@ -92,12 +94,13 @@ OPERATIONS
             p_continue := FALSE ||
             p_session := c_session_indet ||
             p_req_exp_time := c_timeref_indet ||
+            p_req_handle :(p_req_handle : t_server_request_handle_i) ||
             p_req_ctx := c_request_context_indet ||
             p_resp_msg := c_msg_indet
         OR 
             p_continue := TRUE ||
             a_publish_responses,
-            p_session, p_req_exp_time, p_req_ctx, p_resp_msg
+            p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg
             :(
                 a_publish_responses : t_msg +-> t_publishReqQueue &
                 a_publish_responses |>> {p_queue} = a_publish_responses$0 |>> {p_queue} &
@@ -107,6 +110,7 @@ OPERATIONS
                 p_session : t_session &
                 p_req_exp_time : t_timeref_i &
                 p_req_exp_time : t_timeref &
+                p_req_handle : t_server_request_handle_i &
                 p_req_ctx : t_request_context_i &
                 p_req_ctx : t_request_context
             )

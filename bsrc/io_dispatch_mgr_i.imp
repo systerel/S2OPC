@@ -755,12 +755,28 @@ OPERATIONS
     
     bres <-- internal_server_subscription_publish_timeout (p_subscription) =
     VAR
-        l_valid_subscription
+        l_valid_subscription,
+        l_bsend_msg,
+        l_req_context,
+        l_buffer_out,
+        l_valid_buffer_out,
+        l_channel,
+        l_connected_channel
     IN
         l_valid_subscription <-- is_valid_subscription (p_subscription);
         IF l_valid_subscription = TRUE
         THEN
-            server_subscription_publish_timeout (p_subscription);
+            l_bsend_msg, l_req_context, l_buffer_out, l_channel <-- server_service_subscription_publish_timeout (p_subscription);
+            IF l_bsend_msg = TRUE
+            THEN
+                l_connected_channel <-- is_connected_channel (l_channel);
+                l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
+                IF l_connected_channel = TRUE &
+                    l_valid_buffer_out = TRUE
+                THEN
+                    send_channel_msg_buffer (l_channel, l_buffer_out, l_req_context)
+                END
+            END;
             bres := TRUE
         ELSE
             bres := FALSE

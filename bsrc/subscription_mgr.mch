@@ -21,7 +21,8 @@ MACHINE
 SEES
     constants,
     message_in_bs,
-    message_out_bs
+    message_out_bs,
+    request_handle_bs
 
 OPERATIONS
     
@@ -53,7 +54,8 @@ OPERATIONS
     END
     ;
     
-    StatusCode_service, async_resp_msg <-- treat_subscription_publish_request (p_session, p_req_header, p_req_msg, p_req_ctx, p_resp_msg) =
+    StatusCode_service, async_resp_msg <-- treat_subscription_publish_request 
+      (p_session, p_req_header, p_req_msg, p_req_handle, p_req_ctx, p_resp_msg) =
     PRE
         p_session : t_session_i &
         p_session : t_session &
@@ -64,6 +66,7 @@ OPERATIONS
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
         a_msg_in_type = e_msg_subscription_publish_req &
+        p_req_handle : t_server_request_handle_i &
         p_req_ctx : t_request_context_i &
         p_req_ctx : t_request_context &
         p_resp_msg : t_msg_i &
@@ -123,12 +126,22 @@ OPERATIONS
     END
     ;
     
-    server_subscription_publish_timeout (p_subscription) =
+    p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context <-- server_subscription_publish_timeout (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : t_subscription
     THEN
-        skip
+        p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context
+        :(p_msg_to_send : BOOL &
+          p_session : t_session_i &
+          p_req_handle : t_server_request_handle_i &      
+          p_req_context : t_request_context_i &
+          p_publish_resp_msg : t_msg_i &
+          (p_msg_to_send = TRUE => 
+            p_session : t_session &
+            p_req_context : t_request_context &
+            p_publish_resp_msg : t_msg)
+        )
     END
     
 END

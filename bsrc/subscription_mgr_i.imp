@@ -25,7 +25,8 @@ SEES
     message_in_bs,
     message_out_bs,
     write_value_pointer_bs,
-    address_space_bs
+    address_space_bs,
+    request_handle_bs
     
 IMPORTS
     subscription_core,
@@ -34,10 +35,34 @@ IMPORTS
     msg_subscription_create_monitored_item
     
 PROMOTES
-    is_valid_subscription,
-    server_subscription_publish_timeout
+    is_valid_subscription
+    
+LOCAL_OPERATIONS
+    
+    fill_publish_response_msg (p_resp_msg, p_subscription, p_notifMsg) =
+    PRE
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_subscription : t_subscription_i & p_subscription : t_subscription &
+        p_notifMsg : t_notif_msg_i & p_notifMsg : t_notif_msg
+    THEN
+        skip
+    END
     
 OPERATIONS
+    
+    /* LOCAL OPERATIONS */
+    fill_publish_response_msg (p_resp_msg, p_subscription, p_notifMsg) =
+    BEGIN
+        set_msg_publish_resp_subscription (p_resp_msg, p_subscription);
+        /* TODO: fill the availableSeqNum of message: */
+        /* - allocate availableSequenceNumbers
+        - iter on seq nums based on nb_avail_seq_nums */
+        set_msg_publish_resp_notificationMsg (p_resp_msg, p_notifMsg)
+    END
+    ;
+    
+    /* END OF LOCAL OPERATIONS */
     
     StatusCode_service <-- treat_create_subscription_request (p_session, p_req_msg, p_resp_msg) =
     VAR
@@ -89,7 +114,8 @@ OPERATIONS
     END
     ;
     
-    StatusCode_service, async_resp_msg <-- treat_subscription_publish_request (p_session, p_req_header, p_req_msg, p_req_ctx, p_resp_msg) =
+    StatusCode_service, async_resp_msg 
+      <-- treat_subscription_publish_request (p_session, p_req_header, p_req_msg, p_req_handle, p_req_ctx, p_resp_msg) =
     VAR
         l_session_has_subscription,
         l_req_exp_time,
@@ -111,17 +137,12 @@ OPERATIONS
             <=> fill_read_response */
             
             StatusCode_service, async_resp_msg, l_subscription, l_notifMsg 
-              <-- receive_publish_request (p_session, l_req_exp_time, p_req_ctx, p_resp_msg);
+              <-- receive_publish_request (p_session, l_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg);
 
             IF StatusCode_service = e_sc_ok &
                 async_resp_msg = FALSE
             THEN
-                /* TODO => SET ALL THOSE ACTIONS IN LOCAL OP: reuse case on SM transition */
-                set_msg_publish_resp_subscription (p_resp_msg, l_subscription);
-                /* TODO: fill the availableSeqNum of message: */
-                /* - allocate availableSequenceNumbers
-                   - iter on seq nums based on nb_avail_seq_nums */
-                set_msg_publish_resp_notificationMsg (p_resp_msg, l_notifMsg)
+                fill_publish_response_msg (p_resp_msg, l_subscription, l_notifMsg)
             END
         ELSE
             StatusCode_service := e_sc_bad_no_subscription
@@ -184,9 +205,23 @@ OPERATIONS
             l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (l_node)
             /* TODO: iterate on each monitoredItem, for each:
             - check regarding MI properties / aid / old value / new value if notification necessary
-            - add notification to subscription
+            - add notification to subscription (server_subscription_add_notification)
             */
         END
     END
-
+    ;
+    
+    p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context
+      <-- server_subscription_publish_timeout (p_subscription) =
+    VAR
+        l_notifMsg
+    IN
+        p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, l_notifMsg
+          <-- server_subscription_core_publish_timeout (p_subscription);
+        IF p_msg_to_send = TRUE
+        THEN
+            fill_publish_response_msg (p_publish_resp_msg, p_subscription, l_notifMsg)
+        END
+    END
+    
 END

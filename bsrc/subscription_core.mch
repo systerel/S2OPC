@@ -20,7 +20,8 @@ MACHINE
 
 SEES
     constants,
-    message_out_bs
+    message_out_bs,
+    request_handle_bs
 
 DEFINITIONS
     d_variables ==
@@ -251,12 +252,13 @@ OPERATIONS
     ;
     
     StatusCode_service, async_resp_msg, subscription, notifMsg
-      <-- receive_publish_request (p_session, p_req_exp_time, p_req_ctx, p_resp_msg) =
+      <-- receive_publish_request (p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg) =
     PRE
         p_session : t_session_i &
         p_session : t_session &
         p_req_exp_time : t_timeref_i &
         p_req_exp_time : t_timeref &
+        p_req_handle : t_server_request_handle_i &
         p_req_ctx : t_request_context_i &
         p_req_ctx : t_request_context &
         p_resp_msg : t_msg_i &
@@ -346,13 +348,30 @@ OPERATIONS
     END
     ;
     
-    server_subscription_publish_timeout (p_subscription) =
+    p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_notifMsg
+      <-- server_subscription_core_publish_timeout (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription
     THEN
         /* State table evaluation case (Publish Timer Expires: #6, #7, #8, #9, #12, #14, #15, #16, #17, #27) */
-        skip
+        
+        /* CAUTION: p_session shall be activated get_session_state_or_closed(p_session) = userActivated (i.e. channel is connected)
+        to could send a message => some transitions cannot be done without it !
+        */
+        p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_notifMsg
+        :(p_msg_to_send : BOOL &
+          p_session : t_session_i &
+          p_req_handle : t_server_request_handle_i &      
+          p_req_context : t_request_context_i &
+          p_publish_resp_msg : t_msg_i &
+          p_notifMsg : t_notif_msg_i &
+          (p_msg_to_send = TRUE => 
+            p_session : t_session &
+            p_req_context : t_request_context &
+            p_publish_resp_msg : t_msg &
+            p_notifMsg : t_notif_msg)
+        )
     END
     ;
     
@@ -363,5 +382,20 @@ OPERATIONS
     THEN
         monitoredItemQueue :( monitoredItemQueue : t_monitoredItemQueue_i & monitoredItemQueue = a_nodeToMonitoredItemQueue (p_node))
     END
+    ;
+    
+    server_subscription_add_notification (p_subscription, p_monitoredItem, p_writeValuePointer) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
+        p_monitoredItem : t_monitoredItem_i &
+        p_monitoredItem : t_monitoredItem &
+        p_writeValuePointer : t_WriteValuePointer_i &
+        p_writeValuePointer : t_WriteValuePointer
+    THEN
+        /* TODO: add to notification queue */
+        skip
+    END
+        
     
 END

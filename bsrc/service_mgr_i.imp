@@ -74,8 +74,7 @@ PROMOTES
     
     /* subscription_mgr */
     is_valid_subscription,
-    server_subscription_data_changed,
-    server_subscription_publish_timeout
+    server_subscription_data_changed
 
 LOCAL_OPERATIONS
 
@@ -163,13 +162,14 @@ LOCAL_OPERATIONS
     END
     ;
     
-    StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_ctx, req_header, req_msg, resp_msg) =
+    StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
     PRE
         session : t_session_i &
         session : t_session &
         req_typ : t_msg_type_i &
         req_typ = a_msg_in_type &
         a_msg_in_type : s_service_on_session_reqs &
+        req_handle : t_server_request_handle_i &
         req_ctx : t_request_context_i &
         req_ctx : t_request_context &
         req_header : t_msg_header_i &
@@ -455,7 +455,7 @@ OPERATIONS
     END
     ;
     
-    StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_ctx, req_header, req_msg, resp_msg) =
+    StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
     VAR
         l_bret
     IN
@@ -485,7 +485,8 @@ OPERATIONS
             OR e_msg_subscription_create_req THEN
                 StatusCode_service <-- treat_create_subscription_request (session, req_msg, resp_msg)
             OR e_msg_subscription_publish_req THEN
-                StatusCode_service, async_resp_msg <-- treat_subscription_publish_request (session, req_header, req_msg, req_ctx, resp_msg)
+                StatusCode_service, async_resp_msg 
+                  <-- treat_subscription_publish_request (session, req_header, req_msg, req_handle, req_ctx, resp_msg)
             OR e_msg_monitored_items_create_req THEN
                 StatusCode_service <-- treat_subscription_create_monitored_items_req (session, req_msg, resp_msg)
             ELSE
@@ -752,7 +753,13 @@ OPERATIONS
                     THEN
                         // Call local operation to dispatch the service request on right service
                             l_ret, l_async_resp 
-                              <-- treat_session_service_req (l_session, req_typ, req_context, l_req_msg_header, l_req_msg, l_resp_msg);
+                              <-- treat_session_service_req (l_session, 
+                                                             req_typ, 
+                                                             l_request_handle, 
+                                                             req_context, 
+                                                             l_req_msg_header, 
+                                                             l_req_msg, 
+                                                             l_resp_msg);
 
                         // TODO: next operation not necessary ?
                         l_is_valid_resp, l_ret2, l_session_channel 
@@ -977,7 +984,59 @@ OPERATIONS
         dealloc_msg_in_buffer (msg_buffer)
     END
     ;
-
+    
+    bsend_msg, req_context, buffer_out, channel <-- server_service_subscription_publish_timeout (p_subscription) =
+    VAR
+        l_msg_to_send, 
+        l_session, 
+        l_publish_resp_msg, 
+        l_req_handle, 
+        l_req_context,
+        l_resp_typ,
+        l_is_valid_resp,
+        l_is_valid_header,
+        l_ret,
+        l_channel,
+        l_resp_msg_header,
+        l_buffer_out,
+        l_valid_buffer
+    IN
+        bsend_msg := FALSE;
+        req_context := c_request_context_indet;
+        buffer_out := c_byte_buffer_indet;
+        channel := c_channel_indet;
+        
+        l_msg_to_send, l_session, l_publish_resp_msg, l_req_handle, l_req_context <-- server_subscription_publish_timeout (p_subscription);
+        
+        /* Set provided message as output message to could be encoded and deallocated*/
+        bless_msg_out (l_publish_resp_msg);
+        l_resp_typ <-- get_msg_out_type (l_publish_resp_msg);
+        l_is_valid_resp, l_ret, l_channel <-- server_validate_session_service_resp (l_session);
+        IF l_is_valid_resp = TRUE &
+            l_resp_typ = e_msg_subscription_publish_resp
+        THEN
+            l_resp_msg_header <-- alloc_msg_header;
+            l_is_valid_header <-- is_valid_msg_out_header (l_resp_msg_header);
+            IF l_is_valid_header = TRUE
+            THEN
+                server_write_msg_out_header_req_handle (l_resp_msg_header, l_req_handle);
+                write_msg_resp_header_service_status (l_resp_msg_header, e_sc_bad_timeout);
+                /* Response message encoded */
+                l_buffer_out <-- encode_msg (l_resp_typ, l_resp_msg_header, l_publish_resp_msg);
+                dealloc_msg_header_out (l_resp_msg_header);
+                l_valid_buffer <-- is_valid_buffer_out (l_buffer_out);
+                IF l_valid_buffer = TRUE
+                THEN
+                    buffer_out := l_buffer_out;
+                    channel := l_channel;
+                    bsend_msg := TRUE
+                END
+            END
+        END;
+        dealloc_msg_out (l_publish_resp_msg)
+    END
+    ;
+    
     /* SERVER local services */
 
     ret <-- server_receive_local_service_req (endpoint_config_idx, req_class, req_typ, req_msg, app_context) =
@@ -1443,8 +1502,8 @@ OPERATIONS
         END
     END
     ;
-   
-    bres, buffer_out, channel <-- server_send_timed_out_publish_request (session, req_handle, req_typ, publish_resp_msg) =
+
+    bres, buffer_out, channel <-- server_send_timed_out_publish_request (session, req_handle, resp_typ, publish_resp_msg) =
     VAR
         l_is_valid_resp,
         l_is_valid_header,
@@ -1469,7 +1528,7 @@ OPERATIONS
                 server_write_msg_out_header_req_handle (l_resp_msg_header, req_handle);
                 write_msg_resp_header_service_status (l_resp_msg_header, e_sc_bad_timeout);
                 /* Response message encoded */
-                l_buffer_out <-- encode_msg (req_typ, l_resp_msg_header, publish_resp_msg);
+                l_buffer_out <-- encode_msg (resp_typ, l_resp_msg_header, publish_resp_msg);
                 dealloc_msg_header_out (l_resp_msg_header);
                 l_valid_buffer <-- is_valid_buffer_out (l_buffer_out);
                 IF l_valid_buffer = TRUE
