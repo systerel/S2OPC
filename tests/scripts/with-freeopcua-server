@@ -42,7 +42,7 @@ if __name__ == '__main__':
     validation_test_bin = os.path.join(validation_tests_dir, cmd[0])
 
     print('Starting server')
-    server_process = subprocess.Popen([test_server_bin, '25000'], cwd=validation_tests_dir, shell=True)
+    server_process = subprocess.Popen([sys.executable, test_server_bin, '25000'], cwd=validation_tests_dir)
 
     if not wait_server.wait_server(wait_server.DEFAULT_URL, wait_server.TIMEOUT):
         print('Timeout for starting server')
