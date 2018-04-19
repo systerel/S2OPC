@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2018 Systerel and others.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import argparse
+import shutil
+
+HEADER_FILENAME = 'address_space_header.xml.part'
+FOOTER_FILENAME = 'address_space_footer.xml.part'
+
+folder_template_header = '''
+  <UAObject NodeId="ns=42;s=BenchFolder" BrowseName="Bench" SymbolicName="BenchFolder">
+    <DisplayName>Bench</DisplayName>
+    <Description>Folder holding all the benchmark objects.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+'''
+
+folder_template_item = '''<Reference ReferenceType="Organizes">{0}</Reference>\n'''
+
+folder_template_footer = '''
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+'''
+
+variable_template = '''
+  <UAVariable BrowseName="{browse_name}" DataType="Boolean" NodeId="{node_id}" ParentNodeId="ns=42;s=BenchFolder">
+    <DisplayName>{display_name}</DisplayName>
+    <Description>NoName</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=42;s=BenchFolder</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Boolean>false</uax:Boolean>
+    </Value>
+  </UAVariable>
+'''
+
+
+def generate_address_space_xml(out, size):
+    with open(HEADER_FILENAME) as header_fd:
+        shutil.copyfileobj(header_fd, out)
+
+    out.write(folder_template_header)
+
+    for i in range(0, size):
+        out.write(folder_template_item.format('ns=42;s=Objects.%d' % i))
+
+    out.write(folder_template_footer)
+
+    for i in range(0, size):
+        object_data = {
+            'browse_name': 'OBJ_%d' % i,
+            'node_id': 'ns=42;s=Objects.%d' % i,
+            'display_name': 'Object_%d' % i
+        }
+
+        out.write(variable_template.format(**object_data))
+
+    with open(FOOTER_FILENAME) as footer_fd:
+        shutil.copyfileobj(footer_fd, out)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Generate an address space of a given size')
+    parser.add_argument('size', metavar='SIZE', type=int,
+                        help='Number of objects to put in the address space')
+    parser.add_argument('out', metavar='OUT_XML', type=str,
+                        help='Name of the output XML file')
+
+    args = parser.parse_args()
+
+    with open(args.out, 'w') as fd:
+        generate_address_space_xml(fd, args.size)
