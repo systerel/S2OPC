@@ -54,13 +54,13 @@ INITIALISATION
 
 OPERATIONS
 
-    delete_session_token(p_session) = /* PROOF to delete */
+    delete_session_token(p_session) =
     PRE
         p_session : t_session_i &
         p_session : t_session
     THEN
-        a_user         := {p_session} <<| a_user         ||
-        a_server_token := a_server_token |>> {p_session} ||
+        a_user := {p_session} <<| a_user                 || /* If session had a user, remove this relation */
+        a_server_token := a_server_token |>> {p_session} || /* If session had token, remove this relation */
         a_client_token := {p_session} <<| a_client_token
     END
     ;
@@ -159,9 +159,7 @@ OPERATIONS
         state     : t_sessionState &
         is_client : BOOL
     THEN
-        a_user := {session} <<| a_user                 || /* If session had a user, remove this relation */
-        a_server_token := a_server_token |>> {session} || /* If session had token, remove this relation */
-        a_client_token := {session} <<| a_client_token
+        skip /* Generates events to application on session state */
     END
     ;
 
@@ -258,6 +256,17 @@ OPERATIONS
              =>
              signature = c_SignatureData_indet)
         )
+    END
+    ;
+    
+    clear_Signature(p_session, p_signature) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session   &
+        p_signature : t_SignatureData_i &
+        p_signature : t_SignatureData
+    THEN
+        skip
     END
     ;
     

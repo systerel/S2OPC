@@ -130,17 +130,6 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
             }
         }
     }
-    if (session_core_bs__state == constants__e_session_closed)
-    {
-        if (constants__c_session_indet != session_core_bs__session)
-        {
-            SessionData* pSession = &sessionDataArray[session_core_bs__session];
-            SOPC_NodeId_Clear(&pSession->sessionToken);
-            SOPC_ByteString_Clear(&pSession->nonceServer);
-            SOPC_ByteString_Clear(&pSession->nonceClient);
-            OpcUa_SignatureData_Clear(&pSession->signatureData);
-        }
-    }
 }
 
 void session_core_bs__server_get_session_from_token(const constants__t_session_token_i session_core_bs__session_token,
@@ -247,8 +236,7 @@ void session_core_bs__prepare_close_session(const constants__t_session_i session
 
 void session_core_bs__delete_session_token(const constants__t_session_i session_core_bs__p_session)
 {
-    // TODO: clear session token
-    (void) session_core_bs__p_session;
+    SOPC_NodeId_Clear(&sessionDataArray[session_core_bs__p_session].sessionToken);
 }
 
 void session_core_bs__delete_session_application_context(const constants__t_session_i session_core_bs__p_session)
@@ -422,6 +410,14 @@ void session_core_bs__server_create_session_req_do_crypto(
     }
 }
 
+void session_core_bs__clear_Signature(const constants__t_session_i session_core_bs__p_session,
+                                      const constants__t_SignatureData_i session_core_bs__p_signature)
+{
+    // Check same signature since not proved by model
+    assert(session_core_bs__p_signature == &sessionDataArray[session_core_bs__p_session].signatureData);
+    OpcUa_SignatureData_Clear(&sessionDataArray[session_core_bs__p_session].signatureData);
+}
+
 void session_core_bs__client_activate_session_req_do_crypto(
     const constants__t_session_i session_core_bs__session,
     const constants__t_channel_config_idx_i session_core_bs__channel_config_idx,
@@ -569,6 +565,11 @@ void session_core_bs__get_NonceServer(const constants__t_session_i session_core_
     }
 }
 
+void session_core_bs__remove_NonceServer(const constants__t_session_i session_core_bs__p_session)
+{
+    SOPC_ByteString_Clear(&sessionDataArray[session_core_bs__p_session].nonceServer);
+}
+
 void session_core_bs__client_create_session_req_do_crypto(
     const constants__t_session_i session_core_bs__p_session,
     const constants__t_channel_i session_core_bs__p_channel,
@@ -644,10 +645,7 @@ void session_core_bs__get_NonceClient(const constants__t_session_i session_core_
 
 void session_core_bs__drop_NonceClient(const constants__t_session_i session_core_bs__p_session)
 {
-    if (constants__c_session_indet != session_core_bs__p_session)
-    {
-        SOPC_ByteString_Clear(&(sessionDataArray[session_core_bs__p_session].nonceClient));
-    }
+    SOPC_ByteString_Clear(&sessionDataArray[session_core_bs__p_session].nonceClient);
 }
 
 void session_core_bs__client_create_session_check_crypto(

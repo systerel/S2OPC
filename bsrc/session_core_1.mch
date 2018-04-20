@@ -461,6 +461,17 @@ OPERATIONS
     END
     ;
     
+    clear_Signature(p_session, p_signature) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session   &
+        p_signature : t_SignatureData_i &
+        p_signature : t_SignatureData
+    THEN
+        skip
+    END
+    ;
+    
     nonce <-- get_NonceServer(p_session) =
     PRE
         p_session : t_session_i &

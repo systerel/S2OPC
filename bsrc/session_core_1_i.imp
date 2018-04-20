@@ -53,6 +53,7 @@ PROMOTES
     get_session_user,
     server_create_session_req_do_crypto,
     client_activate_session_req_do_crypto,
+    clear_Signature,    
     get_NonceServer,
     client_create_session_req_do_crypto,
     get_NonceClient,
@@ -163,6 +164,8 @@ OPERATIONS
         // a_channel
         l_prec_state <-- get_session_state(session);
         prepare_close_session(session, l_prec_state, is_client);
+        
+        delete_session_token(session);
         // a_user
         // a_server_token
         // a_client_token
