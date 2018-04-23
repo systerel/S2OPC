@@ -1503,7 +1503,7 @@ OPERATIONS
     END
     ;
 
-    bres, buffer_out, channel <-- server_send_timed_out_publish_request (session, req_handle, resp_typ, publish_resp_msg) =
+    bres, buffer_out, channel <-- server_send_timed_out_publish_request (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
     VAR
         l_is_valid_resp,
         l_is_valid_header,
@@ -1526,7 +1526,7 @@ OPERATIONS
             IF l_is_valid_header = TRUE
             THEN
                 server_write_msg_out_header_req_handle (l_resp_msg_header, req_handle);
-                write_msg_resp_header_service_status (l_resp_msg_header, e_sc_bad_timeout);
+                write_msg_resp_header_service_status (l_resp_msg_header, statusCode);
                 /* Response message encoded */
                 l_buffer_out <-- encode_msg (resp_typ, l_resp_msg_header, publish_resp_msg);
                 dealloc_msg_header_out (l_resp_msg_header);

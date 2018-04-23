@@ -219,13 +219,26 @@ OPERATIONS
     p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context
       <-- server_subscription_publish_timeout (p_subscription) =
     VAR
+        l_closeSubscription,
         l_notifMsg
     IN
-        p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, l_notifMsg
-          <-- server_subscription_core_publish_timeout (p_subscription);
-        IF p_msg_to_send = TRUE
+        l_closeSubscription, p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, l_notifMsg
+          <-- server_subscription_core_publish_timeout_check_lifetime (p_subscription);
+        IF l_closeSubscription = FALSE
         THEN
-            fill_publish_response_msg (p_publish_resp_msg, p_subscription, l_notifMsg)
+            p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, l_notifMsg
+              <-- server_subscription_core_publish_timeout (p_subscription);
+            IF p_msg_to_send = TRUE
+            THEN
+                fill_publish_response_msg (p_publish_resp_msg, p_subscription, l_notifMsg)
+            END
+        ELSE
+            delete_subscription (p_subscription);
+            IF p_msg_to_send = TRUE /* Seems to be impossible: see server_subscription_core_publish_timeout_check_lifetime */
+            THEN
+                /* Fill IssueStateChangedNotification message */
+                fill_publish_response_msg (p_publish_resp_msg, p_subscription, l_notifMsg)
+            END
         END
     END
     

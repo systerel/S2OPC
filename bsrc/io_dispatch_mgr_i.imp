@@ -783,7 +783,7 @@ OPERATIONS
         END
     END;
     
-    bres <-- internal_server_send_timed_out_publish_request (p_session, p_req_handle, p_req_context, p_publish_resp_msg) =
+    bres <-- internal_server_send_bad_publish_response (p_session, p_req_handle, p_req_context, p_publish_resp_msg, p_statusCode) =
     VAR
         l_valid_session,
         l_valid_msg,
@@ -798,9 +798,10 @@ OPERATIONS
         l_valid_msg, l_msg_typ <-- is_valid_app_msg_out (p_publish_resp_msg);
         l_valid_req_context <-- is_valid_request_context (p_req_context);
         IF l_valid_session = TRUE & l_valid_msg = TRUE & l_msg_typ = e_msg_subscription_publish_resp & 
-            l_valid_req_context = TRUE
+            l_valid_req_context = TRUE & p_statusCode /= c_StatusCode_indet & p_statusCode /= e_sc_ok
         THEN
-            bres, l_buffer_out, l_channel <-- server_send_timed_out_publish_request (p_session, p_req_handle, l_msg_typ, p_publish_resp_msg);
+            bres, l_buffer_out, l_channel
+              <-- server_send_timed_out_publish_request (p_session, p_req_handle, p_statusCode, l_msg_typ, p_publish_resp_msg);
             IF bres = TRUE
             THEN
                 l_connected_channel <-- is_connected_channel (l_channel);
@@ -817,13 +818,6 @@ OPERATIONS
     END
     ;
     
-    bres <-- internal_client_publish_request_timeout (p_session) =
-    BEGIN
-        /* TODO: only allocate a publish request and send it / check if keep alive necessary ? */
-        bres := FALSE
-    END
-    ;
-
     bres <-- close_all_active_connections =
     BEGIN
         bres <-- close_all_channel

@@ -327,21 +327,13 @@ OPERATIONS
         bres :: BOOL
     END;
     
-    bres <-- internal_server_send_timed_out_publish_request (p_session, p_req_handle, p_req_context, p_publish_resp_msg) =
+    bres <-- internal_server_send_bad_publish_response (p_session, p_req_handle, p_req_context, p_publish_resp_msg, p_statusCode) =
     PRE
         p_session : t_session_i &
         p_req_handle : t_server_request_handle_i &
         p_req_context : t_request_context_i &
-        p_publish_resp_msg : t_msg_i
-    THEN
-        bres :: BOOL
-    END
-    ;
-    
-    /* called when a "keep alive" publish request shall be sent */
-    bres <-- internal_client_publish_request_timeout (p_session) =
-    PRE
-        p_session : t_session_i
+        p_publish_resp_msg : t_msg_i &
+        p_statusCode : t_StatusCode_i
     THEN
         bres :: BOOL
     END

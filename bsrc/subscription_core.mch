@@ -140,6 +140,10 @@ DEFINITIONS
     d_publish_timeout_notif_msg_sent ==
     a_MessageSent := a_MessageSent \/ {p_subscription} ||
     p_msg_to_send := TRUE ||
+    a_SeqNum
+    :(a_SeqNum : s_subscription --> t_sub_seq_num_i &
+      {p_subscription} <<| a_SeqNum = {p_subscription} <<| a_SeqNum$0 &
+      a_SeqNum (p_subscription) /= a_SeqNum$0 (p_subscription)) ||
     p_session, p_req_handle, p_req_context, p_notifMsg
     :(p_session : t_session_i & p_session : t_session &
         p_req_handle : t_server_request_handle_i &
@@ -155,6 +159,16 @@ DEFINITIONS
         p_req_handle : t_server_request_handle_i &
         p_req_context : t_request_context_i & p_req_context : t_request_context &
         p_notifMsg = c_notif_msg_indet)
+    ;
+    
+    d_publish_timeout_state_changed_msg_sent ==
+    a_MessageSent := a_MessageSent \/ {p_subscription} ||
+    p_msg_to_send := TRUE ||
+    p_session, p_req_handle, p_req_context, p_notifMsg
+    :(p_session : t_session_i & p_session : t_session &
+        p_req_handle : t_request_handle_i & p_req_handle : s_request_handle & 
+        p_req_context : t_request_context_i & p_req_context : t_request_context &
+        p_notifMsg : t_notif_msg_i & p_notifMsg : t_notif_msg)
     
 ABSTRACT_VARIABLES
     d_variables
@@ -320,6 +334,58 @@ OPERATIONS
     END
     ;
     
+    delete_subscription (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription
+    THEN
+        s_subscription := s_subscription - {p_subscription} ||
+        
+        a_session := {p_subscription} <<| a_session ||
+        a_publishInterval := {p_subscription} <<| a_publishInterval ||
+        a_lifetimeExpCount := {p_subscription} <<| a_lifetimeExpCount  ||
+        a_keepAliveExpCount := {p_subscription} <<| a_keepAliveExpCount ||
+        a_maxNotifsPerPublish := {p_subscription} <<| a_maxNotifsPerPublish ||
+        
+        a_subscription_state := {p_subscription} <<| a_subscription_state ||
+        a_LatePublishRequest := a_LatePublishRequest - {p_subscription} ||
+        a_LifetimeCounter := {p_subscription} <<| a_LifetimeCounter ||
+        a_KeepAliveCounter := {p_subscription} <<| a_KeepAliveCounter ||
+        a_MessageSent := a_MessageSent - {p_subscription}               ||
+        a_PublishingEnabled := a_PublishingEnabled - {p_subscription}   ||
+        a_SeqNum := {p_subscription} <<| a_SeqNum ||
+        
+        /* Queues emptied : publish responses should be sent if remaining */
+        a_publish_responses := a_publish_responses |>> {a_publishRequestQueue (p_subscription)} ||
+        a_monitored_item_notifications := {a_pendingNotificationQueue (p_subscription)} <<| a_monitored_item_notifications ||
+        a_defined_monitored_items := {a_monitoredItemQueue (p_subscription)} <<| a_defined_monitored_items ||
+        
+        /* Queues deleted */
+        a_pendingNotificationQueue
+        :(
+            a_pendingNotificationQueue : s_subscription --> t_notificationQueue &
+            {p_subscription} <<| a_pendingNotificationQueue = {p_subscription} <<| a_pendingNotificationQueue$0 &
+            p_subscription /: dom(a_pendingNotificationQueue)
+        ) ||
+        a_publishRequestQueue
+        :(
+            a_publishRequestQueue : s_subscription --> t_publishReqQueue &
+            {p_subscription} <<| a_publishRequestQueue = {p_subscription} <<| a_publishRequestQueue$0 &
+            p_subscription /: dom(a_publishRequestQueue)
+        ) ||
+        
+        /* Remove monitoredItems */
+        s_monitoredItem := s_monitoredItem - a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}] ||
+        /* TODO: For each queue in a_nodeToMonitoredItemQueue, remove monitored items: a_monitoredItemQueue (p_subscription) ||*/
+        a_monitoredItemQueue
+        :(
+            a_monitoredItemQueue : s_subscription --> t_monitoredItemQueue &
+            {p_subscription} <<| a_monitoredItemQueue = {p_subscription} <<| a_monitoredItemQueue$0 &
+            p_subscription /: dom(a_monitoredItemQueue)
+        )
+    END
+    ;
+    
     StatusCode_service, async_resp_msg, subscription, notifMsg
       <-- receive_publish_request (p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg) =
     PRE
@@ -479,13 +545,51 @@ OPERATIONS
     END
     ;
     
+    /* Transition #27 shall be evaluated prior to other possible transitions since lifeTimeCounter--
+       never done in other transitions
+    */
+    p_close_sub, p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_notifMsg
+      <-- server_subscription_core_publish_timeout_check_lifetime (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription
+    THEN
+        /* #27 transition */
+        LET l_PublishingReqQueued BE
+            l_PublishingReqQueued = bool (a_publish_responses~[{a_publishRequestQueue (p_subscription)}] /= {})
+        IN
+            IF l_PublishingReqQueued = FALSE
+            THEN
+                IF a_LifetimeCounter (p_subscription) > 1
+                THEN
+                    /* Decrements lifetime counter */
+                    a_LifetimeCounter (p_subscription) := a_LifetimeCounter (p_subscription) - 1 ||
+                    p_close_sub := FALSE ||
+                    d_publish_timeout_no_msg_sent
+                ELSE
+                    /* Lifetime counter expired => send issueStateChanged and close subscription */
+                    a_LifetimeCounter (p_subscription) := 0 ||
+                    /* How to send a status state changed as stated in OpcUa part 4 if no publish request available ?*/
+                    /*d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
+                     d_publish_timeout_state_changed_msg_sent */
+                    p_close_sub := TRUE ||
+                    d_publish_timeout_no_msg_sent
+                END
+            ELSE
+                p_close_sub := FALSE ||
+                d_publish_timeout_no_msg_sent
+            END
+        END
+    END
+    ;
+        
     p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_notifMsg
       <-- server_subscription_core_publish_timeout (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription
     THEN
-        /* State table evaluation case (Publish Timer Expires: #6, #7, #8, #9, #12, #14, #15, #16, #17, #27) */
+        /* State table evaluation case (Publish Timer Expires: #6, #7, #8, #9, #12, #14, #15, #16, #17 (+ #27 => see previous operation)) */
         LET l_PublishingEnabled, l_NotificationAvailable, l_PublishingReqQueued, l_MessageSent BE
             l_PublishingEnabled = bool (p_subscription : a_PublishingEnabled) &
             l_NotificationAvailable = bool (a_monitored_item_notifications [{a_pendingNotificationQueue(p_subscription)}] /= {}) &
@@ -614,8 +718,6 @@ OPERATIONS
                 a_subscription_state (p_subscription) := e_subscription_late ||
                 d_publish_timeout_no_msg_sent
                 
-            /* TODO: #27 transition */
-            
             ELSE
                 d_publish_timeout_no_msg_sent
             END
