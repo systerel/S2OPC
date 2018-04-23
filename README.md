@@ -46,7 +46,7 @@ Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
   * CMake (tested with CMake version >= 2.8.12.2)
   * make (tested with GNU Make version >= 3.81)
   * mbedtls (>= 2.7.0): https://tls.mbed.org/
-  * check (>= 0.10): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=no)
+  * check (>= 0.11): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=no)
 - To build the Toolkit library and tests with default configuration on current stable release:
 ```
   git checkout INGOPCS_Toolkit_0.5.0
