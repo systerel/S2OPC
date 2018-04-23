@@ -48,7 +48,7 @@ LOCAL_OPERATIONS
     THEN
         skip
     END
-    
+
 OPERATIONS
     
     /* LOCAL OPERATIONS */
@@ -216,28 +216,71 @@ OPERATIONS
     END
     ;
     
-    p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context
-      <-- server_subscription_publish_timeout (p_subscription) =
+    server_subscription_publish_timeout (p_subscription) =
     VAR
         l_closeSubscription,
-        l_notifMsg
+        l_msg_to_send,
+        l_session,
+        l_publish_resp_msg,
+        l_req_handle,
+        l_req_context,
+        l_notifMsg,
+        l_moreNotifs,
+        l_morePubReqs
     IN
-        l_closeSubscription, p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, l_notifMsg
+        l_closeSubscription, l_msg_to_send, l_session, l_publish_resp_msg, l_req_handle, l_req_context, l_notifMsg
           <-- server_subscription_core_publish_timeout_check_lifetime (p_subscription);
         IF l_closeSubscription = FALSE
         THEN
-            p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, l_notifMsg
+            l_msg_to_send, l_session, l_publish_resp_msg, l_req_handle, l_req_context, l_notifMsg, l_moreNotifs, l_morePubReqs
               <-- server_subscription_core_publish_timeout (p_subscription);
-            IF p_msg_to_send = TRUE
+            IF l_msg_to_send = TRUE
             THEN
-                fill_publish_response_msg (p_publish_resp_msg, p_subscription, l_notifMsg)
+                fill_publish_response_msg (l_publish_resp_msg, p_subscription, l_notifMsg);
+                generate_internal_send_publish_response_event (l_session, l_publish_resp_msg, l_req_handle, l_req_context);
+                IF l_moreNotifs = TRUE & l_morePubReqs = TRUE
+                THEN
+                    skip
+                    /* TODO: iterator to call until moreNotifications = FALSE or pubReqQueued = FALSE
+                       - server_subscription_core_publish_timeout_return_moreNotifs
+                       - fill_publish_response_msg
+                       - generate_internal_send_publish_response_event
+                    */
+                END
             END
         ELSE
             delete_subscription (p_subscription);
-            IF p_msg_to_send = TRUE /* Seems to be impossible: see server_subscription_core_publish_timeout_check_lifetime */
+            IF l_msg_to_send = TRUE /* Seems to be impossible: see server_subscription_core_publish_timeout_check_lifetime */
             THEN
                 /* Fill IssueStateChangedNotification message */
-                fill_publish_response_msg (p_publish_resp_msg, p_subscription, l_notifMsg)
+                fill_publish_response_msg (l_publish_resp_msg, p_subscription, l_notifMsg);
+                generate_internal_send_publish_response_event (l_session, l_publish_resp_msg, l_req_handle, l_req_context)
+            END
+        END
+    END
+    ;
+    
+    server_subscription_session_inactive (p_session, p_newSessionState) =
+    VAR
+        l_has_sub,
+        l_sub
+    IN
+        l_has_sub <-- has_subscription (p_session);
+        IF l_has_sub = TRUE
+        THEN
+            IF p_newSessionState = e_session_scOrphaned or 
+               p_newSessionState = e_session_scActivating or 
+               p_newSessionState = e_session_closed
+            THEN
+                /* SC is not valid anymore for the session
+                   => publish requests are not valid anymore on another SC */
+                l_sub <-- get_subscription (p_session);
+                empty_session_publish_requests (l_sub);
+                IF p_newSessionState = e_session_closed
+                THEN
+                    /* session is not valid anymore */
+                    remove_subscription_session (l_sub, p_session)
+                END
             END
         END
     END

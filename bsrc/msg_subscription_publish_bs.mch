@@ -21,7 +21,8 @@ MACHINE
 SEES
     constants,
     message_in_bs,
-    message_out_bs
+    message_out_bs,
+    request_handle_bs
     
 OPERATIONS
     
@@ -58,6 +59,17 @@ OPERATIONS
         a_msg_out_type = e_msg_subscription_publish_resp &
         p_notifMsg : t_notif_msg_i &
         p_notifMsg : t_notif_msg
+    THEN
+        skip
+    END
+    ;
+    
+    generate_internal_send_publish_response_event (p_session, p_publish_resp_msg, p_req_handle, p_req_context) =
+    PRE
+        p_session : t_session_i & p_session : t_session &
+        p_publish_resp_msg : t_msg_i & p_publish_resp_msg : t_msg &
+        p_req_handle : t_server_request_handle_i & 
+        p_req_context : t_request_context_i & p_req_context : t_request_context
     THEN
         skip
     END

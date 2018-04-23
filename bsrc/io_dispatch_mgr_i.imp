@@ -755,35 +755,19 @@ OPERATIONS
     
     bres <-- internal_server_subscription_publish_timeout (p_subscription) =
     VAR
-        l_valid_subscription,
-        l_bsend_msg,
-        l_req_context,
-        l_buffer_out,
-        l_valid_buffer_out,
-        l_channel,
-        l_connected_channel
+        l_valid_subscription
     IN
         l_valid_subscription <-- is_valid_subscription (p_subscription);
         IF l_valid_subscription = TRUE
         THEN
-            l_bsend_msg, l_req_context, l_buffer_out, l_channel <-- server_service_subscription_publish_timeout (p_subscription);
-            IF l_bsend_msg = TRUE
-            THEN
-                l_connected_channel <-- is_connected_channel (l_channel);
-                l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
-                IF l_connected_channel = TRUE &
-                    l_valid_buffer_out = TRUE
-                THEN
-                    send_channel_msg_buffer (l_channel, l_buffer_out, l_req_context)
-                END
-            END;
+            server_subscription_publish_timeout (p_subscription);
             bres := TRUE
         ELSE
             bres := FALSE
         END
     END;
     
-    bres <-- internal_server_send_bad_publish_response (p_session, p_req_handle, p_req_context, p_publish_resp_msg, p_statusCode) =
+    bres <-- internal_server_send_publish_response_prio_event (p_session, p_req_handle, p_req_context, p_publish_resp_msg, p_statusCode) =
     VAR
         l_valid_session,
         l_valid_msg,
@@ -801,7 +785,7 @@ OPERATIONS
             l_valid_req_context = TRUE & p_statusCode /= c_StatusCode_indet & p_statusCode /= e_sc_ok
         THEN
             bres, l_buffer_out, l_channel
-              <-- server_send_timed_out_publish_request (p_session, p_req_handle, p_statusCode, l_msg_typ, p_publish_resp_msg);
+              <-- server_send_bad_publish_response (p_session, p_req_handle, p_statusCode, l_msg_typ, p_publish_resp_msg);
             IF bres = TRUE
             THEN
                 l_connected_channel <-- is_connected_channel (l_channel);
@@ -814,6 +798,17 @@ OPERATIONS
             END
         ELSE
 	        bres := FALSE
+        END
+    END
+    ;
+    
+    bres <-- internal_server_inactive_session_prio_event (p_session, p_newSessionState) =
+    BEGIN
+        IF p_session /= c_session_indet THEN
+            bres := TRUE;
+            server_subscription_session_inactive (p_session, p_newSessionState)
+        ELSE
+            bres := FALSE
         END
     END
     ;

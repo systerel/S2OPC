@@ -74,7 +74,9 @@ PROMOTES
     
     /* subscription_mgr */
     is_valid_subscription,
-    server_subscription_data_changed
+    server_subscription_data_changed,
+    server_subscription_session_inactive,
+    server_subscription_publish_timeout
 
 LOCAL_OPERATIONS
 
@@ -985,58 +987,6 @@ OPERATIONS
     END
     ;
     
-    bsend_msg, req_context, buffer_out, channel <-- server_service_subscription_publish_timeout (p_subscription) =
-    VAR
-        l_msg_to_send, 
-        l_session, 
-        l_publish_resp_msg, 
-        l_req_handle, 
-        l_req_context,
-        l_resp_typ,
-        l_is_valid_resp,
-        l_is_valid_header,
-        l_ret,
-        l_channel,
-        l_resp_msg_header,
-        l_buffer_out,
-        l_valid_buffer
-    IN
-        bsend_msg := FALSE;
-        req_context := c_request_context_indet;
-        buffer_out := c_byte_buffer_indet;
-        channel := c_channel_indet;
-        
-        l_msg_to_send, l_session, l_publish_resp_msg, l_req_handle, l_req_context <-- server_subscription_publish_timeout (p_subscription);
-        
-        /* Set provided message as output message to could be encoded and deallocated*/
-        bless_msg_out (l_publish_resp_msg);
-        l_resp_typ <-- get_msg_out_type (l_publish_resp_msg);
-        l_is_valid_resp, l_ret, l_channel <-- server_validate_session_service_resp (l_session);
-        IF l_is_valid_resp = TRUE &
-            l_resp_typ = e_msg_subscription_publish_resp
-        THEN
-            l_resp_msg_header <-- alloc_msg_header;
-            l_is_valid_header <-- is_valid_msg_out_header (l_resp_msg_header);
-            IF l_is_valid_header = TRUE
-            THEN
-                server_write_msg_out_header_req_handle (l_resp_msg_header, l_req_handle);
-                write_msg_resp_header_service_status (l_resp_msg_header, e_sc_bad_timeout);
-                /* Response message encoded */
-                l_buffer_out <-- encode_msg (l_resp_typ, l_resp_msg_header, l_publish_resp_msg);
-                dealloc_msg_header_out (l_resp_msg_header);
-                l_valid_buffer <-- is_valid_buffer_out (l_buffer_out);
-                IF l_valid_buffer = TRUE
-                THEN
-                    buffer_out := l_buffer_out;
-                    channel := l_channel;
-                    bsend_msg := TRUE
-                END
-            END
-        END;
-        dealloc_msg_out (l_publish_resp_msg)
-    END
-    ;
-    
     /* SERVER local services */
 
     ret <-- server_receive_local_service_req (endpoint_config_idx, req_class, req_typ, req_msg, app_context) =
@@ -1503,7 +1453,7 @@ OPERATIONS
     END
     ;
 
-    bres, buffer_out, channel <-- server_send_timed_out_publish_request (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
+    bres, buffer_out, channel <-- server_send_bad_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
     VAR
         l_is_valid_resp,
         l_is_valid_header,

@@ -126,22 +126,23 @@ OPERATIONS
     END
     ;
     
-    p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context <-- server_subscription_publish_timeout (p_subscription) =
+    server_subscription_publish_timeout (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : t_subscription
     THEN
-        p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context
-        :(p_msg_to_send : BOOL &
-          p_session : t_session_i &
-          p_req_handle : t_server_request_handle_i &      
-          p_req_context : t_request_context_i &
-          p_publish_resp_msg : t_msg_i &
-          (p_msg_to_send = TRUE => 
-            p_session : t_session &
-            p_req_context : t_request_context &
-            p_publish_resp_msg : t_msg)
-        )
+        /* Subscription transitions: could generate publish response sending events */
+        skip
+    END
+    ;
+    
+    server_subscription_session_inactive (p_session, p_newSessionState) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_newSessionState : t_sessionState
+    THEN
+        skip
     END
     
 END

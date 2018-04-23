@@ -434,7 +434,7 @@ OPERATIONS
     END
     ;
 
-    bres, buffer_out, channel <-- server_send_timed_out_publish_request (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
+    bres, buffer_out, channel <-- server_send_bad_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -728,21 +728,22 @@ OPERATIONS
     END
     ;
     
-    bsend_msg, req_context, buffer_out, channel <-- server_service_subscription_publish_timeout (p_subscription) =
+    server_subscription_publish_timeout (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : t_subscription
     THEN
-        bsend_msg, req_context, buffer_out, channel
-        :(bsend_msg : BOOL &
-          req_context : t_request_context_i &
-          buffer_out : t_byte_buffer_i &
-          channel : t_channel_i &
-          (bsend_msg = TRUE => 
-            req_context : t_request_context &
-            buffer_out : t_byte_buffer &
-            channel : s_channel_connected)
-        )
+        skip
+    END
+    ;
+    
+    server_subscription_session_inactive (p_session, p_newSessionState) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_newSessionState : t_sessionState
+    THEN
+        skip
     END
 
 END

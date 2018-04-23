@@ -60,12 +60,13 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    res_activated <-- server_internal_activate_req_and_resp (channel, session, p_user, activate_req_msg, activate_resp_msg) =
+    res_activated <-- server_internal_activate_req_and_resp (channel, session, transitoryState, p_user, activate_req_msg, activate_resp_msg) =
     PRE
         channel       : t_channel_i &
         channel       : s_channel_connected &
         session       : t_session_i &
         session       : s_session &
+        transitoryState : t_sessionState & /* used to differentiate transitions externally */
         p_user          : t_user_i &
         p_user          : t_user &
         dom(a_state) = s_session &
@@ -286,7 +287,7 @@ LOCAL_OPERATIONS
 
 OPERATIONS
 
-    res_activated <-- server_internal_activate_req_and_resp (channel, session, p_user, activate_req_msg, activate_resp_msg) =
+    res_activated <-- server_internal_activate_req_and_resp (channel, session, transitoryState, p_user, activate_req_msg, activate_resp_msg) =
     VAR
         l_channel_config_idx,
         l_secpol,
@@ -304,6 +305,7 @@ OPERATIONS
             res_activated := TRUE
         END;
         IF res_activated = TRUE THEN
+            set_session_state (session, transitoryState, FALSE);
             set_session_user_server (session, p_user);
             set_session_channel (session, channel);
             set_session_state (session, e_session_userActivated, FALSE)
@@ -513,7 +515,12 @@ OPERATIONS
             /* Channel must be the same and user must be set */
             IF l_channel = channel
             THEN
-                l_valid <-- server_internal_activate_req_and_resp (channel, session, user, activate_req_msg, activate_resp_msg);
+                l_valid <-- server_internal_activate_req_and_resp (channel, 
+                                                                   session, 
+                                                                   e_session_creating, 
+                                                                   user, 
+                                                                   activate_req_msg, 
+                                                                   activate_resp_msg);
                 IF l_valid = TRUE THEN
                     l_ret := e_sc_ok
                 ELSE
@@ -529,7 +536,12 @@ OPERATIONS
             IF l_channel = channel &
                 l_user /= user
             THEN
-                l_valid <-- server_internal_activate_req_and_resp (channel, session, user, activate_req_msg, activate_resp_msg);
+                l_valid <-- server_internal_activate_req_and_resp (channel, 
+                                                                   session, 
+                                                                   e_session_userActivating, 
+                                                                   user, 
+                                                                   activate_req_msg, 
+                                                                   activate_resp_msg);
                 IF l_valid = TRUE THEN
                     l_ret := e_sc_ok
                 ELSE
@@ -539,7 +551,12 @@ OPERATIONS
             ELSIF l_channel /= channel &
                 l_user = user
             THEN
-                l_valid <-- server_internal_activate_req_and_resp (channel, session, user, activate_req_msg, activate_resp_msg);
+                l_valid <-- server_internal_activate_req_and_resp (channel, 
+                                                                   session, 
+                                                                   e_session_scActivating,
+                                                                   user, 
+                                                                   activate_req_msg, 
+                                                                   activate_resp_msg);
                 IF l_valid = TRUE THEN
                     l_ret := e_sc_ok
                 ELSE
@@ -555,7 +572,12 @@ OPERATIONS
             IF l_channel /= channel &
                 l_user = user
             THEN
-                l_valid <-- server_internal_activate_req_and_resp (channel, session, user, activate_req_msg, activate_resp_msg);
+                l_valid <-- server_internal_activate_req_and_resp (channel, 
+                                                                   session, 
+                                                                   e_session_scActivating,
+                                                                   user, 
+                                                                   activate_req_msg, 
+                                                                   activate_resp_msg);
                 IF l_valid = TRUE THEN
                     l_ret := e_sc_ok
                 ELSE

@@ -327,13 +327,28 @@ OPERATIONS
         bres :: BOOL
     END;
     
-    bres <-- internal_server_send_bad_publish_response (p_session, p_req_handle, p_req_context, p_publish_resp_msg, p_statusCode) =
+    /* Events leading to call this entrypoint shall be enqueued as prioritary event (next to be evaluated)
+       => guarantee of performance on subscription
+    */
+    bres <-- internal_server_send_publish_response_prio_event (p_session, p_req_handle, p_req_context, p_publish_resp_msg, p_statusCode) =
     PRE
         p_session : t_session_i &
         p_req_handle : t_server_request_handle_i &
         p_req_context : t_request_context_i &
         p_publish_resp_msg : t_msg_i &
         p_statusCode : t_StatusCode_i
+    THEN
+        bres :: BOOL
+    END
+    ;
+    
+    /* Events leading to call this entrypoint shall be enqueued as prioritary event (next to be evaluated)
+       => guarantee of state synchronisation between subscription <=> session */
+    bres <-- internal_server_inactive_session_prio_event (p_session, p_newSessionState) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session & /* shall be considered in t_session since is_valid_session will fail if not in s_session */
+        p_newSessionState : t_sessionState
     THEN
         bres :: BOOL
     END
