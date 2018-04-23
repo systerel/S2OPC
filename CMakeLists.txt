@@ -9,6 +9,14 @@ endif()
 # Compiler options (C99 compliant)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -pedantic")
 
+# Define compiler options for each mode.
+# Default optimization level is -O0 for debug and -O2 for others modes.
+# -f-no-omit-frame-pointer is set to use Perf profiling tool,
+# it is not set in Release mode.
+# -g option is already set in Debug and Debugwithdebinfo modes.
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer")
+
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   # Specific flags for CERT rules
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wimplicit -Wreturn-type -Wsequence-point -Wcast-qual -Wuninitialized -Wcast-align -Wstrict-prototypes -Wchar-subscripts -Wformat-security -Wformat -Wconversion")
@@ -19,7 +27,7 @@ else()
   message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Wextra -O0")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 
 option(WITH_ASAN "build with ASAN" OFF)
 if(WITH_ASAN)

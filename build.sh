@@ -39,6 +39,9 @@ else
     BUILD_DIR=build
 fi
 
+# default build mode is RELWITHDEBINFO
+CMAKE_OPTIONS="$CMAKE_OPTIONS -DCMAKE_BUILD_TYPE=RelWithDebInfo"
+
 # Check if the option which name is $1 is defined in env,
 #  and adds it and its value to CMAKE_OPTIONS
 append_cmake_option ()
