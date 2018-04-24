@@ -74,6 +74,20 @@ typedef enum {
     SOPC_LOG_LEVEL_DEBUG = 3
 } SOPC_Log_Level;
 
+/* SecurityMode, directly compatible with the encoded OPC-UA type,
+ * taken from "sopc_types.h" */
+typedef enum {
+    OpcUa_MessageSecurityMode_Invalid = 0,
+    OpcUa_MessageSecurityMode_None = 1,
+    OpcUa_MessageSecurityMode_Sign = 2,
+    OpcUa_MessageSecurityMode_SignAndEncrypt = 3
+} OpcUa_MessageSecurityMode;
+
+/* Security policies, taken from "sopc_crypto_profiles.h" */
+#define SOPC_SecurityPolicy_None_URI "http://opcfoundation.org/UA/SecurityPolicy#None"
+#define SOPC_SecurityPolicy_Basic256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
+#define SOPC_SecurityPolicy_Basic256Sha256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
+
 #endif
 
 /* C String type */
@@ -159,37 +173,35 @@ typedef struct
 {
     SOPC_LibSub_LogCbk host_log_callback;
     SOPC_LibSub_DisconnectCbk disconnect_callback;
-    // TODO : configuration des jetons?
 } SOPC_LibSub_StaticCfg;
-
-/*
- @description
-   User identification
- @field username
-   Username. NULL for anonymous access
- @field password
-   Password. No significant when username is NULL*/
-// TBC...
-typedef struct
-{
-    SOPC_LibSub_CstString username;
-    SOPC_LibSub_CstString password;
-} SOPC_LibSub_UserIdCfg;
 
 /*
  @description
    Connection configuration to a remote OPC server
  @field server_url
    Path to server URL
+ @field security_policy
+   The chosen OPC-UA security policy for the connection, one of the SOPC_SecurityPolicy_*_URI string
+ @field security_mode
+   The chosen OPC-UA security mode for the connection, one of the OpcUa_MessageSecurityMode constant.
+ @field username
+   Username. NULL for anonymous access
+ @field password
+   Password. Not significant when username is NULL
  @field timeout_ms
    Connection timeout (milliseconds)
- @field identification_cfg
-   Encryption, identification configuration */
+ @field token_target
+   Number of tokens (PublishRequest) that the client tries to maintain throughout the connection.
+ */
 typedef struct
 {
     SOPC_LibSub_CstString server_url;
+    SOPC_LibSub_CstString security_policy;
+    OpcUa_MessageSecurityMode security_mode;
+    SOPC_LibSub_CstString username;
+    SOPC_LibSub_CstString password;
     int64_t timeout_ms;
-    SOPC_LibSub_UserIdCfg identification_cfg;
+    uint16_t token_target;
 } SOPC_LibSub_ConnectionCfg;
 
 /*
