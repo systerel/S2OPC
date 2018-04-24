@@ -28,7 +28,7 @@
   This header is designed so as to make it possible to generate automatically an Ada specification package (.ads)
     for any application that would have to link the staticC  library S2OPC_CLIENT.
   The Generation of .ADS file can be done using the following command:
-     g++ -c -fdump-ada-spec -C libs2opc_client.h
+     g++ -c -std=gnu++11 -fdump-ada-spec -C libs2opc_client.h
   gcc also works but loses parameter names in function prototypes, that is why the g++ and 'extern "C"' are used.
 */
 
@@ -43,31 +43,40 @@ typedef const char* cst_string_t;
 // C String type
 typedef char* string_t;
 
-// 64 bits signed integer
-typedef signed long long int64_t;
+// Fixed size integers
+#include <stdint.h>
+#if 0
+typedef signed long long int int64_t;
+typedef unsigned long long int uint64_t;
+typedef unsigned int uint32_t;
+#if __cplusplus
+static_assert(sizeof(int64_t) == 8, "Invalid int64_t definition");
+static_assert(sizeof(uint64_t) == 8, "Invalid uint64_t definition");
+static_assert(sizeof(uint32_t) == 4, "Invalid uint32_t definition");
+#endif
+#endif
 
 // Connection identifier
-typedef signed long long s2opc_client_connection_id_t;
+typedef int64_t s2opc_client_connection_id_t;
 
 // Data identifier (used for subscription change notification)
-typedef unsigned int s2opc_client_data_id_t;
+typedef uint32_t s2opc_client_data_id_t;
 
 /*
   Data value quality
   TBD? Masks for BAD and UNCERTAIN quality? */
-typedef unsigned int s2opc_client_data_quality_t;
+typedef uint32_t s2opc_client_data_quality_t;
 
 // Timestamp (NTP Format)
-typedef unsigned long long s2opc_client_timestamp_t;
+typedef uint64_t s2opc_client_timestamp_t;
 
 // Data value type
-enum s2opc_client_data_type_t
-{
+typedef enum {
     s2opc_client_type_bool = 1,
     s2opc_client_type_integer = 2,
     s2opc_client_type_string = 3,
     s2opc_client_type_bytestring = 4
-};
+} s2opc_client_data_type_t;
 
 /*
   @description
@@ -87,22 +96,16 @@ typedef struct
 } s2opc_client_data_value_t;
 
 // Result
-enum s2opc_client_result_t
-{
-    s2opc_client_no_error = 1,
-    s2opc_client_timeout = 2,
-    s2opc_client_failure = 3
-};
+typedef enum { s2opc_client_no_error = 0, s2opc_client_timeout = 1, s2opc_client_failure = 2 } s2opc_client_result_t;
 
 /*
   Log levels */
-enum s2opc_client_log_level_t
-{
+typedef enum {
     s2opc_client_log_error = 1,
     s2opc_client_log_warning = 2,
     s2opc_client_log_info = 3,
     s2opc_client_log_debug = 4
-};
+} s2opc_client_log_level_t;
 
 /*
  ===================
@@ -185,7 +188,7 @@ typedef struct
  =================== */
 
 /*
-    Return the current version library
+    Return the current version of the library
 */
 cst_string_t s2opc_client_getVersion(void);
 
@@ -201,27 +204,40 @@ s2opc_client_result_t s2opc_client_initialize(const s2opc_client_static_cfg_t* p
 
 /*
  @description
-    Connect to a remote OPC server.
+    Configure a future connection. This function shall be called once per connection
+    before a call to s2opc_client_configured().
+ @param pCfg
+    non null pointer to the static configuration.
  @param c_id [out, not null]
-    The connection id. Set when the value returned is "s2opc_client_no_error"
+    The connection id. Set when the value returned is "s2opc_client_no_error".
  @return
     The operation status */
-s2opc_client_result_t s2opc_client_connect(const s2opc_client_connect_cfg_t* pCfg, s2opc_client_connection_id_t* c_id);
+s2opc_client_result_t s2opc_client_configure_connection(const s2opc_client_connect_cfg_t* pCfg,
+                                                        s2opc_client_connection_id_t* c_id);
 
 /*
  @description
-    Create a subscription on a connection
+    Mark the library as configured. All calls to s2opc_clilent_configure_connection() shall
+    be done prior to calling this function. All calls to s2opc_client_connect shall be done
+    after calling this function.
+ @return
+    the operation status */
+s2opc_client_result_t s2opc_client_configured(void);
+
+/*
+ @description
+    Connect the client with id c_id to a remote OPC server, and create a subscription.
  @param c_id
-    The connection id.
- @param publish_period_msid
+    A connection id return by a call to s2opc_client_.
+ @param publish_period_ms
     The requestes publish period (in milliseconds)
  @param data_change_callback
     The callback for data change notification
  @return
     The operation status */
-s2opc_client_result_t s2opc_client_create_subscription(const s2opc_client_connection_id_t c_id,
-                                                       const int64_t publish_period_ms,
-                                                       data_change_callback_t data_change_callback);
+s2opc_client_result_t s2opc_client_connect(const s2opc_client_connection_id_t c_id,
+                                           const int64_t publish_period_ms,
+                                           data_change_callback_t data_change_callback);
 
 /*
  @description
@@ -229,7 +245,7 @@ s2opc_client_result_t s2opc_client_create_subscription(const s2opc_client_connec
  @param c_id
     The connection id.
  @param d_id [out, not null]
-    The variable data identifier. Will be used in call to data_change_callback.
+    The unique variable data identifier. Will be used in call to data_change_callback.
  @return
     The operation status */
 s2opc_client_result_t s2opc_client_add_to_subscription(const s2opc_client_connection_id_t c_id,
