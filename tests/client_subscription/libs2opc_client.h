@@ -38,10 +38,10 @@
  ================= */
 
 // C Const String type
-typedef const char* cst_string_t;
+typedef const char* SOPC_LibSub_CstString;
 
 // C String type
-typedef char* string_t;
+typedef char* SOPC_LibSub_String;
 
 // Fixed size integers
 #include <stdint.h>
@@ -57,26 +57,26 @@ static_assert(sizeof(uint32_t) == 4, "Invalid uint32_t definition");
 #endif
 
 // Connection identifier
-typedef int64_t s2opc_client_connection_id_t;
+typedef int64_t SOPC_LibSub_ConnectionId;
 
 // Data identifier (used for subscription change notification)
-typedef uint32_t s2opc_client_data_id_t;
+typedef uint32_t SOPC_LibSub_DataId;
 
 /*
   Data value quality
   TBD? Masks for BAD and UNCERTAIN quality? */
-typedef uint32_t s2opc_client_data_quality_t;
+typedef uint32_t SOPC_StatusCode;
 
 // Timestamp (NTP Format)
-typedef uint64_t s2opc_client_timestamp_t;
+typedef uint64_t SOPC_LibSub_Timestamp;
 
 // Data value type
 typedef enum {
-    s2opc_client_type_bool = 1,
-    s2opc_client_type_integer = 2,
-    s2opc_client_type_string = 3,
-    s2opc_client_type_bytestring = 4
-} s2opc_client_data_type_t;
+    SOPC_LibSub_DataType_bool = 1,
+    SOPC_LibSub_DataType_integer = 2,
+    SOPC_LibSub_DataType_string = 3,
+    SOPC_LibSub_DataType_bytestring = 4
+} SOPC_LibSub_DataType;
 
 /*
   @description
@@ -85,27 +85,37 @@ typedef enum {
     The value quality.
   @field type
     The value type. Specifies the type of '*value' amongst:
-    - cst_string_t (s2opc_client_type_string / s2opc_client_type_bytestring)
-    - int64_t (s2opc_client_type_bool / s2opc_client_type_integer)
+    - SOPC_LibSub_CstString (SOPC_LibSub_DataType_string / SOPC_LibSub_DataType_bytestring)
+    - int64_t (SOPC_LibSub_DataType_bool / SOPC_LibSub_DataType_integer)
 */
 typedef struct
 {
-    s2opc_client_data_quality_t quality;
-    s2opc_client_data_type_t type;
+    SOPC_StatusCode quality;
+    SOPC_LibSub_DataType type;
     void* value;
-} s2opc_client_data_value_t;
+} SOPC_LibSub_Value;
 
-// Result
-typedef enum { s2opc_client_no_error = 0, s2opc_client_timeout = 1, s2opc_client_failure = 2 } s2opc_client_result_t;
+/* Result, taken from "sopc_toolkit_constants.h" */
+typedef enum SOPC_ReturnStatus {
+    SOPC_STATUS_OK = 0,
+    SOPC_STATUS_NOK = 1,
+    SOPC_STATUS_INVALID_PARAMETERS = 2,
+    SOPC_STATUS_INVALID_STATE = 3,
+    SOPC_STATUS_ENCODING_ERROR = 4,
+    SOPC_STATUS_WOULD_BLOCK = 5,
+    SOPC_STATUS_TIMEOUT = 6,
+    SOPC_STATUS_OUT_OF_MEMORY = 7,
+    SOPC_STATUS_CLOSED = 8,
+    SOPC_STATUS_NOT_SUPPORTED = 9
+} SOPC_ReturnStatus;
 
-/*
-  Log levels */
+/* Log levels, taken from "sopc_log_manager.h" */
 typedef enum {
-    s2opc_client_log_error = 1,
-    s2opc_client_log_warning = 2,
-    s2opc_client_log_info = 3,
-    s2opc_client_log_debug = 4
-} s2opc_client_log_level_t;
+    SOPC_LOG_LEVEL_ERROR = 0,
+    SOPC_LOG_LEVEL_WARNING = 1,
+    SOPC_LOG_LEVEL_INFO = 2,
+    SOPC_LOG_LEVEL_DEBUG = 3
+} SOPC_Log_Level;
 
 /*
  ===================
@@ -115,28 +125,28 @@ typedef enum {
   @description
     Log callback type
   @param log_level
-    The Log level (s2opc_client_log_level_t). Note: s2opc_client_log_error shall be non-returning.
+    The Log level (SOPC_Log_Level). Note: SOPC_log_error shall be non-returning.
   @param text
     The text string to log (shall not be null) */
-typedef void (*log_callback_t)(const s2opc_client_log_level_t log_level, cst_string_t text);
+typedef void (*SOPC_LibSub_LogCbk)(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
 
 /*
   @description
     Callback type for disconnect event
   @param c_id
     The connection id that has been disconnected */
-typedef void (*disconnect_callback_t)(const s2opc_client_connection_id_t c_id);
+typedef void (*SOPC_LibSub_DisconnectCbk)(const SOPC_LibSub_ConnectionId c_id);
 
 /*
   @description
     Callback type for data change event (related to a subscription)
   @param c_id
     The connection id that has been disconnected */
-typedef void (*data_change_callback_t)(const s2opc_client_connection_id_t c_id,
-                                       const s2opc_client_data_id_t d_id,
-                                       const s2opc_client_data_value_t* value,
-                                       const s2opc_client_timestamp_t source_timestamp,
-                                       const s2opc_client_timestamp_t server_timestamp);
+typedef void (*SOPC_LibSub_DataChangeCbk)(const SOPC_LibSub_ConnectionId c_id,
+                                          const SOPC_LibSub_DataId d_id,
+                                          const SOPC_LibSub_Value* value,
+                                          const SOPC_LibSub_Timestamp source_timestamp,
+                                          const SOPC_LibSub_Timestamp server_timestamp);
 
 /*
  @description
@@ -148,23 +158,23 @@ typedef void (*data_change_callback_t)(const s2opc_client_connection_id_t c_id,
 // TBC...
 typedef struct
 {
-    cst_string_t username;
-    cst_string_t password;
-} s2opc_client_identification_cfg_t;
+    SOPC_LibSub_CstString username;
+    SOPC_LibSub_CstString password;
+} SOPC_LibSub_UserIdCfg;
 
 /*
  @description
    Static configuration of OPC client libray
  @field host_log_callback
    Host log callback
- @field disconnect_callback_t
+ @field SOPC_LibSub_DisconnectCbk
    Notification event for disconnection from server */
 typedef struct
 {
-    log_callback_t host_log_callback;
-    disconnect_callback_t disconnect_callback;
+    SOPC_LibSub_LogCbk host_log_callback;
+    SOPC_LibSub_DisconnectCbk disconnect_callback;
     // TODO : configuration des jetons?
-} s2opc_client_static_cfg_t;
+} SOPC_LibSub_StaticCfg;
 
 /*
  @description
@@ -177,10 +187,10 @@ typedef struct
    Encryption, identification configuration */
 typedef struct
 {
-    cst_string_t server_url;
+    SOPC_LibSub_CstString server_url;
     int64_t timeout_ms;
-    s2opc_client_identification_cfg_t identification_cfg;
-} s2opc_client_connect_cfg_t;
+    SOPC_LibSub_UserIdCfg identification_cfg;
+} SOPC_LibSub_ConnectionCfg;
 
 /*
  ===================
@@ -190,7 +200,7 @@ typedef struct
 /*
     Return the current version of the library
 */
-cst_string_t s2opc_client_getVersion(void);
+SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void);
 
 /*
  @description
@@ -200,44 +210,44 @@ cst_string_t s2opc_client_getVersion(void);
     non null pointer to the static configuration
  @return
     The operation status */
-s2opc_client_result_t s2opc_client_initialize(const s2opc_client_static_cfg_t* pCfg);
+SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg);
 
 /*
  @description
     Configure a future connection. This function shall be called once per connection
-    before a call to s2opc_client_configured().
+    before a call to SOPC_LibSub_Configured().
  @param pCfg
     non null pointer to the static configuration.
  @param c_id [out, not null]
-    The connection id. Set when the value returned is "s2opc_client_no_error".
+    The connection id. Set when the value returned is "SOPC_no_error".
  @return
     The operation status */
-s2opc_client_result_t s2opc_client_configure_connection(const s2opc_client_connect_cfg_t* pCfg,
-                                                        s2opc_client_connection_id_t* c_id);
+SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
+                                                  SOPC_LibSub_ConnectionId* c_id);
 
 /*
  @description
     Mark the library as configured. All calls to s2opc_clilent_configure_connection() shall
-    be done prior to calling this function. All calls to s2opc_client_connect shall be done
+    be done prior to calling this function. All calls to SOPC_LibSub_Connect shall be done
     after calling this function.
  @return
     the operation status */
-s2opc_client_result_t s2opc_client_configured(void);
+SOPC_ReturnStatus SOPC_LibSub_Configured(void);
 
 /*
  @description
     Connect the client with id c_id to a remote OPC server, and create a subscription.
  @param c_id
-    A connection id return by a call to s2opc_client_.
+    A connection id return by a call to SOPC_.
  @param publish_period_ms
     The requestes publish period (in milliseconds)
  @param data_change_callback
     The callback for data change notification
  @return
     The operation status */
-s2opc_client_result_t s2opc_client_connect(const s2opc_client_connection_id_t c_id,
-                                           const int64_t publish_period_ms,
-                                           data_change_callback_t data_change_callback);
+SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConnectionId c_id,
+                                      const int64_t publish_period_ms,
+                                      SOPC_LibSub_DataChangeCbk data_change_callback);
 
 /*
  @description
@@ -248,8 +258,7 @@ s2opc_client_result_t s2opc_client_connect(const s2opc_client_connection_id_t c_
     The unique variable data identifier. Will be used in call to data_change_callback.
  @return
     The operation status */
-s2opc_client_result_t s2opc_client_add_to_subscription(const s2opc_client_connection_id_t c_id,
-                                                       s2opc_client_data_id_t* d_id);
+SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_DataId* d_id);
 
 /*
  @description
@@ -258,7 +267,7 @@ s2opc_client_result_t s2opc_client_add_to_subscription(const s2opc_client_connec
     The connection id to disconnect
  @return
     The operation status */
-s2opc_client_result_t s2opc_client_disconnect(const s2opc_client_connection_id_t c_id);
+SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId c_id);
 
 /*--------------------------------
     TBC??

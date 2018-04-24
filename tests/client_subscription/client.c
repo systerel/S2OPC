@@ -38,55 +38,55 @@
 #define SECURITY_MODE OpcUa_MessageSecurityMode_None
 
 /* Callbacks */
-void log_callback(const s2opc_client_log_level_t log_level, cst_string_t text);
-void disconnect_callback(const s2opc_client_connection_id_t c_id);
+void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
+void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
 
 /* Main subscribing client */
 int main(void)
 {
-    s2opc_client_static_cfg_t cfg_cli = {.host_log_callback = log_callback, .disconnect_callback = disconnect_callback};
-    s2opc_client_connect_cfg_t cfg_con = {
+    SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = log_callback, .disconnect_callback = disconnect_callback};
+    SOPC_LibSub_ConnectionCfg cfg_con = {
         .server_url = ENDPOINT_URL,
         .timeout_ms = 10000 /* TODO: change timeout */,
         .identification_cfg.username = "foobar".identification_cfg.password = "foobar"};
-    s2opc_client_connection_id_t con_id = 0;
+    SOPC_LibSub_ConnectionId con_id = 0;
 
-    if (s2opc_client_no_error != s2opc_client_initialize(&cfg_cli))
+    if (SOPC_STATUS_OK != SOPC_LibSub_Initialize(&cfg_cli))
     {
-        log_callback(s2opc_client_log_error, "Could not initialize library");
+        log_callback(SOPC_LOG_LEVEL_ERROR, "Could not initialize library");
         return 1;
     }
 
-    if (s2opc_client_no_error != s2opc_client_configure_connection(&cfg_con, &con_id))
+    if (SOPC_STATUS_OK != SOPC_LibSub_ConfigureConnection(&cfg_con, &con_id))
     {
-        log_callback(s2opc_client_log_error, "Could not configure connection");
+        log_callback(SOPC_LOG_LEVEL_ERROR, "Could not configure connection");
         return 2;
     }
 
-    if (s2opc_client_no_error != s2opc_client_configured())
+    if (SOPC_STATUS_OK != SOPC_LibSub_Configured())
     {
-        log_callback(s2opc_client_log_error, "Could not configure the toolkit");
+        log_callback(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit");
         return 3;
     }
 
-    if(s2opc_client_no_error != s2opc_client_connect()
+    if (SOPC_STATUS_OK != SOPC_LibSub_Connect())
     {
-        log_callback(s2opc_client_log_error, "Could not configure the toolkit");
+        log_callback(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit");
         return 4;
     }
 
     return 0;
 }
 
-void log_callback(const s2opc_client_log_level_t log_level, cst_string_t text)
+void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text)
 {
     printf("Level %i: %s\n", log_level, text);
 }
 
-void disconnect_callback(const s2opc_client_connection_id_t c_id)
+void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
 {
     char sz[128];
 
     snprintf(sz, sizeof(sz) / sizeof(sz[0]), "Client %" PRIi64 " disconnected", c_id);
-    log_callback(s2opc_client_log_info, sz);
+    log_callback(SOPC_log_info, sz);
 }
