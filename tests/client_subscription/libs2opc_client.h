@@ -88,12 +88,6 @@ typedef enum {
     - SOPC_LibSub_CstString (SOPC_LibSub_DataType_string / SOPC_LibSub_DataType_bytestring)
     - int64_t (SOPC_LibSub_DataType_bool / SOPC_LibSub_DataType_integer)
 */
-typedef struct
-{
-    SOPC_StatusCode quality;
-    SOPC_LibSub_DataType type;
-    void* value;
-} SOPC_LibSub_Value;
 
 /* Result, taken from "sopc_toolkit_constants.h" */
 typedef enum SOPC_ReturnStatus {
@@ -116,6 +110,15 @@ typedef enum {
     SOPC_LOG_LEVEL_INFO = 2,
     SOPC_LOG_LEVEL_DEBUG = 3
 } SOPC_Log_Level;
+
+typedef struct
+{
+    SOPC_LibSub_DataType type;
+    SOPC_StatusCode quality;
+    void* value;
+    SOPC_LibSub_Timestamp source_timestamp;
+    SOPC_LibSub_Timestamp server_timestamp;
+} SOPC_LibSub_Value;
 
 /*
  ===================
@@ -144,9 +147,7 @@ typedef void (*SOPC_LibSub_DisconnectCbk)(const SOPC_LibSub_ConnectionId c_id);
     The connection id that has been disconnected */
 typedef void (*SOPC_LibSub_DataChangeCbk)(const SOPC_LibSub_ConnectionId c_id,
                                           const SOPC_LibSub_DataId d_id,
-                                          const SOPC_LibSub_Value* value,
-                                          const SOPC_LibSub_Timestamp source_timestamp,
-                                          const SOPC_LibSub_Timestamp server_timestamp);
+                                          const SOPC_LibSub_Value* value);
 
 /*
  @description
