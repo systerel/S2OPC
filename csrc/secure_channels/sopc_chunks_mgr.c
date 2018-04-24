@@ -2776,11 +2776,13 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
                                  bool symmetricAlgo,
                                  uint32_t sequenceNumberPosition,
                                  uint32_t encryptedDataLength,
-                                 SOPC_Buffer* encryptedBuffer)
+                                 SOPC_Buffer* encryptedBuffer,
+                                 SOPC_StatusCode* errorStatus)
 {
     assert(scConnection != NULL);
     assert(nonEncryptedBuffer != NULL);
     assert(encryptedBuffer != NULL);
+    assert(errorStatus != NULL);
     bool result = false;
 
     SOPC_SecureChannel_Config* scConfig = NULL;
@@ -2817,7 +2819,16 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
         status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate, &otherAppPublicKey);
 
         // Check size of encrypted data array
-        if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK != status)
+        {
+            *errorStatus = OpcUa_BadTcpInternalError;
+
+            SOPC_Logger_TraceError(
+                "ChunksMgr: encrypt message (asymm): failed to create public key from certificate (scConfigIdx=%" PRIu32
+                ")",
+                scConnection->endpointConnectionConfigIdx);
+        }
+        else
         {
             result = true;
             if (encryptedBuffer->max_size < sequenceNumberPosition + encryptedDataLength)
@@ -2828,6 +2839,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
             if (NULL == encryptedData)
             {
                 result = false;
+                *errorStatus = OpcUa_BadTcpInternalError;
             }
             else
             {
@@ -2835,7 +2847,11 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
                 memcpy(encryptedData, nonEncryptedBuffer->data, sequenceNumberPosition);
                 // Set correct message size and encrypted buffer length
                 status = SOPC_Buffer_SetDataLength(encryptedBuffer, sequenceNumberPosition + encryptedDataLength);
-                assert(SOPC_STATUS_OK == status);
+                if (SOPC_STATUS_OK != status)
+                {
+                    result = false;
+                    *errorStatus = OpcUa_BadTcpInternalError;
+                }
             }
         }
 
@@ -2849,6 +2865,12 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
             if (SOPC_STATUS_OK != status)
             {
                 result = false;
+                *errorStatus = OpcUa_BadEncodingError;
+
+                SOPC_Logger_TraceError(
+                    "ChunksMgr: encrypt message (asymm): failed to encrypt message "
+                    "(scConfigIdx=%" PRIu32 ")",
+                    scConnection->endpointConnectionConfigIdx);
             }
         }
 
@@ -2862,6 +2884,11 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
             NULL == scConnection->currentSecuKeySets.receiverKeySet)
         {
             result = false;
+            *errorStatus = OpcUa_BadTcpInternalError;
+
+            SOPC_Logger_TraceError("ChunksMgr: encrypt message (symm): security key sets missing (scConfigIdx=%" PRIu32
+                                   ")",
+                                   scConnection->endpointConnectionConfigIdx);
         }
         else
         {
@@ -2872,11 +2899,13 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
             if (encryptedBuffer->max_size < sequenceNumberPosition + encryptedDataLength)
             {
                 result = false;
+                *errorStatus = OpcUa_BadTcpInternalError;
             }
             encryptedData = encryptedBuffer->data;
             if (NULL == encryptedData)
             {
                 result = false;
+                *errorStatus = OpcUa_BadTcpInternalError;
             }
             else
             {
@@ -2884,7 +2913,11 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
                 memcpy(encryptedData, nonEncryptedBuffer->data, sequenceNumberPosition);
                 // Set correct message size and encrypted buffer length
                 status = SOPC_Buffer_SetDataLength(encryptedBuffer, sequenceNumberPosition + encryptedDataLength);
-                assert(SOPC_STATUS_OK == status);
+                if (SOPC_STATUS_OK != status)
+                {
+                    result = false;
+                    *errorStatus = OpcUa_BadTcpInternalError;
+                }
             }
 
             // Encrypt
@@ -2898,6 +2931,11 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
                 if (SOPC_STATUS_OK != status)
                 {
                     result = false;
+                    *errorStatus = OpcUa_BadEncodingError;
+
+                    SOPC_Logger_TraceError(
+                        "ChunksMgr: encrypt message (symm): failed to encrypt message (scConfigIdx=%" PRIu32 ")",
+                        scConnection->endpointConnectionConfigIdx);
                 }
             }
 
@@ -2962,7 +3000,17 @@ static bool SC_Chunks_TreatSendBuffer(
     result = SC_Chunks_EncodeTcpMsgHeader(scConnection, sendMsgType,
                                           true, // isFinal
                                           nonEncryptedBuffer);
-    if (result != false)
+
+    if (false == result)
+    {
+        *errorStatus = OpcUa_BadEncodingError;
+
+        SOPC_Logger_TraceError(
+            "ChunksMgr: treat send buffer: failed to encode message header (msgType=%d, scIdx=%" PRIu32
+            ", scCfgIdx=%" PRIu32 ")",
+            sendMsgType, scConnectionIdx, scConnection->endpointConnectionConfigIdx);
+    }
+    else
     {
         if (false == isSendTcpOnly)
         {
@@ -3015,6 +3063,12 @@ static bool SC_Chunks_TreatSendBuffer(
                     {
                         *errorStatus = OpcUa_BadResponseTooLarge;
                     }
+
+                    SOPC_Logger_TraceError(
+                        "ChunksMgr: treat send buffer: symmetric max body size check failed : %" PRIu32
+                        " > max = %" PRIu32 " (scIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
+                        bodySize, scConnection->symmSecuMaxBodySize, scConnectionIdx,
+                        scConnection->endpointConnectionConfigIdx);
                 }
 
                 if (result != false)
@@ -3064,6 +3118,11 @@ static bool SC_Chunks_TreatSendBuffer(
                     if (false == result)
                     {
                         *errorStatus = OpcUa_BadTcpInternalError;
+
+                        SOPC_Logger_TraceError(
+                            "ChunksMgr: treat send buffer: failed to encode asymmetric security header (scIdx=%" PRIu32
+                            ", scCfgIdx=%" PRIu32 ")",
+                            scConnectionIdx, scConnection->endpointConnectionConfigIdx);
                     }
                 }
 
@@ -3104,6 +3163,12 @@ static bool SC_Chunks_TreatSendBuffer(
                                 // Server side
                                 *errorStatus = OpcUa_BadResponseTooLarge;
                             }
+
+                            SOPC_Logger_TraceError(
+                                "ChunksMgr: treat send buffer: asymmetric max body size check failed : %" PRIu32
+                                " > max = %" PRIu32 " (scIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
+                                inputBuffer->length, scConnection->asymmSecuMaxBodySize, scConnectionIdx,
+                                scConnection->endpointConnectionConfigIdx);
                         }
                     }
                 }
@@ -3149,6 +3214,10 @@ static bool SC_Chunks_TreatSendBuffer(
                     if (false == result)
                     {
                         *errorStatus = OpcUa_BadTcpInternalError;
+
+                        SOPC_Logger_TraceError("ChunksMgr: treat send buffer: padding encoding failed (scIdx=%" PRIu32
+                                               ", scCfgIdx=%" PRIu32 ")",
+                                               scConnectionIdx, scConnection->endpointConnectionConfigIdx);
                     }
                 }
                 else if (toSign != false)
@@ -3159,6 +3228,11 @@ static bool SC_Chunks_TreatSendBuffer(
                     // TODO: avoid to compute non necessary crypto values
                     result = SC_Chunks_GetSendingCryptoSizes(scConnection, scConfig, false == isOPN, &tmpBool, &tmpBool,
                                                              &signatureSize, &tmpInt, &tmpInt);
+
+                    if (false == result)
+                    {
+                        *errorStatus = OpcUa_BadTcpInternalError;
+                    }
                 }
                 else
                 {
@@ -3188,6 +3262,11 @@ static bool SC_Chunks_TreatSendBuffer(
                         // Server side
                         *errorStatus = OpcUa_BadResponseTooLarge;
                     }
+
+                    SOPC_Logger_TraceError(
+                        "ChunksMgr: treat send buffer: asymmetric max sender certificate size check failed "
+                        "(scIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
+                        scConnectionIdx, scConnection->endpointConnectionConfigIdx);
                 }
             }
 
@@ -3226,8 +3305,11 @@ static bool SC_Chunks_TreatSendBuffer(
                         result = SC_Chunks_GetEncryptedDataLength(scConnection, scConfig, plainDataToEncryptLength,
                                                                   false == isOPN, // isSymmetricAlgo
                                                                   &encryptedDataLength);
-
-                        if (result != false)
+                        if (false == result)
+                        {
+                            *errorStatus = OpcUa_BadTcpInternalError;
+                        }
+                        else
                         {
                             messageSize =
                                 sequenceNumberPosition + encryptedDataLength; // non encrypted length + encrypted length
@@ -3313,6 +3395,15 @@ static bool SC_Chunks_TreatSendBuffer(
                 result = SC_Chunks_EncodeSignature(scConnection, nonEncryptedBuffer,
                                                    false == isOPN, // = isSymmetric
                                                    signatureSize);
+
+                if (false == result)
+                {
+                    *errorStatus = OpcUa_BadEncodingError;
+
+                    SOPC_Logger_TraceError("ChunksMgr: treat send buffer: encoding signature failed : (scIdx=%" PRIu32
+                                           ", scCfgIdx=%" PRIu32 ")",
+                                           scConnectionIdx, scConnection->endpointConnectionConfigIdx);
+                }
             }
 
             if (result != false)
@@ -3336,22 +3427,27 @@ static bool SC_Chunks_TreatSendBuffer(
                     {
                         result = SC_Chunks_EncryptMsg(scConnection, nonEncryptedBuffer,
                                                       false == isOPN, // = isSymmetric
-                                                      sequenceNumberPosition, encryptedDataLength, encryptedBuffer);
+                                                      sequenceNumberPosition, encryptedDataLength, encryptedBuffer,
+                                                      errorStatus);
+
+                        if (false == result)
+                        {
+                            // errorStatus set by SC_Chunks_EncryptMsg
+
+                            // Deallocate internal buffer (not set as outputBuffer since result == false)
+                            SOPC_Buffer_Delete(encryptedBuffer);
+                            encryptedBuffer = NULL;
+                        }
                     }
                     else
                     {
                         result = false;
+                        *errorStatus = OpcUa_BadOutOfMemory;
                     }
 
                     if (result != false)
                     {
                         *outputBuffer = encryptedBuffer;
-                    }
-                    else if (encryptedBuffer != NULL)
-                    {
-                        // Deallocate internal buffer (not set as outputBuffer since result == false)
-                        SOPC_Buffer_Delete(encryptedBuffer);
-                        encryptedBuffer = NULL;
                     }
 
                     if (inputBuffer != nonEncryptedBuffer)
@@ -3415,10 +3511,6 @@ static bool SC_Chunks_TreatSendBuffer(
             *outputBuffer = nonEncryptedBuffer;
         }
     }
-    else
-    {
-        *errorStatus = OpcUa_BadEncodingError;
-    }
 
     if (result == false)
     {
@@ -3479,7 +3571,8 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
 
                 if (result == false)
                 {
-                    SOPC_Logger_TraceError("ChunksMgr: raised INT_SC_RCV_FAILURE: %X: (epCfgIdx=%u, scCfgIdx=%u)",
+                    SOPC_Logger_TraceError("ChunksMgr: raised INT_SC_RCV_FAILURE: %X: (epCfgIdx=%" PRIu32
+                                           ", scCfgIdx=%" PRIu32 ")",
                                            OpcUa_BadInvalidArgument, scConnection->serverEndpointConfigIdx,
                                            scConnection->endpointConnectionConfigIdx);
                     SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, eltId, NULL,
