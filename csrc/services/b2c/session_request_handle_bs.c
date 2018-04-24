@@ -30,7 +30,7 @@
 
 /* Note: due to request handle generation on client side, request handle is unique regardless the session */
 /* Same size of array than request handles array */
-static constants__t_session_i client_requests[SOPC_MAX_PENDING_REQUESTS];
+static constants__t_session_i client_requests[SOPC_MAX_PENDING_REQUESTS + 1];
 
 /* Store number of pending requests remaining for session */
 static uint32_t session_pending_requests_nb[SOPC_MAX_SESSIONS + 1];
@@ -40,7 +40,8 @@ static uint32_t session_pending_requests_nb[SOPC_MAX_SESSIONS + 1];
   ------------------------*/
 void session_request_handle_bs__INITIALISATION()
 {
-    memset(client_requests, constants__c_session_indet, SOPC_MAX_PENDING_REQUESTS * sizeof(constants__t_session_i));
+    memset(client_requests, constants__c_session_indet,
+           (SOPC_MAX_PENDING_REQUESTS + 1) * sizeof(constants__t_session_i));
     memset(session_pending_requests_nb, 0, (SOPC_MAX_SESSIONS + 1) * sizeof(uint32_t));
 }
 
@@ -77,8 +78,8 @@ void session_request_handle_bs__client_remove_all_request_handles(
     const constants__t_session_i session_request_handle_bs__session)
 {
     assert(session_request_handle_bs__session != constants__c_session_indet);
-    for (uint32_t idx = 0;
-         idx < SOPC_MAX_PENDING_REQUESTS && session_pending_requests_nb[session_request_handle_bs__session] > 0; idx++)
+    for (uint32_t idx = 1;
+         idx <= SOPC_MAX_PENDING_REQUESTS && session_pending_requests_nb[session_request_handle_bs__session] > 0; idx++)
     {
         if (client_requests[idx] == session_request_handle_bs__session)
         {
