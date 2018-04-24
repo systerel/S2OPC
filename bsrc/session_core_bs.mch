@@ -139,27 +139,16 @@ OPERATIONS
     END
     ;
 
-    notify_set_session_state (session, prec_state, state) =
+    notify_set_session_state (session, prec_state, state, is_client) =
     PRE
         session    : t_session_i    &
         session    : t_session      &
         prec_state : t_sessionState &
         state      : t_sessionState &
-        state     /= e_session_closed
-    THEN
-        /* notify  user app when session activated */
-        skip
-    END
-    ;
-
-    prepare_close_session (session, state, is_client) =
-    PRE
-        session   : t_session_i &
-        session   : t_session   &
-        state     : t_sessionState &
         is_client : BOOL
     THEN
-        skip /* Generates events to application on session state */
+        /* Generates events on session state change (application, internal events) */
+        skip
     END
     ;
 

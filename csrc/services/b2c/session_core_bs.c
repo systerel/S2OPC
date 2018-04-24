@@ -96,37 +96,52 @@ void session_core_bs__INITIALISATION(void)
 
 void session_core_bs__notify_set_session_state(const constants__t_session_i session_core_bs__session,
                                                const constants__t_sessionState session_core_bs__prec_state,
-                                               const constants__t_sessionState session_core_bs__state)
+                                               const constants__t_sessionState session_core_bs__state,
+                                               const t_bool session_core_bs__is_client)
 {
-    constants__t_channel_i channel = constants__c_channel_indet;
-    bool is_client_channel = false;
-
-    session_core_1__get_session_channel(session_core_bs__session, &channel);
-
-    if (constants__c_channel_indet != channel)
+    if (session_core_bs__is_client)
     {
-        channel_mgr_1__is_client_channel(channel, &is_client_channel);
-        if (is_client_channel != false)
+        if (session_core_bs__state == constants__e_session_userActivated)
         {
-            if (session_core_bs__state == constants__e_session_userActivated)
-            {
-                SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
-                                                (uint32_t) session_core_bs__session, NULL,
-                                                session_to_activate_context[session_core_bs__session]);
-            }
-            else if (session_core_bs__state == constants__e_session_scOrphaned ||
-                     ((session_core_bs__state == constants__e_session_userActivating ||
-                       session_core_bs__state == constants__e_session_scActivating) &&
-                      session_core_bs__prec_state == constants__e_session_userActivated))
-            {
-                // Session became orphaned OR
-                // Already activated session is activating again on a new user or SC
+            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
+                                            (uint32_t) session_core_bs__session, NULL,
+                                            session_to_activate_context[session_core_bs__session]);
+        }
+        else if (session_core_bs__state == constants__e_session_scOrphaned ||
+                 ((session_core_bs__state == constants__e_session_userActivating ||
+                   session_core_bs__state == constants__e_session_scActivating) &&
+                  session_core_bs__prec_state == constants__e_session_userActivated))
+        {
+            // Session became orphaned OR
+            // Already activated session is activating again on a new user or SC
 
-                // if orphaned will be reactivated or closed => notify as reactivating to avoid use of session by
-                // application
-                SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_REACTIVATING),
-                                                (uint32_t) session_core_bs__session, NULL,
-                                                session_to_activate_context[session_core_bs__session]);
+            // if orphaned will be reactivated or closed => notify as reactivating to avoid use of session by
+            // application
+            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_REACTIVATING),
+                                            (uint32_t) session_core_bs__session, NULL,
+                                            session_to_activate_context[session_core_bs__session]);
+        }
+        else if (session_core_bs__state == constants__e_session_closed)
+        {
+            if (session_core_bs__prec_state != constants__e_session_closing &&
+                session_core_bs__prec_state != constants__e_session_userActivated)
+            {
+                // If session not in closing state or already activated, it is in activation state regarding user app
+                // => notify activation failed
+                SOPC_ServicesToApp_EnqueueEvent(
+                    SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
+                    (uint32_t) session_core_bs__session,                    // session id
+                    NULL,                                                   // user ?
+                    session_to_activate_context[session_core_bs__session]); // user application session context
+            }
+            else
+            {
+                // Activated session closing
+                SOPC_ServicesToApp_EnqueueEvent(
+                    SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
+                    (uint32_t) session_core_bs__session, // session id
+                    NULL,
+                    session_to_activate_context[session_core_bs__session]); // user application session context
             }
         }
     }

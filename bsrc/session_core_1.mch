@@ -141,8 +141,10 @@ OPERATIONS
     END
     ;
 
-    p_session <-- init_new_session =
-    BEGIN
+    p_session <-- init_new_session (is_client) =
+    PRE
+        is_client : BOOL
+    THEN
         IF s_session = t_session
         THEN
             p_session := c_session_indet
@@ -160,13 +162,14 @@ OPERATIONS
     END
     ;
 
-    create_session (session, channel, state) =
+    create_session (session, channel, state, is_client) =
     PRE
         session : t_session_i  &
         session : dom(a_state) &
         channel : t_channel_i  &
         channel : t_channel    &
-        state   : {e_session_created, e_session_creating}
+        state   : {e_session_created, e_session_creating} &
+        is_client : BOOL
     THEN
         a_channel (session) := channel ||
         a_state   (session) := state
@@ -208,12 +211,13 @@ OPERATIONS
     END
     ;
 
-    set_session_state (session, state) =
+    set_session_state (session, state, is_client) =
     PRE
         session : t_session_i    &
         session : dom(a_state)   &
         state   : t_sessionState &
-        state  /: {e_session_closed}
+        state  /: {e_session_closed} &
+        is_client : BOOL
     THEN
         a_state (session) := state
         /* + notify  user app when session activated */

@@ -304,7 +304,7 @@ OPERATIONS
         IF res_activated = TRUE THEN
             set_session_user (session, user);
             set_session_channel (session, channel);
-            set_session_state (session, e_session_userActivated)
+            set_session_state (session, e_session_userActivated, FALSE)
         END
     END
     ;
@@ -312,7 +312,7 @@ OPERATIONS
     /* END OF LOCAL OPERATIONS */
     nsession <-- client_init_session_sm =
     BEGIN
-        nsession <-- init_new_session
+        nsession <-- init_new_session (TRUE)
     END;
 
     valid <-- client_create_session_req_sm (session, channel, create_req_msg) =
@@ -321,7 +321,7 @@ OPERATIONS
         l_nonce_needed,
         l_nonce
     IN
-        create_session (session, channel, e_session_creating);
+        create_session (session, channel, e_session_creating, TRUE);
         l_channel_config_idx <-- get_channel_info (channel);
         valid, l_nonce_needed <-- client_create_session_req_do_crypto(session, channel, l_channel_config_idx);
         IF valid = TRUE THEN
@@ -353,10 +353,10 @@ OPERATIONS
         l_bret
     IN
         service_ret := e_sc_bad_out_of_memory;
-        l_nsession <-- init_new_session;
+        l_nsession <-- init_new_session (FALSE);
         l_valid_session <-- is_valid_session (l_nsession);
         IF l_valid_session = TRUE THEN
-            create_session(l_nsession, channel, e_session_created);
+            create_session(l_nsession, channel, e_session_created, FALSE);
             /* TODO: check request parameters: client certificate */
             /*l_valid_req <-- server_create_session_valid_req(create_req_msg) */
             l_nsession_token <-- server_get_fresh_session_token (l_nsession);
@@ -420,14 +420,14 @@ OPERATIONS
             l_valid <-- client_create_session_check_crypto(session, l_channel_config_idx, create_resp_msg);
             IF l_valid = TRUE THEN
                 // channel: only for the precondition
-                set_session_state (session, e_session_created);
+                set_session_state (session, e_session_created, TRUE);
                 client_set_session_token (session, session_token);
                 drop_NonceClient(session)
             ELSE
                 bret := FALSE
             END
         ELSE
-            set_session_state (session, e_session_created);
+            set_session_state (session, e_session_created, TRUE);
             client_set_session_token (session, session_token)
         END
     END
@@ -478,7 +478,7 @@ OPERATIONS
         END;
         IF ret = e_sc_ok THEN
             set_session_user(session, user);
-            set_session_state(session, e_session_userActivating)
+            set_session_state(session, e_session_userActivating, TRUE)
         END
     END
     ;
@@ -492,7 +492,7 @@ OPERATIONS
         /* TODO: populate msg with parameters  */
         write_activate_msg_user(activate_req_msg, l_user);
         set_session_channel(session, channel);
-        set_session_state(session, e_session_scActivating)
+        set_session_state(session, e_session_scActivating, TRUE)
     END
     ;
 
@@ -582,7 +582,7 @@ OPERATIONS
         l_valid_response <-- client_activate_session_resp_check(session, l_channel_config_idx,  activate_resp_msg);
         IF l_valid_response = TRUE 
         THEN
-            set_session_state (session, e_session_userActivated);
+            set_session_state (session, e_session_userActivated, TRUE);
             bret := TRUE
         ELSE
             bret := FALSE
@@ -602,7 +602,7 @@ OPERATIONS
             THEN
                 /* Active sessions set to orphaned and channel config idx associated */
                 set_session_orphaned (p_session, p_channel_config_idx);
-                set_session_state (p_session, e_session_scOrphaned)
+                set_session_state (p_session, e_session_scOrphaned, TRUE)
             ELSE
                 /* Inactive sessions or all orphaned sessions (if no new channel can be associated) */
                 set_session_state_closed (p_session, TRUE)
@@ -662,7 +662,7 @@ OPERATIONS
             IF l_state = e_session_userActivated
             THEN
                 set_session_orphaned (p_session, c_channel_config_idx_indet);
-                set_session_state (p_session, e_session_scOrphaned)
+                set_session_state (p_session, e_session_scOrphaned, FALSE)
             ELSE
                 set_session_state_closed (p_session, FALSE)
             END
@@ -723,7 +723,7 @@ OPERATIONS
         THEN
             session_token <-- client_get_token_from_session (session);
             /* TODO: populate msg with parameters */
-            set_session_state (session, e_session_closing);
+            set_session_state (session, e_session_closing, TRUE);
             ret := e_sc_ok
         ELSE
             channel := c_channel_indet;
