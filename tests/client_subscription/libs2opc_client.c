@@ -21,7 +21,13 @@
  *
  */
 
+#include "sopc_builtintypes.h"
+#include "sopc_log_manager.h"
+#include "sopc_toolkit_constants.h"
+
+#define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
+
 #include "state_machine.h"
 
 SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void);

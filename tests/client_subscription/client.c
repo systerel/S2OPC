@@ -27,8 +27,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libs2opc_client.h"
+#include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_log_manager.h"
+#include "sopc_toolkit_constants.h"
+
+#define SKIP_S2OPC_DEFINITIONS
+#include "libs2opc_client.h"
 
 /* Secure Channel configuration */
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
