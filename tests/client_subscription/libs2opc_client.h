@@ -32,6 +32,9 @@
   gcc also works but loses parameter names in function prototypes, that is why the g++ and 'extern "C"' are used.
 */
 
+/* Version information */
+#define SOPC_LIBSUB_VERSION "0.0.1*"
+
 /*
  =================
  TYPES DEFINITION

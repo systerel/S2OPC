@@ -32,12 +32,39 @@
 
 #include "state_machine.h"
 
-SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void);
-SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg);
-SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
-                                                  SOPC_LibSub_ConnectionId* c_id);
+SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void)
+{
+    return "Subscribe library v" SOPC_LIBSUB_VERSION " on S2OPC Toolkit v" SOPC_TOOLKIT_VERSION;
+}
+
+SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
+{
+    return SOPC_STATUS_NOK;
+}
+
+SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg, SOPC_LibSub_ConnectionId* c_id)
+{
+    return SOPC_STATUS_NOK;
+}
+
+SOPC_ReturnStatus SOPC_LibSub_Configured(void)
+{
+    return SOPC_STATUS_NOK;
+}
+
 SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConnectionId c_id,
                                       const int64_t publish_period_ms,
-                                      SOPC_LibSub_DataChangeCbk data_change_callback);
-SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_DataId* d_id);
-SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId c_id);
+                                      SOPC_LibSub_DataChangeCbk data_change_callback)
+{
+    return SOPC_STATUS_NOK;
+}
+
+SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_DataId* d_id)
+{
+    return SOPC_STATUS_NOK;
+}
+
+SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId c_id)
+{
+    return SOPC_STATUS_NOK;
+}

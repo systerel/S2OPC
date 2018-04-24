@@ -56,6 +56,8 @@ int main(void)
                                          .token_target = 3};
     SOPC_LibSub_ConnectionId con_id = 0;
 
+    log_callback(SOPC_LOG_LEVEL_INFO, SOPC_LibSub_GetVersion());
+
     if (SOPC_STATUS_OK != SOPC_LibSub_Initialize(&cfg_cli))
     {
         log_callback(SOPC_LOG_LEVEL_ERROR, "Could not initialize library");
