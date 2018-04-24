@@ -119,10 +119,6 @@ typedef struct
 } SOPC_LibSub_Value;
 
 /*
- ===================
- SERVICES DEFINITION
- =================== */
-/*
   @description
     Log callback type
   @param log_level
@@ -148,18 +144,9 @@ typedef void (*SOPC_LibSub_DataChangeCbk)(const SOPC_LibSub_ConnectionId c_id,
                                           const SOPC_LibSub_Value* value);
 
 /*
- @description
-   Identification / encryption configuration
- @field username
-   Username. NULL for anonymous access
- @field password
-   Password. No significant when username is NULL*/
-// TBC...
-typedef struct
-{
-    SOPC_LibSub_CstString username;
-    SOPC_LibSub_CstString password;
-} SOPC_LibSub_UserIdCfg;
+ =====================
+ STRUCTURES DEFINITION
+ ===================== */
 
 /*
  @description
@@ -174,6 +161,20 @@ typedef struct
     SOPC_LibSub_DisconnectCbk disconnect_callback;
     // TODO : configuration des jetons?
 } SOPC_LibSub_StaticCfg;
+
+/*
+ @description
+   User identification
+ @field username
+   Username. NULL for anonymous access
+ @field password
+   Password. No significant when username is NULL*/
+// TBC...
+typedef struct
+{
+    SOPC_LibSub_CstString username;
+    SOPC_LibSub_CstString password;
+} SOPC_LibSub_UserIdCfg;
 
 /*
  @description
