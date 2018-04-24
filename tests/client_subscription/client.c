@@ -45,15 +45,18 @@
 /* Callbacks */
 void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
 void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
+void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
+                         const SOPC_LibSub_DataId d_id,
+                         const SOPC_LibSub_Value* value);
 
 /* Main subscribing client */
 int main(void)
 {
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = log_callback, .disconnect_callback = disconnect_callback};
-    SOPC_LibSub_ConnectionCfg cfg_con = {
-        .server_url = ENDPOINT_URL,
-        .timeout_ms = 10000 /* TODO: change timeout */,
-        .identification_cfg.username = "foobar".identification_cfg.password = "foobar"};
+    SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = ENDPOINT_URL,
+                                         .timeout_ms = 10000 /* TODO: change timeout */,
+                                         .identification_cfg.username = "foobar",
+                                         .identification_cfg.password = "foobar"};
     SOPC_LibSub_ConnectionId con_id = 0;
 
     if (SOPC_STATUS_OK != SOPC_LibSub_Initialize(&cfg_cli))
@@ -74,7 +77,7 @@ int main(void)
         return 3;
     }
 
-    if (SOPC_STATUS_OK != SOPC_LibSub_Connect())
+    if (SOPC_STATUS_OK != SOPC_LibSub_Connect(con_id, 1000, datachange_callback))
     {
         log_callback(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit");
         return 4;
@@ -93,5 +96,16 @@ void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
     char sz[128];
 
     snprintf(sz, sizeof(sz) / sizeof(sz[0]), "Client %" PRIi64 " disconnected", c_id);
-    log_callback(SOPC_log_info, sz);
+    log_callback(SOPC_LOG_LEVEL_INFO, sz);
+}
+
+void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
+                         const SOPC_LibSub_DataId d_id,
+                         const SOPC_LibSub_Value* value)
+{
+    (void) value;
+    char sz[1024];
+
+    snprintf(sz, sizeof(sz) / sizeof(sz[0]), "Client %" PRIi64 " data change:\n  value id %" PRIu32 ".", c_id, d_id);
+    log_callback(SOPC_LOG_LEVEL_INFO, sz);
 }
