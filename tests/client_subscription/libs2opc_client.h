@@ -37,57 +37,20 @@
  TYPES DEFINITION
  ================= */
 
-// C Const String type
-typedef const char* SOPC_LibSub_CstString;
-
-// C String type
-typedef char* SOPC_LibSub_String;
-
-// Fixed size integers
-#include <stdint.h>
-#if 0
-typedef signed long long int int64_t;
-typedef unsigned long long int uint64_t;
-typedef unsigned int uint32_t;
-#if __cplusplus
-static_assert(sizeof(int64_t) == 8, "Invalid int64_t definition");
-static_assert(sizeof(uint64_t) == 8, "Invalid uint64_t definition");
-static_assert(sizeof(uint32_t) == 4, "Invalid uint32_t definition");
-#endif
-#endif
-
-// Connection identifier
-typedef int64_t SOPC_LibSub_ConnectionId;
-
-// Data identifier (used for subscription change notification)
-typedef uint32_t SOPC_LibSub_DataId;
+/* S2OPC types: define them except when SKIP_S2OPC_DEFINITIONS is defined.
+ * To use the LibSub with other parts of the S2OPC Toolkit, you shall define SKIP_S2OPC_DEFINITIONS
+ * and includes the following files before including this header:
+ *  sopc_builtintypes.h
+ *  sopc_toolkit_constants.h
+ *  sopc_log_manager.h
+ */
+#ifndef SKIP_S2OPC_DEFINITIONS
 
 /*
   Data value quality
-  TBD? Masks for BAD and UNCERTAIN quality? */
+  TBD? Masks for BAD and UNCERTAIN quality?
+  Taken from sop "sopc_builtintypes.h" */
 typedef uint32_t SOPC_StatusCode;
-
-// Timestamp (NTP Format)
-typedef uint64_t SOPC_LibSub_Timestamp;
-
-// Data value type
-typedef enum {
-    SOPC_LibSub_DataType_bool = 1,
-    SOPC_LibSub_DataType_integer = 2,
-    SOPC_LibSub_DataType_string = 3,
-    SOPC_LibSub_DataType_bytestring = 4
-} SOPC_LibSub_DataType;
-
-/*
-  @description
-    Structure defining the value of a node
-  @field quality
-    The value quality.
-  @field type
-    The value type. Specifies the type of '*value' amongst:
-    - SOPC_LibSub_CstString (SOPC_LibSub_DataType_string / SOPC_LibSub_DataType_bytestring)
-    - int64_t (SOPC_LibSub_DataType_bool / SOPC_LibSub_DataType_integer)
-*/
 
 /* Result, taken from "sopc_toolkit_constants.h" */
 typedef enum SOPC_ReturnStatus {
@@ -111,6 +74,41 @@ typedef enum {
     SOPC_LOG_LEVEL_DEBUG = 3
 } SOPC_Log_Level;
 
+#endif
+
+/* C String type */
+typedef char* SOPC_LibSub_String;
+
+/* C Const String type */
+typedef const char* SOPC_LibSub_CstString;
+
+/* Connection identifier */
+typedef int64_t SOPC_LibSub_ConnectionId;
+
+/* Data identifier (used for subscription change notification) */
+typedef uint32_t SOPC_LibSub_DataId;
+
+/* Timestamp (NTP Format) */
+typedef uint64_t SOPC_LibSub_Timestamp;
+
+/* Data value type */
+typedef enum {
+    SOPC_LibSub_DataType_bool = 1,
+    SOPC_LibSub_DataType_integer = 2,
+    SOPC_LibSub_DataType_string = 3,
+    SOPC_LibSub_DataType_bytestring = 4
+} SOPC_LibSub_DataType;
+
+/*
+  @description
+    Structure defining the value of a node
+  @field quality
+    The value quality.
+  @field type
+    The value type. Specifies the type of '*value' amongst:
+    - SOPC_LibSub_CstString (SOPC_LibSub_DataType_string / SOPC_LibSub_DataType_bytestring)
+    - int64_t (SOPC_LibSub_DataType_bool / SOPC_LibSub_DataType_integer)
+*/
 typedef struct
 {
     SOPC_LibSub_DataType type;
