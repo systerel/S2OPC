@@ -48,9 +48,12 @@ int main(void)
 {
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = log_callback, .disconnect_callback = disconnect_callback};
     SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = ENDPOINT_URL,
+                                         .security_policy = SECURITY_POLICY,
+                                         .security_mode = SECURITY_MODE,
+                                         .username = "foobar",
+                                         .password = "foobar",
                                          .timeout_ms = 10000 /* TODO: change timeout */,
-                                         .identification_cfg.username = "foobar",
-                                         .identification_cfg.password = "foobar"};
+                                         .token_target = 3};
     SOPC_LibSub_ConnectionId con_id = 0;
 
     if (SOPC_STATUS_OK != SOPC_LibSub_Initialize(&cfg_cli))
