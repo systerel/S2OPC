@@ -678,3 +678,22 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
 		s2opc_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
 	endif()
 endif()
+
+###### Subscribing client library and binary ######
+
+# Library, always static
+set(LIBSUBSCRIBE_PATH "tests/client_subscription")
+add_library(libsubscribe STATIC "${LIBSUBSCRIBE_PATH}/libs2opc_client.c")
+add_dependencies(libsubscribe ingopcs)
+target_link_libraries(libsubscribe PRIVATE ingopcs) # ${INGOPCS_DEP_LIBS})
+target_include_directories(libsubscribe PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
+                                                ${INGOPCS_PRIVATE_INCLUDES})
+set_target_properties(libsubscribe PROPERTIES PUBLIC_HEADER "${LIBSUBSCRIBE_PATH}/libs2opc_client.h")
+install(TARGETS libsubscribe
+        ARCHIVE DESTINATION lib
+        PUBLIC_HEADER DESTINATION include)
+
+# Demo client
+add_executable(libsubscribe_client "${LIBSUBSCRIBE_PATH}/client.c")
+target_link_libraries(libsubscribe_client PRIVATE libsubscribe)
+#target_include_directories(libsubscribe_client PRIVATE ${LIBSUBSCRIBE_PATH})
