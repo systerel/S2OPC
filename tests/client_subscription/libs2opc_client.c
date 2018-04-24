@@ -24,13 +24,12 @@
 #include "libs2opc_client.h"
 #include "state_machine.h"
 
-cst_string_t s2opc_client_getVersion(void);
-s2opc_client_result_t s2opc_client_initialize(const s2opc_client_static_cfg_t* pCfg);
-s2opc_client_result_t s2opc_client_configure_connection(const s2opc_client_connect_cfg_t* pCfg,
-                                                        s2opc_client_connection_id_t* c_id);
-s2opc_client_result_t s2opc_client_connect(const s2opc_client_connection_id_t c_id,
-                                           const int64_t publish_period_ms,
-                                           data_change_callback_t data_change_callback);
-s2opc_client_result_t s2opc_client_add_to_subscription(const s2opc_client_connection_id_t c_id,
-                                                       s2opc_client_data_id_t* d_id);
-s2opc_client_result_t s2opc_client_disconnect(const s2opc_client_connection_id_t c_id);
+SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void);
+SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg);
+SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
+                                                  SOPC_LibSub_ConnectionId* c_id);
+SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConnectionId c_id,
+                                      const int64_t publish_period_ms,
+                                      SOPC_LibSub_DataChangeCbk data_change_callback);
+SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_DataId* d_id);
+SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId c_id);
