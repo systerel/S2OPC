@@ -99,8 +99,11 @@ typedef char* SOPC_LibSub_String;
 /* C Const String type */
 typedef const char* SOPC_LibSub_CstString;
 
+/* Connnection configuration identifier */
+typedef uint32_t SOPC_LibSub_ConfigurationId;
+
 /* Connection identifier */
-typedef int64_t SOPC_LibSub_ConnectionId;
+typedef uint32_t SOPC_LibSub_ConnectionId;
 
 /* Data identifier (used for subscription change notification) */
 typedef uint32_t SOPC_LibSub_DataId;
@@ -186,24 +189,46 @@ typedef struct
  @field security_policy
    The chosen OPC-UA security policy for the connection, one of the SOPC_SecurityPolicy_*_URI string
  @field security_mode
-   The chosen OPC-UA security mode for the connection, one of the OpcUa_MessageSecurityMode constant.
+   The chosen OPC-UA security mode for the connection, one of the OpcUa_MessageSecurityMode constant
+ @field path_cert_auth
+   Path to the root certificate authority in the DER format
+ @field path_cert_srv
+   Path to the server certificate in the DER format, signed by the root certificate authority
+ @field path_cert_cli
+   Path to the client certificate in the DER format, signed by the root certificate authority
+ @field path_key_cli
+   Path to the client private key which is paired to the public key signed server certificate, in the DER format
+ @field path_crl
+   Path to the certificate revocation list in the DER format
  @field username
-   Username. NULL for anonymous access
+   Username, NULL for anonymous access
  @field password
-   Password. Not significant when username is NULL
+   Password, Not significant when username is NULL
+ @field publish_period_ms
+    The requested publish period for the created subscription (in milliseconds)
+ @field data_change_callback
+    The callback for data change notification
  @field timeout_ms
    Connection timeout (milliseconds)
+ @field sc_lifetime
+   Time before secure channel renewal (milliseconds). A parameter larger than 60000 is recommended.
  @field token_target
-   Number of tokens (PublishRequest) that the client tries to maintain throughout the connection.
+   Number of tokens (PublishRequest) that the client tries to maintain throughout the connection
  */
 typedef struct
 {
     SOPC_LibSub_CstString server_url;
     SOPC_LibSub_CstString security_policy;
     OpcUa_MessageSecurityMode security_mode;
+    SOPC_LibSub_CstString path_cert_auth;
+    SOPC_LibSub_CstString path_cert_srv;
+    SOPC_LibSub_CstString path_cert_cli;
+    SOPC_LibSub_CstString path_key_cli;
+    SOPC_LibSub_CstString path_crl;
     SOPC_LibSub_CstString username;
     SOPC_LibSub_CstString password;
-    int64_t timeout_ms;
+    int64_t publish_period_ms, SOPC_LibSub_DataChangeCbk data_change_callback, int64_t timeout_ms;
+    uint32_t sc_lifetime;
     uint16_t token_target;
 } SOPC_LibSub_ConnectionCfg;
 
@@ -222,47 +247,46 @@ SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void);
     Configure the library. This function shall be called once by the host application
     before any other service can be used.
  @param pCfg
-    non null pointer to the static configuration
+    Non null pointer to the static configuration. The content of the configuration is copied
+    and the object pointed by /p pCfg can be freed by the caller.
  @return
     The operation status */
 SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg);
 
 /*
  @description
-    Configure a future connection. This function shall be called once per connection
-    before a call to SOPC_LibSub_Configured().
+    Configure a future connection. This function shall be called once per connection before
+    a call to SOPC_LibSub_Configured(). The given cfg_id is later used to create connections.
  @param pCfg
-    non null pointer to the static configuration.
- @param c_id [out, not null]
-    The connection id. Set when the value returned is "SOPC_no_error".
+    Non null pointer to the connection configuration.
+ @param cfg_id [out, not null]
+    The configuration connection id. Set when the value returned is "SOPC_STATUS_OK".
  @return
     The operation status */
 SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
-                                                  SOPC_LibSub_ConnectionId* c_id);
+                                                  SOPC_LibSub_ConfigurationId* cfg_id);
 
 /*
  @description
-    Mark the library as configured. All calls to s2opc_clilent_configure_connection() shall
-    be done prior to calling this function. All calls to SOPC_LibSub_Connect shall be done
+    Mark the library as configured. All calls to SOPC_LibSub_ConfigureConnection() shall
+    be done prior to calling this function. All calls to SOPC_LibSub_Connect() shall be done
     after calling this function.
  @return
-    the operation status */
+    The operation status */
 SOPC_ReturnStatus SOPC_LibSub_Configured(void);
 
 /*
  @description
-    Connect the client with id c_id to a remote OPC server, and create a subscription.
- @param c_id
-    A connection id return by a call to SOPC_.
- @param publish_period_ms
-    The requestes publish period (in milliseconds)
- @param data_change_callback
-    The callback for data change notification
+    Creates a new connection to a remote OPC server from configuration id cfg_id.
+    The connection represent the whole client and is later identified by the returned cli_id.
+    A subscription is created and associated with this client.
+ @param cfg_id
+    The parameters of the connection to create, return by SOPC_LibSub_ConfigureConnection().
+ @param cli_id [out, not null]
+    The connection id of the newly created client, set when return is SOPC_STATUS_OK.
  @return
     The operation status */
-SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConnectionId c_id,
-                                      const int64_t publish_period_ms,
-                                      SOPC_LibSub_DataChangeCbk data_change_callback);
+SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfg_id, SOPC_LibSub_ConnectionId* cli_id);
 
 /*
  @description

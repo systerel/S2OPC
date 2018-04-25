@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "libs2opc_client.h"
+#include "toolkit_helpers.h"
 
 /* Secure Channel configuration */
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
