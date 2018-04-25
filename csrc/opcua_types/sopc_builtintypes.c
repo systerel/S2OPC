@@ -2246,6 +2246,42 @@ void SOPC_QualifiedName_ClearAux(void* value)
     SOPC_QualifiedName_Clear((SOPC_QualifiedName*) value);
 }
 
+SOPC_ReturnStatus SOPC_QualifiedName_ParseCString(SOPC_QualifiedName* qname, const char* str)
+{
+    SOPC_StatusCode status = SOPC_STATUS_OK;
+
+    if (qname == NULL || str == NULL)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (status == SOPC_STATUS_OK)
+    {
+        char* colon = strchr(str, ':');
+        qname->NamespaceIndex = 0;
+
+        if (colon == NULL)
+        {
+            status = SOPC_String_CopyFromCString(&qname->Name, str);
+        }
+        else
+        {
+            status = SOPC_strtouint16_t(str, &qname->NamespaceIndex, 10, ':');
+
+            if (status == SOPC_STATUS_OK)
+            {
+                status = SOPC_String_CopyFromCString(&qname->Name, colon + 1);
+            }
+            else
+            {
+                status = SOPC_String_CopyFromCString(&qname->Name, str);
+            }
+        }
+    }
+
+    return status;
+}
+
 void SOPC_QualifiedName_Clear(SOPC_QualifiedName* qname)
 {
     if (qname != NULL)

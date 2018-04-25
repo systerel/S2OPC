@@ -489,6 +489,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_Compare(const SOPC_QualifiedName* left,
 SOPC_ReturnStatus SOPC_QualifiedName_CompareAux(const void* left, const void* right, int32_t* comparison);
 void SOPC_QualifiedName_Clear(SOPC_QualifiedName* qname);
 void SOPC_QualifiedName_ClearAux(void* value);
+SOPC_ReturnStatus SOPC_QualifiedName_ParseCString(SOPC_QualifiedName* qname, const char* str);
 
 void SOPC_LocalizedText_Initialize(SOPC_LocalizedText* localizedText);
 void SOPC_LocalizedText_InitializeAux(void* value);

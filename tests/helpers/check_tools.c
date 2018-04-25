@@ -3125,6 +3125,50 @@ START_TEST(test_ua_string_type)
 }
 END_TEST
 
+START_TEST(test_ua_qname_parse)
+{
+    static const struct
+    {
+        const char* input;
+        const char* name;
+        uint16_t ns;
+    } test_data[] = {{
+                         "Hello",
+                         "Hello",
+                         0,
+                     },
+                     {
+                         "42:Hello",
+                         "Hello",
+                         42,
+                     },
+                     {
+                         ":Hello",
+                         ":Hello",
+                         0,
+                     },
+                     {
+                         "Hello:World",
+                         "Hello:World",
+                         0,
+                     },
+                     {NULL, NULL, 0}};
+
+    for (size_t i = 0; test_data[i].input != NULL; ++i)
+    {
+        SOPC_QualifiedName qname;
+        SOPC_QualifiedName_Initialize(&qname);
+
+        SOPC_ReturnStatus status = SOPC_QualifiedName_ParseCString(&qname, test_data[i].input);
+        ck_assert_uint_eq(SOPC_STATUS_OK, status);
+        ck_assert_str_eq(test_data[i].name, SOPC_String_GetRawCString(&qname.Name));
+        ck_assert_uint_eq(test_data[i].ns, qname.NamespaceIndex);
+
+        SOPC_QualifiedName_Clear(&qname);
+    }
+}
+END_TEST
+
 Suite* tests_make_suite_tools(void)
 {
     Suite* s;
@@ -3167,6 +3211,7 @@ Suite* tests_make_suite_tools(void)
 
     tc_ua_types = tcase_create("UA Types");
     tcase_add_test(tc_ua_types, test_ua_string_type);
+    tcase_add_test(tc_ua_types, test_ua_qname_parse);
     suite_add_tcase(s, tc_ua_types);
 
     return s;
