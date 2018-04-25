@@ -1,0 +1,182 @@
+/*
+ *  Copyright (C) 2018 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION
+    subscription_core_i
+REFINES
+    subscription_core
+    
+SEES
+    constants,
+    message_in_bs,
+    message_out_bs,
+    request_handle_bs
+    
+IMPORTS
+    monitored_item_notification_queue_bs,
+    monitored_item_queue_bs,
+    publish_request_queue_bs
+    
+OPERATIONS
+    
+    is_valid <-- is_valid_subscription_on_session (p_session, p_subscription) =
+    BEGIN
+        is_valid := FALSE
+    END
+    ;
+    
+    is_valid <-- is_valid_subscription (p_subscription) =
+    BEGIN
+        is_valid := FALSE
+    END
+    ;
+        
+    l_has_subscription <-- has_subscription (p_session) =
+    BEGIN
+        l_has_subscription := FALSE
+    END
+    ;
+    
+    l_subscription <-- get_subscription (p_session) =
+    BEGIN
+        l_subscription := c_subscription_indet
+    END
+    ;
+    
+    empty_session_publish_requests (p_subscription) =
+    BEGIN
+        skip
+    END
+    ;
+    
+    remove_subscription_session (p_subscription, p_session) =
+    BEGIN
+        skip
+    END
+    ;
+
+    revisedPublishInterval, revisedLifetimeCount, revisedMaxKeepAlive
+      <-- compute_create_subscription_revised_params (p_session,
+                                                      p_reqPublishInterval,
+                                                      p_reqLifetimeCount,
+                                                      p_reqMaxKeepAlive) =
+    BEGIN
+        revisedPublishInterval := c_opcua_duration_indet;
+        revisedLifetimeCount := 0;
+        revisedMaxKeepAlive := 0
+    END
+    ;
+    
+    StatusCode_service, subscription <-- create_subscription (p_session,
+                                                              p_revPublishInterval,
+                                                              p_revLifetimeCount,
+                                                              p_revMaxKeepAlive,
+                                                              p_maxNotificationsPerPublish,
+                                                              p_publishEnabled) =
+    BEGIN
+        StatusCode_service := c_StatusCode_indet;
+        subscription := c_subscription_indet
+    END
+    ;
+    
+    delete_subscription (p_subscription) =
+    BEGIN
+        skip
+    END
+    ;
+    
+    StatusCode_service, async_resp_msg, subscription, notifMsg
+      <-- receive_publish_request (p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg) =
+    BEGIN
+        StatusCode_service := c_StatusCode_indet;
+        async_resp_msg := FALSE;
+        subscription := c_subscription_indet;
+        notifMsg := c_notif_msg_indet
+    END
+    ;
+    
+    revisedSamplingItv, revisedQueueSize <-- compute_create_montitored_item_revised_params (p_reqSamplingItv, p_reqQueueSize) =
+    BEGIN
+        revisedSamplingItv := c_opcua_duration_indet;
+        revisedQueueSize := 0
+    END
+    ;
+
+    StatusCode_service, monitoredItem <-- create_monitored_item (p_subscription,
+                                                                 p_node,
+                                                                 p_aid,
+                                                                 p_timestampToReturn,
+                                                                 p_monitoringMode,
+                                                                 p_clientHandle) =
+    BEGIN
+        StatusCode_service := c_StatusCode_indet;
+        monitoredItem := c_monitoredItem_indet
+    END
+    ;
+    
+    p_close_sub, p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_notifMsg
+      <-- server_subscription_core_publish_timeout_check_lifetime (p_subscription) =
+    BEGIN
+        p_close_sub := FALSE;
+        p_msg_to_send := FALSE;
+        p_session := c_session_indet;
+        p_publish_resp_msg := c_msg_indet;
+        p_req_handle := c_server_request_handle_any;
+        p_req_context := c_request_context_indet;
+        p_notifMsg := c_notif_msg_indet
+    END
+    ;
+        
+    p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_notifMsg, p_moreNotifs, p_morePubReqs
+      <-- server_subscription_core_publish_timeout (p_subscription) =
+    BEGIN
+        p_msg_to_send := FALSE;
+        p_session := c_session_indet;
+        p_publish_resp_msg := c_msg_indet;
+        p_req_handle := c_server_request_handle_any;
+        p_req_context := c_request_context_indet;
+        p_notifMsg := c_notif_msg_indet;
+        p_moreNotifs := FALSE;
+        p_morePubReqs := FALSE
+    END
+    ;
+    
+    p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_notifMsg, p_moreNotifs, p_morePubReqs
+      <-- server_subscription_core_publish_timeout_return_moreNotifs (p_subscription) =
+    BEGIN
+        p_msg_to_send := FALSE;
+        p_session := c_session_indet;
+        p_publish_resp_msg := c_msg_indet;
+        p_req_handle := c_server_request_handle_any;
+        p_req_context := c_request_context_indet;
+        p_notifMsg := c_notif_msg_indet;
+        p_moreNotifs := FALSE;
+        p_morePubReqs := FALSE
+    END
+    ;
+    
+    monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_node) =
+    BEGIN
+        monitoredItemQueue := c_monitoredItemQueue_indet
+    END
+    ;
+    
+    server_subscription_add_notification (p_subscription, p_monitoredItem, p_writeValuePointer) =
+    BEGIN
+        skip
+    END
+END

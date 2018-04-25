@@ -155,6 +155,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__c_notif_msg_indet 0
 #define constants_bs__c_notificationQueueIterator_indet 0
 #define constants_bs__c_notificationQueue_indet 0
+#define constants_bs__c_opcua_duration_indet -1
 #define constants_bs__c_publishReqQueueIterator_indet 0
 #define constants_bs__c_publishReqQueue_indet 0
 #define constants_bs__c_request_context_indet 0

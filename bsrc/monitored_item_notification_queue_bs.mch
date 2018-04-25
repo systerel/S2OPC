@@ -26,7 +26,9 @@ ABSTRACT_VARIABLES
     a_monitored_item_notifications
     
 INVARIANT
-    a_monitored_item_notifications : t_notificationQueue <-> t_monitoredItem
+    a_monitored_item_notifications : t_notificationQueue <-> t_monitoredItem 
+    /* In C implementation, several times same monitored item can be present several times (multiple notifications) 
+       but it will not change the proof constraints when dequeueing. Therefor it is a simplified representation. */
     
 INITIALISATION
     a_monitored_item_notifications :(a_monitored_item_notifications = {})

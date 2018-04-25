@@ -77,7 +77,7 @@ OPERATIONS
     ;
 
     p_continue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg
-      <-- continue_pop_iter_monitor_item_notification (p_iterator, p_queue) =
+      <-- continue_pop_iter_publish_request (p_iterator, p_queue) =
     PRE
         p_iterator : t_notificationQueueIterator_i &
         p_iterator : t_notificationQueueIterator &
