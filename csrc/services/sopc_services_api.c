@@ -23,14 +23,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sopc_secure_channels_api.h"
-#include "sopc_toolkit_constants.h"
-
 #include "sopc_logger.h"
 #include "sopc_mutexes.h"
+#include "sopc_secure_channels_api.h"
 #include "sopc_services_api.h"
+#include "sopc_services_api_internal.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
+#include "sopc_toolkit_constants.h"
 #include "sopc_user_app_itf.h"
 
 #include "io_dispatch_mgr.h"
@@ -55,11 +55,6 @@ static struct
 SOPC_EventDispatcherManager* SOPC_Services_GetEventDispatcher()
 {
     return servicesEventDispatcherMgr;
-}
-
-SOPC_EventDispatcherManager* SOPC_ApplicationCallback_GetEventDispatcher()
-{
-    return applicationEventDispatcherMgr;
 }
 
 static void SOPC_Internal_AllClientSecureChannelsDisconnected(void)
@@ -410,7 +405,69 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* 
 {
     if (servicesEventDispatcherMgr != NULL)
     {
+        switch (seEvent)
+        {
+        case SC_TO_SE_EP_SC_CONNECTED:
+        case SC_TO_SE_EP_CLOSED:
+        case SC_TO_SE_SC_CONNECTED:
+        case SC_TO_SE_SC_CONNECTION_TIMEOUT:
+        case SC_TO_SE_SC_DISCONNECTED:
+        case SC_TO_SE_SC_SERVICE_RCV_MSG:
+        case SC_TO_SE_SND_FAILURE:
+        case SC_TO_SE_REQUEST_TIMEOUT:
+        case APP_TO_SE_OPEN_ENDPOINT:
+        case APP_TO_SE_CLOSE_ENDPOINT:
+        case APP_TO_SE_LOCAL_SERVICE_REQUEST:
+        case APP_TO_SE_ACTIVATE_SESSION:
+        case APP_TO_SE_SEND_SESSION_REQUEST:
+        case APP_TO_SE_SEND_DISCOVERY_REQUEST:
+        case APP_TO_SE_CLOSE_SESSION:
+        case APP_TO_SE_CLOSE_ALL_CONNECTIONS:
         SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr, (int32_t) seEvent, id, params, auxParam, NULL);
+            break;
+        default:
+            assert(false);
+        }
+    }
+}
+
+void SOPC_Services_InternalEnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uintptr_t auxParam)
+{
+    if (servicesEventDispatcherMgr != NULL)
+    {
+        switch (seEvent)
+        {
+        case SE_TO_SE_SC_ALL_DISCONNECTED:
+        case SE_TO_SE_ACTIVATE_ORPHANED_SESSION:
+        case SE_TO_SE_CREATE_SESSION:
+        case SE_TO_SE_ACTIVATE_SESSION:
+        case SE_TO_SE_SERVER_DATA_CHANGED:
+        case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
+        case SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO:
+        case TIMER_SE_EVAL_SESSION_TIMEOUT:
+        case TIMER_SE_PUBLISH_CYCLE_TIMEOUT:
+            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr, (int32_t) seEvent, id, params, auxParam, NULL);
+            break;
+        default:
+            assert(false);
+        }
+    }
+}
+
+void SOPC_Services_InternalEnqueuePrioEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uintptr_t auxParam)
+{
+    if (servicesEventDispatcherMgr != NULL)
+    {
+        switch (seEvent)
+        {
+        case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
+        case SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO:
+            SOPC_EventDispatcherManager_AddEventAsNext(servicesEventDispatcherMgr, (int32_t) seEvent, id, params, auxParam, NULL);
+            break;
+        default:
+            // Other events not authorized to be enqueued in priority
+            assert(false);
+        }
     }
 }
 

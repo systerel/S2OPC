@@ -62,17 +62,37 @@ typedef enum SOPC_Services_Event {
 
     /* Services to services events */
     SE_TO_SE_SC_ALL_DISCONNECTED,       // special event sent by services mgr itself (no parameters)
-    SE_TO_SE_ACTIVATE_ORPHANED_SESSION, /* id = session id
+    SE_TO_SE_ACTIVATE_ORPHANED_SESSION, /* Client side only:
+                                           id = session id
                                            auxParam = (uint32_t) endpoint connection config index
                                         */
-    SE_TO_SE_CREATE_SESSION,            /* id = session id
+    SE_TO_SE_CREATE_SESSION,            /* Client side only:
+                                           id = session id
                                            auxParam = (uint32_t) endpoint connection config index
                                         */
-    SE_TO_SE_ACTIVATE_SESSION,          /* id = session id
+    SE_TO_SE_ACTIVATE_SESSION,          /* Client side only:
+                                         * id = session id
                                          * params = (user token structure)
                                          */
+
+    SE_TO_SE_SERVER_DATA_CHANGED, /* Server side only:
+                                    id = session id
+                                    auxParam = (int32_t) session state
+                                  */
+
+    SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO, /* Server side only:
+                                                 id = session id
+                                                 auxParam = (int32_t) session state
+                                               */
+    SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO, /* Server side only:
+                                                 id = session id
+                                                 params = (asyn resp structure)
+                                               */
+
     /* Timer to services events */
-    TIMER_SE_EVAL_SESSION_TIMEOUT, /* id = session id */
+    TIMER_SE_EVAL_SESSION_TIMEOUT,  /* Server side only: id = session id */
+    TIMER_SE_PUBLISH_CYCLE_TIMEOUT, /* Server side only: id = subscription id */
+
     /* App to Services events : server side */
     APP_TO_SE_OPEN_ENDPOINT,         /* id = endpoint description config index
                                       */
@@ -131,10 +151,4 @@ void SOPC_Services_PreClear(void);
  */
 void SOPC_Services_Clear(void);
 
-// Internal use only (timers)
-SOPC_EventDispatcherManager* SOPC_Services_GetEventDispatcher(void);
-
-// Internal use only (timers)
-SOPC_EventDispatcherManager* SOPC_ApplicationCallback_GetEventDispatcher(void);
-
-#endif /* SOPC_SERVICES_API_H_ */
+#endif /* SOPC_SERVICES_API_H */

@@ -34,7 +34,7 @@
 #include "sopc_key_manager.h"
 #include "sopc_logger.h"
 #include "sopc_secret_buffer.h"
-#include "sopc_services_api.h"
+#include "sopc_services_api_internal.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
@@ -101,6 +101,7 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
 {
     if (session_core_bs__is_client)
     {
+        /* CLIENT SIDE ONLY */
         if (session_core_bs__state == constants__e_session_userActivated)
         {
             SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
@@ -143,6 +144,17 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
                     NULL,
                     session_client_app_context[session_core_bs__session]); // user application session context
             }
+        }
+    }
+    else
+    {
+        /* SERVER SIDE ONLY */
+        if (session_core_bs__prec_state == constants__e_session_userActivated &&
+            session_core_bs__state != constants__e_session_userActivated)
+        {
+            SOPC_Services_InternalEnqueuePrioEvent(SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO,
+                                                   (uint32_t) session_core_bs__session, NULL,
+                                                   (uintptr_t) session_core_bs__state);
         }
     }
 }
@@ -913,24 +925,24 @@ void session_core_bs__client_gen_activate_orphaned_session_internal_event(
     const constants__t_session_i session_core_bs__session,
     const constants__t_channel_config_idx_i session_core_bs__channel_config_idx)
 {
-    SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_ORPHANED_SESSION, session_core_bs__session, NULL,
-                               session_core_bs__channel_config_idx);
+    SOPC_Services_InternalEnqueueEvent(SE_TO_SE_ACTIVATE_ORPHANED_SESSION, (uint32_t) session_core_bs__session, NULL,
+                                       (uintptr_t) session_core_bs__channel_config_idx);
 }
 
 void session_core_bs__client_gen_activate_user_session_internal_event(
     const constants__t_session_i session_core_bs__session,
     const constants__t_user_token_i session_core_bs__p_user_token)
 {
-    SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_SESSION, session_core_bs__session,
-                               (void*) session_core_bs__p_user_token, 0);
+    SOPC_Services_InternalEnqueueEvent(SE_TO_SE_ACTIVATE_SESSION, session_core_bs__session,
+                                       (void*) session_core_bs__p_user_token, 0);
 }
 
 void session_core_bs__client_gen_create_session_internal_event(
     const constants__t_session_i session_core_bs__session,
     const constants__t_channel_config_idx_i session_core_bs__channel_config_idx)
 {
-    SOPC_Services_EnqueueEvent(SE_TO_SE_CREATE_SESSION, session_core_bs__session, NULL,
-                               session_core_bs__channel_config_idx);
+    SOPC_Services_InternalEnqueueEvent(SE_TO_SE_CREATE_SESSION, (uint32_t) session_core_bs__session, NULL,
+                                       (uintptr_t) session_core_bs__channel_config_idx);
 }
 
 void session_core_bs__server_session_timeout_evaluation(const constants__t_session_i session_core_bs__session,
