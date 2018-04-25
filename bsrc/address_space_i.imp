@@ -27,12 +27,14 @@ SEES
     constants,
     service_write_decode_bs,
     service_mgr_1,
-    service_response_cb_bs
+    service_response_cb_bs,
+    gen_subscription_event_bs
 
 IMPORTS
     address_space_bs,
     response_write_bs,
-    address_space_it
+    address_space_it,
+    write_value_pointer_bs
 
 PROMOTES
     readall_AddressSpace_Node,
@@ -58,7 +60,7 @@ INITIALISATION
 LOCAL_OPERATIONS
     /* Outer treat operation. Validates isvalid, asks for uid on (nid, aid),
        calls treat_write_2 which effectively records the write. */
-    sc <-- treat_write_1(isvalid, status, nid, aid, value) =
+    serviceStatusCode, prev_value, prev_sc <-- treat_write_1(isvalid, status, nid, aid, value) =
     PRE
         isvalid : BOOL &
         status : t_StatusCode_i &
@@ -74,11 +76,15 @@ LOCAL_OPERATIONS
         a_NodeId : t_Node >-> t_NodeId &
         a_Value : t_Node +-> t_Variant
     THEN
-        sc,
+        serviceStatusCode,
+        prev_sc,
+        prev_value,
         a_Value
         :(
-            sc : t_StatusCode_i &
-            sc : t_StatusCode &
+            serviceStatusCode : t_StatusCode_i &
+            serviceStatusCode : t_StatusCode &
+            prev_sc : t_StatusCode_i &
+            prev_value : t_Variant_i &
             a_Value : t_Node +-> t_Variant &
             (isvalid = TRUE &
              status : t_StatusCode_i &
@@ -87,7 +93,9 @@ LOCAL_OPERATIONS
              a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable
              /* TODO: & userid valid, which must be supported by some abstract variables */
              =>
-             sc = e_sc_ok &
+             serviceStatusCode = e_sc_ok &
+             prev_sc = a_Value_StatusCode(a_NodeId~(nid)) &
+             prev_value = a_Value$0(a_NodeId~(nid)) &
              a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> value}) &
             (not(isvalid = TRUE &
                  status : t_StatusCode_i &
@@ -96,13 +104,14 @@ LOCAL_OPERATIONS
                  aid = e_aid_Value &
                  a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable)
              =>
-             sc : {e_sc_bad_internal_error, e_sc_bad_attribute_id_invalid, e_sc_bad_node_id_unknown, e_sc_bad_write_not_supported} &
+             serviceStatusCode : 
+               {e_sc_bad_internal_error, e_sc_bad_attribute_id_invalid, e_sc_bad_node_id_unknown, e_sc_bad_write_not_supported} &
              a_Value = a_Value$0)
         )
     END
     ;
 
-    sc <-- treat_write_2(nid, aid, value) =
+    serviceStatusCode, prev_value, prev_sc <-- treat_write_2(nid, aid, value) =
     PRE
         nid : t_NodeId_i &
         nid : t_NodeId &
@@ -113,23 +122,29 @@ LOCAL_OPERATIONS
         a_NodeId : t_Node >-> t_NodeId &
         a_Value : t_Node +-> t_Variant
     THEN
-        sc,
+        serviceStatusCode,
+        prev_sc,
+        prev_value,
         a_Value
         :(
-            sc : t_StatusCode_i &
-            sc : t_StatusCode &
+            serviceStatusCode : t_StatusCode_i &
+            serviceStatusCode : t_StatusCode &
+            prev_sc : t_StatusCode_i &
+            prev_value : t_Variant_i &
             a_Value : t_Node +-> t_Variant &
             (nid : ran(a_NodeId) &
              aid = e_aid_Value &
              a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable
              =>
-             sc = e_sc_ok &
+             serviceStatusCode = e_sc_ok &
+             prev_sc = a_Value_StatusCode(a_NodeId~(nid)) &
+             prev_value = a_Value$0(a_NodeId~(nid)) &
              a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> value}) &
             (not(nid : ran(a_NodeId) &
                  aid = e_aid_Value &
                  a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable)
              =>
-             sc : {e_sc_bad_node_id_unknown, e_sc_bad_write_not_supported} &
+             serviceStatusCode : {e_sc_bad_node_id_unknown, e_sc_bad_write_not_supported} &
              a_Value = a_Value$0)
         )
     END
@@ -166,9 +181,13 @@ OPERATIONS
         l_wvi,
         l_status1,
         l_status2,
+        l_prev_value_status,
+        l_prev_value,
         l_isvalid,
         l_local_treatment,
-        l_wv
+        l_wv,
+        l_bres_wv_copy,
+        l_wv_copy
     IN
         StatusCode_service := e_sc_ok;
         l_nb_req <-- get_nb_WriteValue;
@@ -180,13 +199,23 @@ OPERATIONS
                another local op to realize the write. The latter operation can be
                re-used in another context (e.g. write request from the Application) */
 
-            l_status2 <-- treat_write_1(l_isvalid, l_status1, l_nid, l_aid, l_value);
+            l_status2, l_prev_value, l_prev_value_status <-- treat_write_1(l_isvalid, l_status1, l_nid, l_aid, l_value);
             set_ResponseWrite_StatusCode(l_wvi, l_status2);
             l_local_treatment <-- is_local_service_treatment;
             IF l_local_treatment = FALSE
             THEN
                 l_wv <-- getAndClean_WriteValuePointer(l_wvi);
-                srv_write_notification (l_wv, l_status2)
+                srv_write_notification (l_wv, l_status2);
+                IF l_status2 = e_sc_ok
+                THEN
+                    l_bres_wv_copy, l_wv_copy <-- copy_write_value_pointer_content (l_wv);
+                    IF l_bres_wv_copy = TRUE THEN
+                        gen_data_changed_event (l_prev_value, l_prev_value_status, l_wv_copy)
+                    ELSE
+                        /* Generates an out of memory service result ? */
+                        skip
+                    END
+                END
             END
         INVARIANT
             wreqs_to_iterate <: t_WriteValue &
@@ -238,33 +267,41 @@ OPERATIONS
     END
     ;
 
-    sc <-- treat_write_1(isvalid, status, nid, aid, value) =
+    serviceStatusCode, prev_value, prev_sc <-- treat_write_1(isvalid, status, nid, aid, value) =
     IF isvalid = TRUE THEN
         /* TODO: provide and check user id */
         /* sc <-- check_user(nid, aid, uid) */
-        sc <-- treat_write_2(nid, aid, value)
+        serviceStatusCode, prev_value, prev_sc <-- treat_write_2(nid, aid, value)
     ELSE
-        sc := status
+        serviceStatusCode := status;
+        prev_sc := c_StatusCode_indet;
+        prev_value := c_Variant_indet
     END
     ;
 
-    sc <-- treat_write_2(nid, aid, value) =
+    serviceStatusCode, prev_value, prev_sc <-- treat_write_2(nid, aid, value) =
     VAR
         l_isvalid,
         l_node,
         l_ncl
     IN
-        sc := e_sc_bad_node_id_unknown;
+        prev_sc := c_StatusCode_indet;
+        prev_value := c_Variant_indet;
+        serviceStatusCode := e_sc_bad_node_id_unknown;
         l_isvalid, l_node <-- readall_AddressSpace_Node(nid);
         IF l_isvalid = TRUE THEN
             IF aid = e_aid_Value THEN
                 l_ncl <-- get_NodeClass(l_node);
                 IF l_ncl = e_ncl_Variable THEN
-                    set_Value(l_node, value);
-                    sc := e_sc_ok
+                    serviceStatusCode, prev_value <-- read_AddressSpace_Attribute_value (l_node, l_ncl, aid);
+                    prev_sc <-- get_Value_StatusCode (l_node);
+                    IF serviceStatusCode = e_sc_ok
+                    THEN             
+                        set_Value(l_node, value)
+                    END
                 END
             ELSE
-                sc := e_sc_bad_write_not_supported
+                serviceStatusCode := e_sc_bad_write_not_supported
             END
         END
     END

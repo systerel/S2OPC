@@ -40,5 +40,19 @@ OPERATIONS
         :(p_nid : t_NodeId_i & p_nid : t_NodeId &
             p_aid : t_AttributeId_i & p_aid : t_AttributeId)
     END
+    ;
+    
+    bres, p_write_value_copy <-- copy_write_value_pointer_content (p_write_value) =
+    PRE
+        p_write_value : t_WriteValuePointer_i &
+        p_write_value : t_WriteValuePointer
+    THEN
+        bres,
+        p_write_value_copy
+        :(bres : BOOL &
+          p_write_value_copy : t_WriteValuePointer_i &
+          (bres = FALSE => p_write_value_copy = c_WriteValuePointer_indet) &
+          (bres = TRUE => p_write_value_copy : t_WriteValuePointer))
+    END
     
 END
