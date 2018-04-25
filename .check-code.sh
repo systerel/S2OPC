@@ -86,7 +86,7 @@ SRC_DIRS=(`find $CSRC -not -path "*windows*" -type d`)
 SRC_INCL=${SRC_DIRS[@]/#/-I}
 CLANG_TIDY_LOG=clang_tidy.log
 # Run clang-tidy removing default checks (-*) and adding CERT rules verification
-find $CSRC -not -path "*windows*" -name "*.c" -exec clang-tidy {} -checks=$REMOVE_DEFAULT_RULES$CERT_RULES -- $SRC_INCL \; &> $CLANG_TIDY_LOG
+find $CSRC -not -path "*windows*" -not -path "*uanodeset_expat*" -name "*.c" -exec clang-tidy {} -checks=$REMOVE_DEFAULT_RULES$CERT_RULES -- $SRC_INCL \; &> $CLANG_TIDY_LOG
 # Check if resulting log contains error or warnings
 grep -wiEc "(error|warning)" $CLANG_TIDY_LOG | xargs test 0 -eq
 if [[ $? != 0 ]]; then

@@ -30,6 +30,7 @@
 #ifndef SOPC_TOOLKIT_CONFIG_H_
 #define SOPC_TOOLKIT_CONFIG_H_
 
+#include "sopc_address_space.h"
 #include "sopc_user_app_itf.h"
 
 #include "sopc_builtintypes.h"

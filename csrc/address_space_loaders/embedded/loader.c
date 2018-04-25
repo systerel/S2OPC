@@ -15,11 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_ADDSPACE_H_
-#define SOPC_ADDSPACE_H_
+#include "loader.h"
 
-#include "sopc_address_space.h"
-
-extern SOPC_AddressSpace addressSpace;
-
-#endif /* SOPC_ADDSPACE_H_ */
+// We need to have at least one symbol to compile into the library. Here it is.
+int __SOPC_Uses_Embedded_Loader;

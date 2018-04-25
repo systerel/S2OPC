@@ -25,6 +25,7 @@
 #ifndef SOPC_TOOLKIT_CONFIG_INTERNAL_H_
 #define SOPC_TOOLKIT_CONFIG_INTERNAL_H_
 
+#include "sopc_address_space.h"
 #include "sopc_user_app_itf.h"
 
 /**

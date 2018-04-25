@@ -76,7 +76,7 @@ classes = ['View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
 #include "sopc_toolkit_constants.h"
 #include "sopc_builtintypes.h"
 #include "sopc_types.h"
-#include "sopc_user_app_itf.h"
+#include "sopc_address_space.h"
 
 extern SOPC_AddressSpace addressSpace;
 #define DisplayName addressSpace.displayNameArray

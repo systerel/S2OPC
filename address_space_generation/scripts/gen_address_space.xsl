@@ -119,7 +119,7 @@ classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
  *  along with this program.  If not, see &lt;http://www.gnu.org/licenses/>.
  */
 
-#include "sopc_addspace.h"
+#include "sopc_address_space.h"
 
 #include &lt;stdio.h>
 #include &lt;stdbool.h>
@@ -194,7 +194,7 @@ SOPC_Variant Value[NB_3+NB_4+1] = {DEFAULT_VARIANT<xsl:apply-templates select="$
 static SOPC_StatusCode status_code[] = {OpcUa_BadDataUnavailable, <xsl:value-of select = "for $n in $var_vartype return if ($n/ua:Value) then '0x00000000' else 'OpcUa_BadDataUnavailable'" separator=", "/>};
 
 <!-- Access level -->
-static SOPC_SByte AccessLevel[] = {0, <xsl:value-of select = "for $n in $ua_nodes/ua:UAVariable return if ($n/@AccessLevel) then $n/@AccessLevel else 1" separator=", "/>};
+static SOPC_Byte AccessLevel[] = {0, <xsl:value-of select = "for $n in $ua_nodes/ua:UAVariable return if ($n/@AccessLevel) then $n/@AccessLevel else 1" separator=", "/>};
 
 SOPC_AddressSpace addressSpace = {
     .nbVariables = NB_3,

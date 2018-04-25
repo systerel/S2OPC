@@ -130,7 +130,7 @@ c_header = '''
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sopc_addspace.h"
+#include "sopc_address_space.h"
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -850,7 +850,7 @@ def generate_status_codes(nodes, fd):
 
 
 def generate_access_levels(nodes, fd):
-    fd.write('static SOPC_SByte AccessLevel[] = {\n0,\n')
+    fd.write('static SOPC_Byte AccessLevel[] = {\n0,\n')
 
     for n in [n for n in nodes if n.nodeclass == NODE_CLASS_VARIABLE or n.nodeclass == NODE_CLASS_VARIABLE_TYPE]:
         fd.write(('%d,\n' % n.accesslevel) if n.accesslevel is not None else '1,\n')

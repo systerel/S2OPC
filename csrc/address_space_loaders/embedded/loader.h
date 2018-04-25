@@ -18,7 +18,7 @@
 #ifndef SOPC_ADDSPACE_H_
 #define SOPC_ADDSPACE_H_
 
-#include "sopc_address_space.h"
+#include <sopc_address_space.h>
 
 extern SOPC_AddressSpace addressSpace;
 

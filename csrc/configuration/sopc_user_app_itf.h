@@ -111,52 +111,6 @@ typedef enum SOPC_App_Com_Event {
 
 /* Server only interfaces */
 
-/* Address space structure */
-typedef struct SOPC_AddressSpace
-{
-    const uint32_t nbVariables;
-    const uint32_t nbVariableTypes;
-    const uint32_t nbObjectTypes;
-    const uint32_t nbReferenceTypes;
-    const uint32_t nbDataTypes;
-    const uint32_t nbMethods;
-    const uint32_t nbObjects;
-    const uint32_t nbViews;
-    const uint32_t nbNodesTotal; /* Sum of precedent numbers */
-
-    /* Note: node index is valid for [1, nbNodesTotal], index 0 is used for invalid node */
-    /* Note 2: nodes shall be provided by node class and with a predefined order on their node class:
-       View, Object, Variable, VariableType, ObjectType, ReferenceType, DataType, Method */
-
-    SOPC_QualifiedName* browseNameArray; /* Browse name by node index */
-
-    int* descriptionIdxArray_begin;       /* Given node index, provides the start index in descriptionArray*/
-    int* descriptionIdxArray_end;         /* Given node index, provides the end index in descriptionArray*/
-    SOPC_LocalizedText* descriptionArray; /* Given description index, provides the localized text */
-
-    int* displayNameIdxArray_begin;       /* Given node index, provides the start index in displayNameArray*/
-    int* displayNameIdxArray_end;         /* Given node index, provides the end index in displayNameArray*/
-    SOPC_LocalizedText* displayNameArray; /* Given displayName index, provides the localized text */
-
-    OpcUa_NodeClass* nodeClassArray; /* All nodes classes by node index */
-
-    SOPC_NodeId** nodeIdArray; /* All nodes Ids by node index */
-
-    int* referenceIdxArray_begin;     /* Given node index, provides the start reference index*/
-    int* referenceIdxArray_end;       /* Given node index, provides the end in reference index */
-    SOPC_NodeId** referenceTypeArray; /* Given reference index, provides the reference type node Id */
-    SOPC_ExpandedNodeId**
-        referenceTargetArray;      /* Given reference index, provides the reference target expended node Id */
-    bool* referenceIsForwardArray; /* Given reference index, provides the reference isForward flag value */
-
-    SOPC_Variant* valueArray; /* Given (node index - nbViews - nbObjects), provides the variable/variableType value */
-    SOPC_StatusCode*
-        valueStatusArray; /* Given (node index - nbViews - nbObjects), provides the variable/variableType value */
-
-    SOPC_SByte* accessLevelArray; /* Given (node index - nbViews - nbObjects), provides the variable access level */
-
-} SOPC_AddressSpace;
-
 /* Server address space access/modification notifications to applicative code */
 typedef enum SOPC_App_AddSpace_Event {
     /* Server application events */

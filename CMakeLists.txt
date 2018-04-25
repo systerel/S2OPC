@@ -79,6 +79,8 @@ SET(ADDSPACEGEN_DIR "${CMAKE_SOURCE_DIR}/address_space_generation/genc" CACHE
 SET(DISABLE_CHECK_ADDSPACE FALSE CACHE
     BOOL "Disable the compilation of the address space check")
 
+set(EMBEDDED_ADDRESS_SPACE_FILE "address_space_generation/genc/ingopcs_addspace.c" CACHE FILEPATH "Path to the address space to be compiled in the binary")
+
 # Re-enable asserts for Release and RelWithDebInfo builds
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
@@ -250,6 +252,21 @@ install(TARGETS ingopcs
         ARCHIVE DESTINATION lib # Supposedly static lib
         PUBLIC_HEADER DESTINATION include
 )
+
+# Address space loader backends
+
+add_library(ingopcs-loader-embedded STATIC csrc/address_space_loaders/embedded/loader.c ${EMBEDDED_ADDRESS_SPACE_FILE})
+target_link_libraries(ingopcs-loader-embedded PRIVATE ingopcs)
+target_include_directories(ingopcs-loader-embedded PRIVATE ${INGOPCS_PUBLIC_INCLUDES} PUBLIC "csrc/address_space_loaders")
+
+find_package(EXPAT)
+
+if (EXPAT_FOUND)
+	add_library(ingopcs-loader-uanodeset-expat STATIC csrc/address_space_loaders/uanodeset_expat/loader.c)
+	target_link_libraries(ingopcs-loader-uanodeset-expat PUBLIC ${EXPAT_LIBRARIES} PRIVATE ingopcs)
+	target_include_directories(ingopcs-loader-uanodeset-expat PRIVATE ${INGOPCS_PUBLIC_INCLUDES} ${EXPAT_INCLUDE_DIRS} PUBLIC "csrc/address_space_loaders")
+	set_target_properties(ingopcs-loader-uanodeset-expat PROPERTIES COMPILE_DEFINITIONS "UANODESET_LOADER_LOG")
+endif()
 
 # INGOPCS tests ################################################################################
 
@@ -556,3 +573,9 @@ add_executable(bench_reads "tests/benchmarks/bench_reads.c")
 set_source_files_properties("tests/benchmarks/bench_reads.c" PROPERTIES COMPILE_FLAGS "-D_XOPEN_SOURCE=600")
 target_link_libraries(bench_reads PRIVATE ${INGOPCS_STATIC_LIB})
 target_include_directories(bench_reads PRIVATE ${INGOPCS_PUBLIC_INCLUDES} ${INGOPCS_PRIVATE_INCLUDES})
+
+if (EXPAT_FOUND)
+	add_executable(ingopcs_parse_uanodeset "tests/demo/ingopcs_parse_uanodeset.c")
+	target_link_libraries(ingopcs_parse_uanodeset PRIVATE ingopcs "ingopcs-loader-uanodeset-expat")
+	target_include_directories(ingopcs_parse_uanodeset PRIVATE ${INGOPCS_PUBLIC_INCLUDES})
+endif()

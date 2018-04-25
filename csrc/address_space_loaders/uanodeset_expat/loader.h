@@ -15,11 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_ADDSPACE_H_
-#define SOPC_ADDSPACE_H_
+#include <sopc_address_space.h>
+#include <stdio.h>
 
-#include "sopc_address_space.h"
-
-extern SOPC_AddressSpace addressSpace;
-
-#endif /* SOPC_ADDSPACE_H_ */
+SOPC_ReturnStatus SOPC_UANodeSet_Parse(FILE* fd, SOPC_AddressSpace_Description* desc);
