@@ -158,7 +158,8 @@ int main(int argc, char* argv[])
     (void) argc;
     (void) argv;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    OpcUa_WriteRequest* pWriteReq = NULL;
+    OpcUa_WriteRequest* pWriteReqSent = NULL;
+    OpcUa_WriteRequest* pWriteReqCopy = NULL;
 
     uint32_t epConfigIdx = 0;
     SOPC_Endpoint_Config epConfig;
@@ -346,17 +347,16 @@ int main(int argc, char* argv[])
     {
         // Reset expected result
         test_results_set_service_result(false);
-        /* Sends a WriteRequest */
-        pWriteReq = tlibw_new_WriteRequest();
-        test_results_set_WriteRequest(pWriteReq);
-        // msg freed when sent
-        // Use 1 as write request context
-        SOPC_ToolkitServer_AsyncLocalServiceRequest(epConfigIdx, pWriteReq, 1);
 
-        /* Same data must be provided to verify result, since request will be freed on sending allocate a new (same
-         * content) */
-        pWriteReq = tlibw_new_WriteRequest();
-        test_results_set_WriteRequest(pWriteReq);
+        // Create WriteRequest to be sent (deallocated by toolkit) */
+        pWriteReqSent = tlibw_new_WriteRequest();
+
+        // Create same WriteRequest to check results on response reception */
+        pWriteReqCopy = tlibw_new_WriteRequest();
+        test_results_set_WriteRequest(pWriteReqCopy);
+
+        // Use 1 as write request context
+        SOPC_ToolkitServer_AsyncLocalServiceRequest(epConfigIdx, pWriteReqSent, 1);
 
         printf("<Test_Server_Local_Service: local write request sending\n");
     }
@@ -404,7 +404,7 @@ int main(int argc, char* argv[])
 
     /* Now the request can be freed */
     test_results_set_WriteRequest(NULL);
-    tlibw_free_WriteRequest((OpcUa_WriteRequest**) &pWriteReq);
+    tlibw_free_WriteRequest((OpcUa_WriteRequest**) &pWriteReqCopy);
 
     // Asynchronous request to close the endpoint
     SOPC_ToolkitServer_AsyncCloseEndpoint(epConfigIdx);

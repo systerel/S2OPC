@@ -213,7 +213,8 @@ int main(void)
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    OpcUa_WriteRequest* pWriteReq = NULL;
+    OpcUa_WriteRequest* pWriteReqSent = NULL;
+    OpcUa_WriteRequest* pWriteReqCopy = NULL;
 
     // Paths to client certificate/key and server certificate
     // Client certificate name
@@ -456,17 +457,17 @@ int main(void)
     {
         // Reset expected result
         test_results_set_service_result(false);
-        /* Sends a WriteRequest */
-        pWriteReq = tlibw_new_WriteRequest();
-        test_results_set_WriteRequest(pWriteReq);
-        // msg freed when sent
-        // Use 1 as write request context
-        SOPC_ToolkitClient_AsyncSendRequestOnSession(session, pWriteReq, 1);
 
-        /* Same data must be provided to verify result, since request will be freed on sending allocate a new (same
-         * content) */
-        pWriteReq = tlibw_new_WriteRequest();
-        test_results_set_WriteRequest(pWriteReq);
+        // Create WriteRequest to be sent (deallocated by toolkit)
+        pWriteReqSent = tlibw_new_WriteRequest();
+
+        // Create same WriteRequest to check results on response reception
+        pWriteReqCopy = tlibw_new_WriteRequest();
+
+        test_results_set_WriteRequest(pWriteReqCopy);
+
+        // Use 1 as write request context
+        SOPC_ToolkitClient_AsyncSendRequestOnSession(session, pWriteReqSent, 1);
 
         printf(">>Test_Client_Toolkit: write request sending\n");
     }
@@ -522,7 +523,7 @@ int main(void)
 
     /* Now the request can be freed */
     test_results_set_WriteRequest(NULL);
-    tlibw_free_WriteRequest((OpcUa_WriteRequest**) &pWriteReq);
+    tlibw_free_WriteRequest((OpcUa_WriteRequest**) &pWriteReqCopy);
 
     /* Close the session */
     if (0 != session)
