@@ -28,7 +28,6 @@
 #include <string.h>
 
 #include "libs2opc_client.h"
-#include "toolkit_helpers.h"
 
 /* Secure Channel configuration */
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
@@ -36,6 +35,24 @@
 #define SECURITY_POLICY SOPC_SecurityPolicy_None_URI
 /* Security Mode is None or Sign or SignAndEncrypt */
 #define SECURITY_MODE OpcUa_MessageSecurityMode_None
+
+/* Connection global timeout */
+#define TIMEOUT_MS 10000
+/* Secure Channel lifetime */
+#define SC_LIFETIME_MS 3600000
+/* Publish period */
+#define PUBLISH_PERIOD_MS 500
+/* Number of targetted publish token */
+#define PUBLISH_N_TOKEN 3
+
+/* Path to the certificate authority */
+#define PATH_CACERT_PUBL "./trusted/cacert.der"
+/* Path to the server certificate */
+#define PATH_SERVER_PUBL "./server_public/server_4k.der"
+/* Path to the client certificate */
+#define PATH_CLIENT_PUBL "./client_public/client_4k.der"
+/* Path to the client private key */
+#define PATH_CLIENT_PRIV "./client_private/client_4k.key"
 
 /* Callbacks */
 void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
@@ -51,10 +68,19 @@ int main(void)
     SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = ENDPOINT_URL,
                                          .security_policy = SECURITY_POLICY,
                                          .security_mode = SECURITY_MODE,
-                                         .username = "foobar",
-                                         .password = "foobar",
-                                         .timeout_ms = 10000 /* TODO: change timeout */,
-                                         .token_target = 3};
+                                         .path_cert_auth = PATH_CACERT_PUBL,
+                                         .path_cert_srv = PATH_SERVER_PUBL,
+                                         .path_cert_cli = PATH_CLIENT_PUBL,
+                                         .path_key_cli = PATH_CLIENT_PRIV,
+                                         .path_crl = NULL,
+                                         .username = NULL,
+                                         .password = NULL,
+                                         .publish_period_ms = PUBLISH_PERIOD_MS,
+                                         .data_change_callback = datachange_callback,
+                                         .timeout_ms = TIMEOUT_MS,
+                                         .sc_lifetime = SC_LIFETIME_MS,
+                                         .token_target = PUBLISH_N_TOKEN};
+    SOPC_LibSub_ConfigurationId cfg_id = 0;
     SOPC_LibSub_ConnectionId con_id = 0;
 
     log_callback(SOPC_LOG_LEVEL_INFO, SOPC_LibSub_GetVersion());
@@ -65,7 +91,7 @@ int main(void)
         return 1;
     }
 
-    if (SOPC_STATUS_OK != SOPC_LibSub_ConfigureConnection(&cfg_con, &con_id))
+    if (SOPC_STATUS_OK != SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id))
     {
         log_callback(SOPC_LOG_LEVEL_ERROR, "Could not configure connection");
         return 2;
@@ -77,7 +103,7 @@ int main(void)
         return 3;
     }
 
-    if (SOPC_STATUS_OK != SOPC_LibSub_Connect(con_id, 1000, datachange_callback))
+    if (SOPC_STATUS_OK != SOPC_LibSub_Connect(cfg_id, &con_id))
     {
         log_callback(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit");
         return 4;
@@ -95,7 +121,7 @@ void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
 {
     char sz[128];
 
-    snprintf(sz, sizeof(sz) / sizeof(sz[0]), "Client %" PRIi64 " disconnected", c_id);
+    snprintf(sz, sizeof(sz) / sizeof(sz[0]), "Client %" PRIu32 " disconnected", c_id);
     log_callback(SOPC_LOG_LEVEL_INFO, sz);
 }
 
@@ -106,6 +132,6 @@ void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
     (void) value;
     char sz[1024];
 
-    snprintf(sz, sizeof(sz) / sizeof(sz[0]), "Client %" PRIi64 " data change:\n  value id %" PRIu32 ".", c_id, d_id);
+    snprintf(sz, sizeof(sz) / sizeof(sz[0]), "Client %" PRIu32 " data change:\n  value id %" PRIu32 ".", c_id, d_id);
     log_callback(SOPC_LOG_LEVEL_INFO, sz);
 }

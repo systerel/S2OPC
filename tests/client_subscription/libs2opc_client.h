@@ -32,6 +32,8 @@
   gcc also works but loses parameter names in function prototypes, that is why the g++ and 'extern "C"' are used.
 */
 
+#include <stdint.h>
+
 /* Version information */
 #define SOPC_LIBSUB_VERSION "0.0.1*"
 
@@ -227,7 +229,9 @@ typedef struct
     SOPC_LibSub_CstString path_crl;
     SOPC_LibSub_CstString username;
     SOPC_LibSub_CstString password;
-    int64_t publish_period_ms, SOPC_LibSub_DataChangeCbk data_change_callback, int64_t timeout_ms;
+    int64_t publish_period_ms;
+    SOPC_LibSub_DataChangeCbk data_change_callback;
+    int64_t timeout_ms;
     uint32_t sc_lifetime;
     uint16_t token_target;
 } SOPC_LibSub_ConnectionCfg;
