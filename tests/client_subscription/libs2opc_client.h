@@ -260,15 +260,16 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg);
 /*
  @description
     Configure a future connection. This function shall be called once per connection before
-    a call to SOPC_LibSub_Configured(). The given cfg_id is later used to create connections.
+    a call to SOPC_LibSub_Configured(). The given /p pCfgId is later used to create connections.
  @param pCfg
-    Non null pointer to the connection configuration.
- @param cfg_id [out, not null]
+    Non null pointer to the connection configuration. The content of the configuration is copied
+    and the object pointed by /p pCfg can be freed by the caller.
+ @param pCfgId [out, not null]
     The configuration connection id. Set when the value returned is "SOPC_STATUS_OK".
  @return
     The operation status */
 SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
-                                                  SOPC_LibSub_ConfigurationId* cfg_id);
+                                                  SOPC_LibSub_ConfigurationId* pCfgId);
 
 /*
  @description
@@ -284,24 +285,28 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void);
     Creates a new connection to a remote OPC server from configuration id cfg_id.
     The connection represent the whole client and is later identified by the returned cli_id.
     A subscription is created and associated with this client.
- @param cfg_id
+ @param cfgId
     The parameters of the connection to create, return by SOPC_LibSub_ConfigureConnection().
- @param cli_id [out, not null]
+ @param pCliId [out, not null]
     The connection id of the newly created client, set when return is SOPC_STATUS_OK.
  @return
     The operation status */
-SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfg_id, SOPC_LibSub_ConnectionId* cli_id);
+SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, SOPC_LibSub_ConnectionId* pCliId);
 
 /*
  @description
     Add a variable to an existing subscription
- @param c_id
+ @param cliId
     The connection id.
- @param d_id [out, not null]
+ @param szNodeId
+    A zero-terminated string describing the NodeId to add.
+ @param pDataId [out, not null]
     The unique variable data identifier. Will be used in call to data_change_callback.
  @return
     The operation status */
-SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_DataId* d_id);
+SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId cliId,
+                                                SOPC_LibSub_CstString* szNodeId,
+                                                SOPC_LibSub_DataId* pDataId);
 
 /*
  @description

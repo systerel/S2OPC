@@ -21,6 +21,7 @@
  *
  */
 
+#include <assert.h>
 #include <stdbool.h>
 
 #include "sopc_singly_linked_list.h"
@@ -50,8 +51,9 @@ static bool bLibInitialized = false;
 static bool bLibConfigured = false;
 static SOPC_LibSub_LogCbk cbkLog = NULL;
 static SOPC_LibSub_DisconnectCbk cbkDisco = NULL;
-static SOPC_SLinkedList* pListConfig = NULL; /* IDs are configuration_id, value is SecureChannel_Config */
-static SOPC_SLinkedList* pListClient = NULL; /* IDs are connection_id, value is a StaMac */
+static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId, value is SOPC_LibSub_ConnectionCfg */
+static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
+static SOPC_LibSub_ConnectionId nCreatedClient = 0;
 
 /* Event callback */
 void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
@@ -114,6 +116,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_SecureChannel_Config* pscConfig = NULL;
     uint32_t cfgId = 0;
+    SOPC_LibSub_ConnectionCfg* pCfgCpy = NULL;
 
     if (!bLibInitialized || bLibConfigured)
     {
@@ -143,12 +146,25 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
         }
     }
 
+    /* Copy it to append it safely to the internal list */
+    if (SOPC_STATUS_OK == status)
+    {
+        pCfgCpy = (SOPC_LibSub_ConnectionCfg*) malloc(sizeof(SOPC_LibSub_ConnectionCfg));
+        if (NULL == pCfgCpy)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            *pCfgCpy = *pCfg;
+        }
+    }
     /* Append it to the internal list */
     if (SOPC_STATUS_OK == status)
     {
-        if (SOPC_SLinkedList_Append(pListConfig, cfgId, pscConfig) == NULL)
+        if (SOPC_SLinkedList_Append(pListConfig, cfgId, pCfgCpy) == NULL)
         {
-            status = SOPC_STATUS_NOK;
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
 
@@ -181,20 +197,62 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfg_id, SOPC_LibSub_ConnectionId* cli_id)
+SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, SOPC_LibSub_ConnectionId* pCliId)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_LibSub_ConnectionCfg* pCfg = NULL;
+    SOPC_StaMac_Machine* pSM = NULL;
 
-    if (!bLibInitialized || !bLibConfigured)
+    if (!bLibInitialized || !bLibConfigured || UINT32_MAX == nCreatedClient)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    status = SOPC_STATUS_NOK;
+    if (NULL == pCliId)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* Check the configuration Id */
+    if (SOPC_STATUS_OK == status)
+    {
+        pCfg = SOPC_SLinkedList_FindFromId(pListConfig, cfgId);
+        if (pCfg == NULL)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+            /* TODO: log */
+        }
+    }
+
+    /* Creates a client state machine */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_StaMac_Create(cfgId, pCfg->data_change_callback, pCfg->publish_period_ms, &pSM);
+    }
+
+    /* Adds it to the list */
+    if (SOPC_STATUS_OK == status)
+    {
+        ++nCreatedClient;
+        *pCliId = nCreatedClient;
+        if (pSM != SOPC_SLinkedList_Append(pListClient, *pCliId, pSM))
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    /* Starts the machine */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_StaMac_StartSession(pSM);
+    }
+
     return status;
 }
 
-SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_DataId* d_id)
+SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId cliId,
+                                                SOPC_LibSub_CstString* szNodeId,
+                                                SOPC_LibSub_DataId* pDataId)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -225,4 +283,40 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId c_id)
  * ========================
  */
 
-void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext) {}
+void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext)
+{
+    SOPC_SLinkedListIterator pIterCli = NULL;
+    SOPC_LibSub_ConnectionId cliId = 0;
+    SOPC_LibSub_ConnectionId cliIdPro = 0; /* The cliId of the machine that processed the event */
+    SOPC_StaMac_Machine* pSM = NULL;
+    SOPC_StaMac_Machine* pSMPro = NULL; /* The state machine that processed the event */
+    bool bProcessed = false;
+
+    /* List through known clients and call state machine event callback */
+    pIterCli = SOPC_SLinkedList_GetIterator(pListClient);
+    while (NULL != pIterCli)
+    {
+        pSM = SOPC_SLinkedList_NextWithId(&pIterCli, &cliId);
+        /* Only one machine shall process the event */
+        if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext))
+        {
+            /* TODO: remove asserts, make log, remove assert.h */
+            assert(!bProcessed);
+            bProcessed = true;
+            cliIdPro = cliId;
+            pSMPro = pSM;
+        }
+    }
+
+    /* At least one machine should have processed the event */
+    assert(bProcessed);
+
+    /* Post process the event. The only interesting event is for now CLOSED. */
+    if (SE_CLOSED_SESSION == event)
+    {
+        /* The disconnect callback shall be called after the client has been destroyed */
+        assert(pSMPro == SOPC_SLinkedList_RemoveFromId(pListClient, cliIdPro));
+        SOPC_StaMac_Delete(&pSMPro);
+        cbkDisco(cliIdPro);
+    }
+}

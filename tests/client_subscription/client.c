@@ -105,7 +105,7 @@ int main(void)
 
     if (SOPC_STATUS_OK != SOPC_LibSub_Connect(cfg_id, &con_id))
     {
-        log_callback(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit");
+        log_callback(SOPC_LOG_LEVEL_ERROR, "Could not connect with given con_id");
         return 4;
     }
 
