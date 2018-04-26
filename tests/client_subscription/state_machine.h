@@ -70,6 +70,11 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      SOPC_StaMac_Machine** ppSM);
 
 /**
+ * \brief Deletes and deallocate the machine.
+ */
+void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM);
+
+/**
  * \brief Creates a session.  The toolkit shall be configured with SOPC_Toolkit_Configured() beforehand.
  *
  * See SOPC_ToolkitClient_AsyncActivateSession().
@@ -116,11 +121,6 @@ bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM);
  * \brief Returns a bool whether the machine is in stError or not.
  */
 bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM);
-
-/**
- * \brief Deletes the machine.
- */
-void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM);
 
 /**
  * \brief Handles the events from the Toolkit and changes the state machine state.
