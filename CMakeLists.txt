@@ -696,6 +696,7 @@ install(TARGETS libsubscribe
 # Demo client
 add_executable(libsubscribe_client "${LIBSUBSCRIBE_PATH}/client.c"
                                    "${LIBSUBSCRIBE_PATH}/toolkit_helpers.c"
+                                   "${LIBSUBSCRIBE_PATH}/state_machine.c"
                                    )
 target_link_libraries(libsubscribe_client PRIVATE libsubscribe)
 #target_include_directories(libsubscribe_client PRIVATE ${LIBSUBSCRIBE_PATH})
