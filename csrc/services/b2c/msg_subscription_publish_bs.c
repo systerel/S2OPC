@@ -43,7 +43,7 @@ void msg_subscription_publish_bs__INITIALISATION(void) {}
 void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
     const constants__t_session_i msg_subscription_publish_bs__p_session,
     const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg,
-    const constants__t_request_handle_i msg_subscription_publish_bs__p_req_handle,
+    const constants__t_server_request_handle_i msg_subscription_publish_bs__p_req_handle,
     const constants__t_request_context_i msg_subscription_publish_bs__p_req_context)
 {
     SOPC_Internal_AsyncSendMsgData* eventData = malloc(sizeof(SOPC_Internal_AsyncSendMsgData));

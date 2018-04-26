@@ -25,20 +25,52 @@ SEES
     
 ABSTRACT_VARIABLES
 
+    s_publishReqQueue,
     a_publish_responses
     
 INVARIANT
+    s_publishReqQueue <: t_publishReqQueue &
     a_publish_responses : t_msg +-> t_publishReqQueue
     
 INITIALISATION
+    s_publishReqQueue :(s_publishReqQueue = {}) ||
     a_publish_responses :(a_publish_responses = {})
 
 OPERATIONS
     
+    bres, queue <-- allocate_new_publish_queue =
+    BEGIN
+        IF s_publishReqQueue = t_publishReqQueue
+        THEN
+            bres := FALSE ||
+            queue := c_publishReqQueue_indet
+        ELSE
+            ANY l_queue WHERE
+                l_queue : t_publishReqQueue_i &
+                l_queue : t_publishReqQueue &
+                l_queue /: s_publishReqQueue
+            THEN
+                s_publishReqQueue := s_publishReqQueue \/ {l_queue} ||
+                queue := l_queue ||
+                bres := TRUE
+            END
+        END
+    END
+    ;
+    
+    clear_and_deallocate_publish_queue (p_queue) =
+    PRE
+        p_queue : t_publishReqQueue_i &
+        p_queue : s_publishReqQueue
+    THEN
+        s_publishReqQueue := s_publishReqQueue - {p_queue}
+    END
+    ;
+    
     bres <-- add_publish_request_to_queue (p_queue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg) =
     PRE
         p_queue : t_publishReqQueue_i &
-        p_queue : t_publishReqQueue &
+        p_queue : s_publishReqQueue &
         p_session : t_session_i &
         p_session : t_session &
         p_req_exp_time : t_timeref_i &
@@ -64,7 +96,7 @@ OPERATIONS
     continue, iterator <-- init_iter_publish_request (p_queue) =
     PRE
         p_queue : t_publishReqQueue_i &
-        p_queue : t_publishReqQueue
+        p_queue : s_publishReqQueue
     THEN
         continue,
         iterator
@@ -82,7 +114,7 @@ OPERATIONS
         p_iterator : t_notificationQueueIterator_i &
         p_iterator : t_notificationQueueIterator &
         p_queue : t_publishReqQueue_i &
-        p_queue : t_publishReqQueue
+        p_queue : s_publishReqQueue
     THEN
         IF p_queue : ran(a_publish_responses)
         THEN

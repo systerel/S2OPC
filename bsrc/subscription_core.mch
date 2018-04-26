@@ -45,8 +45,11 @@ DEFINITIONS
     a_monitoredItemQueue,
     a_nodeToMonitoredItemQueue,
     /* Queues content */
+    s_publishReqQueue,
     a_publish_responses,
+    s_notificationQueue,
     a_monitored_item_notifications,
+    s_monitoredItemQueue,
     a_defined_monitored_items
     ;
     
@@ -77,21 +80,24 @@ DEFINITIONS
     /* a_SubscriptionAssignedToClient <: s_subscription */             /* Not really a state machine variable: local variable or function */
     
     /* Subscription Implementation variables */
-    a_pendingNotificationQueue : s_subscription --> t_notificationQueue &
-    /* a_retransmissionQueue : s_subscription --> t_notificationMsgQueue */ /* not implemented */
-    a_monitoredItemQueue : s_subscription --> t_monitoredItemQueue &
-    a_nodeToMonitoredItemQueue : t_Node --> t_monitoredItemQueue &
+    s_notificationQueue <: t_notificationQueue &
+    a_pendingNotificationQueue : s_subscription --> s_notificationQueue &
+    /* a_retransmissionQueue : s_subscription --> s_notificationMsgQueue */ /* not implemented */
+    s_monitoredItemQueue <: t_monitoredItemQueue &
+    a_monitoredItemQueue : s_subscription --> s_monitoredItemQueue &
+    a_nodeToMonitoredItemQueue : t_Node --> s_monitoredItemQueue &
     
     /* (Session) Implementation variables */
     
     /* Note: kept on subscription for now since 1 subs / session + no transfer. Otherwise could be cleared on session close ! */
-    a_publishRequestQueue :  s_subscription --> t_publishReqQueue &
+    s_publishReqQueue <: t_publishReqQueue &
+    a_publishRequestQueue :  s_subscription --> s_publishReqQueue &
     
     /* Queues variables */
     /* PublishRequest queue content: */
-    a_publish_responses : t_msg +-> t_publishReqQueue &
-    a_monitored_item_notifications : t_notificationQueue <-> t_monitoredItem &
-    a_defined_monitored_items : t_monitoredItemQueue <-> t_monitoredItem
+    a_publish_responses : t_msg +-> s_publishReqQueue &
+    a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItem &
+    a_defined_monitored_items : s_monitoredItemQueue <-> t_monitoredItem
     ;
     
     /* Dequeuing a publish request context + response */
@@ -107,7 +113,7 @@ DEFINITIONS
             p_publish_resp_msg := l_resp_msg ||
             a_publish_responses,
             p_morePubReqs
-            :(a_publish_responses : t_msg +-> t_publishReqQueue &
+            :(a_publish_responses : t_msg +-> s_publishReqQueue &
               a_publish_responses = a_publish_responses$0 - {l_resp_msg |-> l_publishQueue} &
               p_morePubReqs : BOOL &
               p_morePubReqs = bool (a_publish_responses /= {}))
@@ -121,7 +127,7 @@ DEFINITIONS
     IN
         a_monitored_item_notifications,
         a_MoreNotifications
-        :(a_monitored_item_notifications : t_notificationQueue <-> t_monitoredItem &
+        :(a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItem &
             {l_notifQueue} <<| a_monitored_item_notifications = {l_notifQueue} <<| a_monitored_item_notifications$0 &
             ({l_notifQueue} <| a_monitored_item_notifications /= {} =>
                 a_MoreNotifications = a_MoreNotifications \/ {p_subscription}
@@ -140,7 +146,7 @@ DEFINITIONS
         a_monitored_item_notifications,
         a_MoreNotifications,
         p_moreNotifs
-        :(a_monitored_item_notifications : t_notificationQueue <-> t_monitoredItem &
+        :(a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItem &
             {l_notifQueue} <<| a_monitored_item_notifications = {l_notifQueue} <<| a_monitored_item_notifications$0 &
             p_moreNotifs : BOOL &
             ({l_notifQueue} <| a_monitored_item_notifications /= {} =>
@@ -237,11 +243,14 @@ INITIALISATION
     a_pendingNotificationQueue := {} ||
     a_publishRequestQueue := {} ||
     a_monitoredItemQueue := {} ||
-    a_nodeToMonitoredItemQueue :(a_nodeToMonitoredItemQueue : t_Node --> t_monitoredItemQueue) || /* DEFINED ON INIT */
+    a_nodeToMonitoredItemQueue :(a_nodeToMonitoredItemQueue : t_Node --> s_monitoredItemQueue) || /* DEFINED ON INIT */
     
     /* Queues content */
+    s_publishReqQueue := {} ||
     a_publish_responses := {} ||
+    s_notificationQueue := {} ||
     a_monitored_item_notifications := {} ||
+    s_monitoredItemQueue := {} ||
     a_defined_monitored_items := {}
     
 OPERATIONS
@@ -357,11 +366,10 @@ OPERATIONS
             ANY l_subscription WHERE
                 l_subscription : t_subscription - s_subscription
             THEN
-                CHOICE
-                    /* Transition #1 + #2 */
-                    StatusCode_service := e_sc_bad_out_of_memory ||
-                    subscription := c_subscription_indet
-                OR
+                IF t_monitoredItemQueue /= s_monitoredItemQueue &
+                   t_notificationQueue /= s_notificationQueue &
+                   t_publishReqQueue /= s_publishReqQueue
+                THEN
                     /* Transition #1 + #3 */
                     StatusCode_service := e_sc_ok ||
                     
@@ -382,24 +390,36 @@ OPERATIONS
                     a_PublishingEnabled := a_PublishingEnabled \/ {l_subscription}   ||
                     a_SeqNum (l_subscription)            := c_sub_seq_num_indet      ||
                     
-                    a_pendingNotificationQueue
-                    :(
-                        a_pendingNotificationQueue : s_subscription --> t_notificationQueue &
-                        {l_subscription} <<| a_pendingNotificationQueue = {l_subscription} <<| a_pendingNotificationQueue$0 &
-                        l_subscription : dom(a_pendingNotificationQueue)
-                    ) ||
-                    a_publishRequestQueue
-                    :(
-                        a_publishRequestQueue : s_subscription --> t_publishReqQueue &
-                        {l_subscription} <<| a_publishRequestQueue = {l_subscription} <<| a_publishRequestQueue$0 &
-                        l_subscription : dom(a_publishRequestQueue)
-                    ) ||
-                    a_monitoredItemQueue
-                    :(
-                        a_monitoredItemQueue : s_subscription --> t_monitoredItemQueue &
-                        {l_subscription} <<| a_monitoredItemQueue = {l_subscription} <<| a_monitoredItemQueue$0 &
-                        l_subscription : dom(a_monitoredItemQueue)
-                    )
+                    ANY l_notifQueue WHERE
+                        l_notifQueue : t_notificationQueue_i &
+                        l_notifQueue : t_notificationQueue &
+                        l_notifQueue /: s_notificationQueue
+                    THEN
+                        s_notificationQueue := s_notificationQueue \/ {l_notifQueue} ||
+                        a_pendingNotificationQueue := a_pendingNotificationQueue \/ {l_subscription |-> l_notifQueue}
+                    END ||
+                    
+                    ANY l_publishQueue WHERE
+                        l_publishQueue : t_publishReqQueue_i &
+                        l_publishQueue : t_publishReqQueue &
+                        l_publishQueue /: s_publishReqQueue
+                    THEN
+                        s_publishReqQueue := s_publishReqQueue \/ {l_publishQueue} ||
+                        a_publishRequestQueue := a_publishRequestQueue \/ {l_subscription |-> l_publishQueue}
+                    END ||
+                    
+                    ANY l_monitoredItemQueue WHERE
+                        l_monitoredItemQueue : t_monitoredItemQueue_i &
+                        l_monitoredItemQueue : t_monitoredItemQueue &
+                        l_monitoredItemQueue /: s_monitoredItemQueue
+                    THEN
+                        s_monitoredItemQueue := s_monitoredItemQueue \/ {l_monitoredItemQueue} ||
+                        a_monitoredItemQueue := a_monitoredItemQueue \/ {l_subscription |-> l_monitoredItemQueue}
+                    END
+                ELSE                       
+                    /* Transition #1 + #2 */
+                    StatusCode_service := e_sc_bad_out_of_memory ||
+                    subscription := c_subscription_indet
                 END
             END                
         END
@@ -433,28 +453,18 @@ OPERATIONS
         a_defined_monitored_items := {a_monitoredItemQueue (p_subscription)} <<| a_defined_monitored_items ||
         
         /* Queues deleted */
-        a_pendingNotificationQueue
-        :(
-            a_pendingNotificationQueue : s_subscription --> t_notificationQueue &
-            {p_subscription} <<| a_pendingNotificationQueue = {p_subscription} <<| a_pendingNotificationQueue$0 &
-            p_subscription /: dom(a_pendingNotificationQueue)
-        ) ||
-        a_publishRequestQueue
-        :(
-            a_publishRequestQueue : s_subscription --> t_publishReqQueue &
-            {p_subscription} <<| a_publishRequestQueue = {p_subscription} <<| a_publishRequestQueue$0 &
-            p_subscription /: dom(a_publishRequestQueue)
-        ) ||
+        s_notificationQueue := s_notificationQueue - {a_pendingNotificationQueue (p_subscription)} ||
+        a_pendingNotificationQueue := 
+          a_pendingNotificationQueue - {p_subscription |-> a_pendingNotificationQueue (p_subscription)} ||
+          
+        s_publishReqQueue := s_publishReqQueue - {a_publishRequestQueue(p_subscription)} ||
+        a_publishRequestQueue := a_publishRequestQueue - {p_subscription |-> a_publishRequestQueue(p_subscription)} ||
         
         /* Remove monitoredItems */
         s_monitoredItem := s_monitoredItem - a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}] ||
         /* TODO: For each queue in a_nodeToMonitoredItemQueue, remove monitored items: a_monitoredItemQueue (p_subscription) ||*/
-        a_monitoredItemQueue
-        :(
-            a_monitoredItemQueue : s_subscription --> t_monitoredItemQueue &
-            {p_subscription} <<| a_monitoredItemQueue = {p_subscription} <<| a_monitoredItemQueue$0 &
-            p_subscription /: dom(a_monitoredItemQueue)
-        )
+        s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
+        a_monitoredItemQueue := a_monitoredItemQueue - {p_subscription |-> a_monitoredItemQueue(p_subscription)}
     END
     ;
     

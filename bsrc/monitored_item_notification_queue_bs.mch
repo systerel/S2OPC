@@ -22,18 +22,49 @@ SEES
     constants
     
 ABSTRACT_VARIABLES
-
+    s_notificationQueue,
     a_monitored_item_notifications
     
 INVARIANT
-    a_monitored_item_notifications : t_notificationQueue <-> t_monitoredItem 
+    s_notificationQueue <: t_notificationQueue &
+    a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItem 
     /* In C implementation, several times same monitored item can be present several times (multiple notifications) 
        but it will not change the proof constraints when dequeueing. Therefor it is a simplified representation. */
     
 INITIALISATION
+    s_notificationQueue :(s_notificationQueue = {}) ||
     a_monitored_item_notifications :(a_monitored_item_notifications = {})
 
 OPERATIONS
+    
+    bres, queue <-- allocate_new_monitored_item_notification_queue =
+    BEGIN
+        IF s_notificationQueue = t_notificationQueue
+        THEN
+            bres := FALSE ||
+            queue := c_notificationQueue_indet
+        ELSE
+            ANY l_queue WHERE
+                l_queue : t_notificationQueue_i &
+                l_queue : t_notificationQueue &
+                l_queue /: s_notificationQueue
+            THEN
+                s_notificationQueue := s_notificationQueue \/ {l_queue} ||
+                queue := l_queue ||
+                bres := TRUE
+            END
+        END
+    END
+    ;
+    
+    clear_and_deallocate_monitored_item_notification_queue (p_queue) =
+    PRE
+        p_queue : t_notificationQueue_i &
+        p_queue : s_notificationQueue
+    THEN
+        s_notificationQueue := s_notificationQueue - {p_queue}
+    END
+    ;
     
     bres <-- add_monitored_item_notification_to_queue (p_queue,
                                                        p_monitoredItem,
@@ -64,9 +95,9 @@ OPERATIONS
         continue,
         iterator
         :(continue : BOOL &
-          iterator : t_monitoredItemQueueIterator_i &
+          iterator : t_notificationQueueIterator_i &
           (continue = TRUE => 
-            iterator : t_monitoredItemQueueIterator)
+            iterator : t_notificationQueueIterator)
         )
     END
     ;
