@@ -25,8 +25,8 @@
  *        defined during toolkit configuration.
  */
 
-#ifndef SOPC_TOOLKIT_ASYNC_API_H
-#define SOPC_TOOLKIT_ASYNC_API_H
+#ifndef SOPC_TOOLKIT_ASYNC_API_H_
+#define SOPC_TOOLKIT_ASYNC_API_H_
 
 #include <stdint.h>
 
@@ -131,4 +131,4 @@ void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx
                                                   void* discoveryReqStruct,
                                                   uintptr_t requestContext);
 
-#endif /* SOPC_TOOLKIT_ASYNC_API_H */
+#endif /* SOPC_TOOLKIT_ASYNC_API_H_ */

@@ -23,8 +23,8 @@
  *         This module is in charge of the event dispatcher thread management.
  */
 
-#ifndef SOPC_SERVICES_API_H
-#define SOPC_SERVICES_API_H
+#ifndef SOPC_SERVICES_API_H_
+#define SOPC_SERVICES_API_H_
 
 #include <stdint.h>
 
@@ -135,4 +135,4 @@ SOPC_EventDispatcherManager* SOPC_Services_GetEventDispatcher(void);
 // Internal use only (timers)
 SOPC_EventDispatcherManager* SOPC_ApplicationCallback_GetEventDispatcher(void);
 
-#endif /* SOPC_SERVICES_API_H */
+#endif /* SOPC_SERVICES_API_H_ */

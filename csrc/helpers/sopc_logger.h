@@ -21,6 +21,9 @@
  *  \brief Specialized logger for the Toolkit
  */
 
+#ifndef SOPC_LOGGER_H_
+#define SOPC_LOGGER_H_
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -125,3 +128,5 @@ void SOPC_Logger_TraceOpcUaAuditWarning(const char* format, ...) LOGGER_FUNC_FOR
  * \brief Clears the logger and close the current log files
  * */
 void SOPC_Logger_Clear(void);
+
+#endif /* SOPC_LOGGER_H_ */

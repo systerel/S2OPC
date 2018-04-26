@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef util_discovery_services_h_
-#define util_discovery_services_h_
+#ifndef UTIL_DISCOVERY_SERVICES_H_
+#define UTIL_DISCOVERY_SERVICES_H_
 
 #include "constants.h"
 #include "sopc_builtintypes.h"
@@ -31,4 +31,4 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
     uint32_t* nbOfEndpointDescriptions,
     OpcUa_EndpointDescription** endpointDescriptions);
 
-#endif /* util_discovery_services_h_ */
+#endif /* UTIL_DISCOVERY_SERVICES_H_ */

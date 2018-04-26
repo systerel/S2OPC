@@ -22,8 +22,8 @@
  * finer grained linking options (https://www.ingopcs.net/trac/ingopcs.projects/ticket/187).
  */
 
-#ifndef SOPC_CRYPTO_FUNCTIONS_LIB_
-#define SOPC_CRYPTO_FUNCTIONS_LIB_
+#ifndef SOPC_CRYPTO_FUNCTIONS_LIB_H_
+#define SOPC_CRYPTO_FUNCTIONS_LIB_H_
 
 #include "../sopc_crypto_decl.h"
 #include "../sopc_key_manager.h"
@@ -165,4 +165,4 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1(const SOPC_C
 SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048(const SOPC_CryptoProvider* pCrypto,
                                                                       const SOPC_Certificate* pCert);
 
-#endif /* SOPC_CRYPTO_FUNCTIONS_LIB_ */
+#endif /* SOPC_CRYPTO_FUNCTIONS_LIB_H_ */

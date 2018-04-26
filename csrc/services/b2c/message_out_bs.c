@@ -26,7 +26,6 @@
 
 #include "sopc_encodeable.h"
 
-#include "internal_msg.h"
 #include "message_out_bs.h"
 #include "util_b2c.h"
 

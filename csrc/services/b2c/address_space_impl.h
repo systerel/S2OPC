@@ -21,8 +21,8 @@
  *        and OPC-UA values of B constants.
  */
 
-#ifndef address_space_impl_h_
-#define address_space_impl_h_
+#ifndef ADDRESS_SPACE_IMPL_H_
+#define ADDRESS_SPACE_IMPL_H_
 
 #include "b2c.h"
 #include "constants.h"
@@ -77,4 +77,4 @@ extern int32_t* address_space_bs__RefIndexEnd;
 /* Address space configured */
 extern bool sopc_addressSpace_configured;
 
-#endif // address_space_impl_h_
+#endif /* ADDRESS_SPACE_IMPL_H_ */

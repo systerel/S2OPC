@@ -21,6 +21,9 @@
  *  \brief A log manager providing circular logging, multiple logging categories and levels with thread-safe accesses.
  */
 
+#ifndef SOPC_LOG_MANAGER_H_
+#define SOPC_LOG_MANAGER_H_
+
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -136,3 +139,5 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst);
  * \brief Clears the logger manager: clear unique file name prefix for execution
  * */
 void SOPC_Log_Clear(void);
+
+#endif /* SOPC_LOG_MANAGER_H_ */

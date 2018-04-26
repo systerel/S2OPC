@@ -25,8 +25,8 @@
  * integrated in toolkit).
  */
 
-#ifndef SOPC_EVENT_TIMER_MANAGER_H
-#define SOPC_EVENT_TIMER_MANAGER_H
+#ifndef SOPC_EVENT_TIMER_MANAGER_H_
+#define SOPC_EVENT_TIMER_MANAGER_H_
 
 #include "sopc_event_dispatcher_manager.h"
 #include "sopc_time.h"
@@ -74,4 +74,4 @@ void SOPC_EventTimer_Cancel(uint32_t timerId);
  */
 void SOPC_EventTimer_CyclicTimersEvaluation(void);
 
-#endif /* SOPC_EVENT_TIMER_MANAGER_H */
+#endif /* SOPC_EVENT_TIMER_MANAGER_H_ */
