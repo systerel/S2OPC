@@ -219,9 +219,9 @@ LOCAL_OPERATIONS
         req_msg     : t_msg &
         app_context : t_application_context_i &
         /* message is not yet set as output before call and deallocated after operation */
-        c_msg_out = c_msg_indet &
+        c_msg_out = req_msg &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
+        a_msg_out_type : s_discovery_service_reqs
     THEN
         s_request_handle,
         a_client_request_type,
@@ -241,7 +241,7 @@ LOCAL_OPERATIONS
             ret :: {e_sc_bad_out_of_memory,
                 e_sc_bad_invalid_argument, /* message has not expected type */
                 e_sc_bad_encoding_error} ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            buffer_out := c_byte_buffer_indet ||
             req_handle := c_request_handle_indet
         OR
             ret := e_sc_ok ||
@@ -446,7 +446,6 @@ OPERATIONS
         l_valid_msg_header,
         l_req_typ,
         l_resp_typ,
-        l_valid_msg,
         l_req_handle,
         l_valid_req_handle,
         l_buffer,
@@ -455,52 +454,46 @@ OPERATIONS
         l_buffer := c_byte_buffer_indet;
         l_req_handle := c_request_handle_indet;
         /* Set application message as output message */
-        bless_msg_out (req_msg);
-        l_valid_msg <-- is_valid_msg_out (req_msg);
-        IF l_valid_msg = TRUE
-        THEN
-            l_req_typ <-- get_msg_out_type (req_msg);
-            CASE l_req_typ OF
-                /* Checks the type is a discovery request */
-                EITHER e_msg_discovery_find_servers_req,
-                    e_msg_discovery_find_servers_on_network_req,
-                    e_msg_discovery_get_endpoints_req,
-                    e_msg_discovery_register_server_req,
-                    e_msg_discovery_register_server2_req
+        l_req_typ <-- get_msg_out_type (req_msg);
+        CASE l_req_typ OF
+            /* Checks the type is a discovery request */
+            EITHER e_msg_discovery_find_servers_req,
+                e_msg_discovery_find_servers_on_network_req,
+                e_msg_discovery_get_endpoints_req,
+                e_msg_discovery_register_server_req,
+                e_msg_discovery_register_server2_req
+            THEN
+                l_resp_typ <-- get_response_type (l_req_typ);
+                l_msg_header <-- alloc_app_req_msg_header;
+                l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
+                l_req_handle <-- client_fresh_req_handle (l_req_typ, l_resp_typ, TRUE, app_context);
+                l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+                IF l_valid_req_handle = TRUE &
+                    l_valid_msg_header = TRUE
                 THEN
-                    l_resp_typ <-- get_response_type (l_req_typ);
-                    l_msg_header <-- alloc_app_req_msg_header;
-                    l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
-                    l_req_handle <-- client_fresh_req_handle (l_req_typ, l_resp_typ, TRUE, app_context);
-                    l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
-                    IF l_valid_req_handle = TRUE &
-                        l_valid_msg_header = TRUE
+                    set_req_handle_channel (l_req_handle, channel);
+                    write_msg_out_header_req_handle (l_msg_header, l_req_handle);
+                    l_buffer <-- encode_msg (e_msg_session_close_req, l_msg_header, req_msg);
+                    l_valid_buffer <-- is_valid_buffer_out (l_buffer);
+                    IF l_valid_buffer = FALSE
                     THEN
-                        set_req_handle_channel (l_req_handle, channel);
-                        write_msg_out_header_req_handle (l_msg_header, l_req_handle);
-                        l_buffer <-- encode_msg (e_msg_session_close_req, l_msg_header, req_msg);
-                        l_valid_buffer <-- is_valid_buffer_out (l_buffer);
-                        IF l_valid_buffer = FALSE
-                        THEN
-                            ret := e_sc_bad_encoding_error
-                        ELSE
-                            ret := e_sc_ok
-                        END
+                        l_req_handle := c_request_handle_indet;
+                        ret := e_sc_bad_encoding_error
                     ELSE
-                        ret := e_sc_bad_out_of_memory
-                    END;
-                    IF l_valid_msg_header = TRUE
-                    THEN
-                        dealloc_msg_header_out (l_msg_header)
+                        ret := e_sc_ok
                     END
                 ELSE
-                    ret := e_sc_bad_invalid_argument
+                    l_req_handle := c_request_handle_indet;
+                    ret := e_sc_bad_out_of_memory
+                END;
+                IF l_valid_msg_header = TRUE
+                THEN
+                    dealloc_msg_header_out (l_msg_header)
                 END
+            ELSE
+                ret := e_sc_bad_invalid_argument
             END
-        ELSE
-            ret := e_sc_bad_invalid_argument
         END;
-        dealloc_msg_out (req_msg);
         buffer_out := l_buffer;
         req_handle := l_req_handle
     END
@@ -1315,8 +1308,20 @@ OPERATIONS
     ;
     
     ret, buffer_out, req_handle <-- client_discovery_service_request (channel, req_msg, app_context) =
-    BEGIN
-        ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_msg, app_context)
+    VAR
+        l_valid_msg
+    IN
+        bless_msg_out (req_msg);
+        l_valid_msg <-- is_valid_msg_out (req_msg);
+        IF l_valid_msg = TRUE
+        THEN
+            ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_msg, app_context)
+        ELSE
+            ret := e_sc_bad_invalid_argument;
+            buffer_out := c_byte_buffer_indet;
+            req_handle := c_request_handle_indet
+        END;
+        dealloc_msg_out (req_msg)
     END
     ;
     
