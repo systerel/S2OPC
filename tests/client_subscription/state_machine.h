@@ -129,6 +129,7 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM);
  *
  * \param pAppCtx   A pointer to an uintptr_t which will contain the appCtx given to
                     SOPC_StaMac_SendRequest(). NULL is valid. 0 indicates "appID unavailable".
+ * \param appCtx    The appCtx given by the Toolkit.
  *
  * \warning This function shall be called upon each event raised by the Toolkit.
  *

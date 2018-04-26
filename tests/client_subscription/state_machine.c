@@ -21,6 +21,8 @@
  *
  */
 
+#include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -30,8 +32,12 @@
 
 #include "state_machine.h"
 
-static uint32_t nSentReqs = 0; /* Number of sent request, used to uniquely associate a response to its request. */
+/* =========
+ * Internals
+ * =========
+ */
 
+/* Structures */
 enum SOPC_StaMac_State
 {
     stError,
@@ -57,13 +63,29 @@ struct SOPC_StaMac_Machine
     SOPC_LibSub_DataChangeCbk cbkDataChanged; /* Callback when subscribed data changed */
     uintptr_t iSessionCtx;                    /* Toolkit Session Context, used to identify session events */
     uint32_t iSessionID;                      /* OPC UA Session ID */
-    SOPC_SLinkedList* pListCtxReqs;           /* List of yet-to-be-answered requests,
+    SOPC_SLinkedList* pListReqCtx;            /* List of yet-to-be-answered requests,
                                                * id is unique request identifier, value is a SOPC_StaMac_ReqCtx */
     double fPublishInterval;                  /* The publish interval, in ms */
     uint32_t iSubscriptionID;                 /* OPC UA subscription ID, non 0 when subscription is created */
     SOPC_SLinkedList* pListMonIt;             /* List of monitored items, where the appCtx is the list id,
                                                * and the value is the uint32_t OPC UA monitored item ID */
 };
+
+/* Global variables */
+static uint32_t nSentReqs = 0; /* Number of sent request, used to uniquely associate a response to its request. */
+
+/* Internal functions */
+bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
+                            uintptr_t* pAppCtx,
+                            SOPC_App_Com_Event event,
+                            uint32_t arg,
+                            void* pParam,
+                            uintptr_t appCtx);
+
+/* ==================
+ * API implementation
+ * ==================
+ */
 
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      SOPC_LibSub_DataChangeCbk cbkDataChanged,
@@ -86,13 +108,13 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->cbkDataChanged = cbkDataChanged;
         pSM->iSessionCtx = 0;
         pSM->iSessionID = 0;
-        pSM->pListCtxReqs = SOPC_SLinkedList_Create(0);
+        pSM->pListReqCtx = SOPC_SLinkedList_Create(0);
         pSM->fPublishInterval = fPublishInterval;
         pSM->iSubscriptionID = 0;
         pSM->pListMonIt = SOPC_SLinkedList_Create(0);
     }
 
-    if (SOPC_STATUS_OK == status && (NULL == pSM->pListCtxReqs || NULL == pSM->pListMonIt))
+    if (SOPC_STATUS_OK == status && (NULL == pSM->pListReqCtx || NULL == pSM->pListMonIt))
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
@@ -109,7 +131,6 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
 SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_StaMac_ReqCtx* pReqCtx = NULL;
 
     if (NULL == pSM)
     {
@@ -128,37 +149,15 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
         printf("# Error: The state machine shall be in stInit state to start a session.\n");
     }
 
-    /* Allocate a request context */
-    if (SOPC_STATUS_OK == status)
-    {
-        pReqCtx = malloc(sizeof(SOPC_StaMac_ReqCtx));
-        if (NULL == pReqCtx)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
-    /* Adds it to the list of yet-to-be-answered requests */
-    if (SOPC_STATUS_OK == status)
-    {
-        ++nSentReqs;
-        pReqCtx->uid = nSentReqs;
-        pReqCtx->appCtx = 0;
-        if (SOPC_SLinkedList_Append(pSM->pListCtxReqs, pReqCtx->uid, (void*) pReqCtx) != pReqCtx)
-        {
-            status = SOPC_STATUS_NOK;
-            free(pReqCtx);
-        }
-    }
-
     /* Sends the request */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ToolkitClient_AsyncActivateSession(pSM->iscConfig, (uintptr_t) pReqCtx);
+        ++nSentReqs;
+        pSM->iSessionCtx = nSentReqs; /* Record the session context, must be reset when connection is closed. */
+        SOPC_ToolkitClient_AsyncActivateSession(pSM->iscConfig, (uintptr_t) pSM->iSessionCtx);
         pSM->state = stActivating;
     }
-
-    if (SOPC_STATUS_OK != status && NULL != pSM)
+    else if (NULL != pSM)
     {
         pSM->state = stError;
     }
@@ -215,7 +214,9 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* reques
         ++nSentReqs;
         pReqCtx->uid = nSentReqs;
         pReqCtx->appCtx = appCtx;
-        if (SOPC_SLinkedList_Append(pSM->pListCtxReqs, pReqCtx->uid, (void*) pReqCtx) != pReqCtx)
+        /* Asserts that there cannot be two requests with the same id when receiving a response */
+        assert(SOPC_SLinkedList_FindFromId(pSM->pListReqCtx, pReqCtx->uid) == NULL);
+        if (SOPC_SLinkedList_Append(pSM->pListReqCtx, pReqCtx->uid, (void*) pReqCtx) != pReqCtx)
         {
             status = SOPC_STATUS_NOK;
             free(pReqCtx);
@@ -277,5 +278,168 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                                  void* pParam,
                                  uintptr_t appCtx)
 {
-    return false;
+    bool bProcess = StaMac_IsEventTargeted(pSM, pAppCtx, event, arg, pParam, appCtx);
+
+    if (bProcess)
+    {
+        switch (pSM->state)
+        {
+        /* Session states */
+        case stActivating:
+            switch (event)
+            {
+            case SE_ACTIVATED_SESSION:
+                pSM->state = stActivated;
+                pSM->iSessionID = arg;
+                printf("# Info: Session activated.\n");
+                /* Creates the subscription */
+                break;
+            case SE_SESSION_ACTIVATION_FAILURE:
+                pSM->state = stError;
+                printf("# Error: Failed session activation.\n");
+                break;
+            default:
+                pSM->state = stError;
+                printf("# Error: In state Activation, unexpected event %i.\n", event);
+                break;
+            }
+            break;
+        case stClosing:
+            switch (event)
+            {
+            case SE_CLOSED_SESSION:
+                pSM->state = stInit;
+                /* Reset the machine */
+                pSM->iSessionCtx = 0;
+                pSM->iSessionID = 0;
+                pSM->iSubscriptionID = 0;
+                SOPC_SLinkedList_Clear(pSM->pListReqCtx);
+                SOPC_SLinkedList_Clear(pSM->pListMonIt);
+                break;
+            default:
+                /* This might be a response to a pending request, so this might not an error */
+                printf("# Warning: Unexpected event in stClosing state, ignoring.\n");
+                break;
+            }
+            break;
+        /* Main state */
+        case stActivated:
+            switch (event)
+            {
+            case SE_RCV_SESSION_RESPONSE:
+                printf("# Info: Response received.\n");
+                break;
+            case SE_SND_REQUEST_FAILED:
+                pSM->state = stError;
+                printf("# Error: Send request 0x%" PRIxPTR " failed.\n", appCtx);
+                break;
+            case SE_SESSION_REACTIVATING:
+                printf("# Info: Session reactivated.\n");
+                break;
+            default:
+                pSM->state = stError;
+                printf("# Error: In state stActivated, unexpected event %i.\n", event);
+                break;
+            }
+            break;
+        /* Creating* states */
+        case stCreatingSubscr:
+            break;
+        case stCreatingMonIt:
+            break;
+        case stCreatingPubReq:
+            break;
+        /* Invalid states */
+        case stInit:
+            pSM->state = stError;
+            printf("# Error: Event received in stInit state.\n");
+            break;
+        case stError:
+            printf("# Warning: Receiving event in stError state, ignoring.\n");
+            break;
+        default:
+            pSM->state = stError;
+            printf("# Error: Dispatching in unknown state %i, event %i.\n", pSM->state, event);
+            break;
+        }
+    }
+
+    return bProcess;
+}
+
+/* ========================
+ * Internals implementation
+ * ========================
+ */
+
+/**
+ * \brief Tells whether the event is targeted to this machine.
+ *
+ * It also unwraps the appCtx if it is a SOPC_StaMac_ReqCtx*, and set *pAppCtx to pReqCtx->appCtx.
+ */
+bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
+                            uintptr_t* pAppCtx,
+                            SOPC_App_Com_Event event,
+                            uint32_t arg,
+                            void* pParam,
+                            uintptr_t appCtx)
+{
+    bool bProcess = true;
+    SOPC_SLinkedListIterator pListIter = NULL;
+
+    if (NULL == pSM)
+    {
+        bProcess = false;
+    }
+
+    /* As long as the appCtx is not surely a SOPC_StaMac_ReqCtx*, it is not possible to dereference it.
+     * But it contains the uid of the request, which is the id of the pListReqCtx.
+     * The appCtx is a uintptr_t, so it cannot be set as the id of the SOPC_SLinkedList,
+     * and searched for easily. */
+    if (bProcess)
+    {
+        /* Depending on the event, check either by request id or by session id. */
+        switch (event)
+        {
+        /* appCtx is request context */
+        case SE_RCV_SESSION_RESPONSE:
+        case SE_RCV_DISCOVERY_RESPONSE:
+        case SE_SND_REQUEST_FAILED:
+            bProcess = false;
+            pListIter = SOPC_SLinkedList_GetIterator(pSM->pListReqCtx);
+            while (!bProcess && NULL != pListIter)
+            {
+                if ((uintptr_t) SOPC_SLinkedList_Next(&pListIter) == appCtx)
+                {
+                    bProcess = true;
+                    /* A response with a known pReqCtx shall free it, and return the appCtx to the caller */
+                    if (NULL != pAppCtx)
+                    {
+                        *pAppCtx = ((SOPC_StaMac_ReqCtx*) appCtx)->appCtx;
+                    }
+                    free((void*) appCtx);
+                    if (SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, ((SOPC_StaMac_ReqCtx*) appCtx)->uid) != NULL)
+                    {
+                        printf("# Warning: failed to pop the request from the pListReqCtx\n");
+                    }
+                }
+            }
+            break;
+        /* appCtx is session context */
+        case SE_SESSION_ACTIVATION_FAILURE:
+        case SE_ACTIVATED_SESSION:
+        case SE_SESSION_REACTIVATING:
+        case SE_CLOSED_SESSION:
+            if (pSM->iSessionCtx != appCtx)
+            {
+                bProcess = false;
+            }
+            break;
+        default:
+            printf("# Error: Unexpected event received by a machine.\n");
+            break;
+        }
+    }
+
+    return bProcess;
 }
