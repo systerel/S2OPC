@@ -3114,7 +3114,7 @@ static bool SC_Chunks_TreatSendBuffer(
                 {
                     result =
                         SC_Chunks_EncodeAsymSecurityHeader(scConnection, scConfig, nonEncryptedBuffer,
-                                                           &senderCertificateSize, &securityPolicyLength, errorStatus);
+                                                           &securityPolicyLength, &senderCertificateSize, errorStatus);
                     if (false == result)
                     {
                         *errorStatus = OpcUa_BadTcpInternalError;
