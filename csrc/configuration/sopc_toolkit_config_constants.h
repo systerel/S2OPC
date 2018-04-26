@@ -110,10 +110,15 @@
 
 /* SESSION CONFIGURATION */
 
-/** @brief Maximum number of sessions established */
+/** @brief Maximum number of sessions (and subscriptions: 1 per session) established */
 #ifndef SOPC_MAX_SESSIONS
 #define SOPC_MAX_SESSIONS 20
 #endif /* SOPC_MAX_SESSIONS */
+
+/** @brief Maximum number of monitored items per subscription */
+#ifndef SOPC_MAX_MONITORED_ITEM
+#define SOPC_MAX_MONITORED_ITEM 100000
+#endif /* SOPC_MAX_MONITORED_ITEM_PER_SUBSCRIPTION */
 
 /* @brief Client requested timeout for which a session shall remain open without activity */
 #ifndef SOPC_REQUESTED_SESSION_TIMEOUT

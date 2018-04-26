@@ -1,0 +1,58 @@
+/*
+ *  Copyright (C) 2018 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION
+    subscription_core_it_i
+
+REFINES
+    subscription_core_it
+
+SEES
+    constants
+
+CONCRETE_VARIABLES
+    subscription_i
+
+INVARIANT
+    subscription_i : INT &
+    subscription_i : 0 .. size(cast_t_subscription) &
+    subscriptions_to_iterate = cast_t_subscription[1..subscription_i]
+
+ASSERTIONS
+    (cast_t_subscription[1..subscription_i] /= {} <=> 1 <= subscription_i);
+    (subscriptions_to_iterate /= {} <=> 1 <= subscription_i)
+
+INITIALISATION
+    subscription_i := 0
+
+OPERATIONS
+
+    p_continue <-- init_iter_subscription =
+    BEGIN
+        subscription_i <-- get_card_t_subscription;
+        p_continue := bool(1 <= subscription_i)
+    END
+    ;
+
+    p_continue, p_subscription <-- continue_iter_subscription =
+    BEGIN
+        p_subscription <-- get_cast_t_subscription(subscription_i);
+        subscription_i  := subscription_i - 1;
+        p_continue := bool(1 <= subscription_i)
+    END
+
+END

@@ -144,8 +144,8 @@ SETS
     /* SUBSCRIPTION TYPES */
     t_subscription_i;
     
-    t_subscriptionState = {
-        c_subsciptionState_indet, /* includes e_subscription_closed */
+    t_subscriptionState_i = {
+        c_subscriptionState_indet, /* includes e_subscription_closed */
         /* e_subscriptionState_creating, => not necesssary */
         e_subscriptionState_normal,
         e_subscriptionState_late,
@@ -316,6 +316,7 @@ CONCRETE_CONSTANTS
     c_subscription_indet,
     c_notif_msg_indet,
     c_sub_seq_num_indet,
+    c_sub_seq_num_init,
     c_timeref_indet,
     c_opcua_duration_indet,
     c_notificationQueue_indet,
@@ -380,6 +381,7 @@ ABSTRACT_CONSTANTS
     t_Nonce,
     t_SignatureData,
     t_subscription,
+    t_subscriptionState,
     t_notif_msg,
     t_sub_seq_num,
     t_timeref,
@@ -565,6 +567,8 @@ PROPERTIES
     cast_t_subscription : NAT +-> t_subscription_i &
     cast_t_subscription : perm(t_subscription) &
 
+    t_subscriptionState = t_subscriptionState_i - {c_subscriptionState_indet} &
+    
     t_counter = NAT &
     
     t_notif_msg <: t_notif_msg_i &
@@ -574,6 +578,9 @@ PROPERTIES
     t_sub_seq_num <: t_sub_seq_num_i &
     c_sub_seq_num_indet : t_sub_seq_num_i &
     c_sub_seq_num_indet /: t_sub_seq_num &
+    
+    c_sub_seq_num_init : t_sub_seq_num_i &
+    c_sub_seq_num_init : t_sub_seq_num &
     
     t_timeref <: t_timeref_i &
     c_timeref_indet : t_timeref_i &
@@ -605,11 +612,7 @@ PROPERTIES
     c_monitoredItemQueueIterator_indet : t_monitoredItemQueueIterator_i &
     c_monitoredItemQueueIterator_indet /: t_monitoredItemQueueIterator &
     
-    t_monitoringMode = {
-        e_monitoringMode_disabled,
-        e_monitoringMode_sampling,
-        e_monitoringMode_reporting
-    } &
+    t_monitoringMode = t_monitoringMode_i - {c_monitoringMode_indet} &
     
     t_monitoredItem <: t_monitoredItem_i &
     c_monitoredItem_indet : t_monitoredItem_i &
@@ -883,6 +886,21 @@ OPERATIONS
         p_type2 : t_NodeId
     THEN
         p_res := Is_SubType(p_type1 |-> p_type2)
+    END
+    ;
+    
+    p_card_subscription <-- get_card_t_subscription =
+    BEGIN
+        p_card_subscription := card(t_subscription)
+    END
+    ;
+    
+    p_subscription <-- get_cast_t_subscription(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_subscription)
+    THEN
+        p_subscription := cast_t_subscription(p_ind)
     END
 
 END

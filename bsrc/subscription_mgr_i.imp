@@ -236,6 +236,7 @@ OPERATIONS
               <-- server_subscription_core_publish_timeout (p_subscription);
             IF l_msg_to_send = TRUE
             THEN
+                /* TODO: if l_moreNotifs = TRUE => encode it in service status code ! */
                 fill_publish_response_msg (l_publish_resp_msg, p_subscription, l_notifMsg);
                 generate_internal_send_publish_response_event (l_session, l_publish_resp_msg, l_req_handle, l_req_context);
                 IF l_moreNotifs = TRUE & l_morePubReqs = TRUE
@@ -249,7 +250,7 @@ OPERATIONS
                 END
             END
         ELSE
-            delete_subscription (p_subscription);
+            close_subscription (p_subscription);
             IF l_msg_to_send = TRUE /* Seems to be impossible: see server_subscription_core_publish_timeout_check_lifetime */
             THEN
                 /* Fill IssueStateChangedNotification message */

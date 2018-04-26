@@ -96,6 +96,7 @@ CONCRETE_CONSTANTS
     c_subscription_indet,
     c_notif_msg_indet,
     c_sub_seq_num_indet,
+    c_sub_seq_num_init,
     c_timeref_indet,
     c_opcua_duration_indet,
     c_notificationQueue_indet,
@@ -134,6 +135,7 @@ ABSTRACT_CONSTANTS
     t_LocalizedText,
     t_QualifiedName,
     t_subscription,
+    cast_t_subscription,
     t_notif_msg,
     t_sub_seq_num,
     t_timeref,
@@ -204,6 +206,8 @@ PROPERTIES
     t_subscription <: t_subscription_i &
     c_subscription_indet : t_subscription_i &
     c_subscription_indet /: t_subscription &
+    cast_t_subscription : NAT +-> t_subscription_i &
+    cast_t_subscription : perm(t_subscription) &
 
     t_notif_msg <: t_notif_msg_i &
     c_notif_msg_indet : t_notif_msg_i &
@@ -212,6 +216,9 @@ PROPERTIES
     t_sub_seq_num <: t_sub_seq_num_i &
     c_sub_seq_num_indet : t_sub_seq_num_i &
     c_sub_seq_num_indet /: t_sub_seq_num &
+    
+    c_sub_seq_num_init : t_sub_seq_num_i &
+    c_sub_seq_num_init : t_sub_seq_num &
     
     t_timeref <: t_timeref_i &
     c_timeref_indet : t_timeref_i &
@@ -374,6 +381,21 @@ OPERATIONS
     THEN
         p_isvalid :: BOOL ||
         p_nid     :: t_NodeId_i
+    END
+    ;
+    
+    p_card_subscription <-- get_card_t_subscription =
+    BEGIN
+        p_card_subscription := card(t_subscription)
+    END
+    ;
+    
+    p_subscription <-- get_cast_t_subscription(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_subscription)
+    THEN
+        p_subscription := cast_t_subscription(p_ind)
     END
 
 END

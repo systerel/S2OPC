@@ -27,19 +27,82 @@ SEES
     request_handle_bs
     
 IMPORTS
+    subscription_core_1,
+    subscription_core_it,
     monitored_item_notification_queue_bs,
     monitored_item_queue_bs,
     publish_request_queue_bs
     
-OPERATIONS
+PROMOTES
+    is_valid_subscription,
+    remove_subscription_session
     
-    is_valid <-- is_valid_subscription_on_session (p_session, p_subscription) =
+LOCAL_OPERATIONS
+    
+    bres, p_subscription <-- get_fresh_subscription =
     BEGIN
-        is_valid := FALSE
+        IF t_subscription = s_subscription
+        THEN
+            bres := FALSE ||
+            p_subscription := c_subscription_indet
+        ELSE
+            ANY l_subscription WHERE
+                l_subscription : t_subscription - s_subscription
+            THEN
+                bres := TRUE ||
+                p_subscription := l_subscription
+            END
+        END
+    END
+    
+OPERATIONS
+    /* LOCAL OPERATIONS */
+    
+    bres, p_subscription <-- get_fresh_subscription =
+    VAR
+        l_subscription,
+        l_is_subscription,
+        l_continue
+    IN
+        bres := FALSE;
+        p_subscription := c_subscription_indet;
+        l_subscription := c_subscription_indet;
+        l_is_subscription := TRUE;
+        l_continue <-- init_iter_subscription;
+        IF  l_continue = TRUE  /* Only for the proof */
+        THEN
+            WHILE
+                l_continue   = TRUE &
+                l_is_subscription = TRUE
+            DO
+                l_continue, l_subscription <-- continue_iter_subscription;
+                l_is_subscription <-- is_valid_subscription(l_subscription)
+            INVARIANT
+                l_continue = bool(subscriptions_to_iterate /= {}) &
+                subscriptions_to_iterate /\ subscriptions_iterated = {} &
+                subscriptions_to_iterate \/ subscriptions_iterated = t_subscription &
+                (   l_is_subscription = TRUE
+                    =>
+                    subscriptions_iterated <: s_subscription) &
+                (   l_is_subscription = FALSE
+                    =>
+                    l_subscription  : t_subscription &
+                    l_subscription /: s_subscription)
+            VARIANT
+                card(subscriptions_to_iterate)
+            END
+        END;
+        IF l_is_subscription = FALSE
+        THEN
+            bres := TRUE;
+            p_subscription := l_subscription
+        END
     END
     ;
     
-    is_valid <-- is_valid_subscription (p_subscription) =
+    /* END OF LOCAL OPERATIONS */
+    
+    is_valid <-- is_valid_subscription_on_session (p_session, p_subscription) =
     BEGIN
         is_valid := FALSE
     END
@@ -58,12 +121,6 @@ OPERATIONS
     ;
     
     empty_session_publish_requests (p_subscription) =
-    BEGIN
-        skip
-    END
-    ;
-    
-    remove_subscription_session (p_subscription, p_session) =
     BEGIN
         skip
     END
@@ -87,13 +144,61 @@ OPERATIONS
                                                               p_revMaxKeepAlive,
                                                               p_maxNotificationsPerPublish,
                                                               p_publishEnabled) =
-    BEGIN
+    VAR
+        l_bres,
+        l_subscription,
+        l_bres_notif,
+        l_newNotifQueue,
+        l_bres_pub,
+        l_newPublishQueue,
+        l_bres_monitored,
+        l_newMonitoredItemQueue
+    IN
         StatusCode_service := c_StatusCode_indet;
-        subscription := c_subscription_indet
+        subscription := c_subscription_indet;
+        l_bres, l_subscription <-- get_fresh_subscription;
+
+        IF l_bres = TRUE
+        THEN
+            l_bres_notif, l_newNotifQueue <-- allocate_new_monitored_item_notification_queue;
+            l_bres_pub, l_newPublishQueue <-- allocate_new_publish_queue;
+            l_bres_monitored, l_newMonitoredItemQueue <-- allocate_new_monitored_item_queue;
+            IF l_bres_notif = TRUE & l_bres_pub = TRUE & l_bres_monitored = TRUE
+            THEN
+                StatusCode_service := e_sc_ok;
+                add_subscription (l_subscription,
+                                  p_session,
+                                  p_revPublishInterval,
+                                  p_revLifetimeCount,
+                                  p_revMaxKeepAlive,
+                                  p_maxNotificationsPerPublish,
+                                  p_publishEnabled,
+                                  l_newNotifQueue,
+                                  l_newPublishQueue,
+                                  l_newMonitoredItemQueue)
+                                
+            ELSE
+                StatusCode_service := e_sc_bad_out_of_memory;
+                IF l_bres_notif = TRUE
+                THEN
+                    clear_and_deallocate_monitored_item_notification_queue (l_newNotifQueue)
+                END;
+                IF l_bres_pub = TRUE
+                THEN
+                    clear_and_deallocate_publish_queue (l_newPublishQueue)
+                END;
+                IF l_bres_monitored = TRUE
+                THEN
+                    clear_and_deallocate_monitored_item_queue (l_newMonitoredItemQueue)
+                END
+            END
+        ELSE
+            StatusCode_service := e_sc_bad_too_many_subscriptions
+        END
     END
     ;
     
-    delete_subscription (p_subscription) =
+    close_subscription (p_subscription) =
     BEGIN
         skip
     END

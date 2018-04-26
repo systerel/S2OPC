@@ -109,7 +109,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__t_endpoint_config_idx_i_max SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
 #define constants_bs__t_monitoredItemQueueIterator_i_max (-1)
 #define constants_bs__t_monitoredItemQueue_i_max (-1)
-#define constants_bs__t_monitoredItem_i_max (-1)
+#define constants_bs__t_monitoredItem_i_max SOPC_MAX_MONITORED_ITEM
 #define constants_bs__t_msg_header_i_max (-1)
 #define constants_bs__t_msg_i_max (-1)
 #define constants_bs__t_notif_msg_i_max (-1)
@@ -123,7 +123,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__t_session_i_max SOPC_MAX_SESSIONS
 #define constants_bs__t_session_token_i_max (-1)
 #define constants_bs__t_sub_seq_num_i_max (-1)
-#define constants_bs__t_subscription_i_max (-1)
+#define constants_bs__t_subscription_i_max SOPC_MAX_SESSIONS // 1 sub / session
 #define constants_bs__t_timeref_i_max (-1)
 #define constants_bs__t_user_i_max (-1)
 #define constants_bs__t_user_token_i_max (-1)
@@ -163,6 +163,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__c_session_indet 0
 #define constants_bs__c_session_token_indet 0
 #define constants_bs__c_sub_seq_num_indet 0
+#define constants_bs__c_sub_seq_num_init 1
 #define constants_bs__c_subscription_indet 0
 #define constants_bs__c_timeref_indet 0
 #define constants_bs__c_user_indet 0
@@ -186,10 +187,13 @@ extern void constants_bs__get_Is_SubType(const constants_bs__t_NodeId_i constant
                                          t_bool* const constants_bs__p_res);
 extern void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel);
 extern void constants_bs__get_card_t_session(t_entier4* const constants_bs__p_card_session);
+extern void constants_bs__get_card_t_subscription(t_entier4* const constants_bs__p_card_subscription);
 extern void constants_bs__get_cast_t_channel(const t_entier4 constants_bs__p_ind,
                                              constants_bs__t_channel_i* const constants_bs__p_channel);
 extern void constants_bs__get_cast_t_session(const t_entier4 constants_bs__p_ind,
                                              constants_bs__t_session_i* const constants_bs__p_session);
+extern void constants_bs__get_cast_t_subscription(const t_entier4 constants_bs__p_ind,
+                                                  constants_bs__t_subscription_i* const constants_bs__p_subscription);
 extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
     const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
     t_bool* const constants_bs__p_isvalid,

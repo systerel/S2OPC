@@ -34,7 +34,6 @@ DEFINITIONS
     a_maxNotifsPerPublish,
     a_subscription_state,
     a_MoreNotifications,
-    a_LatePublishRequest,
     a_LifetimeCounter,
     a_KeepAliveCounter,
     a_MessageSent,
@@ -68,7 +67,6 @@ DEFINITIONS
     
     /* Subscription State Machine : variables shall be defined (part 4 table 84) */
     a_MoreNotifications <: s_subscription &
-    a_LatePublishRequest <: s_subscription &
     a_LifetimeCounter : s_subscription --> t_counter &
     a_KeepAliveCounter : s_subscription --> t_counter & /* missing in table 84 */
     a_MessageSent <: s_subscription &
@@ -76,7 +74,7 @@ DEFINITIONS
     a_PublishingEnabled <: s_subscription &
     /* a_PublishingReqQueued <: s_subscription & */ /* <=> a_publish_responses~[{queue}] /= {} */
     /* a_RequestedMessageFound <: s_subscription */   /* <=> seqNum in a_retransmissionQueue[subscription] */
-    a_SeqNum : s_subscription --> t_sub_seq_num_i &
+    a_SeqNum : s_subscription --> t_sub_seq_num &
     /* a_SubscriptionAssignedToClient <: s_subscription */             /* Not really a state machine variable: local variable or function */
     
     /* Subscription Implementation variables */
@@ -185,11 +183,11 @@ DEFINITIONS
     a_MessageSent := a_MessageSent \/ {p_subscription} ||
     p_msg_to_send := TRUE ||
     a_SeqNum
-    :(a_SeqNum : s_subscription --> t_sub_seq_num_i &
+    :(a_SeqNum : s_subscription --> t_sub_seq_num &
       {p_subscription} <<| a_SeqNum = {p_subscription} <<| a_SeqNum$0 &
       a_SeqNum (p_subscription) /= a_SeqNum$0 (p_subscription)) ||
     p_session, p_req_handle, p_req_context, p_notifMsg
-    :(p_session : t_session_i & p_session : t_session &
+    :(p_session : t_session_i & p_session = a_subscription_session (p_subscription) &
         p_req_handle : t_server_request_handle_i &
         p_req_context : t_request_context_i & p_req_context : t_request_context &
         p_notifMsg : t_notif_msg_i & p_notifMsg : t_notif_msg)
@@ -200,7 +198,7 @@ DEFINITIONS
     p_msg_to_send := TRUE ||
     p_moreNotifs := FALSE ||
     p_session, p_req_handle, p_req_context, p_notifMsg
-    :(p_session : t_session_i & p_session : t_session &
+    :(p_session : t_session_i & p_session = a_subscription_session (p_subscription) &
         p_req_handle : t_server_request_handle_i &
         p_req_context : t_request_context_i & p_req_context : t_request_context &
         p_notifMsg = c_notif_msg_indet)
@@ -210,7 +208,7 @@ DEFINITIONS
     a_MessageSent := a_MessageSent \/ {p_subscription} ||
     p_msg_to_send := TRUE ||
     p_session, p_req_handle, p_req_context, p_notifMsg
-    :(p_session : t_session_i & p_session : t_session &
+    :(p_session : t_session_i & p_session = a_subscription_session (p_subscription) &
         p_req_handle : t_request_handle_i & p_req_handle : s_request_handle & 
         p_req_context : t_request_context_i & p_req_context : t_request_context &
         p_notifMsg : t_notif_msg_i & p_notifMsg : t_notif_msg)
@@ -233,7 +231,6 @@ INITIALISATION
     a_subscription_state := {}                 ||
 
     a_MoreNotifications := {}     ||
-    a_LatePublishRequest := {}    ||
     a_LifetimeCounter := {}       ||
     a_KeepAliveCounter := {}      ||
     a_MessageSent := {}           ||
@@ -333,7 +330,9 @@ OPERATIONS
             revisedMaxKeepAlive
             :(revisedPublishInterval : t_opcua_duration_i &
                 revisedLifetimeCount : t_counter &
+                revisedLifetimeCount > 0 &
                 revisedMaxKeepAlive : t_counter &
+                revisedMaxKeepAlive > 0 &
                 revisedLifetimeCount >= 3 * revisedMaxKeepAlive  /* part 4 table 86 */
             )
     END
@@ -348,10 +347,12 @@ OPERATIONS
     PRE
         p_session : t_session_i &
         p_session : t_session &
-        a_subscription_session |> {p_session} = {} & /* session is not part of any suscription (=> 1 subscription / session) */
+        p_session /: ran(a_subscription_session) & /* session is not part of any suscription (=> 1 subscription / session) */
         p_revPublishInterval : t_opcua_duration_i &
         p_revLifetimeCount : t_counter &
+        p_revLifetimeCount > 0 &
         p_revMaxKeepAlive : t_counter &
+        p_revMaxKeepAlive > 0 &
         p_revLifetimeCount >= 3 * p_revMaxKeepAlive & /* part 4 table 86 */
         p_maxNotificationsPerPublish : t_counter &
         p_publishEnabled = TRUE /* => no subscription modification for now => refuse publishDisabled */
@@ -383,7 +384,6 @@ OPERATIONS
                     a_maxNotifsPerPublish (l_subscription) := p_maxNotificationsPerPublish ||
                     
                     a_subscription_state (l_subscription) := e_subscriptionState_normal   ||
-                    a_LatePublishRequest := a_LatePublishRequest \/ {l_subscription} ||
                     a_LifetimeCounter (l_subscription) := p_revLifetimeCount         ||
                     a_KeepAliveCounter (l_subscription) := p_revMaxKeepAlive         ||
                     a_MessageSent := a_MessageSent \/ {l_subscription}               ||
@@ -426,7 +426,7 @@ OPERATIONS
     END
     ;
     
-    delete_subscription (p_subscription) =
+    close_subscription (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription
@@ -440,7 +440,6 @@ OPERATIONS
         a_maxNotifsPerPublish := {p_subscription} <<| a_maxNotifsPerPublish ||
         
         a_subscription_state := {p_subscription} <<| a_subscription_state ||
-        a_LatePublishRequest := a_LatePublishRequest - {p_subscription} ||
         a_LifetimeCounter := {p_subscription} <<| a_LifetimeCounter ||
         a_KeepAliveCounter := {p_subscription} <<| a_KeepAliveCounter ||
         a_MessageSent := a_MessageSent - {p_subscription}               ||
@@ -454,17 +453,16 @@ OPERATIONS
         
         /* Queues deleted */
         s_notificationQueue := s_notificationQueue - {a_pendingNotificationQueue (p_subscription)} ||
-        a_pendingNotificationQueue := 
-          a_pendingNotificationQueue - {p_subscription |-> a_pendingNotificationQueue (p_subscription)} ||
+        a_pendingNotificationQueue := {p_subscription} <<| a_pendingNotificationQueue ||
           
         s_publishReqQueue := s_publishReqQueue - {a_publishRequestQueue(p_subscription)} ||
-        a_publishRequestQueue := a_publishRequestQueue - {p_subscription |-> a_publishRequestQueue(p_subscription)} ||
+        a_publishRequestQueue := {p_subscription} <<| a_publishRequestQueue ||
         
         /* Remove monitoredItems */
         s_monitoredItem := s_monitoredItem - a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}] ||
         /* TODO: For each queue in a_nodeToMonitoredItemQueue, remove monitored items: a_monitoredItemQueue (p_subscription) ||*/
         s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
-        a_monitoredItemQueue := a_monitoredItemQueue - {p_subscription |-> a_monitoredItemQueue(p_subscription)}
+        a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue
     END
     ;
     
