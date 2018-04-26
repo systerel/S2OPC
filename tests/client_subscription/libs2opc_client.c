@@ -24,6 +24,7 @@
 #include <stdbool.h>
 
 #include "sopc_singly_linked_list.h"
+#include "sopc_toolkit_config.h"
 #include "sopc_user_app_itf.h"
 
 #include "sopc_builtintypes.h"
@@ -35,6 +36,7 @@
 #include "libs2opc_client.h"
 
 #include "state_machine.h"
+#include "toolkit_helpers.h"
 
 /* =========
  * Internals
@@ -49,7 +51,7 @@ static bool bLibConfigured = false;
 static SOPC_LibSub_LogCbk cbkLog = NULL;
 static SOPC_LibSub_DisconnectCbk cbkDisco = NULL;
 static SOPC_SLinkedList* pListConfig = NULL; /* IDs are configuration_id, value is SecureChannel_Config */
-static SOPC_SLinkedList* pListClient = NULL; /* IDs are connection_id */
+static SOPC_SLinkedList* pListClient = NULL; /* IDs are connection_id, value is a StaMac */
 
 /* Event callback */
 void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
@@ -179,9 +181,7 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConnectionId c_id,
-                                      const int64_t publish_period_ms,
-                                      SOPC_LibSub_DataChangeCbk data_change_callback)
+SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfg_id, SOPC_LibSub_ConnectionId* cli_id)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 

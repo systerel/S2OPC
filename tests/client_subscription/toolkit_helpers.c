@@ -21,6 +21,11 @@
  *
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "sopc_crypto_profiles.h"
 #include "sopc_pki_stack.h"
 
 #include "toolkit_helpers.h"
@@ -34,7 +39,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                                                    const char* szPathKeyClient,
                                                    const char* szPathCrl,
                                                    uint32_t iScRequestedLifetime,
-                                                   SOPC_SecureChannel_Config** ppNewCfg);
+                                                   SOPC_SecureChannel_Config** ppNewCfg)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_SecureChannel_Config* pscConfig = NULL;
@@ -55,9 +60,9 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     {
         /* CRL is always optional */
         /* If security policy is None, then security mode shall be None, and paths, except CAuth, shall be NULL */
-        if (strncmp(reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0)
+        if (strncmp(szSecuPolicy, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0)
         {
-            if (OpcUa_MessageSecurityMode_None != msgSecurityMode || NULL != szPathCertClient ||
+            if (OpcUa_MessageSecurityMode_None != msgSecurityMode || NULL != szPathCertClient ||
                 NULL != szPathCertClient || NULL != szPathCertServer)
             {
                 status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -65,7 +70,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         }
         /* Else, the security mode shall not be None, and all paths shall be non NULL (except CRL) */
         {
-            if (OpcUa_MessageSecurityMode_None == msgSecurityMode || NULL == szPathCertClient ||
+            if (OpcUa_MessageSecurityMode_None == msgSecurityMode || NULL == szPathCertClient ||
                 NULL == szPathCertClient || NULL == szPathCertServer)
             {
                 status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -149,11 +154,11 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             pscConfig->crt_srv = pCrtSrv;
             pscConfig->pki = pPki;
             pscConfig->requestedLifetime = iScRequestedLifetime;
-            pscConfig->reqSecuPolicyUri = reqSecuPolicyUri;
+            pscConfig->reqSecuPolicyUri = szSecuPolicy;
             pscConfig->msgSecurityMode = msgSecurityMode;
 
             /* Handles the config to the caller */
-            *ppNewCfg = pscConfig
+            *ppNewCfg = pscConfig;
         }
         else
         {
