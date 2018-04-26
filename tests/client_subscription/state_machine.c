@@ -128,6 +128,28 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
     return status;
 }
 
+void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
+{
+    SOPC_StaMac_Machine* pSM = NULL;
+
+    if (NULL != ppSM && NULL != *ppSM)
+    {
+        pSM = *ppSM;
+        if (NULL != pSM->pListReqCtx)
+        {
+            SOPC_SLinkedList_Delete(pSM->pListReqCtx);
+            pSM->pListReqCtx = NULL;
+        }
+        if (NULL != pSM->pListMonIt)
+        {
+            SOPC_SLinkedList_Delete(pSM->pListMonIt);
+            pSM->pListMonIt = NULL;
+        }
+        free(pSM);
+        *ppSM = NULL;
+    }
+}
+
 SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
