@@ -35,4 +35,11 @@ void SOPC_Services_InternalEnqueuePrioEvent(SOPC_Services_Event seEvent, uint32_
 // Internal use only (timers)
 SOPC_EventDispatcherManager* SOPC_Services_GetEventDispatcher(void);
 
+typedef struct SOPC_Internal_AsyncSendMsgData
+{
+    uint32_t requestId;     // t_request_context
+    uint32_t requestHandle; // t_request_handle
+    void* msgToSend;        // OpcUa_<Msg> *
+} SOPC_Internal_AsyncSendMsgData;
+
 #endif /* SOPC_SERVICES_API_INTERNAL_H */
