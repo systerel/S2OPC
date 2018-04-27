@@ -312,28 +312,33 @@ OPERATIONS
     END
     ;
 
-    revisedPublishInterval, revisedLifetimeCount, revisedMaxKeepAlive
+    revisedPublishInterval, revisedLifetimeCount, revisedMaxKeepAlive, revisedMaxNotificationsPerPublish
       <-- compute_create_subscription_revised_params (p_session,
                                                       p_reqPublishInterval,
                                                       p_reqLifetimeCount,
-                                                      p_reqMaxKeepAlive) =
+                                                      p_reqMaxKeepAlive,
+                                                      p_maxNotificationsPerPublish) =
     PRE
         p_session : t_session_i &
         p_session : t_session &
         a_subscription_session |> {p_session} = {} & /* session is not part of any suscription (=> 1 subscription / session) */
         p_reqPublishInterval : t_opcua_duration_i &
         p_reqLifetimeCount : t_counter &
-        p_reqMaxKeepAlive : t_counter
+        p_reqMaxKeepAlive : t_counter &
+        p_maxNotificationsPerPublish : t_counter
     THEN
         revisedPublishInterval,
             revisedLifetimeCount,
-            revisedMaxKeepAlive
-            :(revisedPublishInterval : t_opcua_duration_i &
+            revisedMaxKeepAlive,
+            revisedMaxNotificationsPerPublish
+            :(revisedPublishInterval : t_opcua_duration_i & revisedPublishInterval /= c_opcua_duration_indet &
                 revisedLifetimeCount : t_counter &
                 revisedLifetimeCount > 0 &
                 revisedMaxKeepAlive : t_counter &
                 revisedMaxKeepAlive > 0 &
-                revisedLifetimeCount >= 3 * revisedMaxKeepAlive  /* part 4 table 86 */
+                revisedLifetimeCount >= 3 * revisedMaxKeepAlive & /* part 4 table 86 */
+                revisedMaxNotificationsPerPublish : t_counter &
+                revisedMaxNotificationsPerPublish > 0
             )
     END
     ;
@@ -358,7 +363,6 @@ OPERATIONS
         p_publishEnabled = TRUE /* => no subscription modification for now => refuse publishDisabled */
     THEN
         /* State table evaluation case (CreateSubscription event: #1, #2, #3) */
-        /* TODO: CREATE PUBLISH TIMER */
         IF t_subscription = s_subscription
         THEN
             StatusCode_service := e_sc_bad_too_many_subscriptions ||

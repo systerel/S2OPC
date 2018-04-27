@@ -28,14 +28,18 @@ SEES
     
 IMPORTS
     subscription_core_1,
+    subscription_core_bs,
     subscription_core_it,
     monitored_item_notification_queue_bs,
     monitored_item_queue_bs,
     publish_request_queue_bs
     
 PROMOTES
+    /* subscription_core_1 */
     is_valid_subscription,
-    remove_subscription_session
+    remove_subscription_session,
+    /* subscription_core_bs */
+    compute_create_subscription_revised_params
     
 LOCAL_OPERATIONS
     
@@ -126,18 +130,6 @@ OPERATIONS
     END
     ;
 
-    revisedPublishInterval, revisedLifetimeCount, revisedMaxKeepAlive
-      <-- compute_create_subscription_revised_params (p_session,
-                                                      p_reqPublishInterval,
-                                                      p_reqLifetimeCount,
-                                                      p_reqMaxKeepAlive) =
-    BEGIN
-        revisedPublishInterval := c_opcua_duration_indet;
-        revisedLifetimeCount := 0;
-        revisedMaxKeepAlive := 0
-    END
-    ;
-    
     StatusCode_service, subscription <-- create_subscription (p_session,
                                                               p_revPublishInterval,
                                                               p_revLifetimeCount,
@@ -157,6 +149,7 @@ OPERATIONS
         StatusCode_service := c_StatusCode_indet;
         subscription := c_subscription_indet;
         l_bres, l_subscription <-- get_fresh_subscription;
+        /* TODO: CREATE PUBLISH TIMER */
 
         IF l_bres = TRUE
         THEN

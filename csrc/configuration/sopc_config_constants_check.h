@@ -59,6 +59,31 @@
 #error "Minimum requested session timeout is > MAX"
 #endif
 
+/** Minimum number of publish intervals before a keep alive is sent (server to client) */
+#if SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS < 1
+#error "Minimum subscription keep alive intervals < 1"
+#endif
+
+/** Maximum number of publish intervals before a keep alive is sent (server to client) */
+#if SOPC_MAX_KEEPALIVE_PUBLISH_INTERVALS > INT32_MAX
+#error "Maximum subscription keep alive intervals > INT32_MAX"
+#endif
+
+/** Minimum number of publish intervals before lifetime expired (client to server communication) */
+#if SOPC_MIN_LIFETIME_PUBLISH_INTERVALS < 3
+#error "Minimum subscription lifetime intervals < 3"
+#endif
+
+/** Maximum number of publish intervals before lifetime expired (client to server communication) */
+#if SOPC_MAX_LIFETIME_PUBLISH_INTERVALS > INT32_MAX
+#error "Maximum subscription lifetime intervals > INT32_MAX"
+#endif
+
+/** @brief Maximum number of monitored items per subscription */
+#if SOPC_MAX_MONITORED_ITEM > INT32_MAX
+#error "Maximum number of monitored items> INT32_MAX"
+#endif
+
 /* Maximum number of operations representable */
 #if SOPC_MAX_OPERATIONS_PER_MSG > INT32_MAX
 #error "Maximum number of operations per message cannot be > INT32_MAX"

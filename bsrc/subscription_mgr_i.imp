@@ -75,7 +75,8 @@ OPERATIONS
         l_subscription,
         l_revisedPublishInterval,
         l_revisedLifetimeCount,
-        l_revisedMaxKeepAlive
+        l_revisedMaxKeepAlive,
+        l_revisedMaxNotificationsPerPublish
     IN
         l_session_has_subscription <-- has_subscription (p_session);
         IF l_session_has_subscription = FALSE
@@ -88,18 +89,19 @@ OPERATIONS
             IF l_publishEnabled = TRUE
             THEN
                 /* Compute revised parameters */
-                l_revisedPublishInterval, l_revisedLifetimeCount, l_revisedMaxKeepAlive 
+                l_revisedPublishInterval, l_revisedLifetimeCount, l_revisedMaxKeepAlive, l_revisedMaxNotificationsPerPublish
                 <-- compute_create_subscription_revised_params (p_session,
                     l_reqPublishInterval,
                     l_reqLifetimeCount,
-                    l_reqMaxKeepAlive);
+                    l_reqMaxKeepAlive,
+                    l_maxNotificationsPerPublish);
                 
                 /* Create subscription */
                 StatusCode_service, l_subscription <-- create_subscription (p_session,
                     l_revisedPublishInterval,
                     l_revisedLifetimeCount,
                     l_revisedMaxKeepAlive,
-                    l_maxNotificationsPerPublish,
+                    l_revisedMaxNotificationsPerPublish,
                     l_publishEnabled);
                 IF StatusCode_service = e_sc_ok 
                 THEN

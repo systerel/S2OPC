@@ -115,11 +115,6 @@
 #define SOPC_MAX_SESSIONS 20
 #endif /* SOPC_MAX_SESSIONS */
 
-/** @brief Maximum number of monitored items per subscription */
-#ifndef SOPC_MAX_MONITORED_ITEM
-#define SOPC_MAX_MONITORED_ITEM 100000
-#endif /* SOPC_MAX_MONITORED_ITEM_PER_SUBSCRIPTION */
-
 /* @brief Client requested timeout for which a session shall remain open without activity */
 #ifndef SOPC_REQUESTED_SESSION_TIMEOUT
 #define SOPC_REQUESTED_SESSION_TIMEOUT 60000 // 60 seconds
@@ -134,6 +129,45 @@
 #ifndef SOPC_MAX_SESSION_TIMEOUT
 #define SOPC_MAX_SESSION_TIMEOUT 43200000 // 12 hours
 #endif
+
+/* SUBSCRIPTION CONFIGURATION */
+
+/** @brief Minimum publish interval of a subscription in milliseconds */
+#ifndef SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION
+#define SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION 100 // 100 ms
+#endif
+
+/** @brief Maximum publish interval of a subscription in milliseconds */
+#ifndef SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION
+#define SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION 3600000 // 1 hour
+#endif
+
+/** @brief Minimum number of publish intervals before a keep alive is sent (server to client) */
+#ifndef SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS
+#define SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS 1
+#endif
+
+/** @brief Maximum number of publish intervals before a keep alive is sent (server to client) */
+#ifndef SOPC_MAX_KEEPALIVE_PUBLISH_INTERVALS
+#define SOPC_MAX_KEEPALIVE_PUBLISH_INTERVALS 100
+#endif
+
+/** @brief Minimum number of publish intervals before lifetime expired (client to server communication) */
+#ifndef SOPC_MIN_LIFETIME_PUBLISH_INTERVALS
+#define SOPC_MIN_LIFETIME_PUBLISH_INTERVALS 3 // >= 3 KeepAlive
+#endif
+
+/** @brief Maximum number of publish intervals before lifetime expired (client to server communication) */
+#ifndef SOPC_MAX_LIFETIME_PUBLISH_INTERVALS
+#define SOPC_MAX_LIFETIME_PUBLISH_INTERVALS 300 // >= 3 KeepAlive
+#endif
+
+/** @brief Maximum number of monitored items per subscription */
+#ifndef SOPC_MAX_MONITORED_ITEM
+#define SOPC_MAX_MONITORED_ITEM 100000
+#endif
+
+/* GENERIC CONFIGURATION*/
 
 /* @brief Maximum number of operations in a request accepted by server (Read, Write, etc.) */
 #ifndef SOPC_MAX_OPERATIONS_PER_MSG
