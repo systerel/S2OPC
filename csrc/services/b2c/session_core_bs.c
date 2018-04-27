@@ -217,38 +217,6 @@ void session_core_bs__client_set_session_token(const constants__t_session_i sess
     }
 }
 
-void session_core_bs__prepare_close_session(const constants__t_session_i session_core_bs__session,
-                                            const constants__t_sessionState session_core_bs__state,
-                                            const t_bool session_core_bs__is_client)
-{
-    // TODO: remove token and nonce ? Or keep token to avoid providing the same to another session until overwritten ?
-    // If tokens not removed, change B model of this operation
-
-    if (session_core_bs__is_client != false)
-    {
-        if (session_core_bs__state != constants__e_session_closing &&
-            session_core_bs__state != constants__e_session_userActivated)
-        {
-            // If session not in closing state or already activated, it is in activation state regarding user app
-            // => notify activation failed
-            SOPC_ServicesToApp_EnqueueEvent(
-                SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
-                (uint32_t) session_core_bs__session,                    // session id
-                NULL,                                                   // user ?
-                session_to_activate_context[session_core_bs__session]); // user application session context
-        }
-        else
-        {
-            // Activated session closing
-            SOPC_ServicesToApp_EnqueueEvent(
-                SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
-                (uint32_t) session_core_bs__session, // session id
-                NULL,
-                session_to_activate_context[session_core_bs__session]); // user application session context
-        }
-    }
-}
-
 void session_core_bs__delete_session_token(const constants__t_session_i session_core_bs__p_session)
 {
     SOPC_NodeId_Clear(&sessionDataArray[session_core_bs__p_session].sessionToken);

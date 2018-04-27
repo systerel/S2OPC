@@ -163,9 +163,12 @@ OPERATIONS
     VAR
         l_prec_state
     IN
+        /* First notify of state change to have access to data before removing all session data */
+        l_prec_state <-- get_session_state(session);
+        notify_set_session_state(session, l_prec_state, e_session_closed, is_client);
+        
         reset_session_channel(session);
         // a_channel
-        l_prec_state <-- get_session_state(session);
         
         delete_session_token(session);
         // a_user
@@ -184,10 +187,8 @@ OPERATIONS
         remove_NonceServer(session);
         // a_NonceServer
         remove_session(session);
-        
         // s_session
         // a_state
-        notify_set_session_state(session, l_prec_state, e_session_closed, is_client);
         
         IF is_client = FALSE
         THEN
