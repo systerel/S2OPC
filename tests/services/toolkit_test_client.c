@@ -48,6 +48,9 @@ static uint8_t sendFailures = 0;
 static uint32_t session = 0;
 static uint32_t session2 = 0;
 static uint32_t session3 = 0;
+static uintptr_t sessionContext[3] = {1, 2, 3};
+static uint32_t context2session[4] = {0, 0, 0, 0};
+
 static bool getEndpointsReceived = false;
 
 #define NB_SESSIONS 3
@@ -142,9 +145,32 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void
         {
             assert(false);
         }
+        if (appContext != 0 &&
+            (appContext == sessionContext[0] || appContext == sessionContext[1] || appContext == sessionContext[2]) &&
+            context2session[appContext] == 0)
+        {
+            context2session[appContext] = idOrStatus;
+        }
+        else
+        {
+            // Invalid context
+            assert(false);
+        }
     }
     else if (event == SE_SESSION_ACTIVATION_FAILURE || event == SE_CLOSED_SESSION)
     {
+        if (appContext != 0 &&
+            (appContext == sessionContext[0] || appContext == sessionContext[1] || appContext == sessionContext[2]))
+        {
+            // Context valid but not yet associated to a session Id (never activated before failure)
+            // OR context is the one associated to the session Id (activated once before failure)
+            assert(context2session[appContext] == 0 || context2session[appContext] == idOrStatus);
+        }
+        else
+        {
+            // Invalid context
+            assert(false);
+        }
         sessionsClosed++;
     }
     else if (event == SE_SND_REQUEST_FAILED)
@@ -391,9 +417,9 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         // Use 1, 2, 3 as session contexts
-        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx, 1);
-        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx, 2);
-        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx2, 3);
+        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx, sessionContext[0]);
+        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx, sessionContext[1]);
+        SOPC_ToolkitClient_AsyncActivateSession(channel_config_idx2, sessionContext[2]);
         printf(">>Test_Client_Toolkit: Creating/Activating 3 sessions on 2 SC: OK\n");
     }
 
