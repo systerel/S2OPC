@@ -24,6 +24,8 @@
 #ifndef TOOLKIT_HELPERS_H_
 #define TOOLKIT_HELPERS_H_
 
+#define MAX_NOTIFICATIONS_PER_REQUEST 1000
+
 #include "sopc_key_manager.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
@@ -42,5 +44,13 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                                                    const char* szPathCrl,
                                                    uint32_t iScRequestedLifetime,
                                                    SOPC_SecureChannel_Config** ppNewCfg);
+
+/**
+ * \brief Creates a new CreateSubscriptionRequest.
+ */
+SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs,
+                                                       uint32_t iCntLifetime,
+                                                       uint32_t iCntMaxKeepAlive,
+                                                       void** ppRequest);
 
 #endif /* TOOLKIT_HELPERS_H_ */
