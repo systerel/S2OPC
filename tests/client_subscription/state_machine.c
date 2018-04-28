@@ -294,6 +294,11 @@ bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM)
     return NULL != pSM && stError == pSM->state;
 }
 
+bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM)
+{
+    return NULL != pSM && 0 != pSM->iSubscriptionID;
+}
+
 bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                                  uintptr_t* pAppCtx,
                                  SOPC_App_Com_Event event,

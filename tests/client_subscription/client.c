@@ -110,6 +110,7 @@ int main(void)
         return 4;
     }
 
+    printf("# Info: Connected.\n");
     usleep(10 * 1000000);
     SOPC_LibSub_Clear();
 

@@ -254,6 +254,20 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
         status = SOPC_StaMac_StartSession(pSM);
     }
 
+    /* Wait for the subscription to be created */
+    /* TODO: use Mutex and CV */
+    if (SOPC_STATUS_OK == status)
+    {
+        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM))
+        {
+            usleep(1000);
+        }
+        if (SOPC_StaMac_IsError(pSM))
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
     return status;
 }
 

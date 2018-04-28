@@ -123,6 +123,11 @@ bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM);
 bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM);
 
 /**
+ * \brief Returns a bool whether the machine has an active subscription or not.
+ */
+bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM);
+
+/**
  * \brief Handles the events from the Toolkit and changes the state machine state.
  *
  * This function can be called even if the message is not destined to this particular machine.
