@@ -234,7 +234,8 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
     /* Creates a client state machine */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_StaMac_Create(cfgId, pCfg->data_change_callback, pCfg->publish_period_ms, &pSM);
+        status =
+            SOPC_StaMac_Create(cfgId, pCfg->data_change_callback, pCfg->publish_period_ms, pCfg->token_target, &pSM);
     }
 
     /* Adds it to the list */

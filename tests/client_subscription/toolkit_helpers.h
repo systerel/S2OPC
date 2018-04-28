@@ -53,4 +53,9 @@ SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs
                                                        uint32_t iCntMaxKeepAlive,
                                                        void** ppRequest);
 
+/**
+ * \brief Creates a new PublishRequest.
+ */
+SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t iSeqNum, void** ppRequest);
+
 #endif /* TOOLKIT_HELPERS_H_ */

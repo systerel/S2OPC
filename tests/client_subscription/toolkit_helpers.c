@@ -202,3 +202,50 @@ SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs
 
     return status;
 }
+
+SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t iSeqNum, void** ppRequest)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_PublishRequest* pReq = NULL;
+
+    if (NULL == ppRequest)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Encodeable_Create(&OpcUa_PublishRequest_EncodeableType, (void**) &pReq);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (bAck)
+        {
+            pReq->NoOfSubscriptionAcknowledgements = 1;
+            pReq->SubscriptionAcknowledgements =
+                (OpcUa_SubscriptionAcknowledgement*) malloc(sizeof(OpcUa_SubscriptionAcknowledgement));
+            if (NULL == pReq->SubscriptionAcknowledgements)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                pReq->SubscriptionAcknowledgements->SubscriptionId = iSubId;
+                pReq->SubscriptionAcknowledgements->SequenceNumber = iSeqNum;
+            }
+        }
+        else
+        {
+            pReq->NoOfSubscriptionAcknowledgements = 0;
+            pReq->SubscriptionAcknowledgements = NULL;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *ppRequest = pReq;
+    }
+
+    return status;
+}
