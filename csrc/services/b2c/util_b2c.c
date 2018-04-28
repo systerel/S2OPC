@@ -305,12 +305,12 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
         break;
     case constants__e_msg_subscription_create_req:
         *reqEncType = &OpcUa_CreateSubscriptionRequest_EncodeableType;
-        *respEncType = &OpcUa_CreateSessionResponse_EncodeableType;
+        *respEncType = &OpcUa_CreateSubscriptionResponse_EncodeableType;
         *isRequest = true;
         break;
     case constants__e_msg_subscription_create_resp:
         *reqEncType = &OpcUa_CreateSubscriptionRequest_EncodeableType;
-        *respEncType = &OpcUa_CreateSessionResponse_EncodeableType;
+        *respEncType = &OpcUa_CreateSubscriptionResponse_EncodeableType;
         break;
     case constants__e_msg_subscription_modify_req:
         *reqEncType = &OpcUa_ModifySubscriptionRequest_EncodeableType;
