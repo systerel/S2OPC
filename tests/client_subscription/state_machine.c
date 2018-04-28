@@ -70,6 +70,12 @@ struct SOPC_StaMac_Machine
     uint32_t iSubscriptionID;                 /* OPC UA subscription ID, non 0 when subscription is created */
     SOPC_SLinkedList* pListMonIt;             /* List of monitored items, where the appCtx is the list id,
                                                * and the value is the uint32_t OPC UA monitored item ID */
+    uint16_t nTokenTarget;                    /* Target number of available tokens */
+    uint16_t nTokenUsable;                    /* Tokens available to the server
+                                               * (PublishRequest_sent - PublishResponse_sent) */
+    bool bAckSubscr;                          /* Indicates whether an acknowledgement should be sent
+                                               * in the next PublishRequest */
+    uint32_t iAckSeqNum;                      /* The sequence number to acknowledge after a PublishResponse */
 };
 
 /* Global variables */
@@ -91,6 +97,7 @@ bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      SOPC_LibSub_DataChangeCbk cbkDataChanged,
                                      double fPublishInterval,
+                                     uint16_t iTokenTarget,
                                      SOPC_StaMac_Machine** ppSM)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -113,6 +120,10 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->fPublishInterval = fPublishInterval;
         pSM->iSubscriptionID = 0;
         pSM->pListMonIt = SOPC_SLinkedList_Create(0);
+        pSM->nTokenTarget = iTokenTarget;
+        pSM->nTokenUsable = 0;
+        pSM->bAckSubscr = false;
+        pSM->iAckSeqNum = 0;
     }
 
     if (SOPC_STATUS_OK == status && (NULL == pSM->pListReqCtx || NULL == pSM->pListMonIt))
@@ -347,6 +358,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 pSM->iSubscriptionID = 0;
                 SOPC_SLinkedList_Clear(pSM->pListReqCtx);
                 SOPC_SLinkedList_Clear(pSM->pListMonIt);
+                pSM->nTokenUsable = 0;
+                pSM->bAckSubscr = false;
                 break;
             default:
                 /* This might be a response to a pending request, so this might not an error */
@@ -398,6 +411,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
         case stCreatingMonIt:
             break;
         case stCreatingPubReq:
+            /* TODO: remove this non existing state */
             break;
         /* Invalid states */
         case stInit:
@@ -441,6 +455,29 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 }
             }
             /* Then add tokens */
+            else if (pSM->nTokenUsable < pSM->nTokenTarget)
+            {
+                while (SOPC_STATUS_OK == status && pSM->nTokenUsable < pSM->nTokenTarget)
+                {
+                    /* Send a PublishRequest */
+                    printf("# Info: Adding publish token.\n");
+                    status =
+                        Helpers_NewPublishRequest(pSM->bAckSubscr, pSM->iSubscriptionID, pSM->iAckSeqNum, &pRequest);
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        status = SOPC_StaMac_SendRequest(pSM, pRequest, 0);
+                    }
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        pSM->nTokenUsable += 1;
+                        pSM->bAckSubscr = false;
+                    }
+                    else
+                    {
+                        pSM->state = stError;
+                    }
+                }
+            }
             break;
         default:
             break;

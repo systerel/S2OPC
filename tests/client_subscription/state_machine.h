@@ -62,11 +62,13 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  * \param iscConfig
  * \param cbkDataChanged    The callback to trigger when a PublishResponse is received
  * \param fPublishInterval  Subscription publish interval, in milliseconds
+ * \param iTokenTarget      Number of subscription tokens the server should always have
  * \param ppSM              The returned machine, when successful
  */
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      SOPC_LibSub_DataChangeCbk cbkDataChanged,
                                      double fPublishInterval,
+                                     uint16_t iTokenTarget,
                                      SOPC_StaMac_Machine** ppSM);
 
 /**
