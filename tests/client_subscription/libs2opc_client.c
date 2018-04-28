@@ -110,6 +110,13 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
     return status;
 }
 
+void SOPC_LibSub_Clear(void)
+{
+    /* TODO: clear configurations */
+    /* TODO: clear connected clients */
+    SOPC_Toolkit_Clear();
+}
+
 SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
                                                   SOPC_LibSub_ConfigurationId* pCfgId)
 {

@@ -69,6 +69,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             }
         }
         /* Else, the security mode shall not be None, and all paths shall be non NULL (except CRL) */
+        else
         {
             if (OpcUa_MessageSecurityMode_None == msgSecurityMode || NULL == szPathCertClient ||
                 NULL == szPathCertClient || NULL == szPathCertServer)
@@ -77,7 +78,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             }
         }
         /* Certificate authority shall always exist */
-        if (SOPC_STATUS_OK == status && NULL == pCrtCAu)
+        if (SOPC_STATUS_OK == status && NULL == szPathCertifAuth)
         {
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }
