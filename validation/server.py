@@ -53,13 +53,21 @@ if __name__=='__main__':
         nid = 1000 + i + 1
         node = objects.add_variable(ua.NodeId(nid, 0), sTypName, ua.Variant(val, typ))
         node.set_writable()
+    # Add a node which increments, the target of an interesting subscription
+    nodeCnt = objects.add_variable(ua.NodeId('Counter', 0), 'Counter', ua.Variant(0, ua.VariantType.UInt64))
+    nodeCnt.set_writable()
 
     # Starts the server
     server.start()
     try:
         print('Server started. Stops in {:.2f} s'.format(args.msTimeout/1000.))
+        t0 = time.time()+args.msTimeout/1000.
         # The freeopcua toolkit is heavily an asyncio thing, which is run in another thread
-        #  but here we have nothing else to do...
-        time.sleep(args.msTimeout/1000.)
+        i = 0
+        while time.time() < t0:
+            # The counter is updated every ~100ms
+            i += 1
+            nodeCnt.set_value(i, varianttype=ua.VariantType.UInt64)
+            time.sleep(.1)
     finally:
         server.stop()
