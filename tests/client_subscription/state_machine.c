@@ -31,6 +31,7 @@
 #include "sopc_user_app_itf.h"
 
 #include "state_machine.h"
+#include "toolkit_helpers.h"
 
 /* =========
  * Internals
@@ -300,10 +301,15 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                                  void* pParam,
                                  uintptr_t appCtx)
 {
-    bool bProcess = StaMac_IsEventTargeted(pSM, pAppCtx, event, arg, pParam, appCtx);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool bProcess = false;
+    void* pRequest = NULL;
+
+    bProcess = StaMac_IsEventTargeted(pSM, pAppCtx, event, arg, pParam, appCtx);
 
     if (bProcess)
     {
+        /* Treat event, if needed */
         switch (pSM->state)
         {
         /* Session states */
@@ -314,7 +320,6 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 pSM->state = stActivated;
                 pSM->iSessionID = arg;
                 printf("# Info: Session activated.\n");
-                /* Creates the subscription */
                 break;
             case SE_SESSION_ACTIVATION_FAILURE:
                 pSM->state = stError;
@@ -366,6 +371,24 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             break;
         /* Creating* states */
         case stCreatingSubscr:
+            switch (event)
+            {
+            case SE_RCV_SESSION_RESPONSE:
+                /* TODO: verify revised values?? */
+                assert(pSM->iSubscriptionID == 0);
+                pSM->iSubscriptionID = ((OpcUa_CreateSubscriptionResponse*) pParam)->SubscriptionId;
+                printf("# Subscription created.\n");
+                pSM->state = stActivated;
+                break;
+            case SE_SND_REQUEST_FAILED:
+                pSM->state = stError;
+                printf("# Error: Send subscription request failed.\n");
+                break;
+            default:
+                pSM->state = stError;
+                printf("# Error: In state stCreatingSubscr, unexpected event %i.\n", event);
+                break;
+            }
             break;
         case stCreatingMonIt:
             break;
@@ -382,6 +405,39 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
         default:
             pSM->state = stError;
             printf("# Error: Dispatching in unknown state %i, event %i.\n", pSM->state, event);
+            break;
+        }
+
+        /* Do other things, now that the event has been processed */
+        switch (pSM->state)
+        {
+        /* Mostly when stActivated is reached */
+        case stActivated:
+            /* First, create the subscription */
+            if (0 == pSM->iSubscriptionID)
+            {
+                /* Creates the subscription */
+                /* The request is freed by the Toolkit */
+                /* TODO: make all value configurable */
+                /* TODO: log errors */
+                printf("# Info: Creating subscription.\n");
+                status = Helpers_NewCreateSubscriptionRequest(pSM->fPublishInterval, 1000, 30, &pRequest);
+                if (SOPC_STATUS_OK == status)
+                {
+                    status = SOPC_StaMac_SendRequest(pSM, pRequest, 0);
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    pSM->state = stCreatingSubscr;
+                }
+                else
+                {
+                    pSM->state = stError;
+                }
+            }
+            /* Then add tokens */
+            break;
+        default:
             break;
         }
     }

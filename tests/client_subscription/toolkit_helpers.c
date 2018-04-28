@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "sopc_crypto_profiles.h"
+#include "sopc_encodeable.h"
 #include "sopc_pki_stack.h"
 
 #include "toolkit_helpers.h"
@@ -165,6 +166,38 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs,
+                                                       uint32_t iCntLifetime,
+                                                       uint32_t iCntMaxKeepAlive,
+                                                       void** ppRequest)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_CreateSubscriptionRequest* pReq = NULL;
+
+    if (NULL == ppRequest)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Encodeable_Create(&OpcUa_CreateSubscriptionRequest_EncodeableType, (void**) &pReq);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        pReq->RequestedPublishingInterval = fPublishIntervalMs;
+        pReq->RequestedLifetimeCount = iCntLifetime;
+        pReq->RequestedMaxKeepAliveCount = iCntMaxKeepAlive;
+        pReq->MaxNotificationsPerPublish = MAX_NOTIFICATIONS_PER_REQUEST;
+        pReq->PublishingEnabled = true;
+        pReq->Priority = 0;
+        *ppRequest = (void*) pReq;
     }
 
     return status;
