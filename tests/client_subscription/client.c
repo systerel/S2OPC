@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h> /* usleep */
 
 #include "libs2opc_client.h"
 
@@ -69,9 +70,9 @@ int main(void)
                                          .security_policy = SECURITY_POLICY,
                                          .security_mode = SECURITY_MODE,
                                          .path_cert_auth = PATH_CACERT_PUBL,
-                                         .path_cert_srv = PATH_SERVER_PUBL,
-                                         .path_cert_cli = PATH_CLIENT_PUBL,
-                                         .path_key_cli = PATH_CLIENT_PRIV,
+                                         .path_cert_srv = NULL,
+                                         .path_cert_cli = NULL,
+                                         .path_key_cli = NULL,
                                          .path_crl = NULL,
                                          .username = NULL,
                                          .password = NULL,
@@ -108,6 +109,9 @@ int main(void)
         log_callback(SOPC_LOG_LEVEL_ERROR, "Could not connect with given con_id");
         return 4;
     }
+
+    usleep(10 * 1000000);
+    SOPC_LibSub_Clear();
 
     return 0;
 }

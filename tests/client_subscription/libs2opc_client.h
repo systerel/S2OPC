@@ -259,6 +259,11 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg);
 
 /*
  @description
+    Clears the connections, configurations, and clears the Toolkit. */
+void SOPC_LibSub_Clear(void);
+
+/*
+ @description
     Configure a future connection. This function shall be called once per connection before
     a call to SOPC_LibSub_Configured(). The given /p pCfgId is later used to create connections.
  @param pCfg
