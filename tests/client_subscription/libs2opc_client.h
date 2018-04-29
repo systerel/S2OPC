@@ -188,7 +188,14 @@ typedef void (*SOPC_LibSub_DisconnectCbk)(const SOPC_LibSub_ConnectionId c_id);
   @description
     Callback type for data change event (related to a subscription)
   @param c_id
-    The connection id that has been disconnected */
+    The connection id on which the datachange happened
+  @param d_id
+    The data id of the monitored item (see SOPC_LibSub_AddToSubscription())
+  @param value
+    The new value. Its content is freed by the LibSub after this function has been called,
+    hence the callback must copy it if it should be used outside the callback.
+    The NULL pointer is given to the callback when the SOPC_DataValue could not be converted
+    to a SOPC_LibSub_Value, or the malloc failed. */
 typedef void (*SOPC_LibSub_DataChangeCbk)(const SOPC_LibSub_ConnectionId c_id,
                                           const SOPC_LibSub_DataId d_id,
                                           const SOPC_LibSub_Value* value);
