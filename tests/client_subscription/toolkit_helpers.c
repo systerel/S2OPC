@@ -249,3 +249,57 @@ SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t
 
     return status;
 }
+
+SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId* pNid,
+                                                         uint32_t iAttrId,
+                                                         uint32_t iSubId,
+                                                         OpcUa_TimestampsToReturn tsToReturn,
+                                                         uint32_t iCliHndl,
+                                                         uint32_t iQueueSize,
+                                                         void** ppRequest)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_CreateMonitoredItemsRequest* pReq = NULL;
+    OpcUa_MonitoredItemCreateRequest* pitc = NULL;
+
+    if (NULL == pNid || NULL == ppRequest || 0 == iAttrId || 22 < iAttrId)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Encodeable_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        pitc = (OpcUa_MonitoredItemCreateRequest*) malloc(sizeof(OpcUa_MonitoredItemCreateRequest));
+        if (NULL == pitc)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        pReq->SubscriptionId = iSubId;
+        pReq->TimestampsToReturn = tsToReturn;
+        pReq->NoOfItemsToCreate = 1;
+        pReq->ItemsToCreate = pitc;
+        pitc->ItemToMonitor.NodeId = *pNid;
+        pitc->ItemToMonitor.AttributeId = iAttrId;
+        SOPC_String_Initialize(&pitc->ItemToMonitor.IndexRange);
+        SOPC_QualifiedName_Initialize(&pitc->ItemToMonitor.DataEncoding);
+        pitc->MonitoringMode = OpcUa_MonitoringMode_Reporting;
+        pitc->RequestedParameters.ClientHandle = iCliHndl;
+        pitc->RequestedParameters.SamplingInterval = 0;
+        SOPC_ExtensionObject_Initialize(&pitc->RequestedParameters.Filter);
+        pitc->RequestedParameters.QueueSize = iQueueSize;
+        pitc->RequestedParameters.DiscardOldest = true;
+
+        *ppRequest = (void*) pReq;
+    }
+
+    return status;
+}

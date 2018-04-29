@@ -83,6 +83,7 @@ int main(void)
                                          .token_target = PUBLISH_N_TOKEN};
     SOPC_LibSub_ConfigurationId cfg_id = 0;
     SOPC_LibSub_ConnectionId con_id = 0;
+    SOPC_LibSub_DataId d_id = 0;
 
     log_callback(SOPC_LOG_LEVEL_INFO, SOPC_LibSub_GetVersion());
 
@@ -111,6 +112,13 @@ int main(void)
     }
 
     printf("# Info: Connected.\n");
+
+    if (SOPC_STATUS_OK != SOPC_LibSub_AddToSubscription(con_id, "s=Counter", SOPC_LibSub_AttributeId_Value, &d_id))
+    {
+        log_callback(SOPC_LOG_LEVEL_ERROR, "Could not create monitored item");
+        return 5;
+    }
+
     usleep(10 * 1000000);
     SOPC_LibSub_Clear();
 

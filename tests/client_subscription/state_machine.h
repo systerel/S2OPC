@@ -36,6 +36,10 @@
 #ifndef STATE_MACHINE_H_
 #define STATE_MACHINE_H_
 
+/* Machine static parameters, MonitoredItem parameters */
+#define MONIT_TIMESTAMPS_TO_RETURN OpcUa_TimestampsToReturn_Both
+#define MONIT_QSIZE 10
+
 #include <stdbool.h>
 
 /* The following includes are required to fetch the SOPC_LibSub_DataChangeCbk type */
@@ -106,6 +110,20 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM);
 SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* requestStruct, uintptr_t appCtx);
 
 /**
+ * \brief Creates a MonitoredItem asynchronously.
+ *
+ * The optional \p pAppCtx may be used to test the effective creation of the MonitoredItem with
+ * SOPC_StaMac_HasMonitoredItem().
+ *
+ * \warning The szNodeId must be \0-terminated.
+ */
+SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
+                                                  const char* szNodeId,
+                                                  uint32_t iAttrId,
+                                                  uintptr_t* pAppCtx,
+                                                  uint32_t* pCliHndl);
+
+/**
  * \brief Returns a bool whether the machine is configured and ready for a new SecureChannel.
  *
  * Note: for now, it is the stInit state.
@@ -128,6 +146,11 @@ bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM);
  * \brief Returns a bool whether the machine has an active subscription or not.
  */
 bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM);
+
+/**
+ * \brief Returns whether the machine has created the MonitoredItem with the given \p appCtx or not.
+ */
+bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx);
 
 /**
  * \brief Handles the events from the Toolkit and changes the state machine state.

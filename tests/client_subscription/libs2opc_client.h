@@ -142,6 +142,34 @@ typedef struct
 
 /*
   @description
+    AttributeIds, as defined in the OPC UA Reference, Part 6 Annex A */
+typedef enum {
+    SOPC_LibSub_AttributeId_NodeId = 1,
+    SOPC_LibSub_AttributeId_NodeClass = 2,
+    SOPC_LibSub_AttributeId_BrowseName = 3,
+    SOPC_LibSub_AttributeId_DisplayName = 4,
+    SOPC_LibSub_AttributeId_Description = 5,
+    SOPC_LibSub_AttributeId_WriteMask = 6,
+    SOPC_LibSub_AttributeId_UserWriteMask = 7,
+    SOPC_LibSub_AttributeId_IsAbstract = 8,
+    SOPC_LibSub_AttributeId_Symmetric = 9,
+    SOPC_LibSub_AttributeId_InverseName = 10,
+    SOPC_LibSub_AttributeId_ContainsNoLoops = 11,
+    SOPC_LibSub_AttributeId_EventNotifier = 12,
+    SOPC_LibSub_AttributeId_Value = 13,
+    SOPC_LibSub_AttributeId_DataType = 14,
+    SOPC_LibSub_AttributeId_ValueRank = 15,
+    SOPC_LibSub_AttributeId_ArrayDimensions = 16,
+    SOPC_LibSub_AttributeId_AccessLevel = 17,
+    SOPC_LibSub_AttributeId_UserAccessLevel = 18,
+    SOPC_LibSub_AttributeId_MinimumSamplingInterval = 19,
+    SOPC_LibSub_AttributeId_Historizing = 20,
+    SOPC_LibSub_AttributeId_Executable = 21,
+    SOPC_LibSub_AttributeId_UserExecutable = 22
+} SOPC_LibSub_AttributeId;
+
+/*
+  @description
     Log callback type
   @param log_level
     The Log level (SOPC_Log_Level). Note: SOPC_log_error shall be non-returning.
@@ -310,7 +338,8 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
  @return
     The operation status */
 SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId cliId,
-                                                SOPC_LibSub_CstString* szNodeId,
+                                                SOPC_LibSub_CstString szNodeId,
+                                                SOPC_LibSub_AttributeId attrId,
                                                 SOPC_LibSub_DataId* pDataId);
 
 /*
