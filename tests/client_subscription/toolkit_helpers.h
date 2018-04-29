@@ -58,4 +58,15 @@ SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs
  */
 SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t iSeqNum, void** ppRequest);
 
+/**
+ * \brief Creates a new CreateMonitoredItemsRequest with a single ItemToCreate.
+ */
+SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId* pNid,
+                                                         uint32_t iAttrId,
+                                                         uint32_t iSubId,
+                                                         OpcUa_TimestampsToReturn tsToReturn,
+                                                         uint32_t iCliHndl,
+                                                         uint32_t iQueueSize,
+                                                         void** ppRequest);
+
 #endif /* TOOLKIT_HELPERS_H_ */

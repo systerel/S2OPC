@@ -25,6 +25,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_async_api.h"
@@ -68,10 +69,10 @@ struct SOPC_StaMac_Machine
                                                * id is unique request identifier, value is a SOPC_StaMac_ReqCtx */
     double fPublishInterval;                  /* The publish interval, in ms */
     uint32_t iSubscriptionID;                 /* OPC UA subscription ID, non 0 when subscription is created */
-    SOPC_SLinkedList* pListMonIt;             /* List of monitored items, where the appCtx is the list id,
-                                               * and the value is the uint32_t OPC UA monitored item ID */
     uint16_t nTokenTarget;                    /* Target number of available tokens */
     uint16_t nTokenUsable;                    /* Tokens available to the server
+    SOPC_SLinkedList* pListMonIt;             /* List of monitored items, where the appCtx is the list value,
+                                               * and the id is the uint32_t OPC UA monitored item ID */
                                                * (PublishRequest_sent - PublishResponse_sent) */
     bool bAckSubscr;                          /* Indicates whether an acknowledgement should be sent
                                                * in the next PublishRequest */
@@ -271,6 +272,97 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* reques
     return status;
 }
 
+SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
+                                                  const char* szNodeId,
+                                                  uint32_t iAttrId,
+                                                  uintptr_t* pAppCtx,
+                                                  uint32_t* pCliHndl)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_NodeId* pNid = NULL;
+    size_t szLen = 0;
+    void* pReq = NULL;
+    uint32_t iCliHndl = 0;
+
+    if (NULL == pSM || NULL == szNodeId || NULL == pCliHndl)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status && stActivated != pSM->state)
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+        /* TODO: log */
+        printf("# Error: creating monitored item, the machine should be in the stActivated state (is in %i).\n",
+               pSM->state);
+    }
+    if (SOPC_STATUS_OK == status && !SOPC_StaMac_HasSubscription(pSM))
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+        printf("# Error: the machine shall have a created subscription.\n");
+    }
+    if (SOPC_STATUS_OK == status && UINT32_MAX == nSentReqs)
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+        printf("# Error: creating monitored item, too much sent requests.\n");
+    }
+
+    /* Create the NodeId */
+    if (SOPC_STATUS_OK == status)
+    {
+        szLen = strlen(szNodeId);
+        if (INT32_MAX < szLen)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+            printf("# Error: creating monitored item, szNodeId is too long.\n");
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pNid = SOPC_NodeId_FromCString(szNodeId, (int32_t) szLen);
+        if (NULL == pNid)
+        {
+            status = SOPC_STATUS_NOK;
+            printf("# Error: creating monitored item, could not convert szNodeId to NodeId.\n");
+        }
+    }
+
+    /* Create the CreateMonitoredItemRequest */
+    if (SOPC_STATUS_OK == status)
+    {
+        ++nSentReqs;
+        iCliHndl = nSentReqs;
+        status = Helpers_NewCreateMonitoredItemsRequest(pNid, iAttrId, pSM->iSubscriptionID, MONIT_TIMESTAMPS_TO_RETURN,
+                                                        iCliHndl, MONIT_QSIZE, &pReq);
+    }
+
+    /* Send it */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_StaMac_SendRequest(pSM, pReq, iCliHndl);
+    }
+
+    /* Update the machine, the *pAppCtx, and *pCliHndl */
+    if (SOPC_STATUS_OK == status)
+    {
+        pSM->state = stCreatingMonIt;
+        if (NULL != pAppCtx)
+        {
+            *pAppCtx = iCliHndl;
+        }
+        *pCliHndl = iCliHndl;
+    }
+
+    /* Partial mallocs */
+    if (SOPC_STATUS_OK != status && NULL != pNid)
+    {
+        free(pNid);
+        pNid = NULL;
+    }
+
+    return status;
+}
+
 bool SOPC_StaMac_IsConnectable(SOPC_StaMac_Machine* pSM)
 {
     return NULL != pSM && stInit == pSM->state;
@@ -308,6 +400,13 @@ bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM)
 bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM)
 {
     return NULL != pSM && 0 != pSM->iSubscriptionID;
+}
+
+bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx)
+{
+    bool bHasMonIt = false;
+
+    return bHasMonIt;
 }
 
 bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
