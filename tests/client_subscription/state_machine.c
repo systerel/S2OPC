@@ -435,6 +435,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool bProcess = false;
+    uintptr_t intAppCtx = 0; /* Internal appCtx, the one wrapped in the (ReqCtx*)appCtx */
     void* pRequest = NULL;
     int32_t i = 0;
     OpcUa_CreateMonitoredItemsResponse* pMonItResp = NULL;
@@ -445,10 +446,15 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
     OpcUa_MonitoredItemNotification* pMonItNotif = NULL;
     SOPC_LibSub_Value* plsVal = NULL;
 
-    bProcess = StaMac_IsEventTargeted(pSM, pAppCtx, event, arg, pParam, appCtx);
+    bProcess = StaMac_IsEventTargeted(pSM, &intAppCtx, event, arg, pParam, appCtx);
 
     if (bProcess)
     {
+        if (NULL != pAppCtx)
+        {
+            *pAppCtx = intAppCtx;
+        }
+
         /* Treat event, if needed */
         switch (pSM->state)
         {
@@ -532,7 +538,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 break;
             case SE_SND_REQUEST_FAILED:
                 pSM->state = stError;
-                printf("# Error: Send request 0x%" PRIxPTR " failed.\n", appCtx);
+                printf("# Error: Send request 0x%" PRIxPTR " failed.\n", intAppCtx);
                 break;
             case SE_SESSION_REACTIVATING:
                 printf("# Info: Session reactivated.\n");
@@ -581,7 +587,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     else
                     {
                         if (SOPC_SLinkedList_Append(pSM->pListMonIt, pMonItResp->Results[i].MonitoredItemId,
-                                                    (void*) appCtx) != (void*) appCtx)
+                                                    (void*) intAppCtx) != (void*) intAppCtx)
                         {
                             status = SOPC_STATUS_NOK;
                         }
@@ -739,11 +745,12 @@ bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                     {
                         *pAppCtx = ((SOPC_StaMac_ReqCtx*) appCtx)->appCtx;
                     }
-                    free((void*) appCtx);
-                    if (SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, ((SOPC_StaMac_ReqCtx*) appCtx)->uid) != NULL)
+                    if (SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, ((SOPC_StaMac_ReqCtx*) appCtx)->uid) == NULL)
                     {
                         printf("# Warning: failed to pop the request from the pListReqCtx\n");
                     }
+                    free((void*) appCtx);
+                    appCtx = 0;
                 }
             }
             break;
