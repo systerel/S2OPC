@@ -405,6 +405,20 @@ bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM)
 bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx)
 {
     bool bHasMonIt = false;
+    SOPC_SLinkedListIterator pIter = NULL;
+
+    if (NULL != pSM || NULL != pSM->pListMonIt)
+    {
+        pIter = SOPC_SLinkedList_GetIterator(pSM->pListMonIt);
+    }
+
+    while (!bHasMonIt && NULL != pIter)
+    {
+        if (SOPC_SLinkedList_Next(&pIter) == (void*) appCtx)
+        {
+            bHasMonIt = true;
+        }
+    }
 
     return bHasMonIt;
 }
@@ -419,6 +433,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool bProcess = false;
     void* pRequest = NULL;
+    int32_t i = 0;
+    OpcUa_CreateMonitoredItemsResponse* pMonItResp = NULL;
 
     bProcess = StaMac_IsEventTargeted(pSM, pAppCtx, event, arg, pParam, appCtx);
 
@@ -494,7 +510,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 /* TODO: verify revised values?? */
                 assert(pSM->iSubscriptionID == 0);
                 pSM->iSubscriptionID = ((OpcUa_CreateSubscriptionResponse*) pParam)->SubscriptionId;
-                printf("# Subscription created.\n");
+                printf("# Info: Subscription created.\n");
                 pSM->state = stActivated;
                 break;
             case SE_SND_REQUEST_FAILED:
@@ -508,6 +524,50 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             }
             break;
         case stCreatingMonIt:
+            switch (event)
+            {
+            case SE_RCV_SESSION_RESPONSE:
+                /* There should be only one result element */
+                pMonItResp = (OpcUa_CreateMonitoredItemsResponse*) pParam;
+                assert(NULL != pMonItResp);
+                for (i = 0; SOPC_STATUS_OK == status && i < pMonItResp->NoOfResults; ++i)
+                {
+                    /* TODO: verify revised values?? */
+                    if (0 != pMonItResp->Results[i].StatusCode) /* OpcUa_Good does not exist... */
+                    {
+                        status = SOPC_STATUS_NOK;
+                    }
+                    else
+                    {
+                        if (SOPC_SLinkedList_Append(pSM->pListMonIt, pMonItResp->Results[i].MonitoredItemId,
+                                                    (void*) appCtx) != (void*) appCtx)
+                        {
+                            status = SOPC_STATUS_NOK;
+                        }
+                    }
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        printf("# Info: MonitoredItem created.\n");
+                    }
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    pSM->state = stActivated;
+                }
+                else
+                {
+                    pSM->state = stError;
+                }
+                break;
+            case SE_SND_REQUEST_FAILED:
+                pSM->state = stError;
+                printf("# Error: Send create monitored items request failed.\n");
+                break;
+            default:
+                pSM->state = stError;
+                printf("# Error: In state stCreatingMonIt, unexpected event %i.\n", event);
+                break;
+            }
             break;
         case stCreatingPubReq:
             /* TODO: remove this non existing state */
@@ -553,8 +613,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     pSM->state = stError;
                 }
             }
-            /* Then add tokens */
-            else if (pSM->nTokenUsable < pSM->nTokenTarget)
+            /* Then add tokens, but wait for at least a monitored item */
+            else if (pSM->nTokenUsable < pSM->nTokenTarget && SOPC_SLinkedList_GetLength(pSM->pListMonIt) > 0)
             {
                 while (SOPC_STATUS_OK == status && pSM->nTokenUsable < pSM->nTokenTarget)
                 {
