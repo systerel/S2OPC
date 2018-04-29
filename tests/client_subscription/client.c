@@ -22,6 +22,7 @@
  */
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +37,8 @@
 #define SECURITY_POLICY SOPC_SecurityPolicy_None_URI
 /* Security Mode is None or Sign or SignAndEncrypt */
 #define SECURITY_MODE OpcUa_MessageSecurityMode_None
+/* Node to subscribe to */
+#define NODE_ID "s=Counter"
 
 /* Connection global timeout */
 #define TIMEOUT_MS 10000
@@ -113,10 +116,15 @@ int main(void)
 
     printf("# Info: Connected.\n");
 
-    if (SOPC_STATUS_OK != SOPC_LibSub_AddToSubscription(con_id, "s=Counter", SOPC_LibSub_AttributeId_Value, &d_id))
+    if (SOPC_STATUS_OK != SOPC_LibSub_AddToSubscription(con_id, NODE_ID, SOPC_LibSub_AttributeId_Value, &d_id))
     {
         log_callback(SOPC_LOG_LEVEL_ERROR, "Could not create monitored item");
         return 5;
+    }
+    else
+    {
+        /* TODO: log */
+        printf("# Info: created MonIt for \"%s\" with data_id %" PRIu32 ".\n", NODE_ID, d_id);
     }
 
     usleep(10 * 1000000);
@@ -142,9 +150,27 @@ void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
                          const SOPC_LibSub_DataId d_id,
                          const SOPC_LibSub_Value* value)
 {
-    (void) value;
     char sz[1024];
+    size_t n;
 
-    snprintf(sz, sizeof(sz) / sizeof(sz[0]), "Client %" PRIu32 " data change:\n  value id %" PRIu32 ".", c_id, d_id);
+    n = (size_t) snprintf(sz, sizeof(sz) / sizeof(sz[0]),
+                          "Client %" PRIu32 " data change:\n  value id %" PRIu32 "\n  new value ", c_id, d_id);
+    if (NULL == value || NULL == value->value)
+    {
+        snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "NULL");
+    }
+    else if (SOPC_LibSub_DataType_bool == value->type)
+    {
+        snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, *(bool*) value->value ? "true" : "false");
+    }
+    else if (SOPC_LibSub_DataType_integer == value->type)
+    {
+        snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%" PRIi64, *(int64_t*) value->value);
+    }
+    else
+    {
+        snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%s", (SOPC_LibSub_CstString) value->value);
+    }
+
     log_callback(SOPC_LOG_LEVEL_INFO, sz);
 }

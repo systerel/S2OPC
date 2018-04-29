@@ -21,6 +21,7 @@
  *
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -302,4 +303,172 @@ SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId* pNid,
     }
 
     return status;
+}
+
+SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSub_Value** pplsVal)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_LibSub_Value* plsVal = NULL;
+
+    if (NULL == pVal || SOPC_VariantArrayType_SingleValue != pVal->Value.ArrayType)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        plsVal = (SOPC_LibSub_Value*) malloc(sizeof(SOPC_LibSub_Value));
+        if (NULL == plsVal)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    /* Create the value, according to the type of the DataValue */
+    if (SOPC_STATUS_OK == status)
+    {
+        switch (pVal->Value.BuiltInTypeId)
+        {
+        case SOPC_Boolean_Id:
+        case SOPC_SByte_Id:
+        case SOPC_Byte_Id:
+        case SOPC_Int16_Id:
+        case SOPC_UInt16_Id:
+        case SOPC_Int32_Id:
+        case SOPC_UInt32_Id:
+        case SOPC_Int64_Id:
+        case SOPC_UInt64_Id:
+            plsVal->type = SOPC_LibSub_DataType_integer;
+            plsVal->value = malloc(sizeof(int64_t));
+            if (NULL == plsVal->value)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                switch (pVal->Value.BuiltInTypeId)
+                {
+                case SOPC_Boolean_Id:
+                    plsVal->type = SOPC_LibSub_DataType_bool;
+                    *(int64_t*) plsVal->value = pVal->Value.Value.Boolean;
+                    break;
+                case SOPC_SByte_Id:
+                    *(int64_t*) plsVal->value = pVal->Value.Value.Sbyte;
+                    break;
+                case SOPC_Byte_Id:
+                    *(int64_t*) plsVal->value = pVal->Value.Value.Byte;
+                    break;
+                case SOPC_Int16_Id:
+                    *(int64_t*) plsVal->value = pVal->Value.Value.Int16;
+                    break;
+                case SOPC_UInt16_Id:
+                    *(int64_t*) plsVal->value = pVal->Value.Value.Uint16;
+                    break;
+                case SOPC_Int32_Id:
+                    *(int64_t*) plsVal->value = pVal->Value.Value.Int32;
+                    break;
+                case SOPC_UInt32_Id:
+                    *(int64_t*) plsVal->value = pVal->Value.Value.Uint32;
+                    break;
+                case SOPC_Int64_Id:
+                    *(int64_t*) plsVal->value = pVal->Value.Value.Int64;
+                    break;
+                case SOPC_UInt64_Id:
+                    if (INT64_MAX < pVal->Value.Value.Uint64)
+                    {
+                        status = SOPC_STATUS_NOK;
+                    }
+                    else
+                    {
+                        *(int64_t*) plsVal->value = (int64_t) pVal->Value.Value.Uint64;
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            break;
+        case SOPC_String_Id:
+            plsVal->type = SOPC_LibSub_DataType_string;
+            plsVal->value = SOPC_String_GetCString(&pVal->Value.Value.String);
+            break;
+        case SOPC_ByteString_Id:
+            plsVal->type = SOPC_LibSub_DataType_bytestring;
+            plsVal->value = SOPC_String_GetCString((SOPC_String*) &pVal->Value.Value.Bstring);
+            break;
+        case SOPC_Null_Id:
+        case SOPC_Float_Id:
+        case SOPC_Double_Id:
+        case SOPC_DateTime_Id:
+        case SOPC_Guid_Id:
+        case SOPC_XmlElement_Id:
+        case SOPC_NodeId_Id:
+        case SOPC_ExpandedNodeId_Id:
+        case SOPC_StatusCode_Id:
+        case SOPC_QualifiedName_Id:
+        case SOPC_LocalizedText_Id:
+        case SOPC_ExtensionObject_Id:
+        case SOPC_DataValue_Id:
+        case SOPC_Variant_Id:
+        case SOPC_DiagnosticInfo_Id:
+        default:
+            status = SOPC_STATUS_NOK;
+            break;
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            /* Maybe string copy failed */
+            if (NULL == plsVal->value)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+    }
+
+    /* Quality and Timestamps */
+    if (SOPC_STATUS_OK == status)
+    {
+        plsVal->quality = pVal->Status;
+        plsVal->source_timestamp = Helpers_OPCTimeToNTP(pVal->SourceTimestamp);
+        plsVal->server_timestamp = Helpers_OPCTimeToNTP(pVal->ServerTimestamp);
+        /* Value is ready, modify given pointer */
+        *pplsVal = plsVal;
+    }
+
+    /* Partial mallocs */
+    if (SOPC_STATUS_OK != status)
+    {
+        if (NULL != plsVal)
+        {
+            if (NULL != plsVal->value)
+            {
+                free(plsVal->value);
+                plsVal->value = NULL;
+            }
+            free(plsVal);
+            plsVal = NULL;
+        }
+    }
+
+    return status;
+}
+
+SOPC_LibSub_Timestamp Helpers_OPCTimeToNTP(SOPC_DateTime ts)
+{
+    /* We are not before 1601 */
+    assert(0 <= ts);
+    /* We are not after year 30848 */
+    assert(INT64_MAX >= ts);
+    /* So we can use unsigned arithmetics, and get rid of warnings. */
+    uint64_t uts = (uint64_t) ts;
+
+    /* First, subtract the difference between epochs */
+    uts -= 9435484800 * 10000000;
+    /* For the fraction of seconds, multiply first, then divide, which keeps the least significant bits of ts */
+    uint64_t fraction = ((uts << 32) / 10000000);
+    /* for the second part, divide first, then multiply, which keeps the most significant bits of ts */
+    uint64_t seconds = ((uts / 10000000) << 32);
+
+    return (seconds & 0xFFFFFFFF00000000) | (fraction & 0xFFFFFFFF);
 }

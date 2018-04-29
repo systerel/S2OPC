@@ -70,6 +70,7 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  * \param ppSM              The returned machine, when successful
  */
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
+                                     uint32_t iCliId,
                                      SOPC_LibSub_DataChangeCbk cbkDataChanged,
                                      double fPublishInterval,
                                      uint32_t iTokenTarget,

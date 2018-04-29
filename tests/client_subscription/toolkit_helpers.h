@@ -31,6 +31,15 @@
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
+/* The following includes are required to fetch the SOPC_LibSub_Value and SOPC_LibSub_DataTime types */
+#include "sopc_builtintypes.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_log_manager.h"
+#include "sopc_toolkit_constants.h"
+#include "sopc_types.h"
+#define SKIP_S2OPC_DEFINITIONS
+#include "libs2opc_client.h"
+
 /**
  * \brief Creates a new Toolkit secure channel configuration from elements of the SOPC_LibSub_ConnectionCfg.
  */
@@ -68,5 +77,19 @@ SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId* pNid,
                                                          uint32_t iCliHndl,
                                                          uint32_t iQueueSize,
                                                          void** ppRequest);
+
+/**
+ * \brief Converts a SOPC_DataValue to a SOPC_LibSub_Value, returns NULL when the conversion is not possible
+ *        (or on memory allocation failure, or when an uint64_t is greater than the INT64_MAX).
+ *
+ * Does not handle arrays.
+ */
+SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSub_Value** pplsVal);
+
+/**
+ * \brief OPC-UA time (hundreds of nanosecs since 1601/01/01 00:00:00 UTC) to NTP time
+ *        (2**-32 seconds since 1900/01/01 00:00:00 UTC).
+ */
+SOPC_LibSub_Timestamp Helpers_OPCTimeToNTP(SOPC_DateTime ts);
 
 #endif /* TOOLKIT_HELPERS_H_ */

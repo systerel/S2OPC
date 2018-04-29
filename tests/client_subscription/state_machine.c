@@ -62,6 +62,7 @@ struct SOPC_StaMac_Machine
 {
     SOPC_StaMac_State state;
     uint32_t iscConfig;                       /* Toolkit scConfig ID */
+    uint32_t iCliId;                          /* LibSub connection ID, used by the callback */
     SOPC_LibSub_DataChangeCbk cbkDataChanged; /* Callback when subscribed data changed */
     uintptr_t iSessionCtx;                    /* Toolkit Session Context, used to identify session events */
     uint32_t iSessionID;                      /* OPC UA Session ID */
@@ -96,6 +97,7 @@ bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
  */
 
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
+                                     uint32_t iCliId,
                                      SOPC_LibSub_DataChangeCbk cbkDataChanged,
                                      double fPublishInterval,
                                      uint32_t iTokenTarget,
@@ -114,6 +116,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
     {
         pSM->state = stInit;
         pSM->iscConfig = iscConfig;
+        pSM->iCliId = iCliId;
         pSM->cbkDataChanged = cbkDataChanged;
         pSM->iSessionCtx = 0;
         pSM->iSessionID = 0;
@@ -435,6 +438,12 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
     void* pRequest = NULL;
     int32_t i = 0;
     OpcUa_CreateMonitoredItemsResponse* pMonItResp = NULL;
+    SOPC_EncodeableType* pEncType = NULL;
+    OpcUa_PublishResponse* pPubResp = NULL;
+    OpcUa_NotificationMessage* pNotifMsg = NULL;
+    OpcUa_DataChangeNotification* pDataNotif = NULL;
+    OpcUa_MonitoredItemNotification* pMonItNotif = NULL;
+    SOPC_LibSub_Value* plsVal = NULL;
 
     bProcess = StaMac_IsEventTargeted(pSM, pAppCtx, event, arg, pParam, appCtx);
 
@@ -487,7 +496,39 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             switch (event)
             {
             case SE_RCV_SESSION_RESPONSE:
-                printf("# Info: Response received.\n");
+                /* There should be an EncodeableType pointer in the first field of the message struct */
+                pEncType = *(SOPC_EncodeableType**) pParam;
+                if (&OpcUa_PublishResponse_EncodeableType == pEncType)
+                {
+                    printf("# Info: PublishResponse received.\n");
+                    /* TODO: move this to an external function */
+                    pPubResp = (OpcUa_PublishResponse*) pParam;
+                    /* Take note to acknowledge later */
+                    /* TODO: this limits the benefits of having multiple pending PublishRequest, maybe
+                     * it would be more appropriate to have a list of SeqNumbsToAck... */
+                    assert(!pSM->bAckSubscr);
+                    pSM->bAckSubscr = true;
+                    pSM->iAckSeqNum = pPubResp->AvailableSequenceNumbers[pPubResp->NoOfAvailableSequenceNumbers - 1];
+                    pSM->nTokenUsable -= 1;
+                    /* Traverse the notifications and calls the callback */
+                    pNotifMsg = &pPubResp->NotificationMessage;
+                    /* For now, only handles NotificationData */
+                    assert(1 == pNotifMsg->NoOfNotificationData);
+                    assert(&OpcUa_DataChangeNotification_EncodeableType ==
+                           pNotifMsg->NotificationData[0].Body.Object.ObjType);
+                    pDataNotif = (OpcUa_DataChangeNotification*) pNotifMsg->NotificationData[0].Body.Object.Value;
+                    for (i = 0; i < pDataNotif->NoOfMonitoredItems; ++i)
+                    {
+                        pMonItNotif = &pDataNotif->MonitoredItems[i];
+                        status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
+                        pSM->cbkDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
+                    }
+                    /* TODO: verify the results[] which contains a status for each Ack */
+                }
+                else
+                {
+                    printf("# Info: Response received.\n");
+                }
                 break;
             case SE_SND_REQUEST_FAILED:
                 pSM->state = stError;
@@ -614,7 +655,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 }
             }
             /* Then add tokens, but wait for at least a monitored item */
-            else if (pSM->nTokenUsable < pSM->nTokenTarget && SOPC_SLinkedList_GetLength(pSM->pListMonIt) > 0)
+            else if (pSM->nTokenUsable < pSM->nTokenTarget)
             {
                 while (SOPC_STATUS_OK == status && pSM->nTokenUsable < pSM->nTokenTarget)
                 {
