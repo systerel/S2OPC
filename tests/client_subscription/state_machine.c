@@ -69,10 +69,10 @@ struct SOPC_StaMac_Machine
                                                * id is unique request identifier, value is a SOPC_StaMac_ReqCtx */
     double fPublishInterval;                  /* The publish interval, in ms */
     uint32_t iSubscriptionID;                 /* OPC UA subscription ID, non 0 when subscription is created */
-    uint16_t nTokenTarget;                    /* Target number of available tokens */
-    uint16_t nTokenUsable;                    /* Tokens available to the server
     SOPC_SLinkedList* pListMonIt;             /* List of monitored items, where the appCtx is the list value,
                                                * and the id is the uint32_t OPC UA monitored item ID */
+    uint32_t nTokenTarget;                    /* Target number of available tokens */
+    uint32_t nTokenUsable;                    /* Tokens available to the server
                                                * (PublishRequest_sent - PublishResponse_sent) */
     bool bAckSubscr;                          /* Indicates whether an acknowledgement should be sent
                                                * in the next PublishRequest */
@@ -98,7 +98,7 @@ bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      SOPC_LibSub_DataChangeCbk cbkDataChanged,
                                      double fPublishInterval,
-                                     uint16_t iTokenTarget,
+                                     uint32_t iTokenTarget,
                                      SOPC_StaMac_Machine** ppSM)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -628,6 +628,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     }
                     if (SOPC_STATUS_OK == status)
                     {
+                        /* This is the reason nTokenUsable and nTokenTarget are uint32_t: uint16_t arithmetics
+                         * would raise a warning, as 1 cannot be interpreted as a uint16_t... */
                         pSM->nTokenUsable += 1;
                         pSM->bAckSubscr = false;
                     }

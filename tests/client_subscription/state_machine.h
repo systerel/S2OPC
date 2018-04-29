@@ -72,7 +72,7 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      SOPC_LibSub_DataChangeCbk cbkDataChanged,
                                      double fPublishInterval,
-                                     uint16_t iTokenTarget,
+                                     uint32_t iTokenTarget,
                                      SOPC_StaMac_Machine** ppSM);
 
 /**
@@ -81,7 +81,10 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
 void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM);
 
 /**
- * \brief Creates a session.  The toolkit shall be configured with SOPC_Toolkit_Configured() beforehand.
+ * \brief Creates a session asynchronously. The toolkit shall be configured with
+ *        SOPC_Toolkit_Configured() beforehand.
+ *
+ * The state machine will also create a subscription. See SOPC_StaMac_HasSubscription().
  *
  * See SOPC_ToolkitClient_AsyncActivateSession().
  * You shall call SOPC_StaMac_StopSession() to close the connection gracefully.
