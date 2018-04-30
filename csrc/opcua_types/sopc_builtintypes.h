@@ -429,6 +429,7 @@ void SOPC_DateTime_FromInt64(SOPC_DateTime* dateTime, int64_t date);
 
 void SOPC_Guid_Initialize(SOPC_Guid* guid);
 void SOPC_Guid_InitializeAux(void* value);
+SOPC_ReturnStatus SOPC_Guid_FromCString(SOPC_Guid* guid, const char* str, size_t len);
 SOPC_ReturnStatus SOPC_Guid_Copy(SOPC_Guid* dest, const SOPC_Guid* src);
 SOPC_ReturnStatus SOPC_Guid_CompareAux(const void* left, const void* right, int32_t* comparison);
 SOPC_ReturnStatus SOPC_Guid_CopyAux(void* dest, const void* src);

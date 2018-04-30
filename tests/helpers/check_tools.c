@@ -3169,6 +3169,55 @@ START_TEST(test_ua_qname_parse)
 }
 END_TEST
 
+#define NULL_GUID                                                            \
+    {                                                                        \
+        0x00, 0x00, 0x00, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } \
+    }
+
+START_TEST(test_ua_guid_parse)
+{
+    SOPC_Helper_EndiannessCfg_Initialize();
+
+    static const struct
+    {
+        const char* input;
+        SOPC_Guid guid;
+    } test_data[] = {{
+                         "61ab45e4-0687-4944-b998-abf8166ac127",
+                         {0x61ab45e4, 0x0687, 0x4944, {0xb9, 0x98, 0xab, 0xf8, 0x16, 0x6a, 0xc1, 0x27}},
+                     },
+                     {
+                         "61AB45E4-0687-4944-B998-ABF8166AC127",
+                         {0x61ab45e4, 0x0687, 0x4944, {0xb9, 0x98, 0xab, 0xf8, 0x16, 0x6a, 0xc1, 0x27}},
+                     },
+                     {
+                         "This is not a UUID",
+                         NULL_GUID,
+                     },
+                     {NULL, NULL_GUID}};
+
+    for (size_t i = 0; test_data[i].input != NULL; ++i)
+    {
+        SOPC_Guid guid;
+        SOPC_Guid_Initialize(&guid);
+
+        SOPC_ReturnStatus status = SOPC_Guid_FromCString(&guid, test_data[i].input, strlen(test_data[i].input));
+
+        if (test_data[i].guid.Data1 != 0)
+        {
+            ck_assert_uint_eq(SOPC_STATUS_OK, status);
+            ck_assert_int_eq(0, memcmp(&guid, &test_data[i].guid, sizeof(SOPC_Guid)));
+        }
+        else
+        {
+            ck_assert_uint_ne(SOPC_STATUS_OK, status);
+        }
+
+        SOPC_Guid_Clear(&guid);
+    }
+}
+END_TEST
+
 Suite* tests_make_suite_tools(void)
 {
     Suite* s;
@@ -3212,6 +3261,7 @@ Suite* tests_make_suite_tools(void)
     tc_ua_types = tcase_create("UA Types");
     tcase_add_test(tc_ua_types, test_ua_string_type);
     tcase_add_test(tc_ua_types, test_ua_qname_parse);
+    tcase_add_test(tc_ua_types, test_ua_guid_parse);
     suite_add_tcase(s, tc_ua_types);
 
     return s;

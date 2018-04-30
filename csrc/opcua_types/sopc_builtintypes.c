@@ -1269,6 +1269,55 @@ void SOPC_Guid_InitializeAux(void* value)
     SOPC_Guid_Initialize((SOPC_Guid*) value);
 }
 
+SOPC_ReturnStatus SOPC_Guid_FromCString(SOPC_Guid* guid, const char* str, size_t len)
+{
+    if (guid == NULL || str == NULL)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (len != 36 || '-' != str[8] || '-' != str[13] || '-' != str[18] || '-' != str[23])
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_strtouint32_t(str, &guid->Data1, 16, '-');
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_strtouint16_t(str + 9, &guid->Data2, 16, '-');
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_strtouint16_t(str + 14, &guid->Data3, 16, '-');
+    }
+
+    char buf[4];
+    memset(buf, 0, sizeof(buf));
+
+    for (int i = 0; i < 2 && SOPC_STATUS_OK == status; ++i)
+    {
+        buf[0] = str[19 + 2 * i];
+        buf[1] = str[20 + 2 * i];
+        status = SOPC_strtouint8_t(buf, &guid->Data4[i], 16, '\0');
+    }
+
+    for (int i = 0; i < 6 && SOPC_STATUS_OK == status; ++i)
+    {
+        buf[0] = str[24 + 2 * i];
+        buf[1] = str[25 + 2 * i];
+        status = SOPC_strtouint8_t(buf, &guid->Data4[2 + i], 16, '\0');
+    }
+
+    return status;
+}
+
 void SOPC_Guid_Initialize(SOPC_Guid* guid)
 {
     if (guid != NULL)
@@ -1705,8 +1754,6 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
     uint32_t iid = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Guid* pGuid = NULL;
-    char sData4[3];
-    int i;
 
     /* Copy the string in a safe place and sscanf it */
     if (NULL != cString && len > 0)
@@ -1799,44 +1846,9 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             break;
         case SOPC_IdentifierType_Guid:
             pNid->Data.Guid = pGuid;
-            /* Check the length of the string, and assert the positions of the dashes
-             * 01020304-0506-0708-090A-0B0C0D0E0F10
-             */
-            if (len - (p - sz) != 36)
-            {
-                status = SOPC_STATUS_NOK;
-            }
-            if (SOPC_STATUS_OK == status && ('-' != p[8] || '-' != p[13] || '-' != p[18] || '-' != p[23]))
-            {
-                status = SOPC_STATUS_NOK;
-            }
-            /* Read the fields */
-            if (SOPC_STATUS_OK == status)
-            {
-                status = SOPC_strtouint32_t(p, &pGuid->Data1, 16, '-');
-            }
-            if (SOPC_STATUS_OK == status)
-            {
-                status = SOPC_strtouint16_t(&p[9], &pGuid->Data2, 16, '-');
-            }
-            if (SOPC_STATUS_OK == status)
-            {
-                status = SOPC_strtouint16_t(&p[14], &pGuid->Data3, 16, '-');
-            }
-            /* The last fields must be split before being sent to strtoul, as the latter is greedy. */
-            memset(sData4, 0, sizeof(sData4));
-            for (i = 0; i < 2 && SOPC_STATUS_OK == status; ++i)
-            {
-                sData4[0] = p[19 + 2 * i];
-                sData4[1] = p[20 + 2 * i];
-                status = SOPC_strtouint8_t(sData4, &pGuid->Data4[i], 16, '\0');
-            }
-            for (i = 0; i < 6 && SOPC_STATUS_OK == status; ++i)
-            {
-                sData4[0] = p[24 + 2 * i];
-                sData4[1] = p[25 + 2 * i];
-                status = SOPC_strtouint8_t(sData4, &pGuid->Data4[2 + i], 16, '\0');
-            }
+
+            status = SOPC_Guid_FromCString(pGuid, p, (size_t)(len - (p - sz)));
+
             /* May be failed, but pGuid is allocated */
             if (SOPC_STATUS_OK != status)
             {
