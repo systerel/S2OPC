@@ -1515,7 +1515,12 @@ SOPC_ReturnStatus SOPC_NodeId_Compare(const SOPC_NodeId* left, const SOPC_NodeId
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != left && NULL != right && comparison != NULL)
     {
-        if (left->Namespace == right->Namespace && left->IdentifierType == right->IdentifierType)
+        if (left == right)
+        {
+            *comparison = 0;
+            status = SOPC_STATUS_OK;
+        }
+        else if (left->Namespace == right->Namespace && left->IdentifierType == right->IdentifierType)
         {
             switch (left->IdentifierType)
             {
