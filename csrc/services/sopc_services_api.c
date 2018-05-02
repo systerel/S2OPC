@@ -75,6 +75,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
     SOPC_Endpoint_Config* epConfig = NULL;
     constants__t_StatusCode_i sCode = constants__e_sc_ok;
     SOPC_EncodeableType* encType = NULL;
+    SOPC_Internal_AsyncSendMsgData* asyncSendMsgData = NULL;
     bool bres = false;
     void* msg = NULL;
     switch (event)
@@ -156,6 +157,15 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
                                                                        (constants__t_channel_config_idx_i) auxParam);
         }
         break;
+    case SE_TO_SE_CREATE_SESSION:
+        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_CREATE_SESSION session=%" PRIu32 " scCfgIdx=%" PRIuPTR, id,
+                               auxParam);
+        if (auxParam <= constants_bs__t_channel_config_idx_i_max)
+        {
+            io_dispatch_mgr__internal_client_create_session((constants__t_session_i) id,
+                                                            (constants__t_channel_config_idx_i) auxParam);
+        }
+        break;
     case SE_TO_SE_ACTIVATE_SESSION:
         SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_ACTIVATE_SESSION session=%" PRIu32, id);
 
@@ -170,23 +180,86 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
             sCode = constants__e_sc_bad_generic;
         }
         break;
-    case SE_TO_SE_CREATE_SESSION:
-        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_CREATE_SESSION session=%" PRIu32 " scCfgIdx=%" PRIuPTR, id,
-                               auxParam);
-        if (auxParam <= constants_bs__t_channel_config_idx_i_max)
+    case SE_TO_SE_SERVER_DATA_CHANGED:
+        /* Server side only:
+           id = session id
+           auxParam = (int32_t) session state
+         */
+        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32, id);
+
+        if (NULL != params && NULL != (void*) auxParam)
         {
-            io_dispatch_mgr__internal_client_create_session(id, (constants__t_channel_config_idx_i) auxParam);
+            io_dispatch_mgr__internal_server_data_changed((OpcUa_WriteValue*) params, (OpcUa_WriteValue*) auxParam,
+                                                          &bres);
+            OpcUa_WriteValue_Clear((OpcUa_WriteValue*) params);
+            free(params);
+            OpcUa_WriteValue_Clear((OpcUa_WriteValue*) auxParam);
+            free((OpcUa_WriteValue*) auxParam);
+
+            if (bres == false)
+            {
+                SOPC_Logger_TraceError("ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32 " treatment failed",
+                                       id);
+            }
         }
         else
         {
             SOPC_Logger_TraceError("ServicesMgr: Too many existing sessions. Cannot create another one.");
         }
         break;
+    case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
+        /* Server side only:
+           id = session id
+           auxParam = (int32_t) session state
+         */
+        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO session=%" PRIu32
+                               " sessionState=%" PRIdPTR,
+                               id, auxParam);
 
+        io_dispatch_mgr__internal_server_inactive_session_prio_event((constants__t_session_i) id,
+                                                                     (constants__t_sessionState) auxParam, &bres);
+
+        if (bres == false)
+        {
+            SOPC_Logger_TraceError(
+                "ServicesMgr: SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO session=%" PRIu32 " treatment failed", id);
+        }
+        break;
+    case SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO:
+        /* Server side only:
+           id = session id
+           params = (SOPC_Internal_AsyncSendMsgData*)
+           auxParams = (constants__t_StatusCode_i) service result code
+         */
+        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO session=%" PRIu32, id);
+        if (NULL != params)
+        {
+            asyncSendMsgData = (SOPC_Internal_AsyncSendMsgData*) params;
+            io_dispatch_mgr__internal_server_send_publish_response_prio_event(
+                (constants__t_session_i) id, asyncSendMsgData->requestHandle, asyncSendMsgData->requestId,
+                asyncSendMsgData->msgToSend, (constants__t_StatusCode_i) auxParam, &bres);
+            free(asyncSendMsgData);
+
+            if (bres == false)
+            {
+                SOPC_Logger_TraceError(
+                    "ServicesMgr: SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO session=%" PRIu32 " treatment failed", id);
+            }
+        }
+        break;
     case TIMER_SE_EVAL_SESSION_TIMEOUT:
         SOPC_Logger_TraceDebug("ServicesMgr: TIMER_SE_EVAL_SESSION_TIMEOUT session=%" PRIu32, id);
-
-        io_dispatch_mgr__internal_server_evaluate_session_timeout(id);
+        io_dispatch_mgr__internal_server_evaluate_session_timeout((constants__t_session_i) id);
+        break;
+    case TIMER_SE_PUBLISH_CYCLE_TIMEOUT:
+        SOPC_Logger_TraceDebug("ServicesMgr: TIMER_SE_PUBLISH_CYCLE_TIMEOUT subscription=%" PRIu32, id);
+        /* Server side only: id = subscription id */
+        io_dispatch_mgr__internal_server_subscription_publish_timeout((constants__t_subscription_i) id, &bres);
+        if (bres == false)
+        {
+            SOPC_Logger_TraceError(
+                "ServicesMgr: TIMER_SE_PUBLISH_CYCLE_TIMEOUT subscription=%" PRIu32 " treatment failed", id);
+        }
         break;
     case SC_TO_SE_SC_SERVICE_RCV_MSG:
         SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_SERVICE_RCV_MSG scIdx=%" PRIu32 " reqId=%" PRIuPTR, id,
@@ -423,7 +496,8 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* 
         case APP_TO_SE_SEND_DISCOVERY_REQUEST:
         case APP_TO_SE_CLOSE_SESSION:
         case APP_TO_SE_CLOSE_ALL_CONNECTIONS:
-        SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr, (int32_t) seEvent, id, params, auxParam, NULL);
+            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr, (int32_t) seEvent, id, params, auxParam,
+                                                 NULL);
             break;
         default:
             assert(false);
@@ -446,7 +520,8 @@ void SOPC_Services_InternalEnqueueEvent(SOPC_Services_Event seEvent, uint32_t id
         case SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO:
         case TIMER_SE_EVAL_SESSION_TIMEOUT:
         case TIMER_SE_PUBLISH_CYCLE_TIMEOUT:
-            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr, (int32_t) seEvent, id, params, auxParam, NULL);
+            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr, (int32_t) seEvent, id, params, auxParam,
+                                                 NULL);
             break;
         default:
             assert(false);
@@ -462,7 +537,8 @@ void SOPC_Services_InternalEnqueuePrioEvent(SOPC_Services_Event seEvent, uint32_
         {
         case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
         case SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO:
-            SOPC_EventDispatcherManager_AddEventAsNext(servicesEventDispatcherMgr, (int32_t) seEvent, id, params, auxParam, NULL);
+            SOPC_EventDispatcherManager_AddEventAsNext(servicesEventDispatcherMgr, (int32_t) seEvent, id, params,
+                                                       auxParam, NULL);
             break;
         default:
             // Other events not authorized to be enqueued in priority

@@ -17,6 +17,8 @@
 
 #include "monitored_item_queue_bs.h"
 
+#include <assert.h>
+
 /*--------------
    SEES Clause
   --------------*/
@@ -34,11 +36,21 @@ void monitored_item_queue_bs__allocate_new_monitored_item_queue(
     t_bool* const monitored_item_queue_bs__bres,
     constants__t_monitoredItemQueue_i* const monitored_item_queue_bs__queue)
 {
+    *monitored_item_queue_bs__queue = SOPC_SLinkedList_Create(0);
+    if (*monitored_item_queue_bs__queue == NULL)
+    {
+        *monitored_item_queue_bs__bres = false;
+    }
+    else
+    {
+        *monitored_item_queue_bs__bres = true;
+    }
 }
 
 void monitored_item_queue_bs__clear_and_deallocate_monitored_item_queue(
     const constants__t_monitoredItemQueue_i monitored_item_queue_bs__p_queue)
 {
+    SOPC_SLinkedList_Delete(monitored_item_queue_bs__p_queue);
 }
 
 void monitored_item_queue_bs__add_monitored_item_to_queue(
@@ -52,6 +64,7 @@ void monitored_item_queue_bs__add_monitored_item_to_queue(
     const constants__t_client_handle_i monitored_item_queue_bs__p_clientHandle,
     t_bool* const monitored_item_queue_bs__bres)
 {
+    assert(false);
 }
 
 void monitored_item_queue_bs__continue_iter_monitored_item(
@@ -66,6 +79,7 @@ void monitored_item_queue_bs__continue_iter_monitored_item(
     constants__t_monitoringMode_i* const monitored_item_queue_bs__p_monitoringMode,
     constants__t_client_handle_i* const monitored_item_queue_bs__p_clientHandle)
 {
+    assert(false);
 }
 
 void monitored_item_queue_bs__get_monitored_item(
@@ -79,6 +93,7 @@ void monitored_item_queue_bs__get_monitored_item(
     constants__t_monitoringMode_i* const monitored_item_queue_bs__p_monitoringMode,
     constants__t_client_handle_i* const monitored_item_queue_bs__p_clientHandle)
 {
+    assert(false);
 }
 
 void monitored_item_queue_bs__init_iter_monitored_item(
@@ -86,6 +101,7 @@ void monitored_item_queue_bs__init_iter_monitored_item(
     t_bool* const monitored_item_queue_bs__continue,
     constants__t_monitoredItemQueueIterator_i* const monitored_item_queue_bs__iterator)
 {
+    assert(false);
 }
 
 void monitored_item_queue_bs__remove_monitored_item(
@@ -93,4 +109,5 @@ void monitored_item_queue_bs__remove_monitored_item(
     const constants__t_monitoredItem_i monitored_item_queue_bs__p_monitoredItem,
     t_bool* const monitored_item_queue_bs__bres)
 {
+    assert(false);
 }

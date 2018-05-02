@@ -17,6 +17,8 @@
 
 #include "monitored_item_notification_queue_bs.h"
 
+#include <assert.h>
+
 /*--------------
    SEES Clause
   --------------*/
@@ -34,11 +36,21 @@ void monitored_item_notification_queue_bs__allocate_new_monitored_item_notificat
     t_bool* const monitored_item_notification_queue_bs__bres,
     constants__t_notificationQueue_i* const monitored_item_notification_queue_bs__queue)
 {
+    *monitored_item_notification_queue_bs__queue = SOPC_SLinkedList_Create(0);
+    if (*monitored_item_notification_queue_bs__queue == NULL)
+    {
+        *monitored_item_notification_queue_bs__bres = false;
+    }
+    else
+    {
+        *monitored_item_notification_queue_bs__bres = true;
+    }
 }
 
 void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_notification_queue(
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue)
 {
+    SOPC_SLinkedList_Delete(monitored_item_notification_queue_bs__p_queue);
 }
 
 void monitored_item_notification_queue_bs__add_monitored_item_notification_to_queue(
@@ -47,6 +59,7 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
     const constants__t_WriteValuePointer_i monitored_item_notification_queue_bs__p_writeValuePointer,
     t_bool* const monitored_item_notification_queue_bs__bres)
 {
+    assert(false);
 }
 
 void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notification(
@@ -56,6 +69,7 @@ void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notifi
     constants__t_monitoredItem_i* const monitored_item_notification_queue_bs__p_monitoredItem,
     constants__t_WriteValuePointer_i* const monitored_item_notification_queue_bs__p_writeValuePointer)
 {
+    assert(false);
 }
 
 void monitored_item_notification_queue_bs__init_iter_monitored_item_notification(
@@ -63,4 +77,5 @@ void monitored_item_notification_queue_bs__init_iter_monitored_item_notification
     t_bool* const monitored_item_notification_queue_bs__continue,
     constants__t_monitoredItemQueueIterator_i* const monitored_item_notification_queue_bs__iterator)
 {
+    assert(false);
 }

@@ -17,6 +17,8 @@
 
 #include "publish_request_queue_bs.h"
 
+#include <assert.h>
+
 /*--------------
    SEES Clause
   --------------*/
@@ -36,11 +38,21 @@ void publish_request_queue_bs__allocate_new_publish_queue(
     t_bool* const publish_request_queue_bs__bres,
     constants__t_publishReqQueue_i* const publish_request_queue_bs__queue)
 {
+    *publish_request_queue_bs__queue = SOPC_SLinkedList_Create(0);
+    if (*publish_request_queue_bs__queue == NULL)
+    {
+        *publish_request_queue_bs__bres = false;
+    }
+    else
+    {
+        *publish_request_queue_bs__bres = true;
+    }
 }
 
 void publish_request_queue_bs__clear_and_deallocate_publish_queue(
     const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue)
 {
+    SOPC_SLinkedList_Delete(publish_request_queue_bs__p_queue);
 }
 
 void publish_request_queue_bs__add_publish_request_to_queue(
@@ -52,6 +64,7 @@ void publish_request_queue_bs__add_publish_request_to_queue(
     const constants__t_msg_i publish_request_queue_bs__p_resp_msg,
     t_bool* const publish_request_queue_bs__bres)
 {
+    assert(false);
 }
 
 void publish_request_queue_bs__continue_pop_iter_publish_request(
@@ -64,6 +77,7 @@ void publish_request_queue_bs__continue_pop_iter_publish_request(
     constants__t_request_context_i* const publish_request_queue_bs__p_req_ctx,
     constants__t_msg_i* const publish_request_queue_bs__p_resp_msg)
 {
+    assert(false);
 }
 
 void publish_request_queue_bs__init_iter_publish_request(
@@ -71,4 +85,5 @@ void publish_request_queue_bs__init_iter_publish_request(
     t_bool* const publish_request_queue_bs__continue,
     constants__t_publishReqQueueIterator_i* const publish_request_queue_bs__iterator)
 {
+    assert(false);
 }
