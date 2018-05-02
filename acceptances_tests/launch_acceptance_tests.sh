@@ -23,6 +23,7 @@ XVFB_PID=$!
 export DISPLAY=:99
 #set -x
 
+ROOT_DIR=$(cd $(dirname $0)/.. && pwd)
 LOG_FILE=server_acceptance_tests.log
 TMP_FILE=`mktemp`
 TAP_FILE=server_acceptance_tests.tap
@@ -74,15 +75,19 @@ fi
 # main script
 
 rm -f $LOG_FILE $TAP_FILE
-echo -e "Launching server"
+echo "Launching server"
 pushd ../bin
 ./toolkit_test_server &
 SERVER_PID=$!
+# wait for server to be up
+${ROOT_DIR}/tests/scripts/wait_server.py
 popd
 
-echo -e "Launching Acceptance Test Tool"
+echo "Launching Acceptance Test Tool"
 
 /opt/opcfoundation/uactt/uacompliancetest.sh -s ./Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE
+
+echo "Closing Acceptance Test Tool"
 
 # kill virtual display since not necessary anymore
 kill -9 $XVFB_PID
@@ -95,7 +100,7 @@ if [ ! -f $LOG_FILE ];then
 fi
 
 
-echo -e "End of acceptance tests - Generating Test Report"
+echo "End of acceptance tests - Generating Test Report"
 
 # result analysis
 # first step: analyse XML thanks to xlst
@@ -186,8 +191,14 @@ sed -i "1s/^/1..$num_tests\n/" $TAP_FILE
 
 rm -f $TMP_FILE
 
-n_err=$(grep "^not ok" $TAP_FILE | wc -l)
-mv $TAP_FILE ../bin/
+echo "Test report generated"
 
-echo -e "Test report generated"
-echo -e "There were $n_err not oks"
+n_err=$(grep -c "^not ok" $TAP_FILE)
+echo "There were $n_err not oks"
+
+# check TAP file
+mv $TAP_FILE ${ROOT_DIR}/bin/
+${ROOT_DIR}/tests/scripts/check-tap ${ROOT_DIR}/bin/$TAP_FILE && echo "TAP file is well formed and free of failed tests" || exit 1
+
+
+

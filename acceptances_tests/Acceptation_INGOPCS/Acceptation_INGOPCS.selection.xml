@@ -1,5 +1,5 @@
 <UaTestCaseSelection xsi:noNamespaceSchemaLocation="testcaseselection.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
- <ProjectInfo ProjectType="ServerProject" Version="1.2.336.256"/>
+ <ProjectInfo ProjectType="ServerProject" Version="1.2.336.273"/>
  <ConformanceGroups>
   <ConformanceGroup name="Address Space Model">
    <ConformanceUnit name="Address Space Base">
