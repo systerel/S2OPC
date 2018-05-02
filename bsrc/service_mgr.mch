@@ -434,14 +434,13 @@ OPERATIONS
     END
     ;
 
-    bres, buffer_out, channel <-- server_send_bad_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
+    bres, buffer_out, channel <-- server_send_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
     PRE
         session : t_session_i &
         session : t_session &
         req_handle : t_server_request_handle_i &
         statusCode : t_StatusCode_i &
         statusCode : t_StatusCode &
-        statusCode /= e_sc_ok &
         publish_resp_msg : t_msg_i &
         publish_resp_msg : t_msg &
         resp_typ = e_msg_subscription_publish_resp &

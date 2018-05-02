@@ -105,12 +105,8 @@ void msg_subscription_create_monitored_item_bs__get_msg_create_monitored_items_r
 {
     OpcUa_CreateMonitoredItemsRequest* createReq =
         (OpcUa_CreateMonitoredItemsRequest*) msg_subscription_create_monitored_item_bs__p_req_msg;
-    bool res = util_TimestampsToReturn__C_to_B(createReq->TimestampsToReturn,
-                                               msg_subscription_create_monitored_item_bs__p_timestampToRet);
-    if (false == res)
-    {
-        *msg_subscription_create_monitored_item_bs__p_timestampToRet = constants__c_TimestampsToReturn_indet;
-    }
+    *msg_subscription_create_monitored_item_bs__p_timestampToRet =
+        util_TimestampsToReturn__C_to_B(createReq->TimestampsToReturn);
 }
 
 void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params(

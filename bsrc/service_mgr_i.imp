@@ -1453,7 +1453,7 @@ OPERATIONS
     END
     ;
 
-    bres, buffer_out, channel <-- server_send_bad_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
+    bres, buffer_out, channel <-- server_send_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
     VAR
         l_is_valid_resp,
         l_is_valid_header,

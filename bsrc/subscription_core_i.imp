@@ -168,8 +168,8 @@ OPERATIONS
                                   p_publishEnabled,
                                   l_newNotifQueue,
                                   l_newPublishQueue,
-                                  l_newMonitoredItemQueue)
-                                
+                                  l_newMonitoredItemQueue);
+                subscription := l_subscription
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory;
                 IF l_bres_notif = TRUE

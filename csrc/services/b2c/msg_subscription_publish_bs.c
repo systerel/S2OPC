@@ -44,7 +44,8 @@ void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
     const constants__t_session_i msg_subscription_publish_bs__p_session,
     const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg,
     const constants__t_server_request_handle_i msg_subscription_publish_bs__p_req_handle,
-    const constants__t_request_context_i msg_subscription_publish_bs__p_req_context)
+    const constants__t_request_context_i msg_subscription_publish_bs__p_req_context,
+    const constants__t_StatusCode_i msg_subscription_publish_bs__p_statusCode)
 {
     SOPC_Internal_AsyncSendMsgData* eventData = malloc(sizeof(SOPC_Internal_AsyncSendMsgData));
     if (NULL != eventData)
@@ -54,7 +55,8 @@ void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
         eventData->requestId = msg_subscription_publish_bs__p_req_context;
 
         SOPC_Services_InternalEnqueuePrioEvent(SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO,
-                                               (uint32_t) msg_subscription_publish_bs__p_session, eventData, 0);
+                                               (uint32_t) msg_subscription_publish_bs__p_session, eventData,
+                                               (uintptr_t) msg_subscription_publish_bs__p_statusCode);
     }
     else
     {

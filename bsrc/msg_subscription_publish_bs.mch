@@ -64,12 +64,13 @@ OPERATIONS
     END
     ;
     
-    generate_internal_send_publish_response_event (p_session, p_publish_resp_msg, p_req_handle, p_req_context) =
+    generate_internal_send_publish_response_event (p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_statusCode) =
     PRE
         p_session : t_session_i & p_session : t_session &
         p_publish_resp_msg : t_msg_i & p_publish_resp_msg : t_msg &
         p_req_handle : t_server_request_handle_i & 
-        p_req_context : t_request_context_i & p_req_context : t_request_context
+        p_req_context : t_request_context_i & p_req_context : t_request_context &
+        p_statusCode : t_StatusCode_i & p_statusCode : t_StatusCode
     THEN
         skip
     END
