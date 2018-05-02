@@ -43,6 +43,7 @@ int main(void)
     srunner_add_suite(sr, tests_make_suite_timers());
     srunner_add_suite(sr, tests_make_suite_logger());
     srunner_add_suite(sr, tests_make_suite_dict());
+    srunner_add_suite(sr, tests_make_suite_array());
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);

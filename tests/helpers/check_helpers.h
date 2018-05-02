@@ -42,4 +42,6 @@ Suite* tests_make_suite_logger(void);
 
 Suite* tests_make_suite_dict(void);
 
+Suite* tests_make_suite_array(void);
+
 #endif // CHECK_HELPERS_H
