@@ -256,7 +256,7 @@ bool SOPC_Dict_Insert(SOPC_Dict* d, void* key, void* value)
     }
 }
 
-void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found)
+static void* get_internal(const SOPC_Dict* d, const void* key, bool* found, void** dict_key)
 {
     uint64_t hash = d->hash_func(key);
     void* value = NULL;
@@ -264,6 +264,11 @@ void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found)
     if (found != NULL)
     {
         *found = false;
+    }
+
+    if (dict_key != NULL)
+    {
+        *dict_key = NULL;
     }
 
     for (uint64_t i = 0; i < d->size; ++i)
@@ -283,8 +288,33 @@ void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found)
             {
                 *found = true;
             }
+
+            if (dict_key != NULL)
+            {
+                *dict_key = d->buckets[idx].key;
+            }
         }
     }
 
     return value;
+}
+
+void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found)
+{
+    return get_internal(d, key, found, NULL);
+}
+
+void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found)
+{
+    void* dict_key;
+    bool _found;
+
+    get_internal(d, key, &_found, &dict_key);
+
+    if (found != NULL)
+    {
+        *found = _found;
+    }
+
+    return dict_key;
 }

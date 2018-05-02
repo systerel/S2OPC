@@ -110,4 +110,20 @@ bool SOPC_Dict_Insert(SOPC_Dict* d, void* key, void* value);
  */
 void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found);
 
+/**
+ * \brief Looks up a given key in the dictionary.
+ * \param d      The dictionary.
+ * \param key    The key to search for.
+ * \param found  Out parameter, set to \c TRUE if the key is found. Can be
+ *               \c NULL if the information is not required.
+ * \return The key stored in the dictionary, or \c NULL if no such key is found.
+ *
+ * The returned value belongs to the dictionary and should not be modified.
+ *
+ * This function is useful for example when "interning" values: one can look up
+ * the stored copy of the key passed as a parameter and use it, freeing the
+ * original.
+ */
+void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found);
+
 #endif /* SOPC_DICT_H_ */

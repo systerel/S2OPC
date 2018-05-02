@@ -162,6 +162,26 @@ START_TEST(test_dict_resize)
 }
 END_TEST
 
+START_TEST(test_dict_get_key)
+{
+    SOPC_Dict* d = SOPC_Dict_Create(NULL, str_hash, str_equal, NULL, NULL);
+    ck_assert_ptr_nonnull(d);
+
+    static char* s = "Hello";
+    ck_assert(SOPC_Dict_Insert(d, s, NULL));
+    bool found;
+    char* key = SOPC_Dict_GetKey(d, "Hello", &found);
+    ck_assert(found);
+    ck_assert_ptr_eq(s, key);
+
+    key = SOPC_Dict_GetKey(d, "World", &found);
+    ck_assert(!found);
+    ck_assert_ptr_null(key);
+
+    SOPC_Dict_Delete(d);
+}
+END_TEST
+
 Suite* tests_make_suite_dict(void)
 {
     Suite* s;
@@ -176,6 +196,7 @@ Suite* tests_make_suite_dict(void)
     tcase_add_test(tc_dict, test_dict_non_null_empty_key);
     tcase_add_test(tc_dict, test_dict_free);
     tcase_add_test(tc_dict, test_dict_resize);
+    tcase_add_test(tc_dict, test_dict_get_key);
     suite_add_tcase(s, tc_dict);
 
     return s;
