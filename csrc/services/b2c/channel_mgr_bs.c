@@ -58,6 +58,10 @@ void channel_mgr_bs__is_valid_channel_config_idx(const constants__t_channel_conf
             res = SOPC_ToolkitServer_GetSecureChannelConfig((uint32_t) channel_mgr_bs__p_config_idx);
         }
     }
+    else
+    {
+        assert(false);
+    }
 
     if (NULL == res)
     {
@@ -77,6 +81,10 @@ void channel_mgr_bs__is_valid_endpoint_config_idx(const constants__t_endpoint_co
     if (channel_mgr_bs__p_config_idx > 0 && channel_mgr_bs__p_config_idx <= constants__t_endpoint_config_idx_i_max)
     {
         res = SOPC_ToolkitServer_GetEndpointConfig((uint32_t) channel_mgr_bs__p_config_idx);
+    }
+    else
+    {
+        assert(false);
     }
 
     if (NULL == res)

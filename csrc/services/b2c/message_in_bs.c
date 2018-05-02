@@ -258,8 +258,8 @@ void message_in_bs__read_create_session_msg_session_token(
     *message_in_bs__session_token = &createSessionResp->AuthenticationToken;
 }
 
-void message_in_bs__read_msg_header_req_handle(const constants__t_msg_header_i message_in_bs__msg_header,
-                                               constants__t_request_handle_i* const message_in_bs__handle)
+void message_in_bs__server_read_msg_header_req_handle(const constants__t_msg_header_i message_in_bs__msg_header,
+                                                      constants__t_server_request_handle_i* const message_in_bs__handle)
 {
     if ((*(SOPC_EncodeableType**) message_in_bs__msg_header) == &OpcUa_ResponseHeader_EncodeableType)
     {
@@ -273,6 +273,12 @@ void message_in_bs__read_msg_header_req_handle(const constants__t_msg_header_i m
     {
         assert(false);
     }
+}
+
+void message_in_bs__client_read_msg_header_req_handle(const constants__t_msg_header_i message_in_bs__msg_header,
+                                                      constants__t_client_request_handle_i* const message_in_bs__handle)
+{
+    message_in_bs__server_read_msg_header_req_handle(message_in_bs__msg_header, message_in_bs__handle);
 }
 
 void message_in_bs__read_msg_req_header_session_token(const constants__t_msg_header_i message_in_bs__msg_header,

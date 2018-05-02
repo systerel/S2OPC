@@ -254,11 +254,11 @@ OPERATIONS
         CHOICE
             a_buffer_out_state := c_buffer_out_state_indet ||
             buffer_out := c_byte_buffer_indet ||
-            req_handle := c_request_handle_indet
+            req_handle := c_client_request_handle_indet
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
+            req_handle :(req_handle : t_client_request_handle_i & req_handle : t_client_request_handle)
         END
     END
     ;
@@ -287,12 +287,12 @@ OPERATIONS
                 e_sc_bad_encoding_error} ||
             channel :(channel : t_channel_i & channel = c_channel_indet) ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
-            req_handle := c_request_handle_indet
+            req_handle := c_client_request_handle_indet
         OR
             ret := e_sc_ok ||
             channel :(channel : t_channel_i & channel : s_channel_connected) ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
+            req_handle :(req_handle : t_client_request_handle_i & req_handle : t_client_request_handle)
         END
     END
     ;
@@ -313,11 +313,11 @@ OPERATIONS
         CHOICE
             a_buffer_out_state := c_buffer_out_state_indet ||
             buffer_out := c_byte_buffer_indet ||
-            req_handle := c_request_handle_indet
+            req_handle := c_client_request_handle_indet
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
+            req_handle :(req_handle : t_client_request_handle_i & req_handle : t_client_request_handle)
         END
     END
     ;
@@ -342,12 +342,12 @@ OPERATIONS
                 e_sc_bad_connection_closed} ||
             channel    := c_channel_indet ||
             buffer_out := c_byte_buffer_indet ||
-            req_handle := c_request_handle_indet
+            req_handle := c_client_request_handle_indet
         OR
             ret        := e_sc_ok ||
             channel    :(channel : t_channel_i & channel : s_channel_connected) ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
+            req_handle :(req_handle : t_client_request_handle_i & req_handle : t_client_request_handle)
         END
     END
     ;
@@ -374,12 +374,12 @@ OPERATIONS
                 e_sc_bad_encoding_error} ||
             channel    := c_channel_indet ||
             buffer_out := c_byte_buffer_indet ||
-            req_handle := c_request_handle_indet
+            req_handle := c_client_request_handle_indet
         OR
             ret        := e_sc_ok ||
             channel    :(channel : t_channel_i & channel : s_channel_connected) ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
+            req_handle :(req_handle : t_client_request_handle_i & req_handle : t_client_request_handle)
         END
     END
     ;
@@ -401,11 +401,11 @@ OPERATIONS
                 e_sc_bad_invalid_argument, /* message has not expected type */
                 e_sc_bad_encoding_error} ||
             buffer_out := c_byte_buffer_indet ||
-            req_handle := c_request_handle_indet
+            req_handle := c_client_request_handle_indet
         OR
             ret        := e_sc_ok ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            req_handle :(req_handle : t_request_handle_i & req_handle : t_request_handle)
+            req_handle :(req_handle : t_client_request_handle_i & req_handle : t_client_request_handle)
         END
     END
     ;
@@ -414,7 +414,7 @@ OPERATIONS
     PRE
         channel  : t_channel_i &
         channel  : t_channel &
-        request_handle : t_request_handle_i &
+        request_handle : t_client_request_handle_i &
         error_status : t_StatusCode_i
     THEN
         skip
@@ -434,7 +434,7 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : t_channel &
-        request_handle : t_request_handle_i
+        request_handle : t_client_request_handle_i
     THEN
         skip
     END
@@ -641,7 +641,7 @@ OPERATIONS
     
     request_id <-- client_req_handle_to_request_id (req_handle) =
     PRE
-        req_handle : t_request_handle_i
+        req_handle : t_client_request_handle_i
     THEN
         request_id :: t_request_context_i
     END
@@ -651,7 +651,7 @@ OPERATIONS
     PRE
         request_id : t_request_context_i
     THEN
-        request_handle :: t_request_handle_i
+        request_handle :: t_client_request_handle_i
     END
     ;
     

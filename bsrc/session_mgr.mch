@@ -31,8 +31,8 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
+        req_handle : t_client_request_handle_i &
+        req_handle : s_client_request_handle &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
         a_msg_in_type : s_session_treatment_resps &
@@ -76,8 +76,8 @@ OPERATIONS
     ret, channel, session_token <-- client_validate_session_service_req (session, req_handle) =
     PRE
         session : t_session_i &
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
+        req_handle : t_client_request_handle_i &
+        req_handle : s_client_request_handle &
         a_msg_out_type : s_service_on_session_reqs
     THEN
         CHOICE
@@ -99,8 +99,8 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
+        req_handle : t_client_request_handle_i &
+        req_handle : s_client_request_handle &
         c_msg_in : t_msg &
         a_msg_in_type : s_service_on_session_resps
     THEN
@@ -114,12 +114,10 @@ OPERATIONS
     END
     ;
     
-    is_valid_res, session, status_code_err <-- server_validate_session_service_req (channel, req_handle, session_token) =
+    is_valid_res, session, status_code_err <-- server_validate_session_service_req (channel, session_token) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
         session_token : t_session_token_i &
         c_msg_in : t_msg &
         a_msg_in_type : s_service_on_session_reqs
@@ -137,13 +135,11 @@ OPERATIONS
     END
     ;
     
-    is_valid_res, status_code_err <-- server_validate_session_service_resp (channel, session, req_handle) =
+    is_valid_res, status_code_err <-- server_validate_session_service_resp (channel, session) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
         session  : t_session_i &
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
         c_msg_in : t_msg &
         c_msg_out : t_msg  &
         a_msg_in_type : s_service_on_session_reqs &
@@ -164,8 +160,8 @@ OPERATIONS
         session : t_session_i &
         channel : t_channel_i &
         channel : s_channel_connected &
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
+        req_handle : t_client_request_handle_i &
+        req_handle : s_client_request_handle &
         create_req_msg : t_msg_i &
         create_req_msg = c_msg_out &
         c_msg_out : t_msg &
@@ -210,8 +206,8 @@ OPERATIONS
     ret, channel, session_token <-- client_user_activate_session_req (session, req_handle, user, activate_req_msg) =
     PRE
         session : t_session_i & // Here session is provided by applicative but still can point to invalid session (ref on closed session)
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
+        req_handle : t_client_request_handle_i &
+        req_handle : s_client_request_handle &
         user : t_user_i &
         user : t_user &
         activate_req_msg : t_msg_i &
@@ -239,8 +235,8 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : t_session & // provided by dispatch manager => not an invalid session
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
+        req_handle : t_client_request_handle_i &
+        req_handle : s_client_request_handle &
         channel : t_channel_i &
         channel : s_channel_connected &
         activate_req_msg : t_msg_i &
@@ -280,8 +276,8 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : t_session &
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
+        req_handle : t_client_request_handle_i &
+        req_handle : s_client_request_handle &
         close_req_msg : t_msg_i &
         close_req_msg = c_msg_out &
         c_msg_out : t_msg &

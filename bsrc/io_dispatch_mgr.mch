@@ -302,7 +302,7 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : t_channel &
-        request_handle : t_request_handle_i
+        request_handle : t_client_request_handle_i
     THEN
         skip
     END

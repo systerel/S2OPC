@@ -54,7 +54,7 @@ LOCAL_OPERATIONS
         a_user,
         a_NonceServer,
         a_NonceClient
-        :(  a_cli_pending_requests : t_request_handle +-> t_session              &
+        :(  a_cli_pending_requests : t_client_request_handle +-> t_session       &
             a_state                : s_session        --> t_sessionState         &
             a_channel              : s_session        +-> t_channel              &
             a_client_orphaned      : s_session        +-> t_channel_config_idx_i &
@@ -80,7 +80,7 @@ LOCAL_OPERATIONS
         a_user,
         a_NonceServer,
         a_NonceClient
-        :(  a_cli_pending_requests : t_request_handle +-> t_session              &
+        :(  a_cli_pending_requests : t_client_request_handle +-> t_session       &
             a_state                : s_session        --> t_sessionState         &
             a_channel              : s_session        +-> t_channel              &
             a_client_orphaned      : s_session        +-> t_channel_config_idx_i &
@@ -124,7 +124,7 @@ LOCAL_OPERATIONS
         sessions_to_iterate,
         sessions_iterated
         :(
-            a_cli_pending_requests : t_request_handle +-> t_session              &
+            a_cli_pending_requests : t_client_request_handle +-> t_session       &
             a_state                : s_session        --> t_sessionState         &
             a_channel              : s_session        +-> t_channel              &
             a_client_orphaned      : s_session        +-> t_channel_config_idx_i &
@@ -477,15 +477,13 @@ OPERATIONS
         END
     END;
 
-    is_valid_res, session, status_code_err <-- server_validate_session_service_req (channel, req_handle, session_token) =
+    is_valid_res, session, status_code_err <-- server_validate_session_service_req (channel, session_token) =
     VAR
         l_session,
         l_valid_session,
         l_session_state,
         l_session_channel
     IN
-        // PRE validates req_handle valid
-        req_handle_do_nothing(req_handle); // avoid warning
         l_session <-- server_get_session_from_token (session_token);
         l_valid_session <-- is_valid_session (l_session);
         l_session_state <-- get_session_state_or_closed (l_session);
@@ -525,14 +523,12 @@ OPERATIONS
     END
     ;
     
-    is_valid_res, status_code_err <-- server_validate_session_service_resp (channel, session, req_handle) =
+    is_valid_res, status_code_err <-- server_validate_session_service_resp (channel, session) =
     VAR
         l_valid_session,
         l_session_state,
         l_session_channel
     IN
-        // PRE validates req_handle valid
-        req_handle_do_nothing(req_handle); // avoid warning
         /* Coherency of messages types done in PRE for now */
         l_valid_session <-- is_valid_session (session);
         l_session_state <-- get_session_state_or_closed (session);

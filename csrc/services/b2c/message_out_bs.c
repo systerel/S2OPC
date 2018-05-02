@@ -534,8 +534,9 @@ void message_out_bs__write_activate_session_resp_msg_crypto(const constants__t_m
     assert(SOPC_STATUS_OK == status);
 }
 
-void message_out_bs__write_msg_out_header_req_handle(const constants__t_msg_header_i message_out_bs__msg_header,
-                                                     const constants__t_request_handle_i message_out_bs__req_handle)
+void message_out_bs__server_write_msg_out_header_req_handle(
+    const constants__t_msg_header_i message_out_bs__msg_header,
+    const constants__t_server_request_handle_i message_out_bs__req_handle)
 {
     if ((*(SOPC_EncodeableType**) message_out_bs__msg_header) == &OpcUa_ResponseHeader_EncodeableType)
     {
@@ -549,6 +550,13 @@ void message_out_bs__write_msg_out_header_req_handle(const constants__t_msg_head
     {
         assert(false);
     }
+}
+
+void message_out_bs__client_write_msg_out_header_req_handle(
+    const constants__t_msg_header_i message_out_bs__msg_header,
+    const constants__t_client_request_handle_i message_out_bs__req_handle)
+{
+    message_out_bs__server_write_msg_out_header_req_handle(message_out_bs__msg_header, message_out_bs__req_handle);
 }
 
 void message_out_bs__write_msg_out_header_session_token(

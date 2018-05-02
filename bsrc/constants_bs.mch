@@ -35,7 +35,8 @@ SETS
     t_msg_header_i;
     t_msg_i;
     t_request_context_i;
-    t_request_handle_i;
+    t_client_request_handle_i;
+    t_server_request_handle_i;
     t_channel_config_idx_i;
     t_endpoint_config_idx_i;
     t_ExpandedNodeId_i;
@@ -66,7 +67,7 @@ CONCRETE_CONSTANTS
     c_request_context_indet,
     c_channel_config_idx_indet,
     c_endpoint_config_idx_indet,
-    c_request_handle_indet,
+    c_client_request_handle_indet,
     c_no_application_context,
     c_ExpandedNodeId_indet,
     c_Reference_indet,
@@ -92,7 +93,7 @@ ABSTRACT_CONSTANTS
     t_request_context,
     t_channel_config_idx,
     t_endpoint_config_idx,
-    t_request_handle,
+    t_client_request_handle,
     t_ExpandedNodeId,
     t_RefIndex,
     t_Reference,
@@ -161,9 +162,9 @@ PROPERTIES
     c_request_context_indet : t_request_context_i &
     c_request_context_indet /: t_request_context &
 
-    t_request_handle <: t_request_handle_i &
-    c_request_handle_indet : t_request_handle_i &
-    c_request_handle_indet /: t_request_handle &
+    t_client_request_handle <: t_client_request_handle_i &
+    c_client_request_handle_indet : t_client_request_handle_i &
+    c_client_request_handle_indet /: t_client_request_handle &
     
     c_no_application_context : t_application_context_i &
 

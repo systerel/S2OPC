@@ -213,7 +213,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         {
             util_status_code__C_to_B((SOPC_StatusCode) auxParam, &sCode);
             io_dispatch_mgr__snd_msg_failure((constants__t_channel_i) id,
-                                             (constants__t_request_handle_i) * (uint32_t*) params, sCode);
+                                             (constants__t_request_context_i) * (uint32_t*) params, sCode);
             free(params);
         } // else: without request Id, it cannot be treated
         break;

@@ -50,10 +50,10 @@ void session_request_handle_bs__INITIALISATION()
   --------------------*/
 void session_request_handle_bs__client_add_session_request_handle(
     const constants__t_session_i session_request_handle_bs__session,
-    const constants__t_request_handle_i session_request_handle_bs__req_handle)
+    const constants__t_client_request_handle_i session_request_handle_bs__req_handle)
 {
     assert(session_request_handle_bs__session != constants__c_session_indet);
-    assert(session_request_handle_bs__req_handle != constants__c_request_handle_indet);
+    assert(session_request_handle_bs__req_handle != constants__c_client_request_handle_indet);
     // It shall be a fresh request handle which means it cannot be assigned to another session
     assert(client_requests[session_request_handle_bs__req_handle] == constants__c_session_indet);
     client_requests[session_request_handle_bs__req_handle] = session_request_handle_bs__session;
@@ -61,10 +61,10 @@ void session_request_handle_bs__client_add_session_request_handle(
 }
 
 void session_request_handle_bs__client_get_session_and_remove_request_handle(
-    const constants__t_request_handle_i session_request_handle_bs__req_handle,
+    const constants__t_client_request_handle_i session_request_handle_bs__req_handle,
     constants__t_session_i* const session_request_handle_bs__session)
 {
-    assert(session_request_handle_bs__req_handle != constants__c_request_handle_indet);
+    assert(session_request_handle_bs__req_handle != constants__c_client_request_handle_indet);
     assert(client_requests[session_request_handle_bs__req_handle] != constants__c_session_indet);
 
     *session_request_handle_bs__session = client_requests[session_request_handle_bs__req_handle];

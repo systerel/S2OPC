@@ -19,7 +19,8 @@ MACHINE
     message_out_bs
 SEES
     constants,
-    message_in_bs
+    message_in_bs,
+    request_handle_bs
 
 DEFINITIONS
     d_variables ==
@@ -228,15 +229,25 @@ OPERATIONS
     END
     ;
 
-    write_msg_out_header_req_handle (msg_header, req_handle) =
+    client_write_msg_out_header_req_handle (msg_header, req_handle) =
     PRE
         msg_header : t_msg_header_i &
         msg_header = c_msg_out_header &
         c_msg_out_header : t_msg_header &
-        req_handle : t_request_handle_i
+        req_handle : t_client_request_handle_i &
+        req_handle : s_client_request_handle
     THEN
-        /* TODO: add relation on request handle ? => need to retrieve after write ? */
-        /* TODO ?: check request handle is a valid handle ? => on server side no need / on client it is preferable ? */
+        skip
+    END
+    ;
+    
+    server_write_msg_out_header_req_handle (msg_header, req_handle) =
+    PRE
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_out_header &
+        c_msg_out_header : t_msg_header &
+        req_handle : t_server_request_handle_i
+    THEN
         skip
     END
     ;

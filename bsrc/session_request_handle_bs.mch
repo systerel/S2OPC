@@ -26,7 +26,7 @@ ABSTRACT_VARIABLES
     a_cli_pending_requests
     
 INVARIANT
-    a_cli_pending_requests : t_request_handle +-> t_session
+    a_cli_pending_requests : t_client_request_handle +-> t_session
     
 INITIALISATION
     a_cli_pending_requests :: {}
@@ -37,8 +37,8 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : s_session &
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle
+        req_handle : t_client_request_handle_i &
+        req_handle : s_client_request_handle
     THEN
         /* req_handle not present in a_cli_pending_requests by construction (fresh requ_handle provided) */
         a_cli_pending_requests := a_cli_pending_requests <+ {req_handle |-> session}
@@ -47,7 +47,7 @@ OPERATIONS
     
     session <-- client_get_session_and_remove_request_handle (req_handle) =
     PRE
-        req_handle : t_request_handle_i
+        req_handle : t_client_request_handle_i
     THEN
         IF req_handle : dom(a_cli_pending_requests)
         THEN

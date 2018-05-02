@@ -238,13 +238,23 @@ OPERATIONS
     END
     ;
     
-    handle <-- read_msg_header_req_handle (msg_header) =
+    handle <-- client_read_msg_header_req_handle (msg_header) =
     PRE
         msg_header : t_msg_header_i &
         msg_header = c_msg_in_header &
         c_msg_in_header : t_msg_header
     THEN
-        handle :: t_request_handle_i
+        handle :: t_client_request_handle_i
+    END
+    ;
+    
+    handle <-- server_read_msg_header_req_handle (msg_header) =
+    PRE
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_in_header &
+        c_msg_in_header : t_msg_header
+    THEN
+        handle :: t_server_request_handle_i
     END
     ;
     

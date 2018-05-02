@@ -51,11 +51,12 @@ typedef uintptr_t constants_bs__t_application_context_i;
 typedef void* constants_bs__t_byte_buffer_i;
 #define constants_bs__t_channel_config_idx_i t_entier4
 #define constants_bs__t_channel_i t_entier4
+typedef uint32_t constants_bs__t_client_request_handle_i;
 #define constants_bs__t_endpoint_config_idx_i t_entier4
 typedef void* constants_bs__t_msg_header_i;
 typedef void* constants_bs__t_msg_i;
 typedef uint32_t constants_bs__t_request_context_i;
-typedef uint32_t constants_bs__t_request_handle_i;
+typedef uint32_t constants_bs__t_server_request_handle_i;
 #define constants_bs__t_session_i t_entier4
 typedef void* constants_bs__t_session_token_i;
 #define constants_bs__t_user_i t_entier4
@@ -77,11 +78,12 @@ typedef void* constants_bs__t_session_token_i;
 #define constants_bs__t_byte_buffer_i_max (-1)
 #define constants_bs__t_channel_config_idx_i_max (2 * SOPC_MAX_SECURE_CONNECTIONS)
 #define constants_bs__t_channel_i_max SOPC_MAX_SECURE_CONNECTIONS
+#define constants_bs__t_client_request_handle_i_max (-1)
 #define constants_bs__t_endpoint_config_idx_i_max SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
 #define constants_bs__t_msg_header_i_max (-1)
 #define constants_bs__t_msg_i_max (-1)
 #define constants_bs__t_request_context_i_max (-1)
-#define constants_bs__t_request_handle_i_max (-1)
+#define constants_bs__t_server_request_handle_i_max (-1)
 #define constants_bs__t_session_i_max SOPC_MAX_SESSIONS
 #define constants_bs__t_session_token_i_max (-1)
 #define constants_bs__t_user_i_max (-1)
@@ -101,12 +103,12 @@ typedef void* constants_bs__t_session_token_i;
 #define constants_bs__c_byte_buffer_indet 0
 #define constants_bs__c_channel_config_idx_indet 0
 #define constants_bs__c_channel_indet 0
+#define constants_bs__c_client_request_handle_indet 0
 #define constants_bs__c_endpoint_config_idx_indet 0
 #define constants_bs__c_msg_header_indet 0
 #define constants_bs__c_msg_indet 0
 #define constants_bs__c_no_application_context 0
 #define constants_bs__c_request_context_indet 0
-#define constants_bs__c_request_handle_indet 0
 #define constants_bs__c_session_indet 0
 #define constants_bs__c_session_token_indet 0
 #define constants_bs__c_user_indet 0
