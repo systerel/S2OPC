@@ -65,6 +65,8 @@ typedef uint32_t constants_bs__t_client_request_handle_i;
 typedef uint32_t constants_bs__t_client_handle_i;
 #define constants_bs__t_counter_i t_entier4
 typedef uint32_t constants_bs__t_endpoint_config_idx_i;
+typedef uint32_t constants_bs__t_monitoredItemId_i;
+typedef void* constants_bs__t_monitoredItemPointer_i;
 typedef SOPC_SLinkedListIterator* constants_bs__t_monitoredItemQueueIterator_i;
 typedef SOPC_SLinkedList* constants_bs__t_monitoredItemQueue_i;
 #define constants_bs__t_monitoredItem_i t_entier4
@@ -107,9 +109,10 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__t_client_handle_i_max (-1)
 #define constants_bs__t_counter_i_max (-1)
 #define constants_bs__t_endpoint_config_idx_i_max SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
+#define constants_bs__t_monitoredItemId_i_max (-1)
+#define constants_bs__t_monitoredItemPointer_i_max (-1)
 #define constants_bs__t_monitoredItemQueueIterator_i_max (-1)
 #define constants_bs__t_monitoredItemQueue_i_max (-1)
-#define constants_bs__t_monitoredItem_i_max SOPC_MAX_MONITORED_ITEM
 #define constants_bs__t_msg_header_i_max (-1)
 #define constants_bs__t_msg_i_max (-1)
 #define constants_bs__t_notif_msg_i_max (-1)
@@ -146,9 +149,10 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__c_channel_indet 0
 #define constants_bs__c_client_request_handle_indet 0
 #define constants_bs__c_endpoint_config_idx_indet 0
+#define constants_bs__c_monitoredItemId_indet 0
+#define constants_bs__c_monitoredItemPointer_indet 0
 #define constants_bs__c_monitoredItemQueueIterator_indet 0
 #define constants_bs__c_monitoredItemQueue_indet 0
-#define constants_bs__c_monitoredItem_indet 0
 #define constants_bs__c_msg_header_indet 0
 #define constants_bs__c_msg_indet 0
 #define constants_bs__c_no_application_context 0

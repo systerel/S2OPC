@@ -55,13 +55,7 @@ void monitored_item_queue_bs__clear_and_deallocate_monitored_item_queue(
 
 void monitored_item_queue_bs__add_monitored_item_to_queue(
     const constants__t_monitoredItemQueue_i monitored_item_queue_bs__p_queue,
-    const constants__t_monitoredItem_i monitored_item_queue_bs__p_monitoredItem,
-    const constants__t_subscription_i monitored_item_queue_bs__p_subscription,
-    const constants__t_Node_i monitored_item_queue_bs__p_node,
-    const constants__t_AttributeId_i monitored_item_queue_bs__p_aid,
-    const constants__t_TimestampsToReturn_i monitored_item_queue_bs__p_timestampToReturn,
-    const constants__t_monitoringMode_i monitored_item_queue_bs__p_monitoringMode,
-    const constants__t_client_handle_i monitored_item_queue_bs__p_clientHandle,
+    const constants__t_monitoredItemPointer_i monitored_item_queue_bs__p_monitoredItem,
     t_bool* const monitored_item_queue_bs__bres)
 {
     assert(false);
@@ -71,27 +65,7 @@ void monitored_item_queue_bs__continue_iter_monitored_item(
     const constants__t_monitoredItemQueueIterator_i monitored_item_queue_bs__p_iterator,
     const constants__t_monitoredItemQueue_i monitored_item_queue_bs__p_queue,
     t_bool* const monitored_item_queue_bs__continue,
-    constants__t_monitoredItem_i* const monitored_item_queue_bs__p_monitoredItem,
-    constants__t_subscription_i* const monitored_item_queue_bs__p_subscription,
-    constants__t_Node_i* const monitored_item_queue_bs__p_node,
-    constants__t_AttributeId_i* const monitored_item_queue_bs__p_aid,
-    constants__t_TimestampsToReturn_i* const monitored_item_queue_bs__p_timestampToReturn,
-    constants__t_monitoringMode_i* const monitored_item_queue_bs__p_monitoringMode,
-    constants__t_client_handle_i* const monitored_item_queue_bs__p_clientHandle)
-{
-    assert(false);
-}
-
-void monitored_item_queue_bs__get_monitored_item(
-    const constants__t_monitoredItemQueue_i monitored_item_queue_bs__p_queue,
-    const constants__t_monitoredItem_i monitored_item_queue_bs__p_monitoredItem,
-    t_bool* const monitored_item_queue_bs__p_bres,
-    constants__t_subscription_i* const monitored_item_queue_bs__p_subscription,
-    constants__t_Node_i* const monitored_item_queue_bs__p_node,
-    constants__t_AttributeId_i* const monitored_item_queue_bs__p_aid,
-    constants__t_TimestampsToReturn_i* const monitored_item_queue_bs__p_timestampToReturn,
-    constants__t_monitoringMode_i* const monitored_item_queue_bs__p_monitoringMode,
-    constants__t_client_handle_i* const monitored_item_queue_bs__p_clientHandle)
+    constants__t_monitoredItemPointer_i* const monitored_item_queue_bs__p_monitoredItem)
 {
     assert(false);
 }
@@ -106,7 +80,7 @@ void monitored_item_queue_bs__init_iter_monitored_item(
 
 void monitored_item_queue_bs__remove_monitored_item(
     const constants__t_monitoredItemQueue_i monitored_item_queue_bs__p_queue,
-    const constants__t_monitoredItem_i monitored_item_queue_bs__p_monitoredItem,
+    const constants__t_monitoredItemPointer_i monitored_item_queue_bs__p_monitoredItem,
     t_bool* const monitored_item_queue_bs__bres)
 {
     assert(false);

@@ -59,7 +59,8 @@ SETS
     t_publishReqQueueIterator_i;
     t_monitoredItemQueue_i;
     t_monitoredItemQueueIterator_i;
-    t_monitoredItem_i;
+    t_monitoredItemPointer_i;
+    t_monitoredItemId_i;
     t_client_handle_i
 
 CONCRETE_CONSTANTS
@@ -105,7 +106,8 @@ CONCRETE_CONSTANTS
     c_publishReqQueueIterator_indet,
     c_monitoredItemQueue_indet,
     c_monitoredItemQueueIterator_indet,
-    c_monitoredItem_indet,
+    c_monitoredItemPointer_indet,
+    c_monitoredItemId_indet,
     c_WriteValuePointer_indet
 
 ABSTRACT_CONSTANTS
@@ -145,7 +147,8 @@ ABSTRACT_CONSTANTS
     t_publishReqQueueIterator,
     t_monitoredItemQueue,
     t_monitoredItemQueueIterator,
-    t_monitoredItem,
+    t_monitoredItemPointer,
+    t_monitoredItemId,
     t_WriteValuePointer
 
 PROPERTIES
@@ -250,9 +253,14 @@ PROPERTIES
     c_monitoredItemQueueIterator_indet : t_monitoredItemQueueIterator_i &
     c_monitoredItemQueueIterator_indet /: t_monitoredItemQueueIterator &
     
-    t_monitoredItem <: t_monitoredItem_i &
-    c_monitoredItem_indet : t_monitoredItem_i &
-    c_monitoredItem_indet /: t_monitoredItem &
+    t_monitoredItemPointer <: t_monitoredItemPointer_i &
+    c_monitoredItemPointer_indet : t_monitoredItemPointer_i &
+    c_monitoredItemPointer_indet /: t_monitoredItemPointer &
+    
+    t_monitoredItemId <: t_monitoredItemId_i &
+    c_monitoredItemId_indet : t_monitoredItemId_i &
+    c_monitoredItemId_indet /: t_monitoredItemId &
+    
     
     t_msg_header <: t_msg_header_i &
     c_msg_header_indet : t_msg_header_i &

@@ -34,6 +34,7 @@
 #include "sopc_user_app_itf.h"
 
 #include "io_dispatch_mgr.h"
+#include "monitored_item_pointer_bs.h"
 #include "service_mgr_bs.h"
 #include "toolkit_header_init.h"
 #include "util_b2c.h"
@@ -597,6 +598,7 @@ void SOPC_Services_Clear()
 {
     address_space_bs__UNINITIALISATION();
     service_mgr_bs__UNINITIALISATION();
+    monitored_item_pointer_bs__UNINITIALISATION();
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);

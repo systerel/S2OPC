@@ -172,7 +172,8 @@ SETS
         e_monitoringMode_reporting
     };
     
-    t_monitoredItem_i;
+    t_monitoredItemPointer_i;
+    t_monitoredItemId_i;
     
     t_client_handle_i; /* uint32_t */
 
@@ -326,7 +327,8 @@ CONCRETE_CONSTANTS
     c_monitoredItemQueue_indet,
     c_monitoredItemQueueIterator_indet,
     c_monitoredItemReqIndex_indet,
-    c_monitoredItem_indet,
+    c_monitoredItemPointer_indet,
+    c_monitoredItemId_indet,
     c_msg_header_indet,
     c_msg_indet,
     c_request_context_indet,
@@ -393,7 +395,8 @@ ABSTRACT_CONSTANTS
     t_monitoredItemQueueIterator,
     t_monitoringMode,
     t_monitoredItemReqIndex,
-    t_monitoredItem,
+    t_monitoredItemPointer,
+    t_monitoredItemId,
     t_buffer_in_state,
     t_msg_header,
     t_msg,
@@ -614,9 +617,13 @@ PROPERTIES
     
     t_monitoringMode = t_monitoringMode_i - {c_monitoringMode_indet} &
     
-    t_monitoredItem <: t_monitoredItem_i &
-    c_monitoredItem_indet : t_monitoredItem_i &
-    c_monitoredItem_indet /: t_monitoredItem &
+    t_monitoredItemPointer <: t_monitoredItemPointer_i &
+    c_monitoredItemPointer_indet : t_monitoredItemPointer_i &
+    c_monitoredItemPointer_indet /: t_monitoredItemPointer &
+    
+    t_monitoredItemId <: t_monitoredItemId_i &
+    c_monitoredItemId_indet : t_monitoredItemId_i &
+    c_monitoredItemId_indet /: t_monitoredItemId &
     
     t_msg_header <: t_msg_header_i &
     c_msg_header_indet : t_msg_header_i &

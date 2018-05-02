@@ -26,7 +26,7 @@ SEES
 DEFINITIONS
     d_variables ==
     s_subscription,
-    s_monitoredItem,
+    s_monitoredItemPointer,
     a_subscription_session,
     a_publishInterval,
     a_lifetimeExpCount,
@@ -54,7 +54,7 @@ DEFINITIONS
     
     d_typing ==
     s_subscription <: t_subscription &
-    s_monitoredItem <: t_monitoredItem &
+
     /* Subscription configuration record */
     a_subscription_session : s_subscription >+> t_session &                  // a subscription may be associated to a session (=> 1 subscription / session)
     a_publishInterval : s_subscription --> t_opcua_duration_i & // a subscription shall have a publishing interval value
@@ -78,6 +78,8 @@ DEFINITIONS
     /* a_SubscriptionAssignedToClient <: s_subscription */             /* Not really a state machine variable: local variable or function */
     
     /* Subscription Implementation variables */
+    s_monitoredItemPointer <: t_monitoredItemPointer &
+    
     s_notificationQueue <: t_notificationQueue &
     a_pendingNotificationQueue : s_subscription --> s_notificationQueue &
     /* a_retransmissionQueue : s_subscription --> s_notificationMsgQueue */ /* not implemented */
@@ -94,8 +96,8 @@ DEFINITIONS
     /* Queues variables */
     /* PublishRequest queue content: */
     a_publish_responses : t_msg +-> s_publishReqQueue &
-    a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItem &
-    a_defined_monitored_items : s_monitoredItemQueue <-> t_monitoredItem
+    a_monitored_item_notifications : s_notificationQueue <-> s_monitoredItemPointer &
+    a_defined_monitored_items : s_monitoredItemQueue <-> s_monitoredItemPointer
     ;
     
     /* Dequeuing a publish request context + response */
@@ -125,7 +127,7 @@ DEFINITIONS
     IN
         a_monitored_item_notifications,
         a_MoreNotifications
-        :(a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItem &
+        :(a_monitored_item_notifications : s_notificationQueue <-> s_monitoredItemPointer &
             {l_notifQueue} <<| a_monitored_item_notifications = {l_notifQueue} <<| a_monitored_item_notifications$0 &
             ({l_notifQueue} <| a_monitored_item_notifications /= {} =>
                 a_MoreNotifications = a_MoreNotifications \/ {p_subscription}
@@ -144,7 +146,7 @@ DEFINITIONS
         a_monitored_item_notifications,
         a_MoreNotifications,
         p_moreNotifs
-        :(a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItem &
+        :(a_monitored_item_notifications : s_notificationQueue <-> s_monitoredItemPointer &
             {l_notifQueue} <<| a_monitored_item_notifications = {l_notifQueue} <<| a_monitored_item_notifications$0 &
             p_moreNotifs : BOOL &
             ({l_notifQueue} <| a_monitored_item_notifications /= {} =>
@@ -221,8 +223,7 @@ INVARIANT
 
 INITIALISATION
     s_subscription := {}        ||
-    s_monitoredItem := {}       ||
-    a_subscription_session := {}             ||
+    a_subscription_session := {}||
     a_publishInterval := {}     ||
     a_lifetimeExpCount := {}    ||
     a_keepAliveExpCount := {}   ||
@@ -242,7 +243,9 @@ INITIALISATION
     a_monitoredItemQueue := {} ||
     a_nodeToMonitoredItemQueue :(a_nodeToMonitoredItemQueue : t_Node --> s_monitoredItemQueue) || /* DEFINED ON INIT */
     
+    s_monitoredItemPointer := {} ||
     /* Queues content */
+    
     s_publishReqQueue := {} ||
     a_publish_responses := {} ||
     s_notificationQueue := {} ||
@@ -463,7 +466,7 @@ OPERATIONS
         a_publishRequestQueue := {p_subscription} <<| a_publishRequestQueue ||
         
         /* Remove monitoredItems */
-        s_monitoredItem := s_monitoredItem - a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}] ||
+        s_monitoredItemPointer := s_monitoredItemPointer - a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}] ||
         /* TODO: For each queue in a_nodeToMonitoredItemQueue, remove monitored items: a_monitoredItemQueue (p_subscription) ||*/
         s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
         a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue
@@ -580,7 +583,8 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service, monitoredItem <-- create_monitored_item (p_subscription,
+    StatusCode_service, monitoredItemPointer <-- create_monitored_item (p_subscription,
+                                                                        p_nid,
                                                                  p_node,
                                                                  p_aid,
                                                                  p_timestampToReturn,
@@ -589,6 +593,8 @@ OPERATIONS
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId &
         p_node : t_Node_i &
         p_node : t_Node &
         p_aid : t_AttributeId_i &
@@ -599,19 +605,18 @@ OPERATIONS
         p_monitoringMode : t_monitoringMode &
         p_clientHandle : t_client_handle_i
     THEN
-        IF t_monitoredItem = s_monitoredItem
+        IF t_monitoredItemPointer = s_monitoredItemPointer
         THEN
             StatusCode_service := e_sc_bad_too_many_monitored_items ||
-            monitoredItem := c_monitoredItem_indet
+            monitoredItemPointer := c_monitoredItemPointer_indet
         ELSE
             ANY l_monitoredItem WHERE
-                l_monitoredItem : t_monitoredItem - s_monitoredItem
+                l_monitoredItem : t_monitoredItemPointer - s_monitoredItemPointer
             THEN
                 CHOICE
                     StatusCode_service := e_sc_ok ||
-                    monitoredItem :(monitoredItem : t_monitoredItem_i & monitoredItem : t_monitoredItem) ||
-                    s_monitoredItem := s_monitoredItem \/ {l_monitoredItem} ||
-                    
+                    s_monitoredItemPointer := s_monitoredItemPointer \/ {l_monitoredItem} ||
+                    monitoredItemPointer := l_monitoredItem ||
                     /* a notification is enqueued with current value of monitored item */
                     a_monitored_item_notifications := 
                     a_monitored_item_notifications \/ {a_pendingNotificationQueue(p_subscription) |-> l_monitoredItem} ||
@@ -622,7 +627,7 @@ OPERATIONS
                 OR
                     /* add to queue failure (out of memory) */
                     StatusCode_service := e_sc_bad_too_many_monitored_items ||
-                    monitoredItem := c_monitoredItem_indet
+                    monitoredItemPointer := c_monitoredItemPointer_indet
                 END
             END
         END
@@ -835,17 +840,18 @@ OPERATIONS
     END
     ;
     
-    server_subscription_add_notification (p_subscription, p_monitoredItem, p_writeValuePointer) =
+    server_subscription_add_notification (p_subscription, p_monitoredItemPointer, p_writeValuePointer) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
-        p_monitoredItem : t_monitoredItem_i &
-        p_monitoredItem : t_monitoredItem &
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : s_monitoredItemPointer &
         p_writeValuePointer : t_WriteValuePointer_i &
         p_writeValuePointer : t_WriteValuePointer
     THEN
         /* a notification is enqueued with current value of monitored item */
-        a_monitored_item_notifications := a_monitored_item_notifications \/ {a_pendingNotificationQueue(p_subscription) |-> p_monitoredItem}
+        a_monitored_item_notifications := 
+          a_monitored_item_notifications \/ {a_pendingNotificationQueue(p_subscription) |-> p_monitoredItemPointer}
     END
         
 END

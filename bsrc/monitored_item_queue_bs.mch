@@ -27,7 +27,7 @@ ABSTRACT_VARIABLES
     
 INVARIANT
     s_monitoredItemQueue <: t_monitoredItemQueue &
-    a_defined_monitored_items : s_monitoredItemQueue <-> t_monitoredItem
+    a_defined_monitored_items : s_monitoredItemQueue <-> t_monitoredItemPointer
     
 INITIALISATION
     s_monitoredItemQueue :(s_monitoredItemQueue = {}) ||
@@ -66,29 +66,12 @@ OPERATIONS
     ;
     
     bres <-- add_monitored_item_to_queue (p_queue,
-                                          p_monitoredItem,
-                                          p_subscription,
-                                          p_node,
-                                          p_aid,
-                                          p_timestampToReturn,
-                                          p_monitoringMode,
-                                          p_clientHandle) =
+                                          p_monitoredItem) =
     PRE
         p_queue : t_monitoredItemQueue_i &
         p_queue : t_monitoredItemQueue &
-        p_monitoredItem : t_monitoredItem_i &
-        p_monitoredItem : t_monitoredItem &
-        p_subscription : t_subscription_i &
-        p_subscription : t_subscription &
-        p_node : t_Node_i &
-        p_node : t_Node &
-        p_aid : t_AttributeId_i &
-        p_aid : t_AttributeId &
-        p_timestampToReturn : t_TimestampsToReturn_i &
-        p_timestampToReturn : t_TimestampsToReturn &
-        p_monitoringMode : t_monitoringMode_i &
-        p_monitoringMode : t_monitoringMode &
-        p_clientHandle : t_client_handle_i
+        p_monitoredItem : t_monitoredItemPointer_i &
+        p_monitoredItem : t_monitoredItemPointer
     THEN
         CHOICE
             bres := FALSE
@@ -99,53 +82,12 @@ OPERATIONS
     END
     ;
     
-    p_bres,
-    p_subscription,
-    p_node,
-    p_aid,
-    p_timestampToReturn,
-    p_monitoringMode,
-    p_clientHandle <-- get_monitored_item (p_queue, p_monitoredItem) =
-    PRE
-        p_queue : t_monitoredItemQueue_i &
-        p_queue : t_monitoredItemQueue &
-        p_monitoredItem : t_monitoredItem_i &
-        p_monitoredItem : t_monitoredItem
-    THEN
-        p_bres,
-        p_subscription,
-        p_node,
-        p_aid,
-        p_timestampToReturn,
-        p_monitoringMode,
-        p_clientHandle
-        :(p_bres : BOOL &
-            p_monitoredItem : t_monitoredItem_i &
-            p_subscription : t_subscription_i &
-            p_node : t_Node_i &
-            p_aid : t_AttributeId_i &
-            p_timestampToReturn : t_TimestampsToReturn_i &
-            p_monitoringMode : t_monitoringMode_i &
-            p_clientHandle : t_client_handle_i &
-            (p_monitoredItem : ran({p_queue} <| a_defined_monitored_items) =>
-              p_bres = TRUE &
-              p_subscription : t_subscription &
-              p_node : t_Node &        
-              p_aid : t_AttributeId &
-              p_timestampToReturn : t_TimestampsToReturn &
-              p_monitoringMode : t_monitoringMode) &
-            (p_monitoredItem /: ran({p_queue} <| a_defined_monitored_items) => 
-              p_bres = FALSE)
-        )
-    END
-    ;
-    
     bres <-- remove_monitored_item (p_queue, p_monitoredItem) =
     PRE
         p_queue : t_monitoredItemQueue_i &
         p_queue : t_monitoredItemQueue &
-        p_monitoredItem : t_monitoredItem_i &
-        p_monitoredItem : t_monitoredItem
+        p_monitoredItem : t_monitoredItemPointer_i &
+        p_monitoredItem : t_monitoredItemPointer
     THEN
         CHOICE
             bres := FALSE
@@ -172,13 +114,7 @@ OPERATIONS
     ;
 
     continue, 
-    p_monitoredItem,
-    p_subscription,
-    p_node,
-    p_aid,
-    p_timestampToReturn,
-    p_monitoringMode,
-    p_clientHandle <-- continue_iter_monitored_item (p_iterator, p_queue) =
+    p_monitoredItem <-- continue_iter_monitored_item (p_iterator, p_queue) =
     PRE
         p_iterator : t_monitoredItemQueueIterator_i &
         p_iterator : t_monitoredItemQueueIterator &
@@ -186,30 +122,13 @@ OPERATIONS
         p_queue : t_monitoredItemQueue
     THEN
         continue,
-        p_monitoredItem,
-        p_subscription,
-        p_node,
-        p_aid,
-        p_timestampToReturn,
-        p_monitoringMode,
-        p_clientHandle
+        p_monitoredItem
         :(continue : BOOL &
-            p_monitoredItem : t_monitoredItem_i &
-            p_subscription : t_subscription_i &
-            p_node : t_Node_i &
-            p_aid : t_AttributeId_i &
-            p_timestampToReturn : t_TimestampsToReturn_i &
-            p_monitoringMode : t_monitoringMode_i &
-            p_clientHandle : t_client_handle_i &
+            p_monitoredItem : t_monitoredItemPointer_i &
             (continue = TRUE =>  
-              p_monitoredItem : t_monitoredItem &
-              p_monitoredItem : ran({p_queue} <| a_defined_monitored_items) &
-              p_subscription : t_subscription &
-              p_node : t_Node &        
-              p_aid : t_AttributeId &
-              p_timestampToReturn : t_TimestampsToReturn &
-              p_monitoringMode : t_monitoringMode
-          )
+              p_monitoredItem : t_monitoredItemPointer &
+              p_monitoredItem : ran({p_queue} <| a_defined_monitored_items)
+            )
         )
     END
     

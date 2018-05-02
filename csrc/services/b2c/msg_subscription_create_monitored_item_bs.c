@@ -164,7 +164,7 @@ void msg_subscription_create_monitored_item_bs__setall_msg_monitored_item_resp_p
     const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_resp_msg,
     const constants__t_monitoredItemReqIndex_i msg_subscription_create_monitored_item_bs__p_index,
     const constants__t_StatusCode_i msg_subscription_create_monitored_item_bs__p_sc,
-    const constants__t_monitoredItem_i msg_subscription_create_monitored_item_bs__p_monitored_item,
+    const constants__t_monitoredItemId_i msg_subscription_create_monitored_item_bs__p_monitored_item_id,
     const constants__t_opcua_duration_i msg_subscription_create_monitored_item_bs__p_revSamplingItv,
     const t_entier4 msg_subscription_create_monitored_item_bs__p_revQueueSize)
 {
@@ -173,7 +173,7 @@ void msg_subscription_create_monitored_item_bs__setall_msg_monitored_item_resp_p
     OpcUa_MonitoredItemCreateResult* monitResp =
         &createResp->Results[msg_subscription_create_monitored_item_bs__p_index];
     util_status_code__B_to_C(msg_subscription_create_monitored_item_bs__p_sc, &monitResp->StatusCode);
-    monitResp->MonitoredItemId = (uint32_t) msg_subscription_create_monitored_item_bs__p_monitored_item;
+    monitResp->MonitoredItemId = msg_subscription_create_monitored_item_bs__p_monitored_item_id;
     monitResp->RevisedSamplingInterval = msg_subscription_create_monitored_item_bs__p_revSamplingItv;
     monitResp->RevisedQueueSize = (uint32_t) msg_subscription_create_monitored_item_bs__p_revQueueSize;
 }

@@ -214,7 +214,8 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service, monitoredItem <-- create_monitored_item (p_subscription,
+    StatusCode_service, monitoredItemPointer <-- create_monitored_item (p_subscription,
+                                                                        p_nid,
                                                                  p_node,
                                                                  p_aid,
                                                                  p_timestampToReturn,
@@ -222,7 +223,7 @@ OPERATIONS
                                                                  p_clientHandle) =
     BEGIN
         StatusCode_service := c_StatusCode_indet;
-        monitoredItem := c_monitoredItem_indet
+        monitoredItemPointer := c_monitoredItemPointer_indet
     END
     ;
     
@@ -273,7 +274,7 @@ OPERATIONS
     END
     ;
     
-    server_subscription_add_notification (p_subscription, p_monitoredItem, p_writeValuePointer) =
+    server_subscription_add_notification (p_subscription, p_monitoredItemPointer, p_writeValuePointer) =
     BEGIN
         skip
     END

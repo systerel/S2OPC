@@ -55,7 +55,7 @@ void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_n
 
 void monitored_item_notification_queue_bs__add_monitored_item_notification_to_queue(
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
-    const constants__t_monitoredItem_i monitored_item_notification_queue_bs__p_monitoredItem,
+    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
     const constants__t_WriteValuePointer_i monitored_item_notification_queue_bs__p_writeValuePointer,
     t_bool* const monitored_item_notification_queue_bs__bres)
 {
@@ -66,7 +66,7 @@ void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notifi
     const constants__t_notificationQueueIterator_i monitored_item_notification_queue_bs__p_iterator,
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     t_bool* const monitored_item_notification_queue_bs__p_continue,
-    constants__t_monitoredItem_i* const monitored_item_notification_queue_bs__p_monitoredItem,
+    constants__t_monitoredItemPointer_i* const monitored_item_notification_queue_bs__p_monitoredItem,
     constants__t_WriteValuePointer_i* const monitored_item_notification_queue_bs__p_writeValuePointer)
 {
     assert(false);

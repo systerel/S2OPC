@@ -27,7 +27,7 @@ ABSTRACT_VARIABLES
     
 INVARIANT
     s_notificationQueue <: t_notificationQueue &
-    a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItem 
+    a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItemPointer 
     /* In C implementation, several times same monitored item can be present several times (multiple notifications) 
        but it will not change the proof constraints when dequeueing. Therefor it is a simplified representation. */
     
@@ -72,8 +72,8 @@ OPERATIONS
     PRE
         p_queue : t_notificationQueue_i &
         p_queue : t_notificationQueue &
-        p_monitoredItem : t_monitoredItem_i &
-        p_monitoredItem : t_monitoredItem &
+        p_monitoredItem : t_monitoredItemPointer_i &
+        p_monitoredItem : t_monitoredItemPointer &
         p_writeValuePointer : t_WriteValuePointer_i &
         p_writeValuePointer : t_WriteValuePointer
     THEN
@@ -114,8 +114,8 @@ OPERATIONS
         IF p_queue : dom(a_monitored_item_notifications)
         THEN
             ANY l_monitoredItem WHERE
-                l_monitoredItem : t_monitoredItem_i &
-                l_monitoredItem : t_monitoredItem &
+                l_monitoredItem : t_monitoredItemPointer_i &
+                l_monitoredItem : t_monitoredItemPointer &
                 l_monitoredItem : a_monitored_item_notifications[{p_queue}]
             THEN
                 p_continue := TRUE ||
@@ -125,7 +125,7 @@ OPERATIONS
             END
         ELSE
             p_continue := FALSE ||
-            p_monitoredItem := c_monitoredItem_indet ||
+            p_monitoredItem := c_monitoredItemPointer_indet ||
             p_writeValuePointer := c_WriteValuePointer_indet
         END
     END

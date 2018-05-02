@@ -26,7 +26,6 @@ SEES
 DEFINITIONS
     d_variables ==
     s_subscription,
-    s_monitoredItem,
     a_subscription_session,
     a_publishInterval,
     a_lifetimeExpCount,
@@ -39,13 +38,13 @@ DEFINITIONS
     a_MessageSent,
     a_PublishingEnabled,
     a_SeqNum,
+
     a_pendingNotificationQueue,
     a_publishRequestQueue,
     a_monitoredItemQueue;
     
     d_typing ==
     s_subscription <: t_subscription &
-    s_monitoredItem <: t_monitoredItem &
 
     /* Subscription configuration record */
     a_subscription_session : s_subscription >+> t_session &                  // a subscription may be associated to a session (=> 1 subscription / session)
@@ -69,7 +68,7 @@ DEFINITIONS
     a_SeqNum : s_subscription --> t_sub_seq_num &
     /* a_SubscriptionAssignedToClient <: s_subscription */             /* Not really a state machine variable: local variable or function */
     
-    /* Subscription Implementation variables */
+    /* Subscription Implementation variables */    
     a_pendingNotificationQueue : s_subscription --> t_notificationQueue &
     /* a_retransmissionQueue : s_subscription --> t_notificationMsgQueue */ /* not implemented */
     a_monitoredItemQueue : s_subscription --> t_monitoredItemQueue &
@@ -87,7 +86,6 @@ INVARIANT
 
 INITIALISATION
     s_subscription := {}             ||
-    s_monitoredItem := {}            ||
     a_subscription_session := {}     ||
     a_publishInterval := {}          ||
     a_lifetimeExpCount := {}         ||
@@ -102,7 +100,7 @@ INITIALISATION
     a_MessageSent := {}              ||
     a_PublishingEnabled := {}        ||
     a_SeqNum              := {}      ||
-    
+
     a_pendingNotificationQueue := {} ||
     a_publishRequestQueue := {}      ||
     a_monitoredItemQueue := {}
@@ -224,33 +222,6 @@ OPERATIONS
     END
     ;
     
-    add_monitoredItem (p_monitoredItem) =
-    PRE
-        p_monitoredItem : t_monitoredItem_i &
-        p_monitoredItem : t_monitoredItem &
-        p_monitoredItem /: s_monitoredItem
-    THEN
-        s_monitoredItem := s_monitoredItem \/ {p_monitoredItem}
-    END
-    ;
-    
-    delete_monitoredItem (p_monitoredItem) =
-    PRE
-        p_monitoredItem : t_monitoredItem_i &
-        p_monitoredItem : s_monitoredItem
-    THEN
-        s_monitoredItem := s_monitoredItem - {p_monitoredItem}
-    END
-    ;
-    
-    bret <-- is_valid_monitored_item (p_monitoredItem) =
-    PRE
-        p_monitoredItem : t_monitoredItem_i
-    THEN
-        bret := bool(p_monitoredItem : s_monitoredItem)
-    END
-    ;
-
     set_subscription_state (p_subscription, p_state) =
     PRE
         p_subscription : t_subscription_i &

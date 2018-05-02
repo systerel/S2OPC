@@ -102,7 +102,7 @@ OPERATIONS
     END
     ;
     
-    setall_msg_monitored_item_resp_params (p_resp_msg, p_index, p_sc, p_monitored_item, p_revSamplingItv, p_revQueueSize) =
+    setall_msg_monitored_item_resp_params (p_resp_msg, p_index, p_sc, p_monitored_item_id, p_revSamplingItv, p_revQueueSize) =
     PRE
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
@@ -112,8 +112,8 @@ OPERATIONS
         p_index : t_monitoredItemReqIndex &
         p_sc : t_StatusCode_i &
         p_sc : t_StatusCode &
-        p_monitored_item : t_monitoredItem_i &
-        p_monitored_item : t_monitoredItem &
+        p_monitored_item_id : t_monitoredItemId_i &
+        p_monitored_item_id : t_monitoredItemId &
         p_revSamplingItv : t_opcua_duration_i &
         p_revQueueSize : t_counter
     THEN

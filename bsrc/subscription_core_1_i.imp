@@ -31,7 +31,6 @@ SEES
 CONCRETE_VARIABLES
     s_subscription_i,
     a_subscription_state_i,
-    s_monitoredItem_i,
     a_subscription_session_i,
     a_session_subscription_i,
     a_publishInterval_i,
@@ -54,8 +53,6 @@ INVARIANT
     s_subscription            = s_subscription_i~[{TRUE}]                                      &
     dom(a_subscription_state) = s_subscription                                                 &
     a_subscription_state      = s_subscription <| a_subscription_state_i |> t_subscriptionState_i &
-    s_monitoredItem_i         : t_monitoredItem_i --> BOOL                                     &
-    s_monitoredItem           = s_monitoredItem_i~[{TRUE}]                                     &
     a_subscription_session_i  : t_subscription_i --> t_session_i                               &
     a_session_subscription_i  : t_session_i --> t_subscription_i                               &
     dom(a_session_subscription_i |> s_subscription) = ran(s_subscription <| a_subscription_session_i |> t_session) &
@@ -114,7 +111,6 @@ INVARIANT
 INITIALISATION
     s_subscription_i             := t_subscription_i * {FALSE};
     a_subscription_state_i       := t_subscription_i * {c_subscriptionState_indet};
-    s_monitoredItem_i            := t_monitoredItem_i * {FALSE};
     a_subscription_session_i     := t_subscription_i * {c_session_indet};
     a_session_subscription_i     := t_session_i * {c_subscription_indet};
     a_publishInterval_i          := t_subscription_i * {c_opcua_duration_indet};
@@ -204,24 +200,6 @@ OPERATIONS
         a_pendingNotificationQueue_i(p_subscription) := c_notificationQueue_indet;
         a_publishRequestQueue_i(p_subscription) := c_publishReqQueue_indet;
         a_monitoredItemQueue_i(p_subscription) := c_monitoredItemQueue_indet
-    END
-    ;
-    
-    add_monitoredItem (p_monitoredItem) =
-    BEGIN
-        s_monitoredItem_i(p_monitoredItem) := TRUE
-    END
-    ;
-    
-    delete_monitoredItem (p_monitoredItem) =
-    BEGIN
-        s_monitoredItem_i(p_monitoredItem) := FALSE
-    END
-    ;
-    
-    bret <-- is_valid_monitored_item (p_monitoredItem) =
-    BEGIN
-        bret := s_monitoredItem_i(p_monitoredItem)
     END
     ;
     
