@@ -71,7 +71,8 @@ SOPC_Dict* SOPC_Dict_Create(void* empty_key,
  * \param d The dictionary.
  *
  * The keys and/or values will also be freed if the corresponding \c key_free
- * and/or \c value_free parameters were passed to \ref SOPC_Dict_Create .
+ * and/or \c value_free parameters were passed to \ref SOPC_Dict_Create , or set
+ * via \ref SOPC_Dict_SetKeyFreeFunc and \ref SOPC_Dict_SetValueFreeFunc .
  */
 void SOPC_Dict_Delete(SOPC_Dict* d);
 
@@ -125,5 +126,35 @@ void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found);
  * original.
  */
 void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found);
+
+/**
+ * \brief Retrieves the free function for this dictionary's keys.
+ * \param d  The dictionary.
+ * \return The function used to free the keys, or NULL if no such function was
+ *         set.
+ */
+SOPC_Dict_Free_Fct SOPC_Dict_GetKeyFreeFunc(const SOPC_Dict* d);
+
+/**
+ * \brief Sets the free function for this dictionary's keys.
+ * \param d     The dictionary.
+ * \param func  The function to use when freeing keys.
+ */
+void SOPC_Dict_SetKeyFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func);
+
+/**
+ * \brief Retrieves the free function for this dictionary's values.
+ * \param d  The dictionary.
+ * \return The function used to free the values, or NULL if no such function was
+ *         set.
+ */
+SOPC_Dict_Free_Fct SOPC_Dict_GetValueFreeFunc(const SOPC_Dict* d);
+
+/**
+ * \brief Sets the free function for this dictionary's values.
+ * \param d     The dictionary.
+ * \param func  The function to use when freeing values.
+ */
+void SOPC_Dict_SetValueFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func);
 
 #endif /* SOPC_DICT_H_ */

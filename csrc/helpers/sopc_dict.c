@@ -318,3 +318,23 @@ void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found)
 
     return dict_key;
 }
+
+SOPC_Dict_Free_Fct SOPC_Dict_GetKeyFreeFunc(const SOPC_Dict* d)
+{
+    return d->key_free;
+}
+
+void SOPC_Dict_SetKeyFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func)
+{
+    d->key_free = func;
+}
+
+SOPC_Dict_Free_Fct SOPC_Dict_GetValueFreeFunc(const SOPC_Dict* d)
+{
+    return d->value_free;
+}
+
+void SOPC_Dict_SetValueFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func)
+{
+    d->value_free = func;
+}
