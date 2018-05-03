@@ -16,10 +16,12 @@
  */
 
 #include <assert.h>
+#include <errno.h>
 #include <inttypes.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
@@ -33,7 +35,11 @@
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 
-#include "sopc_addspace.h"
+#include "embedded/loader.h"
+
+#ifdef WITH_EXPAT
+#include "uanodeset_expat/loader.h"
+#endif
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 #define APPLICATION_URI "urn:INGOPCS:localhost"
@@ -43,6 +49,13 @@ static int endpointClosed = false;
 static bool secuActive = !false;
 
 volatile sig_atomic_t stopServer = 0;
+
+typedef enum {
+    AS_LOADER_EMBEDDED,
+#ifdef WITH_EXPAT
+    AS_LOADER_EXPAT,
+#endif
+} AddressSpaceLoader;
 
 void Test_StopSignal(int sig)
 {
@@ -105,6 +118,75 @@ void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SO
     }
 }
 
+#ifdef WITH_EXPAT
+static SOPC_AddressSpace* load_nodeset_from_file(const char* filename)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_AddressSpace_Description* desc = NULL;
+    SOPC_AddressSpace* address_space = NULL;
+    FILE* fd = fopen(filename, "r");
+
+    if (fd == NULL)
+    {
+        printf("<Test_Server_Toolkit: Error while opening %s: %s\n", filename, strerror(errno));
+        status = SOPC_STATUS_NOK;
+    }
+
+    if (status == SOPC_STATUS_OK)
+    {
+        desc = SOPC_AddressSpace_Description_Create();
+
+        if (desc == NULL)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (status == SOPC_STATUS_OK)
+    {
+        status = SOPC_UANodeSet_Parse(fd, desc);
+    }
+
+    if (status == SOPC_STATUS_OK)
+    {
+        address_space = calloc(1, sizeof(SOPC_AddressSpace));
+
+        if (address_space == NULL)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    else
+    {
+        printf("<Test_Server_Toolkit: Error while parsing XML address space\n");
+    }
+
+    if (status == SOPC_STATUS_OK)
+    {
+        status = SOPC_AddressSpace_Generate(desc, address_space);
+    }
+
+    SOPC_AddressSpace_Description_Delete(desc);
+
+    if (fd != NULL)
+    {
+        fclose(fd);
+    }
+
+    if (status == SOPC_STATUS_OK)
+    {
+        printf("<Test_Server_Toolkit: Loaded address space from %s\n", filename);
+        return address_space;
+    }
+    else
+    {
+        SOPC_AddressSpace_Clear(address_space);
+        free(address_space);
+        return NULL;
+    }
+}
+#endif
+
 int main(int argc, char* argv[])
 {
     (void) argc;
@@ -125,6 +207,10 @@ int main(int argc, char* argv[])
     static SOPC_AsymmetricKey* asymmetricKey = NULL;
     static SOPC_Certificate* authCertificate = NULL;
     static SOPC_PKIProvider* pkiProvider = NULL;
+
+    AddressSpaceLoader address_space_loader = AS_LOADER_EMBEDDED;
+    SOPC_AddressSpace* address_space = NULL;
+    bool address_space_needs_free = false;
 
     SOPC_SecurityPolicy secuConfig[3];
     SOPC_String_Initialize(&secuConfig[0].securityPolicy);
@@ -231,7 +317,43 @@ int main(int argc, char* argv[])
     {
         assert(SOPC_STATUS_OK == SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG));
 
-        status = SOPC_ToolkitServer_SetAddressSpaceConfig(&addressSpace);
+#ifdef WITH_EXPAT
+        const char* xml_file_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
+
+        if (xml_file_path != NULL)
+        {
+            address_space_loader = AS_LOADER_EXPAT;
+        }
+#endif
+
+        switch (address_space_loader)
+        {
+        case AS_LOADER_EMBEDDED:
+            address_space = &addressSpace;
+            status = SOPC_STATUS_OK;
+            break;
+#ifdef WITH_EXPAT
+        case AS_LOADER_EXPAT:
+            address_space = load_nodeset_from_file(xml_file_path);
+
+            if (address_space != NULL)
+            {
+                status = SOPC_STATUS_OK;
+                address_space_needs_free = true;
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
+            }
+            break;
+#endif
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitServer_SetAddressSpaceConfig(address_space);
+
         if (SOPC_STATUS_OK != status)
         {
             printf("<Test_Server_Toolkit: Failed to configure the @ space\n");
@@ -317,6 +439,12 @@ int main(int argc, char* argv[])
     }
 
     // Deallocate locally allocated data
+
+    if (address_space_needs_free)
+    {
+        SOPC_AddressSpace_Clear(address_space);
+        free(address_space);
+    }
 
     SOPC_String_Clear(&secuConfig[0].securityPolicy);
     SOPC_String_Clear(&secuConfig[1].securityPolicy);

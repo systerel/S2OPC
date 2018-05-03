@@ -365,12 +365,15 @@ target_include_directories(toolkit_test_suite_client PRIVATE ${INGOPCS_PUBLIC_IN
                                                              ${CHECK_INCLUDE_DIRS})
 
 # Server test
-add_executable(toolkit_test_server "tests/services/toolkit_test_server.c"
-                                   "${ADDSPACEGEN_DIR}/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_server PRIVATE ${INGOPCS_STATIC_LIB})
-target_include_directories(toolkit_test_server PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
-                                                       ${INGOPCS_PUBLIC_INCLUDES}
+add_executable(toolkit_test_server "tests/services/toolkit_test_server.c")
+target_link_libraries(toolkit_test_server PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
+target_include_directories(toolkit_test_server PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
+
+if (EXPAT_FOUND)
+	target_link_libraries(toolkit_test_server PRIVATE ingopcs-loader-uanodeset-expat)
+	set_target_properties(toolkit_test_server PROPERTIES COMPILE_DEFINITIONS "WITH_EXPAT")
+endif()
 
 add_test(NAME "validation::client_server_test" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap" "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "./toolkit_test_client${FILE_EXT}")
 set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./toolkit_test_server${FILE_EXT};CK_TAP_LOG_FILE_NAME=client_server_test.tap")
