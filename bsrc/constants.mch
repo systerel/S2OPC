@@ -107,8 +107,6 @@ SETS
     t_BrowseValue_i;
     t_BrowseResult_i;
 
-    t_monitoredItemReqIndex_i;
-
     
     t_byte_buffer_i; /* (SOPC_Buffer*) */
     t_LocalizedText_i; /* (SOPC_LocalizedText*) */
@@ -158,11 +156,9 @@ SETS
     t_timeref_i;           /* SOPC_TimeReference */
     t_opcua_duration_i;    /* double */
     t_notificationQueue_i; /* (SOPC_SLinkedList*) */
-    t_notificationQueueIterator_i; /* (SOPC_SLinkedListIterator*) */
     t_publishReqQueue_i;   /* (SOPC_SLinkedList*) */
-    t_publishReqQueueIterator_i; /* (SOPC_SLinkedListIterator*) */
     t_monitoredItemQueue_i;  /* (SOPC_SLinkedList*) */
-    t_monitoredItemQueueIterator_i; /* (SOPC_SLinkedListIterator*) */
+    t_monitoredItemQueueIterator_i; /* (SOPC_SLinkedListIterator) */
     
     /* Subscription (monitored item) */   
     t_monitoringMode_i = {
@@ -320,13 +316,11 @@ CONCRETE_CONSTANTS
     c_sub_seq_num_init,
     c_timeref_indet,
     c_opcua_duration_indet,
+    c_opcua_duration_zero,
     c_notificationQueue_indet,
-    c_notificationQueueIterator_indet,
     c_publishReqQueue_indet,
-    c_publishReqQueueIterator_indet,
     c_monitoredItemQueue_indet,
     c_monitoredItemQueueIterator_indet,
-    c_monitoredItemReqIndex_indet,
     c_monitoredItemPointer_indet,
     c_monitoredItemId_indet,
     c_msg_header_indet,
@@ -373,7 +367,6 @@ ABSTRACT_CONSTANTS
     cast_t_WriteValue,
     cast_t_BrowseValue,
     cast_t_BrowseResult,
-    cast_t_monitoredItemReqIndex,
 
     t_endpoint_config_idx,
     t_session,
@@ -388,9 +381,7 @@ ABSTRACT_CONSTANTS
     t_sub_seq_num,
     t_timeref,
     t_notificationQueue,
-    t_notificationQueueIterator,
     t_publishReqQueue,
-    t_publishReqQueueIterator,
     t_monitoredItemQueue,
     t_monitoredItemQueueIterator,
     t_monitoringMode,
@@ -507,11 +498,7 @@ PROPERTIES
     cast_t_BrowseResult : NAT +-> t_BrowseResult_i &
     cast_t_BrowseResult : perm(t_BrowseResult) &
 
-    t_monitoredItemReqIndex <: t_monitoredItemReqIndex_i &
-    c_monitoredItemReqIndex_indet : t_monitoredItemReqIndex_i &
-    c_monitoredItemReqIndex_indet /: t_monitoredItemReqIndex &
-    cast_t_monitoredItemReqIndex : NAT +-> t_monitoredItemReqIndex_i &
-    cast_t_monitoredItemReqIndex : perm(t_monitoredItemReqIndex) &
+    t_monitoredItemReqIndex <: NAT &
 
     t_RefIndex <: NAT &
 
@@ -590,22 +577,15 @@ PROPERTIES
     c_timeref_indet /: t_timeref &
     
     c_opcua_duration_indet : t_opcua_duration_i &
+    c_opcua_duration_zero : t_opcua_duration_i &
     
     t_notificationQueue <: t_notificationQueue_i &
     c_notificationQueue_indet : t_notificationQueue_i &
     c_notificationQueue_indet /: t_notificationQueue &
     
-    t_notificationQueueIterator <: t_notificationQueueIterator_i &
-    c_notificationQueueIterator_indet : t_notificationQueueIterator_i &
-    c_notificationQueueIterator_indet /: t_notificationQueueIterator &
-    
     t_publishReqQueue <: t_publishReqQueue_i &
     c_publishReqQueue_indet : t_publishReqQueue_i &
     c_publishReqQueue_indet /: t_publishReqQueue &
-
-    t_publishReqQueueIterator <: t_publishReqQueueIterator_i &
-    c_publishReqQueueIterator_indet : t_publishReqQueueIterator_i &
-    c_publishReqQueueIterator_indet /: t_publishReqQueueIterator &
     
     t_monitoredItemQueue <: t_monitoredItemQueue_i &
     c_monitoredItemQueue_indet : t_monitoredItemQueue_i &

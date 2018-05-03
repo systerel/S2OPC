@@ -25,14 +25,18 @@ SEES
     message_in_bs,
     message_out_bs,
     write_value_pointer_bs,
-    address_space_bs,
+    address_space,
     request_handle_bs
     
+DEFINITIONS
+    "definitions.def"
+
 IMPORTS
     subscription_core,
     msg_subscription_create_bs,
     msg_subscription_publish_bs,
-    msg_subscription_create_monitored_item
+    msg_subscription_create_monitored_item,
+    subscription_create_monitored_item_it
     
 PROMOTES
     is_valid_subscription
@@ -48,6 +52,76 @@ LOCAL_OPERATIONS
     THEN
         skip
     END
+    ;
+    
+    fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
+        p_tsToReturn : t_TimestampsToReturn_i &
+        p_tsToReturn : t_TimestampsToReturn &
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_subscription_publish_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_subscription_publish_resp &
+        p_nb_monitored_items : NAT &
+        p_nb_monitored_items : t_monitoredItemReqIndex &
+        p_nb_monitored_items = nb_monitored_items
+    THEN
+        MonitoredItemResp_StatusCode,
+        MonitoredItemResp_Id,
+        s_monitoredItemPointer,
+        s_monitoredItemId,
+        a_monitoredItemId
+        :(
+            MonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode &
+            MonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId &
+            /* A reprendre pour chaque code de retour */
+            MonitoredItemResp_StatusCode =
+            %mi_index.(mi_index : t_monitoredItemReqIndex &
+                       mi_index : 1..nb_monitored_items &
+                       /* ith node id has a node in the Address Space */
+                       mi_index : dom(MonitoredItemReq_NodeId) &
+                       /* Node is in the domain of the attribute */
+                       mi_index : dom(MonitoredItemReq_AttributeId)
+                       /* TODO: add use-access levels */
+                       |
+                       {TRUE |-> e_sc_bad_node_id_unknown,
+                        FALSE |-> {TRUE |-> e_sc_bad_attribute_id_invalid,
+                                   FALSE |-> {TRUE |-> e_sc_bad_too_many_monitored_items,
+                                              FALSE |-> e_sc_ok
+                                              }(bool(t_monitoredItemPointer = s_monitoredItemPointer or
+                                                      t_monitoredItemId = s_monitoredItemId))
+                                   }(bool(a_NodeId~(MonitoredItemReq_NodeId(mi_index)) /:
+                                                     dom(AttributeID_Node_Variant(MonitoredItemReq_AttributeId(mi_index)))))
+                        }(bool(MonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~)))
+            ) &     
+            MonitoredItemResp_Id =
+            %mi_index.(mi_index : t_monitoredItemReqIndex &
+                       mi_index : 1..nb_monitored_items
+                       |
+                         {TRUE |-> c_monitoredItemId_indet, /* TODO: a new monitoredItemId */
+                          FALSE |-> c_monitoredItemId_indet}
+                         (bool(MonitoredItemResp_StatusCode (mi_index) = e_sc_ok))
+            ) &
+            s_monitoredItemPointer <: s_monitoredItemPointer$0 &
+            s_monitoredItemId <: s_monitoredItemId$0 &
+            a_monitoredItemId <: a_monitoredItemId$0 &
+            !mi_index.(mi_index : t_monitoredItemReqIndex &
+                       mi_index : 1..nb_monitored_items &
+                       MonitoredItemResp_StatusCode (mi_index) = e_sc_ok
+                       => 
+                       card(s_monitoredItemPointer) = card(s_monitoredItemPointer$0) + 1 &
+                       card(s_monitoredItemId) = card(s_monitoredItemId$0) + 1 &
+                       card(a_monitoredItemId) = card(a_monitoredItemId) + 1
+                       )                     
+         )
+    END      
+    
 
 OPERATIONS
     
@@ -62,11 +136,118 @@ OPERATIONS
     END
     ;
     
+    fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    VAR
+        l_continue,
+        l_index,
+        l_bres,
+        l_nid,
+        l_aid,
+        l_monitMode,
+        l_clientHandle,
+        l_samplingItv,
+        l_queueSize,
+        l_node,
+        l_sc,
+        l_ncl,
+        l_value,
+        l_valueSc,
+        l_monitoredItemPointer,
+        l_monitoredItemId,
+        l_revSamplingItv, 
+        l_revQueueSize
+    IN
+        l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
+        WHILE l_continue = TRUE DO
+            l_node := c_Node_indet;
+            l_value := c_Variant_indet;
+            l_sc := e_sc_ok;
+            l_valueSc := e_sc_ok;
+            l_monitoredItemId := c_monitoredItemId_indet;
+            l_revSamplingItv := c_opcua_duration_indet;
+            l_revQueueSize := 0;
+            l_continue, l_index <-- continue_iter_monitored_item_request;
+            l_bres, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_queueSize
+              <-- getall_monitored_item_req_params(p_req_msg, l_index);
+            IF l_bres = TRUE
+            THEN
+                l_bres, l_node <-- readall_AddressSpace_Node (l_nid);
+                IF l_bres = FALSE
+                THEN
+                    l_sc := e_sc_bad_node_id_unknown
+                END
+            END
+            ;
+            IF l_sc = e_sc_ok
+            THEN
+                l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(l_node, l_aid);
+                IF l_ncl = e_ncl_Variable
+                THEN
+                    l_valueSc <-- get_Value_StatusCode (l_node)
+                END
+            END
+            ;
+            IF l_sc = e_sc_ok
+            THEN
+                l_sc, l_monitoredItemPointer, l_monitoredItemId <-- create_monitored_item (p_subscription,
+                                                                                           l_nid,
+                                                                                           l_aid,
+                                                                                           l_value,
+                                                                                           l_valueSc,
+                                                                                           p_tsToReturn,
+                                                                                           l_monitMode,
+                                                                                           l_clientHandle);
+                l_revSamplingItv, l_revQueueSize <-- compute_create_montitored_item_revised_params(l_samplingItv, l_queueSize)
+            END
+            ;
+            setall_msg_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_monitoredItemId, l_revSamplingItv, l_revQueueSize)
+              
+        INVARIANT
+            rreqs_to_iterate <: t_monitoredItemReqIndex &
+            rreqs_iterated   <: t_monitoredItemReqIndex &
+            rreqs_to_iterate /\ rreqs_iterated = {} &
+            rreqs_to_iterate \/ rreqs_iterated = 1..nb_monitored_items &
+            l_continue = bool(rreqs_to_iterate /= {}) &
+            
+            /* A reprendre pour chaque code de retour */
+            MonitoredItemResp_StatusCode =
+            %mi_index.(mi_index : t_monitoredItemReqIndex &
+                       mi_index : 1..nb_monitored_items &
+                       /* ith node id has a node in the Address Space */
+                       mi_index : dom(MonitoredItemReq_NodeId) &
+                       MonitoredItemReq_NodeId(mi_index) : dom(a_NodeId~) &
+                       /* Node is in the domain of the attribute */
+                       mi_index : dom(MonitoredItemReq_AttributeId) &
+                       a_NodeId~(MonitoredItemReq_NodeId(mi_index)) :
+                         dom(AttributeID_Node_Variant(MonitoredItemReq_AttributeId(mi_index)))
+                       /* TODO: add use-access levels */
+                       |
+                       {TRUE |-> e_sc_ok,
+                        FALSE |-> e_sc_bad_too_many_monitored_items
+                        }(bool(t_monitoredItemPointer /= s_monitoredItemPointer &
+                               t_monitoredItemId /= s_monitoredItemId)
+                       )
+            ) &
+            MonitoredItemResp_Id =
+            %mi_index.(mi_index : t_monitoredItemReqIndex &
+                       mi_index : 1..nb_monitored_items
+                       |
+                         {TRUE |-> c_monitoredItemId_indet, /* TODO: a new monitoredItemId */
+                          FALSE |-> c_monitoredItemId_indet}
+                         (bool(MonitoredItemResp_StatusCode (mi_index) = e_sc_ok))
+            )
+        VARIANT
+            card(rreqs_to_iterate)
+        END
+    END
+    ;
+    
     /* END OF LOCAL OPERATIONS */
     
     StatusCode_service <-- treat_create_subscription_request (p_session, p_req_msg, p_resp_msg) =
     VAR
         l_session_has_subscription,
+        l_sub,
         l_reqPublishInterval,
         l_reqLifetimeCount,
         l_reqMaxKeepAlive,
@@ -78,7 +259,7 @@ OPERATIONS
         l_revisedMaxKeepAlive,
         l_revisedMaxNotificationsPerPublish
     IN
-        l_session_has_subscription <-- has_subscription (p_session);
+        l_session_has_subscription, l_sub <-- getall_subscription (p_session);
         IF l_session_has_subscription = FALSE
         THEN
             /* Extract create subscription parameters */
@@ -125,6 +306,7 @@ OPERATIONS
       <-- treat_subscription_publish_request (p_session, p_req_header, p_req_msg, p_req_handle, p_req_ctx, p_resp_msg) =
     VAR
         l_session_has_subscription,
+        l_sub,
         l_req_exp_time,
         /*l_nb_subsciptionAcks,
         l_nb_avail_seq_nums,*/
@@ -132,7 +314,7 @@ OPERATIONS
         l_notifMsg
     IN
         async_resp_msg := FALSE;
-        l_session_has_subscription <-- has_subscription (p_session);
+        l_session_has_subscription, l_sub <-- getall_subscription (p_session);
         IF l_session_has_subscription = TRUE
         THEN
             /* Extract values from header: expiration time for Publish Request */
@@ -172,18 +354,11 @@ OPERATIONS
             l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
             IF l_valid_subscription = TRUE
             THEN
-                /* TODO: allocate response results array (alloc_msg_create_monitored_items_resp_results): check not outOfMemory */
                 l_bres <-- alloc_msg_create_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);    
                 IF l_bres = TRUE
                 THEN
-                    /* TODO: iterate on req message monitored items, for each:
-                    - get monitored item req from req message (getall_monitored_item_req_params): check monitoringMode / nodeId validity / ...                
-                    - retrieve node (index) from nodeId (readall_AddressSpace_Node): check if nodeIdUnkown
-                    - check attribute validity using from node + aid (read_AddressSpace_Attribute_value): check if attributeIdInvalid
-                    - compute revised parameters (compute_create_montitored_item_revised_params)
-                    - add monitored item to subscription and retrieve status + Id (create_monitored_item)
-                    - add result to response (setall_msg_monitored_item_resp_params)
-                    */
+                    fill_response_subscription_create_monitored_items 
+                      (l_subscription, l_timestampToRet, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory
@@ -209,7 +384,7 @@ OPERATIONS
         l_nid_valid, l_node <-- readall_AddressSpace_Node (l_nid);
         IF l_nid_valid = TRUE
         THEN
-            l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (l_node)
+            l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (l_nid)
             /* TODO: iterate on each monitoredItem, for each:
             - check regarding MI properties / aid / old value / new value if notification necessary
             - add notification to subscription (server_subscription_add_notification)
@@ -276,7 +451,7 @@ OPERATIONS
         l_has_sub,
         l_sub
     IN
-        l_has_sub <-- has_subscription (p_session);
+        l_has_sub, l_sub <-- getall_subscription (p_session);
         IF l_has_sub = TRUE
         THEN
             IF p_newSessionState = e_session_scOrphaned or 
@@ -285,7 +460,6 @@ OPERATIONS
             THEN
                 /* SC is not valid anymore for the session
                    => publish requests are not valid anymore on another SC */
-                l_sub <-- get_subscription (p_session);
                 empty_session_publish_requests (l_sub);
                 IF p_newSessionState = e_session_closed
                 THEN

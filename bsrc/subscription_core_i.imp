@@ -32,14 +32,17 @@ IMPORTS
     subscription_core_it,
     monitored_item_notification_queue_bs,
     monitored_item_queue_bs,
+    monitored_item_pointer_bs,
     publish_request_queue_bs
     
 PROMOTES
     /* subscription_core_1 */
     is_valid_subscription,
     remove_subscription_session,
+    getall_subscription,
     /* subscription_core_bs */
-    compute_create_subscription_revised_params
+    compute_create_subscription_revised_params,
+    get_nodeToMonitoredItemQueue
     
 LOCAL_OPERATIONS
     
@@ -107,20 +110,12 @@ OPERATIONS
     /* END OF LOCAL OPERATIONS */
     
     is_valid <-- is_valid_subscription_on_session (p_session, p_subscription) =
-    BEGIN
-        is_valid := FALSE
-    END
-    ;
-        
-    l_has_subscription <-- has_subscription (p_session) =
-    BEGIN
-        l_has_subscription := FALSE
-    END
-    ;
-    
-    l_subscription <-- get_subscription (p_session) =
-    BEGIN
-        l_subscription := c_subscription_indet
+    VAR
+        l_dom,
+        l_sub
+    IN
+        l_dom, l_sub <-- getall_subscription (p_session);
+        is_valid := bool(l_dom = TRUE & p_subscription = l_sub)
     END
     ;
     
@@ -209,21 +204,70 @@ OPERATIONS
     
     revisedSamplingItv, revisedQueueSize <-- compute_create_montitored_item_revised_params (p_reqSamplingItv, p_reqQueueSize) =
     BEGIN
-        revisedSamplingItv := c_opcua_duration_indet;
-        revisedQueueSize := 0
+        revisedSamplingItv := c_opcua_duration_zero;
+        revisedQueueSize := p_reqQueueSize
     END
     ;
 
-    StatusCode_service, monitoredItemPointer <-- create_monitored_item (p_subscription,
-                                                                        p_nid,
-                                                                 p_node,
-                                                                 p_aid,
-                                                                 p_timestampToReturn,
-                                                                 p_monitoringMode,
-                                                                 p_clientHandle) =
-    BEGIN
-        StatusCode_service := c_StatusCode_indet;
-        monitoredItemPointer := c_monitoredItemPointer_indet
+    StatusCode_service, monitoredItemPointer, monitoredItemId <-- create_monitored_item (p_subscription,
+                                                                                         p_nid,
+                                                                                         p_aid,
+                                                                                         p_value,
+                                                                                         p_valueSc,
+                                                                                         p_timestampToReturn,
+                                                                                         p_monitoringMode,
+                                                                                         p_clientHandle) =
+    VAR
+        l_bres,
+        l_sub_monitIt_queue,
+        l_node_monitIt_queue,
+        l_sub_notif_queue
+    IN
+        StatusCode_service := e_sc_bad_too_many_monitored_items;
+        /* Create monitored item */
+        l_bres, monitoredItemPointer, monitoredItemId
+          <-- create_monitored_item_pointer(p_subscription,
+                                            p_nid,
+                                            p_aid,
+                                            p_timestampToReturn,
+                                            p_monitoringMode,
+                                            p_clientHandle);
+        IF l_bres = TRUE
+        THEN
+            l_node_monitIt_queue <-- get_nodeToMonitoredItemQueue (p_nid);
+            l_sub_monitIt_queue <-- get_subscription_monitoredItemQueue (p_subscription);
+            l_bres <-- add_monitored_item_to_queue (l_node_monitIt_queue, monitoredItemPointer);
+            IF l_bres = TRUE
+            THEN
+                /* Add monitored item to subscription and node queues */
+                l_bres <-- add_monitored_item_to_queue (l_sub_monitIt_queue, monitoredItemPointer);
+                IF l_bres = FALSE
+                THEN
+                    l_bres <-- remove_monitored_item (l_node_monitIt_queue, monitoredItemPointer);
+                    l_bres := FALSE
+                END
+            END
+            ;
+            IF l_bres = TRUE
+            THEN
+                /* Generate a notification for new monitored item */
+                l_sub_notif_queue <-- get_subscription_notificationQueue (p_subscription);
+                l_bres <-- add_first_monitored_item_notification_to_queue (l_sub_notif_queue, 
+                                                                           monitoredItemPointer, 
+                                                                           p_nid,
+                                                                           p_aid,
+                                                                           p_value,
+                                                                           p_valueSc);
+                IF l_bres = FALSE
+                THEN
+                    l_bres <-- remove_monitored_item (l_node_monitIt_queue, monitoredItemPointer);
+                    l_bres <-- remove_monitored_item (l_sub_monitIt_queue, monitoredItemPointer);
+                    l_bres := FALSE
+                ELSE
+                    StatusCode_service := e_sc_ok
+                END                                                    
+            END
+        END
     END
     ;
     
@@ -265,12 +309,6 @@ OPERATIONS
         p_notifMsg := c_notif_msg_indet;
         p_moreNotifs := FALSE;
         p_morePubReqs := FALSE
-    END
-    ;
-    
-    monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_node) =
-    BEGIN
-        monitoredItemQueue := c_monitoredItemQueue_indet
     END
     ;
     

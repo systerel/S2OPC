@@ -19,9 +19,36 @@ MACHINE
     subscription_core_bs
 
 SEES
-    constants
-
+    constants,
+    monitored_item_queue_bs
+    
+ABSTRACT_VARIABLES
+    a_nodeToMonitoredItemQueue
+    
+INVARIANT
+    a_nodeToMonitoredItemQueue : t_NodeId --> t_monitoredItemQueue
+    
+INITIALISATION
+    a_nodeToMonitoredItemQueue :(a_nodeToMonitoredItemQueue : t_NodeId --> s_monitoredItemQueue)
+    
 OPERATIONS
+    
+    /* Needs UNINIT to deallocate node to monitored item queues */
+    UNINITIALISATION_subscription_core_bs =
+    BEGIN
+        skip
+    END
+    ;
+    
+    p_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_nid) =
+    PRE
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId
+    THEN
+        p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i & 
+                               p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid))
+    END
+    ;
     
     revisedPublishInterval, revisedLifetimeCount, revisedMaxKeepAlive, revisedMaxNotificationsPerPublish
       <-- compute_create_subscription_revised_params (p_session,

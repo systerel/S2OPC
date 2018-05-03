@@ -27,6 +27,8 @@ DEFINITIONS
     d_variables ==
     s_subscription,
     s_monitoredItemPointer,
+    s_monitoredItemId,
+    a_monitoredItemId,
     a_subscription_session,
     a_publishInterval,
     a_lifetimeExpCount,
@@ -79,13 +81,15 @@ DEFINITIONS
     
     /* Subscription Implementation variables */
     s_monitoredItemPointer <: t_monitoredItemPointer &
+    s_monitoredItemId <: t_monitoredItemId &
+    a_monitoredItemId : s_monitoredItemPointer <-> t_monitoredItemId &
     
     s_notificationQueue <: t_notificationQueue &
     a_pendingNotificationQueue : s_subscription --> s_notificationQueue &
     /* a_retransmissionQueue : s_subscription --> s_notificationMsgQueue */ /* not implemented */
     s_monitoredItemQueue <: t_monitoredItemQueue &
     a_monitoredItemQueue : s_subscription --> s_monitoredItemQueue &
-    a_nodeToMonitoredItemQueue : t_Node --> s_monitoredItemQueue &
+    a_nodeToMonitoredItemQueue : t_NodeId --> s_monitoredItemQueue &
     
     /* (Session) Implementation variables */
     
@@ -241,9 +245,11 @@ INITIALISATION
     a_pendingNotificationQueue := {} ||
     a_publishRequestQueue := {} ||
     a_monitoredItemQueue := {} ||
-    a_nodeToMonitoredItemQueue :(a_nodeToMonitoredItemQueue : t_Node --> s_monitoredItemQueue) || /* DEFINED ON INIT */
+    a_nodeToMonitoredItemQueue :(a_nodeToMonitoredItemQueue : t_NodeId --> s_monitoredItemQueue) || /* DEFINED ON INIT */
     
     s_monitoredItemPointer := {} ||
+    s_monitoredItemId := {} ||
+    a_monitoredItemId := {} ||
     /* Queues content */
     
     s_publishReqQueue := {} ||
@@ -273,23 +279,19 @@ OPERATIONS
     END
     ;
         
-    l_has_subscription <-- has_subscription (p_session) =
-    PRE
-        p_session : t_session_i &
-        p_session : t_session
-    THEN
-        l_has_subscription := bool(p_session : ran(a_subscription_session))
-    END
-    ;
-    
-    l_subscription <-- get_subscription (p_session) =
+    p_dom, p_subscription <-- getall_subscription (p_session) =
     PRE
         p_session : t_session_i &
         p_session : t_session &
         p_session : ran(a_subscription_session)
     THEN
-        l_subscription :(l_subscription : t_subscription_i &
-                         l_subscription = a_subscription_session~(p_session))
+        p_dom := bool(p_session : ran(a_subscription_session)) ||
+        IF p_session /: ran(a_subscription_session)
+        THEN
+            p_subscription := c_subscription_indet
+        ELSE
+            p_subscription := a_subscription_session~(p_session)            
+        END
     END
     ;
     
@@ -583,52 +585,56 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service, monitoredItemPointer <-- create_monitored_item (p_subscription,
-                                                                        p_nid,
-                                                                 p_node,
-                                                                 p_aid,
-                                                                 p_timestampToReturn,
-                                                                 p_monitoringMode,
-                                                                 p_clientHandle) =
+    StatusCode_service, monitoredItemPointer, monitoredItemId <-- create_monitored_item (p_subscription,
+                                                                                         p_nid,
+                                                                                         p_aid,
+                                                                                         p_value,
+                                                                                         p_valueSc,
+                                                                                         p_timestampToReturn,
+                                                                                         p_monitoringMode,
+                                                                                         p_clientHandle) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
         p_nid : t_NodeId_i &
         p_nid : t_NodeId &
-        p_node : t_Node_i &
-        p_node : t_Node &
         p_aid : t_AttributeId_i &
         p_aid : t_AttributeId &
+        p_value : t_Variant_i &
+        p_value : t_Variant &
+        p_valueSc : t_StatusCode_i &
+        p_valueSc : t_StatusCode &
         p_timestampToReturn : t_TimestampsToReturn_i &
         p_timestampToReturn : t_TimestampsToReturn &
         p_monitoringMode : t_monitoringMode_i &
         p_monitoringMode : t_monitoringMode &
         p_clientHandle : t_client_handle_i
     THEN
-        IF t_monitoredItemPointer = s_monitoredItemPointer
+        IF t_monitoredItemPointer = s_monitoredItemPointer or
+            t_monitoredItemId = s_monitoredItemId
         THEN
+            /* To simplify proof, this includes the case out of memory when adding queues */
             StatusCode_service := e_sc_bad_too_many_monitored_items ||
-            monitoredItemPointer := c_monitoredItemPointer_indet
+            monitoredItemPointer := c_monitoredItemPointer_indet ||
+            monitoredItemId := c_monitoredItemId_indet
         ELSE
-            ANY l_monitoredItem WHERE
-                l_monitoredItem : t_monitoredItemPointer - s_monitoredItemPointer
+            ANY l_monitoredItem, l_monitoredItemId WHERE
+                l_monitoredItem : t_monitoredItemPointer - s_monitoredItemPointer &
+                l_monitoredItemId : t_monitoredItemId - s_monitoredItemId
             THEN
-                CHOICE
-                    StatusCode_service := e_sc_ok ||
-                    s_monitoredItemPointer := s_monitoredItemPointer \/ {l_monitoredItem} ||
-                    monitoredItemPointer := l_monitoredItem ||
-                    /* a notification is enqueued with current value of monitored item */
-                    a_monitored_item_notifications := 
-                    a_monitored_item_notifications \/ {a_pendingNotificationQueue(p_subscription) |-> l_monitoredItem} ||
-                    /* add monitored item to both queues */
-                    a_defined_monitored_items := 
-                     a_defined_monitored_items \/ {a_monitoredItemQueue(p_subscription) |-> l_monitoredItem}
-                                               \/ {a_nodeToMonitoredItemQueue(p_node) |-> l_monitoredItem}
-                OR
-                    /* add to queue failure (out of memory) */
-                    StatusCode_service := e_sc_bad_too_many_monitored_items ||
-                    monitoredItemPointer := c_monitoredItemPointer_indet
-                END
+                StatusCode_service := e_sc_ok ||
+                s_monitoredItemPointer := s_monitoredItemPointer \/ {l_monitoredItem} ||
+                s_monitoredItemId := s_monitoredItemId \/ {l_monitoredItemId} ||
+                a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
+                monitoredItemPointer := l_monitoredItem ||
+                monitoredItemId := l_monitoredItemId ||
+                /* a notification is enqueued with current value of monitored item */
+                a_monitored_item_notifications := 
+                a_monitored_item_notifications \/ {a_pendingNotificationQueue(p_subscription) |-> l_monitoredItem} ||
+                /* add monitored item to both queues */
+                a_defined_monitored_items := 
+                a_defined_monitored_items \/ {a_monitoredItemQueue(p_subscription) |-> l_monitoredItem}
+                                          \/ {a_nodeToMonitoredItemQueue(p_nid) |-> l_monitoredItem}
             END
         END
     END
@@ -831,12 +837,13 @@ OPERATIONS
     END
     ;
     
-    monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_node) =
+    p_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_nid) =
     PRE
-        p_node : t_Node_i &
-        p_node : t_Node
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId
     THEN
-        monitoredItemQueue :( monitoredItemQueue : t_monitoredItemQueue_i & monitoredItemQueue = a_nodeToMonitoredItemQueue (p_node))
+        p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i & 
+                               p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid))
     END
     ;
     

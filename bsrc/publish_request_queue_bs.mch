@@ -93,26 +93,18 @@ OPERATIONS
     ;
     
     
-    continue, iterator <-- init_iter_publish_request (p_queue) =
+    continue <-- init_iter_publish_request (p_queue) =
     PRE
         p_queue : t_publishReqQueue_i &
         p_queue : s_publishReqQueue
     THEN
-        continue,
-        iterator
-        :(continue : BOOL &
-          iterator : t_publishReqQueueIterator_i &
-          (continue = TRUE => 
-            iterator : t_publishReqQueueIterator)
-        )
+        continue := bool(card(a_publish_responses~[{p_queue}]) > 0)
     END
     ;
 
     p_continue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg
-      <-- continue_pop_iter_publish_request (p_iterator, p_queue) =
+      <-- continue_pop_iter_publish_request (p_queue) =
     PRE
-        p_iterator : t_notificationQueueIterator_i &
-        p_iterator : t_notificationQueueIterator &
         p_queue : t_publishReqQueue_i &
         p_queue : s_publishReqQueue
     THEN

@@ -77,7 +77,7 @@ OPERATIONS
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
         a_msg_in_type = e_msg_monitored_items_create_req &
-        p_index : t_monitoredItemReqIndex_i &
+        p_index : NAT &
         p_index : t_monitoredItemReqIndex
     THEN
         p_bres, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize
@@ -114,7 +114,7 @@ OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_monitored_items_create_resp &
-        p_index : t_monitoredItemReqIndex_i &
+        p_index : NAT &
         p_index : t_monitoredItemReqIndex &
         p_sc : t_StatusCode_i &
         p_sc : t_StatusCode &

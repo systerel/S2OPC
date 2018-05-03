@@ -27,8 +27,8 @@ ABSTRACT_VARIABLES
     
 INVARIANT
     s_notificationQueue <: t_notificationQueue &
-    a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItemPointer 
-    /* In C implementation, several times same monitored item can be present several times (multiple notifications) 
+    a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItemPointer  
+    /* In C implementation, same monitored item can be present several times (multiple notifications) 
        but it will not change the proof constraints when dequeueing. Therefor it is a simplified representation. */
     
 INITIALISATION
@@ -66,6 +66,35 @@ OPERATIONS
     END
     ;
     
+    bres <-- add_first_monitored_item_notification_to_queue (p_queue,
+                                                             p_monitoredItem,
+                                                             p_nid,
+                                                             p_aid,
+                                                             p_VariantValuePointer,
+                                                             p_ValueSc) =
+    PRE
+        p_queue : t_notificationQueue_i &
+        p_queue : t_notificationQueue &
+        p_monitoredItem : t_monitoredItemPointer_i &
+        p_monitoredItem : t_monitoredItemPointer &
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId &
+        p_aid : t_AttributeId_i &
+        p_aid : t_AttributeId &
+        p_VariantValuePointer : t_Variant_i &
+        p_VariantValuePointer : t_Variant &
+        p_ValueSc : t_StatusCode_i &
+        p_ValueSc : t_StatusCode
+    THEN
+        CHOICE
+            bres := FALSE
+        OR 
+            bres := TRUE ||
+            a_monitored_item_notifications := a_monitored_item_notifications \/ {p_queue |-> p_monitoredItem}
+        END
+    END
+    ;
+    
     bres <-- add_monitored_item_notification_to_queue (p_queue,
                                                        p_monitoredItem,
                                                        p_writeValuePointer) =
@@ -87,27 +116,19 @@ OPERATIONS
     ;
     
     
-    continue, iterator <-- init_iter_monitored_item_notification (p_queue) =
+    continue <-- init_iter_monitored_item_notification (p_queue) =
     PRE
         p_queue : t_notificationQueue_i &
         p_queue : t_notificationQueue
     THEN
-        continue,
-        iterator
-        :(continue : BOOL &
-          iterator : t_notificationQueueIterator_i &
-          (continue = TRUE => 
-            iterator : t_notificationQueueIterator)
-        )
+        continue := bool(card(a_monitored_item_notifications[{p_queue}]) > 0)
     END
     ;
 
-    p_continue, 
+    p_continue,
     p_monitoredItem,
-    p_writeValuePointer <-- continue_pop_iter_monitor_item_notification (p_iterator, p_queue) =
+    p_writeValuePointer <-- continue_pop_iter_monitor_item_notification (p_queue) =
     PRE
-        p_iterator : t_notificationQueueIterator_i &
-        p_iterator : t_notificationQueueIterator &
         p_queue : t_notificationQueue_i &
         p_queue : t_notificationQueue
     THEN

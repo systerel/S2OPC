@@ -22,31 +22,37 @@ SEES
     constants
     
 ABSTRACT_VARIABLES
-    s_monitoredItemPointer
+    s_monitoredItemPointer,
+    s_monitoredItemId,
+    a_monitoredItemId
     
 INVARIANT
     
-    s_monitoredItemPointer <: t_monitoredItemPointer
+    s_monitoredItemPointer <: t_monitoredItemPointer &
+    s_monitoredItemId <: t_monitoredItemId &
+    a_monitoredItemId : s_monitoredItemPointer <-> t_monitoredItemId
     
 INITIALISATION
     
-    s_monitoredItemPointer :(s_monitoredItemPointer <: t_monitoredItemPointer & s_monitoredItemPointer = {})
+    s_monitoredItemPointer :(s_monitoredItemPointer <: t_monitoredItemPointer & s_monitoredItemPointer = {}) ||
+    s_monitoredItemId :(s_monitoredItemId <: t_monitoredItemId & s_monitoredItemId = {}) ||
+    a_monitoredItemId :(a_monitoredItemId : s_monitoredItemPointer <-> s_monitoredItemId)
 
 OPERATIONS
     
     /* Needs UNINIT to deallocate dict and list */
-    UNINITIALISATION =
+    UNINITIALISATION_monitored_item_bs =
     BEGIN
         skip
     END
     ;
     
-    bres, monitoredItemPointer <-- create_monitored_item_pointer (p_subscription,
-                                                                  p_nid,
-                                                                  p_aid,
-                                                                  p_timestampToReturn,
-                                                                  p_monitoringMode,
-                                                                  p_clientHandle) =
+    bres, monitoredItemPointer, monitoredItemId <-- create_monitored_item_pointer (p_subscription,
+                                                                                   p_nid,
+                                                                                   p_aid,
+                                                                                   p_timestampToReturn,
+                                                                                   p_monitoringMode,
+                                                                                   p_clientHandle) =
     PRE
         p_subscription : t_subscription_i &
         p_nid : t_NodeId_i &
@@ -59,17 +65,23 @@ OPERATIONS
         p_monitoringMode : t_monitoringMode &
         p_clientHandle : t_client_handle_i
     THEN
-        IF t_monitoredItemPointer = s_monitoredItemPointer
+        IF t_monitoredItemPointer = s_monitoredItemPointer or
+            t_monitoredItemId = s_monitoredItemId
         THEN
             bres := FALSE ||
-            monitoredItemPointer := c_monitoredItemPointer_indet
+            monitoredItemPointer := c_monitoredItemPointer_indet ||
+            monitoredItemId := c_monitoredItemId_indet
         ELSE
-            ANY l_monitoredItem WHERE
-                l_monitoredItem : t_monitoredItemPointer - s_monitoredItemPointer
+            ANY l_monitoredItem, l_monitoredItemId WHERE
+                l_monitoredItem : t_monitoredItemPointer - s_monitoredItemPointer &
+                l_monitoredItemId : t_monitoredItemId - s_monitoredItemId
             THEN
                 bres := TRUE ||
                 s_monitoredItemPointer := s_monitoredItemPointer \/ {l_monitoredItem} ||
-                monitoredItemPointer := l_monitoredItem
+                s_monitoredItemId := s_monitoredItemId \/ {l_monitoredItemId} ||
+                a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
+                monitoredItemPointer := l_monitoredItem ||
+                monitoredItemId := l_monitoredItemId
             END
         END
     END
@@ -80,7 +92,9 @@ OPERATIONS
         p_monitoredItemPointer : t_monitoredItemPointer_i &
         p_monitoredItemPointer : s_monitoredItemPointer
     THEN
-        s_monitoredItemPointer := s_monitoredItemPointer - {p_monitoredItemPointer}
+        s_monitoredItemPointer := s_monitoredItemPointer - {p_monitoredItemPointer} ||
+        s_monitoredItemId := s_monitoredItemId - {a_monitoredItemId(p_monitoredItemPointer)} ||
+        a_monitoredItemId := a_monitoredItemId - {p_monitoredItemPointer |-> a_monitoredItemId(p_monitoredItemPointer)}
     END
     ;
     
@@ -104,7 +118,7 @@ OPERATIONS
         p_monitoringMode,
         p_clientHandle
         :(p_monitoredItemId : t_monitoredItemId_i &
-          p_monitoredItemId : t_monitoredItemId &
+          p_monitoredItemId = a_monitoredItemId(p_monitoredItemPointer) &
           p_subscription : t_subscription_i &
           p_subscription : t_subscription &
           p_nid : t_NodeId_i &

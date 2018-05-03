@@ -24,6 +24,8 @@
   --------------*/
 #include "constants.h"
 
+#include "monitored_item_pointer_impl.h"
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -58,7 +60,9 @@ void monitored_item_queue_bs__add_monitored_item_to_queue(
     const constants__t_monitoredItemPointer_i monitored_item_queue_bs__p_monitoredItem,
     t_bool* const monitored_item_queue_bs__bres)
 {
-    assert(false);
+    SOPC_InternalMontitoredItem* mi = (SOPC_InternalMontitoredItem*) monitored_item_queue_bs__p_monitoredItem;
+    SOPC_SLinkedList_Append(monitored_item_queue_bs__p_queue, mi->monitoredItemId,
+                            monitored_item_queue_bs__p_monitoredItem);
 }
 
 void monitored_item_queue_bs__continue_iter_monitored_item(
@@ -67,7 +71,16 @@ void monitored_item_queue_bs__continue_iter_monitored_item(
     t_bool* const monitored_item_queue_bs__continue,
     constants__t_monitoredItemPointer_i* const monitored_item_queue_bs__p_monitoredItem)
 {
-    assert(false);
+    (void) monitored_item_queue_bs__p_queue;
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_SLinkedListIterator it = (SOPC_SLinkedListIterator) monitored_item_queue_bs__p_iterator;
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+    *monitored_item_queue_bs__continue = false;
+    *monitored_item_queue_bs__p_monitoredItem = SOPC_SLinkedList_Next(&it);
+    if (NULL != *monitored_item_queue_bs__p_monitoredItem)
+    {
+        *monitored_item_queue_bs__continue = true;
+    }
 }
 
 void monitored_item_queue_bs__init_iter_monitored_item(
@@ -75,7 +88,15 @@ void monitored_item_queue_bs__init_iter_monitored_item(
     t_bool* const monitored_item_queue_bs__continue,
     constants__t_monitoredItemQueueIterator_i* const monitored_item_queue_bs__iterator)
 {
-    assert(false);
+    *monitored_item_queue_bs__continue = false;
+    if (SOPC_SLinkedList_GetLength(monitored_item_queue_bs__p_queue) > 0)
+    {
+        *monitored_item_queue_bs__iterator = SOPC_SLinkedList_GetIterator(monitored_item_queue_bs__p_queue);
+        if (*monitored_item_queue_bs__iterator != NULL)
+        {
+            *monitored_item_queue_bs__continue = true;
+        }
+    }
 }
 
 void monitored_item_queue_bs__remove_monitored_item(
@@ -83,5 +104,9 @@ void monitored_item_queue_bs__remove_monitored_item(
     const constants__t_monitoredItemPointer_i monitored_item_queue_bs__p_monitoredItem,
     t_bool* const monitored_item_queue_bs__bres)
 {
-    assert(false);
+    SOPC_InternalMontitoredItem* mi = (SOPC_InternalMontitoredItem*) monitored_item_queue_bs__p_monitoredItem;
+
+    constants__t_monitoredItemPointer_i* res =
+        SOPC_SLinkedList_RemoveFromId(monitored_item_queue_bs__p_queue, mi->monitoredItemId);
+    *monitored_item_queue_bs__bres = res != NULL;
 }

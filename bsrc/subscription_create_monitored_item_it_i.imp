@@ -1,0 +1,53 @@
+/*
+ *  Copyright (C) 2018 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION
+    subscription_create_monitored_item_it_i
+
+REFINES
+    subscription_create_monitored_item_it
+
+SEES
+    constants
+
+CONCRETE_VARIABLES
+    rreqs_i
+
+INVARIANT
+    rreqs_i : NAT &
+    rreqs_i : 0 .. k_n_monitoredItem_max &
+    rreqs_to_iterate = 1..rreqs_i
+
+INITIALISATION
+    rreqs_i := 0
+
+OPERATIONS
+    continue <-- init_iter_monitored_item_request(nb_req) =
+    BEGIN
+        rreqs_i := nb_req;
+        continue := bool(0 < nb_req)
+    END
+    ;
+
+    continue, index <-- continue_iter_monitored_item_request =
+    BEGIN
+        index := rreqs_i;
+        rreqs_i := rreqs_i - 1;
+        continue := bool(0 < rreqs_i)
+    END
+
+END

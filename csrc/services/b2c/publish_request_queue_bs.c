@@ -68,7 +68,6 @@ void publish_request_queue_bs__add_publish_request_to_queue(
 }
 
 void publish_request_queue_bs__continue_pop_iter_publish_request(
-    const constants__t_notificationQueueIterator_i publish_request_queue_bs__p_iterator,
     const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue,
     t_bool* const publish_request_queue_bs__p_continue,
     constants__t_session_i* const publish_request_queue_bs__p_session,
@@ -82,8 +81,7 @@ void publish_request_queue_bs__continue_pop_iter_publish_request(
 
 void publish_request_queue_bs__init_iter_publish_request(
     const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue,
-    t_bool* const publish_request_queue_bs__continue,
-    constants__t_publishReqQueueIterator_i* const publish_request_queue_bs__iterator)
+    t_bool* const publish_request_queue_bs__continue)
 {
     assert(false);
 }

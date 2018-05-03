@@ -16,6 +16,7 @@
  */
 
 #include "monitored_item_pointer_bs.h"
+#include "monitored_item_pointer_impl.h"
 
 /*--------------
    SEES Clause
@@ -26,16 +27,15 @@
 
 #include "sopc_dict.h"
 
-typedef struct SOPC_InternalMontitoredItem
+void SOPC_InternalMontitoredItem_Free(void* data)
 {
-    uint32_t monitoredItemId;
-    constants__t_subscription_i subId;
-    constants__t_NodeId_i nid;
-    constants__t_AttributeId_i aid;
-    constants__t_TimestampsToReturn_i timestampToReturn;
-    constants__t_monitoringMode_i monitoringMode;
-    constants__t_client_handle_i clientHandle;
-} SOPC_InternalMontitoredItem;
+    SOPC_InternalMontitoredItem* mi = (SOPC_InternalMontitoredItem*) data;
+    if (NULL != mi)
+    {
+        SOPC_NodeId_Clear(mi->nid);
+        free(mi);
+    }
+}
 
 void SOPC_InternalMontitoredItemId_Free(void* data)
 {
@@ -78,14 +78,14 @@ void monitored_item_pointer_bs__INITIALISATION(void)
     }
 
     monitoredItemIdDict = SOPC_Dict_Create(0, SOPC_InternalMontitoredItemId_Hash, SOPC_InternalMontitoredItemId_Equal,
-                                           SOPC_InternalMontitoredItemId_Free, free);
+                                           SOPC_InternalMontitoredItemId_Free, SOPC_InternalMontitoredItem_Free);
     assert(monitoredItemIdDict != NULL);
     monitoredItemIdFreed = SOPC_SLinkedList_Create(0);
     assert(monitoredItemIdFreed != NULL);
     monitoredItemIdMax = 0;
 }
 
-void monitored_item_pointer_bs__UNINITIALISATION(void)
+void monitored_item_pointer_bs__UNINITIALISATION_monitored_item_bs(void)
 {
     if (monitoredItemIdDict != NULL)
     {
@@ -113,7 +113,8 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     const constants__t_monitoringMode_i monitored_item_pointer_bs__p_monitoringMode,
     const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
     t_bool* const monitored_item_pointer_bs__bres,
-    constants__t_monitoredItemPointer_i* const monitored_item_pointer_bs__monitoredItemPointer)
+    constants__t_monitoredItemPointer_i* const monitored_item_pointer_bs__monitoredItemPointer,
+    constants__t_monitoredItemId_i* const monitored_item_pointer_bs__monitoredItemId)
 {
     *monitored_item_pointer_bs__bres = false;
     uintptr_t freshId = 0;
@@ -137,6 +138,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
                 SOPC_Dict_Insert(monitoredItemIdDict, (void*) monitoredItemIdMax, monitItem);
                 *monitored_item_pointer_bs__bres = true;
                 *monitored_item_pointer_bs__monitoredItemPointer = monitItem;
+                *monitored_item_pointer_bs__monitoredItemId = monitItem->monitoredItemId;
             } // else: all Ids already in use
         }
         else
@@ -149,6 +151,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
                 SOPC_Dict_Insert(monitoredItemIdDict, (void*) freshId, monitItem);
                 *monitored_item_pointer_bs__bres = true;
                 *monitored_item_pointer_bs__monitoredItemPointer = monitItem;
+                *monitored_item_pointer_bs__monitoredItemId = monitItem->monitoredItemId;
             }
         }
     }

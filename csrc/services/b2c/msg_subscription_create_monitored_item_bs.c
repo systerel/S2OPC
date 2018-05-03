@@ -111,7 +111,7 @@ void msg_subscription_create_monitored_item_bs__get_msg_create_monitored_items_r
 
 void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params(
     const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_req_msg,
-    const constants__t_monitoredItemReqIndex_i msg_subscription_create_monitored_item_bs__p_index,
+    const t_entier4 msg_subscription_create_monitored_item_bs__p_index,
     t_bool* const msg_subscription_create_monitored_item_bs__p_bres,
     constants__t_NodeId_i* const msg_subscription_create_monitored_item_bs__p_nid,
     constants__t_AttributeId_i* const msg_subscription_create_monitored_item_bs__p_aid,
@@ -120,14 +120,30 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
     constants__t_opcua_duration_i* const msg_subscription_create_monitored_item_bs__p_samplingItv,
     t_entier4* const msg_subscription_create_monitored_item_bs__p_queueSize)
 {
+    SOPC_ReturnStatus retStatus = SOPC_STATUS_NOK;
     OpcUa_CreateMonitoredItemsRequest* createReq =
         (OpcUa_CreateMonitoredItemsRequest*) msg_subscription_create_monitored_item_bs__p_req_msg;
     OpcUa_MonitoredItemCreateRequest* monitReq =
-        &createReq->ItemsToCreate[msg_subscription_create_monitored_item_bs__p_index];
-    *msg_subscription_create_monitored_item_bs__p_nid = &monitReq->ItemToMonitor.NodeId;
+        &createReq->ItemsToCreate[msg_subscription_create_monitored_item_bs__p_index - 1];
 
-    *msg_subscription_create_monitored_item_bs__p_bres =
-        util_AttributeId__C_to_B(monitReq->ItemToMonitor.AttributeId, msg_subscription_create_monitored_item_bs__p_aid);
+    *msg_subscription_create_monitored_item_bs__p_nid = malloc(sizeof(SOPC_NodeId));
+    if (NULL != *msg_subscription_create_monitored_item_bs__p_nid)
+    {
+        SOPC_NodeId_Initialize(*msg_subscription_create_monitored_item_bs__p_nid);
+        retStatus =
+            SOPC_NodeId_Copy(*msg_subscription_create_monitored_item_bs__p_nid, &monitReq->ItemToMonitor.NodeId);
+    }
+
+    if (retStatus == SOPC_STATUS_OK)
+    {
+        *msg_subscription_create_monitored_item_bs__p_bres = util_AttributeId__C_to_B(
+            monitReq->ItemToMonitor.AttributeId, msg_subscription_create_monitored_item_bs__p_aid);
+    }
+    else
+    {
+        *msg_subscription_create_monitored_item_bs__p_bres = false;
+    }
+
     if (false == *msg_subscription_create_monitored_item_bs__p_bres)
     {
         *msg_subscription_create_monitored_item_bs__p_aid = constants__c_AttributeId_indet;
@@ -162,7 +178,7 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
 
 void msg_subscription_create_monitored_item_bs__setall_msg_monitored_item_resp_params(
     const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_resp_msg,
-    const constants__t_monitoredItemReqIndex_i msg_subscription_create_monitored_item_bs__p_index,
+    const t_entier4 msg_subscription_create_monitored_item_bs__p_index,
     const constants__t_StatusCode_i msg_subscription_create_monitored_item_bs__p_sc,
     const constants__t_monitoredItemId_i msg_subscription_create_monitored_item_bs__p_monitored_item_id,
     const constants__t_opcua_duration_i msg_subscription_create_monitored_item_bs__p_revSamplingItv,
@@ -171,7 +187,7 @@ void msg_subscription_create_monitored_item_bs__setall_msg_monitored_item_resp_p
     OpcUa_CreateMonitoredItemsResponse* createResp =
         (OpcUa_CreateMonitoredItemsResponse*) msg_subscription_create_monitored_item_bs__p_resp_msg;
     OpcUa_MonitoredItemCreateResult* monitResp =
-        &createResp->Results[msg_subscription_create_monitored_item_bs__p_index];
+        &createResp->Results[msg_subscription_create_monitored_item_bs__p_index - 1];
     util_status_code__B_to_C(msg_subscription_create_monitored_item_bs__p_sc, &monitResp->StatusCode);
     monitResp->MonitoredItemId = msg_subscription_create_monitored_item_bs__p_monitored_item_id;
     monitResp->RevisedSamplingInterval = msg_subscription_create_monitored_item_bs__p_revSamplingItv;

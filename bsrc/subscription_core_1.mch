@@ -99,7 +99,7 @@ INITIALISATION
     a_KeepAliveCounter := {}         ||
     a_MessageSent := {}              ||
     a_PublishingEnabled := {}        ||
-    a_SeqNum              := {}      ||
+    a_SeqNum := {}                   ||
 
     a_pendingNotificationQueue := {} ||
     a_publishRequestQueue := {}      ||

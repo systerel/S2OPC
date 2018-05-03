@@ -161,7 +161,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
     case SE_TO_SE_CREATE_SESSION:
         SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_CREATE_SESSION session=%" PRIu32 " scCfgIdx=%" PRIuPTR, id,
                                auxParam);
-        if (auxParam <= constants_bs__t_channel_config_idx_i_max)
+        if (auxParam <= constants__t_channel_config_idx_i_max)
         {
             io_dispatch_mgr__internal_client_create_session((constants__t_session_i) id,
                                                             (constants__t_channel_config_idx_i) auxParam);
@@ -202,10 +202,6 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
                 SOPC_Logger_TraceError("ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32 " treatment failed",
                                        id);
             }
-        }
-        else
-        {
-            SOPC_Logger_TraceError("ServicesMgr: Too many existing sessions. Cannot create another one.");
         }
         break;
     case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
@@ -598,7 +594,8 @@ void SOPC_Services_Clear()
 {
     address_space_bs__UNINITIALISATION();
     service_mgr_bs__UNINITIALISATION();
-    monitored_item_pointer_bs__UNINITIALISATION();
+    monitored_item_pointer_bs__UNINITIALISATION_monitored_item_bs();
+    subscription_core_bs__UNINITIALISATION_subscription_core_bs();
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);
@@ -611,7 +608,4 @@ void SOPC_Services_Clear()
     {
         SOPC_Logger_TraceError("Application event mgr: error status when stopping '%d'", status);
     }
-
-    closeAllConnectionsSync.allDisconnectedFlag = false;
-    closeAllConnectionsSync.requestedFlag = false;
 }

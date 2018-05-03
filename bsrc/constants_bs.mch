@@ -54,9 +54,7 @@ SETS
     t_counter_i;
     t_opcua_duration_i;
     t_notificationQueue_i;
-    t_notificationQueueIterator_i;
     t_publishReqQueue_i;
-    t_publishReqQueueIterator_i;
     t_monitoredItemQueue_i;
     t_monitoredItemQueueIterator_i;
     t_monitoredItemPointer_i;
@@ -100,10 +98,9 @@ CONCRETE_CONSTANTS
     c_sub_seq_num_init,
     c_timeref_indet,
     c_opcua_duration_indet,
+    c_opcua_duration_zero,
     c_notificationQueue_indet,
-    c_notificationQueueIterator_indet,
     c_publishReqQueue_indet,
-    c_publishReqQueueIterator_indet,
     c_monitoredItemQueue_indet,
     c_monitoredItemQueueIterator_indet,
     c_monitoredItemPointer_indet,
@@ -142,9 +139,7 @@ ABSTRACT_CONSTANTS
     t_sub_seq_num,
     t_timeref,
     t_notificationQueue,
-    t_notificationQueueIterator,
     t_publishReqQueue,
-    t_publishReqQueueIterator,
     t_monitoredItemQueue,
     t_monitoredItemQueueIterator,
     t_monitoredItemPointer,
@@ -228,22 +223,15 @@ PROPERTIES
     c_timeref_indet /: t_timeref &
     
     c_opcua_duration_indet : t_opcua_duration_i &
+    c_opcua_duration_zero : t_opcua_duration_i &
     
     t_notificationQueue <: t_notificationQueue_i &
     c_notificationQueue_indet : t_notificationQueue_i &
     c_notificationQueue_indet /: t_notificationQueue &
     
-    t_notificationQueueIterator <: t_notificationQueueIterator_i &
-    c_notificationQueueIterator_indet : t_notificationQueueIterator_i &
-    c_notificationQueueIterator_indet /: t_notificationQueueIterator &
-    
     t_publishReqQueue <: t_publishReqQueue_i &
     c_publishReqQueue_indet : t_publishReqQueue_i &
     c_publishReqQueue_indet /: t_publishReqQueue &
-
-    t_publishReqQueueIterator <: t_publishReqQueueIterator_i &
-    c_publishReqQueueIterator_indet : t_publishReqQueueIterator_i &
-    c_publishReqQueueIterator_indet /: t_publishReqQueueIterator &
     
     t_monitoredItemQueue <: t_monitoredItemQueue_i &
     c_monitoredItemQueue_indet : t_monitoredItemQueue_i &

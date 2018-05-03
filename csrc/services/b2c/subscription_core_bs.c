@@ -15,17 +15,58 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "util_b2c.h"
+#include "subscription_core_bs.h"
 
 /*--------------
    SEES Clause
   --------------*/
 #include "constants.h"
 
+#include <assert.h>
+
+#include "address_space_impl.h"
+#include "util_b2c.h"
+
+SOPC_Dict* nodeIdToMonitoredItemQueue = NULL;
+
+static uint64_t nodeid_hash(const void* id)
+{
+    uint64_t hash;
+    SOPC_NodeId_Hash((const SOPC_NodeId*) id, &hash);
+    return hash;
+}
+
+static bool nodeid_equal(const void* a, const void* b)
+{
+    int32_t cmp;
+    SOPC_NodeId_Compare((const SOPC_NodeId*) a, (const SOPC_NodeId*) b, &cmp);
+
+    return cmp == 0;
+}
+
+static void free_monitored_item_queue(void* data)
+{
+    SOPC_SLinkedList* miQueue = (SOPC_SLinkedList*) data;
+    SOPC_SLinkedList_Delete(miQueue);
+}
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void subscription_core_bs__INITIALISATION(void) {}
+void subscription_core_bs__INITIALISATION(void)
+{
+    assert(nodeIdToMonitoredItemQueue == NULL);
+
+    nodeIdToMonitoredItemQueue = SOPC_Dict_Create(NULL, nodeid_hash, nodeid_equal, NULL, free_monitored_item_queue);
+    assert(nodeIdToMonitoredItemQueue != NULL);
+}
+
+void subscription_core_bs__UNINITIALISATION_subscription_core_bs(void)
+{
+    assert(nodeIdToMonitoredItemQueue != NULL);
+    SOPC_Dict_Delete(nodeIdToMonitoredItemQueue);
+    nodeIdToMonitoredItemQueue = NULL;
+}
 
 /*--------------------
    OPERATIONS Clause
@@ -93,4 +134,25 @@ void subscription_core_bs__compute_create_subscription_revised_params(
     {
         *subscription_core_bs__revisedMaxNotificationsPerPublish = subscription_core_bs__p_maxNotificationsPerPublish;
     }
+}
+
+void subscription_core_bs__get_nodeToMonitoredItemQueue(
+    const constants__t_NodeId_i subscription_core_bs__p_nid,
+    constants__t_monitoredItemQueue_i* const subscription_core_bs__p_monitoredItemQueue)
+{
+    bool valFound = false;
+    bool valAdded = false;
+    SOPC_SLinkedList* monitoredItemQueue =
+        SOPC_Dict_Get(nodeIdToMonitoredItemQueue, subscription_core_bs__p_nid, &valFound);
+    if (false == valFound)
+    {
+        monitoredItemQueue = SOPC_SLinkedList_Create(0);
+        valAdded = SOPC_Dict_Insert(nodeIdToMonitoredItemQueue, subscription_core_bs__p_nid, monitoredItemQueue);
+        if (false == valAdded)
+        {
+            SOPC_SLinkedList_Delete(monitoredItemQueue);
+            monitoredItemQueue = NULL;
+        }
+    }
+    *subscription_core_bs__p_monitoredItemQueue = monitoredItemQueue;
 }

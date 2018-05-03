@@ -48,15 +48,15 @@ OPERATIONS
         p_subscription <-- get_msg_create_monitored_items_req_subscription (p_req_msg);
         p_timestampToRet <-- get_msg_create_monitored_items_req_timestamp_to_ret (p_req_msg);
         p_nb_monitored_items <-- get_msg_create_monitored_items_req_nb_monitored_items (p_req_msg);
-        IF p_timestampToRet = c_TimestampsToReturn_indet
-        THEN
-            p_sc := e_sc_bad_timestamps_to_return_invalid
-        ELSIF p_nb_monitored_items <= 0
+        IF p_nb_monitored_items <= 0
         THEN
             p_sc := e_sc_bad_nothing_to_do
         ELSIF p_nb_monitored_items > k_n_monitoredItem_max
         THEN
             p_sc := e_sc_bad_too_many_ops
+        ELSIF p_timestampToRet = c_TimestampsToReturn_indet
+        THEN
+            p_sc := e_sc_bad_timestamps_to_return_invalid
         ELSE
             l_monitored_item_not_null <-- check_msg_create_monitored_items_req_not_null (p_req_msg);
             IF l_monitored_item_not_null = FALSE
