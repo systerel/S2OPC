@@ -407,6 +407,16 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
     </References>
   </UAVariable>
+  <UAVariable BrowseName="0:State" NodeId="i=2259" ParentNodeId="i=1000" DataType="Int32">
+    <DisplayName>State</DisplayName>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Int32>0</uax:Int32>
+    </Value>
+  </UAVariable>
   <UAVariable NodeId="i=3114" BrowseName="EnabledFlag" ParentNodeId="i=2010" DataType="Boolean" AccessLevel="3" UserAccessLevel="3">
     <DisplayName>EnabledFlag</DisplayName>
     <Description>If TRUE the diagnostics collection is enabled.</Description>
