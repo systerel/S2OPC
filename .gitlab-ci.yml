@@ -144,7 +144,7 @@ test-check:
 
 test-unit:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:e10957c4e1ea14cc2c1fe2d8b8eec4e923d85cc9c168e6aebe3418eaec4b8ace  # test:2.1
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:60afa61d5eb71d12de72a51ba3c9090505e1525d819c6f682f41a8f782b74ceb  # test:2.2
   script:
     - ./test-all.sh
   artifacts:
@@ -181,7 +181,7 @@ test-uactt:
 coverage-analysis:
   <<: *docker_job
   stage: analyses
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:e10957c4e1ea14cc2c1fe2d8b8eec4e923d85cc9c168e6aebe3418eaec4b8ace  # test:2.1
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:60afa61d5eb71d12de72a51ba3c9090505e1525d819c6f682f41a8f782b74ceb  # test:2.2
   script:
     - ./.gen_coverage.sh
   artifacts:
