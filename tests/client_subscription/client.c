@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h> /* usleep */
 
 #include "libs2opc_client.h"
 
@@ -57,6 +56,10 @@
 #define PATH_CLIENT_PUBL "./client_public/client_4k.der"
 /* Path to the client private key */
 #define PATH_CLIENT_PRIV "./client_private/client_4k.key"
+
+/* usleep declaration. The unistd.h declaration is conditioned by unwanted defines. Consequently, this may fail. */
+#include <unistd.h>
+extern int usleep(__useconds_t __useconds);
 
 /* Callbacks */
 void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);

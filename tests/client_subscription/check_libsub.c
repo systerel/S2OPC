@@ -31,22 +31,22 @@
 START_TEST(test_time_conversion)
 {
     /* Thu Sep 21 00:00:00 1905 UTC, unix timestamp is -2028499761.000000 */
-    ck_assert(Helpers_OPCTimeToNTP(96159738390000000) == 775194519791468544);
+    ck_assert(Helpers_OPCTimeToNTP(96159738390000000ULL) == 775194519791468544ULL);
     /* Tue Jan  3 19:44:21 1978 UTC, unix timestamp is 252701061.000000 */
-    ck_assert(Helpers_OPCTimeToNTP(118971746610000000) == 10572877445889785856);
+    ck_assert(Helpers_OPCTimeToNTP(118971746610000000ULL) == 10572877445889785856ULL);
     /* Thu Nov 30 04:57:25 2034 UTC, unix timestamp is 2048471845.694287 */
-    ck_assert(Helpers_OPCTimeToNTP(136929454456942870) == 18285654237264005879);
+    ck_assert(Helpers_OPCTimeToNTP(136929454456942870ULL) == 18285654237264005879ULL);
     /* Tue Nov 30 04:57:25 2055 UTC, unix timestamp is 2711159845.694287 */
-    ck_assert(Helpers_OPCTimeToNTP(143556334456942870) == 2685133451006102263);
+    ck_assert(Helpers_OPCTimeToNTP(143556334456942870ULL) == 2685133451006102263ULL);
     /* Fri May  4 17:34:36 2018 UTC, unix timestamp is 1525448076.741346 */
-    ck_assert(Helpers_OPCTimeToNTP(131699216767413460) == 16039284254580464121);
+    ck_assert(Helpers_OPCTimeToNTP(131699216767413460ULL) == 16039284254580464121ULL);
 }
 END_TEST
 
 Suite* tests_make_suite_libsub(void)
 {
-    Suite* s;
-    TCase *tc_time, *tc_elapsed_time;
+    Suite* s = NULL;
+    TCase* tc_time = NULL;
 
     s = suite_create("Client subscription library");
 
