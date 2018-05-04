@@ -726,7 +726,7 @@ bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
      * and searched for easily. */
     if (bProcess)
     {
-        /* Depending on the event, check either by request id or by session id. */
+        /* Depending on the event, check either by request ctx or session ctx. */
         switch (event)
         {
         /* appCtx is request context */

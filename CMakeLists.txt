@@ -701,3 +701,9 @@ add_executable(libsubscribe_client "${LIBSUBSCRIBE_PATH}/client.c"
                                    )
 target_link_libraries(libsubscribe_client PRIVATE libsubscribe)
 #target_include_directories(libsubscribe_client PRIVATE ${LIBSUBSCRIBE_PATH})
+
+# Helpers unit tests
+add_executable(check_libsub "${LIBSUBSCRIBE_PATH}/check_libsub.c")
+target_include_directories(check_libsub PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(check_libsub PRIVATE libsubscribe ${LIBCHECK_DEP_LIB})
+s2opc_unit_test(check_libsub)
