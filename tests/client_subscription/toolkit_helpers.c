@@ -465,10 +465,12 @@ SOPC_LibSub_Timestamp Helpers_OPCTimeToNTP(SOPC_DateTime ts)
 
     /* First, subtract the difference between epochs */
     uts -= 9435484800 * 10000000;
-    /* For the fraction of seconds, multiply first, then divide, which keeps the least significant bits of ts */
-    uint64_t fraction = ((uts << 32) / 10000000);
+    /* For the fraction of seconds, take modulo, then multiply, then divide,
+     * which never overflows because modulo is < 2^32 */
+    uint64_t fraction = (((uts % 10000000) << 32) / 10000000);
     /* for the second part, divide first, then multiply, which keeps the most significant bits of ts */
     uint64_t seconds = ((uts / 10000000) << 32);
 
-    return (seconds & 0xFFFFFFFF00000000) | (fraction & 0xFFFFFFFF);
+    /* seconds are always > 2**32, fraction is always < 2**32, it is possible to OR them without mask */
+    return seconds | fraction;
 }
