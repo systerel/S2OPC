@@ -20,8 +20,8 @@
 #
 set -e
 
-# uactt 1.3
-DOCKER_IMAGE=3aca139a3c13
+# uactt 1.4
+DOCKER_IMAGE=223b52ecee12
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
     /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
