@@ -1,4 +1,6 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.8)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
+
 project (INGOPCS)
 include(CheckCXXCompilerFlag)
 
@@ -123,6 +125,40 @@ add_custom_target(build_info ALL
                    DEPENDS csrc/configuration/sopc_toolkit_build_info.h
                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+# Keep a static version of the mbedtls libraries to link the tests
+set(MBEDTLS_CUSTOM_PATH 0)
+
+if(DEFINED MBEDTLS_LIBRARY)
+	set(MBEDTLS_CUSTOM_PATH 1)
+endif()
+
+set(MBEDTLS_USE_STATIC_LIBS 1)
+find_package(MbedTLS QUIET)
+set(MBEDTLS_STATIC_LIBRARIES ${MBEDTLS_LIBRARIES})
+
+# If the path to MbedTLS was not given manually by the user, we need to clear
+# those variables so that the second call to find_package below does a new
+# search.
+if (NOT ${MBEDTLS_CUSTOM_PATH})
+	unset(MBEDTLS_LIBRARY CACHE)
+	unset(MBEDX509_LIBRARY CACHE)
+	unset(MBEDCRYPTO_LIBRARY CACHE)
+endif()
+
+
+# Mandatory dependencies
+if (${BUILD_SHARED_LIBS})
+	set(MBEDTLS_USE_STATIC_LIBS 0)
+else()
+	set(MBEDTLS_USE_STATIC_LIBS 1)
+endif()
+
+find_package(MbedTLS REQUIRED)
+
+# We always link check statically, so that our test binaries are standalone
+set(CHECK_USE_STATIC_LIBS 1)
+find_package(Check REQUIRED)
+
 # Define non-platform dependent source files
 file(GLOB_RECURSE INGOPCS_SRCS
     "csrc/api_toolkit/*.c"
@@ -134,10 +170,6 @@ file(GLOB_RECURSE INGOPCS_SRCS
     "csrc/secure_channels/*.c"
     "csrc/services/*.c"
 )
-
-# Define INGOPCS library (static or shared based on BUILD_SHARED_LIBS)
-add_library(ingopcs ${PLATFORM_SRCS} ${INGOPCS_SRCS})
-add_dependencies(ingopcs build_info)
 
 # Define INGOPCS library includes
 file(GLOB INGOPCS_INCLUDE_FILES
@@ -167,17 +199,41 @@ set(INGOPCS_PRIVATE_INCLUDES
     "csrc/helpers_platform_dep/${PLATFORM_DIR}"
     "csrc/services/bgenc"
 )
-target_include_directories(ingopcs BEFORE
-    PUBLIC  ${INGOPCS_PUBLIC_INCLUDES}
-    PRIVATE ${INGOPCS_PRIVATE_INCLUDES}
-)
 
 # Define INGOPCS library dependencies
-set(INGOPCS_DEP_LIBS mbedtls mbedcrypto mbedx509 ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
+set(INGOPCS_DEP_LIBS ${MBEDTLS_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
+set(INGOPCS_STATIC_DEP_LIBS ${MBEDTLS_STATIC_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
+
+add_library(ingopcs_obj OBJECT ${PLATFORM_SRCS} ${INGOPCS_SRCS})
+target_include_directories(ingopcs_obj BEFORE
+	PUBLIC  ${INGOPCS_PUBLIC_INCLUDES}
+	PRIVATE ${INGOPCS_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS}
+)
+add_dependencies(ingopcs_obj build_info)
+
+# Needed if we want to use the objects in a shared library
+set_property(TARGET ingopcs_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+add_library(ingopcs $<TARGET_OBJECTS:ingopcs_obj>)
+target_include_directories(ingopcs PUBLIC ${INGOPCS_PUBLIC_INCLUDES})
 target_link_libraries(ingopcs PUBLIC ${INGOPCS_DEP_LIBS})
+
 if(WIN32)
-  # always link libc statically (even in case of shared library)
-  target_link_libraries(ingopcs PRIVATE -static-libgcc)
+	# always link libc statically (even in case of shared library)
+	target_link_libraries(ingopcs PRIVATE -static-libgcc)
+endif()
+
+# Ensure we always build a static version of ingopcs for the tests
+if (${BUILD_SHARED_LIBS})
+	add_library(ingopcs_static STATIC $<TARGET_OBJECTS:ingopcs_obj>)
+	target_include_directories(ingopcs_static PUBLIC ${INGOPCS_PUBLIC_INCLUDES})
+	target_link_libraries(ingopcs_static PUBLIC ${INGOPCS_STATIC_DEP_LIBS})
+endif()
+
+if (${BUILD_SHARED_LIBS})
+	set(INGOPCS_STATIC_LIB ingopcs_static)
+else()
+	set(INGOPCS_STATIC_LIB ingopcs)
 endif()
 
 # Define installation targets
@@ -196,17 +252,6 @@ install(TARGETS ingopcs
 )
 
 # INGOPCS tests ################################################################################
-
-# lib Check dependency: set specialized linking configuration dependent on platform
-if(UNIX)
-  # force static linking
-  set(LIBCHECK_DEP_LIB libcheck.a)
-elseif(WIN32)
-  # force static linking + libcheck dependency to provide missing functions on windows
-  set(LIBCHECK_DEP_LIB libcheck.a compat)
-else()
-  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
-endif()
 
 if(UNIX)
   set(PYTHON_BIN python3)
@@ -253,8 +298,9 @@ s2opc_unit_test(check_ingopcs_addspace GENERATE_TAP)
 # Helpers unit tests
 file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
 add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
-target_include_directories(check_helpers PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(check_helpers PRIVATE ingopcs ${LIBCHECK_DEP_LIB})
+target_include_directories(check_helpers PRIVATE ${INGOPCS_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
+target_link_libraries(check_helpers PRIVATE ${INGOPCS_STATIC_LIB} ${CHECK_LIBRARIES})
+
 s2opc_unit_test(check_helpers)
 
 ## Copy reference logs files to bin/ directory
@@ -274,7 +320,7 @@ add_executable(toolkit_test_server_local_service "tests/services/toolkit_test_se
                                                  "tests/services/test_results.c"
                                                  "tests/services/testlib_read_response.c"
                                                  "${ADDSPACEGEN_DIR}/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_server_local_service PRIVATE ingopcs)
+target_link_libraries(toolkit_test_server_local_service PRIVATE ${INGOPCS_STATIC_LIB})
 target_include_directories(toolkit_test_server_local_service PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                              ${INGOPCS_PUBLIC_INCLUDES}
                                                              ${INGOPCS_PRIVATE_INCLUDES})
@@ -287,22 +333,24 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
                                    "${ADDSPACEGEN_DIR}/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_client PRIVATE ingopcs)
+target_link_libraries(toolkit_test_client PRIVATE ${INGOPCS_STATIC_LIB})
 target_include_directories(toolkit_test_client PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                        ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
+
 add_executable(toolkit_test_suite_client "tests/demo/test_suite_client.c"
                                          "tests/demo/test_discovery.c"
                                          "tests/demo/config.c"
                                          "tests/demo/state_machine.c")
-target_link_libraries(toolkit_test_suite_client PRIVATE ingopcs ${LIBCHECK_DEP_LIB})
+target_link_libraries(toolkit_test_suite_client PRIVATE ${INGOPCS_STATIC_LIB} ${CHECK_LIBRARIES})
 target_include_directories(toolkit_test_suite_client PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                             ${INGOPCS_PRIVATE_INCLUDES})
+                                                             ${INGOPCS_PRIVATE_INCLUDES}
+                                                             ${CHECK_INCLUDE_DIRS})
 
 # Server test
 add_executable(toolkit_test_server "tests/services/toolkit_test_server.c"
                                    "${ADDSPACEGEN_DIR}/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_server PRIVATE ingopcs)
+target_link_libraries(toolkit_test_server PRIVATE ${INGOPCS_STATIC_LIB})
 target_include_directories(toolkit_test_server PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                        ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
@@ -315,7 +363,7 @@ add_executable(ingopcs_browse "tests/demo/ingopcs_browse.c"
                               "tests/demo/state_machine.c"
                               "tests/demo/config.c"
                               )
-target_link_libraries(ingopcs_browse PRIVATE ingopcs)
+target_link_libraries(ingopcs_browse PRIVATE ${INGOPCS_STATIC_LIB})
 target_include_directories(ingopcs_browse PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                    ${INGOPCS_PUBLIC_INCLUDES}
                                                    ${INGOPCS_PRIVATE_INCLUDES})
@@ -324,15 +372,16 @@ add_executable(ingopcs_read "tests/demo/ingopcs_read.c"
                             "tests/demo/state_machine.c"
                             "tests/demo/config.c"
                             )
-target_link_libraries(ingopcs_read PRIVATE ingopcs)
+target_link_libraries(ingopcs_read PRIVATE ${INGOPCS_STATIC_LIB})
 target_include_directories(ingopcs_read PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                  ${INGOPCS_PUBLIC_INCLUDES}
                                                  ${INGOPCS_PRIVATE_INCLUDES})
+
 add_executable(ingopcs_write "tests/demo/ingopcs_write.c"
                              "tests/demo/state_machine.c"
                              "tests/demo/config.c"
                              )
-target_link_libraries(ingopcs_write PRIVATE ingopcs)
+target_link_libraries(ingopcs_write PRIVATE ${INGOPCS_STATIC_LIB})
 target_include_directories(ingopcs_write PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                   ${INGOPCS_PUBLIC_INCLUDES}
                                                   ${INGOPCS_PRIVATE_INCLUDES})
@@ -341,7 +390,7 @@ add_executable(ingopcs_discovery "tests/demo/ingopcs_discovery.c"
                                  "tests/demo/state_machine.c"
                                  "tests/demo/config.c"
                                  )
-target_link_libraries(ingopcs_discovery PRIVATE ingopcs)
+target_link_libraries(ingopcs_discovery PRIVATE ${INGOPCS_STATIC_LIB})
 target_include_directories(ingopcs_discovery PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                       ${INGOPCS_PUBLIC_INCLUDES}
                                                       ${INGOPCS_PRIVATE_INCLUDES})
@@ -383,8 +432,9 @@ add_executable(check_sockets ${SOCKETS_SRC}
                              ${SOCKETS_TEST})
 target_include_directories(check_sockets PRIVATE "tests/sockets/stubs"
                                                  ${INGOPCS_PUBLIC_INCLUDES}
-                                                 ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(check_sockets PRIVATE ${LIBCHECK_DEP_LIB} ${INGOPCS_DEP_LIBS})
+                                                 ${INGOPCS_PRIVATE_INCLUDES}
+                                                 ${CHECK_INCLUDE_DIRS})
+target_link_libraries(check_sockets PRIVATE ${CHECK_LIBRARIES} ${INGOPCS_STATIC_DEP_LIBS})
 s2opc_unit_test(check_sockets)
 
 # Secure channels (stubbed on services side) tests
@@ -412,18 +462,20 @@ add_executable(test_secure_channels_client ${SOCKETS_SRC}
 
 target_include_directories(test_secure_channels_client PRIVATE "tests/secure_channels/stubs"
                                                                ${INGOPCS_PUBLIC_INCLUDES}
-                                                               ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(test_secure_channels_client PRIVATE ${INGOPCS_DEP_LIBS})
+                                                               ${INGOPCS_PRIVATE_INCLUDES}
+                                                               ${MBEDTLS_INCLUDE_DIRS})
+target_link_libraries(test_secure_channels_client PRIVATE ${INGOPCS_STATIC_DEP_LIBS})
 
 # Secure channels tests: SERVER executable
 add_executable(test_secure_channels_server ${SOCKETS_SRC}
                                            ${SECURE_CHANNELS_SRC}
                                            ${SECURE_CHANNELS_SERVER_TEST})
-target_link_libraries(test_secure_channels_server PRIVATE ${INGOPCS_DEP_LIBS})
+target_link_libraries(test_secure_channels_server PRIVATE ${INGOPCS_STATIC_DEP_LIBS})
 
 target_include_directories(test_secure_channels_server PRIVATE "tests/secure_channels/stubs"
                                                                ${INGOPCS_PUBLIC_INCLUDES}
-                                                               ${INGOPCS_PRIVATE_INCLUDES})
+                                                               ${INGOPCS_PRIVATE_INCLUDES}
+                                                               ${MBEDTLS_INCLUDE_DIRS})
 
 # Secure channels tests: tests on received buffer
 file(GLOB_RECURSE SECURE_CHANNELS_BUFFER_TEST
@@ -435,12 +487,14 @@ file(GLOB_RECURSE SECURE_CHANNELS_BUFFER_TEST
 
 add_executable(check_sc_rcv_buffer ${SECURE_CHANNELS_SRC}
                                                ${SECURE_CHANNELS_BUFFER_TEST})
-target_link_libraries(check_sc_rcv_buffer PRIVATE ${LIBCHECK_DEP_LIB} ${INGOPCS_DEP_LIBS})
+target_link_libraries(check_sc_rcv_buffer PRIVATE ${CHECK_LIBRARIES} ${INGOPCS_STATIC_DEP_LIBS})
 
 target_include_directories(check_sc_rcv_buffer PRIVATE "tests/secure_channels/stubs"
                                                        "tests/helpers"
                                                        ${INGOPCS_PUBLIC_INCLUDES}
-                                                       ${INGOPCS_PRIVATE_INCLUDES})
+                                                       ${INGOPCS_PRIVATE_INCLUDES}
+                                                       ${MBEDTLS_INCLUDE_DIRS}
+                                                       ${CHECK_INCLUDE_DIRS})
 s2opc_unit_test(check_sc_rcv_buffer)
 
 # Secure channels tests: tests on received encrypted buffer
@@ -453,12 +507,14 @@ file(GLOB_RECURSE SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST
 
 add_executable(check_sc_rcv_encrypted_buffer ${SECURE_CHANNELS_SRC}
                                              ${SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST})
-target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE ${LIBCHECK_DEP_LIB} ${INGOPCS_DEP_LIBS})
+target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE ${CHECK_LIBRARIES} ${INGOPCS_STATIC_DEP_LIBS})
 
 target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "tests/secure_channels/stubs"
                                                                  "tests/helpers"
                                                                  ${INGOPCS_PUBLIC_INCLUDES}
-                                                                 ${INGOPCS_PRIVATE_INCLUDES})
+                                                                 ${INGOPCS_PRIVATE_INCLUDES}
+                                                                 ${MBEDTLS_INCLUDE_DIRS}
+                                                                 ${CHECK_INCLUDE_DIRS})
 s2opc_unit_test(check_sc_rcv_encrypted_buffer)
 
 # Validation tests
@@ -498,5 +554,5 @@ s2opc_sc_level_test("SignAndEncrypt_B256Sha256_2048bit_server_vs_4096bit_client"
 # Benchmarks
 add_executable(bench_reads "tests/benchmarks/bench_reads.c")
 set_source_files_properties("tests/benchmarks/bench_reads.c" PROPERTIES COMPILE_FLAGS "-D_XOPEN_SOURCE=600")
-target_link_libraries(bench_reads PRIVATE ingopcs)
+target_link_libraries(bench_reads PRIVATE ${INGOPCS_STATIC_LIB})
 target_include_directories(bench_reads PRIVATE ${INGOPCS_PUBLIC_INCLUDES} ${INGOPCS_PRIVATE_INCLUDES})
