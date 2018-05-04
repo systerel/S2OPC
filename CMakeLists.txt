@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 2.8)
 project (INGOPCS)
+include(CheckCXXCompilerFlag)
 
 # Define runtime output directory
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
@@ -29,11 +30,25 @@ endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 
+# check if compiler support new sanitization options
+CHECK_CXX_COMPILER_FLAG(-fsanitize=pointer-compare COMPILER_SUPPORTS_SAN_PC)
+CHECK_CXX_COMPILER_FLAG(-fsanitize=pointer-subtract COMPILER_SUPPORTS_SAN_PS)
+
 option(WITH_ASAN "build with ASAN" OFF)
 if(WITH_ASAN)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
+  if(COMPILER_SUPPORTS_SAN_PC)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=pointer-compare")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=pointer-compare")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=pointer-compare")
+  endif()
+  if(COMPILER_SUPPORTS_SAN_PS)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=pointer-subtract")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=pointer-subtract")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=pointer-subtract")
+  endif()
 endif()
 
 option(WITH_TSAN "build with TSAN" OFF)
