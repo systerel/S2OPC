@@ -815,7 +815,7 @@ def generate_variable_values(nodes, fd):
             fd.write('{true, SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {.Bstring=%s}},\n' %
                      generate_string(n.value.val))
         elif n.value.ty == VALUE_TYPE_BYTE:
-            fd.write('{true, SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte=0x%02x}},\n' % n.value.val)
+            fd.write('{true, SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte=%d}},\n' % n.value.val)
         elif n.value.ty == VALUE_TYPE_INT16:
             fd.write('{true, SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue, {.Int16=%d}},\n' % n.value.val)
         elif n.value.ty == VALUE_TYPE_INT32:
@@ -823,7 +823,7 @@ def generate_variable_values(nodes, fd):
         elif n.value.ty == VALUE_TYPE_INT64:
             fd.write('{true, SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64=%d}},\n' % n.value.val)
         elif n.value.ty == VALUE_TYPE_SBYTE:
-            fd.write('{true, SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.Sbyte=0x%02x}},\n' % n.value.val)
+            fd.write('{true, SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.Sbyte=%d}},\n' % n.value.val)
         elif n.value.ty == VALUE_TYPE_UINT16:
             fd.write('{true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16=%d}},\n' % n.value.val)
         elif n.value.ty == VALUE_TYPE_UINT32:
@@ -831,9 +831,9 @@ def generate_variable_values(nodes, fd):
         elif n.value.ty == VALUE_TYPE_UINT64:
             fd.write('{true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64=%d}},\n' % n.value.val)
         elif n.value.ty == VALUE_TYPE_FLOAT:
-            fd.write('{true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Float=%f}},\n' % n.value.val)
+            fd.write('{true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv=%f}},\n' % n.value.val)
         elif n.value.ty == VALUE_TYPE_DOUBLE:
-            fd.write('{true, SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Double=%f}},\n' % n.value.val)
+            fd.write('{true, SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev=%f}},\n' % n.value.val)
         else:
             raise CodeGenerationError('Unsupported value type %d for node %s' % (n.value.ty, n.nodeid))
 
