@@ -31,6 +31,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_log_manager.h"
+#include "sopc_time.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
 #define SKIP_S2OPC_DEFINITIONS
@@ -261,7 +262,7 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
     {
         while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM))
         {
-            usleep(1000);
+            SOPC_Sleep(1);
         }
         if (SOPC_StaMac_IsError(pSM))
         {
@@ -301,11 +302,14 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
     {
         status = SOPC_StaMac_CreateMonitoredItem(pSM, szNodeId, attrId, &appCtx, pDataId);
     }
+
+    /* Wait for the monitored item to be created */
+    /* TODO: use Mutex and CV */
     if (SOPC_STATUS_OK == status)
     {
         while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasMonItByAppCtx(pSM, appCtx))
         {
-            usleep(1000);
+            SOPC_Sleep(1);
         }
         if (SOPC_StaMac_IsError(pSM))
         {
@@ -326,6 +330,7 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId c_id)
     }
 
     status = SOPC_STATUS_NOK;
+    (void) c_id;
     return status;
 }
 

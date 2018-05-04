@@ -40,18 +40,6 @@
  */
 
 /* Structures */
-enum SOPC_StaMac_State
-{
-    stError,
-    stInit,
-    stActivating,
-    stActivated,
-    stCreatingSubscr,
-    stCreatingMonIt,
-    stCreatingPubReq,
-    stClosing
-};
-
 struct SOPC_StaMac_ReqCtx
 {
     uint32_t uid;     /* Unique request identifier */
@@ -712,6 +700,8 @@ bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                             void* pParam,
                             uintptr_t appCtx)
 {
+    (void) arg;
+    (void) pParam;
     bool bProcess = true;
     SOPC_SLinkedListIterator pListIter = NULL;
 

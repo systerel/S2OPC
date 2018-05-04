@@ -53,8 +53,19 @@
 
 #include "sopc_user_app_itf.h"
 
+/* Machine states */
+typedef enum {
+    stError,
+    stInit,
+    stActivating,
+    stActivated,
+    stCreatingSubscr,
+    stCreatingMonIt,
+    stCreatingPubReq,
+    stClosing
+} SOPC_StaMac_State;
+
 /* Machine content is private to the implementation */
-typedef enum SOPC_StaMac_State SOPC_StaMac_State;
 typedef struct SOPC_StaMac_ReqCtx SOPC_StaMac_ReqCtx;
 typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
 
