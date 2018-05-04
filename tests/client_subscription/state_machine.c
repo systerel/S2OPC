@@ -497,25 +497,33 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     printf("# Info: PublishResponse received.\n");
                     /* TODO: move this to an external function */
                     pPubResp = (OpcUa_PublishResponse*) pParam;
-                    /* Take note to acknowledge later */
+                    /* Take note to acknowledge later. There is no ack with KeepAlive. */
                     /* TODO: this limits the benefits of having multiple pending PublishRequest, maybe
                      * it would be more appropriate to have a list of SeqNumbsToAck... */
                     assert(!pSM->bAckSubscr);
-                    pSM->bAckSubscr = true;
-                    pSM->iAckSeqNum = pPubResp->AvailableSequenceNumbers[pPubResp->NoOfAvailableSequenceNumbers - 1];
+                    if (0 < pPubResp->NoOfAvailableSequenceNumbers)
+                    {
+                        pSM->bAckSubscr = true;
+                        /* Only take the last one when more than 1 is available */
+                        pSM->iAckSeqNum =
+                            pPubResp->AvailableSequenceNumbers[pPubResp->NoOfAvailableSequenceNumbers - 1];
+                    }
                     pSM->nTokenUsable -= 1;
                     /* Traverse the notifications and calls the callback */
                     pNotifMsg = &pPubResp->NotificationMessage;
-                    /* For now, only handles NotificationData */
-                    assert(1 == pNotifMsg->NoOfNotificationData);
-                    assert(&OpcUa_DataChangeNotification_EncodeableType ==
-                           pNotifMsg->NotificationData[0].Body.Object.ObjType);
-                    pDataNotif = (OpcUa_DataChangeNotification*) pNotifMsg->NotificationData[0].Body.Object.Value;
-                    for (i = 0; i < pDataNotif->NoOfMonitoredItems; ++i)
+                    /* For now, only handles at most a NotificationData */
+                    assert(1 >= pNotifMsg->NoOfNotificationData);
+                    if (0 < pNotifMsg->NoOfNotificationData)
                     {
-                        pMonItNotif = &pDataNotif->MonitoredItems[i];
-                        status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
-                        pSM->cbkDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
+                        assert(&OpcUa_DataChangeNotification_EncodeableType ==
+                               pNotifMsg->NotificationData[0].Body.Object.ObjType);
+                        pDataNotif = (OpcUa_DataChangeNotification*) pNotifMsg->NotificationData[0].Body.Object.Value;
+                        for (i = 0; i < pDataNotif->NoOfMonitoredItems; ++i)
+                        {
+                            pMonItNotif = &pDataNotif->MonitoredItems[i];
+                            status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
+                            pSM->cbkDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
+                        }
                     }
                     /* TODO: verify the results[] which contains a status for each Ack */
                 }
