@@ -112,7 +112,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_ReferenceTypeId(
     assert(NULL != ppResRefTypeId[msg_browse_response_bs__p_bvi]);
     assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     status = SOPC_NodeId_Copy(&ppResRefTypeId[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                              (SOPC_NodeId*) msg_browse_response_bs__p_NodeId);
+                              msg_browse_response_bs__p_NodeId);
     assert(SOPC_STATUS_OK == status);
 }
 
@@ -139,7 +139,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_BrowseName(
     assert(NULL != ppResBrowseName[msg_browse_response_bs__p_bvi]);
     assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     status = SOPC_QualifiedName_Copy(&ppResBrowseName[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                                     (SOPC_QualifiedName*) msg_browse_response_bs__p_BrowseName);
+                                     msg_browse_response_bs__p_BrowseName);
     assert(SOPC_STATUS_OK == status);
 }
 
@@ -165,7 +165,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_DisplayName(
     assert(NULL != ppResDisplayName[msg_browse_response_bs__p_bvi]);
     assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     status = SOPC_LocalizedText_Copy(&ppResDisplayName[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                                     (SOPC_LocalizedText*) msg_browse_response_bs__p_DisplayName);
+                                     msg_browse_response_bs__p_DisplayName);
     assert(SOPC_STATUS_OK == status);
 }
 
@@ -216,7 +216,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_NodeId(
     assert(NULL != ppResNodeId[msg_browse_response_bs__p_bvi]);
     assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     status = SOPC_ExpandedNodeId_Copy(&ppResNodeId[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                                      (SOPC_ExpandedNodeId*) msg_browse_response_bs__p_ExpandedNodeId);
+                                      msg_browse_response_bs__p_ExpandedNodeId);
     assert(SOPC_STATUS_OK == status);
     /* Also update the current number of references recorded for this BrowseResult */
     /* TODO: this implementation counts on the order of the iterator, which must be increasing */
@@ -244,7 +244,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_TypeDefinition(
     {
         status =
             SOPC_ExpandedNodeId_Copy(&ppResTypeDefinition[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                                     (SOPC_ExpandedNodeId*) msg_browse_response_bs__p_TypeDefinition);
+                                     msg_browse_response_bs__p_TypeDefinition);
         assert(SOPC_STATUS_OK == status);
     }
 }

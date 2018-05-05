@@ -48,7 +48,7 @@ void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_Expan
     *constants_bs__p_nid = constants_bs__c_NodeId_indet;
     if (constants_bs__p_expnid != constants_bs__c_ExpandedNodeId_indet)
     {
-        *constants_bs__p_nid = (constants_bs__t_NodeId_i) & ((SOPC_ExpandedNodeId*) constants_bs__p_expnid)->NodeId;
+        *constants_bs__p_nid = &constants_bs__p_expnid->NodeId;
     }
     if (NULL == constants_bs__p_nid)
         *constants_bs__p_isvalid = false;

@@ -85,7 +85,7 @@ void message_in_bs__dealloc_msg_in(const constants__t_msg_i message_in_bs__msg)
 void message_in_bs__dealloc_msg_in_buffer(const constants__t_byte_buffer_i message_in_bs__msg_buffer)
 {
     // TODO: const modification
-    SOPC_Buffer_Delete((SOPC_Buffer*) message_in_bs__msg_buffer);
+    SOPC_Buffer_Delete(message_in_bs__msg_buffer);
 }
 
 void message_in_bs__decode_msg_type(const constants__t_byte_buffer_i message_in_bs__msg_buffer,
@@ -93,7 +93,7 @@ void message_in_bs__decode_msg_type(const constants__t_byte_buffer_i message_in_
 {
     *message_in_bs__msg_type = constants__c_msg_type_indet;
     SOPC_EncodeableType* encType = NULL;
-    SOPC_ReturnStatus status = SOPC_MsgBodyType_Read((SOPC_Buffer*) message_in_bs__msg_buffer, &encType);
+    SOPC_ReturnStatus status = SOPC_MsgBodyType_Read(message_in_bs__msg_buffer, &encType);
     if (SOPC_STATUS_OK == status && encType != NULL)
     {
         SOPC_Logger_TraceDebug("Services: decoded input message type = '%s'", SOPC_EncodeableType_GetName(encType));
@@ -120,12 +120,12 @@ void message_in_bs__decode_msg_header(const t_bool message_in_bs__is_request,
     void* header = NULL;
     if (false == message_in_bs__is_request)
     {
-        status = SOPC_DecodeMsg_HeaderOrBody((SOPC_Buffer*) message_in_bs__msg_buffer,
+        status = SOPC_DecodeMsg_HeaderOrBody(message_in_bs__msg_buffer,
                                              &OpcUa_ResponseHeader_EncodeableType, &header);
     }
     else
     {
-        status = SOPC_DecodeMsg_HeaderOrBody((SOPC_Buffer*) message_in_bs__msg_buffer,
+        status = SOPC_DecodeMsg_HeaderOrBody(message_in_bs__msg_buffer,
                                              &OpcUa_RequestHeader_EncodeableType, &header);
     }
     if (SOPC_STATUS_OK == status)
@@ -155,7 +155,7 @@ void message_in_bs__decode_msg(const constants__t_msg_type_i message_in_bs__msg_
         encType = reqEncType;
     }
 
-    status = SOPC_DecodeMsg_HeaderOrBody((SOPC_Buffer*) message_in_bs__msg_buffer, encType, &msg);
+    status = SOPC_DecodeMsg_HeaderOrBody(message_in_bs__msg_buffer, encType, &msg);
     if (SOPC_STATUS_OK == status)
     {
         *message_in_bs__msg = (constants__t_msg_i) msg;

@@ -92,7 +92,7 @@ void msg_read_request_bs__getall_req_ReadValue_NodeId(const constants__t_msg_i m
     /* TODO: this should raise a warning, constants__t_NodeId_i IS the void *... No need to cast to a (void **) */
     *msg_read_request_bs__isvalid = true;
     *msg_read_request_bs__nid =
-        (constants__t_NodeId_i*) &msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].NodeId;
+         &msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].NodeId;
 }
 
 void msg_read_request_bs__read_req_TimestampsToReturn(

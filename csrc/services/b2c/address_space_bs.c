@@ -246,7 +246,7 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
 
     *address_space_bs__nid_valid = false;
 
-    pnid_req = (SOPC_NodeId*) address_space_bs__nid;
+    pnid_req = address_space_bs__nid;
 
     if (NULL == pnid_req)
         return;
@@ -331,7 +331,7 @@ void address_space_bs__set_Value(const constants__t_Node_i address_space_bs__nod
     // Clear old value
     SOPC_Variant_Clear(pvar);
     /* Deep-copy the new value */
-    status = SOPC_Variant_Copy(pvar, (SOPC_Variant*) address_space_bs__value);
+    status = SOPC_Variant_Copy(pvar, address_space_bs__value);
     assert(SOPC_STATUS_OK == status);
 }
 
@@ -396,27 +396,27 @@ void address_space_bs__get_TypeDefinition(const constants__t_Node_i address_spac
         assert(address_space_bs__p_node - offHasTypeDefs <= address_space_bs__nObjects + address_space_bs__nVariables);
         /* TODO: Verify implementation of HasTypeDefinition in generated AddressSpace before using this code */
         *address_space_bs__p_type_def =
-            &((SOPC_ExpandedNodeId*) address_space_bs__HasTypeDefinition)[address_space_bs__p_node - offHasTypeDefs];
+            address_space_bs__HasTypeDefinition[address_space_bs__p_node - offHasTypeDefs]; //TODO CME : à vérifier 
     }
 }
 
 void address_space_bs__get_Reference_ReferenceType(const constants__t_Reference_i address_space_bs__p_ref,
                                                    constants__t_NodeId_i* const address_space_bs__p_RefType)
 {
-    *address_space_bs__p_RefType = ((SOPC_NodeId**) address_space_bs__refs_ReferenceType)[address_space_bs__p_ref];
+    *address_space_bs__p_RefType = address_space_bs__refs_ReferenceType[address_space_bs__p_ref];
 }
 
 void address_space_bs__get_Reference_TargetNode(const constants__t_Reference_i address_space_bs__p_ref,
                                                 constants__t_ExpandedNodeId_i* const address_space_bs__p_TargetNode)
 {
     *address_space_bs__p_TargetNode =
-        ((SOPC_ExpandedNodeId**) address_space_bs__refs_TargetNode)[address_space_bs__p_ref];
+        address_space_bs__refs_TargetNode[address_space_bs__p_ref];
 }
 
 void address_space_bs__get_Reference_IsForward(const constants__t_Reference_i address_space_bs__p_ref,
                                                t_bool* const address_space_bs__p_IsForward)
 {
-    *address_space_bs__p_IsForward = ((t_bool*) address_space_bs__refs_IsForward)[address_space_bs__p_ref];
+    *address_space_bs__p_IsForward = address_space_bs__refs_IsForward[address_space_bs__p_ref];
 }
 
 void address_space_bs__get_Node_RefIndexBegin(const constants__t_Node_i address_space_bs__p_node,

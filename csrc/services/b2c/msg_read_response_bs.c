@@ -98,7 +98,7 @@ void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_r
         if (constants__c_Variant_indet != msg_read_response_bs__val)
         {
             /* Note: the following only copies the context of the Variant, not the entire Variant */
-            retStatus = SOPC_Variant_ShallowCopy(&pDataValue->Value, (SOPC_Variant*) msg_read_response_bs__val);
+            retStatus = SOPC_Variant_ShallowCopy(&pDataValue->Value, msg_read_response_bs__val);
         }
 
         if (retStatus == SOPC_STATUS_OK)

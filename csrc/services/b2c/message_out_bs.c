@@ -380,7 +380,7 @@ void message_out_bs__write_create_session_req_msg_crypto(
     /* Write the nonce */
     SOPC_ByteString_Clear(&pReq->ClientNonce);
     /* TODO: this can also fail because of the malloc */
-    status = SOPC_ByteString_Copy(&pReq->ClientNonce, (SOPC_ByteString*) message_out_bs__p_nonce);
+    status = SOPC_ByteString_Copy(&pReq->ClientNonce, message_out_bs__p_nonce);
     if (SOPC_STATUS_OK != status)
         return;
 }
@@ -391,7 +391,7 @@ void message_out_bs__write_create_session_msg_session_token(
 {
     OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) message_out_bs__msg;
     SOPC_ReturnStatus status;
-    const SOPC_NodeId* nodeId = (const SOPC_NodeId*) message_out_bs__session_token;
+    const SOPC_NodeId* nodeId = message_out_bs__session_token;
     status = SOPC_NodeId_Copy(&createSessionResp->AuthenticationToken, nodeId);
     assert(SOPC_STATUS_OK == status);
     status = SOPC_NodeId_Copy(&createSessionResp->SessionId, nodeId);
@@ -445,7 +445,7 @@ void message_out_bs__write_create_session_resp_msg_crypto(
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool result = true;
     OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) message_out_bs__p_msg;
-    OpcUa_SignatureData* pSig = (OpcUa_SignatureData*) message_out_bs__p_signature;
+    OpcUa_SignatureData* pSig = message_out_bs__p_signature;
 
     /* Retrieve the certificate */
     pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig((uint32_t) message_out_bs__p_channel_config_idx);
@@ -472,7 +472,7 @@ void message_out_bs__write_create_session_resp_msg_crypto(
 
         /* TODO: should borrow a reference instead of copy */
         /* Copy Nonce */
-        status = SOPC_ByteString_Copy(&pResp->ServerNonce, (SOPC_ByteString*) message_out_bs__p_nonce);
+        status = SOPC_ByteString_Copy(&pResp->ServerNonce, message_out_bs__p_nonce);
 
         /* TODO: should borrow a reference instead of copy */
         /* Copy Signature, which is not a built-in, so copy its fields */
@@ -501,7 +501,7 @@ void message_out_bs__write_activate_session_req_msg_crypto(const constants__t_ms
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_ActivateSessionRequest* pReq = (OpcUa_ActivateSessionRequest*) message_out_bs__activate_req_msg;
-    OpcUa_SignatureData* pSig = (OpcUa_SignatureData*) message_out_bs__signature;
+    OpcUa_SignatureData* pSig = message_out_bs__signature;
 
     /* Copy Signature, which is not a built-in, so copy its fields */
     /* TODO: should borrow a reference instead of copy */
@@ -530,7 +530,7 @@ void message_out_bs__write_activate_session_resp_msg_crypto(const constants__t_m
 
     /* Write the nonce */
     /* TODO: this can also fail because of the malloc */
-    status = SOPC_ByteString_Copy(&pResp->ServerNonce, (SOPC_ByteString*) message_out_bs__nonce);
+    status = SOPC_ByteString_Copy(&pResp->ServerNonce, message_out_bs__nonce);
     assert(SOPC_STATUS_OK == status);
 }
 
@@ -563,7 +563,7 @@ void message_out_bs__write_msg_out_header_session_token(
     const constants__t_msg_header_i message_out_bs__msg_header,
     const constants__t_session_token_i message_out_bs__session_token)
 {
-    SOPC_NodeId* authToken = (SOPC_NodeId*) message_out_bs__session_token;
+    SOPC_NodeId* authToken = message_out_bs__session_token;
 
     SOPC_ReturnStatus status =
         SOPC_NodeId_Copy(&((OpcUa_RequestHeader*) message_out_bs__msg_header)->AuthenticationToken, authToken);

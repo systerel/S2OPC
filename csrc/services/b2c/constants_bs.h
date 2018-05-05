@@ -32,23 +32,24 @@
 #include "b2c.h"
 
 #include "sopc_builtintypes.h"
+#include "sopc_types.h"
 
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
-typedef void* constants_bs__t_ExpandedNodeId_i;
-typedef void* constants_bs__t_LocalizedText_i;
-typedef void* constants_bs__t_NodeId_i;
+typedef SOPC_ExpandedNodeId* constants_bs__t_ExpandedNodeId_i;
+typedef SOPC_LocalizedText* constants_bs__t_LocalizedText_i;
+typedef SOPC_NodeId* constants_bs__t_NodeId_i;
 #define constants_bs__t_Node_i t_entier4
-typedef void* constants_bs__t_Nonce_i;
-typedef void* constants_bs__t_QualifiedName_i;
+typedef SOPC_ByteString* constants_bs__t_Nonce_i;
+typedef SOPC_QualifiedName* constants_bs__t_QualifiedName_i;
 #define constants_bs__t_Reference_i t_entier4
-typedef void* constants_bs__t_SignatureData_i;
+typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
 #define constants_bs__t_UserId_i t_entier4
 typedef SOPC_Variant* constants_bs__t_Variant_i;
-typedef void* constants_bs__t_WriteValuePointer_i;
+typedef OpcUa_WriteValue* constants_bs__t_WriteValuePointer_i;
 typedef uintptr_t constants_bs__t_application_context_i;
-typedef void* constants_bs__t_byte_buffer_i;
+typedef SOPC_Buffer* constants_bs__t_byte_buffer_i;
 #define constants_bs__t_channel_config_idx_i t_entier4
 #define constants_bs__t_channel_i t_entier4
 typedef uint32_t constants_bs__t_client_request_handle_i;
@@ -58,7 +59,7 @@ typedef void* constants_bs__t_msg_i;
 typedef uint32_t constants_bs__t_request_context_i;
 typedef uint32_t constants_bs__t_server_request_handle_i;
 #define constants_bs__t_session_i t_entier4
-typedef void* constants_bs__t_session_token_i;
+typedef SOPC_NodeId* constants_bs__t_session_token_i;
 #define constants_bs__t_user_i t_entier4
 
 /*--------------------------
@@ -91,7 +92,7 @@ typedef void* constants_bs__t_session_token_i;
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
-#define constants_bs__c_ExpandedNodeId_indet 0
+#define constants_bs__c_ExpandedNodeId_indet NULL
 #define constants_bs__c_LocalizedText_indet 0
 #define constants_bs__c_NodeId_indet 0
 #define constants_bs__c_Node_indet 0

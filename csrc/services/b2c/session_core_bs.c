@@ -151,7 +151,7 @@ void session_core_bs__server_get_session_from_token(const constants__t_session_t
                                                     constants__t_session_i* const session_core_bs__session)
 {
     constants__t_session_i result = constants__c_session_indet;
-    SOPC_NodeId* requestedToken = (SOPC_NodeId*) session_core_bs__session_token;
+    SOPC_NodeId* requestedToken = session_core_bs__session_token;
 
     if (requestedToken->IdentifierType == SOPC_IdentifierType_Numeric && requestedToken->Data.Numeric > 0 &&
         requestedToken->Data.Numeric <= INT32_MAX)
@@ -208,7 +208,7 @@ void session_core_bs__client_set_session_token(const constants__t_session_i sess
         constants__c_session_token_indet != session_core_bs__token)
     {
         sessionToken = &(sessionDataArray[session_core_bs__session].sessionToken);
-        status = SOPC_NodeId_Copy(sessionToken, (SOPC_NodeId*) session_core_bs__token);
+        status = SOPC_NodeId_Copy(sessionToken, session_core_bs__token);
         if (SOPC_STATUS_OK != status)
         {
             // In case of failure, ensure session token is cleared
@@ -618,7 +618,7 @@ void session_core_bs__get_NonceClient(const constants__t_session_i session_core_
 {
     if (constants__c_session_indet != session_core_bs__p_session)
     {
-        *session_core_bs__nonce = (constants__t_Nonce_i) & (sessionDataArray[session_core_bs__p_session].nonceClient);
+        *session_core_bs__nonce = &sessionDataArray[session_core_bs__p_session].nonceClient;
     }
     else
     {
