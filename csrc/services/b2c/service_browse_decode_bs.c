@@ -110,7 +110,7 @@ extern void service_browse_decode_bs__get_BrowseView(constants__t_NodeId_i* cons
         pVid = &(request->View.ViewId);
         if (pVid->IdentifierType != SOPC_IdentifierType_Numeric || pVid->Data.Numeric != 0)
         {
-            *service_browse_decode_bs__p_nid_view = (constants__t_NodeId_i) pVid;
+            *service_browse_decode_bs__p_nid_view = pVid;
         }
     }
 }
@@ -139,7 +139,7 @@ void service_browse_decode_bs__getall_BrowseValue(const constants__t_BrowseValue
 request->NoOfNodesToBrowse) These are already verified by PRE */
     {
         pBwseDesc = &request->NodesToBrowse[service_browse_decode_bs__p_bvi - 1];
-        *service_browse_decode_bs__p_NodeId = (constants__t_NodeId_i) &pBwseDesc->NodeId;
+        *service_browse_decode_bs__p_NodeId = &pBwseDesc->NodeId;
         /* Invalid direction is tested by the B, so it's is not a reason to unset p_isvalid */
         util_BrowseDirection__C_to_B(pBwseDesc->BrowseDirection, service_browse_decode_bs__p_dir);
 
@@ -148,7 +148,7 @@ request->NoOfNodesToBrowse) These are already verified by PRE */
         if (!(pNid->IdentifierType == SOPC_IdentifierType_Numeric && pNid->Data.Numeric == 0))
         {
             *service_browse_decode_bs__p_isreftype = true;
-            *service_browse_decode_bs__p_reftype = (constants__t_NodeId_i) pNid;
+            *service_browse_decode_bs__p_reftype = pNid;
             *service_browse_decode_bs__p_inc_subtype = pBwseDesc->IncludeSubtypes;
         }
 

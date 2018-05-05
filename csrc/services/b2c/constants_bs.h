@@ -45,20 +45,19 @@ typedef SOPC_ByteString* constants_bs__t_Nonce_i;
 typedef SOPC_QualifiedName* constants_bs__t_QualifiedName_i;
 #define constants_bs__t_Reference_i t_entier4
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
-#define constants_bs__t_UserId_i t_entier4
 typedef SOPC_Variant* constants_bs__t_Variant_i;
 typedef OpcUa_WriteValue* constants_bs__t_WriteValuePointer_i;
 typedef uintptr_t constants_bs__t_application_context_i;
 typedef SOPC_Buffer* constants_bs__t_byte_buffer_i;
-#define constants_bs__t_channel_config_idx_i t_entier4
-#define constants_bs__t_channel_i t_entier4
+typedef uint32_t constants_bs__t_channel_config_idx_i;
+typedef uint32_t constants_bs__t_channel_i;
 typedef uint32_t constants_bs__t_client_request_handle_i;
-#define constants_bs__t_endpoint_config_idx_i t_entier4
+typedef uint32_t constants_bs__t_endpoint_config_idx_i;
 typedef void* constants_bs__t_msg_header_i;
 typedef void* constants_bs__t_msg_i;
 typedef uint32_t constants_bs__t_request_context_i;
 typedef uint32_t constants_bs__t_server_request_handle_i;
-#define constants_bs__t_session_i t_entier4
+typedef uint32_t constants_bs__t_session_i;
 typedef SOPC_NodeId* constants_bs__t_session_token_i;
 #define constants_bs__t_user_i t_entier4
 
@@ -73,7 +72,6 @@ typedef SOPC_NodeId* constants_bs__t_session_token_i;
 #define constants_bs__t_QualifiedName_i_max (-1)
 #define constants_bs__t_Reference_i_max (-1)
 #define constants_bs__t_SignatureData_i_max (-1)
-#define constants_bs__t_UserId_i_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
 #define constants_bs__t_application_context_i_max (-1)
 #define constants_bs__t_byte_buffer_i_max (-1)

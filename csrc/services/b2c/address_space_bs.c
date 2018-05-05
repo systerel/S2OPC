@@ -396,7 +396,7 @@ void address_space_bs__get_TypeDefinition(const constants__t_Node_i address_spac
         assert(address_space_bs__p_node - offHasTypeDefs <= address_space_bs__nObjects + address_space_bs__nVariables);
         /* TODO: Verify implementation of HasTypeDefinition in generated AddressSpace before using this code */
         *address_space_bs__p_type_def =
-            address_space_bs__HasTypeDefinition[address_space_bs__p_node - offHasTypeDefs]; //TODO CME : à vérifier 
+            address_space_bs__HasTypeDefinition[address_space_bs__p_node - offHasTypeDefs]; //TODO CME : à vérifier la dernière modification : après suppression des cast suppression de la prise d'adresse
     }
 }
 

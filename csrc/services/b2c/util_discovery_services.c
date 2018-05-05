@@ -101,7 +101,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
 
     SOPC_String_Initialize(&configEndPointURL);
 
-    sopcEndpointConfig = SOPC_ToolkitServer_GetEndpointConfig((uint32_t) endpoint_config_idx);
+    sopcEndpointConfig = SOPC_ToolkitServer_GetEndpointConfig(endpoint_config_idx);
 
     if (NULL != sopcEndpointConfig)
     {

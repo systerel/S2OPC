@@ -93,8 +93,8 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // auxParam == connection Id
         if (id <= INT32_MAX && auxParam <= INT32_MAX && params != NULL && *(uint32_t*) params <= INT32_MAX)
         {
-            io_dispatch_mgr__server_channel_connected_event((int32_t) id, (int32_t) * (uint32_t*) params,
-                                                            (int32_t) auxParam, &bres);
+            io_dispatch_mgr__server_channel_connected_event(id, * (uint32_t*) params,
+                                                            (uint32_t)auxParam, &bres); //CME check conversion of auxParam
             if (bres == false)
             {
                 SOPC_Logger_TraceError("Services: channel state incoherent epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, id,
@@ -123,7 +123,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // => B model entry point to add
         if (id <= INT32_MAX && auxParam <= INT32_MAX)
         {
-            io_dispatch_mgr__client_channel_connected_event((int32_t) auxParam, (int32_t) id);
+            io_dispatch_mgr__client_channel_connected_event((uint32_t) auxParam, id);
         }
         break;
     case SC_TO_SE_SC_CONNECTION_TIMEOUT:
@@ -133,7 +133,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // => B model entry point to add
         if (id <= INT32_MAX)
         {
-            io_dispatch_mgr__client_secure_channel_timeout((int32_t) id);
+            io_dispatch_mgr__client_secure_channel_timeout(id);
         }
         break;
     case SC_TO_SE_SC_DISCONNECTED:
@@ -142,7 +142,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // auxParam = status
         // => B model entry point to add
         // secure_channel_lost call !
-        io_dispatch_mgr__secure_channel_lost((constants__t_channel_i) id);
+        io_dispatch_mgr__secure_channel_lost(id);
         break;
     case SE_TO_SE_SC_ALL_DISCONNECTED:
         SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_SC_ALL_DISCONNECTED");
@@ -156,7 +156,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
 
         if (auxParam <= INT32_MAX)
         {
-            io_dispatch_mgr__internal_client_activate_orphaned_session((constants__t_session_i) id,
+            io_dispatch_mgr__internal_client_activate_orphaned_session(id,
                                                                        (constants__t_channel_config_idx_i) auxParam);
         }
         break;
@@ -165,7 +165,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
 
         if (NULL != params)
         {
-            io_dispatch_mgr__client_reactivate_session_new_user((constants__t_session_i) id,
+            io_dispatch_mgr__client_reactivate_session_new_user(id,
                                                                 *(constants__t_user_i*) params);
             free(params);
         }
@@ -181,7 +181,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
                                auxParam);
         if (auxParam <= INT32_MAX)
         {
-            io_dispatch_mgr__internal_client_create_session((constants__t_session_i) id,
+            io_dispatch_mgr__internal_client_create_session(id,
                                                             (constants__t_channel_config_idx_i) auxParam);
         }
         break;
@@ -189,7 +189,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
     case TIMER_SE_EVAL_SESSION_TIMEOUT:
         SOPC_Logger_TraceDebug("ServicesMgr: TIMER_SE_EVAL_SESSION_TIMEOUT session=%" PRIu32, id);
 
-        io_dispatch_mgr__internal_server_evaluate_session_timeout((constants__t_session_i) id);
+        io_dispatch_mgr__internal_server_evaluate_session_timeout(id);
         break;
     case SC_TO_SE_SC_SERVICE_RCV_MSG:
         SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_SERVICE_RCV_MSG scIdx=%" PRIu32 " reqId=%" PRIuPTR, id,
@@ -199,7 +199,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // params = message content (byte buffer)
         // auxParam == context (request id)
         assert(NULL != params);
-        io_dispatch_mgr__receive_msg_buffer((constants__t_channel_i) id, (constants__t_byte_buffer_i) params,
+        io_dispatch_mgr__receive_msg_buffer(id, (constants__t_byte_buffer_i) params,
                                             (constants__t_request_context_i) auxParam);
         // params is freed by services manager
         break;
@@ -212,7 +212,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         if (NULL != params)
         {
             util_status_code__C_to_B((SOPC_StatusCode) auxParam, &sCode);
-            io_dispatch_mgr__snd_msg_failure((constants__t_channel_i) id,
+            io_dispatch_mgr__snd_msg_failure(id,
                                              (constants__t_request_context_i) * (uint32_t*) params, sCode);
             free(params);
         } // else: without request Id, it cannot be treated
@@ -225,7 +225,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
            auxParam = request handle */
         if (id <= INT32_MAX && auxParam <= UINT32_MAX)
         {
-            io_dispatch_mgr__internal_client_request_timeout((int32_t) id, (uint32_t) auxParam);
+            io_dispatch_mgr__internal_client_request_timeout(id, (uint32_t) auxParam);
         }
         break;
 
@@ -283,7 +283,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // auxParam = user application session context
         if (id <= INT32_MAX)
         {
-            io_dispatch_mgr__server_treat_local_service_request((int32_t) id, params, auxParam, &sCode);
+            io_dispatch_mgr__server_treat_local_service_request(id, params, auxParam, &sCode);
             if (constants__e_sc_ok != sCode)
             {
                 // Error case
@@ -313,7 +313,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // auxParam = user application session context
         if (id <= INT32_MAX && params != NULL && *(uint32_t*) params <= INT32_MAX)
         {
-            io_dispatch_mgr__client_activate_new_session((int32_t) id, (int32_t) * (uint32_t*) params, auxParam, &bres);
+            io_dispatch_mgr__client_activate_new_session(id, (int32_t) * (uint32_t*) params, auxParam, &bres);
         }
         if (bres == false)
         {
@@ -338,7 +338,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // params = request
         if (id <= INT32_MAX)
         {
-            io_dispatch_mgr__client_send_service_request((int32_t) id, params, auxParam, &sCode);
+            io_dispatch_mgr__client_send_service_request(id, params, auxParam, &sCode);
             if (sCode != constants__e_sc_ok)
             {
                 SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
@@ -357,7 +357,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // id == session id
         if (id <= INT32_MAX)
         {
-            io_dispatch_mgr__client_send_close_session_request((int32_t) id, &sCode);
+            io_dispatch_mgr__client_send_close_session_request(id, &sCode);
             if (sCode != constants__e_sc_ok)
             {
                 SOPC_Logger_TraceError("ServicesMgr: APP_TO_SE_CLOSE_SESSION failed session=%" PRIu32, id);
@@ -377,7 +377,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // params = request
         if (id <= INT32_MAX)
         {
-            io_dispatch_mgr__client_send_discovery_request((int32_t) id, params, auxParam, &sCode);
+            io_dispatch_mgr__client_send_discovery_request(id, params, auxParam, &sCode);
             if (sCode != constants__e_sc_ok)
             {
                 SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),

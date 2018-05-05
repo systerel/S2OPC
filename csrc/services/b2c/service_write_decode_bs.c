@@ -114,7 +114,7 @@ void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i 
     {
         wv = &request->NodesToWrite[service_write_decode_bs__wvi - 1];
         *service_write_decode_bs__isvalid = true;
-        *service_write_decode_bs__nid = (constants__t_NodeId_i) &wv->NodeId;
+        *service_write_decode_bs__nid = &wv->NodeId;
         aid = wv->AttributeId;
         switch (aid)
         {
@@ -132,7 +132,7 @@ void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i 
             *service_write_decode_bs__status = constants__e_sc_bad_attribute_id_invalid;
             break;
         }
-        *service_write_decode_bs__value = (constants__t_Variant_i) &wv->Value.Value;
+        *service_write_decode_bs__value = &wv->Value.Value;
     }
     else
     {

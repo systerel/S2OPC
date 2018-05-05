@@ -118,7 +118,7 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
             // if orphaned will be reactivated or closed => notify as reactivating to avoid use of session by
             // application
             SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_REACTIVATING),
-                                            (uint32_t) session_core_bs__session, NULL,
+                                            session_core_bs__session, NULL,
                                             session_to_activate_context[session_core_bs__session]);
         }
         else if (session_core_bs__state == constants__e_session_closed)
@@ -130,7 +130,7 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
                 // => notify activation failed
                 SOPC_ServicesToApp_EnqueueEvent(
                     SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
-                    (uint32_t) session_core_bs__session,                    // session id
+                    session_core_bs__session,                               // session id
                     NULL,                                                   // user ?
                     session_to_activate_context[session_core_bs__session]); // user application session context
             }
@@ -139,7 +139,7 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
                 // Activated session closing
                 SOPC_ServicesToApp_EnqueueEvent(
                     SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
-                    (uint32_t) session_core_bs__session, // session id
+                    session_core_bs__session,                               // session id
                     NULL,
                     session_to_activate_context[session_core_bs__session]); // user application session context
             }
@@ -157,7 +157,7 @@ void session_core_bs__server_get_session_from_token(const constants__t_session_t
         requestedToken->Data.Numeric <= INT32_MAX)
     {
         // Note: on server side, token <=> session index
-        result = (int32_t) requestedToken->Data.Numeric;
+        result = requestedToken->Data.Numeric;
     }
 
     *session_core_bs__session = result;
@@ -184,7 +184,7 @@ void session_core_bs__server_get_fresh_session_token(const constants__t_session_
     {
         // Note: Namespace = 0 for session token ?
         sessionDataArray[session_core_bs__session].sessionToken.IdentifierType = SOPC_IdentifierType_Numeric;
-        sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric = (uint32_t) session_core_bs__session;
+        sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric = session_core_bs__session;
         *session_core_bs__token = &(sessionDataArray[session_core_bs__session].sessionToken);
     }
     else
@@ -284,12 +284,12 @@ void session_core_bs__server_create_session_req_do_crypto(
 
         /* Retrieve the security policy and mode */
         /* TODO: this function is denoted CLIENT */
-        pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig((uint32_t) session_core_bs__p_channel_config_idx);
+        pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
         if (NULL == pSCCfg)
             return;
 
         /* Retrieve the server certificate */
-        pECfg = SOPC_ToolkitServer_GetEndpointConfig((uint32_t) session_core_bs__p_endpoint_config_idx);
+        pECfg = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
         if (NULL == pECfg)
             return;
 
@@ -427,7 +427,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
     {
         pSession = &sessionDataArray[session_core_bs__session];
         /* Retrieve the security policy and mode */
-        pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_bs__channel_config_idx);
+        pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__channel_config_idx);
         if (NULL == pSCCfg)
             return;
 
@@ -540,7 +540,7 @@ void session_core_bs__get_NonceServer(const constants__t_session_i session_core_
 {
     if (constants__c_session_indet != session_core_bs__p_session)
     {
-        *session_core_bs__nonce = (constants__t_Nonce_i) & (sessionDataArray[session_core_bs__p_session].nonceServer);
+        *session_core_bs__nonce = & (sessionDataArray[session_core_bs__p_session].nonceServer);
     }
     else
     {
@@ -577,7 +577,7 @@ void session_core_bs__client_create_session_req_do_crypto(
         pSession = &sessionDataArray[session_core_bs__p_session];
 
         /* Retrieve the security policy */
-        pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_bs__p_channel_config_idx);
+        pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
         if (NULL == pSCCfg)
             return;
 
@@ -660,7 +660,7 @@ void session_core_bs__client_create_session_check_crypto(
         pSession = &sessionDataArray[session_core_bs__p_session];
 
         /* Retrieve the security policy and mode */
-        pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_bs__p_channel_config_idx);
+        pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
         if (NULL == pSCCfg)
             return;
 
@@ -764,7 +764,7 @@ void session_core_bs__server_activate_session_check_crypto(
         pSession = &sessionDataArray[session_core_bs__session];
 
         /* Retrieve the security policy and mode */
-        pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig((uint32_t) session_core_bs__channel_config_idx);
+        pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__channel_config_idx);
         if (NULL == pSCCfg)
             return;
 
@@ -904,8 +904,8 @@ void session_core_bs__client_gen_activate_orphaned_session_internal_event(
     const constants__t_session_i session_core_bs__session,
     const constants__t_channel_config_idx_i session_core_bs__channel_config_idx)
 {
-    SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_ORPHANED_SESSION, (uint32_t) session_core_bs__session, NULL,
-                               (uint32_t) session_core_bs__channel_config_idx);
+    SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_ORPHANED_SESSION, session_core_bs__session, NULL,
+                               session_core_bs__channel_config_idx);
 }
 
 void session_core_bs__client_gen_activate_user_session_internal_event(
@@ -916,7 +916,7 @@ void session_core_bs__client_gen_activate_user_session_internal_event(
     if (user != NULL)
     {
         *user = session_core_bs__user;
-        SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_SESSION, (uint32_t) session_core_bs__session, (void*) user, 0);
+        SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_SESSION, session_core_bs__session, (void*) user, 0);
     }
 }
 
@@ -924,8 +924,8 @@ void session_core_bs__client_gen_create_session_internal_event(
     const constants__t_session_i session_core_bs__session,
     const constants__t_channel_config_idx_i session_core_bs__channel_config_idx)
 {
-    SOPC_Services_EnqueueEvent(SE_TO_SE_CREATE_SESSION, (uint32_t) session_core_bs__session, NULL,
-                               (uint32_t) session_core_bs__channel_config_idx);
+    SOPC_Services_EnqueueEvent(SE_TO_SE_CREATE_SESSION, session_core_bs__session, NULL,
+                               session_core_bs__channel_config_idx);
 }
 
 void session_core_bs__server_session_timeout_evaluation(const constants__t_session_i session_core_bs__session,
@@ -951,7 +951,7 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
                 // Session is not expired
                 *session_core_bs__expired = false;
                 // Re-activate timer for next verification
-                eventParams.eltId = (uint32_t) session_core_bs__session;
+                eventParams.eltId = session_core_bs__session;
                 eventParams.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
                 eventParams.params = NULL;
                 eventParams.auxParam = 0;
@@ -1001,7 +1001,7 @@ void session_core_bs__server_session_timeout_start_timer(const constants__t_sess
             session_RevisedSessionTimeout[session_core_bs__session] =
                 (uint64_t) pResp->RevisedSessionTimeout; // nb milliseconds
         }
-        eventParams.eltId = (uint32_t) session_core_bs__session;
+        eventParams.eltId = session_core_bs__session;
         eventParams.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
         eventParams.params = NULL;
         eventParams.auxParam = 0;
