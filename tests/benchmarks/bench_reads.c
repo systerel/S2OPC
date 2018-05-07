@@ -23,10 +23,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #include <sopc_crypto_profiles.h>
+#include <sopc_mutexes.h>
+#include <sopc_time.h>
 #include <sopc_toolkit_async_api.h>
 #include <sopc_toolkit_config.h>
 #include <sopc_user_app_itf.h>
@@ -58,7 +59,8 @@ static const double T_TABLE[] = {0,     12.706, 4.303, 3.182, 2.776, 2.571, 2.44
 
 struct app_ctx_t
 {
-    int pipefd[2];
+    Mutex run_mutex;
+    Condition run_cond;
     int32_t address_space_size;
     int32_t read_request_size;
     int32_t address_space_offset;
@@ -68,27 +70,10 @@ struct app_ctx_t
     uint64_t n_measurements;
     uint64_t measurements[MAX_N_MEASUREMENTS];
     bench_status_t status;
-    struct timespec cycle_start_ts;
+    SOPC_DateTime cycle_start_ts;
     double mean;
     double rmoe;
 };
-
-static uint64_t ts_delta_ns(struct timespec* start, struct timespec* end)
-{
-    uint64_t delta = 1000000000UL * (uint64_t)(end->tv_sec - start->tv_sec);
-
-    // Complicated dance to avoid compiler warnings...
-    if (end->tv_nsec > start->tv_nsec)
-    {
-        delta += (uint64_t)(end->tv_nsec - start->tv_nsec);
-    }
-    else
-    {
-        delta -= (uint64_t)(start->tv_nsec - end->tv_nsec);
-    }
-
-    return delta;
-}
 
 static void bench_cycle_start(struct app_ctx_t* ctx)
 {
@@ -126,9 +111,7 @@ static void bench_cycle_start(struct app_ctx_t* ctx)
     }
 
     ctx->address_space_offset = (ctx->address_space_offset + ctx->read_request_size) % ctx->address_space_size;
-
-    int res = clock_gettime(CLOCK_MONOTONIC, &ctx->cycle_start_ts);
-    assert(res == 0);
+    ctx->cycle_start_ts = SOPC_Time_GetCurrentTimeUTC();
 
     SOPC_ToolkitClient_AsyncSendRequestOnSession(ctx->session_id, req, (uintptr_t) ctx);
 }
@@ -197,11 +180,11 @@ static bool bench_cycle_end(struct app_ctx_t* ctx)
         return false;
     }
 
-    struct timespec now;
-    int res = clock_gettime(CLOCK_MONOTONIC, &now);
-    assert(res == 0);
+    SOPC_DateTime now = SOPC_Time_GetCurrentTimeUTC();
+    assert(now >= ctx->cycle_start_ts);
 
-    ctx->measurements[ctx->n_measurements] = ts_delta_ns(&ctx->cycle_start_ts, &now);
+    // OPC UA DateTime is 100 nanoseconds
+    ctx->measurements[ctx->n_measurements] = 100 * ((uint64_t)(now - ctx->cycle_start_ts));
     ctx->n_measurements++;
 
     // Standard deviation
@@ -302,10 +285,7 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
     if (shutdown)
     {
         assert(ctx->status != BENCH_RUNNING);
-
-        char buf[1] = {'X'};
-        ssize_t n = write(ctx->pipefd[1], &buf, 1);
-        assert(n == 1);
+        assert(Condition_SignalAll(&ctx->run_cond) == SOPC_STATUS_OK);
     }
 }
 
@@ -352,11 +332,9 @@ int main(int argc, char** argv)
     struct app_ctx_t ctx;
     memset(&ctx, 0, sizeof(struct app_ctx_t));
 
-    if (pipe(ctx.pipefd) != 0)
-    {
-        perror("Error while creating pipe");
-        return 1;
-    }
+    assert(Mutex_Initialization(&ctx.run_mutex) == SOPC_STATUS_OK);
+    assert(Mutex_Lock(&ctx.run_mutex) == SOPC_STATUS_OK);
+    assert(Condition_Init(&ctx.run_cond) == SOPC_STATUS_OK);
 
     ctx.address_space_size = (int32_t) as_size;
     ctx.read_request_size = (int32_t) read_size;
@@ -383,24 +361,7 @@ int main(int argc, char** argv)
     printf("Connecting to the server...\n");
     SOPC_ToolkitClient_AsyncActivateSession(configIdx, (uintptr_t) &ctx);
 
-    char buf[1];
-
-    while (true)
-    {
-        ssize_t r = read(ctx.pipefd[0], buf, 1);
-
-        if (r == 1)
-        {
-            break;
-        }
-
-        if (errno == EAGAIN || errno == EINTR)
-        {
-            continue;
-        }
-
-        assert(false && "Unexpected read return code");
-    }
+    assert(Mutex_UnlockAndWaitCond(&ctx.run_cond, &ctx.run_mutex) == SOPC_STATUS_OK);
 
     SOPC_Toolkit_Clear();
 
