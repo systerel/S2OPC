@@ -27,8 +27,6 @@
 
 #include "sopc_user_app_itf.h"
 
-#include "sopc_namespace_table.h"
-
 /**
  *  \brief Return the endpoint configuration for the given index or null if not defined. (SOPC_Toolkit_Configured
  * required)
@@ -86,20 +84,6 @@ SOPC_SecureChannel_Config* SOPC_ToolkitServer_GetSecureChannelConfig(uint32_t se
  */
 SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx);
 
-/**
- *  \brief Return the encodeable types table configuration used by the stack (SOPC_Toolkit_Configured required)
- *
- *  \return Encodeable types table (terminated by NULL value) or NULL if
- *  toolkit is not configured yet
- */
-SOPC_EncodeableType** SOPC_ToolkitConfig_GetEncodeableTypes(void);
-
-/**
- *  \brief Return the namespace table configuration  (SOPC_Toolkit_Configured required)
- *
- *  \return Namespace table or NULL if toolkit is not configured yet
- */
-SOPC_NamespaceTable* SOPC_ToolkitConfig_GetNamespaces(void);
 
 void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
 

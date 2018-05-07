@@ -20,8 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sopc_namespace_table.h"
-
 SOPC_ReturnStatus SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** encObject)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;

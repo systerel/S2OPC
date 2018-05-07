@@ -76,17 +76,12 @@ typedef struct SOPC_EncodeableType
 } SOPC_EncodeableType;
 
 /**
- *  \brief          Retrieve a defined encodeable object type from the given encodeable types table
- *                  with the given namespace and type Id.
+ *  \brief          Retrieve a defined encodeable object type with the given type Id.
  *
- *  \param encTypesTable  Encodeable types table (NULL terminated) in which encodeable object type is searched for
- *  \param namespac       Namespace in which the given type Id is searched for
  *  \param typeId         Type identifier for which corresponding encodeable object type must be returned
  *  \return               The searched encodeable type or NULL if parameters are incorrect or type is not found
  */
-SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(SOPC_EncodeableType** encTypesTable,
-                                                           const char* namespac,
-                                                           uint32_t typeId);
+SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId);
 
 const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType);
 

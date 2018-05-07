@@ -25,7 +25,6 @@
 
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_endianness_cfg.h"
-#include "sopc_namespace_table.h"
 #include "sopc_toolkit_config_internal.h"
 
 #include "sopc_types.h"
@@ -1585,9 +1584,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
     uint32_t lengthPos;
     uint32_t curPos;
     int32_t length;
-    uint16_t nsIndex = OPCUA_NAMESPACE_INDEX;
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    SOPC_NamespaceTable* nsTable = SOPC_ToolkitConfig_GetNamespaces();
     SOPC_Byte encodingByte = 0;
     if (extObj != NULL)
     {
@@ -1605,10 +1602,8 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
         }
         else
         {
-            status = SOPC_Namespace_GetIndex(nsTable, extObj->Body.Object.ObjType->NamespaceUri, &nsIndex);
-
             nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
-            nodeId.Namespace = nsIndex;
+            nodeId.Namespace = OPCUA_NAMESPACE_INDEX; //CME
             nodeId.Data.Numeric = extObj->Body.Object.ObjType->BinaryEncodingTypeId;
         }
     }
@@ -1670,10 +1665,6 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_EncodeableType* encType = NULL;
-    SOPC_NamespaceTable* nsTable = SOPC_ToolkitConfig_GetNamespaces();
-    SOPC_EncodeableType** encTypeTable = SOPC_ToolkitConfig_GetEncodeableTypes();
-    const char* nsName;
-    bool nsFound = false;
     SOPC_Byte encodingByte = 0;
     if (extObj != NULL)
     {
@@ -1690,41 +1681,25 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
         if (encodingByte == SOPC_ExtObjBodyEncoding_ByteString)
         {
             // Object provided as a byte string, check if encoded object is a known type
-            if (extObj->TypeId.NodeId.IdentifierType == SOPC_IdentifierType_Numeric)
+            if (extObj->TypeId.NodeId.IdentifierType == SOPC_IdentifierType_Numeric &&
+                extObj->TypeId.NodeId.Namespace == OPCUA_NAMESPACE_INDEX)
             {
-                if (extObj->TypeId.NodeId.Namespace != OPCUA_NAMESPACE_INDEX)
-                {
-                    nsName = SOPC_Namespace_GetName(nsTable, extObj->TypeId.NodeId.Namespace);
-                    if (nsName != NULL)
-                    {
-                        nsFound = true;
-                    }
-                }
-                else
-                {
-                    nsName = NULL; // <=> OPCUA_NAMESPACE_NAME in GetEncodeableType
-                    nsFound = true;
-                }
-                if (nsFound != false)
-                {
-                    encType =
-                        SOPC_EncodeableType_GetEncodeableType(encTypeTable, nsName, extObj->TypeId.NodeId.Data.Numeric);
-                }
-                if (false == nsFound || NULL == encType)
-                {
-                    // Keep as a byte string since it is unknown object
-                    encodingByte = SOPC_ExtObjBodyEncoding_ByteString;
-                }
-                else
-                {
+                 encType =
+                    SOPC_EncodeableType_GetEncodeableType(extObj->TypeId.NodeId.Data.Numeric);
+                 if (NULL == encType)
+                 {
+                    status = SOPC_STATUS_ENCODING_ERROR;
+                 }
+                 else
+                 {
                     encodingByte = SOPC_ExtObjBodyEncoding_Object;
                     extObj->Body.Object.ObjType = encType;
                     SOPC_String_AttachFromCstring(&extObj->TypeId.NamespaceUri, encType->NamespaceUri);
-                }
+                 }
             }
             else
             {
-                status = SOPC_STATUS_ENCODING_ERROR;
+               status = SOPC_STATUS_ENCODING_ERROR;
             }
         }
         else if (encodingByte == SOPC_ExtObjBodyEncoding_Object)
@@ -3088,13 +3063,10 @@ SOPC_ReturnStatus SOPC_EncodeMsg_Type_Header_Body(SOPC_Buffer* buf,
 SOPC_ReturnStatus SOPC_MsgBodyType_Read(SOPC_Buffer* buf, SOPC_EncodeableType** receivedEncType)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    SOPC_NamespaceTable* namespaceTable = SOPC_ToolkitConfig_GetNamespaces();
-    SOPC_EncodeableType** knownTypes = SOPC_ToolkitConfig_GetEncodeableTypes();
     SOPC_EncodeableType* recEncType = NULL;
     SOPC_NodeId nodeId;
-    const char* nsName;
     SOPC_NodeId_Initialize(&nodeId);
-    if (buf != NULL && knownTypes != NULL)
+    if (buf != NULL)
     {
         status = SOPC_NodeId_Read(&nodeId, buf);
     }
@@ -3104,19 +3076,11 @@ SOPC_ReturnStatus SOPC_MsgBodyType_Read(SOPC_Buffer* buf, SOPC_EncodeableType** 
         // Must be the case in which we cannot know the type before decoding it
         if (nodeId.Namespace == OPCUA_NAMESPACE_INDEX)
         {
-            recEncType = SOPC_EncodeableType_GetEncodeableType(knownTypes, OPCUA_NAMESPACE_NAME, nodeId.Data.Numeric);
+            recEncType = SOPC_EncodeableType_GetEncodeableType(nodeId.Data.Numeric);
         }
         else
         {
-            nsName = SOPC_Namespace_GetName(namespaceTable, nodeId.Namespace);
-            if (nsName != NULL)
-            {
-                recEncType = SOPC_EncodeableType_GetEncodeableType(knownTypes, nsName, nodeId.Data.Numeric);
-            }
-            if (NULL == recEncType)
-            {
-                status = SOPC_STATUS_ENCODING_ERROR;
-            }
+            status = SOPC_STATUS_ENCODING_ERROR;
         }
         *receivedEncType = recEncType;
     }

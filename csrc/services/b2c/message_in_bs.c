@@ -33,7 +33,6 @@
 #include "opcua_identifiers.h"
 #include "sopc_encoder.h"
 #include "sopc_logger.h"
-#include "sopc_namespace_table.h"
 
 /*------------------------
    INITIALISATION Clause

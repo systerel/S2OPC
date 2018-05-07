@@ -54,11 +54,6 @@ static struct
     uint32_t serverScLastConfigIdx;
     uint32_t epConfigIdxMax;
 
-    /* OPC UA namespace and encodeable types */
-    SOPC_NamespaceTable* nsTable;
-    SOPC_EncodeableType** encTypesTable;
-    uint32_t nbEncTypesTable;
-
     /* Log configuration */
     const char* logDirPath;
     uint32_t logMaxBytes;
@@ -71,9 +66,6 @@ tConfig = {.initDone = false,
            .scConfigIdxMax = 0,
            .serverScLastConfigIdx = 0,
            .epConfigIdxMax = 0,
-           .nsTable = NULL,
-           .encTypesTable = NULL,
-           .nbEncTypesTable = 0,
            .logDirPath = "",
            .logMaxBytes = 1048576, // 1 MB
            .logMaxFiles = 50,
@@ -105,7 +97,6 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         tConfig.initDone = true;
 
         SOPC_Helper_EndiannessCfg_Initialize();
-        SOPC_Namespace_Initialize(tConfig.nsTable);
 
         if (SIZE_MAX / (SOPC_MAX_SECURE_CONNECTIONS + 1) < sizeof(SOPC_SecureChannel_Config*) ||
             SIZE_MAX / (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) < sizeof(SOPC_Endpoint_Config*))
@@ -200,10 +191,6 @@ void SOPC_Toolkit_Clear()
         SOPC_Services_Clear();
 
         Mutex_Lock(&tConfig.mut);
-        if (tConfig.encTypesTable != NULL)
-        {
-            free(tConfig.encTypesTable);
-        }
 
         SOPC_Toolkit_ClearServerScConfigs_WithoutLock();
         SOPC_Logger_Clear();
@@ -213,9 +200,6 @@ void SOPC_Toolkit_Clear()
         tConfig.scConfigIdxMax = 0;
         tConfig.serverScLastConfigIdx = 0;
         tConfig.epConfigIdxMax = 0;
-        tConfig.nsTable = NULL;
-        tConfig.encTypesTable = NULL;
-        tConfig.nbEncTypesTable = 0;
         tConfig.logDirPath = "";
         tConfig.logMaxBytes = 1048576; // 1 MB
         tConfig.logMaxFiles = 50;
@@ -388,144 +372,6 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
     return res;
 }
 
-SOPC_ReturnStatus SOPC_ToolkitConfig_SetNamespaceUris(SOPC_NamespaceTable* nsTable)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
-    if (tConfig.initDone != false)
-    {
-        Mutex_Lock(&tConfig.mut);
-        if (false == tConfig.locked)
-        {
-            status = SOPC_STATUS_OK;
-            tConfig.nsTable = nsTable;
-        }
-        Mutex_Unlock(&tConfig.mut);
-    }
-    return status;
-}
-
-static uint32_t GetKnownEncodeableTypesLength(void)
-{
-    uint32_t result = 0;
-    for (result = 0; SOPC_KnownEncodeableTypes[result] != NULL; result++)
-        ;
-    return result + 1;
-}
-
-SOPC_ReturnStatus SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTable, uint32_t nbTypes)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
-    if (tConfig.initDone != false)
-    {
-        Mutex_Lock(&tConfig.mut);
-        if (false == tConfig.locked)
-        {
-            uint32_t idx = 0;
-            uint32_t nbKnownTypes = 0;
-            SOPC_EncodeableType** additionalTypes = NULL;
-
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-            if (encTypesTable != NULL && nbTypes > 0)
-            {
-                status = SOPC_STATUS_OK;
-                if (NULL == tConfig.encTypesTable)
-                {
-                    // known types to be added
-                    nbKnownTypes = GetKnownEncodeableTypesLength();
-                    // +1 for null value termination
-                    if (((uint64_t) nbKnownTypes + nbTypes + 1) <= SIZE_MAX / sizeof(SOPC_EncodeableType*))
-                    {
-                        tConfig.encTypesTable =
-                            malloc(sizeof(SOPC_EncodeableType*) * (size_t)(nbKnownTypes + nbTypes + 1));
-                    } // else NULL due to previous condition
-                    if (NULL == tConfig.encTypesTable ||
-                        tConfig.encTypesTable != memcpy(tConfig.encTypesTable, SOPC_KnownEncodeableTypes,
-                                                        nbKnownTypes * sizeof(SOPC_EncodeableType*)))
-                    {
-                        tConfig.encTypesTable = NULL;
-                    }
-                    else
-                    {
-                        additionalTypes = tConfig.encTypesTable;
-                        tConfig.nbEncTypesTable = nbKnownTypes;
-                    }
-                }
-                else
-                {
-                    if ((uint64_t) tConfig.nbEncTypesTable + nbTypes + 1 <= SIZE_MAX / sizeof(SOPC_EncodeableType*))
-                    {
-                        // +1 for null value termination
-                        additionalTypes =
-                            realloc(tConfig.encTypesTable,
-                                    sizeof(SOPC_EncodeableType*) * (size_t) tConfig.nbEncTypesTable + nbTypes + 1);
-                    }
-                    else
-                    {
-                        additionalTypes = NULL;
-                    }
-                }
-
-                if (additionalTypes != NULL)
-                {
-                    tConfig.encTypesTable = additionalTypes;
-
-                    for (idx = 0; idx < nbTypes; idx++)
-                    {
-                        tConfig.encTypesTable[tConfig.nbEncTypesTable + idx] = encTypesTable[idx];
-                    }
-                    tConfig.nbEncTypesTable += nbTypes;
-                    // NULL terminated table
-                }
-                else
-                {
-                    status = SOPC_STATUS_NOK;
-                }
-            }
-            return status;
-        }
-        Mutex_Unlock(&tConfig.mut);
-    }
-    return status;
-}
-
-SOPC_EncodeableType** SOPC_ToolkitConfig_GetEncodeableTypes()
-{
-    SOPC_EncodeableType** res = NULL;
-    if (tConfig.initDone != false)
-    {
-        Mutex_Lock(&tConfig.mut);
-        if (tConfig.locked != false)
-        {
-            if (tConfig.encTypesTable != NULL && tConfig.nbEncTypesTable > 0)
-            {
-                // Additional types are present: contains known types + additional
-                res = tConfig.encTypesTable;
-            }
-            else
-            {
-                // No additional types: return static known types
-                res = SOPC_KnownEncodeableTypes;
-            }
-        }
-        Mutex_Unlock(&tConfig.mut);
-    }
-    return res;
-}
-
-SOPC_NamespaceTable* SOPC_ToolkitConfig_GetNamespaces()
-{
-    SOPC_NamespaceTable* res = NULL;
-    if (tConfig.initDone != false)
-    {
-        Mutex_Lock(&tConfig.mut);
-        if (tConfig.locked != false)
-        {
-            res = tConfig.nsTable;
-        }
-        Mutex_Unlock(&tConfig.mut);
-    }
-    return res;
-}
 
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
 {

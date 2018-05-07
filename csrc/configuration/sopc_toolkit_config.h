@@ -33,7 +33,6 @@
 #include "sopc_user_app_itf.h"
 
 #include "sopc_builtintypes.h"
-#include "sopc_namespace_table.h"
 #include "sopc_types.h"
 
 /**
@@ -109,33 +108,6 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
  *  configured or otherwise
  */
 uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* config);
-
-/**
- *  \brief Set the given namespace table configuration (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured
- * required)
- *
- *  \param nsTable  The new namespace table to be used by the stack
- *
- *  \return SOPC_STATUS_OK if configuration succeeded,
- *  SOPC_STATUS_INVALID_STATE if toolkit is not initialized or already
- *  configured, SOPC_STATUS_INVALID_PARAMETER if \p nsTable == NULL,
- *  SOPC_STATUS_NOK otherwise
- */
-SOPC_ReturnStatus SOPC_ToolkitConfig_SetNamespaceUris(SOPC_NamespaceTable* nsTable);
-
-/**
- *  \brief Add the given encodeable types to the configuration (SOPC_Toolkit_Initialize required,
- * !SOPC_Toolkit_Configured required)
- *
- *  \param encTypesTable  The encodeable types to add to the encodeable types configuration (NULL terminated)
- *  \param nbTypes        Number of encodeable types provided in the table
- *
- *  \return SOPC_STATUS_OK if configuration succeeded,
- *  SOPC_STATUS_INVALID_STATE if toolkit is not initialized or already
- *  configured, SOPC_STATUS_INVALID_PARAMETER if \p encTypesTable == NULL,
- *  SOPC_STATUS_NOK otherwise
- */
-SOPC_ReturnStatus SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTable, uint32_t nbTypes);
 
 /**
  * \brief Configure the toolkit log generation properties (SOPC_Toolkit_Initialize required,
