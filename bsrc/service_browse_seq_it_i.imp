@@ -32,6 +32,7 @@ CONCRETE_VARIABLES
     nb_bri,
     bri_i,
 
+    Node,
     RefIndex,
     RefIndexEnd
 
@@ -42,6 +43,8 @@ INVARIANT
     nb_bri : NAT &
     bri_i  : NAT &
 
+    Node        : t_Node_i &
+    Node        : t_Node &
     RefIndex    : NAT &
     RefIndex    : t_RefIndex &
     RefIndexEnd : NAT &
@@ -54,6 +57,7 @@ INITIALISATION
     nb_bri := 0;
     bri_i  := 0;
 
+    Node        := c_Node_indet;
     RefIndex    := 0;
     RefIndexEnd := 0
 
@@ -93,6 +97,7 @@ OPERATIONS
 
     p_continue <-- init_iter_reference(p_node) =
     BEGIN
+        Node        := p_node;
         RefIndex    <-- get_Node_RefIndexBegin(p_node);
         RefIndexEnd <-- get_Node_RefIndexEnd(p_node);
         p_continue := bool(RefIndexEnd >= RefIndex)
@@ -101,7 +106,7 @@ OPERATIONS
 
     p_continue, p_ref <-- continue_iter_reference =
     BEGIN
-       p_ref <-- get_RefIndex_Reference(RefIndex);
+       p_ref <-- get_RefIndex_Reference(Node, RefIndex);
        RefIndex := RefIndex + 1;
        p_continue := bool(RefIndex <= RefIndexEnd)
     END

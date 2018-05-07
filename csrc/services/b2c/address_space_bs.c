@@ -431,7 +431,8 @@ void address_space_bs__get_Node_RefIndexEnd(const constants__t_Node_i address_sp
     *address_space_bs__p_ref_index = address_space_bs__RefIndexEnd[address_space_bs__p_node];
 }
 
-void address_space_bs__get_RefIndex_Reference(const t_entier4 address_space_bs__p_ref_index,
+void address_space_bs__get_RefIndex_Reference(const constants__t_Node_i address_space_bs__p_node,
+                                              const t_entier4 address_space_bs__p_ref_index,
                                               constants__t_Reference_i* const address_space_bs__p_ref)
 {
     *address_space_bs__p_ref = address_space_bs__p_ref_index;

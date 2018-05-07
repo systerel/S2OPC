@@ -77,7 +77,7 @@ DEFINITIONS
         Node_Reference          : t_Node     <-> t_Reference &
         Node_RefIndexBegin      : t_Node     --> t_RefIndex  &
         Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
-        RefIndex_Reference      : t_RefIndex --> t_Reference &
+        RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference &
 
         /* Service Write */
         ResponseWrite_allocated : BOOL &

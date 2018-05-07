@@ -81,7 +81,7 @@ DEFINITIONS
         Node_Reference          : t_Node     <-> t_Reference &
         Node_RefIndexBegin      : t_Node     --> t_RefIndex  &
         Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
-        RefIndex_Reference      : t_RefIndex --> t_Reference &
+        RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference &
 
         /* Service Write */
         ResponseWrite_allocated : BOOL &
@@ -247,13 +247,15 @@ OPERATIONS
     END
     ;
 
-    p_ref <-- get_RefIndex_Reference(p_ref_index) =
+    p_ref <-- get_RefIndex_Reference(p_node, p_ref_index) =
     PRE
+        p_node : t_Node_i &
+        p_node : t_Node &
         p_ref_index : NAT &
         p_ref_index : t_RefIndex
     THEN
         p_ref :(p_ref : t_Reference_i &
-                p_ref = RefIndex_Reference(p_ref_index))
+                p_ref = RefIndex_Reference(p_node |-> p_ref_index))
     END
     ;
 
