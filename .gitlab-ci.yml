@@ -134,6 +134,13 @@ test-check:
     - ./.check-code.sh
   dependencies:
     - generation
+  artifacts:
+    name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'pre-build-check.log'
+      - 'clang_tidy.log'
+    when: on_failure
+    expire_in: '1 month'
 
 test-unit:
   <<: *test_linux
