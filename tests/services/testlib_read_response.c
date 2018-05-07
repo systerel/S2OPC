@@ -28,59 +28,24 @@
 #include "address_space_impl.h"
 #include "testlib_read_response.h"
 
+extern SOPC_AddressSpace* address_space_bs__nodes;
+
 /**
  * You should free() the returned Variant* afterwards.
  */
-SOPC_Variant* new_variant_rvi(SOPC_NodeId** pnids,
-                              OpcUa_NodeClass* pncls,
-                              SOPC_Variant* pvars,
-                              SOPC_StatusCode* pscs,
-                              uint32_t attr_id,
-                              int32_t rvi)
+SOPC_Variant* get_attribute_variant(SOPC_AddressSpace_Item* item, uint32_t attr_id)
 {
-    if (NULL == pnids || NULL == pncls || NULL == pvars || NULL == pscs)
-        return NULL;
-
     switch (attr_id)
     {
     case e_aid_NodeId:
-        return util_variant__new_Variant_from_NodeId(pnids[rvi]);
+        return util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Item_Get_NodeId(item));
     case e_aid_NodeClass:
-        return util_variant__new_Variant_from_NodeClass(pncls[rvi]);
+        return util_variant__new_Variant_from_NodeClass(item->node_class);
     case e_aid_Value:
-        assert(address_space_bs__nViews >= 0);
-        assert(address_space_bs__nObjects >= 0);
-        assert(rvi >= address_space_bs__nViews + address_space_bs__nObjects);
-        assert(rvi - (address_space_bs__nViews + address_space_bs__nObjects) <=
-               address_space_bs__nVariables + address_space_bs__nVariableTypes);
-        return util_variant__new_Variant_from_Variant(
-            &pvars[rvi - (address_space_bs__nViews + address_space_bs__nObjects)]);
+        return util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Item_Get_Value(item));
     default:
         return NULL;
     }
-}
-
-/** Returns false on not found or compare-error */
-static bool get_rvi(SOPC_NodeId** pnids, SOPC_NodeId* target_nid, int32_t* prvi)
-{
-    if (NULL == pnids || NULL == target_nid || NULL == prvi)
-        return false;
-
-    int32_t i;
-    int32_t comp;
-
-    for (i = 1; i <= address_space_bs__nNodeIds; i++)
-    {
-        if (SOPC_STATUS_OK != SOPC_NodeId_Compare(pnids[i], target_nid, &comp))
-            return false;
-        if (comp == 0)
-        {
-            *prvi = i;
-            return true;
-        }
-    }
-
-    return true;
 }
 
 bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode statusCode, int verbose)
@@ -92,7 +57,7 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode s
     bool bTestOk = false;
     int32_t comp = 0;
     SOPC_Variant* pvar;
-    int32_t i, rvi = 0;
+    int32_t i;
 
     /* Check the service StatusCode */
     if (verbose > 0)
@@ -122,13 +87,13 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode s
     for (i = 0; bTestOk && i < pReadReq->NoOfNodesToRead; ++i)
 
     {
-        /* Find NodeId's rvi */
-        bTestOk = get_rvi(address_space_bs__a_NodeId, &pReadReq->NodesToRead[i].NodeId, &rvi);
+        SOPC_AddressSpace_Item* item =
+            SOPC_Dict_Get(address_space_bs__nodes, &pReadReq->NodesToRead[i].NodeId, &bTestOk);
+
         /* Find desired attribute and wrap it in a new SOPC_Variant* */
         if (bTestOk)
         {
-            pvar = new_variant_rvi(address_space_bs__a_NodeId, address_space_bs__a_NodeClass, address_space_bs__a_Value,
-                                   address_space_bs__a_Value_StatusCode, pReadReq->NodesToRead[i].AttributeId, rvi);
+            pvar = get_attribute_variant(item, pReadReq->NodesToRead[i].AttributeId);
         }
         else
         {

@@ -7,8 +7,6 @@ library adaptation for OPC UA needs (using mbedtls).
 
 This project contains the following elements:
 - acceptances_tests: OPC UA Compliance Test Tool configuration and launch script
-- address_space_generation: address space XML description to C source file generator to configure server Toolkit
-- address_space_generation/genc: already generated C source files for the Toolkit tests
 - apidoc: generated HTML documentation of the C source code with doxygen
 - bin: built binaries tests of the toolkit for Linux platform (64 bits)
 - bin_windows: built binaries tests and DLL of the toolkit for Windows platform (32 bits)
@@ -55,9 +53,11 @@ Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
 - For more information, or to compile the master branch on its latest commit, please refer to the wiki.
 
 Address space generation:
-- see address_space_generation/README file for generator dependencies
-- XML file provided complying with schema https://opcfoundation.org/UA/schemas/1.03/UANodeSet.xsd with limitations
-  (see tests/data/address_space/parts/User_Address_Space.xml files for example)
+- The `generate-ingopcs-address-space` tool converts a UANodeSet XML file into a
+  C file that can be compiled in the binary, and used with the embedded address
+  space loader (see the `tests/data/address_space/parts/User_Address_Space.xml`
+  file for example). Not all the features of the schema are supported at the
+  moment.
 
 Licenses:
 - Unless specifically indicated otherwise in a file, INGOPCS files are

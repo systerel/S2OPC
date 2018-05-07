@@ -34,5 +34,4 @@ if [[ -z $ISALL || $ISALL != "all" ]]; then
 else
     echo "Clean generated source files from B model and test @space"
     \rm -fr ./csrc/services/bgenc
-    make -C address_space_generation clean > /dev/null
 fi

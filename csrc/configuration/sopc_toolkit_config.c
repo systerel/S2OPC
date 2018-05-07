@@ -538,40 +538,7 @@ SOPC_App_AddSpace_Event SOPC_AppEvent_AddSpaceEvent_Get(int32_t iEvent)
 
 void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
 {
-    /* Glue the address_space_bs machine content to the generated address space content */
-
-    /* Number of nodes by nodeclass */
-    assert(addressSpace->nbNodesTotal <= INT32_MAX); // guaranteed by caller, it is sum of other fields
-    address_space_bs__nNodeIds = (int32_t) addressSpace->nbNodesTotal;
-    address_space_bs__nVariables = (int32_t) addressSpace->nbVariables;
-    address_space_bs__nVariableTypes = (int32_t) addressSpace->nbVariableTypes;
-    address_space_bs__nObjectTypes = (int32_t) addressSpace->nbObjectTypes;
-    address_space_bs__nReferenceTypes = (int32_t) addressSpace->nbReferenceTypes;
-    address_space_bs__nDataTypes = (int32_t) addressSpace->nbDataTypes;
-    address_space_bs__nMethods = (int32_t) addressSpace->nbMethods;
-    address_space_bs__nObjects = (int32_t) addressSpace->nbObjects;
-    address_space_bs__nViews = (int32_t) addressSpace->nbViews;
-
-    /* Attributes */
-    address_space_bs__a_NodeId = addressSpace->nodeIdArray;
-    /* Converts NodeClasses */
-    address_space_bs__a_NodeClass = addressSpace->nodeClassArray;
-    address_space_bs__a_BrowseName = addressSpace->browseNameArray;
-    address_space_bs__a_DisplayName = addressSpace->displayNameArray;
-    address_space_bs__a_DisplayName_begin = addressSpace->displayNameIdxArray_begin;
-    address_space_bs__a_DisplayName_end = addressSpace->displayNameIdxArray_end;
-    address_space_bs__a_Value = addressSpace->valueArray;
-    /* Converts status codes */
-    address_space_bs__a_Value_StatusCode = addressSpace->valueStatusArray;
-    address_space_bs__HasTypeDefinition = NULL;
-
-    /* References */
-    address_space_bs__refs_ReferenceType = addressSpace->referenceTypeArray;
-    address_space_bs__refs_TargetNode = addressSpace->referenceTargetArray;
-    address_space_bs__refs_IsForward = addressSpace->referenceIsForwardArray;
-    address_space_bs__RefIndexBegin = addressSpace->referenceIdxArray_begin;
-    address_space_bs__RefIndexEnd = addressSpace->referenceIdxArray_end;
-
+    address_space_bs__nodes = addressSpace;
     sopc_addressSpace_configured = true;
 }
 
@@ -586,19 +553,8 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* ad
             Mutex_Lock(&tConfig.mut);
             if (false == tConfig.locked && sopc_addressSpace_configured == false)
             {
-                if (addressSpace->nbNodesTotal <= INT32_MAX &&
-                    addressSpace->nbNodesTotal == addressSpace->nbDataTypes + addressSpace->nbMethods +
-                                                      addressSpace->nbObjectTypes + addressSpace->nbObjects +
-                                                      addressSpace->nbReferenceTypes + addressSpace->nbVariableTypes +
-                                                      addressSpace->nbVariables + addressSpace->nbViews)
-                {
-                    status = SOPC_STATUS_OK;
-                    SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(addressSpace);
-                }
-                else
-                {
-                    status = SOPC_STATUS_INVALID_PARAMETERS;
-                }
+                status = SOPC_STATUS_OK;
+                SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(addressSpace);
             }
             Mutex_Unlock(&tConfig.mut);
         }

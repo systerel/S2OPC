@@ -48,25 +48,15 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    SOPC_AddressSpace_Description* desc = SOPC_AddressSpace_Description_Create();
-    assert(desc != NULL);
-
-    SOPC_ReturnStatus status = SOPC_UANodeSet_Parse(fd, desc);
+    SOPC_AddressSpace* space = SOPC_UANodeSet_Parse(fd);
+    bool ok = (space != NULL);
+    SOPC_AddressSpace_Delete(space);
     fclose(fd);
 
-    if (status == SOPC_STATUS_OK)
-    {
-        SOPC_AddressSpace space;
-        status = SOPC_AddressSpace_Generate(desc, &space);
-        SOPC_AddressSpace_Clear(&space);
-    }
-
-    SOPC_AddressSpace_Description_Delete(desc);
-
-    if (status == SOPC_STATUS_OK)
+    if (ok)
     {
         printf("All nodes parsed successfully.\n");
     }
 
-    return (status == SOPC_STATUS_OK) ? 0 : 1;
+    return ok ? 0 : 1;
 }

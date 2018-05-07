@@ -132,7 +132,7 @@ for f in opcua_identifiers.h opcua_statuscodes.h sopc_types.h sopc_types.c; do
     mv $f $f"_"
 done
 popd > /dev/null
-find csrc tests address_space_generation -name "*.[hc]" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
+find csrc tests -name "*.[hc]" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
 pushd csrc/opcua_types/ > /dev/null
 for f in opcua_identifiers.h opcua_statuscodes.h sopc_types.h sopc_types.c; do
     mv $f"_" $f
@@ -140,9 +140,9 @@ done
 popd > /dev/null
 
 find bsrc -maxdepth 1 -name "*.[im]??" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
-find validation address_space_generation -name "*.py" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_PY || { echo 'Expected header:' ; cat $HEADER_PY ; err=1 ; }
+find validation -name "*.py" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_PY || { echo 'Expected header:' ; cat $HEADER_PY ; err=1 ; }
 find . -name "*.sh" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_SH || { echo 'Expected header:' ; cat $HEADER_SH ; err=1 ; }
-find address_space_generation acceptances_tests -name "*.xsl" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_XSL || { echo 'Expected header:' ; cat $HEADER_XSL ; err=1 ; }
+find acceptances_tests -name "*.xsl" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_XSL || { echo 'Expected header:' ; cat $HEADER_XSL ; err=1 ; }
 
 if [[ 0 -eq $err ]] ; then
     echo "All copyrights are OK"

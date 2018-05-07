@@ -57,7 +57,7 @@ typedef enum {
 struct parse_context_t
 {
     XML_Parser parser;
-    SOPC_AddressSpace_Description* desc;
+    SOPC_AddressSpace* space;
     parse_state_t state;
     char skip_tag[SKIP_TAG_LEN]; // If set, start_tag events are ignored until this tag is closed
 
@@ -75,7 +75,7 @@ struct parse_context_t
     SOPC_Dict* aliases;
     char* current_alias_alias;
     SOPC_BuiltinId current_value_type;
-    SOPC_AddressSpace_Description_Item item;
+    SOPC_AddressSpace_Item item;
 };
 
 #define NS_SEPARATOR "|"
@@ -361,7 +361,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 {
     assert(ctx->item.node_class == 0);
 
-    SOPC_AddressSpace_Description_Item_Initialize(&ctx->item, element_type);
+    SOPC_AddressSpace_Item_Initialize(&ctx->item, element_type);
 
     for (size_t i = 0; attrs[i]; ++i)
     {
@@ -378,8 +378,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
                 return false;
             }
 
-            SOPC_NodeId* element_id = SOPC_AddressSpace_Description_Item_Get_NodeId(&ctx->item);
-
+            SOPC_NodeId* element_id = SOPC_AddressSpace_Item_Get_NodeId(&ctx->item);
             SOPC_ReturnStatus status = SOPC_NodeId_Copy(element_id, id);
             SOPC_NodeId_Clear(id);
             free(id);
@@ -394,7 +393,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
         {
             const char* attr_val = attrs[++i];
 
-            SOPC_QualifiedName* element_browse_name = SOPC_AddressSpace_Description_Item_Get_BrowseName(&ctx->item);
+            SOPC_QualifiedName* element_browse_name = SOPC_AddressSpace_Item_Get_BrowseName(&ctx->item);
             SOPC_QualifiedName_Initialize(element_browse_name);
             SOPC_ReturnStatus status = SOPC_QualifiedName_ParseCString(element_browse_name, attr_val);
 
@@ -413,8 +412,8 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 
 static bool start_node_references(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    int32_t* n_refs = SOPC_AddressSpace_Description_Item_Get_NoOfReferences(&ctx->item);
-    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Description_Item_Get_References(&ctx->item);
+    int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(&ctx->item);
+    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Item_Get_References(&ctx->item);
 
     assert(*n_refs >= 0);
     int32_t new_n_refs = (*n_refs + 1);
@@ -747,8 +746,8 @@ static bool finalize_alias(struct parse_context_t* ctx)
 
 static bool finalize_reference(struct parse_context_t* ctx)
 {
-    int32_t* n_refs = SOPC_AddressSpace_Description_Item_Get_NoOfReferences(&ctx->item);
-    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Description_Item_Get_References(&ctx->item);
+    int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(&ctx->item);
+    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Item_Get_References(&ctx->item);
 
     assert(*n_refs > 0);
     OpcUa_ReferenceNode* ref = &(*refs)[(*n_refs) - 1];
@@ -776,9 +775,9 @@ static SOPC_LocalizedText* element_localized_text_for_state(struct parse_context
     switch (ctx->state)
     {
     case PARSE_NODE_DISPLAYNAME:
-        return SOPC_AddressSpace_Description_Item_Get_DisplayName(&ctx->item);
+        return SOPC_AddressSpace_Item_Get_DisplayName(&ctx->item);
     case PARSE_NODE_DESCRIPTION:
-        return SOPC_AddressSpace_Description_Item_Get_Description(&ctx->item);
+        return SOPC_AddressSpace_Item_Get_Description(&ctx->item);
     default:
         assert(false && "Unexpected state");
     }
@@ -990,9 +989,14 @@ static bool set_variant_value(SOPC_Variant* var, SOPC_BuiltinId type_id, const c
 
 static bool set_element_value(struct parse_context_t* ctx)
 {
-    SOPC_Variant* var = SOPC_AddressSpace_Description_Item_Get_Value(&ctx->item);
+    SOPC_Variant* var = SOPC_AddressSpace_Item_Get_Value(&ctx->item);
     bool ok = set_variant_value(var, ctx->current_value_type, ctx_char_data_stripped(ctx));
     ctx_char_data_reset(ctx);
+
+    if (ok)
+    {
+        ctx->item.value_status = 0x00;
+    }
 
     return ok;
 }
@@ -1062,13 +1066,13 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_NODE:
     {
         SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-        SOPC_AddressSpace_Description_Item* item = calloc(1, sizeof(SOPC_AddressSpace_Description_Item));
+        SOPC_AddressSpace_Item* item = calloc(1, sizeof(SOPC_AddressSpace_Item));
 
         if (item != NULL)
         {
-            memcpy(item, &ctx->item, sizeof(SOPC_AddressSpace_Description_Item));
+            memcpy(item, &ctx->item, sizeof(SOPC_AddressSpace_Item));
             ctx->item.node_class = 0;
-            status = SOPC_AddressSpace_Description_Append(ctx->desc, item);
+            status = SOPC_AddressSpace_Append(ctx->space, item);
         }
         else
         {
@@ -1078,7 +1082,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         if (status != SOPC_STATUS_OK)
         {
             LOG_MEMORY_ALLOCATION_FAILURE;
-            SOPC_AddressSpace_Description_Item_Clear(&ctx->item);
+            SOPC_AddressSpace_Item_Clear(&ctx->item);
             free(item);
             XML_StopParser(ctx->parser, false);
             return;
@@ -1140,20 +1144,22 @@ static bool str_equal(const void* a, const void* b)
     return strcmp((const char*) a, (const char*) b) == 0;
 }
 
-SOPC_StatusCode SOPC_UANodeSet_Parse(FILE* fd, SOPC_AddressSpace_Description* desc)
+SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
 {
     static const size_t char_data_cap_initial = 4096;
     SOPC_Dict* aliases = SOPC_Dict_Create(NULL, str_hash, str_equal, free, free);
     XML_Parser parser = XML_ParserCreateNS(NULL, NS_SEPARATOR[0]);
     char* char_data_buffer = calloc(char_data_cap_initial, sizeof(char));
+    SOPC_AddressSpace* space = SOPC_AddressSpace_Create(true);
 
-    if ((aliases == NULL) || (parser == NULL) || (char_data_buffer == NULL))
+    if ((aliases == NULL) || (parser == NULL) || (char_data_buffer == NULL) || (space == NULL))
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         SOPC_Dict_Delete(aliases);
         XML_ParserFree(parser);
         free(char_data_buffer);
-        return SOPC_STATUS_NOK;
+        SOPC_AddressSpace_Delete(space);
+        return NULL;
     }
 
     struct parse_context_t ctx;
@@ -1163,7 +1169,7 @@ SOPC_StatusCode SOPC_UANodeSet_Parse(FILE* fd, SOPC_AddressSpace_Description* de
     ctx.aliases = aliases;
     ctx.state = PARSE_START;
     ctx.parser = parser;
-    ctx.desc = desc;
+    ctx.space = space;
     ctx.char_data_buffer = char_data_buffer;
     ctx.char_data_cap = char_data_cap_initial;
 
@@ -1176,5 +1182,13 @@ SOPC_StatusCode SOPC_UANodeSet_Parse(FILE* fd, SOPC_AddressSpace_Description* de
     free(ctx.current_alias_alias);
     free(ctx.char_data_buffer);
 
-    return res;
+    if (res == SOPC_STATUS_OK)
+    {
+        return space;
+    }
+    else
+    {
+        SOPC_AddressSpace_Delete(space);
+        return NULL;
+    }
 }

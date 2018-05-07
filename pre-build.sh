@@ -26,7 +26,6 @@
 # - TOOLING_DIR contains the path of the tooling directory (root directory containing bin/)
 
 BMODEL_DIR=bsrc
-ADDSPACE_DIR=address_space_generation
 PREBUILD=pre-build
 PROJET=ingopcs_genc
 
@@ -71,14 +70,6 @@ if [[ $? != 0 ]]; then
 fi
 # Remove pre-build directory in any case
 \rm -rf $CURDIR/$PREBUILD
-
-
-echo "Generate address space C files for tests" | tee -a $LOGPATH
-make -C ./address_space_generation >> $LOGPATH
-if [[ $? != 0 ]]; then
-    echo "ERROR: generating address spaces for tests" | tee -a $LOGPATH
-    EXITCODE=1
-fi
 
 if [[ $EXITCODE -eq 0 ]]; then
     echo "Completed with SUCCESS" | tee -a $LOGPATH

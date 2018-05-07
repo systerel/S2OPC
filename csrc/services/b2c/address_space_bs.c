@@ -33,183 +33,17 @@
 #include "util_b2c.h"
 #include "util_variant.h"
 
-/*
- * The following are the pointers to arrays containing the nodes the AddressSpace.
- * There are also variables storing required lengths and offsets.
- * These pointers and variables must be initialized before address_space_bs__INITIALISATION is called.
- * Index of the arrays should start at 1, so array[0] is never accessed.
- *
- * Attributes are grouped by families.
- * It is possible to group the 22 attributes + 1 pseudo-attribute in 9 families,
- * and to order the nodes by their node class,
- * so that the arrays of the attributes are contiguous.
- * The pseudo-attribute is HasTypeDefinition,
- * which has the same properties as an attribute of Object and Variable:
- * a unique and mandatory field.
- *
- * NodeClass order: Variable, VariableType, ObjectType, ReferenceType, DataType, Method, Object, View
- *
- * Families:
- *  - All: NodeId, NodeClass, BrowseName, Description, DisplayName, UserWriteMask, WriteMask
- *  - Vars: AccessLevel, UserAccessLevel, Historizing, MinimumSamplingInterval
- *  - Vars+Types: ArrayDimensions, DataType, Value, ValueRank
- *  - Method: Executable, UserExecutable
- *  - RefType: InverseName, Symmetric
- *  - View: ContainsNoLoops
- *  - View+Obj: EventNotifier
- *  - Types: IsAbstract
- *  - HasTypeDef
- *
- * Offsets:
- *  - All: 0
- *  - Vars: nViews + nObjects
- *  - Vars+Types: nViews + nObjects
- *  - Method: nViews + nObjects + nVariables + nVariableTypes + nObjectTypes + nReferenceTypes + nDataTypes
- *  - RefType: nViews + nObjects + nVariables + nVariableTypes + nObjectTypes
- *  - View: 0
- *  - View+Obj: 0
- *  - Types: nViews + nObjects + nVariables
- *  - HasTypeDef: nViews
- *
- */
-/* Sizes */
-int32_t address_space_bs__nNodeIds = 0; /* Required by the hashmap */
-int32_t address_space_bs__nVariables = 0;
-int32_t address_space_bs__nVariableTypes = 0;
-int32_t address_space_bs__nObjectTypes = 0;
-int32_t address_space_bs__nReferenceTypes = 0;
-int32_t address_space_bs__nDataTypes = 0;
-int32_t address_space_bs__nMethods = 0; /* May be useless */
-int32_t address_space_bs__nObjects = 0;
-int32_t address_space_bs__nViews = 0;
-/* Offsets. These are filled in INITIALISATION(), and are not public */
-int32_t offVars = 0;
-int32_t offVarsTypes = 0;
-int32_t offMethods = 0;
-int32_t offRefTypes = 0;
-int32_t offTypes = 0;
-int32_t offHasTypeDefs = 0;
-/* Family All */
-SOPC_NodeId** address_space_bs__a_NodeId = NULL;
-OpcUa_NodeClass* address_space_bs__a_NodeClass = NULL;
-SOPC_QualifiedName* address_space_bs__a_BrowseName = NULL;
-SOPC_LocalizedText* address_space_bs__a_DisplayName = NULL;
-int32_t* address_space_bs__a_DisplayName_begin = NULL;
-int32_t* address_space_bs__a_DisplayName_end = NULL;
-/* Family Vars */
-SOPC_Variant* address_space_bs__a_Value = NULL;
-SOPC_StatusCode* address_space_bs__a_Value_StatusCode = NULL;
-
-/* Family HasTypeDefinition */
-SOPC_ExpandedNodeId** address_space_bs__HasTypeDefinition = NULL;
-
-/*
- * The following pointers store the references.
- * Three elements of the references (ReferenceType, TargetNode, IsForward) out of the 4 (SourceNode)
- * are stored in 3 arrays indexed by a t_ReferenceIndex (starting at 1).
- * Two more arrays (Node_RefIndexBegin, Node_RefIndexEnd) associates a t_Node to the slice of t_ReferenceIndex.
- *
- * These pointers to arrays must be initialized before address_space_bs__INITIALISATION is called.
- */
-SOPC_NodeId** address_space_bs__refs_ReferenceType = NULL;
-SOPC_ExpandedNodeId** address_space_bs__refs_TargetNode = NULL;
-bool* address_space_bs__refs_IsForward = NULL;
-int32_t* address_space_bs__RefIndexBegin = NULL;
-int32_t* address_space_bs__RefIndexEnd = NULL;
-
-/* Indicates if the address space was configured */
 bool sopc_addressSpace_configured = false;
-
-static SOPC_Dict* node_id_dict = NULL;
-
-static uint64_t node_id_hash(const void* data)
-{
-    uint64_t hash;
-    SOPC_NodeId_Hash((const SOPC_NodeId*) data, &hash);
-    return hash;
-}
-
-static bool node_id_equal(const void* a, const void* b)
-{
-    int32_t cmp;
-    SOPC_StatusCode status;
-
-    assert(a != NULL && b != NULL);
-    status = SOPC_NodeId_Compare((const SOPC_NodeId*) a, (const SOPC_NodeId*) b, &cmp);
-    assert(status == SOPC_STATUS_OK);
-
-    return cmp == 0;
-}
-
-static bool populate_node_id_dict(SOPC_Dict* dict, SOPC_NodeId** ids, int32_t n_ids)
-{
-    bool ok = (n_ids >= 0);
-
-    if (ok)
-    {
-        ok = SOPC_Dict_Reserve(dict, (uint64_t) n_ids);
-    }
-
-    if (ok)
-    {
-        for (int32_t i = 0; i < n_ids; ++i)
-        {
-            SOPC_NodeId* id = ids[i];
-
-            if (id == NULL)
-            {
-                continue;
-            }
-
-            if (SOPC_Dict_Insert(dict, id, (void*) (uintptr_t) i) == false)
-            {
-                ok = false;
-                break;
-            }
-        }
-    }
-
-    return ok;
-}
+SOPC_AddressSpace* address_space_bs__nodes = NULL;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void address_space_bs__INITIALISATION(void)
 {
-    bool populated = false;
-
-    if (sopc_addressSpace_configured != false)
+    if (sopc_addressSpace_configured)
     {
-        assert(0 != address_space_bs__nNodeIds);
-        assert(NULL != address_space_bs__a_NodeId);
-        assert(NULL != address_space_bs__a_NodeClass);
-        assert(NULL != address_space_bs__a_BrowseName);
-        assert(NULL != address_space_bs__a_DisplayName);
-        assert(NULL != address_space_bs__a_DisplayName_begin);
-        assert(NULL != address_space_bs__a_DisplayName_end);
-        assert(NULL != address_space_bs__a_Value);
-        assert(NULL != address_space_bs__a_Value_StatusCode);
-        /*assert(NULL != address_space_bs__HasTypeDefinition);*/
-        assert(NULL != address_space_bs__refs_ReferenceType);
-        assert(NULL != address_space_bs__refs_TargetNode);
-        assert(NULL != address_space_bs__refs_IsForward);
-        assert(NULL != address_space_bs__RefIndexBegin);
-        assert(NULL != address_space_bs__RefIndexEnd);
-
-        /* Compute offsets */
-        offHasTypeDefs = address_space_bs__nViews;
-        offVars = offHasTypeDefs + address_space_bs__nObjects;
-        offVarsTypes = offVars;
-        offTypes = offVars + address_space_bs__nVariables;
-        offRefTypes = offTypes + address_space_bs__nVariableTypes + address_space_bs__nObjectTypes;
-        offMethods = offRefTypes + address_space_bs__nReferenceTypes + address_space_bs__nDataTypes;
-
-        node_id_dict = SOPC_Dict_Create(NULL, node_id_hash, node_id_equal, NULL, NULL);
-        assert(node_id_dict != NULL);
-
-        populated = populate_node_id_dict(node_id_dict, address_space_bs__a_NodeId, address_space_bs__nNodeIds);
-        assert(populated);
+        assert(NULL != address_space_bs__nodes);
     }
 }
 
@@ -217,23 +51,7 @@ void address_space_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
-/* As INITIALISATION may use mallocs, needs an UNINIT */
-void address_space_bs__UNINITIALISATION(void)
-{
-    int32_t i = 0;
-
-    SOPC_Dict_Delete(node_id_dict);
-    node_id_dict = NULL;
-
-    // Clear address space values if present (to free the values allocated on write service execution)
-    if (address_space_bs__a_Value != NULL)
-    {
-        for (i = 0; i <= address_space_bs__nVariables + address_space_bs__nVariableTypes; i++)
-        {
-            SOPC_Variant_Clear(&address_space_bs__a_Value[i]);
-        }
-    }
-}
+void address_space_bs__UNINITIALISATION(void) {}
 
 /* This is a_NodeId~ */
 void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i address_space_bs__nid,
@@ -251,12 +69,12 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
     if (NULL == pnid_req)
         return;
 
-    val = SOPC_Dict_Get(node_id_dict, pnid_req, &val_found);
+    val = SOPC_Dict_Get(address_space_bs__nodes, pnid_req, &val_found);
 
     if (val_found)
     {
         *address_space_bs__nid_valid = true;
-        *address_space_bs__node = (int) (uintptr_t) val;
+        *address_space_bs__node = val;
     }
 }
 
@@ -269,39 +87,31 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_Node
                                                          constants__t_StatusCode_i* const address_space_bs__sc,
                                                          constants__t_Variant_i* const address_space_bs__variant)
 {
+    SOPC_AddressSpace_Item* item = address_space_bs__node;
+
     /* Note: conv_* variables are abstract, we must be confident */
     *address_space_bs__sc = constants__e_sc_ok;
     switch (address_space_bs__aid)
     {
     case constants__e_aid_NodeId:
-        assert(address_space_bs__node <= address_space_bs__nNodeIds);
-        *address_space_bs__variant =
-            util_variant__new_Variant_from_NodeId(address_space_bs__a_NodeId[address_space_bs__node]);
+        *address_space_bs__variant = util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Item_Get_NodeId(item));
         break;
     case constants__e_aid_NodeClass:
-        assert(address_space_bs__node <= address_space_bs__nNodeIds);
-        *address_space_bs__variant =
-            util_variant__new_Variant_from_NodeClass(address_space_bs__a_NodeClass[address_space_bs__node]);
+        *address_space_bs__variant = util_variant__new_Variant_from_NodeClass(item->node_class);
         break;
     case constants__e_aid_BrowseName:
-        assert(address_space_bs__node <= address_space_bs__nNodeIds);
         *address_space_bs__variant =
-            util_variant__new_Variant_from_QualifiedName(&(address_space_bs__a_BrowseName[address_space_bs__node]));
+            util_variant__new_Variant_from_QualifiedName(SOPC_AddressSpace_Item_Get_BrowseName(item));
         break;
     case constants__e_aid_DisplayName:
-        assert(address_space_bs__node <= address_space_bs__nNodeIds);
         *address_space_bs__variant =
-            util_variant__new_Variant_from_LocalizedText(&(address_space_bs__a_DisplayName)[address_space_bs__node]);
+            util_variant__new_Variant_from_LocalizedText(SOPC_AddressSpace_Item_Get_DisplayName(item));
         break;
     case constants__e_aid_Value:
         if (constants__e_ncl_Variable == address_space_bs__ncl ||
             constants__e_ncl_VariableType == address_space_bs__ncl)
         {
-            assert(address_space_bs__node >= offVarsTypes);
-            assert(address_space_bs__node - offVarsTypes <=
-                   address_space_bs__nVariables + address_space_bs__nVariableTypes);
-            *address_space_bs__variant = util_variant__new_Variant_from_Variant(
-                &(address_space_bs__a_Value[address_space_bs__node - offVarsTypes]));
+            *address_space_bs__variant = util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Item_Get_Value(item));
         }
         else
         {
@@ -324,10 +134,9 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_Node
 void address_space_bs__set_Value(const constants__t_Node_i address_space_bs__node,
                                  const constants__t_Variant_i address_space_bs__value)
 {
+    SOPC_AddressSpace_Item* item = address_space_bs__node;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    assert(address_space_bs__node >= offVarsTypes);
-    assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
-    SOPC_Variant* pvar = &address_space_bs__a_Value[address_space_bs__node - offVarsTypes];
+    SOPC_Variant* pvar = SOPC_AddressSpace_Item_Get_Value(item);
     // Clear old value
     SOPC_Variant_Clear(pvar);
     /* Deep-copy the new value */
@@ -338,10 +147,8 @@ void address_space_bs__set_Value(const constants__t_Node_i address_space_bs__nod
 void address_space_bs__get_Value_StatusCode(const constants__t_Node_i address_space_bs__node,
                                             constants__t_StatusCode_i* const address_space_bs__sc)
 {
-    assert(address_space_bs__node >= offVarsTypes);
-    assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
-    util_status_code__C_to_B(address_space_bs__a_Value_StatusCode[address_space_bs__node - offVarsTypes],
-                             address_space_bs__sc);
+    SOPC_AddressSpace_Item* item = address_space_bs__node;
+    util_status_code__C_to_B(item->value_status, address_space_bs__sc);
 }
 
 void address_space_bs__read_AddressSpace_free_value(const constants__t_Variant_i address_space_bs__val)
@@ -352,29 +159,23 @@ void address_space_bs__read_AddressSpace_free_value(const constants__t_Variant_i
 void address_space_bs__get_BrowseName(const constants__t_Node_i address_space_bs__p_node,
                                       constants__t_QualifiedName_i* const address_space_bs__p_browse_name)
 {
-    assert(address_space_bs__p_node <= address_space_bs__nNodeIds);
-    *address_space_bs__p_browse_name = &(address_space_bs__a_BrowseName[address_space_bs__p_node]);
+    SOPC_AddressSpace_Item* item = address_space_bs__p_node;
+    *address_space_bs__p_browse_name = SOPC_AddressSpace_Item_Get_BrowseName(item);
 }
 
 void address_space_bs__get_DisplayName(const constants__t_Node_i address_space_bs__p_node,
                                        constants__t_LocalizedText_i* const address_space_bs__p_display_name)
 {
-    assert(address_space_bs__p_node <= address_space_bs__nNodeIds);
-    int32_t i = address_space_bs__a_DisplayName_begin[address_space_bs__p_node];
-
-    /* TODO: this constraint should be pushed to dataprep */
-    assert(address_space_bs__a_DisplayName_end[address_space_bs__p_node] >= i);
-    /* TODO: what to do with other display names ([begin + 1, end]) ? */
-    *address_space_bs__p_display_name = &(address_space_bs__a_DisplayName[i]);
+    SOPC_AddressSpace_Item* item = address_space_bs__p_node;
+    *address_space_bs__p_display_name = SOPC_AddressSpace_Item_Get_DisplayName(item);
 }
 
 void address_space_bs__get_NodeClass(const constants__t_Node_i address_space_bs__p_node,
                                      constants__t_NodeClass_i* const address_space_bs__p_node_class)
 {
-    assert(address_space_bs__p_node <= address_space_bs__nNodeIds);
+    SOPC_AddressSpace_Item* item = address_space_bs__p_node;
 
-    bool res =
-        util_NodeClass__C_to_B(address_space_bs__a_NodeClass[address_space_bs__p_node], address_space_bs__p_node_class);
+    bool res = util_NodeClass__C_to_B(item->node_class, address_space_bs__p_node_class);
     if (false == res)
     {
         *address_space_bs__p_node_class = constants__c_NodeClass_indet;
@@ -384,56 +185,54 @@ void address_space_bs__get_NodeClass(const constants__t_Node_i address_space_bs_
 void address_space_bs__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
                                           constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def)
 {
-    /* TODO: Temporary check. HasTypeDefinition is defined by PRE but current implentation does not populate it.
-     *  Also uncomment the assert in address_space_bs__INITIALISATION */
-    if (NULL == address_space_bs__HasTypeDefinition)
-    {
-        *address_space_bs__p_type_def = constants__c_ExpandedNodeId_indet;
-    }
-    else
-    {
-        assert(address_space_bs__p_node >= offHasTypeDefs);
-        assert(address_space_bs__p_node - offHasTypeDefs <= address_space_bs__nObjects + address_space_bs__nVariables);
-        /* TODO: Verify implementation of HasTypeDefinition in generated AddressSpace before using this code */
-        *address_space_bs__p_type_def = address_space_bs__HasTypeDefinition[address_space_bs__p_node - offHasTypeDefs];
-    }
+    // TODO: Not implemented yet
+    (void) address_space_bs__p_node;
+    *address_space_bs__p_type_def = constants__c_ExpandedNodeId_indet;
 }
 
 void address_space_bs__get_Reference_ReferenceType(const constants__t_Reference_i address_space_bs__p_ref,
                                                    constants__t_NodeId_i* const address_space_bs__p_RefType)
 {
-    *address_space_bs__p_RefType = address_space_bs__refs_ReferenceType[address_space_bs__p_ref];
+    OpcUa_ReferenceNode* ref = address_space_bs__p_ref;
+    *address_space_bs__p_RefType = &ref->ReferenceTypeId;
 }
 
 void address_space_bs__get_Reference_TargetNode(const constants__t_Reference_i address_space_bs__p_ref,
                                                 constants__t_ExpandedNodeId_i* const address_space_bs__p_TargetNode)
 {
-    *address_space_bs__p_TargetNode = address_space_bs__refs_TargetNode[address_space_bs__p_ref];
+    OpcUa_ReferenceNode* ref = address_space_bs__p_ref;
+    *address_space_bs__p_TargetNode = &ref->TargetId;
 }
 
 void address_space_bs__get_Reference_IsForward(const constants__t_Reference_i address_space_bs__p_ref,
                                                t_bool* const address_space_bs__p_IsForward)
 {
-    *address_space_bs__p_IsForward = address_space_bs__refs_IsForward[address_space_bs__p_ref];
+    OpcUa_ReferenceNode* ref = address_space_bs__p_ref;
+    *address_space_bs__p_IsForward = !ref->IsInverse;
 }
 
 void address_space_bs__get_Node_RefIndexBegin(const constants__t_Node_i address_space_bs__p_node,
                                               t_entier4* const address_space_bs__p_ref_index)
 {
-    assert(address_space_bs__p_node <= address_space_bs__nNodeIds);
-    *address_space_bs__p_ref_index = address_space_bs__RefIndexBegin[address_space_bs__p_node];
+    (void) address_space_bs__p_node;
+    *address_space_bs__p_ref_index = 0;
 }
 
 void address_space_bs__get_Node_RefIndexEnd(const constants__t_Node_i address_space_bs__p_node,
                                             t_entier4* const address_space_bs__p_ref_index)
 {
-    assert(address_space_bs__p_node <= address_space_bs__nNodeIds);
-    *address_space_bs__p_ref_index = address_space_bs__RefIndexEnd[address_space_bs__p_node];
+    SOPC_AddressSpace_Item* item = address_space_bs__p_node;
+    int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(item);
+    *address_space_bs__p_ref_index = *n_refs - 1;
 }
 
 void address_space_bs__get_RefIndex_Reference(const constants__t_Node_i address_space_bs__p_node,
                                               const t_entier4 address_space_bs__p_ref_index,
                                               constants__t_Reference_i* const address_space_bs__p_ref)
 {
-    *address_space_bs__p_ref = address_space_bs__p_ref_index;
+    SOPC_AddressSpace_Item* item = address_space_bs__p_node;
+    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Item_Get_References(item);
+    int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(item);
+    assert(address_space_bs__p_ref_index < *n_refs);
+    *address_space_bs__p_ref = &(*refs)[address_space_bs__p_ref_index];
 }

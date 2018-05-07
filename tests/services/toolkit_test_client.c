@@ -38,7 +38,7 @@
 #include "test_results.h"
 #include "testlib_read_response.h"
 
-#include "sopc_addspace.h"
+#include "embedded/loader.h"
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 
@@ -249,6 +249,7 @@ int main(void)
     char* certificateSrvLocation = "./server_public/server_2k.der";
     // Client private key
     char* keyLocation = "./client_private/client_2k.key";
+    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_Load();
 
     // Get Toolkit Configuration
     SOPC_Build_Info build_info = SOPC_ToolkitConfig_GetBuildInfo();
@@ -350,7 +351,7 @@ int main(void)
         assert(SOPC_STATUS_OK == SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG));
 
         // NECESSARY ONLY FOR TEST PURPOSES: a client should not define an @ space in a nominal case
-        status = SOPC_ToolkitServer_SetAddressSpaceConfig(&addressSpace);
+        status = SOPC_ToolkitServer_SetAddressSpaceConfig(address_space);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Test_Client_Toolkit: Failed to configure the @ space\n");
@@ -586,6 +587,8 @@ int main(void)
         SOPC_KeyManager_Certificate_Free(crt_ca);
         SOPC_PKIProviderStack_Free(pki);
     }
+
+    SOPC_AddressSpace_Delete(address_space);
 
     if (SOPC_STATUS_OK == status && test_results_get_service_result() != false)
     {

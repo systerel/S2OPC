@@ -73,14 +73,6 @@ if(WITH_COVERAGE)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
 endif()
 
-SET(ADDSPACEGEN_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/address_space_generation/include")
-SET(ADDSPACEGEN_DIR "${CMAKE_SOURCE_DIR}/address_space_generation/genc" CACHE
-    FILEPATH "Directory where the address spaces files are")
-SET(DISABLE_CHECK_ADDSPACE FALSE CACHE
-    BOOL "Disable the compilation of the address space check")
-
-set(EMBEDDED_ADDRESS_SPACE_FILE "address_space_generation/genc/ingopcs_addspace.c" CACHE FILEPATH "Path to the address space to be compiled in the binary")
-
 # Re-enable asserts for Release and RelWithDebInfo builds
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
@@ -108,6 +100,14 @@ if(UNIX)
 elseif(WIN32)
   # minimum Vista for IPV6 support
   set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_FLAGS "-D_WIN32_WINNT=0x0600")
+else()
+  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
+
+if(UNIX)
+  set(PYTHON_BIN python3)
+elseif(WIN32)
+  set(PYTHON_BIN python)
 else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -255,9 +255,25 @@ install(TARGETS ingopcs
 
 # Address space loader backends
 
-add_library(ingopcs-loader-embedded STATIC csrc/address_space_loaders/embedded/loader.c ${EMBEDDED_ADDRESS_SPACE_FILE})
+add_library(ingopcs-loader-embedded STATIC csrc/address_space_loaders/embedded/loader.c)
 target_link_libraries(ingopcs-loader-embedded PRIVATE ingopcs)
 target_include_directories(ingopcs-loader-embedded PRIVATE ${INGOPCS_PUBLIC_INCLUDES} PUBLIC "csrc/address_space_loaders")
+
+function(s2opc_embed_address_space var_name uanodeset_path)
+    set(c_file_path "address_space_${var_name}.c")
+
+    add_custom_command(
+        OUTPUT ${c_file_path}
+        DEPENDS ${uanodeset_path}
+		COMMAND ${PYTHON_BIN} ${CMAKE_SOURCE_DIR}/generate-ingopcs-address-space ${uanodeset_path} ${c_file_path}
+        COMMENT "Generating address space ${var_name}"
+        VERBATIM
+    )
+
+    set_source_files_properties(${c_file_path} PROPERTIES GENERATED TRUE)
+
+    set(${var_name} ${c_file_path} PARENT_SCOPE)
+endfunction()
 
 find_package(EXPAT)
 
@@ -269,14 +285,6 @@ if (EXPAT_FOUND)
 endif()
 
 # INGOPCS tests ################################################################################
-
-if(UNIX)
-  set(PYTHON_BIN python3)
-elseif(WIN32)
-  set(PYTHON_BIN python)
-else()
-  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
-endif()
 
 if(WIN32)
     set(FILE_EXT .exe)
@@ -298,19 +306,9 @@ function(s2opc_unit_test binary_name)
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${binary_name}.tap")
 endfunction()
 
-# Check generated address space for tests
-
-if (NOT DISABLE_CHECK_ADDSPACE)
-add_executable(check_ingopcs_addspace "${ADDSPACEGEN_DIR}/check_ingopcs_addspace.c"
-                                      "${ADDSPACEGEN_DIR}/ingopcs_addspace.c")
-target_link_libraries(check_ingopcs_addspace PRIVATE)
-target_include_directories(check_ingopcs_addspace PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                          "${ADDSPACEGEN_INCLUDE_DIR}")
-endif()
-
 enable_testing()
 
-s2opc_unit_test(check_ingopcs_addspace GENERATE_TAP)
+s2opc_embed_address_space(TEST_ADDRESS_SPACE "${CMAKE_SOURCE_DIR}/tests/data/address_space/ingopcs.xml")
 
 # Helpers unit tests
 file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
@@ -336,11 +334,10 @@ add_executable(toolkit_test_server_local_service "tests/services/toolkit_test_se
                                                  "tests/services/testlib_write.c"
                                                  "tests/services/test_results.c"
                                                  "tests/services/testlib_read_response.c"
-                                                 "${ADDSPACEGEN_DIR}/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_server_local_service PRIVATE ${INGOPCS_STATIC_LIB})
-target_include_directories(toolkit_test_server_local_service PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
-                                                             ${INGOPCS_PUBLIC_INCLUDES}
-                                                             ${INGOPCS_PRIVATE_INCLUDES})
+                                                 ${TEST_ADDRESS_SPACE})
+target_link_libraries(toolkit_test_server_local_service PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
+target_include_directories(toolkit_test_server_local_service PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
+                                                                     ${INGOPCS_PRIVATE_INCLUDES})
 s2opc_unit_test(toolkit_test_server_local_service GENERATE_TAP)
 
 # Client tests
@@ -349,10 +346,9 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/testlib_write.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
-                                   "${ADDSPACEGEN_DIR}/ingopcs_addspace.c")
-target_link_libraries(toolkit_test_client PRIVATE ${INGOPCS_STATIC_LIB})
-target_include_directories(toolkit_test_client PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
-                                                       ${INGOPCS_PUBLIC_INCLUDES}
+                                   ${TEST_ADDRESS_SPACE})
+target_link_libraries(toolkit_test_client PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
+target_include_directories(toolkit_test_client PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
 add_executable(toolkit_test_suite_client "tests/demo/test_suite_client.c"
@@ -365,7 +361,7 @@ target_include_directories(toolkit_test_suite_client PRIVATE ${INGOPCS_PUBLIC_IN
                                                              ${CHECK_INCLUDE_DIRS})
 
 # Server test
-add_executable(toolkit_test_server "tests/services/toolkit_test_server.c")
+add_executable(toolkit_test_server "tests/services/toolkit_test_server.c" ${TEST_ADDRESS_SPACE})
 target_link_libraries(toolkit_test_server PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
 target_include_directories(toolkit_test_server PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
@@ -383,37 +379,33 @@ add_executable(ingopcs_browse "tests/demo/ingopcs_browse.c"
                               "tests/demo/state_machine.c"
                               "tests/demo/config.c"
                               )
-target_link_libraries(ingopcs_browse PRIVATE ${INGOPCS_STATIC_LIB})
-target_include_directories(ingopcs_browse PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
-                                                   ${INGOPCS_PUBLIC_INCLUDES}
-                                                   ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(ingopcs_browse PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
+target_include_directories(ingopcs_browse PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
+                                                  ${INGOPCS_PRIVATE_INCLUDES})
 
 add_executable(ingopcs_read "tests/demo/ingopcs_read.c"
                             "tests/demo/state_machine.c"
                             "tests/demo/config.c"
                             )
-target_link_libraries(ingopcs_read PRIVATE ${INGOPCS_STATIC_LIB})
-target_include_directories(ingopcs_read PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
-                                                 ${INGOPCS_PUBLIC_INCLUDES}
-                                                 ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(ingopcs_read PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
+target_include_directories(ingopcs_read PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
+                                                ${INGOPCS_PRIVATE_INCLUDES})
 
 add_executable(ingopcs_write "tests/demo/ingopcs_write.c"
                              "tests/demo/state_machine.c"
                              "tests/demo/config.c"
                              )
-target_link_libraries(ingopcs_write PRIVATE ${INGOPCS_STATIC_LIB})
-target_include_directories(ingopcs_write PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
-                                                  ${INGOPCS_PUBLIC_INCLUDES}
-                                                  ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(ingopcs_write PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
+target_include_directories(ingopcs_write PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
+                                                 ${INGOPCS_PRIVATE_INCLUDES})
 
 add_executable(ingopcs_discovery "tests/demo/ingopcs_discovery.c"
                                  "tests/demo/state_machine.c"
                                  "tests/demo/config.c"
                                  )
-target_link_libraries(ingopcs_discovery PRIVATE ${INGOPCS_STATIC_LIB})
-target_include_directories(ingopcs_discovery PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
-                                                      ${INGOPCS_PUBLIC_INCLUDES}
-                                                      ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(ingopcs_discovery PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
+target_include_directories(ingopcs_discovery PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
+                                                     ${INGOPCS_PRIVATE_INCLUDES})
 
 add_executable(ingopcs_findserver "tests/demo/ingopcs_findserver.c"
                                   "tests/demo/state_machine.c"

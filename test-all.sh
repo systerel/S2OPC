@@ -44,7 +44,6 @@ CTEST_RET=$?
 ls "${VALIDATION_DIR}"/*.tap >/dev/null 2>&1 && mv "${VALIDATION_DIR}"/*.tap "${BIN_DIR}"/
 
 EXPECTED_TAP_FILES="check_helpers.tap
-check_ingopcs_addspace.tap
 check_sc_rcv_buffer.tap
 check_sc_rcv_encrypted_buffer.tap
 check_sockets.tap

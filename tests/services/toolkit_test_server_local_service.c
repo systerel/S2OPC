@@ -33,7 +33,7 @@
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 
-#include "sopc_addspace.h"
+#include "embedded/loader.h"
 #include "test_results.h"
 #include "testlib_read_response.h"
 #include "testlib_write.h"
@@ -176,6 +176,8 @@ int main(int argc, char* argv[])
     static SOPC_Certificate* authCertificate = NULL;
     static SOPC_PKIProvider* pkiProvider = NULL;
 
+    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_Load();
+
     SOPC_SecurityPolicy secuConfig[1];
     SOPC_String_Initialize(&secuConfig[0].securityPolicy);
 
@@ -244,7 +246,7 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         assert(SOPC_STATUS_OK == SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG));
-        status = SOPC_ToolkitServer_SetAddressSpaceConfig(&addressSpace);
+        status = SOPC_ToolkitServer_SetAddressSpaceConfig(address_space);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Test_Server_Local_Service: Failed to configure the @ space\n");
@@ -444,6 +446,7 @@ int main(int argc, char* argv[])
     SOPC_KeyManager_AsymmetricKey_Free(asymmetricKey);
     SOPC_KeyManager_Certificate_Free(authCertificate);
     SOPC_PKIProviderStack_Free(pkiProvider);
+    SOPC_AddressSpace_Delete(address_space);
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }

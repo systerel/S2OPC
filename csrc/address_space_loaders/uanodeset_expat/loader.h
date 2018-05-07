@@ -18,4 +18,4 @@
 #include <sopc_address_space.h>
 #include <stdio.h>
 
-SOPC_ReturnStatus SOPC_UANodeSet_Parse(FILE* fd, SOPC_AddressSpace_Description* desc);
+SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd);

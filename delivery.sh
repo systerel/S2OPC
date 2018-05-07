@@ -111,7 +111,7 @@ echo "Generate C source files"
 ./.pre-build-in-docker.sh ./pre-build.sh || exit 1
 # Format the generated files added to avoid failure on further format verification
 ./.check-in-docker.sh ./.format.sh || exit 1
-git add -f address_space_generation/genc csrc/services/bgenc
+git add -f csrc/services/bgenc
 git commit -S -m "Add generated source files"
 
 # Clean directories in which windows binaries / libraries are installed

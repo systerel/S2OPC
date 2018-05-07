@@ -26,6 +26,7 @@
 
 #include "b2c.h"
 #include "constants.h"
+#include "sopc_address_space.h"
 #include "sopc_types.h"
 
 /* AttributeIds: they are #defined by the SDK... */
@@ -50,29 +51,7 @@ typedef enum {
 #define SOPC_AccessLevelMask_CurrentWrite 2
 
 /* Attributes, and references */
-extern int32_t address_space_bs__nNodeIds;
-extern int32_t address_space_bs__nVariables;
-extern int32_t address_space_bs__nVariableTypes;
-extern int32_t address_space_bs__nObjectTypes;
-extern int32_t address_space_bs__nReferenceTypes;
-extern int32_t address_space_bs__nDataTypes;
-extern int32_t address_space_bs__nMethods;
-extern int32_t address_space_bs__nObjects;
-extern int32_t address_space_bs__nViews;
-extern SOPC_NodeId** address_space_bs__a_NodeId;
-extern OpcUa_NodeClass* address_space_bs__a_NodeClass;
-extern SOPC_QualifiedName* address_space_bs__a_BrowseName;
-extern SOPC_LocalizedText* address_space_bs__a_DisplayName;
-extern int32_t* address_space_bs__a_DisplayName_begin;
-extern int32_t* address_space_bs__a_DisplayName_end;
-extern SOPC_Variant* address_space_bs__a_Value;
-extern SOPC_StatusCode* address_space_bs__a_Value_StatusCode;
-extern SOPC_ExpandedNodeId** address_space_bs__HasTypeDefinition;
-extern SOPC_NodeId** address_space_bs__refs_ReferenceType;
-extern SOPC_ExpandedNodeId** address_space_bs__refs_TargetNode;
-extern bool* address_space_bs__refs_IsForward;
-extern int32_t* address_space_bs__RefIndexBegin;
-extern int32_t* address_space_bs__RefIndexEnd;
+extern SOPC_AddressSpace* address_space_bs__nodes;
 
 /* Address space configured */
 extern bool sopc_addressSpace_configured;

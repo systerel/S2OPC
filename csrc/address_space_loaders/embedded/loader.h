@@ -20,6 +20,6 @@
 
 #include <sopc_address_space.h>
 
-extern SOPC_AddressSpace addressSpace;
+SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void);
 
 #endif /* SOPC_ADDSPACE_H_ */

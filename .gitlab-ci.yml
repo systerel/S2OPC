@@ -28,7 +28,6 @@ generation:
   artifacts:
     name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
-      - 'address_space_generation/genc'
       - 'csrc/services/bgenc'
     expire_in: '1 month'
 

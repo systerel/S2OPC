@@ -31,6 +31,7 @@
   --------------------------*/
 #include "b2c.h"
 
+#include "sopc_address_space.h"
 #include "sopc_builtintypes.h"
 #include "sopc_types.h"
 
@@ -40,10 +41,10 @@
 typedef SOPC_ExpandedNodeId* constants_bs__t_ExpandedNodeId_i;
 typedef SOPC_LocalizedText* constants_bs__t_LocalizedText_i;
 typedef SOPC_NodeId* constants_bs__t_NodeId_i;
-#define constants_bs__t_Node_i t_entier4
+typedef SOPC_AddressSpace_Item* constants_bs__t_Node_i;
 typedef SOPC_ByteString* constants_bs__t_Nonce_i;
 typedef SOPC_QualifiedName* constants_bs__t_QualifiedName_i;
-#define constants_bs__t_Reference_i t_entier4
+typedef OpcUa_ReferenceNode* constants_bs__t_Reference_i;
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
 typedef SOPC_Variant* constants_bs__t_Variant_i;
 typedef OpcUa_WriteValue* constants_bs__t_WriteValuePointer_i;

@@ -122,8 +122,7 @@ void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SO
 static SOPC_AddressSpace* load_nodeset_from_file(const char* filename)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_AddressSpace_Description* desc = NULL;
-    SOPC_AddressSpace* address_space = NULL;
+    SOPC_AddressSpace* space = NULL;
     FILE* fd = fopen(filename, "r");
 
     if (fd == NULL)
@@ -134,39 +133,18 @@ static SOPC_AddressSpace* load_nodeset_from_file(const char* filename)
 
     if (status == SOPC_STATUS_OK)
     {
-        desc = SOPC_AddressSpace_Description_Create();
+        space = SOPC_UANodeSet_Parse(fd);
 
-        if (desc == NULL)
+        if (space == NULL)
         {
             status = SOPC_STATUS_NOK;
         }
     }
 
-    if (status == SOPC_STATUS_OK)
-    {
-        status = SOPC_UANodeSet_Parse(fd, desc);
-    }
-
-    if (status == SOPC_STATUS_OK)
-    {
-        address_space = calloc(1, sizeof(SOPC_AddressSpace));
-
-        if (address_space == NULL)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
-    else
+    if (status != SOPC_STATUS_OK)
     {
         printf("<Test_Server_Toolkit: Error while parsing XML address space\n");
     }
-
-    if (status == SOPC_STATUS_OK)
-    {
-        status = SOPC_AddressSpace_Generate(desc, address_space);
-    }
-
-    SOPC_AddressSpace_Description_Delete(desc);
 
     if (fd != NULL)
     {
@@ -176,12 +154,11 @@ static SOPC_AddressSpace* load_nodeset_from_file(const char* filename)
     if (status == SOPC_STATUS_OK)
     {
         printf("<Test_Server_Toolkit: Loaded address space from %s\n", filename);
-        return address_space;
+        return space;
     }
     else
     {
-        SOPC_AddressSpace_Clear(address_space);
-        free(address_space);
+        SOPC_AddressSpace_Delete(space);
         return NULL;
     }
 }
@@ -210,7 +187,6 @@ int main(int argc, char* argv[])
 
     AddressSpaceLoader address_space_loader = AS_LOADER_EMBEDDED;
     SOPC_AddressSpace* address_space = NULL;
-    bool address_space_needs_free = false;
 
     SOPC_SecurityPolicy secuConfig[3];
     SOPC_String_Initialize(&secuConfig[0].securityPolicy);
@@ -329,22 +305,13 @@ int main(int argc, char* argv[])
         switch (address_space_loader)
         {
         case AS_LOADER_EMBEDDED:
-            address_space = &addressSpace;
+            address_space = SOPC_Embedded_AddressSpace_Load();
             status = SOPC_STATUS_OK;
             break;
 #ifdef WITH_EXPAT
         case AS_LOADER_EXPAT:
             address_space = load_nodeset_from_file(xml_file_path);
-
-            if (address_space != NULL)
-            {
-                status = SOPC_STATUS_OK;
-                address_space_needs_free = true;
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
+            status = (address_space != NULL) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
             break;
 #endif
         }
@@ -439,12 +406,7 @@ int main(int argc, char* argv[])
     }
 
     // Deallocate locally allocated data
-
-    if (address_space_needs_free)
-    {
-        SOPC_AddressSpace_Clear(address_space);
-        free(address_space);
-    }
+    SOPC_AddressSpace_Delete(address_space);
 
     SOPC_String_Clear(&secuConfig[0].securityPolicy);
     SOPC_String_Clear(&secuConfig[1].securityPolicy);
