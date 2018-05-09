@@ -76,6 +76,8 @@ struct parse_context_t
     char* current_alias_alias;
     SOPC_BuiltinId current_value_type;
     SOPC_AddressSpace_Item item;
+    // Temporary array to store the references.
+    SOPC_Array* references;
 };
 
 #define NS_SEPARATOR "|"
@@ -410,24 +412,10 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
     return true;
 }
 
-static bool start_node_references(struct parse_context_t* ctx, const XML_Char** attrs)
+static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(&ctx->item);
-    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Item_Get_References(&ctx->item);
-
-    assert(*n_refs >= 0);
-    int32_t new_n_refs = (*n_refs + 1);
-    OpcUa_ReferenceNode* new_refs = realloc(*refs, ((size_t) new_n_refs) * sizeof(OpcUa_ReferenceNode));
-
-    if (new_refs == NULL)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    OpcUa_ReferenceNode* ref = &new_refs[new_n_refs - 1];
-    OpcUa_ReferenceNode_Initialize(ref);
-    *refs = new_refs;
+    OpcUa_ReferenceNode ref;
+    OpcUa_ReferenceNode_Initialize(&ref);
 
     for (size_t i = 0; attrs[i]; ++i)
     {
@@ -453,7 +441,7 @@ static bool start_node_references(struct parse_context_t* ctx, const XML_Char** 
                 return false;
             }
 
-            SOPC_StatusCode status = SOPC_NodeId_Copy(&ref->ReferenceTypeId, nodeid);
+            SOPC_StatusCode status = SOPC_NodeId_Copy(&ref.ReferenceTypeId, nodeid);
             SOPC_NodeId_Clear(nodeid);
             free(nodeid);
 
@@ -466,11 +454,25 @@ static bool start_node_references(struct parse_context_t* ctx, const XML_Char** 
         else if (strcmp("IsForward", attr) == 0)
         {
             const char* val = attrs[++i];
-            ref->IsInverse = (strcmp(val, "true") != 0);
+            ref.IsInverse = (strcmp(val, "true") != 0);
         }
     }
 
-    *n_refs = new_n_refs;
+    if (ctx->references == NULL)
+    {
+        ctx->references = SOPC_Array_Create(sizeof(OpcUa_ReferenceNode), 1, OpcUa_ReferenceNode_Clear);
+
+        if (ctx->references == NULL)
+        {
+            OpcUa_ReferenceNode_Clear(&ref);
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+    }
+
+    // Should not fail since we reserved space for one element above
+    assert(SOPC_Array_Append(ctx->references, ref));
+
     ctx->state = PARSE_NODE_REFERENCE;
 
     return true;
@@ -673,7 +675,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     case PARSE_NODE_REFERENCES:
         if (strcmp(NS(UA_NODESET_NS, "Reference"), name) == 0)
         {
-            if (!start_node_references(ctx, attrs))
+            if (!start_node_reference(ctx, attrs))
             {
                 XML_StopParser(ctx->parser, 0);
                 return;
@@ -746,18 +748,16 @@ static bool finalize_alias(struct parse_context_t* ctx)
 
 static bool finalize_reference(struct parse_context_t* ctx)
 {
-    int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(&ctx->item);
-    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Item_Get_References(&ctx->item);
+    size_t n_refs = SOPC_Array_Size(ctx->references);
+    assert(n_refs > 0);
 
-    assert(*n_refs > 0);
-    OpcUa_ReferenceNode* ref = &(*refs)[(*n_refs) - 1];
+    OpcUa_ReferenceNode* ref = SOPC_Array_Get_Ptr(ctx->references, n_refs - 1);
     const char* text = ctx_char_data_stripped(ctx);
     SOPC_NodeId* target_id = SOPC_NodeId_FromCString(text, (int32_t) strlen(text));
 
     if (target_id == NULL)
     {
         LOGF("Cannot parse reference target '%s' into a NodeId.", text);
-        ctx_char_data_reset(ctx);
         return false;
     }
 
@@ -1001,6 +1001,39 @@ static bool set_element_value(struct parse_context_t* ctx)
     return ok;
 }
 
+static bool finalize_node(struct parse_context_t* ctx)
+{
+    if (ctx->references != NULL)
+    {
+        size_t n_references = SOPC_Array_Size(ctx->references);
+        assert(n_references <= INT32_MAX);
+
+        *SOPC_AddressSpace_Item_Get_NoOfReferences(&ctx->item) = (int32_t) n_references;
+        *SOPC_AddressSpace_Item_Get_References(&ctx->item) = SOPC_Array_Into_Raw(ctx->references);
+        ctx->references = NULL;
+    }
+
+    SOPC_AddressSpace_Item* item = calloc(1, sizeof(SOPC_AddressSpace_Item));
+
+    if (item == NULL)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    memcpy(item, &ctx->item, sizeof(SOPC_AddressSpace_Item));
+
+    if (SOPC_AddressSpace_Append(ctx->space, item) == SOPC_STATUS_OK)
+    {
+        return true;
+    }
+    else
+    {
+        free(item);
+        return false;
+    }
+}
+
 static void end_element_handler(void* user_data, const XML_Char* name)
 {
     struct parse_context_t* ctx = user_data;
@@ -1065,25 +1098,11 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         break;
     case PARSE_NODE:
     {
-        SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-        SOPC_AddressSpace_Item* item = calloc(1, sizeof(SOPC_AddressSpace_Item));
+        bool ok = finalize_node(ctx);
 
-        if (item != NULL)
+        if (!ok)
         {
-            memcpy(item, &ctx->item, sizeof(SOPC_AddressSpace_Item));
-            ctx->item.node_class = 0;
-            status = SOPC_AddressSpace_Append(ctx->space, item);
-        }
-        else
-        {
-            LOG_MEMORY_ALLOCATION_FAILURE;
-        }
-
-        if (status != SOPC_STATUS_OK)
-        {
-            LOG_MEMORY_ALLOCATION_FAILURE;
             SOPC_AddressSpace_Item_Clear(&ctx->item);
-            free(item);
             XML_StopParser(ctx->parser, false);
             return;
         }
@@ -1181,6 +1200,7 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
     SOPC_Dict_Delete(aliases);
     free(ctx.current_alias_alias);
     free(ctx.char_data_buffer);
+    SOPC_Array_Delete(ctx.references);
 
     if (res == SOPC_STATUS_OK)
     {
