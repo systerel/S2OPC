@@ -271,6 +271,7 @@ function(s2opc_embed_address_space var_name uanodeset_path)
     )
 
     set_source_files_properties(${c_file_path} PROPERTIES GENERATED TRUE)
+    set_source_files_properties(${c_file_path} PROPERTIES COMPILE_FLAGS -Wno-missing-field-initializers)
 
     set(${var_name} ${c_file_path} PARENT_SCOPE)
 endfunction()
