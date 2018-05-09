@@ -145,6 +145,20 @@ size_t SOPC_Array_Size(const SOPC_Array* array);
 void SOPC_Array_Sort(SOPC_Array* array, SOPC_Array_Compare_Func compare_func);
 
 /**
+ * \brief Converts a SOPC_Array into a raw C array.
+ *
+ * \param array  The array.
+ *
+ * \return A contiguous region of memory holding the array data, or \c NULL if
+ *         the array was empty.
+ *
+ * This function releases the memory of the SOPC_Array itself, only keeping the
+ * data before returning it. The returned memory region holds the data exactly,
+ * without any padding before or after, and must be freed when no longer needed.
+ */
+void* SOPC_Array_Into_Raw(SOPC_Array* array);
+
+/**
  * \brief Returns the function used to clear the elements of an array on deletion.
  *
  * \param array  The array.

@@ -163,6 +163,22 @@ void SOPC_Array_Sort(SOPC_Array* array, SOPC_Array_Compare_Func compare_func)
     qsort(array->data, array->sz, array->element_size, compare_func);
 }
 
+void* SOPC_Array_Into_Raw(SOPC_Array* array)
+{
+    assert(array != NULL);
+
+    void* data = array->data;
+
+    if (array->sz < array->cap)
+    {
+        data = realloc(data, array->sz * array->element_size);
+    }
+
+    free(array);
+
+    return data;
+}
+
 SOPC_Array_Free_Func SOPC_Array_Get_Free_Func(SOPC_Array* array)
 {
     assert(array != NULL);

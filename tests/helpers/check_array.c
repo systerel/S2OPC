@@ -19,6 +19,7 @@
 
 #include <check.h>
 #include <inttypes.h>
+#include <stdlib.h>
 
 #include "sopc_array.h"
 
@@ -118,6 +119,26 @@ START_TEST(test_array_sort)
 }
 END_TEST
 
+START_TEST(test_array_into_raw)
+{
+    SOPC_Array* a = SOPC_Array_Create(sizeof(char), 4, NULL);
+    ck_assert_ptr_nonnull(a);
+
+    char values[] = {'a', 'b', 'c', '\0'};
+    ck_assert(SOPC_Array_Append_Values(a, values, 4));
+    char* data = SOPC_Array_Into_Raw(a);
+
+    ck_assert_str_eq("abc", data);
+    free(data);
+
+    a = SOPC_Array_Create(sizeof(char), 4, NULL);
+    ck_assert_ptr_nonnull(a);
+    data = SOPC_Array_Into_Raw(a);
+
+    ck_assert_ptr_null(data);
+}
+END_TEST
+
 Suite* tests_make_suite_array(void)
 {
     Suite* s;
@@ -130,6 +151,7 @@ Suite* tests_make_suite_array(void)
     tcase_add_test(tc_array, test_array_free_func);
     tcase_add_test(tc_array, test_array_append_get);
     tcase_add_test(tc_array, test_array_sort);
+    tcase_add_test(tc_array, test_array_into_raw);
     suite_add_tcase(s, tc_array);
 
     return s;
