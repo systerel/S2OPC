@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "sopc_secure_connection_state_mgr_internal.h"
 #include "sopc_secure_listener_state_mgr.h"
 
 #include <assert.h>
@@ -41,7 +42,7 @@
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_toolkit_constants.h"
 
-static bool SC_InitNewConnection(uint32_t* newConnectionIdx)
+bool SC_InitNewConnection(uint32_t* newConnectionIdx)
 {
     bool result = false;
     SOPC_SecureConnection* scConnection = NULL;
@@ -118,7 +119,7 @@ static void SC_Client_ClearPendingRequest(uint32_t id, void* val)
     }
 }
 
-static bool SC_CloseConnection(uint32_t connectionIdx)
+bool SC_CloseConnection(uint32_t connectionIdx)
 {
     SOPC_SecureConnection* scConnection = NULL;
     bool result = false;

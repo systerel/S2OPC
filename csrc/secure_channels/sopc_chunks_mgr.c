@@ -16,6 +16,7 @@
  */
 
 #include "sopc_chunks_mgr.h"
+#include "sopc_chunks_mgr_internal.h"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -1352,9 +1353,7 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection, bo
     return result;
 }
 
-static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
-                                      uint32_t* requestId,
-                                      SOPC_StatusCode* errorStatus)
+bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* requestId, SOPC_StatusCode* errorStatus)
 {
     assert(requestId != NULL);
 
@@ -1713,9 +1712,9 @@ static bool fill_buffer(SOPC_Buffer* dst, SOPC_Buffer* src, uint32_t n, uint32_t
 
 // Returns true if a message was decoded (false if there was not enough data).
 // Any potential error is stored in *error.
-static bool SC_Chunks_DecodeReceivedBuffer(SOPC_SecureConnection_ChunkMgrCtx* ctx,
-                                           SOPC_Buffer* receivedBuffer,
-                                           SOPC_StatusCode* error)
+bool SC_Chunks_DecodeReceivedBuffer(SOPC_SecureConnection_ChunkMgrCtx* ctx,
+                                    SOPC_Buffer* receivedBuffer,
+                                    SOPC_StatusCode* error)
 {
     assert(ctx != NULL);
     assert(receivedBuffer != NULL);
