@@ -32,7 +32,7 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
     SOPC_StubSockets_SecureChannelsEventParams* scParams =
         calloc(1, sizeof(SOPC_StubSockets_SecureChannelsEventParams));
     assert(scParams != NULL && secureChannelsEvents != NULL);
-    scParams->event = scEvent;
+    scParams->event = (int32_t) scEvent;
     scParams->eltId = id;
     scParams->params = params;
     scParams->auxParam = auxParam;

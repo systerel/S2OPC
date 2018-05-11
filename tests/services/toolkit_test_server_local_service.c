@@ -445,5 +445,5 @@ int main(int argc, char* argv[])
     SOPC_KeyManager_Certificate_Free(authCertificate);
     SOPC_PKIProviderStack_Free(pkiProvider);
 
-    return status;
+    return (status == SOPC_STATUS_OK) ? 0 : 1;
 }

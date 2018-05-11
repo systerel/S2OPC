@@ -35,7 +35,8 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id,
 {
     if (NULL != socketsEventDispatcherMgr)
     {
-        SOPC_EventDispatcherManager_AddEvent(socketsEventDispatcherMgr, socketEvent, id, params, auxParam, NULL);
+        SOPC_EventDispatcherManager_AddEvent(socketsEventDispatcherMgr, (int32_t) socketEvent, id, params, auxParam,
+                                             NULL);
     }
 }
 

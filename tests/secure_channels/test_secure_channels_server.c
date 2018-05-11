@@ -438,17 +438,11 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         printf("<Stub_Server: Stub_Server test: OK\n");
+        return 0;
     }
     else
     {
         printf("<Stub_Server: Stub_Server test: NOK\n");
+        return 1;
     }
-    if (status != 0)
-    {
-        return -1;
-    }
-    else
-    {
-    }
-    return status;
 }

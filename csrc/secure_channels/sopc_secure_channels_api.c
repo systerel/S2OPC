@@ -135,7 +135,8 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
         case TIMER_SC_CONNECTION_TIMEOUT:
         case SC_DISCONNECT:
         case SC_SERVICE_SND_MSG:
-            SOPC_EventDispatcherManager_AddEvent(secureChannelsEventDispatcherMgr, scEvent, id, params, auxParam, NULL);
+            SOPC_EventDispatcherManager_AddEvent(secureChannelsEventDispatcherMgr, (int32_t) scEvent, id, params,
+                                                 auxParam, NULL);
             break;
         /* Internal or invalid events*/
         case INT_EP_SC_CREATE:
@@ -192,7 +193,8 @@ void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InputEvent scE
         case INT_SC_SND_CLO:
         case INT_SC_SND_MSG_CHUNKS:
         case INT_SC_CLOSE:
-            SOPC_EventDispatcherManager_AddEvent(secureChannelsEventDispatcherMgr, scEvent, id, params, auxParam, NULL);
+            SOPC_EventDispatcherManager_AddEvent(secureChannelsEventDispatcherMgr, (int32_t) scEvent, id, params,
+                                                 auxParam, NULL);
             break;
         /* External or invalid events */
         case SOCKET_LISTENER_OPENED:
@@ -244,8 +246,8 @@ void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InputEve
         case INT_SC_SND_CLO:
         case INT_SC_SND_MSG_CHUNKS:
         case INT_SC_CLOSE:
-            SOPC_EventDispatcherManager_AddEventAsNext(secureChannelsEventDispatcherMgr, scEvent, id, params, auxParam,
-                                                       NULL);
+            SOPC_EventDispatcherManager_AddEventAsNext(secureChannelsEventDispatcherMgr, (int32_t) scEvent, id, params,
+                                                       auxParam, NULL);
             break;
         /* External or invalid events */
         case SOCKET_LISTENER_OPENED:

@@ -47,7 +47,7 @@ constants__t_Variant_i util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass 
     SOPC_Variant_Initialize(pvar);
     pvar->BuiltInTypeId = SOPC_Int32_Id;
     pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
-    pvar->Value.Int32 = ncl;
+    pvar->Value.Int32 = (int32_t) ncl;
 
     return pvar;
 }

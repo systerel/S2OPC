@@ -1073,7 +1073,7 @@ SOPC_ReturnStatus SOPC_NodeId_Write(const SOPC_NodeId* nodeId, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (nodeId != NULL)
     {
-        status = Internal_NodeId_Write(buf, GetNodeIdDataEncoding(nodeId), nodeId);
+        status = Internal_NodeId_Write(buf, (SOPC_Byte) GetNodeIdDataEncoding(nodeId), nodeId);
     }
     return status;
 }
@@ -1194,7 +1194,7 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId
     SOPC_Byte encodingByte = 0xFF;
     if (expNodeId != NULL)
     {
-        encodingByte = GetNodeIdDataEncoding(&expNodeId->NodeId);
+        encodingByte = (SOPC_Byte) GetNodeIdDataEncoding(&expNodeId->NodeId);
         if (expNodeId->NamespaceUri.Length > 0)
         {
             encodingByte |= SOPC_NodeIdEncoding_NamespaceUriFlag;
@@ -1591,7 +1591,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
     SOPC_Byte encodingByte = 0;
     if (extObj != NULL)
     {
-        encodingByte = extObj->Encoding;
+        encodingByte = (SOPC_Byte) extObj->Encoding;
         nodeId = extObj->TypeId.NodeId;
         status = SOPC_STATUS_OK;
     }
@@ -1919,7 +1919,7 @@ static SOPC_ReturnStatus SOPC_Write_Array_WithNestedLevel(SOPC_Buffer* buf,
 static SOPC_Byte GetVariantEncodingMask(const SOPC_Variant* variant)
 {
     assert(variant != NULL);
-    SOPC_Byte encodingByte = variant->BuiltInTypeId;
+    SOPC_Byte encodingByte = (SOPC_Byte) variant->BuiltInTypeId;
     if (variant->ArrayType == SOPC_VariantArrayType_Matrix)
     {
         encodingByte |= SOPC_VariantArrayValueFlag;

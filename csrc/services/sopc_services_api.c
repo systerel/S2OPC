@@ -409,7 +409,7 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* 
 {
     if (servicesEventDispatcherMgr != NULL)
     {
-        SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr, seEvent, id, params, auxParam, NULL);
+        SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr, (int32_t) seEvent, id, params, auxParam, NULL);
     }
 }
 

@@ -597,6 +597,6 @@ int main(void)
     {
         printf(">>Test_Client_Toolkit: read request not received or BAD status (%" PRIu32 ") ! \n", status);
         printf(">>Test_Client_Toolkit final result: NOK\n");
-        return status;
+        return 1;
     }
 }
