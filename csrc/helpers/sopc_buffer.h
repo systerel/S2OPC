@@ -162,4 +162,13 @@ SOPC_ReturnStatus SOPC_Buffer_Copy(SOPC_Buffer* dest, SOPC_Buffer* src);
  */
 SOPC_ReturnStatus SOPC_Buffer_CopyWithLength(SOPC_Buffer* dest, SOPC_Buffer* src, uint32_t limitedLength);
 
+/**
+ * \brief Returns the remaining number of unread bytes in the buffer.
+ *
+ * \param buffer  The buffer.
+ *
+ * \return The number of unread bytes in the buffer.
+ */
+uint32_t SOPC_Buffer_Remaining(SOPC_Buffer* buffer);
+
 #endif /* SOPC_BUFFER_H_ */

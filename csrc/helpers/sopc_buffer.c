@@ -218,3 +218,9 @@ SOPC_ReturnStatus SOPC_Buffer_Copy(SOPC_Buffer* dest, SOPC_Buffer* src)
 
     return status;
 }
+
+uint32_t SOPC_Buffer_Remaining(SOPC_Buffer* buffer)
+{
+    assert(buffer != NULL);
+    return buffer->length - buffer->position;
+}
