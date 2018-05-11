@@ -372,8 +372,15 @@ if (EXPAT_FOUND)
 	set_target_properties(toolkit_test_server PROPERTIES COMPILE_DEFINITIONS "WITH_EXPAT")
 endif()
 
-add_test(NAME "validation::client_server_test" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap" "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "./toolkit_test_client${FILE_EXT}")
-set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./toolkit_test_server${FILE_EXT};CK_TAP_LOG_FILE_NAME=client_server_test.tap")
+add_test(NAME "validation::client_server_test"
+	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+	COMMAND
+	"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap"
+	"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server"
+	"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+	"--server-cmd" "./toolkit_test_server${FILE_EXT}"
+	"./toolkit_test_client${FILE_EXT}")
+set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_server_test.tap")
 
 # Demo clients
 add_executable(ingopcs_browse "tests/demo/ingopcs_browse.c"
@@ -543,13 +550,24 @@ s2opc_unit_test(check_sc_rcv_encrypted_buffer)
 
 function(s2opc_server_validation_test name)
 	set(test_name "validation::${name}")
-	add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "${PYTHON_BIN}" "../validation/${name}")
-	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./toolkit_test_server${FILE_EXT}")
+	add_test(NAME "${test_name}"
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/validation
+		COMMAND
+		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server"
+		"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+		"--server-cmd" "./toolkit_test_server${FILE_EXT}"
+		"${PYTHON_BIN}" ${name})
 endfunction()
 
 function(s2opc_client_validation_test name)
 	set(test_name "validation::${name}")
-	add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-freeopcua-server" "./${name}")
+	add_test(NAME "${test_name}"
+		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+		COMMAND
+		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server"
+		"--server-wd" "${CMAKE_SOURCE_DIR}/validation"
+		"--server-cmd" "${PYTHON_BIN} ${CMAKE_SOURCE_DIR}/validation/server.py 25000"
+		"./${name}")
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${name}.tap")
 endfunction()
 
@@ -561,8 +579,16 @@ s2opc_client_validation_test("toolkit_test_suite_client")
 
 function(s2opc_sc_level_test name server_key_size)
 	set(test_name "validation::secure_channel_level::${name}")
-	add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap" "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-toolkit-test-server" "./test_secure_channels_client${FILE_EXT}" ${ARGN})
-	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "TEST_SERVER_CMD=./test_secure_channels_server ${server_key_size};CK_TAP_LOG_FILE_NAME=secure_channel_level_${name}.tap;TEST_SERVER_EXITS_ALONE=1")
+	add_test(NAME "${test_name}"
+		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+		COMMAND
+		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap"
+		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server"
+		"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+		"--server-cmd" "./test_secure_channels_server ${server_key_size}"
+		"--wait-server"
+		"./test_secure_channels_client${FILE_EXT}" ${ARGN})
+	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=secure_channel_level_${name}.tap")
 endfunction()
 
 s2opc_sc_level_test("SignAndEncrypt_B256Sha256_2048bit" "2048")

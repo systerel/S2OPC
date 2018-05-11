@@ -15,56 +15,49 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
+import argparse
 import shlex
 import subprocess
 import sys
 
 import wait_server
 
-def usage():
-    sys.stderr.write('''Usage: %s SERVER_TEST_NAME
+description = '''Runs a program with a test S2OPC server running in the
+background.
 
-Runs the given test against a toolkit test server running in the background.
-SERVER_TEST_NAME should be the path to the test script.
-
-The command to launch the server is set using the TEST_SERVER_CMD environment
-variable. This command will be run from the bin/ folder. The server should
-listen on port 4841 to be detected by the script.
-
-If the TEST_SERVER_EXITS_ALONE environment variable is set, this script waits
-for the server to exit indefinitely. Else, it sends it a SIGTERM signal once the
-client is done and waits for the server to exit.
-''' % sys.argv[0])
+The background server should listen on port 4841 to be considered as running by
+this script.'''
 
 def log(msg):
     print(msg)
     sys.stdout.flush()
 
 if __name__ == '__main__':
-    cmd = sys.argv[1:]
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('--server-cmd', metavar='CMD', help='The command to start the background server')
+    parser.add_argument('--server-wd', metavar='DIR', help='The directory to run the server in')
+    parser.add_argument('--wait-server', action='store_true', default=False,
+                        help='Wait for the server to exit instead of killing it when the client is done')
+    parser.add_argument('cmd', metavar='CMD', help='The command to run')
+    parser.add_argument('args', metavar='ARGS', nargs=argparse.REMAINDER,
+                        help='Parameters to pass to the command')
 
-    if not cmd:
-        usage()
-        sys.exit(1)
+    args = parser.parse_args()
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    test_server_dir = os.path.join(script_dir, '..', '..', 'bin')
-    test_server_cmd = os.getenv('TEST_SERVER_CMD')
-    kill_server = (os.getenv('TEST_SERVER_EXITS_ALONE') is None)
-
-    if test_server_cmd is None:
-        sys.stderr.write('Missing server command. Set the TEST_SERVER_CMD environment variable.\n')
+    if args.server_cmd is None:
+        sys.stderr.write('Missing server command.\n')
         sys.exit(1)
 
     log('Starting server')
-    server_process = subprocess.Popen(shlex.split(test_server_cmd), cwd=test_server_dir)
+    server_process = subprocess.Popen(shlex.split(args.server_cmd), cwd=args.server_wd)
 
     if not wait_server.wait_server(wait_server.DEFAULT_URL, wait_server.TIMEOUT):
         log('Timeout for starting server')
         server_process.kill()
         server_process.wait()
         sys.exit(1)
+
+    cmd = [args.cmd] + args.args
 
     log('Starting test %s' % ' '.join(cmd))
 
@@ -77,7 +70,7 @@ if __name__ == '__main__':
         sys.stderr.write('%s: Not such file or directory\n' % e.filename)
         test_ret = 127
 
-    if kill_server:
+    if not args.wait_server:
         log('Test finished, killing server')
         server_process.terminate()
 
