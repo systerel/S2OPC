@@ -186,35 +186,6 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
     return result;
 }
 
-static bool SC_Chunks_ReadDataFromReceivedBuffer(SOPC_Buffer* inputBuffer,
-                                                 SOPC_Buffer* receivedBuffer,
-                                                 uint32_t sizeToRead)
-{
-    // received buffer shall have enough data to be read
-    assert(sizeToRead <= (receivedBuffer->length - receivedBuffer->position));
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    bool result = false;
-
-    // Retrieve position in which data must be placed in input buffer (end of buffer)
-    // Its position will not be updated on purpose (to could be read in the future)
-    uint8_t* readDest = &(inputBuffer->data[inputBuffer->length]);
-
-    // Update length of input buffer and check it fits (STATUS_OK returned)
-    status = SOPC_Buffer_SetDataLength(inputBuffer, inputBuffer->length + sizeToRead);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Buffer_Read(readDest, receivedBuffer, sizeToRead);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        result = true;
-    }
-
-    return result;
-}
-
 static SOPC_SecureChannels_InputEvent SC_Chunks_MsgTypeToRcvEvent(SOPC_Msg_Type msgType)
 {
     SOPC_SecureChannels_InputEvent scEvent;
@@ -1709,6 +1680,87 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
     return result;
 }
 
+/**
+ * \brief Fills a target buffer from a source buffer up to a given length.
+ *
+ * Note that this function may copy LESS than \c n bytes to dst, if \c src is
+ * less than \c n bytes long. This is NOT considered as an error, the caller
+ * should call this function again when there is more data in \c src.
+ *
+ * In other words, \c dst has been successfully filled if and only if this
+ * function returns \c TRUE and \c remaining is set to 0.
+ *
+ * \param dst        The buffer to fill.
+ * \param src        The source buffer.
+ * \param n          The number of bytes to accumulate in \c dst.
+ * \param remaining  Out parameter, the number of bytes remaining to fill.
+ *
+ * \return \c TRUE in case of success, \c FALSE in case reading from \c src
+ *         fails.
+ */
+static bool fill_buffer(SOPC_Buffer* dst, SOPC_Buffer* src, uint32_t n, uint32_t* remaining)
+{
+    if (SOPC_Buffer_Remaining(dst) >= n)
+    {
+        *remaining = 0;
+        return true;
+    }
+
+    uint32_t missing = n - SOPC_Buffer_Remaining(dst);
+    int64_t read = SOPC_Buffer_ReadFrom(dst, src, missing);
+
+    if (read < 0)
+    {
+        return false;
+    }
+
+    *remaining = n - SOPC_Buffer_Remaining(dst);
+    return true;
+}
+
+// Returns true if a message was decoded (false if there was not enough data).
+// Any potential error is stored in *error.
+static bool SC_Chunks_DecodeReceivedBuffer(SOPC_SecureConnection_ChunkMgrCtx* ctx,
+                                           SOPC_Buffer* receivedBuffer,
+                                           SOPC_StatusCode* error)
+{
+    assert(ctx != NULL);
+    assert(receivedBuffer != NULL);
+    assert(error != NULL);
+
+    uint32_t remaining = 0;
+    *error = SOPC_GoodGenericStatus;
+
+    // Header decoding
+    if (ctx->currentMsgSize == 0)
+    {
+        if (!fill_buffer(ctx->chunkInputBuffer, receivedBuffer, SOPC_TCP_UA_HEADER_LENGTH, &remaining))
+        {
+            *error = OpcUa_BadTcpInternalError;
+            return false;
+        }
+
+        if ((remaining > 0) || !SC_Chunks_DecodeTcpMsgHeader(ctx, error))
+        {
+            return false;
+        }
+    }
+
+    // Payload decoding
+    assert(ctx->currentMsgSize > 0); // message size was decoded
+    assert(ctx->currentMsgType != SOPC_MSG_TYPE_INVALID);
+    assert(ctx->currentMsgIsFinal != SOPC_MSG_ISFINAL_INVALID);
+
+    if (!fill_buffer(ctx->chunkInputBuffer, receivedBuffer, ctx->currentMsgSize - SOPC_TCP_UA_HEADER_LENGTH,
+                     &remaining))
+    {
+        *error = OpcUa_BadTcpInternalError;
+        return false;
+    }
+
+    return (remaining == 0);
+}
+
 static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                                           uint32_t scConnectionIdx,
                                           SOPC_Buffer* receivedBuffer)
@@ -1717,17 +1769,12 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
     assert(receivedBuffer != NULL);
     assert(receivedBuffer->position == 0);
 
-    uint32_t sizeToRead = 0;
-    uint32_t sizeAlreadyRead = 0;
-    uint32_t sizeAvailable = 0;
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
     uint32_t requestId = 0;
-    bool result = true;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
 
-    sizeAvailable = receivedBuffer->length - receivedBuffer->position;
     // Continue until an error occurred OR received buffer is empty (could contain 1 or several messages)
-    while (result != false && sizeAvailable > 0)
+    while (SOPC_Buffer_Remaining(receivedBuffer) > 0)
     {
         if (NULL == chunkCtx->chunkInputBuffer)
         {
@@ -1736,199 +1783,61 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
             if (NULL == chunkCtx->chunkInputBuffer)
             {
                 errorStatus = OpcUa_BadOutOfMemory;
-                result = false;
+                break;
             }
         }
 
-        if (result != false)
+        if (!SC_Chunks_DecodeReceivedBuffer(&scConnection->chunksCtx, receivedBuffer, &errorStatus))
         {
-            // OPC UA TCP MESSAGE HEADER TREATMENT
-            bool decodeHeader = false;
-
-            if (chunkCtx->chunkInputBuffer->length < SOPC_TCP_UA_HEADER_LENGTH)
+            if (errorStatus != SOPC_GoodGenericStatus)
             {
-                // Message data was already received but not enough to know the message size
-                //  => new attempt to retrieve message header containing size
-
-                // Compute size to read to obtain the complete message header
-                sizeToRead = SOPC_TCP_UA_HEADER_LENGTH - chunkCtx->chunkInputBuffer->length;
-                sizeAvailable = receivedBuffer->length - receivedBuffer->position;
-
-                if (sizeAvailable >= sizeToRead)
-                {
-                    // Complete header available: retrieve header data from received buffer
-                    result =
-                        SC_Chunks_ReadDataFromReceivedBuffer(chunkCtx->chunkInputBuffer, receivedBuffer, sizeToRead);
-
-                    if (false == result)
-                    {
-                        errorStatus = OpcUa_BadTcpMessageTooLarge;
-
-                        SOPC_Logger_TraceError("ChunksMgr: message (header) too large for buffer (epCfgIdx=%" PRIu32
-                                               ", scCfgIdx=%" PRIu32 ")",
-                                               scConnection->serverEndpointConfigIdx,
-                                               scConnection->endpointConnectionConfigIdx);
-                    }
-                    else
-                    {
-                        // Enough data to decode header
-                        decodeHeader = true;
-                    }
-                }
-                else
-                {
-                    // Complete header not available: retrieve available data from received buffer
-                    result =
-                        SC_Chunks_ReadDataFromReceivedBuffer(chunkCtx->chunkInputBuffer, receivedBuffer, sizeAvailable);
-
-                    if (false == result)
-                    {
-                        errorStatus = OpcUa_BadTcpMessageTooLarge;
-
-                        SOPC_Logger_TraceError("ChunksMgr: message (header) too large for buffer (epCfgIdx=%" PRIu32
-                                               ", scCfgIdx=%" PRIu32 ")",
-                                               scConnection->serverEndpointConfigIdx,
-                                               scConnection->endpointConnectionConfigIdx);
-                    }
-                }
+                SOPC_Logger_TraceError("ChunksMgr: TCP UA header decoding failed with statusCode=%" PRIX32
+                                       " (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
+                                       errorStatus, scConnection->serverEndpointConfigIdx,
+                                       scConnection->endpointConnectionConfigIdx);
             }
+            break;
+        }
 
-            if (result != false && decodeHeader != false)
-            {
-                // Decode the received OPC UA TCP message header
-                result = SC_Chunks_DecodeTcpMsgHeader(&scConnection->chunksCtx, &errorStatus);
-                if (false == result)
-                {
-                    SOPC_Logger_TraceError("ChunksMgr: TCP UA header decoding failed with statusCode=%" PRIX32
-                                           " (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-                                           errorStatus, scConnection->serverEndpointConfigIdx,
-                                           scConnection->endpointConnectionConfigIdx);
-                }
-                else
-                {
-                    SOPC_Logger_TraceDebug("ChunksMgr: received TCP UA message type SOPC_Msg_Type=%d (epCfgIdx=%" PRIu32
-                                           ", scCfgIdx=%" PRIu32 ")",
-                                           scConnection->chunksCtx.currentMsgType,
-                                           scConnection->serverEndpointConfigIdx,
-                                           scConnection->endpointConnectionConfigIdx);
-                }
-            }
-        } /* END OF OPC UA TCP MESSAGE HEADER TREATMENT */
+        SOPC_Logger_TraceDebug("ChunksMgr: received TCP UA message type SOPC_Msg_Type=%d (epCfgIdx=%" PRIu32
+                               ", scCfgIdx=%" PRIu32 ")",
+                               scConnection->chunksCtx.currentMsgType, scConnection->serverEndpointConfigIdx,
+                               scConnection->endpointConnectionConfigIdx);
 
-        if (result != false)
+        // Decode OPC UA Secure Conversation MessageChunk specific headers if necessary (not HEL/ACK/ERR)
+        if (SC_Chunks_TreatTcpPayload(scConnection, &requestId, &errorStatus))
         {
-            /* OPC UA TCP MESSAGE PAYLOAD TREATMENT */
-
-            bool completePayload = false;
-            if (chunkCtx->chunkInputBuffer->length >= SOPC_TCP_UA_HEADER_LENGTH)
+            // Transmit OPC UA message to secure connection state manager
+            SOPC_SecureChannels_InputEvent scEvent = SC_Chunks_MsgTypeToRcvEvent(chunkCtx->currentMsgType);
+            if (scEvent == INT_SC_RCV_ERR || scEvent == INT_SC_RCV_CLO)
             {
-                // Message header is decoded but message payload not (completly) retrieved
-                //  => attempt to retrieve complete message payload
-                assert(chunkCtx->currentMsgSize > 0); // message size was decoded
-                assert(chunkCtx->currentMsgType != SOPC_MSG_TYPE_INVALID);
-                assert(chunkCtx->currentMsgIsFinal != SOPC_MSG_ISFINAL_INVALID);
-
-                sizeAvailable = receivedBuffer->length - receivedBuffer->position;
-                // Incomplete message payload data size already retrieved in input buffer
-                sizeAlreadyRead = chunkCtx->chunkInputBuffer->length - chunkCtx->chunkInputBuffer->position;
-
-                if (chunkCtx->currentMsgSize > SOPC_TCP_UA_HEADER_LENGTH + sizeAlreadyRead)
-                {
-                    sizeToRead = chunkCtx->currentMsgSize - SOPC_TCP_UA_HEADER_LENGTH - sizeAlreadyRead;
-                }
-                else
-                {
-                    // Size provided by message seems invalid
-                    result = false;
-                    errorStatus = OpcUa_BadTcpInternalError; // not really internal no error corresponding
-
-                    SOPC_Logger_TraceError(
-                        "ChunksMgr: message size invalid (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-                        scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
-                }
-
-                if (result != false)
-                {
-                    if (sizeAvailable >= sizeToRead)
-                    {
-                        // Complete payload available: retrieve payload data from received buffer
-                        result = SC_Chunks_ReadDataFromReceivedBuffer(chunkCtx->chunkInputBuffer, receivedBuffer,
-                                                                      sizeToRead);
-                        if (false == result)
-                        {
-                            errorStatus = OpcUa_BadTcpMessageTooLarge;
-
-                            SOPC_Logger_TraceError("ChunksMgr: message read into buffer error: sizeToRead=%" PRIu32
-                                                   " (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-                                                   sizeToRead, scConnection->serverEndpointConfigIdx,
-                                                   scConnection->endpointConnectionConfigIdx);
-                        }
-
-                        // Enough data to read complete message
-                        completePayload = true;
-                    }
-                    else
-                    {
-                        result = SC_Chunks_ReadDataFromReceivedBuffer(chunkCtx->chunkInputBuffer, receivedBuffer,
-                                                                      sizeAvailable);
-
-                        if (false == result)
-                        {
-                            errorStatus = OpcUa_BadTcpMessageTooLarge;
-
-                            SOPC_Logger_TraceError("ChunksMgr: message too large for buffer: sizeToRead=%" PRIu32
-                                                   " (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-                                                   sizeToRead, scConnection->serverEndpointConfigIdx,
-                                                   scConnection->endpointConnectionConfigIdx);
-                        }
-                    }
-                }
+                // Treat as prio events
+                SOPC_SecureChannels_EnqueueInternalEventAsNext(scEvent, scConnectionIdx,
+                                                               (void*) chunkCtx->chunkInputBuffer, requestId);
             }
-
-            if (result != false && completePayload != false)
+            else
             {
-                // Decode OPC UA Secure Conversation MessageChunk specific headers if necessary (not HEL/ACK/ERR)
-                result = SC_Chunks_TreatTcpPayload(scConnection, &requestId, &errorStatus);
-                if (result != false)
-                {
-                    // Transmit OPC UA message to secure connection state manager
-                    SOPC_SecureChannels_InputEvent scEvent = SC_Chunks_MsgTypeToRcvEvent(chunkCtx->currentMsgType);
-                    if (scEvent == INT_SC_RCV_ERR || scEvent == INT_SC_RCV_CLO)
-                    {
-                        // Treat as prio events
-                        SOPC_SecureChannels_EnqueueInternalEventAsNext(scEvent, scConnectionIdx,
-                                                                       (void*) chunkCtx->chunkInputBuffer, requestId);
-                    }
-                    else
-                    {
-                        SOPC_SecureChannels_EnqueueInternalEvent(scEvent, scConnectionIdx,
-                                                                 (void*) chunkCtx->chunkInputBuffer, requestId);
-                    }
-                    chunkCtx->chunkInputBuffer = NULL;
-                    // reset chunk context (buffer not deallocated since provided to secure connection state
-                    // manager)
-                    memset(&scConnection->chunksCtx, 0, sizeof(SOPC_SecureConnection_ChunkMgrCtx));
-                }
+                SOPC_SecureChannels_EnqueueInternalEvent(scEvent, scConnectionIdx, (void*) chunkCtx->chunkInputBuffer,
+                                                         requestId);
             }
-        } /* END OF OPC UA TCP MESSAGE PAYLOAD TREATMENT */
-
-        if (false == result)
-        {
-            SOPC_Logger_TraceError(
-                "ChunksMgr: raised INT_SC_RCV_FAILURE: %" PRIX32 ": (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-                errorStatus, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
-
-            // Treat as prio events
-            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, scConnectionIdx, NULL, errorStatus);
-            SOPC_Buffer_Delete(chunkCtx->chunkInputBuffer);
-            // reset chunk context
+            chunkCtx->chunkInputBuffer = NULL;
+            // reset chunk context (buffer not deallocated since provided to secure connection state
+            // manager)
             memset(&scConnection->chunksCtx, 0, sizeof(SOPC_SecureConnection_ChunkMgrCtx));
-            receivedBuffer->length = 0;
-            receivedBuffer->position = 0;
         }
+    }
 
-        // Update available data remaining in received buffer
-        sizeAvailable = receivedBuffer->length - receivedBuffer->position;
+    if (errorStatus != SOPC_GoodGenericStatus)
+    {
+        SOPC_Logger_TraceError(
+            "ChunksMgr: raised INT_SC_RCV_FAILURE: %" PRIX32 ": (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
+            errorStatus, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+
+        // Treat as prio events
+        SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, scConnectionIdx, NULL, errorStatus);
+        SOPC_Buffer_Delete(chunkCtx->chunkInputBuffer);
+        // reset chunk context
+        memset(&scConnection->chunksCtx, 0, sizeof(SOPC_SecureConnection_ChunkMgrCtx));
     }
 
     SOPC_Buffer_Delete(receivedBuffer);
