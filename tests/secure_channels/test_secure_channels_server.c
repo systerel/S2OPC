@@ -74,21 +74,21 @@ int main(int argc, char* argv[])
 
     // Paths to client certificate/key and server certificate
     // Server certificate name
-    char* certificateSrvLocation = "./server_public/server_2k.der";
+    char* certificateSrvLocation = "./server_public/server_2k_cert.der";
     // Server private key
-    char* keyLocation = "./server_private/server_2k.key";
+    char* keyLocation = "./server_private/server_2k_key.pem";
 
     if (argc >= 2)
     {
         if (strlen(argv[1]) == strlen("2048") && 0 == memcmp(argv[1], "2048", strlen("2048")))
         {
-            certificateSrvLocation = "./server_public/server_2k.der";
-            keyLocation = "./server_private/server_2k.key";
+            certificateSrvLocation = "./server_public/server_2k_cert.der";
+            keyLocation = "./server_private/server_2k_key.pem";
         }
         else if (strlen(argv[1]) == strlen("4096") && 0 == memcmp(argv[1], "4096", strlen("4096")))
         {
-            certificateSrvLocation = "./server_public/server_4k.der";
-            keyLocation = "./server_private/server_4k.key";
+            certificateSrvLocation = "./server_public/server_4k_cert.der";
+            keyLocation = "./server_private/server_4k_key.pem";
         }
         else
         {

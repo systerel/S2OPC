@@ -4,7 +4,7 @@ RANDFILE        = $ENV::HOME/.rnd
 ####################################################################
 [ req ]
 default_bits        = 4096
-default_keyfile     = client_4k.key
+default_keyfile     = client_4k_key.pem
 distinguished_name  = client_distinguished_name
 req_extensions      = client_extensions
 string_mask         = utf8only

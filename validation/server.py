@@ -21,6 +21,7 @@ Simple server handling miscellaneous client tests
 """
 
 import argparse
+import os.path
 import time
 
 from opcua import ua, Server
@@ -38,8 +39,10 @@ if __name__=='__main__':
     print('Configuring FreeOpcUa test server')
     server = Server()
     server.set_endpoint(sUri)
-    server.load_certificate('../bin/server_public/server_2k.der')
-    server.load_private_key('../bin/server_private/server_2k.pem')
+
+    cert_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tests', 'data', 'cert')
+    server.load_certificate(os.path.join(cert_dir, 'server_2k_cert.der'))
+    server.load_private_key(os.path.join(cert_dir, 'server_2k_key.pem'))
 
     # Nodes are created under the Objects node
     objects = server.get_objects_node()

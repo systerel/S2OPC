@@ -190,13 +190,13 @@ int main(int argc, char* argv[])
     // Init unique endpoint structure
     epConfig.endpointURL = ENDPOINT_URL;
 
-    status = SOPC_KeyManager_Certificate_CreateFromFile("./server_public/server_2k.der", &serverCertificate);
+    status = SOPC_KeyManager_Certificate_CreateFromFile("./server_public/server_2k_cert.der", &serverCertificate);
     epConfig.serverCertificate = serverCertificate;
 
     if (SOPC_STATUS_OK == status)
     {
         status =
-            SOPC_KeyManager_AsymmetricKey_CreateFromFile("./server_private/server_2k.key", &asymmetricKey, NULL, 0);
+            SOPC_KeyManager_AsymmetricKey_CreateFromFile("./server_private/server_2k_key.pem", &asymmetricKey, NULL, 0);
         epConfig.serverKey = asymmetricKey;
     }
     if (SOPC_STATUS_OK == status)

@@ -121,26 +121,26 @@ int main(int argc, char* argv[])
 
     // Paths to client certificate/key and server certificate
     // Client certificate name
-    char* certificateLocation = "./client_public/client_2k.der";
+    char* certificateLocation = "./client_public/client_2k_cert.der";
     // Server certificate name
-    char* certificateSrvLocation = "./server_public/server_2k.der";
+    char* certificateSrvLocation = "./server_public/server_2k_cert.der";
     // Client private key
-    char* keyLocation = "./client_private/client_2k.key";
+    char* keyLocation = "./client_private/client_2k_key.pem";
 
     // Manage key length used for the client (and default for server) 2048 or 4096
     if (argc >= 4)
     {
         if (strlen(argv[3]) == strlen("2048") && 0 == memcmp(argv[3], "2048", strlen("2048")))
         {
-            certificateLocation = "./client_public/client_2k.der";
-            certificateSrvLocation = "./server_public/server_2k.der";
-            keyLocation = "./client_private/client_2k.key";
+            certificateLocation = "./client_public/client_2k_cert.der";
+            certificateSrvLocation = "./server_public/server_2k_cert.der";
+            keyLocation = "./client_private/client_2k_key.pem";
         }
         else if (strlen(argv[3]) == strlen("4096") && 0 == memcmp(argv[3], "4096", strlen("4096")))
         {
-            certificateLocation = "./client_public/client_4k.der";
-            certificateSrvLocation = "./server_public/server_4k.der";
-            keyLocation = "./client_private/client_4k.key";
+            certificateLocation = "./client_public/client_4k_cert.der";
+            certificateSrvLocation = "./server_public/server_4k_cert.der";
+            keyLocation = "./client_private/client_4k_key.pem";
         }
         else
         {
@@ -154,11 +154,11 @@ int main(int argc, char* argv[])
     {
         if (strlen(argv[4]) == strlen("2048") && 0 == memcmp(argv[4], "2048", strlen("2048")))
         {
-            certificateSrvLocation = "./server_public/server_2k.der";
+            certificateSrvLocation = "./server_public/server_2k_cert.der";
         }
         else if (strlen(argv[4]) == strlen("4096") && 0 == memcmp(argv[4], "4096", strlen("4096")))
         {
-            certificateSrvLocation = "./server_public/server_4k.der";
+            certificateSrvLocation = "./server_public/server_4k_cert.der";
         }
         else
         {

@@ -40,9 +40,9 @@
 /* Active wait sleep, in ms */
 #define SLEEP_LENGTH 200
 
-#define PATH_CLIENT_PUBL "./client_public/client_4k.der"
-#define PATH_CLIENT_PRIV "./client_private/client_4k.key"
-#define PATH_SERVER_PUBL "./server_public/server_4k.der"
+#define PATH_CLIENT_PUBL "./client_public/client_4k_cert.der"
+#define PATH_CLIENT_PRIV "./client_private/client_4k_key.pem"
+#define PATH_SERVER_PUBL "./server_public/server_4k_cert.der"
 #define PATH_CACERT_PUBL "./trusted/cacert.der"
 
 /**

@@ -16,16 +16,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 from opcua import ua
 from opcua.crypto import security_policies
 
 def secure_channels_connect(client, security_policy):
+    cert_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tests', 'data', 'cert')
 
     if (security_policy == security_policies.SecurityPolicyBasic256):
         client.set_security(security_policy,
-        '../bin/client_public/client_2k.der',
-        '../bin/client_private/client_2k.pem',
-        server_certificate_path='../bin/server_public/server_2k.der',
+        os.path.join(cert_dir, 'client_2k_cert.der'),
+        os.path.join(cert_dir, 'client_2k_key.pem'),
+        server_certificate_path=os.path.join(cert_dir, 'server_2k_cert.der'),
         mode=ua.MessageSecurityMode.Sign)
 
     client.connect()

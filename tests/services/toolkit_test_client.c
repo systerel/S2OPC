@@ -244,11 +244,11 @@ int main(void)
 
     // Paths to client certificate/key and server certificate
     // Client certificate name
-    char* certificateLocation = "./client_public/client_2k.der";
+    char* certificateLocation = "./client_public/client_2k_cert.der";
     // Server certificate name
-    char* certificateSrvLocation = "./server_public/server_2k.der";
+    char* certificateSrvLocation = "./server_public/server_2k_cert.der";
     // Client private key
-    char* keyLocation = "./client_private/client_2k.key";
+    char* keyLocation = "./client_private/client_2k_key.pem";
     SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_Load();
 
     // Get Toolkit Configuration
