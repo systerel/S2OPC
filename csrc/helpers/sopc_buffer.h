@@ -171,4 +171,15 @@ SOPC_ReturnStatus SOPC_Buffer_CopyWithLength(SOPC_Buffer* dest, SOPC_Buffer* src
  */
 uint32_t SOPC_Buffer_Remaining(SOPC_Buffer* buffer);
 
+/**
+ * \brief Reads \c n bytes from \c src into \c buffer.
+ *
+ * \param buffer  The buffer to read the bytes into.
+ * \param src     The source buffer.
+ * \param n       The maximum number of bytes to read.
+ *
+ * \return The number of bytes read in case of success, -1 in case of failure.
+ */
+int64_t SOPC_Buffer_ReadFrom(SOPC_Buffer* buffer, SOPC_Buffer* src, uint32_t n);
+
 #endif /* SOPC_BUFFER_H_ */

@@ -224,3 +224,23 @@ uint32_t SOPC_Buffer_Remaining(SOPC_Buffer* buffer)
     assert(buffer != NULL);
     return buffer->length - buffer->position;
 }
+
+int64_t SOPC_Buffer_ReadFrom(SOPC_Buffer* buffer, SOPC_Buffer* src, uint32_t n)
+{
+    if ((buffer->max_size - buffer->length) < n)
+    {
+        return -1;
+    }
+
+    uint32_t available = src->length - src->position;
+
+    if (available < n)
+    {
+        n = available;
+    }
+
+    memcpy(buffer->data + buffer->position, src->data + src->position, n * sizeof(uint8_t));
+    buffer->length += n;
+    src->position += n;
+    return (int64_t) n;
+}
