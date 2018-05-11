@@ -645,3 +645,28 @@ if (EXPAT_FOUND)
 	target_link_libraries(ingopcs_parse_uanodeset PRIVATE ingopcs "ingopcs-loader-uanodeset-expat")
 	target_include_directories(ingopcs_parse_uanodeset PRIVATE ${INGOPCS_PUBLIC_INCLUDES})
 endif()
+
+# Fuzzing
+function(s2opc_fuzzer name src_file)
+	set(standalone_target_name "${name}.standalone")
+	set(fuzz_target_name "${name}.libfuzzer")
+
+	add_executable(${standalone_target_name} "tests/fuzzing/${src_file}" "tests/fuzzing/standalone_fuzzer.c")
+	target_include_directories(${standalone_target_name} PRIVATE ${INGOPCS_PUBLIC_INCLUDES} ${INGOPCS_PRIVATE_INCLUDES})
+	target_link_libraries(${standalone_target_name} ${INGOPCS_STATIC_LIB})
+
+	add_executable(${fuzz_target_name} "tests/fuzzing/${src_file}")
+	set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
+	set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
+	target_include_directories(${fuzz_target_name} PRIVATE ${INGOPCS_PUBLIC_INCLUDES} ${INGOPCS_PRIVATE_INCLUDES})
+	target_link_libraries(${fuzz_target_name} ${INGOPCS_STATIC_LIB})
+endfunction()
+
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+	if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.0.0")
+		# We need at least CLang 6 to get LibFuzzer
+		message(STATUS "Your version of Clang (${CMAKE_C_COMPILER_ID}) is not recent enough to have LibFuzzer")
+	else()
+		s2opc_fuzzer(server_request_fuzzer "fuzz_server_request.c")
+	endif()
+endif()
