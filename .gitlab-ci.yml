@@ -40,7 +40,7 @@ generation:
   stage: build
   image: registry.gitlab.com/systerel/s2opc/build@sha256:043994ffeee40e86c17f30a1bd9adb00817fed52a84494112e939bf43c55d116 # build:1.7
   script:
-    - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install && ../tests/scripts/make-ctestfile-relative CTestTestfile.cmake > ../bin/CTestTestfile.cmake || exit 1'
+    - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install && ../tests/scripts/make-ctestfile-relative CTestTestfile.cmake > ./bin/CTestTestfile.cmake || exit 1'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
     DOCKER_IMAGE: 'sha256:3feedb6f6402c061637c968dfa6ea92cb25235a229f1b5c886989ae2065b1dc8'
@@ -48,7 +48,6 @@ generation:
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
-      - 'bin/'
       - 'install_linux64/'
       - 'build/'  # Required when using coverage analysis
     expire_in: '1 month'
@@ -86,7 +85,7 @@ build-win64: &build_win64
   artifacts:
     name: 'bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
-      - 'bin/'
+      - '$BUILD_DIR/bin/'
       - 'install_win64/'
     expire_in: '1 month'
   only:
@@ -105,7 +104,7 @@ build-win32:
   artifacts:
     name: 'bin-w32-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
-      - 'bin/'
+      - '$BUILD_DIR/bin/'
       - 'install_win32/'
     expire_in: '1 month'
   only:
@@ -163,9 +162,6 @@ test-unit:
   artifacts:
     name: 'test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
-      - 'bin/*.tap'
-      - 'bin/*.log'
-      - 'bin/Testing'
       - 'build/'
     when: always
     expire_in: '1 month'
@@ -183,8 +179,8 @@ test-uactt:
   artifacts:
     name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
-      - 'bin/*.tap'
-      - 'bin/*.log'
+      - '$BUILD_DIR/*.tap'
+      - '$BUILD_DIR/*.log'
     when: on_failure
     expire_in: '1 month'
 

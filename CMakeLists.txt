@@ -11,8 +11,9 @@ if(POLICY CMP0054)
   cmake_policy(SET CMP0054 NEW)
 endif()
 
-# Define runtime output directory
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_SOURCE_DIR}/bin>)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/lib>)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/lib>)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/bin>)
 
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
@@ -337,7 +338,6 @@ target_link_libraries(check_helpers PRIVATE ${INGOPCS_STATIC_LIB} ${CHECK_LIBRAR
 
 s2opc_unit_test(check_helpers)
 
-## Copy reference logs files to bin/ directory
 add_custom_command(
     TARGET check_helpers POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/logger/logAnother.ref ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
@@ -442,7 +442,6 @@ target_include_directories(ingopcs_findserver PRIVATE "${ADDSPACEGEN_INCLUDE_DIR
                                                        ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
-## COPY ALL CERTIFICATES TO BIN/ DIRECTORY
 add_custom_command(
     TARGET toolkit_test_server POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked

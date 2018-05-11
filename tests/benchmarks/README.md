@@ -39,8 +39,7 @@ space loader was compiled with S2OPC: there should be a file named
 not present, make sure the Expat library and its development headers are found
 by CMake at configuration time.
 
-Start the server from the `bin/`
-directory:
+Start the server from `bin/` in the build directory:
 
 ```
 TEST_SERVER_XML_ADDRESS_SPACE=../tests/benchmarks/address_space.xml ./toolkit_test_server

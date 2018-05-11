@@ -76,7 +76,7 @@ fi
 
 rm -f $LOG_FILE $TAP_FILE
 echo "Launching server"
-pushd ../bin
+pushd ${ROOT_DIR}/build/bin
 ./toolkit_test_server &
 SERVER_PID=$!
 # wait for server to be up
@@ -197,8 +197,8 @@ n_err=$(grep -c "^not ok" $TAP_FILE)
 echo "There were $n_err not oks"
 
 # check TAP file
-mv $TAP_FILE ${ROOT_DIR}/bin/
-${ROOT_DIR}/tests/scripts/check-tap ${ROOT_DIR}/bin/$TAP_FILE && echo "TAP file is well formed and free of failed tests" || exit 1
+mv $TAP_FILE ${ROOT_DIR}/build/bin/
+${ROOT_DIR}/tests/scripts/check-tap ${ROOT_DIR}/build/bin/$TAP_FILE && echo "TAP file is well formed and free of failed tests" || exit 1
 
 
 

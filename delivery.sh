@@ -127,7 +127,7 @@ if [[ $? != 0 ]]; then
     exit 1
 fi
 rm -fr ../bin_windows
-cp -r ../bin ../bin_windows
+cp -r bin ../bin_windows
 cd ..
 
 # Clean directories in which linux binaries / library are installed
@@ -142,8 +142,6 @@ if [[ $? != 0 ]]; then
     echo "Error: Generation of Toolkit linux shared binaries failed";
     exit 1
 fi
-# Do not keep the binaries generated with shared library
-rm -fr ../bin
 cd ..
 
 echo "Generate Toolkit linux static binaries (library and tests)"
@@ -155,6 +153,7 @@ if [[ $? != 0 ]]; then
     echo "Error: Generation of Toolkit linux static binaries failed";
     exit 1
 fi
+mv bin ../
 cd ..
 
 echo "Check code with clang tools"
@@ -171,6 +170,10 @@ git commit -S -m "Add toolkit binaries for version $DELIVERY_NAME" &> /dev/null 
 
 echo "Generate test script"
 ./tests/scripts/make-ctestfile-relative build/CTestTestfile.cmake > bin/CTestTestfile.cmake
+
+# The bin folder is moved to the root in releases
+sed -i 's,build/bin,bin,g' bin/CTestTestfile.cmake
+
 git add -f bin/CTestTestfile.cmake &>/dev/null || exit 1
 git commit -S -m "Add CTest test file for version $DELIVERY_NAME" &> /dev/null || exit 1
 

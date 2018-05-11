@@ -8,8 +8,8 @@ library adaptation for OPC UA needs (using mbedtls).
 This project contains the following elements:
 - acceptances_tests: OPC UA Compliance Test Tool configuration and launch script
 - apidoc: generated HTML documentation of the C source code with doxygen
-- bin: built binaries tests of the toolkit for Linux platform (64 bits)
-- bin_windows: built binaries tests and DLL of the toolkit for Windows platform (32 bits)
+- build/bin: built binaries tests of the toolkit for Linux platform (64 bits)
+- build/bin_windows: built binaries tests and DLL of the toolkit for Windows platform (32 bits)
 - bsrc: B model of the Toolkit used to generate C source files for services management layer
 - csrc: root directory for C source files of the INGOPCS project OPC UA Toolkit
 - csrc/api_toolkit: user application API to request server/client treatments once Toolkit configured
@@ -159,22 +159,22 @@ Prerequisites (only for validation based on FreeOpcUa python client):
 
 Run all tests:
 - To run the INGOPCS OPC UA Toolkit tests: execute the test-all.sh script: `./test-all.sh`
-- Tests results are provided in bin/*.tap files and shall indicate "ok" status for each test
+- Tests results are provided in build/bin/*.tap files and shall indicate "ok" status for each test
 
-Run a particular test (bin/ directory):
+Run a particular test (build/bin/ directory):
 - Toolkit helpers unit tests: execute ./check_helpers
 - Toolkit sockets management layer test: execute ./check_sockets
 - Toolkit secure channel (+sockets) management layer: ./test_secure_channels_server and ./test_secure_channels_client in parallel
 - Toolkit client/server session and read/write service example:
   execute ./toolkit_test_server and then ./toolkit_test_client in parallel
 - Toolkit server and read / write / browse service validation:
-  execute ./toolkit_test_server in bin/ directory and python3 client.py in validation/ directory
+  execute ./toolkit_test_server in build/bin/ directory and python3 client.py in validation/ directory
   (depends on FreeOpcUa python client available on github)
 - Toolkit server and secure channel security token renewal validation:
-  execute ./toolkit_test_server in bin/ directory and python3
+  execute ./toolkit_test_server in build/bin/ directory and python3
   client_sc_renew.py in validation/ directory (depends on FreeOpcUa
   python client available on github)
 
 Run OPC UA Compliance Test Tool (UACTT: tool available for OPC foundation corporate members only):
-- Run toolkit server example with long timeout parameter in bin/ directory: ./toolkit_test_server 100000
+- Run toolkit server example with long timeout parameter in build/bin/ directory: ./toolkit_test_server
 - Run the UACTT tests using the UACTT project configuration file acceptances_tests/Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml
