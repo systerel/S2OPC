@@ -67,6 +67,7 @@ else
     append_cmake_option WITH_ASAN
     append_cmake_option WITH_UBSAN
     append_cmake_option WITH_COVERAGE
+    append_cmake_option CMAKE_BUILD_TYPE
     cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
     cd - > /dev/null || exit 1
 fi
