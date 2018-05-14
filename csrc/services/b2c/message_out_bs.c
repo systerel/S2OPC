@@ -219,7 +219,7 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
             reqHeader = (OpcUa_RequestHeader*) message_out_bs__msg_header;
             reqHeader->Timestamp = SOPC_Time_GetCurrentTimeUTC();
             // TODO: reqHeader->AuditEntryId ?
-            reqHeader->TimeoutHint = 0; // TODO: to be configured by each service ?
+            reqHeader->TimeoutHint = SOPC_REQUEST_TIMEOUT_MS; // TODO: to be configured by each service ?
         }
         else if (&OpcUa_ResponseHeader_EncodeableType == headerType)
         {
