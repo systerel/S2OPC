@@ -70,22 +70,22 @@ typedef struct SOPC_Endpoint_Config
 /* Client and Server communication events to be managed by applicative code*/
 typedef enum SOPC_App_Com_Event {
     /* Client application events */
-    SE_SESSION_ACTIVATION_FAILURE, /* id = session id (or 0 if not yet defined)
+    SE_SESSION_ACTIVATION_FAILURE, /* id = internal session id (or 0 if not yet defined)
                                       auxParam = user application session context
                                    */
-    SE_ACTIVATED_SESSION,          /* id = session id
+    SE_ACTIVATED_SESSION,          /* id = internal session id
                                       auxParam = user application session context
                                    */
     SE_SESSION_REACTIVATING,       /* automatic new SC or manual new user on same SC */
-                                   /* id = session id
+                                   /* id = internal session id
                                       auxParam = user application session context
                                    */
-    SE_RCV_SESSION_RESPONSE,       /* id = session id
+    SE_RCV_SESSION_RESPONSE,       /* id = internal session id
                                       params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
                                       (deallocated by toolkit after callback call is terminated)
                                       auxParam = user application request context
                                    */
-    SE_CLOSED_SESSION,             /* id = session id
+    SE_CLOSED_SESSION,             /* id = internal session id
                                       auxParam = user application session context
                                     */
     SE_RCV_DISCOVERY_RESPONSE, /* params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload structure

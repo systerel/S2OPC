@@ -19,7 +19,7 @@
  * - Toolkit configuration
  * - SecureChannel and Session creation
  * Starts in the init state. Shall be configured with a call to StateMachine_ConfigureMachine(), which configures the
- * configure Toolkit with parameters from config.h. Then SOPC_Toolkit_Configured() shall be called  and the Async
+ * Toolkit with parameters from config.h. Then SOPC_Toolkit_Configured() shall be called  and the Async
  * processus shall be started using StateMachine_StartSession() or StateMachine_StartDiscovery() function. The
  * StateMachine_EventDispatcher() shall be called on the state machine from the callback given to
  * SOPC_Toolkit_Initialize().
@@ -47,7 +47,7 @@ typedef struct
     uint32_t iscConfig;                       /* Internal scConfig ID */
     StateMachine_RequestContext* pCtxSession; /* Internal Session context */
     uint32_t iSessionID;                      /* OPC UA Session ID */
-    StateMachine_RequestContext* pCtxRequest; /* Internal request context used for discovery requests */
+    StateMachine_RequestContext* pCtxRequest; /* Internal request context used to identify requests */
 } StateMachine_Machine;
 
 /* Machine lifecycle */

@@ -38,7 +38,7 @@ typedef SOPC_SLinkedList_Elt* SOPC_SLinkedListIterator;
 
 /**
  *  \brief            Create and allocate a new singly linked list containing 0 elements with a size limit of the given
- * size.
+ *                    size.
  *
  *  \param sizeMax    The maximum number of elements allowed in the new linked list or 0 if no limit defined
  *  \return           Pointer to the newly allocated singly linked list
@@ -50,7 +50,8 @@ SOPC_SLinkedList* SOPC_SLinkedList_Create(size_t sizeMax);
  *
  *  \param list     Pointer on the linked list in which new element must be added
  *  \param id       Unique identifier to associate with the element (if not unique prepend LIFO behavior for Find and
- * Remove) \param value    Pointer to the value of the element to prepend
+ *                  Remove)
+ *  \param value    Pointer to the value of the element to prepend
  *
  *  \return         Pointer to the value prepended, provided as parameter, if succeeded, NULL otherwise
  */
@@ -61,7 +62,8 @@ void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value)
  *
  *  \param list     Pointer on the linked list in which new element must be added
  *  \param id       Unique identifier to associate with the element (if not unique append FIFO behavior for Find and
- * Remove) \param value    Pointer to the value of the element to append
+ *                  Remove)
+ *  \param value    Pointer to the value of the element to append
  *
  *  \return         Pointer to the value appended, provided as parameter, if succeeded, NULL otherwise
  */
@@ -118,7 +120,7 @@ void* SOPC_SLinkedList_FindFromId(SOPC_SLinkedList* list, uint32_t id);
 void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, void* val));
 
 /**
- *  \brief          Find and remove the value associated to the given id in the linked list
+ *  \brief          Find and remove the first value associated to the given id (FIFO) in the linked list
  *
  *  \param list     Pointer on the linked list in which element must be found
  *  \param id       Unique identifier associated with the element to remove
@@ -128,16 +130,16 @@ void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, voi
 void* SOPC_SLinkedList_RemoveFromId(SOPC_SLinkedList* list, uint32_t id);
 
 /**
- *  \brief         Delete all elements of the given linked list
+ *  \brief          Delete all elements of the given linked list
  *
- *  \param list    Pointer to the list of elements to be deleted
+ *  \param list     Pointer to the list of elements to be deleted
  */
 void SOPC_SLinkedList_Clear(SOPC_SLinkedList* list);
 
 /**
- *  \brief         Delete and deallocate the given linked list
+ *  \brief          Delete and deallocate the given linked list
  *
- *  \param list    Pointer to the list to deallocate (pointer must not be used anymore after operation)
+ *  \param list     Pointer to the list to deallocate (pointer must not be used anymore after operation)
  */
 void SOPC_SLinkedList_Delete(SOPC_SLinkedList* list);
 
@@ -150,7 +152,7 @@ void SOPC_SLinkedList_Delete(SOPC_SLinkedList* list);
 void SOPC_SLinkedList_EltGenericFree(uint32_t id, void* val);
 
 /**
- * \brief           Get an iterator on a linked list to could iterate on elements (LIFO behavior)
+ * \brief           Get an iterator on a linked list to iterate on elements (LIFO behavior)
  *
  * \param list      Pointer to the list for which an iterator is requested
  *
