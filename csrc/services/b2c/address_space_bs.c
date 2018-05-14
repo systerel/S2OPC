@@ -211,13 +211,6 @@ void address_space_bs__get_Reference_IsForward(const constants__t_Reference_i ad
     *address_space_bs__p_IsForward = !ref->IsInverse;
 }
 
-void address_space_bs__get_Node_RefIndexBegin(const constants__t_Node_i address_space_bs__p_node,
-                                              t_entier4* const address_space_bs__p_ref_index)
-{
-    (void) address_space_bs__p_node;
-    *address_space_bs__p_ref_index = 0;
-}
-
 void address_space_bs__get_Node_RefIndexEnd(const constants__t_Node_i address_space_bs__p_node,
                                             t_entier4* const address_space_bs__p_ref_index)
 {

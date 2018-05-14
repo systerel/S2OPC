@@ -40,7 +40,6 @@ DEFINITIONS
         Reference_IsForward,
 
         Node_Reference,
-        Node_RefIndexBegin,
         Node_RefIndexEnd,
         RefIndex_Reference,
 
@@ -79,7 +78,6 @@ DEFINITIONS
         Reference_IsForward     : t_Reference --> BOOL             &
 
         Node_Reference          : t_Node     <-> t_Reference &
-        Node_RefIndexBegin      : t_Node     --> t_RefIndex  &
         Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
         RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference &
 
@@ -221,20 +219,6 @@ OPERATIONS
     END
     ;
 
-    /* TODOPAB: Voir conjointement avec les Références à l'entrée */
-    /* TODO: On peut mettre un array pour les Begin, pour les End,
-       et un 3° un (Reference *) */
-    p_ref_index <-- get_Node_RefIndexBegin(p_node) =
-    PRE
-        p_node : t_Node_i &
-        p_node : t_Node
-    THEN
-        p_ref_index :(
-            p_ref_index : NAT &
-            p_ref_index = Node_RefIndexBegin(p_node)
-        )
-    END
-    ;
     p_ref_index <-- get_Node_RefIndexEnd(p_node) =
     PRE
         p_node : t_Node_i &

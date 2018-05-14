@@ -41,7 +41,6 @@ PROMOTES
     get_Reference_ReferenceType,
     get_Reference_TargetNode,
     get_Reference_IsForward,
-    get_Node_RefIndexBegin,
     get_Node_RefIndexEnd,
     get_RefIndex_Reference,
     get_Value_StatusCode,

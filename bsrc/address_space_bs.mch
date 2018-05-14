@@ -38,7 +38,6 @@ DEFINITIONS
         Reference_TargetNode,
         Reference_IsForward,
 
-        Node_RefIndexBegin,
         Node_RefIndexEnd,
         RefIndex_Reference
     ;
@@ -62,7 +61,6 @@ DEFINITIONS
         Reference_TargetNode    : t_Reference +-> t_ExpandedNodeId &
         Reference_IsForward     : t_Reference +-> BOOL             &
 
-        Node_RefIndexBegin      : t_Node     +-> t_RefIndex  &
         Node_RefIndexEnd        : t_Node     +-> t_RefIndex  &
         RefIndex_Reference      : t_Node * t_RefIndex +-> t_Reference
     )
@@ -264,18 +262,6 @@ OPERATIONS
         p_ref : t_Reference
     THEN
         p_IsForward := Reference_IsForward(p_ref)
-    END
-    ;
-
-    p_ref_index <-- get_Node_RefIndexBegin(p_node) =
-    PRE
-        p_node : t_Node_i &
-        p_node : t_Node
-    THEN
-        p_ref_index :(
-            p_ref_index : NAT &
-            p_ref_index = Node_RefIndexBegin(p_node)
-        )
     END
     ;
 

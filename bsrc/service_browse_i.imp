@@ -42,7 +42,7 @@ OPERATIONS
     IN
         p_isvalid, p_src_node <-- readall_AddressSpace_Node(p_src_nodeid);
         IF  p_isvalid = TRUE THEN
-            l_ref_index_begin <-- get_Node_RefIndexBegin(p_src_node);
+            l_ref_index_begin := 0;
             l_ref_index_end   <-- get_Node_RefIndexEnd  (p_src_node);
             p_nb_ref := l_ref_index_end - l_ref_index_begin + 1;
             IF  p_nb_ref < 0 THEN

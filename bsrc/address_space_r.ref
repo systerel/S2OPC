@@ -41,7 +41,6 @@ DEFINITIONS
         Reference_IsForward,
    
         Node_Reference,
-        Node_RefIndexBegin,
         Node_RefIndexEnd,
         RefIndex_Reference,
 
@@ -75,7 +74,6 @@ DEFINITIONS
         Reference_IsForward     : t_Reference --> BOOL             &
 
         Node_Reference          : t_Node     <-> t_Reference &
-        Node_RefIndexBegin      : t_Node     --> t_RefIndex  &
         Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
         RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference &
 

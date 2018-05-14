@@ -98,7 +98,7 @@ OPERATIONS
     p_continue <-- init_iter_reference(p_node) =
     BEGIN
         Node        := p_node;
-        RefIndex    <-- get_Node_RefIndexBegin(p_node);
+        RefIndex    := 0;
         RefIndexEnd <-- get_Node_RefIndexEnd(p_node);
         p_continue := bool(RefIndexEnd >= RefIndex)
     END

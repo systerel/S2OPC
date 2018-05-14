@@ -73,7 +73,7 @@ OPERATIONS
                 l_src_node = a_NodeId~(p_src_nodeid)
             IN
                 p_isvalid := TRUE ||
-                p_nb_ref  := max({0, Node_RefIndexEnd(l_src_node) - Node_RefIndexBegin(l_src_node) + 1}) ||
+                p_nb_ref  := max({0, Node_RefIndexEnd(l_src_node) + 1}) ||
                 p_src_node :(p_src_node : t_Node_i &
                              p_src_node = l_src_node)
             END
