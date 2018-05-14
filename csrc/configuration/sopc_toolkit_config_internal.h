@@ -84,7 +84,6 @@ SOPC_SecureChannel_Config* SOPC_ToolkitServer_GetSecureChannelConfig(uint32_t se
  */
 SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx);
 
-
 void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
 
 typedef enum SOPC_App_EventType { SOPC_APP_COM_EVENT = 0x0, SOPC_APP_ADDRESS_SPACE_NOTIF = 0x01 } SOPC_App_EventType;

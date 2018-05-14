@@ -333,8 +333,7 @@ void message_out_bs__write_create_session_req_msg_endpointUrl(
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) message_out_bs__msg;
-    SOPC_SecureChannel_Config* chConfig =
-        SOPC_ToolkitClient_GetSecureChannelConfig(message_out_bs__channel_config_idx);
+    SOPC_SecureChannel_Config* chConfig = SOPC_ToolkitClient_GetSecureChannelConfig(message_out_bs__channel_config_idx);
     if (NULL != chConfig)
     {
         status = SOPC_String_CopyFromCString(&createSessionReq->EndpointUrl, chConfig->url);

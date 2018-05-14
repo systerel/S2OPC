@@ -100,8 +100,7 @@ void channel_mgr_bs__is_valid_endpoint_config_idx(const constants__t_endpoint_co
 void channel_mgr_bs__prepare_cli_open_secure_channel(
     const constants__t_channel_config_idx_i channel_mgr_bs__p_config_idx)
 {
-    SOPC_SecureChannel_Config* config =
-        SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
+    SOPC_SecureChannel_Config* config = SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
     if (NULL != config)
     {
         SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, channel_mgr_bs__p_config_idx, NULL, 0);

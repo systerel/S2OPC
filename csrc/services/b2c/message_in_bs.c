@@ -119,13 +119,11 @@ void message_in_bs__decode_msg_header(const t_bool message_in_bs__is_request,
     void* header = NULL;
     if (false == message_in_bs__is_request)
     {
-        status = SOPC_DecodeMsg_HeaderOrBody(message_in_bs__msg_buffer,
-                                             &OpcUa_ResponseHeader_EncodeableType, &header);
+        status = SOPC_DecodeMsg_HeaderOrBody(message_in_bs__msg_buffer, &OpcUa_ResponseHeader_EncodeableType, &header);
     }
     else
     {
-        status = SOPC_DecodeMsg_HeaderOrBody(message_in_bs__msg_buffer,
-                                             &OpcUa_RequestHeader_EncodeableType, &header);
+        status = SOPC_DecodeMsg_HeaderOrBody(message_in_bs__msg_buffer, &OpcUa_RequestHeader_EncodeableType, &header);
     }
     if (SOPC_STATUS_OK == status)
     {

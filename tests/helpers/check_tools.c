@@ -33,11 +33,11 @@
 
 #include "opcua_statuscodes.h"
 
+#include "opcua_identifiers.h"
 #include "sopc_async_queue.h"
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encoder.h"
-#include "opcua_identifiers.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"

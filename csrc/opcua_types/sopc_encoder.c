@@ -1603,7 +1603,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
         else
         {
             nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
-            nodeId.Namespace = OPCUA_NAMESPACE_INDEX; //CME
+            nodeId.Namespace = OPCUA_NAMESPACE_INDEX; // CME
             nodeId.Data.Numeric = extObj->Body.Object.ObjType->BinaryEncodingTypeId;
         }
     }
@@ -1684,22 +1684,21 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
             if (extObj->TypeId.NodeId.IdentifierType == SOPC_IdentifierType_Numeric &&
                 extObj->TypeId.NodeId.Namespace == OPCUA_NAMESPACE_INDEX)
             {
-                 encType =
-                    SOPC_EncodeableType_GetEncodeableType(extObj->TypeId.NodeId.Data.Numeric);
-                 if (NULL == encType)
-                 {
+                encType = SOPC_EncodeableType_GetEncodeableType(extObj->TypeId.NodeId.Data.Numeric);
+                if (NULL == encType)
+                {
                     status = SOPC_STATUS_ENCODING_ERROR;
-                 }
-                 else
-                 {
+                }
+                else
+                {
                     encodingByte = SOPC_ExtObjBodyEncoding_Object;
                     extObj->Body.Object.ObjType = encType;
                     SOPC_String_AttachFromCstring(&extObj->TypeId.NamespaceUri, encType->NamespaceUri);
-                 }
+                }
             }
             else
             {
-               status = SOPC_STATUS_ENCODING_ERROR;
+                status = SOPC_STATUS_ENCODING_ERROR;
             }
         }
         else if (encodingByte == SOPC_ExtObjBodyEncoding_Object)

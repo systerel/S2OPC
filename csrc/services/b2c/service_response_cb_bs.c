@@ -87,8 +87,8 @@ void service_response_cb_bs__srv_service_response(
     const constants__t_application_context_i service_response_cb_bs__app_context)
 {
     SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_LOCAL_SERVICE_RESPONSE),
-                                    service_response_cb_bs__endpoint_config_idx,
-                                    service_response_cb_bs__resp_msg, service_response_cb_bs__app_context);
+                                    service_response_cb_bs__endpoint_config_idx, service_response_cb_bs__resp_msg,
+                                    service_response_cb_bs__app_context);
 }
 
 void service_response_cb_bs__srv_write_notification(

@@ -34,7 +34,6 @@
 
 #include "sopc_toolkit_constants.h"
 
-
 #define OPCUA_NAMESPACE_INDEX 0
 /*============================================================================
  * DataType Identifiers

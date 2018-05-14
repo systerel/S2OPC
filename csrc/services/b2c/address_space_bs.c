@@ -396,7 +396,12 @@ void address_space_bs__get_TypeDefinition(const constants__t_Node_i address_spac
         assert(address_space_bs__p_node - offHasTypeDefs <= address_space_bs__nObjects + address_space_bs__nVariables);
         /* TODO: Verify implementation of HasTypeDefinition in generated AddressSpace before using this code */
         *address_space_bs__p_type_def =
-            address_space_bs__HasTypeDefinition[address_space_bs__p_node - offHasTypeDefs]; //TODO CME : à vérifier la dernière modification : après suppression des cast suppression de la prise d'adresse
+            address_space_bs__HasTypeDefinition[address_space_bs__p_node -
+                                                offHasTypeDefs]; // TODO CME : à vérifier la
+                                                                 // dernière modification :
+                                                                 // après suppression des cast
+                                                                 // suppression de la prise
+                                                                 // d'adresse
     }
 }
 
@@ -409,8 +414,7 @@ void address_space_bs__get_Reference_ReferenceType(const constants__t_Reference_
 void address_space_bs__get_Reference_TargetNode(const constants__t_Reference_i address_space_bs__p_ref,
                                                 constants__t_ExpandedNodeId_i* const address_space_bs__p_TargetNode)
 {
-    *address_space_bs__p_TargetNode =
-        address_space_bs__refs_TargetNode[address_space_bs__p_ref];
+    *address_space_bs__p_TargetNode = address_space_bs__refs_TargetNode[address_space_bs__p_ref];
 }
 
 void address_space_bs__get_Reference_IsForward(const constants__t_Reference_i address_space_bs__p_ref,

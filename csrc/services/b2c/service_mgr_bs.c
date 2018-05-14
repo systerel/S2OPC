@@ -115,9 +115,8 @@ void service_mgr_bs__client_channel_connected_event_discovery(
                     elt = SOPC_SLinkedList_Next(&listIt);
                     if (elt != NULL)
                     {
-                        SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST,
-                                                   service_mgr_bs__channel_config_idx, elt->msgToSend,
-                                                   elt->msgAppContext);
+                        SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, service_mgr_bs__channel_config_idx,
+                                                   elt->msgToSend, elt->msgAppContext);
                     }
                     free(elt);
                 }

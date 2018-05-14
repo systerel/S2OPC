@@ -139,7 +139,7 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
                 // Activated session closing
                 SOPC_ServicesToApp_EnqueueEvent(
                     SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
-                    session_core_bs__session,                               // session id
+                    session_core_bs__session, // session id
                     NULL,
                     session_to_activate_context[session_core_bs__session]); // user application session context
             }
@@ -540,7 +540,7 @@ void session_core_bs__get_NonceServer(const constants__t_session_i session_core_
 {
     if (constants__c_session_indet != session_core_bs__p_session)
     {
-        *session_core_bs__nonce = & (sessionDataArray[session_core_bs__p_session].nonceServer);
+        *session_core_bs__nonce = &(sessionDataArray[session_core_bs__p_session].nonceServer);
     }
     else
     {

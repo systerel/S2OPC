@@ -69,13 +69,13 @@ void constants_bs__get_card_t_session(t_entier4* const constants_bs__p_card_sess
 void constants_bs__get_cast_t_channel(const t_entier4 constants_bs__p_ind,
                                       constants_bs__t_channel_i* const constants_bs__p_channel)
 {
-    *constants_bs__p_channel = (uint32_t)constants_bs__p_ind;//CME add precondition in B model
+    *constants_bs__p_channel = (uint32_t) constants_bs__p_ind; // CME add precondition in B model
 }
 
 void constants_bs__get_cast_t_session(const t_entier4 constants_bs__p_ind,
                                       constants_bs__t_session_i* const constants_bs__p_session)
 {
-    *constants_bs__p_session = (uint32_t)constants_bs__p_ind; // CME add precondition in B model
+    *constants_bs__p_session = (uint32_t) constants_bs__p_ind; // CME add precondition in B model
 }
 
 void constants_bs__is_t_channel(const constants_bs__t_channel_i constants_bs__p_channel,

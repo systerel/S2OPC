@@ -93,8 +93,8 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // auxParam == connection Id
         if (id <= INT32_MAX && auxParam <= INT32_MAX && params != NULL && *(uint32_t*) params <= INT32_MAX)
         {
-            io_dispatch_mgr__server_channel_connected_event(id, * (uint32_t*) params,
-                                                            (uint32_t)auxParam, &bres); //CME check conversion of auxParam
+            io_dispatch_mgr__server_channel_connected_event(id, *(uint32_t*) params, (uint32_t) auxParam,
+                                                            &bres); // CME check conversion of auxParam
             if (bres == false)
             {
                 SOPC_Logger_TraceError("Services: channel state incoherent epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, id,
@@ -165,8 +165,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
 
         if (NULL != params)
         {
-            io_dispatch_mgr__client_reactivate_session_new_user(id,
-                                                                *(constants__t_user_i*) params);
+            io_dispatch_mgr__client_reactivate_session_new_user(id, *(constants__t_user_i*) params);
             free(params);
         }
         else
@@ -181,8 +180,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
                                auxParam);
         if (auxParam <= INT32_MAX)
         {
-            io_dispatch_mgr__internal_client_create_session(id,
-                                                            (constants__t_channel_config_idx_i) auxParam);
+            io_dispatch_mgr__internal_client_create_session(id, (constants__t_channel_config_idx_i) auxParam);
         }
         break;
 
@@ -212,8 +210,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         if (NULL != params)
         {
             util_status_code__C_to_B((SOPC_StatusCode) auxParam, &sCode);
-            io_dispatch_mgr__snd_msg_failure(id,
-                                             (constants__t_request_context_i) * (uint32_t*) params, sCode);
+            io_dispatch_mgr__snd_msg_failure(id, (constants__t_request_context_i) * (uint32_t*) params, sCode);
             free(params);
         } // else: without request Id, it cannot be treated
         break;
