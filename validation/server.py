@@ -25,6 +25,7 @@ Simple server handling miscellaneous client tests
 import argparse
 import os.path
 import time
+import logging
 
 from opcua import ua, Server
 from common import sUri, variantInfoList
@@ -39,6 +40,7 @@ if __name__=='__main__':
 
     # Open server
     print('Configuring FreeOpcUa test server')
+    #logging.basicConfig(level=logging.DEBUG)
     server = Server()
     server.set_endpoint(sUri)
 
@@ -53,9 +55,13 @@ if __name__=='__main__':
         nid = 1000 + i + 1
         node = objects.add_variable(ua.NodeId(nid, 0), sTypName, ua.Variant(val, typ))
         node.set_writable()
+
     # Add a node which increments, the target of an interesting subscription
     nodeCnt = objects.add_variable(ua.NodeId('Counter', 0), 'Counter', ua.Variant(0, ua.VariantType.UInt64))
     nodeCnt.set_writable()
+    # Add a writable node, so that a client can subscribe to it, while another one can modify it.
+    nodeStr = objects.add_variable(ua.NodeId('StatusString', 0), 'StatusString', ua.Variant('Everything is ok.', ua.VariantType.String))
+    nodeStr.set_writable()
 
     # Starts the server
     server.start()
