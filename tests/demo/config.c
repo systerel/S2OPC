@@ -151,7 +151,7 @@ SOPC_ReturnStatus Config_LoadCertificates(void)
             status = SOPC_KeyManager_Certificate_CreateFromFile(PATH_CACERT_PUBL, &pCrtCAu);
             if (SOPC_STATUS_OK != status)
             {
-                printf(">>Stub_Client: Failed to load CA\n");
+                printf("# Error: Failed to load CA\n");
             }
         }
 

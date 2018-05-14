@@ -107,7 +107,12 @@ SOPC_ReturnStatus StateMachine_StartSession(StateMachine_Machine* pSM)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    if (pSM->state != stConfigured)
+    if (NULL == pSM)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status && pSM->state != stConfigured)
     {
         status = SOPC_STATUS_NOK;
         printf("# Error: The state machine shall be in stConfigured state to start a session.\n");
