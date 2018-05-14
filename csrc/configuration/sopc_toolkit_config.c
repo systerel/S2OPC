@@ -123,12 +123,8 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
                                    SOPC_EncodeableType_GetName(encType), auxParam);
             break;
         case SE_SND_REQUEST_FAILED:
-            if (params != NULL)
-            {
-                encType = *(SOPC_EncodeableType**) params;
-            }
             SOPC_Logger_TraceDebug("App: SE_SND_REQUEST_FAILED retStatus=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
-                                   SOPC_EncodeableType_GetName(encType), auxParam);
+                                   SOPC_EncodeableType_GetName((SOPC_EncodeableType*) params), auxParam);
             break;
         case SE_CLOSED_ENDPOINT:
             SOPC_Logger_TraceDebug("App: SE_CLOSED_ENDPOINT idx=%" PRIu32 " retStatus=%" PRIuPTR, id, auxParam);
