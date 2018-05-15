@@ -1817,18 +1817,21 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
         status = SOPC_Int32_Read(noOfElts, buf);
     }
 
-    if (*noOfElts >= 0 && *noOfElts <= SOPC_MAX_ARRAY_LENGTH && (uint64_t) *noOfElts * sizeOfElt <= SIZE_MAX)
+    if (SOPC_STATUS_OK == status)
     {
-        // OK: number of elements valid
-    }
-    else if (*noOfElts < 0)
-    {
-        // Normalize with 0 length value
-        *noOfElts = 0;
-    }
-    else
-    {
-        status = SOPC_STATUS_OUT_OF_MEMORY;
+        if ((*noOfElts >= 0) && (*noOfElts <= SOPC_MAX_ARRAY_LENGTH) && ((uint64_t) *noOfElts * sizeOfElt <= SIZE_MAX))
+        {
+            // OK: number of elements valid
+        }
+        else if (*noOfElts < 0)
+        {
+            // Normalize with 0 length value
+            *noOfElts = 0;
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
     }
 
     if (SOPC_STATUS_OK == status && *noOfElts > 0)
