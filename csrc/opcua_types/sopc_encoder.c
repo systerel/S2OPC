@@ -1603,7 +1603,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
         else
         {
             nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
-            nodeId.Namespace = OPCUA_NAMESPACE_INDEX; // CME
+            nodeId.Namespace = OPCUA_NAMESPACE_INDEX;
             nodeId.Data.Numeric = extObj->Body.Object.ObjType->BinaryEncodingTypeId;
         }
     }

@@ -93,8 +93,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // auxParam == connection Id
         if (id <= INT32_MAX && auxParam <= INT32_MAX && params != NULL && *(uint32_t*) params <= INT32_MAX)
         {
-            io_dispatch_mgr__server_channel_connected_event(id, *(uint32_t*) params, (uint32_t) auxParam,
-                                                            &bres); // CME check conversion of auxParam
+            io_dispatch_mgr__server_channel_connected_event(id, *(uint32_t*) params, (uint32_t) auxParam, &bres);
             if (bres == false)
             {
                 SOPC_Logger_TraceError("Services: channel state incoherent epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, id,
