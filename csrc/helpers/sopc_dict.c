@@ -224,6 +224,8 @@ void SOPC_Dict_Delete(SOPC_Dict* d)
 
 bool SOPC_Dict_Reserve(SOPC_Dict* d, uint64_t n_items)
 {
+    assert(d != NULL);
+
     uint64_t new_size = d->size;
 
     while (new_size < n_items)
@@ -236,6 +238,7 @@ bool SOPC_Dict_Reserve(SOPC_Dict* d, uint64_t n_items)
 
 bool SOPC_Dict_Insert(SOPC_Dict* d, void* key, void* value)
 {
+    assert(d != NULL);
     assert(key != d->empty_key);
 
     if ((d->n_items >= (d->size / 2)) && !dict_resize(d, 2 * d->size))
@@ -301,11 +304,14 @@ static void* get_internal(const SOPC_Dict* d, const void* key, bool* found, void
 
 void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found)
 {
+    assert(d != NULL);
     return get_internal(d, key, found, NULL);
 }
 
 void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found)
 {
+    assert(d != NULL);
+
     void* dict_key;
     bool _found;
 
@@ -321,20 +327,24 @@ void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found)
 
 SOPC_Dict_Free_Fct SOPC_Dict_GetKeyFreeFunc(const SOPC_Dict* d)
 {
+    assert(d != NULL);
     return d->key_free;
 }
 
 void SOPC_Dict_SetKeyFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func)
 {
+    assert(d != NULL);
     d->key_free = func;
 }
 
 SOPC_Dict_Free_Fct SOPC_Dict_GetValueFreeFunc(const SOPC_Dict* d)
 {
+    assert(d != NULL);
     return d->value_free;
 }
 
 void SOPC_Dict_SetValueFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func)
 {
+    assert(d != NULL);
     d->value_free = func;
 }
