@@ -204,3 +204,18 @@ windows-appveyor:
   only:
     variables:
       - $WINDOWS_TEST
+
+coverity:
+  <<: *docker_job
+  stage: build
+  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:96ff1f104be2fe36c1fe6b9f1154b192fda811db1826d03568a6e31a29ff5fda # 1.0
+  script: |-
+    mkdir build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Debug ..
+    /opt/cov-analysis-linux64-2017.07/bin/cov-build --dir cov-int make
+    tar czf cov-int.tar.gz cov-int
+    curl -k --form token=${COVERITY_TOKEN} --form email=${COVERITY_EMAIL} --form version=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form description=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form file=@cov-int.tar.gz https://scan.coverity.com/builds?project=S2OPC
+  only:
+    variables:
+      - $NO_ASAN
