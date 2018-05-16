@@ -4,33 +4,47 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 project (INGOPCS)
 include(CheckCXXCompilerFlag)
 
-# Define runtime output directory
-if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+# compatibility with CMake 3.1
+if(POLICY CMP0054)
+  # http://www.cmake.org/cmake/help/v3.1/policy/CMP0054.html
+  # See the discussion https://github.com/CGAL/cgal/issues/189
+  cmake_policy(SET CMP0054 NEW)
 endif()
 
-# Compiler options (C99 compliant)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -pedantic")
-
-# Define compiler options for each mode.
-# Default optimization level is -O0 for debug and -O2 for others modes.
-# -f-no-omit-frame-pointer is set to use Perf profiling tool,
-# it is not set in Release mode.
-# -g option is already set in Debug and Debugwithdebinfo modes.
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer")
+# Define runtime output directory
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_SOURCE_DIR}/bin>)
 
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
   # Specific flags for CERT rules
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wimplicit -Wreturn-type -Wsequence-point -Wcast-qual -Wuninitialized -Wcast-align -Wstrict-prototypes -Wchar-subscripts -Wformat-security -Wformat -Wconversion")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
   # Specific flags for CERT rules
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wunicode -Wimplicit-int -Wreserved-id-macro -Wsometimes-uninitialized -Wunsequenced -Wincompatible-pointer-types-discards-qualifiers -Wunevaluated-expression -Wparentheses -Wint-conversion -Wint-to-pointer-cast -Wincompatible-pointer-types -Wvla -Wconversion")
+elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /Zi")
+  # Specific flags for CERT rules
+  # TODO for MSVC
 else()
   message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+	# TODO for MSVC
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ")
+else()
+	# Compiler options (C99 compliant)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -pedantic")
+
+	# Define compiler options for each mode.
+	# Default optimization level is -O0 for debug and -O2 for others modes.
+	# -f-no-omit-frame-pointer is set to use Perf profiling tool,
+	# it is not set in Release mode.
+	# -g option is already set in Debug and Debugwithdebinfo modes.
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer")
+	set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer")
+endif()
 
 # check if compiler support new sanitization options
 CHECK_CXX_COMPILER_FLAG(-fsanitize=pointer-compare COMPILER_SUPPORTS_SAN_PC)
@@ -97,11 +111,6 @@ file(GLOB PLATFORM_SRCS "csrc/helpers_platform_dep/*.c" "csrc/helpers_platform_d
 if(UNIX)
   # add POSIX support
   set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_FLAGS "-D_XOPEN_SOURCE=600")
-elseif(WIN32)
-  # minimum Vista for IPV6 support
-  set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_FLAGS "-D_WIN32_WINNT=0x0600")
-else()
-  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
 if(CMAKE_HOST_UNIX)
@@ -216,13 +225,22 @@ add_dependencies(ingopcs_obj build_info)
 # Needed if we want to use the objects in a shared library
 set_property(TARGET ingopcs_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
+# minimum Vista for IPV6 support
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+  add_definitions(/DWIN32_LEAN_AND_MEAN)
+  add_definitions(/DWIN32_WINNT=0x0600)
+# it shall be MinGw
+elseif(MINGW)
+  add_definitions(-D_WIN32_WINNT=0x0600)
+endif()
+
 add_library(ingopcs $<TARGET_OBJECTS:ingopcs_obj>)
 target_include_directories(ingopcs PUBLIC ${INGOPCS_PUBLIC_INCLUDES})
 target_link_libraries(ingopcs PUBLIC ${INGOPCS_DEP_LIBS})
 
-if(WIN32)
-	# always link libc statically (even in case of shared library)
-	target_link_libraries(ingopcs PRIVATE -static-libgcc)
+if(MINGW)
+    # always link libc statically (even in case of shared library)
+    target_link_libraries(ingopcs PRIVATE -static-libgcc)
 endif()
 
 # Ensure we always build a static version of ingopcs for the tests
@@ -271,7 +289,9 @@ function(s2opc_embed_address_space var_name uanodeset_path)
     )
 
     set_source_files_properties(${c_file_path} PROPERTIES GENERATED TRUE)
-    set_source_files_properties(${c_file_path} PROPERTIES COMPILE_FLAGS -Wno-missing-field-initializers)
+    if(NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+        set_source_files_properties(${c_file_path} PROPERTIES COMPILE_FLAGS -Wno-missing-field-initializers)
+    endif()
 
     set(${var_name} ${c_file_path} PARENT_SCOPE)
 endfunction()
@@ -378,7 +398,7 @@ add_test(NAME "validation::client_server_test"
 	"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap"
 	"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server"
 	"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	"--server-cmd" "./toolkit_test_server${FILE_EXT}"
+	"--server-cmd" "../bin/toolkit_test_server${FILE_EXT}"
 	"./toolkit_test_client${FILE_EXT}")
 set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_server_test.tap")
 
@@ -555,7 +575,7 @@ function(s2opc_server_validation_test name)
 		COMMAND
 		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server"
 		"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-		"--server-cmd" "./toolkit_test_server${FILE_EXT}"
+		"--server-cmd" "../bin/toolkit_test_server${FILE_EXT}"
 		"${PYTHON_BIN}" ${name})
 endfunction()
 
