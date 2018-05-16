@@ -21,11 +21,21 @@
 
 bool SOPC_IEEE_Check()
 {
-    bool bStatus = (FLT_RADIX == 2);
+    bool bFltRadixStatus = (FLT_RADIX == 2);
+    bool bFltRounds = (FLT_ROUNDS == 1);
+    bool bStatus = (bFltRadixStatus && bFltRounds);
 
     if (false == bStatus)
     {
         printf("ERROR: Compiler floating point support is not IEEE-754 compliant\n");
+        if (false == bFltRadixStatus)
+        {
+            printf("Value for FLT_RADIX is : %d instead of 2\n", FLT_RADIX);
+        }
+        if (false == bFltRounds)
+        {
+            printf("Value for FLT_ROUNDS is : %d instead of 1\n", FLT_ROUNDS);
+        }
     }
 
     return bStatus;

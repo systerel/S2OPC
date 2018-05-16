@@ -37,12 +37,6 @@
  */
 bool SOPC_IEEE_Check(void);
 
-#ifndef __clang__ // Clang uses __builtin_flt_rounds() function
-#if FLT_ROUNDS != 1
-#error "Compiler floating point support is not IEEE-754 compliant"
-#endif
-#endif
-
 #if FLT_MAX_EXP != 128
 #error "Compiler float definition differs from IEEE-754 standard"
 #endif
