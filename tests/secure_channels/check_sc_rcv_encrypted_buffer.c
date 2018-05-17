@@ -248,6 +248,10 @@ static SOPC_ReturnStatus Simulate_Received_Message(uint32_t scIdx, char* hexInpu
         {
             SOPC_SecureChannels_EnqueueEvent(SOCKET_RCV_BYTES, scIdx, (void*) buffer, 0);
         }
+        else
+        {
+            SOPC_Buffer_Clear(buffer);
+        }
     }
     else
     {
