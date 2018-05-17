@@ -703,7 +703,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
         {
             if (length > 0)
             {
-                if (length <= SOPC_MAX_STRING_LENGTH && (uint64_t) length * 1 <= SIZE_MAX)
+                if (length <= SOPC_MAX_STRING_LENGTH && (uint64_t) length * sizeof(SOPC_Byte) <= SIZE_MAX)
                 {
                     str->Length = length;
                     str->Data = malloc(sizeof(SOPC_Byte) * (size_t) length);

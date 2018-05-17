@@ -714,7 +714,7 @@ SOPC_ReturnStatus SOPC_ByteString_InitializeFixedSize(SOPC_ByteString* bstring, 
     {
         status = SOPC_STATUS_OK;
         SOPC_ByteString_Initialize(bstring);
-        if ((uint64_t) size * 1 <= SIZE_MAX && size <= INT32_MAX)
+        if ((uint64_t) size * sizeof(SOPC_Byte) <= SIZE_MAX && size <= INT32_MAX)
         {
             bstring->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte) * (size_t) size);
             bstring->Length = (int32_t) size;
@@ -741,7 +741,7 @@ SOPC_ReturnStatus SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, SOPC_Byte
     if (dest != NULL && bytes != NULL && length > 0)
     {
         dest->Length = length;
-        if (length > 0 && (uint64_t) length * 1 <= SIZE_MAX)
+        if (length > 0 && (uint64_t) length * sizeof(SOPC_Byte) <= SIZE_MAX)
         {
             dest->Data = malloc(sizeof(SOPC_Byte) * (size_t) length);
         }
@@ -764,7 +764,7 @@ SOPC_ReturnStatus SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteStr
     if (dest != NULL && NULL == dest->Data && src != NULL)
     {
         dest->Length = src->Length;
-        if ((uint64_t) dest->Length * 1 <= SIZE_MAX)
+        if ((uint64_t) dest->Length * sizeof(SOPC_Byte) <= SIZE_MAX)
         {
             status = SOPC_STATUS_OK;
             if (dest->Length > 0)
@@ -4184,7 +4184,7 @@ SOPC_ReturnStatus SOPC_Op_Array(int32_t noOfElts,
     size_t pos = 0;
     SOPC_Byte* byteArrayLeft = eltsArrayLeft;
     SOPC_Byte* byteArrayRight = eltsArrayRight;
-    if (noOfElts >= 0 && (uint64_t) noOfElts <= SIZE_MAX && byteArrayLeft != NULL && byteArrayRight != NULL)
+    if (noOfElts >= 0 && byteArrayLeft != NULL && byteArrayRight != NULL)
     {
         for (idx = 0; idx < (size_t) noOfElts && SOPC_STATUS_OK == status; idx++)
         {
@@ -4211,7 +4211,7 @@ SOPC_ReturnStatus SOPC_Comp_Array(int32_t noOfElts,
     size_t pos = 0;
     SOPC_Byte* byteArrayLeft = eltsArrayLeft;
     SOPC_Byte* byteArrayRight = eltsArrayRight;
-    if (noOfElts >= 0 && (uint64_t) noOfElts <= SIZE_MAX && byteArrayLeft != NULL && byteArrayRight != NULL)
+    if (noOfElts >= 0 && byteArrayLeft != NULL && byteArrayRight != NULL)
     {
         *comparison = 0;
         for (idx = 0; idx < (size_t) noOfElts && SOPC_STATUS_OK == status && *comparison == 0; idx++)
@@ -4232,7 +4232,7 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
     size_t idx = 0;
     size_t pos = 0;
     SOPC_Byte* byteArray = NULL;
-    if (noOfElts != NULL && *noOfElts >= 0 && (uint64_t) *noOfElts <= SIZE_MAX && eltsArray != NULL)
+    if (noOfElts != NULL && *noOfElts >= 0 && eltsArray != NULL)
     {
         byteArray = *eltsArray;
         if (byteArray != NULL)

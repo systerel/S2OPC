@@ -519,13 +519,13 @@ void msg_browse_response_bs__write_BrowseResponse_msg_out(const constants__t_msg
         }
         if (NULL == lrd)
             return;
-        for (j = 0; j < nRefs && j <= INT32_MAX; ++j)
+        for (j = 0; j < nRefs; ++j)
         {
             OpcUa_ReferenceDescription_Initialize(&lrd[j]);
         }
         lbr[i].References = lrd;
 
-        for (j = 0; j < nRefs && j < INT32_MAX; ++j)
+        for (j = 0; j < nRefs; ++j)
         {
             status = SOPC_NodeId_Copy(&lrd[j].ReferenceTypeId, &ppResRefTypeId[i + 1][j + 1]);
             if (SOPC_STATUS_OK != status)
