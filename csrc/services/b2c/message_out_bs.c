@@ -242,6 +242,11 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
 
         SOPC_Logger_TraceDebug("Services: encoded output message type = '%s'", SOPC_EncodeableType_GetName(encType));
     }
+    else if (NULL != buffer)
+    {
+        // if buffer is not used, it must be freed
+        SOPC_Buffer_Clear(buffer);
+    }
 }
 
 void message_out_bs__forget_resp_msg_out(const constants__t_msg_header_i message_out_bs__msg_header,
