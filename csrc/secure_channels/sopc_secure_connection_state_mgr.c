@@ -2869,10 +2869,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                      OpcUa_BadSecureChannelClosed, "ERR message received");
         }
 
-        if (false == result)
-        {
-            SOPC_Buffer_Delete((SOPC_Buffer*) params);
-        }
+        SOPC_Buffer_Delete((SOPC_Buffer*) params);
         break;
     case INT_EP_SC_CLOSE:
         SOPC_Logger_TraceDebug("ScStateMgr: INT_EP_SC_CLOSE scIdx=%" PRIu32 " epCfgIdx=%" PRIuPTR, eltId, auxParam);
