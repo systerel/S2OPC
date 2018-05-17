@@ -326,8 +326,10 @@ void msg_browse_response_bs__malloc_browse_response(const t_entier4 msg_browse_r
             *msg_browse_response_bs__p_isallocated = false;
 
         /* Clean half-done mallocation */
-        if (msg_browse_response_bs__p_isallocated == false)
+        if (!*msg_browse_response_bs__p_isallocated)
+        {
             msg_browse_response_bs__free_browse_result();
+        }
     }
     else
     {
@@ -410,8 +412,10 @@ void msg_browse_response_bs__malloc_browse_result(const constants__t_BrowseValue
     }
 
     /* Clean half-done mallocation */
-    if (!msg_browse_response_bs__p_isallocated)
+    if (!*msg_browse_response_bs__p_isallocated)
+    {
         msg_browse_response_bs__free_browse_result();
+    }
 }
 
 void msg_browse_response_bs__free_browse_result(void)
