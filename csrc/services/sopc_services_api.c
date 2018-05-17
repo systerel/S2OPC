@@ -371,7 +371,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
 
         // id == endpoint connection config idx
         // params = request
-        if (id <= INT32_MAX)
+        if (id <= constants_bs__t_channel_config_idx_i_max)
         {
             io_dispatch_mgr__client_send_discovery_request(id, params, auxParam, &sCode);
             if (sCode != constants__e_sc_ok)
