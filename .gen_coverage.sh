@@ -19,7 +19,7 @@
 # Calls lcov/genhtml after project has been built with WITH_COVERAGE=1
 set -e
 
-SRC_DIR=build/CMakeFiles/ingopcs.dir/
+SRC_DIR=build/CMakeFiles/ingopcs_obj.dir/
 REPORT_DIR=./report
 REPORT_FILE=$REPORT_DIR/report.info
 
