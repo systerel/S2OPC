@@ -1715,9 +1715,6 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
         case SOPC_ExtObjBodyEncoding_None:
             extObj->Length = -1;
             break;
-        case SOPC_ExtObjBodyEncoding_ByteString:
-            status = SOPC_ByteString_Read(&extObj->Body.Bstring, buf);
-            break;
         case SOPC_ExtObjBodyEncoding_XMLElement:
             status = SOPC_XmlElement_Read(&extObj->Body.Xml, buf);
             break;
