@@ -214,7 +214,8 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket_Lock(const char* uri
 
         if (false == result || // connection already failed => do not keep addresses for next attempts
             (res != NULL &&
-             NULL == freeSocket->connectAddrs)) // async connecting but NO next attempts remaining (if current fails)
+             NULL == freeSocket->connectAddrs) || // async connecting but NO next attempts remaining (if current fails)
+            (NULL == p))                          // result is true but res is no more used
         {
             Socket_AddrInfoDelete(&res);
         }
