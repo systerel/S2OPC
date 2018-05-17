@@ -176,6 +176,7 @@ test-unit:
     variables:
       - $CROSS_COMPILE
       - $WINDOWS_TEST
+      - $WITH_COVERITY
 
 test-uactt:
   <<: *test_linux
