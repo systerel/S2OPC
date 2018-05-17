@@ -477,10 +477,6 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
                 vprintf(format, args_copy);
                 printf("\n");
             }
-            else
-            {
-                va_end(args_copy);
-            }
             if (res > 0 && res2 > 0)
             {
                 if (UINT32_MAX - pLogInst->file->nbBytes > (uint64_t) res + (uint64_t) res2)
@@ -510,6 +506,7 @@ void SOPC_Log_Trace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const cha
     va_list args;
     va_start(args, format);
     SOPC_Log_VTrace(pLogInst, level, format, args);
+    va_end(args);
 }
 
 // Deallocate the Log instance structure

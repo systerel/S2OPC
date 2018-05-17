@@ -96,6 +96,7 @@ void SOPC_Logger_TraceError(const char* format, ...)
     {
         va_start(args, format);
         SOPC_Log_VTrace(toolkitTrace, SOPC_LOG_LEVEL_ERROR, format, args);
+        va_end(args);
     }
 }
 
@@ -106,6 +107,7 @@ void SOPC_Logger_TraceWarning(const char* format, ...)
     {
         va_start(args, format);
         SOPC_Log_VTrace(toolkitTrace, SOPC_LOG_LEVEL_WARNING, format, args);
+        va_end(args);
     }
 }
 
@@ -116,6 +118,7 @@ void SOPC_Logger_TraceInfo(const char* format, ...)
     {
         va_start(args, format);
         SOPC_Log_VTrace(toolkitTrace, SOPC_LOG_LEVEL_INFO, format, args);
+        va_end(args);
     }
 }
 
@@ -126,6 +129,7 @@ void SOPC_Logger_TraceDebug(const char* format, ...)
     {
         va_start(args, format);
         SOPC_Log_VTrace(toolkitTrace, SOPC_LOG_LEVEL_DEBUG, format, args);
+        va_end(args);
     }
 }
 
@@ -136,6 +140,7 @@ void SOPC_Logger_TraceSecurityAudit(const char* format, ...)
     {
         va_start(args, format);
         SOPC_Log_VTrace(toolkitTrace, SOPC_LOG_LEVEL_INFO, format, args);
+        va_end(args);
     }
 }
 
@@ -146,6 +151,7 @@ void SOPC_Logger_TraceSecurityAuditWarning(const char* format, ...)
     {
         va_start(args, format);
         SOPC_Log_VTrace(toolkitTrace, SOPC_LOG_LEVEL_WARNING, format, args);
+        va_end(args);
     }
 }
 
@@ -156,6 +162,7 @@ void SOPC_Logger_TraceOpcUaAudit(const char* format, ...)
     {
         va_start(args, format);
         SOPC_Log_VTrace(toolkitTrace, SOPC_LOG_LEVEL_INFO, format, args);
+        va_end(args);
     }
 }
 
@@ -166,6 +173,7 @@ void SOPC_Logger_TraceOpcUaAuditWarning(const char* format, ...)
     {
         va_start(args, format);
         SOPC_Log_VTrace(toolkitTrace, SOPC_LOG_LEVEL_WARNING, format, args);
+        va_end(args);
     }
 }
 

@@ -45,6 +45,7 @@ void wait_for_machine(int count, ...)
             SOPC_Sleep(SLEEP_LENGTH);
         }
     }
+    va_end(args);
 }
 
 /* Event handlers of the Discovery */
