@@ -410,8 +410,10 @@ START_TEST(test_crypto_generate_nonce_B256S256)
     // It is random, so...
     ck_assert(SOPC_CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce0) == SOPC_STATUS_OK);
     ck_assert(SOPC_CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce1) == SOPC_STATUS_OK);
-    ck_assert(NULL != (pExpKey0 = SOPC_SecretBuffer_Expose(pSecNonce0)));
-    ck_assert(NULL != (pExpKey1 = SOPC_SecretBuffer_Expose(pSecNonce1)));
+    pExpKey0 = SOPC_SecretBuffer_Expose(pSecNonce0);
+    ck_assert_ptr_nonnull(pExpKey0);
+    pExpKey1 = SOPC_SecretBuffer_Expose(pSecNonce1);
+    ck_assert_ptr_nonnull(pExpKey1);
     // You have a slight chance to fail here (1/(2**256))
     ck_assert_msg(
         memcmp(pExpKey0, pExpKey1, 32) != 0,
@@ -578,12 +580,18 @@ START_TEST(test_crypto_derive_keysets_B256S256)
 
     // Prepares security key sets
     memset(zeros, 0, 32);
-    ck_assert(NULL != (cliKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey)));
-    ck_assert(NULL != (cliKS.encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey)));
-    ck_assert(NULL != (cliKS.initVector = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenIV)));
-    ck_assert(NULL != (serKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey)));
-    ck_assert(NULL != (serKS.encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey)));
-    ck_assert(NULL != (serKS.initVector = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenIV)));
+    cliKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey);
+    ck_assert_ptr_nonnull(cliKS.signKey);
+    cliKS.encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey);
+    ck_assert_ptr_nonnull(cliKS.encryptKey);
+    cliKS.initVector = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenIV);
+    ck_assert_ptr_nonnull(cliKS.initVector);
+    serKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey);
+    ck_assert_ptr_nonnull(serKS.signKey);
+    serKS.encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey);
+    ck_assert_ptr_nonnull(serKS.encryptKey);
+    serKS.initVector = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenIV);
+    ck_assert_ptr_nonnull(serKS.initVector);
 
     // These come from a stub_client working with OPC foundation code (e.g. commit
     // 0fbccc98472c781a7f44ac09c1d36d2b4a0c3fb0)
@@ -594,27 +602,33 @@ START_TEST(test_crypto_derive_keysets_B256S256)
     ck_assert(SOPC_CryptoProvider_DeriveKeySets(crypto, clientNonce, lenCliNonce, serverNonce, lenSerNonce, &cliKS,
                                                 &serKS) == SOPC_STATUS_OK);
     // 4 lines for each assert
-    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(cliKS.signKey)));
+    pout = SOPC_SecretBuffer_Expose(cliKS.signKey);
+    ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
     ck_assert(memcmp(hexoutput, "86842427475799fa782efa5c63f5eb6f0b6dbf8a549dd5452247feaa5021714b", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.signKey);
-    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(cliKS.encryptKey)));
+    pout = SOPC_SecretBuffer_Expose(cliKS.encryptKey);
+    ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
     ck_assert(memcmp(hexoutput, "d8de10ac4fb579f2718ddcb50ea68d1851c76644b26454e3f9339958d23429d5", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.encryptKey);
-    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(cliKS.initVector)));
+    pout = SOPC_SecretBuffer_Expose(cliKS.initVector);
+    ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t) lenIV);
     ck_assert(memcmp(hexoutput, "4167de62880e0bdc023aa133965c34ff", 2 * lenIV) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.initVector);
-    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(serKS.signKey)));
+    pout = SOPC_SecretBuffer_Expose(serKS.signKey);
+    ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
     ck_assert(memcmp(hexoutput, "f6db2ad48ad3776f83086b47e9f905ee00193f87e85ccde0c3bf7eb8650e236e", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.signKey);
-    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(serKS.encryptKey)));
+    pout = SOPC_SecretBuffer_Expose(serKS.encryptKey);
+    ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
     ck_assert(memcmp(hexoutput, "2c86aecfd5629ee05c49345bce3b2a7ca959a0bf4c9c281b8516a369650dbc4e", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.encryptKey);
-    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(serKS.initVector)));
+    pout = SOPC_SecretBuffer_Expose(serKS.initVector);
+    ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t) lenIV);
     ck_assert(memcmp(hexoutput, "39a4f596bcbb99e0b48114f60fc6af21", 2 * lenIV) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.initVector);
@@ -627,27 +641,33 @@ START_TEST(test_crypto_derive_keysets_B256S256)
     ck_assert(SOPC_CryptoProvider_DeriveKeySets(crypto, clientNonce, lenCliNonce, serverNonce, lenSerNonce, &cliKS,
                                                 &serKS) == SOPC_STATUS_OK);
     // 4 lines for each assert
-    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(cliKS.signKey)));
+    pout = SOPC_SecretBuffer_Expose(cliKS.signKey);
+    ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
     ck_assert(memcmp(hexoutput, "185e860da28d3a224729926ba5b5b800214b2f74257ed39e694596520e67e574", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.signKey);
-    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(cliKS.encryptKey)));
+    pout = SOPC_SecretBuffer_Expose(cliKS.encryptKey);
+    ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
     ck_assert(memcmp(hexoutput, "7a6c2cdc20a842a0e2039075935b14a07f578c157091328adc9d52bbb8ef727d", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.encryptKey);
-    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(cliKS.initVector)));
+    pout = SOPC_SecretBuffer_Expose(cliKS.initVector);
+    ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t) lenIV);
     ck_assert(memcmp(hexoutput, "dcf97c356f5ef87b7049900f74355c13", 2 * lenIV) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.initVector);
-    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(serKS.signKey)));
+    pout = SOPC_SecretBuffer_Expose(serKS.signKey);
+    ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
     ck_assert(memcmp(hexoutput, "105b1805ecc3a25de8e2eaa5c9e94504b355990243c6163c2c8b95c1f5681694", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.signKey);
-    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(serKS.encryptKey)));
+    pout = SOPC_SecretBuffer_Expose(serKS.encryptKey);
+    ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
     ck_assert(memcmp(hexoutput, "2439bdd8fc365b0fe7b7e2cfcefee67ea7bdea6c157d0b23092f0abc015792d5", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.encryptKey);
-    ck_assert(NULL != (pout = SOPC_SecretBuffer_Expose(serKS.initVector)));
+    pout = SOPC_SecretBuffer_Expose(serKS.initVector);
+    ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t) lenIV);
     ck_assert(memcmp(hexoutput, "005a70781b43979940c77368677718cd", 2 * lenIV) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.initVector);

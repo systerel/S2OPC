@@ -263,12 +263,18 @@ START_TEST(test_crypto_derive_keysets_None)
     lenIV = 32;
     lenCliNonce = 32;
     lenSerNonce = 32;
-    ck_assert(NULL != (cliKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenSignKey)));
-    ck_assert(NULL != (cliKS.encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenCryptoKey)));
-    ck_assert(NULL != (cliKS.initVector = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenIV)));
-    ck_assert(NULL != (serKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenSignKey)));
-    ck_assert(NULL != (serKS.encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenCryptoKey)));
-    ck_assert(NULL != (serKS.initVector = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenIV)));
+    cliKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenSignKey);
+    ck_assert_ptr_nonnull(cliKS.signKey);
+    cliKS.encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenCryptoKey);
+    ck_assert_ptr_nonnull(cliKS.encryptKey);
+    cliKS.initVector = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenIV);
+    ck_assert_ptr_nonnull(cliKS.initVector);
+    serKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenSignKey);
+    ck_assert_ptr_nonnull(serKS.signKey);
+    serKS.encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenCryptoKey);
+    ck_assert_ptr_nonnull(serKS.encryptKey);
+    serKS.initVector = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenIV);
+    ck_assert_ptr_nonnull(serKS.initVector);
 
     // These come from a stub_client working with OPC foundation code (e.g. commit "Bugfix: used CryptoKey instead of
     // SignKey")
