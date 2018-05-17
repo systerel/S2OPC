@@ -39,7 +39,7 @@ generation:
 .build-linux: &build_linux
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:51202084f2105714dd3b1fc54dee8219a8dfc216e4aa6a2b0fcd87e323a2a0e0 # build:1.5
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:9e4a73ce1816e12252d4cc3614d528d135a5b54675e9daefd54cb8dcdc6bf545 # build:1.6
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install && ../tests/scripts/make-ctestfile-relative CTestTestfile.cmake > ../bin/CTestTestfile.cmake'
   variables: &build_linux_variables
