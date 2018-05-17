@@ -202,17 +202,14 @@ SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM)
 
     if (NULL == pSM)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (SOPC_STATUS_OK == status)
+    pReq = malloc(sizeof(OpcUa_ReadRequest));
+    lrv = malloc(1 * sizeof(OpcUa_ReadValueId));
+    if (NULL == pReq || NULL == lrv)
     {
-        pReq = malloc(sizeof(OpcUa_ReadRequest));
-        lrv = malloc(1 * sizeof(OpcUa_ReadValueId));
-        if (NULL == pReq || NULL == lrv)
-        {
-            status = SOPC_STATUS_NOK;
-        }
+        status = SOPC_STATUS_NOK;
     }
 
     if (SOPC_STATUS_OK == status)
@@ -241,10 +238,20 @@ SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM)
     {
         printf("# Error: Send request creation failed. Abort.\n");
         g_pSM->state = stError;
+    }
 
-        OpcUa_ReadRequest_Clear(pReq);
-        free(lrv);
-        free(pReq);
+    /* Free resources when message was not sent to the Toolkit */
+    if (SOPC_STATUS_OK != status)
+    {
+        if (NULL != pReq)
+        {
+            OpcUa_BrowseRequest_Clear(pReq);
+            free(pReq);
+        }
+        if (NULL != lrv)
+        {
+            free(lrv);
+        }
     }
 
     return status;
