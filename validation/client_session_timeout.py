@@ -34,6 +34,7 @@ from tap_logger import TapLogger
 from opcua.crypto import security_policies
 from time import sleep
 import re
+import sys
 
 session_timeout = 10000
 
@@ -171,3 +172,5 @@ if __name__=='__main__':
             print('Disconnected')
 
     logger.finalize_report()
+
+    sys.exit(1 if logger.has_failed_tests else 0)

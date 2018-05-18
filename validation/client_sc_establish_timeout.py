@@ -33,6 +33,7 @@ from tap_logger import TapLogger
 from opcua.crypto import security_policies
 from time import sleep
 import re
+import sys
 
 if __name__=='__main__':
 
@@ -79,3 +80,5 @@ if __name__=='__main__':
 
 
     logger.finalize_report()
+
+    sys.exit(1 if logger.has_failed_tests else 0)

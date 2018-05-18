@@ -28,6 +28,7 @@ from common import sUri
 from tap_logger import TapLogger
 from opcua.crypto import security_policies
 import re
+import sys
 
 if __name__=='__main__':
 
@@ -47,3 +48,5 @@ if __name__=='__main__':
         secure_channel_renew(client, logger)
 
     logger.finalize_report()
+
+    sys.exit(1 if logger.has_failed_tests else 0)

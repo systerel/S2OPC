@@ -26,6 +26,7 @@ class TapLogger(object):
         self.fd = open(file=report_name, mode='w', encoding='utf-8')
         self.tests_results = list()
         self.section = ""
+        self.has_failed_tests = False
 
     def begin_section(self, section_name):
         self.section = section_name
@@ -36,6 +37,7 @@ class TapLogger(object):
             self.tests_results.append("ok {0} {1} {2}\n".format(self.nb_tests, self.section, test_description))
         else:
             self.tests_results.append("not ok {0} {1} {2}\n".format(self.nb_tests, self.section, test_description))
+            self.has_failed_tests = True
 
     def finalize_report(self):
         self.fd.write("1..{0}\n".format(self.nb_tests))
