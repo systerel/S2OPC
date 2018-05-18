@@ -39,7 +39,7 @@ generation:
 .build-linux: &build_linux
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:9e4a73ce1816e12252d4cc3614d528d135a5b54675e9daefd54cb8dcdc6bf545 # build:1.6
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:043994ffeee40e86c17f30a1bd9adb00817fed52a84494112e939bf43c55d116 # build:1.7
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install && ../tests/scripts/make-ctestfile-relative CTestTestfile.cmake > ../bin/CTestTestfile.cmake'
   variables: &build_linux_variables
@@ -145,7 +145,7 @@ build-linux64-coverity:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/check@sha256:76e11aaf485bdbbb8f48bc75d5e423370b9c71b0842f3b35de41f85c8aa21530  # check:1.0
+  image: registry.gitlab.com/systerel/s2opc/check@sha256:71b37ed9ed70d3ac67ceb1b92c691ad9c7cb943112dd5edc328d7cbde8fa5ed6  # check:1.1
   script:
     - ./.check-code.sh
   dependencies:
