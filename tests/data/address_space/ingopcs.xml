@@ -547,7 +547,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:String>"String:INGOPCS"</uax:String>
+      <uax:String>String:INGOPCS</uax:String>
     </Value>
   </UAVariable>
   <UAVariable BrowseName="0:ByteString" DataType="ByteString" NodeId="i=1005" ParentNodeId="i=1000">
@@ -558,7 +558,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:ByteString>"ByteString:INGOPCS"</uax:ByteString>
+      <uax:ByteString>ByteString:INGOPCS</uax:ByteString>
     </Value>
   </UAVariable>
   <UAVariable BrowseName="0:XmlElement" DataType="XmlElement" NodeId="i=1006" ParentNodeId="i=1000">
@@ -569,7 +569,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:XmlElement>"XmlElement:INGOPCS"</uax:XmlElement>
+      <uax:XmlElement>XmlElement:INGOPCS</uax:XmlElement>
     </Value>
   </UAVariable>
   <!-- END OF COMMON PART WITH READ/WRITE TEST -->
