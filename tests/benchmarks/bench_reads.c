@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <sopc_crypto_profiles.h>
 #include <sopc_mutexes.h>
