@@ -1,31 +1,66 @@
 environment:
-  matrix:
-    - PYTHON: "C:\\Python36-x64"
 
-# to display VM information for debug purpose
-#init:
-#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
-#on_finish:
-#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+    matrix:
+        - CC_NAME: Visual Studio 15 2017
+          CC_SHORTNAME: vs2017
+          PYTHON: "C:\\Python36-x64"
+image:
+    - Visual Studio 2017
 
 install:
-  # Prepend chosen Python to the PATH of this build
-  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-  # Check that we have the expected version and architecture for Python
-  - "python --version"
-  - "pip install cryptography==2.0.3 pycparser==2.18 six==1.11.0 asn1crypto==0.23.0 cffi==1.11.2 python_dateutil==2.6.1 argparse==1.4.0 pytz==2017.2 idna==2.6 lxml==4.0.0"
-  - "pip install freeopcua==0.90.6"
+    # Prepend chosen Python to the PATH of this build
+    - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+    # Check that we have the expected version and architecture for Python
+    - "python --version"
+    - "pip install cryptography==2.0.3 pycparser==2.18 six==1.11.0 asn1crypto==0.23.0 cffi==1.11.2 python_dateutil==2.6.1 argparse==1.4.0 pytz==2017.2 idna==2.6 lxml==4.0.0"
+    - "pip install freeopcua==0.90.6"
+
+test_script:
+    - echo %APPVEYOR_BUILD_FOLDER%
+    - cd %APPVEYOR_BUILD_FOLDER%
+    - set ROOT_DIR=%APPVEYOR_BUILD_FOLDER%
+    - set CHECK_DIR_NAME=check-0.12.0
+    - set CHECK_DIR="%ROOT_DIR%\%CHECK_DIR_NAME%"
+    - set CHECK_BUILD_DIR="%CHECK_DIR%\build"
+    - set MBEDTLS_DIR_NAME=mbedtls-2.7.0
+    - set MBEDTLS_DIR="%ROOT_DIR%\%MBEDTLS_DIR_NAME%"
+    - set MBEDTLS_BUILD_DIR="%MBEDTLS_DIR%\build"
+
+    # download and build libcheck
+    - cd %ROOT_DIR%
+    - "appveyor.exe DownloadFile https://github.com/libcheck/check/archive/0.12.0.zip -FileName %CHECK_DIR_NAME%.zip"
+    - "unzip %CHECK_DIR_NAME%.zip"
+    - cmd: |-
+        cd %CHECK_DIR%
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build . --target ALL_BUILD
+    # download and build mbedtls
+    - cd %ROOT_DIR%
+    - "appveyor.exe DownloadFile https://tls.mbed.org/download/mbedtls-2.7.0-apache.tgz -FileName %MBEDTLS_DIR_NAME%-apache.tgz"
+    - tar xvf "%MBEDTLS_DIR_NAME%-apache.tgz"
+    - |-
+        cd mbedtls-2.7.0
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build . --target ALL_BUILD
+    # configure, build and test S2OPC project
+    - |-
+        cd %ROOT_DIR%
+        appveyor.exe DownloadFile https://gitlab.com/systerel/S2OPC/-/jobs/artifacts/master/download?job=generation -FileName bgenc-master.zip
+        unzip bgenc-master.zip
+        rm bgenc-master.zip
+        mkdir build
+        cd build
+        cmake -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/Debug/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/Debug/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/Debug/mbedcrypto.lib -DCHECK_INCLUDE_DIR=%CHECK_BUILD_DIR%\;%CHECK_BUILD_DIR%/src -DCHECK_LIBRARY=%CHECK_BUILD_DIR%/src/debug/check.lib\;%CHECK_BUILD_DIR%/lib/Debug/compat.lib ..
+        cmake --build .
+    - "ctest -T test -C Debug --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536"
 
 build: off
 
-test_script:
- - "echo %JOB_ID%"
- - "appveyor.exe DownloadFile  https://gitlab.com/systerel/S2OPC/-/jobs/%JOB_ID%/artifacts/download?job=build-win64 -FileName artifacts.zip"
- - "unzip artifacts.zip"
- - "cd bin"
- - "ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536"
-
 on_failure:
  - ps: $root = Resolve-Path .\Testing\; [IO.Directory]::GetFiles($root.Path, '*.*', 'AllDirectories') | % { Push-AppveyorArtifact $_ -FileName $_.Substring($root.Path.Length + 1) -DeploymentName to-publish }
-
+#on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
