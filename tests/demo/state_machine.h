@@ -70,9 +70,14 @@ SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM);
 SOPC_ReturnStatus StateMachine_StartSession(StateMachine_Machine* pSM);
 
 /**
- * \brief Send a GetEndpointRequest.
+ * \brief Send a GetEndpointsRequest.
  */
 SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM);
+
+/**
+ * \brief Send a FindServersRequest.
+ */
+SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM);
 
 /**
  * \brief Close the session. If not StateMachine_IsConnected(), the machine is put in state stError.
@@ -107,7 +112,7 @@ bool StateMachine_IsConnectable(StateMachine_Machine* pSM);
 bool StateMachine_IsConnected(StateMachine_Machine* pSM);
 
 /**
- * \brief Returns a bool whether the machine is discovering or not.
+ * \brief Returns a bool whether the machine is discovering (GetEndpoints or FindServers) or not.
  *  For now, it is the stDiscovering states.
  */
 bool StateMachine_IsDiscovering(StateMachine_Machine* pSM);

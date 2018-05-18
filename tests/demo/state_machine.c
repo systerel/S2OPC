@@ -213,6 +213,67 @@ SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM)
     return status;
 }
 
+SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_FindServersRequest* pReq = NULL;
+
+    if (pSM->state != stConfigured)
+    {
+        status = SOPC_STATUS_NOK;
+        printf("# Error: The state machine shall be in stConfigured state to send a find servers request.\n");
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Encodeable_Create(&OpcUa_FindServersRequest_EncodeableType, (void**) &pReq);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_String_AttachFromCstring(&pReq->EndpointUrl, ENDPOINT_URL);
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("# Error: Could not create the FindServersRequest.\n");
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Leave the FindServersRequest's LocaleIds ans ServerUris empty */
+
+        /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX pending discoveries */
+        ++nDiscovery;
+        pSM->pCtxRequest = malloc(sizeof(StateMachine_RequestContext));
+        if (NULL == pSM->pCtxRequest)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            pSM->pCtxRequest->uid = nDiscovery;
+            pSM->pCtxRequest->appCtx = 0;
+            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(pSM->iscConfig, pReq, (uintptr_t) pSM->pCtxRequest);
+            pSM->state = stDiscovering;
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        pSM->state = stError;
+        if (NULL != pReq)
+        {
+            free(pReq);
+        }
+        if (NULL != pSM->pCtxRequest)
+        {
+            free(pSM->pCtxRequest);
+            pSM->pCtxRequest = NULL;
+        }
+    }
+
+    return status;
+}
+
 SOPC_ReturnStatus StateMachine_SendRequest(StateMachine_Machine* pSM, void* requestStruct, uintptr_t appCtx)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
