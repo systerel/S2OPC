@@ -44,10 +44,10 @@ static uint32_t g_iAttr = 13;
 static SOPC_DataValue g_dv;
 
 /* Event handler of the Write */
-void EventDispatcher_Write(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
+static void EventDispatcher_Write(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
 
-SOPC_ReturnStatus SendWriteRequest(StateMachine_Machine* pSM);
-void PrintWriteResponse(OpcUa_WriteResponse* pReadResp);
+static SOPC_ReturnStatus SendWriteRequest(StateMachine_Machine* pSM);
+static void PrintWriteResponse(OpcUa_WriteResponse* pReadResp);
 
 int main(int argc, char* argv[])
 {
@@ -178,7 +178,7 @@ int main(int argc, char* argv[])
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }
 
-void EventDispatcher_Write(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
+static void EventDispatcher_Write(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
 {
     uintptr_t appCtx = 0;
 
@@ -207,7 +207,7 @@ void EventDispatcher_Write(SOPC_App_Com_Event event, uint32_t arg, void* pParam,
     }
 }
 
-SOPC_ReturnStatus SendWriteRequest(StateMachine_Machine* pSM)
+static SOPC_ReturnStatus SendWriteRequest(StateMachine_Machine* pSM)
 {
     OpcUa_WriteRequest* pReq = NULL;
     OpcUa_WriteValue* lwv = NULL;
@@ -272,7 +272,7 @@ SOPC_ReturnStatus SendWriteRequest(StateMachine_Machine* pSM)
     return status;
 }
 
-void PrintWriteResponse(OpcUa_WriteResponse* pResp)
+static void PrintWriteResponse(OpcUa_WriteResponse* pResp)
 {
     int32_t i = 0;
     char* sNid = NULL;

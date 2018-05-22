@@ -38,9 +38,9 @@
 static StateMachine_Machine* g_pSM = NULL;
 
 /* Event handler of the Discovery */
-void EventDispatcher_Discovery(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
+static void EventDispatcher_Discovery(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
 
-void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp);
+static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp);
 
 int main(int argc, char* argv[])
 {
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }
 
-void EventDispatcher_Discovery(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
+static void EventDispatcher_Discovery(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
 {
     uintptr_t appCtx = 0;
 
@@ -123,7 +123,7 @@ void EventDispatcher_Discovery(SOPC_App_Com_Event event, uint32_t arg, void* pPa
     }
 }
 
-void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
+static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
 {
     int32_t i = 0;
     int32_t j = 0;

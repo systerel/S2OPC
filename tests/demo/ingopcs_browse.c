@@ -39,10 +39,10 @@ static StateMachine_Machine* g_pSM = NULL;
 static SOPC_NodeId* g_pNid = NULL;
 
 /* Event handler of the Browse */
-void EventDispatcher_Browse(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
+static void EventDispatcher_Browse(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
 
-SOPC_ReturnStatus SendBrowseRequest(StateMachine_Machine* pSM);
-void PrintBrowseResponse(OpcUa_BrowseResponse* pBwseResp);
+static SOPC_ReturnStatus SendBrowseRequest(StateMachine_Machine* pSM);
+static void PrintBrowseResponse(OpcUa_BrowseResponse* pBwseResp);
 
 int main(int argc, char* argv[])
 {
@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }
 
-void EventDispatcher_Browse(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
+static void EventDispatcher_Browse(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
 {
     uintptr_t appCtx = 0;
 
@@ -156,7 +156,7 @@ void EventDispatcher_Browse(SOPC_App_Com_Event event, uint32_t arg, void* pParam
     }
 }
 
-SOPC_ReturnStatus SendBrowseRequest(StateMachine_Machine* pSM)
+static SOPC_ReturnStatus SendBrowseRequest(StateMachine_Machine* pSM)
 {
     OpcUa_BrowseRequest* pReq = NULL;
     OpcUa_BrowseDescription* pDesc = NULL;
@@ -221,7 +221,7 @@ SOPC_ReturnStatus SendBrowseRequest(StateMachine_Machine* pSM)
     return status;
 }
 
-void PrintBrowseResponse(OpcUa_BrowseResponse* pResp)
+static void PrintBrowseResponse(OpcUa_BrowseResponse* pResp)
 {
     int32_t i = 0;
     int32_t j = 0;

@@ -43,10 +43,10 @@ static SOPC_NodeId* g_pNid = NULL;
 static uint32_t g_iAttr = 0;
 
 /* Event handler of the Read */
-void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
+static void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
 
-SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM);
-void PrintReadResponse(OpcUa_ReadResponse* pReadResp);
+static SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM);
+static void PrintReadResponse(OpcUa_ReadResponse* pReadResp);
 
 int main(int argc, char* argv[])
 {
@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }
 
-void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
+static void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
 {
     uintptr_t appCtx = 0;
 
@@ -194,7 +194,7 @@ void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
     }
 }
 
-SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM)
+static SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM)
 {
     OpcUa_ReadRequest* pReq = NULL;
     OpcUa_ReadValueId* lrv = NULL;
@@ -257,7 +257,7 @@ SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM)
     return status;
 }
 
-void PrintReadResponse(OpcUa_ReadResponse* pResp)
+static void PrintReadResponse(OpcUa_ReadResponse* pResp)
 {
     int32_t i = 0;
     SOPC_DataValue* pVal = NULL;
