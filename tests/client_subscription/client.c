@@ -21,6 +21,7 @@
  *
  */
 
+#include <getopt.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -36,8 +37,6 @@
 #define SECURITY_POLICY SOPC_SecurityPolicy_None_URI
 /* Security Mode is None or Sign or SignAndEncrypt */
 #define SECURITY_MODE OpcUa_MessageSecurityMode_None
-/* Node to subscribe to */
-#define NODE_ID "s=Counter"
 
 /* Connection global timeout */
 #define TIMEOUT_MS 10000
@@ -57,6 +56,31 @@
 /* Path to the client private key */
 #define PATH_CLIENT_PRIV "./client_private/client_4k.key"
 
+/* Command line helpers and arguments */
+enum
+{
+    OPT_HELP,
+    OPT_ENDPOINT,
+    OPT_USERNAME,
+    OPT_PASSWORD,
+    OPT_PUBLISH_PERIOD,
+    OPT_TOKEN_TARGET,
+} cmd_line_option_values_t;
+typedef struct
+{
+    char* endpoint_url;
+    char* username;
+    char* password;
+    char* publish_period_str;
+    int64_t publish_period;
+    char* token_target_str;
+    uint16_t token_target;
+    int node_ids_sz;
+    char** node_ids;
+} cmd_line_options_t;
+static bool parse_options(cmd_line_options_t* o, int argc, char** argv);
+static void print_usage(const char* exe);
+
 /* usleep declaration. The unistd.h declaration is conditioned by unwanted defines. Consequently, this may fail. */
 #include <unistd.h>
 extern int usleep(__useconds_t __useconds);
@@ -69,10 +93,16 @@ void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
                          const SOPC_LibSub_Value* value);
 
 /* Main subscribing client */
-int main(void)
+int main(int argc, char* argv[])
 {
+    cmd_line_options_t options;
+    if (!parse_options(&options, argc, argv))
+    {
+        return 1;
+    }
+
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = log_callback, .disconnect_callback = disconnect_callback};
-    SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = ENDPOINT_URL,
+    SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = options.endpoint_url,
                                          .security_policy = SECURITY_POLICY,
                                          .security_mode = SECURITY_MODE,
                                          .path_cert_auth = PATH_CACERT_PUBL,
@@ -80,13 +110,13 @@ int main(void)
                                          .path_cert_cli = NULL,
                                          .path_key_cli = NULL,
                                          .path_crl = NULL,
-                                         .username = NULL,
-                                         .password = NULL,
-                                         .publish_period_ms = PUBLISH_PERIOD_MS,
+                                         .username = options.username,
+                                         .password = options.password,
+                                         .publish_period_ms = options.publish_period,
                                          .data_change_callback = datachange_callback,
                                          .timeout_ms = TIMEOUT_MS,
                                          .sc_lifetime = SC_LIFETIME_MS,
-                                         .token_target = PUBLISH_N_TOKEN};
+                                         .token_target = options.token_target};
     SOPC_LibSub_ConfigurationId cfg_id = 0;
     SOPC_LibSub_ConnectionId con_id = 0;
     SOPC_LibSub_DataId d_id = 0;
@@ -119,15 +149,19 @@ int main(void)
 
     printf("# Info: Connected.\n");
 
-    if (SOPC_STATUS_OK != SOPC_LibSub_AddToSubscription(con_id, NODE_ID, SOPC_LibSub_AttributeId_Value, &d_id))
+    for (int i = 0; i < options.node_ids_sz; ++i)
     {
-        log_callback(SOPC_LOG_LEVEL_ERROR, "Could not create monitored item");
-        return 5;
-    }
-    else
-    {
-        /* TODO: log */
-        printf("# Info: created MonIt for \"%s\" with data_id %" PRIu32 ".\n", NODE_ID, d_id);
+        if (SOPC_STATUS_OK !=
+            SOPC_LibSub_AddToSubscription(con_id, options.node_ids[i], SOPC_LibSub_AttributeId_Value, &d_id))
+        {
+            log_callback(SOPC_LOG_LEVEL_ERROR, "Could not create monitored item");
+            return 5;
+        }
+        else
+        {
+            /* TODO: log */
+            printf("# Info: created MonIt for \"%s\" with data_id %" PRIu32 ".\n", options.node_ids[i], d_id);
+        }
     }
 
     usleep(10 * 1000000);
@@ -176,4 +210,121 @@ void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
     }
 
     log_callback(SOPC_LOG_LEVEL_INFO, sz);
+}
+
+static bool parse_options(cmd_line_options_t* o, int argc, char** argv)
+{
+    memset(o, 0, sizeof(cmd_line_options_t));
+
+#define FOREACH_OPT(x)                                                                                            \
+    /* name of flag, is flag required, does flag requires argument, internal flag value, field of the C struct */ \
+    x("endpoint", false, required_argument, OPT_ENDPOINT, endpoint_url)                                           \
+        x("username", false, required_argument, OPT_USERNAME, username)                                           \
+            x("password", false, required_argument, OPT_PASSWORD, password)                                       \
+                x("publish-period", false, required_argument, OPT_PUBLISH_PERIOD, publish_period_str)             \
+                    x("token-target", false, required_argument, OPT_TOKEN_TARGET, token_target_str)
+
+#define OPT_DEFINITION(name, req, arg_req, val, field) {name, arg_req, NULL, val},
+
+    static struct option long_options[] = {{"help", no_argument, NULL, OPT_HELP}, FOREACH_OPT(OPT_DEFINITION)};
+
+#undef OPT_DEFINITION
+
+#define STR_OPT_CASE(name, req, arg_req, val, field) \
+    case val:                                        \
+        o->field = malloc(strlen(optarg));           \
+        strcpy(o->field, optarg);                    \
+        break;
+
+    bool parsed = false;
+    while (!parsed)
+    {
+        switch (getopt_long(argc, argv, "", long_options, NULL))
+        {
+            FOREACH_OPT(STR_OPT_CASE)
+
+        case -1:
+            parsed = true;
+            break;
+
+        case OPT_HELP:
+            // fallthrough
+        default:
+            print_usage(argv[0]);
+            return false;
+        }
+    }
+#undef STR_OPT_CASE
+
+#define CHECK_REQUIRED_STR_OPT(name, req, arg_req, val, field) \
+    if (req && o->field == NULL)                               \
+    {                                                          \
+        printf("# Error: Missing option: --" name ".\n\n");    \
+        print_usage(argv[0]);                                  \
+        return false;                                          \
+    }
+
+    FOREACH_OPT(CHECK_REQUIRED_STR_OPT)
+
+#undef CHECK_REQUIRED_STR_OPT
+
+#define CONVERT_STR_OPT(name, type, default_val)                   \
+    if (o->name##_str != NULL)                                     \
+    {                                                              \
+        char* endptr;                                              \
+        o->name = (type) strtoul(o->name##_str, &endptr, 10);      \
+                                                                   \
+        if (*endptr != '\0')                                       \
+        {                                                          \
+            printf("# Error: Invalid name: %s.\n", o->name##_str); \
+            return false;                                          \
+        }                                                          \
+    }                                                              \
+    else                                                           \
+    {                                                              \
+        o->name = default_val;                                     \
+    }
+
+    if (NULL == o->endpoint_url)
+    {
+        o->endpoint_url = ENDPOINT_URL;
+    }
+    CONVERT_STR_OPT(publish_period, int64_t, PUBLISH_PERIOD_MS)
+    CONVERT_STR_OPT(token_target, uint16_t, PUBLISH_N_TOKEN)
+
+#undef CONVERT_STR_OPT
+#undef FOREACH_OPT
+
+    o->node_ids_sz = argc - optind;
+    if (o->node_ids_sz < 1)
+    {
+        printf("# Error: No node to subscribe to were specified.\n");
+        print_usage(argv[0]);
+        return false;
+    }
+    o->node_ids = malloc(sizeof(char*) * (size_t) o->node_ids_sz);
+    if (NULL == o->node_ids)
+    {
+        printf("# Error: out of memory.\n");
+        return false;
+    }
+    for (int i = 0; i < o->node_ids_sz; ++i)
+    {
+        o->node_ids[i] = malloc(strlen(argv[optind + i]));
+        strcpy(o->node_ids[i], argv[optind + i]);
+    }
+
+    return true;
+}
+
+static void print_usage(const char* exe)
+{
+    printf("Usage: %s [options] NODE_ID [NODE_ID...]\n", exe);
+    printf("Options:\n");
+    printf("  --endpoint URL      URL of the endpoint to connect to\n");
+    printf("  --username UNAME    Username of the session user\n");
+    printf("  --password PWD      Password of the session user\n");
+    printf("  --publish-period MILLISEC  Subscription publish cycle, in ms\n");
+    printf("  --token-target N    Number of PublishRequests available to the server\n");
+    printf("\nNODE_ID are the nodes to subscribe to.\n");
 }

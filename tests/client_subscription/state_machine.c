@@ -314,7 +314,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         if (NULL == pNid)
         {
             status = SOPC_STATUS_NOK;
-            printf("# Error: creating monitored item, could not convert szNodeId to NodeId.\n");
+            printf("# Error: creating monitored item, could not convert \"%s\" to NodeId.\n", szNodeId);
         }
     }
 
