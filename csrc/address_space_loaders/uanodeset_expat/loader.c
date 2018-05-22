@@ -379,9 +379,16 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
             }
 
             SOPC_NodeId* element_id = SOPC_AddressSpace_Description_Item_Get_NodeId(&ctx->item);
-            SOPC_NodeId_Copy(element_id, id);
+
+            SOPC_ReturnStatus status = SOPC_NodeId_Copy(element_id, id);
             SOPC_NodeId_Clear(id);
             free(id);
+
+            if (status != SOPC_STATUS_OK)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
         }
         else if (strcmp("BrowseName", attr) == 0)
         {
@@ -447,9 +454,15 @@ static bool start_node_references(struct parse_context_t* ctx, const XML_Char** 
                 return false;
             }
 
-            SOPC_NodeId_Copy(&ref->ReferenceTypeId, nodeid);
+            SOPC_StatusCode status = SOPC_NodeId_Copy(&ref->ReferenceTypeId, nodeid);
             SOPC_NodeId_Clear(nodeid);
             free(nodeid);
+
+            if (status != SOPC_STATUS_OK)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
         }
         else if (strcmp("IsForward", attr) == 0)
         {
