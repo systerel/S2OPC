@@ -233,7 +233,7 @@ static bool parse_signed_value(const char* data, size_t len, uint8_t width, void
         *((int32_t*) dest) = (int32_t) val;
         return true;
     }
-    else if (width == 64 && val >= INT64_MIN && val <= INT64_MAX)
+    else if (width == 64)
     {
         *((int64_t*) dest) = (int64_t) val;
         return true;
@@ -280,7 +280,7 @@ static bool parse_unsigned_value(const char* data, size_t len, uint8_t width, vo
         *((uint32_t*) dest) = (uint32_t) val;
         return true;
     }
-    else if (width == 64 && val <= UINT64_MAX)
+    else if (width == 64)
     {
         *((uint64_t*) dest) = (uint64_t) val;
         return true;
