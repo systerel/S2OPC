@@ -538,7 +538,8 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
             status = SOPC_Buffer_SetPosition(buffer, 0);
             assert(SOPC_STATUS_OK == status);
             // Enqueue message buffer to send
-            SOPC_AsyncQueue_BlockingEnqueue(socketElt->writeQueue, params);
+            status = SOPC_AsyncQueue_BlockingEnqueue(socketElt->writeQueue, params);
+            assert(SOPC_STATUS_OK == status);
             result = true;
             if (socketElt->isNotWritable == false)
             {
