@@ -182,12 +182,35 @@ void address_space_bs__get_NodeClass(const constants__t_Node_i address_space_bs_
     }
 }
 
+static bool is_type_definition(const OpcUa_ReferenceNode* ref)
+{
+    if (ref->IsInverse)
+    {
+        return false;
+    }
+
+    return ref->ReferenceTypeId.IdentifierType == SOPC_IdentifierType_Numeric &&
+           ref->ReferenceTypeId.Data.Numeric == 61;
+}
+
 void address_space_bs__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
                                           constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def)
 {
-    // TODO: Not implemented yet
-    (void) address_space_bs__p_node;
+    SOPC_AddressSpace_Item* item = address_space_bs__p_node;
+    int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(item);
+    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Item_Get_References(item);
     *address_space_bs__p_type_def = constants__c_ExpandedNodeId_indet;
+
+    for (int32_t i = 0; i < *n_refs; ++i)
+    {
+        OpcUa_ReferenceNode* ref = &(*refs)[i];
+
+        if (is_type_definition(ref))
+        {
+            *address_space_bs__p_type_def = &ref->TargetId;
+            break;
+        }
+    }
 }
 
 void address_space_bs__get_Reference_ReferenceType(const constants__t_Reference_i address_space_bs__p_ref,
