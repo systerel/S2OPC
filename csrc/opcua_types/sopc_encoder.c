@@ -2909,50 +2909,43 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Byte* byteArray = NULL;
 
-    if (buf != NULL && noOfElts != NULL && eltsArray != NULL && NULL == *eltsArray && decodeFct != NULL)
+    if (buf == NULL || noOfElts == NULL || eltsArray == NULL || NULL != *eltsArray || decodeFct == NULL)
     {
-        status = SOPC_STATUS_OK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (SOPC_STATUS_OK == status)
+    status = SOPC_Int32_Read(noOfElts, buf);
+
+    if (status != SOPC_STATUS_OK)
     {
-        status = SOPC_Int32_Read(noOfElts, buf);
+        return status;
     }
 
-    if (*noOfElts >= 0 && *noOfElts <= SOPC_MAX_ARRAY_LENGTH && (uint64_t) *noOfElts * sizeOfElt <= SIZE_MAX)
+    if (*noOfElts < 0)
     {
-        // OK: number of elements valid
-    }
-    else if (*noOfElts < 0)
-    {
-        // Normalize with 0 length value
         *noOfElts = 0;
     }
-    else
+
+    if (*noOfElts > SOPC_MAX_ARRAY_LENGTH)
     {
-        status = SOPC_STATUS_OUT_OF_MEMORY;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    if (SOPC_STATUS_OK == status && *noOfElts > 0)
+    if (*noOfElts > 0)
     {
-        *eltsArray = malloc(sizeOfElt * (size_t) *noOfElts);
+        *eltsArray = calloc((size_t) *noOfElts, sizeOfElt);
+
         if (NULL == *eltsArray)
         {
-            status = SOPC_STATUS_NOK;
+            return SOPC_STATUS_NOK;
         }
-        else
-        {
-            byteArray = (SOPC_Byte*) *eltsArray;
-        }
-    }
 
-    if (SOPC_STATUS_OK == status && *noOfElts > 0)
-    {
-        size_t idx = 0;
-        size_t pos = 0;
+        size_t idx;
+        byteArray = (SOPC_Byte*) *eltsArray;
+
         for (idx = 0; SOPC_STATUS_OK == status && idx < (size_t) *noOfElts; idx++)
         {
-            pos = idx * sizeOfElt;
+            size_t pos = idx * sizeOfElt;
             initializeFct(&(byteArray[pos]));
             status = decodeFct(&(byteArray[pos]), buf);
         }
@@ -2964,7 +2957,7 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
             //            the state in which byte array is in the last idx used (decode failed)
             for (clearIdx = 0; clearIdx < (idx - 1); clearIdx++)
             {
-                pos = clearIdx * sizeOfElt;
+                size_t pos = clearIdx * sizeOfElt;
                 clearFct(&(byteArray[pos]));
             }
             free(*eltsArray);
