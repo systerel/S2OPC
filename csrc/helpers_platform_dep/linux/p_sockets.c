@@ -318,8 +318,6 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketS
         val = &timeout;
     }
     nbReady = select(fdmax + 1, &readSet->set, &writeSet->set, &exceptSet->set, val);
-    if (nbReady > INT32_MAX || nbReady < INT32_MIN)
-        return -1;
     return (int32_t) nbReady;
 }
 

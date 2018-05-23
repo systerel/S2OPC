@@ -1023,32 +1023,30 @@ bool util_NodeClass__C_to_B(OpcUa_NodeClass cncl, constants__t_NodeClass_i* bncl
 
 bool util_TimestampsToReturn__B_to_C(constants__t_TimestampsToReturn_i bttr, OpcUa_TimestampsToReturn* pcttr)
 {
-    bool status = NULL != pcttr && constants__c_TimestampsToReturn_indet == bttr;
-
-    if (status)
+    if (pcttr == NULL || bttr == constants__c_TimestampsToReturn_indet)
     {
-        switch (bttr)
-        {
-        case constants__e_ttr_source:
-            *pcttr = OpcUa_TimestampsToReturn_Source;
-            break;
-        case constants__e_ttr_server:
-            *pcttr = OpcUa_TimestampsToReturn_Server;
-            break;
-        case constants__e_ttr_both:
-            *pcttr = OpcUa_TimestampsToReturn_Both;
-            break;
-        case constants__e_ttr_neither:
-            *pcttr = OpcUa_TimestampsToReturn_Neither;
-            break;
-        case constants__c_TimestampsToReturn_indet:
-        default:
-            status = false;
-            break;
-        }
+        return false;
     }
 
-    return status;
+    switch (bttr)
+    {
+    case constants__e_ttr_source:
+        *pcttr = OpcUa_TimestampsToReturn_Source;
+        break;
+    case constants__e_ttr_server:
+        *pcttr = OpcUa_TimestampsToReturn_Server;
+        break;
+    case constants__e_ttr_both:
+        *pcttr = OpcUa_TimestampsToReturn_Both;
+        break;
+    case constants__e_ttr_neither:
+        *pcttr = OpcUa_TimestampsToReturn_Neither;
+        break;
+    default:
+        return false;
+    }
+
+    return true;
 }
 
 bool util_TimestampsToReturn__C_to_B(OpcUa_TimestampsToReturn cttr, constants__t_TimestampsToReturn_i* pbttr)
