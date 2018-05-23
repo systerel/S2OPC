@@ -245,7 +245,7 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
     else if (NULL != buffer)
     {
         // if buffer is not used, it must be freed
-        SOPC_Buffer_Clear(buffer);
+        SOPC_Buffer_Delete(buffer);
     }
 }
 
