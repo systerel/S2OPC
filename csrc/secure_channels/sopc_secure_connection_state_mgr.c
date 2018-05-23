@@ -1672,13 +1672,15 @@ static bool SC_Server_GenerateFreshSecureChannelAndTokenId(SOPC_SecureConnection
         while ((resultSecureChannelId == 0 || resultTokenId == 0) && attempts > 0)
         {
             attempts--;
-            if (resultSecureChannelId == 0)
+            if (resultSecureChannelId == 0 && SOPC_CryptoProvider_GenerateRandomID(
+                                                  scConnection->cryptoProvider, &newSecureChannelId) != SOPC_STATUS_OK)
             {
-                SOPC_CryptoProvider_GenerateRandomID(scConnection->cryptoProvider, &newSecureChannelId);
+                continue;
             }
-            if (resultTokenId == 0)
+            if (resultTokenId == 0 &&
+                SOPC_CryptoProvider_GenerateRandomID(scConnection->cryptoProvider, &newTokenId) != SOPC_STATUS_OK)
             {
-                SOPC_CryptoProvider_GenerateRandomID(scConnection->cryptoProvider, &newTokenId);
+                continue;
             }
             occupiedScId = false;
             occupiedTokenId = false;
