@@ -419,13 +419,18 @@ void SOPC_ServicesToApp_EnqueueEvent(int32_t appEvent, uint32_t id, void* params
 
 void SOPC_Services_Initialize()
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
     servicesEventDispatcherMgr =
         SOPC_EventDispatcherManager_CreateAndStart(SOPC_ServicesEventDispatcher, "Services event dispatcher manager");
     applicationEventDispatcherMgr = SOPC_EventDispatcherManager_CreateAndStart(
         SOPC_Internal_ApplicationEventDispatcher, "(Services) Application event dispatcher manager");
     // Init async close management flag
-    Mutex_Initialization(&closeAllConnectionsSync.mutex);
-    Condition_Init(&closeAllConnectionsSync.cond);
+    status = Mutex_Initialization(&closeAllConnectionsSync.mutex);
+    assert(status == SOPC_STATUS_OK);
+
+    status = Condition_Init(&closeAllConnectionsSync.cond);
+    assert(status == SOPC_STATUS_OK);
 }
 
 void SOPC_Services_ToolkitConfigured()
