@@ -332,7 +332,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
 
         // id == session id
         // params = request
-        if (id <= INT32_MAX)
+        if (id <= constants__t_session_i_max)
         {
             io_dispatch_mgr__client_send_service_request(id, params, auxParam, &sCode);
             if (sCode != constants__e_sc_ok)
