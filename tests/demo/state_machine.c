@@ -105,30 +105,22 @@ SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM)
 
 SOPC_ReturnStatus StateMachine_StartSession(StateMachine_Machine* pSM)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
     if (NULL == pSM)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (SOPC_STATUS_OK == status && pSM->state != stConfigured)
+    if (pSM->state != stConfigured)
     {
-        status = SOPC_STATUS_NOK;
         printf("# Error: The state machine shall be in stConfigured state to start a session.\n");
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_ToolkitClient_AsyncActivateSession(pSM->iscConfig, (uintptr_t) pSM->pCtxSession);
-        pSM->state = stActivating;
-    }
-    else
-    {
         pSM->state = stError;
+        return SOPC_STATUS_NOK;
     }
 
-    return status;
+    SOPC_ToolkitClient_AsyncActivateSession(pSM->iscConfig, (uintptr_t) pSM->pCtxSession);
+    pSM->state = stActivating;
+
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus StateMachine_StopSession(StateMachine_Machine* pSM)
@@ -276,39 +268,31 @@ SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM)
 
 SOPC_ReturnStatus StateMachine_SendRequest(StateMachine_Machine* pSM, void* requestStruct, uintptr_t appCtx)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    if (NULL == pSM || NULL != pSM->pCtxSession || stActivated != pSM->state)
+    if (pSM == NULL)
     {
-        status = SOPC_STATUS_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (SOPC_STATUS_OK == status)
-    {
-        pSM->pCtxSession = malloc(sizeof(StateMachine_RequestContext));
-        status = NULL == pSM->pCtxSession;
-    }
+    StateMachine_RequestContext* ctx = calloc(1, sizeof(StateMachine_RequestContext));
 
-    if (SOPC_STATUS_OK == status)
-    {
-        /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX pending requests */
-        ++nReqSent;
-        pSM->pCtxRequest->uid = nReqSent;
-        pSM->pCtxRequest->appCtx = appCtx;
-        SOPC_ToolkitClient_AsyncSendRequestOnSession(pSM->iSessionID, requestStruct, (uintptr_t) pSM->pCtxRequest);
-    }
-
-    if (SOPC_STATUS_OK != status && NULL != pSM)
+    if (NULL != pSM->pCtxSession || stActivated != pSM->state || ctx == NULL)
     {
         pSM->state = stError;
-        if (NULL != pSM->pCtxRequest)
-        {
-            free(pSM->pCtxRequest);
-            pSM->pCtxRequest = NULL;
-        }
+        free(ctx);
+        free(pSM->pCtxRequest);
+        pSM->pCtxRequest = NULL;
+        return SOPC_STATUS_NOK;
     }
 
-    return status;
+    pSM->pCtxSession = ctx;
+
+    /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX pending requests */
+    ++nReqSent;
+    pSM->pCtxRequest->uid = nReqSent;
+    pSM->pCtxRequest->appCtx = appCtx;
+    SOPC_ToolkitClient_AsyncSendRequestOnSession(pSM->iSessionID, requestStruct, (uintptr_t) pSM->pCtxRequest);
+
+    return SOPC_STATUS_OK;
 }
 
 bool StateMachine_IsConnectable(StateMachine_Machine* pSM)
