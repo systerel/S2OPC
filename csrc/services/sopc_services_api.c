@@ -351,7 +351,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         SOPC_Logger_TraceDebug("ServicesMgr: APP_TO_SE_CLOSE_SESSION  session=%" PRIu32, id);
 
         // id == session id
-        if (id <= INT32_MAX)
+        if (id <= constants__t_session_i_max)
         {
             io_dispatch_mgr__client_send_close_session_request(id, &sCode);
             if (sCode != constants__e_sc_ok)
