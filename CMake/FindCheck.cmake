@@ -40,7 +40,7 @@ if(CHECK_USE_STATIC_LIBS)
 endif()
 
 include(FindPackageHandleStandardArgs)
-
+set(CHECK_FIND_REQUIRED ${Check_FIND_REQUIRED})
 find_package_handle_standard_args(CHECK DEFAULT_MSG CHECK_INCLUDE_DIR CHECK_LIBRARY)
 
 if (CHECK_FOUND)
