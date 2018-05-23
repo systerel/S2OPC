@@ -480,74 +480,72 @@ void msg_browse_response_bs__write_BrowseResponse_msg_out(const constants__t_msg
     OpcUa_BrowseResult* lbr;
     OpcUa_ReferenceDescription* lrd;
     int32_t i, j, nRefs;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     /* TODO: Verify (in previous code) that msg_browse_response_bs__p_msg_out is initialized correctly */
     *msg_browse_response_bs__p_isvalid = false;
 
     /* You must copy the local results, because of the recursive free of BrowseResponse */
     pResp->NoOfResults = nBrowseResult;
-    if (nBrowseResult >= 0 && (uint64_t) SIZE_MAX / sizeof(OpcUa_BrowseResult) >= (uint64_t) nBrowseResult)
+
+    if (nBrowseResult < 0)
     {
-        lbr = (OpcUa_BrowseResult*) malloc(sizeof(OpcUa_BrowseResult) * (size_t) nBrowseResult);
-    }
-    else
-    {
-        lbr = NULL;
-    }
-    if (NULL == lbr)
         return;
+    }
+
+    lbr = calloc((size_t) nBrowseResult, sizeof(OpcUa_BrowseResult));
+
+    if (NULL == lbr)
+    {
+        return;
+    }
+
     for (i = 0; i < nBrowseResult; ++i)
+    {
         OpcUa_BrowseResult_Initialize(&lbr[i]);
+    }
+
     pResp->Results = lbr; /* So that the half-allocated BrowseResults are freed */
 
     /* Fills the BrowseResults with local data */
-    for (i = 0; i < nBrowseResult && i <= INT32_MAX; ++i)
+    for (i = 0; i < nBrowseResult; ++i)
     {
         lbr[i].StatusCode = pBrowseStatus[i + 1];
         SOPC_ByteString_Initialize(&lbr[i].ContinuationPoint);
         /* Also a copy, because of the recursive clear */
         nRefs = pnReferenceDescription[i + 1];
         lbr[i].NoOfReferences = nRefs;
-        if (nRefs >= 0 && (uint64_t) SIZE_MAX / sizeof(OpcUa_ReferenceDescription) >= (uint64_t) nRefs)
+
+        if (nRefs < 0)
         {
-            lrd = (OpcUa_ReferenceDescription*) malloc(sizeof(OpcUa_ReferenceDescription) * (size_t) nRefs);
-        }
-        else
-        {
-            lrd = NULL;
-        }
-        if (NULL == lrd)
             return;
+        }
+
+        lrd = calloc((size_t) nRefs, sizeof(OpcUa_ReferenceDescription));
+
+        if (NULL == lrd)
+        {
+            return;
+        }
+
         for (j = 0; j < nRefs; ++j)
         {
             OpcUa_ReferenceDescription_Initialize(&lrd[j]);
         }
+
         lbr[i].References = lrd;
 
         for (j = 0; j < nRefs; ++j)
         {
-            status = SOPC_NodeId_Copy(&lrd[j].ReferenceTypeId, &ppResRefTypeId[i + 1][j + 1]);
-            if (SOPC_STATUS_OK != status)
+            if (SOPC_NodeId_Copy(&lrd[j].ReferenceTypeId, &ppResRefTypeId[i + 1][j + 1]) != SOPC_STATUS_OK ||
+                SOPC_ExpandedNodeId_Copy(&lrd[j].NodeId, &ppResNodeId[i + 1][j + 1]) != SOPC_STATUS_OK ||
+                SOPC_QualifiedName_Copy(&lrd[j].BrowseName, &ppResBrowseName[i + 1][j + 1]) != SOPC_STATUS_OK ||
+                SOPC_LocalizedText_Copy(&lrd[j].DisplayName, &ppResDisplayName[i + 1][j + 1]) != SOPC_STATUS_OK ||
+                SOPC_ExpandedNodeId_Copy(&lrd[j].TypeDefinition, &ppResTypeDefinition[i + 1][j + 1]) != SOPC_STATUS_OK)
+            {
                 return;
-
+            }
             lrd[j].IsForward = ppResForwards[i + 1][j + 1];
-            status = SOPC_ExpandedNodeId_Copy(&lrd[j].NodeId, &ppResNodeId[i + 1][j + 1]);
-            if (SOPC_STATUS_OK != status)
-                return;
-
-            status = SOPC_QualifiedName_Copy(&lrd[j].BrowseName, &ppResBrowseName[i + 1][j + 1]);
-            if (SOPC_STATUS_OK != status)
-                return;
-
-            status = SOPC_LocalizedText_Copy(&lrd[j].DisplayName, &ppResDisplayName[i + 1][j + 1]);
-            if (SOPC_STATUS_OK != status)
-                return;
             lrd[j].NodeClass = ppResNodeClass[i + 1][j + 1];
-
-            status = SOPC_ExpandedNodeId_Copy(&lrd[j].TypeDefinition, &ppResTypeDefinition[i + 1][j + 1]);
-            if (SOPC_STATUS_OK != status)
-                return;
         }
     }
 
