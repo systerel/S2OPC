@@ -211,35 +211,54 @@ static void* SOPC_SocketsNetworkEventMgr_CyclicThreadLoop(void* nullData)
 
 static bool SOPC_SocketsNetworkEventMgr_CyclicThreadStart(void)
 {
-    bool result = false;
-    if (receptionThread.initDone == false)
+    if (receptionThread.initDone)
     {
-        Mutex_Initialization(&receptionThread.tMutex);
-        Mutex_Lock(&receptionThread.tMutex);
-        receptionThread.initDone = true;
-        receptionThread.stopFlag = false;
-        SOPC_Thread_Create(&receptionThread.thread, SOPC_SocketsNetworkEventMgr_CyclicThreadLoop, NULL);
-        Mutex_Unlock(&receptionThread.tMutex);
-        result = true;
+        return false;
     }
-    return result;
+
+    if (Mutex_Initialization(&receptionThread.tMutex) != SOPC_STATUS_OK ||
+        Mutex_Lock(&receptionThread.tMutex) != SOPC_STATUS_OK)
+    {
+        return false;
+    }
+
+    receptionThread.initDone = true;
+    receptionThread.stopFlag = false;
+
+    if (SOPC_Thread_Create(&receptionThread.thread, SOPC_SocketsNetworkEventMgr_CyclicThreadLoop, NULL) !=
+            SOPC_STATUS_OK ||
+        Mutex_Unlock(&receptionThread.tMutex) != SOPC_STATUS_OK)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 static void SOPC_SocketsNetworkEventMgr_CyclicThreadStop(void)
 {
-    if (receptionThread.initDone != false)
+    if (!receptionThread.initDone)
     {
-        Mutex_Lock(&receptionThread.tMutex);
-        // stop the reception thread
-        receptionThread.stopFlag = true;
-        if (receptionThread.stopFlag != false)
-        {
-            SOPC_Thread_Join(receptionThread.thread);
-        }
-        Mutex_Unlock(&receptionThread.tMutex);
-        Mutex_Clear(&receptionThread.tMutex);
-        receptionThread.initDone = false;
+        return;
     }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    status = Mutex_Lock(&receptionThread.tMutex);
+    assert(status == SOPC_STATUS_OK);
+
+    // stop the reception thread
+    receptionThread.stopFlag = true;
+    status = SOPC_Thread_Join(receptionThread.thread);
+    assert(status == SOPC_STATUS_OK);
+
+    status = Mutex_Unlock(&receptionThread.tMutex);
+    assert(status == SOPC_STATUS_OK);
+
+    status = Mutex_Clear(&receptionThread.tMutex);
+    assert(status == SOPC_STATUS_OK);
+
+    receptionThread.initDone = false;
 }
 
 void SOPC_SocketsNetworkEventMgr_Initialize()
