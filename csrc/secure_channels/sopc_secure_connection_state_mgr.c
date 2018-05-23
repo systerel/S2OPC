@@ -1752,7 +1752,12 @@ static uint32_t SC_Server_GenerateFreshTokenId(SOPC_SecureConnection* scConnecti
         while (resultTokenId == 0 && attempts > 0)
         {
             attempts--;
-            SOPC_CryptoProvider_GenerateRandomID(scConnection->cryptoProvider, &newTokenId);
+
+            if (SOPC_CryptoProvider_GenerateRandomID(scConnection->cryptoProvider, &newTokenId) != SOPC_STATUS_OK)
+            {
+                continue;
+            }
+
             occupiedId = false;
             if (newTokenId != 0)
             {
