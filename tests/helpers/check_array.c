@@ -18,6 +18,7 @@
 #include "check_helpers.h"
 
 #include <check.h>
+#include <inttypes.h>
 
 #include "sopc_array.h"
 
