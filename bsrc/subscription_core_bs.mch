@@ -78,5 +78,30 @@ OPERATIONS
                 revisedMaxNotificationsPerPublish > 0
             )
     END
+    ;
+    
+    bres, timerId <-- create_publish_timer (p_subscription, p_publishInterval) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : t_subscription &
+        p_publishInterval : t_opcua_duration_i
+    THEN
+        CHOICE
+            bres := TRUE ||
+            timerId :(timerId : t_timer_id_i & timerId : t_timer_id)
+        OR
+            bres := FALSE ||
+            timerId :(timerId : t_timer_id_i & timerId = c_timer_id_indet)
+        END
+    END
+    ;
+    
+    delete_publish_timer (p_timer_id) =
+    PRE
+        p_timer_id : t_timer_id_i &
+        p_timer_id : t_timer_id
+    THEN
+        skip
+    END
     
 END

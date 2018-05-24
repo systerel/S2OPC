@@ -44,6 +44,7 @@ DEFINITIONS
     a_pendingNotificationQueue,
     a_publishRequestQueue,
     a_monitoredItemQueue,
+    a_publishTimer,
     a_nodeToMonitoredItemQueue,
     /* Queues content */
     s_publishReqQueue,
@@ -90,6 +91,8 @@ DEFINITIONS
     s_monitoredItemQueue <: t_monitoredItemQueue &
     a_monitoredItemQueue : s_subscription --> s_monitoredItemQueue &
     a_nodeToMonitoredItemQueue : t_NodeId --> s_monitoredItemQueue &
+    
+    a_publishTimer : s_subscription --> t_timer_id &
     
     /* (Session) Implementation variables */
     
@@ -245,6 +248,7 @@ INITIALISATION
     a_pendingNotificationQueue := {} ||
     a_publishRequestQueue := {} ||
     a_monitoredItemQueue := {} ||
+    a_publishTimer := {} ||
     a_nodeToMonitoredItemQueue :(a_nodeToMonitoredItemQueue : t_NodeId --> s_monitoredItemQueue) || /* DEFINED ON INIT */
     
     s_monitoredItemPointer := {} ||

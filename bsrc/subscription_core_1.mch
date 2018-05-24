@@ -41,7 +41,8 @@ DEFINITIONS
 
     a_pendingNotificationQueue,
     a_publishRequestQueue,
-    a_monitoredItemQueue;
+    a_monitoredItemQueue,
+    a_publishTimer;
     
     d_typing ==
     s_subscription <: t_subscription &
@@ -73,6 +74,8 @@ DEFINITIONS
     /* a_retransmissionQueue : s_subscription --> t_notificationMsgQueue */ /* not implemented */
     a_monitoredItemQueue : s_subscription --> t_monitoredItemQueue &
     
+    a_publishTimer : s_subscription --> t_timer_id &
+    
     /* (Session) Implementation variables */
     
     /* Note: kept on subscription for now since 1 subs / session + no transfer. Otherwise could be cleared on session close ! */
@@ -103,7 +106,8 @@ INITIALISATION
 
     a_pendingNotificationQueue := {} ||
     a_publishRequestQueue := {}      ||
-    a_monitoredItemQueue := {}
+    a_monitoredItemQueue := {} ||
+    a_publishTimer := {}
 
 OPERATIONS
     
@@ -151,7 +155,8 @@ OPERATIONS
                       p_publishEnabled,
                       p_notifQueue,
                       p_publishQueue,
-                      p_monitoredItemQueue) =
+                      p_monitoredItemQueue,
+                      p_timerId) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : t_subscription &
@@ -172,7 +177,9 @@ OPERATIONS
         p_publishQueue : t_publishReqQueue_i &
         p_publishQueue : t_publishReqQueue &
         p_monitoredItemQueue : t_monitoredItemQueue_i &
-        p_monitoredItemQueue : t_monitoredItemQueue
+        p_monitoredItemQueue : t_monitoredItemQueue &
+        p_timerId : t_timer_id_i &
+        p_timerId : t_timer_id
     THEN
         s_subscription := s_subscription \/ {p_subscription} ||
         a_subscription_state (p_subscription) := e_subscriptionState_normal   ||
@@ -190,7 +197,8 @@ OPERATIONS
         
         a_pendingNotificationQueue (p_subscription) := p_notifQueue ||
         a_publishRequestQueue (p_subscription) := p_publishQueue ||
-        a_monitoredItemQueue (p_subscription) := p_monitoredItemQueue
+        a_monitoredItemQueue (p_subscription) := p_monitoredItemQueue ||
+        a_publishTimer (p_subscription) := p_timerId
     END
     ;
     
@@ -218,7 +226,19 @@ OPERATIONS
           
         a_publishRequestQueue := {p_subscription} <<| a_publishRequestQueue ||
 
-        a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue
+        a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue ||
+
+        a_publishTimer := {p_subscription} <<| a_publishTimer
+
+    END
+    ;
+    
+    p_timer_id <-- get_subscription_timer_id (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription
+    THEN
+        p_timer_id :(p_timer_id : t_timer_id_i &  p_timer_id = a_publishTimer (p_subscription))
     END
     ;
     

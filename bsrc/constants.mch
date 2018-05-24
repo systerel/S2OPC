@@ -279,7 +279,8 @@ SETS
     };
 
     /* Context provided by application on request and to provide with notifications */
-    t_application_context_i /* uintptr_t */
+    t_application_context_i; /* uintptr_t */
+    t_timer_id_i /* uint32_t */
 
 CONCRETE_CONSTANTS
     /*AddS,*/
@@ -331,6 +332,7 @@ CONCRETE_CONSTANTS
     c_client_request_handle_indet,
     c_server_request_handle_any,
     c_no_application_context,
+    c_timer_id_indet,
     
     t_counter
 
@@ -398,6 +400,7 @@ ABSTRACT_CONSTANTS
     t_channel_config_idx,
     t_channel,
     t_client_request_handle,
+    t_timer_id,
 
     s_session_treatment_reqs,
     s_session_treatment_resps,
@@ -628,6 +631,10 @@ PROPERTIES
     t_channel_config_idx <: t_channel_config_idx_i &
     c_channel_config_idx_indet : t_channel_config_idx_i &
     c_channel_config_idx_indet /: t_channel_config_idx &
+    
+    t_timer_id <: t_timer_id_i &
+    c_timer_id_indet : t_timer_id_i &
+    c_timer_id_indet /: t_timer_id &
 
     t_buffer_in_state = { e_buffer_in_msg_not_read,
         e_buffer_in_msg_type_read,

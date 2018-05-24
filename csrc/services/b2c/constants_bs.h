@@ -82,6 +82,7 @@ typedef uint32_t constants_bs__t_session_i;
 typedef SOPC_NodeId* constants_bs__t_session_token_i;
 typedef uint32_t constants_bs__t_sub_seq_num_i;
 #define constants_bs__t_subscription_i t_entier4
+typedef uint32_t constants_bs__t_timer_id_i;
 typedef SOPC_TimeReference constants_bs__t_timeref_i;
 #define constants_bs__t_user_i t_entier4
 typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
@@ -164,6 +165,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__c_sub_seq_num_indet 0
 #define constants_bs__c_sub_seq_num_init 1
 #define constants_bs__c_subscription_indet 0
+#define constants_bs__c_timer_id_indet 0
 #define constants_bs__c_timeref_indet 0
 #define constants_bs__c_user_indet 0
 #define constants_bs__c_user_token_indet 0

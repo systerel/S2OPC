@@ -25,6 +25,10 @@
 #include <assert.h>
 
 #include "address_space_impl.h"
+#include "inttypes.h"
+#include "sopc_event_timer_manager.h"
+#include "sopc_logger.h"
+#include "sopc_services_api_internal.h"
 #include "util_b2c.h"
 
 SOPC_Dict* nodeIdToMonitoredItemQueue = NULL;
@@ -155,4 +159,47 @@ void subscription_core_bs__get_nodeToMonitoredItemQueue(
         }
     }
     *subscription_core_bs__p_monitoredItemQueue = monitoredItemQueue;
+}
+
+void subscription_core_bs__create_publish_timer(
+    const constants__t_subscription_i subscription_core_bs__p_subscription,
+    const constants__t_opcua_duration_i subscription_core_bs__p_publishInterval,
+    t_bool* const subscription_core_bs__bres,
+    constants__t_timer_id_i* const subscription_core_bs__timerId)
+{
+    *subscription_core_bs__bres = false;
+
+    uint64_t msCycle = 0;
+    SOPC_EventDispatcherParams eventParams;
+
+    eventParams.eltId = (uint32_t) subscription_core_bs__p_subscription;
+    eventParams.event = TIMER_SE_PUBLISH_CYCLE_TIMEOUT;
+    eventParams.params = NULL;
+    eventParams.auxParam = 0;
+    eventParams.debugName = NULL;
+
+    if (subscription_core_bs__p_publishInterval > UINT64_MAX)
+    {
+        msCycle = UINT64_MAX;
+    }
+    else if (subscription_core_bs__p_publishInterval < 0)
+    {
+        msCycle = 0;
+    }
+    else
+    {
+        msCycle = (uint64_t) subscription_core_bs__p_publishInterval;
+    }
+
+    *subscription_core_bs__timerId = SOPC_EventTimer_Create(SOPC_Services_GetEventDispatcher(), eventParams, msCycle);
+
+    if (constants__c_timer_id_indet != *subscription_core_bs__timerId)
+    {
+        *subscription_core_bs__bres = true;
+    }
+}
+
+void subscription_core_bs__delete_publish_timer(const constants__t_timer_id_i subscription_core_bs__p_timer_id)
+{
+    SOPC_EventTimer_Cancel(subscription_core_bs__p_timer_id);
 }

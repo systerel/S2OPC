@@ -58,7 +58,8 @@ SETS
     t_monitoredItemQueueIterator_i;
     t_monitoredItemPointer_i;
     t_monitoredItemId_i;
-    t_client_handle_i
+    t_client_handle_i;
+    t_timer_id_i
 
 CONCRETE_CONSTANTS
     k_n_read_resp_max,
@@ -104,7 +105,8 @@ CONCRETE_CONSTANTS
     c_monitoredItemQueueIterator_indet,
     c_monitoredItemPointer_indet,
     c_monitoredItemId_indet,
-    c_WriteValuePointer_indet
+    c_WriteValuePointer_indet,
+    c_timer_id_indet
 
 ABSTRACT_CONSTANTS
     t_Variant,
@@ -143,7 +145,8 @@ ABSTRACT_CONSTANTS
     t_monitoredItemQueueIterator,
     t_monitoredItemPointer,
     t_monitoredItemId,
-    t_WriteValuePointer
+    t_WriteValuePointer,
+    t_timer_id
 
 PROPERTIES
     k_n_read_resp_max : NAT &
@@ -297,7 +300,11 @@ PROPERTIES
 
     t_WriteValuePointer <: t_WriteValuePointer_i &
     c_WriteValuePointer_indet : t_WriteValuePointer_i &
-    c_WriteValuePointer_indet /: t_WriteValuePointer
+    c_WriteValuePointer_indet /: t_WriteValuePointer &
+    
+    t_timer_id <: t_timer_id_i &
+    c_timer_id_indet : t_timer_id_i &
+    c_timer_id_indet /: t_timer_id
 
 OPERATIONS
 

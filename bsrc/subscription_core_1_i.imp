@@ -45,7 +45,8 @@ CONCRETE_VARIABLES
     a_SeqNum_i,
     a_pendingNotificationQueue_i,
     a_publishRequestQueue_i,
-    a_monitoredItemQueue_i
+    a_monitoredItemQueue_i,
+    a_publishTimer_i
 
 INVARIANT
     s_subscription_i          : t_subscription_i --> BOOL                                      &
@@ -106,7 +107,11 @@ INVARIANT
     
     a_monitoredItemQueue_i       : t_subscription_i --> t_monitoredItemQueue_i                 &
     dom(a_monitoredItemQueue)    = s_subscription                                              &
-    a_monitoredItemQueue         = s_subscription <| a_monitoredItemQueue_i |> t_monitoredItemQueue
+    a_monitoredItemQueue         = s_subscription <| a_monitoredItemQueue_i |> t_monitoredItemQueue &
+    
+    a_publishTimer_i             : t_subscription_i --> t_timer_id_i                           &
+    dom(a_publishTimer)          = s_subscription                                              &
+    a_publishTimer               = s_subscription <| a_publishTimer_i |> t_timer_id
 
 INITIALISATION
     s_subscription_i             := t_subscription_i * {FALSE};
@@ -125,7 +130,8 @@ INITIALISATION
     a_SeqNum_i                   := t_subscription_i * {c_sub_seq_num_indet};
     a_pendingNotificationQueue_i := t_subscription_i * {c_notificationQueue_indet};
     a_publishRequestQueue_i      := t_subscription_i * {c_publishReqQueue_indet};
-    a_monitoredItemQueue_i       := t_subscription_i * {c_monitoredItemQueue_indet}
+    a_monitoredItemQueue_i       := t_subscription_i * {c_monitoredItemQueue_indet};
+    a_publishTimer_i             := t_subscription_i * {c_timer_id_indet}
 
 OPERATIONS
     
@@ -158,7 +164,8 @@ OPERATIONS
                       p_publishEnabled,
                       p_notifQueue,
                       p_publishQueue,
-                      p_monitoredItemQueue) =
+                      p_monitoredItemQueue,
+                      p_timerId) =
     BEGIN
 
         s_subscription_i(p_subscription) := TRUE;
@@ -177,7 +184,8 @@ OPERATIONS
         a_SeqNum_i (p_subscription) := c_sub_seq_num_init;
         a_pendingNotificationQueue_i(p_subscription) := p_notifQueue;
         a_publishRequestQueue_i(p_subscription) := p_publishQueue;
-        a_monitoredItemQueue_i(p_subscription) := p_monitoredItemQueue
+        a_monitoredItemQueue_i(p_subscription) := p_monitoredItemQueue;
+        a_publishTimer_i(p_subscription) := p_timerId
     END
     ;
     
@@ -199,7 +207,14 @@ OPERATIONS
         a_SeqNum_i (p_subscription) := c_sub_seq_num_indet;
         a_pendingNotificationQueue_i(p_subscription) := c_notificationQueue_indet;
         a_publishRequestQueue_i(p_subscription) := c_publishReqQueue_indet;
-        a_monitoredItemQueue_i(p_subscription) := c_monitoredItemQueue_indet
+        a_monitoredItemQueue_i(p_subscription) := c_monitoredItemQueue_indet;
+        a_publishTimer_i(p_subscription) := c_timer_id_indet
+    END
+    ;
+    
+    p_timer_id <-- get_subscription_timer_id (p_subscription) =
+    BEGIN
+        p_timer_id := a_publishTimer_i (p_subscription)
     END
     ;
     

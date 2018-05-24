@@ -139,19 +139,21 @@ OPERATIONS
         l_bres_pub,
         l_newPublishQueue,
         l_bres_monitored,
-        l_newMonitoredItemQueue
+        l_newMonitoredItemQueue,
+        l_bres_timer,
+        l_timerId
     IN
         StatusCode_service := c_StatusCode_indet;
         subscription := c_subscription_indet;
         l_bres, l_subscription <-- get_fresh_subscription;
-        /* TODO: CREATE PUBLISH TIMER */
 
         IF l_bres = TRUE
         THEN
             l_bres_notif, l_newNotifQueue <-- allocate_new_monitored_item_notification_queue;
             l_bres_pub, l_newPublishQueue <-- allocate_new_publish_queue;
             l_bres_monitored, l_newMonitoredItemQueue <-- allocate_new_monitored_item_queue;
-            IF l_bres_notif = TRUE & l_bres_pub = TRUE & l_bres_monitored = TRUE
+            l_bres_timer, l_timerId <-- create_publish_timer (l_subscription, p_revPublishInterval);
+            IF l_bres_notif = TRUE & l_bres_pub = TRUE & l_bres_monitored = TRUE & l_bres_timer = TRUE
             THEN
                 StatusCode_service := e_sc_ok;
                 add_subscription (l_subscription,
@@ -163,7 +165,8 @@ OPERATIONS
                                   p_publishEnabled,
                                   l_newNotifQueue,
                                   l_newPublishQueue,
-                                  l_newMonitoredItemQueue);
+                                  l_newMonitoredItemQueue,
+                                  l_timerId);
                 subscription := l_subscription
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory;
@@ -179,6 +182,11 @@ OPERATIONS
                 THEN
                     clear_and_deallocate_monitored_item_queue (l_newMonitoredItemQueue)
                 END
+                ;
+                IF l_bres_timer = TRUE
+                THEN
+                    delete_publish_timer (l_timerId)
+                END
             END
         ELSE
             StatusCode_service := e_sc_bad_too_many_subscriptions
@@ -187,8 +195,12 @@ OPERATIONS
     ;
     
     close_subscription (p_subscription) =
-    BEGIN
-        skip
+    VAR
+        l_timer_id
+    IN
+        l_timer_id <-- get_subscription_timer_id (p_subscription);
+        delete_publish_timer (l_timer_id);
+        delete_subscription (p_subscription)
     END
     ;
     
