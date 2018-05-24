@@ -250,7 +250,7 @@ static SOPC_ReturnStatus Simulate_Received_Message(uint32_t scIdx, char* hexInpu
         }
         else
         {
-            SOPC_Buffer_Clear(buffer);
+            SOPC_Buffer_Delete(buffer);
         }
     }
     else
