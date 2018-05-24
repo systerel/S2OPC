@@ -22,6 +22,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdbool.h>
 
 #include "sopc_singly_linked_list.h"
@@ -227,7 +228,7 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
         if (pCfg == NULL)
         {
             status = SOPC_STATUS_INVALID_PARAMETERS;
-            /* TODO: log */
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Connect: unknown configuration id: %" PRIu32 ".", cfgId);
         }
     }
 

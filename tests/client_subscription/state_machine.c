@@ -171,8 +171,7 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
     if (SOPC_STATUS_OK == status && pSM->state != stInit)
     {
         status = SOPC_STATUS_INVALID_STATE;
-        /* TODO: log */
-        printf("# Error: The state machine shall be in stInit state to start a session.\n");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "The state machine shall be in stInit state to start a session.");
     }
 
     /* Sends the request */
@@ -207,7 +206,7 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
     }
     else
     {
-        printf("# Error: StopSession on a disconnected machine.\n");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "StopSession on a disconnected machine.");
         pSM->state = stError;
     }
 
@@ -283,19 +282,18 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     if (SOPC_STATUS_OK == status && stActivated != pSM->state)
     {
         status = SOPC_STATUS_INVALID_STATE;
-        /* TODO: log */
-        printf("# Error: creating monitored item, the machine should be in the stActivated state (is in %i).\n",
-               pSM->state);
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                    "creating monitored item, the machine should be in the stActivated state (is in %i).", pSM->state);
     }
     if (SOPC_STATUS_OK == status && !SOPC_StaMac_HasSubscription(pSM))
     {
         status = SOPC_STATUS_INVALID_STATE;
-        printf("# Error: the machine shall have a created subscription.\n");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "the machine shall have a created subscription.");
     }
     if (SOPC_STATUS_OK == status && UINT32_MAX == nSentReqs)
     {
         status = SOPC_STATUS_INVALID_STATE;
-        printf("# Error: creating monitored item, too much sent requests.\n");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, too much sent requests.");
     }
 
     /* Create the NodeId */
@@ -305,7 +303,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         if (INT32_MAX < szLen)
         {
             status = SOPC_STATUS_INVALID_PARAMETERS;
-            printf("# Error: creating monitored item, szNodeId is too long.\n");
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, szNodeId is too long.");
         }
     }
     if (SOPC_STATUS_OK == status)
@@ -314,7 +312,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         if (NULL == pNid)
         {
             status = SOPC_STATUS_NOK;
-            printf("# Error: creating monitored item, could not convert \"%s\" to NodeId.\n", szNodeId);
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, could not convert \"%s\" to NodeId.", szNodeId);
         }
     }
 
@@ -453,15 +451,15 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             case SE_ACTIVATED_SESSION:
                 pSM->state = stActivated;
                 pSM->iSessionID = arg;
-                printf("# Info: Session activated.\n");
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Session activated.");
                 break;
             case SE_SESSION_ACTIVATION_FAILURE:
                 pSM->state = stError;
-                printf("# Error: Failed session activation.\n");
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed session activation.");
                 break;
             default:
                 pSM->state = stError;
-                printf("# Error: In state Activation, unexpected event %i.\n", event);
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "In state Activation, unexpected event %i.", event);
                 break;
             }
             break;
@@ -481,7 +479,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 break;
             default:
                 /* This might be a response to a pending request, so this might not an error */
-                printf("# Warning: Unexpected event in stClosing state, ignoring.\n");
+                Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Unexpected event in stClosing state, ignoring.");
                 break;
             }
             break;
@@ -494,7 +492,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 pEncType = *(SOPC_EncodeableType**) pParam;
                 if (&OpcUa_PublishResponse_EncodeableType == pEncType)
                 {
-                    printf("# Info: PublishResponse received.\n");
+                    Helpers_Log(SOPC_LOG_LEVEL_INFO, "PublishResponse received.");
                     /* TODO: move this to an external function */
                     pPubResp = (OpcUa_PublishResponse*) pParam;
                     /* Take note to acknowledge later. There is no ack with KeepAlive. */
@@ -529,19 +527,19 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 }
                 else
                 {
-                    printf("# Info: Response received.\n");
+                    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Response received.");
                 }
                 break;
             case SE_SND_REQUEST_FAILED:
                 pSM->state = stError;
-                printf("# Error: Send request 0x%" PRIxPTR " failed.\n", intAppCtx);
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Send request 0x%" PRIxPTR " failed.", intAppCtx);
                 break;
             case SE_SESSION_REACTIVATING:
-                printf("# Info: Session reactivated.\n");
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Session reactivated.");
                 break;
             default:
                 pSM->state = stError;
-                printf("# Error: In state stActivated, unexpected event %i.\n", event);
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "In state stActivated, unexpected event %i.", event);
                 break;
             }
             break;
@@ -553,16 +551,16 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 /* TODO: verify revised values?? */
                 assert(pSM->iSubscriptionID == 0);
                 pSM->iSubscriptionID = ((OpcUa_CreateSubscriptionResponse*) pParam)->SubscriptionId;
-                printf("# Info: Subscription created.\n");
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Subscription created.");
                 pSM->state = stActivated;
                 break;
             case SE_SND_REQUEST_FAILED:
                 pSM->state = stError;
-                printf("# Error: Send subscription request failed.\n");
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Send subscription request failed.");
                 break;
             default:
                 pSM->state = stError;
-                printf("# Error: In state stCreatingSubscr, unexpected event %i.\n", event);
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "In state stCreatingSubscr, unexpected event %i.", event);
                 break;
             }
             break;
@@ -590,7 +588,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     }
                     if (SOPC_STATUS_OK == status)
                     {
-                        printf("# Info: MonitoredItem created.\n");
+                        Helpers_Log(SOPC_LOG_LEVEL_INFO, "MonitoredItem created.");
                     }
                 }
                 if (SOPC_STATUS_OK == status)
@@ -604,11 +602,11 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 break;
             case SE_SND_REQUEST_FAILED:
                 pSM->state = stError;
-                printf("# Error: Send create monitored items request failed.\n");
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Send create monitored items request failed.");
                 break;
             default:
                 pSM->state = stError;
-                printf("# Error: In state stCreatingMonIt, unexpected event %i.\n", event);
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "In state stCreatingMonIt, unexpected event %i.", event);
                 break;
             }
             break;
@@ -618,14 +616,14 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
         /* Invalid states */
         case stInit:
             pSM->state = stError;
-            printf("# Error: Event received in stInit state.\n");
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Event received in stInit state.");
             break;
         case stError:
-            printf("# Warning: Receiving event in stError state, ignoring.\n");
+            Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Receiving event in stError state, ignoring.");
             break;
         default:
             pSM->state = stError;
-            printf("# Error: Dispatching in unknown state %i, event %i.\n", pSM->state, event);
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Dispatching in unknown state %i, event %i.", pSM->state, event);
             break;
         }
 
@@ -640,8 +638,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 /* Creates the subscription */
                 /* The request is freed by the Toolkit */
                 /* TODO: make all value configurable */
-                /* TODO: log errors */
-                printf("# Info: Creating subscription.\n");
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Creating subscription.");
                 status = Helpers_NewCreateSubscriptionRequest(pSM->fPublishInterval, 1000, 30, &pRequest);
                 if (SOPC_STATUS_OK == status)
                 {
@@ -662,7 +659,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 while (SOPC_STATUS_OK == status && pSM->nTokenUsable < pSM->nTokenTarget)
                 {
                     /* Send a PublishRequest */
-                    printf("# Info: Adding publish token.\n");
+                    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Adding publish token.");
                     status =
                         Helpers_NewPublishRequest(pSM->bAckSubscr, pSM->iSubscriptionID, pSM->iAckSeqNum, &pRequest);
                     if (SOPC_STATUS_OK == status)
@@ -745,7 +742,7 @@ bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                     }
                     if (SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, ((SOPC_StaMac_ReqCtx*) appCtx)->uid) == NULL)
                     {
-                        printf("# Warning: failed to pop the request from the pListReqCtx\n");
+                        Helpers_Log(SOPC_LOG_LEVEL_WARNING, "failed to pop the request from the pListReqCtx.");
                     }
                     free((void*) appCtx);
                     appCtx = 0;
@@ -763,7 +760,7 @@ bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
             }
             break;
         default:
-            printf("# Error: Unexpected event received by a machine.\n");
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unexpected event received by a machine.");
             break;
         }
     }
