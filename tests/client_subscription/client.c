@@ -121,46 +121,46 @@ int main(int argc, char* argv[])
     SOPC_LibSub_ConnectionId con_id = 0;
     SOPC_LibSub_DataId d_id = 0;
 
-    log_callback(SOPC_LOG_LEVEL_INFO, SOPC_LibSub_GetVersion());
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, SOPC_LibSub_GetVersion());
 
     if (SOPC_STATUS_OK != SOPC_LibSub_Initialize(&cfg_cli))
     {
-        log_callback(SOPC_LOG_LEVEL_ERROR, "Could not initialize library");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not initialize library.");
         return 1;
     }
 
     if (SOPC_STATUS_OK != SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id))
     {
-        log_callback(SOPC_LOG_LEVEL_ERROR, "Could not configure connection");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure connection.");
         return 2;
     }
 
     if (SOPC_STATUS_OK != SOPC_LibSub_Configured())
     {
-        log_callback(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit.");
         return 3;
     }
 
     if (SOPC_STATUS_OK != SOPC_LibSub_Connect(cfg_id, &con_id))
     {
-        log_callback(SOPC_LOG_LEVEL_ERROR, "Could not connect with given con_id");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not connect with given con_id.");
         return 4;
     }
 
-    printf("# Info: Connected.\n");
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Connected.");
 
     for (int i = 0; i < options.node_ids_sz; ++i)
     {
         if (SOPC_STATUS_OK !=
             SOPC_LibSub_AddToSubscription(con_id, options.node_ids[i], SOPC_LibSub_AttributeId_Value, &d_id))
         {
-            log_callback(SOPC_LOG_LEVEL_ERROR, "Could not create monitored item");
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not create monitored item.");
             return 5;
         }
         else
         {
-            /* TODO: log */
-            printf("# Info: created MonIt for \"%s\" with data_id %" PRIu32 ".\n", options.node_ids[i], d_id);
+            Helpers_Log(SOPC_LOG_LEVEL_INFO, "created MonIt for \"%s\" with data_id %" PRIu32 ".", options.node_ids[i],
+                        d_id);
         }
     }
 
@@ -177,10 +177,7 @@ void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text)
 
 void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
 {
-    char sz[128];
-
-    snprintf(sz, sizeof(sz) / sizeof(sz[0]), "Client %" PRIu32 " disconnected", c_id);
-    log_callback(SOPC_LOG_LEVEL_INFO, sz);
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
 }
 
 void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
@@ -256,33 +253,33 @@ static bool parse_options(cmd_line_options_t* o, int argc, char** argv)
     }
 #undef STR_OPT_CASE
 
-#define CHECK_REQUIRED_STR_OPT(name, req, arg_req, val, field) \
-    if (req && o->field == NULL)                               \
-    {                                                          \
-        printf("# Error: Missing option: --" name ".\n\n");    \
-        print_usage(argv[0]);                                  \
-        return false;                                          \
+#define CHECK_REQUIRED_STR_OPT(name, req, arg_req, val, field)            \
+    if (req && o->field == NULL)                                          \
+    {                                                                     \
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Missing option: --" name "."); \
+        print_usage(argv[0]);                                             \
+        return false;                                                     \
     }
 
     FOREACH_OPT(CHECK_REQUIRED_STR_OPT)
 
 #undef CHECK_REQUIRED_STR_OPT
 
-#define CONVERT_STR_OPT(name, type, default_val)                   \
-    if (o->name##_str != NULL)                                     \
-    {                                                              \
-        char* endptr;                                              \
-        o->name = (type) strtoul(o->name##_str, &endptr, 10);      \
-                                                                   \
-        if (*endptr != '\0')                                       \
-        {                                                          \
-            printf("# Error: Invalid name: %s.\n", o->name##_str); \
-            return false;                                          \
-        }                                                          \
-    }                                                              \
-    else                                                           \
-    {                                                              \
-        o->name = default_val;                                     \
+#define CONVERT_STR_OPT(name, type, default_val)                                     \
+    if (o->name##_str != NULL)                                                       \
+    {                                                                                \
+        char* endptr;                                                                \
+        o->name = (type) strtoul(o->name##_str, &endptr, 10);                        \
+                                                                                     \
+        if (*endptr != '\0')                                                         \
+        {                                                                            \
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Invalid name: %s.\n", o->name##_str); \
+            return false;                                                            \
+        }                                                                            \
+    }                                                                                \
+    else                                                                             \
+    {                                                                                \
+        o->name = default_val;                                                       \
     }
 
     if (NULL == o->endpoint_url)
@@ -298,14 +295,14 @@ static bool parse_options(cmd_line_options_t* o, int argc, char** argv)
     o->node_ids_sz = argc - optind;
     if (o->node_ids_sz < 1)
     {
-        printf("# Error: No node to subscribe to were specified.\n");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "No node to subscribe to were specified.");
         print_usage(argv[0]);
         return false;
     }
     o->node_ids = malloc(sizeof(char*) * (size_t) o->node_ids_sz);
     if (NULL == o->node_ids)
     {
-        printf("# Error: out of memory.\n");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Out of memory.");
         return false;
     }
     for (int i = 0; i < o->node_ids_sz; ++i)

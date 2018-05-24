@@ -95,8 +95,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         status = SOPC_KeyManager_Certificate_CreateFromFile(szPathCertifAuth, &pCrtCAu);
         if (SOPC_STATUS_OK != status)
         {
-            /* TODO: update logs */
-            printf("# Error: Failed to load the CA\n");
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load the CA.");
         }
     }
     /* TODO: handle Revocation list */
@@ -105,7 +104,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         status = SOPC_STATUS_INVALID_PARAMETERS;
         if (SOPC_STATUS_OK != status)
         {
-            printf("# Error: Failed to load Certificate Revocation List\n");
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load Certificate Revocation List.");
         }
     }
     if (SOPC_STATUS_OK == status)
@@ -113,7 +112,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         status = SOPC_PKIProviderStack_Create(pCrtCAu, NULL, &pPki);
         if (SOPC_STATUS_OK != status)
         {
-            printf("# Error: Failed to create PKI\n");
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to create PKI.");
         }
     }
     if (SOPC_STATUS_OK == status && OpcUa_MessageSecurityMode_None != msgSecurityMode)
@@ -123,7 +122,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             status = SOPC_KeyManager_Certificate_CreateFromFile(szPathCertServer, &pCrtSrv);
             if (SOPC_STATUS_OK != status)
             {
-                printf("# Error: Failed to load server certificate\n");
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load server certificate.");
             }
         }
 
@@ -132,7 +131,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             status = SOPC_KeyManager_Certificate_CreateFromFile(szPathCertClient, &pCrtCli);
             if (SOPC_STATUS_OK != status)
             {
-                printf("# Error: Failed to load client certificate\n");
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load client certificate.");
             }
         }
 
@@ -141,7 +140,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(szPathKeyClient, &pKeyCli, NULL, 0);
             if (SOPC_STATUS_OK != status)
             {
-                printf("# Error: Failed to load client private key\n");
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load client private key.");
             }
         }
     }
