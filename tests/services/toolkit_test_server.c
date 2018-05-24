@@ -46,7 +46,7 @@
 #define PRODUCT_URI "urn:INGOPCS:localhost"
 
 static int endpointClosed = false;
-static bool secuActive = !false;
+static bool secuActive = true;
 
 volatile sig_atomic_t stopServer = 0;
 
@@ -78,7 +78,7 @@ void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void
     if (event == SE_CLOSED_ENDPOINT)
     {
         printf("<Test_Server_Toolkit: closed endpoint event: OK\n");
-        endpointClosed = !false;
+        endpointClosed = true;
     }
     else
     {
@@ -395,6 +395,12 @@ int main(int argc, char* argv[])
 
     // Clear the toolkit configuration and stop toolkit threads
     SOPC_Toolkit_Clear();
+
+    // Check that endpoint closed due to stop signal
+    if (SOPC_STATUS_OK == status && stopServer == 0)
+    {
+        status = SOPC_STATUS_NOK;
+    }
 
     if (SOPC_STATUS_OK == status)
     {
