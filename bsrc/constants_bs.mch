@@ -25,7 +25,6 @@ SETS
     t_NodeId_i;
     t_Variant_i;
     t_byte_buffer_i;
-    t_UserId_i;
     t_WriteValuePointer_i;
 
     t_channel_i;

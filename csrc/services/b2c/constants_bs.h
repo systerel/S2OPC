@@ -52,7 +52,6 @@ typedef SOPC_ByteString* constants_bs__t_Nonce_i;
 typedef SOPC_QualifiedName* constants_bs__t_QualifiedName_i;
 typedef OpcUa_ReferenceNode* constants_bs__t_Reference_i;
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
-#define constants_bs__t_UserId_i t_entier4
 
 typedef SOPC_Variant* constants_bs__t_Variant_i;
 typedef OpcUa_WriteValue* constants_bs__t_WriteValuePointer_i;
