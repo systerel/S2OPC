@@ -118,7 +118,7 @@ build-win32:
 build-linux64-coverity:
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:96ff1f104be2fe36c1fe6b9f1154b192fda811db1826d03568a6e31a29ff5fda # 1.0
+  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:c56def87725c974b5f1333204f48d9a5329cd49341dd25130394c820c79f4c13 # 1.1
   script: |-
     mkdir build
     cd build
