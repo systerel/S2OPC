@@ -364,4 +364,15 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId c_id);
     - delete_from_subscription
 --------------------------------*/
 
+/**
+ * \brief Buffers a log message, then calls the callback configured with the LibSub.
+ *
+ */
+void Helpers_Log(const SOPC_Log_Level log_level, const char* format, ...);
+
+/**
+ * \brief Helper logger, prints a log message to stdout, with the following format "# log_level: text\n".
+ */
+void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstString text);
+
 #endif /* LIBS2OPC_CLIENT_H_ */

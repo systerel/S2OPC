@@ -32,6 +32,9 @@
 
 #include "toolkit_helpers.h"
 
+/* LibSub logger callback, wrapped by a variadic printf-like */
+static SOPC_LibSub_LogCbk cbkLog = Helpers_LoggerStdout;
+
 SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                                                    const char* szSecuPolicy,
                                                    OpcUa_MessageSecurityMode msgSecurityMode,
@@ -473,4 +476,42 @@ SOPC_LibSub_Timestamp Helpers_OPCTimeToNTP(SOPC_DateTime ts)
 
     /* seconds are always > 2**32, fraction is always < 2**32, it is possible to OR them without mask */
     return seconds | fraction;
+}
+
+void Helpers_Log(const SOPC_Log_Level log_level, const char* format, ...)
+{
+    va_list args;
+    char buffer[2048];
+
+    va_start(args, format);
+    vsprintf(buffer, format, args);
+    va_end(args);
+
+    cbkLog(log_level, buffer);
+}
+
+void Helpers_SetLogger(SOPC_LibSub_LogCbk cbk)
+{
+    cbkLog = cbk;
+}
+
+void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstString text)
+{
+    printf("# ");
+    switch (log_level)
+    {
+    case SOPC_LOG_LEVEL_ERROR:
+        printf("Error");
+        break;
+    case SOPC_LOG_LEVEL_WARNING:
+        printf("Warning");
+        break;
+    case SOPC_LOG_LEVEL_INFO:
+        printf("Info");
+        break;
+    case SOPC_LOG_LEVEL_DEBUG:
+        printf("Debug");
+        break;
+    }
+    printf(": %s\n", text);
 }

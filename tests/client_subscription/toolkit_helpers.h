@@ -31,7 +31,7 @@
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
-/* The following includes are required to fetch the SOPC_LibSub_Value and SOPC_LibSub_DataTime types */
+/* The following includes are required to fetch the SOPC_LibSub_Value, SOPC_LibSub_DataTime and logger types */
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_log_manager.h"
@@ -91,5 +91,25 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
  *        (2**-32 seconds since 1900/01/01 00:00:00 UTC).
  */
 SOPC_LibSub_Timestamp Helpers_OPCTimeToNTP(SOPC_DateTime ts);
+
+/**
+ * \brief Buffers a log message, then calls the callback configured with the LibSub.
+ *
+ * See Helpers_SetLogger().
+ *
+ */
+void Helpers_Log(const SOPC_Log_Level log_level, const char* format, ...);
+
+/**
+ * \brief Sets the \p cbk function as the called callback by Helpers_Log().
+ *
+ * The default log function outputs to the standard output.
+ */
+void Helpers_SetLogger(SOPC_LibSub_LogCbk cbk);
+
+/**
+ * \brief Prints a log message to stdout, with the following format "# log_level: text\n".
+ */
+void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstString text);
 
 #endif /* TOOLKIT_HELPERS_H_ */
