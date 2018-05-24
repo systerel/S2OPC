@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
 
 void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text)
 {
-    printf("Level %i: %s\n", log_level, text);
+    Helpers_LoggerStdout(log_level, text);
 }
 
 void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)

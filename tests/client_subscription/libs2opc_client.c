@@ -50,7 +50,6 @@
 /* Global library variables */
 static bool bLibInitialized = false;
 static bool bLibConfigured = false;
-static SOPC_LibSub_LogCbk cbkLog = NULL;
 static SOPC_LibSub_DisconnectCbk cbkDisco = NULL;
 static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId, value is SOPC_LibSub_ConnectionCfg */
 static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
@@ -93,7 +92,7 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
 
     if (SOPC_STATUS_OK == status)
     {
-        cbkLog = pCfg->host_log_callback;
+        Helpers_SetLogger(pCfg->host_log_callback);
         cbkDisco = pCfg->disconnect_callback;
         bLibInitialized = true;
         status = SOPC_Toolkit_Initialize(ToolkitEventCallback);
