@@ -702,8 +702,8 @@ add_library(client_subscription STATIC "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
                                        "${LIBSUBSCRIBE_PATH}/toolkit_helpers.c"
                                        "${LIBSUBSCRIBE_PATH}/state_machine.c"
                                        )
-add_dependencies(client_subscription ingopcs)
-target_link_libraries(client_subscription PRIVATE ingopcs) # ${INGOPCS_DEP_LIBS})
+# add_dependencies(client_subscription ${INGOPCS_STATIC_LIB})
+target_link_libraries(client_subscription PRIVATE ${INGOPCS_STATIC_LIB}) # ${INGOPCS_DEP_LIBS})
 target_include_directories(client_subscription PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 set_target_properties(client_subscription PROPERTIES PUBLIC_HEADER "${LIBSUBSCRIBE_PATH}/libs2opc_client.h")
@@ -722,7 +722,7 @@ target_link_libraries(s2opc_subscription_client PRIVATE client_subscription)
 # Helpers unit tests
 add_executable(check_libsub "${LIBSUBSCRIBE_PATH}/check_libsub.c")
 target_include_directories(check_libsub PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(check_libsub PRIVATE client_subscription ${LIBCHECK_DEP_LIB})
+target_link_libraries(check_libsub PRIVATE client_subscription ${CHECK_LIBRARIES})
 s2opc_unit_test(check_libsub)
 
 endif(ENABLE_TESTING)
