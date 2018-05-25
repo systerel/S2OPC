@@ -289,6 +289,7 @@ CONCRETE_CONSTANTS
     k_n_BrowseResponse_max,
     k_n_BrowseTarget_max,
     k_n_monitoredItem_max,
+    k_n_monitoredItemNotif_max,
 
     c_Variant_indet,
     c_NodeId_indet,
@@ -390,6 +391,7 @@ ABSTRACT_CONSTANTS
     t_monitoredItemReqIndex,
     t_monitoredItemPointer,
     t_monitoredItemId,
+    t_monitoredItemNotifIndex,
     t_buffer_in_state,
     t_msg_header,
     t_msg,
@@ -468,6 +470,7 @@ PROPERTIES
     k_n_BrowseResponse_max : NAT &
     k_n_BrowseTarget_max : NAT &
     k_n_monitoredItem_max : NAT &
+    k_n_monitoredItemNotif_max : NAT &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
@@ -502,6 +505,7 @@ PROPERTIES
     cast_t_BrowseResult : perm(t_BrowseResult) &
 
     t_monitoredItemReqIndex <: NAT &
+    t_monitoredItemNotifIndex <: NAT &
 
     t_RefIndex <: NAT &
 

@@ -233,6 +233,26 @@ OPERATIONS
     END
     ;
     
+    p_publishInterval <-- get_subscription_publishInterval (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription
+    THEN
+        p_publishInterval := a_publishInterval (p_subscription)
+    END
+    ;
+    
+    set_subscription_timer_id (p_subscription, p_timer_id) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
+        p_timer_id : t_timer_id_i  &
+        p_timer_id : t_timer_id
+    THEN
+        a_publishTimer (p_subscription) := p_timer_id
+    END
+    ;
+    
     p_timer_id <-- get_subscription_timer_id (p_subscription) =
     PRE
         p_subscription : t_subscription_i &

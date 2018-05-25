@@ -26,7 +26,6 @@ SEES
 DEFINITIONS
     d_inv == (
         nb_monitored_items : NAT &
-        nb_monitored_items : t_monitoredItemReqIndex &
         nb_monitored_items <= k_n_monitoredItem_max &
         
         MonitoredItemReq_NodeId      : t_monitoredItemReqIndex +-> t_NodeId &

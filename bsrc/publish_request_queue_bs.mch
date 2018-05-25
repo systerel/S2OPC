@@ -26,15 +26,25 @@ SEES
 ABSTRACT_VARIABLES
 
     s_publishReqQueue,
-    a_publish_responses
+    a_publish_responses,
+    a_publish_expiration_time,
+    s_expired_time_ref,
+    validPublishReqQueued
     
 INVARIANT
     s_publishReqQueue <: t_publishReqQueue &
-    a_publish_responses : t_msg +-> t_publishReqQueue
+    a_publish_responses : t_msg +-> t_publishReqQueue &
+    a_publish_expiration_time : t_msg +-> t_timeref &
+    dom(a_publish_expiration_time) = dom(a_publish_responses) &
+    s_expired_time_ref <: t_timeref & /* Represents the set of expired time references (for model only) */
+    validPublishReqQueued : BOOL
     
 INITIALISATION
     s_publishReqQueue :(s_publishReqQueue = {}) ||
-    a_publish_responses :(a_publish_responses = {})
+    a_publish_responses :(a_publish_responses = {}) ||
+    a_publish_expiration_time :(a_publish_expiration_time = {}) ||
+    s_expired_time_ref :(s_expired_time_ref <: t_timeref) ||
+    validPublishReqQueued := FALSE
 
 OPERATIONS
     
@@ -67,7 +77,7 @@ OPERATIONS
     END
     ;
     
-    bres <-- add_publish_request_to_queue (p_queue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg) =
+    bres <-- append_publish_request_to_queue (p_queue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg) =
     PRE
         p_queue : t_publishReqQueue_i &
         p_queue : s_publishReqQueue &
@@ -87,11 +97,11 @@ OPERATIONS
             bres := FALSE
         OR 
             bres := TRUE ||
-            a_publish_responses := a_publish_responses \/ {p_resp_msg |-> p_queue}
+            a_publish_responses := a_publish_responses \/ {p_resp_msg |-> p_queue} ||
+            a_publish_expiration_time := a_publish_expiration_time \/ {p_resp_msg |-> p_req_exp_time}
         END
     END
     ;
-    
     
     continue <-- init_iter_publish_request (p_queue) =
     PRE
@@ -103,7 +113,7 @@ OPERATIONS
     ;
 
     p_continue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg
-      <-- continue_pop_iter_publish_request (p_queue) =
+      <-- continue_pop_head_iter_publish_request (p_queue) =
     PRE
         p_queue : t_publishReqQueue_i &
         p_queue : s_publishReqQueue &
@@ -117,15 +127,89 @@ OPERATIONS
             p_continue := bool(a_publish_responses~[{p_queue}] /= {l_resp_msg}) ||
             a_publish_responses := a_publish_responses - {l_resp_msg |-> p_queue} ||
             p_resp_msg := l_resp_msg ||
-            p_session, p_req_exp_time, p_req_handle, p_req_ctx
-            :(
-                p_session : t_session_i &
+            a_publish_expiration_time, p_session, p_req_exp_time, p_req_handle, p_req_ctx
+            :(  p_session : t_session_i &
                 p_session : t_session &
                 p_req_exp_time : t_timeref_i &
                 p_req_exp_time : t_timeref &
                 p_req_handle : t_server_request_handle_i &
                 p_req_ctx : t_request_context_i &
-                p_req_ctx : t_request_context
+                p_req_ctx : t_request_context &
+                a_publish_expiration_time = a_publish_expiration_time$0 - {l_resp_msg |-> p_req_exp_time}
+            )
+        END
+    END
+    ;
+    
+    bres <-- is_request_expired (p_req_exp_time) =
+    PRE
+        p_req_exp_time : t_timeref_i &
+        p_req_exp_time : t_timeref
+    THEN
+        s_expired_time_ref,
+        bres
+        :(s_expired_time_ref <: t_timeref & bres = bool(p_req_exp_time /: s_expired_time_ref))
+        /* Update s_expired_time_ref and evaluation of p_req_exp_time expiration */
+    END
+    ;
+    
+    /* Used to re-enqueue the first non expired publish request found in queue */
+    bres <-- prepend_publish_request_to_queue (p_queue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg) =
+    PRE
+        p_queue : t_publishReqQueue_i &
+        p_queue : s_publishReqQueue &
+        p_session : t_session_i &
+        p_session : t_session &
+        p_req_exp_time : t_timeref_i &
+        p_req_exp_time : t_timeref &
+        p_req_exp_time /: s_expired_time_ref & /* Validated as non expired time reference only */
+        p_req_handle : t_server_request_handle_i &
+        p_req_ctx : t_request_context_i &
+        p_req_ctx : t_request_context &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_subscription_publish_resp
+    THEN
+        CHOICE
+            bres := FALSE
+        OR 
+            bres := TRUE ||
+            a_publish_responses := a_publish_responses \/ {p_resp_msg |-> p_queue} ||
+            a_publish_expiration_time := a_publish_expiration_time \/ {p_resp_msg |-> p_req_exp_time} ||
+            validPublishReqQueued := TRUE
+        END
+    END
+    ;
+    
+    /* Used to dequeue a non expired publish request:  */
+    p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg
+      <-- pop_head_publish_request_queue (p_queue) =
+    PRE
+        p_queue : t_publishReqQueue_i &
+        p_queue : s_publishReqQueue &
+        a_publish_responses~[{p_queue}] /= {} &
+        validPublishReqQueued = TRUE
+    THEN
+        ANY l_resp_msg WHERE
+            l_resp_msg : t_msg_i &
+            l_resp_msg : t_msg &
+            l_resp_msg |-> p_queue : a_publish_responses
+        THEN
+            a_publish_responses := a_publish_responses - {l_resp_msg |-> p_queue} ||
+            validPublishReqQueued := FALSE ||
+            p_resp_msg := l_resp_msg ||
+            a_publish_expiration_time, p_session, p_req_exp_time, p_req_handle, p_req_ctx
+            :(
+                p_session : t_session_i &
+                p_session : t_session &
+                p_req_exp_time : t_timeref_i &
+                p_req_exp_time : t_timeref &
+                p_req_exp_time /: s_expired_time_ref & /* Validated as non expired time reference only */
+                p_req_handle : t_server_request_handle_i &
+                p_req_ctx : t_request_context_i &
+                p_req_ctx : t_request_context &
+                a_publish_expiration_time = a_publish_expiration_time$0 - {l_resp_msg |-> p_req_exp_time}
             )
         END
     END

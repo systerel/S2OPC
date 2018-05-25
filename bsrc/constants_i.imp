@@ -37,7 +37,8 @@ PROPERTIES
     cast_t_BrowseValue = id(t_BrowseValue) &
     
     t_monitoredItemReqIndex = 1..k_n_monitoredItem_max &
-    cast_t_BrowseValue = id(t_BrowseValue)
+    
+    t_monitoredItemNotifIndex = 1..k_n_monitoredItemNotif_max
 
 VALUES
 

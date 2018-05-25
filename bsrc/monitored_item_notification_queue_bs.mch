@@ -23,17 +23,20 @@ SEES
     
 ABSTRACT_VARIABLES
     s_notificationQueue,
-    a_monitored_item_notifications
+    a_monitored_item_notifications,
+    monitored_item_notification_queue_iter
     
 INVARIANT
     s_notificationQueue <: t_notificationQueue &
-    a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItemPointer  
+    a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItemPointer  &
     /* In C implementation, same monitored item can be present several times (multiple notifications) 
-       but it will not change the proof constraints when dequeueing. Therefor it is a simplified representation. */
-    
+       but it will not change the proof constraints when dequeueing. Therefore it is a simplified representation. */
+    monitored_item_notification_queue_iter : s_notificationQueue
+       
 INITIALISATION
     s_notificationQueue :(s_notificationQueue = {}) ||
-    a_monitored_item_notifications :(a_monitored_item_notifications = {})
+    a_monitored_item_notifications :(a_monitored_item_notifications = {}) ||
+    monitored_item_notification_queue_iter := c_notificationQueue_indet
 
 OPERATIONS
     
@@ -74,7 +77,7 @@ OPERATIONS
                                                              p_ValueSc) =
     PRE
         p_queue : t_notificationQueue_i &
-        p_queue : t_notificationQueue &
+        p_queue : s_notificationQueue &
         p_monitoredItem : t_monitoredItemPointer_i &
         p_monitoredItem : t_monitoredItemPointer &
         p_nid : t_NodeId_i &
@@ -100,7 +103,7 @@ OPERATIONS
                                                        p_writeValuePointer) =
     PRE
         p_queue : t_notificationQueue_i &
-        p_queue : t_notificationQueue &
+        p_queue : s_notificationQueue &
         p_monitoredItem : t_monitoredItemPointer_i &
         p_monitoredItem : t_monitoredItemPointer &
         p_writeValuePointer : t_WriteValuePointer_i &
@@ -115,13 +118,13 @@ OPERATIONS
     END
     ;
     
-    
-    continue <-- init_iter_monitored_item_notification (p_queue) =
+    p_nb_notifications <-- init_iter_monitored_item_notification (p_queue) =
     PRE
         p_queue : t_notificationQueue_i &
-        p_queue : t_notificationQueue
+        p_queue : s_notificationQueue
     THEN
-        continue := bool(card(a_monitored_item_notifications[{p_queue}]) > 0)
+        p_nb_notifications := card(a_monitored_item_notifications[{p_queue}]) ||
+        monitored_item_notification_queue_iter := p_queue
     END
     ;
 
@@ -130,24 +133,19 @@ OPERATIONS
     p_writeValuePointer <-- continue_pop_iter_monitor_item_notification (p_queue) =
     PRE
         p_queue : t_notificationQueue_i &
-        p_queue : t_notificationQueue
+        p_queue : s_notificationQueue &
+        a_monitored_item_notifications[{p_queue}] /= {} &
+        monitored_item_notification_queue_iter = p_queue
     THEN
-        IF p_queue : dom(a_monitored_item_notifications)
+        ANY l_monitoredItem WHERE
+            l_monitoredItem : t_monitoredItemPointer_i &
+            l_monitoredItem : t_monitoredItemPointer &
+            l_monitoredItem : a_monitored_item_notifications[{p_queue}]
         THEN
-            ANY l_monitoredItem WHERE
-                l_monitoredItem : t_monitoredItemPointer_i &
-                l_monitoredItem : t_monitoredItemPointer &
-                l_monitoredItem : a_monitored_item_notifications[{p_queue}]
-            THEN
-                p_continue := TRUE ||
-                a_monitored_item_notifications := a_monitored_item_notifications - {p_queue |-> l_monitoredItem} ||                 
-                p_monitoredItem := l_monitoredItem ||
-                p_writeValuePointer :(p_writeValuePointer : t_WriteValuePointer_i & p_writeValuePointer : t_WriteValuePointer)
-            END
-        ELSE
-            p_continue := FALSE ||
-            p_monitoredItem := c_monitoredItemPointer_indet ||
-            p_writeValuePointer := c_WriteValuePointer_indet
+            p_continue := bool(a_monitored_item_notifications[{p_queue}] /= {l_monitoredItem}) ||
+            a_monitored_item_notifications := a_monitored_item_notifications - {p_queue |-> l_monitoredItem} ||                 
+            p_monitoredItem := l_monitoredItem ||
+            p_writeValuePointer :(p_writeValuePointer : t_WriteValuePointer_i & p_writeValuePointer : t_WriteValuePointer)
         END
     END
 

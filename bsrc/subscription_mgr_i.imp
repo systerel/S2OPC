@@ -26,7 +26,8 @@ SEES
     message_out_bs,
     write_value_pointer_bs,
     address_space,
-    request_handle_bs
+    request_handle_bs,
+    msg_subscription_publish_bs
     
 DEFINITIONS
     "definitions.def"
@@ -34,7 +35,6 @@ DEFINITIONS
 IMPORTS
     subscription_core,
     msg_subscription_create_bs,
-    msg_subscription_publish_bs,
     msg_subscription_create_monitored_item,
     subscription_create_monitored_item_it,
     monitored_item_queue_it_bs
@@ -44,12 +44,13 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    fill_publish_response_msg (p_resp_msg, p_subscription, p_notifMsg) =
+    fill_publish_response_msg (p_resp_msg, p_subscription, p_notifMsg, p_moreNotifs) =
     PRE
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_subscription : t_subscription_i & p_subscription : t_subscription &
-        p_notifMsg : t_notif_msg_i /* indet in case of keep alive response */
+        p_notifMsg : t_notif_msg_i &
+        p_moreNotifs : BOOL
     THEN
         skip
     END
@@ -128,7 +129,7 @@ LOCAL_OPERATIONS
                         {a_pendingNotificationQueue(p_subscription)} <<| a_monitored_item_notifications$0 &
                        /* add monitored item to both queues (per subscription + per node) */
                        card(a_defined_monitored_items - a_defined_monitored_items$0) =  2
-                       )                     
+                       )
          )
     END
     ;
@@ -145,19 +146,28 @@ LOCAL_OPERATIONS
     THEN
         /* notifications may have been triggered */
         a_monitored_item_notifications
-        :(card(a_monitored_item_notifications - a_monitored_item_notifications$0) >= 0)
+        :(a_monitored_item_notifications$0 <: a_monitored_item_notifications)
+        /* Note: if NodeId / AttributeId are represented in t_WriteValuePointer, 
+           it is possible to describe first part of criteria to generate notification.
+           But other filters will be necessary (index array, ...) */
     END
 
 OPERATIONS
     
     /* LOCAL OPERATIONS */
-    fill_publish_response_msg (p_resp_msg, p_subscription, p_notifMsg) =
-    BEGIN
+    fill_publish_response_msg (p_resp_msg, p_subscription, p_notifMsg, p_moreNotifs) =
+    VAR
+        l_valid_notif_msg
+    IN
         set_msg_publish_resp_subscription (p_resp_msg, p_subscription);
         /* TODO: fill the availableSeqNum of message: */
         /* - allocate availableSequenceNumbers
         - iter on seq nums based on nb_avail_seq_nums */
-        set_msg_publish_resp_notificationMsg (p_resp_msg, p_notifMsg)
+        l_valid_notif_msg <-- is_valid_notif_msg (p_notifMsg);
+        IF l_valid_notif_msg = TRUE
+        THEN          
+            set_msg_publish_resp_notificationMsg (p_resp_msg, p_notifMsg, p_moreNotifs)
+        END
     END
     ;
     
@@ -237,7 +247,7 @@ OPERATIONS
             /* A reprendre pour chaque code de retour */
             MonitoredItemResp_StatusCode =
             %mi_index.(mi_index : t_monitoredItemReqIndex &
-                       mi_index : 1..nb_monitored_items &
+                       mi_index : rreqs_iterated &
                        /* ith node id has a node in the Address Space */
                        mi_index : dom(MonitoredItemReq_NodeId) &
                        MonitoredItemReq_NodeId(mi_index) : dom(a_NodeId~) &
@@ -255,9 +265,9 @@ OPERATIONS
             ) &
             MonitoredItemResp_Id =
             %mi_index.(mi_index : t_monitoredItemReqIndex &
-                       mi_index : 1..nb_monitored_items
+                       mi_index : rreqs_iterated
                        |
-                         {TRUE |-> c_monitoredItemId_indet, /* TODO: a new monitoredItemId */
+                         {TRUE |-> c_monitoredItemId_indet, /* € s_id & s_id /\ s_id$0 = {} */
                           FALSE |-> c_monitoredItemId_indet}
                          (bool(MonitoredItemResp_StatusCode (mi_index) = e_sc_ok))
             )
@@ -381,7 +391,8 @@ OPERATIONS
         /*l_nb_subsciptionAcks,
         l_nb_avail_seq_nums,*/
         l_subscription,
-        l_notifMsg
+        l_notifMsg,
+        l_moreNotifs
     IN
         async_resp_msg := FALSE;
         l_session_has_subscription, l_sub <-- getall_subscription (p_session);
@@ -395,13 +406,13 @@ OPERATIONS
             /* TODO: iter on sub_acks in LOCAL OP and ack it using acknowledge_publish_response (sub_id, seq_num) + fill results[] in resp :           
             <=> fill_read_response */
             
-            StatusCode_service, async_resp_msg, l_subscription, l_notifMsg 
+            StatusCode_service, async_resp_msg, l_subscription, l_notifMsg, l_moreNotifs
               <-- receive_publish_request (p_session, l_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg);
 
             IF StatusCode_service = e_sc_ok &
                 async_resp_msg = FALSE
             THEN
-                fill_publish_response_msg (p_resp_msg, l_subscription, l_notifMsg)
+                fill_publish_response_msg (p_resp_msg, l_subscription, l_notifMsg, l_moreNotifs)
             END
         ELSE
             StatusCode_service := e_sc_bad_no_subscription
@@ -465,6 +476,7 @@ OPERATIONS
     VAR
         l_closeSubscription,
         l_msg_to_send,
+        l_msg_sc,
         l_session,
         l_publish_resp_msg,
         l_req_handle,
@@ -477,17 +489,17 @@ OPERATIONS
           <-- server_subscription_core_publish_timeout_check_lifetime (p_subscription);
         IF l_closeSubscription = FALSE
         THEN
-            l_msg_to_send, l_session, l_publish_resp_msg, l_req_handle, l_req_context, l_notifMsg, l_moreNotifs, l_morePubReqs
+            l_msg_to_send, l_msg_sc, l_session, l_publish_resp_msg, 
+            l_req_handle, l_req_context, l_notifMsg, l_moreNotifs, l_morePubReqs
               <-- server_subscription_core_publish_timeout (p_subscription);
             IF l_msg_to_send = TRUE
             THEN
-                /* TODO: if l_moreNotifs = TRUE => encode it in service status code ! */
-                fill_publish_response_msg (l_publish_resp_msg, p_subscription, l_notifMsg);
+                fill_publish_response_msg (l_publish_resp_msg, p_subscription, l_notifMsg, l_moreNotifs);
                 generate_internal_send_publish_response_event (l_session, 
                                                                l_publish_resp_msg, 
                                                                l_req_handle,
                                                                l_req_context,
-                                                               e_sc_ok);
+                                                               l_msg_sc);
                 IF l_moreNotifs = TRUE & l_morePubReqs = TRUE
                 THEN
                     skip
@@ -503,7 +515,7 @@ OPERATIONS
             IF l_msg_to_send = TRUE /* Seems to be impossible: see server_subscription_core_publish_timeout_check_lifetime */
             THEN
                 /* Fill IssueStatusChangedNotification message */
-                fill_publish_response_msg (l_publish_resp_msg, p_subscription, l_notifMsg);
+                fill_publish_response_msg (l_publish_resp_msg, p_subscription, l_notifMsg, FALSE);
                 generate_internal_send_publish_response_event (l_session, 
                                                                l_publish_resp_msg, 
                                                                l_req_handle, 

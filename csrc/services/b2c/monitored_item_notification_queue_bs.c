@@ -123,23 +123,27 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
     t_bool* const monitored_item_notification_queue_bs__bres)
 {
     *monitored_item_notification_queue_bs__bres = false;
-    SOPC_InternalNotificationElement* notifElt = malloc(sizeof(SOPC_InternalNotificationElement));
-    SOPC_InternalNotificationElement* checkAdded = NULL;
-    if (NULL != notifElt)
+    if (SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) <
+        INT32_MAX) // number of notifications returned in B model as a int32
     {
-        notifElt->monitoredItemPointer = monitored_item_notification_queue_bs__p_monitoredItem;
-        notifElt->value = monitored_item_notification_queue_bs__p_writeValuePointer;
-        checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
-        if (checkAdded == notifElt)
+        SOPC_InternalNotificationElement* notifElt = malloc(sizeof(SOPC_InternalNotificationElement));
+        SOPC_InternalNotificationElement* checkAdded = NULL;
+        if (NULL != notifElt)
         {
-            *monitored_item_notification_queue_bs__bres = true;
-        }
-        else
-        {
-            free(notifElt);
-            /* TODO: valid write values not represented in B model, if it is the case late deallocate in B model*/
-            OpcUa_WriteValue_Clear(monitored_item_notification_queue_bs__p_writeValuePointer);
-            free(monitored_item_notification_queue_bs__p_writeValuePointer);
+            notifElt->monitoredItemPointer = monitored_item_notification_queue_bs__p_monitoredItem;
+            notifElt->value = monitored_item_notification_queue_bs__p_writeValuePointer;
+            checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
+            if (checkAdded == notifElt)
+            {
+                *monitored_item_notification_queue_bs__bres = true;
+            }
+            else
+            {
+                free(notifElt);
+                /* TODO: valid write values not represented in B model, if it is the case late deallocate in B model*/
+                OpcUa_WriteValue_Clear(monitored_item_notification_queue_bs__p_writeValuePointer);
+                free(monitored_item_notification_queue_bs__p_writeValuePointer);
+            }
         }
     }
 }
@@ -165,11 +169,8 @@ void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notifi
 
 void monitored_item_notification_queue_bs__init_iter_monitored_item_notification(
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
-    t_bool* const monitored_item_notification_queue_bs__continue)
+    t_entier4* const monitored_item_notification_queue_bs__p_nb_notifications)
 {
-    *monitored_item_notification_queue_bs__continue = false;
-    if (SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) > 0)
-    {
-        *monitored_item_notification_queue_bs__continue = true;
-    }
+    *monitored_item_notification_queue_bs__p_nb_notifications =
+        (int32_t) SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue);
 }

@@ -203,3 +203,17 @@ void subscription_core_bs__delete_publish_timer(const constants__t_timer_id_i su
 {
     SOPC_EventTimer_Cancel(subscription_core_bs__p_timer_id);
 }
+
+void subscription_core_bs__get_next_subscription_sequence_number(
+    const constants__t_sub_seq_num_i subscription_core_bs__p_prev_seq_num,
+    constants__t_sub_seq_num_i* const subscription_core_bs__p_next_seq_num)
+{
+    if (subscription_core_bs__p_prev_seq_num == UINT32_MAX)
+    {
+        *subscription_core_bs__p_next_seq_num = constants__c_sub_seq_num_init;
+    }
+    else
+    {
+        *subscription_core_bs__p_next_seq_num = subscription_core_bs__p_prev_seq_num + 1;
+    }
+}

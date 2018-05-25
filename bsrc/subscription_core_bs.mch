@@ -103,5 +103,14 @@ OPERATIONS
     THEN
         skip
     END
+    ;
+    
+    p_next_seq_num <-- get_next_subscription_sequence_number (p_prev_seq_num) =
+    PRE
+        p_prev_seq_num : t_sub_seq_num_i &
+        p_prev_seq_num : t_sub_seq_num
+    THEN
+        p_next_seq_num :(p_next_seq_num : t_sub_seq_num_i & p_next_seq_num : t_sub_seq_num)
+    END
     
 END

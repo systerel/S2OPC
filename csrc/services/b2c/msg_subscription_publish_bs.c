@@ -20,6 +20,7 @@
 #include "util_b2c.h"
 
 #include "sopc_services_api_internal.h"
+#include "sopc_time.h"
 #include "sopc_types.h"
 
 /*--------------
@@ -40,6 +41,69 @@ void msg_subscription_publish_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void msg_subscription_publish_bs__alloc_notification_message(
+    const t_entier4 msg_subscription_publish_bs__p_nb_monitored_item_notifications,
+    t_bool* const msg_subscription_publish_bs__bres,
+    constants__t_notif_msg_i* const msg_subscription_publish_bs__p_notifMsg)
+{
+    *msg_subscription_publish_bs__bres = false;
+    OpcUa_NotificationMessage* notifMsg = NULL;
+    OpcUa_DataChangeNotification* dataChangeNotif = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    if ((uint64_t) msg_subscription_publish_bs__p_nb_monitored_item_notifications <
+        SIZE_MAX / sizeof(OpcUa_MonitoredItemNotification))
+    {
+        SOPC_Encodeable_Create(&OpcUa_NotificationMessage_EncodeableType, (void**) &notifMsg);
+        if (NULL != notifMsg)
+        {
+            notifMsg->PublishTime = SOPC_Time_GetCurrentTimeUTC();
+            notifMsg->NoOfNotificationData =
+                1; // Only 1 DataChangeNotification supported (not event & no status change)
+
+            // Create the extension object
+            notifMsg->NotificationData = malloc(sizeof(SOPC_ExtensionObject));
+
+            if (NULL != notifMsg->NotificationData)
+            {
+                SOPC_ExtensionObject_Initialize(notifMsg->NotificationData);
+                // Create the notification data extension object
+                status = SOPC_Encodeable_CreateExtension(notifMsg->NotificationData,
+                                                         &OpcUa_DataChangeNotification_EncodeableType,
+                                                         (void**) &dataChangeNotif);
+
+                if (SOPC_STATUS_OK != status)
+                {
+                    free(notifMsg->NotificationData);
+                    SOPC_Encodeable_Delete(&OpcUa_NotificationMessage_EncodeableType, (void**) &notifMsg);
+                }
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                dataChangeNotif->NoOfMonitoredItems = msg_subscription_publish_bs__p_nb_monitored_item_notifications;
+                dataChangeNotif->MonitoredItems =
+                    malloc((size_t) msg_subscription_publish_bs__p_nb_monitored_item_notifications *
+                           sizeof(OpcUa_MonitoredItemNotification));
+
+                if (NULL != dataChangeNotif->MonitoredItems)
+                {
+                    for (int32_t i = 0; i < msg_subscription_publish_bs__p_nb_monitored_item_notifications; i++)
+                    {
+                        OpcUa_MonitoredItemNotification_Initialize(&dataChangeNotif->MonitoredItems[i]);
+                    }
+                    *msg_subscription_publish_bs__p_notifMsg = notifMsg;
+                    *msg_subscription_publish_bs__bres = true;
+                }
+                else
+                {
+                    SOPC_Encodeable_Delete(&OpcUa_NotificationMessage_EncodeableType, (void**) &notifMsg);
+                }
+            }
+        }
+    }
+}
+
 void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
     const constants__t_session_i msg_subscription_publish_bs__p_session,
     const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg,
@@ -95,16 +159,22 @@ void msg_subscription_publish_bs__get_msg_header_expiration_time(
         SOPC_TimeReference_AddMilliseconds(*msg_subscription_publish_bs__req_expiration_time, millisecondsToTarget);
 }
 
+void msg_subscription_publish_bs__is_valid_notif_msg(
+    const constants__t_notif_msg_i msg_subscription_publish_bs__p_notifMsg,
+    t_bool* const msg_subscription_publish_bs__bres)
+{
+    *msg_subscription_publish_bs__bres = msg_subscription_publish_bs__p_notifMsg != NULL;
+}
+
 void msg_subscription_publish_bs__set_msg_publish_resp_notificationMsg(
     const constants__t_msg_i msg_subscription_publish_bs__p_resp_msg,
-    const constants__t_notif_msg_i msg_subscription_publish_bs__p_notifMsg)
+    const constants__t_notif_msg_i msg_subscription_publish_bs__p_notifMsg,
+    const t_bool msg_subscription_publish_bs__p_moreNotifs)
 {
-    if (msg_subscription_publish_bs__p_notifMsg != constants__c_notif_msg_indet)
-    {
-        OpcUa_PublishResponse* pubResp = (OpcUa_PublishResponse*) msg_subscription_publish_bs__p_resp_msg;
-        pubResp->NotificationMessage = *msg_subscription_publish_bs__p_notifMsg;
-        free(msg_subscription_publish_bs__p_notifMsg);
-    }
+    OpcUa_PublishResponse* pubResp = (OpcUa_PublishResponse*) msg_subscription_publish_bs__p_resp_msg;
+    pubResp->NotificationMessage = *msg_subscription_publish_bs__p_notifMsg;
+    free(msg_subscription_publish_bs__p_notifMsg);
+    pubResp->MoreNotifications = msg_subscription_publish_bs__p_moreNotifs;
 }
 
 void msg_subscription_publish_bs__set_msg_publish_resp_subscription(
@@ -113,4 +183,30 @@ void msg_subscription_publish_bs__set_msg_publish_resp_subscription(
 {
     OpcUa_PublishResponse* pubResp = (OpcUa_PublishResponse*) msg_subscription_publish_bs__p_resp_msg;
     pubResp->SubscriptionId = (uint32_t) msg_subscription_publish_bs__p_subscription;
+}
+
+void msg_subscription_publish_bs__set_notification_message_sequence_number(
+    const constants__t_notif_msg_i msg_subscription_publish_bs__p_notifMsg,
+    const constants__t_sub_seq_num_i msg_subscription_publish_bs__p_seq_num)
+{
+    msg_subscription_publish_bs__p_notifMsg->SequenceNumber = msg_subscription_publish_bs__p_seq_num;
+}
+
+void msg_subscription_publish_bs__setall_notification_msg_monitored_item_notif(
+    const constants__t_notif_msg_i msg_subscription_publish_bs__p_notifMsg,
+    const t_entier4 msg_subscription_publish_bs__p_index,
+    const constants__t_monitoredItemId_i msg_subscription_publish_bs__p_monitored_item_id,
+    const constants__t_client_handle_i msg_subscription_publish_bs__p_clientHandle,
+    const constants__t_WriteValuePointer_i msg_subscription_publish_bs__p_wv_pointer)
+{
+    (void) msg_subscription_publish_bs__p_monitored_item_id;
+    OpcUa_DataChangeNotification* dataChangeNotif =
+        (OpcUa_DataChangeNotification*) msg_subscription_publish_bs__p_notifMsg->NotificationData->Body.Object.Value;
+    dataChangeNotif->MonitoredItems[msg_subscription_publish_bs__p_index - 1].ClientHandle =
+        msg_subscription_publish_bs__p_clientHandle;
+    SOPC_DataValue_Copy(&dataChangeNotif->MonitoredItems[msg_subscription_publish_bs__p_index - 1].Value,
+                        &msg_subscription_publish_bs__p_wv_pointer->Value);
+
+    OpcUa_WriteValue_Clear(msg_subscription_publish_bs__p_wv_pointer);
+    free(msg_subscription_publish_bs__p_wv_pointer);
 }
