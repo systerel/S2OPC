@@ -24,6 +24,7 @@
 #ifndef SOPC_SINGLY_LINKED_LIST_H_
 #define SOPC_SINGLY_LINKED_LIST_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -159,6 +160,15 @@ void SOPC_SLinkedList_EltGenericFree(uint32_t id, void* val);
  * \return          An iterator on the given linked list
  */
 SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list);
+
+/**
+ * \brief           Return true if iterator has a non NULL value to provide on next iteration
+ *
+ * \param it        An iterator on a linked list
+ *
+ * \return          true if iterator has a non NULL value to provide on next iteration, false otherwise
+ */
+bool SOPC_SLinkedList_HasNext(SOPC_SLinkedListIterator* it);
 
 /**
  * \brief           Return the next element pointed by iterator in the linked list  (LIFO behavior)

@@ -382,6 +382,18 @@ void* SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* pId)
     return value;
 }
 
+bool SOPC_SLinkedList_HasNext(SOPC_SLinkedListIterator* it)
+{
+    SOPC_SLinkedList_Elt* elt = NULL;
+    bool result = false;
+    if (it != NULL && *it != NULL)
+    {
+        elt = *it;
+        result = elt->value != NULL;
+    }
+    return result;
+}
+
 void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it)
 {
     return SOPC_SLinkedList_NextWithId(it, NULL);
