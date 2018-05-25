@@ -65,40 +65,6 @@ void monitored_item_queue_bs__add_monitored_item_to_queue(
                             monitored_item_queue_bs__p_monitoredItem);
 }
 
-void monitored_item_queue_bs__continue_iter_monitored_item(
-    const constants__t_monitoredItemQueueIterator_i monitored_item_queue_bs__p_iterator,
-    const constants__t_monitoredItemQueue_i monitored_item_queue_bs__p_queue,
-    t_bool* const monitored_item_queue_bs__continue,
-    constants__t_monitoredItemPointer_i* const monitored_item_queue_bs__p_monitoredItem)
-{
-    (void) monitored_item_queue_bs__p_queue;
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_SLinkedListIterator it = (SOPC_SLinkedListIterator) monitored_item_queue_bs__p_iterator;
-    SOPC_GCC_DIAGNOSTIC_RESTORE
-    *monitored_item_queue_bs__continue = false;
-    *monitored_item_queue_bs__p_monitoredItem = SOPC_SLinkedList_Next(&it);
-    if (NULL != *monitored_item_queue_bs__p_monitoredItem)
-    {
-        *monitored_item_queue_bs__continue = true;
-    }
-}
-
-void monitored_item_queue_bs__init_iter_monitored_item(
-    const constants__t_monitoredItemQueue_i monitored_item_queue_bs__p_queue,
-    t_bool* const monitored_item_queue_bs__continue,
-    constants__t_monitoredItemQueueIterator_i* const monitored_item_queue_bs__iterator)
-{
-    *monitored_item_queue_bs__continue = false;
-    if (SOPC_SLinkedList_GetLength(monitored_item_queue_bs__p_queue) > 0)
-    {
-        *monitored_item_queue_bs__iterator = SOPC_SLinkedList_GetIterator(monitored_item_queue_bs__p_queue);
-        if (*monitored_item_queue_bs__iterator != NULL)
-        {
-            *monitored_item_queue_bs__continue = true;
-        }
-    }
-}
-
 void monitored_item_queue_bs__remove_monitored_item(
     const constants__t_monitoredItemQueue_i monitored_item_queue_bs__p_queue,
     const constants__t_monitoredItemPointer_i monitored_item_queue_bs__p_monitoredItem,

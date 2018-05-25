@@ -29,6 +29,7 @@ DEFINITIONS
     s_monitoredItemPointer,
     s_monitoredItemId,
     a_monitoredItemId,
+    a_monitoredItemSubs,
     a_subscription_session,
     a_publishInterval,
     a_lifetimeExpCount,
@@ -83,7 +84,8 @@ DEFINITIONS
     /* Subscription Implementation variables */
     s_monitoredItemPointer <: t_monitoredItemPointer &
     s_monitoredItemId <: t_monitoredItemId &
-    a_monitoredItemId : s_monitoredItemPointer <-> t_monitoredItemId &
+    a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
+    a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
     
     s_notificationQueue <: t_notificationQueue &
     a_pendingNotificationQueue : s_subscription --> s_notificationQueue &
@@ -254,6 +256,7 @@ INITIALISATION
     s_monitoredItemPointer := {} ||
     s_monitoredItemId := {} ||
     a_monitoredItemId := {} ||
+    a_monitoredItemSubs := {} ||
     /* Queues content */
     
     s_publishReqQueue := {} ||
@@ -841,16 +844,6 @@ OPERATIONS
     END
     ;
     
-    p_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_nid) =
-    PRE
-        p_nid : t_NodeId_i &
-        p_nid : t_NodeId
-    THEN
-        p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i & 
-                               p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid))
-    END
-    ;
-    
     server_subscription_add_notification (p_subscription, p_monitoredItemPointer, p_writeValuePointer) =
     PRE
         p_subscription : t_subscription_i &
@@ -864,5 +857,64 @@ OPERATIONS
         a_monitored_item_notifications := 
           a_monitored_item_notifications \/ {a_pendingNotificationQueue(p_subscription) |-> p_monitoredItemPointer}
     END
-        
+    ;
+    
+    p_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_nid) =
+    PRE
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId
+    THEN
+        p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i & 
+                               p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid))
+    END
+    ;
+    
+    p_monitoredItemId,
+    p_subscription,
+    p_nid,
+    p_aid,
+    p_timestampToReturn,
+    p_monitoringMode,
+    p_clientHandle 
+      <--getall_monitoredItemPointer (p_monitoredItemPointer) =
+    PRE
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : s_monitoredItemPointer
+    THEN
+        p_monitoredItemId,
+        p_subscription,
+        p_nid,
+        p_aid,
+        p_timestampToReturn,
+        p_monitoringMode,
+        p_clientHandle
+        :(p_monitoredItemId : t_monitoredItemId_i &
+          p_monitoredItemId = a_monitoredItemId(p_monitoredItemPointer) &
+          p_subscription : t_subscription_i &
+          p_subscription : t_subscription &
+          p_nid : t_NodeId_i &
+          p_nid : t_NodeId &        
+          p_aid : t_AttributeId_i &
+          p_aid : t_AttributeId &
+          p_timestampToReturn : t_TimestampsToReturn_i &
+          p_timestampToReturn : t_TimestampsToReturn &
+          p_monitoringMode : t_monitoringMode_i &
+          p_monitoringMode : t_monitoringMode &
+          p_clientHandle : t_client_handle_i
+        )
+    END
+    ;
+    
+    bres <-- is_notification_triggered (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer) =
+    PRE
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : t_monitoredItemPointer &
+        p_old_wv_pointer : t_WriteValuePointer_i &
+        p_old_wv_pointer : t_WriteValuePointer &
+        p_new_wv_pointer : t_WriteValuePointer_i &
+        p_new_wv_pointer : t_WriteValuePointer
+    THEN
+        bres :: BOOL
+    END
+
 END

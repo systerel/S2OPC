@@ -96,40 +96,5 @@ OPERATIONS
             a_defined_monitored_items := a_defined_monitored_items - {p_queue |-> p_monitoredItem}
         END
     END
-    ;
-    
-    continue, iterator <-- init_iter_monitored_item (p_queue) =
-    PRE
-        p_queue : t_monitoredItemQueue_i &
-        p_queue : t_monitoredItemQueue
-    THEN
-        continue,
-        iterator
-        :(continue : BOOL &
-          iterator : t_monitoredItemQueueIterator_i &
-          (continue = TRUE => 
-            iterator : t_monitoredItemQueueIterator)
-        )
-    END
-    ;
 
-    continue, 
-    p_monitoredItem <-- continue_iter_monitored_item (p_iterator, p_queue) =
-    PRE
-        p_iterator : t_monitoredItemQueueIterator_i &
-        p_iterator : t_monitoredItemQueueIterator &
-        p_queue : t_monitoredItemQueue_i &
-        p_queue : t_monitoredItemQueue
-    THEN
-        continue,
-        p_monitoredItem
-        :(continue : BOOL &
-            p_monitoredItem : t_monitoredItemPointer_i &
-            (continue = TRUE =>  
-              p_monitoredItem : t_monitoredItemPointer &
-              p_monitoredItem : ran({p_queue} <| a_defined_monitored_items)
-            )
-        )
-    END
-    
 END

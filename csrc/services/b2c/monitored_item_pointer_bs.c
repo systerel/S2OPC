@@ -190,3 +190,41 @@ void monitored_item_pointer_bs__getall_monitoredItemPointer(
     *monitored_item_pointer_bs__p_monitoringMode = monitItem->monitoringMode;
     *monitored_item_pointer_bs__p_clientHandle = monitItem->clientHandle;
 }
+
+void monitored_item_pointer_bs__is_notification_triggered(
+    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
+    const constants__t_WriteValuePointer_i monitored_item_pointer_bs__p_old_wv_pointer,
+    const constants__t_WriteValuePointer_i monitored_item_pointer_bs__p_new_wv_pointer,
+    t_bool* const monitored_item_pointer_bs__bres)
+{
+    *monitored_item_pointer_bs__bres = false;
+    bool res = false;
+    uint32_t miAttributeId = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    int32_t dtCompare = 0;
+    SOPC_InternalMontitoredItem* monitItem = monitored_item_pointer_bs__p_monitoredItemPointer;
+    // We already know that it is the same NodeId, check for attribute Id
+    // TODO: check index if monitored item on an index of an array !
+    res = util_AttributeId__B_to_C(monitItem->aid, &miAttributeId);
+    if (false != res && monitored_item_pointer_bs__p_new_wv_pointer->AttributeId == miAttributeId)
+    {
+        // Same attribute, now compare values (no filters managed for now)
+        status = SOPC_DataValue_Compare(&monitored_item_pointer_bs__p_old_wv_pointer->Value,
+                                        &monitored_item_pointer_bs__p_new_wv_pointer->Value, &dtCompare);
+        if (SOPC_STATUS_OK == status)
+        {
+            if (dtCompare != 0)
+            {
+                // Generate a notification
+                *monitored_item_pointer_bs__bres = true;
+            }
+        }
+        else
+        {
+            SOPC_Logger_TraceError(
+                "MonitoredItem notification trigger: comparison of data values failed with (type, array type)=(%d, %d)",
+                monitored_item_pointer_bs__p_new_wv_pointer->Value.Value.BuiltInTypeId,
+                monitored_item_pointer_bs__p_new_wv_pointer->Value.Value.ArrayType);
+        }
+    }
+}

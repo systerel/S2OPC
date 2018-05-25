@@ -36,7 +36,8 @@ IMPORTS
     msg_subscription_create_bs,
     msg_subscription_publish_bs,
     msg_subscription_create_monitored_item,
-    subscription_create_monitored_item_it
+    subscription_create_monitored_item_it,
+    monitored_item_queue_it_bs
     
 PROMOTES
     is_valid_subscription
@@ -76,7 +77,9 @@ LOCAL_OPERATIONS
         MonitoredItemResp_Id,
         s_monitoredItemPointer,
         s_monitoredItemId,
-        a_monitoredItemId
+        a_monitoredItemId,
+        a_defined_monitored_items,
+        a_monitored_item_notifications
         :(
             MonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode &
             MonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId &
@@ -114,14 +117,36 @@ LOCAL_OPERATIONS
             !mi_index.(mi_index : t_monitoredItemReqIndex &
                        mi_index : 1..nb_monitored_items &
                        MonitoredItemResp_StatusCode (mi_index) = e_sc_ok
-                       => 
-                       card(s_monitoredItemPointer) = card(s_monitoredItemPointer$0) + 1 &
-                       card(s_monitoredItemId) = card(s_monitoredItemId$0) + 1 &
-                       card(a_monitoredItemId) = card(a_monitoredItemId) + 1
+                       =>
+                       card(s_monitoredItemPointer - s_monitoredItemPointer$0) = 1 &
+                       card(s_monitoredItemId - s_monitoredItemId$0) = 1 &
+                       card(a_monitoredItemId - a_monitoredItemId$0) = 1 &
+                       /* a notification is enqueued with current value of monitored item */
+                       card(({a_pendingNotificationQueue(p_subscription)} <| a_monitored_item_notifications) -
+                            ({a_pendingNotificationQueue(p_subscription)} <| a_monitored_item_notifications$0)) = 1 &
+                       {a_pendingNotificationQueue(p_subscription)} <<| a_monitored_item_notifications =
+                        {a_pendingNotificationQueue(p_subscription)} <<| a_monitored_item_notifications$0 &
+                       /* add monitored item to both queues (per subscription + per node) */
+                       card(a_defined_monitored_items - a_defined_monitored_items$0) =  2
                        )                     
          )
-    END      
+    END
+    ;
     
+
+    create_notification_on_monitored_items_if_data_changed (p_monitoredItemQueue, p_old_wv_pointer, p_new_wv_pointer) =
+    PRE
+        p_monitoredItemQueue : t_monitoredItemQueue_i &
+        p_monitoredItemQueue : t_monitoredItemQueue &
+        p_old_wv_pointer : t_WriteValuePointer_i &
+        p_old_wv_pointer : t_WriteValuePointer &
+        p_new_wv_pointer : t_WriteValuePointer_i &
+        p_new_wv_pointer : t_WriteValuePointer
+    THEN
+        /* notifications may have been triggered */
+        a_monitored_item_notifications
+        :(card(a_monitored_item_notifications - a_monitored_item_notifications$0) >= 0)
+    END
 
 OPERATIONS
     
@@ -238,6 +263,51 @@ OPERATIONS
             )
         VARIANT
             card(rreqs_to_iterate)
+        END
+    END
+    ;
+    
+    create_notification_on_monitored_items_if_data_changed (p_monitoredItemQueue, p_old_wv_pointer, p_new_wv_pointer) =
+    VAR
+        l_continue,
+        l_iterator,
+        l_monitoredItemPointer,
+        l_notification_triggered,
+        
+        l_monitoredItemId,
+        l_subscription,
+        l_nid,
+        l_aid,
+        l_timestampToReturn,
+        l_monitoringMode,
+        l_clientHandle
+    IN
+        l_continue, l_iterator <-- init_iter_monitored_item (p_monitoredItemQueue);
+        WHILE l_continue = TRUE DO
+            l_continue, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, p_monitoredItemQueue);
+            l_notification_triggered <-- is_notification_triggered (l_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer);
+            l_monitoredItemId,
+            l_subscription,
+            l_nid,
+            l_aid,
+            l_timestampToReturn,
+            l_monitoringMode,
+            l_clientHandle
+              <--getall_monitoredItemPointer (l_monitoredItemPointer);
+            IF l_notification_triggered = TRUE
+            THEN
+                server_subscription_add_notification (l_subscription, l_monitoredItemPointer, p_new_wv_pointer)
+            END
+        INVARIANT
+            s_mi_to_iterate_it <: t_monitoredItemPointer &
+            s_mi_iterated_it   <: t_monitoredItemPointer &
+            
+            s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
+            card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it &
+            l_continue = bool(s_mi_to_iterate_it /= {})
+
+        VARIANT
+            card(s_mi_to_iterate_it)
         END
     END
     ;
@@ -384,11 +454,9 @@ OPERATIONS
         l_nid_valid, l_node <-- readall_AddressSpace_Node (l_nid);
         IF l_nid_valid = TRUE
         THEN
-            l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (l_nid)
-            /* TODO: iterate on each monitoredItem, for each:
-            - check regarding MI properties / aid / old value / new value if notification necessary
-            - add notification to subscription (server_subscription_add_notification)
-            */
+            l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (l_nid);
+            create_notification_on_monitored_items_if_data_changed 
+             (l_monitoredItemQueue, p_old_write_value_pointer, p_new_write_value_pointer)
         END
     END
     ;

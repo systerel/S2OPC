@@ -42,7 +42,10 @@ PROMOTES
     getall_subscription,
     /* subscription_core_bs */
     compute_create_subscription_revised_params,
-    get_nodeToMonitoredItemQueue
+    get_nodeToMonitoredItemQueue,
+    /* monitored_item_pointer_bs*/
+    is_notification_triggered,
+    getall_monitoredItemPointer
     
 LOCAL_OPERATIONS
     

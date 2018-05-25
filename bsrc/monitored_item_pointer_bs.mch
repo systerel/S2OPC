@@ -24,19 +24,22 @@ SEES
 ABSTRACT_VARIABLES
     s_monitoredItemPointer,
     s_monitoredItemId,
-    a_monitoredItemId
+    a_monitoredItemId,
+    a_monitoredItemSubs
     
 INVARIANT
     
     s_monitoredItemPointer <: t_monitoredItemPointer &
     s_monitoredItemId <: t_monitoredItemId &
-    a_monitoredItemId : s_monitoredItemPointer <-> t_monitoredItemId
+    a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
+    a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription
     
 INITIALISATION
     
     s_monitoredItemPointer :(s_monitoredItemPointer <: t_monitoredItemPointer & s_monitoredItemPointer = {}) ||
     s_monitoredItemId :(s_monitoredItemId <: t_monitoredItemId & s_monitoredItemId = {}) ||
-    a_monitoredItemId :(a_monitoredItemId : s_monitoredItemPointer <-> s_monitoredItemId)
+    a_monitoredItemId :(a_monitoredItemId : s_monitoredItemPointer <-> s_monitoredItemId & a_monitoredItemId = {}) ||
+    a_monitoredItemSubs :(a_monitoredItemSubs : s_monitoredItemPointer <-> t_subscription & a_monitoredItemSubs = {})
 
 OPERATIONS
     
@@ -80,6 +83,7 @@ OPERATIONS
                 s_monitoredItemPointer := s_monitoredItemPointer \/ {l_monitoredItem} ||
                 s_monitoredItemId := s_monitoredItemId \/ {l_monitoredItemId} ||
                 a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
+                a_monitoredItemSubs (l_monitoredItem) := p_subscription ||
                 monitoredItemPointer := l_monitoredItem ||
                 monitoredItemId := l_monitoredItemId
             END
@@ -94,7 +98,8 @@ OPERATIONS
     THEN
         s_monitoredItemPointer := s_monitoredItemPointer - {p_monitoredItemPointer} ||
         s_monitoredItemId := s_monitoredItemId - {a_monitoredItemId(p_monitoredItemPointer)} ||
-        a_monitoredItemId := a_monitoredItemId - {p_monitoredItemPointer |-> a_monitoredItemId(p_monitoredItemPointer)}
+        a_monitoredItemId := a_monitoredItemId - {p_monitoredItemPointer |-> a_monitoredItemId(p_monitoredItemPointer)} ||
+        a_monitoredItemSubs := {p_monitoredItemPointer} <<| a_monitoredItemSubs
     END
     ;
     
@@ -132,18 +137,18 @@ OPERATIONS
           p_clientHandle : t_client_handle_i
         )
     END
-    
-    
-    /*
-    is_valid <-- monitored_item_pointer_is_valid (p_monitoredItemPointer) =
-    PRE
-        p_monitoredItemPointer : t_monitoredItemPointer_i
-    THEN
-        is_valid := bool(p_monitoredItemPointer : s_monitoredItemPointer)
-    END
     ;
-    */
     
-    
-    
+    bres <-- is_notification_triggered (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer) =
+    PRE
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : t_monitoredItemPointer &
+        p_old_wv_pointer : t_WriteValuePointer_i &
+        p_old_wv_pointer : t_WriteValuePointer &
+        p_new_wv_pointer : t_WriteValuePointer_i &
+        p_new_wv_pointer : t_WriteValuePointer
+    THEN
+        bres :: BOOL
+    END
+
 END
