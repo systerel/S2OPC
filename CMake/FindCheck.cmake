@@ -26,6 +26,7 @@ if (CHECK_USE_STATIC_LIBS)
 endif()
 
 find_library(CHECK_LIBRARY check)
+find_library(CHECK_COMPAT_LIBRARY compat)
 
 # We can't know if check was compiled against subunit, so we try to detect it as
 # a non mandatory dependency of check.
@@ -46,6 +47,10 @@ find_package_handle_standard_args(CHECK DEFAULT_MSG CHECK_INCLUDE_DIR CHECK_LIBR
 if (CHECK_FOUND)
 	set(CHECK_LIBRARIES ${CHECK_LIBRARY})
 	set(CHECK_INCLUDE_DIRS ${CHECK_INCLUDE_DIR})
+
+	if (CHECK_COMPAT_LIBRARY)
+		set(CHECK_LIBRARIES ${CHECK_LIBRARIES} ${CHECK_COMPAT_LIBRARY})
+	endif()
 
 	if (SUBUNIT_LIBRARY)
 		set(CHECK_LIBRARIES ${CHECK_LIBRARIES} ${SUBUNIT_LIBRARY})
