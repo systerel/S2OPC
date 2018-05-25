@@ -45,10 +45,7 @@ void monitored_item_queue_it_bs__continue_iter_monitored_item(
     SOPC_GCC_DIAGNOSTIC_RESTORE
     *monitored_item_queue_it_bs__continue = false;
     *monitored_item_queue_it_bs__p_monitoredItem = SOPC_SLinkedList_Next(&it);
-    if (NULL != *monitored_item_queue_it_bs__p_monitoredItem)
-    {
-        *monitored_item_queue_it_bs__continue = true;
-    }
+    *monitored_item_queue_it_bs__continue = SOPC_SLinkedList_HasNext(&it);
 }
 
 void monitored_item_queue_it_bs__init_iter_monitored_item(
@@ -62,7 +59,7 @@ void monitored_item_queue_it_bs__init_iter_monitored_item(
         *monitored_item_queue_it_bs__iterator = SOPC_SLinkedList_GetIterator(monitored_item_queue_it_bs__p_queue);
         if (*monitored_item_queue_it_bs__iterator != NULL)
         {
-            *monitored_item_queue_it_bs__continue = true;
+            *monitored_item_queue_it_bs__continue = SOPC_SLinkedList_HasNext(monitored_item_queue_it_bs__iterator);
         }
     }
 }

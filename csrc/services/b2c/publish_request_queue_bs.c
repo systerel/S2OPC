@@ -77,11 +77,12 @@ void publish_request_queue_bs__continue_pop_iter_publish_request(
     constants__t_msg_i* const publish_request_queue_bs__p_resp_msg)
 {
     assert(false);
+    *publish_request_queue_bs__p_continue = SOPC_SLinkedList_GetLength(publish_request_queue_bs__p_queue) > 0;
 }
 
 void publish_request_queue_bs__init_iter_publish_request(
     const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue,
     t_bool* const publish_request_queue_bs__continue)
 {
-    assert(false);
+    *publish_request_queue_bs__continue = SOPC_SLinkedList_GetLength(publish_request_queue_bs__p_queue) > 0;
 }

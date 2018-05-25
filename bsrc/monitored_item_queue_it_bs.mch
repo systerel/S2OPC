@@ -71,6 +71,7 @@ OPERATIONS
               iterator : t_monitoredItemQueueIterator &
               mi_iterator_it = iterator &
               nb_monitored_items_it > 0 &
+              s_mi_to_iterate_it /= {} &
               card(s_mi_to_iterate_it) = nb_monitored_items_it &
               s_mi_iterated_it = {}
           )
@@ -83,23 +84,20 @@ OPERATIONS
     PRE
         p_iterator : t_monitoredItemQueueIterator_i &
         p_iterator : t_monitoredItemQueueIterator &
+        mi_iterator_it = p_iterator &
         p_queue : t_monitoredItemQueue_i &
-        p_queue : t_monitoredItemQueue
+        p_queue : t_monitoredItemQueue &
+        mi_queue_it = p_queue & 
+        s_mi_to_iterate_it /= {}
     THEN
-        IF mi_queue_it = p_queue & mi_iterator_it = p_iterator & s_mi_to_iterate_it /= {}
+        ANY l_monitoredItem WHERE
+            l_monitoredItem : t_monitoredItemPointer_i &
+            l_monitoredItem : s_mi_to_iterate_it
         THEN
-            continue := TRUE ||
-            ANY l_monitoredItem WHERE
-                l_monitoredItem : t_monitoredItemPointer_i &
-                l_monitoredItem : s_mi_to_iterate_it
-            THEN
-                p_monitoredItem := l_monitoredItem ||
-                s_mi_to_iterate_it := s_mi_to_iterate_it - {p_monitoredItem} ||
-                s_mi_iterated_it := s_mi_to_iterate_it \/ {p_monitoredItem}
-            END
-        ELSE
-            continue := FALSE ||
-            p_monitoredItem := c_monitoredItemPointer_indet
+            continue := bool(s_mi_to_iterate_it /= {l_monitoredItem}) ||
+            p_monitoredItem := l_monitoredItem ||
+            s_mi_to_iterate_it := s_mi_to_iterate_it - {p_monitoredItem} ||
+            s_mi_iterated_it := s_mi_to_iterate_it \/ {p_monitoredItem}
         END
     END
 

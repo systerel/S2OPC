@@ -26,6 +26,8 @@
 #include <assert.h>
 
 #include "sopc_dict.h"
+#include "sopc_logger.h"
+#include "util_b2c.h"
 
 void SOPC_InternalMontitoredItem_Free(void* data)
 {

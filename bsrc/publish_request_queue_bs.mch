@@ -98,7 +98,7 @@ OPERATIONS
         p_queue : t_publishReqQueue_i &
         p_queue : s_publishReqQueue
     THEN
-        continue := bool(card(a_publish_responses~[{p_queue}]) > 0)
+        continue := bool(a_publish_responses~[{p_queue}] /= {})
     END
     ;
 
@@ -106,36 +106,27 @@ OPERATIONS
       <-- continue_pop_iter_publish_request (p_queue) =
     PRE
         p_queue : t_publishReqQueue_i &
-        p_queue : s_publishReqQueue
+        p_queue : s_publishReqQueue &
+        a_publish_responses~[{p_queue}] /= {}
     THEN
-        IF p_queue : ran(a_publish_responses)
+        ANY l_resp_msg WHERE
+            l_resp_msg : t_msg_i &
+            l_resp_msg : t_msg &
+            l_resp_msg |-> p_queue : a_publish_responses
         THEN
-            ANY l_resp_msg WHERE
-                l_resp_msg : t_msg_i &
-                l_resp_msg : t_msg &
-                l_resp_msg |-> p_queue : a_publish_responses
-            THEN
-                p_continue := TRUE ||
-                    a_publish_responses := a_publish_responses - {l_resp_msg |-> p_queue} ||
-                    p_resp_msg := l_resp_msg ||
-                    p_session, p_req_exp_time, p_req_handle, p_req_ctx
-                :(
-                    p_session : t_session_i &
-                    p_session : t_session &
-                    p_req_exp_time : t_timeref_i &
-                    p_req_exp_time : t_timeref &
-                    p_req_handle : t_server_request_handle_i &
-                    p_req_ctx : t_request_context_i &
-                    p_req_ctx : t_request_context
-                )
-            END
-        ELSE
-            p_continue := FALSE ||
-            p_session := c_session_indet ||
-            p_req_exp_time := c_timeref_indet ||
-            p_req_handle :(p_req_handle : t_server_request_handle_i) ||
-            p_req_ctx := c_request_context_indet ||
-            p_resp_msg := c_msg_indet
+            p_continue := bool(a_publish_responses~[{p_queue}] /= {l_resp_msg}) ||
+            a_publish_responses := a_publish_responses - {l_resp_msg |-> p_queue} ||
+            p_resp_msg := l_resp_msg ||
+            p_session, p_req_exp_time, p_req_handle, p_req_ctx
+            :(
+                p_session : t_session_i &
+                p_session : t_session &
+                p_req_exp_time : t_timeref_i &
+                p_req_exp_time : t_timeref &
+                p_req_handle : t_server_request_handle_i &
+                p_req_ctx : t_request_context_i &
+                p_req_ctx : t_request_context
+            )
         END
     END
     
