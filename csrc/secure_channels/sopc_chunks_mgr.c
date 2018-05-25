@@ -1372,7 +1372,6 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
     // Note: we do not treat multiple chunks => guaranteed by HEL/ACK exchanged (chunk config)
     assert(chunkCtx->currentMsgIsFinal == SOPC_MSG_ISFINAL_FINAL);
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool asymmSecuHeader = false;
     bool symmSecuHeader = false;
     bool sequenceHeader = false;
@@ -1481,8 +1480,11 @@ static bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
     if (false != result && hasSecureChannelId != false)
     {
         // Decode secure channel id
-        status = SOPC_UInt32_Read(&secureChannelId, chunkCtx->chunkInputBuffer);
-        assert(SOPC_STATUS_OK == status);
+        result = (SOPC_UInt32_Read(&secureChannelId, chunkCtx->chunkInputBuffer) == SOPC_STATUS_OK);
+    }
+
+    if (false != result && hasSecureChannelId != false)
+    {
         if (isOPN != false)
         {
             if (scConnection->currentSecurityToken.secureChannelId == 0)
