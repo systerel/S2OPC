@@ -122,6 +122,7 @@ int main(int argc, char* argv[])
     SOPC_LibSub_DataId d_id = 0;
 
     Helpers_Log(SOPC_LOG_LEVEL_INFO, SOPC_LibSub_GetVersion());
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Connecting to \"%s\"", cfg_con.server_url);
 
     if (SOPC_STATUS_OK != SOPC_LibSub_Initialize(&cfg_cli))
     {
@@ -229,7 +230,7 @@ static bool parse_options(cmd_line_options_t* o, int argc, char** argv)
 
 #define STR_OPT_CASE(name, req, arg_req, val, field) \
     case val:                                        \
-        o->field = malloc(strlen(optarg));           \
+        o->field = calloc(strlen(optarg) + 1, 1);    \
         strcpy(o->field, optarg);                    \
         break;
 
