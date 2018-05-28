@@ -49,6 +49,8 @@ typedef enum {
     BENCH_FINISHED_ERROR,
 } bench_status_t;
 
+typedef void* (*bench_func_t)(size_t request_size, size_t bench_offset, size_t addspace_size);
+
 // See https://www.itl.nist.gov/div898/handbook/eda/section3/eda3672.htm
 static const double T_TABLE[] = {0,     12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228,
                                  2.201, 2.179,  2.16,  2.145, 2.131, 2.12,  2.11,  2.101, 2.093, 2.086, 2.08,
@@ -60,9 +62,10 @@ struct app_ctx_t
 {
     Mutex run_mutex;
     Condition run_cond;
-    int32_t address_space_size;
-    int32_t read_request_size;
-    int32_t address_space_offset;
+    size_t address_space_size;
+    size_t request_size;
+    size_t address_space_offset;
+    bench_func_t bench_func;
     uint32_t session_id;
     uint64_t n_total_requests;
     uint64_t n_sent_requests;
@@ -74,31 +77,37 @@ struct app_ctx_t
     double rmoe;
 };
 
-static void bench_cycle_start(struct app_ctx_t* ctx)
+static void make_nodeid(char* buf, size_t len, size_t idx)
 {
+    int n = snprintf(buf, len, "ns=42;s=Objects.%zd", idx);
+    assert(n > 0 && (((size_t) n) < (len - 1)));
+}
+
+static void* bench_read_requests(size_t request_size, size_t bench_offset, size_t addspace_size)
+{
+    assert(request_size <= INT32_MAX);
+
     OpcUa_ReadRequest* req = calloc(1, sizeof(OpcUa_ReadRequest));
     assert(req != NULL);
 
-    OpcUa_ReadValueId* req_contents = calloc((size_t) ctx->read_request_size, sizeof(OpcUa_ReadValueId));
+    OpcUa_ReadValueId* req_contents = calloc(request_size, sizeof(OpcUa_ReadValueId));
     assert(req_contents != NULL);
 
     OpcUa_ReadRequest_Initialize(req);
 
     req->TimestampsToReturn = OpcUa_TimestampsToReturn_Neither;
-    req->NoOfNodesToRead = ctx->read_request_size;
+    req->NoOfNodesToRead = (int32_t) request_size;
     req->NodesToRead = req_contents;
 
     char buf[1024];
 
-    for (int32_t i = 0; i < ctx->read_request_size; ++i)
+    for (size_t i = 0; i < request_size; ++i)
     {
         OpcUa_ReadValueId* r = &req_contents[i];
         OpcUa_ReadValueId_Initialize(r);
 
         r->AttributeId = 1; // NodeId
-
-        snprintf(buf, sizeof(buf) / sizeof(char), "ns=42;s=Objects.%d",
-                 (i + ctx->address_space_offset) % ctx->address_space_size);
+        make_nodeid(buf, sizeof(buf) / sizeof(char), (i + bench_offset) % addspace_size);
         SOPC_NodeId* id = SOPC_NodeId_FromCString(buf, (int32_t) strlen(buf));
         assert(id != NULL);
 
@@ -109,7 +118,15 @@ static void bench_cycle_start(struct app_ctx_t* ctx)
         free(id);
     }
 
-    ctx->address_space_offset = (ctx->address_space_offset + ctx->read_request_size) % ctx->address_space_size;
+    return req;
+}
+
+static void bench_cycle_start(struct app_ctx_t* ctx)
+{
+    void* req = ctx->bench_func(ctx->request_size, ctx->address_space_offset, ctx->address_space_size);
+    assert(req != NULL);
+
+    ctx->address_space_offset = (ctx->address_space_offset + ctx->request_size) % ctx->address_space_size;
     ctx->cycle_start_ts = SOPC_Time_GetCurrentTimeUTC();
 
     SOPC_ToolkitClient_AsyncSendRequestOnSession(ctx->session_id, req, (uintptr_t) ctx);
@@ -288,43 +305,85 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
     }
 }
 
+struct
+{
+    const char* name;
+    const char* desc;
+    bench_func_t func;
+} BENCH_FUNCS[] = {
+    {
+        "read",
+        "Retrieves NodeIds using a read request",
+        bench_read_requests,
+    },
+    {NULL, NULL, NULL},
+};
+
 static void usage(char** argv)
 {
     printf(
-        "Usage: %s AS_SIZE READ_SIZE\n\n"
-        "Benchmarks reads against an OPC-UA server.\n\n"
+        "Usage: %s BENCH_TYPE AS_SIZE REQUEST_SIZE\n\n"
+        "Benchmarks a type of request against an OPC-UA server.\n\n"
         "Arguments:\n"
-        "AS_SIZE    Number of benchmark nodes in the server address space.\n"
-        "READ_SIZE  Size of the read operations to do.\n\n"
+        "BENCH_TYPE    The type of benchmark to run (see list below).\n"
+        "AS_SIZE       Number of benchmark nodes in the server address space.\n"
+        "REQUEST_SIZE  Number of operations per request (eg. nodes per read request).\n\n"
         "The address space is supposed to hold AS_SIZE variables with a string\n"
         "NodeId following the syntax \"ns=42;s=Objects.IDX\" with IDX varying\n"
-        "from 0 to AS_SIZE-1.\n",
+        "from 0 to AS_SIZE-1.\n\n"
+        "Benchmark types:\n",
         argv[0]);
+
+    for (size_t i = 0; BENCH_FUNCS[i].name != NULL; ++i)
+    {
+        printf("%-12s  %s\n", BENCH_FUNCS[i].name, BENCH_FUNCS[i].desc);
+    }
 }
 
 int main(int argc, char** argv)
 {
-    if (argc != 3)
+    if (argc != 4)
     {
         usage(argv);
         return 1;
     }
 
+    const char* arg_bench_type = argv[1];
+    const char* arg_as_size = argv[2];
+    const char* arg_request_size = argv[3];
+
+    bench_func_t bench_func = NULL;
+
+    for (size_t i = 0; BENCH_FUNCS[i].name != NULL; ++i)
+    {
+        if (strcmp(BENCH_FUNCS[i].name, arg_bench_type) == 0)
+        {
+            bench_func = BENCH_FUNCS[i].func;
+            break;
+        }
+    }
+
+    if (bench_func == NULL)
+    {
+        fprintf(stderr, "Unknown benchmark type: %s\n", arg_bench_type);
+        return 1;
+    }
+
     char* endptr;
     errno = 0;
-    uint64_t as_size = strtoul(argv[1], &endptr, 10);
+    uint64_t as_size = strtoul(arg_as_size, &endptr, 10);
 
-    if (*argv[1] == '\0' || *endptr != '\0' || errno != 0 || as_size > INT32_MAX)
+    if (arg_as_size[0] == '\0' || *endptr != '\0' || errno != 0)
     {
         fprintf(stderr, "AS_SIZE is not a valid integer or is too large.\n");
         return 1;
     }
 
-    uint64_t read_size = strtoul(argv[2], &endptr, 10);
+    uint64_t request_size = strtoul(arg_request_size, &endptr, 10);
 
-    if (*argv[2] == '\0' || *endptr != '\0' || errno != 0 || read_size > INT32_MAX)
+    if (arg_request_size[0] == '\0' || *endptr != '\0' || errno != 0)
     {
-        fprintf(stderr, "READ_SIZE is not a valid integer or is too large.\n");
+        fprintf(stderr, "REQUEST_SIZE is not a valid integer or is too large.\n");
         return 1;
     }
 
@@ -335,8 +394,9 @@ int main(int argc, char** argv)
     assert(Mutex_Lock(&ctx.run_mutex) == SOPC_STATUS_OK);
     assert(Condition_Init(&ctx.run_cond) == SOPC_STATUS_OK);
 
-    ctx.address_space_size = (int32_t) as_size;
-    ctx.read_request_size = (int32_t) read_size;
+    ctx.address_space_size = as_size;
+    ctx.request_size = request_size;
+    ctx.bench_func = bench_func;
     ctx.status = BENCH_RUNNING;
 
     SOPC_StatusCode status = SOPC_Toolkit_Initialize(event_handler);
@@ -366,7 +426,7 @@ int main(int argc, char** argv)
 
     printf("Finished benchmarking.\n");
     printf("Address space size: %lu\n", as_size);
-    printf("Read request size: %lu\n", read_size);
+    printf("Request size: %lu\n", request_size);
     printf("Number of measurements: %lu\n", ctx.n_measurements);
     printf("Average response time: %.2f us\n", ctx.mean / 1000);
     printf("Relative margin of error: %.2f%%\n", ctx.rmoe);

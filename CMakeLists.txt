@@ -618,10 +618,9 @@ s2opc_sc_level_test("SignAndEncrypt_B256Sha256_4096bit_server_vs_2048bit_client"
 s2opc_sc_level_test("SignAndEncrypt_B256Sha256_2048bit_server_vs_4096bit_client" "2048" "encrypt" "B256Sha256" "4096" "2048")
 
 # Benchmarks
-add_executable(bench_reads "tests/benchmarks/bench_reads.c")
-set_source_files_properties("tests/benchmarks/bench_reads.c" PROPERTIES COMPILE_FLAGS "-D_XOPEN_SOURCE=600")
-target_link_libraries(bench_reads PRIVATE ${INGOPCS_STATIC_LIB})
-target_include_directories(bench_reads PRIVATE ${INGOPCS_PUBLIC_INCLUDES} ${INGOPCS_PRIVATE_INCLUDES})
+add_executable(bench_tool "tests/benchmarks/bench_tool.c")
+target_link_libraries(bench_tool PRIVATE ${INGOPCS_STATIC_LIB})
+target_include_directories(bench_tool PRIVATE ${INGOPCS_PUBLIC_INCLUDES} ${INGOPCS_PRIVATE_INCLUDES})
 
 if (EXPAT_FOUND)
 	add_executable(ingopcs_parse_uanodeset "tests/demo/ingopcs_parse_uanodeset.c")

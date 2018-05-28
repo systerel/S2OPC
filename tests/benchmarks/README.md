@@ -9,13 +9,13 @@ This script generates an arbitrary sized address space in an XML file. An
 address space of size `N` is populated with boolean variables having a NodeId of
 the form `ns=42;s=Objects.I` where `I` is a number from 0 to `N`-1.
 
-## bench_reads
+## bench_tool
 
 This program gets compiled as part of normal builds and ends up in the `bin/`
 directory along all the other binaries. It connects to a server on localhost on
 port 4841 (the endpoint is hardcoded so far at the top of the file) with no
-security and benchmarks the performance of ReadValue requests. The size of each
-request is settable via the command line. The program will keep doing
+security and benchmarks the performance of various kind of requests. The size of
+each request is settable via the command line. The program will keep doing
 measurements until the average time stabilizes enough that it is representative.
 
 ## Putting it all together
@@ -49,5 +49,5 @@ TEST_SERVER_XML_ADDRESS_SPACE=../tests/benchmarks/address_space.xml ./toolkit_te
 And run the benchmark against it (reading 10 values in each ReadValue request):
 
 ```
-./bench_reads 10000 10
+./bench_tool read 10000 10
 ```
