@@ -121,6 +121,47 @@ static void* bench_read_requests(size_t request_size, size_t bench_offset, size_
     return req;
 }
 
+static void* bench_write_requests(size_t request_size, size_t bench_offset, size_t addspace_size)
+{
+    assert(request_size <= INT32_MAX);
+
+    OpcUa_WriteRequest* req = calloc(1, sizeof(OpcUa_WriteRequest));
+    assert(req != NULL);
+
+    OpcUa_WriteValue* req_contents = calloc(request_size, sizeof(OpcUa_WriteValue));
+    assert(req_contents != NULL);
+
+    OpcUa_WriteRequest_Initialize(req);
+
+    req->NoOfNodesToWrite = (int32_t) request_size;
+    req->NodesToWrite = req_contents;
+
+    char buf[1024];
+
+    for (size_t i = 0; i < request_size; ++i)
+    {
+        OpcUa_WriteValue* r = &req_contents[i];
+        OpcUa_WriteValue_Initialize(r);
+
+        make_nodeid(buf, sizeof(buf) / sizeof(char), (i + bench_offset) % addspace_size);
+        SOPC_NodeId* id = SOPC_NodeId_FromCString(buf, (int32_t) strlen(buf));
+        assert(id != NULL);
+
+        SOPC_StatusCode status = SOPC_NodeId_Copy(&r->NodeId, id);
+        assert(status == SOPC_STATUS_OK);
+
+        SOPC_NodeId_Clear(id);
+        free(id);
+
+        r->AttributeId = 13; // Value
+        r->Value.Value.BuiltInTypeId = SOPC_Boolean_Id;
+        r->Value.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+        r->Value.Value.Value.Boolean = true;
+    }
+
+    return req;
+}
+
 static void bench_cycle_start(struct app_ctx_t* ctx)
 {
     void* req = ctx->bench_func(ctx->request_size, ctx->address_space_offset, ctx->address_space_size);
@@ -323,6 +364,11 @@ struct
         "read",
         "Retrieves NodeIds using a read request",
         bench_read_requests,
+    },
+    {
+        "write",
+        "Write the value \"true\" to the nodes using a write request",
+        bench_write_requests,
     },
     {NULL, NULL, NULL},
 };
