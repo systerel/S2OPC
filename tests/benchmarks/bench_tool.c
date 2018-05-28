@@ -266,6 +266,14 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
             break;
         }
 
+        OpcUa_ReadResponse* res = pParam;
+
+        if (res->ResponseHeader.ServiceResult != SOPC_GoodGenericStatus)
+        {
+            fprintf(stderr, "Response with unexpected code %d\n", res->ResponseHeader.ServiceResult);
+            break;
+        }
+
         bool more_needed = bench_cycle_end(ctx);
 
         if (more_needed)
