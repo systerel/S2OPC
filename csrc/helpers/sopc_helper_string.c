@@ -63,6 +63,12 @@ SOPC_ReturnStatus SOPC_strtouint8_t(const char* sz, uint8_t* n, int base, char c
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    /* 10 and 16 are the only supported bases */
+    if (10 != base && 16 != base)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     if (SOPC_STATUS_OK == status)
     {
         /* ULONG_MAX is at least 2^32 - 1 (see C99 §5.2.4.2.1 Sizes of integer types)
@@ -92,6 +98,12 @@ SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base, char
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    /* 10 and 16 are the only supported bases */
+    if (10 != base && 16 != base)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     if (SOPC_STATUS_OK == status)
     {
         /* ULONG_MAX is at least 2^32 - 1 (see C99 §5.2.4.2.1 Sizes of integer types)
@@ -117,6 +129,12 @@ SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base, char
     unsigned long int value = 0;
 
     if (NULL == sz || NULL == n)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* 10 and 16 are the only supported bases */
+    if (10 != base && 16 != base)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }

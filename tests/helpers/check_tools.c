@@ -952,7 +952,7 @@ START_TEST(test_strtouint)
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t("", &a, 10, '\0'));
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t(NULL, &a, 10, '\0'));
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t("42", NULL, 10, '\0'));
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t("42", &a, 1, '\0'));
+
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t("42", &a, 10, ';'));
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint8_t("42zz-24", &a, 10, '-'));
 
@@ -973,7 +973,7 @@ START_TEST(test_strtouint)
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("", &b, 10, '\0'));
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t(NULL, &b, 10, '\0'));
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("42", NULL, 10, '\0'));
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("42", &b, 1, '\0'));
+
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("42", &b, 10, ';'));
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint16_t("42zz-24", &b, 10, '-'));
 
@@ -999,7 +999,7 @@ START_TEST(test_strtouint)
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("", &c, 10, '\0'));
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t(NULL, &c, 10, '\0'));
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("42", NULL, 10, '\0'));
-    ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("42", &c, 1, '\0'));
+
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("42", &c, 10, ';'));
     ck_assert(SOPC_STATUS_OK != SOPC_strtouint32_t("42zz-24", &c, 10, '-'));
 
