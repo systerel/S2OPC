@@ -221,9 +221,9 @@ START_TEST(test_sockets)
     /* SERVER SIDE: receive a msg buffer through connection */
     // Accumulate received bytes in a unique buffer
     receivedBytes = 0;
-    // Let 5 attempts to retrieve all the bytes
+    // Let 10 attempts to retrieve all the bytes
     attempts = 0;
-    while (receivedBytes < 2 * SOPC_MAX_MESSAGE_LENGTH && attempts < 5)
+    while (receivedBytes < 2 * SOPC_MAX_MESSAGE_LENGTH && attempts < 10)
     {
         SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
         // Check event
