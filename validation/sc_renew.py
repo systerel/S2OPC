@@ -34,7 +34,7 @@ def secure_channel_renew(client, logger):
     value = node.get_value()
     print(' Value for Node {:03d}:'.format(nid), value)
     # Wait timeout of the security token
-    sleep(1)
+    sleep(2)
     print(' Error expected on next read:')
     # Try to read a node again
     try:
@@ -44,7 +44,6 @@ def secure_channel_renew(client, logger):
         logger.add_test('OPN renew test - read refused after timeout', True)
     else:
         logger.add_test('OPN renew test - read refused after timeout', False)
-    
     try:
         client.disconnect()
     except:
