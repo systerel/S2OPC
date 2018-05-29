@@ -39,9 +39,9 @@ typedef struct _SOPC_DictBucket
 struct _SOPC_Dict
 {
     SOPC_DictBucket* buckets;
-    uint64_t size;     // Always a power of two
-    uint64_t sizemask; // sizemask == (size - 1), used to replace (hash % size) by (hash & sizemask)
-    uint64_t n_items;
+    size_t size;     // Always a power of two
+    size_t sizemask; // sizemask == (size - 1), used to replace (hash % size) by (hash & sizemask)
+    size_t n_items;
     void* empty_key;
     SOPC_Dict_KeyHash_Fct hash_func;
     SOPC_Dict_KeyEqual_Fct equal_func;
@@ -49,9 +49,9 @@ struct _SOPC_Dict
     SOPC_Dict_Free_Fct value_free;
 };
 
-static void set_empty_keys(SOPC_DictBucket* buckets, uint64_t n_buckets, void* empty_key)
+static void set_empty_keys(SOPC_DictBucket* buckets, size_t n_buckets, void* empty_key)
 {
-    for (uint64_t i = 0; i < n_buckets; ++i)
+    for (size_t i = 0; i < n_buckets; ++i)
     {
         buckets[i].key = empty_key;
     }
@@ -72,9 +72,9 @@ static void free_bucket(SOPC_DictBucket* b, SOPC_Dict_Free_Fct key_free, SOPC_Di
 
 static bool insert_item(SOPC_Dict* d, uint64_t hash, void* key, void* value, bool overwrite)
 {
-    for (uint64_t i = 0; i < d->size; ++i)
+    for (size_t i = 0; i < d->size; ++i)
     {
-        uint64_t idx = HASH_I(hash, i) & d->sizemask;
+        size_t idx = HASH_I(hash, i) & d->sizemask;
         SOPC_DictBucket* b = &d->buckets[idx];
 
         // Normal insert
@@ -101,9 +101,9 @@ static bool insert_item(SOPC_Dict* d, uint64_t hash, void* key, void* value, boo
     return false;
 }
 
-static bool dict_resize(SOPC_Dict* d, uint64_t size)
+static bool dict_resize(SOPC_Dict* d, size_t size)
 {
-    uint64_t sizemask = size - 1;
+    size_t sizemask = size - 1;
     SOPC_DictBucket* buckets = calloc(size, sizeof(SOPC_DictBucket));
 
     if (buckets == NULL)
@@ -116,7 +116,7 @@ static bool dict_resize(SOPC_Dict* d, uint64_t size)
         set_empty_keys(buckets, size, d->empty_key);
     }
 
-    uint64_t old_size = d->size;
+    size_t old_size = d->size;
     SOPC_DictBucket* old_buckets = d->buckets;
 
     d->buckets = buckets;
@@ -125,7 +125,7 @@ static bool dict_resize(SOPC_Dict* d, uint64_t size)
 
     bool ok = true;
 
-    for (uint64_t i = 0; i < old_size; ++i)
+    for (size_t i = 0; i < old_size; ++i)
     {
         if (old_buckets[i].key == d->empty_key)
         {
@@ -162,7 +162,7 @@ SOPC_Dict* SOPC_Dict_Create(void* empty_key,
                             SOPC_Dict_Free_Fct key_free,
                             SOPC_Dict_Free_Fct value_free)
 {
-    static const uint64_t DICT_INITIAL_SIZE = 16;
+    static const size_t DICT_INITIAL_SIZE = 16;
 
     SOPC_Dict* d = calloc(1, sizeof(SOPC_Dict));
 
@@ -207,7 +207,7 @@ void SOPC_Dict_Delete(SOPC_Dict* d)
         // buckets can be NULL if called from SOPC_Dict_Create
         if (d->buckets != NULL)
         {
-            for (uint64_t i = 0; i < d->size; ++i)
+            for (size_t i = 0; i < d->size; ++i)
             {
                 if (d->buckets[i].key != d->empty_key)
                 {
@@ -222,11 +222,11 @@ void SOPC_Dict_Delete(SOPC_Dict* d)
     }
 }
 
-bool SOPC_Dict_Reserve(SOPC_Dict* d, uint64_t n_items)
+bool SOPC_Dict_Reserve(SOPC_Dict* d, size_t n_items)
 {
     assert(d != NULL);
 
-    uint64_t new_size = d->size;
+    size_t new_size = d->size;
 
     while (new_size < n_items)
     {
@@ -274,7 +274,7 @@ static void* get_internal(const SOPC_Dict* d, const void* key, bool* found, void
         *dict_key = NULL;
     }
 
-    for (uint64_t i = 0; i < d->size; ++i)
+    for (size_t i = 0; i < d->size; ++i)
     {
         uint64_t idx = HASH_I(hash, i) & d->sizemask;
 

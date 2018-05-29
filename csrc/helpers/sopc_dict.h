@@ -83,7 +83,7 @@ void SOPC_Dict_Delete(SOPC_Dict* d);
  * \return \c TRUE in case of success, or \c FALSE in case of memory allocation
  *         failure.
  */
-bool SOPC_Dict_Reserve(SOPC_Dict* d, uint64_t n_items);
+bool SOPC_Dict_Reserve(SOPC_Dict* d, size_t n_items);
 
 /**
  * \brief Inserts a new key and value in the dictionary.
