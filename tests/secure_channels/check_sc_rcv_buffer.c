@@ -185,7 +185,7 @@ static SOPC_ReturnStatus Check_Expected_Sent_Message(uint32_t socketIdx,
 
         if (buffer != NULL)
         {
-            if (ignoreBytes != false && start + length < buffer->length)
+            if (ignoreBytes != false && (uint32_t)(start + length) < buffer->length)
             {
                 // Set bytes to 0
                 memset(&buffer->data[start], 0, (size_t) length);
