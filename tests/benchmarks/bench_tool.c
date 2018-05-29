@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <float.h>
+#include <inttypes.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -479,9 +480,9 @@ int main(int argc, char** argv)
     SOPC_Toolkit_Clear();
 
     printf("Finished benchmarking.\n");
-    printf("Address space size: %lu\n", as_size);
-    printf("Request size: %lu\n", request_size);
-    printf("Number of measurements: %lu\n", ctx.n_measurements);
+    printf("Address space size: %" PRIu64 "\n", as_size);
+    printf("Request size: %" PRIu64 "\n", request_size);
+    printf("Number of measurements: %" PRIu64 "\n", ctx.n_measurements);
     printf("Average response time: %.2f us\n", ctx.mean / 1000);
     printf("Relative margin of error: %.2f%%\n", ctx.rmoe);
 
