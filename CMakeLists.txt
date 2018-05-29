@@ -229,6 +229,7 @@ set_property(TARGET ingopcs_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   add_definitions(/DWIN32_LEAN_AND_MEAN)
   add_definitions(/DWIN32_WINNT=0x0600)
+  add_definitions(/D_CRT_SECURE_NO_WARNINGS)
 # it shall be MinGw
 elseif(MINGW)
   add_definitions(-D_WIN32_WINNT=0x0600)
