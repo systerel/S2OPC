@@ -427,7 +427,7 @@ int main(int argc, char** argv)
     errno = 0;
     uint64_t as_size = strtoul(arg_as_size, &endptr, 10);
 
-    if (arg_as_size[0] == '\0' || *endptr != '\0' || errno != 0)
+    if (arg_as_size[0] == '\0' || *endptr != '\0' || errno != 0 || as_size > SIZE_MAX)
     {
         fprintf(stderr, "AS_SIZE is not a valid integer or is too large.\n");
         return 1;
@@ -435,7 +435,7 @@ int main(int argc, char** argv)
 
     uint64_t request_size = strtoul(arg_request_size, &endptr, 10);
 
-    if (arg_request_size[0] == '\0' || *endptr != '\0' || errno != 0)
+    if (arg_request_size[0] == '\0' || *endptr != '\0' || errno != 0 || request_size > SIZE_MAX)
     {
         fprintf(stderr, "REQUEST_SIZE is not a valid integer or is too large.\n");
         return 1;
@@ -448,8 +448,8 @@ int main(int argc, char** argv)
     assert(Mutex_Lock(&ctx.run_mutex) == SOPC_STATUS_OK);
     assert(Condition_Init(&ctx.run_cond) == SOPC_STATUS_OK);
 
-    ctx.address_space_size = as_size;
-    ctx.request_size = request_size;
+    ctx.address_space_size = (size_t) as_size;
+    ctx.request_size = (size_t) request_size;
     ctx.bench_func = bench_func;
     ctx.status = BENCH_RUNNING;
 
