@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8.8)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 
 project (INGOPCS)
-include(CheckCXXCompilerFlag)
+include(CheckCCompilerFlag)
 
 # compatibility with CMake 3.1
 if(POLICY CMP0054)
@@ -47,8 +47,10 @@ else()
 endif()
 
 # check if compiler support new sanitization options
-CHECK_CXX_COMPILER_FLAG(-fsanitize=pointer-compare COMPILER_SUPPORTS_SAN_PC)
-CHECK_CXX_COMPILER_FLAG(-fsanitize=pointer-subtract COMPILER_SUPPORTS_SAN_PS)
+set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
+CHECK_C_COMPILER_FLAG("-fsanitize=address -fsanitize=pointer-compare" COMPILER_SUPPORTS_SAN_PC)
+CHECK_C_COMPILER_FLAG("-fsanitize=address -fsanitize=pointer-subtract" COMPILER_SUPPORTS_SAN_PS)
+unset(CMAKE_REQUIRED_LIBRARIES)
 
 option(WITH_ASAN "build with ASAN" OFF)
 if(WITH_ASAN)
