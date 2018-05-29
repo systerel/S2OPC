@@ -454,11 +454,6 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider*
 static inline SOPC_ReturnStatus NewMsgDigestBuffer(const uint8_t* pInput,
                                                    uint32_t lenInput,
                                                    const mbedtls_md_info_t* pmd_info_hash,
-                                                   uint8_t** ppHash);
-
-static inline SOPC_ReturnStatus NewMsgDigestBuffer(const uint8_t* pInput,
-                                                   uint32_t lenInput,
-                                                   const mbedtls_md_info_t* pmd_info_hash,
                                                    uint8_t** ppHash)
 {
     uint8_t* hash = NULL;
