@@ -62,6 +62,7 @@ void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeC
             FOR_EACH_ELEMENT_TYPE(ELEMENT_ATTRIBUTE_GETTER_CASE, name)        \
         default:                                                              \
             assert(false && "Unknown element type");                          \
+            return NULL;                                                      \
         }                                                                     \
     }
 
@@ -82,6 +83,7 @@ SOPC_Variant* SOPC_AddressSpace_Item_Get_Value(SOPC_AddressSpace_Item* item)
         return &item->data.variable.Value;
     default:
         assert(false && "Current element has no value.");
+        return NULL;
     }
 }
 
@@ -95,6 +97,7 @@ SOPC_Byte* SOPC_AddressSpace_Item_Get_AccessLevel(SOPC_AddressSpace_Item* item)
         return &item->data.variable.AccessLevel;
     default:
         assert(false && "Current element has no value.");
+        return NULL;
     }
 }
 
