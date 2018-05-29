@@ -44,11 +44,56 @@ Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
   * CMake (tested with CMake version >= 2.8.12.2)
   * make (tested with GNU Make version >= 3.81)
   * mbedtls (>= 2.7.0): https://tls.mbed.org/
-  * check (>= 0.11): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=no)
+  * check (>= 0.12): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=no)
 - To build the Toolkit library and tests with default configuration on current stable release:
 ```
   git checkout INGOPCS_Toolkit_0.5.0
   ./build.sh
+```
+Compilation (Windows, tested under Windows 7 and Windows Server 2016):
+- Prerequisites:
+  * Visual Studio (tested with Visual Studio 2017)
+  * CMake (tested with CMake version 3.11.1)
+  * mbedtls (>= 2.7.0): https://tls.mbed.org/
+  * check (>= 0.12): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=no)
+- To build the Toolkit library and tests with default configuration on current stable release, you can adapt the bat script below:
+```
+  git checkout INGOPCS_Toolkit_0.5.0
+
+  REM Set env variables
+  set CURRENT_DIR="%~dp0"
+  set CHECK_DIR=[path to check sources directory]
+  set CHECK_BUILD_DIR="%CHECK_DIR%\build"
+  set MBEDTLS_DIR=[path to mbedtls source directory]
+  set MBEDTLS_BUILD_DIR="%MBEDTLS_DIR%\build"
+
+  REM Build Check
+  cd %CHECK_DIR%
+  rm -rf build
+  mkdir build
+  cd build
+  cmake ..
+  cmake --build . --target ALL_BUILD
+
+  REM Build MbedTLS
+  cd %MBEDTLS_DIR%
+  rm -rf build
+  mkdir build
+  cd build
+  cmake ..
+  cmake --build . --target ALL_BUILD
+
+  REM Configure S2OPC Project
+  cd %CURRENT_DIR%
+  rm -rf build
+  mkdir build
+  cd build
+
+  cmake -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/Debug/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/Debug/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/Debug/mbedcrypto.lib -DCHECK_INCLUDE_DIR=%CHECK_BUILD_DIR%\;%CHECK_BUILD_DIR%/src -DCHECK_LIBRARY=%CHECK_BUILD_DIR%/src/debug/check.lib\;%CHECK_BUILD_DIR%/lib/Debug/compat.lib ..
+
+  REM Build S2OPC Project
+  cmake --build .
+
 ```
 - For more information, or to compile the master branch on its latest commit, please refer to the wiki.
 
