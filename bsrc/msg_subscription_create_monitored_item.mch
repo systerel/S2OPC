@@ -31,7 +31,7 @@ DEFINITIONS
         MonitoredItemReq_NodeId      : t_monitoredItemReqIndex +-> t_NodeId &
         MonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId &
         
-        MonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId &
+        MonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
         MonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode
     )
 
@@ -142,7 +142,8 @@ OPERATIONS
         p_sc : t_StatusCode_i &
         p_sc : t_StatusCode &
         p_monitored_item_id : t_monitoredItemId_i &
-        p_monitored_item_id : t_monitoredItemId &
+        (p_sc = e_sc_ok => p_monitored_item_id : t_monitoredItemId) &
+        (p_sc /= e_sc_ok => p_monitored_item_id = c_monitoredItemId_indet) &
         p_revSamplingItv : t_opcua_duration_i &
         p_revQueueSize : t_counter
     THEN
