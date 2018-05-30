@@ -416,8 +416,6 @@ const char* SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(const SOPC_Crypto
     case SOPC_SecurityPolicy_Basic256_ID:
         return SOPC_SecurityPolicy_Basic256_URI_SignAlgo;
     }
-
-    return NULL;
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_CertificateGetLength_Thumbprint(const SOPC_CryptoProvider* pProvider,
