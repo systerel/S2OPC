@@ -7,7 +7,7 @@ the S2OPC server (and, to some extent, client):
 
 This script generates an arbitrary sized address space in an XML file. An
 address space of size `N` is populated with boolean variables having a NodeId of
-the form `ns=42;s=Objects.I` where `I` is a number from 0 to `N`-1.
+the form `ns=1;s=Objects.I` where `I` is a number from 0 to `N`-1.
 
 ## bench_tool
 

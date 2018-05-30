@@ -81,7 +81,7 @@ struct app_ctx_t
 
 static void make_nodeid(char* buf, size_t len, size_t idx)
 {
-    int n = snprintf(buf, len, "ns=42;s=Objects.%zd", idx);
+    int n = snprintf(buf, len, "ns=1;s=Objects.%zd", idx);
     assert(n > 0 && (((size_t) n) < (len - 1)));
 }
 
@@ -402,7 +402,7 @@ static void usage(char** argv)
         "AS_SIZE          Number of benchmark nodes in the server address space.\n"
         "REQUEST_SIZE     Number of operations per request (eg. nodes per read request).\n\n"
         "The address space is supposed to hold AS_SIZE variables with a string\n"
-        "NodeId following the syntax \"ns=42;s=Objects.IDX\" with IDX varying\n"
+        "NodeId following the syntax \"ns=1;s=Objects.IDX\" with IDX varying\n"
         "from 0 to AS_SIZE-1.\n\n"
         "Security policies:\n",
         argv[0]);

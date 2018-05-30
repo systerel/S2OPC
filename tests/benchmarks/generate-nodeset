@@ -21,29 +21,12 @@ import shutil
 HEADER_FILENAME = 'address_space_header.xml.part'
 FOOTER_FILENAME = 'address_space_footer.xml.part'
 
-folder_template_header = '''
-  <UAObject NodeId="ns=42;s=BenchFolder" BrowseName="Bench" SymbolicName="BenchFolder">
-    <DisplayName>Bench</DisplayName>
-    <Description>Folder holding all the benchmark objects.</Description>
-    <References>
-      <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
-'''
-
-folder_template_item = '''<Reference ReferenceType="Organizes">{0}</Reference>\n'''
-
-folder_template_footer = '''
-      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-    </References>
-  </UAObject>
-'''
-
 variable_template = '''
-  <UAVariable BrowseName="{browse_name}" DataType="Boolean" NodeId="{node_id}" ParentNodeId="ns=42;s=BenchFolder">
+  <UAVariable DataType="Boolean" NodeId="{node_id}" BrowseName="{browse_name}" UserAccessLevel="3" AccessLevel="3">
     <DisplayName>{display_name}</DisplayName>
-    <Description>NoName</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">ns=42;s=BenchFolder</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
     </References>
     <Value>
       <uax:Boolean>false</uax:Boolean>
@@ -56,17 +39,10 @@ def generate_address_space_xml(out, size):
     with open(HEADER_FILENAME) as header_fd:
         shutil.copyfileobj(header_fd, out)
 
-    out.write(folder_template_header)
-
-    for i in range(0, size):
-        out.write(folder_template_item.format('ns=42;s=Objects.%d' % i))
-
-    out.write(folder_template_footer)
-
     for i in range(0, size):
         object_data = {
-            'browse_name': 'OBJ_%d' % i,
-            'node_id': 'ns=42;s=Objects.%d' % i,
+            'browse_name': '1:OBJ_%d' % i,
+            'node_id': 'ns=1;s=Objects.%d' % i,
             'display_name': 'Object_%d' % i
         }
 
