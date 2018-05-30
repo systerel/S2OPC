@@ -27,6 +27,7 @@
 
 #include <sopc_crypto_profiles.h>
 #include <sopc_mutexes.h>
+#include <sopc_pki_stack.h>
 #include <sopc_time.h>
 #include <sopc_toolkit_async_api.h>
 #include <sopc_toolkit_config.h>
@@ -355,7 +356,7 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
     }
 }
 
-struct
+static struct
 {
     const char* name;
     const char* desc;
@@ -374,53 +375,172 @@ struct
     {NULL, NULL, NULL},
 };
 
+static struct
+{
+    const char* name;
+    const char* uri;
+    OpcUa_MessageSecurityMode msg_sec_mode;
+} SECURITY_POLICIES[] = {
+    {"None", SOPC_SecurityPolicy_None_URI, OpcUa_MessageSecurityMode_None},
+    {"Basic256", SOPC_SecurityPolicy_Basic256_URI, OpcUa_MessageSecurityMode_Sign},
+    {"Basic256Sha256", SOPC_SecurityPolicy_Basic256Sha256_URI, OpcUa_MessageSecurityMode_SignAndEncrypt},
+    {NULL, 0, OpcUa_MessageSecurityMode_Invalid}};
+
+static const char* DEFAULT_KEY_PATH = "client_private/client_2k_key.pem";
+static const char* DEFAULT_CERT_PATH = "client_public/client_2k_cert.der";
+static const char* DEFAULT_SERVER_CERT_PATH = "server_public/server_2k_cert.der";
+static const char* DEFAULT_CA_PATH = "trusted/cacert.der";
+
 static void usage(char** argv)
 {
     printf(
-        "Usage: %s BENCH_TYPE AS_SIZE REQUEST_SIZE\n\n"
+        "Usage: %s BENCH_TYPE SECURITY_POLICY AS_SIZE REQUEST_SIZE\n\n"
         "Benchmarks a type of request against an OPC-UA server.\n\n"
         "Arguments:\n"
-        "BENCH_TYPE    The type of benchmark to run (see list below).\n"
-        "AS_SIZE       Number of benchmark nodes in the server address space.\n"
-        "REQUEST_SIZE  Number of operations per request (eg. nodes per read request).\n\n"
+        "BENCH_TYPE       The type of benchmark to run (see list below).\n"
+        "SECURITY_POLICY  The security policy to use to connect to the server (see list below).\n"
+        "AS_SIZE          Number of benchmark nodes in the server address space.\n"
+        "REQUEST_SIZE     Number of operations per request (eg. nodes per read request).\n\n"
         "The address space is supposed to hold AS_SIZE variables with a string\n"
         "NodeId following the syntax \"ns=42;s=Objects.IDX\" with IDX varying\n"
         "from 0 to AS_SIZE-1.\n\n"
-        "Benchmark types:\n",
+        "Security policies:\n",
         argv[0]);
+
+    for (size_t i = 0; SECURITY_POLICIES[i].name != NULL; ++i)
+    {
+        printf("%s\n", SECURITY_POLICIES[i].name);
+    }
+
+    printf(
+        "\nIf a security policy is defined, the paths to the client key, certificate and to\n"
+        "the certificate authority can be set using the environment variables SOPC_KEY, SOPC_CERT\n"
+        "and SOPC_CA. The default values for those variables are:\n"
+        "SOPC_KEY:         %s\n"
+        "SOPC_CERT:        %s\n"
+        "SOPC_SERVER_CERT: %s\n"
+        "SOPC_CA:          %s\n\n"
+        "Benchmark types:\n",
+        DEFAULT_KEY_PATH, DEFAULT_CERT_PATH, DEFAULT_SERVER_CERT_PATH, DEFAULT_CA_PATH);
 
     for (size_t i = 0; BENCH_FUNCS[i].name != NULL; ++i)
     {
-        printf("%-12s  %s\n", BENCH_FUNCS[i].name, BENCH_FUNCS[i].desc);
+        printf("%-15s  %s\n", BENCH_FUNCS[i].name, BENCH_FUNCS[i].desc);
     }
+}
+
+static bench_func_t bench_func_by_name(const char* name)
+{
+    for (size_t i = 0; BENCH_FUNCS[i].name != NULL; ++i)
+    {
+        if (strcmp(BENCH_FUNCS[i].name, name) == 0)
+        {
+            return BENCH_FUNCS[i].func;
+        }
+    }
+
+    return NULL;
+}
+
+static bool security_policy_by_name(const char* name, const char** uri, OpcUa_MessageSecurityMode* msg_sec_mode)
+{
+    for (size_t i = 0; SECURITY_POLICIES[i].name != NULL; ++i)
+    {
+        if (strcmp(SECURITY_POLICIES[i].name, name) == 0)
+        {
+            *uri = SECURITY_POLICIES[i].uri;
+            *msg_sec_mode = SECURITY_POLICIES[i].msg_sec_mode;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static const char* getenv_default(const char* name, const char* default_value)
+{
+    const char* val = getenv(name);
+
+    return (val != NULL) ? val : default_value;
+}
+
+static bool load_keys(SOPC_Certificate** cert,
+                      SOPC_AsymmetricKey** key,
+                      SOPC_Certificate** server_cert,
+                      SOPC_Certificate** ca)
+{
+    const char* cert_path = getenv_default("SOPC_CERT", DEFAULT_CERT_PATH);
+    const char* key_path = getenv_default("SOPC_KEY", DEFAULT_KEY_PATH);
+    const char* server_cert_path = getenv_default("SOPC_SERVER_CERT", DEFAULT_SERVER_CERT_PATH);
+    const char* ca_path = getenv_default("SOPC_CA", DEFAULT_CA_PATH);
+
+    if (SOPC_KeyManager_Certificate_CreateFromFile(cert_path, cert) != SOPC_STATUS_OK)
+    {
+        fprintf(stderr, "Error while loading client certificate from %s\n", cert_path);
+    }
+
+    if (SOPC_KeyManager_AsymmetricKey_CreateFromFile(key_path, key, NULL, 0) != SOPC_STATUS_OK)
+    {
+        fprintf(stderr, "Error while loading private key from %s\n", key_path);
+    }
+
+    if (SOPC_KeyManager_Certificate_CreateFromFile(server_cert_path, server_cert) != SOPC_STATUS_OK)
+    {
+        fprintf(stderr, "Error while loading server certificate from %s\n", ca_path);
+    }
+
+    if (SOPC_KeyManager_Certificate_CreateFromFile(ca_path, ca) != SOPC_STATUS_OK)
+    {
+        fprintf(stderr, "Error while loading CA certificate from %s\n", ca_path);
+    }
+
+    if (*cert == NULL || *key == NULL || *server_cert == NULL || *ca == NULL)
+    {
+        SOPC_KeyManager_Certificate_Free(*cert);
+        *cert = NULL;
+
+        SOPC_KeyManager_AsymmetricKey_Free(*key);
+        *key = NULL;
+
+        SOPC_KeyManager_Certificate_Free(*server_cert);
+        *server_cert = NULL;
+
+        SOPC_KeyManager_Certificate_Free(*ca);
+        *ca = NULL;
+
+        return false;
+    }
+
+    return true;
 }
 
 int main(int argc, char** argv)
 {
-    if (argc != 4)
+    if (argc != 5)
     {
         usage(argv);
         return 1;
     }
 
     const char* arg_bench_type = argv[1];
-    const char* arg_as_size = argv[2];
-    const char* arg_request_size = argv[3];
+    const char* arg_security_policy = argv[2];
+    const char* arg_as_size = argv[3];
+    const char* arg_request_size = argv[4];
 
-    bench_func_t bench_func = NULL;
-
-    for (size_t i = 0; BENCH_FUNCS[i].name != NULL; ++i)
-    {
-        if (strcmp(BENCH_FUNCS[i].name, arg_bench_type) == 0)
-        {
-            bench_func = BENCH_FUNCS[i].func;
-            break;
-        }
-    }
+    bench_func_t bench_func = bench_func_by_name(arg_bench_type);
 
     if (bench_func == NULL)
     {
         fprintf(stderr, "Unknown benchmark type: %s\n", arg_bench_type);
+        return 1;
+    }
+
+    const char* security_policy;
+    OpcUa_MessageSecurityMode msg_sec_mode;
+
+    if (!security_policy_by_name(arg_security_policy, &security_policy, &msg_sec_mode))
+    {
+        fprintf(stderr, "Unknown security policy: %s\n", arg_security_policy);
         return 1;
     }
 
@@ -465,9 +585,34 @@ int main(int argc, char** argv)
 
     scConfig.isClientSc = true;
     scConfig.url = SERVER_URL;
-    scConfig.reqSecuPolicyUri = SOPC_SecurityPolicy_None_URI;
-    scConfig.msgSecurityMode = OpcUa_MessageSecurityMode_None;
+    scConfig.reqSecuPolicyUri = security_policy;
+    scConfig.msgSecurityMode = msg_sec_mode;
     scConfig.requestedLifetime = 60000;
+
+    SOPC_Certificate* cert = NULL;
+    SOPC_AsymmetricKey* key = NULL;
+    SOPC_Certificate* server_cert = NULL;
+    SOPC_Certificate* ca = NULL;
+    SOPC_PKIProvider* pki = NULL;
+
+    if (msg_sec_mode != OpcUa_MessageSecurityMode_None)
+    {
+        if (!load_keys(&cert, &key, &server_cert, &ca) ||
+            SOPC_PKIProviderStack_Create(ca, NULL, &pki) != SOPC_STATUS_OK)
+        {
+            SOPC_PKIProviderStack_Free(pki);
+            SOPC_KeyManager_Certificate_Free(cert);
+            SOPC_KeyManager_AsymmetricKey_Free(key);
+            SOPC_KeyManager_Certificate_Free(server_cert);
+            SOPC_KeyManager_Certificate_Free(ca);
+            return 1;
+        }
+
+        scConfig.crt_cli = cert;
+        scConfig.crt_srv = server_cert;
+        scConfig.key_priv_cli = key;
+        scConfig.pki = pki;
+    }
 
     uint32_t configIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
     assert(configIdx != 0);
@@ -478,6 +623,11 @@ int main(int argc, char** argv)
     assert(Mutex_UnlockAndWaitCond(&ctx.run_cond, &ctx.run_mutex) == SOPC_STATUS_OK);
 
     SOPC_Toolkit_Clear();
+    SOPC_PKIProviderStack_Free(pki);
+    SOPC_KeyManager_Certificate_Free(cert);
+    SOPC_KeyManager_AsymmetricKey_Free(key);
+    SOPC_KeyManager_Certificate_Free(server_cert);
+    SOPC_KeyManager_Certificate_Free(ca);
 
     printf("Finished benchmarking.\n");
     printf("Address space size: %" PRIu64 "\n", as_size);
