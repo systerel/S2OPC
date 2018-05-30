@@ -629,12 +629,19 @@ int main(int argc, char** argv)
     SOPC_KeyManager_Certificate_Free(server_cert);
     SOPC_KeyManager_Certificate_Free(ca);
 
-    printf("Finished benchmarking.\n");
-    printf("Address space size: %" PRIu64 "\n", as_size);
-    printf("Request size: %" PRIu64 "\n", request_size);
-    printf("Number of measurements: %" PRIu64 "\n", ctx.n_measurements);
-    printf("Average response time: %.2f us\n", ctx.mean / 1000);
-    printf("Relative margin of error: %.2f%%\n", ctx.rmoe);
-
-    return (ctx.status == BENCH_FINISHED_OK) ? 0 : 1;
+    if (ctx.status == BENCH_FINISHED_OK)
+    {
+        printf("Finished benchmarking.\n");
+        printf("Address space size: %" PRIu64 "\n", as_size);
+        printf("Request size: %" PRIu64 "\n", request_size);
+        printf("Number of measurements: %" PRIu64 "\n", ctx.n_measurements);
+        printf("Average response time: %.2f us\n", ctx.mean / 1000);
+        printf("Relative margin of error: %.2f%%\n", ctx.rmoe);
+        return 0;
+    }
+    else
+    {
+        fprintf(stderr, "Could not run the benchmark, aborting.\n");
+        return 1;
+    }
 }
