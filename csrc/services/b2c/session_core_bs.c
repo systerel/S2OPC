@@ -273,7 +273,7 @@ void session_core_bs__server_create_session_req_do_crypto(
     uint32_t lenToSign = 0;
     OpcUa_CreateSessionRequest* pReq = (OpcUa_CreateSessionRequest*) session_core_bs__p_req_msg;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    uint32_t sigLength;
+    uint32_t sigLength = 0;
 
     *session_core_bs__valid = false;
     *session_core_bs__signature = constants__c_SignatureData_indet;

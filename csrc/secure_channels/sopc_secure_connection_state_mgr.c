@@ -822,7 +822,7 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     SOPC_SecureChannel_Config* config = NULL;
-    SOPC_Buffer* opnMsgBuffer;
+    SOPC_Buffer* opnMsgBuffer = NULL;
     OpcUa_RequestHeader reqHeader;
     OpcUa_RequestHeader_Initialize(&reqHeader);
     OpcUa_OpenSecureChannelRequest opnReq;
@@ -2228,7 +2228,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
 {
     bool result = false;
     bool isExpectedType = false;
-    uint32_t idx;
+    uint32_t idx = 0;
     SOPC_SecureChannel_Config* scConfig = NULL;
     SOPC_SecureConnection* scConnection = NULL;
     uint32_t* requestIdForSndFailure = NULL;

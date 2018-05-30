@@ -2581,7 +2581,6 @@ static bool SC_Chunks_EncodeSignature(SOPC_SecureConnection* scConnection,
                                       bool symmetricAlgo,
                                       uint32_t signatureSize)
 {
-    bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_ByteString signedData;
 
@@ -2603,10 +2602,12 @@ static bool SC_Chunks_EncodeSignature(SOPC_SecureConnection* scConnection,
             runningAppPrivateKey = epConfig->serverKey;
         }
 
-        if (runningAppPrivateKey != NULL)
+        if (runningAppPrivateKey == NULL)
         {
-            status = SOPC_ByteString_InitializeFixedSize(&signedData, signatureSize);
+            return false;
         }
+
+        status = SOPC_ByteString_InitializeFixedSize(&signedData, signatureSize);
 
         if (SOPC_STATUS_OK == status)
         {
@@ -2626,50 +2627,41 @@ static bool SC_Chunks_EncodeSignature(SOPC_SecureConnection* scConnection,
         {
             status = SOPC_Buffer_Write(buffer, signedData.Data, (uint32_t) signedData.Length);
         }
-        if (SOPC_STATUS_OK == status)
-        {
-            result = true;
-        }
+
         SOPC_ByteString_Clear(&signedData);
+        return (SOPC_STATUS_OK == status);
     }
     else
     {
         if (NULL == scConnection->currentSecuKeySets.senderKeySet ||
             NULL == scConnection->currentSecuKeySets.receiverKeySet)
         {
-            result = false;
+            return false;
         }
-        else
+
+        status = SOPC_ByteString_InitializeFixedSize(&signedData, signatureSize);
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_ByteString_InitializeFixedSize(&signedData, signatureSize);
-            if (SOPC_STATUS_OK == status)
+            if (signedData.Length > 0)
             {
-                if (signedData.Length > 0)
-                {
-                    status =
-                        SOPC_CryptoProvider_SymmetricSign(scConnection->cryptoProvider, buffer->data, buffer->length,
-                                                          scConnection->currentSecuKeySets.senderKeySet->signKey,
-                                                          signedData.Data, (uint32_t) signedData.Length);
-                }
-                else
-                {
-                    status = SOPC_STATUS_NOK;
-                }
+                status = SOPC_CryptoProvider_SymmetricSign(scConnection->cryptoProvider, buffer->data, buffer->length,
+                                                           scConnection->currentSecuKeySets.senderKeySet->signKey,
+                                                           signedData.Data, (uint32_t) signedData.Length);
             }
-
-            if (SOPC_STATUS_OK == status)
+            else
             {
-                status = SOPC_Buffer_Write(buffer, signedData.Data, (uint32_t) signedData.Length);
+                status = SOPC_STATUS_NOK;
             }
-            if (SOPC_STATUS_OK == status)
-            {
-                result = true;
-            }
-
-            SOPC_ByteString_Clear(&signedData);
         }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_Buffer_Write(buffer, signedData.Data, (uint32_t) signedData.Length);
+        }
+
+        SOPC_ByteString_Clear(&signedData);
+        return (SOPC_STATUS_OK == status);
     }
-    return result;
 }
 
 static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
