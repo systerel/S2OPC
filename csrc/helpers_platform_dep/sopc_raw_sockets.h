@@ -204,12 +204,12 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
  *  \param sock         The socket on which data must be read
  *  \param data         The data bytes to be set with read bytes
  *  \param dataSize     The number of bytes that can be set (or expected to be read)
- *  \param readCount    The number of bytes actually read on the socket
+ *  \param readCount    The number of bytes actually written on the socket
  *
  *  \return         GOOD if operation succeeded, SOPC_STATUS_CLOSED in case of disconnection and SOPC_STATUS_NOK
  * otherwise.
  */
-SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int64_t* readCount);
+SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount);
 
 /**
  *  \brief Close the socket connection and/or clear the socket

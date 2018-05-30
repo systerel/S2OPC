@@ -329,8 +329,17 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
     {
         status = SOPC_STATUS_NOK;
         res = send(sock, data, count, 0);
-        *sentBytes = (uint32_t) res;
-        if (res >= 0 && (uint32_t) res == count)
+
+        if (res > 0)
+        {
+            *sentBytes = (uint32_t) res;
+        }
+        else
+        {
+            *sentBytes = 0;
+        }
+
+        if (res == (int64_t) count)
         {
             status = SOPC_STATUS_OK;
         }
@@ -347,7 +356,7 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
     return status;
 }
 
-SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int64_t* readCount)
+SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     ssize_t sReadCount = 0;
@@ -363,7 +372,7 @@ SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int
 
         if (sReadCount > 0)
         {
-            *readCount = (int32_t) sReadCount;
+            *readCount = (uint32_t) sReadCount;
             status = SOPC_STATUS_OK;
         }
         else if (sReadCount == 0)
@@ -373,7 +382,7 @@ SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int
         }
         else if (sReadCount == -1)
         {
-            *readCount = -1;
+            *readCount = 0;
 
             /* Extract of man recv (release 3.54 of the Linux man-pages project):
              * If  no  messages  are available at the socket, the receive calls wait for a message to arrive, unless the

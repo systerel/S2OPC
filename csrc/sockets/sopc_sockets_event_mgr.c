@@ -441,7 +441,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
     SOPC_Socket* socketElt = NULL;
     SOPC_Socket* acceptSock = NULL;
     SOPC_Buffer* buffer = NULL;
-    int64_t readBytes = 0;
+    uint32_t readBytes = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     switch (socketEvent)
@@ -709,7 +709,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
                 buffer = NULL;
                 // wait next ready to read event
             }
-            else if (SOPC_STATUS_OK == status && readBytes >= 0 && readBytes <= UINT32_MAX)
+            else if (SOPC_STATUS_OK == status)
             {
                 // Update buffer lengtn
                 SOPC_Buffer_SetDataLength(buffer, (uint32_t) readBytes);

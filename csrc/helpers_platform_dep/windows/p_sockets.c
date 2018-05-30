@@ -326,9 +326,9 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
     {
         status = SOPC_STATUS_NOK;
         res = send(sock, (char*) data, (int) count, 0);
-        *sentBytes = (uint32_t) res;
         if (res == SOCKET_ERROR)
         {
+            *sentBytes = 0;
             wsaError = WSAGetLastError();
             // ERROR CASE
             if (wsaError == WSAEWOULDBLOCK)
@@ -339,28 +339,33 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
         }
         else if (res >= 0 && (uint32_t) res == count)
         {
+            *sentBytes = (uint32_t) res;
             status = SOPC_STATUS_OK;
         } // else SOPC_STATUS_NOK
     }
     return status;
 }
 
-SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int64_t* readCount)
+SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    int res = 0;
     if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0 && dataSize <= INT32_MAX)
     {
-        *readCount = recv(sock, (char*) data, (int) dataSize, 0);
-        if (*readCount > 0)
+        res = recv(sock, (char*) data, (int) dataSize, 0);
+        if (res > 0)
         {
+            *readCount = (uint32_t) res;
             status = SOPC_STATUS_OK;
         }
-        else if (*readCount == 0)
+        else if (res == 0)
         {
+            *readCount = 0;
             status = SOPC_STATUS_CLOSED;
         }
-        else if (*readCount == -1)
+        else if (res == -1)
         {
+            *readCount = 0;
             if (WSAGetLastError() == WSAEWOULDBLOCK)
             {
                 status = SOPC_STATUS_WOULD_BLOCK;
@@ -368,6 +373,7 @@ SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int
         }
         else
         {
+            *readCount = 0;
             status = SOPC_STATUS_NOK;
         }
     }
