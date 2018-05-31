@@ -345,7 +345,8 @@ static SOPC_ReturnStatus DuplicateKey(const SOPC_CryptoProvider* pProvider,
                                       SOPC_AsymmetricKey** ppKeyCopy)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    uint8_t* buffer = NULL;
+    SOPC_SecretBuffer* secBuf = NULL;
+    SOPC_ExposedBuffer* buffer = NULL;
     SOPC_AsymmetricKey* pKeyCopy = NULL;
     uint32_t lenBuffer = 0;
 
@@ -357,30 +358,33 @@ static SOPC_ReturnStatus DuplicateKey(const SOPC_CryptoProvider* pProvider,
     if (SOPC_STATUS_OK == status)
     {
         lenBuffer *= 8;
-        buffer = (uint8_t*) malloc(sizeof(uint8_t) * lenBuffer);
-        if (NULL == buffer)
+        secBuf = SOPC_SecretBuffer_New(lenBuffer);
+        if (NULL == secBuf)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
     if (SOPC_STATUS_OK == status)
     {
+        buffer = SOPC_SecretBuffer_Expose(secBuf);
         status = SOPC_KeyManager_AsymmetricKey_ToDER(pKey, bIsPrivateKey, buffer, lenBuffer, &lenBuffer);
+        SOPC_SecretBuffer_Unexpose(buffer, secBuf);
     }
 
     if (SOPC_STATUS_OK == status)
     {
+        buffer = SOPC_SecretBuffer_Expose(secBuf);
         status = SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(buffer, lenBuffer, bIsPrivateKey, &pKeyCopy);
+        SOPC_SecretBuffer_Unexpose(buffer, secBuf);
     }
     if (SOPC_STATUS_OK == status)
     {
         *ppKeyCopy = pKeyCopy;
     }
 
-    if (NULL != buffer)
+    if (NULL != secBuf)
     {
-        /* TODO: use a SecretBuffer */
-        free(buffer);
+        SOPC_SecretBuffer_DeleteClear(secBuf);
     }
 
     return status;
