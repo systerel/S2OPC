@@ -401,48 +401,36 @@ static SOPC_AsymmetricKey *key_pub = NULL, *key_priv = NULL;
 // in the tests. This is the key used for Basic256. KeyLengths and some lengths should still work with such key.
 #define DER_ASYM_PUB_HEXA                                                                                              \
     "30820286308201efa003020102020900c4d03aaaf2bbde98300d06092a864886f70d01010b0500305c310b3009060355040613024652310f" \
-    "300d06035504080c"                                                                                                 \
-    "064672616e6365310c300a06035504070c034169783111300f060355040a0c08537973746572656c311b301906035504030c12494e474f50" \
-    "4353205465737420"                                                                                                 \
-    "7375697465301e170d3136313132353137353033385a170d3137303330353137353033385a305c310b3009060355040613024652310f300d" \
-    "06035504080c0646"                                                                                                 \
-    "72616e6365310c300a06035504070c034169783111300f060355040a0c08537973746572656c311b301906035504030c12494e474f504353" \
-    "2054657374207375"                                                                                                 \
-    "69746530819f300d06092a864886f70d010101050003818d0030818902818100ec5d569bf77931e401c07a030921301a74cfe6a3f994175b" \
-    "0db5d668a5f10ec8"                                                                                                 \
-    "d17828919b436f64cc2540ea246d9bcae0d891a4983d39f9342218a2c87836824e98fe63814429119f98bcfc4b81fc9946f01eefca8e3ae6" \
-    "ec2878a77bd960ed"                                                                                                 \
-    "c5acf1ea7f8af18a6de2f0a6b4f8c52da4a70816718c20da7dfa629fc9e613510203010001a350304e301d0603551d0e041604142417c23c" \
-    "516564e10e04671a"                                                                                                 \
+    "300d06035504080c064672616e6365310c300a06035504070c034169783111300f060355040a0c08537973746572656c311b301906035504" \
+    "030c12494e474f5043532054657374207375697465301e170d3136313132353137353033385a170d3137303330353137353033385a305c31" \
+    "0b3009060355040613024652310f300d06035504080c064672616e6365310c300a06035504070c034169783111300f060355040a0c085379" \
+    "73746572656c311b301906035504030c12494e474f504353205465737420737569746530819f300d06092a864886f70d010101050003818d" \
+    "0030818902818100ec5d569bf77931e401c07a030921301a74cfe6a3f994175b0db5d668a5f10ec8d17828919b436f64cc2540ea246d9bca" \
+    "e0d891a4983d39f9342218a2c87836824e98fe63814429119f98bcfc4b81fc9946f01eefca8e3ae6ec2878a77bd960edc5acf1ea7f8af18a" \
+    "6de2f0a6b4f8c52da4a70816718c20da7dfa629fc9e613510203010001a350304e301d0603551d0e041604142417c23c516564e10e04671a" \
     "234ca8939b492a5d301f0603551d230418301680142417c23c516564e10e04671a234ca8939b492a5d300c0603551d13040530030101ff30" \
-    "0d06092a864886f7"                                                                                                 \
-    "0d01010b050003818100630e6c7d008cc1b681608231dbb28d274683498c654a8244c2fc1411c4d239a0512803bf4dfbd2f1ddd96a83f7de" \
-    "68c4fd6b8df80782"                                                                                                 \
-    "043dcb8d80a27021dd03b2f403c06ebd45b9e75a5a06715283c6796988bb23fce0749c8aecee4cc205cb423ebfb84f57759e1b02cc48e89c" \
-    "d3cb90b27e2785d7"                                                                                                 \
-    "a22ebee8bf0988edec28"
+    "0d06092a864886f70d01010b050003818100630e6c7d008cc1b681608231dbb28d274683498c654a8244c2fc1411c4d239a0512803bf4dfb" \
+    "d2f1ddd96a83f7de68c4fd6b8df80782043dcb8d80a27021dd03b2f403c06ebd45b9e75a5a06715283c6796988bb23fce0749c8aecee4cc2" \
+    "05cb423ebfb84f57759e1b02cc48e89cd3cb90b27e2785d7a22ebee8bf0988edec28"
 #define DER_ASYM_PUB_LENG 650
 #define DER_ASYM_PRIV_HEXA                                                                                             \
     "3082025e02010002818100ec5d569bf77931e401c07a030921301a74cfe6a3f994175b0db5d668a5f10ec8d17828919b436f64cc2540ea24" \
-    "6d9bcae0d891a498"                                                                                                 \
-    "3d39f9342218a2c87836824e98fe63814429119f98bcfc4b81fc9946f01eefca8e3ae6ec2878a77bd960edc5acf1ea7f8af18a6de2f0a6b4" \
-    "f8c52da4a7081671"                                                                                                 \
-    "8c20da7dfa629fc9e613510203010001028181008e8f9d7564c60c7961351e62465766140ef07643e07c99b9a9834b56c2ffa9d325c43b73" \
-    "d719cd4e167341bb"                                                                                                 \
-    "f74cc4f290bb0edd1f958e29e86fc83c267d9b21c45a7618c4c5ca124e2dd8bbb2828669f57a9dc5395f4ce49f7afb251ddb4ebe97cadf64" \
-    "8f26fc850e2587d7"                                                                                                 \
-    "3bd86bbda4769615de4fcbc4de6b1d9cf15b8d81024100f6401a1f0eae030171ae99edf82e708fb46912889189315ad27c759a75207cc0f1" \
-    "1d129aa995393174"                                                                                                 \
-    "a045fb29a6476487e6cd92242978729e2136d5ce953f65024100f5b909a77e0bd1de7d9979429508e17f4339fbe05cffd0c9d4c3ee886f39" \
-    "183bb5ac452d3c36"                                                                                                 \
-    "68a2af1a01fe435bc4ad14be9b1dbd359eca5a89aa923001337d024012d2296cf0414a8784b9d498049d000b6bbd902612018b5d26b34e85" \
-    "c4a7fc00ff2cbaac"                                                                                                 \
+    "6d9bcae0d891a4983d39f9342218a2c87836824e98fe63814429119f98bcfc4b81fc9946f01eefca8e3ae6ec2878a77bd960edc5acf1ea7f" \
+    "8af18a6de2f0a6b4f8c52da4a70816718c20da7dfa629fc9e613510203010001028181008e8f9d7564c60c7961351e62465766140ef07643" \
+    "e07c99b9a9834b56c2ffa9d325c43b73d719cd4e167341bbf74cc4f290bb0edd1f958e29e86fc83c267d9b21c45a7618c4c5ca124e2dd8bb" \
+    "b2828669f57a9dc5395f4ce49f7afb251ddb4ebe97cadf648f26fc850e2587d73bd86bbda4769615de4fcbc4de6b1d9cf15b8d81024100f6" \
+    "401a1f0eae030171ae99edf82e708fb46912889189315ad27c759a75207cc0f11d129aa995393174a045fb29a6476487e6cd92242978729e" \
+    "2136d5ce953f65024100f5b909a77e0bd1de7d9979429508e17f4339fbe05cffd0c9d4c3ee886f39183bb5ac452d3c3668a2af1a01fe435b" \
+    "c4ad14be9b1dbd359eca5a89aa923001337d024012d2296cf0414a8784b9d498049d000b6bbd902612018b5d26b34e85c4a7fc00ff2cbaac" \
     "4983d740396aba8e8ccb61af845796a4b1d0dd9cdd0b2ad6c29853a5024100f34a19fcf417cfdb72901a378a4818bc605b70bf5c550cec48" \
-    "f5159f903fff765f"                                                                                                 \
-    "120a0c17a9e73fec0edc1a5ba6e8bc55e5c2bf572f57e112736ba70250ae21024100ca81e8f4360563e0721f3a2227be2f52141806f39880" \
-    "1e3f7cba4c1e960b"                                                                                                 \
-    "f7b53ff4babc92075300f69c8d1f2e56738165896558707f1831bd84f929cf12fb51"
+    "f5159f903fff765f120a0c17a9e73fec0edc1a5ba6e8bc55e5c2bf572f57e112736ba70250ae21024100ca81e8f4360563e0721f3a2227be" \
+    "2f52141806f398801e3f7cba4c1e960bf7b53ff4babc92075300f69c8d1f2e56738165896558707f1831bd84f929cf12fb51"
 #define DER_ASYM_PRIV_LENG 610
+#define DER_ASYM_PUB_KEYONLY_HEXA                                                                                      \
+    "30819f300d06092a864886f70d010101050003818d0030818902818100ec5d569bf77931e401c07a030921301a74cfe6a3f994175b0db5d6" \
+    "68a5f10ec8d17828919b436f64cc2540ea246d9bcae0d891a4983d39f9342218a2c87836824e98fe63814429119f98bcfc4b81fc9946f01e" \
+    "efca8e3ae6ec2878a77bd960edc5acf1ea7f8af18a6de2f0a6b4f8c52da4a70816718c20da7dfa629fc9e613510203010001"
+#define DER_ASYM_PUB_KEYONLY_LENG 162
 
 static inline void setup_asym_keys(void)
 {
@@ -545,18 +533,36 @@ END_TEST
 
 START_TEST(test_crypto_asym_copykey_None)
 {
-    uint8_t buffer[2048], der_priv[DER_ASYM_PRIV_LENG];
+    uint8_t buffer[2048], der_priv[DER_ASYM_PRIV_LENG], der_pub_key[DER_ASYM_PUB_LENG];
     uint32_t lenDER = 0;
+    SOPC_AsymmetricKey* pKey = NULL;
 
     // Copy to DER
     ck_assert(SOPC_KeyManager_AsymmetricKey_ToDER(key_priv, false, buffer, 2048, &lenDER) == SOPC_STATUS_OK);
 
-    // Loads DER of private key
+    // Loads DER of key
     ck_assert(unhexlify(DER_ASYM_PRIV_HEXA, der_priv, DER_ASYM_PRIV_LENG) == DER_ASYM_PRIV_LENG);
 
     // Verifies
     ck_assert(lenDER == DER_ASYM_PRIV_LENG);
     ck_assert(memcmp(buffer, der_priv, DER_ASYM_PRIV_LENG) == 0);
+
+    // Public Key
+    // Copy to DER
+    ck_assert(SOPC_KeyManager_AsymmetricKey_ToDER(key_pub, true, buffer, 2048, &lenDER) == SOPC_STATUS_OK);
+
+    // The produced DER is the key only, not the whole cert
+    ck_assert(unhexlify(DER_ASYM_PUB_KEYONLY_HEXA, der_pub_key, DER_ASYM_PUB_KEYONLY_LENG) ==
+              DER_ASYM_PUB_KEYONLY_LENG);
+
+    // Verifies
+    ck_assert(lenDER == DER_ASYM_PUB_KEYONLY_LENG);
+    ck_assert(memcmp(buffer, der_pub_key, DER_ASYM_PUB_KEYONLY_LENG) == 0);
+
+    // Also verifies that the DER is useable in CreateFromBuffer, even if the result cannot be memcmp-ed.
+    ck_assert(SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(der_pub_key, DER_ASYM_PUB_KEYONLY_LENG, true, &pKey) ==
+              SOPC_STATUS_OK);
+    SOPC_KeyManager_AsymmetricKey_Free(pKey);
 }
 END_TEST
 
