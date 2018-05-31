@@ -396,7 +396,7 @@ add_test(NAME "validation::client_server_test"
 	"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap"
 	"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server"
 	"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	"--server-cmd" "../bin/toolkit_test_server${FILE_EXT}"
+	"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
 	"./toolkit_test_client${FILE_EXT}")
 set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_server_test.tap")
 
@@ -570,7 +570,7 @@ function(s2opc_server_validation_test name)
 		COMMAND
 		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server"
 		"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-		"--server-cmd" "../bin/toolkit_test_server${FILE_EXT}"
+		"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
 		"${PYTHON_BIN}" ${name})
 endfunction()
 
