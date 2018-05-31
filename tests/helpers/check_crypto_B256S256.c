@@ -861,7 +861,7 @@ static inline void setup_asym_keys(void)
 
     // Loads the corresponding private key
     ck_assert(unhexlify(DER_ASYM_PRIV_HEXA, der_priv, DER_ASYM_PRIV_LENG) == DER_ASYM_PRIV_LENG);
-    ck_assert(SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(der_priv, DER_ASYM_PRIV_LENG, &key_priv) ==
+    ck_assert(SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(der_priv, DER_ASYM_PRIV_LENG, true, &key_priv) ==
               SOPC_STATUS_OK);
 }
 
@@ -982,7 +982,7 @@ START_TEST(test_crypto_asym_copykey_B256S256)
     uint32_t lenDER = 0;
 
     // Copy to DER
-    ck_assert(SOPC_KeyManager_AsymmetricKey_ToDER(key_priv, buffer, 2048, &lenDER) == SOPC_STATUS_OK);
+    ck_assert(SOPC_KeyManager_AsymmetricKey_ToDER(key_priv, true, buffer, 2048, &lenDER) == SOPC_STATUS_OK);
 
     // Loads DER of private key
     ck_assert(unhexlify(DER_ASYM_PRIV_HEXA, der_priv, DER_ASYM_PRIV_LENG) == DER_ASYM_PRIV_LENG);

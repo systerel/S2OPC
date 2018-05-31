@@ -42,10 +42,11 @@
  *                  \p buffer is \p lenBuf long, and describes the key in the DER of PEM format.
  *
  *                  Public keys are usually extracted from Certificate, see
- * KeyManager_AsymmetricKey_CreateFromCertificate() or KeyManager_AsymmetricKey_CreateFromCertificate().
+ *                  SOPC_KeyManager_AsymmetricKey_CreateFromCertificate().
  *
  * \param buffer    A valid pointer to the buffer containing the DER or PEM description.
  * \param lenBuf    The length in bytes of the DER/PEM description of the key.
+ * \param bPrivate  Whether the buffer encodes a private key (true) or a public key (false).
  * \param ppKey     A handle to the created key. This object must be freed with a call to
  * KeyManager_AsymmetricKey_Free().
  *
@@ -56,6 +57,7 @@
  */
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* buffer,
                                                                  uint32_t lenBuf,
+                                                                 bool bPrivate,
                                                                  SOPC_AsymmetricKey** ppKey);
 
 /**
@@ -123,6 +125,7 @@ void SOPC_KeyManager_AsymmetricKey_Free(SOPC_AsymmetricKey* pKey);
  *                  When SOPC_STATUS_NOK is returned, the function may be called again with a larger buffer.
  *
  * \param pKey      A valid pointer to the asymmetric key (public/private) to encode.
+ * \param bPrivate  True when the key is a private key, false otherwise.
  * \param pDest     A valid pointer to the buffer which will receive the DER encoded key.
  * \param lenDest   The length in bytes of the buffer \p pDest.
  * \param pLenWritten  A valid pointer to the number of bytes written to pDest.
@@ -133,6 +136,7 @@ void SOPC_KeyManager_AsymmetricKey_Free(SOPC_AsymmetricKey* pKey);
  *                  and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* pKey,
+                                                      bool bPrivate,
                                                       uint8_t* pDest,
                                                       uint32_t lenDest,
                                                       uint32_t* pLenWritten);
