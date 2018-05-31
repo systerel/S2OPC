@@ -346,6 +346,15 @@ static SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx, uint32_t socketI
 void clearToolkit(void)
 {
     SOPC_Toolkit_Clear();
+
+    // Free all allocated resources
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_KeyManager_Certificate_Free(scConfig.pki->pUserCertAuthList);
+    SOPC_KeyManager_Certificate_Free((SOPC_Certificate*) scConfig.crt_cli);
+    SOPC_KeyManager_Certificate_Free((SOPC_Certificate*) scConfig.crt_srv);
+    SOPC_KeyManager_AsymmetricKey_Free((SOPC_AsymmetricKey*) scConfig.key_priv_cli);
+    SOPC_PKIProviderStack_Free((SOPC_PKIProvider*) scConfig.pki);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
 }
 
 void establishSC(void)
