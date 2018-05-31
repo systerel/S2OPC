@@ -113,6 +113,16 @@ void SOPC_AddressSpace_Item_Clear(SOPC_AddressSpace_Item* item)
     }
 }
 
+static void clear_description_item_value(void* data)
+{
+    SOPC_AddressSpace_Item* item = data;
+
+    if (item->node_class == OpcUa_NodeClass_Variable || item->node_class == OpcUa_NodeClass_VariableType)
+    {
+        SOPC_Variant_Clear(SOPC_AddressSpace_Item_Get_Value(item));
+    }
+}
+
 static void free_description_item(void* data)
 {
     SOPC_AddressSpace_Item* item = data;
@@ -137,7 +147,8 @@ static bool nodeid_equal(const void* a, const void* b)
 
 SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items)
 {
-    return SOPC_Dict_Create(NULL, nodeid_hash, nodeid_equal, NULL, free_items ? free_description_item : NULL);
+    return SOPC_Dict_Create(NULL, nodeid_hash, nodeid_equal, NULL,
+                            free_items ? free_description_item : clear_description_item_value);
 }
 
 SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)

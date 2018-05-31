@@ -511,7 +511,7 @@ POINTER_VARIANT_TYPES = {VALUE_TYPE_GUID, VALUE_TYPE_NODEID, VALUE_TYPE_DATETIME
 
 def generate_value_variant(val):
     if val is None:
-        return '{false, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}}'
+        return '{true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}}'
 
     if val.ty == VALUE_TYPE_BOOL:
         return generate_variant('SOPC_Boolean_Id', 'Boolean', ('true' if val.val else 'false'))
