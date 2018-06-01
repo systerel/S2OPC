@@ -39,15 +39,15 @@ else
     BUILD_DIR=build
 fi
 
-# default build mode is RELWITHDEBINFO
-CMAKE_OPTIONS="$CMAKE_OPTIONS -DCMAKE_BUILD_TYPE=RelWithDebInfo"
-
 # Check if the option which name is $1 is defined in env,
 #  and adds it and its value to CMAKE_OPTIONS
+#  else add default value defined in $2.
 append_cmake_option ()
 {
-    if [[ $1 ]]; then
+    if [[ -n "${!1}" ]]; then
         CMAKE_OPTIONS="$CMAKE_OPTIONS -D$1=${!1}"
+    elif [[ -n "$2" ]]; then
+        CMAKE_OPTIONS="$CMAKE_OPTIONS -D$1=$2"
     fi
 }
 
@@ -67,7 +67,7 @@ else
     append_cmake_option WITH_ASAN
     append_cmake_option WITH_UBSAN
     append_cmake_option WITH_COVERAGE
-    append_cmake_option CMAKE_BUILD_TYPE
+    append_cmake_option CMAKE_BUILD_TYPE RelWithDebInfo
     cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
     cd - > /dev/null || exit 1
 fi
