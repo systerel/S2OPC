@@ -56,7 +56,7 @@ CLANG_BIN_DIR=$PWD/bin_clang
 \mkdir -p $CLANG_BUILD_DIR
 cd $CLANG_BUILD_DIR
 CC=clang cmake -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=$CLANG_BIN_DIR .. >> $LOGPATH | tee -a $LOGPATH
-make all >> $LOGPATH
+make all -j$(nproc) >> $LOGPATH
 if [[ $? != 0 ]]; then
     cd - >> $LOGPATH
     echo "ERROR: compiling project with Clang compiler: see log $LOGPATH / use make clean all in $CLANG_BUILD_DIR" | tee -a $LOGPATH
