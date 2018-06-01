@@ -46,7 +46,13 @@ PROMOTES
     get_nodeToMonitoredItemQueue,
     /* monitored_item_pointer_bs*/
     is_notification_triggered,
-    getall_monitoredItemPointer
+    getall_monitoredItemPointer,
+    /* msg_subscription_publish_bs */
+    get_msg_header_expiration_time,
+    set_msg_publish_resp_subscription,
+    set_msg_publish_resp_notificationMsg,
+    generate_internal_send_publish_response_event
+    
     
 LOCAL_OPERATIONS
     
@@ -260,8 +266,11 @@ OPERATIONS
     ;
     
     empty_session_publish_requests (p_subscription) =
-    BEGIN
-        skip
+    VAR
+        l_PublishRequestQueue
+    IN
+        l_PublishRequestQueue <-- get_subscription_publishRequestQueue (p_subscription);
+        clear_and_deallocate_publish_queue (l_PublishRequestQueue)
     END
     ;
 
@@ -344,18 +353,180 @@ OPERATIONS
     END
     ;
     
-    StatusCode_service, async_resp_msg, subscription, notifMsg, moreNotifs
+    StatusCode_service, async_resp_msg, subscription, moreNotifs
       <-- receive_publish_request (p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg) =
-    BEGIN
-        StatusCode_service := c_StatusCode_indet;
-        async_resp_msg := FALSE;
+    VAR
+        l_dom,
+        l_subscription,
+        l_subscriptionState,
+        l_PublishingReqQueue,
+        l_PublishingEnabled,
+        l_NotificationQueue,
+        l_nb_notifications,
+        l_NotificationAvailable,
+        l_MoreNotifications,
+        
+        l_bres,
+        l_notifMsg,
+        l_seq_num,
+        l_next_seq_num
+    IN
+        l_dom, l_subscription <-- getall_subscription (p_session); /* l_dom = TRUE already verified by caller */
+        l_subscriptionState <-- get_subscription_state (l_subscription);
+        l_PublishingReqQueue <-- get_subscription_publishRequestQueue (l_subscription);
+        l_PublishingEnabled <-- get_subscription_PublishingEnabled (l_subscription);
+        l_MoreNotifications <-- get_subscription_MoreNotifications (l_subscription);
+        l_NotificationQueue <-- get_subscription_notificationQueue (l_subscription);
+        l_nb_notifications <-- init_iter_monitored_item_notification (l_NotificationQueue);
+        l_NotificationAvailable := bool(l_nb_notifications > 0);
+        
+        moreNotifs := FALSE;
         subscription := c_subscription_indet;
-        notifMsg := c_notif_msg_indet;
-        moreNotifs := FALSE
+        
+        /* #4 transition */
+        IF l_subscriptionState = e_subscriptionState_normal &
+           (l_PublishingEnabled = FALSE
+            or
+            (l_PublishingEnabled = TRUE &
+             l_MoreNotifications = FALSE)
+           )
+        THEN
+            l_bres <-- append_publish_request_to_queue (l_PublishingReqQueue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg);
+            IF l_bres = TRUE
+            THEN
+                StatusCode_service := e_sc_ok;
+                async_resp_msg := TRUE
+            ELSE
+                StatusCode_service := e_sc_bad_out_of_memory;
+                async_resp_msg := FALSE
+            END
+        /* #5 transition */
+        ELSIF l_subscriptionState = e_subscriptionState_normal &
+              l_PublishingEnabled = TRUE & l_MoreNotifications = TRUE
+        THEN
+            subscription := l_subscription;
+            async_resp_msg := FALSE;
+            
+            /* reset lifetime counter */
+            reset_subscription_LifetimeCounter (l_subscription);
+            
+            /* retrieve notification number */
+            IF l_nb_notifications > k_n_monitoredItemNotif_max
+            THEN
+                l_nb_notifications := k_n_monitoredItemNotif_max;
+                moreNotifs := TRUE
+            END
+            ;
+            
+            /* allocate and fill notification "message" */
+            l_bres, l_notifMsg <-- alloc_notification_message_items (p_resp_msg, l_nb_notifications);
+            IF l_bres = TRUE
+            THEN
+                /* Manage sequence number */
+                l_seq_num <-- get_subscription_SeqNum (l_subscription);
+                set_notification_message_sequence_number (l_notifMsg, l_seq_num);
+                l_next_seq_num <-- get_next_subscription_sequence_number (l_seq_num);
+                set_subscription_SeqNum (l_subscription, l_next_seq_num);
+                
+                /* Fill notification message */
+                fill_notification_message (l_NotificationQueue, l_notifMsg, l_nb_notifications);
+                StatusCode_service := e_sc_ok
+            ELSE
+                moreNotifs := TRUE;
+                StatusCode_service := e_sc_bad_out_of_memory
+            END;
+            set_subscription_MoreNotifications (l_subscription, moreNotifs);
+            set_subscription_MessageSent (l_subscription)
+
+        /* #10 transition */
+        ELSIF l_subscriptionState = e_subscriptionState_late &
+              l_PublishingEnabled = TRUE &
+              (l_MoreNotifications = TRUE or l_NotificationAvailable = TRUE)
+        THEN
+            set_subscription_state (l_subscription, e_subscriptionState_normal);
+            subscription := l_subscription;
+            async_resp_msg := FALSE;
+            
+            /* Note: Idem previous transition below: */
+
+            /* reset lifetime counter */
+            reset_subscription_LifetimeCounter (l_subscription);
+            
+            /* retrieve notification number */
+            IF l_nb_notifications > k_n_monitoredItemNotif_max
+            THEN
+                l_nb_notifications := k_n_monitoredItemNotif_max;
+                moreNotifs := TRUE
+            END
+            ;
+            
+            /* allocate and fill notification "message" */
+            l_bres, l_notifMsg <-- alloc_notification_message_items (p_resp_msg, l_nb_notifications);
+            IF l_bres = TRUE
+            THEN
+                /* Manage sequence number */
+                l_seq_num <-- get_subscription_SeqNum (l_subscription);
+                set_notification_message_sequence_number (l_notifMsg, l_seq_num);
+                l_next_seq_num <-- get_next_subscription_sequence_number (l_seq_num);
+                set_subscription_SeqNum (l_subscription, l_next_seq_num);
+                
+                /* Fill notification message */
+                fill_notification_message (l_NotificationQueue, l_notifMsg, l_nb_notifications);
+                StatusCode_service := e_sc_ok
+            ELSE
+                moreNotifs := TRUE;
+                StatusCode_service := e_sc_bad_out_of_memory
+            END;
+            set_subscription_MoreNotifications (l_subscription, moreNotifs);
+            set_subscription_MessageSent (l_subscription)
+
+        /* #11 transition */
+        ELSIF l_subscriptionState = e_subscriptionState_late &
+             (l_PublishingEnabled = FALSE
+              or  
+              (l_PublishingEnabled = TRUE &
+               l_NotificationAvailable = FALSE &
+               l_MoreNotifications = FALSE)               
+             )
+        THEN
+            set_subscription_state (l_subscription, e_subscriptionState_keepAlive);
+            subscription := l_subscription;
+            async_resp_msg := FALSE;
+            
+            /* reset lifetime counter */
+            reset_subscription_LifetimeCounter (l_subscription);
+            
+            /* prepare a keep alive message content */
+            StatusCode_service := e_sc_ok;
+            /* get and fill notification "message" */
+            l_notifMsg <-- get_notification_message_no_items (p_resp_msg);
+            /* Get sequence number of next message to be sent (do not increment it for keep alive) */
+            l_seq_num <-- get_subscription_SeqNum (l_subscription);
+            set_notification_message_sequence_number (l_notifMsg, l_seq_num);
+            set_subscription_MessageSent (l_subscription)
+            
+        /* #13 transition */
+        ELSIF l_subscriptionState = e_subscriptionState_keepAlive
+        THEN
+            l_bres <-- append_publish_request_to_queue (l_PublishingReqQueue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg);
+            IF l_bres = TRUE
+            THEN
+                StatusCode_service := e_sc_ok;
+                async_resp_msg := TRUE
+            ELSE
+                StatusCode_service := e_sc_bad_out_of_memory;
+                async_resp_msg := FALSE
+            END
+        ELSE
+            subscription := l_subscription;
+            StatusCode_service := e_sc_bad_invalid_state;
+            async_resp_msg := FALSE
+            
+        END
     END
     ;
     
-    revisedSamplingItv, revisedQueueSize <-- compute_create_montitored_item_revised_params (p_reqSamplingItv, p_reqQueueSize) =
+    revisedSamplingItv, revisedQueueSize <-- compute_create_montitored_item_revised_params (p_reqQueueSize) =
     BEGIN
         revisedSamplingItv := c_opcua_duration_zero;
         revisedQueueSize := p_reqQueueSize
@@ -424,11 +595,16 @@ OPERATIONS
     END
     ;
     
-    p_close_sub, p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_notifMsg
+    p_validPublishingReqQueued <-- server_subscription_core_check_valid_publish_req_queue (p_subscription) =
+    BEGIN
+        p_validPublishingReqQueued <-- pop_invalid_and_check_valid_publishReqQueued (p_subscription)
+    END
+    ;
+    
+    p_close_sub, p_msg_to_send, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_validPubReqQueued
       <-- server_subscription_core_publish_timeout_check_lifetime (p_subscription) =
     VAR
-        l_lifetimeCounter,
-        l_PublishingReqQueued
+        l_lifetimeCounter
     IN
         /* #27 transition evaluation */
         p_close_sub := FALSE;
@@ -437,10 +613,9 @@ OPERATIONS
         p_publish_resp_msg := c_msg_indet;
         p_req_handle := c_server_request_handle_any;
         p_req_context := c_request_context_indet;
-        p_notifMsg := c_notif_msg_indet;
         
-        l_PublishingReqQueued <-- pop_invalid_and_check_valid_publishReqQueued (p_subscription);
-        IF l_PublishingReqQueued = FALSE
+        p_validPubReqQueued <-- pop_invalid_and_check_valid_publishReqQueued (p_subscription);
+        IF p_validPubReqQueued = FALSE
         THEN
             l_lifetimeCounter <-- get_subscription_LifetimeCounter (p_subscription);
             IF l_lifetimeCounter <= 1
@@ -454,22 +629,22 @@ OPERATIONS
     END
     ;
         
-    p_msg_to_send, p_msg_sc, p_session, p_publish_resp_msg, 
-    p_req_handle, p_req_context, p_notifMsg, p_moreNotifs, p_morePubReqs
-      <-- server_subscription_core_publish_timeout (p_subscription) =
+    p_msg_to_send, p_msg_sc, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_moreNotifs
+      <-- server_subscription_core_publish_timeout (p_subscription, p_validPublishReqQueued) =
     VAR
         l_pubInterval,
         l_newTimerId,
         l_bres,
         l_State,
         l_PublishingReqQueue,
-        l_PublishingReqQueued,
         l_PublishingEnabled,
         l_NotificationQueue,
         l_nb_notifications,
         l_NotificationAvailable,
         l_MessageSent,
+        l_KeepAliveCounter,
         
+        l_notifMsg,
         l_req_exp_time,
         l_seq_num,
         l_next_seq_num
@@ -479,9 +654,7 @@ OPERATIONS
         p_publish_resp_msg := c_msg_indet;
         p_req_handle := c_server_request_handle_any;
         p_req_context := c_request_context_indet;
-        p_notifMsg := c_notif_msg_indet;
         p_moreNotifs := FALSE;
-        p_morePubReqs := FALSE;
         p_msg_sc := c_StatusCode_indet;
         
         /* Restart timer */
@@ -496,19 +669,21 @@ OPERATIONS
         /* Retrieve state variables */
         l_State <-- get_subscription_state (p_subscription);
         l_PublishingReqQueue <-- get_subscription_publishRequestQueue (p_subscription);
-        l_PublishingReqQueued <-- pop_invalid_and_check_valid_publishReqQueued (p_subscription);
         l_PublishingEnabled <-- get_subscription_PublishingEnabled (p_subscription);
         l_NotificationQueue <-- get_subscription_notificationQueue (p_subscription);
         l_nb_notifications <-- init_iter_monitored_item_notification (l_NotificationQueue);
         l_NotificationAvailable := bool(l_nb_notifications > 0);
         l_MessageSent <-- get_subscription_MessageSent (p_subscription);
+        l_KeepAliveCounter <-- get_subscription_KeepAliveCounter (p_subscription);
         
         /* #6 transition */
         IF l_State = e_subscriptionState_normal &
-            l_PublishingReqQueued = TRUE &
+            p_validPublishReqQueued = TRUE &
             l_PublishingEnabled = TRUE &
             l_NotificationAvailable = TRUE
         THEN
+            /* Note: same treatment as #14 below ! */
+            
             /* reset lifetime counter */
             reset_subscription_LifetimeCounter (p_subscription);
             /* retrieve a valid publish response */
@@ -521,39 +696,225 @@ OPERATIONS
             END
             ;
             /* allocate and fill notification "message" */
-            l_bres, p_notifMsg <-- alloc_notification_message (l_nb_notifications);
+            l_bres, l_notifMsg <-- alloc_notification_message_items (p_publish_resp_msg, l_nb_notifications);
             IF l_bres = TRUE
             THEN
                 /* Manage sequence number */
                 l_seq_num <-- get_subscription_SeqNum (p_subscription);
-                set_notification_message_sequence_number (p_notifMsg, l_seq_num);
+                set_notification_message_sequence_number (l_notifMsg, l_seq_num);
                 l_next_seq_num <-- get_next_subscription_sequence_number (l_seq_num);
                 set_subscription_SeqNum (p_subscription, l_next_seq_num);
                 
                 /* Fill notification message */
-                fill_notification_message (l_NotificationQueue, p_notifMsg, l_nb_notifications);
+                fill_notification_message (l_NotificationQueue, l_notifMsg, l_nb_notifications);
                 p_msg_sc := e_sc_ok
             ELSE
+                p_moreNotifs := TRUE;
                 p_msg_sc := e_sc_bad_out_of_memory
             END;
-            set_subscription_MoreNotifications (p_subscription, p_moreNotifs)
+            set_subscription_MoreNotifications (p_subscription, p_moreNotifs);
+            set_subscription_MessageSent (p_subscription)
+        /* #7 transition */
+        ELSIF l_State = e_subscriptionState_normal &
+              p_validPublishReqQueued = TRUE &
+              l_MessageSent = FALSE &
+              (l_PublishingEnabled = FALSE or
+                (l_PublishingEnabled = TRUE &
+                 l_NotificationAvailable = FALSE)
+              )
+        THEN 
+            /* reset lifetime counter */
+            reset_subscription_LifetimeCounter (p_subscription);
+            /* retrieve a valid publish response */
+            p_session, l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
+              <-- pop_head_publish_request_queue (l_PublishingReqQueue);
+            set_publish_response_msg (p_publish_resp_msg);
             
+            /* Note: same treatment as #15 below ! */
+            
+            /* prepare a keep alive message content */
+            p_msg_sc := e_sc_ok;
+            p_moreNotifs := FALSE;
+            /* get and fill notification "message" */
+            l_notifMsg <-- get_notification_message_no_items (p_publish_resp_msg);
+            /* Get sequence number of next message to be sent (do not increment it for keep alive) */
+            l_seq_num <-- get_subscription_SeqNum (p_subscription);
+            set_notification_message_sequence_number (l_notifMsg, l_seq_num);
+            set_subscription_MessageSent (p_subscription)
+            
+        /* #8 transition */
+        ELSIF l_State = e_subscriptionState_normal &
+              p_validPublishReqQueued = FALSE &
+              (l_MessageSent = FALSE 
+               or
+               (l_PublishingEnabled = TRUE &
+                l_NotificationAvailable = TRUE)
+              )
+        THEN
+            set_subscription_state (p_subscription, e_subscriptionState_late)
+            
+        /* #9 transition */
+        ELSIF l_State = e_subscriptionState_normal &
+              l_MessageSent = TRUE &
+              (l_PublishingEnabled = FALSE
+               or
+               (l_PublishingEnabled = TRUE &
+                l_NotificationAvailable = TRUE)
+              )
+        THEN
+            set_subscription_state (p_subscription, e_subscriptionState_keepAlive);
+            reset_subscription_KeepAliveCounter (p_subscription)
+            
+        /* #12 transition */
+        ELSIF l_State = e_subscriptionState_late
+        THEN
+            skip /* Nothing to do: lifetime already checked */
+        /* #14 transition */
+        ELSIF l_State = e_subscriptionState_keepAlive &
+              l_PublishingEnabled = TRUE &
+              l_NotificationAvailable = TRUE &
+              p_validPublishReqQueued = TRUE
+        THEN
+            set_subscription_state (p_subscription, e_subscriptionState_normal);
+            
+            /* Note: same treatment as #7 below ! */
+            /* reset lifetime counter */
+            reset_subscription_LifetimeCounter (p_subscription);
+            
+            /* retrieve a valid publish response */
+            p_session, l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
+              <-- pop_head_publish_request_queue (l_PublishingReqQueue);
+            
+            /* retrieve notification number */
+            IF l_nb_notifications > k_n_monitoredItemNotif_max
+            THEN
+                l_nb_notifications := k_n_monitoredItemNotif_max;
+                p_moreNotifs := TRUE
+            END
+            ;
+            /* allocate and fill notification "message" */
+            l_bres, l_notifMsg <-- alloc_notification_message_items (p_publish_resp_msg, l_nb_notifications);
+            IF l_bres = TRUE
+            THEN
+                /* Manage sequence number */
+                l_seq_num <-- get_subscription_SeqNum (p_subscription);
+                set_notification_message_sequence_number (l_notifMsg, l_seq_num);
+                l_next_seq_num <-- get_next_subscription_sequence_number (l_seq_num);
+                set_subscription_SeqNum (p_subscription, l_next_seq_num);
+                
+                /* Fill notification message */
+                fill_notification_message (l_NotificationQueue, l_notifMsg, l_nb_notifications);
+                p_msg_sc := e_sc_ok
+            ELSE
+                p_moreNotifs := TRUE;
+                p_msg_sc := e_sc_bad_out_of_memory
+            END;
+            set_subscription_MoreNotifications (p_subscription, p_moreNotifs);
+            set_subscription_MessageSent (p_subscription)
+
+        /* #15 transition */
+        ELSIF l_State = e_subscriptionState_keepAlive &
+              p_validPublishReqQueued = TRUE &
+              l_KeepAliveCounter = 1 &
+              (l_PublishingEnabled = FALSE
+               or
+               (l_PublishingEnabled = TRUE &
+                l_NotificationAvailable = FALSE)
+              )
+        THEN
+            reset_subscription_KeepAliveCounter (p_subscription);
+            
+            /* Note: same treatment as #7 below ! */
+            /* retrieve a valid publish response */
+            p_session, l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
+              <-- pop_head_publish_request_queue (l_PublishingReqQueue);
+            set_publish_response_msg (p_publish_resp_msg);
+
+            /* prepare a keep alive message content */
+            p_msg_sc := e_sc_ok;
+            p_moreNotifs := FALSE;
+            /* get and fill notification "message" */
+            l_notifMsg <-- get_notification_message_no_items (p_publish_resp_msg);
+            /* Get sequence number of next message to be sent (do not increment it for keep alive) */
+            l_seq_num <-- get_subscription_SeqNum (p_subscription);
+            set_notification_message_sequence_number (l_notifMsg, l_seq_num)
+            
+        /* #16 transition */
+        ELSIF l_State = e_subscriptionState_keepAlive &
+              l_KeepAliveCounter > 1 &
+              (l_PublishingEnabled = FALSE
+               or
+               (l_PublishingEnabled = TRUE &
+                l_NotificationAvailable = FALSE)
+              )
+        THEN
+            decrement_subscription_KeepAliveCounter (p_subscription)
+
+        /* #17 transition */
+        ELSIF l_State = e_subscriptionState_keepAlive &
+              p_validPublishReqQueued = FALSE &
+              (l_KeepAliveCounter = 1
+               or
+               (l_KeepAliveCounter > 1 &
+                l_PublishingEnabled = TRUE &
+                l_NotificationAvailable = TRUE)
+              )
+        THEN
+            set_subscription_state (p_subscription, e_subscriptionState_late)
+        ELSE
+            skip
+            /* TODO: invalid state evaluation: generate log error trace */
         END
     END
     ;
     
-    p_msg_to_send, p_msg_sc, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_notifMsg, p_moreNotifs, p_morePubReqs
+    p_msg_to_send, p_msg_sc, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_moreNotifs
       <-- server_subscription_core_publish_timeout_return_moreNotifs (p_subscription) =
-    BEGIN
-        p_msg_to_send := FALSE;
-        p_session := c_session_indet;
-        p_publish_resp_msg := c_msg_indet;
-        p_req_handle := c_server_request_handle_any;
-        p_req_context := c_request_context_indet;
-        p_notifMsg := c_notif_msg_indet;
+    VAR
+        l_req_exp_time,
+        l_PublishingReqQueue,
+        l_nb_notifications,
+        l_bres,
+        l_notifMsg,
+        l_seq_num,
+        l_next_seq_num,
+        l_NotificationQueue
+    IN
         p_moreNotifs := FALSE;
-        p_morePubReqs := FALSE;
-        p_msg_sc := c_StatusCode_indet
+        p_msg_to_send := TRUE;
+        l_PublishingReqQueue <-- get_subscription_publishRequestQueue (p_subscription);
+        l_NotificationQueue <-- get_subscription_notificationQueue (p_subscription);
+        l_nb_notifications <-- init_iter_monitored_item_notification (l_NotificationQueue);
+          
+        /* retrieve a valid publish response */
+        p_session, l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
+          <-- pop_head_publish_request_queue (l_PublishingReqQueue);
+            
+        /* retrieve notification number */
+        IF l_nb_notifications > k_n_monitoredItemNotif_max
+        THEN
+            l_nb_notifications := k_n_monitoredItemNotif_max;
+            p_moreNotifs := TRUE
+        END
+        ;
+        /* allocate and fill notification "message" */
+        l_bres, l_notifMsg <-- alloc_notification_message_items (p_publish_resp_msg, l_nb_notifications);
+        IF l_bres = TRUE
+        THEN
+            /* Manage sequence number */
+            l_seq_num <-- get_subscription_SeqNum (p_subscription);
+            set_notification_message_sequence_number (l_notifMsg, l_seq_num);
+            l_next_seq_num <-- get_next_subscription_sequence_number (l_seq_num);
+            set_subscription_SeqNum (p_subscription, l_next_seq_num);
+            
+            /* Fill notification message */
+            fill_notification_message (l_NotificationQueue, l_notifMsg, l_nb_notifications);
+            p_msg_sc := e_sc_ok
+        ELSE
+            p_moreNotifs := TRUE;
+            p_msg_sc := e_sc_bad_out_of_memory
+        END;
+        set_subscription_MoreNotifications (p_subscription, p_moreNotifs)
     END
     ;
     

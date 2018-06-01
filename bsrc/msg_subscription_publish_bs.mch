@@ -25,25 +25,30 @@ SEES
     request_handle_bs
 
 ABSTRACT_VARIABLES
+    publish_response_message,
     notification_message,
+    notification_message_seq_num,
     nb_monitored_item_notifications,
     MonitoredItemNotification_MonitoredItemId
 
 INVARIANT
-    notification_message : t_notif_msg &
+    publish_response_message : t_msg_i &
+    notification_message : t_notif_msg_i &
+    notification_message_seq_num : t_sub_seq_num_i &
     nb_monitored_item_notifications : NAT &
     nb_monitored_item_notifications <= k_n_monitoredItemNotif_max &
     
     MonitoredItemNotification_MonitoredItemId : t_monitoredItemNotifIndex +-> t_monitoredItemId
 
 INITIALISATION
+    publish_response_message := c_msg_indet ||
     notification_message := c_notif_msg_indet ||
+    notification_message_seq_num := c_sub_seq_num_indet ||
     nb_monitored_item_notifications := 0 ||
     MonitoredItemNotification_MonitoredItemId :(MonitoredItemNotification_MonitoredItemId = {})
 
 OPERATIONS
     
-    /* TODO: move into message_in_bs: + need type for header ? */
     req_expiration_time <-- get_msg_header_expiration_time (p_req_header) =
     PRE
         p_req_header : t_msg_header_i &
@@ -59,8 +64,8 @@ OPERATIONS
     PRE
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
-        p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_subscription_publish_resp &
+        ((p_resp_msg = c_msg_out & a_msg_out_type = e_msg_subscription_publish_resp)
+         or publish_response_message = p_resp_msg) &
         p_subscription : t_subscription_i &
         p_subscription : t_subscription
     THEN
@@ -68,14 +73,12 @@ OPERATIONS
     END
     ;
     
-    set_msg_publish_resp_notificationMsg (p_resp_msg, p_notifMsg, p_moreNotifs) =
+    set_msg_publish_resp_notificationMsg (p_resp_msg, p_moreNotifs) =
     PRE
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
-        p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_subscription_publish_resp &
-        p_notifMsg : t_notif_msg_i &
-        p_notifMsg : t_notif_msg &
+        ((p_resp_msg = c_msg_out & a_msg_out_type = e_msg_subscription_publish_resp)
+         or publish_response_message = p_resp_msg) &
         p_moreNotifs : BOOL
     THEN
         skip
@@ -86,6 +89,7 @@ OPERATIONS
     PRE
         p_session : t_session_i & p_session : t_session &
         p_publish_resp_msg : t_msg_i & p_publish_resp_msg : t_msg &
+        publish_response_message = p_publish_resp_msg &
         p_req_handle : t_server_request_handle_i & 
         p_req_context : t_request_context_i & p_req_context : t_request_context &
         p_statusCode : t_StatusCode_i & p_statusCode : t_StatusCode
@@ -94,9 +98,31 @@ OPERATIONS
     END
     ;
     
-    /* Notification message treatments */
-    bres, p_notifMsg <-- alloc_notification_message (p_nb_monitored_item_notifications) =
+    /* Define current publish response message */
+    set_publish_response_msg (p_publish_resp_msg) =
     PRE
+        p_publish_resp_msg : t_msg_i & p_publish_resp_msg : t_msg
+    THEN
+        publish_response_message := p_publish_resp_msg
+    END
+    ;
+    
+    /* Notification message treatments */
+    p_notifMsg <-- get_notification_message_no_items (p_publish_resp_msg) =
+    PRE
+        p_publish_resp_msg : t_msg_i & p_publish_resp_msg : t_msg &
+        publish_response_message = p_publish_resp_msg
+    THEN
+        notification_message, p_notifMsg
+        :(p_notifMsg : t_notif_msg_i & p_notifMsg : t_notif_msg &
+            notification_message = p_notifMsg)
+    END
+    ;
+    
+    bres, p_notifMsg <-- alloc_notification_message_items (p_publish_resp_msg, p_nb_monitored_item_notifications) =
+    PRE
+        p_publish_resp_msg : t_msg_i & p_publish_resp_msg : t_msg &
+        publish_response_message = p_publish_resp_msg &
         p_nb_monitored_item_notifications : NAT &
         p_nb_monitored_item_notifications > 0 &
         p_nb_monitored_item_notifications <= k_n_monitoredItemNotif_max
@@ -120,7 +146,7 @@ OPERATIONS
         p_notifMsg = notification_message &
         p_seq_num : t_sub_seq_num_i & p_seq_num : t_sub_seq_num
     THEN
-        skip
+        notification_message_seq_num := p_seq_num
     END
     ;
     
@@ -139,14 +165,6 @@ OPERATIONS
         p_wv_pointer : t_WriteValuePointer
     THEN
         MonitoredItemNotification_MonitoredItemId(p_index) := p_monitored_item_id
-    END
-    ;
-    
-    bres <-- is_valid_notif_msg (p_notifMsg) =
-    PRE
-        p_notifMsg : t_notif_msg_i
-    THEN
-        bres := bool(p_notifMsg : t_notif_msg)
     END
 
 END

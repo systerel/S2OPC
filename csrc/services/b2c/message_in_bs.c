@@ -44,6 +44,12 @@ void message_in_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void message_in_bs__nothing_msg_in(const constants__t_msg_i message_in_bs__msg)
+{
+    /* NOTHING TO DO: avoid unused variable */
+    (void) message_in_bs__msg;
+}
+
 void message_in_bs__bless_msg_in(const constants__t_msg_i message_in_bs__msg)
 {
     /* NOTHING TO DO: in B model now message_in_bs__msg = c_msg_in now */
