@@ -33,7 +33,7 @@
 #include <sopc_toolkit_config.h>
 #include <sopc_user_app_itf.h>
 
-static const char* SERVER_URL = "opc.tcp://localhost:4841";
+static const char* DEFAULT_SERVER_URL = "opc.tcp://localhost:4841";
 
 // Minimum number of measurements to consider a statistic representative.
 #define MIN_N_MEASUREMENTS 1000
@@ -427,6 +427,11 @@ static void usage(char** argv)
     {
         printf("%-15s  %s\n", BENCH_FUNCS[i].name, BENCH_FUNCS[i].desc);
     }
+
+    printf(
+        "\nThe server address can be set using the SOPC_SERVER_URL environment variable.\n"
+        "By default, it is set to %s .\n",
+        DEFAULT_SERVER_URL);
 }
 
 static bench_func_t bench_func_by_name(const char* name)
@@ -584,7 +589,7 @@ int main(int argc, char** argv)
     memset(&scConfig, 0, sizeof(SOPC_SecureChannel_Config));
 
     scConfig.isClientSc = true;
-    scConfig.url = SERVER_URL;
+    scConfig.url = getenv_default("SOPC_SERVER_URL", DEFAULT_SERVER_URL);
     scConfig.reqSecuPolicyUri = security_policy;
     scConfig.msgSecurityMode = msg_sec_mode;
     scConfig.requestedLifetime = 60000;
