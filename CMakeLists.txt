@@ -85,6 +85,17 @@ if(WITH_COVERAGE)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
 endif()
 
+option(WITH_GPERF_PROFILER "link against the gperftool profiler")
+if(WITH_GPERF_PROFILER)
+	find_library(GPERF_PROFILER profiler)
+
+	if (NOT GPERF_PROFILER)
+		message(FATAL_ERROR "Could not find libprofiler")
+	endif()
+
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lprofiler")
+endif()
+
 # Re-enable asserts for Release and RelWithDebInfo builds
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
