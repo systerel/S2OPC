@@ -307,7 +307,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // id == secure channel configuration
         // params = user authentication
         // auxParam = user application session context
-        if (id <= INT32_MAX && params != NULL && *(uint32_t*) params <= INT32_MAX)
+        if (id <= constants__t_channel_config_idx_i_max && params != NULL && *(uint32_t*) params <= INT32_MAX)
         {
             io_dispatch_mgr__client_activate_new_session(id, (int32_t) * (uint32_t*) params, auxParam, &bres);
         }
