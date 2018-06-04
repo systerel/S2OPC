@@ -29,6 +29,26 @@
 
 #include "check_helpers.h"
 
+#include "sopc_atomic.h"
+#include "sopc_time.h"
+
+bool wait_value(int32_t* atomic, int32_t val)
+{
+    for (int i = 0; i < 100; ++i)
+    {
+        int32_t x = SOPC_Atomic_Int_Get(atomic);
+
+        if (x == val)
+        {
+            return true;
+        }
+
+        SOPC_Sleep(10);
+    }
+
+    return false;
+}
+
 int main(void)
 {
     int number_failed;

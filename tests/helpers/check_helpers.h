@@ -24,7 +24,12 @@
 #ifndef CHECK_HELPERS_H
 #define CHECK_HELPERS_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #include <check.h>
+
+bool wait_value(int32_t* atomic, int32_t val);
 
 Suite* tests_make_suite_crypto_B256S256(void);
 Suite* tests_make_suite_crypto_B256(void);

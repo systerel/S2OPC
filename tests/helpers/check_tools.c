@@ -35,6 +35,7 @@
 
 #include "opcua_identifiers.h"
 #include "sopc_async_queue.h"
+#include "sopc_atomic.h"
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encoder.h"
@@ -1163,8 +1164,8 @@ typedef struct AsyncQueue_Element
 {
     SOPC_AsyncQueue* queue;
     uint8_t nbMsgs;
-    bool blockingDequeue;
-    bool success;
+    int32_t dequeue_pending;
+    int32_t success;
 } AsyncQueue_Element;
 
 void* test_async_queue_blocking_dequeue_fct(void* args)
@@ -1178,9 +1179,9 @@ void* test_async_queue_blocking_dequeue_fct(void* args)
     // Dequeue expected number of messages with increased value sequence as action parameter
     while (nbDequeued < param->nbMsgs && success != false)
     {
-        param->blockingDequeue = true;
+        SOPC_Atomic_Int_Add(&param->dequeue_pending, 1);
         status = SOPC_AsyncQueue_BlockingDequeue(param->queue, &arg);
-        param->blockingDequeue = false;
+        SOPC_Atomic_Int_Add(&param->dequeue_pending, -1);
         nbDequeued++;
         assert(status == SOPC_STATUS_OK);
         if (*((uint8_t*) arg) == lastValueDeq + 1)
@@ -1192,7 +1193,8 @@ void* test_async_queue_blocking_dequeue_fct(void* args)
             success = false;
         }
     }
-    param->success = success;
+
+    SOPC_Atomic_Int_Add(&param->success, success ? 1 : 0);
     return NULL;
 }
 
@@ -1246,51 +1248,33 @@ START_TEST(test_async_queue_threads)
     uint8_t five = 5;
     SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&queue, NULL);
     ck_assert(status == SOPC_STATUS_OK);
-    params.success = false;
-    params.blockingDequeue = false;
+    params.success = 0;
+    params.dequeue_pending = 0;
     params.nbMsgs = 5;
     params.queue = queue;
     // Nominal behavior of async queue FIFO (blocking dequeue)
     status = SOPC_Thread_Create(&thread, test_async_queue_blocking_dequeue_fct, &params);
     ck_assert(status == SOPC_STATUS_OK);
-    SOPC_Sleep(10);
-    ck_assert(params.blockingDequeue == !false);
-    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &one);
-    ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &two);
-    ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &three);
-    ck_assert(status == SOPC_STATUS_OK);
-    SOPC_Sleep(100);
-    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &four);
-    ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &five);
-    ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_Thread_Join(thread);
-    ck_assert(status == SOPC_STATUS_OK);
-    ck_assert(params.success == !false);
+    ck_assert(wait_value(&params.dequeue_pending, 1));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &one));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &two));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &three));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &four));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &five));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(thread));
+    ck_assert_int_eq(1, SOPC_Atomic_Int_Get(&params.success));
 
     // Nominal behavior of async queue FIFO (non blocking dequeue)
-    params.success = false;
-    params.blockingDequeue = false;
-    params.nbMsgs = 5;
-    params.queue = queue;
-    status = SOPC_Thread_Create(&thread, test_async_queue_nonblocking_dequeue_fct, &params);
-    ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &one);
-    ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &two);
-    ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &three);
-    ck_assert(status == SOPC_STATUS_OK);
-    SOPC_Sleep(100);
-    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &four);
-    ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &five);
-    ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_Thread_Join(thread);
-    ck_assert(status == SOPC_STATUS_OK);
-    ck_assert(params.success == !false);
+    SOPC_Atomic_Int_Set(&params.success, 0);
+    SOPC_Atomic_Int_Set(&params.dequeue_pending, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Create(&thread, test_async_queue_nonblocking_dequeue_fct, &params));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &one));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &two));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &three));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &four));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &five));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(thread));
+    ck_assert_int_eq(1, SOPC_Atomic_Int_Get(&params.success));
 
     SOPC_AsyncQueue_Free(&queue);
 }

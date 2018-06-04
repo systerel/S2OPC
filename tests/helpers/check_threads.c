@@ -23,12 +23,15 @@
  * http://check.sourceforge.net/doc/check_html/check_4.html#No-Fork-Mode
  */
 
+#include <inttypes.h>
+
 #include <check.h>
 #include <stdlib.h>
 
 #include "check_helpers.h"
 #include "opcua_statuscodes.h"
 
+#include "sopc_atomic.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
@@ -46,19 +49,15 @@ typedef struct CondRes
 
 void* test_thread_exec_fct(void* args)
 {
-    uint32_t* addr_i = (uint32_t*) args;
-    while (*addr_i < 100)
-    {
-        *addr_i = *addr_i + 1;
-        SOPC_Sleep(1);
-    }
+    SOPC_Atomic_Int_Add((int32_t*) args, 1);
     return NULL;
 }
 
 void* test_thread_mutex_fct(void* args)
 {
+    SOPC_Atomic_Int_Add((int32_t*) args, 1);
     Mutex_Lock(&gmutex);
-    test_thread_exec_fct(args);
+    SOPC_Atomic_Int_Add((int32_t*) args, 1);
     Mutex_Unlock(&gmutex);
     return NULL;
 }
@@ -66,15 +65,15 @@ void* test_thread_mutex_fct(void* args)
 START_TEST(test_thread_exec)
 {
     Thread thread;
-    uint32_t cpt = 0;
+    int32_t cpt = 0;
     // Nominal behavior
     SOPC_ReturnStatus status = SOPC_Thread_Create(&thread, test_thread_exec_fct, &cpt);
     ck_assert(status == SOPC_STATUS_OK);
-    SOPC_Sleep(10);
-    ck_assert(cpt > 0 && cpt < 100);
+
+    ck_assert(wait_value(&cpt, 1));
+
     status = SOPC_Thread_Join(thread);
     ck_assert(status == SOPC_STATUS_OK);
-    ck_assert(cpt == 100);
 
     // Degraded behavior
     status = SOPC_Thread_Create(NULL, test_thread_exec_fct, &cpt);
@@ -89,27 +88,29 @@ END_TEST
 START_TEST(test_thread_mutex)
 {
     Thread thread;
-    uint32_t cpt = 0;
+    int32_t cpt = 0;
     // Nominal behavior
-    SOPC_ReturnStatus status = Mutex_Initialization(&gmutex);
-    ck_assert(status == SOPC_STATUS_OK);
-    status = Mutex_Lock(&gmutex);
-    ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_Thread_Create(&thread, test_thread_mutex_fct, &cpt);
-    ck_assert(status == SOPC_STATUS_OK);
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Initialization(&gmutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Lock(&gmutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Create(&thread, test_thread_mutex_fct, &cpt));
+
+    // Wait until the thread reaches the "lock mutex" statement
+    ck_assert(wait_value(&cpt, 1));
+
+    // Wait a bit, this is not really deterministic anyway as the thread could
+    // have been put to sleep by the OS...
     SOPC_Sleep(10);
-    ck_assert(cpt == 0);
-    Mutex_Unlock(&gmutex);
-    SOPC_Sleep(10);
-    ck_assert(cpt > 0 && cpt < 100);
-    status = SOPC_Thread_Join(thread);
-    ck_assert(status == SOPC_STATUS_OK);
-    ck_assert(cpt == 100);
-    status = Mutex_Clear(&gmutex);
-    ck_assert(status == SOPC_STATUS_OK);
+    ck_assert_int_eq(1, SOPC_Atomic_Int_Get(&cpt));
+
+    // Unlock the mutex and check that the thread can go forward.
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Unlock(&gmutex));
+    ck_assert(wait_value(&cpt, 2));
+
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(thread));
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Clear(&gmutex));
 
     // Degraded behavior
-    status = Mutex_Initialization(NULL);
+    SOPC_StatusCode status = Mutex_Initialization(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_Lock(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);

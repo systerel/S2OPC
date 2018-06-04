@@ -28,6 +28,7 @@
 #include <check.h>
 #include <stdlib.h>
 
+#include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
 #include "sopc_event_dispatcher_manager.h"
 #include "sopc_event_timer_manager.h"
@@ -54,14 +55,17 @@ uint32_t timersId[NB_TIMERS];
 
 void timeout_event(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
+    uint32_t triggered = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &timersTriggered);
+
     ck_assert(EVENT == event);
     ck_assert(eltId < NB_TIMERS);
-    ck_assert(eltId == eltsIdNoCancel[timersTriggered]);
-    ck_assert(auxParam == eltsIdNoCancel[timersTriggered]);
+    ck_assert(eltId == eltsIdNoCancel[triggered]);
+    ck_assert(auxParam == eltsIdNoCancel[triggered]);
     SOPC_DateTime* dateTime = (SOPC_DateTime*) params;
     ck_assert(NULL != dateTime);
     *dateTime = SOPC_Time_GetCurrentTimeUTC();
-    timersTriggered++;
+
+    SOPC_Atomic_Int_Add((int32_t*) &timersTriggered, 1);
 }
 
 START_TEST(test_timers)
@@ -91,7 +95,7 @@ START_TEST(test_timers)
         ck_assert(timerId != 0);
     }
 
-    while (timersTriggered < NB_TIMERS)
+    while (SOPC_Atomic_Int_Get((int32_t*) &timersTriggered) < NB_TIMERS)
     {
         // Manually trigger the timers evaluation
         SOPC_EventTimer_CyclicTimersEvaluation();
@@ -112,14 +116,17 @@ END_TEST
 
 void canceled_timeout_event(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
+    uint32_t triggeredWithCancel = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &timersTriggeredWithCancel);
+
     ck_assert(EVENT == event);
     ck_assert(eltId < NB_TIMERS);
-    ck_assert(eltId == timersTriggeredWithCancel);
-    ck_assert(auxParam == timersTriggeredWithCancel);
+    ck_assert(eltId == triggeredWithCancel);
+    ck_assert(auxParam == triggeredWithCancel);
     SOPC_DateTime* dateTime = (SOPC_DateTime*) params;
     ck_assert(NULL != dateTime);
     *dateTime = SOPC_Time_GetCurrentTimeUTC();
-    timersTriggeredWithCancel++;
+
+    SOPC_Atomic_Int_Add((int32_t*) &timersTriggeredWithCancel, 1);
 }
 
 START_TEST(test_timers_with_cancellation)
@@ -149,7 +156,7 @@ START_TEST(test_timers_with_cancellation)
     }
 
     i = 0;
-    while (timersTriggeredWithCancel < NB_TIMERS_WITH_CANCEL)
+    while (SOPC_Atomic_Int_Get((int32_t*) &timersTriggeredWithCancel) < NB_TIMERS_WITH_CANCEL)
     {
         // Manually trigger the timers evaluation
         SOPC_EventTimer_CyclicTimersEvaluation();
