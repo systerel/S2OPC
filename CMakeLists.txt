@@ -80,6 +80,10 @@ if(WITH_UBSAN)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
 endif()
 
+if(WITH_ASAN AND WITH_TSAN)
+  message(FATAL_ERROR "ASan and TSan cannot be used at the same time")
+endif()
+
 option(WITH_COVERAGE "build with COVERAGE" OFF)
 if(WITH_COVERAGE)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
