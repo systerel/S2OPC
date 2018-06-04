@@ -23,104 +23,46 @@
 
 #include "sopc_time.h"
 
+static char* get_time_string(bool local, bool compact)
+{
+    static const char* format_seconds_terse = "%Y/%m/%d %H:%M:%S";
+    static const char* format_milliseconds_terse = ".%03lu";
+    static const char* format_seconds_compact = "%Y%m%d_%H%M%S";
+    static const char* format_milliseconds_compact = "_%03lu";
+    static const size_t buf_size = 24;
+
+    char* buf = calloc(buf_size, sizeof(char));
+
+    if (buf == NULL)
+    {
+        return NULL;
+    }
+
+    SOPC_DateTime dt = SOPC_Time_GetCurrentTimeUTC();
+    assert(dt != 0);
+
+    time_t seconds;
+    SOPC_ReturnStatus status = SOPC_DateTime_ToTimeT(dt, &seconds);
+    assert(status == SOPC_STATUS_OK);
+
+    time_t milliseconds = (time_t)((dt / 10000) % 1000);
+    size_t res = strftime(buf, buf_size - 1, compact ? format_seconds_compact : format_seconds_terse,
+                          local ? localtime(&seconds) : gmtime(&seconds));
+    assert(res != 0);
+
+    sprintf(buf + 19, compact ? format_milliseconds_compact : format_milliseconds_terse, milliseconds);
+
+    return buf;
+}
+
 char* SOPC_Time_GetStringOfCurrentLocalTime(bool compact)
 {
-    // 19 characters for date with second precision + 4 for milliseconds (.000)
-    char* stime = malloc(24 * sizeof(char));
-    time_t timer;
-    SOPC_DateTime dt = 0;
-    uint16_t ms = 0;
-    if (NULL != stime)
-    {
-        timer = time(NULL);
-        if (compact == false)
-        {
-            // Max size = 19 characters for date + '\0' terminating => 20
-            strftime(stime, 20, "%Y/%m/%d %H:%M:%S", localtime(&timer)); // => 19 used
-            dt = SOPC_Time_GetCurrentTimeUTC();
-            if (dt > 0)
-            {
-                ms = (uint16_t)(dt / 10000) % 1000; // 100 nanosecs => millisecs
-            }
-            else
-            {
-                ms = 0;
-            }
-            // . + 3 digits = 19 + 4 => 23 used
-            sprintf(&stime[19], ".%03u", ms);
-            // '\0' terminating => 24 used
-            stime[23] = '\0';
-        }
-        else
-        {
-            // Max size = 15 characters for date + '\0' terminating => 16
-            strftime(stime, 16, "%Y%m%d_%H%M%S", localtime(&timer)); // => 15 used
-            dt = SOPC_Time_GetCurrentTimeUTC();
-            if (dt > 0)
-            {
-                ms = (uint16_t)(dt / 10000) % 1000; // 100 nanosecs => millisecs
-            }
-            else
-            {
-                ms = 0;
-            }
-            // . + 3 digits = 15 + 4 => 19 used
-            sprintf(&stime[15], "_%03u", ms);
-            // '\0' terminating => 20 used
-            stime[20] = '\0';
-        }
-    }
-    return stime;
+    return get_time_string(true, compact);
 }
 
 char* SOPC_Time_GetStringOfCurrentTimeUTC(bool compact)
 {
-    // 19 characters for date with second precision + 4 for milliseconds (.000)
-    char* stime = malloc(24 * sizeof(char));
-    time_t timer;
-    SOPC_DateTime dt = 0;
-    uint16_t ms = 0;
-    if (NULL != stime)
-    {
-        timer = time(NULL);
-        if (compact == false)
-        {
-            // Max size = 19 characters for date + '\0' terminating => 20
-            strftime(stime, 20, "%Y/%m/%d %H:%M:%S", gmtime(&timer)); // => 19 used
-            dt = SOPC_Time_GetCurrentTimeUTC();
-            if (dt > 0)
-            {
-                ms = (uint16_t)(dt / 10000) % 1000; // 100 nanosecs => millisecs
-            }
-            else
-            {
-                ms = 0;
-            }
-            // . + 3 digits = 19 + 4 => 23 used
-            sprintf(&stime[19], ".%03u", ms);
-            // '\0' terminating => 24 used
-            stime[23] = '\0';
-        }
-        else
-        {
-            // Max size = 15 characters for date + '\0' terminating => 16
-            strftime(stime, 16, "%Y%m%d_%H%M%S", gmtime(&timer)); // => 15 used
-            dt = SOPC_Time_GetCurrentTimeUTC();
-            if (dt > 0)
-            {
-                ms = (uint16_t)(dt / 10000) % 1000; // 100 nanosecs => millisecs
-            }
-            else
-            {
-                ms = 0;
-            }
-            // . + 3 digits = 15 + 4 => 19 used
-            sprintf(&stime[15], "_%03u", ms);
-            // '\0' terminating => 20 used
-            stime[19] = '\0';
-        }
-    }
-    return stime;
+    return get_time_string(false, compact);
 }
 
 SOPC_TimeReference SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference timeRef, uint64_t ms)
