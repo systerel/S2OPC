@@ -47,6 +47,8 @@ else()
 	set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer")
 endif()
 
+add_definitions(-DSOPC_PTR_SIZE=${CMAKE_SIZEOF_VOID_P})
+
 # check if compiler support new sanitization options
 set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
 CHECK_C_COMPILER_FLAG("-fsanitize=address -fsanitize=pointer-compare" COMPILER_SUPPORTS_SAN_PC)
