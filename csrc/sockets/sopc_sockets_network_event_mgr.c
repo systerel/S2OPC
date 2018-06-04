@@ -26,6 +26,7 @@
 #include "sopc_sockets_api.h"
 #include "sopc_sockets_internal_ctx.h"
 
+#include "sopc_atomic.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
 #include "sopc_mutexes.h"
@@ -35,12 +36,11 @@
 static struct
 {
     bool initDone;
-    bool stopFlag;
-    Mutex tMutex;
+    int32_t stopFlag;
     Thread thread;
 } receptionThread = {
     .initDone = false,
-    .stopFlag = false,
+    .stopFlag = 0,
 };
 
 static void SOPC_Internal_TriggerEventToSocketsManager(SOPC_Socket* socket,
@@ -199,7 +199,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
 static void* SOPC_SocketsNetworkEventMgr_CyclicThreadLoop(void* nullData)
 {
     (void) nullData;
-    while (receptionThread.stopFlag == false)
+    while (SOPC_Atomic_Int_Get(&receptionThread.stopFlag) == 0)
     {
         SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(SOPC_MAX_CYCLE_TIMEOUT_MS);
         SOPC_EventTimer_CyclicTimersEvaluation();
@@ -216,21 +216,15 @@ static bool SOPC_SocketsNetworkEventMgr_CyclicThreadStart(void)
         return false;
     }
 
-    if (Mutex_Initialization(&receptionThread.tMutex) != SOPC_STATUS_OK ||
-        Mutex_Lock(&receptionThread.tMutex) != SOPC_STATUS_OK)
+    receptionThread.stopFlag = 0;
+
+    if (SOPC_Thread_Create(&receptionThread.thread, SOPC_SocketsNetworkEventMgr_CyclicThreadLoop, NULL) !=
+        SOPC_STATUS_OK)
     {
         return false;
     }
 
     receptionThread.initDone = true;
-    receptionThread.stopFlag = false;
-
-    if (SOPC_Thread_Create(&receptionThread.thread, SOPC_SocketsNetworkEventMgr_CyclicThreadLoop, NULL) !=
-            SOPC_STATUS_OK ||
-        Mutex_Unlock(&receptionThread.tMutex) != SOPC_STATUS_OK)
-    {
-        return false;
-    }
 
     return true;
 }
@@ -244,18 +238,9 @@ static void SOPC_SocketsNetworkEventMgr_CyclicThreadStop(void)
 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    status = Mutex_Lock(&receptionThread.tMutex);
-    assert(status == SOPC_STATUS_OK);
-
     // stop the reception thread
-    receptionThread.stopFlag = true;
+    SOPC_Atomic_Int_Add(&receptionThread.stopFlag, 1);
     status = SOPC_Thread_Join(receptionThread.thread);
-    assert(status == SOPC_STATUS_OK);
-
-    status = Mutex_Unlock(&receptionThread.tMutex);
-    assert(status == SOPC_STATUS_OK);
-
-    status = Mutex_Clear(&receptionThread.tMutex);
     assert(status == SOPC_STATUS_OK);
 
     receptionThread.initDone = false;
