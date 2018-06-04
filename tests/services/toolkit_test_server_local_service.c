@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "sopc_atomic.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_pki_stack.h"
@@ -44,7 +45,7 @@
 #define PRODUCT_URI "urn:INGOPCS:localhost"
 
 static int endpointClosed = false;
-static bool getEndpointsReceived = false;
+static int getEndpointsReceived = false;
 
 static uint32_t cptReadResps = 0;
 
@@ -58,7 +59,7 @@ void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void
     if (event == SE_CLOSED_ENDPOINT)
     {
         printf("<Test_Server_Local_Service: closed endpoint event: OK\n");
-        endpointClosed = !false;
+        SOPC_Atomic_Int_Add(&endpointClosed, 1);
     }
     else if (event == SE_LOCAL_SERVICE_RESPONSE)
     {
@@ -110,7 +111,7 @@ void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void
             {
                 validEndpoints = SOPC_String_Equal(&getEndpointsResp->Endpoints[idx].EndpointUrl, &endpointUrl);
             }
-            getEndpointsReceived = validEndpoints;
+            SOPC_Atomic_Int_Add(&getEndpointsReceived, validEndpoints ? 1 : 0);
         }
     }
     else
@@ -310,14 +311,15 @@ int main(int argc, char* argv[])
 
     /* Wait until get endpoints response or timeout */
     loopCpt = 0;
-    while (SOPC_STATUS_OK == status && getEndpointsReceived == false && loopCpt * sleepTimeout <= loopTimeout)
+    while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&getEndpointsReceived) == 0 &&
+           loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
         SOPC_Sleep(sleepTimeout);
     }
 
-    if (getEndpointsReceived == false)
+    if (SOPC_Atomic_Int_Get(&getEndpointsReceived) == 0)
     {
         printf("<Test_Server_Local_Service: GetEndpoints Response received: NOK\n");
         status = SOPC_STATUS_NOK;
@@ -414,7 +416,8 @@ int main(int argc, char* argv[])
     // Wait until endpoint is closed
     loopCpt = 0;
     loopTimeout = 1000;
-    while (SOPC_STATUS_OK == status && endpointClosed == false && loopCpt * sleepTimeout <= loopTimeout)
+    while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&endpointClosed) == 0 &&
+           loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
