@@ -55,3 +55,13 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent()
      */
     return GetTickCount64();
 }
+
+SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
+{
+    return (localtime_s(tm, &t) == 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+}
+
+SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
+{
+    return (gmtime_s(tm, &t) == 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+}

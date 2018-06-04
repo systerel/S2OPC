@@ -118,3 +118,13 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent()
 
     return result;
 }
+
+SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
+{
+    return (localtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
+{
+    return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+}

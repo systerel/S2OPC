@@ -104,4 +104,24 @@ SOPC_TimeReference SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference timeRef
  */
 int8_t SOPC_TimeReference_Compare(SOPC_TimeReference left, SOPC_TimeReference right);
 
+/**
+ * \brief Breaks down a timestamp to its structured representation in local time.
+ *
+ * \param t   the timestamp.
+ * \param tm  the structured representation of the timestamp in local time.
+ *
+ * \return \ref SOPC_STATUS_OK in case of success, \ref SOPC_STATUS_NOK in case of error.
+ */
+SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm);
+
+/**
+ * \brief Breaks down a timestamp to its structured representation in UTC time.
+ *
+ * \param t   the timestamp.
+ * \param tm  the structured representation of the timestamp in UTC time.
+ *
+ * \return \ref SOPC_STATUS_OK in case of success, \ref SOPC_STATUS_NOK in case of error.
+ */
+SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm);
+
 #endif /* SOPC_TIME_H_ */
