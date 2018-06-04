@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
     uint32_t epConfigIdx = 0;
     SOPC_Endpoint_Config epConfig;
     // Sleep timeout in milliseconds
-    const uint32_t sleepTimeout = 500;
+    const uint32_t sleepTimeout = 50;
     // Loop timeout in milliseconds
     uint32_t loopTimeout = 5000;
     // Counter to stop waiting on timeout
