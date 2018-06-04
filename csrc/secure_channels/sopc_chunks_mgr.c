@@ -803,6 +803,10 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
             scConnection->serverAsymmSecuInfo.validSecurityModes = validSecuModes;
             scConnection->serverAsymmSecuInfo.isSecureModeActive = isSecureModeActive;
         }
+        else
+        {
+            SOPC_KeyManager_Certificate_Free(clientCertificate);
+        }
     }
 
     if (false == result && scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
