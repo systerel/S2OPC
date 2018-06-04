@@ -89,7 +89,7 @@ void constants_bs__get_cast_t_session(const t_entier4 constants_bs__p_ind,
 void constants_bs__get_cast_t_subscription(const t_entier4 constants_bs__p_ind,
                                            constants_bs__t_subscription_i* const constants_bs__p_subscription)
 {
-    *constants_bs__p_subscription = constants_bs__p_ind;
+    *constants_bs__p_subscription = (uint32_t) constants_bs__p_ind; // TODO: add precondition in B model
 }
 
 void constants_bs__is_t_channel(const constants_bs__t_channel_i constants_bs__p_channel,

@@ -29,8 +29,11 @@ DEFINITIONS
         nb_monitored_items <= k_n_monitoredItem_max &
         
         MonitoredItemReq_NodeId      : t_monitoredItemReqIndex +-> t_NodeId &
-        MonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId &
+        MonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId_i &
+        MonitoredItemReq_ValidMonitoringMode : t_monitoredItemReqIndex +-> BOOL &
+        MonitoredItemReq_FilterPresence : t_monitoredItemReqIndex +-> BOOL &
         
+        MonitoredItemResp_Allocated : BOOL &
         MonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
         MonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode
     )
@@ -39,6 +42,9 @@ ABSTRACT_VARIABLES
     nb_monitored_items,
     MonitoredItemReq_NodeId,
     MonitoredItemReq_AttributeId,
+    MonitoredItemReq_ValidMonitoringMode,
+    MonitoredItemReq_FilterPresence,
+    MonitoredItemResp_Allocated,
     MonitoredItemResp_Id,
     MonitoredItemResp_StatusCode
 
@@ -49,6 +55,9 @@ INITIALISATION
     nb_monitored_items           := 0  ||
     MonitoredItemReq_NodeId      := {} ||
     MonitoredItemReq_AttributeId := {} ||
+    MonitoredItemReq_ValidMonitoringMode := {} ||
+    MonitoredItemReq_FilterPresence := {} ||
+    MonitoredItemResp_Allocated := FALSE ||
     MonitoredItemResp_Id := {}         ||
     MonitoredItemResp_StatusCode := {}
     
@@ -67,7 +76,9 @@ OPERATIONS
         p_nb_monitored_items,
         nb_monitored_items,
         MonitoredItemReq_NodeId,
-        MonitoredItemReq_AttributeId
+        MonitoredItemReq_AttributeId,
+        MonitoredItemReq_ValidMonitoringMode,
+        MonitoredItemReq_FilterPresence
         :(  p_sc                 : t_StatusCode &
             p_subscription       : t_subscription_i &
             p_timestampToRet     : t_TimestampsToReturn_i &
@@ -79,8 +90,12 @@ OPERATIONS
                 nb_monitored_items = p_nb_monitored_items &
                 MonitoredItemReq_NodeId : t_monitoredItemReqIndex +-> t_NodeId &
                 dom(MonitoredItemReq_NodeId) = 1..nb_monitored_items &
-                MonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId &
+                MonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId_i &
                 dom(MonitoredItemReq_AttributeId) = 1..nb_monitored_items &
+                MonitoredItemReq_ValidMonitoringMode : t_monitoredItemReqIndex +-> BOOL &
+                dom(MonitoredItemReq_ValidMonitoringMode) = 1..nb_monitored_items &
+                MonitoredItemReq_FilterPresence : t_monitoredItemReqIndex +-> BOOL &
+                dom(MonitoredItemReq_FilterPresence) = 1..nb_monitored_items &
                 p_timestampToRet : t_TimestampsToReturn) &
             (p_sc /= e_sc_ok
                 => p_sc : {e_sc_bad_decoding_error, e_sc_bad_nothing_to_do, e_sc_bad_timestamps_to_return_invalid, e_sc_bad_too_many_ops})
@@ -89,7 +104,7 @@ OPERATIONS
     ;
     
     /* Filters and DiscardOldest not extracted => not managed */
-    p_bres, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize <-- getall_monitored_item_req_params (p_req_msg, p_index) =
+    p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize <-- getall_monitored_item_req_params (p_req_msg, p_index) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
@@ -100,18 +115,31 @@ OPERATIONS
         p_index > 0 &
         p_index <= nb_monitored_items
     THEN
-        p_bres, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize
+        p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize
         :(p_bres : BOOL &
-            p_nid : t_NodeId_i &
-            p_aid : t_AttributeId_i & 
-            p_monitMode : t_monitoringMode_i &
-            p_clientHandle : t_client_handle_i &
-            p_samplingItv : t_opcua_duration_i &
-            p_queueSize : t_counter &
-            (p_bres = TRUE => 
-             p_nid = MonitoredItemReq_NodeId(p_index) &
-             p_aid = MonitoredItemReq_AttributeId(p_index) &
-             p_monitMode : t_monitoringMode))
+          p_sc : t_StatusCode_i & p_sc : t_StatusCode &
+          p_sc : {e_sc_ok, e_sc_bad_attribute_id_invalid, 
+                  e_sc_bad_monitoring_mode_invalid, 
+                  e_sc_bad_monitored_item_filter_unsupported} &
+          p_nid : t_NodeId_i &
+          p_aid : t_AttributeId_i & 
+          p_monitMode : t_monitoringMode_i &
+          p_clientHandle : t_client_handle_i &
+          p_samplingItv : t_opcua_duration_i &
+          p_queueSize : t_counter &
+          (p_bres = TRUE =>
+           p_sc = e_sc_ok &
+           p_nid = MonitoredItemReq_NodeId(p_index) &
+           MonitoredItemReq_AttributeId(p_index) : t_AttributeId &
+           p_aid = MonitoredItemReq_AttributeId(p_index) &
+           p_monitMode : t_monitoringMode) &
+          (p_index /: dom(MonitoredItemReq_AttributeId) =>
+           p_sc = e_sc_bad_attribute_id_invalid) &
+          (MonitoredItemReq_ValidMonitoringMode(p_index) = FALSE => 
+           p_sc = e_sc_bad_monitoring_mode_invalid) &
+          (MonitoredItemReq_FilterPresence(p_index) = TRUE => 
+           p_sc = e_sc_bad_monitored_item_filter_unsupported)
+         )
     END
     ;
     
@@ -125,7 +153,10 @@ OPERATIONS
         p_nb_results > 0 &
         p_nb_results = nb_monitored_items
     THEN
-        bres :: BOOL
+        bres, MonitoredItemResp_Allocated
+        :(bres : BOOL & 
+          MonitoredItemResp_Allocated : BOOL & 
+          MonitoredItemResp_Allocated = bres)
     END
     ;
     
@@ -145,7 +176,8 @@ OPERATIONS
         (p_sc = e_sc_ok => p_monitored_item_id : t_monitoredItemId) &
         (p_sc /= e_sc_ok => p_monitored_item_id = c_monitoredItemId_indet) &
         p_revSamplingItv : t_opcua_duration_i &
-        p_revQueueSize : t_counter
+        p_revQueueSize : t_counter &
+        MonitoredItemResp_Allocated = TRUE
     THEN
         MonitoredItemResp_Id(p_index) := p_monitored_item_id ||
         MonitoredItemResp_StatusCode(p_index) := p_sc

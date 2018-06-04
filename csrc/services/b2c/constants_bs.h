@@ -81,7 +81,7 @@ typedef uint32_t constants_bs__t_server_request_handle_i;
 typedef uint32_t constants_bs__t_session_i;
 typedef SOPC_NodeId* constants_bs__t_session_token_i;
 typedef uint32_t constants_bs__t_sub_seq_num_i;
-#define constants_bs__t_subscription_i t_entier4
+typedef uint32_t constants_bs__t_subscription_i;
 typedef uint32_t constants_bs__t_timer_id_i;
 typedef SOPC_TimeReference constants_bs__t_timeref_i;
 #define constants_bs__t_user_i t_entier4

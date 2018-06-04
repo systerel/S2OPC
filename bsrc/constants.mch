@@ -79,7 +79,10 @@ SETS
                       e_sc_bad_no_subscription,
                       e_sc_bad_subscription_id_invalid,
                       e_sc_bad_too_many_monitored_items,
+                      e_sc_bad_monitoring_mode_invalid, 
+                      e_sc_bad_monitored_item_filter_unsupported,
                       e_sc_bad_index_range_invalid};
+                      
 
     t_BrowseDirection_i = {e_bd_indet,
                            e_bd_forward,

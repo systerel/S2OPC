@@ -71,7 +71,7 @@ PROMOTES
     client_close_sessions_on_final_connection_failure,
     client_close_session,
     server_evaluate_session_timeout,
-    
+
     /* subscription_mgr */
     is_valid_subscription,
     server_subscription_data_changed,
@@ -143,7 +143,7 @@ LOCAL_OPERATIONS
         )
     END
     ;
-    
+
     StatusCode_service <-- treat_session_local_service_req (req_typ, req_msg, resp_msg) =
     PRE
         req_typ : t_msg_type_i &
@@ -160,10 +160,10 @@ LOCAL_OPERATIONS
         :(  StatusCode_service : t_StatusCode_i &
             StatusCode_service : t_StatusCode
         )
-        
+
     END
     ;
-    
+
     StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
     PRE
         session : t_session_i &
@@ -209,7 +209,7 @@ LOCAL_OPERATIONS
             data_Value_StatusCode    : t_ReadValue +-> t_StatusCode  &
             StatusCode_service       : t_StatusCode_i                &
             StatusCode_service       : t_StatusCode                  &
-            async_resp_msg           : BOOL                          & 
+            async_resp_msg           : BOOL                          &
             ResponseWrite_allocated  : BOOL                          &
             nb_WriteValue            : NAT                           &
             nb_WriteValue <= k_n_WriteResponse_max                   &
@@ -241,7 +241,7 @@ LOCAL_OPERATIONS
         :(  StatusCode_service : t_StatusCode_i &
             StatusCode_service : t_StatusCode
         )
-        
+
     END
     ;
 
@@ -421,7 +421,7 @@ OPERATIONS
         free_write_request
     END
     ;
-    
+
     StatusCode_service <-- treat_session_local_service_req (req_typ, req_msg, resp_msg) =
     VAR
         l_bret
@@ -456,7 +456,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
     VAR
         l_bret
@@ -487,7 +487,7 @@ OPERATIONS
             OR e_msg_subscription_create_req THEN
                 StatusCode_service <-- treat_create_subscription_request (session, req_msg, resp_msg)
             OR e_msg_subscription_publish_req THEN
-                StatusCode_service, async_resp_msg 
+                StatusCode_service, async_resp_msg
                   <-- treat_subscription_publish_request (session, req_header, req_msg, req_handle, req_ctx, resp_msg)
             OR e_msg_monitored_items_create_req THEN
                 StatusCode_service <-- treat_subscription_create_monitored_items_req (session, req_msg, resp_msg)
@@ -754,17 +754,17 @@ OPERATIONS
                         l_valid_resp_header = TRUE
                     THEN
                         // Call local operation to dispatch the service request on right service
-                            l_ret, l_async_resp 
-                              <-- treat_session_service_req (l_session, 
-                                                             req_typ, 
-                                                             l_request_handle, 
-                                                             req_context, 
-                                                             l_req_msg_header, 
-                                                             l_req_msg, 
+                            l_ret, l_async_resp
+                              <-- treat_session_service_req (l_session,
+                                                             req_typ,
+                                                             l_request_handle,
+                                                             req_context,
+                                                             l_req_msg_header,
+                                                             l_req_msg,
                                                              l_resp_msg);
 
                         // TODO: next operation not necessary ?
-                        l_is_valid_resp, l_ret2, l_session_channel 
+                        l_is_valid_resp, l_ret2, l_session_channel
                           <-- server_validate_session_service_resp (l_session);
                         IF l_ret2 /= e_sc_ok
                         THEN
@@ -804,15 +804,14 @@ OPERATIONS
                 /* response message structures not necessary anymore */
                 dealloc_msg_header_out (l_resp_msg_header);
                 dealloc_msg_out (l_resp_msg)
-                
             ELSIF l_valid_msg = TRUE &
-                l_valid_resp_header = TRUE &
-                l_async_resp = TRUE
+                    l_valid_resp_header = TRUE &
+                    l_async_resp = TRUE
             THEN
-                dealloc_msg_header_out (l_resp_msg_header); /* free header only */
-                /* response message is not deallocated since it will be sent later */
+                /* response header is deallocated but
+                   response message is not deallocated since it will be sent later */
                 forget_resp_msg_out(l_resp_msg_header, l_resp_msg)
-            ELSE 
+            ELSE
                 /* ELSE: = nothing to do => alloc_resp_msg implies l_valid_msg = FALSE & l_valid_resp_header = FALSE */
                 skip
             END
@@ -986,7 +985,7 @@ OPERATIONS
         dealloc_msg_in_buffer (msg_buffer)
     END
     ;
-    
+
     /* SERVER local services */
 
     ret <-- server_receive_local_service_req (endpoint_config_idx, req_class, req_typ, req_msg, app_context) =

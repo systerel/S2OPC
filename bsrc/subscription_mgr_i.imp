@@ -83,15 +83,21 @@ LOCAL_OPERATIONS
                 mi_index : dom(MonitoredItemReq_AttributeId)
                 /* TODO: add use-access levels */
                 |
-                {TRUE |-> e_sc_bad_node_id_unknown,
-                 FALSE |-> {TRUE |-> e_sc_bad_attribute_id_invalid,
-                            FALSE |-> {TRUE |-> e_sc_bad_too_many_monitored_items,
-                                       FALSE |-> e_sc_ok
-                                      }(bool(t_monitoredItemPointer = s_monitoredItemPointer or
-                                             t_monitoredItemId = s_monitoredItemId))
-                           }(bool(a_NodeId~(MonitoredItemReq_NodeId(mi_index)) /:
-                                  dom(AttributeID_Node_Variant(MonitoredItemReq_AttributeId(mi_index)))))
-                }(bool(MonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~)))
+                {TRUE |-> e_sc_bad_attribute_id_invalid,
+                 FALSE |-> {TRUE |-> e_sc_bad_monitoring_mode_invalid,
+                            FALSE |-> {TRUE |-> e_sc_bad_monitored_item_filter_unsupported,
+                                       FALSE |-> {TRUE |-> e_sc_bad_node_id_unknown,
+                                                  FALSE |-> {TRUE |-> e_sc_bad_attribute_id_invalid,
+                                                             FALSE |-> {TRUE |-> e_sc_bad_too_many_monitored_items,
+                                                                        FALSE |-> e_sc_ok
+                                                                       }(bool(t_monitoredItemPointer = s_monitoredItemPointer or
+                                                                              t_monitoredItemId = s_monitoredItemId))
+                                                            }(bool(a_NodeId~(MonitoredItemReq_NodeId(mi_index)) /:
+                                                                   dom(AttributeID_Node_Variant(MonitoredItemReq_AttributeId(mi_index)))))
+                                                 }(bool(MonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~)))
+                                      }(bool(MonitoredItemReq_FilterPresence(mi_index) = TRUE))
+                           }(bool(MonitoredItemReq_ValidMonitoringMode(mi_index) = FALSE))
+                }(bool(mi_index /: dom(MonitoredItemReq_AttributeId)))               
             )
         IN
             ANY max_mi_ids, max_mi_pointers, s_maximums, nb_allocated_monitored_items WHERE
@@ -242,13 +248,12 @@ OPERATIONS
         WHILE l_continue = TRUE DO
             l_node := c_Node_indet;
             l_value := c_Variant_indet;
-            l_sc := e_sc_ok;
             l_valueSc := e_sc_ok;
             l_monitoredItemId := c_monitoredItemId_indet;
             l_revSamplingItv := c_opcua_duration_indet;
             l_revQueueSize := 0;
             l_continue, l_index <-- continue_iter_monitored_item_request;
-            l_bres, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_queueSize
+            l_bres, l_sc, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_queueSize
               <-- getall_monitored_item_req_params(p_req_msg, l_index);
             IF l_bres = TRUE
             THEN

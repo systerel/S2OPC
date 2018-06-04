@@ -91,7 +91,7 @@ void msg_subscription_create_monitored_item_bs__get_msg_create_monitored_items_r
         (OpcUa_CreateMonitoredItemsRequest*) msg_subscription_create_monitored_item_bs__p_req_msg;
     if (createReq->SubscriptionId > 0 && createReq->SubscriptionId <= INT32_MAX)
     {
-        *msg_subscription_create_monitored_item_bs__p_subscription = (int32_t) createReq->SubscriptionId;
+        *msg_subscription_create_monitored_item_bs__p_subscription = createReq->SubscriptionId;
     }
     else
     {
@@ -113,6 +113,7 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
     const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_req_msg,
     const t_entier4 msg_subscription_create_monitored_item_bs__p_index,
     t_bool* const msg_subscription_create_monitored_item_bs__p_bres,
+    constants__t_StatusCode_i* const msg_subscription_create_monitored_item_bs__p_sc,
     constants__t_NodeId_i* const msg_subscription_create_monitored_item_bs__p_nid,
     constants__t_AttributeId_i* const msg_subscription_create_monitored_item_bs__p_aid,
     constants__t_monitoringMode_i* const msg_subscription_create_monitored_item_bs__p_monitMode,
@@ -121,6 +122,7 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
     t_entier4* const msg_subscription_create_monitored_item_bs__p_queueSize)
 {
     SOPC_ReturnStatus retStatus = SOPC_STATUS_NOK;
+    *msg_subscription_create_monitored_item_bs__p_sc = constants__c_StatusCode_indet;
     OpcUa_CreateMonitoredItemsRequest* createReq =
         (OpcUa_CreateMonitoredItemsRequest*) msg_subscription_create_monitored_item_bs__p_req_msg;
     OpcUa_MonitoredItemCreateRequest* monitReq =
@@ -138,41 +140,65 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
     {
         *msg_subscription_create_monitored_item_bs__p_bres = util_AttributeId__C_to_B(
             monitReq->ItemToMonitor.AttributeId, msg_subscription_create_monitored_item_bs__p_aid);
+
+        if (false == *msg_subscription_create_monitored_item_bs__p_bres)
+        {
+            *msg_subscription_create_monitored_item_bs__p_aid = constants__c_AttributeId_indet;
+            *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_attribute_id_invalid;
+        }
     }
     else
     {
         *msg_subscription_create_monitored_item_bs__p_bres = false;
+        *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_internal_error;
     }
 
-    if (false == *msg_subscription_create_monitored_item_bs__p_bres)
+    if (*msg_subscription_create_monitored_item_bs__p_bres != false)
     {
-        *msg_subscription_create_monitored_item_bs__p_aid = constants__c_AttributeId_indet;
+        switch (monitReq->MonitoringMode)
+        {
+        case OpcUa_MonitoringMode_Disabled:
+            *msg_subscription_create_monitored_item_bs__p_monitMode = constants__e_monitoringMode_disabled;
+            break;
+        case OpcUa_MonitoringMode_Sampling:
+            *msg_subscription_create_monitored_item_bs__p_monitMode = constants__e_monitoringMode_sampling;
+            break;
+        case OpcUa_MonitoringMode_Reporting:
+            *msg_subscription_create_monitored_item_bs__p_monitMode = constants__e_monitoringMode_reporting;
+            break;
+        default:
+            *msg_subscription_create_monitored_item_bs__p_bres = false;
+            *msg_subscription_create_monitored_item_bs__p_monitMode = constants__c_monitoringMode_indet;
+            *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_monitoring_mode_invalid;
+        }
     }
 
-    switch (monitReq->MonitoringMode)
+    if (*msg_subscription_create_monitored_item_bs__p_bres != false)
     {
-    case OpcUa_MonitoringMode_Disabled:
-        *msg_subscription_create_monitored_item_bs__p_monitMode = constants__e_monitoringMode_disabled;
-        break;
-    case OpcUa_MonitoringMode_Sampling:
-        *msg_subscription_create_monitored_item_bs__p_monitMode = constants__e_monitoringMode_sampling;
-        break;
-    case OpcUa_MonitoringMode_Reporting:
-        *msg_subscription_create_monitored_item_bs__p_monitMode = constants__e_monitoringMode_reporting;
-        break;
-    default:
-        *msg_subscription_create_monitored_item_bs__p_bres = false;
-        *msg_subscription_create_monitored_item_bs__p_monitMode = constants__c_monitoringMode_indet;
+        *msg_subscription_create_monitored_item_bs__p_clientHandle = monitReq->RequestedParameters.ClientHandle;
+        *msg_subscription_create_monitored_item_bs__p_samplingItv = monitReq->RequestedParameters.SamplingInterval;
+
+        if (monitReq->RequestedParameters.QueueSize <= INT32_MAX)
+        {
+            *msg_subscription_create_monitored_item_bs__p_queueSize = (int32_t) monitReq->RequestedParameters.QueueSize;
+        }
+        else
+        {
+            *msg_subscription_create_monitored_item_bs__p_queueSize = INT32_MAX;
+        }
+
+        // Check no filter active since not supported by server
+        if (monitReq->RequestedParameters.Filter.Length > 0)
+        {
+            // We do not support filter but there is one requested
+            *msg_subscription_create_monitored_item_bs__p_bres = false;
+            *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_monitored_item_filter_unsupported;
+        }
     }
-    *msg_subscription_create_monitored_item_bs__p_clientHandle = monitReq->RequestedParameters.ClientHandle;
-    *msg_subscription_create_monitored_item_bs__p_samplingItv = monitReq->RequestedParameters.SamplingInterval;
-    if (monitReq->RequestedParameters.QueueSize <= INT32_MAX)
+
+    if (*msg_subscription_create_monitored_item_bs__p_bres != false)
     {
-        *msg_subscription_create_monitored_item_bs__p_queueSize = (int32_t) monitReq->RequestedParameters.QueueSize;
-    }
-    else
-    {
-        *msg_subscription_create_monitored_item_bs__p_queueSize = INT32_MAX;
+        *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_ok;
     }
 }
 

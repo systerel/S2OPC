@@ -723,6 +723,12 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_too_many_monitored_items:
         *status = OpcUa_BadTooManyMonitoredItems;
         break;
+    case constants__e_sc_bad_monitoring_mode_invalid:
+        *status = OpcUa_BadMonitoringModeInvalid;
+        break;
+    case constants__e_sc_bad_monitored_item_filter_unsupported:
+        *status = OpcUa_BadMonitoredItemFilterUnsupported;
+        break;
     case constants__e_sc_bad_index_range_invalid:
         *status = OpcUa_BadIndexRangeInvalid;
         break;
@@ -889,6 +895,12 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         break;
     case OpcUa_BadTooManyMonitoredItems:
         *bstatus = constants__e_sc_bad_too_many_monitored_items;
+        break;
+    case OpcUa_BadMonitoringModeInvalid:
+        *bstatus = constants__e_sc_bad_monitoring_mode_invalid;
+        break;
+    case OpcUa_BadMonitoredItemFilterUnsupported:
+        *bstatus = constants__e_sc_bad_monitored_item_filter_unsupported;
         break;
     case OpcUa_BadIndexRangeInvalid:
         *bstatus = constants__e_sc_bad_index_range_invalid;

@@ -71,7 +71,7 @@ OPERATIONS
     END
     ;
     
-    p_bres, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize <-- getall_monitored_item_req_params (p_req_msg, p_index) =
+    p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize <-- getall_monitored_item_req_params (p_req_msg, p_index) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
@@ -80,18 +80,23 @@ OPERATIONS
         p_index : NAT &
         p_index : t_monitoredItemReqIndex
     THEN
-        p_bres, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize
+        p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize
         :(p_bres : BOOL &
-            p_nid : t_NodeId_i &
-            p_aid : t_AttributeId_i & 
-            p_monitMode : t_monitoringMode_i &
-            p_clientHandle : t_client_handle_i &
-            p_samplingItv : t_opcua_duration_i &
-            p_queueSize : t_counter &
-            (p_bres = TRUE => 
-             p_nid : t_NodeId &
-             p_aid : t_AttributeId &
-             p_monitMode : t_monitoringMode))
+          p_sc : t_StatusCode_i &
+          p_sc : {e_sc_ok, e_sc_bad_attribute_id_invalid, 
+                  e_sc_bad_monitoring_mode_invalid, 
+                  e_sc_bad_monitored_item_filter_unsupported} &
+          p_nid : t_NodeId_i &
+          p_aid : t_AttributeId_i & 
+          p_monitMode : t_monitoringMode_i &
+          p_clientHandle : t_client_handle_i &
+          p_samplingItv : t_opcua_duration_i &
+          p_queueSize : t_counter &
+          (p_bres = TRUE => 
+           p_sc = e_sc_ok &
+           p_nid : t_NodeId &
+           p_aid : t_AttributeId &
+           p_monitMode : t_monitoringMode))
     END
     ;
     
