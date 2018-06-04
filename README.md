@@ -1,62 +1,114 @@
-# INGOPCS OPC UA Toolkit
+## S2OPC OPC UA Toolkit
 
 This OPC UA Toolkit project provides a C source code implementation
 including an OPC UA communication stack, B model and C source code
 implementation for a minimal set of services and a cryptographic
 library adaptation for OPC UA needs (using mbedtls).
 
-This project contains the following elements:
-- acceptances_tests: OPC UA Compliance Test Tool configuration and launch script
-- apidoc: generated HTML documentation of the C source code with doxygen
-- build/bin: built binaries tests of the toolkit for Linux platform (64 bits)
-- build/bin_windows: built binaries tests and DLL of the toolkit for Windows platform (32 bits)
-- bsrc: B model of the Toolkit used to generate C source files for services management layer
-- csrc: root directory for C source files of the INGOPCS project OPC UA Toolkit
-- csrc/api_toolkit: user application API to request server/client treatments once Toolkit configured
-- csrc/configuration: user application API and shared configuration of the Toolkit server/client
-- csrc/crypto: cryptographic API and generic layer for managing certificates and keys
-- csrc/crypto/mbedtls: adaptation layer between crypotgraphic generic layer and mbedtls library
-- csrc/helpers: independent helpers used by Toolkit
-- csrc/helpers_platform_dep: independent helpers dependent on platform (Linux and Windows) used by Toolkit
-- csrc/opcua_types: opcua types implementation, encoder and helpers
-- csrc/secure_channels: secure channels services management layer based on I/O event dispatcher
-- csrc/services: services (except secure channels) management layer based on I/O event dispatcher
-- csrc/services/b2c: adaptation layer between generated C source files from B model and C source code
-- csrc/services/bgenc: generated C source files from B model
-- csrc/sockets: sockets management layer base on I/O event dispatcher
-- doxygen: doxygen configuration file for HTML documentation generation
-- install_linux: library (static and shared) and headers to install the toolkit as a library
-- install_windows: shared library and headers to install the toolkit as a library
-- tests: tests source code and data for the Toolkit library
-- tests/data: data used in the different tests (certificates, address space config, reference logs, etc.)
-- tests/demo: command line client demonstration examples using a state machine to manage connections
-- tests/helpers: unit tests of toolkit helpers (data structures, crypto, etc.)
-- tests/scripts: shell scripts used to run automatic tests
-- tests/secure_channels: secure channel layer component tests
-- tests/services: services layer component tests
-- tests/sockets: sockets layer component tests
-- validation: client validation tool using FreeOpcUa python library
+## S2OPC Toolkit features
 
+Common features:
 
-Compilation (Linux, tested under Ubuntu 14.04 and Debian 7):
-- Prerequisites:
-  * gcc (tested with GCC version >= 4.8.4)
-  * CMake (tested with CMake version >= 2.8.12.2)
-  * make (tested with GNU Make version >= 3.81)
-  * mbedtls (>= 2.7.0): https://tls.mbed.org/
-  * check (>= 0.12): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=no)
-- To build the Toolkit library and tests with default configuration on current stable release:
+- Asynchronous user application API
+- Available security policies (encryption schemes) with any security mode:
+    - http://opcfoundation.org/UA/SecurityPolicy#None,
+    - http://opcfoundation.org/UA/SecurityPolicy#Basic256,
+    - http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256.
+
+Client side (e.g.: tests/services/toolkit_test_client.c):
+
+- Secure Channel configuration on Toolkit initialization
+- Activate a session with an anonymous user
+- Send a service on session request (read, write, browse, etc.)
+- Send a discovery service request (getEndpoints, etc.)
+
+Server side (e.g.: tests/services/toolkit_test_server.c):
+
+- Endpoint descriptions configuration on Toolkit initialization
+- 1 address space configuration on Toolkit initialization
+- Checks and accepts several instances of secure channels
+- Checks and accepts activation of several sessions with an anonymous user
+- Supported services:
+  - Read service
+  - Write service
+  - Browse service (simplified: no continuation point)
+  - GetEndpoints service (restriction: locale Ids and profile URIs ignored)
+
+## Current status
+
+- Security policies available: None, Basic256 and Basic256Sha256
+- Security modes available: None, Sign and SignAndEncrypt
+- Server instantiation: several endpoint descriptions, 1 address space, multiple secure channel instances and session instances
+- Server services: getEndpoints, read (no index), write (no index) and simplified browse (no filtering, no continuation point)
+- Server local services: server services are locally accessible through application API
+- Server address space modification notification: write notification events are reported through application API
+- Client instantiation: multiple secure channel instances and session instances
+- Client services requests: any discovery service or service on session request. Requests are only forwarded to server (no functional behavior)
+- Address space with following attributes: NodeId, NodeClass, BrowseName, Value (with single value Variants),
+  References, Access Level (R/W default value only)
+
+## Address space generation
+
+The `generate-ingopcs-address-space` tool converts a UANodeSet XML file into a
+C file that can be compiled in the binary, and used with the embedded address
+space loader (see the `tests/data/address_space/parts/User_Address_Space.xml`
+file for example). Not all the features of the schema are supported at the
+moment.
+
+S2OPC server can also dynamically load a UANodeSet XML at startup.
+To do so, set `TEST_SERVER_XML_ADDRESS_SPACE` to the location of the address space and launch the server.
+
+## S2OPC Development
+
+- systematic peer review using GitLab Merge Request mechanism,
+- formal modeling of OPC-UA services using [B method](https://en.wikipedia.org/wiki/B-Method),
+- static analysis using [Frama C](http://frama-c.com/) from CEA and [TIS analyser](https://taas.trust-in-soft.com/) from Trust-In-Soft,
+- static analysis using [Coverity](https://scan.coverity.com/),
+- check for memory leaks using [Valgrind](http://valgrind.org/),
+- use of GCC sanitizers to detect undefined behaviours, race conditions, memory leaks and errors,
+- compilation using four compilers (GCC, CLang, mingGw and MSVC) with conservative compilation flags,
+- all development and testing environment are bundled into [Docker](https://www.docker.com/) images
+- continuous integration with a test bench containing:
+    - modular tests using libcheck
+    - validation tests using [FreeOPCUA](https://github.com/FreeOpcUa/python-opcua)
+    - interoperability tests using [UACTT] (https://opcfoundation.org/developer-tools/certification-test-tools/opc-ua-compliance-test-tool-uactt/),
+    - fuzzing tests.
+
+## Demo
+
+See the [demo](https://gitlab.com/systerel/S2OPC/wikis/demo) page from the Wiki.
+
+## Getting started
+
+For a sample server (respectively sample client), you can look at test/services/toolkit_test_server.c (respectively test/services/toolkit_test_client.c).
+
+## S2OPC Linux compilation
+
+Tested under Ubuntu 14.04 and Debian 7.
+Prerequisites:
+- gcc (tested with GCC version 8.1)
+- CMake (tested with CMake version >= 3.5)
+- make (tested with GNU Make version >= 4.2)
+- [mbedtls](https://tls.mbed.org/)(>= 2.7.0)
+- [check](https://libcheck.github.io/check/)(>= 0.12)
+
+To build the Toolkit library and tests with default configuration on current stable release:
 ```
   git checkout INGOPCS_Toolkit_0.5.0
   ./build.sh
 ```
-Compilation (Windows, tested under Windows 7 and Windows Server 2016):
-- Prerequisites:
-  * Visual Studio (tested with Visual Studio 2017)
-  * CMake (tested with CMake version 3.11.1)
-  * mbedtls (>= 2.7.0): https://tls.mbed.org/
-  * check (>= 0.12): https://libcheck.github.io/check/ (without sub-unit: use ./configure --enable-subunit=no)
-- To build the Toolkit library and tests with default configuration on current stable release, you can adapt the bat script below:
+For more information, or to compile the master branch on its latest commit, please refer to the [wiki](https://gitlab.com/systerel/S2OPC/wikis/compilation).
+
+## S2OPC Windows compilation
+
+Tested under Windows 7 and Windows Server 2016.
+Prerequisites:
+- Visual Studio (tested with Visual Studio 2017)
+- CMake (tested with CMake version 3.11.1)
+- [mbedtls](https://tls.mbed.org/) (>= 2.7.0)
+- [check](https://libcheck.github.io/check/) (>= 0.12)
+
+To build the Toolkit library and tests with default configuration on current stable release, you can adapt the bat script below:
 ```
   git checkout INGOPCS_Toolkit_0.5.0
 
@@ -93,64 +145,12 @@ Compilation (Windows, tested under Windows 7 and Windows Server 2016):
 
   REM Build S2OPC Project
   cmake --build .
-
 ```
-- For more information, or to compile the master branch on its latest commit, please refer to the wiki.
+The project file INGOPCS.sln can be imported in Visual Studio environment.
 
-Address space generation:
-- The `generate-ingopcs-address-space` tool converts a UANodeSet XML file into a
-  C file that can be compiled in the binary, and used with the embedded address
-  space loader (see the `tests/data/address_space/parts/User_Address_Space.xml`
-  file for example). Not all the features of the schema are supported at the
-  moment.
+For more information, or to compile the master branch on its latest commit, please refer to the [wiki](https://gitlab.com/systerel/S2OPC/wikis/compilation) .
 
-Licenses:
-- Unless specifically indicated otherwise in a file, INGOPCS files are
-licensed under the GNU AFFERO GPL v3 license, as can be found in `agpl-3.0.txt`
-- OPC UA Stack code generated with the OPC foundation code generator
-  tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT
-  License 1.00
-- The mbedtls library is also distributed under the Apache 2.0 license
-
-Current status:
-- Security policies available: None, Basic256 and Basic256Sha256
-- Security mode available: None, Sign and SignAndEncrypt
-- Server instantiation: several endpoint descriptions, 1 address space, multiple secure channel instances and session instances
-- Server services: getEndpoints, read (no index), write (no index) and simplified browse (no filtering, no continuation point)
-- Server local services: server services are locally accessibles through application API
-- Server address space modification notification: write notification events are reported through application API
-- Client instantiation: multiple secure channel instances and session instances
-- Client services requests: any discovery service or service on session request. Requests are only forwarded to server (no functional behavior)
-- Address space with following attributes: NodeId, NodeClass, BrowseName, Value (with single value Variants),
-  References, Access Level (R/W default value only)
-
-# INGOPCS OPC UA Toolkit features
-
- Common features:
- * Asynchronous user application API
- * Available security policy (encryption schemes) with any security mode:
-   + http://opcfoundation.org/UA/SecurityPolicy#None,
-   + http://opcfoundation.org/UA/SecurityPolicy#Basic256,
-   + http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256.
-
- Client side (e.g.: tests/services/toolkit_test_client.c):
- * Secure Channel configurations on Toolkit initialization
- * Activate a session with an anonymous user
- * Send a service on session request (read, write, browse, etc.)
- * Send a discovery service request (getEndpoints, etc.)
-
- Server side (e.g.: tests/services/toolkit_test_server.c):
-* Endpoint descriptions configuration on Toolkit initialization
-* 1 address space configuration on Toolkit initialization
-* Checks and accepts several instances of secure channel
-* Checks and accepts activation of several sessions with an anonymous user
-* Supported services:
-  + Read service
-  + Write service
-  + Browse service (simplified: no continuation point)
-  + GetEndpoints service (restriction: locale Ids and profile URIs ignored)
-
-# INGOPCS OPC UA Toolkit tests
+## S2OPC OPC UA Toolkit tests
 
 Prerequisites (only for validation based on FreeOpcUa python client):
 - Python 3
@@ -158,7 +158,7 @@ Prerequisites (only for validation based on FreeOpcUa python client):
 - FreeOpcUa (tested with version 0.90.6)
 
 Run all tests:
-- To run the INGOPCS OPC UA Toolkit tests: execute the test-all.sh script: `./test-all.sh`
+- To run the S2OPC OPC UA Toolkit tests: execute the test-all.sh script: `./test-all.sh`
 - Tests results are provided in build/bin/*.tap files and shall indicate "ok" status for each test
 
 Run a particular test (build/bin/ directory):
@@ -178,3 +178,18 @@ Run a particular test (build/bin/ directory):
 Run OPC UA Compliance Test Tool (UACTT: tool available for OPC foundation corporate members only):
 - Run toolkit server example with long timeout parameter in build/bin/ directory: ./toolkit_test_server
 - Run the UACTT tests using the UACTT project configuration file acceptances_tests/Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml
+
+## Licenses
+
+Unless specifically indicated otherwise in a file, S2OPC files are
+licensed under the GNU AFFERO GPL v3 license, as can be found in `agpl-3.0.txt`
+OPC UA Stack code generated with the OPC foundation code generator
+tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT
+License 1.00
+The mbedtls library is also distributed under the Apache 2.0 license.
+
+## Commercial support
+
+Commercial support is available on demand for custom development and maintenance support.
+Contact: contact@systerel.fr
+
