@@ -396,27 +396,14 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                         epConfigIdx, scConfigIdx);
                 }
 
-                if (false == scConnection->isServerConnection)
+                if (false == scConnection->isServerConnection || status != SOPC_STATUS_OK)
                 {
-                    if (NULL != cert)
-                        SOPC_KeyManager_Certificate_Free(cert);
+                    SOPC_KeyManager_Certificate_Free(cert);
                 }
                 else
                 {
-                    // SERVER SIDE ONLY
-                    if (SOPC_STATUS_OK == status)
-                    {
-                        // Set client application certificate to record
-                        *clientSenderCertificate = cert;
-                    }
-                    else
-                    {
-                        // Error case
-                        if (NULL != cert)
-                        {
-                            SOPC_KeyManager_Certificate_Free(cert);
-                        }
-                    }
+                    // Set client application certificate to record
+                    *clientSenderCertificate = cert;
                 }
             }
         }
