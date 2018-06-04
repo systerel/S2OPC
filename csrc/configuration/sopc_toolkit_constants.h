@@ -92,11 +92,9 @@ typedef enum SOPC_ReturnStatus {
 
 #if defined(__GNUC__) && !defined(__clang__)
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST _Pragma("GCC diagnostic ignored \"-Wcast-qual\"");
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_STRINGS_OVERLENGTH _Pragma("GCC diagnostic ignored \"-Woverlength-strings\"");
 #define SOPC_GCC_DIAGNOSTIC_RESTORE _Pragma("GCC diagnostic pop")
 #else
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_STRINGS_OVERLENGTH
 #define SOPC_GCC_DIAGNOSTIC_RESTORE
 #endif
 

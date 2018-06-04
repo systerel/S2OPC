@@ -974,11 +974,9 @@ END_TEST
 
 START_TEST(test_crypto_asym_uri_B256)
 {
-    SOPC_GCC_DIAGNOSTIC_IGNORE_STRINGS_OVERLENGTH
-    ck_assert(strncmp(SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(crypto),
-                      SOPC_SecurityPolicy_Basic256_URI_SignAlgo,
-                      strlen(SOPC_SecurityPolicy_Basic256_URI_SignAlgo) + 1) == 0);
-    SOPC_GCC_DIAGNOSTIC_RESTORE
+    int res = strncmp(SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(crypto),
+                      SOPC_SecurityPolicy_Basic256_URI_SignAlgo, strlen(SOPC_SecurityPolicy_Basic256_URI_SignAlgo) + 1);
+    ck_assert_int_eq(res, 0);
 }
 END_TEST
 
