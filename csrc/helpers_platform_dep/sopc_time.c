@@ -39,16 +39,39 @@ static char* get_time_string(bool local, bool compact)
     }
 
     SOPC_DateTime dt = SOPC_Time_GetCurrentTimeUTC();
-    assert(dt != 0);
+
+    if (dt == 0)
+    {
+        return NULL;
+    }
 
     time_t seconds;
     SOPC_ReturnStatus status = SOPC_DateTime_ToTimeT(dt, &seconds);
     assert(status == SOPC_STATUS_OK);
 
     time_t milliseconds = (time_t)((dt / 10000) % 1000);
-    size_t res = strftime(buf, buf_size - 1, compact ? format_seconds_compact : format_seconds_terse,
-                          local ? localtime(&seconds) : gmtime(&seconds));
-    assert(res != 0);
+    struct tm tm;
+
+    if (local)
+    {
+        status = SOPC_Time_Breakdown_Local(seconds, &tm);
+    }
+    else
+    {
+        status = SOPC_Time_Breakdown_UTC(seconds, &tm);
+    }
+
+    if (status != SOPC_STATUS_OK)
+    {
+        return NULL;
+    }
+
+    size_t res = strftime(buf, buf_size - 1, compact ? format_seconds_compact : format_seconds_terse, &tm);
+
+    if (res == 0)
+    {
+        return NULL;
+    }
 
     sprintf(buf + 19, compact ? format_milliseconds_compact : format_milliseconds_terse, milliseconds);
 
