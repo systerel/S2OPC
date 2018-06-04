@@ -68,11 +68,25 @@ OPERATIONS
     END
     ;
     
+    clear_publish_queue (p_queue) =
+    PRE
+        p_queue : t_publishReqQueue_i &
+        p_queue : s_publishReqQueue
+    THEN
+        a_publish_responses :(a_publish_responses : t_msg +-> t_publishReqQueue &
+                              a_publish_responses |> {p_queue} = {} &
+                              a_publish_responses |>> {p_queue} = a_publish_responses$0 |>> {p_queue})
+    END
+    ;
+    
     clear_and_deallocate_publish_queue (p_queue) =
     PRE
         p_queue : t_publishReqQueue_i &
         p_queue : s_publishReqQueue
     THEN
+        a_publish_responses :(a_publish_responses : t_msg +-> t_publishReqQueue &
+                              a_publish_responses |> {p_queue} = {} &
+                              a_publish_responses |>> {p_queue} = a_publish_responses$0 |>> {p_queue}) ||
         s_publishReqQueue := s_publishReqQueue - {p_queue}
     END
     ;

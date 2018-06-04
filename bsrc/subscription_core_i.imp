@@ -270,7 +270,7 @@ OPERATIONS
         l_PublishRequestQueue
     IN
         l_PublishRequestQueue <-- get_subscription_publishRequestQueue (p_subscription);
-        clear_and_deallocate_publish_queue (l_PublishRequestQueue)
+        clear_publish_queue (l_PublishRequestQueue)
     END
     ;
 
@@ -345,10 +345,17 @@ OPERATIONS
     
     close_subscription (p_subscription) =
     VAR
-        l_timer_id
+        l_timer_id,
+        l_publish_queue,
+        l_monitored_item_queue
     IN
         l_timer_id <-- get_subscription_timer_id (p_subscription);
         delete_publish_timer (l_timer_id);
+        l_publish_queue <-- get_subscription_publishRequestQueue (p_subscription);
+        clear_and_deallocate_publish_queue (l_publish_queue);
+        /* TODO: iter on monitored items and remove them from node queues ! */
+        l_monitored_item_queue <-- get_subscription_monitoredItemQueue (p_subscription);
+        clear_and_deallocate_monitored_item_queue (l_monitored_item_queue);
         delete_subscription (p_subscription)
     END
     ;

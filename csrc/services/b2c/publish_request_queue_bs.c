@@ -49,10 +49,27 @@ void publish_request_queue_bs__allocate_new_publish_queue(
     }
 }
 
+static void SOPC_InternalPublishRequestQueueElement_Free(uint32_t id, void* val)
+{
+    (void) id;
+    SOPC_InternalPublishRequestQueueElement* elt = (SOPC_InternalPublishRequestQueueElement*) val;
+    OpcUa_PublishResponse_Clear(elt->resp_msg);
+    free(elt->resp_msg);
+    free(elt);
+}
+
 void publish_request_queue_bs__clear_and_deallocate_publish_queue(
     const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue)
 {
+    SOPC_SLinkedList_Apply(publish_request_queue_bs__p_queue, SOPC_InternalPublishRequestQueueElement_Free);
     SOPC_SLinkedList_Delete(publish_request_queue_bs__p_queue);
+}
+
+void publish_request_queue_bs__clear_publish_queue(
+    const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue)
+{
+    SOPC_SLinkedList_Apply(publish_request_queue_bs__p_queue, SOPC_InternalPublishRequestQueueElement_Free);
+    SOPC_SLinkedList_Clear(publish_request_queue_bs__p_queue);
 }
 
 void publish_request_queue_bs__append_publish_request_to_queue(
