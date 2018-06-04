@@ -20,6 +20,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <time.h>
 
 #include "sopc_encodeabletype.h"
 #include "sopc_toolkit_constants.h"
@@ -425,7 +426,8 @@ SOPC_ReturnStatus SOPC_DateTime_Compare(const SOPC_DateTime* left, const SOPC_Da
 SOPC_ReturnStatus SOPC_DateTime_CompareAux(const void* left, const void* right, int32_t* comparison);
 void SOPC_DateTime_Clear(SOPC_DateTime* dateTime);
 void SOPC_DateTime_ClearAux(void* value);
-void SOPC_DateTime_FromInt64(SOPC_DateTime* dateTime, int64_t date);
+SOPC_ReturnStatus SOPC_DateTime_FromTimeT(time_t time, SOPC_DateTime* res);
+SOPC_ReturnStatus SOPC_DateTime_ToTimeT(SOPC_DateTime dateTime, time_t* res);
 
 void SOPC_Guid_Initialize(SOPC_Guid* guid);
 void SOPC_Guid_InitializeAux(void* value);

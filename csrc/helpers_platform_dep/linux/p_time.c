@@ -26,17 +26,13 @@
  * It represents the number of seconds between the OPC-UA (Windows) which starts on 1601/01/01 (supposedly 00:00:00
  * UTC), and Linux times starts on epoch, 1970/01/01 00:00:00 UTC.
  * */
-static const uint64_t SOPC_SECONDS_BETWEEN_EPOCHS = 11644473600;
-static const uint64_t SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7
 static const uint64_t SOPC_SECOND_TO_NANOSECONDS = 1000000000;   // 10^9
 static const uint64_t SOPC_MILLISECOND_TO_NANOSECONDS = 1000000; // 10^6
 
 SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
 {
     struct timespec currentTime;
-    int gettimeResult;
-    uint64_t intermediateResult = 0;
-    SOPC_DateTime result = 0;
+    SOPC_DateTime dt = 0;
 
     /*
      * Extract from clock_gettime documentation:
@@ -44,44 +40,22 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
      * represents seconds and nanoseconds since the Epoch.  When its time is changed, timers for a relative interval are
      * unaffected, but timers for an absolute point in time are affected.
      * */
-    gettimeResult = clock_gettime(CLOCK_REALTIME, &currentTime);
-    if (gettimeResult == 0)
+    if (clock_gettime(CLOCK_REALTIME, &currentTime) != 0)
     {
-        if (currentTime.tv_sec > 0)
-        {
-            intermediateResult = (uint64_t) currentTime.tv_sec;
-        }
-        else
-        {
-            intermediateResult = 0;
-        }
-        if (UINT64_MAX - SOPC_SECONDS_BETWEEN_EPOCHS > intermediateResult)
-        {
-            intermediateResult += SOPC_SECONDS_BETWEEN_EPOCHS;
-            if (UINT64_MAX / SOPC_SECOND_TO_100_NANOSECONDS > intermediateResult)
-            {
-                intermediateResult *= SOPC_SECOND_TO_100_NANOSECONDS;
-                result = currentTime.tv_nsec / 100; // set nanosecs in 100 nanosecs
-                if ((uint64_t) INT64_MAX >= intermediateResult + (uint64_t) result)
-                {
-                    result += (int64_t) intermediateResult;
-                }
-                else
-                {
-                    // Maximum value to be used as result since value does not fit in INT64 value
-                    result = INT64_MAX;
-                }
-            }
-        }
-        else
-        {
-            // Maximum value to be used as result since value does not fit in INT64 value
-            result = INT64_MAX;
-        }
+        return 0;
+    }
 
-    } // else return the minimum time value which is 0
+    int64_t ns100 = currentTime.tv_nsec / 100;
 
-    return result;
+    if ((SOPC_DateTime_FromTimeT(currentTime.tv_sec, &dt) != SOPC_STATUS_OK) || (INT64_MAX - ns100 < dt))
+    {
+        // Time overflow...
+        return INT64_MAX;
+    }
+
+    dt += ns100;
+
+    return dt;
 }
 
 SOPC_TimeReference SOPC_TimeReference_GetCurrent()

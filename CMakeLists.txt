@@ -493,6 +493,7 @@ add_custom_command(
 file(GLOB_RECURSE SOCKETS_SRC
     ${PLATFORM_SRCS}
     "csrc/helpers/*.c"
+    "csrc/opcua_types/sopc_builtintypes.c"
     "csrc/sockets/*.c"
 )
 
