@@ -69,7 +69,8 @@ struct SOPC_StaMac_Machine
 };
 
 /* Global variables */
-static uint32_t nSentReqs = 0; /* Number of sent request, used to uniquely associate a response to its request. */
+static uint32_t nSentReqs = 0;     /* Number of sent requests, used to uniquely associate a response to its request. */
+static uintptr_t nPublishReqs = 0; /* Number of sent publish requests */
 
 /* Internal functions */
 bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
@@ -532,7 +533,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 break;
             case SE_SND_REQUEST_FAILED:
                 pSM->state = stError;
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Send request 0x%" PRIxPTR " failed.", intAppCtx);
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Send request failed, type %s, context 0x%" PRIxPTR ".",
+                            ((SOPC_EncodeableType*) pParam)->TypeName, intAppCtx);
                 break;
             case SE_SESSION_REACTIVATING:
                 Helpers_Log(SOPC_LOG_LEVEL_INFO, "Session reactivated.");
@@ -664,7 +666,11 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                         Helpers_NewPublishRequest(pSM->bAckSubscr, pSM->iSubscriptionID, pSM->iAckSeqNum, &pRequest);
                     if (SOPC_STATUS_OK == status)
                     {
-                        status = SOPC_StaMac_SendRequest(pSM, pRequest, 0);
+                        if (nPublishReqs < UINTPTR_MAX)
+                        {
+                            ++nPublishReqs;
+                        }
+                        status = SOPC_StaMac_SendRequest(pSM, pRequest, nPublishReqs);
                     }
                     if (SOPC_STATUS_OK == status)
                     {

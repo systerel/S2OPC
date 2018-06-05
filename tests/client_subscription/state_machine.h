@@ -148,7 +148,7 @@ bool SOPC_StaMac_IsConnectable(SOPC_StaMac_Machine* pSM);
 /**
  * \brief Returns a bool whether the machine is in a connected state or not.
  *
- * Connected states are: stActivating, stActivated, stCreateing*, stClosing.
+ * Connected states are: stActivating, stActivated, stCreating*, stClosing.
  */
 bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM);
 
