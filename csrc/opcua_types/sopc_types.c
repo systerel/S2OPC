@@ -93,7 +93,7 @@ SOPC_ReturnStatus OpcUa_Node_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_Node* a_pValue = (const OpcUa_Node*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -144,7 +144,7 @@ SOPC_ReturnStatus OpcUa_Node_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_Node* a_pValue = (OpcUa_Node*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -262,7 +262,7 @@ SOPC_ReturnStatus OpcUa_InstanceNode_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_InstanceNode* a_pValue = (const OpcUa_InstanceNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -313,7 +313,7 @@ SOPC_ReturnStatus OpcUa_InstanceNode_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_InstanceNode* a_pValue = (OpcUa_InstanceNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -431,7 +431,7 @@ SOPC_ReturnStatus OpcUa_TypeNode_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_TypeNode* a_pValue = (const OpcUa_TypeNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -482,7 +482,7 @@ SOPC_ReturnStatus OpcUa_TypeNode_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_TypeNode* a_pValue = (OpcUa_TypeNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -602,7 +602,7 @@ SOPC_ReturnStatus OpcUa_ObjectNode_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ObjectNode* a_pValue = (const OpcUa_ObjectNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -657,7 +657,7 @@ SOPC_ReturnStatus OpcUa_ObjectNode_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ObjectNode* a_pValue = (OpcUa_ObjectNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -781,7 +781,7 @@ SOPC_ReturnStatus OpcUa_ObjectTypeNode_Encode(const void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ObjectTypeNode* a_pValue = (const OpcUa_ObjectTypeNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -836,7 +836,7 @@ SOPC_ReturnStatus OpcUa_ObjectTypeNode_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ObjectTypeNode* a_pValue = (OpcUa_ObjectTypeNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -976,7 +976,7 @@ SOPC_ReturnStatus OpcUa_VariableNode_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_VariableNode* a_pValue = (const OpcUa_VariableNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -1061,7 +1061,7 @@ SOPC_ReturnStatus OpcUa_VariableNode_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_VariableNode* a_pValue = (OpcUa_VariableNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -1226,7 +1226,7 @@ SOPC_ReturnStatus OpcUa_VariableTypeNode_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_VariableTypeNode* a_pValue = (const OpcUa_VariableTypeNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -1299,7 +1299,7 @@ SOPC_ReturnStatus OpcUa_VariableTypeNode_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_VariableTypeNode* a_pValue = (OpcUa_VariableTypeNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -1446,7 +1446,7 @@ SOPC_ReturnStatus OpcUa_ReferenceTypeNode_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ReferenceTypeNode* a_pValue = (const OpcUa_ReferenceTypeNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -1509,7 +1509,7 @@ SOPC_ReturnStatus OpcUa_ReferenceTypeNode_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ReferenceTypeNode* a_pValue = (OpcUa_ReferenceTypeNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -1643,7 +1643,7 @@ SOPC_ReturnStatus OpcUa_MethodNode_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_MethodNode* a_pValue = (const OpcUa_MethodNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -1702,7 +1702,7 @@ SOPC_ReturnStatus OpcUa_MethodNode_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_MethodNode* a_pValue = (OpcUa_MethodNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -1832,7 +1832,7 @@ SOPC_ReturnStatus OpcUa_ViewNode_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ViewNode* a_pValue = (const OpcUa_ViewNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -1891,7 +1891,7 @@ SOPC_ReturnStatus OpcUa_ViewNode_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ViewNode* a_pValue = (OpcUa_ViewNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2019,7 +2019,7 @@ SOPC_ReturnStatus OpcUa_DataTypeNode_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DataTypeNode* a_pValue = (const OpcUa_DataTypeNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2074,7 +2074,7 @@ SOPC_ReturnStatus OpcUa_DataTypeNode_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DataTypeNode* a_pValue = (OpcUa_DataTypeNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2184,7 +2184,7 @@ SOPC_ReturnStatus OpcUa_ReferenceNode_Encode(const void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ReferenceNode* a_pValue = (const OpcUa_ReferenceNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2213,7 +2213,7 @@ SOPC_ReturnStatus OpcUa_ReferenceNode_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ReferenceNode* a_pValue = (OpcUa_ReferenceNode*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2301,7 +2301,7 @@ SOPC_ReturnStatus OpcUa_Argument_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_Argument* a_pValue = (const OpcUa_Argument*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2340,7 +2340,7 @@ SOPC_ReturnStatus OpcUa_Argument_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_Argument* a_pValue = (OpcUa_Argument*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2433,7 +2433,7 @@ SOPC_ReturnStatus OpcUa_EnumValueType_Encode(const void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_EnumValueType* a_pValue = (const OpcUa_EnumValueType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2462,7 +2462,7 @@ SOPC_ReturnStatus OpcUa_EnumValueType_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_EnumValueType* a_pValue = (OpcUa_EnumValueType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2546,7 +2546,7 @@ SOPC_ReturnStatus OpcUa_EnumField_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_EnumField* a_pValue = (const OpcUa_EnumField*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2579,7 +2579,7 @@ SOPC_ReturnStatus OpcUa_EnumField_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_EnumField* a_pValue = (OpcUa_EnumField*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2663,7 +2663,7 @@ SOPC_ReturnStatus OpcUa_OptionSet_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_OptionSet* a_pValue = (const OpcUa_OptionSet*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2688,7 +2688,7 @@ SOPC_ReturnStatus OpcUa_OptionSet_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_OptionSet* a_pValue = (OpcUa_OptionSet*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2764,7 +2764,7 @@ SOPC_ReturnStatus OpcUa_TimeZoneDataType_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_TimeZoneDataType* a_pValue = (const OpcUa_TimeZoneDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2789,7 +2789,7 @@ SOPC_ReturnStatus OpcUa_TimeZoneDataType_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_TimeZoneDataType* a_pValue = (OpcUa_TimeZoneDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2877,7 +2877,7 @@ SOPC_ReturnStatus OpcUa_ApplicationDescription_Encode(const void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ApplicationDescription* a_pValue = (const OpcUa_ApplicationDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -2924,7 +2924,7 @@ SOPC_ReturnStatus OpcUa_ApplicationDescription_Decode(void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ApplicationDescription* a_pValue = (OpcUa_ApplicationDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3034,7 +3034,7 @@ SOPC_ReturnStatus OpcUa_RequestHeader_Encode(const void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RequestHeader* a_pValue = (const OpcUa_RequestHeader*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3079,7 +3079,7 @@ SOPC_ReturnStatus OpcUa_RequestHeader_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RequestHeader* a_pValue = (OpcUa_RequestHeader*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3185,7 +3185,7 @@ SOPC_ReturnStatus OpcUa_ResponseHeader_Encode(const void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ResponseHeader* a_pValue = (const OpcUa_ResponseHeader*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3228,7 +3228,7 @@ SOPC_ReturnStatus OpcUa_ResponseHeader_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ResponseHeader* a_pValue = (OpcUa_ResponseHeader*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3321,14 +3321,9 @@ SOPC_ReturnStatus OpcUa_ServiceFault_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ServiceFault* a_pValue = (const OpcUa_ServiceFault*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, buf);
     }
 
     return status;
@@ -3342,17 +3337,12 @@ SOPC_ReturnStatus OpcUa_ServiceFault_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ServiceFault* a_pValue = (OpcUa_ServiceFault*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
 
     OpcUa_ServiceFault_Initialize(a_pValue);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, buf);
-    }
 
     if (status != SOPC_STATUS_OK && a_pValue != NULL)
     {
@@ -3421,7 +3411,7 @@ SOPC_ReturnStatus OpcUa_FindServersRequest_Encode(const void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_FindServersRequest* a_pValue = (const OpcUa_FindServersRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3454,7 +3444,7 @@ SOPC_ReturnStatus OpcUa_FindServersRequest_Decode(void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_FindServersRequest* a_pValue = (OpcUa_FindServersRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3542,7 +3532,7 @@ SOPC_ReturnStatus OpcUa_FindServersResponse_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_FindServersResponse* a_pValue = (const OpcUa_FindServersResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3565,7 +3555,7 @@ SOPC_ReturnStatus OpcUa_FindServersResponse_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_FindServersResponse* a_pValue = (OpcUa_FindServersResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3649,7 +3639,7 @@ SOPC_ReturnStatus OpcUa_ServerOnNetwork_Encode(const void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ServerOnNetwork* a_pValue = (const OpcUa_ServerOnNetwork*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3684,7 +3674,7 @@ SOPC_ReturnStatus OpcUa_ServerOnNetwork_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ServerOnNetwork* a_pValue = (OpcUa_ServerOnNetwork*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3776,7 +3766,7 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Encode(const void* pValue, S
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_FindServersOnNetworkRequest* a_pValue = (const OpcUa_FindServersOnNetworkRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3807,7 +3797,7 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Decode(void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_FindServersOnNetworkRequest* a_pValue = (OpcUa_FindServersOnNetworkRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3895,7 +3885,7 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Encode(const void* pValue, 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_FindServersOnNetworkResponse* a_pValue = (const OpcUa_FindServersOnNetworkResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -3922,7 +3912,7 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_FindServersOnNetworkResponse* a_pValue = (OpcUa_FindServersOnNetworkResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4010,7 +4000,7 @@ SOPC_ReturnStatus OpcUa_UserTokenPolicy_Encode(const void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_UserTokenPolicy* a_pValue = (const OpcUa_UserTokenPolicy*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4047,7 +4037,7 @@ SOPC_ReturnStatus OpcUa_UserTokenPolicy_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_UserTokenPolicy* a_pValue = (OpcUa_UserTokenPolicy*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4150,7 +4140,7 @@ SOPC_ReturnStatus OpcUa_EndpointDescription_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_EndpointDescription* a_pValue = (const OpcUa_EndpointDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4201,7 +4191,7 @@ SOPC_ReturnStatus OpcUa_EndpointDescription_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_EndpointDescription* a_pValue = (OpcUa_EndpointDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4313,7 +4303,7 @@ SOPC_ReturnStatus OpcUa_GetEndpointsRequest_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_GetEndpointsRequest* a_pValue = (const OpcUa_GetEndpointsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4346,7 +4336,7 @@ SOPC_ReturnStatus OpcUa_GetEndpointsRequest_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_GetEndpointsRequest* a_pValue = (OpcUa_GetEndpointsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4436,7 +4426,7 @@ SOPC_ReturnStatus OpcUa_GetEndpointsResponse_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_GetEndpointsResponse* a_pValue = (const OpcUa_GetEndpointsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4459,7 +4449,7 @@ SOPC_ReturnStatus OpcUa_GetEndpointsResponse_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_GetEndpointsResponse* a_pValue = (OpcUa_GetEndpointsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4553,7 +4543,7 @@ SOPC_ReturnStatus OpcUa_RegisteredServer_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RegisteredServer* a_pValue = (const OpcUa_RegisteredServer*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4606,7 +4596,7 @@ SOPC_ReturnStatus OpcUa_RegisteredServer_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RegisteredServer* a_pValue = (OpcUa_RegisteredServer*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4712,7 +4702,7 @@ SOPC_ReturnStatus OpcUa_RegisterServerRequest_Encode(const void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RegisterServerRequest* a_pValue = (const OpcUa_RegisterServerRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4733,7 +4723,7 @@ SOPC_ReturnStatus OpcUa_RegisterServerRequest_Decode(void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RegisterServerRequest* a_pValue = (OpcUa_RegisterServerRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4804,14 +4794,9 @@ SOPC_ReturnStatus OpcUa_RegisterServerResponse_Encode(const void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RegisterServerResponse* a_pValue = (const OpcUa_RegisterServerResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, buf);
     }
 
     return status;
@@ -4825,17 +4810,12 @@ SOPC_ReturnStatus OpcUa_RegisterServerResponse_Decode(void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RegisterServerResponse* a_pValue = (OpcUa_RegisterServerResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
 
     OpcUa_RegisterServerResponse_Initialize(a_pValue);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, buf);
-    }
 
     if (status != SOPC_STATUS_OK && a_pValue != NULL)
     {
@@ -4901,7 +4881,7 @@ SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Encode(const void* pValue, SO
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_MdnsDiscoveryConfiguration* a_pValue = (const OpcUa_MdnsDiscoveryConfiguration*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -4928,7 +4908,7 @@ SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Decode(void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_MdnsDiscoveryConfiguration* a_pValue = (OpcUa_MdnsDiscoveryConfiguration*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5012,7 +4992,7 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Request_Encode(const void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RegisterServer2Request* a_pValue = (const OpcUa_RegisterServer2Request*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5039,7 +5019,7 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Request_Decode(void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RegisterServer2Request* a_pValue = (OpcUa_RegisterServer2Request*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5128,7 +5108,7 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Response_Encode(const void* pValue, SOPC_
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RegisterServer2Response* a_pValue = (const OpcUa_RegisterServer2Response*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5157,7 +5137,7 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RegisterServer2Response* a_pValue = (OpcUa_RegisterServer2Response*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5246,7 +5226,7 @@ SOPC_ReturnStatus OpcUa_ChannelSecurityToken_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ChannelSecurityToken* a_pValue = (const OpcUa_ChannelSecurityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5279,7 +5259,7 @@ SOPC_ReturnStatus OpcUa_ChannelSecurityToken_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ChannelSecurityToken* a_pValue = (OpcUa_ChannelSecurityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5371,7 +5351,7 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Encode(const void* pValue, SOPC
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_OpenSecureChannelRequest* a_pValue = (const OpcUa_OpenSecureChannelRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5408,7 +5388,7 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Decode(void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_OpenSecureChannelRequest* a_pValue = (OpcUa_OpenSecureChannelRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5501,7 +5481,7 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Encode(const void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_OpenSecureChannelResponse* a_pValue = (const OpcUa_OpenSecureChannelResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5530,7 +5510,7 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Decode(void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_OpenSecureChannelResponse* a_pValue = (OpcUa_OpenSecureChannelResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5587,7 +5567,6 @@ void OpcUa_CloseSecureChannelRequest_Initialize(void* pValue)
     if (a_pValue != NULL)
     {
         a_pValue->encodeableType = &OpcUa_CloseSecureChannelRequest_EncodeableType;
-        OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
     }
 }
 
@@ -5599,7 +5578,6 @@ void OpcUa_CloseSecureChannelRequest_Clear(void* pValue)
     OpcUa_CloseSecureChannelRequest* a_pValue = (OpcUa_CloseSecureChannelRequest*) pValue;
     if (a_pValue != NULL)
     {
-        OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
     }
 }
 
@@ -5611,14 +5589,9 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Encode(const void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CloseSecureChannelRequest* a_pValue = (const OpcUa_CloseSecureChannelRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = OpcUa_RequestHeader_Encode(&a_pValue->RequestHeader, buf);
     }
 
     return status;
@@ -5632,17 +5605,12 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Decode(void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CloseSecureChannelRequest* a_pValue = (OpcUa_CloseSecureChannelRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
 
     OpcUa_CloseSecureChannelRequest_Initialize(a_pValue);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = OpcUa_RequestHeader_Decode(&a_pValue->RequestHeader, buf);
-    }
 
     if (status != SOPC_STATUS_OK && a_pValue != NULL)
     {
@@ -5703,14 +5671,9 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Encode(const void* pValue, SO
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CloseSecureChannelResponse* a_pValue = (const OpcUa_CloseSecureChannelResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, buf);
     }
 
     return status;
@@ -5724,17 +5687,12 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Decode(void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CloseSecureChannelResponse* a_pValue = (OpcUa_CloseSecureChannelResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
 
     OpcUa_CloseSecureChannelResponse_Initialize(a_pValue);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, buf);
-    }
 
     if (status != SOPC_STATUS_OK && a_pValue != NULL)
     {
@@ -5798,7 +5756,7 @@ SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Encode(const void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SignedSoftwareCertificate* a_pValue = (const OpcUa_SignedSoftwareCertificate*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5823,7 +5781,7 @@ SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Decode(void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SignedSoftwareCertificate* a_pValue = (OpcUa_SignedSoftwareCertificate*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5900,7 +5858,7 @@ SOPC_ReturnStatus OpcUa_SignatureData_Encode(const void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SignatureData* a_pValue = (const OpcUa_SignatureData*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -5925,7 +5883,7 @@ SOPC_ReturnStatus OpcUa_SignatureData_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SignatureData* a_pValue = (OpcUa_SignatureData*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6014,7 +5972,7 @@ SOPC_ReturnStatus OpcUa_CreateSessionRequest_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CreateSessionRequest* a_pValue = (const OpcUa_CreateSessionRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6063,7 +6021,7 @@ SOPC_ReturnStatus OpcUa_CreateSessionRequest_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CreateSessionRequest* a_pValue = (OpcUa_CreateSessionRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6188,7 +6146,7 @@ SOPC_ReturnStatus OpcUa_CreateSessionResponse_Encode(const void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CreateSessionResponse* a_pValue = (const OpcUa_CreateSessionResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6246,7 +6204,7 @@ SOPC_ReturnStatus OpcUa_CreateSessionResponse_Decode(void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CreateSessionResponse* a_pValue = (OpcUa_CreateSessionResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6359,7 +6317,7 @@ SOPC_ReturnStatus OpcUa_UserIdentityToken_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_UserIdentityToken* a_pValue = (const OpcUa_UserIdentityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6380,7 +6338,7 @@ SOPC_ReturnStatus OpcUa_UserIdentityToken_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_UserIdentityToken* a_pValue = (OpcUa_UserIdentityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6450,7 +6408,7 @@ SOPC_ReturnStatus OpcUa_AnonymousIdentityToken_Encode(const void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AnonymousIdentityToken* a_pValue = (const OpcUa_AnonymousIdentityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6471,7 +6429,7 @@ SOPC_ReturnStatus OpcUa_AnonymousIdentityToken_Decode(void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AnonymousIdentityToken* a_pValue = (OpcUa_AnonymousIdentityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6548,7 +6506,7 @@ SOPC_ReturnStatus OpcUa_UserNameIdentityToken_Encode(const void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_UserNameIdentityToken* a_pValue = (const OpcUa_UserNameIdentityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6581,7 +6539,7 @@ SOPC_ReturnStatus OpcUa_UserNameIdentityToken_Decode(void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_UserNameIdentityToken* a_pValue = (OpcUa_UserNameIdentityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6666,7 +6624,7 @@ SOPC_ReturnStatus OpcUa_X509IdentityToken_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_X509IdentityToken* a_pValue = (const OpcUa_X509IdentityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6691,7 +6649,7 @@ SOPC_ReturnStatus OpcUa_X509IdentityToken_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_X509IdentityToken* a_pValue = (OpcUa_X509IdentityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6767,7 +6725,7 @@ SOPC_ReturnStatus OpcUa_KerberosIdentityToken_Encode(const void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_KerberosIdentityToken* a_pValue = (const OpcUa_KerberosIdentityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6792,7 +6750,7 @@ SOPC_ReturnStatus OpcUa_KerberosIdentityToken_Decode(void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_KerberosIdentityToken* a_pValue = (OpcUa_KerberosIdentityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6871,7 +6829,7 @@ SOPC_ReturnStatus OpcUa_IssuedIdentityToken_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_IssuedIdentityToken* a_pValue = (const OpcUa_IssuedIdentityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6900,7 +6858,7 @@ SOPC_ReturnStatus OpcUa_IssuedIdentityToken_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_IssuedIdentityToken* a_pValue = (OpcUa_IssuedIdentityToken*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -6994,7 +6952,7 @@ SOPC_ReturnStatus OpcUa_ActivateSessionRequest_Encode(const void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ActivateSessionRequest* a_pValue = (const OpcUa_ActivateSessionRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7036,7 +6994,7 @@ SOPC_ReturnStatus OpcUa_ActivateSessionRequest_Decode(void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ActivateSessionRequest* a_pValue = (OpcUa_ActivateSessionRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7142,7 +7100,7 @@ SOPC_ReturnStatus OpcUa_ActivateSessionResponse_Encode(const void* pValue, SOPC_
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ActivateSessionResponse* a_pValue = (const OpcUa_ActivateSessionResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7175,7 +7133,7 @@ SOPC_ReturnStatus OpcUa_ActivateSessionResponse_Decode(void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ActivateSessionResponse* a_pValue = (OpcUa_ActivateSessionResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7263,7 +7221,7 @@ SOPC_ReturnStatus OpcUa_CloseSessionRequest_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CloseSessionRequest* a_pValue = (const OpcUa_CloseSessionRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7284,7 +7242,7 @@ SOPC_ReturnStatus OpcUa_CloseSessionRequest_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CloseSessionRequest* a_pValue = (OpcUa_CloseSessionRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7355,14 +7313,9 @@ SOPC_ReturnStatus OpcUa_CloseSessionResponse_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CloseSessionResponse* a_pValue = (const OpcUa_CloseSessionResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, buf);
     }
 
     return status;
@@ -7376,17 +7329,12 @@ SOPC_ReturnStatus OpcUa_CloseSessionResponse_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CloseSessionResponse* a_pValue = (OpcUa_CloseSessionResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
 
     OpcUa_CloseSessionResponse_Initialize(a_pValue);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, buf);
-    }
 
     if (status != SOPC_STATUS_OK && a_pValue != NULL)
     {
@@ -7449,7 +7397,7 @@ SOPC_ReturnStatus OpcUa_CancelRequest_Encode(const void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CancelRequest* a_pValue = (const OpcUa_CancelRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7470,7 +7418,7 @@ SOPC_ReturnStatus OpcUa_CancelRequest_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CancelRequest* a_pValue = (OpcUa_CancelRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7542,7 +7490,7 @@ SOPC_ReturnStatus OpcUa_CancelResponse_Encode(const void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CancelResponse* a_pValue = (const OpcUa_CancelResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7563,7 +7511,7 @@ SOPC_ReturnStatus OpcUa_CancelResponse_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CancelResponse* a_pValue = (OpcUa_CancelResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7642,7 +7590,7 @@ SOPC_ReturnStatus OpcUa_NodeAttributes_Encode(const void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_NodeAttributes* a_pValue = (const OpcUa_NodeAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7679,7 +7627,7 @@ SOPC_ReturnStatus OpcUa_NodeAttributes_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_NodeAttributes* a_pValue = (OpcUa_NodeAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7775,7 +7723,7 @@ SOPC_ReturnStatus OpcUa_ObjectAttributes_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ObjectAttributes* a_pValue = (const OpcUa_ObjectAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7816,7 +7764,7 @@ SOPC_ReturnStatus OpcUa_ObjectAttributes_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ObjectAttributes* a_pValue = (OpcUa_ObjectAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -7932,7 +7880,7 @@ SOPC_ReturnStatus OpcUa_VariableAttributes_Encode(const void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_VariableAttributes* a_pValue = (const OpcUa_VariableAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8003,7 +7951,7 @@ SOPC_ReturnStatus OpcUa_VariableAttributes_Decode(void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_VariableAttributes* a_pValue = (OpcUa_VariableAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8136,7 +8084,7 @@ SOPC_ReturnStatus OpcUa_MethodAttributes_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_MethodAttributes* a_pValue = (const OpcUa_MethodAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8181,7 +8129,7 @@ SOPC_ReturnStatus OpcUa_MethodAttributes_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_MethodAttributes* a_pValue = (OpcUa_MethodAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8285,7 +8233,7 @@ SOPC_ReturnStatus OpcUa_ObjectTypeAttributes_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ObjectTypeAttributes* a_pValue = (const OpcUa_ObjectTypeAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8326,7 +8274,7 @@ SOPC_ReturnStatus OpcUa_ObjectTypeAttributes_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ObjectTypeAttributes* a_pValue = (OpcUa_ObjectTypeAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8437,7 +8385,7 @@ SOPC_ReturnStatus OpcUa_VariableTypeAttributes_Encode(const void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_VariableTypeAttributes* a_pValue = (const OpcUa_VariableTypeAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8496,7 +8444,7 @@ SOPC_ReturnStatus OpcUa_VariableTypeAttributes_Decode(void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_VariableTypeAttributes* a_pValue = (OpcUa_VariableTypeAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8620,7 +8568,7 @@ SOPC_ReturnStatus OpcUa_ReferenceTypeAttributes_Encode(const void* pValue, SOPC_
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ReferenceTypeAttributes* a_pValue = (const OpcUa_ReferenceTypeAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8669,7 +8617,7 @@ SOPC_ReturnStatus OpcUa_ReferenceTypeAttributes_Decode(void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ReferenceTypeAttributes* a_pValue = (OpcUa_ReferenceTypeAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8778,7 +8726,7 @@ SOPC_ReturnStatus OpcUa_DataTypeAttributes_Encode(const void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DataTypeAttributes* a_pValue = (const OpcUa_DataTypeAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8819,7 +8767,7 @@ SOPC_ReturnStatus OpcUa_DataTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DataTypeAttributes* a_pValue = (OpcUa_DataTypeAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8921,7 +8869,7 @@ SOPC_ReturnStatus OpcUa_ViewAttributes_Encode(const void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ViewAttributes* a_pValue = (const OpcUa_ViewAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -8966,7 +8914,7 @@ SOPC_ReturnStatus OpcUa_ViewAttributes_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ViewAttributes* a_pValue = (OpcUa_ViewAttributes*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9072,7 +9020,7 @@ SOPC_ReturnStatus OpcUa_AddNodesItem_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AddNodesItem* a_pValue = (const OpcUa_AddNodesItem*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9117,7 +9065,7 @@ SOPC_ReturnStatus OpcUa_AddNodesItem_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AddNodesItem* a_pValue = (OpcUa_AddNodesItem*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9213,7 +9161,7 @@ SOPC_ReturnStatus OpcUa_AddNodesResult_Encode(const void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AddNodesResult* a_pValue = (const OpcUa_AddNodesResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9238,7 +9186,7 @@ SOPC_ReturnStatus OpcUa_AddNodesResult_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AddNodesResult* a_pValue = (OpcUa_AddNodesResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9315,7 +9263,7 @@ SOPC_ReturnStatus OpcUa_AddNodesRequest_Encode(const void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AddNodesRequest* a_pValue = (const OpcUa_AddNodesRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9338,7 +9286,7 @@ SOPC_ReturnStatus OpcUa_AddNodesRequest_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AddNodesRequest* a_pValue = (OpcUa_AddNodesRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9421,7 +9369,7 @@ SOPC_ReturnStatus OpcUa_AddNodesResponse_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AddNodesResponse* a_pValue = (const OpcUa_AddNodesResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9450,7 +9398,7 @@ SOPC_ReturnStatus OpcUa_AddNodesResponse_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AddNodesResponse* a_pValue = (OpcUa_AddNodesResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9542,7 +9490,7 @@ SOPC_ReturnStatus OpcUa_AddReferencesItem_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AddReferencesItem* a_pValue = (const OpcUa_AddReferencesItem*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9583,7 +9531,7 @@ SOPC_ReturnStatus OpcUa_AddReferencesItem_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AddReferencesItem* a_pValue = (OpcUa_AddReferencesItem*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9678,7 +9626,7 @@ SOPC_ReturnStatus OpcUa_AddReferencesRequest_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AddReferencesRequest* a_pValue = (const OpcUa_AddReferencesRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9701,7 +9649,7 @@ SOPC_ReturnStatus OpcUa_AddReferencesRequest_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AddReferencesRequest* a_pValue = (OpcUa_AddReferencesRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9785,7 +9733,7 @@ SOPC_ReturnStatus OpcUa_AddReferencesResponse_Encode(const void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AddReferencesResponse* a_pValue = (const OpcUa_AddReferencesResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9814,7 +9762,7 @@ SOPC_ReturnStatus OpcUa_AddReferencesResponse_Decode(void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AddReferencesResponse* a_pValue = (OpcUa_AddReferencesResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9899,7 +9847,7 @@ SOPC_ReturnStatus OpcUa_DeleteNodesItem_Encode(const void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteNodesItem* a_pValue = (const OpcUa_DeleteNodesItem*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -9924,7 +9872,7 @@ SOPC_ReturnStatus OpcUa_DeleteNodesItem_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteNodesItem* a_pValue = (OpcUa_DeleteNodesItem*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10002,7 +9950,7 @@ SOPC_ReturnStatus OpcUa_DeleteNodesRequest_Encode(const void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteNodesRequest* a_pValue = (const OpcUa_DeleteNodesRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10025,7 +9973,7 @@ SOPC_ReturnStatus OpcUa_DeleteNodesRequest_Decode(void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteNodesRequest* a_pValue = (OpcUa_DeleteNodesRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10108,7 +10056,7 @@ SOPC_ReturnStatus OpcUa_DeleteNodesResponse_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteNodesResponse* a_pValue = (const OpcUa_DeleteNodesResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10137,7 +10085,7 @@ SOPC_ReturnStatus OpcUa_DeleteNodesResponse_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteNodesResponse* a_pValue = (OpcUa_DeleteNodesResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10228,7 +10176,7 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesItem_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteReferencesItem* a_pValue = (const OpcUa_DeleteReferencesItem*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10265,7 +10213,7 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesItem_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteReferencesItem* a_pValue = (OpcUa_DeleteReferencesItem*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10357,7 +10305,7 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesRequest_Encode(const void* pValue, SOPC_
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteReferencesRequest* a_pValue = (const OpcUa_DeleteReferencesRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10380,7 +10328,7 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesRequest_Decode(void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteReferencesRequest* a_pValue = (OpcUa_DeleteReferencesRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10464,7 +10412,7 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Encode(const void* pValue, SOPC
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteReferencesResponse* a_pValue = (const OpcUa_DeleteReferencesResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10493,7 +10441,7 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Decode(void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteReferencesResponse* a_pValue = (OpcUa_DeleteReferencesResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10580,7 +10528,7 @@ SOPC_ReturnStatus OpcUa_ViewDescription_Encode(const void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ViewDescription* a_pValue = (const OpcUa_ViewDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10609,7 +10557,7 @@ SOPC_ReturnStatus OpcUa_ViewDescription_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ViewDescription* a_pValue = (OpcUa_ViewDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10697,7 +10645,7 @@ SOPC_ReturnStatus OpcUa_BrowseDescription_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_BrowseDescription* a_pValue = (const OpcUa_BrowseDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10738,7 +10686,7 @@ SOPC_ReturnStatus OpcUa_BrowseDescription_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_BrowseDescription* a_pValue = (OpcUa_BrowseDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10840,7 +10788,7 @@ SOPC_ReturnStatus OpcUa_ReferenceDescription_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ReferenceDescription* a_pValue = (const OpcUa_ReferenceDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10885,7 +10833,7 @@ SOPC_ReturnStatus OpcUa_ReferenceDescription_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ReferenceDescription* a_pValue = (OpcUa_ReferenceDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -10987,7 +10935,7 @@ SOPC_ReturnStatus OpcUa_BrowseResult_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_BrowseResult* a_pValue = (const OpcUa_BrowseResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11018,7 +10966,7 @@ SOPC_ReturnStatus OpcUa_BrowseResult_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_BrowseResult* a_pValue = (OpcUa_BrowseResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11109,7 +11057,7 @@ SOPC_ReturnStatus OpcUa_BrowseRequest_Encode(const void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_BrowseRequest* a_pValue = (const OpcUa_BrowseRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11140,7 +11088,7 @@ SOPC_ReturnStatus OpcUa_BrowseRequest_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_BrowseRequest* a_pValue = (OpcUa_BrowseRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11231,7 +11179,7 @@ SOPC_ReturnStatus OpcUa_BrowseResponse_Encode(const void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_BrowseResponse* a_pValue = (const OpcUa_BrowseResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11260,7 +11208,7 @@ SOPC_ReturnStatus OpcUa_BrowseResponse_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_BrowseResponse* a_pValue = (OpcUa_BrowseResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11348,7 +11296,7 @@ SOPC_ReturnStatus OpcUa_BrowseNextRequest_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_BrowseNextRequest* a_pValue = (const OpcUa_BrowseNextRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11375,7 +11323,7 @@ SOPC_ReturnStatus OpcUa_BrowseNextRequest_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_BrowseNextRequest* a_pValue = (OpcUa_BrowseNextRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11461,7 +11409,7 @@ SOPC_ReturnStatus OpcUa_BrowseNextResponse_Encode(const void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_BrowseNextResponse* a_pValue = (const OpcUa_BrowseNextResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11490,7 +11438,7 @@ SOPC_ReturnStatus OpcUa_BrowseNextResponse_Decode(void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_BrowseNextResponse* a_pValue = (OpcUa_BrowseNextResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11578,7 +11526,7 @@ SOPC_ReturnStatus OpcUa_RelativePathElement_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RelativePathElement* a_pValue = (const OpcUa_RelativePathElement*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11611,7 +11559,7 @@ SOPC_ReturnStatus OpcUa_RelativePathElement_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RelativePathElement* a_pValue = (OpcUa_RelativePathElement*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11696,7 +11644,7 @@ SOPC_ReturnStatus OpcUa_RelativePath_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RelativePath* a_pValue = (const OpcUa_RelativePath*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11719,7 +11667,7 @@ SOPC_ReturnStatus OpcUa_RelativePath_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RelativePath* a_pValue = (OpcUa_RelativePath*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11795,7 +11743,7 @@ SOPC_ReturnStatus OpcUa_BrowsePath_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_BrowsePath* a_pValue = (const OpcUa_BrowsePath*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11820,7 +11768,7 @@ SOPC_ReturnStatus OpcUa_BrowsePath_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_BrowsePath* a_pValue = (OpcUa_BrowsePath*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11896,7 +11844,7 @@ SOPC_ReturnStatus OpcUa_BrowsePathTarget_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_BrowsePathTarget* a_pValue = (const OpcUa_BrowsePathTarget*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11921,7 +11869,7 @@ SOPC_ReturnStatus OpcUa_BrowsePathTarget_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_BrowsePathTarget* a_pValue = (OpcUa_BrowsePathTarget*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -11999,7 +11947,7 @@ SOPC_ReturnStatus OpcUa_BrowsePathResult_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_BrowsePathResult* a_pValue = (const OpcUa_BrowsePathResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12026,7 +11974,7 @@ SOPC_ReturnStatus OpcUa_BrowsePathResult_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_BrowsePathResult* a_pValue = (OpcUa_BrowsePathResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12108,7 +12056,7 @@ SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(const void* 
     const OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue =
         (const OpcUa_TranslateBrowsePathsToNodeIdsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12131,7 +12079,7 @@ SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue = (OpcUa_TranslateBrowsePathsToNodeIdsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12215,7 +12163,7 @@ SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(const void*
     const OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue =
         (const OpcUa_TranslateBrowsePathsToNodeIdsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12244,7 +12192,7 @@ SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue = (OpcUa_TranslateBrowsePathsToNodeIdsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12331,7 +12279,7 @@ SOPC_ReturnStatus OpcUa_RegisterNodesRequest_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RegisterNodesRequest* a_pValue = (const OpcUa_RegisterNodesRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12354,7 +12302,7 @@ SOPC_ReturnStatus OpcUa_RegisterNodesRequest_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RegisterNodesRequest* a_pValue = (OpcUa_RegisterNodesRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12432,7 +12380,7 @@ SOPC_ReturnStatus OpcUa_RegisterNodesResponse_Encode(const void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RegisterNodesResponse* a_pValue = (const OpcUa_RegisterNodesResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12455,7 +12403,7 @@ SOPC_ReturnStatus OpcUa_RegisterNodesResponse_Decode(void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RegisterNodesResponse* a_pValue = (OpcUa_RegisterNodesResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12533,7 +12481,7 @@ SOPC_ReturnStatus OpcUa_UnregisterNodesRequest_Encode(const void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_UnregisterNodesRequest* a_pValue = (const OpcUa_UnregisterNodesRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12556,7 +12504,7 @@ SOPC_ReturnStatus OpcUa_UnregisterNodesRequest_Decode(void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_UnregisterNodesRequest* a_pValue = (OpcUa_UnregisterNodesRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12630,14 +12578,9 @@ SOPC_ReturnStatus OpcUa_UnregisterNodesResponse_Encode(const void* pValue, SOPC_
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_UnregisterNodesResponse* a_pValue = (const OpcUa_UnregisterNodesResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, buf);
     }
 
     return status;
@@ -12651,17 +12594,12 @@ SOPC_ReturnStatus OpcUa_UnregisterNodesResponse_Decode(void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_UnregisterNodesResponse* a_pValue = (OpcUa_UnregisterNodesResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
 
     OpcUa_UnregisterNodesResponse_Initialize(a_pValue);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, buf);
-    }
 
     if (status != SOPC_STATUS_OK && a_pValue != NULL)
     {
@@ -12739,7 +12677,7 @@ SOPC_ReturnStatus OpcUa_EndpointConfiguration_Encode(const void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_EndpointConfiguration* a_pValue = (const OpcUa_EndpointConfiguration*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12792,7 +12730,7 @@ SOPC_ReturnStatus OpcUa_EndpointConfiguration_Decode(void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_EndpointConfiguration* a_pValue = (OpcUa_EndpointConfiguration*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12907,7 +12845,7 @@ SOPC_ReturnStatus OpcUa_SupportedProfile_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SupportedProfile* a_pValue = (const OpcUa_SupportedProfile*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -12950,7 +12888,7 @@ SOPC_ReturnStatus OpcUa_SupportedProfile_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SupportedProfile* a_pValue = (OpcUa_SupportedProfile*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13065,7 +13003,7 @@ SOPC_ReturnStatus OpcUa_SoftwareCertificate_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SoftwareCertificate* a_pValue = (const OpcUa_SoftwareCertificate*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13124,7 +13062,7 @@ SOPC_ReturnStatus OpcUa_SoftwareCertificate_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SoftwareCertificate* a_pValue = (OpcUa_SoftwareCertificate*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13239,7 +13177,7 @@ SOPC_ReturnStatus OpcUa_QueryDataDescription_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_QueryDataDescription* a_pValue = (const OpcUa_QueryDataDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13268,7 +13206,7 @@ SOPC_ReturnStatus OpcUa_QueryDataDescription_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_QueryDataDescription* a_pValue = (OpcUa_QueryDataDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13355,7 +13293,7 @@ SOPC_ReturnStatus OpcUa_NodeTypeDescription_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_NodeTypeDescription* a_pValue = (const OpcUa_NodeTypeDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13386,7 +13324,7 @@ SOPC_ReturnStatus OpcUa_NodeTypeDescription_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_NodeTypeDescription* a_pValue = (OpcUa_NodeTypeDescription*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13475,7 +13413,7 @@ SOPC_ReturnStatus OpcUa_QueryDataSet_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_QueryDataSet* a_pValue = (const OpcUa_QueryDataSet*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13506,7 +13444,7 @@ SOPC_ReturnStatus OpcUa_QueryDataSet_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_QueryDataSet* a_pValue = (OpcUa_QueryDataSet*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13595,7 +13533,7 @@ SOPC_ReturnStatus OpcUa_NodeReference_Encode(const void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_NodeReference* a_pValue = (const OpcUa_NodeReference*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13630,7 +13568,7 @@ SOPC_ReturnStatus OpcUa_NodeReference_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_NodeReference* a_pValue = (OpcUa_NodeReference*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13720,7 +13658,7 @@ SOPC_ReturnStatus OpcUa_ContentFilterElement_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ContentFilterElement* a_pValue = (const OpcUa_ContentFilterElement*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13747,7 +13685,7 @@ SOPC_ReturnStatus OpcUa_ContentFilterElement_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ContentFilterElement* a_pValue = (OpcUa_ContentFilterElement*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13828,7 +13766,7 @@ SOPC_ReturnStatus OpcUa_ContentFilter_Encode(const void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ContentFilter* a_pValue = (const OpcUa_ContentFilter*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13851,7 +13789,7 @@ SOPC_ReturnStatus OpcUa_ContentFilter_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ContentFilter* a_pValue = (OpcUa_ContentFilter*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13925,7 +13863,7 @@ SOPC_ReturnStatus OpcUa_ElementOperand_Encode(const void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ElementOperand* a_pValue = (const OpcUa_ElementOperand*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -13946,7 +13884,7 @@ SOPC_ReturnStatus OpcUa_ElementOperand_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ElementOperand* a_pValue = (OpcUa_ElementOperand*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14016,7 +13954,7 @@ SOPC_ReturnStatus OpcUa_LiteralOperand_Encode(const void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_LiteralOperand* a_pValue = (const OpcUa_LiteralOperand*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14037,7 +13975,7 @@ SOPC_ReturnStatus OpcUa_LiteralOperand_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_LiteralOperand* a_pValue = (OpcUa_LiteralOperand*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14115,7 +14053,7 @@ SOPC_ReturnStatus OpcUa_AttributeOperand_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AttributeOperand* a_pValue = (const OpcUa_AttributeOperand*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14152,7 +14090,7 @@ SOPC_ReturnStatus OpcUa_AttributeOperand_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AttributeOperand* a_pValue = (OpcUa_AttributeOperand*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14246,7 +14184,7 @@ SOPC_ReturnStatus OpcUa_SimpleAttributeOperand_Encode(const void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SimpleAttributeOperand* a_pValue = (const OpcUa_SimpleAttributeOperand*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14281,7 +14219,7 @@ SOPC_ReturnStatus OpcUa_SimpleAttributeOperand_Decode(void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SimpleAttributeOperand* a_pValue = (OpcUa_SimpleAttributeOperand*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14378,7 +14316,7 @@ SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Encode(const void* pValue, SO
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ContentFilterElementResult* a_pValue = (const OpcUa_ContentFilterElementResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14411,7 +14349,7 @@ SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Decode(void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ContentFilterElementResult* a_pValue = (OpcUa_ContentFilterElementResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14506,7 +14444,7 @@ SOPC_ReturnStatus OpcUa_ContentFilterResult_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ContentFilterResult* a_pValue = (const OpcUa_ContentFilterResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14535,7 +14473,7 @@ SOPC_ReturnStatus OpcUa_ContentFilterResult_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ContentFilterResult* a_pValue = (OpcUa_ContentFilterResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14628,7 +14566,7 @@ SOPC_ReturnStatus OpcUa_ParsingResult_Encode(const void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ParsingResult* a_pValue = (const OpcUa_ParsingResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14661,7 +14599,7 @@ SOPC_ReturnStatus OpcUa_ParsingResult_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ParsingResult* a_pValue = (OpcUa_ParsingResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14758,7 +14696,7 @@ SOPC_ReturnStatus OpcUa_QueryFirstRequest_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_QueryFirstRequest* a_pValue = (const OpcUa_QueryFirstRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14797,7 +14735,7 @@ SOPC_ReturnStatus OpcUa_QueryFirstRequest_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_QueryFirstRequest* a_pValue = (OpcUa_QueryFirstRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14906,7 +14844,7 @@ SOPC_ReturnStatus OpcUa_QueryFirstResponse_Encode(const void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_QueryFirstResponse* a_pValue = (const OpcUa_QueryFirstResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -14949,7 +14887,7 @@ SOPC_ReturnStatus OpcUa_QueryFirstResponse_Decode(void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_QueryFirstResponse* a_pValue = (OpcUa_QueryFirstResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15051,7 +14989,7 @@ SOPC_ReturnStatus OpcUa_QueryNextRequest_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_QueryNextRequest* a_pValue = (const OpcUa_QueryNextRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15076,7 +15014,7 @@ SOPC_ReturnStatus OpcUa_QueryNextRequest_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_QueryNextRequest* a_pValue = (OpcUa_QueryNextRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15157,7 +15095,7 @@ SOPC_ReturnStatus OpcUa_QueryNextResponse_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_QueryNextResponse* a_pValue = (const OpcUa_QueryNextResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15184,7 +15122,7 @@ SOPC_ReturnStatus OpcUa_QueryNextResponse_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_QueryNextResponse* a_pValue = (OpcUa_QueryNextResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15269,7 +15207,7 @@ SOPC_ReturnStatus OpcUa_ReadValueId_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ReadValueId* a_pValue = (const OpcUa_ReadValueId*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15302,7 +15240,7 @@ SOPC_ReturnStatus OpcUa_ReadValueId_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ReadValueId* a_pValue = (OpcUa_ReadValueId*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15391,7 +15329,7 @@ SOPC_ReturnStatus OpcUa_ReadRequest_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ReadRequest* a_pValue = (const OpcUa_ReadRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15422,7 +15360,7 @@ SOPC_ReturnStatus OpcUa_ReadRequest_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ReadRequest* a_pValue = (OpcUa_ReadRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15512,7 +15450,7 @@ SOPC_ReturnStatus OpcUa_ReadResponse_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ReadResponse* a_pValue = (const OpcUa_ReadResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15541,7 +15479,7 @@ SOPC_ReturnStatus OpcUa_ReadResponse_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ReadResponse* a_pValue = (OpcUa_ReadResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15629,7 +15567,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadValueId_Encode(const void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_HistoryReadValueId* a_pValue = (const OpcUa_HistoryReadValueId*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15662,7 +15600,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadValueId_Decode(void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryReadValueId* a_pValue = (OpcUa_HistoryReadValueId*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15748,7 +15686,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadResult_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_HistoryReadResult* a_pValue = (const OpcUa_HistoryReadResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15777,7 +15715,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadResult_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryReadResult* a_pValue = (OpcUa_HistoryReadResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15861,7 +15799,7 @@ SOPC_ReturnStatus OpcUa_ReadEventDetails_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ReadEventDetails* a_pValue = (const OpcUa_ReadEventDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15894,7 +15832,7 @@ SOPC_ReturnStatus OpcUa_ReadEventDetails_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ReadEventDetails* a_pValue = (OpcUa_ReadEventDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -15984,7 +15922,7 @@ SOPC_ReturnStatus OpcUa_ReadRawModifiedDetails_Encode(const void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ReadRawModifiedDetails* a_pValue = (const OpcUa_ReadRawModifiedDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16021,7 +15959,7 @@ SOPC_ReturnStatus OpcUa_ReadRawModifiedDetails_Decode(void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ReadRawModifiedDetails* a_pValue = (OpcUa_ReadRawModifiedDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16118,7 +16056,7 @@ SOPC_ReturnStatus OpcUa_ReadProcessedDetails_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ReadProcessedDetails* a_pValue = (const OpcUa_ReadProcessedDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16157,7 +16095,7 @@ SOPC_ReturnStatus OpcUa_ReadProcessedDetails_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ReadProcessedDetails* a_pValue = (OpcUa_ReadProcessedDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16251,7 +16189,7 @@ SOPC_ReturnStatus OpcUa_ReadAtTimeDetails_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ReadAtTimeDetails* a_pValue = (const OpcUa_ReadAtTimeDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16278,7 +16216,7 @@ SOPC_ReturnStatus OpcUa_ReadAtTimeDetails_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ReadAtTimeDetails* a_pValue = (OpcUa_ReadAtTimeDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16357,7 +16295,7 @@ SOPC_ReturnStatus OpcUa_HistoryData_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_HistoryData* a_pValue = (const OpcUa_HistoryData*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16380,7 +16318,7 @@ SOPC_ReturnStatus OpcUa_HistoryData_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryData* a_pValue = (OpcUa_HistoryData*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16457,7 +16395,7 @@ SOPC_ReturnStatus OpcUa_ModificationInfo_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ModificationInfo* a_pValue = (const OpcUa_ModificationInfo*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16486,7 +16424,7 @@ SOPC_ReturnStatus OpcUa_ModificationInfo_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ModificationInfo* a_pValue = (OpcUa_ModificationInfo*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16572,7 +16510,7 @@ SOPC_ReturnStatus OpcUa_HistoryModifiedData_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_HistoryModifiedData* a_pValue = (const OpcUa_HistoryModifiedData*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16601,7 +16539,7 @@ SOPC_ReturnStatus OpcUa_HistoryModifiedData_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryModifiedData* a_pValue = (OpcUa_HistoryModifiedData*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16685,7 +16623,7 @@ SOPC_ReturnStatus OpcUa_HistoryEvent_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_HistoryEvent* a_pValue = (const OpcUa_HistoryEvent*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16708,7 +16646,7 @@ SOPC_ReturnStatus OpcUa_HistoryEvent_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryEvent* a_pValue = (OpcUa_HistoryEvent*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16792,7 +16730,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadRequest_Encode(const void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_HistoryReadRequest* a_pValue = (const OpcUa_HistoryReadRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16827,7 +16765,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadRequest_Decode(void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryReadRequest* a_pValue = (OpcUa_HistoryReadRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16922,7 +16860,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadResponse_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_HistoryReadResponse* a_pValue = (const OpcUa_HistoryReadResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -16951,7 +16889,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadResponse_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryReadResponse* a_pValue = (OpcUa_HistoryReadResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17041,7 +16979,7 @@ SOPC_ReturnStatus OpcUa_WriteValue_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_WriteValue* a_pValue = (const OpcUa_WriteValue*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17074,7 +17012,7 @@ SOPC_ReturnStatus OpcUa_WriteValue_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_WriteValue* a_pValue = (OpcUa_WriteValue*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17159,7 +17097,7 @@ SOPC_ReturnStatus OpcUa_WriteRequest_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_WriteRequest* a_pValue = (const OpcUa_WriteRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17182,7 +17120,7 @@ SOPC_ReturnStatus OpcUa_WriteRequest_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_WriteRequest* a_pValue = (OpcUa_WriteRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17264,7 +17202,7 @@ SOPC_ReturnStatus OpcUa_WriteResponse_Encode(const void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_WriteResponse* a_pValue = (const OpcUa_WriteResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17293,7 +17231,7 @@ SOPC_ReturnStatus OpcUa_WriteResponse_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_WriteResponse* a_pValue = (OpcUa_WriteResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17375,7 +17313,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateDetails_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_HistoryUpdateDetails* a_pValue = (const OpcUa_HistoryUpdateDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17396,7 +17334,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateDetails_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryUpdateDetails* a_pValue = (OpcUa_HistoryUpdateDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17473,7 +17411,7 @@ SOPC_ReturnStatus OpcUa_UpdateDataDetails_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_UpdateDataDetails* a_pValue = (const OpcUa_UpdateDataDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17504,7 +17442,7 @@ SOPC_ReturnStatus OpcUa_UpdateDataDetails_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_UpdateDataDetails* a_pValue = (OpcUa_UpdateDataDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17591,7 +17529,7 @@ SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Encode(const void* pValue, SO
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_UpdateStructureDataDetails* a_pValue = (const OpcUa_UpdateStructureDataDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17622,7 +17560,7 @@ SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Decode(void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_UpdateStructureDataDetails* a_pValue = (OpcUa_UpdateStructureDataDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17713,7 +17651,7 @@ SOPC_ReturnStatus OpcUa_UpdateEventDetails_Encode(const void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_UpdateEventDetails* a_pValue = (const OpcUa_UpdateEventDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17748,7 +17686,7 @@ SOPC_ReturnStatus OpcUa_UpdateEventDetails_Decode(void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_UpdateEventDetails* a_pValue = (OpcUa_UpdateEventDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17840,7 +17778,7 @@ SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Encode(const void* pValue, SOPC
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteRawModifiedDetails* a_pValue = (const OpcUa_DeleteRawModifiedDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17873,7 +17811,7 @@ SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Decode(void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteRawModifiedDetails* a_pValue = (OpcUa_DeleteRawModifiedDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17960,7 +17898,7 @@ SOPC_ReturnStatus OpcUa_DeleteAtTimeDetails_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteAtTimeDetails* a_pValue = (const OpcUa_DeleteAtTimeDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -17987,7 +17925,7 @@ SOPC_ReturnStatus OpcUa_DeleteAtTimeDetails_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteAtTimeDetails* a_pValue = (OpcUa_DeleteAtTimeDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18069,7 +18007,7 @@ SOPC_ReturnStatus OpcUa_DeleteEventDetails_Encode(const void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteEventDetails* a_pValue = (const OpcUa_DeleteEventDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18096,7 +18034,7 @@ SOPC_ReturnStatus OpcUa_DeleteEventDetails_Decode(void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteEventDetails* a_pValue = (OpcUa_DeleteEventDetails*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18183,7 +18121,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateResult_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_HistoryUpdateResult* a_pValue = (const OpcUa_HistoryUpdateResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18216,7 +18154,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateResult_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryUpdateResult* a_pValue = (OpcUa_HistoryUpdateResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18306,7 +18244,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateRequest_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_HistoryUpdateRequest* a_pValue = (const OpcUa_HistoryUpdateRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18329,7 +18267,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateRequest_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryUpdateRequest* a_pValue = (OpcUa_HistoryUpdateRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18413,7 +18351,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateResponse_Encode(const void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_HistoryUpdateResponse* a_pValue = (const OpcUa_HistoryUpdateResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18442,7 +18380,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateResponse_Decode(void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryUpdateResponse* a_pValue = (OpcUa_HistoryUpdateResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18532,7 +18470,7 @@ SOPC_ReturnStatus OpcUa_CallMethodRequest_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CallMethodRequest* a_pValue = (const OpcUa_CallMethodRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18563,7 +18501,7 @@ SOPC_ReturnStatus OpcUa_CallMethodRequest_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CallMethodRequest* a_pValue = (OpcUa_CallMethodRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18658,7 +18596,7 @@ SOPC_ReturnStatus OpcUa_CallMethodResult_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CallMethodResult* a_pValue = (const OpcUa_CallMethodResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18697,7 +18635,7 @@ SOPC_ReturnStatus OpcUa_CallMethodResult_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CallMethodResult* a_pValue = (OpcUa_CallMethodResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18794,7 +18732,7 @@ SOPC_ReturnStatus OpcUa_CallRequest_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CallRequest* a_pValue = (const OpcUa_CallRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18817,7 +18755,7 @@ SOPC_ReturnStatus OpcUa_CallRequest_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CallRequest* a_pValue = (OpcUa_CallRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18900,7 +18838,7 @@ SOPC_ReturnStatus OpcUa_CallResponse_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CallResponse* a_pValue = (const OpcUa_CallResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -18929,7 +18867,7 @@ SOPC_ReturnStatus OpcUa_CallResponse_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CallResponse* a_pValue = (OpcUa_CallResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19016,7 +18954,7 @@ SOPC_ReturnStatus OpcUa_DataChangeFilter_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DataChangeFilter* a_pValue = (const OpcUa_DataChangeFilter*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19045,7 +18983,7 @@ SOPC_ReturnStatus OpcUa_DataChangeFilter_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DataChangeFilter* a_pValue = (OpcUa_DataChangeFilter*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19129,7 +19067,7 @@ SOPC_ReturnStatus OpcUa_EventFilter_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_EventFilter* a_pValue = (const OpcUa_EventFilter*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19156,7 +19094,7 @@ SOPC_ReturnStatus OpcUa_EventFilter_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_EventFilter* a_pValue = (OpcUa_EventFilter*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19242,7 +19180,7 @@ SOPC_ReturnStatus OpcUa_AggregateConfiguration_Encode(const void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AggregateConfiguration* a_pValue = (const OpcUa_AggregateConfiguration*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19279,7 +19217,7 @@ SOPC_ReturnStatus OpcUa_AggregateConfiguration_Decode(void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AggregateConfiguration* a_pValue = (OpcUa_AggregateConfiguration*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19372,7 +19310,7 @@ SOPC_ReturnStatus OpcUa_AggregateFilter_Encode(const void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AggregateFilter* a_pValue = (const OpcUa_AggregateFilter*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19405,7 +19343,7 @@ SOPC_ReturnStatus OpcUa_AggregateFilter_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AggregateFilter* a_pValue = (OpcUa_AggregateFilter*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19497,7 +19435,7 @@ SOPC_ReturnStatus OpcUa_EventFilterResult_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_EventFilterResult* a_pValue = (const OpcUa_EventFilterResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19530,7 +19468,7 @@ SOPC_ReturnStatus OpcUa_EventFilterResult_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_EventFilterResult* a_pValue = (OpcUa_EventFilterResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19619,7 +19557,7 @@ SOPC_ReturnStatus OpcUa_AggregateFilterResult_Encode(const void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AggregateFilterResult* a_pValue = (const OpcUa_AggregateFilterResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19648,7 +19586,7 @@ SOPC_ReturnStatus OpcUa_AggregateFilterResult_Decode(void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AggregateFilterResult* a_pValue = (OpcUa_AggregateFilterResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19735,7 +19673,7 @@ SOPC_ReturnStatus OpcUa_MonitoringParameters_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_MonitoringParameters* a_pValue = (const OpcUa_MonitoringParameters*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19772,7 +19710,7 @@ SOPC_ReturnStatus OpcUa_MonitoringParameters_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_MonitoringParameters* a_pValue = (OpcUa_MonitoringParameters*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19863,7 +19801,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Encode(const void* pValue, SO
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_MonitoredItemCreateRequest* a_pValue = (const OpcUa_MonitoredItemCreateRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19892,7 +19830,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Decode(void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_MonitoredItemCreateRequest* a_pValue = (OpcUa_MonitoredItemCreateRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -19979,7 +19917,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Encode(const void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_MonitoredItemCreateResult* a_pValue = (const OpcUa_MonitoredItemCreateResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20016,7 +19954,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Decode(void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_MonitoredItemCreateResult* a_pValue = (OpcUa_MonitoredItemCreateResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20112,7 +20050,7 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Encode(const void* pValue, S
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CreateMonitoredItemsRequest* a_pValue = (const OpcUa_CreateMonitoredItemsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20143,7 +20081,7 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CreateMonitoredItemsRequest* a_pValue = (OpcUa_CreateMonitoredItemsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20236,7 +20174,7 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Encode(const void* pValue, 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CreateMonitoredItemsResponse* a_pValue = (const OpcUa_CreateMonitoredItemsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20265,7 +20203,7 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Decode(void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CreateMonitoredItemsResponse* a_pValue = (OpcUa_CreateMonitoredItemsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20351,7 +20289,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Encode(const void* pValue, SO
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_MonitoredItemModifyRequest* a_pValue = (const OpcUa_MonitoredItemModifyRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20376,7 +20314,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Decode(void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_MonitoredItemModifyRequest* a_pValue = (OpcUa_MonitoredItemModifyRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20457,7 +20395,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Encode(const void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_MonitoredItemModifyResult* a_pValue = (const OpcUa_MonitoredItemModifyResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20490,7 +20428,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Decode(void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_MonitoredItemModifyResult* a_pValue = (OpcUa_MonitoredItemModifyResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20582,7 +20520,7 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Encode(const void* pValue, S
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ModifyMonitoredItemsRequest* a_pValue = (const OpcUa_ModifyMonitoredItemsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20613,7 +20551,7 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ModifyMonitoredItemsRequest* a_pValue = (OpcUa_ModifyMonitoredItemsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20706,7 +20644,7 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Encode(const void* pValue, 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ModifyMonitoredItemsResponse* a_pValue = (const OpcUa_ModifyMonitoredItemsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20735,7 +20673,7 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Decode(void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ModifyMonitoredItemsResponse* a_pValue = (OpcUa_ModifyMonitoredItemsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20826,7 +20764,7 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Encode(const void* pValue, SOPC
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SetMonitoringModeRequest* a_pValue = (const OpcUa_SetMonitoringModeRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20857,7 +20795,7 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Decode(void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SetMonitoringModeRequest* a_pValue = (OpcUa_SetMonitoringModeRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20948,7 +20886,7 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Encode(const void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SetMonitoringModeResponse* a_pValue = (const OpcUa_SetMonitoringModeResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -20977,7 +20915,7 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Decode(void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SetMonitoringModeResponse* a_pValue = (OpcUa_SetMonitoringModeResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21071,7 +21009,7 @@ SOPC_ReturnStatus OpcUa_SetTriggeringRequest_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SetTriggeringRequest* a_pValue = (const OpcUa_SetTriggeringRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21108,7 +21046,7 @@ SOPC_ReturnStatus OpcUa_SetTriggeringRequest_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SetTriggeringRequest* a_pValue = (OpcUa_SetTriggeringRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21215,7 +21153,7 @@ SOPC_ReturnStatus OpcUa_SetTriggeringResponse_Encode(const void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SetTriggeringResponse* a_pValue = (const OpcUa_SetTriggeringResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21256,7 +21194,7 @@ SOPC_ReturnStatus OpcUa_SetTriggeringResponse_Decode(void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SetTriggeringResponse* a_pValue = (OpcUa_SetTriggeringResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21359,7 +21297,7 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Encode(const void* pValue, S
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteMonitoredItemsRequest* a_pValue = (const OpcUa_DeleteMonitoredItemsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21386,7 +21324,7 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteMonitoredItemsRequest* a_pValue = (OpcUa_DeleteMonitoredItemsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21473,7 +21411,7 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Encode(const void* pValue, 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteMonitoredItemsResponse* a_pValue = (const OpcUa_DeleteMonitoredItemsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21502,7 +21440,7 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Decode(void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteMonitoredItemsResponse* a_pValue = (OpcUa_DeleteMonitoredItemsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21596,7 +21534,7 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Encode(const void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CreateSubscriptionRequest* a_pValue = (const OpcUa_CreateSubscriptionRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21637,7 +21575,7 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Decode(void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CreateSubscriptionRequest* a_pValue = (OpcUa_CreateSubscriptionRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21736,7 +21674,7 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Encode(const void* pValue, SO
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_CreateSubscriptionResponse* a_pValue = (const OpcUa_CreateSubscriptionResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21769,7 +21707,7 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Decode(void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_CreateSubscriptionResponse* a_pValue = (OpcUa_CreateSubscriptionResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21864,7 +21802,7 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Encode(const void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ModifySubscriptionRequest* a_pValue = (const OpcUa_ModifySubscriptionRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -21905,7 +21843,7 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Decode(void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ModifySubscriptionRequest* a_pValue = (OpcUa_ModifySubscriptionRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22002,7 +21940,7 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Encode(const void* pValue, SO
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ModifySubscriptionResponse* a_pValue = (const OpcUa_ModifySubscriptionResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22031,7 +21969,7 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Decode(void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ModifySubscriptionResponse* a_pValue = (OpcUa_ModifySubscriptionResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22116,7 +22054,7 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Encode(const void* pValue, SOPC
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SetPublishingModeRequest* a_pValue = (const OpcUa_SetPublishingModeRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22143,7 +22081,7 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Decode(void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SetPublishingModeRequest* a_pValue = (OpcUa_SetPublishingModeRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22230,7 +22168,7 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Encode(const void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SetPublishingModeResponse* a_pValue = (const OpcUa_SetPublishingModeResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22259,7 +22197,7 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Decode(void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SetPublishingModeResponse* a_pValue = (OpcUa_SetPublishingModeResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22349,7 +22287,7 @@ SOPC_ReturnStatus OpcUa_NotificationMessage_Encode(const void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_NotificationMessage* a_pValue = (const OpcUa_NotificationMessage*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22380,7 +22318,7 @@ SOPC_ReturnStatus OpcUa_NotificationMessage_Decode(void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_NotificationMessage* a_pValue = (OpcUa_NotificationMessage*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22472,7 +22410,7 @@ SOPC_ReturnStatus OpcUa_DataChangeNotification_Encode(const void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DataChangeNotification* a_pValue = (const OpcUa_DataChangeNotification*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22501,7 +22439,7 @@ SOPC_ReturnStatus OpcUa_DataChangeNotification_Decode(void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DataChangeNotification* a_pValue = (OpcUa_DataChangeNotification*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22586,7 +22524,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Encode(const void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_MonitoredItemNotification* a_pValue = (const OpcUa_MonitoredItemNotification*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22611,7 +22549,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Decode(void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_MonitoredItemNotification* a_pValue = (OpcUa_MonitoredItemNotification*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22688,7 +22626,7 @@ SOPC_ReturnStatus OpcUa_EventNotificationList_Encode(const void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_EventNotificationList* a_pValue = (const OpcUa_EventNotificationList*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22711,7 +22649,7 @@ SOPC_ReturnStatus OpcUa_EventNotificationList_Decode(void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_EventNotificationList* a_pValue = (OpcUa_EventNotificationList*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22789,7 +22727,7 @@ SOPC_ReturnStatus OpcUa_EventFieldList_Encode(const void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_EventFieldList* a_pValue = (const OpcUa_EventFieldList*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22816,7 +22754,7 @@ SOPC_ReturnStatus OpcUa_EventFieldList_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_EventFieldList* a_pValue = (OpcUa_EventFieldList*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22895,7 +22833,7 @@ SOPC_ReturnStatus OpcUa_HistoryEventFieldList_Encode(const void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_HistoryEventFieldList* a_pValue = (const OpcUa_HistoryEventFieldList*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22918,7 +22856,7 @@ SOPC_ReturnStatus OpcUa_HistoryEventFieldList_Decode(void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryEventFieldList* a_pValue = (OpcUa_HistoryEventFieldList*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -22994,7 +22932,7 @@ SOPC_ReturnStatus OpcUa_StatusChangeNotification_Encode(const void* pValue, SOPC
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_StatusChangeNotification* a_pValue = (const OpcUa_StatusChangeNotification*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23019,7 +22957,7 @@ SOPC_ReturnStatus OpcUa_StatusChangeNotification_Decode(void* pValue, SOPC_Buffe
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_StatusChangeNotification* a_pValue = (OpcUa_StatusChangeNotification*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23096,7 +23034,7 @@ SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Encode(const void* pValue, S
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SubscriptionAcknowledgement* a_pValue = (const OpcUa_SubscriptionAcknowledgement*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23121,7 +23059,7 @@ SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Decode(void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SubscriptionAcknowledgement* a_pValue = (OpcUa_SubscriptionAcknowledgement*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23202,7 +23140,7 @@ SOPC_ReturnStatus OpcUa_PublishRequest_Encode(const void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_PublishRequest* a_pValue = (const OpcUa_PublishRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23226,7 +23164,7 @@ SOPC_ReturnStatus OpcUa_PublishRequest_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_PublishRequest* a_pValue = (OpcUa_PublishRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23320,7 +23258,7 @@ SOPC_ReturnStatus OpcUa_PublishResponse_Encode(const void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_PublishResponse* a_pValue = (const OpcUa_PublishResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23367,7 +23305,7 @@ SOPC_ReturnStatus OpcUa_PublishResponse_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_PublishResponse* a_pValue = (OpcUa_PublishResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23472,7 +23410,7 @@ SOPC_ReturnStatus OpcUa_RepublishRequest_Encode(const void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RepublishRequest* a_pValue = (const OpcUa_RepublishRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23497,7 +23435,7 @@ SOPC_ReturnStatus OpcUa_RepublishRequest_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RepublishRequest* a_pValue = (OpcUa_RepublishRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23573,7 +23511,7 @@ SOPC_ReturnStatus OpcUa_RepublishResponse_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RepublishResponse* a_pValue = (const OpcUa_RepublishResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23594,7 +23532,7 @@ SOPC_ReturnStatus OpcUa_RepublishResponse_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RepublishResponse* a_pValue = (OpcUa_RepublishResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23669,7 +23607,7 @@ SOPC_ReturnStatus OpcUa_TransferResult_Encode(const void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_TransferResult* a_pValue = (const OpcUa_TransferResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23696,7 +23634,7 @@ SOPC_ReturnStatus OpcUa_TransferResult_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_TransferResult* a_pValue = (OpcUa_TransferResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23779,7 +23717,7 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Encode(const void* pValue, 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_TransferSubscriptionsRequest* a_pValue = (const OpcUa_TransferSubscriptionsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23806,7 +23744,7 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Decode(void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_TransferSubscriptionsRequest* a_pValue = (OpcUa_TransferSubscriptionsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23893,7 +23831,7 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Encode(const void* pValue,
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_TransferSubscriptionsResponse* a_pValue = (const OpcUa_TransferSubscriptionsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -23922,7 +23860,7 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Decode(void* pValue, SOPC_
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_TransferSubscriptionsResponse* a_pValue = (OpcUa_TransferSubscriptionsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24008,7 +23946,7 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Encode(const void* pValue, SO
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteSubscriptionsRequest* a_pValue = (const OpcUa_DeleteSubscriptionsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24031,7 +23969,7 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Decode(void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteSubscriptionsRequest* a_pValue = (OpcUa_DeleteSubscriptionsRequest*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24114,7 +24052,7 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Encode(const void* pValue, S
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DeleteSubscriptionsResponse* a_pValue = (const OpcUa_DeleteSubscriptionsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24143,7 +24081,7 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_Bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteSubscriptionsResponse* a_pValue = (OpcUa_DeleteSubscriptionsResponse*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24236,7 +24174,7 @@ SOPC_ReturnStatus OpcUa_BuildInfo_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_BuildInfo* a_pValue = (const OpcUa_BuildInfo*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24277,7 +24215,7 @@ SOPC_ReturnStatus OpcUa_BuildInfo_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_BuildInfo* a_pValue = (OpcUa_BuildInfo*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24371,7 +24309,7 @@ SOPC_ReturnStatus OpcUa_RedundantServerDataType_Encode(const void* pValue, SOPC_
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_RedundantServerDataType* a_pValue = (const OpcUa_RedundantServerDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24400,7 +24338,7 @@ SOPC_ReturnStatus OpcUa_RedundantServerDataType_Decode(void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_RedundantServerDataType* a_pValue = (OpcUa_RedundantServerDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24481,7 +24419,7 @@ SOPC_ReturnStatus OpcUa_EndpointUrlListDataType_Encode(const void* pValue, SOPC_
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_EndpointUrlListDataType* a_pValue = (const OpcUa_EndpointUrlListDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24504,7 +24442,7 @@ SOPC_ReturnStatus OpcUa_EndpointUrlListDataType_Decode(void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_EndpointUrlListDataType* a_pValue = (OpcUa_EndpointUrlListDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24584,7 +24522,7 @@ SOPC_ReturnStatus OpcUa_NetworkGroupDataType_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_NetworkGroupDataType* a_pValue = (const OpcUa_NetworkGroupDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24611,7 +24549,7 @@ SOPC_ReturnStatus OpcUa_NetworkGroupDataType_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_NetworkGroupDataType* a_pValue = (OpcUa_NetworkGroupDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24697,7 +24635,7 @@ SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Encode(const void* p
     const OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue =
         (const OpcUa_SamplingIntervalDiagnosticsDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24730,7 +24668,7 @@ SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue,
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue = (OpcUa_SamplingIntervalDiagnosticsDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24835,7 +24773,7 @@ SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Encode(const void* pVal
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ServerDiagnosticsSummaryDataType* a_pValue = (const OpcUa_ServerDiagnosticsSummaryDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -24900,7 +24838,7 @@ SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue, SO
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ServerDiagnosticsSummaryDataType* a_pValue = (OpcUa_ServerDiagnosticsSummaryDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -25025,7 +24963,7 @@ SOPC_ReturnStatus OpcUa_ServerStatusDataType_Encode(const void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ServerStatusDataType* a_pValue = (const OpcUa_ServerStatusDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -25066,7 +25004,7 @@ SOPC_ReturnStatus OpcUa_ServerStatusDataType_Decode(void* pValue, SOPC_Buffer* b
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ServerStatusDataType* a_pValue = (OpcUa_ServerStatusDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -25243,7 +25181,7 @@ SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Encode(const void* pValue, SO
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SessionDiagnosticsDataType* a_pValue = (const OpcUa_SessionDiagnosticsDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -25434,7 +25372,7 @@ SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Decode(void* pValue, SOPC_Buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SessionDiagnosticsDataType* a_pValue = (OpcUa_SessionDiagnosticsDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -25694,7 +25632,7 @@ SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Encode(const void* pV
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SessionSecurityDiagnosticsDataType* a_pValue = (const OpcUa_SessionSecurityDiagnosticsDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -25749,7 +25687,7 @@ SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue, 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SessionSecurityDiagnosticsDataType* a_pValue = (OpcUa_SessionSecurityDiagnosticsDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -25857,7 +25795,7 @@ SOPC_ReturnStatus OpcUa_ServiceCounterDataType_Encode(const void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ServiceCounterDataType* a_pValue = (const OpcUa_ServiceCounterDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -25882,7 +25820,7 @@ SOPC_ReturnStatus OpcUa_ServiceCounterDataType_Decode(void* pValue, SOPC_Buffer*
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ServiceCounterDataType* a_pValue = (OpcUa_ServiceCounterDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -25959,7 +25897,7 @@ SOPC_ReturnStatus OpcUa_StatusResult_Encode(const void* pValue, SOPC_Buffer* buf
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_StatusResult* a_pValue = (const OpcUa_StatusResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -25984,7 +25922,7 @@ SOPC_ReturnStatus OpcUa_StatusResult_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_StatusResult* a_pValue = (OpcUa_StatusResult*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26118,7 +26056,7 @@ SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Encode(const void* pValu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SubscriptionDiagnosticsDataType* a_pValue = (const OpcUa_SubscriptionDiagnosticsDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26259,7 +26197,7 @@ SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SubscriptionDiagnosticsDataType* a_pValue = (OpcUa_SubscriptionDiagnosticsDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26454,7 +26392,7 @@ SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Encode(const void* pValue, 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ModelChangeStructureDataType* a_pValue = (const OpcUa_ModelChangeStructureDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26483,7 +26421,7 @@ SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Decode(void* pValue, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ModelChangeStructureDataType* a_pValue = (OpcUa_ModelChangeStructureDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26564,7 +26502,7 @@ SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Encode(const void* pValu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_SemanticChangeStructureDataType* a_pValue = (const OpcUa_SemanticChangeStructureDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26589,7 +26527,7 @@ SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Decode(void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_SemanticChangeStructureDataType* a_pValue = (OpcUa_SemanticChangeStructureDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26666,7 +26604,7 @@ SOPC_ReturnStatus OpcUa_Range_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_Range* a_pValue = (const OpcUa_Range*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26691,7 +26629,7 @@ SOPC_ReturnStatus OpcUa_Range_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_Range* a_pValue = (OpcUa_Range*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26771,7 +26709,7 @@ SOPC_ReturnStatus OpcUa_EUInformation_Encode(const void* pValue, SOPC_Buffer* bu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_EUInformation* a_pValue = (const OpcUa_EUInformation*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26804,7 +26742,7 @@ SOPC_ReturnStatus OpcUa_EUInformation_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_EUInformation* a_pValue = (OpcUa_EUInformation*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26888,7 +26826,7 @@ SOPC_ReturnStatus OpcUa_ComplexNumberType_Encode(const void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ComplexNumberType* a_pValue = (const OpcUa_ComplexNumberType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26913,7 +26851,7 @@ SOPC_ReturnStatus OpcUa_ComplexNumberType_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ComplexNumberType* a_pValue = (OpcUa_ComplexNumberType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -26989,7 +26927,7 @@ SOPC_ReturnStatus OpcUa_DoubleComplexNumberType_Encode(const void* pValue, SOPC_
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_DoubleComplexNumberType* a_pValue = (const OpcUa_DoubleComplexNumberType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -27014,7 +26952,7 @@ SOPC_ReturnStatus OpcUa_DoubleComplexNumberType_Decode(void* pValue, SOPC_Buffer
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_DoubleComplexNumberType* a_pValue = (OpcUa_DoubleComplexNumberType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -27099,7 +27037,7 @@ SOPC_ReturnStatus OpcUa_AxisInformation_Encode(const void* pValue, SOPC_Buffer* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_AxisInformation* a_pValue = (const OpcUa_AxisInformation*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -27138,7 +27076,7 @@ SOPC_ReturnStatus OpcUa_AxisInformation_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_AxisInformation* a_pValue = (OpcUa_AxisInformation*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -27229,7 +27167,7 @@ SOPC_ReturnStatus OpcUa_XVType_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_XVType* a_pValue = (const OpcUa_XVType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -27254,7 +27192,7 @@ SOPC_ReturnStatus OpcUa_XVType_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_XVType* a_pValue = (OpcUa_XVType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -27350,7 +27288,7 @@ SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Encode(const void* pValue, SOP
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_ProgramDiagnosticDataType* a_pValue = (const OpcUa_ProgramDiagnosticDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -27411,7 +27349,7 @@ SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Decode(void* pValue, SOPC_Buff
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_ProgramDiagnosticDataType* a_pValue = (OpcUa_ProgramDiagnosticDataType*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -27530,7 +27468,7 @@ SOPC_ReturnStatus OpcUa_Annotation_Encode(const void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const OpcUa_Annotation* a_pValue = (const OpcUa_Annotation*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }
@@ -27559,7 +27497,7 @@ SOPC_ReturnStatus OpcUa_Annotation_Decode(void* pValue, SOPC_Buffer* buf)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     OpcUa_Annotation* a_pValue = (OpcUa_Annotation*) pValue;
 
-    if (a_pValue != NULL)
+    if (a_pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
     }

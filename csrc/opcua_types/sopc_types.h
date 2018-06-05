@@ -1325,7 +1325,6 @@ typedef struct _OpcUa_CloseSecureChannelRequest
     /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
      *  for giving a copy of the header to application.
      */
-    OpcUa_RequestHeader RequestHeader;
 } OpcUa_CloseSecureChannelRequest;
 
 void OpcUa_CloseSecureChannelRequest_Initialize(void* pValue);
