@@ -720,7 +720,9 @@ OPERATIONS
                 p_msg_sc := e_sc_bad_out_of_memory
             END;
             set_subscription_MoreNotifications (p_subscription, p_moreNotifs);
-            set_subscription_MessageSent (p_subscription)
+            set_subscription_MessageSent (p_subscription);
+            p_msg_to_send := TRUE
+            
         /* #7 transition */
         ELSIF l_State = e_subscriptionState_normal &
               p_validPublishReqQueued = TRUE &
@@ -747,7 +749,8 @@ OPERATIONS
             /* Get sequence number of next message to be sent (do not increment it for keep alive) */
             l_seq_num <-- get_subscription_SeqNum (p_subscription);
             set_notification_message_sequence_number (l_notifMsg, l_seq_num);
-            set_subscription_MessageSent (p_subscription)
+            set_subscription_MessageSent (p_subscription);
+            p_msg_to_send := TRUE
             
         /* #8 transition */
         ELSIF l_State = e_subscriptionState_normal &
@@ -766,7 +769,7 @@ OPERATIONS
               (l_PublishingEnabled = FALSE
                or
                (l_PublishingEnabled = TRUE &
-                l_NotificationAvailable = TRUE)
+                l_NotificationAvailable = FALSE)
               )
         THEN
             set_subscription_state (p_subscription, e_subscriptionState_keepAlive);
@@ -817,7 +820,8 @@ OPERATIONS
                 p_msg_sc := e_sc_bad_out_of_memory
             END;
             set_subscription_MoreNotifications (p_subscription, p_moreNotifs);
-            set_subscription_MessageSent (p_subscription)
+            set_subscription_MessageSent (p_subscription);
+            p_msg_to_send := TRUE
 
         /* #15 transition */
         ELSIF l_State = e_subscriptionState_keepAlive &
@@ -844,7 +848,8 @@ OPERATIONS
             l_notifMsg <-- get_notification_message_no_items (p_publish_resp_msg);
             /* Get sequence number of next message to be sent (do not increment it for keep alive) */
             l_seq_num <-- get_subscription_SeqNum (p_subscription);
-            set_notification_message_sequence_number (l_notifMsg, l_seq_num)
+            set_notification_message_sequence_number (l_notifMsg, l_seq_num);
+            p_msg_to_send := TRUE
             
         /* #16 transition */
         ELSIF l_State = e_subscriptionState_keepAlive &

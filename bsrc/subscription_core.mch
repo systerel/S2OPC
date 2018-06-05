@@ -839,7 +839,7 @@ OPERATIONS
                       (l_PublishingEnabled = FALSE
                        or
                        (l_PublishingEnabled = TRUE &
-                        l_NotificationAvailable = TRUE)
+                        l_NotificationAvailable = FALSE)
                       )
                 THEN
                     a_subscription_state (p_subscription) := e_subscriptionState_keepAlive ||
