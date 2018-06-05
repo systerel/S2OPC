@@ -157,6 +157,11 @@ void message_in_bs__decode_msg(const constants__t_msg_type_i message_in_bs__msg_
     {
         *message_in_bs__msg = (constants__t_msg_i) msg;
     }
+    else
+    {
+        SOPC_Logger_TraceError("Services: Failed to decode input message type = '%s'",
+                               SOPC_EncodeableType_GetName(encType));
+    }
 }
 
 void message_in_bs__get_msg_in_type(const constants__t_msg_i message_in_bs__msg,
