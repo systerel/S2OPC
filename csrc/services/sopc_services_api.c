@@ -192,10 +192,12 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         {
             io_dispatch_mgr__internal_server_data_changed((OpcUa_WriteValue*) params, (OpcUa_WriteValue*) auxParam,
                                                           &bres);
+            /* Note:
+             *  - deallocate the old value after call to B model
+             *  - do not deallocate the new value since now managed by B model
+             */
             OpcUa_WriteValue_Clear((OpcUa_WriteValue*) params);
             free(params);
-            OpcUa_WriteValue_Clear((OpcUa_WriteValue*) auxParam);
-            free((OpcUa_WriteValue*) auxParam);
 
             if (bres == false)
             {

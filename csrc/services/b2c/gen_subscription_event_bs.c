@@ -37,7 +37,7 @@ void gen_subscription_event_bs__gen_data_changed_event(
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
     OpcUa_WriteValue* newValue = gen_subscription_event_bs__p_new_value_pointer;
     OpcUa_WriteValue* oldValue = malloc(sizeof(OpcUa_WriteValue));
-    OpcUa_WriteValue_Initialize(&oldValue);
+    OpcUa_WriteValue_Initialize((void*) oldValue);
     SOPC_Variant* oldVariantValue = gen_subscription_event_bs__p_prev_value;
 
     if (NULL != oldValue)
