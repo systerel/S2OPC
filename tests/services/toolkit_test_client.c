@@ -27,6 +27,7 @@
 #include "test_results.h"
 
 #include "opcua_statuscodes.h"
+#include "sopc_atomic.h"
 #include "sopc_encodeable.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
@@ -42,16 +43,16 @@
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 
-static uint8_t sessionsActivated = 0;
-static uint8_t sessionsClosed = 0;
-static uint8_t sendFailures = 0;
+static int32_t sessionsActivated = 0;
+static int32_t sessionsClosed = 0;
+static int32_t sendFailures = 0;
 static uint32_t session = 0;
 static uint32_t session2 = 0;
 static uint32_t session3 = 0;
 static uintptr_t sessionContext[3] = {1, 2, 3};
 static uint32_t context2session[4] = {0, 0, 0, 0};
 
-static bool getEndpointsReceived = false;
+static int32_t getEndpointsReceived = 0;
 
 #define NB_SESSIONS 3
 
@@ -59,6 +60,10 @@ static uint32_t cptReadResps = 0;
 
 void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
+    uintptr_t sessionContext0 = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[0]);
+    uintptr_t sessionContext1 = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[1]);
+    uintptr_t sessionContext2 = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[2]);
+
     if (event == SE_RCV_SESSION_RESPONSE)
     {
         if (NULL != param)
@@ -121,35 +126,40 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void
                     validEndpoints = SOPC_String_Equal(&getEndpointsResp->Endpoints[idx].EndpointUrl, &endpointUrl);
                 }
 
-                getEndpointsReceived = validEndpoints;
+                SOPC_Atomic_Int_Add(&getEndpointsReceived, validEndpoints ? 1 : 0);
             }
         }
     }
     else if (event == SE_ACTIVATED_SESSION)
     {
-        sessionsActivated++;
+        int n_sessions_activated = SOPC_Atomic_Int_Add(&sessionsActivated, 1);
+        n_sessions_activated++; // SOPC_Atomic_Int_Add returns the old value
+
         // Check context value is same as one provided with activation request
-        if (sessionsActivated == 1)
+        if (n_sessions_activated == 1)
         {
-            session = idOrStatus;
+            SOPC_Atomic_Int_Set((int32_t*) &session, (int32_t) idOrStatus);
         }
-        else if (sessionsActivated == 2)
+        else if (n_sessions_activated == 2)
         {
-            session2 = idOrStatus;
+            SOPC_Atomic_Int_Set((int32_t*) &session2, (int32_t) idOrStatus);
         }
-        else if (sessionsActivated == 3)
+        else if (n_sessions_activated == 3)
         {
-            session3 = idOrStatus;
+            SOPC_Atomic_Int_Set((int32_t*) &session3, (int32_t) idOrStatus);
         }
         else
         {
             assert(false);
         }
+
+        uint32_t session_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &context2session[appContext]);
+
         if (appContext != 0 &&
-            (appContext == sessionContext[0] || appContext == sessionContext[1] || appContext == sessionContext[2]) &&
-            context2session[appContext] == 0)
+            (appContext == sessionContext0 || appContext == sessionContext1 || appContext == sessionContext2) &&
+            session_idx == 0)
         {
-            context2session[appContext] = idOrStatus;
+            SOPC_Atomic_Int_Set((int32_t*) &context2session[appContext], (int32_t) idOrStatus);
         }
         else
         {
@@ -160,22 +170,23 @@ void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void
     else if (event == SE_SESSION_ACTIVATION_FAILURE || event == SE_CLOSED_SESSION)
     {
         if (appContext != 0 &&
-            (appContext == sessionContext[0] || appContext == sessionContext[1] || appContext == sessionContext[2]))
+            (appContext == sessionContext0 || appContext == sessionContext1 || appContext == sessionContext2))
         {
             // Context valid but not yet associated to a session Id (never activated before failure)
             // OR context is the one associated to the session Id (activated once before failure)
-            assert(context2session[appContext] == 0 || context2session[appContext] == idOrStatus);
+            uint32_t session_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &context2session[appContext]);
+            assert(session_idx == 0 || session_idx == idOrStatus);
         }
         else
         {
             // Invalid context
             assert(false);
         }
-        sessionsClosed++;
+        SOPC_Atomic_Int_Add(&sessionsClosed, 1);
     }
     else if (event == SE_SND_REQUEST_FAILED)
     {
-        sendFailures++;
+        SOPC_Atomic_Int_Add(&sendFailures, 1);
     }
     else
     {
@@ -396,14 +407,15 @@ int main(void)
 
     /* Wait until get endpoints response or timeout */
     loopCpt = 0;
-    while (SOPC_STATUS_OK == status && getEndpointsReceived == false && loopCpt * sleepTimeout <= loopTimeout)
+    while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&getEndpointsReceived) == 0 &&
+           loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
         SOPC_Sleep(sleepTimeout);
     }
 
-    if (getEndpointsReceived == false || sendFailures > 0)
+    if (SOPC_Atomic_Int_Get(&getEndpointsReceived) == 0 || SOPC_Atomic_Int_Get(&sendFailures) > 0)
     {
         printf(">>Test_Client_Toolkit: GetEndpoints Response received: NOK\n");
         status = SOPC_STATUS_NOK;
@@ -426,7 +438,8 @@ int main(void)
 
     /* Wait until session is activated or timeout */
     loopCpt = 0;
-    while (SOPC_STATUS_OK == status && (sessionsActivated + sessionsClosed) < NB_SESSIONS &&
+    while (SOPC_STATUS_OK == status &&
+           (SOPC_Atomic_Int_Get(&sessionsActivated) + SOPC_Atomic_Int_Get(&sessionsClosed)) < NB_SESSIONS &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
@@ -439,12 +452,12 @@ int main(void)
         status = SOPC_STATUS_TIMEOUT;
     }
 
-    if (sessionsClosed != 0 || sendFailures > 0)
+    if (SOPC_Atomic_Int_Get(&sessionsClosed) != 0 || SOPC_Atomic_Int_Get(&sendFailures) > 0)
     {
         status = SOPC_STATUS_NOK;
     }
 
-    if (SOPC_STATUS_OK == status && sessionsActivated == NB_SESSIONS)
+    if (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&sessionsActivated) == NB_SESSIONS)
     {
         printf(">>Test_Client_Toolkit: Sessions activated: OK'\n");
     }
@@ -458,7 +471,8 @@ int main(void)
         /* Create a service request message and send it through session (read service)*/
         // msg freed when sent
         // Use 1 as read request context
-        SOPC_ToolkitClient_AsyncSendRequestOnSession(session, getReadRequest_message(), 1);
+        SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
+                                                     getReadRequest_message(), 1);
         printf(">>Test_Client_Toolkit: read request sending\n");
     }
 
@@ -475,7 +489,7 @@ int main(void)
     {
         status = SOPC_STATUS_TIMEOUT;
     }
-    else if (sendFailures > 0)
+    else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
     {
         status = SOPC_STATUS_NOK;
     }
@@ -494,7 +508,8 @@ int main(void)
         test_results_set_WriteRequest(pWriteReqCopy);
 
         // Use 1 as write request context
-        SOPC_ToolkitClient_AsyncSendRequestOnSession(session, pWriteReqSent, 1);
+        SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session), pWriteReqSent,
+                                                     1);
 
         printf(">>Test_Client_Toolkit: write request sending\n");
     }
@@ -512,7 +527,7 @@ int main(void)
     {
         status = SOPC_STATUS_TIMEOUT;
     }
-    else if (sendFailures > 0)
+    else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
     {
         status = SOPC_STATUS_NOK;
     }
@@ -525,7 +540,8 @@ int main(void)
         /* The callback will call the verification */
         // msg freed when sent
         // Use 2 as read request context
-        SOPC_ToolkitClient_AsyncSendRequestOnSession(session, getReadRequest_verif_message(), 2);
+        SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
+                                                     getReadRequest_verif_message(), 2);
 
         printf(">>Test_Client_Toolkit: read request sending\n");
     }
@@ -543,7 +559,7 @@ int main(void)
     {
         status = SOPC_STATUS_TIMEOUT;
     }
-    else if (sendFailures > 0)
+    else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
     {
         status = SOPC_STATUS_NOK;
     }
@@ -552,20 +568,24 @@ int main(void)
     test_results_set_WriteRequest(NULL);
     tlibw_free_WriteRequest((OpcUa_WriteRequest**) &pWriteReqCopy);
 
+    uint32_t session1_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session);
+    uint32_t session2_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session2);
+    uint32_t session3_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session3);
+
     /* Close the session */
-    if (0 != session)
+    if (0 != session1_idx)
     {
-        SOPC_ToolkitClient_AsyncCloseSession(session);
+        SOPC_ToolkitClient_AsyncCloseSession(session1_idx);
     }
 
-    if (0 != session2)
+    if (0 != session2_idx)
     {
-        SOPC_ToolkitClient_AsyncCloseSession(session2);
+        SOPC_ToolkitClient_AsyncCloseSession(session2_idx);
     }
 
-    if (0 != session3)
+    if (0 != session3_idx)
     {
-        SOPC_ToolkitClient_AsyncCloseSession(session3);
+        SOPC_ToolkitClient_AsyncCloseSession(session3_idx);
     }
 
     /* Wait until session is closed or timeout */
@@ -574,7 +594,8 @@ int main(void)
     {
         loopCpt++;
         SOPC_Sleep(sleepTimeout);
-    } while (SOPC_STATUS_OK == status && sessionsClosed < NB_SESSIONS && loopCpt * sleepTimeout <= loopTimeout);
+    } while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&sessionsClosed) < NB_SESSIONS &&
+             loopCpt * sleepTimeout <= loopTimeout);
 
     SOPC_Toolkit_Clear();
 
