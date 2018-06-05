@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK != SOPC_LibSub_Connect(cfg_id, &con_id))
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not connect with given con_id.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not connect with given configuration id.");
         return 4;
     }
 
@@ -166,7 +166,11 @@ int main(int argc, char* argv[])
     }
 
     usleep(10 * 1000000);
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the connection.");
+    SOPC_LibSub_Disconnect(con_id);
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the Toolkit.");
     SOPC_LibSub_Clear();
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Toolkit closed.");
 
     return 0;
 }

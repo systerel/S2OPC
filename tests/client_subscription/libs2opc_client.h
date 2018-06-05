@@ -325,6 +325,8 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void);
     Creates a new connection to a remote OPC server from configuration id cfg_id.
     The connection represent the whole client and is later identified by the returned cli_id.
     A subscription is created and associated with this client.
+    The function waits until the client is effectively connected and the subscription created,
+    or the Toolkit times out.
  @param cfgId
     The parameters of the connection to create, return by SOPC_LibSub_ConfigureConnection().
  @param pCliId [out, not null]
@@ -352,11 +354,12 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
 /*
  @description
     Disconnect from a remote OPC server.
+    The function waits until the client is effectively disconnected, or the Toolkit times out.
  @param c_id
     The connection id to disconnect
  @return
     The operation status */
-SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId c_id);
+SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId);
 
 /*--------------------------------
     TBC??

@@ -115,6 +115,14 @@ void SOPC_LibSub_Clear(void)
 {
     /* TODO: clear configurations */
     /* TODO: clear connected clients */
+    /* Put machines in stShutdown, so that they interpret failure event as "expected"
+    SOPC_SLinkedListIterator pIterCli = NULL;
+    pIterCli = SOPC_SLinkedList_GetIterator(pListClient);
+    while (NULL != pIterCli)
+    {
+        pSM = SOPC_SLinkedList_NextWithId(&pIterCli, &cliId);
+
+    }*/
     SOPC_Toolkit_Clear();
 }
 
@@ -320,17 +328,45 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
     return status;
 }
 
-SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId c_id)
+SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_StaMac_Machine* pSM = NULL;
 
     if (!bLibInitialized || !bLibConfigured)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    status = SOPC_STATUS_NOK;
-    (void) c_id;
+    /* Retrieve the machine to disconnect */
+    if (SOPC_STATUS_OK == status)
+    {
+        pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
+        if (NULL == pSM)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_StaMac_StopSession(pSM);
+    }
+
+    /* Wait for the connection to be closed */
+    /* TODO: use Mutex and CV */
+    if (SOPC_STATUS_OK == status)
+    {
+        while (!SOPC_StaMac_IsError(pSM) && SOPC_StaMac_IsConnected(pSM))
+        {
+            SOPC_Sleep(1);
+        }
+        if (SOPC_StaMac_IsError(pSM))
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
     return status;
 }
 
@@ -353,10 +389,9 @@ void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* p
     while (NULL != pIterCli)
     {
         pSM = SOPC_SLinkedList_NextWithId(&pIterCli, &cliId);
-        /* Only one machine shall process the event */
+        /* No more than one machine shall process the event */
         if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext))
         {
-            /* TODO: remove asserts, make log, remove assert.h */
             assert(!bProcessed);
             bProcessed = true;
             cliIdPro = cliId;
