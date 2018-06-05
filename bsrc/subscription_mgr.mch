@@ -54,6 +54,26 @@ OPERATIONS
     END
     ;
     
+    StatusCode_service <-- treat_delete_subscriptions_request (p_session, p_req_msg, p_resp_msg) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_subscription_delete_subscriptions_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_subscription_delete_subscriptions_resp
+    THEN
+        StatusCode_service
+        :(  StatusCode_service : t_StatusCode_i &
+            StatusCode_service : t_StatusCode
+        )
+    END
+    ;
+    
     StatusCode_service, async_resp_msg <-- treat_subscription_publish_request 
       (p_session, p_req_header, p_req_msg, p_req_handle, p_req_ctx, p_resp_msg) =
     PRE

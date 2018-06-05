@@ -108,10 +108,20 @@ void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message_out_bs
     }
 }
 
-void message_out_bs__alloc_msg_header(constants__t_msg_header_i* const message_out_bs__nmsg_header)
+void message_out_bs__alloc_msg_header(const t_bool message_out_bs__p_is_request,
+                                      constants__t_msg_header_i* const message_out_bs__nmsg_header)
 {
     void* header = NULL;
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_RequestHeader_EncodeableType, &header);
+    SOPC_EncodeableType* encType = NULL;
+    if (message_out_bs__p_is_request == false)
+    {
+        encType = &OpcUa_ResponseHeader_EncodeableType;
+    }
+    else
+    {
+        encType = &OpcUa_RequestHeader_EncodeableType;
+    }
+    SOPC_ReturnStatus status = SOPC_Encodeable_Create(encType, &header);
     if (SOPC_STATUS_OK == status)
     {
         *message_out_bs__nmsg_header = (constants__t_msg_header_i) header;

@@ -34,6 +34,7 @@ DEFINITIONS
 IMPORTS
     subscription_core,
     msg_subscription_create_bs,
+    msg_subscription_delete_bs,
     msg_subscription_create_monitored_item,
     subscription_create_monitored_item_it,
     monitored_item_queue_it_bs
@@ -403,6 +404,41 @@ OPERATIONS
             END
         ELSE
             StatusCode_service := e_sc_bad_too_many_subscriptions
+        END
+    END
+    ;
+    
+    StatusCode_service <-- treat_delete_subscriptions_request (p_session, p_req_msg, p_resp_msg) =
+    VAR
+        l_session_has_subscription,
+        l_session_sub,
+        l_nb_subs,
+        l_first_sub_in_request,
+        l_bres
+    IN
+        l_session_has_subscription, l_session_sub <-- getall_subscription (p_session);
+        /* Note: we only treat the first subscription in list since only one subscription per session can be opened*/
+        l_nb_subs, l_first_sub_in_request <-- get_msg_delete_subscriptions_req_first_subscription (p_req_msg);
+        IF l_session_has_subscription = TRUE &
+           l_nb_subs > 0 &
+           l_first_sub_in_request = l_session_sub
+        THEN
+            /* Note: if same subscription as the one recorded for current session => the subscription id is valid */
+            close_subscription (l_session_sub);
+            l_bres <-- allocate_msg_delete_subscriptions_resp_results_array (p_resp_msg, l_nb_subs);
+            IF l_bres = TRUE
+            THEN
+                set_msg_delete_subscriptions_resp_first_subscription (p_resp_msg, TRUE);
+                StatusCode_service := e_sc_ok
+            ELSE
+                StatusCode_service := e_sc_bad_out_of_memory
+            END
+        ELSIF l_nb_subs <= 0
+        THEN
+            StatusCode_service := e_sc_bad_nothing_to_do
+        ELSE
+            set_msg_delete_subscriptions_resp_first_subscription (p_resp_msg, FALSE);
+            StatusCode_service := e_sc_ok
         END
     END
     ;

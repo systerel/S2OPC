@@ -486,6 +486,8 @@ OPERATIONS
                 free_browse_result
             OR e_msg_subscription_create_req THEN
                 StatusCode_service <-- treat_create_subscription_request (session, req_msg, resp_msg)
+            OR e_msg_subscription_delete_subscriptions_req THEN
+                StatusCode_service <-- treat_delete_subscriptions_request (session, req_msg, resp_msg)
             OR e_msg_subscription_publish_req THEN
                 StatusCode_service, async_resp_msg
                   <-- treat_subscription_publish_request (session, req_header, req_msg, req_handle, req_ctx, resp_msg)
@@ -538,7 +540,7 @@ OPERATIONS
                 e_msg_discovery_register_server2_req
             THEN
                 l_resp_typ <-- get_response_type (l_req_typ);
-                l_msg_header <-- alloc_msg_header;
+                l_msg_header <-- alloc_msg_header (TRUE);
                 l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
                 l_req_handle <-- client_fresh_req_handle (l_req_typ, l_resp_typ, TRUE, app_context);
                 l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
@@ -1330,7 +1332,7 @@ OPERATIONS
                     e_msg_subscription_delete_subscriptions_req
                 THEN
                     l_resp_typ <-- get_response_type (l_req_typ);
-                    l_msg_header <-- alloc_msg_header;
+                    l_msg_header <-- alloc_msg_header (TRUE);
                     l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
                     l_req_handle <-- client_fresh_req_handle (l_req_typ, l_resp_typ, TRUE, app_context);
                     l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
@@ -1470,7 +1472,7 @@ OPERATIONS
         l_is_valid_resp, l_ret, l_channel <-- server_validate_session_service_resp (session);
         IF l_is_valid_resp = TRUE
         THEN
-            l_resp_msg_header <-- alloc_msg_header;
+            l_resp_msg_header <-- alloc_msg_header (FALSE);
             l_is_valid_header <-- is_valid_msg_out_header (l_resp_msg_header);
             IF l_is_valid_header = TRUE
             THEN

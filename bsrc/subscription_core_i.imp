@@ -347,7 +347,8 @@ OPERATIONS
     VAR
         l_timer_id,
         l_publish_queue,
-        l_monitored_item_queue
+        l_monitored_item_queue,
+        l_notification_queue
     IN
         l_timer_id <-- get_subscription_timer_id (p_subscription);
         delete_publish_timer (l_timer_id);
@@ -356,6 +357,8 @@ OPERATIONS
         /* TODO: iter on monitored items and remove them from node queues ! */
         l_monitored_item_queue <-- get_subscription_monitoredItemQueue (p_subscription);
         clear_and_deallocate_monitored_item_queue (l_monitored_item_queue);
+        l_notification_queue <-- get_subscription_notificationQueue (p_subscription);
+        clear_and_deallocate_monitored_item_notification_queue (l_notification_queue);
         delete_subscription (p_subscription)
     END
     ;

@@ -48,9 +48,10 @@ INITIALISATION
 
 OPERATIONS
     
-    nmsg_header <-- alloc_msg_header =
+    nmsg_header <-- alloc_msg_header (p_is_request) =
     PRE
-        c_msg_out_header = c_msg_header_indet
+        c_msg_out_header = c_msg_header_indet &
+        p_is_request : BOOL
     THEN
         CHOICE
             nmsg_header, c_msg_out_header
