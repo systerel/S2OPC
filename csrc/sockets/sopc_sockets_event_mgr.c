@@ -362,6 +362,46 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket_Lock(const char* uri
     return resultSocket;
 }
 
+static SOPC_ReturnStatus SOPC_SocketsEventMgr_Socket_WriteAll(SOPC_Socket* sock,
+                                                              const uint8_t* data,
+                                                              uint32_t count,
+                                                              uint32_t* finalSentBytes)
+{
+    assert(sock != NULL);
+    assert(data != NULL);
+    assert(finalSentBytes != NULL);
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    uint32_t sentBytes = 0;
+    uint32_t totalSentBytes = 0;
+
+    if (count == 0)
+    {
+        // Nothing to send in buffer
+        *finalSentBytes = 0;
+        return SOPC_STATUS_OK;
+    }
+
+    do // While not blocking and bytes sent on socket
+    {
+        status = Socket_Write(sock->sock, data + totalSentBytes, count - totalSentBytes, &sentBytes);
+        if (SOPC_STATUS_OK == status)
+        {
+            totalSentBytes += sentBytes;
+        }
+    } while (SOPC_STATUS_OK == status && totalSentBytes < count && sentBytes > 0);
+
+    if (sentBytes == 0 && SOPC_STATUS_OK == status) // Consider that 0 bytes sent without blocking is an error on socket
+    {
+        status = SOPC_STATUS_NOK;
+        SOPC_Logger_TraceError("Non blocking call to Socket_Write returned 0 bytes written (socketIdx=%" PRIu32
+                               ", connectionId=%" PRIu32,
+                               sock->socketIdx, sock->connectionId);
+    }
+
+    *finalSentBytes = totalSentBytes;
+    return status;
+}
+
 static bool SOPC_SocketsEventMgr_TreatWriteBuffer_NoLock(SOPC_Socket* sock)
 {
     bool nothingToDequeue = false;
@@ -392,10 +432,12 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer_NoLock(SOPC_Socket* sock)
         }
         if (false != writeQueueResult && false == nothingToDequeue)
         {
-            sentBytes = 0;
+            // Treat current buffer to be written on socket
             data = &(buffer->data[buffer->position]);
             count = buffer->length - buffer->position;
-            status = Socket_Write(sock->sock, data, count, &sentBytes);
+
+            status = SOPC_SocketsEventMgr_Socket_WriteAll(sock, data, count, &sentBytes);
+
             if (SOPC_STATUS_WOULD_BLOCK == status)
             {
                 writeBlocked = true;

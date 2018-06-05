@@ -317,7 +317,7 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketS
     return (int32_t) nbReady;
 }
 
-SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint32_t* sentBytes)
+SOPC_ReturnStatus Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int res = 0;
@@ -326,9 +326,21 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
     {
         status = SOPC_STATUS_NOK;
         res = send(sock, (char*) data, (int) count, 0);
-        if (res == SOCKET_ERROR)
+        if (res >= 0)
+        {
+            /* MSDN send documentation indicates case res == 0 shall not occur in non blocking mode:
+             * "If no buffer space is available within the transport system to hold the data to be transmitted, send
+             * will block unless the socket has been placed in nonblocking mode. On nonblocking stream oriented sockets,
+             * the number of bytes written can be between 1 and the requested length, depending on buffer availability
+             * on both the client and server computers."
+             * */
+            *sentBytes = (uint32_t) res;
+            status = SOPC_STATUS_OK;
+        }
+        else
         {
             *sentBytes = 0;
+
             wsaError = WSAGetLastError();
             // ERROR CASE
             if (wsaError == WSAEWOULDBLOCK)
@@ -337,11 +349,6 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
                 status = SOPC_STATUS_WOULD_BLOCK;
             } // keep SOPC_STATUS_NOK
         }
-        else if (res >= 0 && (uint32_t) res == count)
-        {
-            *sentBytes = (uint32_t) res;
-            status = SOPC_STATUS_OK;
-        } // else SOPC_STATUS_NOK
     }
     return status;
 }
@@ -363,18 +370,13 @@ SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uin
             *readCount = 0;
             status = SOPC_STATUS_CLOSED;
         }
-        else if (res == -1)
+        else
         {
             *readCount = 0;
             if (WSAGetLastError() == WSAEWOULDBLOCK)
             {
                 status = SOPC_STATUS_WOULD_BLOCK;
             }
-        }
-        else
-        {
-            *readCount = 0;
-            status = SOPC_STATUS_NOK;
         }
     }
     return status;

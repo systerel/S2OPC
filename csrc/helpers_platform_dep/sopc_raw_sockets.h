@@ -191,12 +191,13 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketS
  *  \param data      The data bytes to write on socket
  *  \param count     The number of bytes to write
  *  \param sentBytes Pointer to the number of bytes sent on socket after call
+ *                   (only significant when SOPC_STATUS_OK returned)
  *
- *  \return          SOPC_STATUS_OK if all bytes were written,
+ *  \return          SOPC_STATUS_OK if bytes were written,
  *                   SOPC_STATUS_WOULD_BLOCK if socket write operation would block,
  *                   SOPC_STATUS_NOK if it failed and
  */
-SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint32_t* sentBytes);
+SOPC_ReturnStatus Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes);
 
 /**
  *  \brief Read data through the socket
@@ -204,10 +205,11 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
  *  \param sock         The socket on which data must be read
  *  \param data         The data bytes to be set with read bytes
  *  \param dataSize     The number of bytes that can be set (or expected to be read)
- *  \param readCount    The number of bytes actually written on the socket
+ *  \param readCount    Pointer to the number of bytes actually written on the socket
+ *                      (only significant when SOPC_STATUS_OK returned)
  *
- *  \return         GOOD if operation succeeded, SOPC_STATUS_CLOSED in case of disconnection and SOPC_STATUS_NOK
- * otherwise.
+ *  \return         SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_CLOSED in case of disconnection and
+ * SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount);
 

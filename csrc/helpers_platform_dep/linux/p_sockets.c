@@ -321,7 +321,7 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketS
     return (int32_t) nbReady;
 }
 
-SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint32_t* sentBytes)
+SOPC_ReturnStatus Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     ssize_t res = 0;
@@ -330,21 +330,15 @@ SOPC_ReturnStatus Socket_Write(Socket sock, uint8_t* data, uint32_t count, uint3
         status = SOPC_STATUS_NOK;
         res = send(sock, data, count, 0);
 
-        if (res > 0)
+        if (res >= 0)
         {
+            status = SOPC_STATUS_OK;
             *sentBytes = (uint32_t) res;
         }
         else
         {
             *sentBytes = 0;
-        }
 
-        if (res == (int64_t) count)
-        {
-            status = SOPC_STATUS_OK;
-        }
-        else
-        {
             // ERROR CASE
             if (errno == EAGAIN || errno == EWOULDBLOCK)
             {
