@@ -89,7 +89,7 @@ Prerequisites:
 - gcc (tested with GCC version 8.1)
 - CMake (tested with CMake version >= 3.5)
 - make (tested with GNU Make version >= 4.2)
-- [mbedtls](https://tls.mbed.org/)(>= 2.7.0)
+- [mbedtls](https://tls.mbed.org/)(>= 2.9.0)
 - [check](https://libcheck.github.io/check/)(>= 0.12)
 
 To build the Toolkit library and tests with default configuration on current stable release:
@@ -105,7 +105,7 @@ Tested under Windows 7 and Windows Server 2016.
 Prerequisites:
 - Visual Studio (tested with Visual Studio 2017)
 - CMake (tested with CMake version 3.11.1)
-- [mbedtls](https://tls.mbed.org/) (>= 2.7.0)
+- [mbedtls](https://tls.mbed.org/) (>= 2.9.0)
 - [check](https://libcheck.github.io/check/) (>= 0.12)
 
 To build the Toolkit library and tests with default configuration on current stable release, you can adapt the bat script below:
