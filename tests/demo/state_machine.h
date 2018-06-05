@@ -30,6 +30,7 @@
 
 #include <stdbool.h>
 
+#include "sopc_mutexes.h"
 #include "sopc_user_app_itf.h"
 
 typedef enum { stInit, stConfigured, stActivating, stActivated, stClosing, stDiscovering, stError } StateMachine_State;
@@ -42,6 +43,7 @@ typedef struct
 
 typedef struct
 {
+    Mutex mutex;
     StateMachine_State state;
     SOPC_SecureChannel_Config* pscConfig;
     uint32_t iscConfig;                       /* Internal scConfig ID */
