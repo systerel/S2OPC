@@ -1245,6 +1245,7 @@ SOPC_ReturnStatus SOPC_DateTime_Compare(const SOPC_DateTime* left, const SOPC_Da
         {
             *comparison = 0;
         }
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
