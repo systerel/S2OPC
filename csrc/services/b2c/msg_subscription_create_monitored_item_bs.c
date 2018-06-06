@@ -121,39 +121,18 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
     constants__t_opcua_duration_i* const msg_subscription_create_monitored_item_bs__p_samplingItv,
     t_entier4* const msg_subscription_create_monitored_item_bs__p_queueSize)
 {
-    SOPC_ReturnStatus retStatus = SOPC_STATUS_NOK;
     *msg_subscription_create_monitored_item_bs__p_sc = constants__c_StatusCode_indet;
+    *msg_subscription_create_monitored_item_bs__p_aid = constants__c_AttributeId_indet;
     OpcUa_CreateMonitoredItemsRequest* createReq =
         (OpcUa_CreateMonitoredItemsRequest*) msg_subscription_create_monitored_item_bs__p_req_msg;
     OpcUa_MonitoredItemCreateRequest* monitReq =
         &createReq->ItemsToCreate[msg_subscription_create_monitored_item_bs__p_index - 1];
+    *msg_subscription_create_monitored_item_bs__p_nid = &monitReq->ItemToMonitor.NodeId;
 
-    *msg_subscription_create_monitored_item_bs__p_nid = malloc(sizeof(SOPC_NodeId));
-    if (NULL != *msg_subscription_create_monitored_item_bs__p_nid)
-    {
-        SOPC_NodeId_Initialize(*msg_subscription_create_monitored_item_bs__p_nid);
-        retStatus =
-            SOPC_NodeId_Copy(*msg_subscription_create_monitored_item_bs__p_nid, &monitReq->ItemToMonitor.NodeId);
-    }
+    *msg_subscription_create_monitored_item_bs__p_bres =
+        util_AttributeId__C_to_B(monitReq->ItemToMonitor.AttributeId, msg_subscription_create_monitored_item_bs__p_aid);
 
-    if (retStatus == SOPC_STATUS_OK)
-    {
-        *msg_subscription_create_monitored_item_bs__p_bres = util_AttributeId__C_to_B(
-            monitReq->ItemToMonitor.AttributeId, msg_subscription_create_monitored_item_bs__p_aid);
-
-        if (false == *msg_subscription_create_monitored_item_bs__p_bres)
-        {
-            *msg_subscription_create_monitored_item_bs__p_aid = constants__c_AttributeId_indet;
-            *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_attribute_id_invalid;
-        }
-    }
-    else
-    {
-        *msg_subscription_create_monitored_item_bs__p_bres = false;
-        *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_internal_error;
-    }
-
-    if (*msg_subscription_create_monitored_item_bs__p_bres != false)
+    if (*msg_subscription_create_monitored_item_bs__p_bres)
     {
         switch (monitReq->MonitoringMode)
         {
@@ -172,8 +151,13 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
             *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_monitoring_mode_invalid;
         }
     }
+    else
+    {
+        *msg_subscription_create_monitored_item_bs__p_aid = constants__c_AttributeId_indet;
+        *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_attribute_id_invalid;
+    }
 
-    if (*msg_subscription_create_monitored_item_bs__p_bres != false)
+    if (*msg_subscription_create_monitored_item_bs__p_bres)
     {
         *msg_subscription_create_monitored_item_bs__p_clientHandle = monitReq->RequestedParameters.ClientHandle;
         *msg_subscription_create_monitored_item_bs__p_samplingItv = monitReq->RequestedParameters.SamplingInterval;
@@ -196,7 +180,7 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
         }
     }
 
-    if (*msg_subscription_create_monitored_item_bs__p_bres != false)
+    if (*msg_subscription_create_monitored_item_bs__p_bres)
     {
         *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_ok;
     }

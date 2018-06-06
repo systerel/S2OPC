@@ -44,7 +44,7 @@ INITIALISATION
 OPERATIONS
     
     /* Needs UNINIT to deallocate dict and list */
-    UNINITIALISATION_monitored_item_bs =
+    monitored_item_pointer_bs_UNINITIALISATION =
     BEGIN
         skip
     END

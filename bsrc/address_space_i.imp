@@ -201,20 +201,26 @@ OPERATIONS
 
             l_status2, l_prev_value, l_prev_value_status <-- treat_write_1(l_isvalid, l_status1, l_nid, l_aid, l_value);
             set_ResponseWrite_StatusCode(l_wvi, l_status2);
+            l_wv <-- getall_WriteValuePointer(l_wvi);
+            IF l_status2 = e_sc_ok
+            THEN
+                l_bres_wv_copy, l_wv_copy <-- copy_write_value_pointer_content (l_wv);
+                IF l_bres_wv_copy = TRUE THEN
+                    gen_data_changed_event (l_prev_value, l_prev_value_status, l_wv_copy)
+                ELSE
+                    /* TODO: Generates an out of memory service result or error trace ? */
+                    skip
+                END
+            END;
             l_local_treatment <-- is_local_service_treatment;
             IF l_local_treatment = FALSE
             THEN
-                l_wv <-- getAndClean_WriteValuePointer(l_wvi);
-                srv_write_notification (l_wv, l_status2);
-                IF l_status2 = e_sc_ok
-                THEN
-                    l_bres_wv_copy, l_wv_copy <-- copy_write_value_pointer_content (l_wv);
-                    IF l_bres_wv_copy = TRUE THEN
-                        gen_data_changed_event (l_prev_value, l_prev_value_status, l_wv_copy)
-                    ELSE
-                        /* Generates an out of memory service result ? */
-                        skip
-                    END
+                l_bres_wv_copy, l_wv_copy <-- copy_write_value_pointer_content (l_wv);
+                IF l_bres_wv_copy = TRUE THEN
+                    srv_write_notification (l_wv_copy, l_status2)
+                ELSE
+                    /* TODO: Generates an out of memory service result or error trace ? */
+                    skip
                 END
             END
         INVARIANT
@@ -293,12 +299,8 @@ OPERATIONS
             IF aid = e_aid_Value THEN
                 l_ncl <-- get_NodeClass(l_node);
                 IF l_ncl = e_ncl_Variable THEN
-                    serviceStatusCode, prev_value <-- read_AddressSpace_Attribute_value (l_node, l_ncl, aid);
                     prev_sc <-- get_Value_StatusCode (l_node);
-                    IF serviceStatusCode = e_sc_ok
-                    THEN             
-                        set_Value(l_node, value)
-                    END
+                    serviceStatusCode, prev_value <-- set_Value(l_node, value)
                 END
             ELSE
                 serviceStatusCode := e_sc_bad_write_not_supported

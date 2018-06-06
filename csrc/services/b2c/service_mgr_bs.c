@@ -174,7 +174,7 @@ static void SOPC_ServiceMgrBs_DeallocateMsgs(uint32_t id, void* val)
     }
 }
 
-void service_mgr_bs__UNINITIALISATION(void)
+void service_mgr_bs__service_mgr_bs_UNINITIALISATION(void)
 {
     SOPC_SLinkedList* sLinkedList = NULL;
     for (constants_bs__t_channel_config_idx_i idx = 0; idx <= constants_bs__t_channel_config_idx_i_max; idx++)

@@ -78,12 +78,25 @@ OPERATIONS
         )
     END
     ;
+    
+    clear_iter_monitored_item (p_iterator) =
+    PRE
+        p_iterator : t_monitoredItemQueueIterator_i &
+        p_iterator : t_monitoredItemQueueIterator &
+        mi_iterator_it = p_iterator
+    THEN
+        mi_queue_it := c_monitoredItemQueue_indet ||
+        mi_iterator_it := c_monitoredItemQueueIterator_indet ||
+        nb_monitored_items_it := 0 ||
+        s_mi_to_iterate_it :(s_mi_to_iterate_it = {}) ||
+        s_mi_iterated_it :(s_mi_iterated_it = {})
+    END
+    ;
 
     continue, 
     p_monitoredItem <-- continue_iter_monitored_item (p_iterator, p_queue) =
     PRE
         p_iterator : t_monitoredItemQueueIterator_i &
-        p_iterator : t_monitoredItemQueueIterator &
         mi_iterator_it = p_iterator &
         p_queue : t_monitoredItemQueue_i &
         p_queue : t_monitoredItemQueue &

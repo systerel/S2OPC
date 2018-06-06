@@ -90,3 +90,10 @@ void write_value_pointer_bs__write_value_pointer_is_valid(
 {
     *write_value_pointer_bs__is_valid = write_value_pointer_bs__p_write_value != constants__c_WriteValuePointer_indet;
 }
+
+void write_value_pointer_bs__free_write_value_pointer(
+    const constants__t_WriteValuePointer_i write_value_pointer_bs__p_write_value)
+{
+    OpcUa_WriteValue_Clear(write_value_pointer_bs__p_write_value);
+    free(write_value_pointer_bs__p_write_value);
+}

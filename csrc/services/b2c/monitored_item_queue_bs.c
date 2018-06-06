@@ -52,6 +52,7 @@ void monitored_item_queue_bs__allocate_new_monitored_item_queue(
 void monitored_item_queue_bs__clear_and_deallocate_monitored_item_queue(
     const constants__t_monitoredItemQueue_i monitored_item_queue_bs__p_queue)
 {
+    // No deallocation: done in UNINITIALISATION in monitored_item_pointer_bs
     SOPC_SLinkedList_Delete(monitored_item_queue_bs__p_queue);
 }
 

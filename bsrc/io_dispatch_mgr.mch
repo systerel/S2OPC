@@ -362,5 +362,11 @@ OPERATIONS
     BEGIN
         bres :: BOOL // indicates if active connection will be closed
     END
+    ;
+
+    UNINITIALISATION =
+    BEGIN
+        skip
+    END
 
 END

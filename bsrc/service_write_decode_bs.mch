@@ -140,7 +140,7 @@ OPERATIONS
     ;
 
     /* inter B to C code use only: used to return the writeValue as address space modification notification */
-    wvPointer <-- getAndClean_WriteValuePointer(wvi) =
+    wvPointer <-- getall_WriteValuePointer(wvi) =
     PRE
         wvi : t_WriteValue_i &
         wvi : cast_t_WriteValue[1..nb_WriteValue]

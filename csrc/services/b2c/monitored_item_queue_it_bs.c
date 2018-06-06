@@ -53,14 +53,20 @@ void monitored_item_queue_it_bs__init_iter_monitored_item(
     constants__t_monitoredItemQueueIterator_i* const monitored_item_queue_it_bs__iterator)
 {
     SOPC_SLinkedListIterator* it = malloc(sizeof(SOPC_SLinkedListIterator));
+    *monitored_item_queue_it_bs__iterator = it;
     *monitored_item_queue_it_bs__continue = false;
     if (it != NULL && SOPC_SLinkedList_GetLength(monitored_item_queue_it_bs__p_queue) > 0)
     {
         *it = SOPC_SLinkedList_GetIterator(monitored_item_queue_it_bs__p_queue);
-        *monitored_item_queue_it_bs__iterator = it;
         if (*monitored_item_queue_it_bs__iterator != NULL)
         {
             *monitored_item_queue_it_bs__continue = SOPC_SLinkedList_HasNext(it);
         }
     }
+}
+
+void monitored_item_queue_it_bs__clear_iter_monitored_item(
+    const constants__t_monitoredItemQueueIterator_i monitored_item_queue_it_bs__p_iterator)
+{
+    free(monitored_item_queue_it_bs__p_iterator);
 }

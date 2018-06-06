@@ -817,5 +817,11 @@ OPERATIONS
     BEGIN
         bres <-- close_all_channel
     END
+    ;
+    
+    UNINITIALISATION =
+    BEGIN
+        service_mgr_UNINITIALISATION
+    END
 
 END

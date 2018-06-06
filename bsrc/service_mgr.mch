@@ -744,5 +744,11 @@ OPERATIONS
     THEN
         skip
     END
+    ;
+    
+    service_mgr_UNINITIALISATION =
+    BEGIN
+        skip
+    END
 
 END

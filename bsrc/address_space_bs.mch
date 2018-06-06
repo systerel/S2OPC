@@ -95,12 +95,6 @@ INITIALISATION
      )
 
 OPERATIONS
-    /* As INITIALISATION may use mallocs, needs an UNINIT */
-    UNINITIALISATION =
-    BEGIN
-        skip
-    END
-    ;
 
     /* a_NodeId~ */
     nid_valid, node <-- readall_AddressSpace_Node(nid) =
@@ -157,14 +151,21 @@ OPERATIONS
     ;
 
     /* a_Value, setter */
-    set_Value(node, value) =
+    serviceStatusCode, prev_value <-- set_Value(node, value) =
     PRE
         node  : t_Node_i    &
         node  : t_Node      &
         value : t_Variant_i &
         value : t_Variant
     THEN
-        a_Value(node) := value
+        CHOICE
+            serviceStatusCode := e_sc_ok ||
+            prev_value :(prev_value : t_Variant_i & prev_value = a_Value(node)) ||
+            a_Value(node) := value
+        OR
+            serviceStatusCode := e_sc_bad_out_of_memory ||
+            prev_value := c_Variant_indet
+        END
     END
     ;
 

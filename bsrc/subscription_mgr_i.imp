@@ -285,8 +285,7 @@ OPERATIONS
                                                                                            l_monitMode,
                                                                                            l_clientHandle);
                 l_revSamplingItv, l_revQueueSize <-- compute_create_montitored_item_revised_params(l_queueSize)
-            END
-            ;
+            END;
             setall_msg_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_monitoredItemId, l_revSamplingItv, l_revQueueSize)
               
         INVARIANT
@@ -344,7 +343,8 @@ OPERATIONS
 
         VARIANT
             card(s_mi_to_iterate_it)
-        END
+        END;
+        clear_iter_monitored_item (l_iterator)
     END
     ;
     
@@ -522,16 +522,22 @@ OPERATIONS
         l_aid,
         l_nid_valid,
         l_node,
-        l_monitoredItemQueue
+        l_monitoredItemQueue,
+        l_bres
     IN
         l_nid, l_aid <-- get_write_value_pointer_NodeId_AttributeId (p_new_write_value_pointer);
         l_nid_valid, l_node <-- readall_AddressSpace_Node (l_nid);
         IF l_nid_valid = TRUE
         THEN
-            l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (l_nid);
-            create_notification_on_monitored_items_if_data_changed 
-             (l_monitoredItemQueue, p_old_write_value_pointer, p_new_write_value_pointer)
-        END
+            l_bres, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (l_nid);
+            IF l_bres = TRUE
+            THEN
+                create_notification_on_monitored_items_if_data_changed 
+                (l_monitoredItemQueue, p_old_write_value_pointer, p_new_write_value_pointer)
+            END // TODO: log error
+        END;
+        free_write_value_pointer (p_old_write_value_pointer);
+        free_write_value_pointer (p_new_write_value_pointer)
     END
     ;
     
@@ -630,6 +636,12 @@ OPERATIONS
                 END
             END
         END
+    END
+    ;
+    
+    subscription_mgr_UNINITIALISATION =
+    BEGIN
+        subscription_core_UNINITIALISATION
     END
     
 END

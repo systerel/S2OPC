@@ -51,7 +51,15 @@ static bool nodeid_equal(const void* a, const void* b)
 static void free_monitored_item_queue(void* data)
 {
     SOPC_SLinkedList* miQueue = (SOPC_SLinkedList*) data;
+    // No deallocation for queue elements: done in UNINITIALISATION in monitored_item_pointer_bs
     SOPC_SLinkedList_Delete(miQueue);
+}
+
+static void free_node_id(void* data)
+{
+    SOPC_NodeId* nid = (SOPC_NodeId*) data;
+    SOPC_NodeId_Clear(nid);
+    free(nid);
 }
 
 /*------------------------
@@ -61,11 +69,12 @@ void subscription_core_bs__INITIALISATION(void)
 {
     assert(nodeIdToMonitoredItemQueue == NULL);
 
-    nodeIdToMonitoredItemQueue = SOPC_Dict_Create(NULL, nodeid_hash, nodeid_equal, NULL, free_monitored_item_queue);
+    nodeIdToMonitoredItemQueue =
+        SOPC_Dict_Create(NULL, nodeid_hash, nodeid_equal, free_node_id, free_monitored_item_queue);
     assert(nodeIdToMonitoredItemQueue != NULL);
 }
 
-void subscription_core_bs__UNINITIALISATION_subscription_core_bs(void)
+void subscription_core_bs__subscription_core_bs_UNINITIALISATION(void)
 {
     assert(nodeIdToMonitoredItemQueue != NULL);
     SOPC_Dict_Delete(nodeIdToMonitoredItemQueue);
@@ -142,20 +151,51 @@ void subscription_core_bs__compute_create_subscription_revised_params(
 
 void subscription_core_bs__get_nodeToMonitoredItemQueue(
     const constants__t_NodeId_i subscription_core_bs__p_nid,
+    t_bool* const subscription_core_bs__p_bres,
     constants__t_monitoredItemQueue_i* const subscription_core_bs__p_monitoredItemQueue)
 {
+    *subscription_core_bs__p_bres = false;
+    *subscription_core_bs__p_monitoredItemQueue = constants__c_monitoredItemQueue_indet;
     bool valFound = false;
     bool valAdded = false;
     SOPC_SLinkedList* monitoredItemQueue =
         SOPC_Dict_Get(nodeIdToMonitoredItemQueue, subscription_core_bs__p_nid, &valFound);
-    if (false == valFound)
+    if (valFound)
     {
+        *subscription_core_bs__p_bres = true;
+    }
+    else
+    {
+        // Insert a new allocated queue for the new nodeId
+
+        SOPC_NodeId* nid = malloc(sizeof(SOPC_NodeId));
         monitoredItemQueue = SOPC_SLinkedList_Create(0);
-        valAdded = SOPC_Dict_Insert(nodeIdToMonitoredItemQueue, subscription_core_bs__p_nid, monitoredItemQueue);
-        if (false == valAdded)
+
+        if (NULL == monitoredItemQueue || NULL == nid)
+        {
+            SOPC_SLinkedList_Delete(monitoredItemQueue);
+            free(nid);
+            return;
+        }
+
+        SOPC_ReturnStatus retStatus = SOPC_STATUS_NOK;
+        SOPC_NodeId_Initialize(nid);
+        retStatus = SOPC_NodeId_Copy(nid, subscription_core_bs__p_nid);
+
+        if (SOPC_STATUS_OK == retStatus)
+        {
+            valAdded = SOPC_Dict_Insert(nodeIdToMonitoredItemQueue, nid, monitoredItemQueue);
+            if (valAdded)
+            {
+                *subscription_core_bs__p_bres = true;
+            }
+        }
+
+        if (false == *subscription_core_bs__p_bres)
         {
             SOPC_SLinkedList_Delete(monitoredItemQueue);
             monitoredItemQueue = NULL;
+            free(nid);
         }
     }
     *subscription_core_bs__p_monitoredItemQueue = monitoredItemQueue;

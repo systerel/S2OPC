@@ -53,8 +53,6 @@ void address_space_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
-void address_space_bs__UNINITIALISATION(void) {}
-
 /* This is a_NodeId~ */
 void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i address_space_bs__nid,
                                                  t_bool* const address_space_bs__nid_valid,
@@ -134,16 +132,25 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_Node
 }
 
 void address_space_bs__set_Value(const constants__t_Node_i address_space_bs__node,
-                                 const constants__t_Variant_i address_space_bs__value)
+                                 const constants__t_Variant_i address_space_bs__value,
+                                 constants__t_StatusCode_i* const address_space_bs__serviceStatusCode,
+                                 constants__t_Variant_i* const address_space_bs__prev_value)
 {
+    *address_space_bs__serviceStatusCode = constants__e_sc_bad_out_of_memory;
     SOPC_AddressSpace_Item* item = address_space_bs__node;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Variant* pvar = SOPC_AddressSpace_Item_Get_Value(item);
-    // Clear old value
-    SOPC_Variant_Clear(pvar);
-    /* Deep-copy the new value */
+    *address_space_bs__prev_value = malloc(sizeof(SOPC_Variant));
+    if (NULL == *address_space_bs__prev_value)
+    {
+        return;
+    }
+    **address_space_bs__prev_value = *pvar; /* Copy variant content */
+    SOPC_Variant_Initialize(pvar);          /* Re-init content without clear since content just copied */
+    /* Deep-copy the new value to set */
     status = SOPC_Variant_Copy(pvar, address_space_bs__value);
     assert(SOPC_STATUS_OK == status);
+    *address_space_bs__serviceStatusCode = constants__e_sc_ok;
 }
 
 void address_space_bs__get_Value_StatusCode(const constants__t_Node_i address_space_bs__node,

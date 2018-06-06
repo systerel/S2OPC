@@ -164,5 +164,11 @@ OPERATIONS
     THEN
         skip
     END
+    ;
+    
+    subscription_mgr_UNINITIALISATION =
+    BEGIN
+        skip
+    END
     
 END

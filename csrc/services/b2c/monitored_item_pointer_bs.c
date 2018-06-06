@@ -35,6 +35,7 @@ void SOPC_InternalMontitoredItem_Free(void* data)
     if (NULL != mi)
     {
         SOPC_NodeId_Clear(mi->nid);
+        free(mi->nid);
         free(mi);
     }
 }
@@ -87,7 +88,7 @@ void monitored_item_pointer_bs__INITIALISATION(void)
     monitoredItemIdMax = 0;
 }
 
-void monitored_item_pointer_bs__UNINITIALISATION_monitored_item_bs(void)
+void monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION(void)
 {
     if (monitoredItemIdDict != NULL)
     {
@@ -121,10 +122,23 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     *monitored_item_pointer_bs__bres = false;
     uintptr_t freshId = 0;
     SOPC_InternalMontitoredItem* monitItem = malloc(sizeof(SOPC_InternalMontitoredItem));
-    if (NULL != monitItem)
+    SOPC_NodeId* nid = malloc(sizeof(SOPC_NodeId));
+    SOPC_ReturnStatus retStatus = SOPC_STATUS_NOK;
+
+    if (NULL == monitItem || NULL == nid)
+    {
+        free(monitItem);
+        free(nid);
+        return;
+    }
+
+    SOPC_NodeId_Initialize(nid);
+    retStatus = SOPC_NodeId_Copy(nid, monitored_item_pointer_bs__p_nid);
+
+    if (SOPC_STATUS_OK == retStatus)
     {
         monitItem->subId = monitored_item_pointer_bs__p_subscription;
-        monitItem->nid = monitored_item_pointer_bs__p_nid;
+        monitItem->nid = nid;
         monitItem->aid = monitored_item_pointer_bs__p_aid;
         monitItem->timestampToReturn = monitored_item_pointer_bs__p_timestampToReturn;
         monitItem->monitoringMode = monitored_item_pointer_bs__p_monitoringMode;
@@ -157,6 +171,12 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
             }
         }
     }
+
+    if (false == *monitored_item_pointer_bs__bres)
+    {
+        free(monitItem);
+        free(nid);
+    }
 }
 
 void monitored_item_pointer_bs__delete_monitored_item_pointer(
@@ -164,11 +184,10 @@ void monitored_item_pointer_bs__delete_monitored_item_pointer(
 {
     SOPC_InternalMontitoredItem* monitItem =
         (SOPC_InternalMontitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
-    // Reset monitored item associated
-    SOPC_Dict_Insert(monitoredItemIdDict, (void*) (uintptr_t) monitItem->monitoredItemId, NULL);
     SOPC_SLinkedList_Append(monitoredItemIdFreed, monitItem->monitoredItemId,
                             (void*) (uintptr_t) monitItem->monitoredItemId);
-    free(monitItem);
+    // Reset monitored item associated
+    SOPC_Dict_Insert(monitoredItemIdDict, (void*) (uintptr_t) monitItem->monitoredItemId, NULL);
 }
 
 void monitored_item_pointer_bs__getall_monitoredItemPointer(

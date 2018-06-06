@@ -190,14 +190,9 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
 
         if (NULL != params && NULL != (void*) auxParam)
         {
+            /* Note: write values deallocation managed by B model */
             io_dispatch_mgr__internal_server_data_changed((OpcUa_WriteValue*) params, (OpcUa_WriteValue*) auxParam,
                                                           &bres);
-            /* Note:
-             *  - deallocate the old value after call to B model
-             *  - do not deallocate the new value since now managed by B model
-             */
-            OpcUa_WriteValue_Clear((OpcUa_WriteValue*) params);
-            free(params);
 
             if (bres == false)
             {
@@ -594,10 +589,7 @@ void SOPC_Services_PreClear()
 
 void SOPC_Services_Clear()
 {
-    address_space_bs__UNINITIALISATION();
-    service_mgr_bs__UNINITIALISATION();
-    monitored_item_pointer_bs__UNINITIALISATION_monitored_item_bs();
-    subscription_core_bs__UNINITIALISATION_subscription_core_bs();
+    io_dispatch_mgr__UNINITIALISATION();
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);

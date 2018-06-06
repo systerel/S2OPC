@@ -44,7 +44,7 @@ INITIALISATION
 OPERATIONS
 
     /* Needs UNINIT to deallocate non sent messages on uninit */
-    UNINITIALISATION =
+    service_mgr_bs_UNINITIALISATION =
     BEGIN
         skip
     END

@@ -32,6 +32,7 @@ IMPORTS
     subscription_core_it,
     monitored_item_notification_queue_bs,
     monitored_item_queue_bs,
+    monitored_item_queue_it_bs,
     monitored_item_pointer_bs,
     publish_request_queue_bs,
     msg_subscription_publish_bs
@@ -128,6 +129,46 @@ LOCAL_OPERATIONS
               ran(MonitoredItemNotification_MonitoredItemId) = a_monitoredItemId[l_a_monitored_item_notifications_dequeued[{p_queue}]]) ||
             a_monitored_item_notifications := a_monitored_item_notifications - l_a_monitored_item_notifications_dequeued
         END
+    END
+    ;
+    
+    local_close_subscription (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription
+    THEN
+        s_subscription := s_subscription - {p_subscription} ||
+        
+        a_subscription_session := {p_subscription} <<| a_subscription_session ||
+        a_publishInterval := {p_subscription} <<| a_publishInterval ||
+        a_lifetimeExpCount := {p_subscription} <<| a_lifetimeExpCount  ||
+        a_keepAliveExpCount := {p_subscription} <<| a_keepAliveExpCount ||
+        a_maxNotifsPerPublish := {p_subscription} <<| a_maxNotifsPerPublish ||
+        
+        a_subscription_state := {p_subscription} <<| a_subscription_state ||
+        a_LifetimeCounter := {p_subscription} <<| a_LifetimeCounter ||
+        a_KeepAliveCounter := {p_subscription} <<| a_KeepAliveCounter ||
+        a_MessageSent := a_MessageSent - {p_subscription}               ||
+        a_PublishingEnabled := a_PublishingEnabled - {p_subscription}   ||
+        a_SeqNum := {p_subscription} <<| a_SeqNum ||
+        
+        /* Queues emptied : publish responses should be sent if remaining */
+        a_publish_responses := a_publish_responses |>> {a_publishRequestQueue (p_subscription)} ||
+        a_monitored_item_notifications := {a_pendingNotificationQueue (p_subscription)} <<| a_monitored_item_notifications ||
+        a_defined_monitored_items := {a_monitoredItemQueue (p_subscription)} <<| a_defined_monitored_items ||
+        
+        /* Queues deleted */
+        s_notificationQueue := s_notificationQueue - {a_pendingNotificationQueue (p_subscription)} ||
+        a_pendingNotificationQueue := {p_subscription} <<| a_pendingNotificationQueue ||
+          
+        s_publishReqQueue := s_publishReqQueue - {a_publishRequestQueue(p_subscription)} ||
+        a_publishRequestQueue := {p_subscription} <<| a_publishRequestQueue ||
+        
+        /* Remove monitoredItems */
+        s_monitoredItemPointer := s_monitoredItemPointer - a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}] ||
+        /* TODO: For each queue in a_nodeToMonitoredItemQueue, remove monitored items: a_monitoredItemQueue (p_subscription) ||*/
+        s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
+        a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue
     END
     
 OPERATIONS
@@ -253,6 +294,70 @@ OPERATIONS
     END
     ;
     
+    local_close_subscription (p_subscription) =
+    VAR
+        l_timer_id,
+        l_publish_queue,
+        l_monitored_item_queue,
+        l_notification_queue,
+        l_continue,
+        l_iterator,
+        l_monitoredItemPointer,
+        l_monitoredItemId,
+        l_subscription,
+        l_nid,
+        l_aid,
+        l_timestampToReturn,
+        l_monitoringMode,
+        l_clientHandle,
+        l_monitored_item_node_queue,
+        l_bres
+    IN
+        l_timer_id <-- get_subscription_timer_id (p_subscription);
+        delete_publish_timer (l_timer_id);
+        l_publish_queue <-- get_subscription_publishRequestQueue (p_subscription);
+        clear_and_deallocate_publish_queue (l_publish_queue);
+        /* TODO: iter on monitored items and remove them from node queues ! */
+        l_monitored_item_queue <-- get_subscription_monitoredItemQueue (p_subscription);
+        l_continue, l_iterator <-- init_iter_monitored_item (l_monitored_item_queue);
+        WHILE l_continue = TRUE DO
+            l_continue, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, l_monitored_item_queue);
+            l_monitoredItemId,
+            l_subscription,
+            l_nid,
+            l_aid,
+            l_timestampToReturn,
+            l_monitoringMode,
+            l_clientHandle
+              <--getall_monitoredItemPointer (l_monitoredItemPointer);
+            l_bres, l_monitored_item_node_queue <-- get_nodeToMonitoredItemQueue (l_nid);
+            IF l_bres = TRUE
+            THEN
+                l_bres <-- remove_monitored_item(l_monitored_item_node_queue, l_monitoredItemPointer)
+            END; // TODO: ELSE log error
+            // Deallocate monitored item pointer since l_monitored_item_queue will then be cleared
+            delete_monitored_item_pointer (l_monitoredItemPointer)
+        INVARIANT
+            s_mi_to_iterate_it <: t_monitoredItemPointer &
+            s_mi_iterated_it   <: t_monitoredItemPointer &
+            
+            s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
+            card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it &
+            l_continue = bool(s_mi_to_iterate_it /= {}) &
+            s_mi_iterated_it /\ a_defined_monitored_items[ran(a_nodeToMonitoredItemQueue)] = {} &
+            s_mi_to_iterate_it /\ a_defined_monitored_items[ran(a_nodeToMonitoredItemQueue)] = s_mi_to_iterate_it
+
+        VARIANT
+            card(s_mi_to_iterate_it)
+        END;
+        clear_iter_monitored_item (l_iterator);
+        clear_and_deallocate_monitored_item_queue (l_monitored_item_queue);
+        l_notification_queue <-- get_subscription_notificationQueue (p_subscription);
+        clear_and_deallocate_monitored_item_notification_queue (l_notification_queue);
+        delete_subscription (p_subscription)
+    END
+    ;
+    
     /* END OF LOCAL OPERATIONS */
     
     is_valid <-- is_valid_subscription_on_session (p_session, p_subscription) =
@@ -344,22 +449,8 @@ OPERATIONS
     ;
     
     close_subscription (p_subscription) =
-    VAR
-        l_timer_id,
-        l_publish_queue,
-        l_monitored_item_queue,
-        l_notification_queue
-    IN
-        l_timer_id <-- get_subscription_timer_id (p_subscription);
-        delete_publish_timer (l_timer_id);
-        l_publish_queue <-- get_subscription_publishRequestQueue (p_subscription);
-        clear_and_deallocate_publish_queue (l_publish_queue);
-        /* TODO: iter on monitored items and remove them from node queues ! */
-        l_monitored_item_queue <-- get_subscription_monitoredItemQueue (p_subscription);
-        clear_and_deallocate_monitored_item_queue (l_monitored_item_queue);
-        l_notification_queue <-- get_subscription_notificationQueue (p_subscription);
-        clear_and_deallocate_monitored_item_notification_queue (l_notification_queue);
-        delete_subscription (p_subscription)
+    BEGIN
+        local_close_subscription (p_subscription)
     END
     ;
     
@@ -469,7 +560,7 @@ OPERATIONS
                 moreNotifs := TRUE
             END
             ;
-            
+
             /* allocate and fill notification "message" */
             l_bres, l_notifMsg <-- alloc_notification_message_items (p_resp_msg, l_nb_notifications);
             IF l_bres = TRUE
@@ -568,38 +659,46 @@ OPERATIONS
                                             p_clientHandle);
         IF l_bres = TRUE
         THEN
-            l_node_monitIt_queue <-- get_nodeToMonitoredItemQueue (p_nid);
-            l_sub_monitIt_queue <-- get_subscription_monitoredItemQueue (p_subscription);
-            l_bres <-- add_monitored_item_to_queue (l_node_monitIt_queue, monitoredItemPointer);
+            l_bres, l_node_monitIt_queue <-- get_nodeToMonitoredItemQueue (p_nid);
+            
             IF l_bres = TRUE
             THEN
-                /* Add monitored item to subscription and node queues */
-                l_bres <-- add_monitored_item_to_queue (l_sub_monitIt_queue, monitoredItemPointer);
-                IF l_bres = FALSE
+                l_sub_monitIt_queue <-- get_subscription_monitoredItemQueue (p_subscription);
+                l_bres <-- add_monitored_item_to_queue (l_node_monitIt_queue, monitoredItemPointer);
+                IF l_bres = TRUE
                 THEN
-                    l_bres <-- remove_monitored_item (l_node_monitIt_queue, monitoredItemPointer);
-                    l_bres := FALSE
+                    /* Add monitored item to subscription and node queues */
+                    l_bres <-- add_monitored_item_to_queue (l_sub_monitIt_queue, monitoredItemPointer);
+                    IF l_bres = FALSE
+                    THEN
+                        l_bres <-- remove_monitored_item (l_node_monitIt_queue, monitoredItemPointer);
+                        l_bres := FALSE
+                    END
                 END
-            END
-            ;
-            IF l_bres = TRUE
-            THEN
-                /* Generate a notification for new monitored item */
-                l_sub_notif_queue <-- get_subscription_notificationQueue (p_subscription);
-                l_bres <-- add_first_monitored_item_notification_to_queue (l_sub_notif_queue, 
-                                                                           monitoredItemPointer, 
-                                                                           p_nid,
-                                                                           p_aid,
-                                                                           p_value,
-                                                                           p_valueSc);
-                IF l_bres = FALSE
+                ;
+                IF l_bres = TRUE
                 THEN
-                    l_bres <-- remove_monitored_item (l_node_monitIt_queue, monitoredItemPointer);
-                    l_bres <-- remove_monitored_item (l_sub_monitIt_queue, monitoredItemPointer);
-                    l_bres := FALSE
-                ELSE
-                    StatusCode_service := e_sc_ok
-                END                                                    
+                    /* Generate a notification for new monitored item */
+                    l_sub_notif_queue <-- get_subscription_notificationQueue (p_subscription);
+                    l_bres <-- add_first_monitored_item_notification_to_queue (l_sub_notif_queue, 
+                        monitoredItemPointer, 
+                        p_nid,
+                        p_aid,
+                        p_value,
+                        p_valueSc);
+                    IF l_bres = FALSE
+                    THEN
+                        l_bres <-- remove_monitored_item (l_node_monitIt_queue, monitoredItemPointer);
+                        l_bres <-- remove_monitored_item (l_sub_monitIt_queue, monitoredItemPointer);
+                        l_bres := FALSE
+                    ELSE
+                        StatusCode_service := e_sc_ok
+                    END
+                END
+            END;
+            IF l_bres = FALSE
+            THEN
+                delete_monitored_item_pointer(monitoredItemPointer)
             END
         END
     END
@@ -941,6 +1040,36 @@ OPERATIONS
         l_notif_queue <-- get_subscription_notificationQueue (p_subscription);
         l_res <-- add_monitored_item_notification_to_queue (l_notif_queue, p_monitoredItemPointer, p_writeValuePointer)
         /* TODO: manage l_res == FALSE*/
+    END
+    ;
+    
+    subscription_core_UNINITIALISATION =
+    VAR
+        l_subscription,
+        l_is_subscription,
+        l_continue
+    IN
+        l_continue <-- init_iter_subscription;
+        WHILE
+            l_continue   = TRUE
+        DO
+            l_continue, l_subscription <-- continue_iter_subscription;
+            l_is_subscription <-- is_valid_subscription(l_subscription);
+            IF l_is_subscription = TRUE
+            THEN
+                local_close_subscription (l_subscription)
+            END
+        INVARIANT
+            l_continue = bool(subscriptions_to_iterate /= {}) &
+            subscriptions_to_iterate /\ subscriptions_iterated = {} &
+            subscriptions_to_iterate \/ subscriptions_iterated = t_subscription &
+            subscriptions_iterated /\ s_subscription = {} &
+            subscriptions_to_iterate = s_subscription
+        VARIANT
+            card(subscriptions_to_iterate)
+        END;
+        subscription_core_bs_UNINITIALISATION;
+        monitored_item_pointer_bs_UNINITIALISATION
     END
 
 END

@@ -54,5 +54,13 @@ OPERATIONS
           (bres = FALSE => p_write_value_copy = c_WriteValuePointer_indet) &
           (bres = TRUE => p_write_value_copy : t_WriteValuePointer))
     END
+    ;
     
+    free_write_value_pointer (p_write_value) =
+    PRE
+        p_write_value : t_WriteValuePointer_i &
+        p_write_value : t_WriteValuePointer
+    THEN
+        skip
+    END
 END

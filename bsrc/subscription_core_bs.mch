@@ -34,19 +34,25 @@ INITIALISATION
 OPERATIONS
     
     /* Needs UNINIT to deallocate node to monitored item queues */
-    UNINITIALISATION_subscription_core_bs =
+    subscription_core_bs_UNINITIALISATION =
     BEGIN
         skip
     END
     ;
     
-    p_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_nid) =
+    p_bres, p_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_nid) =
     PRE
         p_nid : t_NodeId_i &
         p_nid : t_NodeId
     THEN
-        p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i & 
-                               p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid))
+        CHOICE
+            p_bres := FALSE ||
+            p_monitoredItemQueue := c_monitoredItemQueue_indet
+        OR
+            p_bres := TRUE ||
+            p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i & 
+                p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid))
+        END
     END
     ;
     

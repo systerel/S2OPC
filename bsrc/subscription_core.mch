@@ -63,6 +63,50 @@ DEFINITIONS
     a_defined_monitored_items
     ;
     
+    d_init ==
+    s_subscription := {}        ||
+    a_subscription_session := {}||
+    a_publishInterval := {}     ||
+    a_lifetimeExpCount := {}    ||
+    a_keepAliveExpCount := {}   ||
+    a_maxNotifsPerPublish := {} ||
+
+    a_subscription_state := {}    ||
+
+    a_MoreNotifications := {}     ||
+    a_LifetimeCounter := {}       ||
+    a_KeepAliveCounter := {}      ||
+    a_MessageSent := {}           ||
+    a_PublishingEnabled := {}     ||
+    a_SeqNum            := {}     ||
+    
+    a_pendingNotificationQueue := {} ||
+    a_publishRequestQueue := {} ||
+    a_monitoredItemQueue := {} ||
+    a_publishTimer := {} ||
+    a_nodeToMonitoredItemQueue := {} ||
+    
+    s_monitoredItemPointer := {} ||
+    s_monitoredItemId := {} ||
+    a_monitoredItemId := {} ||
+    a_monitoredItemSubs := {} ||
+    /* Publish response and notification message content */
+    publish_response_message := c_msg_indet ||
+    notification_message := c_notif_msg_indet ||
+    notification_message_seq_num := c_sub_seq_num_indet ||
+    
+    /* Queues content */
+    
+    s_publishReqQueue := {} ||
+    a_publish_responses := {} ||
+    validPublishReqQueued := FALSE ||
+    
+    s_notificationQueue := {} ||
+    a_monitored_item_notifications := {} ||
+    s_monitoredItemQueue := {} ||
+    a_defined_monitored_items := {}
+    ;
+    
     d_typing ==
     s_subscription <: t_subscription &
 
@@ -292,47 +336,7 @@ INVARIANT
     d_typing
 
 INITIALISATION
-    s_subscription := {}        ||
-    a_subscription_session := {}||
-    a_publishInterval := {}     ||
-    a_lifetimeExpCount := {}    ||
-    a_keepAliveExpCount := {}   ||
-    a_maxNotifsPerPublish := {} ||
-
-    a_subscription_state := {}    ||
-
-    a_MoreNotifications := {}     ||
-    a_LifetimeCounter := {}       ||
-    a_KeepAliveCounter := {}      ||
-    a_MessageSent := {}           ||
-    a_PublishingEnabled := {}     ||
-    a_SeqNum            := {}     ||
-    
-    a_pendingNotificationQueue := {} ||
-    a_publishRequestQueue := {} ||
-    a_monitoredItemQueue := {} ||
-    a_publishTimer := {} ||
-    a_nodeToMonitoredItemQueue :(a_nodeToMonitoredItemQueue : t_NodeId --> s_monitoredItemQueue) || /* DEFINED ON INIT */
-    
-    s_monitoredItemPointer := {} ||
-    s_monitoredItemId := {} ||
-    a_monitoredItemId := {} ||
-    a_monitoredItemSubs := {} ||
-    /* Publish response and notification message content */
-    publish_response_message := c_msg_indet ||
-    notification_message := c_notif_msg_indet ||
-    notification_message_seq_num := c_sub_seq_num_indet ||
-    
-    /* Queues content */
-    
-    s_publishReqQueue := {} ||
-    a_publish_responses := {} ||
-    validPublishReqQueued := FALSE ||
-    
-    s_notificationQueue := {} ||
-    a_monitored_item_notifications := {} ||
-    s_monitoredItemQueue := {} ||
-    a_defined_monitored_items := {}
+    d_init
     
 OPERATIONS
     
@@ -944,13 +948,19 @@ OPERATIONS
     END
     ;
     
-    p_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_nid) =
+    p_bres, p_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_nid) =
     PRE
         p_nid : t_NodeId_i &
         p_nid : t_NodeId
     THEN
-        p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i & 
-                               p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid))
+        CHOICE
+            p_bres := FALSE ||
+            p_monitoredItemQueue := c_monitoredItemQueue_indet
+        OR
+            p_bres := TRUE ||
+            p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i & 
+                p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid))
+        END
     END
     ;
     
@@ -1046,6 +1056,12 @@ OPERATIONS
         p_statusCode : t_StatusCode_i & p_statusCode : t_StatusCode
     THEN
         skip
+    END
+    ;
+    
+    subscription_core_UNINITIALISATION =
+    BEGIN
+        d_init
     END
 
 END
