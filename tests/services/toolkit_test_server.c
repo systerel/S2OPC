@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "sopc_atomic.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_pki_stack.h"
@@ -45,7 +46,7 @@
 #define APPLICATION_URI "urn:INGOPCS:localhost"
 #define PRODUCT_URI "urn:INGOPCS:localhost"
 
-static int endpointClosed = false;
+static int32_t endpointClosed = 0;
 static bool secuActive = true;
 
 volatile sig_atomic_t stopServer = 0;
@@ -78,7 +79,7 @@ void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void
     if (event == SE_CLOSED_ENDPOINT)
     {
         printf("<Test_Server_Toolkit: closed endpoint event: OK\n");
-        endpointClosed = true;
+        SOPC_Atomic_Int_Set(&endpointClosed, 1);
     }
     else
     {
@@ -375,19 +376,19 @@ int main(int argc, char* argv[])
     }
 
     // Run the server until notification that endpoint is closed or stop server signal
-    while (SOPC_STATUS_OK == status && stopServer == 0 && endpointClosed == false)
+    while (SOPC_STATUS_OK == status && stopServer == 0 && SOPC_Atomic_Int_Get(&endpointClosed) == 0)
     {
         SOPC_Sleep(sleepTimeout);
     }
 
-    if (SOPC_STATUS_OK == status && endpointClosed == false)
+    if (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&endpointClosed) == 0)
     {
         // Asynchronous request to close the endpoint
         SOPC_ToolkitServer_AsyncCloseEndpoint(epConfigIdx);
     }
 
     // Wait until endpoint is closed or stop server signal
-    while (SOPC_STATUS_OK == status && stopServer == 0 && endpointClosed == false)
+    while (SOPC_STATUS_OK == status && stopServer == 0 && SOPC_Atomic_Int_Get(&endpointClosed) == 0)
     {
         // Retrieve received messages on socket
         SOPC_Sleep(sleepTimeout);
