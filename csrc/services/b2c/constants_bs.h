@@ -66,13 +66,13 @@ typedef uint32_t constants_bs__t_client_handle_i;
 typedef uint32_t constants_bs__t_endpoint_config_idx_i;
 typedef uint32_t constants_bs__t_monitoredItemId_i;
 typedef void* constants_bs__t_monitoredItemPointer_i;
-typedef SOPC_SLinkedListIterator constants_bs__t_monitoredItemQueueIterator_i;
+typedef SOPC_SLinkedListIterator* constants_bs__t_monitoredItemQueueIterator_i;
 typedef SOPC_SLinkedList* constants_bs__t_monitoredItemQueue_i;
 #define constants_bs__t_monitoredItem_i t_entier4
 typedef void* constants_bs__t_msg_header_i; /* OpcUa_RequestHeader OR OpcUa_ResponseHeader */
 typedef void* constants_bs__t_msg_i;        /* OpcUa_* message */
 typedef OpcUa_NotificationMessage* constants_bs__t_notif_msg_i;
-typedef SOPC_SLinkedListIterator constants_bs__t_notificationQueueIterator_i;
+typedef SOPC_SLinkedListIterator* constants_bs__t_notificationQueueIterator_i;
 typedef SOPC_SLinkedList* constants_bs__t_notificationQueue_i;
 typedef double constants_bs__t_opcua_duration_i;
 typedef SOPC_SLinkedList* constants_bs__t_publishReqQueue_i;

@@ -132,6 +132,12 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
         {
             notifElt->monitoredItemPointer = monitored_item_notification_queue_bs__p_monitoredItem;
             notifElt->value = monitored_item_notification_queue_bs__p_writeValuePointer;
+            if (notifElt->value->Value.SourceTimestamp == 0)
+            {
+                notifElt->value->Value.SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
+            }
+            notifElt->value->Value.ServerTimestamp = SOPC_Time_GetCurrentTimeUTC();
+
             checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
             if (checkAdded == notifElt)
             {
