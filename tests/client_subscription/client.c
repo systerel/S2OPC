@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
     }
 
     usleep(10 * 1000000);
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the connection.");
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the connections.");
     SOPC_LibSub_Disconnect(con_id);
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the Toolkit.");
     SOPC_LibSub_Clear();

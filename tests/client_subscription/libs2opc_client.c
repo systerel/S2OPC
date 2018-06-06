@@ -348,7 +348,7 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId)
         }
     }
 
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && SOPC_StaMac_IsConnected(pSM))
     {
         status = SOPC_StaMac_StopSession(pSM);
     }
@@ -360,10 +360,6 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId)
         while (!SOPC_StaMac_IsError(pSM) && SOPC_StaMac_IsConnected(pSM))
         {
             SOPC_Sleep(1);
-        }
-        if (SOPC_StaMac_IsError(pSM))
-        {
-            status = SOPC_STATUS_NOK;
         }
     }
 
@@ -379,9 +375,7 @@ void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* p
 {
     SOPC_SLinkedListIterator pIterCli = NULL;
     SOPC_LibSub_ConnectionId cliId = 0;
-    SOPC_LibSub_ConnectionId cliIdPro = 0; /* The cliId of the machine that processed the event */
     SOPC_StaMac_Machine* pSM = NULL;
-    SOPC_StaMac_Machine* pSMPro = NULL; /* The state machine that processed the event */
     bool bProcessed = false;
 
     /* List through known clients and call state machine event callback */
@@ -394,20 +388,15 @@ void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* p
         {
             assert(!bProcessed);
             bProcessed = true;
-            cliIdPro = cliId;
-            pSMPro = pSM;
+            /* Post process the event. The only interesting event is for now CLOSED. */
+            if (SE_CLOSED_SESSION == event)
+            {
+                /* The disconnect callback shall be called after the client has been destroyed */
+                cbkDisco(cliId);
+            }
         }
     }
 
     /* At least one machine should have processed the event */
     assert(bProcessed);
-
-    /* Post process the event. The only interesting event is for now CLOSED. */
-    if (SE_CLOSED_SESSION == event)
-    {
-        /* The disconnect callback shall be called after the client has been destroyed */
-        assert(pSMPro == SOPC_SLinkedList_RemoveFromId(pListClient, cliIdPro));
-        SOPC_StaMac_Delete(&pSMPro);
-        cbkDisco(cliIdPro);
-    }
 }

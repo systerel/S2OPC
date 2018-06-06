@@ -198,17 +198,14 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
     if (!SOPC_StaMac_IsConnected(pSM))
     {
         status = SOPC_STATUS_NOK;
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "StopSession on a disconnected machine.");
+        pSM->state = stError;
     }
 
     if (SOPC_STATUS_OK == status)
     {
         SOPC_ToolkitClient_AsyncCloseSession(pSM->iSessionID);
         pSM->state = stClosing;
-    }
-    else
-    {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "StopSession on a disconnected machine.");
-        pSM->state = stError;
     }
 
     return status;
@@ -219,7 +216,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* reques
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_ReqCtx* pReqCtx = NULL;
 
-    if (NULL == pSM || (!SOPC_StaMac_IsConnected(pSM) && stClosing != pSM->state) || UINT32_MAX == nSentReqs)
+    if (NULL == pSM || !SOPC_StaMac_IsConnected(pSM) || UINT32_MAX == nSentReqs)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
@@ -366,7 +363,6 @@ bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM)
     {
         switch (pSM->state)
         {
-        case stActivating:
         case stActivated:
         case stCreatingSubscr:
         case stCreatingMonIt:
@@ -432,11 +428,13 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
     OpcUa_DataChangeNotification* pDataNotif = NULL;
     OpcUa_MonitoredItemNotification* pMonItNotif = NULL;
     SOPC_LibSub_Value* plsVal = NULL;
+    SOPC_StaMac_State oldState = stError;
 
     bProcess = StaMac_IsEventTargeted(pSM, &intAppCtx, event, arg, pParam, appCtx);
 
     if (bProcess)
     {
+        oldState = pSM->state;
         if (NULL != pAppCtx)
         {
             *pAppCtx = intAppCtx;
@@ -468,15 +466,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             switch (event)
             {
             case SE_CLOSED_SESSION:
-                pSM->state = stInit;
-                /* Reset the machine */
-                pSM->iSessionCtx = 0;
-                pSM->iSessionID = 0;
-                pSM->iSubscriptionID = 0;
-                SOPC_SLinkedList_Clear(pSM->pListReqCtx);
-                SOPC_SLinkedList_Clear(pSM->pListMonIt);
-                pSM->nTokenUsable = 0;
-                pSM->bAckSubscr = false;
+                /* Put the machine in a correct closed state, events may still be received */
+                pSM->state = stError;
                 break;
             default:
                 /* This might be a response to a pending request, so this might not an error */
@@ -621,7 +612,24 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Event received in stInit state.");
             break;
         case stError:
-            Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Receiving event in stError state, ignoring.");
+            switch (event)
+            {
+            case SE_SESSION_ACTIVATION_FAILURE:
+            case SE_CLOSED_SESSION:
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Received post-closed closed event or activation failure, ignored.");
+                break;
+            case SE_SND_REQUEST_FAILED:
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Received post-closed send request failure for message of type %s.",
+                            ((SOPC_EncodeableType*) pParam)->TypeName);
+                break;
+            case SE_SESSION_REACTIVATING:
+                Helpers_Log(SOPC_LOG_LEVEL_INFO,
+                            "Reactivating event received, but closed connection are considered lost.");
+                break;
+            default:
+                Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Receiving unexpected event %i in closed state, ignored.", event);
+                break;
+            }
             break;
         default:
             pSM->state = stError;
@@ -683,6 +691,29 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     {
                         pSM->state = stError;
                     }
+                }
+            }
+            break;
+        /* Try to send a close session if the session was connected before the error */
+        case stError:
+            if (stError != oldState && stClosing != oldState)
+            {
+                pSM->state = oldState;
+                if (SOPC_StaMac_IsConnected(pSM))
+                {
+                    status = SOPC_StaMac_StopSession(pSM);
+                    if (SOPC_STATUS_OK != status)
+                    {
+                        pSM->state = stError;
+                    }
+                    else
+                    {
+                        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the connection because of the previous error.");
+                    }
+                }
+                else
+                {
+                    pSM->state = stError;
                 }
             }
             break;
