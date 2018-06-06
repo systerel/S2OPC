@@ -296,8 +296,7 @@ void session_core_bs__server_create_session_req_do_crypto(
     }
 
     /* If security policy is not None, generate the nonce and a signature */
-    if (strncmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) !=
-        0) /* Including the terminating \0 */
+    if (strcmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI) != 0)
     {
         pNonce = &pSession->nonceServer;
         pSign = &pSession->signatureData;
@@ -454,8 +453,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
     }
 
     /* If security policy is not None, generate the signature */
-    if (strncmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) !=
-        0) /* Including the terminating \0 */
+    if (strcmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI) != 0) /* Including the terminating \0 */
     {
         /* Retrieve ptr Signature */
         pSign = &pSession->signatureData;
@@ -610,8 +608,7 @@ void session_core_bs__client_create_session_req_do_crypto(
             return;
 
         /* If security policy is not None, generate the nonce */
-        if (strncmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) !=
-            0) /* Including the terminating \0 */
+        if (strcmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI) != 0) /* Including the terminating \0 */
         {
             *session_core_bs__nonce_needed = true;
             /* Retrieve ptrs to Nonce and Signature */
@@ -719,7 +716,7 @@ void session_core_bs__client_create_session_check_crypto(
         /* Verify signature algorithm URI */
         szSignUri = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider);
 
-        if (szSignUri != NULL && strncmp((char*) pSignCandid->Algorithm.Data, szSignUri, strlen(szSignUri) + 1) == 0)
+        if (szSignUri != NULL && strcmp((char*) pSignCandid->Algorithm.Data, szSignUri) == 0)
         {
             /* Build signed data (client certificate + client nonce) */
             /* a) Get Der of client certificate */
@@ -813,7 +810,7 @@ void session_core_bs__server_activate_session_check_crypto(
         /* Verify signature algorithm URI */
         szSignUri = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider);
 
-        if (szSignUri != NULL && strncmp((char*) pSignCandid->Algorithm.Data, szSignUri, strlen(szSignUri) + 1) == 0)
+        if (szSignUri != NULL && strcmp((char*) pSignCandid->Algorithm.Data, szSignUri) == 0)
         {
             /* Build signed data (server certificate + server nonce) */
             /* a) Get Der of client certificate */
