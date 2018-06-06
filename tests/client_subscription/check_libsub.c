@@ -24,9 +24,22 @@
  */
 
 #include <check.h>
+#include <stdint.h>
 #include <stdlib.h>
 
+#include "sopc_builtintypes.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_log_manager.h"
+#include "sopc_time.h" /* SOPC_Sleep */
+#include "sopc_toolkit_constants.h"
+#include "sopc_types.h"
+#define SKIP_S2OPC_DEFINITIONS
+#include "libs2opc_client.h"
+
 #include "toolkit_helpers.h"
+
+#define SLEEP_TIME 10
+#define TEST_TIMEOUT 10000
 
 START_TEST(test_time_conversion)
 {
@@ -43,16 +56,103 @@ START_TEST(test_time_conversion)
 }
 END_TEST
 
+/* Subscription test */
+
+SOPC_LibSub_ConnectionId con_id = 0;
+SOPC_LibSub_DataId dat_id = 0;
+bool bFirstValue = true;
+int64_t iFirstValue = 0;
+int32_t bValueChanged = 0; /* TODO: use sopc_atomic.h */
+int32_t bDisconnected = 0;
+
+static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
+{
+    /* This is not just assert(false), as the disconnection shall happen when closing the lib */
+    ck_assert(c_id == con_id);
+    bDisconnected = 1; /* TODO: use SOPC_Atomit_Int_Set */
+}
+
+static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
+                                const SOPC_LibSub_DataId d_id,
+                                const SOPC_LibSub_Value* value)
+{
+    ck_assert(c_id == con_id);
+    ck_assert(d_id == dat_id);
+    ck_assert(value->type == SOPC_LibSub_DataType_integer);
+    ck_assert(value->quality == 0);
+
+    if (bFirstValue)
+    {
+        bFirstValue = false;
+        iFirstValue = *(int64_t*) (value->value);
+    }
+    else if (0 == bValueChanged)
+    {
+        bValueChanged = 1; /* TODO: use SOPC_Atomit_Int_Set */
+        ck_assert(*(int64_t*) (value->value) == iFirstValue + 1);
+    }
+}
+
+static inline void setup_client(void) {}
+
+static inline void teardown_client(void) {}
+
+START_TEST(test_subscription)
+{
+    SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = Helpers_LoggerStdout,
+                                     .disconnect_callback = disconnect_callback};
+    SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = "opc.tcp://localhost:4841",
+                                         .security_policy = SOPC_SecurityPolicy_None_URI,
+                                         .security_mode = OpcUa_MessageSecurityMode_None,
+                                         .path_cert_auth = "./trusted/cacert.der",
+                                         .path_cert_srv = NULL,
+                                         .path_cert_cli = NULL,
+                                         .path_key_cli = NULL,
+                                         .path_crl = NULL,
+                                         .username = NULL,
+                                         .password = NULL,
+                                         .publish_period_ms = 100,
+                                         .data_change_callback = datachange_callback,
+                                         .timeout_ms = TEST_TIMEOUT,
+                                         .sc_lifetime = 60000,
+                                         .token_target = 3};
+    SOPC_LibSub_ConfigurationId cfg_id = 0;
+
+    ck_assert(SOPC_LibSub_Initialize(&cfg_cli) == SOPC_STATUS_OK);
+    ck_assert(SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id) == SOPC_STATUS_OK);
+    ck_assert(SOPC_LibSub_Configured() == SOPC_STATUS_OK);
+    ck_assert(SOPC_LibSub_Connect(cfg_id, &con_id) == SOPC_STATUS_OK);
+    ck_assert(SOPC_LibSub_AddToSubscription(con_id, "s=Counter", SOPC_LibSub_AttributeId_Value, &dat_id) ==
+              SOPC_STATUS_OK);
+
+    /* Wait for deconnection, failed assert, or subscription success */
+    int iCnt = 0;
+    /* TODO: use SOPC_Atomic_Int_Get */
+    while (iCnt * SLEEP_TIME <= TEST_TIMEOUT && bValueChanged == 0 && bDisconnected == 0)
+    {
+        SOPC_Sleep(SLEEP_TIME);
+    }
+
+    ck_assert(bDisconnected == 0);
+    ck_assert(SOPC_LibSub_Disconnect(con_id) == SOPC_STATUS_OK);
+    SOPC_LibSub_Clear();
+}
+END_TEST
+
 Suite* tests_make_suite_libsub(void)
 {
     Suite* s = NULL;
-    TCase* tc_time = NULL;
+    TCase *tc_time = NULL, *tc_libsub;
 
     s = suite_create("Client subscription library");
 
     tc_time = tcase_create("Time");
     tcase_add_test(tc_time, test_time_conversion);
     suite_add_tcase(s, tc_time);
+
+    tc_libsub = tcase_create("LibSub");
+    tcase_add_test(tc_libsub, test_subscription);
+    suite_add_tcase(s, tc_libsub);
 
     return s;
 }
