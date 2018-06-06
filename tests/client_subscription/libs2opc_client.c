@@ -113,17 +113,30 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
 
 void SOPC_LibSub_Clear(void)
 {
-    /* TODO: clear configurations */
-    /* TODO: clear connected clients */
-    /* Put machines in stShutdown, so that they interpret failure event as "expected"
-    SOPC_SLinkedListIterator pIterCli = NULL;
-    pIterCli = SOPC_SLinkedList_GetIterator(pListClient);
-    while (NULL != pIterCli)
-    {
-        pSM = SOPC_SLinkedList_NextWithId(&pIterCli, &cliId);
+    SOPC_SLinkedListIterator pIter = NULL;
+    SOPC_StaMac_Machine* pSM = NULL;
+    SOPC_LibSub_ConnectionCfg* pCfg = NULL;
 
-    }*/
     SOPC_Toolkit_Clear();
+
+    pIter = SOPC_SLinkedList_GetIterator(pListClient);
+    while (NULL != pIter)
+    {
+        pSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_Next(&pIter);
+        SOPC_StaMac_Delete(&pSM);
+    }
+    SOPC_SLinkedList_Delete(pListClient);
+
+    pIter = SOPC_SLinkedList_GetIterator(pListConfig);
+    while (NULL != pIter)
+    {
+        pCfg = (SOPC_LibSub_ConnectionCfg*) SOPC_SLinkedList_Next(&pIter);
+        free(pCfg);
+    }
+    SOPC_SLinkedList_Delete(pListConfig);
+
+    bLibInitialized = false;
+    bLibConfigured = false;
 }
 
 SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
