@@ -723,6 +723,6 @@ target_link_libraries(s2opc_subscription_client PRIVATE client_subscription)
 add_executable(check_libsub "${LIBSUBSCRIBE_PATH}/check_libsub.c")
 target_include_directories(check_libsub PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
 target_link_libraries(check_libsub PRIVATE client_subscription ${CHECK_LIBRARIES})
-s2opc_unit_test(check_libsub)
+s2opc_client_validation_test(check_libsub)
 
 endif(ENABLE_TESTING)
