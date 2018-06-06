@@ -55,7 +55,7 @@
 
 /* Machine states */
 typedef enum {
-    stError,
+    stError, /* stError is both error and closed state */
     stInit,
     stActivating,
     stActivated,
