@@ -184,4 +184,15 @@ uint32_t SOPC_Buffer_Remaining(SOPC_Buffer* buffer);
  */
 int64_t SOPC_Buffer_ReadFrom(SOPC_Buffer* buffer, SOPC_Buffer* src, uint32_t n);
 
+/**
+ * \brief Reads the contents of a file into a SOPC_Buffer.
+ *
+ * \param path  The path to the file.
+ * \param buf   Out parameter, points to a new buffer holding the contents of
+ *              the file. This buffer should be freed by the caller.
+ *
+ * \return \c SOPC_STATUS_OK on success, an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf);
+
 #endif /* SOPC_BUFFER_H_ */

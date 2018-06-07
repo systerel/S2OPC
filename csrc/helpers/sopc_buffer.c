@@ -19,6 +19,7 @@
 
 #include "sopc_buffer.h"
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -245,4 +246,83 @@ int64_t SOPC_Buffer_ReadFrom(SOPC_Buffer* buffer, SOPC_Buffer* src, uint32_t n)
     buffer->length += n;
     src->position += n;
     return (int64_t) n;
+}
+
+static long get_file_size(FILE* fd)
+{
+    if (fseek(fd, 0, SEEK_END) == -1)
+    {
+        return -1;
+    }
+
+    long sz = ftell(fd);
+
+    if (sz == -1)
+    {
+        return -1;
+    }
+
+    if (fseek(fd, 0, SEEK_SET) == -1)
+    {
+        return -1;
+    }
+
+    return sz;
+}
+
+static bool read_file(FILE* fd, char* data, size_t len)
+{
+    size_t read = 0;
+
+    while (true)
+    {
+        size_t res = fread(data + read, sizeof(char), len - read, fd);
+
+        if (res == 0)
+        {
+            break;
+        }
+
+        read += res;
+    }
+
+    return ferror(fd) == 0;
+}
+
+SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf)
+{
+    FILE* fd = fopen(path, "rb");
+
+    if (fd == NULL)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    long size = get_file_size(fd);
+
+    if (size == -1 || ((unsigned long) size) > UINT32_MAX || ((unsigned long) size) > SIZE_MAX)
+    {
+        fclose(fd);
+        return SOPC_STATUS_NOK;
+    }
+
+    SOPC_Buffer* buffer = SOPC_Buffer_Create((uint32_t) size);
+
+    if (buffer == NULL)
+    {
+        fclose(fd);
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    bool ok = read_file(fd, (char*) buffer->data, (size_t) size);
+    fclose(fd);
+
+    if (!ok)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    buffer->length = buffer->max_size;
+    *buf = buffer;
+    return SOPC_STATUS_OK;
 }
