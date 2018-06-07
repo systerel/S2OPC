@@ -19,7 +19,7 @@
 
 int32_t SOPC_Atomic_Int_Get(int32_t* atomic)
 {
-#if !defined(__clang__)
+#if !defined(__clang__) && (__GNUC__ > 4)
     // This version works with TSan, the other one creates false positives...
     return (int32_t) __atomic_load_4(atomic, __ATOMIC_SEQ_CST);
 #else
@@ -30,7 +30,7 @@ int32_t SOPC_Atomic_Int_Get(int32_t* atomic)
 
 void SOPC_Atomic_Int_Set(int32_t* atomic, int32_t val)
 {
-#if !defined(__clang__)
+#if !defined(__clang__) && (__GNUC__ > 4)
     __atomic_store_4(atomic, (unsigned int) val, __ATOMIC_SEQ_CST);
 #else
     *atomic = val;
@@ -45,7 +45,7 @@ int32_t SOPC_Atomic_Int_Add(int32_t* atomic, int32_t val)
 
 void* SOPC_Atomic_Ptr_Get(void** atomic)
 {
-#if !defined(__clang__)
+#if !defined(__clang__) && (__GNUC__ > 4)
 
 #if SOPC_PTR_SIZE == 4
     return (void*) __atomic_load_4(atomic, __ATOMIC_SEQ_CST);
@@ -63,7 +63,7 @@ void* SOPC_Atomic_Ptr_Get(void** atomic)
 
 void SOPC_Atomic_Ptr_Set(void** atomic, void* val)
 {
-#if !defined(__clang__)
+#if !defined(__clang__) && (__GNUC__ > 4)
 
 #if SOPC_PTR_SIZE == 4
     __atomic_store_4(atomic, (uintptr_t) val, __ATOMIC_SEQ_CST);
