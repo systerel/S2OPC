@@ -406,7 +406,7 @@ OPERATIONS
             l_bres_notif, l_newNotifQueue <-- allocate_new_monitored_item_notification_queue;
             l_bres_pub, l_newPublishQueue <-- allocate_new_publish_queue;
             l_bres_monitored, l_newMonitoredItemQueue <-- allocate_new_monitored_item_queue;
-            l_bres_timer, l_timerId <-- create_publish_timer (l_subscription, p_revPublishInterval);
+            l_bres_timer, l_timerId <-- create_periodic_publish_timer (l_subscription, p_revPublishInterval);
             IF l_bres_notif = TRUE & l_bres_pub = TRUE & l_bres_monitored = TRUE & l_bres_timer = TRUE
             THEN
                 StatusCode_service := e_sc_ok;
@@ -741,8 +741,6 @@ OPERATIONS
     p_msg_to_send, p_msg_sc, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_moreNotifs
       <-- server_subscription_core_publish_timeout (p_subscription, p_validPublishReqQueued) =
     VAR
-        l_pubInterval,
-        l_newTimerId,
         l_bres,
         l_State,
         l_PublishingReqQueue,
@@ -765,15 +763,6 @@ OPERATIONS
         p_req_context := c_request_context_indet;
         p_moreNotifs := FALSE;
         p_msg_sc := c_StatusCode_indet;
-        
-        /* Restart timer */
-        l_pubInterval <-- get_subscription_publishInterval (p_subscription);
-        l_bres, l_newTimerId <-- create_publish_timer (p_subscription, l_pubInterval);
-        IF l_bres = TRUE
-        THEN
-            set_subscription_timer_id (p_subscription, l_newTimerId)
-        END;
-        /* TODO : manage l_bres = FALSE */
         
         /* Retrieve state variables */
         l_State <-- get_subscription_state (p_subscription);

@@ -126,6 +126,10 @@ void subscription_core_bs__compute_create_subscription_revised_params(
     {
         *subscription_core_bs__revisedLifetimeCount = 3 * *subscription_core_bs__revisedMaxKeepAlive;
     }
+    else
+    {
+        *subscription_core_bs__revisedLifetimeCount = subscription_core_bs__p_reqLifetimeCount;
+    }
 
     if (*subscription_core_bs__revisedLifetimeCount < SOPC_MIN_LIFETIME_PUBLISH_INTERVALS)
     {
@@ -198,7 +202,7 @@ void subscription_core_bs__get_nodeToMonitoredItemQueue(
     *subscription_core_bs__p_monitoredItemQueue = monitoredItemQueue;
 }
 
-void subscription_core_bs__create_publish_timer(
+void subscription_core_bs__create_periodic_publish_timer(
     const constants__t_subscription_i subscription_core_bs__p_subscription,
     const constants__t_opcua_duration_i subscription_core_bs__p_publishInterval,
     t_bool* const subscription_core_bs__bres,
@@ -228,7 +232,8 @@ void subscription_core_bs__create_publish_timer(
         msCycle = (uint64_t) subscription_core_bs__p_publishInterval;
     }
 
-    *subscription_core_bs__timerId = SOPC_EventTimer_Create(SOPC_Services_GetEventDispatcher(), eventParams, msCycle);
+    *subscription_core_bs__timerId =
+        SOPC_EventTimer_CreatePeriodic(SOPC_Services_GetEventDispatcher(), eventParams, msCycle);
 
     if (constants__c_timer_id_indet != *subscription_core_bs__timerId)
     {

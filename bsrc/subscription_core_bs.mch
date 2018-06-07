@@ -86,7 +86,7 @@ OPERATIONS
     END
     ;
     
-    bres, timerId <-- create_publish_timer (p_subscription, p_publishInterval) =
+    bres, timerId <-- create_periodic_publish_timer (p_subscription, p_publishInterval) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : t_subscription &
