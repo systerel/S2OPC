@@ -38,6 +38,7 @@
  */
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* buffer,
                                                                  uint32_t lenBuf,
+                                                                 bool is_public,
                                                                  SOPC_AsymmetricKey** ppKey)
 {
     SOPC_AsymmetricKey* key = NULL;
@@ -51,7 +52,33 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
     key->isBorrowedFromCert = false;
     mbedtls_pk_init(&key->pk);
 
-    if (mbedtls_pk_parse_key(&key->pk, buffer, lenBuf, NULL, 0) != 0) // This should also parse PEM keys.
+    int res = -1;
+
+    // MbedTLS fix: mbedtls_pk_parse_key needs a NULL terminated buffer to parse
+    // PEM keys.
+    if (buffer[lenBuf - 1] != '\0')
+    {
+        uint8_t* null_terminated_buffer = calloc(1 + lenBuf, sizeof(uint8_t));
+
+        if (null_terminated_buffer == NULL)
+        {
+            free(key);
+            return SOPC_STATUS_OUT_OF_MEMORY;
+        }
+
+        memcpy(null_terminated_buffer, buffer, lenBuf);
+        res = is_public ? mbedtls_pk_parse_public_key(&key->pk, null_terminated_buffer, 1 + lenBuf)
+                        : mbedtls_pk_parse_key(&key->pk, null_terminated_buffer, 1 + lenBuf, NULL, 0);
+        free(null_terminated_buffer);
+    }
+
+    if (res != 0)
+    {
+        res = is_public ? mbedtls_pk_parse_public_key(&key->pk, buffer, lenBuf)
+                        : mbedtls_pk_parse_key(&key->pk, buffer, lenBuf, NULL, 0);
+    }
+
+    if (res != 0)
     {
         free(key);
         return SOPC_STATUS_NOK;
@@ -138,6 +165,7 @@ void SOPC_KeyManager_AsymmetricKey_Free(SOPC_AsymmetricKey* pKey)
  * in bytes is recommended.
  */
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* pKey,
+                                                      bool is_public,
                                                       uint8_t* pDest,
                                                       uint32_t lenDest,
                                                       uint32_t* pLenWritten)
@@ -154,7 +182,8 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
         return SOPC_STATUS_NOK;
     // Asymmetric key should be const in mbedtls
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    lengthWritten = mbedtls_pk_write_key_der(&((SOPC_AsymmetricKey*) pKey)->pk, buffer, lenDest);
+    lengthWritten = is_public ? mbedtls_pk_write_pubkey_der(&((SOPC_AsymmetricKey*) pKey)->pk, buffer, lenDest)
+                              : mbedtls_pk_write_key_der(&((SOPC_AsymmetricKey*) pKey)->pk, buffer, lenDest);
     SOPC_GCC_DIAGNOSTIC_RESTORE
     if (lengthWritten > 0 && (uint32_t) lengthWritten <= lenDest)
     {
