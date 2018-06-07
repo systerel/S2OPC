@@ -23,80 +23,69 @@
 #include <stdlib.h>
 
 #include "sopc_async_queue.h"
+#include "sopc_atomic.h"
 #include "sopc_threads.h"
 
 struct SOPC_EventDispatcherManager
 {
     SOPC_AsyncQueue* queue;
     SOPC_EventDispatcherFct* pDispatcherFct;
-    bool* stopMgr;
+    int32_t stop;
     Thread mgrThread;
 };
+
+static void* POISON_PILL = (void*) 0x01;
 
 static void* SOPC_ThreadStartEventDispatcherManager(void* pEventMgr)
 {
     assert(NULL != pEventMgr);
     SOPC_EventDispatcherManager* pMgr = (SOPC_EventDispatcherManager*) pEventMgr;
-    bool localStopMgr = false;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    SOPC_EventDispatcherParams* pParams = NULL;
-    void* pAnonParam = NULL;
-    while (false == localStopMgr)
+
+    while (true)
     {
-        status = SOPC_AsyncQueue_BlockingDequeue(pMgr->queue, &pAnonParam);
-        if (SOPC_STATUS_OK == status)
+        void* pAnonParam = NULL;
+        SOPC_ReturnStatus status = SOPC_AsyncQueue_BlockingDequeue(pMgr->queue, &pAnonParam);
+
+        if (status != SOPC_STATUS_OK || pAnonParam == NULL)
         {
-            if (pAnonParam != NULL)
-            {
-                if (pAnonParam == pMgr->stopMgr)
-                { // It is the stop flag address
-                    assert(*pMgr->stopMgr != false);
-                    localStopMgr = true;
-                    free(pMgr->stopMgr);
-                    pMgr->stopMgr = NULL;
-                }
-                else
-                { // Nominal case
-                    pParams = (SOPC_EventDispatcherParams*) pAnonParam;
-                    pMgr->pDispatcherFct(pParams->event, pParams->eltId, pParams->params, pParams->auxParam);
-                    free(pParams);
-                }
-            }
+            continue;
         }
+
+        if (pAnonParam == POISON_PILL)
+        {
+            break;
+        }
+
+        SOPC_EventDispatcherParams* pParams = (SOPC_EventDispatcherParams*) pAnonParam;
+        pMgr->pDispatcherFct(pParams->event, pParams->eltId, pParams->params, pParams->auxParam);
+        free(pParams);
     }
+
     return NULL;
 }
 
 SOPC_EventDispatcherManager* SOPC_EventDispatcherManager_CreateAndStart(SOPC_EventDispatcherFct fctPointer,
                                                                         const char* name)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    SOPC_EventDispatcherManager* pEventMgr = NULL;
-    pEventMgr = calloc(1, sizeof(SOPC_EventDispatcherManager));
-    if (NULL != pEventMgr)
+    SOPC_EventDispatcherManager* pEventMgr = calloc(1, sizeof(SOPC_EventDispatcherManager));
+
+    if (pEventMgr == NULL)
     {
-        pEventMgr->stopMgr = calloc(1, sizeof(bool));
-        if (NULL != pEventMgr->stopMgr)
-        {
-            status = SOPC_AsyncQueue_Init(&pEventMgr->queue, name);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            pEventMgr->pDispatcherFct = fctPointer;
-            *pEventMgr->stopMgr = false;
-            status =
-                SOPC_Thread_Create(&pEventMgr->mgrThread, SOPC_ThreadStartEventDispatcherManager, (void*) pEventMgr);
-        }
-        if (SOPC_STATUS_OK != status)
-        {
-            if (NULL != pEventMgr->stopMgr)
-            {
-                free(pEventMgr->stopMgr);
-            }
-            free(pEventMgr);
-            pEventMgr = NULL;
-        }
+        return NULL;
     }
+
+    pEventMgr->stop = 0;
+    pEventMgr->pDispatcherFct = fctPointer;
+
+    if (SOPC_AsyncQueue_Init(&pEventMgr->queue, name) != SOPC_STATUS_OK ||
+        SOPC_Thread_Create(&pEventMgr->mgrThread, SOPC_ThreadStartEventDispatcherManager, (void*) pEventMgr) !=
+            SOPC_STATUS_OK)
+    {
+        SOPC_AsyncQueue_Free(&pEventMgr->queue);
+        free(pEventMgr);
+        return NULL;
+    }
+
     return pEventMgr;
 }
 
@@ -108,38 +97,32 @@ static SOPC_ReturnStatus SOPC_EventDispatcherManager_AddEventInternal(SOPC_Event
                                                                       const char* debugName,
                                                                       bool enqueueAsFirstOut)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    SOPC_EventDispatcherParams* pParams = NULL;
-    if (NULL != eventMgr)
+    if (eventMgr == NULL || SOPC_Atomic_Int_Get(&eventMgr->stop) != 0)
     {
-        status = SOPC_STATUS_INVALID_STATE;
-        if (false == *eventMgr->stopMgr)
-        {
-            pParams = calloc(1, sizeof(SOPC_EventDispatcherParams));
-            if (NULL != pParams)
-            {
-                pParams->event = event;
-                pParams->eltId = eltId;
-                pParams->params = params;
-                pParams->auxParam = auxParam;
-                pParams->debugName = debugName;
-                if (false == enqueueAsFirstOut)
-                {
-                    // Nominal case
-                    status = SOPC_AsyncQueue_BlockingEnqueue(eventMgr->queue, pParams);
-                }
-                else
-                {
-                    status = SOPC_AsyncQueue_BlockingEnqueueFirstOut(eventMgr->queue, pParams);
-                }
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
-        }
+        return SOPC_STATUS_INVALID_STATE;
     }
-    return status;
+
+    SOPC_EventDispatcherParams* pParams = calloc(1, sizeof(SOPC_EventDispatcherParams));
+
+    if (pParams == NULL)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    pParams->event = event;
+    pParams->eltId = eltId;
+    pParams->params = params;
+    pParams->auxParam = auxParam;
+    pParams->debugName = debugName;
+
+    if (false == enqueueAsFirstOut)
+    {
+        return SOPC_AsyncQueue_BlockingEnqueue(eventMgr->queue, pParams);
+    }
+    else
+    {
+        return SOPC_AsyncQueue_BlockingEnqueueFirstOut(eventMgr->queue, pParams);
+    }
 }
 
 SOPC_ReturnStatus SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager* eventMgr,
@@ -164,26 +147,22 @@ SOPC_ReturnStatus SOPC_EventDispatcherManager_AddEventAsNext(SOPC_EventDispatche
 
 SOPC_ReturnStatus SOPC_EventDispatcherManager_StopAndDelete(SOPC_EventDispatcherManager** eventMgr)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL != eventMgr && NULL != *eventMgr)
+    if (eventMgr == NULL || *eventMgr == NULL)
     {
-        status = SOPC_STATUS_INVALID_STATE;
-        if (false == *(*eventMgr)->stopMgr)
-        {
-            *(*eventMgr)->stopMgr = true;
-            // Use stopMgr flag address as indicator all precedent actions were treated
-            status = SOPC_AsyncQueue_BlockingEnqueue((*eventMgr)->queue, (*eventMgr)->stopMgr);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_Thread_Join((*eventMgr)->mgrThread);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_AsyncQueue_Free(&(*eventMgr)->queue);
-            free(*eventMgr);
-            *eventMgr = NULL;
-        }
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    return status;
+
+    SOPC_Atomic_Int_Set(&(*eventMgr)->stop, 1);
+
+    if (SOPC_AsyncQueue_BlockingEnqueue((*eventMgr)->queue, POISON_PILL) != SOPC_STATUS_OK ||
+        SOPC_Thread_Join((*eventMgr)->mgrThread) != SOPC_STATUS_OK)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    SOPC_AsyncQueue_Free(&(*eventMgr)->queue);
+    free(*eventMgr);
+    *eventMgr = NULL;
+
+    return SOPC_STATUS_OK;
 }
