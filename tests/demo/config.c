@@ -28,9 +28,9 @@
 
 /* Only supports one set of certificates at a time. They are all shared by the configs. */
 int nCfgCreated = 0; /* Number of created configs with certificates, to remember when to release certificates */
-SOPC_Certificate* pCrtCli = NULL;
-SOPC_Certificate* pCrtSrv = NULL;
-SOPC_AsymmetricKey* pKeyCli = NULL;
+SOPC_Buffer* pCrtCli = NULL;
+SOPC_Buffer* pCrtSrv = NULL;
+SOPC_Buffer* pKeyCli = NULL;
 SOPC_Certificate* pCrtCAu = NULL;
 SOPC_PKIProvider* pPki = NULL;
 
@@ -105,9 +105,9 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
     /* Garbage collect, if needed */
     if (0 == nCfgCreated)
     {
-        SOPC_KeyManager_Certificate_Free(pCrtCli);
-        SOPC_KeyManager_Certificate_Free(pCrtSrv);
-        SOPC_KeyManager_AsymmetricKey_Free(pKeyCli);
+        SOPC_Buffer_Delete(pCrtCli);
+        SOPC_Buffer_Delete(pCrtSrv);
+        SOPC_Buffer_Delete(pKeyCli);
         SOPC_PKIProviderStack_Free(pPki);
         SOPC_KeyManager_Certificate_Free(pCrtCAu);
         pCrtCli = NULL;
@@ -124,7 +124,7 @@ SOPC_ReturnStatus Config_LoadCertificates(void)
 
     if (0 == nCfgCreated)
     {
-        status = SOPC_KeyManager_Certificate_CreateFromFile(PATH_CLIENT_PUBL, &pCrtCli);
+        status = SOPC_Buffer_ReadFile(PATH_CLIENT_PUBL, &pCrtCli);
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Failed to load client certificate\n");
@@ -132,7 +132,7 @@ SOPC_ReturnStatus Config_LoadCertificates(void)
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_Certificate_CreateFromFile(PATH_SERVER_PUBL, &pCrtSrv);
+            status = SOPC_Buffer_ReadFile(PATH_SERVER_PUBL, &pCrtSrv);
             if (SOPC_STATUS_OK != status)
             {
                 printf("# Error: Failed to load server certificate\n");
@@ -141,7 +141,7 @@ SOPC_ReturnStatus Config_LoadCertificates(void)
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(PATH_CLIENT_PRIV, &pKeyCli, NULL, 0);
+            status = SOPC_Buffer_ReadFile(PATH_CLIENT_PRIV, &pKeyCli);
             if (SOPC_STATUS_OK != status)
             {
                 printf("# Error: Failed to load client private key\n");

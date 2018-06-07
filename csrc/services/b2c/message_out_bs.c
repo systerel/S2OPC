@@ -378,24 +378,30 @@ void message_out_bs__write_create_session_req_msg_crypto(
 {
     SOPC_SecureChannel_Config* pSCCfg = NULL;
     OpcUa_CreateSessionRequest* pReq = (OpcUa_CreateSessionRequest*) message_out_bs__p_req_msg;
-    const SOPC_Certificate* pCrtCli = NULL;
+    const SOPC_Buffer* pCrtCli = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    uint32_t certLength = 0;
 
     /* Retrieve the certificate */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(message_out_bs__p_channel_config_idx);
+
     if (NULL == pSCCfg)
+    {
         return;
+    }
+
     pCrtCli = pSCCfg->crt_cli;
+
     if (NULL == pCrtCli)
+    {
         return;
+    }
 
     /* Write the Certificate */
     SOPC_ByteString_Clear(&pReq->ClientCertificate);
     /* TODO: this is a malloc error, this can fail, and the B model should be notified */
-    status = SOPC_KeyManager_Certificate_CopyDER(pCrtCli, &pReq->ClientCertificate.Data, &certLength);
-    assert(certLength <= INT32_MAX);
-    pReq->ClientCertificate.Length = (int32_t) certLength;
+    assert(pCrtCli->length <= INT32_MAX);
+    status = SOPC_ByteString_CopyFromBytes(&pReq->ClientCertificate, pCrtCli->data, (int32_t) pCrtCli->length);
+    pReq->ClientCertificate.Length = (int32_t) pCrtCli->length;
     if (SOPC_STATUS_OK != status)
         return;
 
@@ -463,7 +469,7 @@ void message_out_bs__write_create_session_resp_msg_crypto(
     t_bool* const message_out_bs__bret)
 {
     SOPC_SecureChannel_Config* pSCCfg = NULL;
-    const SOPC_Certificate* pCrtSrv = NULL;
+    const SOPC_Buffer* pCrtSrv = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool result = true;
     OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) message_out_bs__p_msg;
@@ -488,13 +494,16 @@ void message_out_bs__write_create_session_resp_msg_crypto(
     if (result != false)
     {
         SOPC_ByteString_Clear(&pResp->ServerCertificate);
-        /* TODO: this is a malloc error, this can fail, and the B model should be notified */
-        status = SOPC_KeyManager_Certificate_CopyDER(pCrtSrv, &pResp->ServerCertificate.Data,
-                                                     (uint32_t*) &pResp->ServerCertificate.Length);
+        assert(pCrtSrv->length <= INT32_MAX);
+        status = SOPC_ByteString_CopyFromBytes(&pResp->ServerCertificate, pCrtSrv->data, (int32_t) pCrtSrv->length);
 
-        /* TODO: should borrow a reference instead of copy */
-        /* Copy Nonce */
-        status = SOPC_ByteString_Copy(&pResp->ServerNonce, message_out_bs__p_nonce);
+        if (SOPC_STATUS_OK == status)
+        {
+            pResp->ServerCertificate.Length = (int32_t) pCrtSrv->length;
+            /* TODO: should borrow a reference instead of copy */
+            /* Copy Nonce */
+            status = SOPC_ByteString_Copy(&pResp->ServerNonce, message_out_bs__p_nonce);
+        }
 
         /* TODO: should borrow a reference instead of copy */
         /* Copy Signature, which is not a built-in, so copy its fields */

@@ -54,8 +54,8 @@ int main(int argc, char* argv[])
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
 
-    SOPC_Certificate* crt_srv = NULL;
-    SOPC_AsymmetricKey* priv_srv = NULL;
+    SOPC_Buffer* crt_srv = NULL;
+    SOPC_Buffer* priv_srv = NULL;
     SOPC_Certificate* crt_ca = NULL;
 
     // Secu policy configuration: empty
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     // The certificates: load
     if (SOPC_STATUS_OK == status && cryptoDeactivated == false)
     {
-        status = SOPC_KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
+        status = SOPC_Buffer_ReadFile(certificateSrvLocation, &crt_srv);
 
         if (SOPC_STATUS_OK != status)
         {
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
     // Private key: load
     if (SOPC_STATUS_OK == status && cryptoDeactivated == false)
     {
-        status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_srv, NULL, 0);
+        status = SOPC_Buffer_ReadFile(keyLocation, &priv_srv);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Stub_Server: Failed to load private key\n");
@@ -434,9 +434,9 @@ int main(int argc, char* argv[])
     printf("<Stub_Server: Final status: %" PRIu32 "\n", status);
     SOPC_Toolkit_Clear();
     SOPC_PKIProviderStack_Free(pki);
-    SOPC_KeyManager_Certificate_Free(crt_srv);
+    SOPC_Buffer_Delete(crt_srv);
     SOPC_KeyManager_Certificate_Free(crt_ca);
-    SOPC_KeyManager_AsymmetricKey_Free(priv_srv);
+    SOPC_Buffer_Delete(priv_srv);
     if (SOPC_STATUS_OK == status)
     {
         printf("<Stub_Server: Stub_Server test: OK\n");

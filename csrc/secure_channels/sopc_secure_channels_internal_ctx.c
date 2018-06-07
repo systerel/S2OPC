@@ -44,3 +44,13 @@ SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx)
 }
 
 void SOPC_SecureChannelsInternalContext_Clear() {}
+
+const SOPC_Certificate* SC_OwnCertificate(SOPC_SecureConnection* conn)
+{
+    return conn->isServerConnection ? conn->serverCertificate : conn->clientCertificate;
+}
+
+const SOPC_Certificate* SC_PeerCertificate(SOPC_SecureConnection* conn)
+{
+    return conn->isServerConnection ? conn->clientCertificate : conn->serverCertificate;
+}

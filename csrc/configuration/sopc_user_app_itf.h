@@ -36,9 +36,9 @@ typedef struct SOPC_SecureChannel_Config
 {
     uint8_t isClientSc;
     const char* url;
-    const SOPC_Certificate* crt_cli;
-    const SOPC_AsymmetricKey* key_priv_cli;
-    const SOPC_Certificate* crt_srv;
+    const SOPC_Buffer* crt_cli;
+    const SOPC_Buffer* key_priv_cli;
+    const SOPC_Buffer* crt_srv;
     const SOPC_PKIProvider* pki;
     const char* reqSecuPolicyUri;
     uint32_t requestedLifetime;
@@ -61,8 +61,8 @@ typedef struct SOPC_SecurityPolicy
 typedef struct SOPC_Endpoint_Config
 {
     char* endpointURL;
-    SOPC_Certificate* serverCertificate;
-    SOPC_AsymmetricKey* serverKey;
+    SOPC_Buffer* serverCertificate;
+    SOPC_Buffer* serverKey;
     SOPC_PKIProvider* pki;
     uint8_t nbSecuConfigs;
     SOPC_SecurityPolicy* secuConfigurations;

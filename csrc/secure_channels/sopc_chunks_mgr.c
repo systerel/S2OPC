@@ -283,13 +283,14 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     {
         // CLIENT side: config is mandatory and security mode to be enforced
         assert(scConfig != NULL);
-        runningAppCert = scConfig->crt_cli;
+        runningAppCert = scConnection->clientCertificate;
         pkiProvider = scConfig->pki;
         enforceSecuMode = true;
         if (scConfig->crt_srv != NULL)
         {
             // retrieve expected sender certificate as a ByteString
-            status = SOPC_KeyManager_Certificate_CopyDER(scConfig->crt_srv, &otherBsAppCert.Data, &tmpLength);
+            status =
+                SOPC_KeyManager_Certificate_CopyDER(scConnection->serverCertificate, &otherBsAppCert.Data, &tmpLength);
             if (SOPC_STATUS_OK == status && tmpLength > 0)
             {
                 otherBsAppCert.Length = (int32_t) tmpLength;
@@ -302,7 +303,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     {
         // SERVER side: client config could be defined or not (new secure channel opening)
         assert(epConfig != NULL);
-        runningAppCert = epConfig->serverCertificate;
+        runningAppCert = scConnection->serverCertificate;
         pkiProvider = epConfig->pki;
         if (scConfig != NULL)
         {
@@ -310,7 +311,8 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
             if (scConfig->crt_cli != NULL)
             {
                 // retrieve expected sender certificate as a ByteString
-                status = SOPC_KeyManager_Certificate_CopyDER(scConfig->crt_cli, &otherBsAppCert.Data, &tmpLength);
+                status = SOPC_KeyManager_Certificate_CopyDER(scConnection->clientCertificate, &otherBsAppCert.Data,
+                                                             &tmpLength);
                 if (SOPC_STATUS_OK == status && tmpLength > 0)
                 {
                     otherBsAppCert.Length = (int32_t) tmpLength;
@@ -1111,26 +1113,10 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
 
     if (false == isSymmetric)
     {
-        const SOPC_AsymmetricKey* runningAppPrivateKey = NULL;
-        if (false == scConnection->isServerConnection)
-        {
-            SOPC_SecureChannel_Config* scConfig =
-                SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
-            assert(scConfig != NULL);
-            runningAppPrivateKey = scConfig->key_priv_cli;
-        }
-        else
-        {
-            SOPC_Endpoint_Config* epConfig =
-                SOPC_ToolkitServer_GetEndpointConfig(scConnection->serverEndpointConfigIdx);
-            assert(epConfig != NULL);
-            runningAppPrivateKey = epConfig->serverKey;
-        }
-
-        if (runningAppPrivateKey != NULL)
+        if (scConnection->privateKey != NULL)
         {
             status = SOPC_CryptoProvider_AsymmetricGetLength_Decryption(
-                scConnection->cryptoProvider, runningAppPrivateKey, lengthToDecrypt, &decryptedTextLength);
+                scConnection->cryptoProvider, scConnection->privateKey, lengthToDecrypt, &decryptedTextLength);
             if (SOPC_STATUS_OK == status)
             {
                 result = true;
@@ -1157,7 +1143,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
             if (result != false)
             {
                 status = SOPC_CryptoProvider_AsymmetricDecrypt(
-                    scConnection->cryptoProvider, dataToDecrypt, lengthToDecrypt, runningAppPrivateKey,
+                    scConnection->cryptoProvider, dataToDecrypt, lengthToDecrypt, scConnection->privateKey,
                     &(plainBuffer->data[sequenceNumberPosition]), decryptedTextLength, &decryptedTextLength);
                 if (SOPC_STATUS_OK == status)
                 {
@@ -1289,14 +1275,7 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection, bo
         else if (scConfig != NULL)
         {
             // Client side or Server side in case of OPN renew
-            if (false == scConnection->isServerConnection)
-            {
-                otherAppCertificate = scConfig->crt_srv;
-            }
-            else
-            {
-                otherAppCertificate = scConfig->crt_cli;
-            }
+            otherAppCertificate = SC_PeerCertificate(scConnection);
         }
         else
         {
@@ -1940,7 +1919,6 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection* scConnecti
     SOPC_String_Initialize(&strSecuPolicy);
     SOPC_ByteString bsSenderCert;
     SOPC_ByteString_Initialize(&bsSenderCert);
-    const SOPC_Certificate* receiverCertCrypto = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     toEncrypt = SC_Chunks_IsMsgEncrypted(scConfig->msgSecurityMode, true);
@@ -1971,18 +1949,9 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection* scConnecti
     // Sender Certificate:
     if (result != false)
     {
-        const SOPC_Certificate* senderCert = NULL;
         uint32_t length = 0;
-        if (false == scConnection->isServerConnection)
-        {
-            // Client side
-            senderCert = scConfig->crt_cli;
-        }
-        else
-        {
-            // Server side
-            senderCert = scConfig->crt_srv;
-        }
+        const SOPC_Certificate* senderCert = SC_OwnCertificate(scConnection);
+
         if (senderCert != NULL)
         {
             status = SOPC_KeyManager_Certificate_CopyDER(senderCert, &bsSenderCert.Data, &length);
@@ -2001,8 +1970,9 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection* scConnecti
     if (result != false)
     {
         // Note: part 6 v1.03 table 27: This field shall be null if the Message is not signed
-        if (toSign != false && bsSenderCert.Length > 0)
+        if (toSign)
         {
+            assert(bsSenderCert.Length > 0);
             status = SOPC_ByteString_Write(&bsSenderCert, buffer);
             if (SOPC_STATUS_OK != status)
             {
@@ -2010,7 +1980,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection* scConnecti
                 *errorStatus = OpcUa_BadTcpInternalError;
             }
         }
-        else if (false == toSign)
+        else
         {
             // Note: foundation stack expects -1 value whereas 0 is also valid:
             const int32_t minusOne = -1;
@@ -2022,27 +1992,12 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection* scConnecti
             }
             // NULL string: nothing to write
         }
-        else
-        {
-            // Certificate shall be defined in configuration if necessary (configuration constraint)
-            assert(false);
-        }
     }
 
     // Receiver Certificate Thumbprint:
     if (result != false)
     {
-        // Retrieve correct certificate
-        if (false == scConnection->isServerConnection)
-        {
-            // Client side
-            receiverCertCrypto = scConfig->crt_srv;
-        }
-        else
-        {
-            // Server side
-            receiverCertCrypto = scConfig->crt_cli;
-        }
+        const SOPC_Certificate* receiverCertCrypto = SC_PeerCertificate(scConnection);
 
         // Note: part 6 v1.03 table 27: This field shall be null if the Message is not encrypted
         if (toEncrypt != false && receiverCertCrypto != NULL)
@@ -2204,25 +2159,12 @@ static bool SC_Chunks_GetSendingCryptoSizes(SOPC_SecureConnection* scConnection,
         {
             SOPC_AsymmetricKey* receiverPublicKey = NULL;
             SOPC_AsymmetricKey* senderPublicKey = NULL;
-            const SOPC_Certificate* receiverAppCertificate = NULL;
-            const SOPC_Certificate* senderAppCertificate = NULL;
+            const SOPC_Certificate* receiverAppCertificate = SC_PeerCertificate(scConnection);
+            const SOPC_Certificate* senderAppCertificate = SC_OwnCertificate(scConnection);
 
             // Asymmetric case: used only for opening channel, signature AND encryption mandatory in this case
             *toEncrypt = true;
             *toSign = true;
-
-            if (false == scConnection->isServerConnection)
-            {
-                // Client side
-                senderAppCertificate = scConfig->crt_cli;
-                receiverAppCertificate = scConfig->crt_srv;
-            }
-            else
-            {
-                // Server side
-                senderAppCertificate = scConfig->crt_srv;
-                receiverAppCertificate = scConfig->crt_cli;
-            }
 
             status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(senderAppCertificate, &senderPublicKey);
             if (SOPC_STATUS_OK != status)
@@ -2518,17 +2460,8 @@ static bool SC_Chunks_GetEncryptedDataLength(SOPC_SecureConnection* scConnection
 
     if (false == isSymmetricAlgo)
     {
-        const SOPC_Certificate* otherAppCertificate = NULL;
-        if (false == scConnection->isServerConnection)
-        {
-            // Client side
-            otherAppCertificate = scConfig->crt_srv;
-        }
-        else
-        {
-            // Server side
-            otherAppCertificate = scConfig->crt_cli;
-        }
+        const SOPC_Certificate* otherAppCertificate = SC_PeerCertificate(scConnection);
+
         if (NULL == otherAppCertificate)
         {
             result = false;
@@ -2588,23 +2521,7 @@ static bool SC_Chunks_EncodeSignature(SOPC_SecureConnection* scConnection,
 
     if (false == symmetricAlgo)
     {
-        const SOPC_AsymmetricKey* runningAppPrivateKey = NULL;
-        if (false == scConnection->isServerConnection)
-        {
-            SOPC_SecureChannel_Config* scConfig =
-                SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
-            assert(scConfig != NULL);
-            runningAppPrivateKey = scConfig->key_priv_cli;
-        }
-        else
-        {
-            SOPC_Endpoint_Config* epConfig =
-                SOPC_ToolkitServer_GetEndpointConfig(scConnection->serverEndpointConfigIdx);
-            assert(epConfig != NULL);
-            runningAppPrivateKey = epConfig->serverKey;
-        }
-
-        if (runningAppPrivateKey == NULL)
+        if (scConnection->privateKey == NULL)
         {
             return false;
         }
@@ -2616,7 +2533,7 @@ static bool SC_Chunks_EncodeSignature(SOPC_SecureConnection* scConnection,
             if (signedData.Length > 0)
             {
                 status = SOPC_CryptoProvider_AsymmetricSign(scConnection->cryptoProvider, buffer->data, buffer->length,
-                                                            runningAppPrivateKey, signedData.Data,
+                                                            scConnection->privateKey, signedData.Data,
                                                             (uint32_t) signedData.Length);
             }
             else
@@ -2696,7 +2613,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
             // Client side
             scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
             assert(scConfig != NULL);
-            otherAppCertificate = scConfig->crt_srv;
+            otherAppCertificate = scConnection->serverCertificate;
         }
         else
         {
@@ -2704,7 +2621,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
             scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
             assert(scConfig != NULL); // Even on server side it is guaranteed by secure connection state manager (no
                                       // sending in wrong state)
-            otherAppCertificate = scConfig->crt_cli;
+            otherAppCertificate = scConnection->clientCertificate;
         }
 
         SOPC_AsymmetricKey* otherAppPublicKey = NULL;

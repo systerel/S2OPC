@@ -209,6 +209,10 @@ bool SC_CloseConnection(uint32_t connectionIdx)
                 }
             }
 
+            SOPC_KeyManager_AsymmetricKey_Free(scConnection->privateKey);
+            SOPC_KeyManager_Certificate_Free(scConnection->serverCertificate);
+            SOPC_KeyManager_Certificate_Free(scConnection->clientCertificate);
+
             // Clear the rest (state=0 <=> SC_CLOSED)
             memset(scConnection, 0, sizeof(SOPC_SecureConnection));
         }
@@ -1441,6 +1445,35 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     return result;
 }
 
+static bool get_certificate_der(SOPC_Certificate* cert, SOPC_Buffer** buffer)
+{
+    if (cert == NULL)
+    {
+        *buffer = NULL;
+        return true;
+    }
+
+    uint8_t* cert_data = NULL;
+    uint32_t cert_len = 0;
+    SOPC_Buffer* cert_buffer = NULL;
+
+    if (SOPC_KeyManager_Certificate_CopyDER(cert, &cert_data, &cert_len) != SOPC_STATUS_OK)
+    {
+        return false;
+    }
+
+    cert_buffer = SOPC_Buffer_Attach(cert_data, cert_len);
+
+    if (cert_buffer == NULL)
+    {
+        free(cert_data);
+        return false;
+    }
+
+    *buffer = cert_buffer;
+    return true;
+}
+
 static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* scConnection,
                                                        SOPC_Buffer* opnReqMsgBuffer,
                                                        uint32_t* requestHandle,
@@ -1602,38 +1635,40 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
             }
         }
 
-        if (result != false)
+        SOPC_SecureChannel_Config* nconfig = calloc(1, sizeof(SOPC_SecureChannel_Config));
+        SOPC_Buffer* cert_buffer = NULL;
+
+        if (nconfig == NULL || !get_certificate_der(scConnection->serverAsymmSecuInfo.clientCertificate, &cert_buffer))
         {
-            SOPC_SecureChannel_Config* nconfig = calloc(1, sizeof(SOPC_SecureChannel_Config));
-            if (NULL == nconfig)
-            {
-                result = false;
-                //*errorStatus = OpcUa_BadOutOfMemory; => not a TCP error message authorized error
-                *errorStatus = OpcUa_BadTcpInternalError;
-            }
-            else
-            {
-                nconfig->crt_cli = scConnection->serverAsymmSecuInfo.clientCertificate;
-                nconfig->crt_srv = epConfig->serverCertificate;
-                nconfig->isClientSc = false;
-                nconfig->key_priv_cli = NULL;
-                nconfig->msgSecurityMode = opnReq->SecurityMode;
-                nconfig->pki = epConfig->pki;
-                nconfig->reqSecuPolicyUri = scConnection->serverAsymmSecuInfo.securityPolicyUri;
-                nconfig->requestedLifetime = opnReq->RequestedLifetime;
-                nconfig->url = epConfig->endpointURL;
-                idx = SOPC_ToolkitServer_AddSecureChannelConfig(nconfig);
-                if (idx == 0)
-                {
-                    result = false;
-                    //*errorStatus = OpcUa_BadOutOfMemory; => not a TCP error message authorized error
-                    *errorStatus = OpcUa_BadTcpInternalError;
-                }
-                else
-                {
-                    scConnection->endpointConnectionConfigIdx = idx;
-                }
-            }
+            result = false;
+        }
+
+        if (result)
+        {
+            nconfig->crt_cli = cert_buffer;
+            nconfig->crt_srv = epConfig->serverCertificate;
+            nconfig->isClientSc = false;
+            nconfig->key_priv_cli = NULL;
+            nconfig->msgSecurityMode = opnReq->SecurityMode;
+            nconfig->pki = epConfig->pki;
+            nconfig->reqSecuPolicyUri = scConnection->serverAsymmSecuInfo.securityPolicyUri;
+            nconfig->requestedLifetime = opnReq->RequestedLifetime;
+            nconfig->url = epConfig->endpointURL;
+            idx = SOPC_ToolkitServer_AddSecureChannelConfig(nconfig);
+            result = (idx > 0);
+        }
+
+        if (result)
+        {
+            scConnection->endpointConnectionConfigIdx = idx;
+            scConnection->clientCertificate = scConnection->serverAsymmSecuInfo.clientCertificate;
+        }
+
+        if (result == false)
+        {
+            free(nconfig);
+            free(cert_buffer);
+            *errorStatus = OpcUa_BadTcpInternalError;
         }
     }
 
@@ -2223,6 +2258,61 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     return result;
 }
 
+static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
+{
+    const SOPC_Buffer* private_key_data = NULL;
+    const SOPC_Buffer* cert_data = NULL;
+    const SOPC_Buffer* peer_cert_data = NULL;
+
+    if (sc->isServerConnection)
+    {
+        SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(sc->serverEndpointConfigIdx);
+        assert(epConfig != NULL);
+        private_key_data = epConfig->serverKey;
+        cert_data = epConfig->serverCertificate;
+    }
+    else
+    {
+        SOPC_SecureChannel_Config* scConfig =
+            SOPC_ToolkitClient_GetSecureChannelConfig(sc->endpointConnectionConfigIdx);
+        assert(scConfig != NULL);
+        private_key_data = scConfig->key_priv_cli;
+        cert_data = scConfig->crt_cli;
+        peer_cert_data = scConfig->crt_srv;
+    }
+
+    if (private_key_data == NULL || cert_data == NULL)
+    {
+        return true;
+    }
+
+    SOPC_Certificate** cert = sc->isServerConnection ? &sc->serverCertificate : &sc->clientCertificate;
+
+    if (SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(private_key_data->data, private_key_data->length, false,
+                                                       &sc->privateKey) != SOPC_STATUS_OK ||
+        SOPC_KeyManager_Certificate_CreateFromDER(cert_data->data, cert_data->length, cert) != SOPC_STATUS_OK ||
+        (peer_cert_data != NULL &&
+         SOPC_KeyManager_Certificate_CreateFromDER(peer_cert_data->data, peer_cert_data->length,
+                                                   &sc->serverCertificate) != SOPC_STATUS_OK))
+    {
+        SOPC_KeyManager_AsymmetricKey_Free(sc->privateKey);
+        sc->privateKey = NULL;
+
+        SOPC_KeyManager_Certificate_Free(*cert);
+        *cert = NULL;
+
+        if (peer_cert_data != NULL)
+        {
+            SOPC_KeyManager_Certificate_Free(sc->serverCertificate);
+            sc->serverCertificate = NULL;
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
 void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                               uint32_t eltId,
                                               void* params,
@@ -2311,6 +2401,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 assert(scConnection != NULL);
                 // record the secure channel connection configuration
                 scConnection->endpointConnectionConfigIdx = eltId;
+
+                result = sc_init_key_and_certs(scConnection);
             }
         }
         if (false == result)
@@ -2491,6 +2583,11 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 // set connection as a server side connection
                 scConnection->isServerConnection = true;
 
+                result = sc_init_key_and_certs(scConnection);
+            }
+
+            if (result)
+            {
                 // notify socket that connection is accepted
                 SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, (uint32_t) auxParam, NULL, idx);
                 // notify secure listener that connection is accepted

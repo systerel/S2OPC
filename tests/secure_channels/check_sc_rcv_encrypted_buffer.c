@@ -352,9 +352,9 @@ void clearToolkit(void)
     // Free all allocated resources
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     SOPC_KeyManager_Certificate_Free(scConfig.pki->pUserCertAuthList);
-    SOPC_KeyManager_Certificate_Free((SOPC_Certificate*) scConfig.crt_cli);
-    SOPC_KeyManager_Certificate_Free((SOPC_Certificate*) scConfig.crt_srv);
-    SOPC_KeyManager_AsymmetricKey_Free((SOPC_AsymmetricKey*) scConfig.key_priv_cli);
+    SOPC_Buffer_Delete((SOPC_Buffer*) scConfig.crt_cli);
+    SOPC_Buffer_Delete((SOPC_Buffer*) scConfig.crt_srv);
+    SOPC_Buffer_Delete((SOPC_Buffer*) scConfig.key_priv_cli);
     SOPC_PKIProviderStack_Free((SOPC_PKIProvider*) scConfig.pki);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 }
@@ -371,9 +371,9 @@ void establishSC(void)
     char hexOutput[512];
 
     SOPC_PKIProvider* pki = NULL;
-    SOPC_Certificate *crt_cli = NULL, *crt_srv = NULL;
+    SOPC_Buffer *crt_cli = NULL, *crt_srv = NULL;
     SOPC_Certificate* crt_ca = NULL;
-    SOPC_AsymmetricKey* priv_cli = NULL;
+    SOPC_Buffer* priv_cli = NULL;
 
     // Endpoint URL
     SOPC_String stEndpointUrl;
@@ -400,7 +400,7 @@ void establishSC(void)
                certificateLocation, certificateSrvLocation);
 
         // The certificates: load
-        status = SOPC_KeyManager_Certificate_CreateFromFile(certificateLocation, &crt_cli);
+        status = SOPC_Buffer_ReadFile(certificateLocation, &crt_cli);
         if (SOPC_STATUS_OK != status)
         {
             printf("SC_Rcv_Buffer Init: Failed to load client certificate\n");
@@ -413,7 +413,7 @@ void establishSC(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
+        status = SOPC_Buffer_ReadFile(certificateSrvLocation, &crt_srv);
         if (SOPC_STATUS_OK != status)
         {
             printf("SC_Rcv_Buffer Init: Failed to load server certificate\n");
@@ -427,7 +427,7 @@ void establishSC(void)
     if (SOPC_STATUS_OK == status)
     {
         // Private key: load
-        status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli, NULL, 0);
+        status = SOPC_Buffer_ReadFile(keyLocation, &priv_cli);
         if (SOPC_STATUS_OK != status)
         {
             printf("SC_Rcv_Buffer Init: Failed to load private key\n");

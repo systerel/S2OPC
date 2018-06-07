@@ -44,13 +44,17 @@ static void SOPC_SetServerCertificate(SOPC_Endpoint_Config* sopcEndpointConfig, 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     uint32_t tmpLength = 0;
 
-    if (sopcEndpointConfig->serverCertificate != NULL)
+    if (sopcEndpointConfig->serverCertificate == NULL)
     {
-        status = SOPC_KeyManager_Certificate_CopyDER(sopcEndpointConfig->serverCertificate,
-                                                     &epDesc->ServerCertificate.Data, &tmpLength);
+        return;
     }
+
+    assert(sopcEndpointConfig->serverCertificate->length <= INT32_MAX);
+    status = SOPC_ByteString_CopyFromBytes((SOPC_ByteString*) &epDesc->ServerCertificate,
+                                           sopcEndpointConfig->serverCertificate->data,
+                                           (int32_t) sopcEndpointConfig->serverCertificate->length);
     assert(SOPC_STATUS_OK == status && tmpLength <= INT32_MAX);
-    epDesc->ServerCertificate.Length = (int32_t) tmpLength;
+    epDesc->ServerCertificate.Length = (int32_t) sopcEndpointConfig->serverCertificate->length;
 }
 
 static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpointConfig,
