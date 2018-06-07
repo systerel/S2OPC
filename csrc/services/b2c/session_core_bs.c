@@ -658,106 +658,117 @@ void session_core_bs__drop_NonceClient(const constants__t_session_i session_core
     SOPC_ByteString_Clear(&sessionDataArray[session_core_bs__p_session].nonceClient);
 }
 
+static SOPC_ReturnStatus check_signature_with_provider(SOPC_CryptoProvider* provider,
+                                                       const SOPC_String* requestedSecurityPolicy,
+                                                       const SOPC_AsymmetricKey* publicKey,
+                                                       const uint8_t* payload,
+                                                       uint32_t payload_len,
+                                                       const SOPC_ByteString* nonce,
+                                                       const SOPC_String* signature)
+{
+    /* Verify signature algorithm URI */
+    const char* algorithm = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(provider);
+
+    if (algorithm == NULL ||
+        strncmp(algorithm, (const char*) requestedSecurityPolicy->Data, (size_t) requestedSecurityPolicy->Length) !=
+            0 ||
+        payload_len > (UINT32_MAX - LENGTH_NONCE) || nonce->Length != LENGTH_NONCE)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    uint32_t verify_len = payload_len + LENGTH_NONCE;
+    uint8_t* verify_payload = calloc(verify_len, sizeof(uint8_t));
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    if (verify_payload != NULL)
+    {
+        memcpy(verify_payload, payload, payload_len);
+        memcpy(verify_payload + payload_len, nonce->Data, LENGTH_NONCE);
+
+        status = SOPC_CryptoProvider_AsymmetricVerify(provider, verify_payload, verify_len, publicKey, signature->Data,
+                                                      (uint32_t) signature->Length);
+        free(verify_payload);
+    }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    return status;
+}
+
+static SOPC_ReturnStatus check_signature(const char* channelSecurityPolicy,
+                                         const SOPC_String* requestedSecurityPolicy,
+                                         const SOPC_AsymmetricKey* publicKey,
+                                         const uint8_t* payload,
+                                         uint32_t payload_len,
+                                         const SOPC_ByteString* nonce,
+                                         const SOPC_String* signature)
+{
+    SOPC_CryptoProvider* provider = SOPC_CryptoProvider_Create(channelSecurityPolicy);
+
+    if (provider == NULL)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    SOPC_ReturnStatus status = check_signature_with_provider(provider, requestedSecurityPolicy, publicKey, payload,
+                                                             payload_len, nonce, signature);
+    SOPC_CryptoProvider_Free(provider);
+    return status;
+}
+
 void session_core_bs__client_create_session_check_crypto(
     const constants__t_session_i session_core_bs__p_session,
     const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
     const constants__t_msg_i session_core_bs__p_resp_msg,
     t_bool* const session_core_bs__valid)
 {
-    SOPC_CryptoProvider* pProvider = NULL;
     const SOPC_SecureChannel_Config* pSCCfg = NULL;
     SessionData* pSession = NULL;
-    const SOPC_ByteString* pNonce = NULL;
-    const OpcUa_SignatureData* pSignCandid = NULL;
     uint8_t* pDerCli = NULL;
     uint32_t lenDerCli = 0;
-    uint8_t* pToVerify = NULL;
-    uint32_t lenToVerify = 0;
     const OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) session_core_bs__p_resp_msg;
-    const SOPC_Certificate *pCrtCli = NULL, *pCrtSrv = NULL;
-    const char* szSignUri = NULL;
+    const OpcUa_SignatureData* pSignCandid = &pResp->ServerSignature;
     SOPC_AsymmetricKey* pKeyCrtSrv = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     /* Default answer */
     *session_core_bs__valid = false;
 
-    if (constants__c_session_indet != session_core_bs__p_session)
+    if (constants__c_session_indet == session_core_bs__p_session)
     {
-        pSession = &sessionDataArray[session_core_bs__p_session];
-
-        /* Retrieve the security policy and mode */
-        pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
-        if (NULL == pSCCfg)
-            return;
-
-        /* Retrieve the certificates */
-        pCrtCli = pSCCfg->crt_cli;
-        pCrtSrv = pSCCfg->crt_srv;
-        if (NULL == pCrtSrv || NULL == pCrtCli)
-            return;
-
-        /* TODO: Verify that the server certificate in the Response is the same as the one stored with the SecureChannel
-         */
-
-        /* Retrieve ptrs to ClientNonce and ServerSignature */
-        pNonce = &pSession->nonceClient;
-        pSignCandid = &pResp->ServerSignature;
-
-        if (pResp->ServerNonce.Length <= 0)
-            return;
-
-        status = SOPC_ByteString_Copy(&pSession->nonceServer, &pResp->ServerNonce);
-        if (SOPC_STATUS_OK != status)
-            return;
-
-        /* Build CryptoProvider */
-        /* TODO: don't create it each time, maybe add it to the session */
-        pProvider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
-
-        /* Verify signature algorithm URI */
-        szSignUri = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider);
-
-        if (szSignUri != NULL && strcmp((char*) pSignCandid->Algorithm.Data, szSignUri) == 0)
-        {
-            /* Build signed data (client certificate + client nonce) */
-            /* a) Get Der of client certificate */
-            status = SOPC_KeyManager_Certificate_CopyDER(pCrtCli, &pDerCli, &lenDerCli);
-            if (SOPC_STATUS_OK == status)
-            {
-                /* b) Concat Nonce */
-                lenToVerify = lenDerCli + LENGTH_NONCE;
-                pToVerify = (uint8_t*) malloc(sizeof(uint8_t) * lenToVerify);
-                if (NULL != pToVerify && pNonce->Length > 0)
-                {
-                    /* TODO: The KeyManager API should be changed to avoid these useless copies */
-                    memcpy(pToVerify, pDerCli, lenDerCli);
-                    memcpy(pToVerify + lenDerCli, pNonce->Data, (size_t) pNonce->Length);
-
-                    /* Verify given signature */
-                    /* a) Retrieve public key from certificate */
-                    status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtSrv, &pKeyCrtSrv);
-                    if (SOPC_STATUS_OK == status && pSignCandid->Signature.Length > 0)
-                    {
-                        /* b) Call AsymVerify */
-                        status = SOPC_CryptoProvider_AsymmetricVerify(pProvider, pToVerify, lenToVerify, pKeyCrtSrv,
-                                                                      pSignCandid->Signature.Data,
-                                                                      (uint32_t) pSignCandid->Signature.Length);
-                        if (SOPC_STATUS_OK == status)
-                        {
-                            *session_core_bs__valid = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        /* Clear */
-        SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtSrv);
-        free(pToVerify);
-        free(pDerCli);
-        SOPC_CryptoProvider_Free(pProvider);
+        return;
     }
+
+    pSession = &sessionDataArray[session_core_bs__p_session];
+
+    /* Retrieve the security policy and mode */
+    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
+
+    if (NULL == pSCCfg || NULL == pSCCfg->crt_cli || NULL == pSCCfg->crt_srv)
+    {
+        return;
+    }
+
+    /* TODO: Verify that the server certificate in the Response is the same as the one stored with the SecureChannel */
+
+    if (pResp->ServerNonce.Length <= 0 ||
+        SOPC_ByteString_Copy(&pSession->nonceServer, &pResp->ServerNonce) != SOPC_STATUS_OK)
+    {
+        return;
+    }
+
+    if (SOPC_KeyManager_Certificate_CopyDER(pSCCfg->crt_cli, &pDerCli, &lenDerCli) == SOPC_STATUS_OK &&
+        SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pSCCfg->crt_srv, &pKeyCrtSrv) == SOPC_STATUS_OK &&
+        check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtSrv, pDerCli, lenDerCli,
+                        &pSession->nonceClient, &pSignCandid->Signature) == SOPC_STATUS_OK)
+    {
+        *session_core_bs__valid = true;
+    }
+
+    free(pDerCli);
+    SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtSrv);
 }
 
 void session_core_bs__server_activate_session_check_crypto(
@@ -768,99 +779,64 @@ void session_core_bs__server_activate_session_check_crypto(
     t_bool* const session_core_bs__valid)
 {
     (void) session_core_bs__channel;
-    SOPC_CryptoProvider* pProvider = NULL;
     const SOPC_SecureChannel_Config* pSCCfg = NULL;
+    SOPC_CryptoProvider* provider = NULL;
     SessionData* pSession = NULL;
     SOPC_ByteString* pNonce = NULL;
-    const OpcUa_SignatureData* pSignCandid = NULL;
     uint8_t* pDerSrv = NULL;
     uint32_t lenDerSrv = 0;
-    uint8_t* pToVerify = NULL;
-    uint32_t lenToVerify = 0;
     const OpcUa_ActivateSessionRequest* pReq = (OpcUa_ActivateSessionRequest*) session_core_bs__activate_req_msg;
-    const SOPC_Certificate *pCrtCli = NULL, *pCrtSrv = NULL;
-    const char* szSignUri = NULL;
+    const OpcUa_SignatureData* pSignCandid = &pReq->ClientSignature;
     SOPC_AsymmetricKey* pKeyCrtCli = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     /* Default answer */
     *session_core_bs__valid = false;
 
-    if (constants__c_session_indet != session_core_bs__session)
+    if (constants__c_session_indet == session_core_bs__session)
     {
-        pSession = &sessionDataArray[session_core_bs__session];
-
-        /* Retrieve the security policy and mode */
-        pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__channel_config_idx);
-        if (NULL == pSCCfg)
-            return;
-
-        /* Retrieve the certificates */
-        pCrtCli = pSCCfg->crt_cli;
-        pCrtSrv = pSCCfg->crt_srv;
-        if (NULL == pCrtSrv || NULL == pCrtCli)
-            return;
-
-        /* Retrieve ptrs to ServerNonce and ClientSignature */
-        pNonce = &pSession->nonceServer;
-        pSignCandid = &pReq->ClientSignature;
-
-        /* Build CryptoProvider */
-        /* TODO: don't create it each time, maybe add it to the session */
-        pProvider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
-
-        /* Verify signature algorithm URI */
-        szSignUri = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider);
-
-        if (szSignUri != NULL && strcmp((char*) pSignCandid->Algorithm.Data, szSignUri) == 0)
-        {
-            /* Build signed data (server certificate + server nonce) */
-            /* a) Get Der of client certificate */
-            status = SOPC_KeyManager_Certificate_CopyDER(pCrtSrv, &pDerSrv, &lenDerSrv);
-            if (SOPC_STATUS_OK == status)
-            {
-                /* b) Concat Nonce */
-                lenToVerify = lenDerSrv + LENGTH_NONCE;
-                pToVerify = (uint8_t*) malloc(sizeof(uint8_t) * lenToVerify);
-                if (NULL != pToVerify && pNonce->Length > 0)
-                {
-                    /* TODO: The KeyManager API should be changed to avoid these useless copies */
-                    memcpy(pToVerify, pDerSrv, lenDerSrv);
-                    memcpy(pToVerify + lenDerSrv, pNonce->Data, (size_t) pNonce->Length);
-
-                    /* Verify given signature */
-                    /* a) Retrieve public key from certificate */
-                    status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtCli, &pKeyCrtCli);
-                    if (SOPC_STATUS_OK == status && pSignCandid->Signature.Length > 0)
-                    {
-                        /* b) Call AsymVerify */
-                        status = SOPC_CryptoProvider_AsymmetricVerify(pProvider, pToVerify, lenToVerify, pKeyCrtCli,
-                                                                      pSignCandid->Signature.Data,
-                                                                      (uint32_t) pSignCandid->Signature.Length);
-                        if (SOPC_STATUS_OK == status)
-                        {
-                            *session_core_bs__valid = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (*session_core_bs__valid != false && pNonce->Length > 0)
-        {
-            // renew the server Nonce
-            free(pNonce->Data);
-            pNonce->Data = NULL;
-            status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, (uint32_t) pNonce->Length, &pNonce->Data);
-            assert(SOPC_STATUS_OK == status);
-        }
-
-        /* Clear */
-        SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtCli);
-        free(pToVerify);
-        free(pDerSrv);
-        SOPC_CryptoProvider_Free(pProvider);
+        return;
     }
+
+    pSession = &sessionDataArray[session_core_bs__session];
+
+    /* Retrieve the security policy and mode */
+    pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__channel_config_idx);
+
+    if (NULL == pSCCfg || NULL == pSCCfg->crt_cli || NULL == pSCCfg->crt_srv)
+    {
+        return;
+    }
+
+    /* Retrieve ptrs to ServerNonce and ClientSignature */
+    pNonce = &pSession->nonceServer;
+
+    if (pNonce == NULL || pNonce->Length <= 0)
+    {
+        return;
+    }
+
+    provider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
+
+    if (provider != NULL &&
+        SOPC_KeyManager_Certificate_CopyDER(pSCCfg->crt_srv, &pDerSrv, &lenDerSrv) == SOPC_STATUS_OK &&
+        SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pSCCfg->crt_cli, &pKeyCrtCli) == SOPC_STATUS_OK &&
+        check_signature_with_provider(provider, &pSignCandid->Algorithm, pKeyCrtCli, pDerSrv, lenDerSrv, pNonce,
+                                      &pSignCandid->Signature) == SOPC_STATUS_OK)
+    {
+        *session_core_bs__valid = true;
+
+        // renew the server Nonce
+        free(pNonce->Data);
+        pNonce->Data = NULL;
+        status = SOPC_CryptoProvider_GenerateRandomBytes(provider, (uint32_t) pNonce->Length, &pNonce->Data);
+        assert(SOPC_STATUS_OK == status);
+    }
+
+    /* Clear */
+    SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtCli);
+    free(pDerSrv);
+    SOPC_CryptoProvider_Free(provider);
 }
 
 void session_core_bs__client_activate_session_resp_check(
