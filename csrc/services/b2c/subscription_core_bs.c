@@ -109,34 +109,31 @@ void subscription_core_bs__compute_create_subscription_revised_params(
         *subscription_core_bs__revisedPublishInterval = subscription_core_bs__p_reqPublishInterval;
     }
 
-    if (subscription_core_bs__p_reqMaxKeepAlive < SOPC_MIN_LIFETIME_PUBLISH_INTERVALS)
+    if (subscription_core_bs__p_reqMaxKeepAlive < SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS)
     {
-        *subscription_core_bs__revisedMaxKeepAlive = SOPC_MIN_LIFETIME_PUBLISH_INTERVALS;
+        *subscription_core_bs__revisedMaxKeepAlive = SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS;
     }
-    else if (subscription_core_bs__p_reqMaxKeepAlive > SOPC_MAX_LIFETIME_PUBLISH_INTERVALS)
+    else if (subscription_core_bs__p_reqMaxKeepAlive > SOPC_MAX_KEEPALIVE_PUBLISH_INTERVALS)
     {
-        *subscription_core_bs__revisedMaxKeepAlive = SOPC_MAX_LIFETIME_PUBLISH_INTERVALS;
+        *subscription_core_bs__revisedMaxKeepAlive = SOPC_MAX_KEEPALIVE_PUBLISH_INTERVALS;
     }
     else
     {
         *subscription_core_bs__revisedMaxKeepAlive = subscription_core_bs__p_reqMaxKeepAlive;
     }
 
-    if (subscription_core_bs__p_reqLifetimeCount < SOPC_MIN_LIFETIME_PUBLISH_INTERVALS)
-    {
-        *subscription_core_bs__revisedLifetimeCount = SOPC_MIN_LIFETIME_PUBLISH_INTERVALS;
-    }
-    else if (subscription_core_bs__p_reqLifetimeCount > SOPC_MAX_LIFETIME_PUBLISH_INTERVALS)
-    {
-        *subscription_core_bs__revisedLifetimeCount = SOPC_MAX_LIFETIME_PUBLISH_INTERVALS;
-    }
-    else if (subscription_core_bs__p_reqLifetimeCount < 3 * *subscription_core_bs__revisedMaxKeepAlive)
+    if (subscription_core_bs__p_reqLifetimeCount < 3 * *subscription_core_bs__revisedMaxKeepAlive)
     {
         *subscription_core_bs__revisedLifetimeCount = 3 * *subscription_core_bs__revisedMaxKeepAlive;
     }
-    else
+
+    if (*subscription_core_bs__revisedLifetimeCount < SOPC_MIN_LIFETIME_PUBLISH_INTERVALS)
     {
-        *subscription_core_bs__revisedLifetimeCount = subscription_core_bs__p_reqLifetimeCount;
+        *subscription_core_bs__revisedLifetimeCount = SOPC_MIN_LIFETIME_PUBLISH_INTERVALS;
+    }
+    else if (*subscription_core_bs__revisedLifetimeCount > SOPC_MAX_LIFETIME_PUBLISH_INTERVALS)
+    {
+        *subscription_core_bs__revisedLifetimeCount = SOPC_MAX_LIFETIME_PUBLISH_INTERVALS;
     }
 
     if (subscription_core_bs__p_maxNotificationsPerPublish > SOPC_MAX_OPERATIONS_PER_MSG)

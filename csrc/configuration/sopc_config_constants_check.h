@@ -69,13 +69,18 @@
 #error "Maximum subscription keep alive intervals > INT32_MAX"
 #endif
 
-/** Minimum number of publish intervals before lifetime expired (client to server communication) */
-#if SOPC_MIN_LIFETIME_PUBLISH_INTERVALS < 3
+/** Maximum number of publish intervals before lifetime expired (client to server communication) */
+#if SOPC_MAX_LIFETIME_PUBLISH_INTERVALS > INT32_MAX
+#error "Maximum subscription lifetime intervals > INT32_MAX"
+#endif
+
+/** Minimum number of publish intervals before lifetime expired shall be 3 times bigger than keep alive max value */
+#if SOPC_MIN_LIFETIME_PUBLISH_INTERVALS < 3 * SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS
 #error "Minimum subscription lifetime intervals < 3"
 #endif
 
-/** Maximum number of publish intervals before lifetime expired (client to server communication) */
-#if SOPC_MAX_LIFETIME_PUBLISH_INTERVALS > INT32_MAX
+/** Maximum number of publish intervals before lifetime expired shall be 3 times bigger than keep alive max value */
+#if SOPC_MAX_LIFETIME_PUBLISH_INTERVALS < 3 * SOPC_MAX_KEEPALIVE_PUBLISH_INTERVALS
 #error "Maximum subscription lifetime intervals > INT32_MAX"
 #endif
 
