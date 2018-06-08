@@ -59,6 +59,20 @@ SOPC_Buffer* SOPC_Buffer_Create(uint32_t size);
 SOPC_ReturnStatus SOPC_Buffer_Init(SOPC_Buffer* buffer, uint32_t size);
 
 /**
+ * \brief Wraps a raw memory area into an SOPC_Buffer.
+ *
+ * \param data  A pointer the memory zone.
+ * \param size  The size of the memory zone.
+ *
+ * \return The created SOPC_Buffer, or NULL on memory allocation failure.
+ *
+ * The ownership of the memory area is tranfered to the SOPC_Buffer. In other
+ * words, the memory will be freed when \ref SOPC_Buffer_Clear or
+ * \ref SOPC_Buffer_Delete is called.
+ */
+SOPC_Buffer* SOPC_Buffer_Attach(uint8_t* data, uint32_t size);
+
+/**
  *  \brief          Deallocate buffer data bytes content
  *
  *  \param buffer   Pointer to the buffer in which data bytes content must be deallocated.

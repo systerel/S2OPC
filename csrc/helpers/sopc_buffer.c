@@ -63,6 +63,22 @@ SOPC_ReturnStatus SOPC_Buffer_Init(SOPC_Buffer* buffer, uint32_t size)
     return status;
 }
 
+SOPC_Buffer* SOPC_Buffer_Attach(uint8_t* data, uint32_t size)
+{
+    SOPC_Buffer* b = calloc(1, sizeof(SOPC_Buffer));
+
+    if (b == NULL)
+    {
+        return NULL;
+    }
+
+    b->data = data;
+    b->length = size;
+    b->max_size = size;
+
+    return b;
+}
+
 void SOPC_Buffer_Clear(SOPC_Buffer* buffer)
 {
     if (buffer != NULL)
