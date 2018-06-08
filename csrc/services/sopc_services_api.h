@@ -49,7 +49,7 @@ typedef enum SOPC_Services_Event {
                                      */
     SC_TO_SE_SC_SERVICE_RCV_MSG,    /* id = secure channel connection index,
                                        params = (SOPC_Buffer*) OPC UA message payload buffer,
-                                       auxParam = (uint32_t) request Id context (server side only)
+                                       auxParam = (uint32_t) request Id context (server side only, 0 if client)
                                     */
     SC_TO_SE_SND_FAILURE,           /* id = secure channel connection index,
                                        params = (uint32_t*) requestId,
