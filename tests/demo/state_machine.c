@@ -127,6 +127,19 @@ SOPC_ReturnStatus StateMachine_StartSession(StateMachine_Machine* pSM)
     return SOPC_STATUS_OK;
 }
 
+static bool is_connected_unlocked(StateMachine_Machine* pSM)
+{
+    switch (pSM->state)
+    {
+    case stActivating:
+    case stActivated:
+    case stClosing:
+        return true;
+    default:
+        return false;
+    }
+}
+
 SOPC_ReturnStatus StateMachine_StopSession(StateMachine_Machine* pSM)
 {
     if (pSM == NULL)
@@ -138,7 +151,7 @@ SOPC_ReturnStatus StateMachine_StopSession(StateMachine_Machine* pSM)
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    if (!StateMachine_IsConnected(pSM))
+    if (!is_connected_unlocked(pSM))
     {
         status = SOPC_STATUS_NOK;
     }
@@ -352,20 +365,7 @@ bool StateMachine_IsConnected(StateMachine_Machine* pSM)
     }
 
     assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
-
-    bool bConnected = false;
-
-    switch (pSM->state)
-    {
-    case stActivating:
-    case stActivated:
-    case stClosing:
-        bConnected = true;
-        break;
-    default:
-        break;
-    }
-
+    bool bConnected = is_connected_unlocked(pSM);
     assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
 
     return bConnected;
