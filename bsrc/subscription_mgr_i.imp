@@ -420,7 +420,7 @@ OPERATIONS
         /* Note: we only treat the first subscription in list since only one subscription per session can be opened*/
         l_nb_subs, l_first_sub_in_request <-- get_msg_delete_subscriptions_req_first_subscription (p_req_msg);
         IF l_session_has_subscription = TRUE &
-           l_nb_subs > 0 &
+           l_nb_subs > 0 & l_nb_subs <= k_n_genericOperationPerReq_max &
            l_first_sub_in_request = l_session_sub
         THEN
             /* Note: if same subscription as the one recorded for current session => the subscription id is valid */
@@ -436,9 +436,19 @@ OPERATIONS
         ELSIF l_nb_subs <= 0
         THEN
             StatusCode_service := e_sc_bad_nothing_to_do
+        ELSIF l_first_sub_in_request = l_session_sub & l_nb_subs > k_n_genericOperationPerReq_max
+        THEN
+            StatusCode_service := e_sc_bad_too_many_ops
         ELSE
-            set_msg_delete_subscriptions_resp_first_subscription (p_resp_msg, FALSE);
-            StatusCode_service := e_sc_ok
+            /* Service ok but subscription Id invalid */
+            l_bres <-- allocate_msg_delete_subscriptions_resp_results_array (p_resp_msg, l_nb_subs);
+            IF l_bres = TRUE
+            THEN
+                set_msg_delete_subscriptions_resp_first_subscription (p_resp_msg, FALSE);
+                StatusCode_service := e_sc_ok
+            ELSE
+                StatusCode_service := e_sc_bad_out_of_memory
+            END
         END
     END
     ;

@@ -293,6 +293,7 @@ CONCRETE_CONSTANTS
     k_n_BrowseTarget_max,
     k_n_monitoredItem_max,
     k_n_monitoredItemNotif_max,
+    k_n_genericOperationPerReq_max,
 
     c_Variant_indet,
     c_NodeId_indet,
@@ -474,6 +475,7 @@ PROPERTIES
     k_n_BrowseTarget_max : NAT &
     k_n_monitoredItem_max : NAT &
     k_n_monitoredItemNotif_max : NAT &
+    k_n_genericOperationPerReq_max : NAT &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
