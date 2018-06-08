@@ -698,16 +698,18 @@ endif(ENABLE_TESTING)
 
 # Library, always static
 set(LIBSUBSCRIBE_PATH "tests/client_subscription")
-add_library(client_subscription STATIC "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
-                                       "${LIBSUBSCRIBE_PATH}/toolkit_helpers.c"
-                                       "${LIBSUBSCRIBE_PATH}/state_machine.c"
-                                       )
+add_library(client_subscription "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
+                                "${LIBSUBSCRIBE_PATH}/toolkit_helpers.c"
+                                "${LIBSUBSCRIBE_PATH}/state_machine.c"
+                                )
 # add_dependencies(client_subscription ${INGOPCS_STATIC_LIB})
 target_link_libraries(client_subscription PRIVATE ${INGOPCS_STATIC_LIB}) # ${INGOPCS_DEP_LIBS})
 target_include_directories(client_subscription PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                       ${INGOPCS_PRIVATE_INCLUDES})
+                                                       ${INGOPCS_PRIVATE_INCLUDES}
+                                                       ${LIBSUBSCRIBE_PATH})
 set_target_properties(client_subscription PROPERTIES PUBLIC_HEADER "${LIBSUBSCRIBE_PATH}/libs2opc_client.h")
 install(TARGETS client_subscription
+        LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         PUBLIC_HEADER DESTINATION include)
 
@@ -717,12 +719,11 @@ if(ENABLE_TESTING)
 add_executable(s2opc_subscription_client "${LIBSUBSCRIBE_PATH}/client.c"
                                          )
 target_link_libraries(s2opc_subscription_client PRIVATE client_subscription)
-#target_include_directories(client_subscription_client PRIVATE ${LIBSUBSCRIBE_PATH})
 
 # Helpers unit tests
 add_executable(check_libsub "${LIBSUBSCRIBE_PATH}/check_libsub.c")
-target_include_directories(check_libsub PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
-target_link_libraries(check_libsub PRIVATE client_subscription ${CHECK_LIBRARIES})
+target_include_directories(check_libsub PRIVATE ${INGOPCS_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
+target_link_libraries(check_libsub PRIVATE client_subscription ${INGOPCS_STATIC_LIB} ${CHECK_LIBRARIES})
 s2opc_client_validation_test(check_libsub)
 
 endif(ENABLE_TESTING)
