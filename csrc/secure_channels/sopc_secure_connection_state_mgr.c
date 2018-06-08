@@ -929,6 +929,10 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
     {
         SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_OPN, scConnectionIdx, (void*) opnMsgBuffer, 0);
     }
+    else
+    {
+        SOPC_Buffer_Delete(opnMsgBuffer);
+    }
 
     OpcUa_RequestHeader_Clear(&reqHeader);
     OpcUa_OpenSecureChannelRequest_Clear(&opnReq);
