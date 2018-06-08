@@ -124,7 +124,7 @@ bool SC_CloseConnection(uint32_t connectionIdx)
     SOPC_SecureConnection* scConnection = NULL;
     bool result = false;
     bool configRes = false;
-    if (connectionIdx > 0 && connectionIdx < SOPC_MAX_SECURE_CONNECTIONS)
+    if (connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS)
     {
         scConnection = &(secureConnectionsArray[connectionIdx]);
         if (scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
