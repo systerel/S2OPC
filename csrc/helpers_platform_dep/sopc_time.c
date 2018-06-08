@@ -31,13 +31,6 @@ static char* get_time_string(bool local, bool compact)
     static const char* format_milliseconds_compact = "_%03lu";
     static const size_t buf_size = 24;
 
-    char* buf = calloc(buf_size, sizeof(char));
-
-    if (buf == NULL)
-    {
-        return NULL;
-    }
-
     SOPC_DateTime dt = SOPC_Time_GetCurrentTimeUTC();
 
     if (dt == 0)
@@ -66,10 +59,18 @@ static char* get_time_string(bool local, bool compact)
         return NULL;
     }
 
+    char* buf = calloc(buf_size, sizeof(char));
+
+    if (buf == NULL)
+    {
+        return NULL;
+    }
+
     size_t res = strftime(buf, buf_size - 1, compact ? format_seconds_compact : format_seconds_terse, &tm);
 
     if (res == 0)
     {
+        free(buf);
         return NULL;
     }
 
