@@ -93,10 +93,6 @@ static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
     }
 }
 
-static inline void setup_client(void) {}
-
-static inline void teardown_client(void) {}
-
 START_TEST(test_subscription)
 {
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = Helpers_LoggerStdout,

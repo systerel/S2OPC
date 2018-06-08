@@ -340,8 +340,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         *pCliHndl = iCliHndl;
     }
 
-    /* Partial mallocs */
-    if (SOPC_STATUS_OK != status && NULL != pNid)
+    if (NULL != pNid)
     {
         free(pNid);
         pNid = NULL;
@@ -513,6 +512,11 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                             pMonItNotif = &pDataNotif->MonitoredItems[i];
                             status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
                             pSM->cbkDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
+                            if (SOPC_STATUS_OK == status)
+                            {
+                                free(plsVal->value);
+                                free(plsVal);
+                            }
                         }
                     }
                     /* TODO: verify the results[] which contains a status for each Ack */
