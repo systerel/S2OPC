@@ -73,12 +73,12 @@ static uint32_t nSentReqs = 0;     /* Number of sent requests, used to uniquely 
 static uintptr_t nPublishReqs = 0; /* Number of sent publish requests */
 
 /* Internal functions */
-bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
-                            uintptr_t* pAppCtx,
-                            SOPC_App_Com_Event event,
-                            uint32_t arg,
-                            void* pParam,
-                            uintptr_t appCtx);
+static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
+                                   uintptr_t* pAppCtx,
+                                   SOPC_App_Com_Event event,
+                                   uint32_t arg,
+                                   void* pParam,
+                                   uintptr_t appCtx);
 
 /* ==================
  * API implementation
@@ -739,12 +739,12 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
  *
  * It also unwraps the appCtx if it is a SOPC_StaMac_ReqCtx*, and set *pAppCtx to pReqCtx->appCtx.
  */
-bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
-                            uintptr_t* pAppCtx,
-                            SOPC_App_Com_Event event,
-                            uint32_t arg,
-                            void* pParam,
-                            uintptr_t appCtx)
+static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
+                                   uintptr_t* pAppCtx,
+                                   SOPC_App_Com_Event event,
+                                   uint32_t arg,
+                                   void* pParam,
+                                   uintptr_t appCtx)
 {
     (void) arg;
     (void) pParam;

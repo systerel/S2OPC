@@ -86,11 +86,11 @@ static void print_usage(const char* exe);
 extern int usleep(__useconds_t __useconds);
 
 /* Callbacks */
-void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
-void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
-void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
-                         const SOPC_LibSub_DataId d_id,
-                         const SOPC_LibSub_Value* value);
+static void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
+static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
+static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
+                                const SOPC_LibSub_DataId d_id,
+                                const SOPC_LibSub_Value* value);
 
 /* Main subscribing client */
 int main(int argc, char* argv[])
@@ -175,19 +175,19 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text)
+static void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text)
 {
     Helpers_LoggerStdout(log_level, text);
 }
 
-void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
+static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
 {
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
 }
 
-void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
-                         const SOPC_LibSub_DataId d_id,
-                         const SOPC_LibSub_Value* value)
+static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
+                                const SOPC_LibSub_DataId d_id,
+                                const SOPC_LibSub_Value* value)
 {
     char sz[1024];
     size_t n;
