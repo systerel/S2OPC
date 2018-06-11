@@ -58,12 +58,12 @@ END_TEST
 
 /* Subscription test */
 
-SOPC_LibSub_ConnectionId con_id = 0;
-SOPC_LibSub_DataId dat_id = 0;
-bool bFirstValue = true;
-int64_t iFirstValue = 0;
-int32_t bValueChanged = 0; /* TODO: use sopc_atomic.h */
-int32_t bDisconnected = 0;
+static SOPC_LibSub_ConnectionId con_id = 0;
+static SOPC_LibSub_DataId dat_id = 0;
+static bool bFirstValue = true;
+static int64_t iFirstValue = 0;
+static int32_t bValueChanged = 0; /* TODO: use sopc_atomic.h */
+static int32_t bDisconnected = 0;
 
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
 {
