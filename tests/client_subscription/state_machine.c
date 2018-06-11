@@ -79,6 +79,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                                    uint32_t arg,
                                    void* pParam,
                                    uintptr_t appCtx);
+static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_State oldState);
 
 /* ==================
  * API implementation
@@ -422,7 +423,6 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool bProcess = false;
     uintptr_t intAppCtx = 0; /* Internal appCtx, the one wrapped in the (ReqCtx*)appCtx */
-    void* pRequest = NULL;
     int32_t i = 0;
     OpcUa_CreateMonitoredItemsResponse* pMonItResp = NULL;
     SOPC_EncodeableType* pEncType = NULL;
@@ -645,89 +645,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             break;
         }
 
-        /* Do other things, now that the event has been processed */
-        switch (pSM->state)
-        {
-        /* Mostly when stActivated is reached */
-        case stActivated:
-            /* First, create the subscription */
-            if (0 == pSM->iSubscriptionID)
-            {
-                /* Creates the subscription */
-                /* The request is freed by the Toolkit */
-                /* TODO: make all value configurable */
-                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Creating subscription.");
-                status = Helpers_NewCreateSubscriptionRequest(pSM->fPublishInterval, 1000, 30, &pRequest);
-                if (SOPC_STATUS_OK == status)
-                {
-                    status = SOPC_StaMac_SendRequest(pSM, pRequest, 0);
-                }
-                if (SOPC_STATUS_OK == status)
-                {
-                    pSM->state = stCreatingSubscr;
-                }
-                else
-                {
-                    pSM->state = stError;
-                }
-            }
-            /* Then add tokens, but wait for at least a monitored item */
-            else if (pSM->nTokenUsable < pSM->nTokenTarget)
-            {
-                while (SOPC_STATUS_OK == status && pSM->nTokenUsable < pSM->nTokenTarget)
-                {
-                    /* Send a PublishRequest */
-                    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Adding publish token.");
-                    status =
-                        Helpers_NewPublishRequest(pSM->bAckSubscr, pSM->iSubscriptionID, pSM->iAckSeqNum, &pRequest);
-                    if (SOPC_STATUS_OK == status)
-                    {
-                        if (nPublishReqs < UINTPTR_MAX)
-                        {
-                            ++nPublishReqs;
-                        }
-                        status = SOPC_StaMac_SendRequest(pSM, pRequest, nPublishReqs);
-                    }
-                    if (SOPC_STATUS_OK == status)
-                    {
-                        /* This is the reason nTokenUsable and nTokenTarget are uint32_t: uint16_t arithmetics
-                         * would raise a warning, as 1 cannot be interpreted as a uint16_t... */
-                        pSM->nTokenUsable += 1;
-                        pSM->bAckSubscr = false;
-                    }
-                    else
-                    {
-                        pSM->state = stError;
-                    }
-                }
-            }
-            break;
-        /* Try to send a close session if the session was connected before the error */
-        case stError:
-            if (stError != oldState && stClosing != oldState)
-            {
-                pSM->state = oldState;
-                if (SOPC_StaMac_IsConnected(pSM))
-                {
-                    status = SOPC_StaMac_StopSession(pSM);
-                    if (SOPC_STATUS_OK != status)
-                    {
-                        pSM->state = stError;
-                    }
-                    else
-                    {
-                        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the connection because of the previous error.");
-                    }
-                }
-                else
-                {
-                    pSM->state = stError;
-                }
-            }
-            break;
-        default:
-            break;
-        }
+        StaMac_PostProcessActions(pSM, oldState);
     }
 
     return bProcess;
@@ -811,4 +729,98 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
     }
 
     return bProcess;
+}
+
+/**
+ * \brief Do the post process actions: create a subscription, keep the target number of PublishRequest, ...
+ *
+ */
+static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_State oldState)
+{
+    assert(NULL != pSM);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    void* pRequest = NULL;
+
+    switch (pSM->state)
+    {
+    /* Mostly when stActivated is reached */
+    case stActivated:
+        /* First, create the subscription */
+        if (0 == pSM->iSubscriptionID)
+        {
+            /* Creates the subscription */
+            /* The request is freed by the Toolkit */
+            /* TODO: make all value configurable */
+            Helpers_Log(SOPC_LOG_LEVEL_INFO, "Creating subscription.");
+            status = Helpers_NewCreateSubscriptionRequest(pSM->fPublishInterval, 1000, 30, &pRequest);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_StaMac_SendRequest(pSM, pRequest, 0);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                pSM->state = stCreatingSubscr;
+            }
+            else
+            {
+                pSM->state = stError;
+            }
+        }
+        /* Then add tokens, but wait for at least a monitored item */
+        else if (pSM->nTokenUsable < pSM->nTokenTarget)
+        {
+            while (SOPC_STATUS_OK == status && pSM->nTokenUsable < pSM->nTokenTarget)
+            {
+                /* Send a PublishRequest */
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Adding publish token.");
+                status = Helpers_NewPublishRequest(pSM->bAckSubscr, pSM->iSubscriptionID, pSM->iAckSeqNum, &pRequest);
+                if (SOPC_STATUS_OK == status)
+                {
+                    if (nPublishReqs < UINTPTR_MAX)
+                    {
+                        ++nPublishReqs;
+                    }
+                    status = SOPC_StaMac_SendRequest(pSM, pRequest, nPublishReqs);
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    /* This is the reason nTokenUsable and nTokenTarget are uint32_t: uint16_t arithmetics
+                     * would raise a warning, as 1 cannot be interpreted as a uint16_t... */
+                    pSM->nTokenUsable += 1;
+                    pSM->bAckSubscr = false;
+                }
+                else
+                {
+                    pSM->state = stError;
+                }
+            }
+        }
+        break;
+    /* Try to send a close session if the session was connected before the error */
+    case stError:
+        if (stError != oldState && stClosing != oldState)
+        {
+            pSM->state = oldState;
+            if (SOPC_StaMac_IsConnected(pSM))
+            {
+                status = SOPC_StaMac_StopSession(pSM);
+                if (SOPC_STATUS_OK != status)
+                {
+                    pSM->state = stError;
+                }
+                else
+                {
+                    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the connection because of the previous error.");
+                }
+            }
+            else
+            {
+                pSM->state = stError;
+            }
+        }
+        break;
+    default:
+        break;
+    }
 }
