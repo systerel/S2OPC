@@ -93,6 +93,8 @@ typedef enum {
 #define SOPC_SecurityPolicy_Basic256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
 #define SOPC_SecurityPolicy_Basic256Sha256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 
+void SOPC_Sleep(unsigned int milliseconds);
+
 #endif
 
 /* C String type */

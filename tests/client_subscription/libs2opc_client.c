@@ -178,7 +178,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
     /* Copy it to append it safely to the internal list */
     if (SOPC_STATUS_OK == status)
     {
-        pCfgCpy = (SOPC_LibSub_ConnectionCfg*) malloc(sizeof(SOPC_LibSub_ConnectionCfg));
+        pCfgCpy = malloc(sizeof(SOPC_LibSub_ConnectionCfg));
         if (NULL == pCfgCpy)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
