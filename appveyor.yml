@@ -35,7 +35,7 @@ test_script:
         mkdir build
         cd build
         cmake ..
-        cmake --build . --target ALL_BUILD
+        cmake --build . --target ALL_BUILD --config RelWithDebInfo
     # download and build mbedtls
     - cd %ROOT_DIR%
     - "appveyor.exe DownloadFile https://tls.mbed.org/download/mbedtls-2.9.0-apache.tgz -FileName %MBEDTLS_DIR_NAME%-apache.tgz"
@@ -45,7 +45,7 @@ test_script:
         mkdir build
         cd build
         cmake ..
-        cmake --build . --target ALL_BUILD
+        cmake --build . --target ALL_BUILD --config RelWithDebInfo
     # configure, build and test S2OPC project
     - |-
         cd %ROOT_DIR%
@@ -54,9 +54,9 @@ test_script:
         rm bgenc-master.zip
         mkdir build
         cd build
-        cmake -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/Debug/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/Debug/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/Debug/mbedcrypto.lib -DCHECK_INCLUDE_DIR=%CHECK_BUILD_DIR%\;%CHECK_BUILD_DIR%/src -DCHECK_LIBRARY=%CHECK_BUILD_DIR%/src/debug/check.lib\;%CHECK_BUILD_DIR%/lib/Debug/compat.lib ..
-        cmake --build .
-    - "ctest -T test -C Debug --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536"
+        cmake -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/RelWithDebInfo/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/RelWithDebInfo/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/RelWithDebInfo/mbedcrypto.lib -DCHECK_INCLUDE_DIR=%CHECK_BUILD_DIR%\;%CHECK_BUILD_DIR%/src -DCHECK_LIBRARY=%CHECK_BUILD_DIR%/src/RelWithDebInfo/check.lib\;%CHECK_BUILD_DIR%/lib/RelWithDebInfo/compat.lib ..
+        cmake --build . --config RelWithDebInfo
+    - "ctest -T test -C RelWithDebInfo --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536"
 
 build: off
 
