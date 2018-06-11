@@ -129,6 +129,10 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
     {
         *ppSM = pSM;
     }
+    else if (NULL != pSM)
+    {
+        SOPC_StaMac_Delete(&pSM);
+    }
 
     return status;
 }

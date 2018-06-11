@@ -171,6 +171,34 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         }
     }
 
+    if (SOPC_STATUS_OK != status)
+    {
+        if (NULL != pCrtCAu)
+        {
+            SOPC_KeyManager_Certificate_Free(pCrtCAu);
+        }
+        if (NULL != pPki)
+        {
+            SOPC_PKIProviderStack_Free(pPki);
+        }
+        if (NULL != pCrtSrv)
+        {
+            SOPC_KeyManager_Certificate_Free(pCrtSrv);
+        }
+        if (NULL != pCrtCli)
+        {
+            SOPC_KeyManager_Certificate_Free(pCrtCli);
+        }
+        if (NULL != pKeyCli)
+        {
+            SOPC_KeyManager_AsymmetricKey_Free(pKeyCli);
+        }
+        if (NULL != pscConfig)
+        {
+            free(pscConfig);
+        }
+    }
+
     return status;
 }
 
@@ -249,6 +277,14 @@ SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t
     {
         *ppRequest = pReq;
     }
+    else if (NULL != pReq)
+    {
+        if (NULL != pReq->SubscriptionAcknowledgements)
+        {
+            free(pReq->SubscriptionAcknowledgements);
+        }
+        SOPC_Encodeable_Delete(&OpcUa_PublishRequest_EncodeableType, (void**) &pReq);
+    }
 
     return status;
 }
@@ -302,6 +338,10 @@ SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId* pNid,
         pitc->RequestedParameters.DiscardOldest = true;
 
         *ppRequest = (void*) pReq;
+    }
+    else if (NULL != pReq)
+    {
+        SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
     }
 
     return status;
