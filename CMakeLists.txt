@@ -24,9 +24,9 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
   # Specific flags for CERT rules
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wunicode -Wimplicit-int -Wreserved-id-macro -Wsometimes-uninitialized -Wunsequenced -Wincompatible-pointer-types-discards-qualifiers -Wunevaluated-expression -Wparentheses -Wint-conversion -Wint-to-pointer-cast -Wincompatible-pointer-types -Wvla -Wconversion")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /Zi")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /Zi /sdl")
   # Specific flags for CERT rules
-  # TODO for MSVC
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
 else()
   message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
