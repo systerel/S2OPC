@@ -160,19 +160,24 @@ LOCAL_OPERATIONS
                             /* Update set of valid monitored items and their properties */
                             s_monitoredItemId := s_monitoredItemId \/ s_newMonitoredItemId ||
                             s_monitoredItemPointer := s_monitoredItemPointer \/ s_newMonitoredItemPointer ||
-                            a_monitoredItemId, a_monitoredItemSubs, 
+                            a_monitoredItemId, a_monitoredItemSubs, a_monitoredItemNodeId,
                             a_monitored_item_notifications, a_defined_monitored_items
                             :(/* Associate new pointers with new ids */
                               a_monitoredItemId <: a_monitoredItemId$0 &
                               s_newMonitoredItemPointer <<| a_monitoredItemId =
                                s_newMonitoredItemPointer <<| a_monitoredItemId$0 &
                               a_monitoredItemId[s_newMonitoredItemPointer] = s_newMonitoredItemId &
+                              /* Associate new pointers with nodeIds */
+                              a_monitoredItemNodeId <: a_monitoredItemNodeId$0 &
+                              s_newMonitoredItemPointer <<| a_monitoredItemNodeId =
+                               s_newMonitoredItemPointer <<| a_monitoredItemNodeId$0 &
+                              a_monitoredItemNodeId[s_newMonitoredItemPointer] = ran(miIndexToNodeIds) &
                                
                               /* Associate new pointers with current subscription */
                               a_monitoredItemSubs <: a_monitoredItemSubs$0 &
                               s_newMonitoredItemPointer <<| a_monitoredItemSubs =
                                s_newMonitoredItemPointer <<| a_monitoredItemSubs$0 &
-                              a_monitoredItemSubs[s_newMonitoredItemPointer] = {p_subscription} &
+                              a_monitoredItemSubs[s_newMonitoredItemPointer] = {p_subscription} & 
                               /* Add notifications to subscription notification queue */
                               a_monitored_item_notifications <: a_monitored_item_notifications$0 &
                               {a_pendingNotificationQueue(p_subscription)} <<| a_monitored_item_notifications =
@@ -371,7 +376,6 @@ OPERATIONS
             /* Extract create subscription parameters */
             l_reqPublishInterval, l_reqLifetimeCount, l_reqMaxKeepAlive, l_maxNotificationsPerPublish, l_publishEnabled
               <-- get_msg_create_subscription_req_params (p_req_msg);
-            /* TODO: refuse publishEnabled = FALSE ? */
             
             IF l_publishEnabled = TRUE
             THEN

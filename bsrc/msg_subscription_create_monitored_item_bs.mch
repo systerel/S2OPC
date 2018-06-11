@@ -22,8 +22,6 @@ SEES
     constants,
     message_in_bs,
     message_out_bs
-    
-/* TODO: define variable to represents the response content */
 
 OPERATIONS
     

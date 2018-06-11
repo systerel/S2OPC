@@ -31,6 +31,7 @@ DEFINITIONS
     s_monitoredItemId,
     a_monitoredItemId,
     a_monitoredItemSubs,
+    a_monitoredItemNodeId,
     a_subscription_session,
     a_publishInterval,
     a_lifetimeExpCount,
@@ -90,6 +91,7 @@ DEFINITIONS
     s_monitoredItemId := {} ||
     a_monitoredItemId := {} ||
     a_monitoredItemSubs := {} ||
+    a_monitoredItemNodeId := {} ||
     /* Publish response and notification message content */
     publish_response_message := c_msg_indet ||
     notification_message := c_notif_msg_indet ||
@@ -137,6 +139,7 @@ DEFINITIONS
     s_monitoredItemId <: t_monitoredItemId &
     a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
     a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
+    a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId &
     
     s_notificationQueue <: t_notificationQueue &
     a_pendingNotificationQueue : s_subscription --> s_notificationQueue &
@@ -537,7 +540,6 @@ OPERATIONS
         /* Queues emptied : publish responses should be sent if remaining */
         a_publish_responses := a_publish_responses |>> {a_publishRequestQueue (p_subscription)} ||
         a_monitored_item_notifications := {a_pendingNotificationQueue (p_subscription)} <<| a_monitored_item_notifications ||
-        a_defined_monitored_items := {a_monitoredItemQueue (p_subscription)} <<| a_defined_monitored_items ||
         
         /* Queues deleted */
         s_notificationQueue := s_notificationQueue - {a_pendingNotificationQueue (p_subscription)} ||
@@ -546,11 +548,26 @@ OPERATIONS
         s_publishReqQueue := s_publishReqQueue - {a_publishRequestQueue(p_subscription)} ||
         a_publishRequestQueue := {p_subscription} <<| a_publishRequestQueue ||
         
+        
         /* Remove monitoredItems */
-        s_monitoredItemPointer := s_monitoredItemPointer - a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}] ||
-        /* TODO: For each queue in a_nodeToMonitoredItemQueue, remove monitored items: a_monitoredItemQueue (p_subscription) ||*/
-        s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
-        a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue
+        LET s_removedMonitoredItemPointer BE
+            s_removedMonitoredItemPointer = a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}]
+        IN
+            s_monitoredItemPointer := s_monitoredItemPointer - s_removedMonitoredItemPointer ||
+            s_monitoredItemId := s_monitoredItemId - a_monitoredItemId[s_removedMonitoredItemPointer] ||
+            a_monitoredItemId := a_monitoredItemId - (s_removedMonitoredItemPointer <| a_monitoredItemId) ||
+            a_monitoredItemSubs := s_removedMonitoredItemPointer <<| a_monitoredItemSubs ||
+            a_monitoredItemNodeId := s_removedMonitoredItemPointer <<| a_monitoredItemNodeId ||
+            
+            s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
+            a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue ||
+            
+            /* Remove subscription monitoredItem queue and all removed monitored items from other queues (i.e.:nodeId to mi queues) */
+            a_defined_monitored_items := 
+             {a_monitoredItemQueue (p_subscription)}
+              <<| a_defined_monitored_items |>>
+             s_removedMonitoredItemPointer
+        END
     END
     ;
     
@@ -714,6 +731,7 @@ OPERATIONS
                 s_monitoredItemId := s_monitoredItemId \/ {l_monitoredItemId} ||
                 a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
                 a_monitoredItemSubs(l_monitoredItem) := p_subscription ||
+                a_monitoredItemNodeId(l_monitoredItem) := p_nid ||
                 monitoredItemPointer := l_monitoredItem ||
                 monitoredItemId := l_monitoredItemId ||
                 /* a notification is enqueued with current value of monitored item */

@@ -25,21 +25,24 @@ ABSTRACT_VARIABLES
     s_monitoredItemPointer,
     s_monitoredItemId,
     a_monitoredItemId,
-    a_monitoredItemSubs
+    a_monitoredItemSubs,
+    a_monitoredItemNodeId
     
 INVARIANT
     
     s_monitoredItemPointer <: t_monitoredItemPointer &
     s_monitoredItemId <: t_monitoredItemId &
     a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
-    a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription
+    a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
+    a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId
     
 INITIALISATION
     
     s_monitoredItemPointer :(s_monitoredItemPointer <: t_monitoredItemPointer & s_monitoredItemPointer = {}) ||
     s_monitoredItemId :(s_monitoredItemId <: t_monitoredItemId & s_monitoredItemId = {}) ||
     a_monitoredItemId :(a_monitoredItemId : s_monitoredItemPointer <-> s_monitoredItemId & a_monitoredItemId = {}) ||
-    a_monitoredItemSubs :(a_monitoredItemSubs : s_monitoredItemPointer <-> t_subscription & a_monitoredItemSubs = {})
+    a_monitoredItemSubs :(a_monitoredItemSubs : s_monitoredItemPointer <-> t_subscription & a_monitoredItemSubs = {}) ||
+    a_monitoredItemNodeId :(a_monitoredItemNodeId : s_monitoredItemPointer <-> t_NodeId & a_monitoredItemNodeId = {})
 
 OPERATIONS
     
@@ -84,6 +87,7 @@ OPERATIONS
                 s_monitoredItemId := s_monitoredItemId \/ {l_monitoredItemId} ||
                 a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
                 a_monitoredItemSubs (l_monitoredItem) := p_subscription ||
+                a_monitoredItemNodeId (l_monitoredItem) := p_nid ||
                 monitoredItemPointer := l_monitoredItem ||
                 monitoredItemId := l_monitoredItemId
             END
@@ -99,7 +103,8 @@ OPERATIONS
         s_monitoredItemPointer := s_monitoredItemPointer - {p_monitoredItemPointer} ||
         s_monitoredItemId := s_monitoredItemId - {a_monitoredItemId(p_monitoredItemPointer)} ||
         a_monitoredItemId := a_monitoredItemId - {p_monitoredItemPointer |-> a_monitoredItemId(p_monitoredItemPointer)} ||
-        a_monitoredItemSubs := {p_monitoredItemPointer} <<| a_monitoredItemSubs
+        a_monitoredItemSubs := {p_monitoredItemPointer} <<| a_monitoredItemSubs ||
+        a_monitoredItemNodeId := {p_monitoredItemPointer} <<| a_monitoredItemNodeId
     END
     ;
     
@@ -125,9 +130,9 @@ OPERATIONS
         :(p_monitoredItemId : t_monitoredItemId_i &
           p_monitoredItemId = a_monitoredItemId(p_monitoredItemPointer) &
           p_subscription : t_subscription_i &
-          p_subscription : t_subscription &
+          p_subscription = a_monitoredItemSubs(p_monitoredItemPointer) &
           p_nid : t_NodeId_i &
-          p_nid : t_NodeId &        
+          p_nid = a_monitoredItemNodeId(p_monitoredItemPointer) &
           p_aid : t_AttributeId_i &
           p_aid : t_AttributeId &
           p_timestampToReturn : t_TimestampsToReturn_i &

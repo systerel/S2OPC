@@ -155,7 +155,6 @@ LOCAL_OPERATIONS
         /* Queues emptied : publish responses should be sent if remaining */
         a_publish_responses := a_publish_responses |>> {a_publishRequestQueue (p_subscription)} ||
         a_monitored_item_notifications := {a_pendingNotificationQueue (p_subscription)} <<| a_monitored_item_notifications ||
-        a_defined_monitored_items := {a_monitoredItemQueue (p_subscription)} <<| a_defined_monitored_items ||
         
         /* Queues deleted */
         s_notificationQueue := s_notificationQueue - {a_pendingNotificationQueue (p_subscription)} ||
@@ -165,10 +164,24 @@ LOCAL_OPERATIONS
         a_publishRequestQueue := {p_subscription} <<| a_publishRequestQueue ||
         
         /* Remove monitoredItems */
-        s_monitoredItemPointer := s_monitoredItemPointer - a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}] ||
-        /* TODO: For each queue in a_nodeToMonitoredItemQueue, remove monitored items: a_monitoredItemQueue (p_subscription) ||*/
-        s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
-        a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue
+        LET s_removedMonitoredItemPointer BE
+            s_removedMonitoredItemPointer = a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}]
+        IN
+            s_monitoredItemPointer := s_monitoredItemPointer - s_removedMonitoredItemPointer ||
+            s_monitoredItemId := s_monitoredItemId - a_monitoredItemId[s_removedMonitoredItemPointer] ||
+            a_monitoredItemId := a_monitoredItemId - (s_removedMonitoredItemPointer <| a_monitoredItemId) ||
+            a_monitoredItemSubs := s_removedMonitoredItemPointer <<| a_monitoredItemSubs ||
+            a_monitoredItemNodeId := s_removedMonitoredItemPointer <<| a_monitoredItemNodeId ||
+            
+            s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
+            a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue ||
+            
+            /* Remove subscription monitoredItem queue and all removed monitored items from other queues (i.e.:nodeId to mi queues) */
+            a_defined_monitored_items := 
+             {a_monitoredItemQueue (p_subscription)}
+              <<| a_defined_monitored_items |>>
+             s_removedMonitoredItemPointer
+        END
     END
     
 OPERATIONS
@@ -317,7 +330,6 @@ OPERATIONS
         delete_publish_timer (l_timer_id);
         l_publish_queue <-- get_subscription_publishRequestQueue (p_subscription);
         clear_and_deallocate_publish_queue (l_publish_queue);
-        /* TODO: iter on monitored items and remove them from node queues ! */
         l_monitored_item_queue <-- get_subscription_monitoredItemQueue (p_subscription);
         l_continue, l_iterator <-- init_iter_monitored_item (l_monitored_item_queue);
         WHILE l_continue = TRUE DO
