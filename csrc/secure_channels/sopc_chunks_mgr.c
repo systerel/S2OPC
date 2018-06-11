@@ -1091,7 +1091,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
     return result;
 }
 
-static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSymmetric, uint32_t isPrecCryptoData)
+static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSymmetric, bool isPrecCryptoData)
 {
     assert(scConnection != NULL);
     SOPC_Buffer* encryptedBuffer = scConnection->chunksCtx.chunkInputBuffer;
