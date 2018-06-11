@@ -78,12 +78,8 @@ typedef struct
     int node_ids_sz;
     char** node_ids;
 } cmd_line_options_t;
-static bool parse_options(cmd_line_options_t* o, int argc, char** argv);
+static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv);
 static void print_usage(const char* exe);
-
-/* usleep declaration. The unistd.h declaration is conditioned by unwanted defines. Consequently, this may fail. */
-#include <unistd.h>
-extern int usleep(__useconds_t __useconds);
 
 /* Callbacks */
 static void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
@@ -93,7 +89,7 @@ static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
                                 const SOPC_LibSub_Value* value);
 
 /* Main subscribing client */
-int main(int argc, char* argv[])
+int main(int argc, char* const argv[])
 {
     cmd_line_options_t options;
     if (!parse_options(&options, argc, argv))
@@ -174,7 +170,11 @@ int main(int argc, char* argv[])
         }
     }
 
-    usleep(10 * 1000000);
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Sleep(10 * 1000);
+    }
+
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the connections.");
     SOPC_LibSub_Disconnect(con_id);
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the Toolkit.");
@@ -227,7 +227,7 @@ static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
     log_callback(SOPC_LOG_LEVEL_INFO, sz);
 }
 
-static bool parse_options(cmd_line_options_t* o, int argc, char** argv)
+static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
 {
     memset(o, 0, sizeof(cmd_line_options_t));
 

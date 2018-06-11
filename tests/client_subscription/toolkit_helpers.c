@@ -254,8 +254,7 @@ SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t
         if (bAck)
         {
             pReq->NoOfSubscriptionAcknowledgements = 1;
-            pReq->SubscriptionAcknowledgements =
-                (OpcUa_SubscriptionAcknowledgement*) malloc(sizeof(OpcUa_SubscriptionAcknowledgement));
+            pReq->SubscriptionAcknowledgements = malloc(sizeof(OpcUa_SubscriptionAcknowledgement));
             if (NULL == pReq->SubscriptionAcknowledgements)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -313,7 +312,7 @@ SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId* pNid,
 
     if (SOPC_STATUS_OK == status)
     {
-        pitc = (OpcUa_MonitoredItemCreateRequest*) malloc(sizeof(OpcUa_MonitoredItemCreateRequest));
+        pitc = malloc(sizeof(OpcUa_MonitoredItemCreateRequest));
         if (NULL == pitc)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -359,7 +358,7 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
 
     if (SOPC_STATUS_OK == status)
     {
-        plsVal = (SOPC_LibSub_Value*) malloc(sizeof(SOPC_LibSub_Value));
+        plsVal = malloc(sizeof(SOPC_LibSub_Value));
         if (NULL == plsVal)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -523,7 +522,7 @@ void Helpers_Log(const SOPC_Log_Level log_level, const char* format, ...)
     char buffer[2048];
 
     va_start(args, format);
-    vsprintf(buffer, format, args);
+    vsnprintf(buffer, sizeof(buffer) / sizeof(buffer[0]), format, args);
     va_end(args);
 
     cbkLog(log_level, buffer);
