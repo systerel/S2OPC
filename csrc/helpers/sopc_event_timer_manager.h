@@ -59,6 +59,20 @@ uint32_t SOPC_EventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
                                 uint64_t msDelay);
 
 /**
+ * \brief Creates a periodic timer raising an event on a dispatch manager every msPeriod milliseconds.
+ *
+ * \param eventMgr    the event dispatch manager to which event params will be provided on timeout
+ * \param eventParams the event parameters that will be provided on timeout to the event dispatch manager
+ * \param msPeriod    the period in milliseconds
+ *
+ * \return the timer identifier (or value 0 if operation failed)
+ *
+ * */
+uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventDispatcherManager* eventMgr,
+                                        SOPC_EventDispatcherParams eventParams,
+                                        uint64_t msPeriod);
+
+/**
  * \brief Cancel a started timer
  *
  * \param timerId the identifier of the started timer to cancel

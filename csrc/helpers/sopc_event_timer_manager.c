@@ -18,9 +18,11 @@
 #include "sopc_event_timer_manager.h"
 
 #include <assert.h>
+#include <inttypes.h>
 #include <string.h>
 
 #include "sopc_atomic.h"
+#include "sopc_logger.h"
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 
@@ -30,14 +32,18 @@ typedef struct SOPC_EventTimer
     SOPC_EventDispatcherManager* eventMgr;
     SOPC_EventDispatcherParams eventParams;
     SOPC_TimeReference endTime;
+    /* Rest is used only for periodic timers */
+    bool isPeriodicTimer;
+    uint64_t periodMs;
 } SOPC_EventTimer;
 
-#define SOPC_MAX_TIMERS UINT16_MAX
+#define SOPC_MAX_TIMERS UINT8_MAX /* TODO: avoid static maximum (see monitoredItems Id creation) */
 
 static bool usedTimerIds[SOPC_MAX_TIMERS + 1]; // 0 idx value is invalid (max idx = MAX)
 static uint32_t latestTimerId = 0;
 
 static SOPC_SLinkedList* timers = NULL;
+static SOPC_SLinkedList* periodicTimersToRestart = NULL;
 
 static Mutex timersMutex;
 static int32_t initialized = 0;
@@ -108,9 +114,12 @@ void SOPC_EventTimer_Initialize()
     Mutex_Initialization(&timersMutex);
     memset(usedTimerIds, false, sizeof(bool) * (SOPC_MAX_TIMERS + 1)); // 0 idx value is invalid (max idx = MAX + 1)
     timers = SOPC_SLinkedList_Create(SOPC_MAX_TIMERS);
+    periodicTimersToRestart = SOPC_SLinkedList_Create(SOPC_MAX_TIMERS);
 
-    if (timers == NULL)
+    if (timers == NULL || periodicTimersToRestart == NULL)
     {
+        SOPC_SLinkedList_Delete(timers);
+        SOPC_SLinkedList_Delete(periodicTimersToRestart);
         return;
     }
 
@@ -145,13 +154,17 @@ void SOPC_EventTimer_Clear()
     SOPC_SLinkedList_Apply(timers, SOPC_SLinkedList_EltGenericFree);
     SOPC_SLinkedList_Delete(timers);
     timers = NULL;
+    // No need to iterate to free elements, elements are temporary added only during timer evaluation
+    SOPC_SLinkedList_Delete(periodicTimersToRestart);
+    periodicTimersToRestart = NULL;
     SOPC_Atomic_Int_Set(&initialized, 0);
     Mutex_Unlock(&timersMutex);
 }
 
-uint32_t SOPC_EventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
-                                SOPC_EventDispatcherParams eventParams,
-                                uint64_t msDelay)
+static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
+                                               SOPC_EventDispatcherParams eventParams,
+                                               uint64_t msDelay,
+                                               bool isPeriodic)
 {
     if (!is_initialized())
     {
@@ -177,6 +190,8 @@ uint32_t SOPC_EventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
     newTimer->endTime = targetTime;
     newTimer->eventMgr = eventMgr;
     newTimer->eventParams = eventParams;
+    newTimer->isPeriodicTimer = isPeriodic;
+    newTimer->periodMs = msDelay;
 
     // Set timer
     Mutex_Lock(&timersMutex);
@@ -202,10 +217,24 @@ uint32_t SOPC_EventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
     return result;
 }
 
+uint32_t SOPC_EventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
+                                SOPC_EventDispatcherParams eventParams,
+                                uint64_t msDelay)
+{
+    return SOPC_InternalEventTimer_Create(eventMgr, eventParams, msDelay, false);
+}
+
+uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventDispatcherManager* eventMgr,
+                                        SOPC_EventDispatcherParams eventParams,
+                                        uint64_t msPeriod)
+{
+    return SOPC_InternalEventTimer_Create(eventMgr, eventParams, msPeriod, true);
+}
+
 static void SOPC_Internal_EventTimer_Cancel_WithoutLock(uint32_t timerId)
 {
     SOPC_EventTimer* timer = NULL;
-    if (usedTimerIds[timerId] != false)
+    if (usedTimerIds[timerId])
     {
         timer = SOPC_SLinkedList_RemoveFromId(timers, timerId);
         if (timer != NULL)
@@ -226,6 +255,36 @@ void SOPC_EventTimer_Cancel(uint32_t timerId)
     Mutex_Lock(&timersMutex);
     SOPC_Internal_EventTimer_Cancel_WithoutLock(timerId);
     Mutex_Unlock(&timersMutex);
+}
+
+static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventTimer* timer)
+{
+    SOPC_EventTimer* result = NULL;
+
+    if (usedTimerIds[timer->id])
+    {
+        result = SOPC_SLinkedList_RemoveFromId(timers, timer->id);
+        assert(result == timer);
+
+        // Set timer
+        result = SOPC_SLinkedList_SortedInsert(timers, timer->id, timer, SOPC_Internal_SLinkedList_EventTimerCompare);
+
+        if (result != timer)
+        {
+            usedTimerIds[timer->id] = false;
+            free(timer);
+            SOPC_Logger_TraceError("EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
+                                   " with event=%" PRIi32 " and associated id=%" PRIu32,
+                                   timer->id, timer->eventParams.event, timer->eventParams.eltId);
+        }
+    }
+    else
+    {
+        free(timer);
+        SOPC_Logger_TraceError("EventTimerManager: failed to restart the disabled periodic timer id=%" PRIu32
+                               " with event=%" PRIi32 " and associated id=%" PRIu32,
+                               timer->id, timer->eventParams.event, timer->eventParams.eltId);
+    }
 }
 
 void SOPC_EventTimer_CyclicTimersEvaluation()
@@ -258,14 +317,39 @@ void SOPC_EventTimer_CyclicTimersEvaluation()
         SOPC_EventDispatcherManager_AddEvent(timer->eventMgr, timer->eventParams.event, timer->eventParams.eltId,
                                              timer->eventParams.params, timer->eventParams.auxParam,
                                              timer->eventParams.debugName);
-        // Remove the triggered timer (possible during iteration since we remove already iterated item)
-        SOPC_Internal_EventTimer_Cancel_WithoutLock(timerId);
+
+        if (timer->isPeriodicTimer)
+        {
+            // Set target time reference
+            timer->endTime = SOPC_TimeReference_AddMilliseconds(timer->endTime, timer->periodMs);
+            // Add to list of timers to restart it
+            if (timer != SOPC_SLinkedList_Append(periodicTimersToRestart, timer->id, (void*) timer))
+            {
+                SOPC_Logger_TraceError(
+                    "EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
+                    " with event=%" PRIi32 " and associated id=%" PRIu32,
+                    timer->id, timer->eventParams.event, timer->eventParams.eltId);
+            }
+        }
+        else
+        {
+            // Remove the triggered timer (possible during iteration since we remove already iterated item)
+            SOPC_Internal_EventTimer_Cancel_WithoutLock(timerId);
+        }
 
         // Prepare next timeout evaluation
         timer = (SOPC_EventTimer*) SOPC_SLinkedList_Next(&timerIt);
         if (timer != NULL)
         {
             compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
+        }
+    }
+    while (SOPC_SLinkedList_GetLength(periodicTimersToRestart) > 0)
+    {
+        timer = (SOPC_EventTimer*) SOPC_SLinkedList_PopHead(periodicTimersToRestart);
+        if (NULL != timer)
+        {
+            SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(timer);
         }
     }
     Mutex_Unlock(&timersMutex);
