@@ -101,6 +101,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = log_callback, .disconnect_callback = disconnect_callback};
     SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = options.endpoint_url,
                                          .security_policy = SECURITY_POLICY,
@@ -127,36 +128,44 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK != SOPC_LibSub_Initialize(&cfg_cli))
     {
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not initialize library.");
-        return 1;
-    }
-
-    if (SOPC_STATUS_OK != SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id))
-    {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure connection.");
         return 2;
     }
 
-    if (SOPC_STATUS_OK != SOPC_LibSub_Configured())
+    status = SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id);
+    if (SOPC_STATUS_OK != status)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit.");
-        return 3;
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure connection.");
     }
 
-    if (SOPC_STATUS_OK != SOPC_LibSub_Connect(cfg_id, &con_id))
+    if (SOPC_STATUS_OK == status)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not connect with given configuration id.");
-        return 4;
+        status = SOPC_LibSub_Configured();
+        if (SOPC_STATUS_OK != status)
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit.");
+        }
     }
 
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Connected.");
-
-    for (int i = 0; i < options.node_ids_sz; ++i)
+    if (SOPC_STATUS_OK == status)
     {
-        if (SOPC_STATUS_OK !=
-            SOPC_LibSub_AddToSubscription(con_id, options.node_ids[i], SOPC_LibSub_AttributeId_Value, &d_id))
+        status = SOPC_LibSub_Connect(cfg_id, &con_id);
+        if (SOPC_STATUS_OK != status)
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not connect with given configuration id.");
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Connected.");
+    }
+
+    for (int i = 0; SOPC_STATUS_OK == status && i < options.node_ids_sz; ++i)
+    {
+        status = SOPC_LibSub_AddToSubscription(con_id, options.node_ids[i], SOPC_LibSub_AttributeId_Value, &d_id);
+        if (SOPC_STATUS_OK != status)
         {
             Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not create monitored item.");
-            return 5;
         }
         else
         {
@@ -172,6 +181,10 @@ int main(int argc, char* argv[])
     SOPC_LibSub_Clear();
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Toolkit closed.");
 
+    if (SOPC_STATUS_OK != status)
+    {
+        return 3;
+    }
     return 0;
 }
 

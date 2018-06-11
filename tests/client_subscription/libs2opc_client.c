@@ -202,6 +202,10 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
     {
         *pCfgId = cfgId;
     }
+    else if (NULL != pCfgCpy)
+    {
+        free(pCfgCpy);
+    }
 
     return status;
 }
@@ -289,6 +293,10 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
         {
             status = SOPC_STATUS_NOK;
         }
+    }
+    else if (NULL != pSM)
+    {
+        SOPC_StaMac_Delete(&pSM);
     }
 
     return status;
