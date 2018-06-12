@@ -136,7 +136,7 @@ void publish_request_queue_bs__is_request_expired(const constants__t_timeref_i p
     *publish_request_queue_bs__bres = current >= publish_request_queue_bs__p_req_exp_time;
 }
 
-void publish_request_queue_bs__pop_head_publish_request_queue(
+void publish_request_queue_bs__pop_valid_publish_request_queue(
     const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue,
     constants__t_session_i* const publish_request_queue_bs__p_session,
     constants__t_timeref_i* const publish_request_queue_bs__p_req_exp_time,

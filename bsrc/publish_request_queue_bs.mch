@@ -198,7 +198,7 @@ OPERATIONS
     
     /* Used to dequeue a non expired publish request:  */
     p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg
-      <-- pop_head_publish_request_queue (p_queue) =
+      <-- pop_valid_publish_request_queue (p_queue) =
     PRE
         p_queue : t_publishReqQueue_i &
         p_queue : s_publishReqQueue &
@@ -226,6 +226,6 @@ OPERATIONS
                 a_publish_expiration_time = a_publish_expiration_time$0 - {l_resp_msg |-> p_req_exp_time}
             )
         END
-    END
+    END    
     
 END

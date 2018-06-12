@@ -311,9 +311,15 @@ OPERATIONS
     VAR
         l_timer_id,
         l_publish_queue,
+        l_continue_pub,
+        l_session,
+        l_req_exp_time,
+        l_req_handle,
+        l_req_ctx,
+        l_resp_msg,
         l_monitored_item_queue,
         l_notification_queue,
-        l_continue,
+        l_continue_mi,
         l_iterator,
         l_monitoredItemPointer,
         l_monitoredItemId,
@@ -329,11 +335,26 @@ OPERATIONS
         l_timer_id <-- get_subscription_timer_id (p_subscription);
         delete_publish_timer (l_timer_id);
         l_publish_queue <-- get_subscription_publishRequestQueue (p_subscription);
+        /* Clearing queue create asynchronous publish response sending indicating Bad_NoSubscription */
+        l_continue_pub <-- init_iter_publish_request (l_publish_queue);
+        WHILE l_continue_pub = TRUE DO
+            l_continue_pub, l_session, l_req_exp_time, l_req_handle, l_req_ctx, l_resp_msg 
+              <-- continue_pop_head_iter_publish_request (l_publish_queue);
+            /* Generates BadNoSubscription since only 1 subscription per session (no other subscription possibly opened) */
+            generate_internal_send_publish_response_event (l_session, l_resp_msg, l_req_handle, l_req_ctx, e_sc_bad_no_subscription)
+        INVARIANT
+            l_continue_pub = bool(a_publish_responses~[{l_publish_queue}] /= {})
+
+        VARIANT
+            card(a_publish_responses~[{l_publish_queue}])
+        END
+        ;
+        /* Deallocate queue */ 
         clear_and_deallocate_publish_queue (l_publish_queue);
         l_monitored_item_queue <-- get_subscription_monitoredItemQueue (p_subscription);
-        l_continue, l_iterator <-- init_iter_monitored_item (l_monitored_item_queue);
-        WHILE l_continue = TRUE DO
-            l_continue, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, l_monitored_item_queue);
+        l_continue_mi, l_iterator <-- init_iter_monitored_item (l_monitored_item_queue);
+        WHILE l_continue_mi = TRUE DO
+            l_continue_mi, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, l_monitored_item_queue);
             l_monitoredItemId,
             l_subscription,
             l_nid,
@@ -355,7 +376,7 @@ OPERATIONS
             
             s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
             card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it &
-            l_continue = bool(s_mi_to_iterate_it /= {}) &
+            l_continue_mi = bool(s_mi_to_iterate_it /= {}) &
             s_mi_iterated_it /\ a_defined_monitored_items[ran(a_nodeToMonitoredItemQueue)] = {} &
             s_mi_to_iterate_it /\ a_defined_monitored_items[ran(a_nodeToMonitoredItemQueue)] = s_mi_to_iterate_it
 
@@ -797,7 +818,8 @@ OPERATIONS
             /* reset lifetime counter */
             reset_subscription_LifetimeCounter (p_subscription);
             /* retrieve a valid publish response */
-            p_session, l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg <-- pop_head_publish_request_queue (l_PublishingReqQueue);
+            p_session, l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg 
+              <-- pop_valid_publish_request_queue (l_PublishingReqQueue);
             /* retrieve notification number */
             IF l_nb_notifications > k_n_monitoredItemNotif_max
             THEN
@@ -839,7 +861,7 @@ OPERATIONS
             reset_subscription_LifetimeCounter (p_subscription);
             /* retrieve a valid publish response */
             p_session, l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
-              <-- pop_head_publish_request_queue (l_PublishingReqQueue);
+              <-- pop_valid_publish_request_queue (l_PublishingReqQueue);
             set_publish_response_msg (p_publish_resp_msg);
             
             /* Note: same treatment as #15 below ! */
@@ -896,7 +918,7 @@ OPERATIONS
             
             /* retrieve a valid publish response */
             p_session, l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
-              <-- pop_head_publish_request_queue (l_PublishingReqQueue);
+              <-- pop_valid_publish_request_queue (l_PublishingReqQueue);
             
             /* retrieve notification number */
             IF l_nb_notifications > k_n_monitoredItemNotif_max
@@ -941,7 +963,7 @@ OPERATIONS
             /* Note: same treatment as #7 below ! */
             /* retrieve a valid publish response */
             p_session, l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
-              <-- pop_head_publish_request_queue (l_PublishingReqQueue);
+              <-- pop_valid_publish_request_queue (l_PublishingReqQueue);
             set_publish_response_msg (p_publish_resp_msg);
 
             /* prepare a keep alive message content */
@@ -1003,7 +1025,7 @@ OPERATIONS
           
         /* retrieve a valid publish response */
         p_session, l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
-          <-- pop_head_publish_request_queue (l_PublishingReqQueue);
+          <-- pop_valid_publish_request_queue (l_PublishingReqQueue);
             
         /* retrieve notification number */
         IF l_nb_notifications > k_n_monitoredItemNotif_max
