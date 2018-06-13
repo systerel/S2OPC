@@ -371,7 +371,7 @@ void SOPC_ByteString_Initialize(SOPC_ByteString* bstring);
 void SOPC_ByteString_InitializeAux(void* value);
 SOPC_ByteString* SOPC_ByteString_Create(void);
 SOPC_ReturnStatus SOPC_ByteString_InitializeFixedSize(SOPC_ByteString* bstring, uint32_t size);
-SOPC_ReturnStatus SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, SOPC_Byte* bytes, int32_t length);
+SOPC_ReturnStatus SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, const SOPC_Byte* bytes, int32_t length);
 SOPC_ReturnStatus SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteString* src);
 SOPC_ReturnStatus SOPC_ByteString_CopyAux(void* dest, const void* src);
 void SOPC_ByteString_Clear(SOPC_ByteString* bstring);
