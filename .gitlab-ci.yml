@@ -179,8 +179,7 @@ test-uactt:
   artifacts:
     name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
-      - '$BUILD_DIR/*.tap'
-      - '$BUILD_DIR/*.log'
+      - 'build/'
     when: on_failure
     expire_in: '1 month'
 
