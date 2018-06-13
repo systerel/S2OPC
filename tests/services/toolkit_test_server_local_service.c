@@ -174,9 +174,9 @@ int main(int argc, char* argv[])
     uint32_t loopCpt = 0;
 
     // Secu policy configuration:
-    static SOPC_Buffer* serverCertificate = NULL;
-    static SOPC_Buffer* serverKey = NULL;
-    static SOPC_Certificate* authCertificate = NULL;
+    static SOPC_SerializedCertificate* serverCertificate = NULL;
+    static SOPC_SerializedAsymmetricKey* serverKey = NULL;
+    static SOPC_SerializedCertificate* authCertificate = NULL;
     static SOPC_PKIProvider* pkiProvider = NULL;
 
     SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_Load();
@@ -193,17 +193,19 @@ int main(int argc, char* argv[])
     // Init unique endpoint structure
     epConfig.endpointURL = ENDPOINT_URL;
 
-    status = SOPC_Buffer_ReadFile("./server_public/server_2k_cert.der", &serverCertificate);
+    status =
+        SOPC_KeyManager_SerializedCertificate_CreateFromFile("./server_public/server_2k_cert.der", &serverCertificate);
     epConfig.serverCertificate = serverCertificate;
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Buffer_ReadFile("./server_private/server_2k_key.pem", &serverKey);
+        status =
+            SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile("./server_private/server_2k_key.pem", &serverKey);
         epConfig.serverKey = serverKey;
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &authCertificate);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./trusted/cacert.der", &authCertificate);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -446,9 +448,9 @@ int main(int argc, char* argv[])
 
     SOPC_String_Clear(&secuConfig[0].securityPolicy);
 
-    SOPC_Buffer_Delete(serverCertificate);
-    SOPC_Buffer_Delete(serverKey);
-    SOPC_KeyManager_Certificate_Free(authCertificate);
+    SOPC_KeyManager_SerializedCertificate_Delete(serverCertificate);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(serverKey);
+    SOPC_KeyManager_SerializedCertificate_Delete(authCertificate);
     SOPC_PKIProviderStack_Free(pkiProvider);
     SOPC_AddressSpace_Delete(address_space);
 

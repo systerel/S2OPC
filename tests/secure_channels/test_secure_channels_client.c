@@ -63,9 +63,8 @@ int main(int argc, char* argv[])
     uint32_t scConnectionId = 0;
 
     SOPC_PKIProvider* pki = NULL;
-    SOPC_Buffer *crt_cli = NULL, *crt_srv = NULL;
-    SOPC_Certificate* crt_ca = NULL;
-    SOPC_Buffer* priv_cli = NULL;
+    SOPC_SerializedCertificate *crt_cli = NULL, *crt_srv = NULL, *crt_ca = NULL;
+    SOPC_SerializedAsymmetricKey* priv_cli = NULL;
 
     // Endpoint URL
     SOPC_String stEndpointUrl;
@@ -175,7 +174,7 @@ int main(int argc, char* argv[])
                certificateLocation, certificateSrvLocation);
 
         // The certificates: load
-        status = SOPC_Buffer_ReadFile(certificateLocation, &crt_cli);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(certificateLocation, &crt_cli);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to load client certificate\n");
@@ -188,7 +187,7 @@ int main(int argc, char* argv[])
 
     if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
-        status = SOPC_Buffer_ReadFile(certificateSrvLocation, &crt_srv);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(certificateSrvLocation, &crt_srv);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to load server certificate\n");
@@ -202,7 +201,7 @@ int main(int argc, char* argv[])
     if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
         // Private key: load
-        status = SOPC_Buffer_ReadFile(keyLocation, &priv_cli);
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(keyLocation, &priv_cli);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to load private key\n");
@@ -216,7 +215,7 @@ int main(int argc, char* argv[])
     if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
         // Certificate Authority: load
-        status = SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./trusted/cacert.der", &crt_ca);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to load CA\n");
@@ -477,10 +476,10 @@ int main(int argc, char* argv[])
 
     SOPC_PKIProviderStack_Free(pki);
     SOPC_String_Clear(&stEndpointUrl);
-    SOPC_Buffer_Delete(crt_cli);
-    SOPC_Buffer_Delete(crt_srv);
-    SOPC_KeyManager_Certificate_Free(crt_ca);
-    SOPC_Buffer_Delete(priv_cli);
+    SOPC_KeyManager_SerializedCertificate_Delete(crt_cli);
+    SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
+    SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
 
     if (SOPC_STATUS_OK == status)
     {

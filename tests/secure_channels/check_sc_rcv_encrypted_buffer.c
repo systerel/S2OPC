@@ -345,18 +345,20 @@ static SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx, uint32_t socketI
     return status;
 }
 
+static SOPC_PKIProvider* pki = NULL;
+static SOPC_SerializedCertificate *crt_cli = NULL, *crt_srv = NULL, *crt_ca = NULL;
+static SOPC_SerializedAsymmetricKey* priv_cli = NULL;
+
 void clearToolkit(void)
 {
     SOPC_Toolkit_Clear();
 
     // Free all allocated resources
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_KeyManager_Certificate_Free(scConfig.pki->pUserCertAuthList);
-    SOPC_Buffer_Delete((SOPC_Buffer*) scConfig.crt_cli);
-    SOPC_Buffer_Delete((SOPC_Buffer*) scConfig.crt_srv);
-    SOPC_Buffer_Delete((SOPC_Buffer*) scConfig.key_priv_cli);
-    SOPC_PKIProviderStack_Free((SOPC_PKIProvider*) scConfig.pki);
-    SOPC_GCC_DIAGNOSTIC_RESTORE
+    SOPC_KeyManager_SerializedCertificate_Delete(crt_cli);
+    SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
+    SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
+    SOPC_PKIProviderStack_Free(pki);
 }
 
 void establishSC(void)
@@ -369,11 +371,6 @@ void establishSC(void)
     int res = 0;
     SOPC_Buffer* buffer = NULL;
     char hexOutput[512];
-
-    SOPC_PKIProvider* pki = NULL;
-    SOPC_Buffer *crt_cli = NULL, *crt_srv = NULL;
-    SOPC_Certificate* crt_ca = NULL;
-    SOPC_Buffer* priv_cli = NULL;
 
     // Endpoint URL
     SOPC_String stEndpointUrl;
@@ -400,7 +397,7 @@ void establishSC(void)
                certificateLocation, certificateSrvLocation);
 
         // The certificates: load
-        status = SOPC_Buffer_ReadFile(certificateLocation, &crt_cli);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(certificateLocation, &crt_cli);
         if (SOPC_STATUS_OK != status)
         {
             printf("SC_Rcv_Buffer Init: Failed to load client certificate\n");
@@ -413,7 +410,7 @@ void establishSC(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Buffer_ReadFile(certificateSrvLocation, &crt_srv);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(certificateSrvLocation, &crt_srv);
         if (SOPC_STATUS_OK != status)
         {
             printf("SC_Rcv_Buffer Init: Failed to load server certificate\n");
@@ -427,7 +424,7 @@ void establishSC(void)
     if (SOPC_STATUS_OK == status)
     {
         // Private key: load
-        status = SOPC_Buffer_ReadFile(keyLocation, &priv_cli);
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(keyLocation, &priv_cli);
         if (SOPC_STATUS_OK != status)
         {
             printf("SC_Rcv_Buffer Init: Failed to load private key\n");
@@ -441,7 +438,7 @@ void establishSC(void)
     if (SOPC_STATUS_OK == status)
     {
         // Certificate Authority: load
-        status = SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./trusted/cacert.der", &crt_ca);
         if (SOPC_STATUS_OK != status)
         {
             printf("SC_Rcv_Buffer Init: Failed to load CA\n");

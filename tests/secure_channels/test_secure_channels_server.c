@@ -54,9 +54,8 @@ int main(int argc, char* argv[])
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
 
-    SOPC_Buffer* crt_srv = NULL;
-    SOPC_Buffer* priv_srv = NULL;
-    SOPC_Certificate* crt_ca = NULL;
+    SOPC_SerializedCertificate *crt_srv = NULL, *crt_ca = NULL;
+    SOPC_SerializedAsymmetricKey* priv_srv = NULL;
 
     // Secu policy configuration: empty
     SOPC_SecurityPolicy secuConfig[NB_SECU_POLICY_CONFIGS];
@@ -103,7 +102,7 @@ int main(int argc, char* argv[])
     // The certificates: load
     if (SOPC_STATUS_OK == status && cryptoDeactivated == false)
     {
-        status = SOPC_Buffer_ReadFile(certificateSrvLocation, &crt_srv);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(certificateSrvLocation, &crt_srv);
 
         if (SOPC_STATUS_OK != status)
         {
@@ -118,7 +117,7 @@ int main(int argc, char* argv[])
     // Private key: load
     if (SOPC_STATUS_OK == status && cryptoDeactivated == false)
     {
-        status = SOPC_Buffer_ReadFile(keyLocation, &priv_srv);
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(keyLocation, &priv_srv);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Stub_Server: Failed to load private key\n");
@@ -132,7 +131,7 @@ int main(int argc, char* argv[])
     // Certificate Authority: load
     if (SOPC_STATUS_OK == status && cryptoDeactivated == false)
     {
-        status = SOPC_KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./trusted/cacert.der", &crt_ca);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Stub_Server: Failed to load CA\n");
@@ -434,9 +433,9 @@ int main(int argc, char* argv[])
     printf("<Stub_Server: Final status: %" PRIu32 "\n", status);
     SOPC_Toolkit_Clear();
     SOPC_PKIProviderStack_Free(pki);
-    SOPC_Buffer_Delete(crt_srv);
-    SOPC_KeyManager_Certificate_Free(crt_ca);
-    SOPC_Buffer_Delete(priv_srv);
+    SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
+    SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_srv);
     if (SOPC_STATUS_OK == status)
     {
         printf("<Stub_Server: Stub_Server test: OK\n");

@@ -2260,7 +2260,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
 
 static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
 {
-    const SOPC_Buffer* private_key_data = NULL;
+    const SOPC_SerializedAsymmetricKey* serialized_private_key = NULL;
     const SOPC_Buffer* cert_data = NULL;
     const SOPC_Buffer* peer_cert_data = NULL;
 
@@ -2268,7 +2268,7 @@ static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
     {
         SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(sc->serverEndpointConfigIdx);
         assert(epConfig != NULL);
-        private_key_data = epConfig->serverKey;
+        serialized_private_key = epConfig->serverKey;
         cert_data = epConfig->serverCertificate;
     }
     else
@@ -2276,20 +2276,20 @@ static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
         SOPC_SecureChannel_Config* scConfig =
             SOPC_ToolkitClient_GetSecureChannelConfig(sc->endpointConnectionConfigIdx);
         assert(scConfig != NULL);
-        private_key_data = scConfig->key_priv_cli;
+        serialized_private_key = scConfig->key_priv_cli;
         cert_data = scConfig->crt_cli;
         peer_cert_data = scConfig->crt_srv;
     }
 
-    if (private_key_data == NULL || cert_data == NULL)
+    if (serialized_private_key == NULL || cert_data == NULL)
     {
         return true;
     }
 
     SOPC_Certificate** cert = sc->isServerConnection ? &sc->serverCertificate : &sc->clientCertificate;
 
-    if (SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(private_key_data->data, private_key_data->length, false,
-                                                       &sc->privateKey) != SOPC_STATUS_OK ||
+    if (SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(serialized_private_key, false, &sc->privateKey) !=
+            SOPC_STATUS_OK ||
         SOPC_KeyManager_Certificate_CreateFromDER(cert_data->data, cert_data->length, cert) != SOPC_STATUS_OK ||
         (peer_cert_data != NULL &&
          SOPC_KeyManager_Certificate_CreateFromDER(peer_cert_data->data, peer_cert_data->length,

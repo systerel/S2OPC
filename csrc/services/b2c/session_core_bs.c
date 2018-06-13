@@ -347,8 +347,7 @@ void session_core_bs__server_create_session_req_do_crypto(
         if (SOPC_STATUS_OK == status)
         {
             assert(pECfg->serverKey != NULL);
-            status = SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(pECfg->serverKey->data, pECfg->serverKey->length,
-                                                                    false, &privateKey);
+            status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pECfg->serverKey, false, &privateKey);
         }
 
         if (SOPC_STATUS_OK == status)
@@ -503,8 +502,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(pSCCfg->key_priv_cli->data,
-                                                                    pSCCfg->key_priv_cli->length, false, &clientKey);
+            status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pSCCfg->key_priv_cli, false, &clientKey);
         }
 
         if (SOPC_STATUS_OK == status)
@@ -768,8 +766,7 @@ void session_core_bs__client_create_session_check_crypto(
         return;
     }
 
-    if (SOPC_KeyManager_Certificate_CreateFromDER(pSCCfg->crt_srv->data, pSCCfg->crt_srv->length, &pCrtSrv) ==
-            SOPC_STATUS_OK &&
+    if (SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->crt_srv, &pCrtSrv) == SOPC_STATUS_OK &&
         SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtSrv, &pKeyCrtSrv) == SOPC_STATUS_OK &&
         check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtSrv, pSCCfg->crt_cli,
                         &pSession->nonceClient, &pSignCandid->Signature) == SOPC_STATUS_OK)
@@ -828,8 +825,7 @@ void session_core_bs__server_activate_session_check_crypto(
     provider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
 
     if (provider != NULL &&
-        SOPC_KeyManager_Certificate_CreateFromDER(pSCCfg->crt_cli->data, pSCCfg->crt_cli->length, &pCrtCli) ==
-            SOPC_STATUS_OK &&
+        SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->crt_cli, &pCrtCli) == SOPC_STATUS_OK &&
         SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtCli, &pKeyCrtCli) == SOPC_STATUS_OK &&
         check_signature_with_provider(provider, &pSignCandid->Algorithm, pKeyCrtCli, pSCCfg->crt_srv, pNonce,
                                       &pSignCandid->Signature) == SOPC_STATUS_OK)

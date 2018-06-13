@@ -55,7 +55,7 @@ struct SOPC_CertificateRevList;
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_Certificate* pCertAuth,
+SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCertAuth,
                                                struct SOPC_CertificateRevList* pRevocationList,
                                                SOPC_PKIProvider** ppPKI);
 

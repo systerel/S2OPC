@@ -471,45 +471,48 @@ static const char* getenv_default(const char* name, const char* default_value)
     return (val != NULL) ? val : default_value;
 }
 
-static bool load_keys(SOPC_Buffer** cert, SOPC_Buffer** key, SOPC_Buffer** server_cert, SOPC_Certificate** ca)
+static bool load_keys(SOPC_SerializedCertificate** cert,
+                      SOPC_SerializedAsymmetricKey** key,
+                      SOPC_SerializedCertificate** server_cert,
+                      SOPC_SerializedCertificate** ca)
 {
     const char* cert_path = getenv_default("SOPC_CERT", DEFAULT_CERT_PATH);
     const char* key_path = getenv_default("SOPC_KEY", DEFAULT_KEY_PATH);
     const char* server_cert_path = getenv_default("SOPC_SERVER_CERT", DEFAULT_SERVER_CERT_PATH);
     const char* ca_path = getenv_default("SOPC_CA", DEFAULT_CA_PATH);
 
-    if (SOPC_Buffer_ReadFile(cert_path, cert) != SOPC_STATUS_OK)
+    if (SOPC_KeyManager_SerializedCertificate_CreateFromFile(cert_path, cert) != SOPC_STATUS_OK)
     {
         fprintf(stderr, "Error while loading client certificate from %s\n", cert_path);
     }
 
-    if (SOPC_Buffer_ReadFile(key_path, key) != SOPC_STATUS_OK)
+    if (SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(key_path, key) != SOPC_STATUS_OK)
     {
         fprintf(stderr, "Error while loading private key from %s\n", key_path);
     }
 
-    if (SOPC_Buffer_ReadFile(server_cert_path, server_cert) != SOPC_STATUS_OK)
+    if (SOPC_KeyManager_SerializedCertificate_CreateFromFile(server_cert_path, server_cert) != SOPC_STATUS_OK)
     {
         fprintf(stderr, "Error while loading server certificate from %s\n", ca_path);
     }
 
-    if (SOPC_KeyManager_Certificate_CreateFromFile(ca_path, ca) != SOPC_STATUS_OK)
+    if (SOPC_KeyManager_SerializedCertificate_CreateFromFile(ca_path, ca) != SOPC_STATUS_OK)
     {
         fprintf(stderr, "Error while loading CA certificate from %s\n", ca_path);
     }
 
     if (*cert == NULL || *key == NULL || *server_cert == NULL || *ca == NULL)
     {
-        SOPC_Buffer_Delete(*cert);
+        SOPC_KeyManager_SerializedCertificate_Delete(*cert);
         *cert = NULL;
 
-        SOPC_Buffer_Delete(*key);
+        SOPC_KeyManager_SerializedAsymmetricKey_Delete(*key);
         *key = NULL;
 
-        SOPC_Buffer_Delete(*server_cert);
+        SOPC_KeyManager_SerializedCertificate_Delete(*server_cert);
         *server_cert = NULL;
 
-        SOPC_KeyManager_Certificate_Free(*ca);
+        SOPC_KeyManager_SerializedCertificate_Delete(*ca);
         *ca = NULL;
 
         return false;
@@ -593,10 +596,10 @@ int main(int argc, char** argv)
     scConfig.msgSecurityMode = msg_sec_mode;
     scConfig.requestedLifetime = 60000;
 
-    SOPC_Buffer* cert = NULL;
-    SOPC_Buffer* key = NULL;
-    SOPC_Buffer* server_cert = NULL;
-    SOPC_Certificate* ca = NULL;
+    SOPC_SerializedCertificate* cert = NULL;
+    SOPC_SerializedAsymmetricKey* key = NULL;
+    SOPC_SerializedCertificate* server_cert = NULL;
+    SOPC_SerializedCertificate* ca = NULL;
     SOPC_PKIProvider* pki = NULL;
 
     if (msg_sec_mode != OpcUa_MessageSecurityMode_None)
@@ -605,10 +608,10 @@ int main(int argc, char** argv)
             SOPC_PKIProviderStack_Create(ca, NULL, &pki) != SOPC_STATUS_OK)
         {
             SOPC_PKIProviderStack_Free(pki);
-            SOPC_Buffer_Delete(cert);
-            SOPC_Buffer_Delete(key);
-            SOPC_Buffer_Delete(server_cert);
-            SOPC_KeyManager_Certificate_Free(ca);
+            SOPC_KeyManager_SerializedCertificate_Delete(cert);
+            SOPC_KeyManager_SerializedAsymmetricKey_Delete(key);
+            SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
+            SOPC_KeyManager_SerializedCertificate_Delete(ca);
             return 1;
         }
 
@@ -628,10 +631,10 @@ int main(int argc, char** argv)
 
     SOPC_Toolkit_Clear();
     SOPC_PKIProviderStack_Free(pki);
-    SOPC_Buffer_Delete(cert);
-    SOPC_Buffer_Delete(key);
-    SOPC_Buffer_Delete(server_cert);
-    SOPC_KeyManager_Certificate_Free(ca);
+    SOPC_KeyManager_SerializedCertificate_Delete(cert);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(key);
+    SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
+    SOPC_KeyManager_SerializedCertificate_Delete(ca);
 
     if (ctx.status == BENCH_FINISHED_OK)
     {
