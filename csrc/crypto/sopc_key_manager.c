@@ -68,3 +68,90 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate* pC
 
     return SOPC_STATUS_OK;
 }
+
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(const uint8_t* data,
+                                                                         uint32_t len,
+                                                                         SOPC_SerializedAsymmetricKey** key)
+{
+    SOPC_SecretBuffer* sec = SOPC_SecretBuffer_New(len);
+
+    if (sec == NULL)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    SOPC_ExposedBuffer* buf = SOPC_SecretBuffer_ExposeModify(sec);
+    memcpy(buf, data, (size_t) len);
+    SOPC_SecretBuffer_UnexposeModify(buf, sec);
+    *key = sec;
+
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(const char* path,
+                                                                         SOPC_SerializedAsymmetricKey** key)
+{
+    SOPC_SecretBuffer* sec = SOPC_SecretBuffer_NewFromFile(path);
+
+    if (sec == NULL)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    *key = sec;
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(const SOPC_SerializedAsymmetricKey* cert,
+                                                                      bool is_public,
+                                                                      SOPC_AsymmetricKey** res)
+{
+    uint32_t len = SOPC_SecretBuffer_GetLength(cert);
+    const SOPC_ExposedBuffer* buf = SOPC_SecretBuffer_Expose(cert);
+    SOPC_ReturnStatus status = SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(buf, len, is_public, res);
+    SOPC_SecretBuffer_Unexpose(buf, cert);
+    return status;
+}
+
+void SOPC_KeyManager_SerializedAsymmetricKey_Delete(SOPC_SerializedAsymmetricKey* key)
+{
+    SOPC_SecretBuffer_DeleteClear(key);
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromDER(const uint8_t* der,
+                                                                      uint32_t len,
+                                                                      SOPC_SerializedCertificate** cert)
+{
+    SOPC_Buffer* buf = SOPC_Buffer_Create(len);
+
+    if (buf == NULL)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    SOPC_Buffer_Write(buf, der, len);
+    *cert = buf;
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromFile(const char* path,
+                                                                       SOPC_SerializedCertificate** cert)
+{
+    return SOPC_Buffer_ReadFile(path, cert);
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_Deserialize(const SOPC_SerializedCertificate* cert,
+                                                                    SOPC_Certificate** res)
+{
+    return SOPC_KeyManager_Certificate_CreateFromDER(cert->data, cert->length, res);
+}
+
+const SOPC_Buffer* SOPC_KeyManager_SerializedCertificate_Data(const SOPC_SerializedCertificate* cert)
+{
+    return cert;
+}
+
+void SOPC_KeyManager_SerializedCertificate_Delete(SOPC_SerializedCertificate* cert)
+{
+    SOPC_Buffer_Delete(cert);
+}

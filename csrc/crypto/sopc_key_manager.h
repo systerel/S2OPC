@@ -30,8 +30,24 @@
 #ifndef SOPC_KEY_MANAGER_H_
 #define SOPC_KEY_MANAGER_H_
 
+#include "sopc_buffer.h"
 #include "sopc_crypto_decl.h"
+#include "sopc_secret_buffer.h"
 #include "sopc_toolkit_constants.h"
+
+/**
+ * \brief A serialized representation of an asymmetric key.
+ *
+ * This representation is safe to share across threads.
+ */
+typedef SOPC_SecretBuffer SOPC_SerializedAsymmetricKey;
+
+/**
+ * \brief A serialized representation of a certificate.
+ *
+ * This representation is safe to share across threads.
+ */
+typedef SOPC_Buffer SOPC_SerializedCertificate;
 
 /* ------------------------------------------------------------------------------------------------
  * AsymmetricKey API
@@ -234,5 +250,101 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
                                                             const SOPC_Certificate* pCert,
                                                             uint8_t* pDest,
                                                             uint32_t lenDest);
+
+/**
+ * \brief Creates a serialized asymmetric key from a DER or PEM payload.
+ *
+ * \param data   the key data in DER or PEM format
+ * \param len   length of the data
+ * \param key  out parameter, the created serialized key
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(const uint8_t* data,
+                                                                         uint32_t len,
+                                                                         SOPC_SerializedAsymmetricKey** key);
+
+/**
+ * \brief Creates a serialized asymmetric key from a file in DER or PEM format.
+ *
+ * \param path  path to the file
+ * \param cert  out parameter, the created serialized key
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(const char* path,
+                                                                         SOPC_SerializedAsymmetricKey** key);
+
+/**
+ * \brief Deserializes a serialized key.
+ *
+ * \param key        the serialized key
+ * \param is_public  whether the serialized key is a public or a private key
+ * \param res        out parameter, the decoded key as a newly allocated SOPC_AsymmetricKey
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(const SOPC_SerializedAsymmetricKey* key,
+                                                                      bool is_public,
+                                                                      SOPC_AsymmetricKey** res);
+
+/**
+ * \brief Releases all resources associated to a serialized asymmetric key.
+ *
+ * \param key  The serialized key
+ */
+void SOPC_KeyManager_SerializedAsymmetricKey_Delete(SOPC_SerializedAsymmetricKey* key);
+
+/**
+ * \brief Creates a serialized certificate from a DER payload.
+ *
+ * \param der   the certificate data in DER format
+ * \param len   length of the DER data
+ * \param cert  out parameter, the created serialized certificate
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromDER(const uint8_t* der,
+                                                                      uint32_t len,
+                                                                      SOPC_SerializedCertificate** cert);
+
+/**
+ * \brief Creates a serialized certificate from a file in DER format.
+ *
+ * \param path  path to the file
+ * \param cert  out parameter, the created serialized certificate
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromFile(const char* path,
+                                                                       SOPC_SerializedCertificate** cert);
+
+/**
+ * \brief Deserializes a serialized certificate.
+ *
+ * \param key  the serialized certificate
+ * \param res  out parameter, the decoded certificate as a newly allocated SOPC_Certificate
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_Deserialize(const SOPC_SerializedCertificate* cert,
+                                                                    SOPC_Certificate** res);
+
+/**
+ * \brief Returns the data held in a serialized certificate
+ *
+ * \param cert  the serialized certificate
+ *
+ * \return The data held in the serialized certificate. The returned memory is owned
+ *         by the serialized certificate, and should not be modified or freed.
+ */
+const SOPC_Buffer* SOPC_KeyManager_SerializedCertificate_Data(const SOPC_SerializedCertificate* cert);
+
+/**
+ * \brief Releases all resources associated to a serialized certificate.
+ *
+ * \param cert  The serialized certificate
+ */
+void SOPC_KeyManager_SerializedCertificate_Delete(SOPC_SerializedCertificate* cert);
 
 #endif /* SOPC_KEY_MANAGER_H_ */
