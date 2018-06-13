@@ -88,7 +88,7 @@ uint32_t SOPC_SecretBuffer_GetLength(const SOPC_SecretBuffer* sec);
  *
  * \return          The ExposedBuffer when successful, otherwise a NULL.
  */
-SOPC_ExposedBuffer* SOPC_SecretBuffer_Expose(SOPC_SecretBuffer* sec);
+const SOPC_ExposedBuffer* SOPC_SecretBuffer_Expose(const SOPC_SecretBuffer* sec);
 
 /**
  * \brief           Unexposes the buffer.
@@ -97,6 +97,28 @@ SOPC_ExposedBuffer* SOPC_SecretBuffer_Expose(SOPC_SecretBuffer* sec);
  * \param sec       The SecretBuffer to store the data
  *
  */
-void SOPC_SecretBuffer_Unexpose(SOPC_ExposedBuffer* buf, SOPC_SecretBuffer* sec);
+void SOPC_SecretBuffer_Unexpose(const SOPC_ExposedBuffer* buf, const SOPC_SecretBuffer* sec);
+
+/**
+ * \brief           Creates a ExposedBuffer from a SecretBuffer for modification.
+ *
+ *                  Each call to _Expose shoud be followed by a call to SecretBuffer_Unexpose().
+ *
+ * \warning         \p sec shall not be de-allocated before the call to SecretBuffer_Unexpose().
+ *
+ * \param sec       The SecretBuffer to expose.
+ *
+ * \return          The ExposedBuffer when successful, otherwise a NULL.
+ */
+SOPC_ExposedBuffer* SOPC_SecretBuffer_ExposeModify(SOPC_SecretBuffer* sec);
+
+/**
+ * \brief           Unexposes the buffer exposed for modification.
+ *
+ * \param buf       The ExposedBuffer
+ * \param sec       The SecretBuffer to store the data
+ *
+ */
+void SOPC_SecretBuffer_UnexposeModify(SOPC_ExposedBuffer* buf, SOPC_SecretBuffer* sec);
 
 #endif // SOPC_SECRET_BUFFER_H_

@@ -829,7 +829,7 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
     OpcUa_RequestHeader_Initialize(&reqHeader);
     OpcUa_OpenSecureChannelRequest opnReq;
     OpcUa_OpenSecureChannelRequest_Initialize(&opnReq);
-    uint8_t* bytes = NULL;
+    const uint8_t* bytes = NULL;
     uint32_t length = 0;
 
     config = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
@@ -1811,7 +1811,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     OpcUa_OpenSecureChannelResponse_Initialize(&opnResp);
     SOPC_Buffer* opnRespBuffer = NULL;
     SOPC_SecureChannel_Config* scConfig = NULL;
-    uint8_t* bytes = NULL;
+    const uint8_t* bytes = NULL;
     uint32_t length = 0;
 
     scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
@@ -2082,7 +2082,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     SOPC_SecureChannel_Config* scConfig = NULL;
     SOPC_SecureConnection_SecurityToken newSecuToken;
     SOPC_SC_SecurityKeySets newSecuKeySets;
-    uint8_t* bytes = NULL;
+    const uint8_t* bytes = NULL;
     uint32_t length = 0;
 
     memset(&newSecuKeySets, 0, sizeof(SOPC_SC_SecurityKeySets));

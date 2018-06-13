@@ -84,14 +84,27 @@ uint32_t SOPC_SecretBuffer_GetLength(const SOPC_SecretBuffer* sec)
     return sec->len;
 }
 
-SOPC_ExposedBuffer* SOPC_SecretBuffer_Expose(SOPC_SecretBuffer* sec)
+const SOPC_ExposedBuffer* SOPC_SecretBuffer_Expose(const SOPC_SecretBuffer* sec)
 {
     if (NULL != sec)
         return sec->buf;
     return NULL;
 }
 
-void SOPC_SecretBuffer_Unexpose(SOPC_ExposedBuffer* buf, SOPC_SecretBuffer* sec)
+void SOPC_SecretBuffer_Unexpose(const SOPC_ExposedBuffer* buf, const SOPC_SecretBuffer* sec)
+{
+    (void) buf;
+    (void) sec;
+}
+
+SOPC_ExposedBuffer* SOPC_SecretBuffer_ExposeModify(SOPC_SecretBuffer* sec)
+{
+    if (NULL != sec)
+        return sec->buf;
+    return NULL;
+}
+
+void SOPC_SecretBuffer_UnexposeModify(SOPC_ExposedBuffer* buf, SOPC_SecretBuffer* sec)
 {
     (void) buf;
     (void) sec;

@@ -407,7 +407,7 @@ END_TEST
 START_TEST(test_crypto_generate_nonce_B256S256)
 {
     SOPC_SecretBuffer *pSecNonce0, *pSecNonce1;
-    SOPC_ExposedBuffer *pExpKey0, *pExpKey1;
+    const SOPC_ExposedBuffer *pExpKey0, *pExpKey1;
 
     // It is random, so...
     ck_assert(SOPC_CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce0) == SOPC_STATUS_OK);
@@ -567,7 +567,8 @@ END_TEST
 
 START_TEST(test_crypto_derive_keysets_B256S256)
 {
-    SOPC_ExposedBuffer clientNonce[32], serverNonce[32], *pout, zeros[32];
+    SOPC_ExposedBuffer clientNonce[32], serverNonce[32], zeros[32];
+    const SOPC_ExposedBuffer* pout;
     char hexoutput[160];
     uint32_t lenKey, lenKeyBis, lenIV, lenCliNonce, lenSerNonce, lenOutp;
     SOPC_SC_SecurityKeySet cliKS, serKS;

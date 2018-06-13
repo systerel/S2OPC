@@ -457,8 +457,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider
                                                        uint32_t lenOutput)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ExposedBuffer* pExpKey = NULL;
-    SOPC_ExposedBuffer* pExpIV = NULL;
+    const SOPC_ExposedBuffer* pExpKey = NULL;
+    const SOPC_ExposedBuffer* pExpIV = NULL;
     uint32_t lenCiphered = 0;
 
     if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV ||
@@ -517,8 +517,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
                                                        uint32_t lenOutput)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ExposedBuffer* pExpKey = NULL;
-    SOPC_ExposedBuffer* pExpIV = NULL;
+    const SOPC_ExposedBuffer* pExpKey = NULL;
+    const SOPC_ExposedBuffer* pExpIV = NULL;
     uint32_t lenDeciphered = 0;
 
     if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV ||
@@ -576,7 +576,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* p
                                                     uint32_t lenOutput)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ExposedBuffer* pExpKey = NULL;
+    const SOPC_ExposedBuffer* pExpKey = NULL;
     uint32_t len;
 
     if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pOutput ||
@@ -613,7 +613,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricVerify(const SOPC_CryptoProvider*
                                                       uint32_t lenOutput)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ExposedBuffer* pExpKey = NULL;
+    const SOPC_ExposedBuffer* pExpKey = NULL;
     uint32_t len;
 
     if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pSignature ||
@@ -828,9 +828,9 @@ static inline SOPC_ReturnStatus DeriveKS(const SOPC_CryptoProvider* pProvider,
     SOPC_ExposedBuffer *pExpEncr = NULL, *pExpSign = NULL, *pExpIV = NULL;
 
     // Exposes SecretBuffers
-    pExpEncr = SOPC_SecretBuffer_Expose(pks->encryptKey);
-    pExpSign = SOPC_SecretBuffer_Expose(pks->signKey);
-    pExpIV = SOPC_SecretBuffer_Expose(pks->initVector);
+    pExpEncr = SOPC_SecretBuffer_ExposeModify(pks->encryptKey);
+    pExpSign = SOPC_SecretBuffer_ExposeModify(pks->signKey);
+    pExpIV = SOPC_SecretBuffer_ExposeModify(pks->initVector);
 
     // Verifies exposures
     if (NULL == pExpEncr || NULL == pExpSign || NULL == pExpIV)
@@ -847,9 +847,9 @@ static inline SOPC_ReturnStatus DeriveKS(const SOPC_CryptoProvider* pProvider,
     }
 
     // Release ExposedBuffers
-    SOPC_SecretBuffer_Unexpose(pExpEncr, pks->encryptKey);
-    SOPC_SecretBuffer_Unexpose(pExpSign, pks->signKey);
-    SOPC_SecretBuffer_Unexpose(pExpIV, pks->initVector);
+    SOPC_SecretBuffer_UnexposeModify(pExpEncr, pks->encryptKey);
+    SOPC_SecretBuffer_UnexposeModify(pExpSign, pks->signKey);
+    SOPC_SecretBuffer_UnexposeModify(pExpIV, pks->initVector);
 
     return status;
 }
@@ -862,7 +862,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySetsClient(const SOPC_CryptoProvi
                                                           SOPC_SC_SecurityKeySet* pServerKeySet)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ExposedBuffer* pExpCli = NULL;
+    const SOPC_ExposedBuffer* pExpCli = NULL;
 
     if (NULL == pProvider || NULL == pClientNonce || NULL == pServerNonce || NULL == pClientKeySet ||
         NULL == pServerKeySet)
@@ -891,7 +891,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySetsServer(const SOPC_CryptoProvi
                                                           SOPC_SC_SecurityKeySet* pServerKeySet)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ExposedBuffer* pExpSer = NULL;
+    const SOPC_ExposedBuffer* pExpSer = NULL;
 
     if (NULL == pProvider || NULL == pClientNonce || NULL == pServerNonce || NULL == pClientKeySet ||
         NULL == pServerKeySet)
