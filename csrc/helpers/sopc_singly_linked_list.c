@@ -44,10 +44,9 @@ SOPC_SLinkedList* SOPC_SLinkedList_Create(size_t sizeMax)
 
     if (sizeMax <= UINT32_MAX)
     {
-        result = malloc(sizeof(SOPC_SLinkedList));
+        result = calloc(1, sizeof(SOPC_SLinkedList));
         if (result != NULL)
         {
-            memset(result, 0, sizeof(SOPC_SLinkedList));
             result->maxLength = (uint32_t) sizeMax;
         }
     }
@@ -56,32 +55,34 @@ SOPC_SLinkedList* SOPC_SLinkedList_Create(size_t sizeMax)
 
 void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value)
 {
+    assert(list != NULL);
+    assert(value != NULL);
+
     SOPC_SLinkedList_Elt* elt = NULL;
     void* result = NULL;
 
-    if (NULL != list && NULL != value)
+    if (list->length < list->maxLength || list->maxLength == 0)
     {
-        if (list->length < list->maxLength || list->maxLength == 0)
-        {
-            elt = malloc(sizeof(SOPC_SLinkedList_Elt));
-        }
+        elt = malloc(sizeof(SOPC_SLinkedList_Elt));
     }
 
-    if (elt != NULL)
+    if (elt == NULL)
     {
-        // Value will be added in list, set result as valid
-        result = value;
-
-        elt->id = id;
-        elt->value = value;
-        elt->next = list->first;
-        if (NULL == list->last)
-        {
-            list->last = elt;
-        }
-        list->first = elt;
-        list->length = list->length + 1;
+        return NULL;
     }
+
+    // Value will be added in list, set result as valid
+    result = value;
+
+    elt->id = id;
+    elt->value = value;
+    elt->next = list->first;
+    if (NULL == list->last)
+    {
+        list->last = elt;
+    }
+    list->first = elt;
+    list->length = list->length + 1;
 
     return result;
 }
@@ -127,96 +128,98 @@ void* SOPC_SLinkedList_SortedInsert(SOPC_SLinkedList* list,
                                     void* value,
                                     int8_t (*pCompFn)(void* left, void* right))
 {
+    assert(list != NULL);
+    assert(value != NULL);
+
     SOPC_SLinkedList_Elt* newElt = NULL;
     SOPC_SLinkedList_Elt* elt = NULL;
     SOPC_SLinkedList_Elt* nextElt = NULL;
     void* result = NULL;
     int8_t compareResult = 0;
 
-    if (NULL != list && NULL != value)
+    if (list->length < list->maxLength || list->maxLength == 0)
     {
-        if (list->length < list->maxLength || list->maxLength == 0)
-        {
-            newElt = malloc(sizeof(SOPC_SLinkedList_Elt));
-        }
+        newElt = malloc(sizeof(SOPC_SLinkedList_Elt));
     }
 
-    if (newElt != NULL)
+    if (newElt == NULL)
     {
-        newElt->id = id;
-        newElt->value = value;
-        newElt->next = NULL;
+        return NULL;
     }
 
-    if (newElt != NULL)
-    {
-        // Value will be added in list, set result as valid
-        result = value;
+    newElt->id = id;
+    newElt->value = value;
+    newElt->next = NULL;
 
-        if (list->first == NULL)
+    // Value will be added in list, set result as valid
+    result = value;
+
+    if (list->first == NULL)
+    {
+        assert(list->last == NULL);
+        assert(list->length == 0);
+        list->first = newElt;
+        list->last = newElt;
+        list->length = list->length + 1;
+    }
+    else
+    {
+        // Not NULL nor empty list
+        compareResult = pCompFn(value, list->first->value);
+        if (compareResult < 0)
         {
-            assert(list->last == NULL);
-            assert(list->length == 0);
-            list->first = newElt;
-            list->last = newElt;
+            // New element shall be inserted in place of first element
             list->length = list->length + 1;
+            newElt->next = list->first;
+            list->first = newElt;
         }
         else
         {
-            // Not NULL nor empty list
-            compareResult = pCompFn(value, list->first->value);
-            if (compareResult < 0)
+            // Search position to insert new element in rest of list
+            elt = list->first;
+            if (elt->next != NULL)
             {
-                // New element shall be inserted in place of first element
+                do
+                {
+                    compareResult = pCompFn(value, elt->next->value);
+                    if (compareResult >= 0)
+                    {
+                        // Position not found yet, continue to search with next element
+                        elt = elt->next;
+                    } // else < 0: position is before the next element, stop research
+                } while (elt->next != NULL && compareResult >= 0);
+            }
+
+            if (elt->next != NULL)
+            {
+                // Insertion position found: insert between current element and next
                 list->length = list->length + 1;
-                newElt->next = list->first;
-                list->first = newElt;
+                nextElt = elt->next;
+                newElt->next = nextElt;
+                elt->next = newElt;
             }
             else
             {
-                // Search position to insert new element in rest of list
-                elt = list->first;
-                if (elt->next != NULL)
-                {
-                    do
-                    {
-                        compareResult = pCompFn(value, elt->next->value);
-                        if (compareResult >= 0)
-                        {
-                            // Position not found yet, continue to search with next element
-                            elt = elt->next;
-                        } // else < 0: position is before the next element, stop research
-                    } while (elt->next != NULL && compareResult >= 0);
-                }
-
-                if (elt->next != NULL)
-                {
-                    // Insertion position found: insert between current element and next
-                    list->length = list->length + 1;
-                    nextElt = elt->next;
-                    newElt->next = nextElt;
-                    elt->next = newElt;
-                }
-                else
-                {
-                    // Insert as last element
-                    assert(list->last == elt);
-                    list->length = list->length + 1;
-                    elt->next = newElt;
-                    list->last = newElt;
-                }
+                // Insert as last element
+                assert(list->last == elt);
+                list->length = list->length + 1;
+                elt->next = newElt;
+                list->last = newElt;
             }
         }
     }
+
     return result;
 }
 
 void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list)
 {
+    assert(list != NULL);
+
     void* result = NULL;
     SOPC_SLinkedList_Elt* nextElt = NULL;
 
-    if (NULL == list || NULL == list->first)
+    if (NULL == list->first)
     {
         return NULL;
     }
@@ -238,14 +241,13 @@ void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list)
 
 SOPC_SLinkedList_Elt* SOPC_SLinkedList_InternalFind(SOPC_SLinkedList* list, uint32_t id)
 {
-    SOPC_SLinkedList_Elt* elt = NULL;
-    if (list != NULL)
+    assert(list != NULL);
+
+    SOPC_SLinkedList_Elt* elt = list->first;
+
+    while (elt != 0 && elt->id != id)
     {
-        elt = list->first;
-        while (elt != 0 && elt->id != id)
-        {
-            elt = elt->next;
-        }
+        elt = elt->next;
     }
     return elt;
 }
@@ -264,10 +266,10 @@ void* SOPC_SLinkedList_FindFromId(SOPC_SLinkedList* list, uint32_t id)
 
 void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, void* val))
 {
-    SOPC_SLinkedList_Elt* elt = NULL;
+    assert(list != NULL);
+    assert(pFn != NULL);
 
-    if (NULL == list || NULL == pFn)
-        return;
+    SOPC_SLinkedList_Elt* elt = NULL;
 
     elt = list->first;
     while (NULL != elt)
@@ -280,10 +282,12 @@ void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, voi
 // Returns null => Not found, otherwise => elt pointer
 void* SOPC_SLinkedList_RemoveFromId(SOPC_SLinkedList* list, uint32_t id)
 {
+    assert(list != NULL);
+
     SOPC_SLinkedList_Elt* elt = NULL;
     SOPC_SLinkedList_Elt* nextElt = NULL;
     void* result = NULL;
-    if (list != NULL && list->first != NULL)
+    if (list->first != NULL)
     {
         // Not NULL nor empty list
         if (list->first->id == id)
@@ -367,9 +371,10 @@ SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list)
 
 void* SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* pId)
 {
+    assert(it != NULL);
     SOPC_SLinkedList_Elt* elt = NULL;
     void* value = NULL;
-    if (it != NULL && *it != NULL)
+    if (*it != NULL)
     {
         elt = *it;
         value = elt->value;
@@ -384,9 +389,10 @@ void* SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* pId)
 
 bool SOPC_SLinkedList_HasNext(SOPC_SLinkedListIterator* it)
 {
+    assert(it != NULL);
     SOPC_SLinkedList_Elt* elt = NULL;
     bool result = false;
-    if (it != NULL && *it != NULL)
+    if (*it != NULL)
     {
         elt = *it;
         result = elt->value != NULL;
@@ -401,10 +407,6 @@ void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it)
 
 uint32_t SOPC_SLinkedList_GetLength(SOPC_SLinkedList* list)
 {
-    uint32_t result = 0;
-    if (NULL != list)
-    {
-        result = list->length;
-    } // else 0 elements in the list
-    return result;
+    assert(NULL != list);
+    return list->length;
 }

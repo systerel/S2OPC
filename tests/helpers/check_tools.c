@@ -537,10 +537,6 @@ START_TEST(test_linked_list)
     //// Test nominal case
     list = SOPC_SLinkedList_Create(3);
     ck_assert(list != NULL);
-    // Insert NULL value should result in returning a NULL value and do not add it
-    value = SOPC_SLinkedList_Prepend(list, 1, NULL);
-    ck_assert(NULL == value);
-    ck_assert(0 == SOPC_SLinkedList_GetLength(list));
 
     value = SOPC_SLinkedList_Prepend(list, 1, &value1);
     ck_assert(value == &value1);
@@ -570,11 +566,6 @@ START_TEST(test_linked_list)
 
     //// Test degraded case: add in full linked list
     value = SOPC_SLinkedList_Prepend(list, 4, &value3);
-    ck_assert(value == NULL);
-    ck_assert(3 == SOPC_SLinkedList_GetLength(list));
-
-    //// Test degraded case: add to NULL pointer linked list
-    value = SOPC_SLinkedList_Prepend(NULL, 4, &value3);
     ck_assert(value == NULL);
     ck_assert(3 == SOPC_SLinkedList_GetLength(list));
 
@@ -635,9 +626,7 @@ START_TEST(test_linked_list)
     //// Check LIFO behavior in case id not unique
     value = SOPC_SLinkedList_FindFromId(list, UINT32_MAX);
     ck_assert(value == &value1);
-    //// Verify degraded find behavior
-    value = SOPC_SLinkedList_FindFromId(NULL, 2);
-    ck_assert(value == NULL);
+    //// Verify not found behavior
     value = SOPC_SLinkedList_FindFromId(list, 1);
     ck_assert(value == NULL);
 
@@ -677,15 +666,6 @@ START_TEST(test_linked_list)
     value = SOPC_SLinkedList_FindFromId(list, UINT32_MAX);
     ck_assert(value == NULL);
     value = SOPC_SLinkedList_RemoveFromId(list, UINT32_MAX);
-    ck_assert(value == NULL);
-    ck_assert(0 == SOPC_SLinkedList_GetLength(list));
-
-    //// Verify degraded remove behavior
-    value = SOPC_SLinkedList_RemoveFromId(NULL, 2);
-    ck_assert(value == NULL);
-    ck_assert(0 == SOPC_SLinkedList_GetLength(list));
-
-    value = SOPC_SLinkedList_RemoveFromId(NULL, 1);
     ck_assert(value == NULL);
     ck_assert(0 == SOPC_SLinkedList_GetLength(list));
 
