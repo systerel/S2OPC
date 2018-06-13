@@ -398,6 +398,21 @@ OPERATIONS
         a_subscription_session := a_subscription_session - {p_subscription |-> p_session}
     END
     ;
+    
+    set_subscription_PublishingEnabled (p_subscription, p_pubEnabled) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
+        p_pubEnabled : BOOL
+    THEN
+        IF p_pubEnabled = TRUE
+        THEN
+            a_PublishingEnabled := a_PublishingEnabled \/ {p_subscription}
+        ELSE
+            a_PublishingEnabled := a_PublishingEnabled - {p_subscription}
+        END
+    END
+    ;
 
     revisedPublishInterval, revisedLifetimeCount, revisedMaxKeepAlive, revisedMaxNotificationsPerPublish
       <-- compute_create_subscription_revised_params (p_session,

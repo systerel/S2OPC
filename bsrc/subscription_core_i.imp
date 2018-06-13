@@ -42,6 +42,7 @@ PROMOTES
     is_valid_subscription,
     remove_subscription_session,
     getall_subscription,
+    set_subscription_PublishingEnabled,
     /* subscription_core_bs */
     compute_create_subscription_revised_params,
     get_nodeToMonitoredItemQueue,

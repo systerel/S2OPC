@@ -35,6 +35,7 @@ IMPORTS
     subscription_core,
     msg_subscription_create_bs,
     msg_subscription_delete_bs,
+    msg_subscription_set_publishing_mode_bs,
     msg_subscription_create_monitored_item,
     subscription_create_monitored_item_it,
     monitored_item_queue_it_bs
@@ -215,6 +216,53 @@ LOCAL_OPERATIONS
            it is possible to describe first part of criteria to generate notification.
            But other filters will be necessary (index array, ...) */
     END
+    ;
+    
+    fill_set_publishing_mode_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_pub_enabled, p_nb_reqs) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_subscription_set_publishing_mode_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_subscription_set_publishing_mode_resp &
+        p_has_sub : BOOL &
+        p_session_sub : t_subscription_i &
+        p_pub_enabled : BOOL &
+        p_nb_reqs : NAT &
+        p_nb_reqs > 0 &
+        p_nb_reqs <= k_n_genericOperationPerReq_max &
+        p_nb_reqs = nb_set_publishing_mode &
+        set_publishing_mode_resp_allocated = TRUE
+    THEN
+        LET l_set_publishing_mode_resp_StatusCode BE
+            l_set_publishing_mode_resp_StatusCode =
+              %p_index.(p_index : 1..p_nb_reqs |
+                        {FALSE |-> e_sc_bad_subscription_id_invalid,
+                         TRUE  |-> e_sc_ok
+                        }(bool(p_has_sub = TRUE & set_publishing_mode_req_sub_id(p_index) = p_session_sub))
+                       ) 
+        IN
+            set_publishing_mode_resp_StatusCode := l_set_publishing_mode_resp_StatusCode ||
+            LET l_valid_sub_ids BE
+              l_valid_sub_ids =
+              %p_index.(p_index : 1..p_nb_reqs &
+                        l_set_publishing_mode_resp_StatusCode(p_index) = e_sc_ok 
+                        | 
+                        set_publishing_mode_req_sub_id(p_index)
+                       )
+            IN
+                IF p_pub_enabled = TRUE
+                THEN                
+                    a_PublishingEnabled := a_PublishingEnabled \/ ran(l_valid_sub_ids)
+                ELSE
+                    a_PublishingEnabled := a_PublishingEnabled - ran(l_valid_sub_ids)
+                END
+            END
+        END
+    END
 
 OPERATIONS
     
@@ -353,6 +401,31 @@ OPERATIONS
     END
     ;
     
+    fill_set_publishing_mode_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_pub_enabled, p_nb_reqs) =
+    VAR
+        l_index,
+        l_sub
+    IN
+        l_index := 1;
+        WHILE l_index <= p_nb_reqs DO
+            l_sub <-- getall_msg_set_publishing_mode_at_index (p_req_msg, l_index);
+            IF p_has_sub = TRUE & l_sub = p_session_sub
+            THEN
+                set_subscription_PublishingEnabled (l_sub, p_pub_enabled);
+                setall_msg_subscription_set_publishing_mode_resp_at_index (p_resp_msg, l_index, TRUE)
+            ELSE
+                setall_msg_subscription_set_publishing_mode_resp_at_index (p_resp_msg, l_index, FALSE)
+            END;
+            l_index := l_index + 1
+        INVARIANT
+            dom(set_publishing_mode_resp_StatusCode) = 1..l_index &
+            dom(set_publishing_mode_req_sub_id) = 1..p_nb_reqs
+        VARIANT
+            (p_nb_reqs - l_index)
+        END
+    END
+    ;
+    
     /* END OF LOCAL OPERATIONS */
     
     StatusCode_service <-- treat_create_subscription_request (p_session, p_req_msg, p_resp_msg) =
@@ -377,34 +450,29 @@ OPERATIONS
             l_reqPublishInterval, l_reqLifetimeCount, l_reqMaxKeepAlive, l_maxNotificationsPerPublish, l_publishEnabled
               <-- get_msg_create_subscription_req_params (p_req_msg);
             
-            IF l_publishEnabled = TRUE
+            /* Compute revised parameters */
+            l_revisedPublishInterval, l_revisedLifetimeCount, l_revisedMaxKeepAlive, l_revisedMaxNotificationsPerPublish
+              <-- compute_create_subscription_revised_params (p_session,
+                l_reqPublishInterval,
+                l_reqLifetimeCount,
+                l_reqMaxKeepAlive,
+                l_maxNotificationsPerPublish);
+            
+            /* Create subscription */
+            StatusCode_service, l_subscription <-- create_subscription (p_session,
+                l_revisedPublishInterval,
+                l_revisedLifetimeCount,
+                l_revisedMaxKeepAlive,
+                l_revisedMaxNotificationsPerPublish,
+                l_publishEnabled);
+            IF StatusCode_service = e_sc_ok 
             THEN
-                /* Compute revised parameters */
-                l_revisedPublishInterval, l_revisedLifetimeCount, l_revisedMaxKeepAlive, l_revisedMaxNotificationsPerPublish
-                <-- compute_create_subscription_revised_params (p_session,
-                    l_reqPublishInterval,
-                    l_reqLifetimeCount,
-                    l_reqMaxKeepAlive,
-                    l_maxNotificationsPerPublish);
-                
-                /* Create subscription */
-                StatusCode_service, l_subscription <-- create_subscription (p_session,
+                /* Fill values to response message */
+                set_msg_create_subscription_resp_params (p_resp_msg,
+                    l_subscription, 
                     l_revisedPublishInterval,
                     l_revisedLifetimeCount,
-                    l_revisedMaxKeepAlive,
-                    l_revisedMaxNotificationsPerPublish,
-                    l_publishEnabled);
-                IF StatusCode_service = e_sc_ok 
-                THEN
-                    /* Fill values to response message */
-                    set_msg_create_subscription_resp_params (p_resp_msg,
-                        l_subscription, 
-                        l_revisedPublishInterval,
-                        l_revisedLifetimeCount,
-                        l_revisedMaxKeepAlive)
-                END
-            ELSE
-                StatusCode_service := e_sc_bad_invalid_argument
+                    l_revisedMaxKeepAlive)
             END
         ELSE
             StatusCode_service := e_sc_bad_too_many_subscriptions
@@ -453,6 +521,36 @@ OPERATIONS
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory
             END
+        END
+    END
+    ;
+    
+    StatusCode_service <-- treat_publishing_mode_request (p_session, p_req_msg, p_resp_msg) =
+    VAR
+        l_session_has_subscription,
+        l_session_sub,
+        l_nb_reqs,
+        l_pub_enabled,
+        l_bres
+    IN
+        l_nb_reqs, l_pub_enabled <-- getall_msg_subscription_set_publishing_mode_params (p_req_msg);
+        IF l_nb_reqs > 0 & l_nb_reqs <= k_n_genericOperationPerReq_max
+        THEN
+            l_session_has_subscription, l_session_sub <-- getall_subscription (p_session);
+            l_bres <-- allocate_msg_subscription_set_publishing_mode_resp_results_array (p_resp_msg, l_nb_reqs);
+            IF l_bres = TRUE
+            THEN
+                fill_set_publishing_mode_response 
+                  (p_req_msg, p_resp_msg, l_session_has_subscription, l_session_sub, l_pub_enabled, l_nb_reqs);
+                StatusCode_service := e_sc_ok
+            ELSE
+                StatusCode_service := e_sc_bad_out_of_memory
+            END
+        ELSIF l_nb_reqs <= 0
+        THEN
+            StatusCode_service := e_sc_bad_nothing_to_do
+        ELSE
+            StatusCode_service := e_sc_bad_too_many_ops
         END
     END
     ;

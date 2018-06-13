@@ -488,6 +488,8 @@ OPERATIONS
                 StatusCode_service <-- treat_create_subscription_request (session, req_msg, resp_msg)
             OR e_msg_subscription_delete_subscriptions_req THEN
                 StatusCode_service <-- treat_delete_subscriptions_request (session, req_msg, resp_msg)
+            OR e_msg_subscription_set_publishing_mode_req THEN
+                StatusCode_service <-- treat_publishing_mode_request (session, req_msg, resp_msg)
             OR e_msg_subscription_publish_req THEN
                 StatusCode_service, async_resp_msg
                   <-- treat_subscription_publish_request (session, req_header, req_msg, req_handle, req_ctx, resp_msg)
