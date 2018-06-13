@@ -35,6 +35,7 @@ constants__t_Variant_i util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid)
     pvar->BuiltInTypeId = SOPC_NodeId_Id;
     pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
     pvar->Value.NodeId = pnid;
+    pvar->DoNotClear = true; // It is shallow copy of provided node
 
     return pvar;
 }
@@ -65,6 +66,7 @@ constants__t_Variant_i util_variant__new_Variant_from_QualifiedName(SOPC_Qualifi
     pvar->BuiltInTypeId = SOPC_QualifiedName_Id;
     pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
     pvar->Value.Qname = qn;
+    pvar->DoNotClear = true; // It is shallow copy of provided node
 
     return pvar;
 }
@@ -80,6 +82,7 @@ constants__t_Variant_i util_variant__new_Variant_from_LocalizedText(SOPC_Localiz
     pvar->BuiltInTypeId = SOPC_LocalizedText_Id;
     pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
     pvar->Value.LocalizedText = lt;
+    pvar->DoNotClear = true; // It is shallow copy of provided node
 
     return pvar;
 }
@@ -195,6 +198,7 @@ constants__t_Variant_i util_variant__new_Variant_from_ByteString(SOPC_ByteString
     pvar->BuiltInTypeId = SOPC_ByteString_Id;
     pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
     pvar->Value.Bstring = buf;
+    pvar->DoNotClear = true; // It is shallow copy of provided node
 
     return pvar;
 }
