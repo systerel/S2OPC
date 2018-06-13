@@ -56,6 +56,15 @@ typedef uint8_t SOPC_ExposedBuffer;
 SOPC_SecretBuffer* SOPC_SecretBuffer_NewFromExposedBuffer(SOPC_ExposedBuffer* buf, uint32_t len);
 
 /**
+ * \brief Creates a new SecretBuffer from a file.
+ *
+ * \param path  The path to the file
+ *
+ * \return The created SecretBuffer if successful, or NULL in case of error.
+ */
+SOPC_SecretBuffer* SOPC_SecretBuffer_NewFromFile(const char* path);
+
+/**
  * \brief           Creates a new empty SecretBuffer.
  *
  * \param len       Number of bytes of the buffer.

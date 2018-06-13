@@ -18,9 +18,12 @@
  */
 
 #include "sopc_secret_buffer.h"
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "sopc_buffer.h"
 
 struct SOPC_SecretBuffer
 {
@@ -38,6 +41,33 @@ SOPC_SecretBuffer* SOPC_SecretBuffer_NewFromExposedBuffer(SOPC_ExposedBuffer* bu
         if (NULL != sec && NULL != sec->buf)
             memcpy(sec->buf, buf, len);
     }
+
+    return sec;
+}
+
+SOPC_SecretBuffer* SOPC_SecretBuffer_NewFromFile(const char* path)
+{
+    SOPC_Buffer* contents = NULL;
+
+    if (SOPC_Buffer_ReadFile(path, &contents) != SOPC_STATUS_OK)
+    {
+        return NULL;
+    }
+
+    SOPC_SecretBuffer* sec = calloc(1, sizeof(SOPC_SecretBuffer));
+
+    if (sec == NULL)
+    {
+        SOPC_Buffer_Delete(contents);
+        return NULL;
+    }
+
+    // "Steal" the data from the buffer. This is a bit on the hacky side, but
+    // it allows reusing existing code.
+    sec->len = contents->length;
+    sec->buf = contents->data;
+    contents->data = NULL;
+    SOPC_Buffer_Delete(contents);
 
     return sec;
 }
