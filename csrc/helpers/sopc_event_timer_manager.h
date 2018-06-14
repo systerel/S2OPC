@@ -75,6 +75,18 @@ uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventDispatcherManager* eventMgr,
                                         uint64_t msPeriod);
 
 /**
+ * \brief Modifies an existing periodic timer period
+ *
+ * \note The new period value is applied from next timer expiration
+ *
+ * \param timerId the identifier of the started periodic timer to modify
+ * \param msPeriod the new period to apply in milliseconds
+ *
+ * \return true if the modification was successfully done, false otherwise
+ */
+bool SOPC_EventTimer_ModifyPeriodic(uint32_t timerId, uint64_t msPeriod);
+
+/**
  * \brief Cancel a started timer
  *
  * \param timerId the identifier of the started timer to cancel

@@ -234,6 +234,21 @@ uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventDispatcherManager* eventMgr,
     return SOPC_InternalEventTimer_Create(eventMgr, eventParams, msPeriod, true);
 }
 
+bool SOPC_EventTimer_ModifyPeriodic(uint32_t timerId, uint64_t msPeriod)
+{
+    bool result = false;
+    SOPC_EventTimer* timer = NULL;
+    Mutex_Lock(&timersMutex);
+    timer = (SOPC_EventTimer*) SOPC_SLinkedList_FindFromId(timers, timerId);
+    if (timer != NULL && timer->isPeriodicTimer)
+    {
+        result = true;
+        timer->periodMs = msPeriod;
+    }
+    Mutex_Unlock(&timersMutex);
+    return result;
+}
+
 static void SOPC_Internal_EventTimer_Cancel_WithoutLock(uint32_t timerId)
 {
     SOPC_EventTimer* timer = NULL;
