@@ -52,6 +52,8 @@ struct SOPC_CertificateRevList;
  *
  * \note            Content of the pki is unspecified when return value is not SOPC_STATUS_OK.
  *
+ * \note            The pki is not safe to share across threads.
+ *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
