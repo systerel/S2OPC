@@ -415,15 +415,11 @@ OPERATIONS
     ;
 
     revisedPublishInterval, revisedLifetimeCount, revisedMaxKeepAlive, revisedMaxNotificationsPerPublish
-      <-- compute_create_subscription_revised_params (p_session,
-                                                      p_reqPublishInterval,
+      <-- compute_create_subscription_revised_params (p_reqPublishInterval,
                                                       p_reqLifetimeCount,
                                                       p_reqMaxKeepAlive,
                                                       p_maxNotificationsPerPublish) =
     PRE
-        p_session : t_session_i &
-        p_session : t_session &
-        a_subscription_session |> {p_session} = {} & /* session is not part of any suscription (=> 1 subscription / session) */
         p_reqPublishInterval : t_opcua_duration_i &
         p_reqLifetimeCount : t_counter &
         p_reqMaxKeepAlive : t_counter &
@@ -529,6 +525,34 @@ OPERATIONS
                 END
             END                
         END
+    END
+    ;
+    
+    
+    modify_subscription (p_session,
+                         p_subscription,
+                         p_revPublishInterval,
+                         p_revLifetimeCount,
+                         p_revMaxKeepAlive,
+                         p_revMaxNotifPerPublish) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
+        a_subscription_session (p_subscription) = p_session &
+        p_revPublishInterval : t_opcua_duration_i &
+        p_revLifetimeCount : t_counter &
+        p_revLifetimeCount > 0 &
+        p_revMaxKeepAlive : t_counter &
+        p_revMaxKeepAlive > 0 &
+        p_revLifetimeCount >= 3 * p_revMaxKeepAlive & /* part 4 table 86 */
+        p_revMaxNotifPerPublish : t_counter
+    THEN
+        a_publishInterval (p_subscription) := p_revPublishInterval ||
+        a_lifetimeExpCount (p_subscription) := p_revLifetimeCount  ||
+        a_keepAliveExpCount (p_subscription) := p_revMaxKeepAlive  ||
+        a_maxNotifsPerPublish (p_subscription) := p_revMaxNotifPerPublish
     END
     ;
     

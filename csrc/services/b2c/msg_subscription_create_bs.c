@@ -75,6 +75,47 @@ void msg_subscription_create_bs__get_msg_create_subscription_req_params(
     *msg_subscription_create_bs__publishEnabled = req->PublishingEnabled;
 }
 
+void msg_subscription_create_bs__get_msg_modify_subscription_req_params(
+    const constants__t_msg_i msg_subscription_create_bs__p_req_msg,
+    constants__t_subscription_i* const msg_subscription_create_bs__subscription,
+    constants__t_opcua_duration_i* const msg_subscription_create_bs__reqPublishInterval,
+    t_entier4* const msg_subscription_create_bs__reqLifetimeCount,
+    t_entier4* const msg_subscription_create_bs__reqMaxKeepAlive,
+    t_entier4* const msg_subscription_create_bs__maxNotificationsPerPublish)
+{
+    OpcUa_ModifySubscriptionRequest* req = (OpcUa_ModifySubscriptionRequest*) msg_subscription_create_bs__p_req_msg;
+    *msg_subscription_create_bs__reqPublishInterval = req->RequestedPublishingInterval;
+
+    *msg_subscription_create_bs__subscription = req->SubscriptionId;
+
+    if (req->RequestedLifetimeCount <= INT32_MAX)
+    {
+        *msg_subscription_create_bs__reqLifetimeCount = (int32_t) req->RequestedLifetimeCount;
+    }
+    else
+    {
+        *msg_subscription_create_bs__reqLifetimeCount = INT32_MAX;
+    }
+
+    if (req->RequestedMaxKeepAliveCount <= INT32_MAX)
+    {
+        *msg_subscription_create_bs__reqMaxKeepAlive = (int32_t) req->RequestedMaxKeepAliveCount;
+    }
+    else
+    {
+        *msg_subscription_create_bs__reqMaxKeepAlive = INT32_MAX;
+    }
+
+    if (req->MaxNotificationsPerPublish <= INT32_MAX)
+    {
+        *msg_subscription_create_bs__maxNotificationsPerPublish = (int32_t) req->MaxNotificationsPerPublish;
+    }
+    else
+    {
+        *msg_subscription_create_bs__maxNotificationsPerPublish = INT32_MAX;
+    }
+}
+
 void msg_subscription_create_bs__set_msg_create_subscription_resp_params(
     const constants__t_msg_i msg_subscription_create_bs__p_resp_msg,
     const constants__t_subscription_i msg_subscription_create_bs__p_subscription,
@@ -84,6 +125,18 @@ void msg_subscription_create_bs__set_msg_create_subscription_resp_params(
 {
     OpcUa_CreateSubscriptionResponse* resp = (OpcUa_CreateSubscriptionResponse*) msg_subscription_create_bs__p_resp_msg;
     resp->SubscriptionId = (uint32_t) msg_subscription_create_bs__p_subscription;
+    resp->RevisedPublishingInterval = msg_subscription_create_bs__p_revisedPublishInterval;
+    resp->RevisedLifetimeCount = (uint32_t) msg_subscription_create_bs__p_revisedLifetimeCount;
+    resp->RevisedMaxKeepAliveCount = (uint32_t) msg_subscription_create_bs__p_revisedMaxKeepAlive;
+}
+
+void msg_subscription_create_bs__set_msg_modify_subscription_resp_params(
+    const constants__t_msg_i msg_subscription_create_bs__p_resp_msg,
+    const constants__t_opcua_duration_i msg_subscription_create_bs__p_revisedPublishInterval,
+    const t_entier4 msg_subscription_create_bs__p_revisedLifetimeCount,
+    const t_entier4 msg_subscription_create_bs__p_revisedMaxKeepAlive)
+{
+    OpcUa_ModifySubscriptionResponse* resp = (OpcUa_ModifySubscriptionResponse*) msg_subscription_create_bs__p_resp_msg;
     resp->RevisedPublishingInterval = msg_subscription_create_bs__p_revisedPublishInterval;
     resp->RevisedLifetimeCount = (uint32_t) msg_subscription_create_bs__p_revisedLifetimeCount;
     resp->RevisedMaxKeepAliveCount = (uint32_t) msg_subscription_create_bs__p_revisedMaxKeepAlive;

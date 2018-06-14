@@ -486,6 +486,8 @@ OPERATIONS
                 free_browse_result
             OR e_msg_subscription_create_req THEN
                 StatusCode_service <-- treat_create_subscription_request (session, req_msg, resp_msg)
+            OR e_msg_subscription_modify_req THEN
+                StatusCode_service <-- treat_modify_subscription_request (session, req_msg, resp_msg)
             OR e_msg_subscription_delete_subscriptions_req THEN
                 StatusCode_service <-- treat_delete_subscriptions_request (session, req_msg, resp_msg)
             OR e_msg_subscription_set_publishing_mode_req THEN

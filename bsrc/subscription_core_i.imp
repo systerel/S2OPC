@@ -24,7 +24,8 @@ SEES
     constants,
     message_in_bs,
     message_out_bs,
-    request_handle_bs
+    request_handle_bs,
+    session_core_1
     
 IMPORTS
     subscription_core_1,
@@ -479,6 +480,24 @@ OPERATIONS
         ELSE
             StatusCode_service := e_sc_bad_too_many_subscriptions
         END
+    END
+    ;
+    
+    modify_subscription (p_session,
+                         p_subscription,
+                         p_revPublishInterval,
+                         p_revLifetimeCount,
+                         p_revMaxKeepAlive,
+                         p_revMaxNotifPerPublish) =
+    VAR
+        l_timerId
+    IN
+        session_do_nothing (p_session); /* used in PRE */
+        set_subscription_publishInterval (p_subscription, p_revPublishInterval);
+        set_subscription_MaxLifetimeAndKeepAliveCount (p_subscription, p_revLifetimeCount, p_revMaxKeepAlive);
+        set_subscription_MaxNotifsPerPublish (p_subscription, p_revMaxNotifPerPublish);
+        l_timerId <-- get_subscription_timer_id (p_subscription);
+        modify_publish_timer_period (l_timerId, p_revPublishInterval)
     END
     ;
     

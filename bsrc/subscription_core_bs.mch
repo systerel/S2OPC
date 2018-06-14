@@ -57,14 +57,11 @@ OPERATIONS
     ;
     
     revisedPublishInterval, revisedLifetimeCount, revisedMaxKeepAlive, revisedMaxNotificationsPerPublish
-      <-- compute_create_subscription_revised_params (p_session,
-                                                      p_reqPublishInterval,
+      <-- compute_create_subscription_revised_params (p_reqPublishInterval,
                                                       p_reqLifetimeCount,
                                                       p_reqMaxKeepAlive,
                                                       p_maxNotificationsPerPublish) =
     PRE
-        p_session : t_session_i &
-        p_session : t_session &
         p_reqPublishInterval : t_opcua_duration_i &
         p_reqLifetimeCount : t_counter &
         p_reqMaxKeepAlive : t_counter &
@@ -99,6 +96,16 @@ OPERATIONS
             bres := FALSE ||
             timerId :(timerId : t_timer_id_i & timerId = c_timer_id_indet)
         END
+    END
+    ;
+    
+    modify_publish_timer_period (p_timerId, p_revPublishInterval) =
+    PRE
+        p_timerId : t_timer_id_i &
+        p_timerId : t_timer_id &
+        p_revPublishInterval : t_opcua_duration_i
+    THEN
+        skip
     END
     ;
     

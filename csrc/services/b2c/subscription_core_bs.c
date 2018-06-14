@@ -85,7 +85,6 @@ void subscription_core_bs__subscription_core_bs_UNINITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 void subscription_core_bs__compute_create_subscription_revised_params(
-    const constants__t_session_i subscription_core_bs__p_session,
     const constants__t_opcua_duration_i subscription_core_bs__p_reqPublishInterval,
     const t_entier4 subscription_core_bs__p_reqLifetimeCount,
     const t_entier4 subscription_core_bs__p_reqMaxKeepAlive,
@@ -95,7 +94,6 @@ void subscription_core_bs__compute_create_subscription_revised_params(
     t_entier4* const subscription_core_bs__revisedMaxKeepAlive,
     t_entier4* const subscription_core_bs__revisedMaxNotificationsPerPublish)
 {
-    (void) subscription_core_bs__p_session;
     if (subscription_core_bs__p_reqPublishInterval < SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION)
     {
         *subscription_core_bs__revisedPublishInterval = SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION;
@@ -238,6 +236,32 @@ void subscription_core_bs__create_periodic_publish_timer(
     if (constants__c_timer_id_indet != *subscription_core_bs__timerId)
     {
         *subscription_core_bs__bres = true;
+    }
+}
+
+void subscription_core_bs__modify_publish_timer_period(
+    const constants__t_timer_id_i subscription_core_bs__p_timerId,
+    const constants__t_opcua_duration_i subscription_core_bs__p_revPublishInterval)
+{
+    uint64_t msCycle = 0;
+    if (subscription_core_bs__p_revPublishInterval > UINT64_MAX)
+    {
+        msCycle = UINT64_MAX;
+    }
+    else if (subscription_core_bs__p_revPublishInterval < 0)
+    {
+        msCycle = 0;
+    }
+    else
+    {
+        msCycle = (uint64_t) subscription_core_bs__p_revPublishInterval;
+    }
+
+    bool res = SOPC_EventTimer_ModifyPeriodic(subscription_core_bs__p_timerId, msCycle);
+    if (!res)
+    {
+        SOPC_Logger_TraceError("Subscription modify publish timer: failed to modify period of time %" PRIu32,
+                               subscription_core_bs__p_timerId);
     }
 }
 

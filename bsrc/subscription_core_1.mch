@@ -242,6 +242,16 @@ OPERATIONS
     END
     ;
     
+    set_subscription_publishInterval (p_subscription, p_revPublishInterval) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
+        p_revPublishInterval : t_opcua_duration_i
+    THEN
+        a_publishInterval (p_subscription) := p_revPublishInterval
+    END
+    ;
+    
     set_subscription_timer_id (p_subscription, p_timer_id) =
     PRE
         p_subscription : t_subscription_i &
@@ -306,6 +316,22 @@ OPERATIONS
     END
     ;
     
+    set_subscription_MaxLifetimeAndKeepAliveCount (p_subscription, p_revLifetimeCount, p_revMaxKeepAlive) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : dom(a_keepAliveExpCount) &
+        p_revMaxKeepAlive : t_counter &
+        p_revMaxKeepAlive > 0 &
+        p_subscription : dom(a_lifetimeExpCount) &
+        p_revLifetimeCount : t_counter &
+        p_revLifetimeCount > 0 &
+        p_revLifetimeCount >= 3 * p_revMaxKeepAlive /* part 4 table 86 */
+    THEN
+        a_keepAliveExpCount (p_subscription) := p_revMaxKeepAlive ||
+        a_lifetimeExpCount(p_subscription) := p_revLifetimeCount
+    END
+    ;
+    
     decrement_subscription_LifetimeCounter (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
@@ -333,7 +359,7 @@ OPERATIONS
         p_lifetimeCounter := a_LifetimeCounter(p_subscription)
     END
     ;
-    
+
     decrement_subscription_KeepAliveCounter (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
@@ -360,7 +386,26 @@ OPERATIONS
     THEN
         p_keepAliveCounter := a_KeepAliveCounter(p_subscription)
     END
-    ;    
+    ;
+    
+    set_subscription_MaxNotifsPerPublish (p_subscription, p_maxNotificationsPerPublish) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : dom(a_maxNotifsPerPublish) &
+        p_maxNotificationsPerPublish : t_counter
+    THEN
+        a_maxNotifsPerPublish (p_subscription) := p_maxNotificationsPerPublish
+    END
+    ;
+    
+    p_maxNotificationsPerPublish <-- get_subscription_MaxNotifsPerPublish (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : dom(a_maxNotifsPerPublish)
+    THEN
+        p_maxNotificationsPerPublish := a_maxNotifsPerPublish (p_subscription)
+    END
+    ;
     
     set_subscription_MessageSent (p_subscription) =
     PRE

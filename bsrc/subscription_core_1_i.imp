@@ -219,6 +219,12 @@ OPERATIONS
     END
     ;
     
+    set_subscription_publishInterval (p_subscription, p_revPublishInterval) =
+    BEGIN
+        a_publishInterval_i (p_subscription) := p_revPublishInterval
+    END
+    ;
+    
     set_subscription_timer_id (p_subscription, p_timer_id) =
     BEGIN
         a_publishTimer_i (p_subscription) := p_timer_id
@@ -255,6 +261,13 @@ OPERATIONS
     END
     ;
     
+    set_subscription_MaxLifetimeAndKeepAliveCount (p_subscription, p_revLifetimeCount, p_revMaxKeepAlive) =
+    BEGIN
+        a_lifetimeExpCount_i(p_subscription) := p_revLifetimeCount;
+        a_keepAliveExpCount_i(p_subscription) := p_revMaxKeepAlive
+    END
+    ;
+    
     decrement_subscription_LifetimeCounter (p_subscription) =
     BEGIN
         a_LifetimeCounter_i(p_subscription) := a_LifetimeCounter_i(p_subscription) - 1
@@ -288,6 +301,18 @@ OPERATIONS
     p_keepAliveCounter <-- get_subscription_KeepAliveCounter (p_subscription) =
     BEGIN
         p_keepAliveCounter := a_KeepAliveCounter_i(p_subscription)
+    END
+    ;
+    
+    set_subscription_MaxNotifsPerPublish (p_subscription, p_maxNotificationsPerPublish) =
+    BEGIN
+        a_maxNotifsPerPublish_i (p_subscription) := p_maxNotificationsPerPublish
+    END
+    ;
+    
+    p_maxNotificationsPerPublish <-- get_subscription_MaxNotifsPerPublish (p_subscription) =
+    BEGIN
+        p_maxNotificationsPerPublish := a_maxNotifsPerPublish_i (p_subscription)
     END
     ;
     

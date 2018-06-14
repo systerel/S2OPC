@@ -452,11 +452,10 @@ OPERATIONS
             
             /* Compute revised parameters */
             l_revisedPublishInterval, l_revisedLifetimeCount, l_revisedMaxKeepAlive, l_revisedMaxNotificationsPerPublish
-              <-- compute_create_subscription_revised_params (p_session,
-                l_reqPublishInterval,
-                l_reqLifetimeCount,
-                l_reqMaxKeepAlive,
-                l_maxNotificationsPerPublish);
+              <-- compute_create_subscription_revised_params (l_reqPublishInterval,
+                                                              l_reqLifetimeCount,                                                              
+                                                              l_reqMaxKeepAlive,
+                                                              l_maxNotificationsPerPublish);
             
             /* Create subscription */
             StatusCode_service, l_subscription <-- create_subscription (p_session,
@@ -476,6 +475,55 @@ OPERATIONS
             END
         ELSE
             StatusCode_service := e_sc_bad_too_many_subscriptions
+        END
+    END
+    ;
+    
+    StatusCode_service <-- treat_modify_subscription_request (p_session, p_req_msg, p_resp_msg) =
+    VAR
+        l_session_has_subscription,
+        l_session_sub,
+        l_sub,
+        l_reqPublishInterval,
+        l_reqLifetimeCount,
+        l_reqMaxKeepAlive,
+        l_maxNotifPerPublish,
+        l_revisedPublishInterval,
+        l_revisedLifetimeCount,
+        l_revisedMaxKeepAlive,
+        l_revisedMaxNotificationsPerPublish
+    IN
+        l_session_has_subscription, l_session_sub <-- getall_subscription (p_session);
+        /* Extract create subscription parameters */
+        l_sub, l_reqPublishInterval, l_reqLifetimeCount, l_reqMaxKeepAlive, l_maxNotifPerPublish
+          <-- get_msg_modify_subscription_req_params (p_req_msg);
+        IF l_session_has_subscription = TRUE & l_sub = l_session_sub
+        THEN
+            
+            /* Compute revised parameters */
+            l_revisedPublishInterval, l_revisedLifetimeCount, l_revisedMaxKeepAlive, l_revisedMaxNotificationsPerPublish
+              <-- compute_create_subscription_revised_params (l_reqPublishInterval,
+                                                              l_reqLifetimeCount,
+                                                              l_reqMaxKeepAlive,
+                                                              l_maxNotifPerPublish);
+            
+            /* Modify subscription */
+            modify_subscription (p_session,
+                                 l_session_sub,
+                                 l_revisedPublishInterval,
+                                 l_revisedLifetimeCount,
+                                 l_revisedMaxKeepAlive,
+                                 l_revisedMaxNotificationsPerPublish);
+            
+            /* Fill values to response message */
+            set_msg_modify_subscription_resp_params (p_resp_msg,
+                                                     l_revisedPublishInterval,
+                                                     l_revisedLifetimeCount,
+                                                     l_revisedMaxKeepAlive);
+                                                 
+            StatusCode_service := e_sc_ok
+        ELSE
+            StatusCode_service := e_sc_bad_subscription_id_invalid
         END
     END
     ;
