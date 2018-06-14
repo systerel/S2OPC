@@ -17,9 +17,6 @@
 
 #include "msg_subscription_set_publishing_mode_bs.h"
 
-/*--------------
-   SEES Clause
-  --------------*/
 #include "constants.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"

@@ -145,16 +145,6 @@ OPERATIONS
     END
     ;
     
-    /* Avoid unused variable argument for which preconditions are evaluated */
-    nothing_msg_in (msg) =
-    PRE
-        msg : t_msg_i &
-        msg : t_msg
-    THEN
-        skip
-    END
-    ;
-    
     /* Accept a message that was allocated by another part of the program */
     bless_msg_in (msg) =
     PRE

@@ -54,6 +54,8 @@ SETS
     t_opcua_duration_i;
     t_notificationQueue_i;
     t_publishReqQueue_i;
+    t_notifRepublishQueue_i;
+    t_notifRepublishQueueIterator_i;
     t_monitoredItemQueue_i;
     t_monitoredItemQueueIterator_i;
     t_monitoredItemPointer_i;
@@ -103,6 +105,8 @@ CONCRETE_CONSTANTS
     c_opcua_duration_zero,
     c_notificationQueue_indet,
     c_publishReqQueue_indet,
+    c_notifRepublishQueue_indet,
+    c_notifRepublishQueueIterator_indet,
     c_monitoredItemQueue_indet,
     c_monitoredItemQueueIterator_indet,
     c_monitoredItemPointer_indet,
@@ -142,6 +146,8 @@ ABSTRACT_CONSTANTS
     t_sub_seq_num,
     t_timeref,
     t_notificationQueue,
+    t_notifRepublishQueue,
+    t_notifRepublishQueueIterator,
     t_publishReqQueue,
     t_monitoredItemQueue,
     t_monitoredItemQueueIterator,
@@ -238,6 +244,14 @@ PROPERTIES
     t_publishReqQueue <: t_publishReqQueue_i &
     c_publishReqQueue_indet : t_publishReqQueue_i &
     c_publishReqQueue_indet /: t_publishReqQueue &
+    
+    t_notifRepublishQueue <: t_notifRepublishQueue_i &
+    c_notifRepublishQueue_indet : t_notifRepublishQueue_i &
+    c_notifRepublishQueue_indet /: t_notifRepublishQueue &
+    
+    t_notifRepublishQueueIterator <: t_notifRepublishQueueIterator_i &
+    c_notifRepublishQueueIterator_indet : t_notifRepublishQueueIterator_i &
+    c_notifRepublishQueueIterator_indet /: t_notifRepublishQueueIterator &
     
     t_monitoredItemQueue <: t_monitoredItemQueue_i &
     c_monitoredItemQueue_indet : t_monitoredItemQueue_i &

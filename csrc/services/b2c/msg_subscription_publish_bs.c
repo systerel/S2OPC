@@ -31,8 +31,6 @@
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
 
-static const uint64_t SOPC_MILLISECOND_TO_100_NANOSECONDS = 10000; // 10^4
-
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -130,37 +128,6 @@ void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
     {
         // TODO: log ?
     }
-}
-
-void msg_subscription_publish_bs__get_msg_header_expiration_time(
-    const constants__t_msg_header_i msg_subscription_publish_bs__p_req_header,
-    constants__t_timeref_i* const msg_subscription_publish_bs__req_expiration_time)
-{
-    OpcUa_RequestHeader* pubReqHeader = msg_subscription_publish_bs__p_req_header;
-    *msg_subscription_publish_bs__req_expiration_time = SOPC_TimeReference_GetCurrent();
-
-    int64_t dtDelta = SOPC_Time_GetCurrentTimeUTC() - pubReqHeader->Timestamp;
-    uint64_t millisecondsToTarget = 0;
-    if (dtDelta > 0)
-    {
-        if (pubReqHeader->TimeoutHint >= (uint64_t) dtDelta / SOPC_MILLISECOND_TO_100_NANOSECONDS)
-        {
-            millisecondsToTarget = pubReqHeader->TimeoutHint - (uint64_t) dtDelta / SOPC_MILLISECOND_TO_100_NANOSECONDS;
-        }
-        else
-        {
-            // Already expired
-            millisecondsToTarget = 0;
-            // TODO: log ?
-        }
-    }
-    else
-    {
-        // Keep only timeoutHint from current time
-        millisecondsToTarget = pubReqHeader->TimeoutHint;
-    }
-    *msg_subscription_publish_bs__req_expiration_time =
-        SOPC_TimeReference_AddMilliseconds(*msg_subscription_publish_bs__req_expiration_time, millisecondsToTarget);
 }
 
 void msg_subscription_publish_bs__set_msg_publish_resp_notificationMsg(

@@ -78,6 +78,7 @@ SETS
                       e_sc_bad_too_many_subscriptions,
                       e_sc_bad_no_subscription,
                       e_sc_bad_subscription_id_invalid,
+                      e_sc_bad_sequence_number_unknown,
                       e_sc_bad_too_many_monitored_items,
                       e_sc_bad_monitoring_mode_invalid, 
                       e_sc_bad_monitored_item_filter_unsupported,
@@ -160,8 +161,10 @@ SETS
     t_opcua_duration_i;    /* double */
     t_notificationQueue_i; /* (SOPC_SLinkedList*) */
     t_publishReqQueue_i;   /* (SOPC_SLinkedList*) */
+    t_notifRepublishQueue_i; /* (SOPC_SLinkedList*) */
+    t_notifRepublishQueueIterator_i; /* (SOPC_SLinkedListIterator*) */
     t_monitoredItemQueue_i;  /* (SOPC_SLinkedList*) */
-    t_monitoredItemQueueIterator_i; /* (SOPC_SLinkedListIterator) */
+    t_monitoredItemQueueIterator_i; /* (SOPC_SLinkedListIterator*) */
     
     /* Subscription (monitored item) */   
     t_monitoringMode_i = {
@@ -325,6 +328,8 @@ CONCRETE_CONSTANTS
     c_opcua_duration_zero,
     c_notificationQueue_indet,
     c_publishReqQueue_indet,
+    c_notifRepublishQueue_indet,
+    c_notifRepublishQueueIterator_indet,
     c_monitoredItemQueue_indet,
     c_monitoredItemQueueIterator_indet,
     c_monitoredItemPointer_indet,
@@ -389,6 +394,8 @@ ABSTRACT_CONSTANTS
     t_timeref,
     t_notificationQueue,
     t_publishReqQueue,
+    t_notifRepublishQueue,
+    t_notifRepublishQueueIterator,
     t_monitoredItemQueue,
     t_monitoredItemQueueIterator,
     t_monitoringMode,
@@ -598,6 +605,14 @@ PROPERTIES
     t_publishReqQueue <: t_publishReqQueue_i &
     c_publishReqQueue_indet : t_publishReqQueue_i &
     c_publishReqQueue_indet /: t_publishReqQueue &
+    
+    t_notifRepublishQueue <: t_notifRepublishQueue_i &
+    c_notifRepublishQueue_indet : t_notifRepublishQueue_i &
+    c_notifRepublishQueue_indet /: t_notifRepublishQueue &
+    
+    t_notifRepublishQueueIterator <: t_notifRepublishQueueIterator_i &
+    c_notifRepublishQueueIterator_indet : t_notifRepublishQueueIterator_i &
+    c_notifRepublishQueueIterator_indet /: t_notifRepublishQueueIterator &
     
     t_monitoredItemQueue <: t_monitoredItemQueue_i &
     c_monitoredItemQueue_indet : t_monitoredItemQueue_i &

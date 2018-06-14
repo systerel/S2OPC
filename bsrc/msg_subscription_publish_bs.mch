@@ -25,6 +25,7 @@ SEES
     request_handle_bs
 
 ABSTRACT_VARIABLES
+   
     publish_response_message,
     notification_message,
     notification_message_seq_num,
@@ -32,6 +33,7 @@ ABSTRACT_VARIABLES
     MonitoredItemNotification_MonitoredItemId
 
 INVARIANT
+    
     publish_response_message : t_msg_i &
     notification_message : t_notif_msg_i &
     notification_message_seq_num : t_sub_seq_num_i &
@@ -41,6 +43,7 @@ INVARIANT
     MonitoredItemNotification_MonitoredItemId : t_monitoredItemNotifIndex +-> t_monitoredItemId
 
 INITIALISATION
+
     publish_response_message := c_msg_indet ||
     notification_message := c_notif_msg_indet ||
     notification_message_seq_num := c_sub_seq_num_indet ||
@@ -48,18 +51,7 @@ INITIALISATION
     MonitoredItemNotification_MonitoredItemId :(MonitoredItemNotification_MonitoredItemId = {})
 
 OPERATIONS
-    
-    req_expiration_time <-- get_msg_header_expiration_time (p_req_header) =
-    PRE
-        p_req_header : t_msg_header_i &
-        p_req_header = c_msg_in_header &
-        c_msg_in_header : t_msg_header &
-        a_msg_in_type = e_msg_subscription_publish_req
-    THEN
-        req_expiration_time :(req_expiration_time : t_timeref_i & req_expiration_time : t_timeref)
-    END
-    ;
-    
+
     set_msg_publish_resp_subscription (p_resp_msg, p_subscription) =
     PRE
         p_resp_msg : t_msg_i &
@@ -129,9 +121,10 @@ OPERATIONS
     THEN
         CHOICE
             bres := FALSE ||
+            nb_monitored_item_notifications := 0 ||
             p_notifMsg := c_notif_msg_indet
         OR
-            bres := FALSE ||
+            bres := TRUE ||
             nb_monitored_item_notifications := p_nb_monitored_item_notifications ||
             notification_message, p_notifMsg
             :(p_notifMsg : t_notif_msg_i & p_notifMsg : t_notif_msg &
@@ -154,6 +147,7 @@ OPERATIONS
     PRE
         p_notifMsg : t_notif_msg_i & p_notifMsg : t_notif_msg &
         p_notifMsg = notification_message &
+        nb_monitored_item_notifications > 0 &
         p_index : NAT &
         p_index : t_monitoredItemNotifIndex &
         p_index > 0 &

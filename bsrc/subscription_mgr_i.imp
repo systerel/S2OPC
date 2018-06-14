@@ -35,6 +35,7 @@ IMPORTS
     subscription_core,
     msg_subscription_create_bs,
     msg_subscription_delete_bs,
+    msg_subscription_publish_ack_bs,
     msg_subscription_set_publishing_mode_bs,
     msg_subscription_create_monitored_item,
     subscription_create_monitored_item_it,
@@ -52,7 +53,88 @@ LOCAL_OPERATIONS
         p_subscription : t_subscription_i & p_subscription : t_subscription &
         p_moreNotifs : BOOL
     THEN
-        skip
+        CHOICE
+            subscription_available_seq_nums_resp_SeqNum 
+            :(subscription_available_seq_nums_resp_SeqNum : NAT +-> t_sub_seq_num)
+        OR
+            skip /* Allocation failed, still send the notification message */
+        END
+    END
+    ;
+    
+    fill_publish_response_msg_ack_results (p_session, p_req_msg, p_resp_msg, p_nb_acks) =
+    PRE
+        p_session : t_session_i & p_session : t_session &
+        p_session : ran(a_subscription_session) &
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_subscription_publish_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_subscription_publish_resp &
+        p_nb_acks : NAT &
+        p_nb_acks : 1..k_n_genericOperationPerReq_max &
+        subscription_ack_resp_allocated = TRUE
+    THEN
+        LET l_subscription_ack_resp_StatusCode, l_acknowledged_notif_msgs BE
+            l_subscription_ack_resp_StatusCode = 
+             %p_index.(p_index : 1..p_nb_acks
+                       |
+                       {FALSE |-> e_sc_bad_subscription_id_invalid,
+                        TRUE |-> {FALSE |-> e_sc_bad_sequence_number_unknown,
+                                  TRUE |-> e_sc_ok
+                              }(bool(subscription_ack_req_ackSeqNum(p_index) :
+                                      a_notification_seq_num[ /* sub republish queue notification msgs seq numbers */
+                                       a_republish_notification~[ /* sub republish queue notification msgs */
+                                          {a_notifRepublishQueue /* sub republish queue */
+                                            (subscription_ack_req_subscription(p_index)) /* sub */
+                                          }
+                                       ]
+                                      ]
+                                    )
+                               )
+                       }(bool(subscription_ack_req_subscription(p_index) :
+                                a_subscription_session~[{p_session}])) /* subscription is valid in current session */
+                      ) &
+            l_acknowledged_notif_msgs =
+             %p_index.(p_index : 1..p_nb_acks &
+                       l_subscription_ack_resp_StatusCode(p_index) = e_sc_ok
+                       |
+                       a_republish_notification~[ /* sub republish queue notification msgs */
+                                                 {a_notifRepublishQueue /* sub republish queue */
+                                                  (subscription_ack_req_subscription(p_index)) /* sub */
+                                                 }
+                                             ]
+                      )
+        IN
+            subscription_ack_resp_StatusCode := l_subscription_ack_resp_StatusCode ||
+            a_republish_notification := union(ran(l_acknowledged_notif_msgs)) <<| a_republish_notification ||
+            a_notification_seq_num := union(ran(l_acknowledged_notif_msgs)) <<| a_notification_seq_num
+        END
+    END
+    ;
+    
+    fill_publish_response_msg_available_seq_nums (p_resp_msg, republishQueue, nb_seq_nums) =
+    PRE
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        ((p_resp_msg = c_msg_out & a_msg_out_type = e_msg_subscription_publish_resp)
+            or publish_response_message = p_resp_msg) &
+        republishQueue : t_notifRepublishQueue_i &
+        republishQueue : t_notifRepublishQueue &
+        republishQueue = notification_republish_iter_queue &
+        nb_seq_nums : NAT & nb_seq_nums > 0 & /* Give guarantee on maximum value*/
+        nb_seq_nums = subscription_available_seq_nums_resp_nb
+    THEN
+        ANY l_subscription_available_seq_nums_resp_SeqNum WHERE
+            l_subscription_available_seq_nums_resp_SeqNum : 1..nb_seq_nums --> t_sub_seq_num &
+            ran(l_subscription_available_seq_nums_resp_SeqNum) = 
+             a_notification_seq_num[a_republish_notification~[{republishQueue}]]
+        THEN
+             subscription_available_seq_nums_resp_SeqNum := l_subscription_available_seq_nums_resp_SeqNum
+        END
     END
     ;
     
@@ -359,12 +441,87 @@ OPERATIONS
     
     /* LOCAL OPERATIONS */
     fill_publish_response_msg (p_resp_msg, p_subscription, p_moreNotifs) =
-    BEGIN
+    VAR
+        l_republishQueue,
+        l_nb_seq_nums,
+        l_bres
+    IN
+        l_republishQueue <-- get_subscription_notifRepublishQueue (p_subscription);
+        l_nb_seq_nums <-- get_available_republish (l_republishQueue);
+        IF l_nb_seq_nums > 0
+        THEN
+            l_bres <-- allocate_subscription_available_seq_nums (p_resp_msg, l_nb_seq_nums);
+            IF l_bres = TRUE
+            THEN
+                fill_publish_response_msg_available_seq_nums (p_resp_msg, l_republishQueue, l_nb_seq_nums)
+            END
+        END
+        ;
         set_msg_publish_resp_subscription (p_resp_msg, p_subscription);
         /* TODO: fill the availableSeqNum of message: */
         /* - allocate availableSequenceNumbers
         - iter on seq nums based on nb_avail_seq_nums */
         set_msg_publish_resp_notificationMsg (p_resp_msg, p_moreNotifs)
+    END
+    ;
+    
+    fill_publish_response_msg_ack_results (p_session, p_req_msg, p_resp_msg, p_nb_acks) =
+    VAR
+        l_has_sub,
+        l_session_sub,
+        l_index,
+        l_sub,
+        l_seq_num,
+        l_valid_seq_num
+    IN
+        l_has_sub, l_session_sub <-- getall_subscription (p_session);
+        l_index := 1;
+        WHILE l_index <= p_nb_acks DO
+            l_sub, l_seq_num <-- getall_msg_publish_request_ack (p_req_msg, l_index);
+            IF l_has_sub = TRUE & l_sub = l_session_sub
+            THEN
+                l_valid_seq_num <-- subscription_ack_notif_msg (l_session_sub, l_seq_num);
+                IF l_valid_seq_num = TRUE
+                THEN
+                    setall_msg_publish_resp_ack_result (p_resp_msg, l_index, e_sc_ok)
+                ELSE
+                    setall_msg_publish_resp_ack_result (p_resp_msg, l_index, e_sc_bad_sequence_number_unknown)
+                END
+            ELSE
+                setall_msg_publish_resp_ack_result (p_resp_msg, l_index, e_sc_bad_subscription_id_invalid)
+            END;
+            l_index := l_index + 1
+        INVARIANT
+            dom(subscription_ack_resp_StatusCode) = 1..l_index &
+            dom(subscription_ack_req_ackSeqNum) = 1..p_nb_acks
+        VARIANT
+            (p_nb_acks - l_index)
+        END
+    END
+    ;
+    
+    fill_publish_response_msg_available_seq_nums (p_resp_msg, republishQueue, nb_seq_nums) =
+    VAR
+        l_continue,
+        l_republishIterator,
+        l_index,
+        l_seq_num
+    IN
+        l_index := 1;
+        l_continue, l_republishIterator <-- init_iter_notif_republish (republishQueue);
+        WHILE l_continue = TRUE & l_index <= nb_seq_nums DO
+            l_continue, l_seq_num <-- continue_iter_notif_republish (republishQueue, l_republishIterator);
+            setall_msg_publish_resp_available_seq_num (p_resp_msg, l_index, l_seq_num);
+            l_index := l_index + 1
+        INVARIANT
+            s_to_iterate_sub_seq_num /\ s_iterated_sub_seq_num = {} &
+            s_to_iterate_sub_seq_num \/ s_iterated_sub_seq_num =
+             a_notification_seq_num[a_republish_notification~[{republishQueue}]]
+        VARIANT
+            card(s_to_iterate_sub_seq_num)
+        END
+        ;
+        clear_notif_republish_iterator (republishQueue, l_republishIterator)
     END
     ;
     
@@ -714,11 +871,14 @@ OPERATIONS
         l_session_has_subscription,
         l_sub,
         l_req_exp_time,
-        /*l_nb_subsciptionAcks,
-        l_nb_avail_seq_nums,*/
+        l_nb_subscriptionAcks,
+        /* l_nb_avail_seq_nums, */
         l_subscription,
-        l_moreNotifs
+        l_moreNotifs,
+        l_bres
     IN
+        l_subscription := c_subscription_indet;
+        l_moreNotifs := FALSE;
         async_resp_msg := FALSE;
         l_session_has_subscription, l_sub <-- getall_subscription (p_session);
         IF l_session_has_subscription = TRUE
@@ -726,17 +886,33 @@ OPERATIONS
             /* Extract values from header: expiration time for Publish Request */
             l_req_exp_time <-- get_msg_header_expiration_time (p_req_header);
             
-            
             /* TODO: remove when used */
-            nothing_msg_in (p_req_msg);
-            /* TODO: Extract values from message: l_nb_subsciptionAcks <-- get_msg_publish_request_params (p_req_msg); */            
-            /* TODO: allocate acks results array of response message */
-            /* TODO: iter on sub_acks in LOCAL OP and ack it using acknowledge_publish_response (sub_id, seq_num) + fill results[] in resp :           
-            <=> fill_read_response */
-            
-            StatusCode_service, async_resp_msg, l_subscription, l_moreNotifs
-              <-- receive_publish_request (p_session, l_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg);
+            l_nb_subscriptionAcks <-- get_msg_publish_request_ack_params (p_req_msg);
+            IF l_nb_subscriptionAcks > 0 & l_nb_subscriptionAcks <= k_n_genericOperationPerReq_max
+            THEN
+                l_bres <-- allocate_subscription_ack_results (p_resp_msg, l_nb_subscriptionAcks);
+                IF l_bres = TRUE
+                THEN
+                    fill_publish_response_msg_ack_results (p_session, p_req_msg, p_resp_msg, l_nb_subscriptionAcks);
+                    StatusCode_service := e_sc_ok
+                ELSE
+                    StatusCode_service := e_sc_bad_out_of_memory
+                END
+            ELSIF l_nb_subscriptionAcks > k_n_genericOperationPerReq_max
+            THEN
+                StatusCode_service := e_sc_bad_too_many_ops
+            ELSE
+                StatusCode_service := e_sc_ok
+            END
+            ;
 
+            IF StatusCode_service = e_sc_ok
+            THEN
+                
+                StatusCode_service, async_resp_msg, l_subscription, l_moreNotifs
+                  <-- receive_publish_request (p_session, l_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg)
+            END
+            ;
             IF StatusCode_service = e_sc_ok &
                 async_resp_msg = FALSE
             THEN

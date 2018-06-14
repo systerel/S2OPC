@@ -57,8 +57,8 @@ typedef uintptr_t constants_bs__t_application_context_i;
 typedef SOPC_Buffer* constants_bs__t_byte_buffer_i;
 typedef uint32_t constants_bs__t_channel_config_idx_i;
 typedef uint32_t constants_bs__t_channel_i;
-typedef uint32_t constants_bs__t_client_request_handle_i;
 typedef uint32_t constants_bs__t_client_handle_i;
+typedef uint32_t constants_bs__t_client_request_handle_i;
 #define constants_bs__t_counter_i t_entier4
 typedef uint32_t constants_bs__t_endpoint_config_idx_i;
 typedef uint32_t constants_bs__t_monitoredItemId_i;
@@ -67,8 +67,9 @@ typedef SOPC_SLinkedListIterator* constants_bs__t_monitoredItemQueueIterator_i;
 typedef SOPC_SLinkedList* constants_bs__t_monitoredItemQueue_i;
 typedef void* constants_bs__t_msg_header_i; /* OpcUa_RequestHeader OR OpcUa_ResponseHeader */
 typedef void* constants_bs__t_msg_i;        /* OpcUa_* message */
+typedef SOPC_SLinkedListIterator* constants_bs__t_notifRepublishQueueIterator_i;
+typedef SOPC_SLinkedList* constants_bs__t_notifRepublishQueue_i;
 typedef OpcUa_NotificationMessage* constants_bs__t_notif_msg_i;
-typedef SOPC_SLinkedListIterator* constants_bs__t_notificationQueueIterator_i;
 typedef SOPC_SLinkedList* constants_bs__t_notificationQueue_i;
 typedef double constants_bs__t_opcua_duration_i;
 typedef SOPC_SLinkedList* constants_bs__t_publishReqQueue_i;
@@ -110,6 +111,8 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__t_monitoredItemQueue_i_max (-1)
 #define constants_bs__t_msg_header_i_max (-1)
 #define constants_bs__t_msg_i_max (-1)
+#define constants_bs__t_notifRepublishQueueIterator_i_max (-1)
+#define constants_bs__t_notifRepublishQueue_i_max (-1)
 #define constants_bs__t_notif_msg_i_max (-1)
 #define constants_bs__t_notificationQueue_i_max (-1)
 #define constants_bs__t_opcua_duration_i_max (-1)
@@ -150,6 +153,8 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__c_msg_header_indet 0
 #define constants_bs__c_msg_indet 0
 #define constants_bs__c_no_application_context 0
+#define constants_bs__c_notifRepublishQueueIterator_indet 0
+#define constants_bs__c_notifRepublishQueue_indet 0
 #define constants_bs__c_notif_msg_indet 0
 #define constants_bs__c_notificationQueue_indet 0
 #define constants_bs__c_opcua_duration_indet -1

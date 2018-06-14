@@ -41,6 +41,7 @@ DEFINITIONS
 
     a_pendingNotificationQueue,
     a_publishRequestQueue,
+    a_notifRepublishQueue,
     a_monitoredItemQueue,
     a_publishTimer;
     
@@ -79,7 +80,8 @@ DEFINITIONS
     /* (Session) Implementation variables */
     
     /* Note: kept on subscription for now since 1 subs / session + no transfer. Otherwise could be cleared on session close ! */
-    a_publishRequestQueue :  s_subscription --> t_publishReqQueue
+    a_publishRequestQueue :  s_subscription --> t_publishReqQueue &
+    a_notifRepublishQueue : s_subscription --> t_notifRepublishQueue
     
 ABSTRACT_VARIABLES
     d_variables
@@ -106,6 +108,7 @@ INITIALISATION
 
     a_pendingNotificationQueue := {} ||
     a_publishRequestQueue := {}      ||
+    a_notifRepublishQueue := {}      ||
     a_monitoredItemQueue := {} ||
     a_publishTimer := {}
 
@@ -155,6 +158,7 @@ OPERATIONS
                       p_publishEnabled,
                       p_notifQueue,
                       p_publishQueue,
+                      p_republishQueue,
                       p_monitoredItemQueue,
                       p_timerId) =
     PRE
@@ -176,6 +180,8 @@ OPERATIONS
         p_notifQueue : t_notificationQueue &
         p_publishQueue : t_publishReqQueue_i &
         p_publishQueue : t_publishReqQueue &
+        p_republishQueue : t_notifRepublishQueue_i &
+        p_republishQueue : t_notifRepublishQueue &
         p_monitoredItemQueue : t_monitoredItemQueue_i &
         p_monitoredItemQueue : t_monitoredItemQueue &
         p_timerId : t_timer_id_i &
@@ -197,6 +203,7 @@ OPERATIONS
         
         a_pendingNotificationQueue (p_subscription) := p_notifQueue ||
         a_publishRequestQueue (p_subscription) := p_publishQueue ||
+        a_notifRepublishQueue (p_subscription) := p_republishQueue ||
         a_monitoredItemQueue (p_subscription) := p_monitoredItemQueue ||
         a_publishTimer (p_subscription) := p_timerId
     END
@@ -225,6 +232,7 @@ OPERATIONS
         a_pendingNotificationQueue := {p_subscription} <<| a_pendingNotificationQueue ||
           
         a_publishRequestQueue := {p_subscription} <<| a_publishRequestQueue ||
+        a_notifRepublishQueue := {p_subscription} <<| a_notifRepublishQueue ||
 
         a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue ||
 
@@ -486,6 +494,16 @@ OPERATIONS
     THEN
         p_publishReqQueue :(p_publishReqQueue : t_publishReqQueue_i & 
                             p_publishReqQueue = a_publishRequestQueue(p_subscription))
+    END
+    ;
+    
+    p_republishQueue <-- get_subscription_notifRepublishQueue (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : dom(a_notifRepublishQueue)
+    THEN
+        p_republishQueue :(p_republishQueue : t_notifRepublishQueue_i & 
+                           p_republishQueue = a_notifRepublishQueue(p_subscription))
     END
     ;
     
