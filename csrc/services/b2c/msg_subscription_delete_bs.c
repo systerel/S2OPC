@@ -56,42 +56,37 @@ void msg_subscription_delete_bs__allocate_msg_delete_subscriptions_resp_results_
     }
 }
 
-void msg_subscription_delete_bs__get_msg_delete_subscriptions_req_first_subscription(
+void msg_subscription_delete_bs__getall_msg_delete_subscriptions_at_index(
     const constants__t_msg_i msg_subscription_delete_bs__p_req_msg,
-    t_entier4* const msg_subscription_delete_bs__l_nb_subs,
-    constants__t_subscription_i* const msg_subscription_delete_bs__p_first_sub_in_request)
+    const t_entier4 msg_subscription_delete_bs__p_index,
+    constants__t_subscription_i* const msg_subscription_delete_bs__p_sub_id)
 {
     OpcUa_DeleteSubscriptionsRequest* req = (OpcUa_DeleteSubscriptionsRequest*) msg_subscription_delete_bs__p_req_msg;
-    *msg_subscription_delete_bs__l_nb_subs = req->NoOfSubscriptionIds;
-    if (req->NoOfSubscriptionIds > 0)
-    {
-        *msg_subscription_delete_bs__p_first_sub_in_request = req->SubscriptionIds[0];
-    }
+    *msg_subscription_delete_bs__p_sub_id = req->SubscriptionIds[msg_subscription_delete_bs__p_index - 1];
 }
 
-void msg_subscription_delete_bs__set_msg_delete_subscriptions_resp_first_subscription(
+void msg_subscription_delete_bs__getall_msg_delete_subscriptions_req_params(
+    const constants__t_msg_i msg_subscription_delete_bs__p_req_msg,
+    t_entier4* const msg_subscription_delete_bs__p_nb_reqs)
+{
+    OpcUa_DeleteSubscriptionsRequest* req = (OpcUa_DeleteSubscriptionsRequest*) msg_subscription_delete_bs__p_req_msg;
+    *msg_subscription_delete_bs__p_nb_reqs = req->NoOfSubscriptionIds;
+}
+
+void msg_subscription_delete_bs__setall_msg_subscription_delete_subscriptions_resp_at_index(
     const constants__t_msg_i msg_subscription_delete_bs__p_resp_msg,
-    const t_bool msg_subscription_delete_bs__p_valid_first_sub)
+    const t_entier4 msg_subscription_delete_bs__p_index,
+    const t_bool msg_subscription_delete_bs__p_valid_sub)
 {
     OpcUa_DeleteSubscriptionsResponse* resp =
         (OpcUa_DeleteSubscriptionsResponse*) msg_subscription_delete_bs__p_resp_msg;
 
-    for (int32_t i = 0; i < resp->NoOfResults; i++)
+    if (msg_subscription_delete_bs__p_valid_sub)
     {
-        if (i == 0)
-        {
-            if (msg_subscription_delete_bs__p_valid_first_sub != false)
-            {
-                resp->Results[0] = SOPC_GoodGenericStatus;
-            }
-            else
-            {
-                resp->Results[0] = OpcUa_BadSubscriptionIdInvalid;
-            }
-        }
-        else
-        {
-            resp->Results[i] = OpcUa_BadSubscriptionIdInvalid;
-        }
+        resp->Results[msg_subscription_delete_bs__p_index - 1] = SOPC_GoodGenericStatus;
+    }
+    else
+    {
+        resp->Results[msg_subscription_delete_bs__p_index - 1] = OpcUa_BadSubscriptionIdInvalid;
     }
 }

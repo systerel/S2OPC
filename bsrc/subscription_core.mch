@@ -360,7 +360,7 @@ OPERATIONS
         is_valid := bool(p_subscription : s_subscription)
     END
     ;
-        
+
     p_dom, p_subscription <-- getall_subscription (p_session) =
     PRE
         p_session : t_session_i &

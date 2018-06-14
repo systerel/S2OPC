@@ -218,6 +218,97 @@ LOCAL_OPERATIONS
     END
     ;
     
+    fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_nb_reqs) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_subscription_delete_subscriptions_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_subscription_delete_subscriptions_resp &
+        p_has_sub : BOOL &
+        p_session_sub : t_subscription_i &
+        p_nb_reqs : NAT &
+        p_nb_reqs > 0 &
+        p_nb_reqs <= k_n_genericOperationPerReq_max &
+        p_nb_reqs = nb_delete_subscriptions &
+        delete_subscriptions_resp_allocated = TRUE
+    THEN
+        LET l_delete_subscriptions_resp_StatusCode BE
+            l_delete_subscriptions_resp_StatusCode =
+              %p_index.(p_index : 1..p_nb_reqs |
+                        {FALSE |-> e_sc_bad_subscription_id_invalid,
+                         TRUE  |-> e_sc_ok
+                        }(bool(p_has_sub = TRUE &
+                               delete_subscriptions_req_sub_id(p_index) = p_session_sub &
+                               delete_subscriptions_req_sub_id(p_index) : s_subscription
+                              )
+                         )
+                       ) 
+        IN
+            delete_subscriptions_resp_StatusCode := l_delete_subscriptions_resp_StatusCode ||
+            LET l_valid_sub_ids, l_deleted_subs BE
+              l_valid_sub_ids =
+              %p_index.(p_index : 1..p_nb_reqs &
+                        l_delete_subscriptions_resp_StatusCode(p_index) = e_sc_ok 
+                        | 
+                        delete_subscriptions_req_sub_id(p_index)
+                       ) &
+              l_deleted_subs = ran(l_valid_sub_ids)
+            IN
+                s_subscription := s_subscription - l_deleted_subs ||
+                
+                a_subscription_session := l_deleted_subs <<| a_subscription_session ||
+                a_publishInterval := l_deleted_subs <<| a_publishInterval ||
+                a_lifetimeExpCount := l_deleted_subs <<| a_lifetimeExpCount  ||
+                a_keepAliveExpCount := l_deleted_subs <<| a_keepAliveExpCount ||
+                a_maxNotifsPerPublish := l_deleted_subs <<| a_maxNotifsPerPublish ||
+                
+                a_subscription_state := l_deleted_subs <<| a_subscription_state ||
+                a_LifetimeCounter := l_deleted_subs <<| a_LifetimeCounter ||
+                a_KeepAliveCounter := l_deleted_subs <<| a_KeepAliveCounter ||
+                a_MessageSent := a_MessageSent - l_deleted_subs               ||
+                a_PublishingEnabled := a_PublishingEnabled - l_deleted_subs   ||
+                a_SeqNum := l_deleted_subs <<| a_SeqNum ||
+                
+                /* Queues emptied : publish responses should be sent if remaining */
+                a_publish_responses := a_publish_responses |>> a_publishRequestQueue[l_deleted_subs] ||
+                a_monitored_item_notifications := a_pendingNotificationQueue[l_deleted_subs] <<| a_monitored_item_notifications ||
+                
+                /* Queues deleted */
+                s_notificationQueue := s_notificationQueue - a_pendingNotificationQueue[l_deleted_subs] ||
+                a_pendingNotificationQueue := l_deleted_subs <<| a_pendingNotificationQueue ||
+                
+                s_publishReqQueue := s_publishReqQueue - a_publishRequestQueue[l_deleted_subs] ||
+                a_publishRequestQueue := l_deleted_subs <<| a_publishRequestQueue ||
+                
+                
+                /* Remove monitoredItems */
+                LET s_removedMonitoredItemPointer BE
+                    s_removedMonitoredItemPointer = a_defined_monitored_items[a_monitoredItemQueue[l_deleted_subs]]
+                IN
+                    s_monitoredItemPointer := s_monitoredItemPointer - s_removedMonitoredItemPointer ||
+                    s_monitoredItemId := s_monitoredItemId - a_monitoredItemId[s_removedMonitoredItemPointer] ||
+                    a_monitoredItemId := a_monitoredItemId - (s_removedMonitoredItemPointer <| a_monitoredItemId) ||
+                    a_monitoredItemSubs := s_removedMonitoredItemPointer <<| a_monitoredItemSubs ||
+                    a_monitoredItemNodeId := s_removedMonitoredItemPointer <<| a_monitoredItemNodeId ||
+                    
+                    s_monitoredItemQueue := s_monitoredItemQueue - a_monitoredItemQueue[l_deleted_subs] ||
+                    a_monitoredItemQueue := l_deleted_subs <<| a_monitoredItemQueue ||
+                    
+                    /* Remove subscription monitoredItem queue and all removed monitored items from other queues (i.e.:nodeId to mi queues) */
+                    a_defined_monitored_items := 
+                    a_monitoredItemQueue[l_deleted_subs]
+                    <<| a_defined_monitored_items |>>
+                    s_removedMonitoredItemPointer
+                END
+            END
+        END
+    END
+    ;
+    
     fill_set_publishing_mode_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_pub_enabled, p_nb_reqs) =
     PRE
         p_req_msg : t_msg_i &
@@ -401,6 +492,36 @@ OPERATIONS
     END
     ;
     
+    fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_nb_reqs) =
+    VAR
+        l_index,
+        l_sub,
+        l_sub_still_valid
+    IN
+        l_index := 1;
+        WHILE l_index <= p_nb_reqs DO
+            l_sub <-- getall_msg_delete_subscriptions_at_index (p_req_msg, l_index);
+            IF p_has_sub = TRUE & l_sub = p_session_sub
+            THEN
+                l_sub_still_valid <-- is_valid_subscription (l_sub); /* Avoid to close 2 times same subscription */
+                IF l_sub_still_valid = TRUE
+                THEN
+                    close_subscription (l_sub)
+                END;
+                setall_msg_subscription_delete_subscriptions_resp_at_index (p_resp_msg, l_index, TRUE)
+            ELSE
+                setall_msg_subscription_delete_subscriptions_resp_at_index (p_resp_msg, l_index, FALSE)
+            END;
+            l_index := l_index + 1
+        INVARIANT
+            dom(delete_subscriptions_resp_StatusCode) = 1..l_index &
+            dom(delete_subscriptions_req_sub_id) = 1..p_nb_reqs
+        VARIANT
+            (p_nb_reqs - l_index)
+        END
+    END
+    ;
+    
     fill_set_publishing_mode_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_pub_enabled, p_nb_reqs) =
     VAR
         l_index,
@@ -532,43 +653,27 @@ OPERATIONS
     VAR
         l_session_has_subscription,
         l_session_sub,
-        l_nb_subs,
-        l_first_sub_in_request,
+        l_nb_reqs,
         l_bres
     IN
-        l_session_has_subscription, l_session_sub <-- getall_subscription (p_session);
-        /* Note: we only treat the first subscription in list since only one subscription per session can be opened*/
-        l_nb_subs, l_first_sub_in_request <-- get_msg_delete_subscriptions_req_first_subscription (p_req_msg);
-        IF l_session_has_subscription = TRUE &
-           l_nb_subs > 0 & l_nb_subs <= k_n_genericOperationPerReq_max &
-           l_first_sub_in_request = l_session_sub
+        l_nb_reqs <-- getall_msg_delete_subscriptions_req_params (p_req_msg);
+        IF l_nb_reqs > 0 & l_nb_reqs <= k_n_genericOperationPerReq_max
         THEN
-            /* Note: if same subscription as the one recorded for current session => the subscription id is valid */
-            close_subscription (l_session_sub);
-            l_bres <-- allocate_msg_delete_subscriptions_resp_results_array (p_resp_msg, l_nb_subs);
+            l_session_has_subscription, l_session_sub <-- getall_subscription (p_session);
+            l_bres <-- allocate_msg_delete_subscriptions_resp_results_array (p_resp_msg, l_nb_reqs);
             IF l_bres = TRUE
             THEN
-                set_msg_delete_subscriptions_resp_first_subscription (p_resp_msg, TRUE);
+                fill_delete_subscriptions_response 
+                  (p_req_msg, p_resp_msg, l_session_has_subscription, l_session_sub, l_nb_reqs);
                 StatusCode_service := e_sc_ok
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory
             END
-        ELSIF l_nb_subs <= 0
+        ELSIF l_nb_reqs <= 0
         THEN
             StatusCode_service := e_sc_bad_nothing_to_do
-        ELSIF l_first_sub_in_request = l_session_sub & l_nb_subs > k_n_genericOperationPerReq_max
-        THEN
-            StatusCode_service := e_sc_bad_too_many_ops
         ELSE
-            /* Service ok but subscription Id invalid */
-            l_bres <-- allocate_msg_delete_subscriptions_resp_results_array (p_resp_msg, l_nb_subs);
-            IF l_bres = TRUE
-            THEN
-                set_msg_delete_subscriptions_resp_first_subscription (p_resp_msg, FALSE);
-                StatusCode_service := e_sc_ok
-            ELSE
-                StatusCode_service := e_sc_bad_out_of_memory
-            END
+            StatusCode_service := e_sc_bad_too_many_ops
         END
     END
     ;
