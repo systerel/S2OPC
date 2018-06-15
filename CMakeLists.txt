@@ -22,11 +22,9 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
   # Specific flags for CERT rules
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wunicode -Wimplicit-int -Wreserved-id-macro -Wsometimes-uninitialized -Wunsequenced -Wincompatible-pointer-types-discards-qualifiers -Wunevaluated-expression -Wparentheses -Wint-conversion -Wint-to-pointer-cast -Wincompatible-pointer-types -Wvla -Wconversion")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunicode -Wimplicit-int -Wreserved-id-macro -Wsometimes-uninitialized -Wunsequenced -Wincompatible-pointer-types-discards-qualifiers -Wunevaluated-expression -Wparentheses -Wint-conversion -Wint-to-pointer-cast -Wincompatible-pointer-types -Wvla -Wconversion")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /Zi /sdl")
-  # Specific flags for CERT rules
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
 else()
   message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
@@ -113,6 +111,20 @@ if (WITH_CLANG_SOURCE_COVERAGE)
 endif()
 
 option(ENABLE_TESTING "Build the S2OPC tests" ON)
+
+option(WARNINGS_AS_ERRORS "Treat warnings as errors when building" ON)
+
+if(WARNINGS_AS_ERRORS)
+	if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+	  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+	elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+	  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+	elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+	  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
+	else()
+	  message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}")
+	endif()
+endif()
 
 # Re-enable asserts for Release and RelWithDebInfo builds
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
