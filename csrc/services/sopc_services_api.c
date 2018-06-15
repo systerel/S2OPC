@@ -219,7 +219,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
 
         /* id = secure channel connection index,
            auxParam = request handle */
-        if (id <= INT32_MAX && auxParam <= UINT32_MAX)
+        if (id <= constants__t_channel_config_idx_i_max && auxParam <= SOPC_MAX_PENDING_REQUESTS)
         {
             io_dispatch_mgr__internal_client_request_timeout(id, (uint32_t) auxParam);
         }
