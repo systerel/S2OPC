@@ -112,6 +112,8 @@ if (WITH_CLANG_SOURCE_COVERAGE)
 	SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
 endif()
 
+option(ENABLE_TESTING "Build the S2OPC tests" ON)
+
 # Re-enable asserts for Release and RelWithDebInfo builds
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
@@ -192,8 +194,10 @@ endif()
 find_package(MbedTLS REQUIRED)
 
 # We always link check statically, so that our test binaries are standalone
-set(CHECK_USE_STATIC_LIBS 1)
-find_package(Check REQUIRED)
+if(ENABLE_TESTING)
+	set(CHECK_USE_STATIC_LIBS 1)
+	find_package(Check REQUIRED)
+endif()
 
 # Define non-platform dependent source files
 file(GLOB_RECURSE INGOPCS_SRCS
@@ -336,6 +340,8 @@ endif()
 if(WIN32)
     set(FILE_EXT .exe)
 endif()
+
+if(ENABLE_TESTING)
 
 function(s2opc_unit_test binary_name)
 	set(test_name "unit::${binary_name}")
@@ -678,3 +684,5 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
 		s2opc_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
 	endif()
 endif()
+
+endif(ENABLE_TESTING)
