@@ -250,6 +250,11 @@ static SOPC_ReturnStatus Simulate_Received_Message(uint32_t scIdx, char* hexInpu
     {
         status = SOPC_STATUS_NOK;
     }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Buffer_Delete(buffer);
+    }
     return status;
 }
 
