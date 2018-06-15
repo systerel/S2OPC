@@ -517,6 +517,8 @@ OPERATIONS
         l_PublishingEnabled,
         l_NotificationQueue,
         l_nb_notifications,
+        l_max_configured_notifications,
+        l_max_nb_notifications,
         l_NotificationAvailable,
         l_MoreNotifications,
         
@@ -532,7 +534,16 @@ OPERATIONS
         l_MoreNotifications <-- get_subscription_MoreNotifications (l_subscription);
         l_NotificationQueue <-- get_subscription_notificationQueue (l_subscription);
         l_nb_notifications <-- init_iter_monitored_item_notification (l_NotificationQueue);
+        l_max_configured_notifications <-- get_subscription_MaxNotifsPerPublish (l_subscription);
         l_NotificationAvailable := bool(l_nb_notifications > 0);
+        
+        IF l_max_configured_notifications > 0 & l_max_configured_notifications < k_n_monitoredItemNotif_max
+        THEN
+            l_max_nb_notifications := l_max_configured_notifications
+        ELSE
+            l_max_nb_notifications := k_n_monitoredItemNotif_max
+        END
+        ;
         
         moreNotifs := FALSE;
         subscription := c_subscription_indet;
@@ -565,9 +576,9 @@ OPERATIONS
             reset_subscription_LifetimeCounter (l_subscription);
             
             /* retrieve notification number */
-            IF l_nb_notifications > k_n_monitoredItemNotif_max
+            IF l_nb_notifications > l_max_nb_notifications
             THEN
-                l_nb_notifications := k_n_monitoredItemNotif_max;
+                l_nb_notifications := l_max_nb_notifications;
                 moreNotifs := TRUE
             END
             ;
@@ -607,9 +618,9 @@ OPERATIONS
             reset_subscription_LifetimeCounter (l_subscription);
             
             /* retrieve notification number */
-            IF l_nb_notifications > k_n_monitoredItemNotif_max
+            IF l_nb_notifications > l_max_nb_notifications
             THEN
-                l_nb_notifications := k_n_monitoredItemNotif_max;
+                l_nb_notifications := l_max_nb_notifications;
                 moreNotifs := TRUE
             END
             ;
@@ -800,6 +811,8 @@ OPERATIONS
         l_PublishingEnabled,
         l_NotificationQueue,
         l_nb_notifications,
+        l_max_configured_notifications,
+        l_max_nb_notifications,
         l_NotificationAvailable,
         l_MessageSent,
         l_KeepAliveCounter,
@@ -823,9 +836,18 @@ OPERATIONS
         l_PublishingEnabled <-- get_subscription_PublishingEnabled (p_subscription);
         l_NotificationQueue <-- get_subscription_notificationQueue (p_subscription);
         l_nb_notifications <-- init_iter_monitored_item_notification (l_NotificationQueue);
+        l_max_configured_notifications <-- get_subscription_MaxNotifsPerPublish (p_subscription);
         l_NotificationAvailable := bool(l_nb_notifications > 0);
         l_MessageSent <-- get_subscription_MessageSent (p_subscription);
         l_KeepAliveCounter <-- get_subscription_KeepAliveCounter (p_subscription);
+        
+        IF l_max_configured_notifications > 0 & l_max_configured_notifications < k_n_monitoredItemNotif_max
+        THEN
+            l_max_nb_notifications := l_max_configured_notifications
+        ELSE
+            l_max_nb_notifications := k_n_monitoredItemNotif_max
+        END
+        ;
         
         /* #6 transition */
         IF l_State = e_subscriptionState_normal &
@@ -841,9 +863,9 @@ OPERATIONS
             p_session, l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg 
               <-- pop_valid_publish_request_queue (l_PublishingReqQueue);
             /* retrieve notification number */
-            IF l_nb_notifications > k_n_monitoredItemNotif_max
+            IF l_nb_notifications > l_max_nb_notifications
             THEN
-                l_nb_notifications := k_n_monitoredItemNotif_max;
+                l_nb_notifications := l_max_nb_notifications;
                 p_moreNotifs := TRUE
             END
             ;
@@ -941,9 +963,9 @@ OPERATIONS
               <-- pop_valid_publish_request_queue (l_PublishingReqQueue);
             
             /* retrieve notification number */
-            IF l_nb_notifications > k_n_monitoredItemNotif_max
+            IF l_nb_notifications > l_max_nb_notifications
             THEN
-                l_nb_notifications := k_n_monitoredItemNotif_max;
+                l_nb_notifications := l_max_nb_notifications;
                 p_moreNotifs := TRUE
             END
             ;
@@ -1031,6 +1053,8 @@ OPERATIONS
         l_req_exp_time,
         l_PublishingReqQueue,
         l_nb_notifications,
+        l_max_configured_notifications,
+        l_max_nb_notifications,
         l_bres,
         l_notifMsg,
         l_seq_num,
@@ -1042,15 +1066,23 @@ OPERATIONS
         l_PublishingReqQueue <-- get_subscription_publishRequestQueue (p_subscription);
         l_NotificationQueue <-- get_subscription_notificationQueue (p_subscription);
         l_nb_notifications <-- init_iter_monitored_item_notification (l_NotificationQueue);
+        l_max_configured_notifications <-- get_subscription_MaxNotifsPerPublish (p_subscription);
+        IF l_max_configured_notifications > 0 & l_max_configured_notifications < k_n_monitoredItemNotif_max
+        THEN
+            l_max_nb_notifications := l_max_configured_notifications
+        ELSE
+            l_max_nb_notifications := k_n_monitoredItemNotif_max
+        END
+        ;
           
         /* retrieve a valid publish response */
         p_session, l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
           <-- pop_valid_publish_request_queue (l_PublishingReqQueue);
-            
+
         /* retrieve notification number */
-        IF l_nb_notifications > k_n_monitoredItemNotif_max
+        IF l_nb_notifications > l_max_nb_notifications
         THEN
-            l_nb_notifications := k_n_monitoredItemNotif_max;
+            l_nb_notifications := l_max_nb_notifications;
             p_moreNotifs := TRUE
         END
         ;
