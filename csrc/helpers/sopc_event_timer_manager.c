@@ -272,18 +272,18 @@ static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventT
         if (result != timer)
         {
             usedTimerIds[timer->id] = false;
-            free(timer);
             SOPC_Logger_TraceError("EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
                                    " with event=%" PRIi32 " and associated id=%" PRIu32,
                                    timer->id, timer->eventParams.event, timer->eventParams.eltId);
+            free(timer);
         }
     }
     else
     {
-        free(timer);
         SOPC_Logger_TraceError("EventTimerManager: failed to restart the disabled periodic timer id=%" PRIu32
                                " with event=%" PRIi32 " and associated id=%" PRIu32,
                                timer->id, timer->eventParams.event, timer->eventParams.eltId);
+        free(timer);
     }
 }
 
