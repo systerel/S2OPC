@@ -21,6 +21,10 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#ifndef IPPROTO_TCP
+#include <linux/in.h>
+#include <linux/in6.h>
+#endif
 #include <netinet/tcp.h>
 #include <string.h>
 #include <unistd.h>
