@@ -1,6 +1,26 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 THEORY User_Pass IS
 Operation(refinement_of_get_response_type) & ff(0) & ar(th_eh_hyp_loc; SUB; th_simp) & dd & mp(Tac(th_eh_ident; th_typage));
 Operation(refinement_of_treat_session_service_req) & ff(0) & dd & pp(rt.1);
 Operation(client_discovery_service_request) & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
 Operation(refinement_of_local_client_discovery_service_request) & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp))
-END 
+END
+
