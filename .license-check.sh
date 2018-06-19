@@ -150,9 +150,12 @@ done
 popd > /dev/null
 
 find bsrc -maxdepth 1 -name "*.[im]??" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
-find validation -name "*.py" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_PY || { echo 'Expected header:' ; cat $HEADER_PY ; err=1 ; }
+find bsrc -maxdepth 1 -name "*.pmm" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
+find bsrc -maxdepth 1 -name "*.ref" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
+find . -name "*.py" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_PY || { echo 'Expected header:' ; cat $HEADER_PY ; err=1 ; }
 find . -name "*.sh" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_SH || { echo 'Expected header:' ; cat $HEADER_SH ; err=1 ; }
-find acceptances_tests -name "*.xsl" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_XSL || { echo 'Expected header:' ; cat $HEADER_XSL ; err=1 ; }
+find . -type f -name "make*" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_SH || { echo 'Expected header:' ; cat $HEADER_SH ; err=1 ; }
+find . -name "*.xsl" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_XSL || { echo 'Expected header:' ; cat $HEADER_XSL ; err=1 ; }
 
 if [[ 0 -eq $err ]] ; then
     echo "All copyrights are OK"
