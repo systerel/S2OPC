@@ -28,7 +28,7 @@ address space of size 10 000.
 First, we generate the XML file of the address space:
 
 ```
-./generate-nodeset 10000 address_space.xml
+./generate-nodeset.py 10000 address_space.xml
 ```
 
 ### Running the benchmark

@@ -343,7 +343,7 @@ function(s2opc_unit_test binary_name)
 
 	foreach(arg ${ARGN})
 		if("${arg}" STREQUAL "GENERATE_TAP")
-			set(test_cmd "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap" "${test_cmd}")
+			set(test_cmd "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap.py" "${test_cmd}")
 		else()
 			message(FATAL_ERROR "Unknown parameter for s2opc_unit_test: ${arg}")
 		endif()
@@ -420,8 +420,8 @@ endif()
 add_test(NAME "validation::client_server_test"
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 	COMMAND
-	"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap"
-	"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server"
+	"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap.py"
+	"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
 	"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 	"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
 	"./toolkit_test_client${FILE_EXT}")
@@ -596,7 +596,7 @@ function(s2opc_server_validation_test name)
 	add_test(NAME "${test_name}"
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/validation
 		COMMAND
-		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server"
+		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
 		"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 		"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
 		"${PYTHON_BIN}" ${name})
@@ -607,7 +607,7 @@ function(s2opc_client_validation_test name)
 	add_test(NAME "${test_name}"
 		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 		COMMAND
-		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server"
+		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
 		"--server-wd" "${CMAKE_SOURCE_DIR}/validation"
 		"--server-cmd" "${PYTHON_BIN} ${CMAKE_SOURCE_DIR}/validation/server.py 25000"
 		"./${name}")
@@ -625,8 +625,8 @@ function(s2opc_sc_level_test name server_key_size)
 	add_test(NAME "${test_name}"
 		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 		COMMAND
-		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap"
-		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server"
+		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap.py"
+		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
 		"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 		"--server-cmd" "./test_secure_channels_server ${server_key_size}"
 		"--wait-server"

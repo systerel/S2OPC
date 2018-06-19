@@ -200,7 +200,7 @@ echo "There were $n_err not oks"
 
 # check TAP file
 mv $TAP_FILE ${ROOT_DIR}/build/bin/
-${ROOT_DIR}/tests/scripts/check-tap ${ROOT_DIR}/build/bin/$TAP_FILE && echo "TAP file is well formed and free of failed tests" || exit 1
+${ROOT_DIR}/tests/scripts/check-tap.py ${ROOT_DIR}/build/bin/$TAP_FILE && echo "TAP file is well formed and free of failed tests" || exit 1
 
 
 

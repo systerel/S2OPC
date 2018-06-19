@@ -80,6 +80,6 @@ if [ "$ACTUAL_TAP_FILES" != "$EXPECTED_TAP_FILES" ]; then
 	exit 1
 fi
 
-${MY_DIR}/tests/scripts/check-tap ${TAP_DIR}/*.tap && echo "All TAP files are well formed and free of failed tests" || exit 1
+${MY_DIR}/tests/scripts/check-tap.py ${TAP_DIR}/*.tap && echo "All TAP files are well formed and free of failed tests" || exit 1
 
 exit $CTEST_RET
