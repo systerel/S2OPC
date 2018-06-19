@@ -182,7 +182,7 @@ Run OPC UA Compliance Test Tool (UACTT: tool available for OPC foundation corpor
 ## Licenses
 
 Unless specifically indicated otherwise in a file, S2OPC files are
-licensed under the GNU AFFERO GPL v3 license, as can be found in `agpl-3.0.txt`
+licensed under the Apache License Version 2.0, as can be found in `LICENSE`
 OPC UA Stack code generated with the OPC foundation code generator
 tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT
 License 1.00
