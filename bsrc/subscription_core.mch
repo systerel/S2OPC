@@ -690,7 +690,20 @@ OPERATIONS
             THEN
                 CHOICE
                     /* Enqueue publish request (request data + response): */
-                    a_publish_responses := a_publish_responses \/ {p_resp_msg |-> a_publishRequestQueue (l_subscription)} ||
+                    IF card(a_publish_responses~[{a_publishRequestQueue (l_subscription)}]) = k_n_publishRequestPerSub_max
+                    THEN
+                        /* + Discard oldest publish request if maximum publish requests reached */
+                        ANY l_old_resp_msg WHERE
+                            l_old_resp_msg : t_msg_i &
+                            (l_old_resp_msg |-> a_publishRequestQueue (l_subscription)) : a_publish_responses
+                        THEN
+                            a_publish_responses := a_publish_responses 
+                             - {l_old_resp_msg |-> a_publishRequestQueue (l_subscription)}
+                             \/ {p_resp_msg |-> a_publishRequestQueue (l_subscription)}
+                        END
+                    ELSE
+                        a_publish_responses := a_publish_responses \/ {p_resp_msg |-> a_publishRequestQueue (l_subscription)}
+                    END ||
                     StatusCode_service := e_sc_ok ||
                     async_resp_msg := TRUE ||
                     subscription := c_subscription_indet ||
@@ -746,7 +759,20 @@ OPERATIONS
             THEN
                 CHOICE
                     /* Enqueue publish request (request data + response): */
-                    a_publish_responses := a_publish_responses \/ {p_resp_msg |-> a_publishRequestQueue (l_subscription)} ||
+                    IF card(a_publish_responses~[{a_publishRequestQueue (l_subscription)}]) = k_n_publishRequestPerSub_max
+                    THEN
+                        /* + Discard oldest publish request if maximum publish requests reached */
+                        ANY l_old_resp_msg WHERE
+                            l_old_resp_msg : t_msg_i &
+                            (l_old_resp_msg |-> a_publishRequestQueue (l_subscription)) : a_publish_responses
+                        THEN
+                            a_publish_responses := a_publish_responses 
+                             - {l_old_resp_msg |-> a_publishRequestQueue (l_subscription)}
+                             \/ {p_resp_msg |-> a_publishRequestQueue (l_subscription)}
+                        END
+                    ELSE
+                        a_publish_responses := a_publish_responses \/ {p_resp_msg |-> a_publishRequestQueue (l_subscription)}
+                    END ||
                     StatusCode_service := e_sc_ok ||
                     async_resp_msg := TRUE ||
                     subscription := c_subscription_indet ||

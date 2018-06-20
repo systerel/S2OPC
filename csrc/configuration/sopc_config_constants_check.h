@@ -59,6 +59,16 @@
 #error "Minimum requested session timeout is > MAX"
 #endif
 
+/** Minimum number of publish requests per subscription shall be > 0 for B model */
+#if SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS <= 0
+#error "Minimum subscription publish requests <= 0"
+#endif
+
+/** Maximum number of publish requests per subscription shall be in NAT for B model */
+#if SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS > INT32_MAX
+#error "Maximum subscription publish requests > INT32_MAX"
+#endif
+
 /** Minimum number of publish intervals before a keep alive is sent (server to client) */
 #if SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS < 1
 #error "Minimum subscription keep alive intervals < 1"

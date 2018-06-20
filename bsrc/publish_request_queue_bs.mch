@@ -91,6 +91,43 @@ OPERATIONS
     END
     ;
     
+    nb_pub_reqs <-- get_nb_publish_requests (p_queue) =
+    PRE
+        p_queue : t_publishReqQueue_i &
+        p_queue : s_publishReqQueue
+    THEN
+        nb_pub_reqs 
+        :(nb_pub_reqs = card(a_publish_responses~[{p_queue}]) & nb_pub_reqs <= k_n_publishRequestPerSub_max)
+    END
+    ;
+    
+    old_session, old_resp_msg, old_req_handle, old_req_ctx
+      <-- discard_oldest_publish_request (p_queue) =
+    PRE
+        p_queue : t_publishReqQueue_i &
+        p_queue : s_publishReqQueue &
+        card(a_publish_responses~[{p_queue}]) = k_n_publishRequestPerSub_max
+    THEN
+        ANY l_old_resp_msg, l_req_exp_time WHERE
+            l_old_resp_msg : t_msg_i &
+            (l_old_resp_msg |-> p_queue) : a_publish_responses &
+            l_req_exp_time : t_timeref_i &
+            (l_old_resp_msg |-> l_req_exp_time) : a_publish_expiration_time
+        THEN
+            a_publish_responses := a_publish_responses - {l_old_resp_msg |-> p_queue} ||
+            a_publish_expiration_time := a_publish_expiration_time - {l_old_resp_msg |-> l_req_exp_time} ||
+            old_resp_msg := l_old_resp_msg ||
+            old_session, old_req_handle, old_req_ctx
+            :(old_session : t_session_i & 
+                old_session : t_session &
+                old_req_handle : t_server_request_handle_i &
+                old_req_ctx : t_request_context_i &
+                old_req_ctx : t_request_context
+            )
+        END
+    END
+    ;
+    
     bres <-- append_publish_request_to_queue (p_queue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg) =
     PRE
         p_queue : t_publishReqQueue_i &
@@ -105,7 +142,8 @@ OPERATIONS
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_subscription_publish_resp
+        a_msg_out_type = e_msg_subscription_publish_resp &
+        card(a_publish_responses~[{p_queue}]) < k_n_publishRequestPerSub_max
     THEN
         CHOICE
             bres := FALSE

@@ -132,6 +132,11 @@
 
 /* SUBSCRIPTION CONFIGURATION */
 
+/** @brief Maximum publish requests stored by server for a subscription */
+#ifndef SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS
+#define SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS 10
+#endif
+
 /** @brief Minimum publish interval of a subscription in milliseconds */
 #ifndef SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION
 #define SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION 100 // 100 ms

@@ -103,6 +103,29 @@ void publish_request_queue_bs__append_publish_request_to_queue(
     }
 }
 
+void publish_request_queue_bs__discard_oldest_publish_request(
+    const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue,
+    constants__t_session_i* const publish_request_queue_bs__old_session,
+    constants__t_msg_i* const publish_request_queue_bs__old_resp_msg,
+    constants__t_server_request_handle_i* const publish_request_queue_bs__old_req_handle,
+    constants__t_request_context_i* const publish_request_queue_bs__old_req_ctx)
+{
+    /* Dequeue oldest publish request */
+    SOPC_InternalPublishRequestQueueElement* elt = SOPC_SLinkedList_PopLast(publish_request_queue_bs__p_queue);
+    *publish_request_queue_bs__old_session = elt->session;
+    *publish_request_queue_bs__old_req_handle = elt->req_handle;
+    *publish_request_queue_bs__old_req_ctx = elt->req_ctx;
+    *publish_request_queue_bs__old_resp_msg = elt->resp_msg;
+    free(elt);
+}
+
+void publish_request_queue_bs__get_nb_publish_requests(
+    const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue,
+    t_entier4* const publish_request_queue_bs__nb_pub_reqs)
+{
+    *publish_request_queue_bs__nb_pub_reqs = (int32_t) SOPC_SLinkedList_GetLength(publish_request_queue_bs__p_queue);
+}
+
 void publish_request_queue_bs__continue_pop_head_iter_publish_request(
     const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue,
     t_bool* const publish_request_queue_bs__p_continue,

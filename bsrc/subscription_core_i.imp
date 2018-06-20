@@ -603,6 +603,11 @@ OPERATIONS
         l_notifRepublishQueue,
         
         l_bres,
+        l_nb_pub_reqs,
+        l_old_session,
+        l_old_req_handle,
+        l_old_req_ctx,
+        l_old_resp_msg,
         l_notifMsg,
         l_seq_num,
         l_next_seq_num
@@ -629,7 +634,18 @@ OPERATIONS
              l_MoreNotifications = FALSE)
            )
         THEN
-            l_bres <-- append_publish_request_to_queue (l_PublishingReqQueue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg);
+            l_nb_pub_reqs <-- get_nb_publish_requests (l_PublishingReqQueue);
+            IF l_nb_pub_reqs = k_n_publishRequestPerSub_max
+            THEN
+                l_old_session,
+                l_old_resp_msg,
+                l_old_req_handle,
+                l_old_req_ctx <-- discard_oldest_publish_request (l_PublishingReqQueue);
+                generate_internal_send_publish_response_event 
+                  (l_old_session, l_old_resp_msg, l_old_req_handle, l_old_req_ctx, e_sc_bad_too_many_publish_requests)
+            END;
+            l_bres <-- append_publish_request_to_queue 
+                (l_PublishingReqQueue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg);
             IF l_bres = TRUE
             THEN
                 StatusCode_service := e_sc_ok;
@@ -691,7 +707,18 @@ OPERATIONS
         /* #13 transition */
         ELSIF l_subscriptionState = e_subscriptionState_keepAlive
         THEN
-            l_bres <-- append_publish_request_to_queue (l_PublishingReqQueue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg);
+            l_nb_pub_reqs <-- get_nb_publish_requests (l_PublishingReqQueue);
+            IF l_nb_pub_reqs = k_n_publishRequestPerSub_max
+            THEN
+                l_old_session,
+                l_old_resp_msg,
+                l_old_req_handle,
+                l_old_req_ctx <-- discard_oldest_publish_request (l_PublishingReqQueue);
+                generate_internal_send_publish_response_event 
+                  (l_old_session, l_old_resp_msg, l_old_req_handle, l_old_req_ctx, e_sc_bad_too_many_publish_requests)
+            END;
+            l_bres <-- append_publish_request_to_queue 
+                (l_PublishingReqQueue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg);
             IF l_bres = TRUE
             THEN
                 StatusCode_service := e_sc_ok;

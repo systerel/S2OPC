@@ -82,8 +82,8 @@ SETS
                       e_sc_bad_too_many_monitored_items,
                       e_sc_bad_monitoring_mode_invalid, 
                       e_sc_bad_monitored_item_filter_unsupported,
+                      e_sc_bad_too_many_publish_requests,
                       e_sc_bad_index_range_invalid};
-                      
 
     t_BrowseDirection_i = {e_bd_indet,
                            e_bd_forward,
@@ -296,6 +296,7 @@ CONCRETE_CONSTANTS
     k_n_BrowseTarget_max,
     k_n_monitoredItem_max,
     k_n_monitoredItemNotif_max,
+    k_n_publishRequestPerSub_max,
     k_n_genericOperationPerReq_max,
 
     c_Variant_indet,
@@ -482,6 +483,8 @@ PROPERTIES
     k_n_BrowseTarget_max : NAT &
     k_n_monitoredItem_max : NAT &
     k_n_monitoredItemNotif_max : NAT &
+    k_n_publishRequestPerSub_max : NAT &
+    k_n_publishRequestPerSub_max > 0 &
     k_n_genericOperationPerReq_max : NAT &
 
     t_Node <: t_Node_i &
