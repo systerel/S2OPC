@@ -89,6 +89,33 @@ OPERATIONS
     END
     ;
     
+    nb_notifs <-- get_nb_republish_notifs (p_queue) =
+    PRE
+        p_queue : t_notifRepublishQueue_i &
+        p_queue : s_republishQueue
+    THEN
+        nb_notifs :(nb_notifs = card(a_republish_notification~[{p_queue}]) & nb_notifs <= k_n_republishNotifPerSub_max)
+    END
+    ;
+    
+    discard_oldest_republish_notif (p_queue) =
+    PRE
+        p_queue : t_notifRepublishQueue_i &
+        p_queue : s_republishQueue &
+        card(a_republish_notification~[{p_queue}]) = k_n_republishNotifPerSub_max
+    THEN
+        ANY l_old_notif_msg, l_seq_num WHERE
+            l_old_notif_msg : t_notif_msg_i &
+            (l_old_notif_msg |-> p_queue) : a_republish_notification &
+            l_seq_num : t_sub_seq_num_i &
+            (l_old_notif_msg |-> l_seq_num) : a_notification_seq_num
+        THEN
+            a_republish_notification := a_republish_notification - {l_old_notif_msg |-> p_queue} ||
+            a_notification_seq_num := a_notification_seq_num - {l_old_notif_msg |-> l_seq_num}
+        END
+    END
+    ;
+    
     bres <-- add_republish_notif_to_queue (p_queue, p_seq_num, p_notif_msg) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -96,7 +123,8 @@ OPERATIONS
         p_seq_num : t_sub_seq_num_i &
         p_seq_num : t_sub_seq_num &
         p_notif_msg : t_notif_msg_i &
-        p_notif_msg : t_notif_msg
+        p_notif_msg : t_notif_msg &
+        card(a_republish_notification~[{p_queue}]) < k_n_republishNotifPerSub_max
     THEN
         CHOICE
             bres := FALSE

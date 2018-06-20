@@ -272,9 +272,9 @@ DEFINITIONS
        a_SeqNum (p_subscription) /= a_SeqNum$0 (p_subscription) &
        notification_message : t_notif_msg &
        notification_message_seq_num = a_SeqNum$0 (p_subscription) & // Consume precedent sequence number
-       /* Add notification msg in republish queue and record seq num associated */
-       a_republish_notification |> {l_republishQueue} = 
-         a_republish_notification$0 |> {l_republishQueue}  \/ {notification_message |-> l_republishQueue} &
+       /* Add notification msg in republish queue and record seq num associated (with possibly discarded old element)
+          => only indicate modified and containing the new notif here */
+       (notification_message |-> l_republishQueue) : (a_republish_notification |> {l_republishQueue}) &
        a_notification_seq_num = a_notification_seq_num$0 \/ {notification_message |-> notification_message_seq_num} &
        // Update moreNotification
        ({l_notifQueue} <| a_monitored_item_notifications /= {} =>

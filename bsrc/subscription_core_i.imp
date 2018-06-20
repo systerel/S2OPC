@@ -91,6 +91,13 @@ DEFINITIONS
         /* Fill notification message */
         fill_notification_message (p_notifQueue, l_notifMsg, p_nb_notifs);
         /* Add notification message to republish queue */
+        /* + Discard oldest if maximum reached */
+        l_nb_repub_notifs <-- get_nb_republish_notifs (p_repubQueue);
+        IF l_nb_repub_notifs = k_n_republishNotifPerSub_max
+        THEN
+            discard_oldest_republish_notif (p_repubQueue)
+        END
+        ;
         l_bres <-- add_republish_notif_to_queue (p_repubQueue, l_seq_num, l_notifMsg);
         
         IF l_bres = FALSE
@@ -604,6 +611,7 @@ OPERATIONS
         
         l_bres,
         l_nb_pub_reqs,
+        l_nb_repub_notifs,
         l_old_session,
         l_old_req_handle,
         l_old_req_ctx,
@@ -863,6 +871,7 @@ OPERATIONS
         l_KeepAliveCounter,
         l_notifRepublishQueue,
         
+        l_nb_repub_notifs,
         l_notifMsg,
         l_req_exp_time,
         l_seq_num,
@@ -1032,6 +1041,7 @@ OPERATIONS
         l_nb_notifications,
         l_max_configured_notifications,
         l_max_nb_notifications,
+        l_nb_repub_notifs,
         l_bres,
         l_notifMsg,
         l_seq_num,

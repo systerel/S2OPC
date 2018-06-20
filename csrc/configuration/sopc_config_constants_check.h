@@ -64,9 +64,10 @@
 #error "Minimum subscription publish requests <= 0"
 #endif
 
-/** Maximum number of publish requests per subscription shall be in NAT for B model */
-#if SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS > INT32_MAX
-#error "Maximum subscription publish requests > INT32_MAX"
+/** Maximum number of publish requests per subscription shall be in NAT for B model
+ * Note: max republish notifs == 2 * max publish requests */
+#if SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS > INT32_MAX / 2
+#error "Maximum subscription publish requests > INT32_MAX / 2"
 #endif
 
 /** Minimum number of publish intervals before a keep alive is sent (server to client) */

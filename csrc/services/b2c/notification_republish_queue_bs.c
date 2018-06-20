@@ -168,6 +168,22 @@ void notification_republish_queue_bs__clear_republish_queue(
     SOPC_SLinkedList_Clear(notification_republish_queue_bs__p_queue);
 }
 
+void notification_republish_queue_bs__discard_oldest_republish_notif(
+    const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue)
+{
+    void* removed = SOPC_SLinkedList_PopLast(notification_republish_queue_bs__p_queue);
+    assert(NULL != removed); // Guarantee in precondition of B model
+    SOPC_InternalDeallocNotifMsg(0, removed);
+}
+
+void notification_republish_queue_bs__get_nb_republish_notifs(
+    const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue,
+    t_entier4* const notification_republish_queue_bs__nb_notifs)
+{
+    *notification_republish_queue_bs__nb_notifs =
+        (int32_t) SOPC_SLinkedList_GetLength(notification_republish_queue_bs__p_queue);
+}
+
 void notification_republish_queue_bs__get_republish_notif_from_queue(
     const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue,
     const constants__t_sub_seq_num_i notification_republish_queue_bs__p_seq_num,
