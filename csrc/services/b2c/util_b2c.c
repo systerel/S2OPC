@@ -732,6 +732,9 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_too_many_publish_requests:
         *status = OpcUa_BadTooManyPublishRequests;
         break;
+    case constants__e_sc_bad_message_not_available:
+        *status = OpcUa_BadMessageNotAvailable;
+        break;
     case constants__e_sc_bad_sequence_number_unknown:
         *status = OpcUa_BadSequenceNumberUnknown;
         break;
@@ -910,6 +913,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         break;
     case OpcUa_BadTooManyPublishRequests:
         *bstatus = constants__e_sc_bad_too_many_publish_requests;
+        break;
+    case OpcUa_BadMessageNotAvailable:
+        *bstatus = constants__e_sc_bad_message_not_available;
         break;
     case OpcUa_BadSequenceNumberUnknown:
         *bstatus = constants__e_sc_bad_sequence_number_unknown;

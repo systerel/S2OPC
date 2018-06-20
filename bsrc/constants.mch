@@ -83,6 +83,7 @@ SETS
                       e_sc_bad_monitoring_mode_invalid, 
                       e_sc_bad_monitored_item_filter_unsupported,
                       e_sc_bad_too_many_publish_requests,
+                      e_sc_bad_message_not_available,
                       e_sc_bad_index_range_invalid};
 
     t_BrowseDirection_i = {e_bd_indet,

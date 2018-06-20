@@ -155,6 +155,26 @@ OPERATIONS
     END
     ;
     
+    StatusCode_service <-- treat_subscription_republish_request (p_session, p_req_msg, p_resp_msg) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        c_msg_in_header : t_msg_header &
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_subscription_republish_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_subscription_republish_resp
+    THEN
+        StatusCode_service 
+        :(StatusCode_service : t_StatusCode_i & 
+          StatusCode_service : {e_sc_ok, e_sc_bad_subscription_id_invalid, e_sc_bad_message_not_available})
+    END
+    ;
+    
     StatusCode_service <-- treat_subscription_create_monitored_items_req (p_session, p_req_msg, p_resp_msg) =
     PRE
         p_session : t_session_i &

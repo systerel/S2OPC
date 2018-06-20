@@ -154,5 +154,29 @@ OPERATIONS
     THEN
         subscription_available_seq_nums_resp_SeqNum (p_index) := p_seq_num
     END
+    ;
+    
+    l_sub, l_seq_num <-- getall_msg_republish_request (p_req_msg) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_subscription_republish_req
+    THEN
+        l_sub, l_seq_num :(l_sub : t_subscription_i & l_seq_num : t_sub_seq_num_i)
+    END
+    ;
+    
+    setall_msg_republish_response (p_resp_msg, l_notifMsg) =
+    PRE
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_subscription_republish_resp &
+        l_notifMsg : t_notif_msg_i & 
+        l_notifMsg : t_notif_msg
+    THEN
+        skip
+    END
 
 END

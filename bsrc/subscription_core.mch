@@ -392,8 +392,10 @@ OPERATIONS
         p_subscription : t_subscription_i &
         p_subscription : s_subscription
     THEN
-        /* TODO: empty republish queue also */
-        a_publish_responses := a_publish_responses |>> {a_publishRequestQueue (p_subscription)}
+        a_publish_responses := a_publish_responses |>> {a_publishRequestQueue (p_subscription)} ||
+        a_republish_notification := a_republish_notification |>> {a_notifRepublishQueue(p_subscription)} ||
+        a_notification_seq_num := 
+          dom(a_republish_notification |> {a_notifRepublishQueue(p_subscription)}) <<| a_notification_seq_num
     END
     ;
     
@@ -606,6 +608,13 @@ OPERATIONS
         s_publishReqQueue := s_publishReqQueue - {a_publishRequestQueue(p_subscription)} ||
         a_publishRequestQueue := {p_subscription} <<| a_publishRequestQueue ||
         
+        /* Republish queue deleted */
+        a_republish_notification := a_republish_notification |>> {a_notifRepublishQueue(p_subscription)} ||
+        a_notification_seq_num := 
+          dom(a_republish_notification |> {a_notifRepublishQueue(p_subscription)}) <<| a_notification_seq_num ||
+        
+        s_republishQueue := s_republishQueue - {a_notifRepublishQueue(p_subscription)} ||
+        a_notifRepublishQueue := {p_subscription} <<| a_notifRepublishQueue ||
         
         /* Remove monitoredItems */
         LET s_removedMonitoredItemPointer BE
@@ -1188,6 +1197,29 @@ OPERATIONS
     subscription_core_UNINITIALISATION =
     BEGIN
         d_init
+    END
+    ;
+    
+    bres, p_notif_msg <-- get_republish_notif_from_queue (p_queue, p_seq_num) =
+    PRE
+        p_queue : t_notifRepublishQueue_i &
+        p_queue : s_republishQueue &
+        p_seq_num : t_sub_seq_num_i &
+        p_seq_num : t_sub_seq_num &
+        p_notif_msg : t_notif_msg_i &
+        p_notif_msg : t_notif_msg
+    THEN
+        IF p_seq_num : a_notification_seq_num[a_republish_notification~[{p_queue}]]
+        THEN
+            bres := TRUE ||
+            p_notif_msg
+            :(p_notif_msg : t_notif_msg_i & p_notif_msg : t_notif_msg &
+              p_notif_msg : a_republish_notification~[{p_queue}] &
+              a_notification_seq_num(p_notif_msg) = p_seq_num)
+        ELSE
+            p_notif_msg := c_notif_msg_indet ||
+            bres := FALSE
+        END
     END
     ;
     

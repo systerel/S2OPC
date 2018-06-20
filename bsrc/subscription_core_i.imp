@@ -58,7 +58,9 @@ PROMOTES
     /* msg_subscription_publish_bs */
     set_msg_publish_resp_subscription,
     set_msg_publish_resp_notificationMsg,
-    generate_internal_send_publish_response_event
+    generate_internal_send_publish_response_event,
+    /* notif republish queue */
+    get_republish_notif_from_queue
     
 DEFINITIONS
 
@@ -232,6 +234,14 @@ LOCAL_OPERATIONS
         s_publishReqQueue := s_publishReqQueue - {a_publishRequestQueue(p_subscription)} ||
         a_publishRequestQueue := {p_subscription} <<| a_publishRequestQueue ||
         
+        /* Republish queue deleted */
+        a_republish_notification := a_republish_notification |>> {a_notifRepublishQueue(p_subscription)} ||
+        a_notification_seq_num := 
+          dom(a_republish_notification |> {a_notifRepublishQueue(p_subscription)}) <<| a_notification_seq_num ||
+        
+        s_republishQueue := s_republishQueue - {a_notifRepublishQueue(p_subscription)} ||
+        a_notifRepublishQueue := {p_subscription} <<| a_notifRepublishQueue ||
+        
         /* Remove monitoredItems */
         LET s_removedMonitoredItemPointer BE
             s_removedMonitoredItemPointer = a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}]
@@ -380,6 +390,7 @@ OPERATIONS
     VAR
         l_timer_id,
         l_publish_queue,
+        l_republish_queue,
         l_continue_pub,
         l_session,
         l_req_exp_time,
@@ -404,6 +415,7 @@ OPERATIONS
         l_timer_id <-- get_subscription_timer_id (p_subscription);
         delete_publish_timer (l_timer_id);
         l_publish_queue <-- get_subscription_publishRequestQueue (p_subscription);
+        l_republish_queue <-- get_subscription_notifRepublishQueue (p_subscription);
         /* Clearing queue create asynchronous publish response sending indicating Bad_NoSubscription */
         l_continue_pub <-- init_iter_publish_request (l_publish_queue);
         WHILE l_continue_pub = TRUE DO
@@ -418,8 +430,10 @@ OPERATIONS
             card(a_publish_responses~[{l_publish_queue}])
         END
         ;
-        /* Deallocate queue */ 
+        /* Deallocate publish queue */
         clear_and_deallocate_publish_queue (l_publish_queue);
+        /* Deallocate republish queue */
+        clear_and_deallocate_republish_queue (l_republish_queue);
         l_monitored_item_queue <-- get_subscription_monitoredItemQueue (p_subscription);
         l_continue_mi, l_iterator <-- init_iter_monitored_item (l_monitored_item_queue);
         WHILE l_continue_mi = TRUE DO
@@ -474,10 +488,13 @@ OPERATIONS
     
     empty_session_publish_requests (p_subscription) =
     VAR
-        l_PublishRequestQueue
+        l_PublishRequestQueue,
+        l_RepublishQueue
     IN
         l_PublishRequestQueue <-- get_subscription_publishRequestQueue (p_subscription);
-        clear_publish_queue (l_PublishRequestQueue)
+        clear_publish_queue (l_PublishRequestQueue);
+        l_RepublishQueue <-- get_subscription_notifRepublishQueue (p_subscription);
+        clear_republish_queue (l_RepublishQueue)
     END
     ;
 
@@ -585,11 +602,10 @@ OPERATIONS
     
     is_valid_seq_num <-- subscription_ack_notif_msg (p_sub, p_seq_num) =
     VAR
-        l_republishQueue,
-        l_notif_msg
+        l_republishQueue
     IN
         l_republishQueue <-- get_subscription_notifRepublishQueue (p_sub);
-        is_valid_seq_num, l_notif_msg <-- remove_republish_notif_from_queue (l_republishQueue, p_seq_num)
+        is_valid_seq_num <-- remove_republish_notif_from_queue (l_republishQueue, p_seq_num)
     END
     ;
     

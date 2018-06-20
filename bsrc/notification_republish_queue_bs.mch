@@ -159,7 +159,7 @@ OPERATIONS
     END
     ;
     
-    bres, p_notif_msg <-- remove_republish_notif_from_queue (p_queue, p_seq_num) =
+    bres <-- remove_republish_notif_from_queue (p_queue, p_seq_num) =
     PRE
         p_queue : t_notifRepublishQueue_i &
         p_queue : s_republishQueue &
@@ -174,12 +174,10 @@ OPERATIONS
                 l_notif_msg : a_republish_notification~[{p_queue}] &
                 a_notification_seq_num(l_notif_msg) = p_seq_num
             THEN
-                p_notif_msg := l_notif_msg ||
                 a_republish_notification := a_republish_notification - {l_notif_msg |-> p_queue} ||
                 a_notification_seq_num := a_notification_seq_num - {l_notif_msg |-> p_seq_num}
             END
         ELSE
-            p_notif_msg := c_notif_msg_indet ||
             bres := FALSE
         END
     END

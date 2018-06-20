@@ -202,14 +202,15 @@ void notification_republish_queue_bs__get_republish_notif_from_queue(
 void notification_republish_queue_bs__remove_republish_notif_from_queue(
     const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue,
     const constants__t_sub_seq_num_i notification_republish_queue_bs__p_seq_num,
-    t_bool* const notification_republish_queue_bs__bres,
-    constants__t_notif_msg_i* const notification_republish_queue_bs__p_notif_msg)
+    t_bool* const notification_republish_queue_bs__bres)
 {
     *notification_republish_queue_bs__bres = false;
-    *notification_republish_queue_bs__p_notif_msg = SOPC_SLinkedList_RemoveFromId(
+    OpcUa_NotificationMessage* notifMsg = (OpcUa_NotificationMessage*) SOPC_SLinkedList_RemoveFromId(
         notification_republish_queue_bs__p_queue, notification_republish_queue_bs__p_seq_num);
-    if (*notification_republish_queue_bs__p_notif_msg != NULL)
+    if (notifMsg != NULL)
     {
+        OpcUa_NotificationMessage_Clear(notifMsg);
+        free(notifMsg);
         *notification_republish_queue_bs__bres = true;
     }
 }
