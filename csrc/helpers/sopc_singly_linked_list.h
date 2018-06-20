@@ -102,6 +102,16 @@ void* SOPC_SLinkedList_SortedInsert(SOPC_SLinkedList* list,
 void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list);
 
 /**
+ *  \brief          Get and remove the last element of the list
+ *  \note           This function iterate on the whole list to could remove the last element
+ *
+ *  \param list     Pointer on the linked list from which head element must be returned and removed
+ *
+ *  \return         Pointer to the last element value of the list
+ */
+void* SOPC_SLinkedList_PopLast(SOPC_SLinkedList* list);
+
+/**
  *  \brief          Find the value associated to the given id in the linked list
  *
  *  \param list     Pointer on the linked list in which element must be found
@@ -170,7 +180,7 @@ SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list);
  *
  * \return          true if iterator has a non NULL value to provide on next iteration, false otherwise
  */
-bool SOPC_SLinkedList_HasNext(SOPC_SLinkedListIterator* it);
+bool SOPC_SLinkedList_HasNext(const SOPC_SLinkedListIterator* it);
 
 /**
  * \brief           Return the next element pointed by iterator in the linked list  (LIFO behavior)

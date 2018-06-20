@@ -555,14 +555,22 @@ START_TEST(test_linked_list)
     /// Test iterator nominal case
     it = SOPC_SLinkedList_GetIterator(list);
     ck_assert(it != NULL);
+    bool hasNext = SOPC_SLinkedList_HasNext(&it);
+    ck_assert(hasNext);
     value = SOPC_SLinkedList_NextWithId(&it, &id);
     ck_assert(value == &value2);
     ck_assert(id == 2);
+    hasNext = SOPC_SLinkedList_HasNext(&it);
+    ck_assert(hasNext);
     value = SOPC_SLinkedList_Next(&it);
     ck_assert(value == &value1);
+    hasNext = SOPC_SLinkedList_HasNext(&it);
+    ck_assert(hasNext);
     value = SOPC_SLinkedList_NextWithId(&it, &id);
     ck_assert(value == &value3);
     ck_assert(id == 3);
+    hasNext = SOPC_SLinkedList_HasNext(&it);
+    ck_assert(false == hasNext);
     value = SOPC_SLinkedList_NextWithId(&it, &id);
     ck_assert(value == NULL);
 
@@ -576,12 +584,12 @@ START_TEST(test_linked_list)
     ck_assert(value == &value2);
     ck_assert(2 == SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_PopHead(list);
-    ck_assert(value == &value1);
+    value = SOPC_SLinkedList_PopLast(list);
+    ck_assert(value == &value3);
     ck_assert(1 == SOPC_SLinkedList_GetLength(list));
 
     value = SOPC_SLinkedList_PopHead(list);
-    ck_assert(value == &value3);
+    ck_assert(value == &value1);
     ck_assert(0 == SOPC_SLinkedList_GetLength(list));
 
     // Test pop degraded case

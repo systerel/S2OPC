@@ -241,6 +241,79 @@ void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list)
     return result;
 }
 
+static bool SOPC_InternalSLinkedList_IsEqualToEltToRemove(SOPC_SLinkedList_Elt* left, SOPC_SLinkedList_Elt* right)
+{
+    return left == right;
+}
+
+static bool SOPC_InternalSLinkedList_IsEltIdEqualToEltToRemove(SOPC_SLinkedList_Elt* left, SOPC_SLinkedList_Elt* right)
+{
+    return left->id == right->id;
+}
+
+static void* SOPC_SLinkedList_RemoveFromElt(SOPC_SLinkedList* list,
+                                            SOPC_SLinkedList_Elt* eltToRemove,
+                                            bool (*isElementFct)(SOPC_SLinkedList_Elt* left,
+                                                                 SOPC_SLinkedList_Elt* right))
+{
+    assert(list != NULL);
+
+    SOPC_SLinkedList_Elt* elt = NULL;
+    SOPC_SLinkedList_Elt* nextElt = NULL;
+    void* result = NULL;
+    if (list->first != NULL)
+    {
+        // Not NULL nor empty list
+        if (isElementFct(list->first, eltToRemove))
+        {
+            // First element is researched element
+            list->length = list->length - 1;
+            result = list->first->value;
+            nextElt = list->first->next;
+            free(list->first);
+            list->first = nextElt;
+            // If no element remaining, last element to be updated too
+            if (NULL == list->first)
+            {
+                list->last = NULL;
+            }
+        }
+        else
+        {
+            // Search element in rest of list
+            elt = list->first;
+            while (elt->next != NULL && false == isElementFct(elt->next, eltToRemove))
+            {
+                elt = elt->next;
+            }
+            if (elt->next != NULL)
+            {
+                list->length = list->length - 1;
+                result = elt->next->value;
+                nextElt = elt->next->next;
+                // If element is the last element, then set precedent element as precedent
+                if (elt->next == list->last)
+                {
+                    list->last = elt;
+                }
+                free(elt->next);
+                elt->next = nextElt;
+            }
+        }
+    }
+    return result;
+}
+
+void* SOPC_SLinkedList_PopLast(SOPC_SLinkedList* list)
+{
+    assert(list != NULL);
+    if (list->last == NULL)
+    {
+        return NULL;
+    }
+    return SOPC_SLinkedList_RemoveFromElt(list, list->last, SOPC_InternalSLinkedList_IsEqualToEltToRemove);
+}
+
 SOPC_SLinkedList_Elt* SOPC_SLinkedList_InternalFind(SOPC_SLinkedList* list, uint32_t id)
 {
     assert(list != NULL);
@@ -286,50 +359,9 @@ void* SOPC_SLinkedList_RemoveFromId(SOPC_SLinkedList* list, uint32_t id)
 {
     assert(list != NULL);
 
-    SOPC_SLinkedList_Elt* elt = NULL;
-    SOPC_SLinkedList_Elt* nextElt = NULL;
-    void* result = NULL;
-    if (list->first != NULL)
-    {
-        // Not NULL nor empty list
-        if (list->first->id == id)
-        {
-            // First element is researched element
-            list->length = list->length - 1;
-            result = list->first->value;
-            nextElt = list->first->next;
-            free(list->first);
-            list->first = nextElt;
-            // If no element remaining, last element to be updated too
-            if (NULL == list->first)
-            {
-                list->last = NULL;
-            }
-        }
-        else
-        {
-            // Search element in rest of list
-            elt = list->first;
-            while (elt->next != NULL && elt->next->id != id)
-            {
-                elt = elt->next;
-            }
-            if (elt->next != NULL)
-            {
-                list->length = list->length - 1;
-                result = elt->next->value;
-                nextElt = elt->next->next;
-                // If element is the last element, then set precedent element as precedent
-                if (elt->next == list->last)
-                {
-                    list->last = elt;
-                }
-                free(elt->next);
-                elt->next = nextElt;
-            }
-        }
-    }
-    return result;
+    SOPC_SLinkedList_Elt eltToRemove = {id, NULL, NULL};
+
+    return SOPC_SLinkedList_RemoveFromElt(list, &eltToRemove, SOPC_InternalSLinkedList_IsEltIdEqualToEltToRemove);
 }
 
 void SOPC_SLinkedList_Clear(SOPC_SLinkedList* list)
@@ -389,7 +421,7 @@ void* SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* pId)
     return value;
 }
 
-bool SOPC_SLinkedList_HasNext(SOPC_SLinkedListIterator* it)
+bool SOPC_SLinkedList_HasNext(const SOPC_SLinkedListIterator* it)
 {
     assert(it != NULL);
     SOPC_SLinkedList_Elt* elt = NULL;
