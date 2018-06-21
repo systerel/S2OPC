@@ -116,6 +116,11 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         {
             Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to create PKI.");
         }
+        else
+        {
+            SOPC_KeyManager_SerializedCertificate_Delete(pCrtCAu);
+            pCrtCAu = NULL;
+        }
     }
     if (SOPC_STATUS_OK == status && OpcUa_MessageSecurityMode_None != msgSecurityMode)
     {
