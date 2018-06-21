@@ -48,10 +48,10 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_SecureChannel_Config* pscConfig = NULL;
-    SOPC_Certificate* pCrtCAu = NULL;
-    SOPC_Certificate* pCrtSrv = NULL;
-    SOPC_Certificate* pCrtCli = NULL;
-    SOPC_AsymmetricKey* pKeyCli = NULL;
+    SOPC_SerializedCertificate* pCrtCAu = NULL;
+    SOPC_SerializedCertificate* pCrtSrv = NULL;
+    SOPC_SerializedCertificate* pCrtCli = NULL;
+    SOPC_SerializedAsymmetricKey* pKeyCli = NULL;
     SOPC_PKIProvider* pPki = NULL;
 
     /* Check parameters */
@@ -92,7 +92,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     /* Load the certificates & CRL before the creation of the PKI, then the config */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_Certificate_CreateFromFile(szPathCertifAuth, &pCrtCAu);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(szPathCertifAuth, &pCrtCAu);
         if (SOPC_STATUS_OK != status)
         {
             Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load the CA.");
@@ -119,7 +119,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     {
         if (NULL != szPathCertServer)
         {
-            status = SOPC_KeyManager_Certificate_CreateFromFile(szPathCertServer, &pCrtSrv);
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(szPathCertServer, &pCrtSrv);
             if (SOPC_STATUS_OK != status)
             {
                 Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load server certificate.");
@@ -128,7 +128,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 
         if (SOPC_STATUS_OK == status && NULL != szPathCertClient)
         {
-            status = SOPC_KeyManager_Certificate_CreateFromFile(szPathCertClient, &pCrtCli);
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(szPathCertClient, &pCrtCli);
             if (SOPC_STATUS_OK != status)
             {
                 Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load client certificate.");
@@ -137,7 +137,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(szPathKeyClient, &pKeyCli, NULL, 0);
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(szPathKeyClient, &pKeyCli);
             if (SOPC_STATUS_OK != status)
             {
                 Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load client private key.");
@@ -175,7 +175,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     {
         if (NULL != pCrtCAu)
         {
-            SOPC_KeyManager_Certificate_Free(pCrtCAu);
+            SOPC_KeyManager_SerializedCertificate_Delete(pCrtCAu);
         }
         if (NULL != pPki)
         {
@@ -183,15 +183,15 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         }
         if (NULL != pCrtSrv)
         {
-            SOPC_KeyManager_Certificate_Free(pCrtSrv);
+            SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
         }
         if (NULL != pCrtCli)
         {
-            SOPC_KeyManager_Certificate_Free(pCrtCli);
+            SOPC_KeyManager_SerializedCertificate_Delete(pCrtCli);
         }
         if (NULL != pKeyCli)
         {
-            SOPC_KeyManager_AsymmetricKey_Free(pKeyCli);
+            SOPC_KeyManager_SerializedAsymmetricKey_Delete(pKeyCli);
         }
         if (NULL != pscConfig)
         {
