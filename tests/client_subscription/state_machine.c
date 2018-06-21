@@ -578,6 +578,9 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     if (0 != pMonItResp->Results[i].StatusCode) /* OpcUa_Good does not exist... */
                     {
                         status = SOPC_STATUS_NOK;
+                        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                                    "Server could not create monitored item, sc = 0x%08" PRIX32 ".",
+                                    pMonItResp->Results[i].StatusCode);
                     }
                     else
                     {
