@@ -37,7 +37,7 @@
 #include <stdint.h>
 
 /* Version information */
-#define SOPC_LIBSUB_VERSION "0.0.1*"
+#define SOPC_LIBSUB_VERSION "0.0.2"
 
 /*
  =================
