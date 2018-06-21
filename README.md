@@ -182,11 +182,10 @@ Run OPC UA Compliance Test Tool (UACTT: tool available for OPC foundation corpor
 ## Licenses
 
 Unless specifically indicated otherwise in a file, S2OPC files are
-licensed under the Apache License Version 2.0, as can be found in `LICENSE`
-OPC UA Stack code generated with the OPC foundation code generator
-tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT
-License 1.00
+licensed under the Apache License Version 2.0, as can be found in `LICENSE`.
 The mbedtls library is also distributed under the Apache 2.0 license.
+OPC UA Stack code generated with the OPC foundation code generator
+tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT License 1.00.
 
 ## Commercial support
 
