@@ -233,6 +233,7 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
         for (j = 0; j < pEndp->NoOfUserIdentityTokens; ++j)
         {
             pPol = &pEndp->UserIdentityTokens[j];
+            printf("  - PolicyId %s\n", SOPC_String_GetRawCString(&pPol->PolicyId));
             switch (pPol->TokenType)
             {
             case OpcUa_UserTokenType_Anonymous:
@@ -246,6 +247,8 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
                 break;
             case OpcUa_UserTokenType_IssuedToken:
                 printf("    OpcUa_UserTokenType_IssuedToken\n");
+                printf("    IssuedTokenType %s\n", SOPC_String_GetRawCString(&pPol->IssuedTokenType));
+                printf("    IssuerEndpointUrl %s\n", SOPC_String_GetRawCString(&pPol->IssuerEndpointUrl));
                 break;
             case OpcUa_UserTokenType_Kerberos:
                 printf("    OpcUa_UserTokenType_Kerberos\n");
@@ -253,6 +256,25 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
             default:
                 printf("    Invalid/Unrecognized\n");
                 break;
+            }
+            printf("    SecurityPolicyUri ");
+            if (pPol->SecurityPolicyUri.Length <= 0)
+            {
+                printf("<empty, endpoint policy is %s>\n", SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri));
+                if (strncmp(SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri), SOPC_SecurityPolicy_None_URI,
+                            strlen(SOPC_SecurityPolicy_None_URI)) == 0)
+                {
+                    printf("      WARNING: secrets in user identity token will not be encrypted\n");
+                }
+            }
+            else
+            {
+                printf("%s", SOPC_String_GetRawCString(&pPol->SecurityPolicyUri));
+                if (strncmp(SOPC_String_GetRawCString(&pPol->SecurityPolicyUri), SOPC_SecurityPolicy_None_URI,
+                            strlen(SOPC_SecurityPolicy_None_URI)) == 0)
+                {
+                    printf("      WARNING: secrets in user identity token will not be encrypted\n");
+                }
             }
         }
     }
