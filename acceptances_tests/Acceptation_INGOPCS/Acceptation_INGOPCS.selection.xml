@@ -278,7 +278,6 @@
      <TestCase name="049.js"/>
      <TestCase name="050.js"/>
      <TestCase name="051.js"/>
-     <TestCase name="052.js"/>
      <TestCase name="053.js"/>
      <TestCase name="054.js"/>
      <TestCase name="055.js"/>
@@ -334,6 +333,20 @@
      <TestCase name="002.js"/>
      <TestCase name="003.js"/>
      <TestCase name="004.js"/>
+     <TestCase name="Err-001.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Subscription Publish Min 05">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="005.js"/>
+     <TestCase name="Err-001.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Subscription Publish Min 10">
+    <TestCases>
+     <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
      <TestCase name="Err-001.js"/>
     </TestCases>
    </ConformanceUnit>
