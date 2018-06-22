@@ -362,6 +362,19 @@ test-uactt:
            # + no UACTT tests on PubSub + excludes ALL_BUILDS + excludes ALL_TESTS
       when: on_success
 
+test-framac:
+  image: registry.gitlab.com/systerel/s2opc/framac@sha256:27f3555e25ebccc7f0e902f3797d7ac796f424cd108379026a80ff2fe050ddb2 # framac 1.1
+  stage: test
+  script:
+    - './.wp-verification.sh'
+  artifacts:
+    name: 'framac-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'wp_log/*.log'
+      - 'wp-verification.tap'
+    when: on_failure
+    expire_in: '1 month'
+
 ##
 # Windows native build and tests (done in "build-others" stage)
 ##

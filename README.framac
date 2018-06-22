@@ -1,0 +1,21 @@
+# Using FramaC for WP proof
+
+To simply start FramaC verification on this project, run from this directory the following command:
+
+./.wp-verfication.sh
+
+It will recursively find in this directory files with ACSL notations and run WP with the Alt-Ergo 
+and CVC4 provers on all selected files.
+
+Linking of header files, needed for WP, is automatic and greedy, ie: any .h file in this project
+is included, even if they are not required for the annotated files.
+
+To launch FramaC on a specific file, you can specify the path :
+
+./.wp-verification.sh path/to/file.c
+
+To launch the FramaC GUI on a specific file, you can use "-gui" and the path to the file as arguments :
+
+./.wp-verification.sh -gui path/to/file.c
+
+For information about the specific use of FramaC in this project, see tests/wp/NOTES.md.
