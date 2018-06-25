@@ -407,7 +407,7 @@ int main(int argc, char* argv[])
     }
     loopCpt = 0;
 
-    if (SOPC_STATUS_OK == closeStatus)
+    if ((SOPC_STATUS_OK == closeStatus) && (SOPC_STATUS_OK == status))
     {
         if (serviceEvent->event == SC_TO_SE_EP_CLOSED)
         {
