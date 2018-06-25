@@ -179,9 +179,13 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
     case SE_TO_SE_CREATE_SESSION:
         SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_CREATE_SESSION session=%" PRIu32 " scCfgIdx=%" PRIuPTR, id,
                                auxParam);
-        if (auxParam <= INT32_MAX)
+        if (auxParam <= constants_bs__t_channel_config_idx_i_max)
         {
             io_dispatch_mgr__internal_client_create_session(id, (constants__t_channel_config_idx_i) auxParam);
+        }
+        else
+        {
+            SOPC_Logger_TraceError("ServicesMgr: Too many existing sessions. Cannot create another one.");
         }
         break;
 
