@@ -190,5 +190,5 @@ tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT License 1.00
 ## Commercial support
 
 Commercial support is available on demand for custom development and maintenance support.
-Contact: contact@systerel.fr
+Contact: s2opc-support@systerel.fr
 
