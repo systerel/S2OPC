@@ -458,7 +458,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
     pSession = &sessionDataArray[session_core_bs__session];
     /* Retrieve the security policy and mode */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__channel_config_idx);
-    if (NULL == pSCCfg)
+    if ((NULL == pSCCfg) || (NULL == pSCCfg->crt_srv))
     {
         return;
     }
@@ -482,7 +482,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
             status = SOPC_STATUS_NOK;
         }
 
-        if (SOPC_STATUS_OK == status && pSCCfg->crt_srv != NULL)
+        if (SOPC_STATUS_OK == status)
         {
             // retrieve expected sender certificate as a ByteString
             serverCert = pSCCfg->crt_srv;
