@@ -335,6 +335,7 @@ SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf)
 
     if (!ok)
     {
+        SOPC_Buffer_Delete(buffer);
         return SOPC_STATUS_NOK;
     }
 
