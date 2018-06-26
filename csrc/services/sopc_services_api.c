@@ -477,4 +477,7 @@ void SOPC_Services_Clear()
     {
         SOPC_Logger_TraceError("Application event mgr: error status when stopping '%d'", status);
     }
+
+    closeAllConnectionsSync.allDisconnectedFlag = false;
+    closeAllConnectionsSync.requestedFlag = false;
 }
