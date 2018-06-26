@@ -107,6 +107,8 @@ static void SC_Client_ClearPendingRequest(uint32_t id, void* val)
     SOPC_SentRequestMsg_Context* msgCtx = val;
     if (NULL != msgCtx)
     {
+        SOPC_EventTimer_Cancel(msgCtx->timerId);
+
         switch (msgCtx->msgType)
         {
         case SOPC_MSG_TYPE_SC_MSG:
@@ -2539,6 +2541,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         scConnection = SC_GetConnection(eltId);
         if (scConnection != NULL && auxParam <= UINT32_MAX)
         {
+            assert(scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED);
+
             SOPC_SentRequestMsg_Context* msgCtx = NULL;
             msgCtx = SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, (uint32_t) auxParam);
             if (NULL != msgCtx)
