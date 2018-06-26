@@ -156,14 +156,6 @@ if(UNIX)
 endif()
 
 if(CMAKE_HOST_UNIX)
-  set(PYTHON_BIN python3)
-elseif(CMAKE_HOST_WIN32)
-  set(PYTHON_BIN python)
-else()
-  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
-endif()
-
-if(CMAKE_HOST_UNIX)
   add_custom_command(OUTPUT csrc/configuration/sopc_toolkit_build_info.h
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h_ ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h
                      COMMAND ./gen_build_info_file.sh ${CMAKE_SOURCE_DIR}
@@ -328,7 +320,7 @@ function(s2opc_embed_address_space var_name uanodeset_path)
     add_custom_command(
         OUTPUT ${c_file_path}
         DEPENDS ${uanodeset_path}
-		COMMAND ${PYTHON_BIN} ${CMAKE_SOURCE_DIR}/generate-ingopcs-address-space ${uanodeset_path} ${c_file_path}
+		COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/generate-ingopcs-address-space ${uanodeset_path} ${c_file_path}
         COMMENT "Generating address space ${var_name}"
         VERBATIM
     )
@@ -364,7 +356,7 @@ function(s2opc_unit_test binary_name)
 
 	foreach(arg ${ARGN})
 		if("${arg}" STREQUAL "GENERATE_TAP")
-			set(test_cmd "${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap.py" "${test_cmd}")
+			set(test_cmd "${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap.py" "${test_cmd}")
 		else()
 			message(FATAL_ERROR "Unknown parameter for s2opc_unit_test: ${arg}")
 		endif()
@@ -441,8 +433,8 @@ endif()
 add_test(NAME "validation::client_server_test"
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 	COMMAND
-	"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap.py"
-	"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
+	"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap.py"
+	"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
 	"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 	"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
 	"./toolkit_test_client${FILE_EXT}")
@@ -617,10 +609,10 @@ function(s2opc_server_validation_test name)
 	add_test(NAME "${test_name}"
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/validation
 		COMMAND
-		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
+		"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
 		"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 		"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
-		"${PYTHON_BIN}" ${name})
+		"${PYTHON_EXECUTABLE}" ${name})
 endfunction()
 
 function(s2opc_client_validation_test name)
@@ -628,9 +620,9 @@ function(s2opc_client_validation_test name)
 	add_test(NAME "${test_name}"
 		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 		COMMAND
-		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
+		"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
 		"--server-wd" "${CMAKE_SOURCE_DIR}/validation"
-		"--server-cmd" "${PYTHON_BIN} ${CMAKE_SOURCE_DIR}/validation/server.py 25000"
+		"--server-cmd" "${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/validation/server.py 25000"
 		"./${name}")
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${name}.tap")
 endfunction()
@@ -646,8 +638,8 @@ function(s2opc_sc_level_test name server_key_size)
 	add_test(NAME "${test_name}"
 		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 		COMMAND
-		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap.py"
-		"${PYTHON_BIN}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
+		"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap.py"
+		"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
 		"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 		"--server-cmd" "./test_secure_channels_server ${server_key_size}"
 		"--wait-server"
