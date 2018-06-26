@@ -411,6 +411,8 @@ void message_out_bs__write_create_session_req_msg_crypto(
     status = SOPC_ByteString_Copy(&pReq->ClientNonce, message_out_bs__p_nonce);
     if (SOPC_STATUS_OK != status)
         return;
+
+    SOPC_String_CopyFromCString(&pReq->ClientDescription.ApplicationUri, pSCCfg->applicationUri);
 }
 
 void message_out_bs__write_create_session_msg_session_token(
