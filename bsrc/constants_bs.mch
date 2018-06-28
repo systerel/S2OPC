@@ -32,6 +32,7 @@ SETS
     t_session_i;
     t_session_token_i;
     t_user_i;
+    t_user_token_i;
     t_Nonce_i;
     t_SignatureData_i;
     t_msg_header_i;
@@ -60,6 +61,7 @@ CONCRETE_CONSTANTS
 
     c_channel_indet,
     c_user_indet,
+    c_user_token_indet,
     c_session_indet,
     c_session_token_indet,
     c_Nonce_indet,
@@ -83,11 +85,12 @@ ABSTRACT_CONSTANTS
     t_byte_buffer,
 
     t_channel,
-    cast_t_channel,    
+    cast_t_channel,
     t_session,
-    cast_t_session,    
+    cast_t_session,
     t_session_token,
     t_user,
+    t_user_token,
     t_Nonce,
     t_SignatureData,
     t_msg_header,
@@ -144,6 +147,10 @@ PROPERTIES
     c_user_indet : t_user_i &
     c_user_indet /: t_user &
 
+    t_user_token <: t_user_token_i &
+    c_user_token_indet : t_user_token_i &
+    c_user_token_indet /: t_user_token &
+
     t_Nonce <: t_Nonce_i &
     c_Nonce_indet : t_Nonce_i &
     c_Nonce_indet /: t_Nonce &
@@ -167,7 +174,7 @@ PROPERTIES
     t_client_request_handle <: t_client_request_handle_i &
     c_client_request_handle_indet : t_client_request_handle_i &
     c_client_request_handle_indet /: t_client_request_handle &
-    
+
     c_no_application_context : t_application_context_i &
 
     t_channel_config_idx <: t_channel_config_idx_i &
@@ -205,7 +212,7 @@ OPERATIONS
         p_res := bool(p_config_idx : t_channel_config_idx)
     END
     ;
-        
+
     p_res <-- is_t_endpoint_config_idx(p_endpoint_config_idx) =
     PRE
         p_endpoint_config_idx : t_endpoint_config_idx_i
@@ -213,7 +220,7 @@ OPERATIONS
         p_res := bool(p_endpoint_config_idx : t_endpoint_config_idx)
     END
     ;
-    
+
     p_card_session <-- get_card_t_session =
     BEGIN
         p_card_session := card(t_session)

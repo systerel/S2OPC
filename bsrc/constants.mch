@@ -105,7 +105,8 @@ SETS
 
     t_session_i;
     t_session_token_i;
-    t_user_i;
+    t_user_i; /* Server-side user */
+    t_user_token_i; /* Client-side user */
     t_Nonce_i; /* void* */
     t_SignatureData_i; /* void* */
     t_msg_header_i;
@@ -232,7 +233,7 @@ SETS
         e_msg_discovery_service_class,
         e_msg_service_fault_class
     };
-    
+
     /* Context provided by application on request and to provide with notifications */
     t_application_context_i
 
@@ -258,6 +259,7 @@ CONCRETE_CONSTANTS
 
     c_endpoint_config_idx_indet,
     c_user_indet,
+    c_user_token_indet,
     c_session_indet,
     c_session_token_indet,
     c_Nonce_indet,
@@ -306,6 +308,7 @@ ABSTRACT_CONSTANTS
     t_session,
     t_session_token,
     t_user,
+    t_user_token,
     t_Nonce,
     t_SignatureData,
     t_buffer_in_state,
@@ -401,7 +404,7 @@ PROPERTIES
     c_WriteValue_indet /: t_WriteValue &
     cast_t_WriteValue : NAT +-> t_WriteValue_i &
     cast_t_WriteValue : perm(t_WriteValue) &
-    
+
     t_BrowseValue <: t_BrowseValue_i &
     c_BrowseValue_indet : t_BrowseValue_i &
     c_BrowseValue_indet /: t_BrowseValue &
@@ -460,6 +463,10 @@ PROPERTIES
     c_user_indet : t_user_i &
     c_user_indet /: t_user &
 
+    t_user_token <: t_user_token_i &
+    c_user_token_indet : t_user_token_i &
+    c_user_token_indet /: t_user_token &
+
     t_msg_header <: t_msg_header_i &
     c_msg_header_indet : t_msg_header_i &
     c_msg_header_indet /: t_msg_header &
@@ -475,7 +482,7 @@ PROPERTIES
     t_client_request_handle <: t_client_request_handle_i &
     c_client_request_handle_indet : t_client_request_handle_i &
     c_client_request_handle_indet /: t_client_request_handle &
-    
+
     c_no_application_context : t_application_context_i &
 
     t_channel_config_idx <: t_channel_config_idx_i &
@@ -566,13 +573,13 @@ PROPERTIES
         e_msg_discovery_register_server_req,
         e_msg_discovery_register_server2_req
     } &
-    
+
     s_discovery_service_resps = {
         e_msg_discovery_find_servers_resp,
         e_msg_discovery_find_servers_on_network_resp,
         e_msg_discovery_get_endpoints_resp,
         e_msg_discovery_register_server_resp,
-        e_msg_discovery_register_server2_resp} 
+        e_msg_discovery_register_server2_resp}
     &
 
     s_service_reqs  = s_session_treatment_reqs \/ s_service_on_session_reqs \/ s_discovery_service_reqs &
@@ -584,7 +591,7 @@ PROPERTIES
     t_msg_header_type <: t_msg_header_type_i &
     c_msg_header_type_indet : t_msg_header_type_i &
     c_msg_header_type_indet /: t_msg_header_type &
-    
+
     t_msg_service_class <: t_msg_service_class_i &
     c_msg_service_class_indet : t_msg_service_class_i &
     c_msg_service_class_indet /: t_msg_service_class &
@@ -609,7 +616,7 @@ OPERATIONS
         p_res := bool(p_config_idx : t_channel_config_idx)
     END
     ;
-        
+
     p_res <-- is_t_endpoint_config_idx(p_endpoint_config_idx) =
     PRE
         p_endpoint_config_idx : t_endpoint_config_idx_i
@@ -617,7 +624,7 @@ OPERATIONS
         p_res := bool(p_endpoint_config_idx : t_endpoint_config_idx)
     END
     ;
-    
+
     p_card_session <-- get_card_t_session =
     BEGIN
         p_card_session := card(t_session)
