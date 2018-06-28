@@ -17,11 +17,14 @@
  * under the License.
  */
 
+#include <stdlib.h>
+
 #include "sopc_toolkit_async_api.h"
 
+#include "sopc_encodeable.h"
+#include "sopc_logger.h"
 #include "sopc_services_api.h"
-
-uint32_t uniqueUserId = 1;
+#include "sopc_types.h"
 
 void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointConfigIdx)
 {
@@ -41,9 +44,89 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
     SOPC_Services_EnqueueEvent(APP_TO_SE_LOCAL_SERVICE_REQUEST, endpointConfigIdx, requestStruct, requestContext);
 }
 
-void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx, uintptr_t sessionContext)
+void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
+                                             uintptr_t sessionContext,
+                                             SOPC_ExtensionObject* userToken)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, &uniqueUserId, sessionContext);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, userToken, sessionContext);
+}
+
+bool SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnectionIdx,
+                                                       uintptr_t sessionContext,
+                                                       const char* policyId)
+{
+    SOPC_ExtensionObject* user = calloc(1, sizeof(SOPC_ExtensionObject));
+    OpcUa_AnonymousIdentityToken* token = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (NULL == user)
+    {
+        return false;
+    }
+
+    status = SOPC_Encodeable_CreateExtension(user, &OpcUa_AnonymousIdentityToken_EncodeableType, (void**) &token);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_InitializeFromCString(&token->PolicyId, policyId);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionIdx, sessionContext, user);
+    }
+    else
+    {
+        SOPC_Logger_TraceError("Failed to create anonymous UserIdentityToken.");
+        SOPC_ExtensionObject_Clear(user);
+        free(user);
+    }
+
+    return status;
+}
+
+bool SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint32_t endpointConnectionIdx,
+                                                              uintptr_t sessionContext,
+                                                              const char* policyId,
+                                                              const char* username,
+                                                              const uint8_t* password,
+                                                              int32_t length_password)
+{
+    SOPC_ExtensionObject* user = calloc(1, sizeof(SOPC_ExtensionObject));
+    OpcUa_UserNameIdentityToken* token = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (NULL == user)
+    {
+        return false;
+    }
+
+    status = SOPC_Encodeable_CreateExtension(user, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_InitializeFromCString(&token->PolicyId, policyId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_InitializeFromCString(&token->UserName, username);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ByteString_CopyFromBytes(&token->Password, password, length_password);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_String_Initialize(&token->EncryptionAlgorithm);
+        SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionIdx, sessionContext, user);
+    }
+    else
+    {
+        SOPC_Logger_TraceError("Failed to create username UserIdentityToken.");
+        SOPC_ExtensionObject_Clear(user);
+        free(user);
+    }
+
+    return status;
 }
 
 void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requestStruct, uintptr_t requestContext)

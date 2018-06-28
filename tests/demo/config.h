@@ -47,6 +47,9 @@
 #define PATH_SERVER_PUBL "./server_public/server_4k_cert.der"
 #define PATH_CACERT_PUBL "./trusted/cacert.der"
 
+/* The policyId of the chosen IdentityToken */
+#define ANONYMOUS_POLICY_ID "anonymous"
+
 /**
  * \brief   Creates a new SecureChannel configuration, which shall be freed with Config_DeleteSCConfig().
  *  When security policy is not None, the underlying certificates and PKI provider are created.

@@ -122,7 +122,8 @@ SOPC_ReturnStatus StateMachine_StartSession(StateMachine_Machine* pSM)
         return SOPC_STATUS_NOK;
     }
 
-    SOPC_ToolkitClient_AsyncActivateSession(pSM->iscConfig, (uintptr_t) pSM->pCtxSession);
+    SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, (uintptr_t) pSM->pCtxSession,
+                                                      ANONYMOUS_POLICY_ID);
     pSM->state = stActivating;
     assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
 
