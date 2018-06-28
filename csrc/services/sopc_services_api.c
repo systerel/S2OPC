@@ -167,7 +167,6 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         if (NULL != params)
         {
             io_dispatch_mgr__client_reactivate_session_new_user(id, (constants__t_user_token_i) params);
-            free(params);
         }
         else
         {
