@@ -81,6 +81,7 @@ build-win64: &build_win64
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
     DOCKER_IMAGE: 'sha256:5d20e9edbc180891c44f88edc2a16c3a7e1eb0e5015c9df67fef36ee8a7933b5'
     BUILD_SHARED_LIBS: 'true'
+    WARNINGS_AS_ERRORS: '0'
     BUILD_DIR: build_toolchain
   artifacts:
     name: 'bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
