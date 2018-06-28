@@ -130,7 +130,7 @@ OPERATIONS
     ;
 
     /* Fills the part of the response to a browse request message on one given source node.
-       Iterates on each reference 
+       Iterates on each reference
        p_bvi         : browse value index of the starting node
        p_nb_bri      : maximum number of target nodes
        p_src_node    : source node from which refences should start

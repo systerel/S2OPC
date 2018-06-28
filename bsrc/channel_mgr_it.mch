@@ -68,5 +68,5 @@ OPERATIONS
             p_continue          := bool(channels_to_iterate /= {l_channel})
         END
     END
-    
+
 END

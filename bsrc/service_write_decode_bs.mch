@@ -98,7 +98,7 @@ OPERATIONS
                 status :: t_StatusCode_i ||
                 nid,
                 aid,
-                value :(nid : t_NodeId_i  & nid = WriteValue_NodeId(wvi) &     
+                value :(nid : t_NodeId_i  & nid = WriteValue_NodeId(wvi) &
                         aid : t_AttributeId_i & aid = WriteValue_AttributeId(wvi) &
                         value : t_Variant_i & value = WriteValue_Value(wvi))
             ELSE
@@ -117,7 +117,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     /* inter B to C code use only: used to return the writeValue as address space modification notification */
     wvPointer <-- getAndClean_WriteValuePointer(wvi) =
     PRE

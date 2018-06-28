@@ -189,7 +189,7 @@ OPERATIONS
         a_client_to_create := {p_session} <<| a_client_to_create
     END
     ;
-    
+
     reset_session_to_activate(p_session) =
     PRE
         p_session : t_session_i &
@@ -288,8 +288,8 @@ OPERATIONS
         channel :(channel : t_channel_i & channel = a_channel(session))
     END
     ;
-    
-        
+
+
     p_dom, p_channel_config_idx <-- getall_to_create(p_session) =
     PRE
         p_session : t_session_i &
@@ -306,7 +306,6 @@ OPERATIONS
         END
     END
     ;
-    
 
     p_dom, p_user_token <-- getall_to_activate(p_session) =
     PRE
@@ -321,7 +320,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     p_dom, p_channel_config_idx <-- getall_orphaned(p_session) =
     PRE
         p_session : t_session_i &
@@ -338,7 +337,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     set_session_to_create(p_session, p_channel_config_idx) =
     PRE
         p_session            : t_session_i            &
@@ -349,7 +348,6 @@ OPERATIONS
         a_client_to_create(p_session) := p_channel_config_idx
     END
     ;
-    
 
     set_session_to_activate(p_session, p_user_token, p_app_context) =
     PRE
@@ -466,8 +464,8 @@ OPERATIONS
          )
     END
     ;
-    
-    valid, signature <-- client_activate_session_req_do_crypto(session, channel_config_idx, server_nonce) = 
+
+    valid, signature <-- client_activate_session_req_do_crypto(session, channel_config_idx, server_nonce) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -495,7 +493,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     clear_Signature(p_session, p_signature) =
     PRE
         p_session : t_session_i &
@@ -506,7 +504,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     nonce <-- get_NonceServer(p_session) =
     PRE
         p_session : t_session_i &
@@ -592,7 +590,7 @@ OPERATIONS
         a_NonceServer
         :(  p_valid : BOOL &
             a_NonceServer : t_session +-> t_Nonce &
-            
+
             (   p_valid = TRUE
                 =>
                 {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
@@ -605,7 +603,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     p_valid <-- server_activate_session_check_crypto(p_session, p_channel, p_channel_config_idx, p_activate_req_msg) =
     PRE
         p_session : t_session_i &
@@ -625,7 +623,7 @@ OPERATIONS
         a_NonceServer
         :(  p_valid : BOOL &
             a_NonceServer : t_session +-> t_Nonce &
-            
+
             (   p_valid = TRUE
                 =>
                 {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
@@ -638,7 +636,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     valid <-- client_activate_session_resp_check(p_session, p_channel_config_idx, p_resp_msg) =
     PRE
         p_session : t_session_i &
@@ -653,7 +651,7 @@ OPERATIONS
         valid :: BOOL
     END
     ;
-    
+
     client_close_session_req_msg (req_msg) =
     PRE
         req_msg : t_msg_i &
@@ -663,7 +661,7 @@ OPERATIONS
     THEN
         skip
     END;
-    
+
     client_close_session_resp_msg (resp_msg) =
     PRE
         resp_msg : t_msg_i &
@@ -673,9 +671,9 @@ OPERATIONS
     THEN
         skip
     END;
-    
+
     server_close_session_check_req (req_msg, resp_msg) =
-    PRE 
+    PRE
         req_msg : t_msg_i &
         req_msg = c_msg_in &
         c_msg_in : t_msg &
@@ -688,7 +686,7 @@ OPERATIONS
         /* TODO: return delete subscription boolean value for subscription service */
         skip
     END;
-    
+
     session_do_nothing (session) =
     PRE
         session : t_session_i &
@@ -697,7 +695,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     client_gen_create_session_internal_event (session, channel_config_idx) =
     PRE
         session : t_session_i &
@@ -708,7 +706,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     client_gen_activate_orphaned_session_internal_event (session, channel_config_idx) =
     PRE
         session : t_session_i &
@@ -719,7 +717,6 @@ OPERATIONS
         skip
     END
     ;
-    
 
     client_gen_activate_user_session_internal_event (session, p_user_token) =
     PRE
@@ -731,7 +728,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     server_session_timeout_start_timer (session, resp_msg) =
     PRE
         session : t_session_i &
@@ -744,7 +741,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     expired <-- server_session_timeout_evaluation (session) =
     PRE
         session : t_session_i &
@@ -753,7 +750,7 @@ OPERATIONS
         expired :: BOOL
     END
     ;
-    
+
     server_session_timeout_msg_received (session) =
     PRE
         session : t_session_i &

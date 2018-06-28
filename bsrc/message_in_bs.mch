@@ -21,29 +21,29 @@ MACHINE
     message_in_bs
 SEES
     constants
-    
+
 DEFINITIONS
     d_variables ==
     a_buffer_in_state,
     c_msg_in_header,
     c_msg_in,
     a_msg_in_type;
-    
-    d_typing == 
+
+    d_typing ==
     a_buffer_in_state : t_buffer_in_state_i &
     c_msg_in_header : t_msg_header_i &
     c_msg_in : t_msg_i &
     a_msg_in_type : t_msg_type_i
-    
+
 ABSTRACT_VARIABLES
-    d_variables 
-    
+    d_variables
+
 INVARIANT
     d_typing
-    
+
 INITIALISATION
     d_variables :( d_typing )
-    
+
 OPERATIONS
 
     msg_typ <-- decode_msg_type (msg_buffer) =
@@ -87,7 +87,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     msg <-- decode_msg (msg_type, msg_buffer) =
     PRE
         msg_type : t_msg_type_i &
@@ -113,7 +113,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     dealloc_msg_in_header (msg_header) =
     PRE
         msg_header : t_msg_header_i &
@@ -123,7 +123,7 @@ OPERATIONS
         c_msg_in_header := c_msg_header_indet
     END
     ;
-    
+
     dealloc_msg_in (msg) =
     PRE
         msg : t_msg_i &
@@ -135,7 +135,7 @@ OPERATIONS
         a_msg_in_type := c_msg_type_indet
     END
     ;
-    
+
     dealloc_msg_in_buffer (msg_buffer) =
     PRE
         msg_buffer : t_byte_buffer_i &
@@ -144,7 +144,7 @@ OPERATIONS
         a_buffer_in_state := c_buffer_in_state_indet
     END
     ;
-    
+
     /* Accept a message that was allocated by another part of the program */
     bless_msg_in (msg) =
     PRE
@@ -155,7 +155,7 @@ OPERATIONS
         a_msg_in_type :: t_msg_type
     END
     ;
-    
+
     /* Consider response message as deallocated since responsibility was forwarded to application */
     forget_resp_msg_in (msg_header, msg) =
     PRE
@@ -172,7 +172,7 @@ OPERATIONS
         c_msg_in_header := c_msg_header_indet
     END
     ;
-        
+
     bres <-- is_valid_msg_in_header (msg_header) =
     PRE
         msg_header : t_msg_header_i
@@ -180,7 +180,7 @@ OPERATIONS
         bres := bool(msg_header = c_msg_in_header & c_msg_in_header : t_msg_header)
     END
     ;
-    
+
     bres, msg_typ <-- is_valid_app_msg_in (msg) =
     PRE
         msg : t_msg_i
@@ -194,7 +194,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     bres <-- is_valid_msg_in (msg) =
     PRE
         msg : t_msg_i
@@ -202,7 +202,7 @@ OPERATIONS
         bres := bool(msg = c_msg_in & c_msg_in : t_msg)
     END
     ;
-    
+
     bres <-- is_valid_msg_in_type (msg_typ) =
     PRE
         msg_typ : t_msg_type_i
@@ -210,7 +210,7 @@ OPERATIONS
         bres := bool(msg_typ = a_msg_in_type & a_msg_in_type : t_msg_type)
     END
     ;
-    
+
     bres <-- is_valid_request_context (req_context) =
     PRE
         req_context : t_request_context_i
@@ -218,7 +218,7 @@ OPERATIONS
         bres := bool(req_context : t_request_context)
     END
     ;
-    
+
     msgtype <-- get_msg_in_type (req_msg) =
     PRE
         req_msg : t_msg_i &
@@ -228,7 +228,7 @@ OPERATIONS
         msgtype, a_msg_in_type :( msgtype : t_msg_type_i & msgtype = a_msg_in_type & a_msg_in_type : t_msg_type)
     END
     ;
-    
+
     session_token <-- read_msg_req_header_session_token (msg_header) =
     PRE
         msg_header : t_msg_header_i &
@@ -239,7 +239,7 @@ OPERATIONS
         session_token :: t_session_token_i
     END
     ;
-    
+
     handle <-- client_read_msg_header_req_handle (msg_header) =
     PRE
         msg_header : t_msg_header_i &
@@ -249,7 +249,7 @@ OPERATIONS
         handle :: t_client_request_handle_i
     END
     ;
-    
+
     handle <-- server_read_msg_header_req_handle (msg_header) =
     PRE
         msg_header : t_msg_header_i &
@@ -259,7 +259,7 @@ OPERATIONS
         handle :: t_server_request_handle_i
     END
     ;
-    
+
     session_token <-- read_create_session_msg_session_token (msg) =
     PRE
         msg : t_msg_i &
@@ -270,7 +270,7 @@ OPERATIONS
         session_token :: t_session_token_i
     END
     ;
-    
+
     valid_user_token, user <-- read_activate_req_msg_user (msg) =
     PRE
         msg : t_msg_i &
@@ -282,7 +282,7 @@ OPERATIONS
         user :: t_user_i
     END
     ;
-    
+
     status <-- read_msg_resp_header_service_status (msg_header) =
     PRE
         msg_header : t_msg_header_i &
@@ -293,8 +293,8 @@ OPERATIONS
         status :( status : t_StatusCode_i & status : t_StatusCode)
     END
     ;
-    
-    /* Operation to copy header content in response message 
+
+    /* Operation to copy header content in response message
        in order to be provided to client user application */
     copy_msg_resp_header_into_msg (msg_header, msg) =
     PRE
@@ -308,5 +308,5 @@ OPERATIONS
     THEN
         skip
     END
-    
+
 END

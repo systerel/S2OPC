@@ -22,7 +22,7 @@ IMPLEMENTATION
 
 REFINES
     channel_mgr_1
-    
+
 SEES
     constants
 
@@ -144,13 +144,13 @@ OPERATIONS
         p_card_connecting := card_cli_channel_connecting_i
     END
     ;
-    
+
     p_card_connected <-- get_card_channel_connected =
     BEGIN
         p_card_connected := card_channel_connected_i
     END
     ;
-    
+
     add_cli_channel_connecting(p_config_idx) =
     VAR
         l_res
@@ -215,7 +215,7 @@ OPERATIONS
         s_cli_channel_disconnecting_i(p_config_idx) := TRUE
     END
     ;
-    
+
     remove_channel_connected(p_channel) =
     VAR
         l_res
@@ -233,7 +233,7 @@ OPERATIONS
        s_cli_channel_disconnecting_i(p_config_idx) := FALSE
     END
     ;
-    
+
     reset_config(p_channel) =
     VAR
         l_config_idx
@@ -243,13 +243,13 @@ OPERATIONS
         a_config_i    (p_channel)    := c_channel_config_idx_indet
     END
     ;
-    
+
     reset_endpoint(p_channel) =
     BEGIN
         a_endpoint_i(p_channel) := c_endpoint_config_idx_indet
     END
     ;
-    
+
     remove_cli_channel_connecting(p_config_idx) =
     VAR
         l_res

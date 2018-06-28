@@ -75,7 +75,7 @@ LOCAL_OPERATIONS
             channels_to_iterate /\ channels_iterated = {}
          )
     END
-    
+
 OPERATIONS
 
     /* Local operations */
@@ -187,7 +187,7 @@ OPERATIONS
         l_close_secure_channel(channel)
     END
     ;
-    
+
     bres <-- close_all_channel =
     VAR
         l_continue,

@@ -33,7 +33,7 @@ INITIALISATION
     a_SecurityPolicy :: {{}}
 
 OPERATIONS
-    
+
     bres <-- is_valid_channel_config_idx (p_config_idx) =
     PRE
         p_config_idx : t_channel_config_idx_i
@@ -42,7 +42,7 @@ OPERATIONS
         bres := bool(p_config_idx : t_channel_config_idx)
     END
     ;
-    
+
     bres <-- is_valid_endpoint_config_idx (p_config_idx) =
     PRE
         p_config_idx : t_endpoint_config_idx_i
@@ -82,7 +82,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     last_connected_channel_lost =
     BEGIN
         skip
@@ -120,7 +120,7 @@ OPERATIONS
         secpol := a_SecurityPolicy(channel)
     END
     ;
-    
+
     channel_do_nothing(channel) =
     PRE
         channel : t_channel_i

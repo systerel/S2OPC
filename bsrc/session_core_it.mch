@@ -19,7 +19,7 @@
 
 MACHINE
     session_core_it
-    
+
 SEES
     constants
 
@@ -68,5 +68,5 @@ OPERATIONS
             p_continue          := bool(sessions_to_iterate /= {l_session})
         END
     END
-    
+
 END

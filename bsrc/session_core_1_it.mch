@@ -70,5 +70,5 @@ OPERATIONS
             p_continue          := bool(sessions_to_iterate /= {l_session})
         END
     END
-    
+
 END

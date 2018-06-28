@@ -19,7 +19,7 @@
 
 MACHINE
     session_mgr
-    
+
 SEES
     constants,
     message_in_bs,
@@ -28,7 +28,7 @@ SEES
     request_handle_bs
 
 OPERATIONS
-    
+
     session <-- client_receive_session_resp (channel, req_handle, resp_typ, resp_header, resp_msg) =
     PRE
         channel : t_channel_i &
@@ -48,7 +48,7 @@ OPERATIONS
         session :: t_session_i
     END
     ;
-    
+
     session, service_ret <-- server_receive_session_req (channel, session_token, req_msg, req_typ, resp_msg) =
     PRE
         channel : t_channel_i &
@@ -74,7 +74,7 @@ OPERATIONS
         session :: t_session_i
     END
     ;
-    
+
     ret, channel, session_token <-- client_validate_session_service_req (session, req_handle) =
     PRE
         session : t_session_i &
@@ -96,7 +96,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     bres, session <-- client_validate_session_service_resp (channel, req_handle) =
     PRE
         channel : t_channel_i &
@@ -115,7 +115,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     is_valid_res, session, status_code_err <-- server_validate_session_service_req (channel, session_token) =
     PRE
         channel : t_channel_i &
@@ -130,13 +130,13 @@ OPERATIONS
             status_code_err := e_sc_ok
         OR
             is_valid_res := FALSE ||
-            status_code_err :: {e_sc_bad_session_id_invalid, e_sc_bad_session_not_activated, 
+            status_code_err :: {e_sc_bad_session_id_invalid, e_sc_bad_session_not_activated,
                                 e_sc_bad_invalid_state, e_sc_bad_secure_channel_id_invalid} ||
             session := c_session_indet
         END
     END
     ;
-    
+
     is_valid_res, status_code_err <-- server_validate_session_service_resp (channel, session) =
     PRE
         channel : t_channel_i &
@@ -156,8 +156,8 @@ OPERATIONS
         END
     END
     ;
-    
-    bret <-- client_create_session_req (session, channel, req_handle, create_req_msg) = 
+
+    bret <-- client_create_session_req (session, channel, req_handle, create_req_msg) =
     PRE
         session : t_session_i &
         channel : t_channel_i &
@@ -172,7 +172,7 @@ OPERATIONS
         bret :: BOOL
     END
     ;
-    
+
     /* New session: creation and activation async */
     bres <-- client_async_activate_new_session_without_channel (channel_config_idx, p_user_token, app_context) =
     PRE
@@ -185,7 +185,7 @@ OPERATIONS
         bres :: BOOL
     END
     ;
-    
+
     /* New session: creation sync and activation async */
     bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, p_user_token, app_context) =
     PRE
@@ -204,7 +204,6 @@ OPERATIONS
         bres :: BOOL
     END
     ;
-    
 
     ret, channel, session_token <-- client_user_activate_session_req (session, req_handle, p_user_token, activate_req_msg) =
     PRE
@@ -233,7 +232,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     ret, session_token <-- client_sc_activate_session_req (session, req_handle, channel, activate_req_msg) =
     PRE
         session : t_session_i &
@@ -263,7 +262,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     client_channel_connected_event_session (channel_config_idx, channel) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
@@ -274,7 +273,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     ret, channel, session_token <-- client_close_session_req (session, req_handle, close_req_msg) =
     PRE
         session : t_session_i &
@@ -293,23 +292,23 @@ OPERATIONS
         OR
             ret :: {e_sc_bad_invalid_state,
                 e_sc_bad_invalid_argument,
-                e_sc_bad_out_of_memory, 
+                e_sc_bad_out_of_memory,
                 e_sc_bad_unexpected_error} ||
             channel := c_channel_indet ||
             session_token := c_session_token_indet
         END
     END
     ;
-    
+
     client_close_sessions_on_final_connection_failure (channel_config_idx) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx
     THEN
         skip
-    END    
+    END
     ;
-    
+
     client_close_session (session) =
     PRE
         session : t_session_i
@@ -317,7 +316,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     server_evaluate_session_timeout (session) =
     PRE
         session : t_session_i &
@@ -326,7 +325,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     /*PROMOTES*/
     ret <-- is_valid_session (session) =
     PRE
@@ -335,7 +334,7 @@ OPERATIONS
         ret :=  bool(session : t_session)
     END
     ;
-    
+
     client_secure_channel_lost_session_sm (p_lost_channel, p_channel_config_idx) =
     PRE
         p_lost_channel : t_channel_i &
@@ -345,7 +344,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     server_secure_channel_lost_session_sm (p_lost_channel) =
     PRE
         p_lost_channel : t_channel_i &
@@ -354,7 +353,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     server_close_session_sm (session) =
     PRE
         session : t_session_i
@@ -362,7 +361,6 @@ OPERATIONS
         skip
     END
     ;
-        
 
     p_user_token <-- get_session_user_or_indet (session) =
     PRE

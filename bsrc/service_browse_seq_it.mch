@@ -79,7 +79,7 @@ OPERATIONS
         END
     END
     ;
-   
+
     p_continue <-- init_iter_browse_result(p_nb_bri) =
     PRE
         p_nb_bri : NAT
@@ -87,7 +87,7 @@ OPERATIONS
         p_continue :: BOOL
     END
     ;
-   
+
     p_continue, p_bri <-- continue_iter_browse_result =
     BEGIN
        p_continue :: BOOL ||
@@ -97,7 +97,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     p_continue <-- init_iter_reference(p_node) =
     PRE
         p_node : t_Node_i &
@@ -106,7 +106,7 @@ OPERATIONS
         p_continue :: BOOL
     END
     ;
-    
+
     p_continue, p_ref <-- continue_iter_reference =
     BEGIN
        p_continue :: BOOL ||
@@ -115,5 +115,5 @@ OPERATIONS
            p_ref : t_Reference
         )
     END
-    
+
 END

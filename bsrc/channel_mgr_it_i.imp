@@ -37,7 +37,7 @@ INVARIANT
 ASSERTIONS
    (cast_t_channel[1..channel_i] /= {} <=> 1 <= channel_i);
    (channels_to_iterate /= {} <=> 1 <= channel_i)
-   
+
 INITIALISATION
     channel_i := 0
 

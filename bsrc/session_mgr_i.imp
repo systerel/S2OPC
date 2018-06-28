@@ -21,29 +21,29 @@ IMPLEMENTATION
     session_mgr_i
 REFINES
     session_mgr
-    
+
 SEES
     constants,
     message_in_bs,
     message_out_bs,
     channel_mgr,
     request_handle_bs
-    
+
 IMPORTS
     session_core,
     session_mgr_it,
     session_request_handle_bs
-    
+
 PROMOTES
     is_valid_session,
     get_session_user_or_indet,
     client_secure_channel_lost_session_sm,
     server_secure_channel_lost_session_sm,
     server_close_session_sm
-    
+
 LOCAL_OPERATIONS
-    
-    local_client_close_session (session) = 
+
+    local_client_close_session (session) =
     PRE
         session : t_session_i &
         session : s_session
@@ -69,8 +69,8 @@ LOCAL_OPERATIONS
             a_NonceClient          : s_session        +-> t_Nonce
         )
     END;
-    
-    local_client_close_session_if_needed (cond, session) = 
+
+    local_client_close_session_if_needed (cond, session) =
     PRE
         cond    : BOOL &
         session : t_session_i &
@@ -97,7 +97,7 @@ LOCAL_OPERATIONS
             a_NonceClient          : s_session        +-> t_Nonce
         )
     END;
-    
+
     local_client_activate_sessions_on_SC_connection (channel_config_idx) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
@@ -113,7 +113,7 @@ LOCAL_OPERATIONS
         )
     END
     ;
-    
+
     local_client_close_sessions_on_SC_final_connection_failure (channel_config_idx) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
@@ -146,21 +146,21 @@ LOCAL_OPERATIONS
             sessions_to_iterate /\ sessions_iterated = {}
         )
     END
-    
+
 OPERATIONS
-    
+
     local_client_close_session (session) =
     BEGIN
         client_remove_all_request_handles (session);
         client_close_session_sm (session)
     END;
 
-    local_client_close_session_if_needed (cond, session) = 
+    local_client_close_session_if_needed (cond, session) =
     IF cond = FALSE THEN
         local_client_close_session (session)
     END
     ;
-    
+
     local_client_activate_sessions_on_SC_connection (channel_config_idx) =
     VAR
         l_continue,
@@ -196,8 +196,8 @@ OPERATIONS
         END
     END
     ;
-    
-        
+
+
     local_client_close_sessions_on_SC_final_connection_failure (channel_config_idx) =
     VAR
         l_continue,
@@ -232,14 +232,14 @@ OPERATIONS
         END
     END
     ;
-    
+
     /* END OF LOCAL OPERATIONS */
-    
+
     session <-- client_receive_session_resp (channel, req_handle, resp_typ, resp_header, resp_msg) =
     VAR
         l_session_token,
         l_session_state,
-        l_session_channel,      
+        l_session_channel,
         l_resp_status,
         l_session_user_token,
         l_bret
@@ -250,7 +250,7 @@ OPERATIONS
         l_resp_status <-- read_msg_resp_header_service_status (resp_header);
         IF  l_session_state /= e_session_closed &
             l_resp_status = e_sc_ok
-        THEN         
+        THEN
             CASE resp_typ OF
                 EITHER e_msg_session_create_resp THEN
                     IF l_session_state = e_session_creating THEN
@@ -287,7 +287,7 @@ OPERATIONS
                         l_session_state = e_session_scActivating
                     THEN
                         l_session_channel <-- get_session_channel (session);
-                        IF l_session_channel = channel THEN	
+                        IF l_session_channel = channel THEN
                             l_bret <-- client_activate_session_resp_sm (channel, session, resp_msg)
                         ELSE
                             /* Bad secure channel */
@@ -328,7 +328,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     session, service_ret <-- server_receive_session_req (channel, session_token, req_msg, req_typ, resp_msg) =
     VAR
         l_valid_session,
@@ -380,7 +380,7 @@ OPERATIONS
                         THEN
                             // Invalid user or parameters in received request: choice is to close the session in this case (not specified)
                             server_close_session_sm (session)
-                        ELSE                            
+                        ELSE
                             server_session_timeout_msg_received (session)
                         END
                     ELSE
@@ -430,7 +430,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     ret, channel, session_token <-- client_validate_session_service_req (session, req_handle) =
     VAR
         l_session_state,
@@ -451,14 +451,14 @@ OPERATIONS
         END;
         ret := l_ret
     END;
-    
+
     bres, session <-- client_validate_session_service_resp (channel, req_handle) =
     VAR
         l_session,
         l_valid_session,
         l_session_state,
         l_session_channel
-    IN  
+    IN
         session := c_session_indet;
         l_session <-- client_get_session_and_remove_request_handle (req_handle);
         l_valid_session <-- is_valid_session (l_session);
@@ -530,7 +530,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     is_valid_res, status_code_err <-- server_validate_session_service_resp (channel, session) =
     VAR
         l_valid_session,
@@ -564,8 +564,8 @@ OPERATIONS
         END
     END
     ;
-    
-    bret <-- client_create_session_req (session, channel, req_handle, create_req_msg) = 
+
+    bret <-- client_create_session_req (session, channel, req_handle, create_req_msg) =
     VAR
         l_valid_session,
         l_session_state,
@@ -597,7 +597,6 @@ OPERATIONS
         END;
         bret := l_bret
     END;
-    
 
     bres <-- client_async_activate_new_session_without_channel (channel_config_idx, p_user_token, app_context) =
     VAR
@@ -605,7 +604,7 @@ OPERATIONS
         l_session_state
     IN
         l_session <-- client_init_session_sm;
-	    l_session_state <-- get_session_state_or_closed (l_session); // Note: state != closed => session is valid
+        l_session_state <-- get_session_state_or_closed (l_session); // Note: state != closed => session is valid
         IF l_session_state = e_session_init
         THEN
             bres := TRUE;
@@ -638,7 +637,6 @@ OPERATIONS
         END
     END
     ;
-    
 
     ret, channel, session_token <-- client_user_activate_session_req (session, req_handle, p_user_token, activate_req_msg) =
     VAR
@@ -666,12 +664,12 @@ OPERATIONS
         ELSE
             l_ret := e_sc_bad_invalid_argument;
             channel := c_channel_indet;
-            session_token := c_session_token_indet            
+            session_token := c_session_token_indet
         END;
         ret := l_ret
     END
     ;
-    
+
     ret, session_token <-- client_sc_activate_session_req (session , req_handle, channel, activate_req_msg) =
     VAR
         l_valid_session,
@@ -682,7 +680,7 @@ OPERATIONS
         IF l_valid_session = TRUE
         THEN
             l_session_state <-- get_session_state_or_closed (session);
-            IF l_session_state = e_session_scOrphaned or 
+            IF l_session_state = e_session_scOrphaned or
                 l_session_state = e_session_userActivated
             THEN
                 session_token <-- client_sc_activate_session_req_sm (session , channel, activate_req_msg);
@@ -699,16 +697,16 @@ OPERATIONS
         ret := l_ret
     END
     ;
-    
+
     client_channel_connected_event_session (channel_config_idx, channel) =
     BEGIN
         // PRE guarantee channel is connected
         channel_do_nothing(channel);
         // Associate sessions waiting for sc connection (orphaned or waiting for creation)
         local_client_activate_sessions_on_SC_connection (channel_config_idx)
-    END    
+    END
     ;
-    
+
     ret, channel, session_token <-- client_close_session_req (session, req_handle, close_req_msg) =
     VAR
         l_valid_session,
@@ -747,20 +745,20 @@ OPERATIONS
         ret := l_ret
     END
     ;
-    
+
     client_close_sessions_on_final_connection_failure (channel_config_idx) =
     BEGIN
         // Close all sessions waiting for this channel config to be connected since its final failure
         local_client_close_sessions_on_SC_final_connection_failure (channel_config_idx)
-    END    
+    END
     ;
-    
+
     client_close_session (session) =
     BEGIN
         local_client_close_session (session)
     END
     ;
-    
+
     server_evaluate_session_timeout (session) =
     VAR
         l_session_expired
@@ -771,5 +769,5 @@ OPERATIONS
             server_close_session_sm (session)
         END
     END
- 
+
 END

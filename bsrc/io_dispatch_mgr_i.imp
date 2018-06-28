@@ -26,7 +26,7 @@ SEES
 IMPORTS
     service_mgr,
     channel_mgr
-    
+
 PROMOTES
     internal_client_request_timeout
 
@@ -39,7 +39,7 @@ LOCAL_OPERATIONS
     THEN
         header_type
         :(  header_type : t_msg_header_type_i &
-        
+
             (   msg_typ : s_service_reqs
                 =>
                 header_type = e_msg_request_type) &
@@ -62,7 +62,7 @@ LOCAL_OPERATIONS
         service_class
         :(  service_class : t_msg_service_class_i &
             service_class : t_msg_service_class   &
-            
+
             (   msg_typ : s_discovery_service_reqs \/ s_discovery_service_resps
                 =>
                 service_class = e_msg_discovery_service_class) &
@@ -326,7 +326,7 @@ OPERATIONS
                             OR e_msg_discovery_service_class THEN
                                 client_receive_discovery_service_resp (channel, l_msg_type, buffer)
                             OR e_msg_service_fault_class THEN
-                                /* TODO: manage cas in which we do not know the service type ! */                                
+                                /* TODO: manage cas in which we do not know the service type ! */
                                 skip
                             END
                         END
@@ -342,7 +342,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     snd_msg_failure (channel, request_id, error_status) =
     VAR
         l_connected_channel,
@@ -359,15 +359,15 @@ OPERATIONS
                 l_request_handle <-- client_request_id_to_req_handle (request_id);
                 client_snd_msg_failure (channel, l_request_handle, error_status)
             END
-            /* ELSE 
+            /* ELSE
             Note: in case of server message not sent, session state could be inconsistent with sent message.
-            But it is necessary to have session id to could close it 
+            But it is necessary to have session id to could close it
             => reqId / reqHandle is not necessary unique on server side since client provided it
             */
         END
     END
     ;
-    
+
     client_channel_connected_event (channel_config_idx, channel) =
     VAR
         l_bres
@@ -496,7 +496,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     ret <-- client_send_discovery_request (channel_config_idx, req_msg, app_context) =
     VAR
         l_valid_msg,
@@ -522,7 +522,7 @@ OPERATIONS
                     /* No connected channel: will trigger to send discovery request on channel connection event */
                     l_bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg, app_context);
                     IF l_bres = TRUE
-                    THEN 
+                    THEN
                         ret := e_sc_ok
                     ELSE
                         /* Guarantee deallocation in error case */
@@ -555,7 +555,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     ret <-- server_treat_local_service_request (endpoint_config_idx, req_msg, app_context) =
     VAR
         l_valid_msg,
@@ -659,7 +659,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     internal_server_evaluate_session_timeout (session) =
     VAR
         l_valid_session
@@ -702,9 +702,9 @@ OPERATIONS
                             l_bres <-- cli_open_secure_channel (l_channel_config_idx)
                             // async operation => cannot use channel until connection is effective ?
                         END;
-                        
+
                         l_valid_new_channel <-- is_connected_channel (l_new_channel);
-                        
+
                         IF l_valid_new_channel = TRUE
                         THEN
                             client_channel_connected_event_session (l_channel_config_idx, l_new_channel)

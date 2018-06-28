@@ -79,7 +79,7 @@ OPERATIONS
         /* c_msg_in instance could be provided to app but should be not referenced anymore in c_msg_in */
     END
     ;
-    
+
     snd_msg_failure (channel, request_id, error_status) =
     PRE
         channel  : t_channel_i &
@@ -218,8 +218,8 @@ OPERATIONS
             e_sc_bad_encoding_error}
     END
     ;
-    
-    
+
+
     ret <-- client_send_discovery_request (channel_config_idx, req_msg, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
@@ -239,7 +239,7 @@ OPERATIONS
             e_sc_bad_generic}
     END
     ;
-    
+
     ret <-- server_treat_local_service_request (endpoint_config_idx, req_msg, app_context) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
@@ -291,7 +291,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     internal_server_evaluate_session_timeout (session) =
     PRE
         session : t_session_i
@@ -299,7 +299,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     internal_client_request_timeout (channel, request_handle) =
     PRE
         channel : t_channel_i &

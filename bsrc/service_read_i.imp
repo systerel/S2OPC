@@ -141,7 +141,7 @@ OPERATIONS
             rreqs_to_iterate /\ rreqs_iterated = {} &
             rreqs_to_iterate \/ rreqs_iterated = cast_t_ReadValue[1..nb_ReadValue] &
             l_continue = bool(rreqs_to_iterate /= {}) &
-            
+
             data_Value_Value =
             %rvi.(rvi : t_ReadValue &
                   rvi : rreqs_iterated &

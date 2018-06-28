@@ -85,19 +85,19 @@ INVARIANT
 
     // All sessions to be created are included in session in init state
     dom(a_client_to_create) <: dom(a_state |> {e_session_init}) &
-    
+
     // All sessions to be activated are included in session in init, creating or created state
     dom(a_client_to_activate) <: dom(a_state |> {e_session_init, e_session_creating, e_session_created}) &
-    
+
     // All sessions to be activated keep application context for notifications until session closed (since re-activation can occur)
     dom(a_client_to_activate_context) <: dom(a_state |>> {e_session_closed}) &
 
     // All sessions have a token (except when in state creating, init or closed (since it creating can be predecessor))
     dom(a_state |>> {e_session_creating, e_session_closed, e_session_init}) = ran(a_server_token) \/ dom(a_client_token) &
-    
+
     // Client orphaned sessions are included in orphaned sessions
     dom(a_client_orphaned) <: dom(a_state |> {e_session_scOrphaned}) &
-    
+
     /* Sessions not (init or creating or closed) have a Nonce when their security policy is not None*/
     /* The security policy part cannot be modeled in this invariant, but is in the operations */
     /* TODO: decide whether this invariant is useful or not, as it is weak. */
@@ -635,7 +635,7 @@ OPERATIONS
             channel :(channel : t_channel_i & channel = a_channel(session))
     END
     ;
-    
+
     reset_session_to_create(p_session) =
     PRE
         p_session : t_session_i &
@@ -644,7 +644,7 @@ OPERATIONS
         a_client_to_create := {p_session} <<| a_client_to_create
     END
     ;
-    
+
     reset_session_to_activate(p_session) =
     PRE
         p_session : t_session_i &
@@ -653,7 +653,7 @@ OPERATIONS
         a_client_to_activate := {p_session} <<| a_client_to_activate
     END
     ;
-    
+
     p_dom, p_channel_config_idx <-- getall_to_create(p_session) =
     PRE
         p_session : t_session_i &
@@ -670,7 +670,6 @@ OPERATIONS
         END
     END
     ;
-    
 
     p_dom, p_user_token <-- getall_to_activate(p_session) =
     PRE
@@ -685,7 +684,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     p_dom, p_channel_config_idx <-- getall_orphaned(p_session) =
     PRE
         p_session : t_session_i &
@@ -702,7 +701,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     set_session_to_create(p_session, p_channel_config_idx) =
     PRE
         p_session            : t_session_i            &
@@ -713,7 +712,6 @@ OPERATIONS
         a_client_to_create(p_session) := p_channel_config_idx
     END
     ;
-    
 
     set_session_to_activate(p_session, p_user_token, p_app_context) =
     PRE
@@ -727,7 +725,7 @@ OPERATIONS
         a_client_to_activate_context(p_session) := p_app_context
     END
     ;
-    
+
     ret <-- is_valid_session (session) =
     PRE
         session : t_session_i
@@ -754,7 +752,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     client_gen_activate_orphaned_session_internal_event (session, channel_config_idx) =
     PRE
         session : t_session_i &
@@ -765,7 +763,6 @@ OPERATIONS
         skip
     END
     ;
-    
 
     client_gen_activate_user_session_internal_event (session, p_user_token) =
     PRE
@@ -777,7 +774,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     server_session_timeout_start_timer (session, resp_msg) =
     PRE
         session : t_session_i &
@@ -790,7 +787,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     expired <-- server_session_timeout_evaluation (session) =
     PRE
         session : t_session_i &
@@ -799,7 +796,7 @@ OPERATIONS
         expired :: BOOL
     END
     ;
-    
+
     server_session_timeout_msg_received (session) =
     PRE
         session : t_session_i &

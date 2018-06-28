@@ -385,7 +385,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     ret, buffer_out, req_handle <-- client_discovery_service_request (channel, req_msg, app_context) =
     PRE
         channel     : t_channel_i &
@@ -411,7 +411,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     client_snd_msg_failure (channel, request_handle, error_status) =
     PRE
         channel  : t_channel_i &
@@ -422,7 +422,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     server_evaluate_session_timeout (session) =
     PRE
         session : t_session_i &
@@ -431,7 +431,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     internal_client_request_timeout (channel, request_handle) =
     PRE
         channel : t_channel_i &
@@ -455,7 +455,7 @@ OPERATIONS
         bres :: BOOL
     END
     ;
-    
+
     /* Generates an event to send the discovery request */
     client_channel_connected_event_discovery (channel_config_idx, channel) =
     PRE
@@ -477,7 +477,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     /* New session: creation and activation async */
     bres <-- client_async_activate_new_session_without_channel (channel_config_idx, p_user_token, app_context) =
     PRE
@@ -524,7 +524,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     ret <-- is_valid_session (session) =
     PRE
         session : t_session_i
@@ -532,7 +532,7 @@ OPERATIONS
         ret :=  bool(session : t_session)
     END
     ;
-    
+
     client_secure_channel_lost_session_sm (p_lost_channel, p_channel_config_idx) =
     PRE
         p_lost_channel : t_channel_i &
@@ -580,7 +580,7 @@ OPERATIONS
         bres := bool(msg_typ = a_msg_in_type & a_msg_in_type : t_msg_type)
     END
     ;
-    
+
     bres <-- is_valid_app_msg_out (msg) =
     PRE
         msg : t_msg_i
@@ -588,7 +588,7 @@ OPERATIONS
         bres := bool(msg : t_msg)
     END
     ;
-    
+
     bres, msg_typ <-- is_valid_app_msg_in (msg) =
     PRE
         msg : t_msg_i
@@ -602,7 +602,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     bres <-- is_valid_buffer_out (buffer) =
     PRE
         buffer : t_byte_buffer_i
@@ -610,7 +610,7 @@ OPERATIONS
         bres := bool(a_buffer_out_state = e_buffer_out_msg_written & buffer : t_byte_buffer)
     END
     ;
-    
+
     bless_msg_out (msg) =
     PRE
         msg : t_msg_i &
@@ -620,7 +620,7 @@ OPERATIONS
         a_msg_out_type :: t_msg_type
     END
     ;
-    
+
     dealloc_msg_out (msg) =
     PRE
         msg : t_msg_i &
@@ -640,7 +640,7 @@ OPERATIONS
         bres := bool(req_context : t_request_context)
     END
     ;
-    
+
     request_id <-- client_req_handle_to_request_id (req_handle) =
     PRE
         req_handle : t_client_request_handle_i
@@ -648,7 +648,7 @@ OPERATIONS
         request_id :: t_request_context_i
     END
     ;
-    
+
     request_handle <-- client_request_id_to_req_handle (request_id) =
     PRE
         request_id : t_request_context_i
@@ -656,14 +656,14 @@ OPERATIONS
         request_handle :: t_client_request_handle_i
     END
     ;
-    
+
     client_close_sessions_on_final_connection_failure (channel_config_idx) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx
     THEN
         skip
-    END    
+    END
     ;
 
     client_close_session (session) =

@@ -31,11 +31,11 @@ OPERATIONS
         var :: t_Variant_i
     END
     ;
-    var <-- conv_NodeClass_to_Variant(nc) = 
+    var <-- conv_NodeClass_to_Variant(nc) =
     PRE
         nc : t_NodeId_i
     THEN
         var :: t_Variant_i
-    END    
+    END
 
 END

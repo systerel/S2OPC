@@ -30,7 +30,7 @@ DEFINITIONS
     ;
 
     d_typing ==
-	a_client_discovery_req_to_send : t_channel_config_idx +-> t_msg
+    a_client_discovery_req_to_send : t_channel_config_idx +-> t_msg
 
 ABSTRACT_VARIABLES
     d_variables
@@ -42,14 +42,14 @@ INITIALISATION
     d_variables :(d_typing)
 
 OPERATIONS
-    
+
     /* Needs UNINIT to deallocate non sent messages on uninit */
     UNINITIALISATION =
     BEGIN
         skip
     END
     ;
-    
+
     /* Discovery request without connected channel: keep request to send it later */
     bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg, app_context) =
     PRE
@@ -57,12 +57,12 @@ OPERATIONS
         channel_config_idx : t_channel_config_idx &
         req_msg            : t_msg_i &
         req_msg            : t_msg &
-        app_context        : t_application_context_i        
+        app_context        : t_application_context_i
     THEN
         bres :: BOOL
     END
     ;
-    
+
     /* Generates an event to send the discovery request */
     client_channel_connected_event_discovery (channel_config_idx, channel) =
     PRE
@@ -74,7 +74,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     client_discovery_req_failures_on_final_connection_failure (channel_config_idx) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
@@ -82,5 +82,5 @@ OPERATIONS
     THEN
         skip
     END
-    
+
 END

@@ -19,15 +19,15 @@
 
 MACHINE
     service_response_cb_bs
-    
+
 SEES
     constants,
     message_in_bs,
     message_out_bs
-    
+
 OPERATIONS
-    
-    cli_service_response (session, resp_msg, app_context) = 
+
+    cli_service_response (session, resp_msg, app_context) =
     PRE
         session : t_session_i &
         resp_msg   : t_msg_i &
@@ -39,7 +39,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     cli_snd_failure (req_typ, app_context, error_status) =
     PRE
         req_typ : t_msg_type_i &
@@ -50,7 +50,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     cli_request_timeout (req_typ, app_context) =
     PRE
         req_typ : t_msg_type_i &
@@ -60,8 +60,8 @@ OPERATIONS
         skip
     END
     ;
-    
-    srv_service_response (endpoint_config_idx, resp_msg, app_context) = 
+
+    srv_service_response (endpoint_config_idx, resp_msg, app_context) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
         endpoint_config_idx : t_endpoint_config_idx &
@@ -74,7 +74,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     srv_write_notification (write_request_pointer, write_status) =
     PRE
         write_request_pointer : t_WriteValuePointer_i &

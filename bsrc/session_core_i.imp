@@ -195,7 +195,7 @@ LOCAL_OPERATIONS
         )
     END
     ;
-    
+
     l_server_secure_channel_lost_session_sm(p_dom, p_channel, p_lost_channel, p_session) =
     PRE
         p_dom          : BOOL        &
@@ -592,7 +592,7 @@ OPERATIONS
         l_channel_config_idx <-- get_channel_info (channel);
         /* TODO: check response parameters + nonce param if applicable */
         l_valid_response <-- client_activate_session_resp_check(session, l_channel_config_idx,  activate_resp_msg);
-        IF l_valid_response = TRUE 
+        IF l_valid_response = TRUE
         THEN
             set_session_state (session, e_session_userActivated, TRUE);
             bret := TRUE
@@ -622,7 +622,7 @@ OPERATIONS
         END
     END
     ;
-   
+
     client_secure_channel_lost_session_sm (p_lost_channel, p_channel_config_idx) =
     VAR
         l_continue,
@@ -682,7 +682,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     server_secure_channel_lost_session_sm (p_lost_channel) =
     VAR
         l_continue,
@@ -719,7 +719,7 @@ OPERATIONS
             VARIANT
                 card(sessions_to_iterate)
             END
-        END    
+        END
     END
     ;
 
@@ -744,7 +744,7 @@ OPERATIONS
             session_token := c_session_token_indet;
             ret := e_sc_bad_unexpected_error
         END
-        
+
     END
     ;
 
@@ -754,7 +754,7 @@ OPERATIONS
         channel_do_nothing (channel); /* Avoid unused variable */
         /* TODO: actions on pending requests or current subscriptions to manage (see request) */
         server_close_session_check_req (close_req_msg, close_resp_msg);
-        /* No need to store the handle since we will send response in same step */       
+        /* No need to store the handle since we will send response in same step */
         set_session_state_closed (session, FALSE);
         ret := e_sc_ok
     END

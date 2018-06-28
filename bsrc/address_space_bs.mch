@@ -145,7 +145,7 @@ OPERATIONS
         WHEN aid = e_aid_BrowseName THEN
             variant := conv_NodeClass_Variant(a_NodeClass(node)) ||
             sc := e_sc_ok
-        WHEN aid = e_aid_Value & 
+        WHEN aid = e_aid_Value &
              (ncl = e_ncl_Variable or ncl = e_ncl_VariableType) THEN
             variant := a_Value(node) ||
             sc := e_sc_ok

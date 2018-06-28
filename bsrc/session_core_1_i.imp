@@ -57,7 +57,7 @@ PROMOTES
     get_session_user_client,
     server_create_session_req_do_crypto,
     client_activate_session_req_do_crypto,
-    clear_Signature,    
+    clear_Signature,
     get_NonceServer,
     client_create_session_req_do_crypto,
     get_NonceClient,
@@ -94,7 +94,7 @@ LOCAL_OPERATIONS
     END
 
 OPERATIONS
-   
+
     /* Local operations */
 
     l_set_session_state(p_session, p_state, is_client) =
@@ -170,10 +170,10 @@ OPERATIONS
         /* First notify of state change to have access to data before removing all session data */
         l_prec_state <-- get_session_state(session);
         notify_set_session_state(session, l_prec_state, e_session_closed, is_client);
-        
+
         reset_session_channel(session);
         // a_channel
-        
+
         delete_session_token(session);
         // a_user_server
         // a_user_client
@@ -194,7 +194,7 @@ OPERATIONS
         remove_session(session);
         // s_session
         // a_state
-        
+
         IF is_client = FALSE
         THEN
             server_session_timeout_stop_timer(session)

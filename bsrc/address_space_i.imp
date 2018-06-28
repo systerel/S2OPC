@@ -194,7 +194,7 @@ OPERATIONS
             wreqs_to_iterate /\ wreqs_iterated = {} &
             wreqs_to_iterate \/ wreqs_iterated = cast_t_WriteValue[1..nb_WriteValue] &
             l_continue = bool(wreqs_to_iterate /= {}) &
-           
+
             a_Value : t_Node +-> t_Variant &
 
             dom(a_Value) = dom(a_Value$0 <+
@@ -208,7 +208,7 @@ OPERATIONS
                                                                     WriteValue_NodeId~ ;
                         (cast_t_WriteValue[1..nb_WriteValue] /\
                          WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_Value) &
-                 
+
             ResponseWrite_StatusCode = %wvi.(
                 wvi : t_WriteValue &
                 wvi : wreqs_iterated
@@ -219,12 +219,12 @@ OPERATIONS
                                        TRUE  |-> {FALSE |-> e_sc_bad_write_not_supported,
                                                   TRUE  |-> e_sc_ok
                                                  } (bool(WriteValue_AttributeId(wvi) = e_aid_Value &
-                                                        a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) 
+                                                        a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi)))
                                                          = e_ncl_Variable))
                                       } (bool(WriteValue_NodeId(wvi) : ran(a_NodeId)))
                            }(bool(WriteValue_AttributeId(wvi) : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value}))
                 }(bool(wvi : dom(WriteValue_NodeId) &
-                        wvi : dom(WriteValue_Value) & 
+                        wvi : dom(WriteValue_Value) &
                         wvi : dom(WriteValue_AttributeId))))
         VARIANT
             card(wreqs_to_iterate)

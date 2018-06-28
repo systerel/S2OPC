@@ -113,5 +113,5 @@ OPERATIONS
     BEGIN
         p_nb_ReadValue := nb_ReadValue
     END
-                 
+
 END

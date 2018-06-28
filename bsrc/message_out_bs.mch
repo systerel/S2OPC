@@ -47,7 +47,7 @@ INITIALISATION
     d_variables :( d_typing )
 
 OPERATIONS
-    
+
     nmsg_header <-- alloc_app_req_msg_header =
     PRE
         c_msg_out_header = c_msg_header_indet
@@ -60,7 +60,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     bres <-- is_valid_app_msg_out (msg) =
     PRE
         msg : t_msg_i
@@ -69,7 +69,7 @@ OPERATIONS
         bres := bool(msg : t_msg)
     END
     ;
-    
+
     /* Accept a message that was allocated by another part of the program */
     bless_msg_out (msg) =
     PRE
@@ -80,7 +80,7 @@ OPERATIONS
         a_msg_out_type :: t_msg_type
     END
     ;
-    
+
     /* Consider response message as deallocated since responsibility was forwarded to application */
     forget_resp_msg_out (msg_header, msg) =
     PRE
@@ -116,7 +116,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     nmsg_header, nmsg <-- alloc_resp_msg (msg_type) =
     PRE
         msg_type : t_msg_type_i &
@@ -242,7 +242,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     server_write_msg_out_header_req_handle (msg_header, req_handle) =
     PRE
         msg_header : t_msg_header_i &
@@ -281,7 +281,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     write_create_session_req_msg_endpointUrl (msg, channel_config_idx) =
     PRE
         msg : t_msg_i &
@@ -309,7 +309,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     /* ret is status code of get_endpoints-ish service for create session response */
     ret <-- write_create_session_msg_server_endpoints (req_msg, resp_msg, endpoint_config_idx) =
     PRE
@@ -326,7 +326,7 @@ OPERATIONS
         ret :(ret : t_StatusCode_i & ret : t_StatusCode)
     END
     ;
-    
+
     write_create_session_msg_session_revised_timeout (req_msg, resp_msg) =
     PRE
         req_msg : t_msg_i &
@@ -372,7 +372,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     bret <-- write_activate_session_req_msg_crypto(activate_req_msg, signature) =
     PRE
         activate_req_msg : t_msg_i &
@@ -385,8 +385,8 @@ OPERATIONS
         bret :: BOOL
     END
     ;
-    
-    
+
+
     write_activate_session_resp_msg_crypto(activate_resp_msg, nonce) =
     PRE
         activate_resp_msg : t_msg_i &
@@ -424,8 +424,8 @@ OPERATIONS
         skip
     END
     ;
-    
-    /* Operation to copy header content in response message 
+
+    /* Operation to copy header content in response message
        in order to be provided to client user application */
     copy_msg_resp_header_into_msg_out (msg_header, msg) =
     PRE
@@ -439,5 +439,5 @@ OPERATIONS
     THEN
         skip
     END
-    
+
 END

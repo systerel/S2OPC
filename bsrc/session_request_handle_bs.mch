@@ -26,15 +26,15 @@ SEES
 
 ABSTRACT_VARIABLES
     a_cli_pending_requests
-    
+
 INVARIANT
     a_cli_pending_requests : t_client_request_handle +-> t_session
-    
+
 INITIALISATION
     a_cli_pending_requests :: {}
-    
+
 OPERATIONS
-    
+
     client_add_session_request_handle (session, req_handle) =
     PRE
         session : t_session_i &
@@ -46,7 +46,7 @@ OPERATIONS
         a_cli_pending_requests := a_cli_pending_requests <+ {req_handle |-> session}
     END
     ;
-    
+
     session <-- client_get_session_and_remove_request_handle (req_handle) =
     PRE
         req_handle : t_client_request_handle_i
@@ -60,7 +60,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     client_remove_all_request_handles (session) =
     PRE
         session : t_session_i &
@@ -68,5 +68,5 @@ OPERATIONS
     THEN
         a_cli_pending_requests := a_cli_pending_requests |>> {session}
     END
-    
+
 END

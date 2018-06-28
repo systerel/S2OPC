@@ -22,4 +22,6 @@
 
 SRCS_DIR=.
 
-find $SRCS_DIR -name "*.c" -or -name "*.h" | xargs clang-format -style=file -i
+find $SRCS_DIR -name "*.[hc]" | xargs clang-format -style=file -i
+find $SRCS_DIR -name "*.[hc]" -or -name "*.mch" -or -name "*.imp" | xargs sed 's/\t/    /g' -i
+find $SRCS_DIR -name "*.[hc]" -or -name "*.mch" -or -name "*.imp" | xargs sed 's/\s\+$//g' -i

@@ -62,8 +62,8 @@ OPERATIONS
         p_tsToReturn :: t_TimestampsToReturn_i
     END
     ;
-    
-    p_maxAge_valid <-- read_req_MaxAge(p_msg) = 
+
+    p_maxAge_valid <-- read_req_MaxAge(p_msg) =
     PRE
         p_msg : t_msg_i &
         p_msg = c_msg_in &

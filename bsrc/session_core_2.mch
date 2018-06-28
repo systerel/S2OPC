@@ -33,14 +33,14 @@ ABSTRACT_VARIABLES
     a_channel,
     a_client_to_create,
     a_client_orphaned
-    
+
 INVARIANT
     s_session         <: t_session                            &
     a_state            : t_session +-> t_sessionState         &
     a_channel          : t_session +-> t_channel              &
     a_client_to_create : t_session +-> t_channel_config_idx_i &
     a_client_orphaned  : t_session +-> t_channel_config_idx_i
-    
+
 INITIALISATION
     s_session          := {} ||
     a_state            := {} ||
@@ -70,7 +70,7 @@ OPERATIONS
         a_state   := {p_session} <<| a_state
     END
     ;
-    
+
     reset_session_channel(p_session) =
     PRE
         p_session : t_session_i &
@@ -79,7 +79,7 @@ OPERATIONS
         a_channel := {p_session} <<| a_channel
     END
     ;
-    
+
     reset_session_to_create(p_session) =
     PRE
         p_session : t_session_i &
@@ -88,7 +88,7 @@ OPERATIONS
         a_client_to_create := {p_session} <<| a_client_to_create
     END
     ;
-    
+
     reset_session_orphaned(p_session) =
     PRE
         p_session : t_session_i &
@@ -97,7 +97,7 @@ OPERATIONS
         a_client_orphaned := {p_session} <<| a_client_orphaned
     END
     ;
-   
+
     ret <-- is_valid_session (session) =
     PRE
         session : t_session_i
@@ -163,7 +163,7 @@ OPERATIONS
                   channel = a_channel(session))
     END
     ;
-    
+
     p_dom, p_channel_config_idx <-- getall_to_create(p_session) =
     PRE
         p_session : t_session_i &
@@ -180,7 +180,7 @@ OPERATIONS
         END
     END
     ;
-        
+
     p_dom, p_channel_config_idx <-- getall_orphaned(p_session) =
     PRE
         p_session : t_session_i &
@@ -197,7 +197,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     set_session_to_create(p_session, p_channel_config_idx) =
     PRE
         p_session            : t_session_i            &

@@ -19,7 +19,7 @@
 
 MACHINE
     channel_mgr_1
-    
+
 SEES
     constants
 
@@ -140,13 +140,13 @@ OPERATIONS
         p_card_connecting := card(s_cli_channel_connecting)
     END
     ;
-    
+
     p_card_connected <-- get_card_channel_connected =
     BEGIN
         p_card_connected := card(s_channel_connected)
     END
     ;
-    
+
     add_cli_channel_connecting(p_config_idx) =
     PRE
         p_config_idx : t_channel_config_idx_i &
@@ -227,7 +227,7 @@ OPERATIONS
         s_cli_channel_disconnecting := s_cli_channel_disconnecting \/ {p_config_idx}
     END
     ;
-    
+
     remove_channel_connected(p_channel) =
     PRE
         p_channel : t_channel_i &
@@ -245,7 +245,7 @@ OPERATIONS
         s_cli_channel_disconnecting := s_cli_channel_disconnecting - {p_config_idx}
     END
     ;
-    
+
     reset_config(p_channel) =
     PRE
         p_channel : t_channel_i &
@@ -254,7 +254,7 @@ OPERATIONS
         a_config := {p_channel} <<| a_config
     END
     ;
-    
+
     reset_endpoint(p_channel) =
     PRE
         p_channel : t_channel_i &
@@ -263,7 +263,7 @@ OPERATIONS
         a_endpoint := {p_channel} <<| a_endpoint
     END
     ;
-    
+
     remove_cli_channel_connecting(p_config_idx) =
     PRE
         p_config_idx : t_channel_config_idx_i &

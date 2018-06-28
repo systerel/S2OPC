@@ -19,14 +19,14 @@
 
 MACHINE
     service_get_endpoints_bs
-    
+
 SEES
     constants,
     message_in_bs,
     message_out_bs
 
 OPERATIONS
-    
+
     ret <-- treat_get_endpoints_request (req_msg, resp_msg, endpoint_config_idx) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &

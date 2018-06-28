@@ -47,7 +47,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     /* Browse request cannot be used anymore */
     free_browse_request =
     BEGIN
