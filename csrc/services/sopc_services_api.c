@@ -166,7 +166,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
 
         if (NULL != params)
         {
-            io_dispatch_mgr__client_reactivate_session_new_user(id, *(constants__t_user_i*) params);
+            io_dispatch_mgr__client_reactivate_session_new_user(id, (constants__t_user_token_i) params);
             free(params);
         }
         else
@@ -315,7 +315,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // auxParam = user application session context
         if (id <= constants__t_channel_config_idx_i_max && params != NULL && *(uint32_t*) params <= INT32_MAX)
         {
-            io_dispatch_mgr__client_activate_new_session(id, (int32_t) * (uint32_t*) params, auxParam, &bres);
+            io_dispatch_mgr__client_activate_new_session(id, (constants__t_user_token_i) params, auxParam, &bres);
         }
         if (bres == false)
         {
