@@ -224,6 +224,9 @@ void session_core_bs__client_set_session_token(const constants__t_session_i sess
 void session_core_bs__delete_session_token(const constants__t_session_i session_core_bs__p_session)
 {
     SOPC_NodeId_Clear(&sessionDataArray[session_core_bs__p_session].sessionToken);
+    SOPC_ExtensionObject_Clear(sessionDataArray[session_core_bs__p_session].user_client);
+    free(sessionDataArray[session_core_bs__p_session].user_client);
+    sessionDataArray[session_core_bs__p_session].user_client = NULL;
 }
 
 void session_core_bs__delete_session_application_context(const constants__t_session_i session_core_bs__p_session)
@@ -945,16 +948,8 @@ void session_core_bs__client_gen_activate_user_session_internal_event(
     const constants__t_session_i session_core_bs__session,
     const constants__t_user_token_i session_core_bs__p_user_token)
 {
-    SOPC_ExtensionObject* user = calloc(1, sizeof(SOPC_ExtensionObject));
-    /* TODO: deal with this runtime error without assert */
-    assert(NULL != user);
-
-    if (user != NULL)
-    {
-        /* TODO: deal with this runtime error without assert */
-        assert(SOPC_STATUS_OK == SOPC_ExtensionObject_Copy(user, session_core_bs__p_user_token));
-        SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_SESSION, session_core_bs__session, (void*) user, 0);
-    }
+    SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_SESSION, session_core_bs__session,
+                               (void*) session_core_bs__p_user_token, 0);
 }
 
 void session_core_bs__client_gen_create_session_internal_event(
