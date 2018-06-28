@@ -2458,56 +2458,59 @@ void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj)
 
 SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SOPC_ExtensionObject* src)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL != dest && NULL != src)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == dest || NULL == src)
     {
-        switch (src->Encoding)
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    switch (src->Encoding)
+    {
+    case SOPC_ExtObjBodyEncoding_None:
+        break;
+    case SOPC_ExtObjBodyEncoding_ByteString:
+        status = SOPC_ByteString_Copy(&dest->Body.Bstring, &src->Body.Bstring);
+        break;
+    case SOPC_ExtObjBodyEncoding_XMLElement:
+        status = SOPC_XmlElement_Copy(&dest->Body.Xml, &src->Body.Xml);
+        break;
+    case SOPC_ExtObjBodyEncoding_Object:
+        if (NULL != src->Body.Object.ObjType && NULL != src->Body.Object.Value)
         {
-        case SOPC_ExtObjBodyEncoding_None:
-            break;
-        case SOPC_ExtObjBodyEncoding_ByteString:
-            status = SOPC_ByteString_Copy(&dest->Body.Bstring, &src->Body.Bstring);
-            break;
-        case SOPC_ExtObjBodyEncoding_XMLElement:
-            status = SOPC_XmlElement_Copy(&dest->Body.Xml, &src->Body.Xml);
-            break;
-        case SOPC_ExtObjBodyEncoding_Object:
-            if (NULL != src->Body.Object.ObjType && NULL != src->Body.Object.Value)
+            dest->Body.Object.Value = malloc(src->Body.Object.ObjType->AllocationSize);
+            if (NULL == dest->Body.Object.Value)
             {
-                dest->Body.Object.Value = malloc(src->Body.Object.ObjType->AllocationSize);
-                if (NULL == dest->Body.Object.Value)
+                status = SOPC_STATUS_NOK;
+            }
+            else
+            {
+                // TODO: full copy ? need to provide a copy function in encodeable type ?
+                if (dest->Body.Object.Value ==
+                    memcpy(dest->Body.Object.Value, src->Body.Object.Value, src->Body.Object.ObjType->AllocationSize))
                 {
-                    status = SOPC_STATUS_NOK;
+                    dest->Body.Object.ObjType = src->Body.Object.ObjType;
                 }
                 else
                 {
-                    // TODO: full copy ? need to provide a copy function in encodeable type ?
-                    if (dest->Body.Object.Value == memcpy(dest->Body.Object.Value, src->Body.Object.Value,
-                                                          src->Body.Object.ObjType->AllocationSize))
-                    {
-                        dest->Body.Object.ObjType = src->Body.Object.ObjType;
-                    }
-                    else
-                    {
-                        status = SOPC_STATUS_NOK;
-                    }
+                    status = SOPC_STATUS_NOK;
                 }
             }
         }
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_ExpandedNodeId_Copy(&dest->TypeId, &src->TypeId);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            dest->Encoding = src->Encoding;
-            dest->Length = src->Length;
-        }
-        else
-        {
-            SOPC_ExtensionObject_Clear(dest);
-        }
     }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ExpandedNodeId_Copy(&dest->TypeId, &src->TypeId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        dest->Encoding = src->Encoding;
+        dest->Length = src->Length;
+    }
+    else
+    {
+        SOPC_ExtensionObject_Clear(dest);
+    }
+
     return status;
 }
 
@@ -2520,40 +2523,43 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Compare(const SOPC_ExtensionObject* left,
                                                const SOPC_ExtensionObject* right,
                                                int32_t* comparison)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL != left && NULL != right && NULL != comparison)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == left || NULL == right || NULL == comparison)
     {
-        if (left->Encoding < right->Encoding)
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (left->Encoding < right->Encoding)
+    {
+        *comparison = -1;
+    }
+    else if (right->Encoding < left->Encoding)
+    {
+        *comparison = 1;
+    }
+    else
+    {
+        status = SOPC_ExpandedNodeId_Compare(&left->TypeId, &right->TypeId, comparison);
+        if (SOPC_STATUS_OK == status && *comparison == 0)
         {
-            *comparison = -1;
-        }
-        else if (right->Encoding < left->Encoding)
-        {
-            *comparison = 1;
-        }
-        else
-        {
-            status = SOPC_ExpandedNodeId_Compare(&left->TypeId, &right->TypeId, comparison);
-            if (SOPC_STATUS_OK == status && *comparison == 0)
+            switch (right->Encoding)
             {
-                switch (right->Encoding)
-                {
-                case SOPC_ExtObjBodyEncoding_None:
-                    *comparison = 0;
-                    break;
-                case SOPC_ExtObjBodyEncoding_ByteString:
-                    status = SOPC_ByteString_Compare(&left->Body.Bstring, &right->Body.Bstring, comparison);
-                    break;
-                case SOPC_ExtObjBodyEncoding_XMLElement:
-                    status = SOPC_XmlElement_Compare(&left->Body.Xml, &right->Body.Xml, comparison);
-                    break;
-                case SOPC_ExtObjBodyEncoding_Object:
-                    // TODO: compare encoded values or add a compare function in encodeable types
-                    status = SOPC_STATUS_NOT_SUPPORTED;
-                }
+            case SOPC_ExtObjBodyEncoding_None:
+                *comparison = 0;
+                break;
+            case SOPC_ExtObjBodyEncoding_ByteString:
+                status = SOPC_ByteString_Compare(&left->Body.Bstring, &right->Body.Bstring, comparison);
+                break;
+            case SOPC_ExtObjBodyEncoding_XMLElement:
+                status = SOPC_XmlElement_Compare(&left->Body.Xml, &right->Body.Xml, comparison);
+                break;
+            case SOPC_ExtObjBodyEncoding_Object:
+                // TODO: compare encoded values or add a compare function in encodeable types
+                status = SOPC_STATUS_NOT_SUPPORTED;
             }
         }
     }
+
     return status;
 }
 
