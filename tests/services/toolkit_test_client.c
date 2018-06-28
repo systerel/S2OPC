@@ -271,6 +271,8 @@ int main(void)
     printf("toolkitDockerId: %s\n", build_info.toolkitDockerId);
     printf("toolkitBuildDate: %s\n", build_info.toolkitBuildDate);
 
+    scConfig.applicationUri = "urn:INGOPCS:localhost";
+
     // If security mode is set, load certificates and key
 
     if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None)
