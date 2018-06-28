@@ -51,8 +51,10 @@ PROMOTES
     getall_orphaned,
     set_session_to_create,
     is_valid_user, /* TODO FBA devrait être déplacée dans constants.mch VMO: pour l'instant laisser là pour le C */
-    set_session_user,
-    get_session_user,
+    set_session_user_server,
+    set_session_user_client,
+    get_session_user_server,
+    get_session_user_client,
     server_create_session_req_do_crypto,
     client_activate_session_req_do_crypto,
     clear_Signature,    
@@ -173,7 +175,8 @@ OPERATIONS
         // a_channel
         
         delete_session_token(session);
-        // a_user
+        // a_user_server
+        // a_user_client
         // a_server_token
         // a_client_token
         reset_session_to_create(session);

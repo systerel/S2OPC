@@ -53,7 +53,8 @@ LOCAL_OPERATIONS
         a_channel,
         a_client_orphaned,
         a_client_token,
-        a_user,
+        a_user_server,
+        a_user_client,
         a_NonceServer,
         a_NonceClient
         :(  a_cli_pending_requests : t_client_request_handle +-> t_session       &
@@ -62,7 +63,8 @@ LOCAL_OPERATIONS
             a_client_orphaned      : s_session        +-> t_channel_config_idx_i &
             a_client_token         : s_session        +-> t_session_token        &
             a_server_token         : t_session_token  >+> s_session              &
-            a_user                 : s_session        +-> t_user                 &
+            a_user_server          : s_session        +-> t_user                 &
+            a_user_client          : s_session        +-> t_user_token           &
             a_NonceServer          : s_session        +-> t_Nonce                &
             a_NonceClient          : s_session        +-> t_Nonce
         )
@@ -79,7 +81,8 @@ LOCAL_OPERATIONS
         a_channel,
         a_client_orphaned,
         a_client_token,
-        a_user,
+        a_user_server,
+        a_user_client,
         a_NonceServer,
         a_NonceClient
         :(  a_cli_pending_requests : t_client_request_handle +-> t_session       &
@@ -88,7 +91,8 @@ LOCAL_OPERATIONS
             a_client_orphaned      : s_session        +-> t_channel_config_idx_i &
             a_client_token         : s_session        +-> t_session_token        &
             a_server_token         : t_session_token  >+> s_session              &
-            a_user                 : s_session        +-> t_user                 &
+            a_user_server          : s_session        +-> t_user                 &
+            a_user_client          : s_session        +-> t_user_token           &
             a_NonceServer          : s_session        +-> t_Nonce                &
             a_NonceClient          : s_session        +-> t_Nonce
         )
@@ -120,7 +124,8 @@ LOCAL_OPERATIONS
         a_channel,
         a_client_orphaned,
         a_client_token,
-        a_user,
+        a_user_server,
+        a_user_client,
         a_NonceServer,
         a_NonceClient,
         sessions_to_iterate,
@@ -132,7 +137,8 @@ LOCAL_OPERATIONS
             a_client_orphaned      : s_session        +-> t_channel_config_idx_i &
             a_client_token         : s_session        +-> t_session_token        &
             a_server_token         : t_session_token  >+> s_session              &
-            a_user                 : s_session        +-> t_user                 &
+            a_user_server          : s_session        +-> t_user                 &
+            a_user_client          : s_session        +-> t_user_token           &
             a_NonceServer          : s_session        +-> t_Nonce                &
             a_NonceClient          : s_session        +-> t_Nonce                &
             sessions_to_iterate   <: t_session                                   &

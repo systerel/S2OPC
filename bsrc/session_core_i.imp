@@ -82,7 +82,7 @@ LOCAL_OPERATIONS
         CHOICE
             a_state(session) := e_session_userActivated ||
             a_channel(session) := channel ||
-            a_user(session) := user ||
+            a_user_server(session) := p_user ||
             res_activated := TRUE ||
             a_NonceServer
             :(
@@ -118,7 +118,8 @@ LOCAL_OPERATIONS
         a_client_to_activate,
         a_client_to_activate_context,
         a_client_orphaned,
-        a_user,
+        a_user_server,
+        a_user_client,
         a_server_token,
         a_client_token,
         a_NonceServer,
@@ -128,12 +129,13 @@ LOCAL_OPERATIONS
             a_state                      : t_session +-> t_sessionState          &
             a_channel                    : t_session +-> t_channel               &
             a_client_to_create           : t_session +-> t_channel_config_idx_i  &
-            a_client_to_activate         : t_session +-> t_user                  &
-            a_client_to_activate_context : t_session +-> t_application_context_i & 
+            a_client_to_activate         : t_session +-> t_user_token            &
+            a_client_to_activate_context : t_session +-> t_application_context_i &
             a_client_orphaned            : t_session +-> t_channel_config_idx_i  &
             a_client_token               : t_session +-> t_session_token         &
             a_server_token               : t_session_token +-> t_session         &
-            a_user                       : t_session +-> t_user                  &
+            a_user_server                : t_session +-> t_user                  &
+            a_user_client                : t_session +-> t_user_token            &
             a_NonceServer                : t_session +-> t_Nonce                 &
             a_NonceClient                : t_session +-> t_Nonce                 &
 
@@ -148,7 +150,8 @@ LOCAL_OPERATIONS
                     a_client_to_create           = a_client_to_create$0 &
                     a_client_to_activate         = a_client_to_activate$0 &
                     a_client_to_activate_context = a_client_to_activate_context$0 &
-                    a_user                       = a_user$0 &
+                    a_user_server                = a_user_server$0 &
+                    a_user_client                = a_user_client$0 &
                     a_server_token               = a_server_token$0 &
                     a_client_token               = a_client_token$0 &
                     a_NonceServer                = a_NonceServer$0 &
@@ -164,7 +167,8 @@ LOCAL_OPERATIONS
                     a_client_to_activate         = {p_session} <<| a_client_to_activate$0 &
                     a_client_to_activate_context = {p_session} <<| a_client_to_activate_context$0 &
                     a_client_orphaned            = {p_session} <<| a_client_orphaned$0 &
-                    a_user                       = {p_session} <<| a_user$0 &
+                    a_user_server                = {p_session} <<| a_user_server$0 &
+                    a_user_client                = {p_session} <<| a_user_client$0 &
                     a_server_token               = a_server_token$0 |>> {p_session} &
                     a_client_token               = {p_session} <<| a_client_token$0 &
                     a_NonceServer                = {p_session} <<| a_NonceServer$0 &
@@ -181,7 +185,8 @@ LOCAL_OPERATIONS
                 a_client_to_activate         = a_client_to_activate$0 &
                 a_client_to_activate_context = a_client_to_activate_context$0 &
                 a_client_orphaned            = a_client_orphaned$0 &
-                a_user                       = a_user$0 &
+                a_user_server                = a_user_server$0 &
+                a_user_client                = a_user_client$0 &
                 a_server_token               = a_server_token$0 &
                 a_client_token               = a_client_token$0 &
                 a_NonceServer                = a_NonceServer$0 &
@@ -211,7 +216,8 @@ LOCAL_OPERATIONS
         a_client_to_activate,
         a_client_to_activate_context,
         a_client_orphaned,
-        a_user,
+        a_user_server,
+        a_user_client,
         a_server_token,
         a_client_token,
         a_NonceServer,
@@ -221,12 +227,13 @@ LOCAL_OPERATIONS
             a_state                      : t_session +-> t_sessionState          &
             a_channel                    : t_session +-> t_channel               &
             a_client_to_create           : t_session +-> t_channel_config_idx_i  &
-            a_client_to_activate         : t_session +-> t_user                  &
-            a_client_to_activate_context : t_session +-> t_application_context_i & 
+            a_client_to_activate         : t_session +-> t_user_token            &
+            a_client_to_activate_context : t_session +-> t_application_context_i &
             a_client_orphaned            : t_session +-> t_channel_config_idx_i  &
             a_client_token               : t_session +-> t_session_token         &
             a_server_token               : t_session_token +-> t_session         &
-            a_user                       : t_session +-> t_user                  &
+            a_user_server                : t_session +-> t_user                  &
+            a_user_client                : t_session +-> t_user_token            &
             a_NonceServer                : t_session +-> t_Nonce                 &
             a_NonceClient                : t_session +-> t_Nonce                 &
 
@@ -241,7 +248,8 @@ LOCAL_OPERATIONS
                     a_client_to_create           = a_client_to_create$0 &
                     a_client_to_activate         = a_client_to_activate$0 &
                     a_client_to_activate_context = a_client_to_activate_context$0 &
-                    a_user                       = a_user$0 &
+                    a_user_server                = a_user_server$0 &
+                    a_user_client                = a_user_client$0 &
                     a_server_token               = a_server_token$0 &
                     a_client_token               = a_client_token$0 &
                     a_NonceServer                = a_NonceServer$0 &
@@ -257,7 +265,8 @@ LOCAL_OPERATIONS
                     a_client_to_activate         = {p_session} <<| a_client_to_activate$0 &
                     a_client_to_activate_context = {p_session} <<| a_client_to_activate_context$0 &
                     a_client_orphaned            = {p_session} <<| a_client_orphaned$0 &
-                    a_user                       = {p_session} <<| a_user$0 &
+                    a_user_server                = {p_session} <<| a_user_server$0 &
+                    a_user_client                = {p_session} <<| a_user_client$0 &
                     a_server_token               = a_server_token$0 |>> {p_session} &
                     a_client_token               = {p_session} <<| a_client_token$0 &
                     a_NonceServer                = {p_session} <<| a_NonceServer$0 &
@@ -274,7 +283,8 @@ LOCAL_OPERATIONS
                 a_client_to_activate         = a_client_to_activate$0 &
                 a_client_to_activate_context = a_client_to_activate_context$0 &
                 a_client_orphaned            = a_client_orphaned$0 &
-                a_user                       = a_user$0 &
+                a_user_server                = a_user_server$0 &
+                a_user_client                = a_user_client$0 &
                 a_server_token               = a_server_token$0 &
                 a_client_token               = a_client_token$0 &
                 a_NonceServer                = a_NonceServer$0 &
@@ -286,7 +296,7 @@ LOCAL_OPERATIONS
 
 OPERATIONS
 
-    res_activated <-- server_internal_activate_req_and_resp (channel, session, user, activate_req_msg, activate_resp_msg) =
+    res_activated <-- server_internal_activate_req_and_resp (channel, session, p_user, activate_req_msg, activate_resp_msg) =
     VAR
         l_channel_config_idx,
         l_secpol,
@@ -304,7 +314,7 @@ OPERATIONS
             res_activated := TRUE
         END;
         IF res_activated = TRUE THEN
-            set_session_user (session, user);
+            set_session_user_server (session, p_user);
             set_session_channel (session, channel);
             set_session_state (session, e_session_userActivated, FALSE)
         END
@@ -435,7 +445,7 @@ OPERATIONS
     END
     ;
 
-    ret, channel, session_token <-- client_user_activate_session_req_sm (session, user, activate_req_msg) =
+    ret, channel, session_token <-- client_user_activate_session_req_sm (session, p_user_token, activate_req_msg) =
     VAR
         l_is_connected_channel,
         l_channel_config_idx,
@@ -450,9 +460,9 @@ OPERATIONS
         IF l_is_connected_channel = TRUE THEN
             session_token <-- client_get_token_from_session (session);
             l_channel_config_idx <-- get_channel_info (channel);
-            /* TODO: check validity of user */
+            /* TODO: check validity of p_user_token */
             /* TODO: populate msg with parameters */
-            write_activate_msg_user(activate_req_msg, user);
+            write_activate_msg_user(activate_req_msg, p_user_token);
             l_secpol <-- get_SecurityPolicy(channel);
             IF l_secpol /= e_secpol_None THEN
                 l_server_nonce <-- get_NonceServer(session);
@@ -479,7 +489,7 @@ OPERATIONS
             ret := e_sc_bad_unexpected_error
         END;
         IF ret = e_sc_ok THEN
-            set_session_user(session, user);
+            set_session_user_client(session, p_user_token);
             set_session_state(session, e_session_userActivating, TRUE)
         END
     END
@@ -487,12 +497,12 @@ OPERATIONS
 
     session_token <-- client_sc_activate_session_req_sm (session, channel, activate_req_msg) =
     VAR
-        l_user
+        l_user_token
     IN
         session_token <-- client_get_token_from_session (session);
-        l_user <-- get_session_user (session);
+        l_user_token <-- get_session_user_client (session);
         /* TODO: populate msg with parameters  */
-        write_activate_msg_user(activate_req_msg, l_user);
+        write_activate_msg_user(activate_req_msg, l_user_token);
         set_session_channel(session, channel);
         set_session_state(session, e_session_scActivating, TRUE)
     END
@@ -507,7 +517,7 @@ OPERATIONS
         l_ret
     IN
         l_channel <-- get_session_channel (session);
-        l_user <-- get_session_user (session);
+        l_user <-- get_session_user_server (session);
         l_state <-- get_session_state (session);
         IF l_state = e_session_created
         THEN
@@ -640,7 +650,8 @@ OPERATIONS
                 a_client_to_activate         = d_inactive_sessions <<| a_client_to_activate$0                                            &
                 a_client_to_activate_context = d_inactive_sessions <<| a_client_to_activate_context$0                                    &
                 a_client_orphaned            = d_inactive_sessions <<| a_client_orphaned$0 <+ d_active_sessions * {p_channel_config_idx} &
-                a_user                       = d_inactive_sessions <<| a_user$0                                                          &
+                a_user_server                = d_inactive_sessions <<| a_user_server$0                                                   &
+                a_user_client                = d_inactive_sessions <<| a_user_client$0                                                   &
                 a_server_token               = a_server_token$0 |>> d_inactive_sessions                                                  &
                 a_client_token               = d_inactive_sessions <<| a_client_token$0                                                  &
                 a_NonceServer                = d_inactive_sessions <<| a_NonceServer$0                                                   &
@@ -699,7 +710,8 @@ OPERATIONS
                 a_client_to_activate         = d_inactive_sessions <<| a_client_to_activate$0                                  &
                 a_client_to_activate_context = d_inactive_sessions <<| a_client_to_activate_context$0                          &
                 a_client_orphaned            = d_inactive_sessions <<| a_client_orphaned$0                                     &
-                a_user                       = d_inactive_sessions <<| a_user$0                                                &
+                a_user_server                = d_inactive_sessions <<| a_user_server$0                                         &
+                a_user_client                = d_inactive_sessions <<| a_user_client$0                                         &
                 a_server_token               = a_server_token$0 |>> d_inactive_sessions                                        &
                 a_client_token               = d_inactive_sessions <<| a_client_token$0                                        &
                 a_NonceServer                = d_inactive_sessions <<| a_NonceServer$0                                         &
@@ -793,12 +805,12 @@ OPERATIONS
     END
     ;
 
-    user <-- get_session_user_or_indet (session) =
+    p_user_token <-- get_session_user_or_indet (session) =
     VAR
         l_valid_session,
         l_session_state
     IN
-        user := c_user_indet;
+        p_user_token := c_user_token_indet;
         l_valid_session <-- is_valid_session (session);
         IF l_valid_session = TRUE
         THEN
@@ -808,7 +820,7 @@ OPERATIONS
                 l_session_state /= e_session_closed &
                 l_session_state /= e_session_init
             THEN
-                user <-- get_session_user (session)
+                p_user_token <-- get_session_user_client (session)
             END
         END
     END

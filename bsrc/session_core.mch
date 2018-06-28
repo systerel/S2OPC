@@ -37,7 +37,8 @@ DEFINITIONS
     a_client_orphaned,
     a_client_token,
     a_server_token,
-    a_user,
+    a_user_server,
+    a_user_client,
     a_NonceServer,
     a_NonceClient;
 
@@ -51,7 +52,8 @@ DEFINITIONS
     a_client_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)
     a_client_token : s_session +-> t_session_token & // a client session has an associated session token once create response received
     a_server_token : t_session_token >+> s_session & // a server session has a unique authentication token in server once create response sent
-    a_user : s_session +-> t_user & // a session may be associated to a valid user
+    a_user_server : s_session +-> t_user & // a session may be associated to a valid user
+    a_user_client : s_session +-> t_user_token &
     /* The NonceServer negotiated for a session in CreateSession or ActivateSession */
     a_NonceServer : s_session +-> t_Nonce &
     /* The NonceClient is remembered by the client in Sess_Creating */
@@ -60,7 +62,8 @@ DEFINITIONS
     d_close_session (session) ==
     a_channel := {session} <<| a_channel                 || // If session had a channel, remove this relation
     a_client_orphaned := {session} <<| a_client_orphaned || // If session was orphaned, remove this relation
-    a_user := {session} <<| a_user                       || // If session had a user, remove this relation
+    a_user_server := {session} <<| a_user_server         || // If session had a user, remove this relation
+    a_user_client := {session} <<| a_user_client         || // If session had a user, remove this relation
     a_client_token := {session} <<| a_client_token       || // If session had a token, remove this relation
     a_server_token := a_server_token |>> {session}       || // If session had a token, remove this relation
     a_state(session) := e_session_closed                 || // keep session token as used
@@ -78,8 +81,8 @@ INVARIANT
     dom(a_state |>> {e_session_scOrphaned, e_session_closed, e_session_init}) = dom(a_channel) &
 
     // All sessions not (created or creating or closed or init) have a user associated and only those sessions
-    dom(a_state |>> {e_session_created, e_session_creating, e_session_closed, e_session_init}) = dom(a_user) &
-    
+    dom(a_state |>> {e_session_created, e_session_creating, e_session_closed, e_session_init}) = dom(a_user_server) \/ dom(a_user_client) &
+
     // All sessions to be created are included in session in init state
     dom(a_client_to_create) <: dom(a_state |> {e_session_init}) &
     
@@ -114,7 +117,8 @@ INITIALISATION
     a_client_orphaned            := {} ||
     a_client_token               := {} ||
     a_server_token               := {} ||
-    a_user                       := {} ||
+    a_user_server                := {} ||
+    a_user_client                := {} ||
     a_NonceServer                := {} ||
     a_NonceClient                := {}
 
@@ -272,12 +276,12 @@ OPERATIONS
     THEN
         CHOICE
             a_state(session) := e_session_userActivating ||
-            a_user(session) := user              ||
-            ret := e_sc_ok                          ||
+            a_user_client(session) := p_user_token       ||
+            ret := e_sc_ok                               ||
             channel :(channel : t_channel_i & channel : s_channel_connected) ||
             session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
         OR
-            // applicative code provided invalid user: no change
+            // applicative code provided invalid p_user_token: no change
             // ...
             ret :: {e_sc_bad_identity_token_invalid,
                 e_sc_bad_unexpected_error} ||
@@ -334,7 +338,7 @@ OPERATIONS
             /* UserActivateReq */
             CHOICE
                 a_state(session) := e_session_userActivated ||
-                a_user(session) := user ||
+                a_user_server(session) := user ||
                 ret := e_sc_ok
                 // modify credential if user was already associated, sends response
             OR
@@ -342,7 +346,7 @@ OPERATIONS
                 // sends response with error
             END
         ELSIF a_state(session) : {e_session_scOrphaned, e_session_userActivated} &
-            a_user(session) = user // user provided in activate request is the user associated to the current session
+            a_user_server(session) = user // user provided in activate request is the user associated to the current session
         THEN
             /* ScActivateReq */
             CHOICE
@@ -405,7 +409,7 @@ OPERATIONS
             a_client_to_activate         := inactive_sessions <<| a_client_to_activate                                          ||
             a_client_to_activate_context := inactive_sessions <<| a_client_to_activate_context                                  ||
             a_client_orphaned            := inactive_sessions <<| a_client_orphaned <+ active_sessions * {p_channel_config_idx} ||
-            a_user                       := inactive_sessions <<| a_user                                                        ||
+            a_user_client                := inactive_sessions <<| a_user_client                                                 ||
             a_server_token               := a_server_token |>> inactive_sessions                                                ||
             a_client_token               := inactive_sessions <<| a_client_token                                                ||
             a_NonceServer                := inactive_sessions <<| a_NonceServer                                                 ||
@@ -437,7 +441,7 @@ OPERATIONS
             a_client_to_activate         := inactive_sessions <<| a_client_to_activate                                  ||
             a_client_to_activate_context := inactive_sessions <<| a_client_to_activate_context                          ||
             a_client_orphaned            := inactive_sessions <<| a_client_orphaned                                     ||
-            a_user                       := inactive_sessions <<| a_user                                                ||
+            a_user_server                := inactive_sessions <<| a_user_server                                         ||
             a_server_token               := a_server_token |>> inactive_sessions                                        ||
             a_client_token               := inactive_sessions <<| a_client_token                                        ||
             a_NonceServer                := inactive_sessions <<| a_NonceServer                                         ||

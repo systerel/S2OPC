@@ -32,16 +32,18 @@ ABSTRACT_VARIABLES
     a_client_to_activate_context,
     a_client_token,
     a_server_token,
-    a_user,
+    a_user_server,
+    a_user_client,
     a_NonceServer,
     a_NonceClient
 
 INVARIANT
-    a_client_to_activate         : t_session       +-> t_user                  &
+    a_client_to_activate         : t_session       +-> t_user_token            &
     a_client_to_activate_context : t_session       +-> t_application_context_i &
     a_client_token               : t_session       +-> t_session_token         &
     a_server_token               : t_session_token +-> t_session               &
-    a_user                       : t_session       +-> t_user                  &
+    a_user_server                : t_session       +-> t_user                  &
+    a_user_client                : t_session       +-> t_user_token            &
     a_NonceServer                : t_session       +-> t_Nonce                 &
     a_NonceClient                : t_session       +-> t_Nonce
 
@@ -50,7 +52,8 @@ INITIALISATION
     a_client_to_activate_context :: {{}} ||
     a_client_token               :: {{}} ||
     a_server_token               :: {{}} ||
-    a_user                       :: {{}} ||
+    a_user_server                :: {{}} ||
+    a_user_client                :: {{}} ||
     a_NonceServer                :: {{}} ||
     a_NonceClient                :: {{}}
 
@@ -61,7 +64,8 @@ OPERATIONS
         p_session : t_session_i &
         p_session : t_session
     THEN
-        a_user := {p_session} <<| a_user                 || /* If session had a user, remove this relation */
+        a_user_server := {p_session} <<| a_user_server   || /* If session had a user, remove this relation */
+        a_user_client := {p_session} <<| a_user_client   ||
         a_server_token := a_server_token |>> {p_session} || /* If session had token, remove this relation */
         a_client_token := {p_session} <<| a_client_token
     END
@@ -154,6 +158,7 @@ OPERATIONS
     END
     ;
 
+    /* Server-side validation */
     ret <-- is_valid_user (user) = /* TODO FBA devrait être déplacée dans constants.mch VMO: pour l'instant laisser là pour le C */
     PRE
         user : t_user_i
@@ -162,25 +167,47 @@ OPERATIONS
     END
     ;
 
-    set_session_user (session, user) =
+    set_session_user_server (session, p_user) =
     PRE
         session : t_session_i &
         session : t_session   &
-        user    : t_user_i    &
-        user    : t_user
+        p_user  : t_user_i    &
+        p_user  : t_user
     THEN
-        a_user (session) := user
+        a_user_server (session) := p_user
     END
     ;
 
-    user <-- get_session_user (session) =
+    set_session_user_client (session, p_user_token) =
+    PRE
+        session      : t_session_i    &
+        session      : t_session      &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token
+    THEN
+        a_user_client (session) := p_user_token
+    END
+    ;
+
+    p_user <-- get_session_user_server (session) =
     PRE
         session : t_session_i &
         session : t_session   &
-        session : dom(a_user)
+        session : dom(a_user_server)
     THEN
-        user :(user : t_user_i &
-               user = a_user (session))
+        p_user :(p_user : t_user_i &
+                 p_user = a_user_server (session))
+    END
+    ;
+
+    p_user_token <-- get_session_user_client (session) =
+    PRE
+        session : t_session_i &
+        session : t_session   &
+        session : dom(a_user_client)
+    THEN
+        p_user_token :(p_user_token : t_user_token_i &
+                       p_user_token = a_user_client (session))
     END
     ;
 
