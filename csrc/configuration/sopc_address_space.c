@@ -82,7 +82,7 @@ SOPC_Variant* SOPC_AddressSpace_Item_Get_Value(SOPC_AddressSpace_Item* item)
     case OpcUa_NodeClass_Variable:
         return &item->data.variable.Value;
     case OpcUa_NodeClass_VariableType:
-        return &item->data.variable.Value;
+        return &item->data.variable_type.Value;
     default:
         assert(false && "Current element has no value.");
         return NULL;
@@ -95,10 +95,8 @@ SOPC_Byte* SOPC_AddressSpace_Item_Get_AccessLevel(SOPC_AddressSpace_Item* item)
     {
     case OpcUa_NodeClass_Variable:
         return &item->data.variable.AccessLevel;
-    case OpcUa_NodeClass_VariableType:
-        return &item->data.variable.AccessLevel;
     default:
-        assert(false && "Current element has no value.");
+        assert(false && "Current element has no access level.");
         return NULL;
     }
 }
