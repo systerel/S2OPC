@@ -63,6 +63,7 @@ typedef uint32_t constants_bs__t_server_request_handle_i;
 typedef uint32_t constants_bs__t_session_i;
 typedef SOPC_NodeId* constants_bs__t_session_token_i;
 #define constants_bs__t_user_i t_entier4
+typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 
 /*--------------------------
    Added by the Translator
@@ -89,6 +90,7 @@ typedef SOPC_NodeId* constants_bs__t_session_token_i;
 #define constants_bs__t_session_i_max SOPC_MAX_SESSIONS
 #define constants_bs__t_session_token_i_max (-1)
 #define constants_bs__t_user_i_max (-1)
+#define constants_bs__t_user_token_i_max (-1)
 
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
@@ -114,6 +116,7 @@ typedef SOPC_NodeId* constants_bs__t_session_token_i;
 #define constants_bs__c_session_indet 0
 #define constants_bs__c_session_token_indet 0
 #define constants_bs__c_user_indet 0
+#define constants_bs__c_user_token_indet 0
 #define constants_bs__k_n_BrowseResponse_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_BrowseTarget_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_WriteResponse_max SOPC_MAX_OPERATIONS_PER_MSG

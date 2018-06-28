@@ -329,25 +329,13 @@ void message_out_bs__is_valid_msg_out_header(const constants__t_msg_header_i mes
 }
 
 void message_out_bs__write_activate_msg_user(const constants__t_msg_i message_out_bs__msg,
-                                             const constants__t_user_i message_out_bs__user)
+                                             const constants__t_user_token_i message_out_bs__p_user_token)
 {
-    assert(message_out_bs__user == 1); // anonymous user only for now
-
     OpcUa_ActivateSessionRequest* req = (OpcUa_ActivateSessionRequest*) message_out_bs__msg;
 
-    req->UserIdentityToken.TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
-    req->UserIdentityToken.TypeId.NodeId.Namespace = OPCUA_NAMESPACE_INDEX;
-    req->UserIdentityToken.TypeId.NodeId.Data.Numeric = OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary;
-    req->UserIdentityToken.Encoding = SOPC_ExtObjBodyEncoding_Object;
-
-    OpcUa_AnonymousIdentityToken* token = calloc(1, sizeof(OpcUa_AnonymousIdentityToken));
-    assert(token != NULL);
-
-    OpcUa_AnonymousIdentityToken_Initialize(token);
-    assert(SOPC_String_AttachFromCstring(&token->PolicyId, "anonymous") == SOPC_STATUS_OK);
-
-    req->UserIdentityToken.Body.Object.ObjType = &OpcUa_AnonymousIdentityToken_EncodeableType;
-    req->UserIdentityToken.Body.Object.Value = token;
+    /* TODO: deal with this runtime error without assert */
+    assert(SOPC_STATUS_OK ==
+           SOPC_ExtensionObject_Copy(&req->UserIdentityToken, (SOPC_ExtensionObject*) message_out_bs__p_user_token));
 }
 
 void message_out_bs__write_create_session_req_msg_endpointUrl(

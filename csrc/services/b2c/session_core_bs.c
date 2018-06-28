@@ -52,14 +52,15 @@ typedef struct SessionData
 {
     SOPC_NodeId sessionToken; /* IMPORTANT NOTE: on server side token (numeric value) <=> session index */
     SOPC_ByteString nonceServer;
-    SOPC_ByteString nonceClient;       /* TODO: remove ? => no need to be store if returned directly */
-    OpcUa_SignatureData signatureData; /* TODO: remove ? => no need to be stored */
-    constants__t_user_i user;          /* TODO: remove user management */
+    SOPC_ByteString nonceClient;           /* TODO: remove ? => no need to be store if returned directly */
+    OpcUa_SignatureData signatureData;     /* TODO: remove ? => no need to be stored */
+    constants__t_user_i user_server;       /* TODO: remove user management */
+    constants__t_user_token_i user_client; /* TODO: remove user management */
 } SessionData;
 
 static SessionData sessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
 
-static constants__t_user_i session_to_activate_user[SOPC_MAX_SESSIONS + 1];
+static constants__t_user_token_i session_to_activate_user[SOPC_MAX_SESSIONS + 1];
 
 static constants__t_application_context_i session_to_activate_context[SOPC_MAX_SESSIONS + 1];
 
@@ -80,12 +81,13 @@ void session_core_bs__INITIALISATION(void)
         SOPC_ByteString_Initialize(&sData->nonceClient);
         SOPC_ByteString_Initialize(&sData->nonceServer);
         OpcUa_SignatureData_Initialize(&sData->signatureData);
-        sData->user = constants__c_user_indet;
+        sData->user_server = constants__c_user_indet;
+        sData->user_client = constants__c_user_token_indet;
     }
 
     assert(SOPC_MAX_SESSIONS + 1 <= SIZE_MAX / sizeof(constants__t_user_i));
-    memset(session_to_activate_user, (int) constants__c_user_indet,
-           sizeof(constants__t_user_i) * (SOPC_MAX_SESSIONS + 1));
+    memset(session_to_activate_user, (int) constants__c_user_token_indet,
+           sizeof(constants__t_user_token_i) * (SOPC_MAX_SESSIONS + 1));
     memset(session_to_activate_context, (int) 0, sizeof(constants__t_application_context_i) * (SOPC_MAX_SESSIONS + 1));
     memset(session_expiration_timer, (int) 0, sizeof(uint32_t) * (SOPC_MAX_SESSIONS + 1));
     memset(session_RevisedSessionTimeout, (int) 0, sizeof(uint64_t) * (SOPC_MAX_SESSIONS + 1));
@@ -235,25 +237,47 @@ void session_core_bs__is_valid_user(const constants__t_user_i session_core_bs__u
     *session_core_bs__ret = true;
 }
 
-void session_core_bs__set_session_user(const constants__t_session_i session_core_bs__session,
-                                       const constants__t_user_i session_core_bs__user)
+void session_core_bs__set_session_user_server(const constants__t_session_i session_core_bs__session,
+                                              const constants__t_user_i session_core_bs__p_user)
 {
     if (constants__c_session_indet != session_core_bs__session)
     {
-        sessionDataArray[session_core_bs__session].user = session_core_bs__user;
+        sessionDataArray[session_core_bs__session].user_server = session_core_bs__p_user;
     }
 }
 
-void session_core_bs__get_session_user(const constants__t_session_i session_core_bs__session,
-                                       constants__t_user_i* const session_core_bs__user)
+void session_core_bs__set_session_user_client(const constants__t_session_i session_core_bs__session,
+                                              const constants__t_user_token_i session_core_bs__p_user_token)
 {
     if (constants__c_session_indet != session_core_bs__session)
     {
-        *session_core_bs__user = sessionDataArray[session_core_bs__session].user;
+        sessionDataArray[session_core_bs__session].user_client = session_core_bs__p_user_token;
+    }
+}
+
+void session_core_bs__get_session_user_server(const constants__t_session_i session_core_bs__session,
+                                              constants__t_user_i* const session_core_bs__p_user)
+{
+    if (constants__c_session_indet != session_core_bs__session)
+    {
+        *session_core_bs__p_user = sessionDataArray[session_core_bs__session].user_server;
     }
     else
     {
-        *session_core_bs__user = constants__c_user_indet;
+        *session_core_bs__p_user = constants__c_user_indet;
+    }
+}
+
+void session_core_bs__get_session_user_client(const constants__t_session_i session_core_bs__session,
+                                              constants__t_user_token_i* const session_core_bs__p_user_token)
+{
+    if (constants__c_session_indet != session_core_bs__session)
+    {
+        *session_core_bs__p_user_token = sessionDataArray[session_core_bs__session].user_client;
+    }
+    else
+    {
+        *session_core_bs__p_user_token = constants__c_user_token_indet;
     }
 }
 
@@ -881,26 +905,26 @@ void session_core_bs__session_do_nothing(const constants__t_session_i session_co
 }
 
 void session_core_bs__set_session_to_activate(const constants__t_session_i session_core_bs__p_session,
-                                              const constants__t_user_i session_core_bs__p_user,
+                                              const constants__t_user_token_i session_core_bs__p_user_token,
                                               const constants__t_application_context_i session_core_bs__p_app_context)
 {
-    session_to_activate_user[session_core_bs__p_session] = session_core_bs__p_user;
+    session_to_activate_user[session_core_bs__p_session] = session_core_bs__p_user_token;
     session_to_activate_context[session_core_bs__p_session] = session_core_bs__p_app_context;
 }
 
 void session_core_bs__getall_to_activate(const constants__t_session_i session_core_bs__p_session,
                                          t_bool* const session_core_bs__p_dom,
-                                         constants__t_user_i* const session_core_bs__p_user)
+                                         constants__t_user_token_i* const session_core_bs__p_user_token)
 {
-    if (session_to_activate_user[session_core_bs__p_session] != constants__c_user_indet)
+    if (session_to_activate_user[session_core_bs__p_session] != constants__c_user_token_indet)
     {
         *session_core_bs__p_dom = true;
-        *session_core_bs__p_user = session_to_activate_user[session_core_bs__p_session];
+        *session_core_bs__p_user_token = session_to_activate_user[session_core_bs__p_session];
     }
     else
     {
         *session_core_bs__p_dom = false;
-        *session_core_bs__p_user = constants__c_user_indet;
+        *session_core_bs__p_user_token = constants__c_user_token_indet;
     }
 }
 
@@ -919,12 +943,16 @@ void session_core_bs__client_gen_activate_orphaned_session_internal_event(
 
 void session_core_bs__client_gen_activate_user_session_internal_event(
     const constants__t_session_i session_core_bs__session,
-    const constants__t_user_i session_core_bs__user)
+    const constants__t_user_token_i session_core_bs__p_user_token)
 {
-    constants__t_user_i* user = malloc(sizeof(constants__t_user_i));
+    SOPC_ExtensionObject* user = calloc(1, sizeof(SOPC_ExtensionObject));
+    /* TODO: deal with this runtime error without assert */
+    assert(NULL != user);
+
     if (user != NULL)
     {
-        *user = session_core_bs__user;
+        /* TODO: deal with this runtime error without assert */
+        assert(SOPC_STATUS_OK == SOPC_ExtensionObject_Copy(user, session_core_bs__p_user_token));
         SOPC_Services_EnqueueEvent(SE_TO_SE_ACTIVATE_SESSION, session_core_bs__session, (void*) user, 0);
     }
 }
