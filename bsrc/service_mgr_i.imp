@@ -1055,7 +1055,7 @@ OPERATIONS
     END
     ;
 
-    ret, channel, buffer_out, req_handle <-- client_service_activate_session (session, user) =
+    ret, channel, buffer_out, req_handle <-- client_service_activate_session (session, p_user_token) =
     VAR
         l_msg_header,
         l_valid_msg_header,
@@ -1085,7 +1085,7 @@ OPERATIONS
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle = TRUE
             THEN
-                l_ret, l_channel, l_session_token <-- client_user_activate_session_req (session, l_req_handle, user, l_req_msg);
+                l_ret, l_channel, l_session_token <-- client_user_activate_session_req (session, l_req_handle, p_user_token, l_req_msg);
                 IF l_ret = e_sc_ok
                 THEN
                     set_req_handle_channel (l_req_handle, l_channel);

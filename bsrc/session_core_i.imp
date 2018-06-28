@@ -60,14 +60,14 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    res_activated <-- server_internal_activate_req_and_resp (channel, session, user, activate_req_msg, activate_resp_msg) =
+    res_activated <-- server_internal_activate_req_and_resp (channel, session, p_user, activate_req_msg, activate_resp_msg) =
     PRE
         channel       : t_channel_i &
         channel       : s_channel_connected &
         session       : t_session_i &
         session       : s_session &
-        user          : t_user_i &
-        user          : t_user &
+        p_user          : t_user_i &
+        p_user          : t_user &
         dom(a_state) = s_session &
         a_state(session) : {e_session_created, e_session_userActivated, e_session_scOrphaned} &
         activate_req_msg : t_msg_i &

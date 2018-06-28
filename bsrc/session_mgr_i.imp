@@ -235,7 +235,7 @@ OPERATIONS
         l_session_state,
         l_session_channel,      
         l_resp_status,
-        l_session_user,
+        l_session_user_token,
         l_bret
     IN
         l_bret := FALSE;
@@ -257,12 +257,12 @@ OPERATIONS
                             l_session_state <-- get_session_state_or_closed (session);
                             IF l_session_state = e_session_created
                             THEN
-                                l_bret, l_session_user <-- getall_to_activate (session);
+                                l_bret, l_session_user_token <-- getall_to_activate (session);
                                 IF l_bret = TRUE &
-                                    l_session_user /= c_user_indet
+                                    l_session_user_token /= c_user_token_indet
                                 THEN
                                     reset_session_to_activate (session);
-                                    client_gen_activate_user_session_internal_event (session, l_session_user)
+                                    client_gen_activate_user_session_internal_event (session, l_session_user_token)
                                 END
                             ELSE
                                 /* The session may be not e_session_created when Nonce generation failed */
@@ -592,7 +592,8 @@ OPERATIONS
         bret := l_bret
     END;
     
-    bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user, app_context) =
+
+    bres <-- client_async_activate_new_session_without_channel (channel_config_idx, p_user_token, app_context) =
     VAR
         l_session,
         l_session_state
@@ -604,14 +605,14 @@ OPERATIONS
             bres := TRUE;
             /* channel did not exist or is not connected anymore: add async session creation on SC connection */
             set_session_to_create(l_session, channel_config_idx);
-            set_session_to_activate(l_session, user, app_context)
+            set_session_to_activate(l_session, p_user_token, app_context)
         ELSE
             bres := FALSE
         END
     END
     ;
 
-    bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, user, app_context) =
+    bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, p_user_token, app_context) =
     VAR
         l_session,
         l_session_state
@@ -625,14 +626,15 @@ OPERATIONS
             bres := TRUE;
             /* Generate event to create the session next and then waiting to be activated */
             client_gen_create_session_internal_event (l_session, channel_config_idx);
-            set_session_to_activate(l_session, user, app_context)
+            set_session_to_activate(l_session, p_user_token, app_context)
         ELSE
             bres := FALSE
         END
     END
     ;
     
-    ret, channel, session_token <-- client_user_activate_session_req (session, req_handle, user, activate_req_msg) =
+
+    ret, channel, session_token <-- client_user_activate_session_req (session, req_handle, p_user_token, activate_req_msg) =
     VAR
         l_valid_session,
         l_session_state,
@@ -645,7 +647,7 @@ OPERATIONS
             IF l_session_state = e_session_created or
                 l_session_state = e_session_userActivated
             THEN
-                l_ret, channel, session_token <-- client_user_activate_session_req_sm (session, user, activate_req_msg);
+                l_ret, channel, session_token <-- client_user_activate_session_req_sm (session, p_user_token, activate_req_msg);
                 IF l_ret = e_sc_ok
                 THEN
                     client_add_session_request_handle (session, req_handle)

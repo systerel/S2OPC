@@ -130,11 +130,11 @@ OPERATIONS
     ;
 
     /* Only one session could be in activation until the first session is notified as activated */
-    bres <-- client_activate_new_session (channel_config_idx, user, app_context) =
+    bres <-- client_activate_new_session (channel_config_idx, p_user_token, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
-        user : t_user_i &
-        user : t_user &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token &
         app_context : t_application_context_i &
         a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
@@ -146,12 +146,12 @@ OPERATIONS
     END
     ;
 
-    /* Only to change user on an active channel */
-    client_reactivate_session_new_user (session, user) =
+    /* Only to change user_token on an active channel */
+    client_reactivate_session_new_user (session, p_user_token) =
     PRE
         session : t_session_i &
-        user : t_user_i &
-        user : t_user &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token &
         a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &

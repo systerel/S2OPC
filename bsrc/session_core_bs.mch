@@ -460,29 +460,30 @@ OPERATIONS
     END
     ;
     
-    set_session_to_activate(p_session, p_user, p_app_context) =
+
+    set_session_to_activate(p_session, p_user_token, p_app_context) =
     PRE
-        p_session : t_session_i &
-        p_session : t_session   &
-        p_user    : t_user_i    &
-        p_user    : t_user      &
+        p_session     : t_session_i    &
+        p_session     : t_session      &
+        p_user_token  : t_user_token_i &
+        p_user_token  : t_user_token   &
         p_app_context : t_application_context_i
     THEN
-        a_client_to_activate(p_session) := p_user ||
+        a_client_to_activate(p_session) := p_user_token ||
         a_client_to_activate_context(p_session) := p_app_context
     END
     ;
-    
-    p_dom, p_user <-- getall_to_activate(p_session) =
+
+    p_dom, p_user_token <-- getall_to_activate(p_session) =
     PRE
         p_session : t_session_i &
         p_session : t_session
     THEN
         p_dom := bool(p_session : dom(a_client_to_activate)) ||
         IF  p_session /: dom(a_client_to_activate) THEN
-            p_user := c_user_indet
+            p_user_token := c_user_token_indet
         ELSE
-            p_user := a_client_to_activate(p_session)
+            p_user_token := a_client_to_activate(p_session)
         END
     END
     ;
@@ -527,12 +528,12 @@ OPERATIONS
     /* Generate internal event to activate given session on event treatment.
        Used to transform multiple sessions treatment into single session treatment
     */
-    client_gen_activate_user_session_internal_event (session, user) =
+    client_gen_activate_user_session_internal_event (session, p_user_token) =
     PRE
         session : t_session_i &
         session : t_session &
-        user : t_user_i &
-        user : t_user
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token
     THEN
         skip
     END

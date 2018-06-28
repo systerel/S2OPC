@@ -174,12 +174,12 @@ OPERATIONS
     ;
     
     /* New session: creation and activation async */
-    bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user, app_context) =
+    bres <-- client_async_activate_new_session_without_channel (channel_config_idx, p_user_token, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
-        user : t_user_i &
-        user : t_user &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token &
         app_context : t_application_context_i
     THEN
         bres :: BOOL
@@ -187,14 +187,14 @@ OPERATIONS
     ;
     
     /* New session: creation sync and activation async */
-    bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, user, app_context) =
+    bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, p_user_token, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         channel : t_channel_i &
         channel : s_channel_connected &
-        user : t_user_i &
-        user : t_user &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token &
         app_context : t_application_context_i &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
@@ -205,13 +205,14 @@ OPERATIONS
     END
     ;
     
-    ret, channel, session_token <-- client_user_activate_session_req (session, req_handle, user, activate_req_msg) =
+
+    ret, channel, session_token <-- client_user_activate_session_req (session, req_handle, p_user_token, activate_req_msg) =
     PRE
         session : t_session_i & // Here session is provided by applicative but still can point to invalid session (ref on closed session)
         req_handle : t_client_request_handle_i &
         req_handle : s_client_request_handle &
-        user : t_user_i &
-        user : t_user &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token &
         activate_req_msg : t_msg_i &
         activate_req_msg = c_msg_out &
         c_msg_out : t_msg &
@@ -362,11 +363,12 @@ OPERATIONS
     END
     ;
         
-    user <-- get_session_user_or_indet (session) =
+
+    p_user_token <-- get_session_user_or_indet (session) =
     PRE
         session : t_session_i
     THEN
-        user :: t_user_i
+        p_user_token :: t_user_token_i
     END
 
 END

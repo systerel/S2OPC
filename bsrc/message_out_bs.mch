@@ -411,16 +411,16 @@ OPERATIONS
     END
     ;*/
 
-    write_activate_msg_user (msg, user) =
+    write_activate_msg_user (msg, p_user_token) =
     PRE
         msg : t_msg_i &
         msg = c_msg_out &
         c_msg_out : t_msg &
-        user : t_user_i &
-        user : t_user &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token &
         a_msg_out_type = e_msg_session_activate_req
     THEN
-        /* TODO: add relation on user ? => need to retrieve after write ? */
+        /* TODO: add relation on p_user_token ? => need to retrieve after write ? */
         skip
     END
     ;

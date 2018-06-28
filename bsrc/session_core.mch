@@ -46,7 +46,7 @@ DEFINITIONS
     a_state : s_session --> t_sessionState & // a session shall be associated to a state
     a_channel : s_session +-> t_channel & // a session may be associated to a valid channel
     a_client_to_create : s_session +-> t_channel_config_idx_i & // a client session may be waiting to be created on a channel (not yet established)
-    a_client_to_activate : s_session +-> t_user & // a client session may be waiting to be activated (session not yet created)
+    a_client_to_activate : s_session +-> t_user_token & // a client session may be waiting to be activated (session not yet created)
     a_client_to_activate_context : s_session +-> t_application_context_i & // a client session has an application context associated
     a_client_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)
     a_client_token : s_session +-> t_session_token & // a client session has an associated session token once create response received
@@ -258,13 +258,13 @@ OPERATIONS
     ;
 
     // Client sends a user activate request for current session
-    ret, channel, session_token <-- client_user_activate_session_req_sm (session, user, activate_req_msg) =
+    ret, channel, session_token <-- client_user_activate_session_req_sm (session, p_user_token, activate_req_msg) =
     PRE
         session : t_session_i &
         session : s_session &
         a_state(session) : {e_session_created, e_session_userActivated} &
-        user : t_user_i &
-        user : t_user &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token &
         activate_req_msg : t_msg_i &
         activate_req_msg = c_msg_out &
         c_msg_out : t_msg &
@@ -566,15 +566,15 @@ OPERATIONS
     END
     ;
 
-    user <-- get_session_user_or_indet (session) =
+    p_user_token <-- get_session_user_or_indet (session) =
     PRE
         session : t_session_i
     THEN
         IF session : s_session & a_state(session) = e_session_userActivated
         THEN
-            user :( user : t_user_i & user = a_user (session))
+            p_user_token :( p_user_token : t_user_token_i & p_user_token = a_user_client (session))
         ELSE
-            user := c_user_indet
+            p_user_token := c_user_token_indet
         END
     END
     ;
@@ -667,16 +667,17 @@ OPERATIONS
     END
     ;
     
-    p_dom, p_user <-- getall_to_activate(p_session) =
+
+    p_dom, p_user_token <-- getall_to_activate(p_session) =
     PRE
         p_session : t_session_i &
         p_session : t_session
     THEN
         p_dom := bool(p_session : dom(a_client_to_activate)) ||
         IF  p_session /: dom(a_client_to_activate) THEN
-            p_user := c_user_indet
+            p_user_token := c_user_token_indet
         ELSE
-            p_user := a_client_to_activate(p_session)
+            p_user_token := a_client_to_activate(p_session)
         END
     END
     ;
@@ -709,15 +710,16 @@ OPERATIONS
     END
     ;
     
-    set_session_to_activate(p_session, p_user, p_app_context) =
+
+    set_session_to_activate(p_session, p_user_token, p_app_context) =
     PRE
-        p_session : t_session_i &
-        p_session : s_session   &
-        p_user    : t_user_i    &
-        p_user    : t_user      &
+        p_session     : t_session_i    &
+        p_session     : s_session      &
+        p_user_token  : t_user_token_i &
+        p_user_token  : t_user_token   &
         p_app_context : t_application_context_i
     THEN
-        a_client_to_activate(p_session) := p_user ||
+        a_client_to_activate(p_session) := p_user_token ||
         a_client_to_activate_context(p_session) := p_app_context
     END
     ;
@@ -760,12 +762,13 @@ OPERATIONS
     END
     ;
     
-    client_gen_activate_user_session_internal_event (session, user) =
+
+    client_gen_activate_user_session_internal_event (session, p_user_token) =
     PRE
         session : t_session_i &
         session : t_session &
-        user : t_user_i &
-        user : t_user
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token
     THEN
         skip
     END
