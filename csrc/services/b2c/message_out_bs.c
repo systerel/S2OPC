@@ -362,6 +362,7 @@ void message_out_bs__write_activate_msg_user(const constants__t_msg_i message_ou
     else
     {
         SOPC_Logger_TraceError("Unsupported IdentityToken.");
+        assert(false);
     }
 }
 

@@ -19,6 +19,7 @@
 
 #include "sopc_encodeable.h"
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -68,13 +69,21 @@ SOPC_ReturnStatus SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObjec
         if (SOPC_STATUS_OK == status)
         {
             SOPC_ExpandedNodeId_Initialize(&extObject->TypeId);
-            SOPC_String_InitializeFromCString(&extObject->TypeId.NamespaceUri, encTyp->NamespaceUri);
+            status = SOPC_String_InitializeFromCString(&extObject->TypeId.NamespaceUri, encTyp->NamespaceUri);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
             extObject->TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
             extObject->TypeId.NodeId.Namespace = OPCUA_NAMESPACE_INDEX;
             extObject->TypeId.NodeId.Data.Numeric = encTyp->BinaryEncodingTypeId;
             extObject->Encoding = SOPC_ExtObjBodyEncoding_Object;
             extObject->Body.Object.ObjType = encTyp;
             extObject->Body.Object.Value = *encObject;
+        }
+        else
+        {
+            assert(SOPC_Encodeable_Delete(encTyp, encObject) == SOPC_STATUS_OK);
         }
     }
     return status;
