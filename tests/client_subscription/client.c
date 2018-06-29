@@ -58,11 +58,15 @@
 /* Path to the client private key */
 #define PATH_CLIENT_PRIV "./client_private/client_4k.key"
 
+/* Default policy Id */
+#define POLICY_ID "anonymous"
+
 /* Command line helpers and arguments */
 enum
 {
     OPT_HELP,
     OPT_ENDPOINT,
+    OPT_POLICYID,
     OPT_USERNAME,
     OPT_PASSWORD,
     OPT_PUBLISH_PERIOD,
@@ -71,6 +75,7 @@ enum
 typedef struct
 {
     char* endpoint_url;
+    char* policyId;
     char* username;
     char* password;
     char* publish_period_str;
@@ -109,6 +114,7 @@ int main(int argc, char* const argv[])
                                          .path_cert_cli = NULL,
                                          .path_key_cli = NULL,
                                          .path_crl = NULL,
+                                         .policyId = options.policyId,
                                          .username = options.username,
                                          .password = options.password,
                                          .publish_period_ms = options.publish_period,
@@ -236,10 +242,11 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
 #define FOREACH_OPT(x)                                                                                            \
     /* name of flag, is flag required, does flag requires argument, internal flag value, field of the C struct */ \
     x("endpoint", false, required_argument, OPT_ENDPOINT, endpoint_url)                                           \
-        x("username", false, required_argument, OPT_USERNAME, username)                                           \
-            x("password", false, required_argument, OPT_PASSWORD, password)                                       \
-                x("publish-period", false, required_argument, OPT_PUBLISH_PERIOD, publish_period_str)             \
-                    x("token-target", false, required_argument, OPT_TOKEN_TARGET, token_target_str)
+        x("policyId", false, required_argument, OPT_POLICYID, policyId)                                           \
+            x("username", false, required_argument, OPT_USERNAME, username)                                       \
+                x("password", false, required_argument, OPT_PASSWORD, password)                                   \
+                    x("publish-period", false, required_argument, OPT_PUBLISH_PERIOD, publish_period_str)         \
+                        x("token-target", false, required_argument, OPT_TOKEN_TARGET, token_target_str)
 
 #define OPT_DEFINITION(name, req, arg_req, val, field) {name, arg_req, NULL, val},
 
@@ -306,6 +313,10 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     {
         o->endpoint_url = ENDPOINT_URL;
     }
+    if (NULL == o->policyId)
+    {
+        o->policyId = POLICY_ID;
+    }
     CONVERT_STR_OPT(publish_period, int64_t, PUBLISH_PERIOD_MS)
     CONVERT_STR_OPT(token_target, uint16_t, PUBLISH_N_TOKEN)
 
@@ -338,10 +349,11 @@ static void print_usage(const char* exe)
 {
     printf("Usage: %s [options] NODE_ID [NODE_ID...]\n", exe);
     printf("Options:\n");
-    printf("  --endpoint URL      URL of the endpoint to connect to\n");
-    printf("  --username UNAME    Username of the session user\n");
-    printf("  --password PWD      Password of the session user\n");
+    printf("  --endpoint URL        URL of the endpoint to connect to\n");
+    printf("  --policy-id POLICYID  Name of the selected UserIdentityToken policy id\n");
+    printf("  --username UNAME      Username of the session user\n");
+    printf("  --password PWD        Password of the session user\n");
     printf("  --publish-period MILLISEC  Subscription publish cycle, in ms\n");
-    printf("  --token-target N    Number of PublishRequests available to the server\n");
+    printf("  --token-target N      Number of PublishRequests available to the server\n");
     printf("\nNODE_ID are the nodes to subscribe to.\n");
 }

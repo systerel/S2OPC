@@ -80,10 +80,16 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  * \param cbkDataChanged    The callback to trigger when a PublishResponse is received
  * \param fPublishInterval  Subscription publish interval, in milliseconds
  * \param iTokenTarget      Number of subscription tokens the server should always have
+ * \param szPolicyId        Zero-terminated user identity policy id, see SOPC_LibSub_ConnectionCfg
+ * \param szUsername        Zero-terminated username, see SOPC_LibSub_ConnectionCfg
+ * \param szPassword        Zero-terminated password, see SOPC_LibSub_ConnectionCfg
  * \param ppSM              The returned machine, when successful
  */
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      uint32_t iCliId,
+                                     const char* szPolicyId,
+                                     const char* szUsername,
+                                     const char* szPassword,
                                      SOPC_LibSub_DataChangeCbk cbkDataChanged,
                                      double fPublishInterval,
                                      uint32_t iTokenTarget,

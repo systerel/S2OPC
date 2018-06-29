@@ -37,7 +37,7 @@
 #include <stdint.h>
 
 /* Version information */
-#define SOPC_LIBSUB_VERSION "0.0.2"
+#define SOPC_LIBSUB_VERSION "0.0.2*"
 
 /*
  =================
@@ -226,29 +226,36 @@ typedef struct
  @description
    Connection configuration to a remote OPC server
  @field server_url
-   Path to server URL
+   Zero-terminated path to server URL
  @field security_policy
    The chosen OPC-UA security policy for the connection, one of the SOPC_SecurityPolicy_*_URI string
  @field security_mode
    The chosen OPC-UA security mode for the connection, one of the OpcUa_MessageSecurityMode constant
  @field path_cert_auth
-   Path to the root certificate authority in the DER format
+   Zero-terminated path to the root certificate authority in the DER format
  @field path_cert_srv
-   Path to the server certificate in the DER format, signed by the root certificate authority
+   Zero-terminated path to the server certificate in the DER format, signed by the root certificate authority
  @field path_cert_cli
-   Path to the client certificate in the DER format, signed by the root certificate authority
+   Zero-terminated path to the client certificate in the DER format, signed by the root certificate authority
  @field path_key_cli
-   Path to the client private key which is paired to the public key signed server certificate, in the DER format
+   Zero-terminated path to the client private key which is paired to the public key signed server certificate, in the
+ DER format
  @field path_crl
-   Path to the certificate revocation list in the DER format
+   Zero-terminated path to the certificate revocation list in the DER format
+ @field policyId
+   Zero-terminated policy id. To know which policy id to use, please read a
+   GetEndpointsResponse or a CreateSessionResponse. When username is NULL, the
+   AnonymousIdentityToken is used and the policy id must correspond to an
+   anonymous UserIdentityPolicy. Otherwise, the UserNameIdentityToken is used
+   and the policy id must correspond to an username UserIdentityPolicy.
  @field username
-   Username, NULL for anonymous access
+   Zero-terminated username, NULL for anonymous access, see policyId
  @field password
-   Password, Not significant when username is NULL
+   Zero-terminated password, ignored when username is NULL
  @field publish_period_ms
-    The requested publish period for the created subscription (in milliseconds)
+   The requested publish period for the created subscription (in milliseconds)
  @field data_change_callback
-    The callback for data change notification
+   The callback for data change notification
  @field timeout_ms
    Connection timeout (milliseconds)
  @field sc_lifetime
@@ -266,6 +273,7 @@ typedef struct
     SOPC_LibSub_CstString path_cert_cli;
     SOPC_LibSub_CstString path_key_cli;
     SOPC_LibSub_CstString path_crl;
+    SOPC_LibSub_CstString policyId;
     SOPC_LibSub_CstString username;
     SOPC_LibSub_CstString password;
     int64_t publish_period_ms;

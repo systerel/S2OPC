@@ -68,6 +68,9 @@ struct SOPC_StaMac_Machine
     bool bAckSubscr;                          /* Indicates whether an acknowledgement should be sent
                                                * in the next PublishRequest */
     uint32_t iAckSeqNum;                      /* The sequence number to acknowledge after a PublishResponse */
+    const char* szPolicyId;                   /* See SOPC_LibSub_ConnectionCfg */
+    const char* szUsername;                   /* See SOPC_LibSub_ConnectionCfg */
+    const char* szPassword;                   /* See SOPC_LibSub_ConnectionCfg */
 };
 
 /* Global variables */
@@ -90,6 +93,9 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
 
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      uint32_t iCliId,
+                                     const char* szPolicyId,
+                                     const char* szUsername,
+                                     const char* szPassword,
                                      SOPC_LibSub_DataChangeCbk cbkDataChanged,
                                      double fPublishInterval,
                                      uint32_t iTokenTarget,
@@ -120,6 +126,9 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->nTokenUsable = 0;
         pSM->bAckSubscr = false;
         pSM->iAckSeqNum = 0;
+        pSM->szPolicyId = szPolicyId;
+        pSM->szUsername = szUsername;
+        pSM->szPassword = szPassword;
     }
 
     if (SOPC_STATUS_OK == status && (NULL == pSM->pListReqCtx || NULL == pSM->pListMonIt))
@@ -187,7 +196,12 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
     {
         ++nSentReqs;
         pSM->iSessionCtx = nSentReqs; /* Record the session context, must be reset when connection is closed. */
-        SOPC_ToolkitClient_AsyncActivateSession(pSM->iscConfig, (uintptr_t) pSM->iSessionCtx);
+        /* TODO: also implement UserName */
+        status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, (uintptr_t) pSM->iSessionCtx,
+                                                                   pSM->szPolicyId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
         pSM->state = stActivating;
     }
     else if (NULL != pSM)

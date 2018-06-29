@@ -107,6 +107,7 @@ START_TEST(test_subscription)
                                          .path_cert_cli = NULL,
                                          .path_key_cli = NULL,
                                          .path_crl = NULL,
+                                         .policyId = "anonymous",
                                          .username = NULL,
                                          .password = NULL,
                                          .publish_period_ms = 100,

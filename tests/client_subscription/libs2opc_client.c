@@ -187,6 +187,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
         }
         else
         {
+            /* TODO: Make a deep copy of the strings */
             *pCfgCpy = *pCfg;
         }
     }
@@ -264,8 +265,9 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
     {
         ++nCreatedClient;
         *pCliId = nCreatedClient;
-        status = SOPC_StaMac_Create(cfgId, *pCliId, pCfg->data_change_callback, (double) pCfg->publish_period_ms,
-                                    pCfg->token_target, &pSM);
+        status =
+            SOPC_StaMac_Create(cfgId, *pCliId, pCfg->policyId, pCfg->username, pCfg->password,
+                               pCfg->data_change_callback, (double) pCfg->publish_period_ms, pCfg->token_target, &pSM);
     }
 
     /* Adds it to the list */
