@@ -18,6 +18,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "sopc_toolkit_async_api.h"
 
@@ -51,17 +52,22 @@ void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
     SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, userToken, sessionContext);
 }
 
-bool SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnectionIdx,
-                                                       uintptr_t sessionContext,
-                                                       const char* policyId)
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnectionIdx,
+                                                                    uintptr_t sessionContext,
+                                                                    const char* policyId)
 {
+    if (NULL == policyId || strlen(policyId) == 0)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     SOPC_ExtensionObject* user = calloc(1, sizeof(SOPC_ExtensionObject));
     OpcUa_AnonymousIdentityToken* token = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     if (NULL == user)
     {
-        return false;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     status = SOPC_Encodeable_CreateExtension(user, &OpcUa_AnonymousIdentityToken_EncodeableType, (void**) &token);
@@ -84,39 +90,52 @@ bool SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnecti
     return status;
 }
 
-bool SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint32_t endpointConnectionIdx,
-                                                              uintptr_t sessionContext,
-                                                              const char* policyId,
-                                                              const char* username,
-                                                              const uint8_t* password,
-                                                              int32_t length_password)
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint32_t endpointConnectionIdx,
+                                                                           uintptr_t sessionContext,
+                                                                           const char* policyId,
+                                                                           const char* username,
+                                                                           const uint8_t* password,
+                                                                           int32_t length_password)
 {
+    if (NULL == policyId || strlen(policyId) == 0)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    bool consistent = ((0 == length_password) ^ (NULL == password)) != 0;
+    if (!consistent)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     SOPC_ExtensionObject* user = calloc(1, sizeof(SOPC_ExtensionObject));
     OpcUa_UserNameIdentityToken* token = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     if (NULL == user)
     {
-        return false;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     status = SOPC_Encodeable_CreateExtension(user, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
     if (SOPC_STATUS_OK == status)
     {
+        SOPC_String_Initialize(&token->UserName);
+        SOPC_ByteString_Initialize(&token->Password);
+        SOPC_String_Initialize(&token->EncryptionAlgorithm);
         status = SOPC_String_InitializeFromCString(&token->PolicyId, policyId);
     }
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != username)
     {
         status = SOPC_String_InitializeFromCString(&token->UserName, username);
     }
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != password)
     {
         status = SOPC_ByteString_CopyFromBytes(&token->Password, password, length_password);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_String_Initialize(&token->EncryptionAlgorithm);
         SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionIdx, sessionContext, user);
     }
     else

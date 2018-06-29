@@ -34,6 +34,7 @@
 #include <stdint.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_toolkit_constants.h"
 #include "sopc_user_app_itf.h"
 
 /**
@@ -94,7 +95,7 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
  * \param sessionContext         A context value, it will be provided in case of session activation or failure
  *                               notification
  * \param userToken              An extension object, containing either an OpcUa_AnonymousIdentityToken, a
- *                               OpcUa_UserNameIdentityToken, or a OpcUa_X509IdentityToken. This object is borrowd by
+ *                               OpcUa_UserNameIdentityToken, or a OpcUa_X509IdentityToken. This object is borrowed by
  *                               the Toolkit and shall not be freed or modified by the caller.
  *
  */
@@ -107,11 +108,11 @@ void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
  *
  * \param policyId  The policy id to use for the identity token.
  *
- * \return False when SOPC_ToolkitClient_AsyncActivateSession() is not called.
+ * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called.
  */
-bool SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnectionIdx,
-                                                       uintptr_t sessionContext,
-                                                       const char* policyId);
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnectionIdx,
+                                                                    uintptr_t sessionContext,
+                                                                    const char* policyId);
 
 /**
  * \brief Request to activate a session with a UserNameIdentityToken. See SOPC_ToolkitClient_AsyncActivateSession().
@@ -119,19 +120,19 @@ bool SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnecti
  * \warn The method does not support encryption yet. Hence this connection method shall not be used with an
  *       unencrypted endpoint.
  *
- * \param policyId  The policy id to use for the identity token.
- * \param username  The zero-terminated string username.
- * \param password  The bytestring containing the password
+ * \param policyId  The policy id to use for the identity token, must not be NULL
+ * \param username  The zero-terminated string username
+ * \param password  The bytestring containing the password, may be NULL if length_password is 0
  * \param length_password The password length
  *
- * \return False when SOPC_ToolkitClient_AsyncActivateSession() is not called.
+ * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called.
  */
-bool SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint32_t endpointConnectionIdx,
-                                                              uintptr_t sessionContext,
-                                                              const char* policyId,
-                                                              const char* username,
-                                                              const uint8_t* password,
-                                                              int32_t length_password);
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint32_t endpointConnectionIdx,
+                                                                           uintptr_t sessionContext,
+                                                                           const char* policyId,
+                                                                           const char* username,
+                                                                           const uint8_t* password,
+                                                                           int32_t length_password);
 
 /**
  * \brief Request to send a service request on given active session.
