@@ -701,6 +701,7 @@ set(LIBSUBSCRIBE_PATH "tests/client_subscription")
 add_library(client_subscription "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
                                 "${LIBSUBSCRIBE_PATH}/toolkit_helpers.c"
                                 "${LIBSUBSCRIBE_PATH}/state_machine.c"
+                                "${LIBSUBSCRIBE_PATH}/pki_permissive.c"
                                 )
 # add_dependencies(client_subscription ${INGOPCS_STATIC_LIB})
 target_link_libraries(client_subscription PRIVATE ${INGOPCS_STATIC_LIB}) # ${INGOPCS_DEP_LIBS})
