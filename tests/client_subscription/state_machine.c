@@ -126,6 +126,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->nTokenUsable = 0;
         pSM->bAckSubscr = false;
         pSM->iAckSeqNum = 0;
+        /* TODO: deep copy the strings */
         pSM->szPolicyId = szPolicyId;
         pSM->szUsername = szUsername;
         pSM->szPassword = szPassword;
@@ -196,9 +197,17 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
     {
         ++nSentReqs;
         pSM->iSessionCtx = nSentReqs; /* Record the session context, must be reset when connection is closed. */
-        /* TODO: also implement UserName */
-        status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, (uintptr_t) pSM->iSessionCtx,
-                                                                   pSM->szPolicyId);
+        if (NULL == pSM->szUsername)
+        {
+            status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, (uintptr_t) pSM->iSessionCtx,
+                                                                       pSM->szPolicyId);
+        }
+        else
+        {
+            status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
+                pSM->iscConfig, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pSM->szUsername,
+                (const uint8_t*) pSM->szPassword, (int32_t) strlen(pSM->szPassword));
+        }
     }
     if (SOPC_STATUS_OK == status)
     {

@@ -151,21 +151,28 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
 
     if (!bLibInitialized || bLibConfigured)
     {
-        status = SOPC_STATUS_INVALID_STATE;
+        return SOPC_STATUS_INVALID_STATE;
     }
 
-    if (SOPC_STATUS_OK == status && (NULL == pCfg || NULL == pCfgId))
+    if (NULL == pCfg || NULL == pCfgId)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL == pCfg->policyId)
+    {
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Cannot configure connection with NULL policyId.");
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL != pCfg->username && NULL == pCfg->password)
+    {
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Cannot configure connection with non NULL user name but NULL password.");
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     /* Create the new configuration */
-    if (SOPC_STATUS_OK == status)
-    {
-        status = Helpers_NewSCConfigFromLibSubCfg(pCfg->server_url, pCfg->security_policy, pCfg->security_mode,
-                                                  pCfg->path_cert_auth, pCfg->path_cert_srv, pCfg->path_cert_cli,
-                                                  pCfg->path_key_cli, pCfg->path_crl, pCfg->sc_lifetime, &pscConfig);
-    }
+    status = Helpers_NewSCConfigFromLibSubCfg(pCfg->server_url, pCfg->security_policy, pCfg->security_mode,
+                                              pCfg->path_cert_auth, pCfg->path_cert_srv, pCfg->path_cert_cli,
+                                              pCfg->path_key_cli, pCfg->path_crl, pCfg->sc_lifetime, &pscConfig);
 
     /* Add it to the Toolkit */
     if (SOPC_STATUS_OK == status)
