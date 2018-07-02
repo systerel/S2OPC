@@ -71,6 +71,7 @@ enum
     OPT_PASSWORD,
     OPT_PUBLISH_PERIOD,
     OPT_TOKEN_TARGET,
+    OPT_DISABLE_SECU,
 } cmd_line_option_values_t;
 typedef struct
 {
@@ -84,6 +85,7 @@ typedef struct
     uint16_t token_target;
     int node_ids_sz;
     char** node_ids;
+    bool disable_certificate_verification;
 } cmd_line_options_t;
 static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv);
 static void print_usage(const char* exe);
@@ -109,10 +111,11 @@ int main(int argc, char* const argv[])
     SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = options.endpoint_url,
                                          .security_policy = SECURITY_POLICY,
                                          .security_mode = SECURITY_MODE,
+                                         .disable_certificate_verification = options.disable_certificate_verification,
                                          .path_cert_auth = PATH_CACERT_PUBL,
-                                         .path_cert_srv = NULL,
-                                         .path_cert_cli = NULL,
-                                         .path_key_cli = NULL,
+                                         .path_cert_srv = PATH_SERVER_PUBL,
+                                         .path_cert_cli = PATH_CLIENT_PUBL,
+                                         .path_key_cli = PATH_CLIENT_PRIV,
                                          .path_crl = NULL,
                                          .policyId = options.policyId,
                                          .username = options.username,
@@ -250,7 +253,9 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
 
 #define OPT_DEFINITION(name, req, arg_req, val, field) {name, arg_req, NULL, val},
 
-    static struct option long_options[] = {{"help", no_argument, NULL, OPT_HELP}, FOREACH_OPT(OPT_DEFINITION)};
+    static struct option long_options[] = {{"help", no_argument, NULL, OPT_HELP},
+                                           {"disable-certificate-verification", no_argument, NULL, OPT_DISABLE_SECU},
+                                           FOREACH_OPT(OPT_DEFINITION)};
 
 #undef OPT_DEFINITION
 
@@ -266,11 +271,12 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
         switch (getopt_long(argc, argv, "", long_options, NULL))
         {
             FOREACH_OPT(STR_OPT_CASE)
-
         case -1:
             parsed = true;
             break;
-
+        case OPT_DISABLE_SECU:
+            o->disable_certificate_verification = true;
+            break;
         case OPT_HELP:
             // fallthrough
         default:
@@ -355,5 +361,6 @@ static void print_usage(const char* exe)
     printf("  --password PWD        Password of the session user\n");
     printf("  --publish-period MILLISEC  Subscription publish cycle, in ms\n");
     printf("  --token-target N      Number of PublishRequests available to the server\n");
+    printf("  --disable-certificate-validation  For development only\n");
     printf("\nNODE_ID are the nodes to subscribe to.\n");
 }
