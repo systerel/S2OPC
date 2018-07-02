@@ -168,6 +168,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             pscConfig->requestedLifetime = iScRequestedLifetime;
             pscConfig->reqSecuPolicyUri = szSecuPolicy;
             pscConfig->msgSecurityMode = msgSecurityMode;
+            pscConfig->applicationUri = NULL;
 
             /* Handles the config to the caller */
             *ppNewCfg = pscConfig;
