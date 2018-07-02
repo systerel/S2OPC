@@ -129,7 +129,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint3
     {
         status = SOPC_String_InitializeFromCString(&token->UserName, username);
     }
-    if (SOPC_STATUS_OK == status && NULL != password)
+    if (SOPC_STATUS_OK == status && NULL != password && length_password > 0)
     {
         status = SOPC_ByteString_CopyFromBytes(&token->Password, password, length_password);
     }
