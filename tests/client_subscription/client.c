@@ -36,9 +36,9 @@
 /* Secure Channel configuration */
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 /* Security Policy is None or Basic256 or Basic256Sha256 */
-#define SECURITY_POLICY SOPC_SecurityPolicy_None_URI
+#define SECURITY_POLICY SOPC_SecurityPolicy_Basic256_URI
 /* Security Mode is None or Sign or SignAndEncrypt */
-#define SECURITY_MODE OpcUa_MessageSecurityMode_None
+#define SECURITY_MODE OpcUa_MessageSecurityMode_Sign
 
 /* Connection global timeout */
 #define TIMEOUT_MS 10000
@@ -52,11 +52,11 @@
 /* Path to the certificate authority */
 #define PATH_CACERT_PUBL "./trusted/cacert.der"
 /* Path to the server certificate */
-#define PATH_SERVER_PUBL "./server_public/server_4k.der"
+#define PATH_SERVER_PUBL "./server_public/server_2k_cert.der"
 /* Path to the client certificate */
-#define PATH_CLIENT_PUBL "./client_public/client_4k.der"
+#define PATH_CLIENT_PUBL "./client_public/client_2k_cert.der"
 /* Path to the client private key */
-#define PATH_CLIENT_PRIV "./client_private/client_4k.key"
+#define PATH_CLIENT_PRIV "./client_private/client_2k_key.pem"
 
 /* Default policy Id */
 #define POLICY_ID "anonymous"
