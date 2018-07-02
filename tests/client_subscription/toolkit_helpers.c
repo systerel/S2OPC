@@ -32,6 +32,7 @@
 #include "sopc_encodeable.h"
 #include "sopc_pki_stack.h"
 
+#include "pki_permissive.h"
 #include "toolkit_helpers.h"
 
 /* LibSub logger callback, wrapped by a variadic printf-like */
@@ -40,6 +41,7 @@ static SOPC_LibSub_LogCbk cbkLog = Helpers_LoggerStdout;
 SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                                                    const char* szSecuPolicy,
                                                    OpcUa_MessageSecurityMode msgSecurityMode,
+                                                   bool bDisablePKI,
                                                    const char* szPathCertifAuth,
                                                    const char* szPathCertServer,
                                                    const char* szPathCertClient,
@@ -92,7 +94,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     }
 
     /* Load the certificates & CRL before the creation of the PKI, then the config */
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && !bDisablePKI)
     {
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(szPathCertifAuth, &pCrtCAu);
         if (SOPC_STATUS_OK != status)
@@ -111,15 +113,27 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProviderStack_Create(pCrtCAu, NULL, &pPki);
-        if (SOPC_STATUS_OK != status)
+        if (!bDisablePKI)
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to create PKI.");
+            status = SOPC_PKIProviderStack_Create(pCrtCAu, NULL, &pPki);
+            if (SOPC_STATUS_OK != status)
+            {
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to create PKI.");
+            }
+            else
+            {
+                SOPC_KeyManager_SerializedCertificate_Delete(pCrtCAu);
+                pCrtCAu = NULL;
+            }
         }
         else
         {
-            SOPC_KeyManager_SerializedCertificate_Delete(pCrtCAu);
-            pCrtCAu = NULL;
+            Helpers_Log(SOPC_LOG_LEVEL_WARNING, "DISABLED CERTIFICATE VERIFICATION.");
+            status = SOPC_PKIPermissive_Create(&pPki);
+            if (SOPC_STATUS_OK != status)
+            {
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to create PKI.");
+            }
         }
     }
     if (SOPC_STATUS_OK == status && OpcUa_MessageSecurityMode_None != msgSecurityMode)
@@ -187,7 +201,14 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         }
         if (NULL != pPki)
         {
-            SOPC_PKIProviderStack_Free(pPki);
+            if (bDisablePKI)
+            {
+                SOPC_PKIPermissive_Free(pPki);
+            }
+            else
+            {
+                SOPC_PKIProviderStack_Free(pPki);
+            }
         }
         if (NULL != pCrtSrv)
         {

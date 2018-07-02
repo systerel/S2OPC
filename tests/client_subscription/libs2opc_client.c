@@ -171,8 +171,9 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
 
     /* Create the new configuration */
     status = Helpers_NewSCConfigFromLibSubCfg(pCfg->server_url, pCfg->security_policy, pCfg->security_mode,
-                                              pCfg->path_cert_auth, pCfg->path_cert_srv, pCfg->path_cert_cli,
-                                              pCfg->path_key_cli, pCfg->path_crl, pCfg->sc_lifetime, &pscConfig);
+                                              pCfg->disable_certificate_verification, pCfg->path_cert_auth,
+                                              pCfg->path_cert_srv, pCfg->path_cert_cli, pCfg->path_key_cli,
+                                              pCfg->path_crl, pCfg->sc_lifetime, &pscConfig);
 
     /* Add it to the Toolkit */
     if (SOPC_STATUS_OK == status)

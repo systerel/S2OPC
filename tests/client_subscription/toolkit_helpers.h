@@ -28,6 +28,8 @@
 
 #define MAX_NOTIFICATIONS_PER_REQUEST 1000
 
+#include <stdbool.h>
+
 #include "sopc_key_manager.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
@@ -48,6 +50,7 @@
 SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                                                    const char* szSecuPolicy,
                                                    OpcUa_MessageSecurityMode msgSecurityMode,
+                                                   bool bDisablePKI,
                                                    const char* szPathCertifAuth,
                                                    const char* szPathCertServer,
                                                    const char* szPathCertClient,

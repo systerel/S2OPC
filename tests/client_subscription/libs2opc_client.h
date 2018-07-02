@@ -231,6 +231,10 @@ typedef struct
    The chosen OPC-UA security policy for the connection, one of the SOPC_SecurityPolicy_*_URI string
  @field security_mode
    The chosen OPC-UA security mode for the connection, one of the OpcUa_MessageSecurityMode constant
+ @field disable_certificate_verification
+   Uses a PKIProvider which does not verify the certificates against a certificate authority.
+   Setting this flag to not 0 severely harms security. The certificate authority is not required in this case.
+   Other certificates are still required when using an encrypted or signed secure channel.
  @field path_cert_auth
    Zero-terminated path to the root certificate authority in the DER format
  @field path_cert_srv
@@ -268,6 +272,7 @@ typedef struct
     SOPC_LibSub_CstString server_url;
     SOPC_LibSub_CstString security_policy;
     OpcUa_MessageSecurityMode security_mode;
+    uint8_t disable_certificate_verification;
     SOPC_LibSub_CstString path_cert_auth;
     SOPC_LibSub_CstString path_cert_srv;
     SOPC_LibSub_CstString path_cert_cli;
