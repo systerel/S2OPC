@@ -60,6 +60,11 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                                                    SOPC_SecureChannel_Config** ppNewCfg);
 
 /**
+ * \brief A SOPC_SecureChannel_Config destructor which free elements from Helpers_NewSCConfigFromLibSubCfg().
+ */
+void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig);
+
+/**
  * \brief Creates a new CreateSubscriptionRequest.
  */
 SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs,

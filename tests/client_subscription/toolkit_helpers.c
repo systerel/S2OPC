@@ -173,6 +173,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 
         if (NULL != pscConfig)
         {
+            /* TODO: copy strings elements */
             pscConfig->isClientSc = true;
             pscConfig->url = szServerUrl;
             pscConfig->crt_cli = pCrtCli;
@@ -211,6 +212,22 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     }
 
     return status;
+}
+
+void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
+{
+    SOPC_SecureChannel_Config* pscConfig = *ppscConfig;
+
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->crt_cli);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) pscConfig->key_priv_cli);
+    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->crt_srv);
+    /* TODO: Select the right PKIProvider free, which will free the CA... */
+    SOPC_PKIProviderStack_Free((SOPC_PKIProvider*) pscConfig->pki);
+    SOPC_String_Delete((SOPC_String*) pscConfig->applicationUri);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+
+    *ppscConfig = NULL;
 }
 
 SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs,

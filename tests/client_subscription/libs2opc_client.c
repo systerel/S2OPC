@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#include "sopc_array.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_user_app_itf.h"
@@ -57,6 +58,7 @@ static SOPC_LibSub_DisconnectCbk cbkDisco = NULL;
 static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId, value is SOPC_LibSub_ConnectionCfg */
 static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
 static SOPC_LibSub_ConnectionId nCreatedClient = 0;
+static SOPC_Array* pArrScConfig = NULL; /* Stores the created scConfig to free them in SOPC_LibSub_Clear() */
 
 /* Event callback */
 void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
@@ -87,7 +89,9 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
     {
         pListConfig = SOPC_SLinkedList_Create(0);
         pListClient = SOPC_SLinkedList_Create(0);
-        if (NULL == pListConfig || NULL == pListClient)
+        pArrScConfig = SOPC_Array_Create(sizeof(SOPC_SecureChannel_Config*), 0,
+                                         (SOPC_Array_Free_Func) Helpers_SecureChannel_Config_Free);
+        if (NULL == pListConfig || NULL == pListClient || NULL == pArrScConfig)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
@@ -108,6 +112,8 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
         pListConfig = NULL;
         SOPC_SLinkedList_Delete(pListClient);
         pListClient = NULL;
+        SOPC_Array_Delete(pArrScConfig);
+        pArrScConfig = NULL;
     }
 
     return status;
@@ -128,14 +134,21 @@ void SOPC_LibSub_Clear(void)
         SOPC_StaMac_Delete(&pSM);
     }
     SOPC_SLinkedList_Delete(pListClient);
+    pListClient = NULL;
 
     pIter = SOPC_SLinkedList_GetIterator(pListConfig);
     while (NULL != pIter)
     {
         pCfg = (SOPC_LibSub_ConnectionCfg*) SOPC_SLinkedList_Next(&pIter);
+        /* TODO: Free content of the struct, make a static function that can also be used in
+         * SOPC_LibSub_ConfigureConnection */
         free(pCfg);
     }
     SOPC_SLinkedList_Delete(pListConfig);
+    pListConfig = NULL;
+
+    SOPC_Array_Delete(pArrScConfig);
+    pArrScConfig = NULL;
 
     bLibInitialized = false;
     bLibConfigured = false;
@@ -175,9 +188,19 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
                                               pCfg->path_cert_srv, pCfg->path_cert_cli, pCfg->path_key_cli,
                                               pCfg->path_crl, pCfg->sc_lifetime, &pscConfig);
 
+    /* Store it to free it on SOPC_LibSub_Clear() */
+    if (SOPC_STATUS_OK == status)
+    {
+        if (!SOPC_Array_Append(pArrScConfig, pscConfig))
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
     /* Add it to the Toolkit */
     if (SOPC_STATUS_OK == status)
     {
+        /* TODO: store pscConfigs to free their content later */
         cfgId = SOPC_ToolkitClient_AddSecureChannelConfig(pscConfig);
         if (0 == cfgId)
         {
@@ -215,6 +238,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
     }
     else if (NULL != pCfgCpy)
     {
+        /* TODO: Free strings */
         free(pCfgCpy);
     }
 
