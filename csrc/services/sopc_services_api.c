@@ -155,7 +155,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_ACTIVATE_ORPHANED_SESSION session=%" PRIu32 " scCfgIdx=%" PRIuPTR,
                                id, auxParam);
 
-        if (auxParam <= INT32_MAX)
+        if (auxParam <= constants__t_channel_config_idx_i_max)
         {
             io_dispatch_mgr__internal_client_activate_orphaned_session(id,
                                                                        (constants__t_channel_config_idx_i) auxParam);
