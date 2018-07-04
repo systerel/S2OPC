@@ -22,14 +22,14 @@ MACHINE
 
 SEES
     constants
-    
+
 ABSTRACT_VARIABLES
     mi_queue_it,
     mi_iterator_it,
     nb_monitored_items_it,
     s_mi_to_iterate_it,
     s_mi_iterated_it
-    
+
 INVARIANT
     mi_queue_it : t_monitoredItemQueue_i &
     mi_iterator_it : t_monitoredItemQueueIterator_i &
@@ -40,7 +40,7 @@ INVARIANT
     s_mi_iterated_it <: t_monitoredItemPointer &
     s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
     card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it
-    
+
 INITIALISATION
     mi_queue_it := c_monitoredItemQueue_indet ||
     mi_iterator_it := c_monitoredItemQueueIterator_indet ||
@@ -49,7 +49,7 @@ INITIALISATION
     s_mi_iterated_it :(s_mi_iterated_it = {})
 
 OPERATIONS
-    
+
     continue, iterator <-- init_iter_monitored_item (p_queue) =
     PRE
         p_queue : t_monitoredItemQueue_i &
@@ -80,7 +80,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     clear_iter_monitored_item (p_iterator) =
     PRE
         p_iterator : t_monitoredItemQueueIterator_i &
@@ -95,14 +95,14 @@ OPERATIONS
     END
     ;
 
-    continue, 
+    continue,
     p_monitoredItem <-- continue_iter_monitored_item (p_iterator, p_queue) =
     PRE
         p_iterator : t_monitoredItemQueueIterator_i &
         mi_iterator_it = p_iterator &
         p_queue : t_monitoredItemQueue_i &
         p_queue : t_monitoredItemQueue &
-        mi_queue_it = p_queue & 
+        mi_queue_it = p_queue &
         s_mi_to_iterate_it /= {}
     THEN
         ANY l_monitoredItem WHERE

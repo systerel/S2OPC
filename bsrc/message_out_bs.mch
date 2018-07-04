@@ -47,7 +47,7 @@ INITIALISATION
     d_variables :( d_typing )
 
 OPERATIONS
-    
+
     nmsg_header <-- alloc_msg_header (p_is_request) =
     PRE
         c_msg_out_header = c_msg_header_indet &
@@ -93,7 +93,7 @@ OPERATIONS
         a_msg_out_type :: t_msg_type
     END
     ;
-    
+
     /* Consider response message as deallocated since responsibility was forwarded to application or postponed */
     forget_resp_msg_out (msg_header, msg) =
     PRE

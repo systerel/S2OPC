@@ -104,7 +104,7 @@ LOCAL_OPERATIONS
                  aid = e_aid_Value &
                  a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable)
              =>
-             serviceStatusCode : 
+             serviceStatusCode :
                {e_sc_bad_internal_error, e_sc_bad_attribute_id_invalid, e_sc_bad_node_id_unknown, e_sc_bad_write_not_supported} &
              a_Value = a_Value$0)
         )

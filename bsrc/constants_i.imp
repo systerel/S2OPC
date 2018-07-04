@@ -35,9 +35,9 @@ PROPERTIES
 
     t_BrowseValue = 1..k_n_BrowseResponse_max &
     cast_t_BrowseValue = id(t_BrowseValue) &
-    
+
     t_monitoredItemReqIndex = 1..k_n_monitoredItem_max &
-    
+
     t_monitoredItemNotifIndex = 1..k_n_monitoredItemNotif_max
 
 VALUES
@@ -51,7 +51,7 @@ VALUES
     c_WriteValue_indet = 0;
     c_BrowseValue_indet = 0;
     c_BrowseResult_indet = 0;
-    
+
     t_counter = NAT
 
 PROMOTES

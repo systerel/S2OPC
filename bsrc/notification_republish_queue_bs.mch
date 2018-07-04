@@ -22,24 +22,24 @@ MACHINE
 
 SEES
     constants
-    
+
 ABSTRACT_VARIABLES
     s_republishQueue,
     a_republish_notification,
     a_notification_seq_num
-    
+
 INVARIANT
     s_republishQueue <: t_notifRepublishQueue &
     a_republish_notification : t_notif_msg +-> t_notifRepublishQueue &
     a_notification_seq_num : t_notif_msg --> t_sub_seq_num
-    
+
 INITIALISATION
     s_republishQueue :(s_republishQueue = {}) ||
     a_republish_notification :(a_republish_notification = {}) ||
     a_notification_seq_num :(a_notification_seq_num = {})
 
 OPERATIONS
-    
+
     bres, queue <-- allocate_new_republish_queue =
     BEGIN
         IF s_republishQueue = t_notifRepublishQueue
@@ -59,7 +59,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     clear_republish_queue (p_queue) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -74,7 +74,7 @@ OPERATIONS
                                    a_republish_notification~[{p_queue}] <<| a_notification_seq_num$0)
     END
     ;
-    
+
     clear_and_deallocate_republish_queue (p_queue) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -90,7 +90,7 @@ OPERATIONS
         s_republishQueue := s_republishQueue - {p_queue}
     END
     ;
-    
+
     nb_notifs <-- get_nb_republish_notifs (p_queue) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -99,7 +99,7 @@ OPERATIONS
         nb_notifs :(nb_notifs = card(a_republish_notification~[{p_queue}]) & nb_notifs <= k_n_republishNotifPerSub_max)
     END
     ;
-    
+
     discard_oldest_republish_notif (p_queue) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -117,7 +117,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     bres <-- add_republish_notif_to_queue (p_queue, p_seq_num, p_notif_msg) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -130,14 +130,14 @@ OPERATIONS
     THEN
         CHOICE
             bres := FALSE
-        OR 
+        OR
             bres := TRUE ||
             a_republish_notification := a_republish_notification \/ {p_notif_msg |-> p_queue} ||
             a_notification_seq_num := a_notification_seq_num \/ {p_notif_msg |-> p_seq_num}
         END
     END
     ;
-    
+
     bres, p_notif_msg <-- get_republish_notif_from_queue (p_queue, p_seq_num) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -160,7 +160,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     bres <-- remove_republish_notif_from_queue (p_queue, p_seq_num) =
     PRE
         p_queue : t_notifRepublishQueue_i &

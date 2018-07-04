@@ -22,24 +22,24 @@ MACHINE
 
 SEES
     constants
-    
+
 ABSTRACT_VARIABLES
     s_monitoredItemPointer,
     s_monitoredItemId,
     a_monitoredItemId,
     a_monitoredItemSubs,
     a_monitoredItemNodeId
-    
+
 INVARIANT
-    
+
     s_monitoredItemPointer <: t_monitoredItemPointer &
     s_monitoredItemId <: t_monitoredItemId &
     a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
     a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
     a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId
-    
+
 INITIALISATION
-    
+
     s_monitoredItemPointer :(s_monitoredItemPointer <: t_monitoredItemPointer & s_monitoredItemPointer = {}) ||
     s_monitoredItemId :(s_monitoredItemId <: t_monitoredItemId & s_monitoredItemId = {}) ||
     a_monitoredItemId :(a_monitoredItemId : s_monitoredItemPointer <-> s_monitoredItemId & a_monitoredItemId = {}) ||
@@ -47,14 +47,14 @@ INITIALISATION
     a_monitoredItemNodeId :(a_monitoredItemNodeId : s_monitoredItemPointer <-> t_NodeId & a_monitoredItemNodeId = {})
 
 OPERATIONS
-    
+
     /* Needs UNINIT to deallocate dict and list */
     monitored_item_pointer_bs_UNINITIALISATION =
     BEGIN
         skip
     END
     ;
-    
+
     bres, monitoredItemPointer, monitoredItemId <-- create_monitored_item_pointer (p_subscription,
                                                                                    p_nid,
                                                                                    p_aid,
@@ -96,7 +96,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     delete_monitored_item_pointer (p_monitoredItemPointer) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &
@@ -109,14 +109,14 @@ OPERATIONS
         a_monitoredItemNodeId := {p_monitoredItemPointer} <<| a_monitoredItemNodeId
     END
     ;
-    
+
     p_monitoredItemId,
     p_subscription,
     p_nid,
     p_aid,
     p_timestampToReturn,
     p_monitoringMode,
-    p_clientHandle 
+    p_clientHandle
       <--getall_monitoredItemPointer (p_monitoredItemPointer) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &
@@ -145,7 +145,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     bres <-- is_notification_triggered (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &

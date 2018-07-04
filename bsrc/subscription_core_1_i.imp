@@ -60,62 +60,62 @@ INVARIANT
     a_subscription_session_i  : t_subscription_i --> t_session_i                               &
     a_session_subscription_i  : t_session_i --> t_subscription_i                               &
     dom(a_session_subscription_i |> s_subscription) = ran(s_subscription <| a_subscription_session_i |> t_session) &
-    
+
     a_subscription_session    = s_subscription <| a_subscription_session_i |> t_session        &
-    
+
     a_publishInterval_i       : t_subscription_i --> t_opcua_duration_i                        &
     dom(a_publishInterval)    = s_subscription                                                 &
     a_publishInterval         <: a_publishInterval_i                                           &
-    
+
     a_lifetimeExpCount_i      : t_subscription_i --> t_counter                                 &
     dom(a_lifetimeExpCount)   = s_subscription                                                 &
     a_lifetimeExpCount        <: a_lifetimeExpCount_i                                          &
-    
+
     a_keepAliveExpCount_i     : t_subscription_i --> t_counter                                 &
     dom(a_keepAliveExpCount)  = s_subscription                                                 &
     a_keepAliveExpCount       <: a_keepAliveExpCount_i                                         &
-    
+
     a_maxNotifsPerPublish_i   : t_subscription_i --> t_counter                                 &
     dom(a_maxNotifsPerPublish) = s_subscription                                                &
     a_maxNotifsPerPublish     <: a_maxNotifsPerPublish_i                                       &
-    
+
     a_PublishingEnabled_i     : t_subscription_i --> BOOL                                      &
     a_PublishingEnabled       = dom(s_subscription <| a_PublishingEnabled_i |> {TRUE})         &
-    
+
     a_MoreNotifications_i     : t_subscription_i --> BOOL                                      &
     a_MoreNotifications       = dom(s_subscription <| a_MoreNotifications_i |> {TRUE})         &
-    
+
     a_LifetimeCounter_i       : t_subscription_i --> t_counter                                 &
     dom(a_LifetimeCounter)    = s_subscription                                                 &
     a_LifetimeCounter         <: a_LifetimeCounter_i                                           &
-    
+
     a_KeepAliveCounter_i      : t_subscription_i --> t_counter                                 &
     dom(a_KeepAliveCounter)   = s_subscription                                                 &
     a_KeepAliveCounter        <: a_KeepAliveCounter_i                                          &
-    
+
     a_MessageSent_i           : t_subscription_i --> BOOL                                      &
     a_MessageSent             = dom(s_subscription <| a_MessageSent_i |> {TRUE})               &
-    
+
     a_SeqNum_i                : t_subscription_i --> t_sub_seq_num_i                           &
     dom(a_SeqNum)             = s_subscription                                                 &
     a_SeqNum                  = s_subscription <| a_SeqNum_i |> t_sub_seq_num                  &
-    
+
     a_pendingNotificationQueue_i : t_subscription_i --> t_notificationQueue_i                  &
     dom(a_pendingNotificationQueue) = s_subscription                                           &
     a_pendingNotificationQueue   = s_subscription <| a_pendingNotificationQueue_i |> t_notificationQueue &
-    
+
     a_publishRequestQueue_i      : t_subscription_i --> t_publishReqQueue_i                    &
     dom(a_publishRequestQueue)   = s_subscription                                              &
     a_publishRequestQueue        = s_subscription <| a_publishRequestQueue_i |> t_publishReqQueue &
-    
+
     a_notifRepublishQueue_i      : t_subscription_i --> t_notifRepublishQueue_i                &
     dom(a_notifRepublishQueue)   = s_subscription                                              &
     a_notifRepublishQueue        = s_subscription <| a_notifRepublishQueue_i |> t_notifRepublishQueue &
-    
+
     a_monitoredItemQueue_i       : t_subscription_i --> t_monitoredItemQueue_i                 &
     dom(a_monitoredItemQueue)    = s_subscription                                              &
     a_monitoredItemQueue         = s_subscription <| a_monitoredItemQueue_i |> t_monitoredItemQueue &
-    
+
     a_publishTimer_i             : t_subscription_i --> t_timer_id_i                           &
     dom(a_publishTimer)          = s_subscription                                              &
     a_publishTimer               = s_subscription <| a_publishTimer_i |> t_timer_id
@@ -142,27 +142,27 @@ INITIALISATION
     a_publishTimer_i             := t_subscription_i * {c_timer_id_indet}
 
 OPERATIONS
-    
+
     is_valid <-- is_valid_subscription (p_subscription) =
     BEGIN
         is_valid := s_subscription_i(p_subscription)
     END
     ;
-    
+
     p_dom, p_subscription <-- getall_subscription (p_session) =
     BEGIN
         p_subscription := a_session_subscription_i(p_session);
         p_dom := s_subscription_i(p_subscription)
     END
     ;
-    
+
     remove_subscription_session (p_subscription, p_session) =
     BEGIN
         a_subscription_session_i(p_subscription) := c_session_indet;
         a_session_subscription_i(p_session) := c_subscription_indet
     END
     ;
-    
+
     add_subscription (p_subscription,
                       p_session,
                       p_revPublishInterval,
@@ -179,7 +179,7 @@ OPERATIONS
 
         s_subscription_i(p_subscription) := TRUE;
         a_subscription_state_i(p_subscription) := e_subscriptionState_normal;
-        
+
         a_subscription_session_i(p_subscription) := p_session;
         a_session_subscription_i(p_session) := p_subscription;
         a_publishInterval_i(p_subscription) := p_revPublishInterval;
@@ -199,12 +199,12 @@ OPERATIONS
         a_SeqNum_i (p_subscription) := c_sub_seq_num_init
     END
     ;
-    
+
     delete_subscription (p_subscription) =
     BEGIN
         s_subscription_i(p_subscription) := FALSE;
         a_subscription_state_i(p_subscription) := c_subscriptionState_indet;
-        
+
         a_subscription_session_i(p_subscription) := c_session_indet;
         a_session_subscription_i(a_subscription_session_i(p_subscription)) := c_subscription_indet;
         a_publishInterval_i(p_subscription) := c_opcua_duration_indet;
@@ -223,167 +223,167 @@ OPERATIONS
         a_publishTimer_i(p_subscription) := c_timer_id_indet
     END
     ;
-    
+
     p_publishInterval <-- get_subscription_publishInterval (p_subscription) =
     BEGIN
         p_publishInterval := a_publishInterval_i (p_subscription)
     END
     ;
-    
+
     set_subscription_publishInterval (p_subscription, p_revPublishInterval) =
     BEGIN
         a_publishInterval_i (p_subscription) := p_revPublishInterval
     END
     ;
-    
+
     set_subscription_timer_id (p_subscription, p_timer_id) =
     BEGIN
         a_publishTimer_i (p_subscription) := p_timer_id
     END
     ;
-    
+
     p_timer_id <-- get_subscription_timer_id (p_subscription) =
     BEGIN
         p_timer_id := a_publishTimer_i (p_subscription)
     END
     ;
-    
+
     set_subscription_state (p_subscription, p_state) =
     BEGIN
         a_subscription_state_i(p_subscription) := p_state
     END
     ;
-    
+
     p_state <-- get_subscription_state (p_subscription) =
     BEGIN
         p_state := a_subscription_state_i(p_subscription)
     END
     ;
-    
+
     set_subscription_MoreNotifications (p_subscription, p_moreNotifs) =
     BEGIN
         a_MoreNotifications_i(p_subscription) := p_moreNotifs
     END
     ;
-    
+
     p_moreNotifs <-- get_subscription_MoreNotifications (p_subscription) =
     BEGIN
         p_moreNotifs := a_MoreNotifications_i(p_subscription)
     END
     ;
-    
+
     set_subscription_MaxLifetimeAndKeepAliveCount (p_subscription, p_revLifetimeCount, p_revMaxKeepAlive) =
     BEGIN
         a_lifetimeExpCount_i(p_subscription) := p_revLifetimeCount;
         a_keepAliveExpCount_i(p_subscription) := p_revMaxKeepAlive
     END
     ;
-    
+
     decrement_subscription_LifetimeCounter (p_subscription) =
     BEGIN
         a_LifetimeCounter_i(p_subscription) := a_LifetimeCounter_i(p_subscription) - 1
     END
     ;
-    
+
     reset_subscription_LifetimeCounter (p_subscription) =
     BEGIN
         a_LifetimeCounter_i(p_subscription) := a_lifetimeExpCount_i(p_subscription)
     END
     ;
-    
+
     p_lifetimeCounter <-- get_subscription_LifetimeCounter (p_subscription) =
     BEGIN
         p_lifetimeCounter := a_LifetimeCounter_i(p_subscription)
     END
     ;
-    
+
     decrement_subscription_KeepAliveCounter (p_subscription) =
     BEGIN
         a_KeepAliveCounter_i(p_subscription) := a_KeepAliveCounter_i(p_subscription) - 1
     END
     ;
-    
+
     reset_subscription_KeepAliveCounter (p_subscription) =
     BEGIN
         a_KeepAliveCounter_i(p_subscription) := a_keepAliveExpCount_i(p_subscription)
     END
     ;
-    
+
     p_keepAliveCounter <-- get_subscription_KeepAliveCounter (p_subscription) =
     BEGIN
         p_keepAliveCounter := a_KeepAliveCounter_i(p_subscription)
     END
     ;
-    
+
     set_subscription_MaxNotifsPerPublish (p_subscription, p_maxNotificationsPerPublish) =
     BEGIN
         a_maxNotifsPerPublish_i (p_subscription) := p_maxNotificationsPerPublish
     END
     ;
-    
+
     p_maxNotificationsPerPublish <-- get_subscription_MaxNotifsPerPublish (p_subscription) =
     BEGIN
         p_maxNotificationsPerPublish := a_maxNotifsPerPublish_i (p_subscription)
     END
     ;
-    
+
     set_subscription_MessageSent (p_subscription) =
     BEGIN
         a_MessageSent_i(p_subscription) :=  TRUE
     END
     ;
-    
+
     p_firstMsgSent <-- get_subscription_MessageSent (p_subscription) =
     BEGIN
         p_firstMsgSent := a_MessageSent_i(p_subscription)
     END
     ;
-    
+
     set_subscription_PublishingEnabled (p_subscription, p_pubEnabled) =
     BEGIN
         a_PublishingEnabled_i(p_subscription) := p_pubEnabled
     END
     ;
-    
+
     p_pubEnabled <-- get_subscription_PublishingEnabled (p_subscription) =
     BEGIN
         p_pubEnabled := a_PublishingEnabled_i(p_subscription)
     END
     ;
-    
+
     set_subscription_SeqNum (p_subscription, p_nextSeqNum) =
     BEGIN
         a_SeqNum_i(p_subscription) := p_nextSeqNum
     END
     ;
-    
+
     p_seqNumToSend <-- get_subscription_SeqNum (p_subscription) =
     BEGIN
         p_seqNumToSend := a_SeqNum_i(p_subscription)
     END
     ;
-    
+
     p_notificationQueue <-- get_subscription_notificationQueue (p_subscription) =
     BEGIN
         p_notificationQueue := a_pendingNotificationQueue_i(p_subscription)
     END
     ;
-    
+
     p_publishReqQueue <-- get_subscription_publishRequestQueue (p_subscription) =
     BEGIN
         p_publishReqQueue := a_publishRequestQueue_i(p_subscription)
     END
     ;
-    
+
     p_republishQueue <-- get_subscription_notifRepublishQueue (p_subscription) =
     BEGIN
         p_republishQueue := a_notifRepublishQueue_i(p_subscription)
     END
     ;
-    
+
     p_monitoredItemQueue <-- get_subscription_monitoredItemQueue (p_subscription) =
     BEGIN
         p_monitoredItemQueue := a_monitoredItemQueue_i(p_subscription)
-    END  
-    
+    END
+
 END

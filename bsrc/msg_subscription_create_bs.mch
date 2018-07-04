@@ -24,9 +24,9 @@ SEES
     constants,
     message_in_bs,
     message_out_bs
-    
+
 OPERATIONS
-   
+
     reqPublishInterval, reqLifetimeCount, reqMaxKeepAlive, maxNotificationsPerPublish, publishEnabled
       <-- get_msg_create_subscription_req_params (p_req_msg) =
     PRE
@@ -47,9 +47,9 @@ OPERATIONS
           publishEnabled : BOOL)
     END
     ;
-  
+
     set_msg_create_subscription_resp_params (p_resp_msg,
-                                             p_subscription, 
+                                             p_subscription,
                                              p_revisedPublishInterval,
                                              p_revisedLifetimeCount,
                                              p_revisedMaxKeepAlive) =
@@ -63,12 +63,12 @@ OPERATIONS
         p_revisedPublishInterval : t_opcua_duration_i &
         p_revisedLifetimeCount : t_counter &
         p_revisedMaxKeepAlive : t_counter &
-        p_revisedLifetimeCount >= 3 * p_revisedMaxKeepAlive /* part 4 table 86 */ 
+        p_revisedLifetimeCount >= 3 * p_revisedMaxKeepAlive /* part 4 table 86 */
     THEN
         skip
     END
     ;
-    
+
     subscription, reqPublishInterval, reqLifetimeCount, reqMaxKeepAlive, maxNotificationsPerPublish
       <-- get_msg_modify_subscription_req_params (p_req_msg) =
     PRE
@@ -89,7 +89,7 @@ OPERATIONS
           maxNotificationsPerPublish : t_counter)
     END
     ;
-  
+
     set_msg_modify_subscription_resp_params (p_resp_msg,
                                              p_revisedPublishInterval,
                                              p_revisedLifetimeCount,
@@ -102,7 +102,7 @@ OPERATIONS
         p_revisedPublishInterval : t_opcua_duration_i &
         p_revisedLifetimeCount : t_counter &
         p_revisedMaxKeepAlive : t_counter &
-        p_revisedLifetimeCount >= 3 * p_revisedMaxKeepAlive /* part 4 table 86 */ 
+        p_revisedLifetimeCount >= 3 * p_revisedMaxKeepAlive /* part 4 table 86 */
     THEN
         skip
     END

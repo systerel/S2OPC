@@ -515,11 +515,11 @@ OPERATIONS
             /* Channel must be the same and user must be set */
             IF l_channel = channel
             THEN
-                l_valid <-- server_internal_activate_req_and_resp (channel, 
-                                                                   session, 
-                                                                   e_session_creating, 
-                                                                   user, 
-                                                                   activate_req_msg, 
+                l_valid <-- server_internal_activate_req_and_resp (channel,
+                                                                   session,
+                                                                   e_session_creating,
+                                                                   user,
+                                                                   activate_req_msg,
                                                                    activate_resp_msg);
                 IF l_valid = TRUE THEN
                     l_ret := e_sc_ok
@@ -536,11 +536,11 @@ OPERATIONS
             IF l_channel = channel &
                 l_user /= user
             THEN
-                l_valid <-- server_internal_activate_req_and_resp (channel, 
-                                                                   session, 
-                                                                   e_session_userActivating, 
-                                                                   user, 
-                                                                   activate_req_msg, 
+                l_valid <-- server_internal_activate_req_and_resp (channel,
+                                                                   session,
+                                                                   e_session_userActivating,
+                                                                   user,
+                                                                   activate_req_msg,
                                                                    activate_resp_msg);
                 IF l_valid = TRUE THEN
                     l_ret := e_sc_ok
@@ -551,11 +551,11 @@ OPERATIONS
             ELSIF l_channel /= channel &
                 l_user = user
             THEN
-                l_valid <-- server_internal_activate_req_and_resp (channel, 
-                                                                   session, 
+                l_valid <-- server_internal_activate_req_and_resp (channel,
+                                                                   session,
                                                                    e_session_scActivating,
-                                                                   user, 
-                                                                   activate_req_msg, 
+                                                                   user,
+                                                                   activate_req_msg,
                                                                    activate_resp_msg);
                 IF l_valid = TRUE THEN
                     l_ret := e_sc_ok
@@ -572,11 +572,11 @@ OPERATIONS
             IF l_channel /= channel &
                 l_user = user
             THEN
-                l_valid <-- server_internal_activate_req_and_resp (channel, 
-                                                                   session, 
+                l_valid <-- server_internal_activate_req_and_resp (channel,
+                                                                   session,
                                                                    e_session_scActivating,
-                                                                   user, 
-                                                                   activate_req_msg, 
+                                                                   user,
+                                                                   activate_req_msg,
                                                                    activate_resp_msg);
                 IF l_valid = TRUE THEN
                     l_ret := e_sc_ok

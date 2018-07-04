@@ -24,19 +24,19 @@ SEES
     constants,
     message_in_bs,
     message_out_bs
-    
+
 ABSTRACT_VARIABLES
     set_publishing_mode_req_sub_id,
     set_publishing_mode_resp_allocated,
     set_publishing_mode_resp_StatusCode,
-    nb_set_publishing_mode    
-    
+    nb_set_publishing_mode
+
 INVARIANT
     set_publishing_mode_req_sub_id : 1..k_n_genericOperationPerReq_max +-> t_subscription_i &
     set_publishing_mode_resp_allocated : BOOL &
     set_publishing_mode_resp_StatusCode : 1..k_n_genericOperationPerReq_max +-> t_StatusCode &
     nb_set_publishing_mode : NAT
-    
+
 INITIALISATION
     set_publishing_mode_req_sub_id :(set_publishing_mode_req_sub_id = {}) ||
     set_publishing_mode_resp_allocated := FALSE ||
@@ -44,7 +44,7 @@ INITIALISATION
     nb_set_publishing_mode := 0
 
 OPERATIONS
-    
+
     p_nb_reqs, p_pub_enabled <-- getall_msg_subscription_set_publishing_mode_params (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
@@ -58,7 +58,7 @@ OPERATIONS
           set_publishing_mode_req_sub_id : 1..p_nb_reqs --> t_subscription_i)
     END
     ;
-    
+
     p_sub_id <-- getall_msg_set_publishing_mode_at_index (p_req_msg, p_index) =
     PRE
         p_req_msg : t_msg_i &
@@ -72,8 +72,8 @@ OPERATIONS
     THEN
         p_sub_id :(p_sub_id : t_subscription_i)
     END
-    ;    
-    
+    ;
+
     bres <-- allocate_msg_subscription_set_publishing_mode_resp_results_array (p_resp_msg, l_nb_reqs) =
     PRE
         p_resp_msg : t_msg_i &
@@ -89,8 +89,8 @@ OPERATIONS
         :(bres : BOOL & set_publishing_mode_resp_allocated = bres)
     END
     ;
-    
-    setall_msg_subscription_set_publishing_mode_resp_at_index (p_resp_msg, p_index, p_valid_sub) = 
+
+    setall_msg_subscription_set_publishing_mode_resp_at_index (p_resp_msg, p_index, p_valid_sub) =
     PRE
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &

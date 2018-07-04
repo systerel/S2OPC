@@ -600,7 +600,7 @@ OPERATIONS
         bres := bool(msg_typ = a_msg_in_type & a_msg_in_type : t_msg_type)
     END
     ;
-    
+
     bres, msg_typ <-- is_valid_app_msg_out (msg) =
     PRE
         msg : t_msg_i
@@ -705,9 +705,9 @@ OPERATIONS
     THEN
         skip
     END;
-    
+
     /* SUBSCRIPTION PROMOTED */
-    
+
     is_valid <-- is_valid_subscription (p_subscription) =
     PRE
         p_subscription : t_subscription_i
@@ -715,7 +715,7 @@ OPERATIONS
         is_valid := bool(p_subscription : t_subscription)
     END
     ;
-    
+
     server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
     PRE
         p_old_write_value_pointer : t_WriteValuePointer_i &
@@ -726,7 +726,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     server_subscription_publish_timeout (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
@@ -735,7 +735,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     server_subscription_session_inactive (p_session, p_newSessionState) =
     PRE
         p_session : t_session_i &
@@ -745,7 +745,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     service_mgr_UNINITIALISATION =
     BEGIN
         skip

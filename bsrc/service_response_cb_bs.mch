@@ -64,7 +64,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     srv_write_notification (write_value_pointer, write_status) =
     PRE
         write_value_pointer : t_WriteValuePointer_i &

@@ -19,7 +19,7 @@
 
 MACHINE
     msg_subscription_publish_ack_bs
-    
+
 SEES
     constants,
     message_in_bs,
@@ -54,7 +54,7 @@ INITIALISATION
     subscription_available_seq_nums_resp_SeqNum :(subscription_available_seq_nums_resp_SeqNum = {})
 
 OPERATIONS
-    
+
     req_expiration_time <-- get_msg_header_expiration_time (p_req_header) =
     PRE
         p_req_header : t_msg_header_i &
@@ -65,7 +65,7 @@ OPERATIONS
         req_expiration_time :(req_expiration_time : t_timeref_i & req_expiration_time : t_timeref)
     END
     ;
-    
+
     p_nb_acks <-- get_msg_publish_request_ack_params (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
@@ -73,12 +73,12 @@ OPERATIONS
         p_req_msg = c_msg_in &
         a_msg_in_type = e_msg_subscription_publish_req
     THEN
-        p_nb_acks, nb_subscription_acks, subscription_ack_req_ackSeqNum 
+        p_nb_acks, nb_subscription_acks, subscription_ack_req_ackSeqNum
         :(p_nb_acks : NAT & p_nb_acks = nb_subscription_acks &
           subscription_ack_req_ackSeqNum : 1..p_nb_acks --> t_sub_seq_num_i)
     END
     ;
-    
+
     p_sub, p_seq_num <-- getall_msg_publish_request_ack (p_req_msg, p_index) =
     PRE
         p_req_msg : t_msg_i &
@@ -93,7 +93,7 @@ OPERATIONS
         p_seq_num := subscription_ack_req_ackSeqNum (p_index)
     END
     ;
-    
+
     bres <-- allocate_subscription_ack_results (p_resp_msg, p_nb_acks) =
     PRE
         p_resp_msg : t_msg_i &
@@ -108,7 +108,7 @@ OPERATIONS
         :(bres : BOOL & bres = subscription_ack_resp_allocated)
     END
     ;
-    
+
     setall_msg_publish_resp_ack_result (p_resp_msg, p_index, p_sc) =
     PRE
         p_resp_msg : t_msg_i &
@@ -125,7 +125,7 @@ OPERATIONS
         subscription_ack_resp_StatusCode (p_index) := p_sc
     END
     ;
-    
+
     bres <-- allocate_subscription_available_seq_nums (p_resp_msg, p_nb_seq_num) =
     PRE
         p_resp_msg : t_msg_i &
@@ -142,7 +142,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     setall_msg_publish_resp_available_seq_num (p_resp_msg, p_index, p_seq_num) =
     PRE
         p_resp_msg : t_msg_i &
@@ -157,7 +157,7 @@ OPERATIONS
         subscription_available_seq_nums_resp_SeqNum (p_index) := p_seq_num
     END
     ;
-    
+
     l_sub, l_seq_num <-- getall_msg_republish_request (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
@@ -168,14 +168,14 @@ OPERATIONS
         l_sub, l_seq_num :(l_sub : t_subscription_i & l_seq_num : t_sub_seq_num_i)
     END
     ;
-    
+
     setall_msg_republish_response (p_resp_msg, l_notifMsg) =
     PRE
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_subscription_republish_resp &
-        l_notifMsg : t_notif_msg_i & 
+        l_notifMsg : t_notif_msg_i &
         l_notifMsg : t_notif_msg
     THEN
         skip

@@ -23,25 +23,25 @@ MACHINE
 SEES
     constants,
     monitored_item_queue_bs
-    
+
 ABSTRACT_VARIABLES
     a_nodeToMonitoredItemQueue
-    
+
 INVARIANT
     a_nodeToMonitoredItemQueue : t_NodeId --> t_monitoredItemQueue
-    
+
 INITIALISATION
     a_nodeToMonitoredItemQueue :(a_nodeToMonitoredItemQueue : t_NodeId --> s_monitoredItemQueue)
-    
+
 OPERATIONS
-    
+
     /* Needs UNINIT to deallocate node to monitored item queues */
     subscription_core_bs_UNINITIALISATION =
     BEGIN
         skip
     END
     ;
-    
+
     p_bres, p_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_nid) =
     PRE
         p_nid : t_NodeId_i &
@@ -52,12 +52,12 @@ OPERATIONS
             p_monitoredItemQueue := c_monitoredItemQueue_indet
         OR
             p_bres := TRUE ||
-            p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i & 
+            p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i &
                 p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid))
         END
     END
     ;
-    
+
     revisedPublishInterval, revisedLifetimeCount, revisedMaxKeepAlive, revisedMaxNotificationsPerPublish
       <-- compute_create_subscription_revised_params (p_reqPublishInterval,
                                                       p_reqLifetimeCount,
@@ -84,7 +84,7 @@ OPERATIONS
             )
     END
     ;
-    
+
     bres, timerId <-- create_periodic_publish_timer (p_subscription, p_publishInterval) =
     PRE
         p_subscription : t_subscription_i &
@@ -100,7 +100,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     modify_publish_timer_period (p_timerId, p_revPublishInterval) =
     PRE
         p_timerId : t_timer_id_i &
@@ -110,7 +110,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     delete_publish_timer (p_timer_id) =
     PRE
         p_timer_id : t_timer_id_i &
@@ -119,7 +119,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     p_next_seq_num <-- get_next_subscription_sequence_number (p_prev_seq_num) =
     PRE
         p_prev_seq_num : t_sub_seq_num_i &
@@ -127,5 +127,5 @@ OPERATIONS
     THEN
         p_next_seq_num :(p_next_seq_num : t_sub_seq_num_i & p_next_seq_num : t_sub_seq_num)
     END
-    
+
 END

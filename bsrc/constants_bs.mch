@@ -228,54 +228,54 @@ PROPERTIES
     t_notif_msg <: t_notif_msg_i &
     c_notif_msg_indet : t_notif_msg_i &
     c_notif_msg_indet /: t_notif_msg &
-    
+
     t_sub_seq_num <: t_sub_seq_num_i &
     c_sub_seq_num_indet : t_sub_seq_num_i &
     c_sub_seq_num_indet /: t_sub_seq_num &
-    
+
     c_sub_seq_num_init : t_sub_seq_num_i &
     c_sub_seq_num_init : t_sub_seq_num &
-    
+
     t_timeref <: t_timeref_i &
     c_timeref_indet : t_timeref_i &
     c_timeref_indet /: t_timeref &
-    
+
     c_opcua_duration_indet : t_opcua_duration_i &
     c_opcua_duration_zero : t_opcua_duration_i &
-    
+
     t_notificationQueue <: t_notificationQueue_i &
     c_notificationQueue_indet : t_notificationQueue_i &
     c_notificationQueue_indet /: t_notificationQueue &
-    
+
     t_publishReqQueue <: t_publishReqQueue_i &
     c_publishReqQueue_indet : t_publishReqQueue_i &
     c_publishReqQueue_indet /: t_publishReqQueue &
-    
+
     t_notifRepublishQueue <: t_notifRepublishQueue_i &
     c_notifRepublishQueue_indet : t_notifRepublishQueue_i &
     c_notifRepublishQueue_indet /: t_notifRepublishQueue &
-    
+
     t_notifRepublishQueueIterator <: t_notifRepublishQueueIterator_i &
     c_notifRepublishQueueIterator_indet : t_notifRepublishQueueIterator_i &
     c_notifRepublishQueueIterator_indet /: t_notifRepublishQueueIterator &
-    
+
     t_monitoredItemQueue <: t_monitoredItemQueue_i &
     c_monitoredItemQueue_indet : t_monitoredItemQueue_i &
     c_monitoredItemQueue_indet /: t_monitoredItemQueue &
-    
+
     t_monitoredItemQueueIterator <: t_monitoredItemQueueIterator_i &
     c_monitoredItemQueueIterator_indet : t_monitoredItemQueueIterator_i &
     c_monitoredItemQueueIterator_indet /: t_monitoredItemQueueIterator &
-    
+
     t_monitoredItemPointer <: t_monitoredItemPointer_i &
     c_monitoredItemPointer_indet : t_monitoredItemPointer_i &
     c_monitoredItemPointer_indet /: t_monitoredItemPointer &
-    
+
     t_monitoredItemId <: t_monitoredItemId_i &
     c_monitoredItemId_indet : t_monitoredItemId_i &
     c_monitoredItemId_indet /: t_monitoredItemId &
-    
-    
+
+
     t_msg_header <: t_msg_header_i &
     c_msg_header_indet : t_msg_header_i &
     c_msg_header_indet /: t_msg_header &
@@ -325,7 +325,7 @@ PROPERTIES
     t_WriteValuePointer <: t_WriteValuePointer_i &
     c_WriteValuePointer_indet : t_WriteValuePointer_i &
     c_WriteValuePointer_indet /: t_WriteValuePointer &
-    
+
     t_timer_id <: t_timer_id_i &
     c_timer_id_indet : t_timer_id_i &
     c_timer_id_indet /: t_timer_id
@@ -409,13 +409,13 @@ OPERATIONS
         p_nid     :: t_NodeId_i
     END
     ;
-    
+
     p_card_subscription <-- get_card_t_subscription =
     BEGIN
         p_card_subscription := card(t_subscription)
     END
     ;
-    
+
     p_subscription <-- get_cast_t_subscription(p_ind) =
     PRE
         p_ind : NAT &

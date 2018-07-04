@@ -30,7 +30,7 @@ SEES
     constants,
     message_in_bs,
     message_out_bs
-    
+
 PROMOTES
     getall_monitored_item_req_params,
     alloc_msg_create_monitored_items_resp_results,
@@ -69,6 +69,6 @@ OPERATIONS
                 p_sc := e_sc_ok
             END
         END
-    END    
+    END
 
 END

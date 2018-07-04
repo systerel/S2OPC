@@ -19,7 +19,7 @@
 
 MACHINE
     subscription_core_it
-    
+
 SEES
     constants
 
@@ -68,5 +68,5 @@ OPERATIONS
             p_continue               := bool(subscriptions_to_iterate /= {l_subscription})
         END
     END
-    
+
 END

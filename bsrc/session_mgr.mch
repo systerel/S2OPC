@@ -136,7 +136,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     is_valid_res, status_code_err, channel <-- server_validate_session_service_resp (session) =
     PRE
         session  : t_session_i &

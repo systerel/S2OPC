@@ -1499,7 +1499,7 @@ OPERATIONS
         dealloc_msg_out (publish_resp_msg)
     END
     ;
-    
+
     service_mgr_UNINITIALISATION =
     BEGIN
         subscription_mgr_UNINITIALISATION;

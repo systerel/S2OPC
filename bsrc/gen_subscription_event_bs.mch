@@ -19,13 +19,13 @@
 
 MACHINE
     gen_subscription_event_bs
-    
+
 SEES
     constants,
     message_in_bs,
     message_out_bs
-    
-OPERATIONS    
+
+OPERATIONS
 
     gen_data_changed_event (p_prev_value, p_prev_value_status, p_new_value_pointer) =
     PRE

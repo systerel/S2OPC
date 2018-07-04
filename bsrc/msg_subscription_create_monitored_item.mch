@@ -24,17 +24,17 @@ SEES
     constants,
     message_in_bs,
     message_out_bs
-    
+
 DEFINITIONS
     d_inv == (
         nb_monitored_items : NAT &
         nb_monitored_items <= k_n_monitoredItem_max &
-        
+
         MonitoredItemReq_NodeId      : t_monitoredItemReqIndex +-> t_NodeId &
         MonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId_i &
         MonitoredItemReq_ValidMonitoringMode : t_monitoredItemReqIndex +-> BOOL &
         MonitoredItemReq_FilterPresence : t_monitoredItemReqIndex +-> BOOL &
-        
+
         MonitoredItemResp_Allocated : BOOL &
         MonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
         MonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode
@@ -62,9 +62,9 @@ INITIALISATION
     MonitoredItemResp_Allocated := FALSE ||
     MonitoredItemResp_Id := {}         ||
     MonitoredItemResp_StatusCode := {}
-    
-OPERATIONS  
-    
+
+OPERATIONS
+
     p_sc, p_subscription, p_timestampToRet, p_nb_monitored_items <-- getall_msg_create_monitored_items_req_params (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
@@ -104,7 +104,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     /* Filters and DiscardOldest not extracted => not managed */
     p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize <-- getall_monitored_item_req_params (p_req_msg, p_index) =
     PRE
@@ -120,11 +120,11 @@ OPERATIONS
         p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize
         :(p_bres : BOOL &
           p_sc : t_StatusCode_i & p_sc : t_StatusCode &
-          p_sc : {e_sc_ok, e_sc_bad_attribute_id_invalid, 
-                  e_sc_bad_monitoring_mode_invalid, 
+          p_sc : {e_sc_ok, e_sc_bad_attribute_id_invalid,
+                  e_sc_bad_monitoring_mode_invalid,
                   e_sc_bad_monitored_item_filter_unsupported} &
           p_nid : t_NodeId_i &
-          p_aid : t_AttributeId_i & 
+          p_aid : t_AttributeId_i &
           p_monitMode : t_monitoringMode_i &
           p_clientHandle : t_client_handle_i &
           p_samplingItv : t_opcua_duration_i &
@@ -137,14 +137,14 @@ OPERATIONS
            p_monitMode : t_monitoringMode) &
           (p_index /: dom(MonitoredItemReq_AttributeId) =>
            p_sc = e_sc_bad_attribute_id_invalid) &
-          (MonitoredItemReq_ValidMonitoringMode(p_index) = FALSE => 
+          (MonitoredItemReq_ValidMonitoringMode(p_index) = FALSE =>
            p_sc = e_sc_bad_monitoring_mode_invalid) &
-          (MonitoredItemReq_FilterPresence(p_index) = TRUE => 
+          (MonitoredItemReq_FilterPresence(p_index) = TRUE =>
            p_sc = e_sc_bad_monitored_item_filter_unsupported)
          )
     END
     ;
-    
+
     bres <-- alloc_msg_create_monitored_items_resp_results (p_resp_msg, p_nb_results) =
     PRE
         p_resp_msg : t_msg_i &
@@ -156,12 +156,12 @@ OPERATIONS
         p_nb_results = nb_monitored_items
     THEN
         bres, MonitoredItemResp_Allocated
-        :(bres : BOOL & 
-          MonitoredItemResp_Allocated : BOOL & 
+        :(bres : BOOL &
+          MonitoredItemResp_Allocated : BOOL &
           MonitoredItemResp_Allocated = bres)
     END
     ;
-    
+
     setall_msg_monitored_item_resp_params (p_resp_msg, p_index, p_sc, p_monitored_item_id, p_revSamplingItv, p_revQueueSize) =
     PRE
         p_resp_msg : t_msg_i &

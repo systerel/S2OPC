@@ -144,7 +144,7 @@ OPERATIONS
         a_buffer_in_state := c_buffer_in_state_indet
     END
     ;
-    
+
     /* Accept a message that was allocated by another part of the program */
     bless_msg_in (msg) =
     PRE

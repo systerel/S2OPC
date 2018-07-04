@@ -80,7 +80,7 @@ SETS
                       e_sc_bad_subscription_id_invalid,
                       e_sc_bad_sequence_number_unknown,
                       e_sc_bad_too_many_monitored_items,
-                      e_sc_bad_monitoring_mode_invalid, 
+                      e_sc_bad_monitoring_mode_invalid,
                       e_sc_bad_monitored_item_filter_unsupported,
                       e_sc_bad_too_many_publish_requests,
                       e_sc_bad_message_not_available,
@@ -100,7 +100,7 @@ SETS
                               e_ttr_neither};
 
     /* INDEXES */
-         
+
     /* A ReadValue of a ReadRequest. The size of that will define the nb_max_read_value. */
     t_ReadValue_i;
 
@@ -112,7 +112,7 @@ SETS
     t_BrowseValue_i;
     t_BrowseResult_i;
 
-    
+
     t_byte_buffer_i; /* (SOPC_Buffer*) */
     t_LocalizedText_i; /* (SOPC_LocalizedText*) */
     t_QualifiedName_i; /* (SOPC_QualifiedName*) */
@@ -143,10 +143,10 @@ SETS
         e_session_closing,
         e_session_closed};
 
-    
+
     /* SUBSCRIPTION TYPES */
     t_subscription_i;
-    
+
     t_subscriptionState_i = {
         c_subscriptionState_indet, /* includes e_subscription_closed */
         /* e_subscriptionState_creating, => not necesssary */
@@ -166,18 +166,18 @@ SETS
     t_notifRepublishQueueIterator_i; /* (SOPC_SLinkedListIterator*) */
     t_monitoredItemQueue_i;  /* (SOPC_SLinkedList*) */
     t_monitoredItemQueueIterator_i; /* (SOPC_SLinkedListIterator*) */
-    
-    /* Subscription (monitored item) */   
+
+    /* Subscription (monitored item) */
     t_monitoringMode_i = {
         c_monitoringMode_indet,
         e_monitoringMode_disabled,
         e_monitoringMode_sampling,
         e_monitoringMode_reporting
     };
-    
+
     t_monitoredItemPointer_i;
     t_monitoredItemId_i;
-    
+
     t_client_handle_i; /* uint32_t */
 
     t_SecurityPolicy = {
@@ -346,7 +346,7 @@ CONCRETE_CONSTANTS
     c_server_request_handle_any,
     c_no_application_context,
     c_timer_id_indet,
-    
+
     t_counter
 
 ABSTRACT_CONSTANTS
@@ -506,11 +506,11 @@ PROPERTIES
     c_WriteValue_indet /: t_WriteValue &
     cast_t_WriteValue : NAT +-> t_WriteValue_i &
     cast_t_WriteValue : perm(t_WriteValue) &
-    
+
     t_WriteValuePointer <: t_WriteValuePointer_i &
     c_WriteValuePointer_indet : t_WriteValuePointer_i &
     c_WriteValuePointer_indet /: t_WriteValuePointer &
-    
+
     t_BrowseValue <: t_BrowseValue_i &
     c_BrowseValue_indet : t_BrowseValue_i &
     c_BrowseValue_indet /: t_BrowseValue &
@@ -576,7 +576,7 @@ PROPERTIES
     t_user_token <: t_user_token_i &
     c_user_token_indet : t_user_token_i &
     c_user_token_indet /: t_user_token &
-    
+
     t_subscription <: t_subscription_i &
     c_subscription_indet : t_subscription_i &
     c_subscription_indet /: t_subscription &
@@ -584,61 +584,61 @@ PROPERTIES
     cast_t_subscription : perm(t_subscription) &
 
     t_subscriptionState = t_subscriptionState_i - {c_subscriptionState_indet} &
-    
+
     t_counter = NAT &
-    
+
     t_notif_msg <: t_notif_msg_i &
     c_notif_msg_indet : t_notif_msg_i &
     c_notif_msg_indet /: t_notif_msg &
-    
+
     t_sub_seq_num <: t_sub_seq_num_i &
     c_sub_seq_num_indet : t_sub_seq_num_i &
     c_sub_seq_num_indet /: t_sub_seq_num &
-    
+
     c_sub_seq_num_init : t_sub_seq_num_i &
     c_sub_seq_num_init : t_sub_seq_num &
-    
+
     t_timeref <: t_timeref_i &
     c_timeref_indet : t_timeref_i &
     c_timeref_indet /: t_timeref &
-    
+
     c_opcua_duration_indet : t_opcua_duration_i &
     c_opcua_duration_zero : t_opcua_duration_i &
-    
+
     t_notificationQueue <: t_notificationQueue_i &
     c_notificationQueue_indet : t_notificationQueue_i &
     c_notificationQueue_indet /: t_notificationQueue &
-    
+
     t_publishReqQueue <: t_publishReqQueue_i &
     c_publishReqQueue_indet : t_publishReqQueue_i &
     c_publishReqQueue_indet /: t_publishReqQueue &
-    
+
     t_notifRepublishQueue <: t_notifRepublishQueue_i &
     c_notifRepublishQueue_indet : t_notifRepublishQueue_i &
     c_notifRepublishQueue_indet /: t_notifRepublishQueue &
-    
+
     t_notifRepublishQueueIterator <: t_notifRepublishQueueIterator_i &
     c_notifRepublishQueueIterator_indet : t_notifRepublishQueueIterator_i &
     c_notifRepublishQueueIterator_indet /: t_notifRepublishQueueIterator &
-    
+
     t_monitoredItemQueue <: t_monitoredItemQueue_i &
     c_monitoredItemQueue_indet : t_monitoredItemQueue_i &
     c_monitoredItemQueue_indet /: t_monitoredItemQueue &
-    
+
     t_monitoredItemQueueIterator <: t_monitoredItemQueueIterator_i &
     c_monitoredItemQueueIterator_indet : t_monitoredItemQueueIterator_i &
     c_monitoredItemQueueIterator_indet /: t_monitoredItemQueueIterator &
-    
+
     t_monitoringMode = t_monitoringMode_i - {c_monitoringMode_indet} &
-    
+
     t_monitoredItemPointer <: t_monitoredItemPointer_i &
     c_monitoredItemPointer_indet : t_monitoredItemPointer_i &
     c_monitoredItemPointer_indet /: t_monitoredItemPointer &
-    
+
     t_monitoredItemId <: t_monitoredItemId_i &
     c_monitoredItemId_indet : t_monitoredItemId_i &
     c_monitoredItemId_indet /: t_monitoredItemId &
-    
+
     t_msg_header <: t_msg_header_i &
     c_msg_header_indet : t_msg_header_i &
     c_msg_header_indet /: t_msg_header &
@@ -662,7 +662,7 @@ PROPERTIES
     t_channel_config_idx <: t_channel_config_idx_i &
     c_channel_config_idx_indet : t_channel_config_idx_i &
     c_channel_config_idx_indet /: t_channel_config_idx &
-    
+
     t_timer_id <: t_timer_id_i &
     c_timer_id_indet : t_timer_id_i &
     c_timer_id_indet /: t_timer_id &
@@ -913,13 +913,13 @@ OPERATIONS
         p_res := Is_SubType(p_type1 |-> p_type2)
     END
     ;
-    
+
     p_card_subscription <-- get_card_t_subscription =
     BEGIN
         p_card_subscription := card(t_subscription)
     END
     ;
-    
+
     p_subscription <-- get_cast_t_subscription(p_ind) =
     PRE
         p_ind : NAT &

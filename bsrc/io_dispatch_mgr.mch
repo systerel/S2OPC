@@ -311,7 +311,7 @@ OPERATIONS
     ;
 
     /* SUBSCRIPTIONS */
-    
+
     bres <-- internal_server_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
     PRE
         p_old_write_value_pointer : t_WriteValuePointer_i &
@@ -319,14 +319,14 @@ OPERATIONS
     THEN
         bres :: BOOL
     END;
-    
+
     bres <-- internal_server_subscription_publish_timeout (p_subscription) =
     PRE
         p_subscription : t_subscription_i
     THEN
         bres :: BOOL
     END;
-    
+
     /* Events leading to call this entrypoint shall be enqueued as prioritary event (next to be evaluated)
        => guarantee of performance on subscription
     */
@@ -341,7 +341,7 @@ OPERATIONS
         bres :: BOOL
     END
     ;
-    
+
     /* Events leading to call this entrypoint shall be enqueued as prioritary event (next to be evaluated)
        => guarantee of state synchronisation between subscription <=> session */
     bres <-- internal_server_inactive_session_prio_event (p_session, p_newSessionState) =
@@ -353,11 +353,11 @@ OPERATIONS
         bres :: BOOL
     END
     ;
-    
+
     /* CLEAR OPERATIONS */
-    
+
     // TODO: add close all sessions / subscriptions
-    
+
     bres <-- close_all_active_connections =
     BEGIN
         bres :: BOOL // indicates if active connection will be closed

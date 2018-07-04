@@ -22,26 +22,26 @@ MACHINE
 
 SEES
     constants
-    
+
 ABSTRACT_VARIABLES
     s_notificationQueue,
     a_monitored_item_notifications,
     monitored_item_notification_queue_iter
-    
+
 INVARIANT
     s_notificationQueue <: t_notificationQueue &
     a_monitored_item_notifications : s_notificationQueue <-> t_monitoredItemPointer  &
-    /* In C implementation, same monitored item can be present several times (multiple notifications) 
+    /* In C implementation, same monitored item can be present several times (multiple notifications)
        but it will not change the proof constraints when dequeueing. Therefore it is a simplified representation. */
     monitored_item_notification_queue_iter : s_notificationQueue
-       
+
 INITIALISATION
     s_notificationQueue :(s_notificationQueue = {}) ||
     a_monitored_item_notifications :(a_monitored_item_notifications = {}) ||
     monitored_item_notification_queue_iter := c_notificationQueue_indet
 
 OPERATIONS
-    
+
     bres, queue <-- allocate_new_monitored_item_notification_queue =
     BEGIN
         IF s_notificationQueue = t_notificationQueue
@@ -61,7 +61,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     clear_and_deallocate_monitored_item_notification_queue (p_queue) =
     PRE
         p_queue : t_notificationQueue_i &
@@ -70,7 +70,7 @@ OPERATIONS
         s_notificationQueue := s_notificationQueue - {p_queue}
     END
     ;
-    
+
     bres <-- add_first_monitored_item_notification_to_queue (p_queue,
                                                              p_monitoredItem,
                                                              p_nid,
@@ -93,13 +93,13 @@ OPERATIONS
     THEN
         CHOICE
             bres := FALSE
-        OR 
+        OR
             bres := TRUE ||
             a_monitored_item_notifications := a_monitored_item_notifications \/ {p_queue |-> p_monitoredItem}
         END
     END
     ;
-    
+
     bres <-- add_monitored_item_notification_to_queue (p_queue,
                                                        p_monitoredItem,
                                                        p_writeValuePointer) =
@@ -113,13 +113,13 @@ OPERATIONS
     THEN
         CHOICE
             bres := FALSE
-        OR 
+        OR
             bres := TRUE ||
             a_monitored_item_notifications := a_monitored_item_notifications \/ {p_queue |-> p_monitoredItem}
         END
     END
     ;
-    
+
     p_nb_notifications <-- init_iter_monitored_item_notification (p_queue) =
     PRE
         p_queue : t_notificationQueue_i &
@@ -145,7 +145,7 @@ OPERATIONS
             l_monitoredItem : a_monitored_item_notifications[{p_queue}]
         THEN
             p_continue := bool(a_monitored_item_notifications[{p_queue}] /= {l_monitoredItem}) ||
-            a_monitored_item_notifications := a_monitored_item_notifications - {p_queue |-> l_monitoredItem} ||                 
+            a_monitored_item_notifications := a_monitored_item_notifications - {p_queue |-> l_monitoredItem} ||
             p_monitoredItem := l_monitoredItem ||
             p_writeValuePointer :(p_writeValuePointer : t_WriteValuePointer_i & p_writeValuePointer : t_WriteValuePointer)
         END

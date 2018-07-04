@@ -19,7 +19,7 @@
 
 MACHINE
     subscription_mgr
-    
+
 SEES
     constants,
     message_in_bs,
@@ -27,7 +27,7 @@ SEES
     request_handle_bs
 
 OPERATIONS
-    
+
     is_valid <-- is_valid_subscription (p_subscription) =
     PRE
         p_subscription : t_subscription_i
@@ -35,7 +35,7 @@ OPERATIONS
         is_valid := bool(p_subscription : t_subscription)
     END
     ;
-    
+
     StatusCode_service <-- treat_create_subscription_request (p_session, p_req_msg, p_resp_msg) =
     PRE
         p_session : t_session_i &
@@ -55,7 +55,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     StatusCode_service <-- treat_modify_subscription_request (p_session, p_req_msg, p_resp_msg) =
     PRE
         p_session : t_session_i &
@@ -75,7 +75,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     StatusCode_service <-- treat_delete_subscriptions_request (p_session, p_req_msg, p_resp_msg) =
     PRE
         p_session : t_session_i &
@@ -95,7 +95,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     StatusCode_service <-- treat_publishing_mode_request (p_session, p_req_msg, p_resp_msg) =
     PRE
         p_session : t_session_i &
@@ -115,8 +115,8 @@ OPERATIONS
         )
     END
     ;
-    
-    StatusCode_service, async_resp_msg <-- treat_subscription_publish_request 
+
+    StatusCode_service, async_resp_msg <-- treat_subscription_publish_request
       (p_session, p_req_header, p_req_msg, p_req_handle, p_req_ctx, p_resp_msg) =
     PRE
         p_session : t_session_i &
@@ -152,11 +152,11 @@ OPERATIONS
             :(  StatusCode_service : t_StatusCode_i &
                 StatusCode_service = e_sc_ok &
                 async_resp_msg : BOOL
-            )            
+            )
         END
     END
     ;
-    
+
     StatusCode_service <-- treat_subscription_republish_request (p_session, p_req_msg, p_resp_msg) =
     PRE
         p_session : t_session_i &
@@ -171,12 +171,12 @@ OPERATIONS
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_subscription_republish_resp
     THEN
-        StatusCode_service 
-        :(StatusCode_service : t_StatusCode_i & 
+        StatusCode_service
+        :(StatusCode_service : t_StatusCode_i &
           StatusCode_service : {e_sc_ok, e_sc_bad_subscription_id_invalid, e_sc_bad_message_not_available})
     END
     ;
-    
+
     StatusCode_service <-- treat_subscription_create_monitored_items_req (p_session, p_req_msg, p_resp_msg) =
     PRE
         p_session : t_session_i &
@@ -196,7 +196,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
     PRE
         p_old_write_value_pointer : t_WriteValuePointer_i &
@@ -207,7 +207,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     server_subscription_publish_timeout (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
@@ -217,7 +217,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     server_subscription_session_inactive (p_session, p_newSessionState) =
     PRE
         p_session : t_session_i &
@@ -227,10 +227,10 @@ OPERATIONS
         skip
     END
     ;
-    
+
     subscription_mgr_UNINITIALISATION =
     BEGIN
         skip
     END
-    
+
 END

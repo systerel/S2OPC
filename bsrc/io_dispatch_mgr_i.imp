@@ -736,7 +736,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     bres <-- internal_server_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
     VAR
         l_old_valid_pointer,
@@ -752,7 +752,7 @@ OPERATIONS
             bres := FALSE
         END
     END;
-    
+
     bres <-- internal_server_subscription_publish_timeout (p_subscription) =
     VAR
         l_valid_subscription
@@ -766,7 +766,7 @@ OPERATIONS
             bres := FALSE
         END
     END;
-    
+
     bres <-- internal_server_send_publish_response_prio_event (p_session, p_req_handle, p_req_context, p_publish_resp_msg, p_statusCode) =
     VAR
         l_valid_session,
@@ -781,7 +781,7 @@ OPERATIONS
         l_valid_session <-- is_valid_session (p_session);
         l_valid_msg, l_msg_typ <-- is_valid_app_msg_out (p_publish_resp_msg);
         l_valid_req_context <-- is_valid_request_context (p_req_context);
-        IF l_valid_session = TRUE & l_valid_msg = TRUE & l_msg_typ = e_msg_subscription_publish_resp & 
+        IF l_valid_session = TRUE & l_valid_msg = TRUE & l_msg_typ = e_msg_subscription_publish_resp &
             l_valid_req_context = TRUE & p_statusCode /= c_StatusCode_indet
         THEN
             bres, l_buffer_out, l_channel
@@ -797,11 +797,11 @@ OPERATIONS
                 END
             END
         ELSE
-	        bres := FALSE
+            bres := FALSE
         END
     END
     ;
-    
+
     bres <-- internal_server_inactive_session_prio_event (p_session, p_newSessionState) =
     BEGIN
         IF p_session /= c_session_indet THEN
@@ -812,13 +812,13 @@ OPERATIONS
         END
     END
     ;
-    
+
     bres <-- close_all_active_connections =
     BEGIN
         bres <-- close_all_channel
     END
     ;
-    
+
     UNINITIALISATION =
     BEGIN
         service_mgr_UNINITIALISATION

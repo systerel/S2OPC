@@ -23,25 +23,25 @@ MACHINE
 SEES
     constants,
     notification_republish_queue_bs
-    
-ABSTRACT_VARIABLES   
+
+ABSTRACT_VARIABLES
     notification_republish_iter_queue,
     s_to_iterate_sub_seq_num,
     s_iterated_sub_seq_num
-    
+
 INVARIANT
     notification_republish_iter_queue : t_notifRepublishQueue &
     s_to_iterate_sub_seq_num <: t_sub_seq_num &
     s_iterated_sub_seq_num <: t_sub_seq_num &
     s_to_iterate_sub_seq_num /\ s_iterated_sub_seq_num = {}
-    
-INITIALISATION    
+
+INITIALISATION
     notification_republish_iter_queue := c_notifRepublishQueue_indet ||
     s_to_iterate_sub_seq_num :(s_to_iterate_sub_seq_num = {}) ||
     s_iterated_sub_seq_num :(s_iterated_sub_seq_num = {})
 
 OPERATIONS
-    
+
     nb_seq_nums <-- get_available_republish (p_queue) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -50,7 +50,7 @@ OPERATIONS
         nb_seq_nums := card(a_republish_notification~[{p_queue}])
     END
     ;
-    
+
     continue, iterator <-- init_iter_notif_republish (p_queue) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -61,11 +61,11 @@ OPERATIONS
         s_iterated_sub_seq_num := {} ||
         s_to_iterate_sub_seq_num := a_notification_seq_num[a_republish_notification~[{p_queue}]] ||
         iterator :(iterator : t_notifRepublishQueueIterator_i &
-                   (a_republish_notification~[{p_queue}] /= {} => 
+                   (a_republish_notification~[{p_queue}] /= {} =>
                      iterator : t_notifRepublishQueueIterator))
     END
     ;
-    
+
     continue, seq_num <-- continue_iter_notif_republish (p_queue, p_iterator) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -86,7 +86,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     clear_notif_republish_iterator (p_queue, p_iterator) =
     PRE
         p_queue : t_notifRepublishQueue_i &

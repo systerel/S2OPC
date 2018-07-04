@@ -21,7 +21,7 @@ IMPLEMENTATION
     subscription_mgr_i
 REFINES
     subscription_mgr
-    
+
 SEES
     constants,
     message_in_bs,
@@ -29,7 +29,7 @@ SEES
     write_value_pointer_bs,
     address_space,
     request_handle_bs
-    
+
 DEFINITIONS
     "definitions.def"
 
@@ -42,7 +42,7 @@ IMPORTS
     msg_subscription_create_monitored_item,
     subscription_create_monitored_item_it,
     monitored_item_queue_it_bs
-    
+
 PROMOTES
     is_valid_subscription
 
@@ -56,14 +56,14 @@ LOCAL_OPERATIONS
         p_moreNotifs : BOOL
     THEN
         CHOICE
-            subscription_available_seq_nums_resp_SeqNum 
+            subscription_available_seq_nums_resp_SeqNum
             :(subscription_available_seq_nums_resp_SeqNum : NAT +-> t_sub_seq_num)
         OR
             skip /* Allocation failed, still send the notification message */
         END
     END
     ;
-    
+
     fill_publish_response_msg_ack_results (p_session, p_req_msg, p_resp_msg, p_nb_acks) =
     PRE
         p_session : t_session_i & p_session : t_session &
@@ -81,7 +81,7 @@ LOCAL_OPERATIONS
         subscription_ack_resp_allocated = TRUE
     THEN
         LET l_subscription_ack_resp_StatusCode, l_acknowledged_notif_msgs BE
-            l_subscription_ack_resp_StatusCode = 
+            l_subscription_ack_resp_StatusCode =
              %p_index.(p_index : 1..p_nb_acks
                        |
                        {FALSE |-> e_sc_bad_subscription_id_invalid,
@@ -117,7 +117,7 @@ LOCAL_OPERATIONS
         END
     END
     ;
-    
+
     fill_publish_response_msg_available_seq_nums (p_resp_msg, republishQueue, nb_seq_nums) =
     PRE
         p_resp_msg : t_msg_i &
@@ -132,14 +132,14 @@ LOCAL_OPERATIONS
     THEN
         ANY l_subscription_available_seq_nums_resp_SeqNum WHERE
             l_subscription_available_seq_nums_resp_SeqNum : 1..nb_seq_nums --> t_sub_seq_num &
-            ran(l_subscription_available_seq_nums_resp_SeqNum) = 
+            ran(l_subscription_available_seq_nums_resp_SeqNum) =
              a_notification_seq_num[a_republish_notification~[{republishQueue}]]
         THEN
              subscription_available_seq_nums_resp_SeqNum := l_subscription_available_seq_nums_resp_SeqNum
         END
     END
     ;
-    
+
     fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     PRE
         p_subscription : t_subscription_i &
@@ -160,7 +160,7 @@ LOCAL_OPERATIONS
     THEN
         LET l_monitoredItemResp_StatusCode BE
             /* Evaluate the expected valid responses for which a monitored item should be allocated (e_sc_ok case) */
-            l_monitoredItemResp_StatusCode = 
+            l_monitoredItemResp_StatusCode =
             %mi_index.(mi_index : t_monitoredItemReqIndex &
                 mi_index : 1..nb_monitored_items &
                 /* ith node id has a node in the Address Space */
@@ -183,7 +183,7 @@ LOCAL_OPERATIONS
                                                  }(bool(MonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~)))
                                       }(bool(MonitoredItemReq_FilterPresence(mi_index) = TRUE))
                            }(bool(MonitoredItemReq_ValidMonitoringMode(mi_index) = FALSE))
-                }(bool(mi_index /: dom(MonitoredItemReq_AttributeId)))               
+                }(bool(mi_index /: dom(MonitoredItemReq_AttributeId)))
             )
         IN
             ANY max_mi_ids, max_mi_pointers, s_maximums, nb_allocated_monitored_items WHERE
@@ -203,24 +203,24 @@ LOCAL_OPERATIONS
                                   FALSE |-> {TRUE |-> e_sc_bad_too_many_monitored_items, /* Restriction due to allocation */
                                              FALSE |-> l_monitoredItemResp_StatusCode(mi_index) /* Copy result if not e_sc_ok */
                                             }(bool(l_monitoredItemResp_StatusCode(mi_index) = e_sc_ok))
-                                 }(bool(card((1..mi_index <| l_monitoredItemResp_StatusCode |> {e_sc_ok})) < 
+                                 }(bool(card((1..mi_index <| l_monitoredItemResp_StatusCode |> {e_sc_ok})) <
                                                nb_allocated_monitored_items))
                                 )
                 IN
                     /* Define monitored items allocated (with unique id) */
                     ANY s_newMonitoredItemId, miIndexToMiId, s_newMonitoredItemPointer, l_MonitoredItemResp_Id WHERE
-                      
+
                         /* Allocate the new monitored items */
                         s_newMonitoredItemId <: t_monitoredItemId &
                         s_newMonitoredItemId /\ s_monitoredItemId = {} &
-                        
+
                         miIndexToMiId : dom(l_allocMonitoredItemResp_StatusCode |> {e_sc_ok}) >-> t_monitoredItemId &
                         ran(miIndexToMiId) = s_newMonitoredItemId &
-                        
+
                         s_newMonitoredItemPointer <: t_monitoredItemPointer &
                         s_newMonitoredItemPointer /\ s_monitoredItemPointer = {} &
                         card(s_newMonitoredItemPointer) = card(s_newMonitoredItemId) &
-                        
+
                         /* Reserve those new monitored items for the response */
                         l_MonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
                         l_MonitoredItemResp_Id[dom(l_allocMonitoredItemResp_StatusCode |>> {e_sc_ok})] = {c_monitoredItemId_indet} &
@@ -241,7 +241,7 @@ LOCAL_OPERATIONS
                             /* Set response variables */
                             MonitoredItemResp_StatusCode := l_allocMonitoredItemResp_StatusCode ||
                             MonitoredItemResp_Id := l_MonitoredItemResp_Id ||
-                            
+
                             /* Update set of valid monitored items and their properties */
                             s_monitoredItemId := s_monitoredItemId \/ s_newMonitoredItemId ||
                             s_monitoredItemPointer := s_monitoredItemPointer \/ s_newMonitoredItemPointer ||
@@ -257,12 +257,12 @@ LOCAL_OPERATIONS
                               s_newMonitoredItemPointer <<| a_monitoredItemNodeId =
                                s_newMonitoredItemPointer <<| a_monitoredItemNodeId$0 &
                               a_monitoredItemNodeId[s_newMonitoredItemPointer] = ran(miIndexToNodeIds) &
-                               
+
                               /* Associate new pointers with current subscription */
                               a_monitoredItemSubs <: a_monitoredItemSubs$0 &
                               s_newMonitoredItemPointer <<| a_monitoredItemSubs =
                                s_newMonitoredItemPointer <<| a_monitoredItemSubs$0 &
-                              a_monitoredItemSubs[s_newMonitoredItemPointer] = {p_subscription} & 
+                              a_monitoredItemSubs[s_newMonitoredItemPointer] = {p_subscription} &
                               /* Add notifications to subscription notification queue */
                               a_monitored_item_notifications <: a_monitored_item_notifications$0 &
                               {a_pendingNotificationQueue(p_subscription)} <<| a_monitored_item_notifications =
@@ -273,7 +273,7 @@ LOCAL_OPERATIONS
                               a_defined_monitored_items <: a_defined_monitored_items$0 &
                               s_miQueues <<| a_defined_monitored_items =
                                s_miQueues <<| a_defined_monitored_items$0 &
-                              a_defined_monitored_items[s_miQueues] = s_monitoredItemPointer                          
+                              a_defined_monitored_items[s_miQueues] = s_monitoredItemPointer
                             )
                        END
                     END
@@ -282,7 +282,7 @@ LOCAL_OPERATIONS
         END
     END
     ;
-    
+
 
     create_notification_on_monitored_items_if_data_changed (p_monitoredItemQueue, p_old_wv_pointer, p_new_wv_pointer) =
     PRE
@@ -296,12 +296,12 @@ LOCAL_OPERATIONS
         /* notifications may have been triggered */
         a_monitored_item_notifications
         :(a_monitored_item_notifications$0 <: a_monitored_item_notifications)
-        /* Note: if NodeId / AttributeId are represented in t_WriteValuePointer, 
+        /* Note: if NodeId / AttributeId are represented in t_WriteValuePointer,
            it is possible to describe first part of criteria to generate notification.
            But other filters will be necessary (index array, ...) */
     END
     ;
-    
+
     fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_nb_reqs) =
     PRE
         p_req_msg : t_msg_i &
@@ -330,45 +330,45 @@ LOCAL_OPERATIONS
                                delete_subscriptions_req_sub_id(p_index) : s_subscription
                               )
                          )
-                       ) 
+                       )
         IN
             delete_subscriptions_resp_StatusCode := l_delete_subscriptions_resp_StatusCode ||
             LET l_valid_sub_ids, l_deleted_subs BE
               l_valid_sub_ids =
               %p_index.(p_index : 1..p_nb_reqs &
-                        l_delete_subscriptions_resp_StatusCode(p_index) = e_sc_ok 
-                        | 
+                        l_delete_subscriptions_resp_StatusCode(p_index) = e_sc_ok
+                        |
                         delete_subscriptions_req_sub_id(p_index)
                        ) &
               l_deleted_subs = ran(l_valid_sub_ids)
             IN
                 s_subscription := s_subscription - l_deleted_subs ||
-                
+
                 a_subscription_session := l_deleted_subs <<| a_subscription_session ||
                 a_publishInterval := l_deleted_subs <<| a_publishInterval ||
                 a_lifetimeExpCount := l_deleted_subs <<| a_lifetimeExpCount  ||
                 a_keepAliveExpCount := l_deleted_subs <<| a_keepAliveExpCount ||
                 a_maxNotifsPerPublish := l_deleted_subs <<| a_maxNotifsPerPublish ||
-                
+
                 a_subscription_state := l_deleted_subs <<| a_subscription_state ||
                 a_LifetimeCounter := l_deleted_subs <<| a_LifetimeCounter ||
                 a_KeepAliveCounter := l_deleted_subs <<| a_KeepAliveCounter ||
                 a_MessageSent := a_MessageSent - l_deleted_subs               ||
                 a_PublishingEnabled := a_PublishingEnabled - l_deleted_subs   ||
                 a_SeqNum := l_deleted_subs <<| a_SeqNum ||
-                
+
                 /* Queues emptied : publish responses should be sent if remaining */
                 a_publish_responses := a_publish_responses |>> a_publishRequestQueue[l_deleted_subs] ||
                 a_monitored_item_notifications := a_pendingNotificationQueue[l_deleted_subs] <<| a_monitored_item_notifications ||
-                
+
                 /* Queues deleted */
                 s_notificationQueue := s_notificationQueue - a_pendingNotificationQueue[l_deleted_subs] ||
                 a_pendingNotificationQueue := l_deleted_subs <<| a_pendingNotificationQueue ||
-                
+
                 s_publishReqQueue := s_publishReqQueue - a_publishRequestQueue[l_deleted_subs] ||
                 a_publishRequestQueue := l_deleted_subs <<| a_publishRequestQueue ||
-                
-                
+
+
                 /* Remove monitoredItems */
                 LET s_removedMonitoredItemPointer BE
                     s_removedMonitoredItemPointer = a_defined_monitored_items[a_monitoredItemQueue[l_deleted_subs]]
@@ -378,12 +378,12 @@ LOCAL_OPERATIONS
                     a_monitoredItemId := a_monitoredItemId - (s_removedMonitoredItemPointer <| a_monitoredItemId) ||
                     a_monitoredItemSubs := s_removedMonitoredItemPointer <<| a_monitoredItemSubs ||
                     a_monitoredItemNodeId := s_removedMonitoredItemPointer <<| a_monitoredItemNodeId ||
-                    
+
                     s_monitoredItemQueue := s_monitoredItemQueue - a_monitoredItemQueue[l_deleted_subs] ||
                     a_monitoredItemQueue := l_deleted_subs <<| a_monitoredItemQueue ||
-                    
+
                     /* Remove subscription monitoredItem queue and all removed monitored items from other queues (i.e.:nodeId to mi queues) */
-                    a_defined_monitored_items := 
+                    a_defined_monitored_items :=
                     a_monitoredItemQueue[l_deleted_subs]
                     <<| a_defined_monitored_items |>>
                     s_removedMonitoredItemPointer
@@ -392,7 +392,7 @@ LOCAL_OPERATIONS
         END
     END
     ;
-    
+
     fill_set_publishing_mode_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_pub_enabled, p_nb_reqs) =
     PRE
         p_req_msg : t_msg_i &
@@ -418,19 +418,19 @@ LOCAL_OPERATIONS
                         {FALSE |-> e_sc_bad_subscription_id_invalid,
                          TRUE  |-> e_sc_ok
                         }(bool(p_has_sub = TRUE & set_publishing_mode_req_sub_id(p_index) = p_session_sub))
-                       ) 
+                       )
         IN
             set_publishing_mode_resp_StatusCode := l_set_publishing_mode_resp_StatusCode ||
             LET l_valid_sub_ids BE
               l_valid_sub_ids =
               %p_index.(p_index : 1..p_nb_reqs &
-                        l_set_publishing_mode_resp_StatusCode(p_index) = e_sc_ok 
-                        | 
+                        l_set_publishing_mode_resp_StatusCode(p_index) = e_sc_ok
+                        |
                         set_publishing_mode_req_sub_id(p_index)
                        )
             IN
                 IF p_pub_enabled = TRUE
-                THEN                
+                THEN
                     a_PublishingEnabled := a_PublishingEnabled \/ ran(l_valid_sub_ids)
                 ELSE
                     a_PublishingEnabled := a_PublishingEnabled - ran(l_valid_sub_ids)
@@ -440,7 +440,7 @@ LOCAL_OPERATIONS
     END
 
 OPERATIONS
-    
+
     /* LOCAL OPERATIONS */
     fill_publish_response_msg (p_resp_msg, p_subscription, p_moreNotifs) =
     VAR
@@ -466,7 +466,7 @@ OPERATIONS
         set_msg_publish_resp_notificationMsg (p_resp_msg, p_moreNotifs)
     END
     ;
-    
+
     fill_publish_response_msg_ack_results (p_session, p_req_msg, p_resp_msg, p_nb_acks) =
     VAR
         l_has_sub,
@@ -501,7 +501,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     fill_publish_response_msg_available_seq_nums (p_resp_msg, republishQueue, nb_seq_nums) =
     VAR
         l_continue,
@@ -526,7 +526,7 @@ OPERATIONS
         clear_notif_republish_iterator (republishQueue, l_republishIterator)
     END
     ;
-    
+
     fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     VAR
         l_continue,
@@ -545,7 +545,7 @@ OPERATIONS
         l_valueSc,
         l_monitoredItemPointer,
         l_monitoredItemId,
-        l_revSamplingItv, 
+        l_revSamplingItv,
         l_revQueueSize
     IN
         l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
@@ -590,28 +590,28 @@ OPERATIONS
                 l_revSamplingItv, l_revQueueSize <-- compute_create_montitored_item_revised_params(l_queueSize)
             END;
             setall_msg_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_monitoredItemId, l_revSamplingItv, l_revQueueSize)
-              
+
         INVARIANT
             rreqs_to_iterate <: t_monitoredItemReqIndex &
             rreqs_iterated   <: t_monitoredItemReqIndex &
             rreqs_to_iterate /\ rreqs_iterated = {} &
             rreqs_to_iterate \/ rreqs_iterated = 1..nb_monitored_items &
             l_continue = bool(rreqs_to_iterate /= {})
-            
+
             /* TODO: reprendre les propriétés de fill_response_subscription_create_monitored_items */
         VARIANT
             card(rreqs_to_iterate)
         END
     END
     ;
-    
+
     create_notification_on_monitored_items_if_data_changed (p_monitoredItemQueue, p_old_wv_pointer, p_new_wv_pointer) =
     VAR
         l_continue,
         l_iterator,
         l_monitoredItemPointer,
         l_notification_triggered,
-        
+
         l_monitoredItemId,
         l_subscription,
         l_nid,
@@ -639,7 +639,7 @@ OPERATIONS
         INVARIANT
             s_mi_to_iterate_it <: t_monitoredItemPointer &
             s_mi_iterated_it   <: t_monitoredItemPointer &
-            
+
             s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
             card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it &
             l_continue = bool(s_mi_to_iterate_it /= {})
@@ -650,7 +650,7 @@ OPERATIONS
         clear_iter_monitored_item (l_iterator)
     END
     ;
-    
+
     fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_nb_reqs) =
     VAR
         l_index,
@@ -680,7 +680,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     fill_set_publishing_mode_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_pub_enabled, p_nb_reqs) =
     VAR
         l_index,
@@ -705,9 +705,9 @@ OPERATIONS
         END
     END
     ;
-    
+
     /* END OF LOCAL OPERATIONS */
-    
+
     StatusCode_service <-- treat_create_subscription_request (p_session, p_req_msg, p_resp_msg) =
     VAR
         l_session_has_subscription,
@@ -729,14 +729,14 @@ OPERATIONS
             /* Extract create subscription parameters */
             l_reqPublishInterval, l_reqLifetimeCount, l_reqMaxKeepAlive, l_maxNotificationsPerPublish, l_publishEnabled
               <-- get_msg_create_subscription_req_params (p_req_msg);
-            
+
             /* Compute revised parameters */
             l_revisedPublishInterval, l_revisedLifetimeCount, l_revisedMaxKeepAlive, l_revisedMaxNotificationsPerPublish
               <-- compute_create_subscription_revised_params (l_reqPublishInterval,
-                                                              l_reqLifetimeCount,                                                              
+                                                              l_reqLifetimeCount,
                                                               l_reqMaxKeepAlive,
                                                               l_maxNotificationsPerPublish);
-            
+
             /* Create subscription */
             StatusCode_service, l_subscription <-- create_subscription (p_session,
                 l_revisedPublishInterval,
@@ -744,11 +744,11 @@ OPERATIONS
                 l_revisedMaxKeepAlive,
                 l_revisedMaxNotificationsPerPublish,
                 l_publishEnabled);
-            IF StatusCode_service = e_sc_ok 
+            IF StatusCode_service = e_sc_ok
             THEN
                 /* Fill values to response message */
                 set_msg_create_subscription_resp_params (p_resp_msg,
-                    l_subscription, 
+                    l_subscription,
                     l_revisedPublishInterval,
                     l_revisedLifetimeCount,
                     l_revisedMaxKeepAlive)
@@ -758,7 +758,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     StatusCode_service <-- treat_modify_subscription_request (p_session, p_req_msg, p_resp_msg) =
     VAR
         l_session_has_subscription,
@@ -779,14 +779,14 @@ OPERATIONS
           <-- get_msg_modify_subscription_req_params (p_req_msg);
         IF l_session_has_subscription = TRUE & l_sub = l_session_sub
         THEN
-            
+
             /* Compute revised parameters */
             l_revisedPublishInterval, l_revisedLifetimeCount, l_revisedMaxKeepAlive, l_revisedMaxNotificationsPerPublish
               <-- compute_create_subscription_revised_params (l_reqPublishInterval,
                                                               l_reqLifetimeCount,
                                                               l_reqMaxKeepAlive,
                                                               l_maxNotifPerPublish);
-            
+
             /* Modify subscription */
             modify_subscription (p_session,
                                  l_session_sub,
@@ -794,20 +794,20 @@ OPERATIONS
                                  l_revisedLifetimeCount,
                                  l_revisedMaxKeepAlive,
                                  l_revisedMaxNotificationsPerPublish);
-            
+
             /* Fill values to response message */
             set_msg_modify_subscription_resp_params (p_resp_msg,
                                                      l_revisedPublishInterval,
                                                      l_revisedLifetimeCount,
                                                      l_revisedMaxKeepAlive);
-                                                 
+
             StatusCode_service := e_sc_ok
         ELSE
             StatusCode_service := e_sc_bad_subscription_id_invalid
         END
     END
     ;
-    
+
     StatusCode_service <-- treat_delete_subscriptions_request (p_session, p_req_msg, p_resp_msg) =
     VAR
         l_session_has_subscription,
@@ -822,7 +822,7 @@ OPERATIONS
             l_bres <-- allocate_msg_delete_subscriptions_resp_results_array (p_resp_msg, l_nb_reqs);
             IF l_bres = TRUE
             THEN
-                fill_delete_subscriptions_response 
+                fill_delete_subscriptions_response
                   (p_req_msg, p_resp_msg, l_session_has_subscription, l_session_sub, l_nb_reqs);
                 StatusCode_service := e_sc_ok
             ELSE
@@ -836,7 +836,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     StatusCode_service <-- treat_publishing_mode_request (p_session, p_req_msg, p_resp_msg) =
     VAR
         l_session_has_subscription,
@@ -852,7 +852,7 @@ OPERATIONS
             l_bres <-- allocate_msg_subscription_set_publishing_mode_resp_results_array (p_resp_msg, l_nb_reqs);
             IF l_bres = TRUE
             THEN
-                fill_set_publishing_mode_response 
+                fill_set_publishing_mode_response
                   (p_req_msg, p_resp_msg, l_session_has_subscription, l_session_sub, l_pub_enabled, l_nb_reqs);
                 StatusCode_service := e_sc_ok
             ELSE
@@ -866,8 +866,8 @@ OPERATIONS
         END
     END
     ;
-    
-    StatusCode_service, async_resp_msg 
+
+    StatusCode_service, async_resp_msg
       <-- treat_subscription_publish_request (p_session, p_req_header, p_req_msg, p_req_handle, p_req_ctx, p_resp_msg) =
     VAR
         l_session_has_subscription,
@@ -887,7 +887,7 @@ OPERATIONS
         THEN
             /* Extract values from header: expiration time for Publish Request */
             l_req_exp_time <-- get_msg_header_expiration_time (p_req_header);
-            
+
             /* TODO: remove when used */
             l_nb_subscriptionAcks <-- get_msg_publish_request_ack_params (p_req_msg);
             IF l_nb_subscriptionAcks > 0 & l_nb_subscriptionAcks <= k_n_genericOperationPerReq_max
@@ -910,7 +910,7 @@ OPERATIONS
 
             IF StatusCode_service = e_sc_ok
             THEN
-                
+
                 StatusCode_service, async_resp_msg, l_subscription, l_moreNotifs
                   <-- receive_publish_request (p_session, l_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg)
             END
@@ -925,7 +925,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     StatusCode_service <-- treat_subscription_republish_request (p_session, p_req_msg, p_resp_msg) =
     VAR
         l_session_has_subscription,
@@ -954,8 +954,8 @@ OPERATIONS
         END
     END
     ;
-        
-    
+
+
     StatusCode_service <-- treat_subscription_create_monitored_items_req (p_session, p_req_msg, p_resp_msg) =
     VAR
         l_sc,
@@ -971,15 +971,15 @@ OPERATIONS
             l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
             IF l_valid_subscription = TRUE
             THEN
-                l_bres <-- alloc_msg_create_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);    
+                l_bres <-- alloc_msg_create_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
                 IF l_bres = TRUE
                 THEN
-                    fill_response_subscription_create_monitored_items 
+                    fill_response_subscription_create_monitored_items
                       (l_subscription, l_timestampToRet, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory
-                END                
+                END
             ELSE
                 StatusCode_service := e_sc_bad_subscription_id_invalid
             END
@@ -988,7 +988,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
     VAR
         l_nid,
@@ -1005,7 +1005,7 @@ OPERATIONS
             l_bres, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (l_nid);
             IF l_bres = TRUE
             THEN
-                create_notification_on_monitored_items_if_data_changed 
+                create_notification_on_monitored_items_if_data_changed
                 (l_monitoredItemQueue, p_old_write_value_pointer, p_new_write_value_pointer)
             END // TODO: log error
         END;
@@ -1013,7 +1013,7 @@ OPERATIONS
         free_write_value_pointer (p_new_write_value_pointer)
     END
     ;
-    
+
     server_subscription_publish_timeout (p_subscription) =
     VAR
         l_closeSubscription,
@@ -1029,18 +1029,18 @@ OPERATIONS
         l_closeSubscription, l_msg_to_send, l_session, l_publish_resp_msg,
         l_req_handle, l_req_context, l_validPublishingReqQueued
           <-- server_subscription_core_publish_timeout_check_lifetime (p_subscription);
-          
+
         IF l_closeSubscription = FALSE
         THEN
             l_msg_to_send, l_msg_sc, l_session, l_publish_resp_msg,
             l_req_handle, l_req_context, l_moreNotifs
               <-- server_subscription_core_publish_timeout (p_subscription, l_validPublishingReqQueued);
-            
+
             IF l_msg_to_send = TRUE
             THEN
                 fill_publish_response_msg (l_publish_resp_msg, p_subscription, l_moreNotifs);
-                generate_internal_send_publish_response_event (l_session, 
-                                                               l_publish_resp_msg, 
+                generate_internal_send_publish_response_event (l_session,
+                                                               l_publish_resp_msg,
                                                                l_req_handle,
                                                                l_req_context,
                                                                l_msg_sc);
@@ -1049,11 +1049,11 @@ OPERATIONS
                     /* TODO: move in a LOCAL operation and specify variables changes */
                     l_validPublishingReqQueued <-- server_subscription_core_check_valid_publish_req_queue (p_subscription);
                     WHILE l_moreNotifs = TRUE & l_validPublishingReqQueued = TRUE DO
-                        l_msg_to_send, l_msg_sc, l_session, l_publish_resp_msg, 
-                        l_req_handle, l_req_context, l_moreNotifs <-- server_subscription_core_publish_timeout_return_moreNotifs (p_subscription);                        
+                        l_msg_to_send, l_msg_sc, l_session, l_publish_resp_msg,
+                        l_req_handle, l_req_context, l_moreNotifs <-- server_subscription_core_publish_timeout_return_moreNotifs (p_subscription);
                         fill_publish_response_msg (l_publish_resp_msg, p_subscription, l_moreNotifs);
-                        generate_internal_send_publish_response_event (l_session, 
-                            l_publish_resp_msg, 
+                        generate_internal_send_publish_response_event (l_session,
+                            l_publish_resp_msg,
                             l_req_handle,
                             l_req_context,
                             l_msg_sc);
@@ -1067,8 +1067,8 @@ OPERATIONS
                     VARIANT
                         card(a_monitored_item_notifications[{a_pendingNotificationQueue(p_subscription)}]) +
                         /* necessary in case allocation failed: notification queue will not decrease */
-                        card(a_publish_responses~[{a_publishRequestQueue (p_subscription)}]) 
-                    END                
+                        card(a_publish_responses~[{a_publishRequestQueue (p_subscription)}])
+                    END
                 END
             END
         ELSE
@@ -1077,16 +1077,16 @@ OPERATIONS
             THEN
                 /* Fill IssueStatusChangedNotification message */
                 fill_publish_response_msg (l_publish_resp_msg, p_subscription, FALSE);
-                generate_internal_send_publish_response_event (l_session, 
-                                                               l_publish_resp_msg, 
-                                                               l_req_handle, 
+                generate_internal_send_publish_response_event (l_session,
+                                                               l_publish_resp_msg,
+                                                               l_req_handle,
                                                                l_req_context,
                                                                e_sc_ok)
             END
         END
     END
     ;
-    
+
     server_subscription_session_inactive (p_session, p_newSessionState) =
     VAR
         l_has_sub,
@@ -1095,8 +1095,8 @@ OPERATIONS
         l_has_sub, l_sub <-- getall_subscription (p_session);
         IF l_has_sub = TRUE
         THEN
-            IF p_newSessionState = e_session_scOrphaned or 
-               p_newSessionState = e_session_scActivating or 
+            IF p_newSessionState = e_session_scOrphaned or
+               p_newSessionState = e_session_scActivating or
                p_newSessionState = e_session_closed
             THEN
                 /* SC is not valid anymore for the session
@@ -1111,10 +1111,10 @@ OPERATIONS
         END
     END
     ;
-    
+
     subscription_mgr_UNINITIALISATION =
     BEGIN
         subscription_core_UNINITIALISATION
     END
-    
+
 END

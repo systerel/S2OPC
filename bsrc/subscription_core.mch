@@ -69,7 +69,7 @@ DEFINITIONS
     notification_republish_iter_queue,
     s_to_iterate_sub_seq_num,
     s_iterated_sub_seq_num,
-    
+
     /* notif queue */
     s_notificationQueue,
     a_monitored_item_notifications,
@@ -77,7 +77,7 @@ DEFINITIONS
     s_monitoredItemQueue,
     a_defined_monitored_items
     ;
-    
+
     d_init ==
     s_subscription := {}        ||
     a_subscription_session := {}||
@@ -94,14 +94,14 @@ DEFINITIONS
     a_MessageSent := {}           ||
     a_PublishingEnabled := {}     ||
     a_SeqNum            := {}     ||
-    
+
     a_pendingNotificationQueue := {} ||
     a_publishRequestQueue := {} ||
     a_notifRepublishQueue := {} ||
     a_monitoredItemQueue := {} ||
     a_publishTimer := {} ||
     a_nodeToMonitoredItemQueue := {} ||
-    
+
     s_monitoredItemPointer := {} ||
     s_monitoredItemId := {} ||
     a_monitoredItemId := {} ||
@@ -111,26 +111,26 @@ DEFINITIONS
     publish_response_message := c_msg_indet ||
     notification_message := c_notif_msg_indet ||
     notification_message_seq_num := c_sub_seq_num_indet ||
-    
+
     /* Queues content */
-    
+
     s_publishReqQueue := {} ||
     a_publish_responses := {} ||
     validPublishReqQueued := FALSE ||
-    
+
     s_republishQueue := {} ||
     a_republish_notification := {} ||
     a_notification_seq_num := {} ||
     notification_republish_iter_queue := c_notifRepublishQueue_indet ||
     s_to_iterate_sub_seq_num :(s_to_iterate_sub_seq_num = {}) ||
     s_iterated_sub_seq_num :(s_iterated_sub_seq_num = {}) ||
-    
+
     s_notificationQueue := {} ||
     a_monitored_item_notifications := {} ||
     s_monitoredItemQueue := {} ||
     a_defined_monitored_items := {}
     ;
-    
+
     d_typing ==
     s_subscription <: t_subscription &
 
@@ -140,10 +140,10 @@ DEFINITIONS
     a_lifetimeExpCount : s_subscription --> t_counter &       // a subscription shall have a lifetime expiration count value
     a_keepAliveExpCount : s_subscription --> t_counter &      // a subscription shall have a keepAlive expiration count value
     a_maxNotifsPerPublish : s_subscription --> t_counter &    // a subscription shall have a maximum notifications per publish response
-    
+
     /* Subscription State Machine : state shall be defined (part 4 table 82) */
     a_subscription_state : s_subscription --> t_subscriptionState &
-    
+
     /* Subscription State Machine : variables shall be defined (part 4 table 84) */
     a_MoreNotifications <: s_subscription &
     a_LifetimeCounter : s_subscription --> t_counter &
@@ -155,30 +155,30 @@ DEFINITIONS
     /* a_RequestedMessageFound <: s_subscription */   /* <=> seqNum in a_retransmissionQueue[subscription] */
     a_SeqNum : s_subscription --> t_sub_seq_num &
     /* a_SubscriptionAssignedToClient <: s_subscription */             /* Not really a state machine variable: local variable or function */
-    
+
     /* Subscription Implementation variables */
     s_monitoredItemPointer <: t_monitoredItemPointer &
     s_monitoredItemId <: t_monitoredItemId &
     a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
     a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
     a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId &
-    
+
     s_notificationQueue <: t_notificationQueue &
     a_pendingNotificationQueue : s_subscription --> s_notificationQueue &
     /* a_retransmissionQueue : s_subscription --> s_notificationMsgQueue */ /* not implemented */
     s_monitoredItemQueue <: t_monitoredItemQueue &
     a_monitoredItemQueue : s_subscription --> s_monitoredItemQueue &
     a_nodeToMonitoredItemQueue : t_NodeId --> s_monitoredItemQueue &
-    
+
     a_publishTimer : s_subscription --> t_timer_id &
-    
+
     /* Publish response and notification message content */
     publish_response_message : t_msg_i &
     notification_message : t_notif_msg_i &
     notification_message_seq_num : t_sub_seq_num_i &
-    
+
     /* (Session) Implementation variables */
-    
+
     /* Note: kept on subscription for now since 1 subs / session + no transfer. Otherwise could be cleared on session close ! */
     s_publishReqQueue <: t_publishReqQueue &
     a_publishRequestQueue :  s_subscription --> s_publishReqQueue &
@@ -187,21 +187,21 @@ DEFINITIONS
     s_to_iterate_sub_seq_num <: t_sub_seq_num &
     s_iterated_sub_seq_num <: t_sub_seq_num &
     s_to_iterate_sub_seq_num /\ s_iterated_sub_seq_num = {} &
-    
+
     /* Queues variables */
     /* PublishRequest queue content: */
     a_publish_responses : t_msg +-> s_publishReqQueue &
     validPublishReqQueued : BOOL &
-    
+
     /* Notification republish queue content */
     s_republishQueue <: t_notifRepublishQueue &
     a_republish_notification : t_notif_msg +-> t_notifRepublishQueue &
     a_notification_seq_num : t_notif_msg --> t_sub_seq_num &
-    
+
     a_monitored_item_notifications : s_notificationQueue <-> s_monitoredItemPointer &
     a_defined_monitored_items : s_monitoredItemQueue <-> s_monitoredItemPointer
     ;
-    
+
     /* Dequeuing invalid publish requests and check for a valid request still enqueued */
     d_check_for_valid_publish_req_queue(p_subsciption, l_PublishingReqQueued, l_new_publish_response) ==
         l_new_publish_response : t_msg +-> t_publishReqQueue &
@@ -212,7 +212,7 @@ DEFINITIONS
         a_publish_responses |> {a_publishRequestQueue(p_subscription)} &
         l_PublishingReqQueued = bool (l_new_publish_response~[{a_publishRequestQueue(p_subscription)}] /= {})
     ;
-    
+
     /* Dequeuing a publish request context + response */
     d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ==
     LET l_publishQueue BE
@@ -240,13 +240,13 @@ DEFINITIONS
     p_req_context := c_request_context_indet ||
     p_publish_resp_msg := c_msg_indet
     ;
-    
+
     d_publish_timeout_no_msg_sent_setMoreNotifs ==
     d_publish_timeout_no_msg_sent ||
     p_moreNotifs := FALSE ||
     p_msg_sc := c_StatusCode_indet
     ;
-    
+
     d_publish_request_notif_msg_sent_dequeuing_notifications (p_subscription, p_msg_sc, p_moreNotifs) ==
     LET l_notifQueue, l_republishQueue BE
         l_notifQueue = a_pendingNotificationQueue(p_subscription) &
@@ -269,7 +269,7 @@ DEFINITIONS
       a_republish_notification |>> {l_republishQueue} = a_republish_notification$0 |>> {l_republishQueue} &
       a_notification_seq_num : t_notif_msg --> t_sub_seq_num &
       // OK CASE
-      (p_msg_sc = e_sc_ok => 
+      (p_msg_sc = e_sc_ok =>
        {p_subscription} <<| a_SeqNum = {p_subscription} <<| a_SeqNum$0 &
        a_SeqNum (p_subscription) /= a_SeqNum$0 (p_subscription) &
        notification_message : t_notif_msg &
@@ -287,9 +287,9 @@ DEFINITIONS
            a_MoreNotifications = a_MoreNotifications$0 - {p_subscription} &
            p_moreNotifs = FALSE
        )
-      ) & 
+      ) &
       // OUT OF MEMORY CASE
-      (p_msg_sc = e_sc_bad_out_of_memory =>  
+      (p_msg_sc = e_sc_bad_out_of_memory =>
        a_SeqNum = a_SeqNum$0 &
        a_MoreNotifications = a_MoreNotifications$0 \/ {p_subscription} &
        p_moreNotifs = TRUE &
@@ -299,8 +299,8 @@ DEFINITIONS
     )
     END
     ;
-    
-    d_publish_timeout_notif_msg_sent_dequeuing_notifications (p_subscription, p_msg_sc, p_moreNotifs, 
+
+    d_publish_timeout_notif_msg_sent_dequeuing_notifications (p_subscription, p_msg_sc, p_moreNotifs,
                                                               p_session, p_req_handle, p_req_ctx, p_msg_to_send) ==
     p_session, p_req_handle, p_req_context
     :(p_session : t_session_i & p_session = a_subscription_session (p_subscription) &
@@ -309,7 +309,7 @@ DEFINITIONS
     p_msg_to_send := TRUE ||
     d_publish_request_notif_msg_sent_dequeuing_notifications (p_subscription, p_msg_sc, p_moreNotifs)
     ;
-    
+
     d_publish_timeout_keepAlive_msg_sent ==
     a_MessageSent := a_MessageSent \/ {p_subscription} ||
     p_msg_to_send := TRUE ||
@@ -323,25 +323,25 @@ DEFINITIONS
       notification_message_seq_num = a_SeqNum (p_subscription) // Use next sequence number to be sent in keep alive
     ) /* Note: no update of republish notification queue in keepAlive case */
     ;
-    
+
     d_publish_timeout_state_changed_msg_sent ==
     a_MessageSent := a_MessageSent \/ {p_subscription} ||
     p_msg_to_send := TRUE ||
-    p_session, p_req_handle, p_req_context, 
+    p_session, p_req_handle, p_req_context,
     notification_message, notification_message_seq_num, a_SeqNum,
     a_republish_notification, a_notification_seq_num
     :(p_session : t_session_i & p_session = a_subscription_session (p_subscription) &
-        p_req_handle : t_request_handle_i & p_req_handle : s_request_handle & 
+        p_req_handle : t_request_handle_i & p_req_handle : s_request_handle &
         p_req_context : t_request_context_i & p_req_context : t_request_context &
         notification_message : t_notif_msg_i & notification_message : t_notif_msg &
         notification_message_seq_num = a_SeqNum$0 (p_subscription) &
         {l_subscription} <<| a_SeqNum = {l_subscription} <<| a_SeqNum$0 &
         a_SeqNum (l_subscription) /= a_SeqNum$0 (l_subscription) &
-        a_republish_notification |> {l_republishQueue} = 
+        a_republish_notification |> {l_republishQueue} =
           a_republish_notification$0 |> {l_republishQueue}  \/ {notification_message |-> l_republishQueue} &
         a_notification_seq_num = a_notification_seq_num$0 \/ {notification_message |-> notification_message_seq_num}
     )
-    
+
 ABSTRACT_VARIABLES
     d_variables
 
@@ -350,9 +350,9 @@ INVARIANT
 
 INITIALISATION
     d_init
-    
+
 OPERATIONS
-    
+
     is_valid <-- is_valid_subscription_on_session (p_session, p_subscription) =
     PRE
         p_session : t_session_i &
@@ -362,7 +362,7 @@ OPERATIONS
         is_valid := bool(p_subscription : s_subscription & a_subscription_session(p_subscription) = p_session)
     END
     ;
-    
+
     is_valid <-- is_valid_subscription (p_subscription) =
     PRE
         p_subscription : t_subscription_i
@@ -382,11 +382,11 @@ OPERATIONS
         THEN
             p_subscription := c_subscription_indet
         ELSE
-            p_subscription := a_subscription_session~(p_session)            
+            p_subscription := a_subscription_session~(p_session)
         END
     END
     ;
-    
+
     /* To be used if is_session_still_activated (p_subscription) == FALSE
        since requests will not be valid anymore on another SC */
     empty_session_publish_requests (p_subscription) =
@@ -396,11 +396,11 @@ OPERATIONS
     THEN
         a_publish_responses := a_publish_responses |>> {a_publishRequestQueue (p_subscription)} ||
         a_republish_notification := a_republish_notification |>> {a_notifRepublishQueue(p_subscription)} ||
-        a_notification_seq_num := 
+        a_notification_seq_num :=
           dom(a_republish_notification |> {a_notifRepublishQueue(p_subscription)}) <<| a_notification_seq_num
     END
     ;
-    
+
     remove_subscription_session (p_subscription, p_session) =
     PRE
         p_subscription : t_subscription_i &
@@ -411,7 +411,7 @@ OPERATIONS
         a_subscription_session := a_subscription_session - {p_subscription |-> p_session}
     END
     ;
-    
+
     set_subscription_PublishingEnabled (p_subscription, p_pubEnabled) =
     PRE
         p_subscription : t_subscription_i &
@@ -426,13 +426,13 @@ OPERATIONS
         END
     END
     ;
-    
+
     p_republishQueue <-- get_subscription_notifRepublishQueue (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : dom(a_notifRepublishQueue)
     THEN
-        p_republishQueue :(p_republishQueue : t_notifRepublishQueue_i & 
+        p_republishQueue :(p_republishQueue : t_notifRepublishQueue_i &
                            p_republishQueue = a_notifRepublishQueue(p_subscription))
     END
     ;
@@ -463,7 +463,7 @@ OPERATIONS
             )
     END
     ;
-    
+
     StatusCode_service, subscription <-- create_subscription (p_session,
                                                               p_revPublishInterval,
                                                               p_revLifetimeCount,
@@ -498,23 +498,23 @@ OPERATIONS
                 THEN
                     /* Transition #1 + #3 */
                     StatusCode_service := e_sc_ok ||
-                    
+
                     subscription := l_subscription ||
                     s_subscription := s_subscription \/ {l_subscription} ||
-                    
+
                     a_subscription_session (l_subscription) := p_session ||
                     a_publishInterval (l_subscription) := p_revPublishInterval ||
                     a_lifetimeExpCount (l_subscription) := p_revLifetimeCount  ||
                     a_keepAliveExpCount (l_subscription) := p_revMaxKeepAlive  ||
                     a_maxNotifsPerPublish (l_subscription) := p_maxNotificationsPerPublish ||
-                    
+
                     a_subscription_state (l_subscription) := e_subscriptionState_normal   ||
                     a_LifetimeCounter (l_subscription) := p_revLifetimeCount         ||
                     a_KeepAliveCounter (l_subscription) := p_revMaxKeepAlive         ||
                     a_MessageSent := a_MessageSent \/ {l_subscription}               ||
                     a_PublishingEnabled := a_PublishingEnabled \/ {l_subscription}   ||
                     a_SeqNum (l_subscription)            := c_sub_seq_num_indet      ||
-                    
+
                     ANY l_notifQueue WHERE
                         l_notifQueue : t_notificationQueue_i &
                         l_notifQueue : t_notificationQueue &
@@ -523,7 +523,7 @@ OPERATIONS
                         s_notificationQueue := s_notificationQueue \/ {l_notifQueue} ||
                         a_pendingNotificationQueue := a_pendingNotificationQueue \/ {l_subscription |-> l_notifQueue}
                     END ||
-                    
+
                     ANY l_publishQueue WHERE
                         l_publishQueue : t_publishReqQueue_i &
                         l_publishQueue : t_publishReqQueue &
@@ -532,7 +532,7 @@ OPERATIONS
                         s_publishReqQueue := s_publishReqQueue \/ {l_publishQueue} ||
                         a_publishRequestQueue := a_publishRequestQueue \/ {l_subscription |-> l_publishQueue}
                     END ||
-                    
+
                     ANY l_monitoredItemQueue WHERE
                         l_monitoredItemQueue : t_monitoredItemQueue_i &
                         l_monitoredItemQueue : t_monitoredItemQueue &
@@ -541,17 +541,17 @@ OPERATIONS
                         s_monitoredItemQueue := s_monitoredItemQueue \/ {l_monitoredItemQueue} ||
                         a_monitoredItemQueue := a_monitoredItemQueue \/ {l_subscription |-> l_monitoredItemQueue}
                     END
-                ELSE                       
+                ELSE
                     /* Transition #1 + #2 */
                     StatusCode_service := e_sc_bad_out_of_memory ||
                     subscription := c_subscription_indet
                 END
-            END                
+            END
         END
     END
     ;
-    
-    
+
+
     modify_subscription (p_session,
                          p_subscription,
                          p_revPublishInterval,
@@ -578,46 +578,46 @@ OPERATIONS
         a_maxNotifsPerPublish (p_subscription) := p_revMaxNotifPerPublish
     END
     ;
-    
+
     close_subscription (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription
     THEN
         s_subscription := s_subscription - {p_subscription} ||
-        
+
         a_subscription_session := {p_subscription} <<| a_subscription_session ||
         a_publishInterval := {p_subscription} <<| a_publishInterval ||
         a_lifetimeExpCount := {p_subscription} <<| a_lifetimeExpCount  ||
         a_keepAliveExpCount := {p_subscription} <<| a_keepAliveExpCount ||
         a_maxNotifsPerPublish := {p_subscription} <<| a_maxNotifsPerPublish ||
-        
+
         a_subscription_state := {p_subscription} <<| a_subscription_state ||
         a_LifetimeCounter := {p_subscription} <<| a_LifetimeCounter ||
         a_KeepAliveCounter := {p_subscription} <<| a_KeepAliveCounter ||
         a_MessageSent := a_MessageSent - {p_subscription}               ||
         a_PublishingEnabled := a_PublishingEnabled - {p_subscription}   ||
         a_SeqNum := {p_subscription} <<| a_SeqNum ||
-        
+
         /* Queues emptied : publish responses should be sent if remaining */
         a_publish_responses := a_publish_responses |>> {a_publishRequestQueue (p_subscription)} ||
         a_monitored_item_notifications := {a_pendingNotificationQueue (p_subscription)} <<| a_monitored_item_notifications ||
-        
+
         /* Queues deleted */
         s_notificationQueue := s_notificationQueue - {a_pendingNotificationQueue (p_subscription)} ||
         a_pendingNotificationQueue := {p_subscription} <<| a_pendingNotificationQueue ||
-          
+
         s_publishReqQueue := s_publishReqQueue - {a_publishRequestQueue(p_subscription)} ||
         a_publishRequestQueue := {p_subscription} <<| a_publishRequestQueue ||
-        
+
         /* Republish queue deleted */
         a_republish_notification := a_republish_notification |>> {a_notifRepublishQueue(p_subscription)} ||
-        a_notification_seq_num := 
+        a_notification_seq_num :=
           dom(a_republish_notification |> {a_notifRepublishQueue(p_subscription)}) <<| a_notification_seq_num ||
-        
+
         s_republishQueue := s_republishQueue - {a_notifRepublishQueue(p_subscription)} ||
         a_notifRepublishQueue := {p_subscription} <<| a_notifRepublishQueue ||
-        
+
         /* Remove monitoredItems */
         LET s_removedMonitoredItemPointer BE
             s_removedMonitoredItemPointer = a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}]
@@ -627,19 +627,19 @@ OPERATIONS
             a_monitoredItemId := a_monitoredItemId - (s_removedMonitoredItemPointer <| a_monitoredItemId) ||
             a_monitoredItemSubs := s_removedMonitoredItemPointer <<| a_monitoredItemSubs ||
             a_monitoredItemNodeId := s_removedMonitoredItemPointer <<| a_monitoredItemNodeId ||
-            
+
             s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
             a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue ||
-            
+
             /* Remove subscription monitoredItem queue and all removed monitored items from other queues (i.e.:nodeId to mi queues) */
-            a_defined_monitored_items := 
+            a_defined_monitored_items :=
              {a_monitoredItemQueue (p_subscription)}
               <<| a_defined_monitored_items |>>
              s_removedMonitoredItemPointer
         END
     END
     ;
-    
+
     is_valid_seq_num <-- subscription_ack_notif_msg (p_sub, p_seq_num) =
     PRE
         p_sub : t_subscription_i &
@@ -668,7 +668,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     StatusCode_service, async_resp_msg, subscription, moreNotifs
       <-- receive_publish_request (p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg) =
     PRE
@@ -708,7 +708,7 @@ OPERATIONS
                             l_old_resp_msg : t_msg_i &
                             (l_old_resp_msg |-> a_publishRequestQueue (l_subscription)) : a_publish_responses
                         THEN
-                            a_publish_responses := a_publish_responses 
+                            a_publish_responses := a_publish_responses
                              - {l_old_resp_msg |-> a_publishRequestQueue (l_subscription)}
                              \/ {p_resp_msg |-> a_publishRequestQueue (l_subscription)}
                         END
@@ -725,7 +725,7 @@ OPERATIONS
                     subscription := c_subscription_indet ||
                     moreNotifs := FALSE
                 END
- 
+
             /* #5 transition */
             ELSIF a_subscription_state (l_subscription) = e_subscriptionState_normal &
                   l_PublishingEnabled = TRUE & l_MoreNotifications = TRUE
@@ -734,7 +734,7 @@ OPERATIONS
                 subscription := l_subscription ||
                 async_resp_msg := FALSE ||
                 d_publish_request_notif_msg_sent_dequeuing_notifications (l_subscription, StatusCode_service, moreNotifs)
-                
+
             /* #10 transition */
             ELSIF a_subscription_state (l_subscription) = e_subscriptionState_late & l_PublishingEnabled = TRUE &
                 (l_NotificationAvailable = TRUE or l_MoreNotifications = TRUE)
@@ -745,10 +745,10 @@ OPERATIONS
                 async_resp_msg := FALSE ||
                 /* return notifications (dequeue notifications) + update MoreNotification variable */
                 d_publish_request_notif_msg_sent_dequeuing_notifications (l_subscription, StatusCode_service, moreNotifs)
-                
+
             /* #11 transition */
             ELSIF a_subscription_state (l_subscription) = e_subscriptionState_late &
-                (l_PublishingEnabled = FALSE 
+                (l_PublishingEnabled = FALSE
                  or
                  (l_PublishingEnabled = TRUE &
                   l_NotificationAvailable = FALSE &
@@ -764,7 +764,7 @@ OPERATIONS
                 notification_message :(notification_message : t_notif_msg_i & notification_message : t_notif_msg) ||
                 notification_message_seq_num := a_SeqNum (l_subscription) || /* KeepAlive => no seq num update */
                 moreNotifs := FALSE
-                
+
             /* #13 transition */
             ELSIF a_subscription_state (l_subscription) = e_subscriptionState_keepAlive
             THEN
@@ -777,7 +777,7 @@ OPERATIONS
                             l_old_resp_msg : t_msg_i &
                             (l_old_resp_msg |-> a_publishRequestQueue (l_subscription)) : a_publish_responses
                         THEN
-                            a_publish_responses := a_publish_responses 
+                            a_publish_responses := a_publish_responses
                              - {l_old_resp_msg |-> a_publishRequestQueue (l_subscription)}
                              \/ {p_resp_msg |-> a_publishRequestQueue (l_subscription)}
                         END
@@ -800,10 +800,10 @@ OPERATIONS
                 subscription := l_subscription ||
                 moreNotifs := FALSE
             END
-        END 
+        END
     END
     ;
-    
+
     revisedSamplingItv, revisedQueueSize <-- compute_create_montitored_item_revised_params (p_reqQueueSize) =
     PRE
         p_reqQueueSize : t_counter
@@ -859,17 +859,17 @@ OPERATIONS
                 monitoredItemPointer := l_monitoredItem ||
                 monitoredItemId := l_monitoredItemId ||
                 /* a notification is enqueued with current value of monitored item */
-                a_monitored_item_notifications := 
+                a_monitored_item_notifications :=
                 a_monitored_item_notifications \/ {a_pendingNotificationQueue(p_subscription) |-> l_monitoredItem} ||
                 /* add monitored item to both queues */
-                a_defined_monitored_items := 
+                a_defined_monitored_items :=
                 a_defined_monitored_items \/ {a_monitoredItemQueue(p_subscription) |-> l_monitoredItem}
                                           \/ {a_nodeToMonitoredItemQueue(p_nid) |-> l_monitoredItem}
             END
         END
     END
     ;
-    
+
     p_validPublishingReqQueued <-- server_subscription_core_check_valid_publish_req_queue (p_subscription) =
     PRE
         p_subscription : t_subscription_i &
@@ -884,7 +884,7 @@ OPERATIONS
         END
     END
     ;
-        
+
     /* Transition #27 shall be evaluated prior to other possible transitions since lifeTimeCounter--
        never done in other transitions
     */
@@ -925,7 +925,7 @@ OPERATIONS
         END
     END
     ;
-        
+
     p_msg_to_send, p_msg_sc, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_moreNotifs
       <-- server_subscription_core_publish_timeout (p_subscription, p_validPublishReqQueued) =
     PRE
@@ -959,7 +959,7 @@ OPERATIONS
                       p_validPublishReqQueued = TRUE &
                       l_MessageSent = FALSE &
                       (l_PublishingEnabled = FALSE
-                       or 
+                       or
                        (l_PublishingEnabled = TRUE &
                         l_NotificationAvailable = FALSE)
                       )
@@ -968,19 +968,19 @@ OPERATIONS
                     a_LifetimeCounter (p_subscription) := a_lifetimeExpCount (p_subscription) ||
                     d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
                     d_publish_timeout_keepAlive_msg_sent
-            
+
                 /* #8 transition */
                 ELSIF a_subscription_state (p_subscription) = e_subscriptionState_normal &
                       p_validPublishReqQueued = FALSE &
                       (l_MessageSent = FALSE
-                       or 
+                       or
                        (l_PublishingEnabled = TRUE &
                         l_NotificationAvailable = TRUE)
                       )
                 THEN
                     a_subscription_state (p_subscription) := e_subscriptionState_late ||
                     d_publish_timeout_no_msg_sent_setMoreNotifs
-                    
+
                 /* #9 transition */
                 ELSIF a_subscription_state (p_subscription) = e_subscriptionState_normal &
                       l_MessageSent = TRUE &
@@ -994,12 +994,12 @@ OPERATIONS
                     /* reset keepAlive counter */
                     a_KeepAliveCounter (p_subscription) := a_keepAliveExpCount (p_subscription) ||
                     d_publish_timeout_no_msg_sent_setMoreNotifs
-            
+
                 /* #12 transition */
                 ELSIF a_subscription_state (p_subscription) = e_subscriptionState_late
                 THEN
                     d_publish_timeout_no_msg_sent_setMoreNotifs
-                    
+
                 /* #14 transition */
                 ELSIF a_subscription_state (p_subscription) = e_subscriptionState_keepAlive &
                       l_PublishingEnabled = TRUE &
@@ -1014,7 +1014,7 @@ OPERATIONS
                     d_publish_timeout_notif_msg_sent_dequeuing_notifications (p_subscription, p_msg_sc, p_moreNotifs,
                                                                               p_session, p_req_handle, p_req_context,
                                                                               p_msg_to_send)
-                    
+
                 /* #15 transition */
                 ELSIF a_subscription_state (p_subscription) = e_subscriptionState_keepAlive &
                       p_validPublishReqQueued = TRUE &
@@ -1029,7 +1029,7 @@ OPERATIONS
                     a_KeepAliveCounter (p_subscription) := a_keepAliveExpCount (p_subscription) ||
                     d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
                     d_publish_timeout_keepAlive_msg_sent
-                    
+
                 /* #16 transition */
                 ELSIF a_subscription_state (p_subscription) = e_subscriptionState_keepAlive &
                       a_KeepAliveCounter (p_subscription) > 1 &
@@ -1041,7 +1041,7 @@ OPERATIONS
                 THEN
                     a_KeepAliveCounter (p_subscription) := a_KeepAliveCounter (p_subscription) - 1 ||
                     d_publish_timeout_no_msg_sent_setMoreNotifs
-                    
+
                 /* #17 transition */
                 ELSIF a_subscription_state (p_subscription) = e_subscriptionState_keepAlive &
                       p_validPublishReqQueued = FALSE &
@@ -1054,14 +1054,14 @@ OPERATIONS
                 THEN
                     a_subscription_state (p_subscription) := e_subscriptionState_late ||
                     d_publish_timeout_no_msg_sent_setMoreNotifs
-                    
+
                 ELSE
                     d_publish_timeout_no_msg_sent_setMoreNotifs
                 END
             END
     END
     ;
-    
+
     /* Corresponds to recursive call to ReturnNotifications() when MoreNotifications = TRUE & PublishingReqQueued = TRUE */
     p_msg_to_send, p_msg_sc, p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_moreNotifs
       <-- server_subscription_core_publish_timeout_return_moreNotifs (p_subscription) =
@@ -1072,7 +1072,7 @@ OPERATIONS
         a_subscription_state (p_subscription) = e_subscriptionState_normal &
         a_pendingNotificationQueue [{p_subscription}] /= {} &
         validPublishReqQueued = TRUE
-    THEN               
+    THEN
         d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
         // return notifications (dequeue notifications) + update MoreNotification variable
         d_publish_timeout_notif_msg_sent_dequeuing_notifications (p_subscription, p_msg_sc, p_moreNotifs,
@@ -1080,7 +1080,7 @@ OPERATIONS
                                                                   p_msg_to_send)
     END
     ;
-    
+
     server_subscription_add_notification (p_subscription, p_monitoredItemPointer, p_writeValuePointer) =
     PRE
         p_subscription : t_subscription_i &
@@ -1091,11 +1091,11 @@ OPERATIONS
         p_writeValuePointer : t_WriteValuePointer
     THEN
         /* a notification is enqueued with current value of monitored item */
-        a_monitored_item_notifications := 
+        a_monitored_item_notifications :=
           a_monitored_item_notifications \/ {a_pendingNotificationQueue(p_subscription) |-> p_monitoredItemPointer}
     END
     ;
-    
+
     p_bres, p_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_nid) =
     PRE
         p_nid : t_NodeId_i &
@@ -1106,19 +1106,19 @@ OPERATIONS
             p_monitoredItemQueue := c_monitoredItemQueue_indet
         OR
             p_bres := TRUE ||
-            p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i & 
+            p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i &
                 p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid))
         END
     END
     ;
-    
+
     p_monitoredItemId,
     p_subscription,
     p_nid,
     p_aid,
     p_timestampToReturn,
     p_monitoringMode,
-    p_clientHandle 
+    p_clientHandle
       <--getall_monitoredItemPointer (p_monitoredItemPointer) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &
@@ -1136,7 +1136,7 @@ OPERATIONS
           p_subscription : t_subscription_i &
           p_subscription : t_subscription &
           p_nid : t_NodeId_i &
-          p_nid : t_NodeId &        
+          p_nid : t_NodeId &
           p_aid : t_AttributeId_i &
           p_aid : t_AttributeId &
           p_timestampToReturn : t_TimestampsToReturn_i &
@@ -1147,7 +1147,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     bres <-- is_notification_triggered (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &
@@ -1160,7 +1160,7 @@ OPERATIONS
         bres :: BOOL
     END
     ;
-    
+
     set_msg_publish_resp_subscription (p_resp_msg, p_subscription) =
     PRE
         p_resp_msg : t_msg_i &
@@ -1172,7 +1172,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     set_msg_publish_resp_notificationMsg (p_resp_msg, p_moreNotifs) =
     PRE
         p_resp_msg : t_msg_i &
@@ -1183,25 +1183,25 @@ OPERATIONS
         skip
     END
     ;
-    
+
     generate_internal_send_publish_response_event (p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_statusCode) =
     PRE
         p_session : t_session_i & p_session : t_session &
         p_publish_resp_msg : t_msg_i & p_publish_resp_msg : t_msg &
-        p_req_handle : t_server_request_handle_i & 
+        p_req_handle : t_server_request_handle_i &
         p_req_context : t_request_context_i & p_req_context : t_request_context &
         p_statusCode : t_StatusCode_i & p_statusCode : t_StatusCode
     THEN
         skip
     END
     ;
-    
+
     subscription_core_UNINITIALISATION =
     BEGIN
         d_init
     END
     ;
-    
+
     bres, p_notif_msg <-- get_republish_notif_from_queue (p_queue, p_seq_num) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -1224,7 +1224,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     /* EXTENDS */
     nb_seq_nums <-- get_available_republish (p_queue) =
     PRE
@@ -1234,7 +1234,7 @@ OPERATIONS
         nb_seq_nums := card(a_republish_notification~[{p_queue}])
     END
     ;
-    
+
     continue, iterator <-- init_iter_notif_republish (p_queue) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -1245,11 +1245,11 @@ OPERATIONS
         s_iterated_sub_seq_num := {} ||
         s_to_iterate_sub_seq_num := a_notification_seq_num[a_republish_notification~[{p_queue}]] ||
         iterator :(iterator : t_notifRepublishQueueIterator_i &
-                   (a_republish_notification~[{p_queue}] /= {} => 
+                   (a_republish_notification~[{p_queue}] /= {} =>
                      iterator : t_notifRepublishQueueIterator))
     END
     ;
-    
+
     continue, seq_num <-- continue_iter_notif_republish (p_queue, p_iterator) =
     PRE
         p_queue : t_notifRepublishQueue_i &
@@ -1270,7 +1270,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     clear_notif_republish_iterator (p_queue, p_iterator) =
     PRE
         p_queue : t_notifRepublishQueue_i &

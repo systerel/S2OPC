@@ -24,7 +24,7 @@ SEES
     constants
 
 OPERATIONS
-    
+
     is_valid <-- write_value_pointer_is_valid (p_write_value) =
     PRE
         p_write_value : t_WriteValuePointer_i
@@ -32,7 +32,7 @@ OPERATIONS
         is_valid := bool(p_write_value : t_WriteValuePointer)
     END
     ;
-    
+
     p_nid, p_aid <-- get_write_value_pointer_NodeId_AttributeId (p_write_value) =
     PRE
         p_write_value : t_WriteValuePointer_i &
@@ -43,7 +43,7 @@ OPERATIONS
             p_aid : t_AttributeId_i & p_aid : t_AttributeId)
     END
     ;
-    
+
     bres, p_write_value_copy <-- copy_write_value_pointer_content (p_write_value) =
     PRE
         p_write_value : t_WriteValuePointer_i &
@@ -57,7 +57,7 @@ OPERATIONS
           (bres = TRUE => p_write_value_copy : t_WriteValuePointer))
     END
     ;
-    
+
     free_write_value_pointer (p_write_value) =
     PRE
         p_write_value : t_WriteValuePointer_i &
