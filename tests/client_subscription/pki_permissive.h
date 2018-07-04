@@ -30,6 +30,8 @@
 /**
  * \brief           Creates a PKI Provider without security.
  *
+ *                  The PKI should be freed with SOPC_PKIProvider_Free() or SOPC_PKIPermissive_Free().
+ *
  * \warning         Using this PKI is considered harmful for the security of the connection.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,

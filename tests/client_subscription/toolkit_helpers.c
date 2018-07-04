@@ -202,14 +202,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     if (SOPC_STATUS_OK != status)
     {
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtCAu);
-        if (bDisablePKI)
-        {
-            SOPC_PKIPermissive_Free(pPki);
-        }
-        else
-        {
-            SOPC_PKIProviderStack_Free(pPki);
-        }
+        SOPC_PKIProvider_Free(&pPki);
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtCli);
         SOPC_KeyManager_SerializedAsymmetricKey_Delete(pKeyCli);
@@ -227,8 +220,7 @@ void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
     SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->crt_cli);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) pscConfig->key_priv_cli);
     SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->crt_srv);
-    /* TODO: Select the right PKIProvider free, which will free the CA... */
-    SOPC_PKIProviderStack_Free((SOPC_PKIProvider*) pscConfig->pki);
+    SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&pscConfig->pki));
     SOPC_String_Delete((SOPC_String*) pscConfig->applicationUri);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 

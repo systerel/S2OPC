@@ -451,7 +451,7 @@ int main(int argc, char* argv[])
     SOPC_KeyManager_SerializedCertificate_Delete(serverCertificate);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(serverKey);
     SOPC_KeyManager_SerializedCertificate_Delete(authCertificate);
-    SOPC_PKIProviderStack_Free(pkiProvider);
+    SOPC_PKIProvider_Free(&pkiProvider);
     SOPC_AddressSpace_Delete(address_space);
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;

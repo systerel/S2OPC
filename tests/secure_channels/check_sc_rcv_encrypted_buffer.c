@@ -358,7 +358,7 @@ void clearToolkit(void)
     SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
     SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
-    SOPC_PKIProviderStack_Free(pki);
+    SOPC_PKIProvider_Free(&pki);
 }
 
 void establishSC(void)

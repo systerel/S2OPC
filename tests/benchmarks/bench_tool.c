@@ -607,7 +607,7 @@ int main(int argc, char** argv)
         if (!load_keys(&cert, &key, &server_cert, &ca) ||
             SOPC_PKIProviderStack_Create(ca, NULL, &pki) != SOPC_STATUS_OK)
         {
-            SOPC_PKIProviderStack_Free(pki);
+            SOPC_PKIProvider_Free(&pki);
             SOPC_KeyManager_SerializedCertificate_Delete(cert);
             SOPC_KeyManager_SerializedAsymmetricKey_Delete(key);
             SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
@@ -630,7 +630,7 @@ int main(int argc, char** argv)
     assert(Mutex_UnlockAndWaitCond(&ctx.run_cond, &ctx.run_mutex) == SOPC_STATUS_OK);
 
     SOPC_Toolkit_Clear();
-    SOPC_PKIProviderStack_Free(pki);
+    SOPC_PKIProvider_Free(&pki);
     SOPC_KeyManager_SerializedCertificate_Delete(cert);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(key);
     SOPC_KeyManager_SerializedCertificate_Delete(server_cert);

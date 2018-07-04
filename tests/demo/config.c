@@ -108,7 +108,7 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtCli);
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
         SOPC_KeyManager_SerializedAsymmetricKey_Delete(pKeyCli);
-        SOPC_PKIProviderStack_Free(pPki);
+        SOPC_PKIProvider_Free(&pPki);
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtCAu);
         pCrtCli = NULL;
         pCrtSrv = NULL;

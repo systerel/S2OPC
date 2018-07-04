@@ -474,7 +474,7 @@ int main(int argc, char* argv[])
     printf(">>Stub_Client: Final status: %" PRIu32 "\n", status);
     SOPC_Toolkit_Clear();
 
-    SOPC_PKIProviderStack_Free(pki);
+    SOPC_PKIProvider_Free(&pki);
     SOPC_String_Clear(&stEndpointUrl);
     SOPC_KeyManager_SerializedCertificate_Delete(crt_cli);
     SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);

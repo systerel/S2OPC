@@ -640,7 +640,7 @@ static inline void setup_pki_stack(void)
 
 static inline void teardown_pki_stack(void)
 {
-    SOPC_PKIProviderStack_Free(pki);
+    SOPC_PKIProvider_Free(&pki);
     SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
 
     teardown_certificate();

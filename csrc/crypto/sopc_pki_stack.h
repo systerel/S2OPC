@@ -41,14 +41,15 @@ struct SOPC_CertificateRevList;
  *                  This verifies the certificate in the safest manner (whole certificate chain, with date validation),
  *                  with a single certificate authority, and an optional revocation list.
  *                  It requires a certificate authority signed with SHA-256, and an RSA private key which is at least
- * 2048 bits long.
+ *                  2048 bits long.
  *
  * \warning         Provided certificates must be valid until the destruction of the created PKI (they are not copied).
  *
  * \param pCertAuth A valid pointer to the Certificate of the certification authority.
  * \param pRevocationList  An optional certificate chain containing the revocation list. If NULL, no revocation list is
- * checked. \param ppPKI     A valid pointer to the newly created PKIProvider. You should free such provider with
- * PKIProviderStack_Free
+ *                  checked.
+ * \param ppPKI     A valid pointer to the newly created PKIProvider. You should free such provider with
+ *                  SOPC_PKIProvider_Free() or SOPC_PKIProviderStack_Free().
  *
  * \note            Content of the pki is unspecified when return value is not SOPC_STATUS_OK.
  *

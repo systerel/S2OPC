@@ -610,7 +610,7 @@ int main(void)
         SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
         SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
         SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
-        SOPC_PKIProviderStack_Free(pki);
+        SOPC_PKIProvider_Free(&pki);
     }
 
     SOPC_AddressSpace_Delete(address_space);
