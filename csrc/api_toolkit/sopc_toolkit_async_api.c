@@ -102,12 +102,6 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint3
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    bool consistent = ((0 == length_password) ^ (NULL == password)) != 0;
-    if (!consistent)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
     SOPC_ExtensionObject* user = calloc(1, sizeof(SOPC_ExtensionObject));
     OpcUa_UserNameIdentityToken* token = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;

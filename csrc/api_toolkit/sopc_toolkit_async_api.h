@@ -121,9 +121,9 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t end
  *       unencrypted endpoint.
  *
  * \param policyId  The policy id to use for the identity token, must not be NULL
- * \param username  The zero-terminated string username
- * \param password  The bytestring containing the password, may be NULL if length_password is 0
- * \param length_password The password length
+ * \param username  The zero-terminated string username, may be NULL
+ * \param password  The bytestring containing the password, may be NULL
+ * \param length_password The password length, ignored when password is NULL
  *
  * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called.
  */
