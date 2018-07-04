@@ -58,43 +58,48 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     SOPC_SerializedAsymmetricKey* pKeyCli = NULL;
     SOPC_PKIProvider* pPki = NULL;
 
-    /* Check parameters */
     if (NULL == szServerUrl || NULL == szSecuPolicy || OpcUa_MessageSecurityMode_Invalid == msgSecurityMode)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     /* Check security policy and parameters consistency */
-    if (SOPC_STATUS_OK == status)
+    /* CRL is always optional */
+    /* If security policy is None, then security mode shall be None, and paths, except CAuth, shall be NULL */
+    if (strncmp(szSecuPolicy, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0)
     {
-        /* CRL is always optional */
-        /* If security policy is None, then security mode shall be None, and paths, except CAuth, shall be NULL */
-        if (strncmp(szSecuPolicy, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0)
+        if (OpcUa_MessageSecurityMode_None != msgSecurityMode || NULL != szPathCertClient || NULL != szPathCertClient ||
+            NULL != szPathCertServer)
         {
-            if (OpcUa_MessageSecurityMode_None != msgSecurityMode || NULL != szPathCertClient ||
-                NULL != szPathCertClient || NULL != szPathCertServer)
-            {
-                status = SOPC_STATUS_INVALID_PARAMETERS;
-            }
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                        "Invalid parameters: security policy is None, but security mode is not None or path to "
+                        "certificates are not NULL.");
+            return SOPC_STATUS_INVALID_PARAMETERS;
         }
-        /* Else, the security mode shall not be None, and all paths shall be non NULL (except CRL) */
-        else
+    }
+    /* Else, the security mode shall not be None, and all paths shall be non NULL (except CRL) */
+    else
+    {
+        if (OpcUa_MessageSecurityMode_None == msgSecurityMode || NULL == szPathCertClient || NULL == szPathCertClient ||
+            NULL == szPathCertServer)
         {
-            if (OpcUa_MessageSecurityMode_None == msgSecurityMode || NULL == szPathCertClient ||
-                NULL == szPathCertClient || NULL == szPathCertServer)
-            {
-                status = SOPC_STATUS_INVALID_PARAMETERS;
-            }
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                        "Invalid parameters: security policy is not None, but security mode is None or path to "
+                        "certificates are NULL.");
+            return SOPC_STATUS_INVALID_PARAMETERS;
         }
-        /* Certificate authority shall always exist */
-        if (SOPC_STATUS_OK == status && NULL == szPathCertifAuth)
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
+    }
+    /* Certificate authority shall only exist when PKI is not disabled */
+    if ((bDisablePKI && NULL != szPathCertifAuth) || ((!bDisablePKI) && NULL == szPathCertifAuth))
+    {
+        Helpers_Log(
+            SOPC_LOG_LEVEL_ERROR,
+            "Invalid parameters: path to PKI can be NULL if and only if PKI security verifications are disabled.");
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     /* Load the certificates & CRL before the creation of the PKI, then the config */
-    if (SOPC_STATUS_OK == status && !bDisablePKI)
+    if (!bDisablePKI)
     {
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(szPathCertifAuth, &pCrtCAu);
         if (SOPC_STATUS_OK != status)

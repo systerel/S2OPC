@@ -36,9 +36,9 @@
 /* Secure Channel configuration */
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 /* Security Policy is None or Basic256 or Basic256Sha256 */
-#define SECURITY_POLICY SOPC_SecurityPolicy_Basic256_URI
+#define SECURITY_POLICY SOPC_SecurityPolicy_None_URI
 /* Security Mode is None or Sign or SignAndEncrypt */
-#define SECURITY_MODE OpcUa_MessageSecurityMode_Sign
+#define SECURITY_MODE OpcUa_MessageSecurityMode_None
 
 /* Connection global timeout */
 #define TIMEOUT_MS 10000
@@ -119,10 +119,10 @@ int main(int argc, char* const argv[])
                                          .security_policy = SECURITY_POLICY,
                                          .security_mode = SECURITY_MODE,
                                          .disable_certificate_verification = options.disable_certificate_verification,
-                                         .path_cert_auth = PATH_CACERT_PUBL,
-                                         .path_cert_srv = PATH_SERVER_PUBL,
-                                         .path_cert_cli = PATH_CLIENT_PUBL,
-                                         .path_key_cli = PATH_CLIENT_PRIV,
+                                         .path_cert_auth = NULL,
+                                         .path_cert_srv = NULL,
+                                         .path_cert_cli = NULL,
+                                         .path_key_cli = NULL,
                                          .path_crl = NULL,
                                          .policyId = options.policyId,
                                          .username = options.username,
@@ -137,6 +137,17 @@ int main(int argc, char* const argv[])
     SOPC_LibSub_ConfigurationId cfg_id = 0;
     SOPC_LibSub_ConnectionId con_id = 0;
     SOPC_LibSub_DataId d_id = 0;
+
+    if (cfg_con.security_mode != OpcUa_MessageSecurityMode_None)
+    {
+        cfg_con.path_cert_srv = PATH_SERVER_PUBL;
+        cfg_con.path_cert_cli = PATH_CLIENT_PUBL;
+        cfg_con.path_key_cli = PATH_CLIENT_PRIV;
+    }
+    if (!cfg_con.disable_certificate_verification)
+    {
+        cfg_con.path_cert_auth = PATH_CACERT_PUBL;
+    }
 
     Helpers_Log(SOPC_LOG_LEVEL_INFO, SOPC_LibSub_GetVersion());
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Connecting to \"%s\"", cfg_con.server_url);
