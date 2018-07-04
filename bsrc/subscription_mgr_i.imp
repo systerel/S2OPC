@@ -632,7 +632,7 @@ OPERATIONS
             l_monitoringMode,
             l_clientHandle
               <--getall_monitoredItemPointer (l_monitoredItemPointer);
-            IF l_notification_triggered = TRUE
+            IF l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting
             THEN
                 server_subscription_add_notification (l_subscription, l_monitoredItemPointer, p_new_wv_pointer)
             END

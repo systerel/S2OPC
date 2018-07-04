@@ -100,6 +100,15 @@ OPERATIONS
     END
     ;
 
+    free_first_monitored_item_notification_value (p_VariantValuePointer) =
+    PRE
+        p_VariantValuePointer : t_Variant_i &
+        p_VariantValuePointer : t_Variant
+    THEN
+        skip
+    END
+    ;
+
     bres <-- add_monitored_item_notification_to_queue (p_queue,
                                                        p_monitoredItem,
                                                        p_writeValuePointer) =

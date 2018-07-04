@@ -217,6 +217,12 @@ void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notifi
     }
 }
 
+void monitored_item_notification_queue_bs__free_first_monitored_item_notification_value(
+    const constants__t_Variant_i monitored_item_notification_queue_bs__p_VariantValuePointer)
+{
+    free(monitored_item_notification_queue_bs__p_VariantValuePointer);
+}
+
 void monitored_item_notification_queue_bs__init_iter_monitored_item_notification(
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     t_entier4* const monitored_item_notification_queue_bs__p_nb_notifications)
