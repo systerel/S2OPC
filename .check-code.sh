@@ -29,6 +29,7 @@
 
 ISADVANCED=$1
 
+BSRC=bsrc
 CSRC=csrc
 TST=tests
 
@@ -104,7 +105,7 @@ fi
 
 echo "Clang automatic formatting check" | tee -a $LOGPATH
 ./.format.sh >> $LOGPATH
-ALREADY_FORMAT=`git ls-files -m $CSRC $TST`
+ALREADY_FORMAT=`git ls-files -m $BSRC $CSRC $TST`
 
 if [[ -z $ALREADY_FORMAT ]]; then
     echo "C source code formatting already done" | tee -a $LOGPATH
