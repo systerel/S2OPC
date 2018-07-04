@@ -44,8 +44,12 @@
 #define TIMEOUT_MS 10000
 /* Secure Channel lifetime */
 #define SC_LIFETIME_MS 3600000
-/* Publish period */
+/* Default publish period */
 #define PUBLISH_PERIOD_MS 500
+/* Default max keep alive count */
+#define MAX_KEEP_ALIVE_COUNT 30
+/* Lifetime Count of subscriptions */
+#define MAX_LIFETIME_COUNT 1000
 /* Number of targetted publish token */
 #define PUBLISH_N_TOKEN 3
 
@@ -72,6 +76,7 @@ enum
     OPT_PUBLISH_PERIOD,
     OPT_TOKEN_TARGET,
     OPT_DISABLE_SECU,
+    OPT_KEEPALIVE,
 } cmd_line_option_values_t;
 typedef struct
 {
@@ -86,6 +91,8 @@ typedef struct
     int node_ids_sz;
     char** node_ids;
     bool disable_certificate_verification;
+    char* n_max_keepalive_str;
+    uint32_t n_max_keepalive;
 } cmd_line_options_t;
 static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv);
 static void print_usage(const char* exe);
@@ -121,6 +128,8 @@ int main(int argc, char* const argv[])
                                          .username = options.username,
                                          .password = options.password,
                                          .publish_period_ms = options.publish_period,
+                                         .n_max_keepalive = options.n_max_keepalive,
+                                         .n_max_lifetime = MAX_LIFETIME_COUNT,
                                          .data_change_callback = datachange_callback,
                                          .timeout_ms = TIMEOUT_MS,
                                          .sc_lifetime = SC_LIFETIME_MS,
@@ -249,7 +258,8 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
             x("username", false, required_argument, OPT_USERNAME, username)                                       \
                 x("password", false, required_argument, OPT_PASSWORD, password)                                   \
                     x("publish-period", false, required_argument, OPT_PUBLISH_PERIOD, publish_period_str)         \
-                        x("token-target", false, required_argument, OPT_TOKEN_TARGET, token_target_str)
+                        x("token-target", false, required_argument, OPT_TOKEN_TARGET, token_target_str)           \
+                            x("max-keepalive-count", false, required_argument, OPT_KEEPALIVE, n_max_keepalive_str)
 
 #define OPT_DEFINITION(name, req, arg_req, val, field) {name, arg_req, NULL, val},
 
@@ -325,6 +335,7 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     }
     CONVERT_STR_OPT(publish_period, int64_t, PUBLISH_PERIOD_MS)
     CONVERT_STR_OPT(token_target, uint16_t, PUBLISH_N_TOKEN)
+    CONVERT_STR_OPT(n_max_keepalive, uint32_t, MAX_KEEP_ALIVE_COUNT)
 
 #undef CONVERT_STR_OPT
 #undef FOREACH_OPT
@@ -362,5 +373,6 @@ static void print_usage(const char* exe)
     printf("  --publish-period MILLISEC  Subscription publish cycle, in ms\n");
     printf("  --token-target N      Number of PublishRequests available to the server\n");
     printf("  --disable-certificate-validation  For development only\n");
+    printf("  --max-keepalive-count  Number of times an empty PublishResponse will not be sent\n");
     printf("\nNODE_ID are the nodes to subscribe to.\n");
 }

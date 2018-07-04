@@ -242,8 +242,8 @@ typedef struct
  @field path_cert_cli
    Zero-terminated path to the client certificate in the DER format, signed by the root certificate authority
  @field path_key_cli
-   Zero-terminated path to the client private key which is paired to the public key signed server certificate, in the
- DER format
+   Zero-terminated path to the client private key which is paired to the public key signed server certificate,
+   in the DER format
  @field path_crl
    Zero-terminated path to the certificate revocation list in the DER format
  @field policyId
@@ -258,6 +258,13 @@ typedef struct
    Zero-terminated password, ignored when username is NULL
  @field publish_period_ms
    The requested publish period for the created subscription (in milliseconds)
+ @field n_max_keepalive
+   The max keep alive count for the subscription. When there is no notification to send, the subscription waits
+   at most the number of publish cycle before sending a publish response (which is then empty).
+ @field n_max_lifetime
+   The max number of time that a subscription may timeout its publish cycle without being able to send a
+   response (because there is no publish request to answer to). In this case, the subscription is killed by the
+   server. A large value is recommended (e.g. 1000).
  @field data_change_callback
    The callback for data change notification
  @field timeout_ms
@@ -282,6 +289,8 @@ typedef struct
     SOPC_LibSub_CstString username;
     SOPC_LibSub_CstString password;
     int64_t publish_period_ms;
+    uint32_t n_max_keepalive;
+    uint32_t n_max_lifetime;
     SOPC_LibSub_DataChangeCbk data_change_callback;
     int64_t timeout_ms;
     uint32_t sc_lifetime;

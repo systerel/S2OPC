@@ -214,8 +214,8 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 }
 
 SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs,
-                                                       uint32_t iCntLifetime,
                                                        uint32_t iCntMaxKeepAlive,
+                                                       uint32_t iCntLifetime,
                                                        void** ppRequest)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;

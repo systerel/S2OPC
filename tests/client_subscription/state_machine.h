@@ -92,6 +92,8 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      const char* szPassword,
                                      SOPC_LibSub_DataChangeCbk cbkDataChanged,
                                      double fPublishInterval,
+                                     uint32_t iCntMaxKeepAlive,
+                                     uint32_t iCntLifetime,
                                      uint32_t iTokenTarget,
                                      SOPC_StaMac_Machine** ppSM);
 

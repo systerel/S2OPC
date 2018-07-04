@@ -59,6 +59,8 @@ struct SOPC_StaMac_Machine
     SOPC_SLinkedList* pListReqCtx;            /* List of yet-to-be-answered requests,
                                                * id is unique request identifier, value is a SOPC_StaMac_ReqCtx */
     double fPublishInterval;                  /* The publish interval, in ms */
+    uint32_t iCntMaxKeepAlive;                /* Number of skipped response before sending an empty KeepAlive */
+    uint32_t iCntLifetime;                    /* Number of deprived publish cycles before subscription deletion */
     uint32_t iSubscriptionID;                 /* OPC UA subscription ID, non 0 when subscription is created */
     SOPC_SLinkedList* pListMonIt;             /* List of monitored items, where the appCtx is the list value,
                                                * and the id is the uint32_t OPC UA monitored item ID */
@@ -98,6 +100,8 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      const char* szPassword,
                                      SOPC_LibSub_DataChangeCbk cbkDataChanged,
                                      double fPublishInterval,
+                                     uint32_t iCntMaxKeepAlive,
+                                     uint32_t iCntLifetime,
                                      uint32_t iTokenTarget,
                                      SOPC_StaMac_Machine** ppSM)
 {
@@ -120,6 +124,8 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->iSessionID = 0;
         pSM->pListReqCtx = SOPC_SLinkedList_Create(0);
         pSM->fPublishInterval = fPublishInterval;
+        pSM->iCntMaxKeepAlive = iCntMaxKeepAlive;
+        pSM->iCntLifetime = iCntLifetime;
         pSM->iSubscriptionID = 0;
         pSM->pListMonIt = SOPC_SLinkedList_Create(0);
         pSM->nTokenTarget = iTokenTarget;
@@ -773,7 +779,8 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
             /* The request is freed by the Toolkit */
             /* TODO: make all value configurable */
             Helpers_Log(SOPC_LOG_LEVEL_INFO, "Creating subscription.");
-            status = Helpers_NewCreateSubscriptionRequest(pSM->fPublishInterval, 1000, 30, &pRequest);
+            status = Helpers_NewCreateSubscriptionRequest(pSM->fPublishInterval, pSM->iCntMaxKeepAlive,
+                                                          pSM->iCntLifetime, &pRequest);
             if (SOPC_STATUS_OK == status)
             {
                 status = SOPC_StaMac_SendRequest(pSM, pRequest, 0);
