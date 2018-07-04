@@ -64,6 +64,8 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
 /**
  * \brief           Frees a pki created with PKIProviderStack_Create().
  *
+ * \note            Prefer the use of SOPC_PKIProvider_Free(), which also clears the pointer.
+ *
  * \param pPKI      A valid pointer to the pki to free.
  */
 void SOPC_PKIProviderStack_Free(SOPC_PKIProvider* pPKI);

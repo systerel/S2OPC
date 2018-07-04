@@ -40,6 +40,7 @@
 #include "sopc_key_manager.h"
 #include "sopc_toolkit_constants.h"
 
+typedef void (*SOPC_PKIProvider_Free_Func)(SOPC_PKIProvider* pPKI);
 typedef SOPC_ReturnStatus (*SOPC_FnValidateCertificate)(const struct SOPC_PKIProvider* pPKI,
                                                         const SOPC_Certificate* pToValidate);
 
@@ -48,6 +49,11 @@ typedef SOPC_ReturnStatus (*SOPC_FnValidateCertificate)(const struct SOPC_PKIPro
  */
 struct SOPC_PKIProvider
 {
+    /**
+     * \brief   The free function, called upon generic SOPC_PKIProvider destruction.
+     */
+    const SOPC_PKIProvider_Free_Func pFnFree;
+
     /**
      *  \brief          The validation function, which is wrapped by CryptoProvider_Certificate_Validate().
      *
@@ -70,5 +76,10 @@ struct SOPC_PKIProvider
     /** \brief PKI implementations can use this placeholder to store more specific data. */
     void* pUserData;
 };
+
+/**
+ * \brief   Free a PKI provider.
+ */
+void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI);
 
 #endif /* SOPC_PKI_H_ */

@@ -19,10 +19,10 @@
 
 #include <stdlib.h>
 
-#include "sopc_pki.h"
+#include "pki_permissive.h"
 
-static SOPC_ReturnStatus PKIPermissive_ValidateNothing(const SOPC_PKIProvider* pPKI,
-                                                       const SOPC_Certificate* pToValidate)
+static SOPC_ReturnStatus PKIPermissive_ValidateAnything(const SOPC_PKIProvider* pPKI,
+                                                        const SOPC_Certificate* pToValidate)
 {
     (void) (pPKI);
     (void) (pToValidate);
@@ -47,7 +47,8 @@ SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
 
     // The pki function pointer shall be const after this init
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    *(SOPC_FnValidateCertificate*) (&pki->pFnValidateCertificate) = &PKIPermissive_ValidateNothing;
+    *(SOPC_PKIProvider_Free_Func*) (&pki->pFnFree) = &SOPC_PKIPermissive_Free;
+    *(SOPC_FnValidateCertificate*) (&pki->pFnValidateCertificate) = &PKIPermissive_ValidateAnything;
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     pki->pUserCertAuthList = NULL;

@@ -40,6 +40,8 @@ SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI);
 /**
  * \brief           Frees a pki created with SOPC_PKIPermissive_Create().
  *
+ * \note            Prefer the use of SOPC_PKIProvider_Free(), which also clears the pointer.
+ *
  * \param pPKI      A valid pointer to the pki to free.
  */
 void SOPC_PKIPermissive_Free(SOPC_PKIProvider* pPKI);
