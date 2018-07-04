@@ -2459,7 +2459,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
 
         /* id = secure channel connection index,
            params = (SOPC_Buffer*) received buffer,
-           auxParam = request Id context if response (server) / request =%" PRIu32 "dle context if request (client) */
+           auxParam = request Id context if response (server) / request Handle context if request (client) */
         scConnection = SC_GetConnection(eltId);
         if (NULL == scConnection || (scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
                                      scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW))
