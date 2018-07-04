@@ -142,7 +142,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
     {
         *ppSM = pSM;
     }
-    else if (NULL != pSM)
+    else
     {
         SOPC_StaMac_Delete(&pSM);
     }
@@ -152,21 +152,13 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
 
 void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
 {
-    SOPC_StaMac_Machine* pSM = NULL;
-
     if (NULL != ppSM && NULL != *ppSM)
     {
-        pSM = *ppSM;
-        if (NULL != pSM->pListReqCtx)
-        {
-            SOPC_SLinkedList_Delete(pSM->pListReqCtx);
-            pSM->pListReqCtx = NULL;
-        }
-        if (NULL != pSM->pListMonIt)
-        {
-            SOPC_SLinkedList_Delete(pSM->pListMonIt);
-            pSM->pListMonIt = NULL;
-        }
+        SOPC_StaMac_Machine* pSM = *ppSM;
+        SOPC_SLinkedList_Delete(pSM->pListReqCtx);
+        pSM->pListReqCtx = NULL;
+        SOPC_SLinkedList_Delete(pSM->pListMonIt);
+        pSM->pListMonIt = NULL;
         free(pSM);
         *ppSM = NULL;
     }

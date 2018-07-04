@@ -195,37 +195,19 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 
     if (SOPC_STATUS_OK != status)
     {
-        if (NULL != pCrtCAu)
+        SOPC_KeyManager_SerializedCertificate_Delete(pCrtCAu);
+        if (bDisablePKI)
         {
-            SOPC_KeyManager_SerializedCertificate_Delete(pCrtCAu);
+            SOPC_PKIPermissive_Free(pPki);
         }
-        if (NULL != pPki)
+        else
         {
-            if (bDisablePKI)
-            {
-                SOPC_PKIPermissive_Free(pPki);
-            }
-            else
-            {
-                SOPC_PKIProviderStack_Free(pPki);
-            }
+            SOPC_PKIProviderStack_Free(pPki);
         }
-        if (NULL != pCrtSrv)
-        {
-            SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
-        }
-        if (NULL != pCrtCli)
-        {
-            SOPC_KeyManager_SerializedCertificate_Delete(pCrtCli);
-        }
-        if (NULL != pKeyCli)
-        {
-            SOPC_KeyManager_SerializedAsymmetricKey_Delete(pKeyCli);
-        }
-        if (NULL != pscConfig)
-        {
-            free(pscConfig);
-        }
+        SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
+        SOPC_KeyManager_SerializedCertificate_Delete(pCrtCli);
+        SOPC_KeyManager_SerializedAsymmetricKey_Delete(pKeyCli);
+        free(pscConfig);
     }
 
     return status;

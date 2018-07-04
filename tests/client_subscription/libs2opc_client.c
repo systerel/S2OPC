@@ -306,7 +306,7 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
             status = SOPC_STATUS_NOK;
         }
     }
-    else if (NULL != pSM)
+    else
     {
         SOPC_StaMac_Delete(&pSM);
     }
