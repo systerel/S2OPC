@@ -515,21 +515,20 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         /* id = socket index,
          * auxParam = secure channel connection index associated to accepted connection */
-        if (auxParam <= UINT32_MAX)
+        assert(auxParam <= UINT32_MAX && eltId < SOPC_MAX_SOCKETS);
+
+        Mutex_Lock(&socketsMutex);
+        socketElt = &socketsArray[eltId];
+        if (socketElt->state == SOCKET_STATE_ACCEPTED)
         {
-            Mutex_Lock(&socketsMutex);
-            socketElt = &socketsArray[eltId];
-            if (socketElt->state == SOCKET_STATE_ACCEPTED)
-            {
-                socketElt->connectionId = (uint32_t) auxParam;
-                socketElt->state = SOCKET_STATE_CONNECTED;
-            }
-            else
-            {
-                SOPC_SocketsInternalContext_CloseSocketNoLock(eltId);
-            }
-            Mutex_Unlock(&socketsMutex);
+            socketElt->connectionId = (uint32_t) auxParam;
+            socketElt->state = SOCKET_STATE_CONNECTED;
         }
+        else
+        {
+            SOPC_SocketsInternalContext_CloseSocketNoLock(eltId);
+        }
+        Mutex_Unlock(&socketsMutex);
         break;
     case SOCKET_CREATE_CLIENT:
         SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CREATE_CLIENT scIdx=%" PRIu32 " URI=%s", eltId, (char*) params);
@@ -548,12 +547,15 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
         break;
     case SOCKET_CLOSE:
+        assert(eltId < SOPC_MAX_SOCKETS);
         SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CLOSE socketIdx=%" PRIu32, eltId);
         /* id = socket index */
         socketElt = &socketsArray[eltId];
 
         if (socketElt->isServerConnection != false && socketElt->state != SOCKET_STATE_CLOSED)
         {
+            assert(socketElt->listenerSocketIdx < SOPC_MAX_SOCKETS);
+
             // Management of number of connection on a listener
             if (socketsArray[socketElt->listenerSocketIdx].state == SOCKET_STATE_LISTENING &&
                 socketsArray[socketElt->listenerSocketIdx].listenerConnections > 0)
@@ -565,6 +567,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         SOPC_SocketsInternalContext_CloseSocketLock(eltId);
         break;
     case SOCKET_WRITE:
+        assert(eltId < SOPC_MAX_SOCKETS);
         SOPC_Logger_TraceDebug("SocketEvent: SOCKET_WRITE socketIdx=%" PRIu32, eltId);
         /*
         id = socket index,
@@ -610,6 +613,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         break;
     case INT_SOCKET_LISTENER_CONNECTION_ATTEMPT:
+        assert(eltId < SOPC_MAX_SOCKETS);
         SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_LISTENER_CONNECTION_ATTEMPT socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
 
@@ -660,6 +664,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         break;
     case INT_SOCKET_CONNECTION_ATTEMPT_FAILED:
+        assert(eltId < SOPC_MAX_SOCKETS);
         SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_CONNECTION_ATTEMPT_FAILED socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
         // State is connecting
@@ -683,6 +688,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         break;
     case INT_SOCKET_CONNECTED:
+        assert(eltId < SOPC_MAX_SOCKETS);
         SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_CONNECTED socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
         // State was set to connected by network manager
@@ -709,6 +715,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         break;
     case INT_SOCKET_CLOSE:
+        assert(eltId < SOPC_MAX_SOCKETS);
         SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_CLOSE socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
 
@@ -720,6 +727,8 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         {
             if (socketElt->isServerConnection != false)
             {
+                assert(socketElt->listenerSocketIdx < SOPC_MAX_SOCKETS);
+
                 // Management of number of connection on a listener
                 if (socketsArray[socketElt->listenerSocketIdx].state == SOCKET_STATE_LISTENING &&
                     socketsArray[socketElt->listenerSocketIdx].listenerConnections > 0)
@@ -733,6 +742,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         SOPC_SocketsInternalContext_CloseSocketLock(eltId);
         break;
     case INT_SOCKET_READY_TO_READ:
+        assert(eltId < SOPC_MAX_SOCKETS);
         SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_READY_TO_READ socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
 
@@ -773,6 +783,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         break;
     case INT_SOCKET_READY_TO_WRITE:
+        assert(eltId < SOPC_MAX_SOCKETS);
         SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_READY_TO_WRITE socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
 
