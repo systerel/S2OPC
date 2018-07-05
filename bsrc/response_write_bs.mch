@@ -64,7 +64,8 @@ OPERATIONS
         wvi : t_WriteValue_i &
         wvi : t_WriteValue &
         sc : t_StatusCode_i &
-        sc : t_StatusCode
+        sc : t_StatusCode &
+        wvi : dom(ResponseWrite_StatusCode)
     THEN
         ResponseWrite_StatusCode(wvi) := sc
     END
