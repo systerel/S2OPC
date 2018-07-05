@@ -61,7 +61,7 @@ static SOPC_LibSub_ConnectionId nCreatedClient = 0;
 static SOPC_Array* pArrScConfig = NULL; /* Stores the created scConfig to free them in SOPC_LibSub_Clear() */
 
 /* Event callback */
-void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
+static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
 
 /* ==================
  * API implementation
@@ -428,7 +428,7 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId)
  * ========================
  */
 
-void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext)
+static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext)
 {
     SOPC_SLinkedListIterator pIterCli = NULL;
     SOPC_LibSub_ConnectionId cliId = 0;
