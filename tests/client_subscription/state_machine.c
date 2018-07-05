@@ -538,9 +538,9 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                         {
                             pMonItNotif = &pDataNotif->MonitoredItems[i];
                             status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
-                            pSM->cbkDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
                             if (SOPC_STATUS_OK == status)
                             {
+                                pSM->cbkDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
                                 free(plsVal->value);
                                 free(plsVal);
                             }
