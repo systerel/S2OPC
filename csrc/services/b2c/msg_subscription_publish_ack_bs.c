@@ -19,68 +19,12 @@
 
 #include "msg_subscription_publish_ack_bs.h"
 
+#include "notification_republish_queue_util.h"
 #include "util_b2c.h"
 
 #include <assert.h>
 
 static const uint64_t SOPC_MILLISECOND_TO_100_NANOSECONDS = 10000; // 10^4
-
-/* TODO: remove copy of this function already defined notification_republish_queue_bs */
-static SOPC_ReturnStatus SOPC_InternalOpcUa_DataChangeNotification_Copy(OpcUa_DataChangeNotification* dest,
-                                                                        OpcUa_DataChangeNotification* src)
-{
-    assert(dest != NULL);
-    assert(src != NULL);
-    *dest = *src;
-    if (src->NoOfDiagnosticInfos != 0)
-    {
-        dest->DiagnosticInfos = calloc((size_t) src->NoOfDiagnosticInfos, sizeof(SOPC_DiagnosticInfo));
-        if (dest->DiagnosticInfos == NULL)
-        {
-            return SOPC_STATUS_NOK;
-        }
-        for (int32_t i = 0; i < dest->NoOfDiagnosticInfos; i++)
-        {
-            SOPC_DiagnosticInfo_Initialize(&dest->DiagnosticInfos[i]);
-            if (SOPC_DiagnosticInfo_Copy(&dest->DiagnosticInfos[i], &src->DiagnosticInfos[i]) != SOPC_STATUS_OK)
-            {
-                free(dest->DiagnosticInfos);
-                dest->DiagnosticInfos = NULL;
-                return SOPC_STATUS_NOK;
-            }
-        }
-    }
-    else
-    {
-        dest->DiagnosticInfos = NULL;
-    }
-    dest->NoOfDiagnosticInfos = src->NoOfDiagnosticInfos;
-    if (src->NoOfMonitoredItems != 0)
-    {
-        dest->MonitoredItems = calloc((size_t) src->NoOfMonitoredItems, sizeof(OpcUa_MonitoredItemNotification));
-        if (dest->MonitoredItems == NULL)
-        {
-            return SOPC_STATUS_NOK;
-        }
-        for (int32_t i = 0; i < dest->NoOfMonitoredItems; i++)
-        {
-            OpcUa_MonitoredItemNotification_Initialize(&dest->MonitoredItems[i]);
-            if (SOPC_DataValue_Copy(&dest->MonitoredItems[i].Value, &src->MonitoredItems[i].Value) != SOPC_STATUS_OK)
-            {
-                free(dest->DiagnosticInfos);
-                dest->DiagnosticInfos = NULL;
-
-                free(dest->MonitoredItems);
-                dest->MonitoredItems = NULL;
-                return SOPC_STATUS_NOK;
-            }
-            dest->MonitoredItems[i].ClientHandle = src->MonitoredItems[i].ClientHandle;
-        }
-    }
-    dest->NoOfMonitoredItems = src->NoOfMonitoredItems;
-
-    return SOPC_STATUS_OK;
-}
 
 /*------------------------
    INITIALISATION Clause

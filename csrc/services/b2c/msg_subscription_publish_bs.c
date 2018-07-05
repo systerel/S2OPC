@@ -79,22 +79,24 @@ void msg_subscription_publish_bs__alloc_notification_message_items(
         if (SOPC_STATUS_OK == status)
         {
             dataChangeNotif->NoOfMonitoredItems = msg_subscription_publish_bs__p_nb_monitored_item_notifications;
-            dataChangeNotif->MonitoredItems =
-                malloc((size_t) msg_subscription_publish_bs__p_nb_monitored_item_notifications *
-                       sizeof(OpcUa_MonitoredItemNotification));
-
-            if (NULL != dataChangeNotif->MonitoredItems)
+            if (dataChangeNotif->NoOfMonitoredItems > 0)
             {
-                for (int32_t i = 0; i < msg_subscription_publish_bs__p_nb_monitored_item_notifications; i++)
+                dataChangeNotif->MonitoredItems =
+                    malloc((size_t) msg_subscription_publish_bs__p_nb_monitored_item_notifications *
+                           sizeof(OpcUa_MonitoredItemNotification));
+                if (NULL != dataChangeNotif->MonitoredItems)
                 {
-                    OpcUa_MonitoredItemNotification_Initialize(&dataChangeNotif->MonitoredItems[i]);
+                    for (int32_t i = 0; i < msg_subscription_publish_bs__p_nb_monitored_item_notifications; i++)
+                    {
+                        OpcUa_MonitoredItemNotification_Initialize(&dataChangeNotif->MonitoredItems[i]);
+                    }
+                    *msg_subscription_publish_bs__p_notifMsg = notifMsg;
+                    *msg_subscription_publish_bs__bres = true;
                 }
-                *msg_subscription_publish_bs__p_notifMsg = notifMsg;
-                *msg_subscription_publish_bs__bres = true;
-            }
-            else
-            {
-                SOPC_Encodeable_Delete(&OpcUa_NotificationMessage_EncodeableType, (void**) &notifMsg);
+                else
+                {
+                    SOPC_ExtensionObject_Clear(notifMsg->NotificationData);
+                }
             }
         }
     }

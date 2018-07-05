@@ -18,6 +18,7 @@
  */
 
 #include "notification_republish_queue_bs.h"
+#include "notification_republish_queue_util.h"
 
 #include <assert.h>
 
@@ -29,15 +30,16 @@ void notification_republish_queue_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-static SOPC_ReturnStatus SOPC_InternalOpcUa_DataChangeNotification_Copy(OpcUa_DataChangeNotification* dest,
-                                                                        OpcUa_DataChangeNotification* src)
+SOPC_ReturnStatus SOPC_InternalOpcUa_DataChangeNotification_Copy(OpcUa_DataChangeNotification* dest,
+                                                                 OpcUa_DataChangeNotification* src)
 {
     assert(dest != NULL);
     assert(src != NULL);
-    *dest = *src;
-    if (src->NoOfDiagnosticInfos != 0)
+
+    dest->NoOfDiagnosticInfos = src->NoOfDiagnosticInfos;
+    if (dest->NoOfDiagnosticInfos != 0)
     {
-        dest->DiagnosticInfos = calloc((size_t) src->NoOfDiagnosticInfos, sizeof(SOPC_DiagnosticInfo));
+        dest->DiagnosticInfos = calloc((size_t) dest->NoOfDiagnosticInfos, sizeof(SOPC_DiagnosticInfo));
         if (dest->DiagnosticInfos == NULL)
         {
             return SOPC_STATUS_NOK;
@@ -57,10 +59,11 @@ static SOPC_ReturnStatus SOPC_InternalOpcUa_DataChangeNotification_Copy(OpcUa_Da
     {
         dest->DiagnosticInfos = NULL;
     }
-    dest->NoOfDiagnosticInfos = src->NoOfDiagnosticInfos;
-    if (src->NoOfMonitoredItems != 0)
+
+    dest->NoOfMonitoredItems = src->NoOfMonitoredItems;
+    if (dest->NoOfMonitoredItems != 0)
     {
-        dest->MonitoredItems = calloc((size_t) src->NoOfMonitoredItems, sizeof(OpcUa_MonitoredItemNotification));
+        dest->MonitoredItems = calloc((size_t) dest->NoOfMonitoredItems, sizeof(OpcUa_MonitoredItemNotification));
         if (dest->MonitoredItems == NULL)
         {
             return SOPC_STATUS_NOK;
@@ -80,7 +83,10 @@ static SOPC_ReturnStatus SOPC_InternalOpcUa_DataChangeNotification_Copy(OpcUa_Da
             dest->MonitoredItems[i].ClientHandle = src->MonitoredItems[i].ClientHandle;
         }
     }
-    dest->NoOfMonitoredItems = src->NoOfMonitoredItems;
+    else
+    {
+        dest->MonitoredItems = NULL;
+    }
 
     return SOPC_STATUS_OK;
 }
