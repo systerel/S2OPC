@@ -49,7 +49,7 @@ struct SOPC_CertificateRevList;
  * \param pRevocationList  An optional certificate chain containing the revocation list. If NULL, no revocation list is
  *                  checked.
  * \param ppPKI     A valid pointer to the newly created PKIProvider. You should free such provider with
- *                  SOPC_PKIProvider_Free() or SOPC_PKIProviderStack_Free().
+ *                  SOPC_PKIProvider_Free().
  *
  * \note            Content of the pki is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -61,14 +61,5 @@ struct SOPC_CertificateRevList;
 SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCertAuth,
                                                struct SOPC_CertificateRevList* pRevocationList,
                                                SOPC_PKIProvider** ppPKI);
-
-/**
- * \brief           Frees a pki created with PKIProviderStack_Create().
- *
- * \note            Prefer the use of SOPC_PKIProvider_Free(), which also clears the pointer.
- *
- * \param pPKI      A valid pointer to the pki to free.
- */
-void SOPC_PKIProviderStack_Free(SOPC_PKIProvider* pPKI);
 
 #endif /* SOPC_PKI_STACK_H_ */

@@ -30,7 +30,7 @@
 /**
  * \brief           Creates a PKI Provider without security.
  *
- *                  The PKI should be freed with SOPC_PKIProvider_Free() or SOPC_PKIPermissive_Free().
+ *                  The PKI should be freed with SOPC_PKIProvider_Free().
  *
  * \warning         Using this PKI is considered harmful for the security of the connection.
  *
@@ -38,14 +38,5 @@
  *                  and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI);
-
-/**
- * \brief           Frees a pki created with SOPC_PKIPermissive_Create().
- *
- * \note            Prefer the use of SOPC_PKIProvider_Free(), which also clears the pointer.
- *
- * \param pPKI      A valid pointer to the pki to free.
- */
-void SOPC_PKIPermissive_Free(SOPC_PKIProvider* pPKI);
 
 #endif /* SOPC_PKI_PERMISSIVE_H_ */
