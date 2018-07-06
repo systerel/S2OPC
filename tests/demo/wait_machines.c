@@ -19,28 +19,20 @@
 
 #include <stdarg.h>
 
+#include "sopc_atomic.h"
 #include "sopc_time.h"
 
 #include "config.h"
 #include "state_machine.h"
 #include "wait_machines.h"
 
-void wait_for_machines(int count, ...)
+void wait_for_machine(int32_t* atomicValidatingResult, StateMachine_Machine* pSM)
 {
-    va_list args;
-    int i = 0;
-    StateMachine_Machine* pSM = NULL;
     uint32_t iWait = 0;
-
-    va_start(args, count);
-    for (i = 0; i < count; ++i)
+    while (NULL != pSM && (!StateMachine_IsIdle(pSM) || SOPC_Atomic_Int_Get(atomicValidatingResult) == 1) &&
+           iWait * SLEEP_LENGTH <= SC_LIFETIME)
     {
-        pSM = va_arg(args, StateMachine_Machine*);
-        while (NULL != pSM && !StateMachine_IsIdle(pSM) && iWait * SLEEP_LENGTH <= SC_LIFETIME)
-        {
-            iWait += 1;
-            SOPC_Sleep(SLEEP_LENGTH);
-        }
+        iWait += 1;
+        SOPC_Sleep(SLEEP_LENGTH);
     }
-    va_end(args);
 }

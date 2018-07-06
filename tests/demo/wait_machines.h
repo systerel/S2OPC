@@ -21,8 +21,8 @@
 #define WAIT_MACHINES_H_
 
 /**
- * \brief   Test helper, waits for \p count machines to finish, up to SC_LIFETIME millisecs
+ * \brief   Test helper, waits for \p atomicValidatingResult and \p pSM machines to finish, up to SC_LIFETIME millisecs
  */
-void wait_for_machines(int count, ...);
+void wait_for_machine(int32_t* atomicValidatingResult, StateMachine_Machine* pSM);
 
 #endif /* WAIT_MACHINES_H_ */

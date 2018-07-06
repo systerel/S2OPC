@@ -24,6 +24,7 @@
 #include <check.h>
 #include <stdbool.h>
 
+#include "sopc_atomic.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 
@@ -32,6 +33,7 @@
 #include "wait_machines.h"
 
 static StateMachine_Machine* g_pSM = NULL;
+static int32_t atomicValidatingResult = 0;
 
 static void EventDispatcher_QuitAfterConnect(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
 
@@ -45,7 +47,7 @@ START_TEST(test_username_password)
 
     ck_assert(StateMachine_StartSession_UsernamePassword(g_pSM, "UserName", "user", (const uint8_t*) "password",
                                                          (int32_t) strlen("password")) == SOPC_STATUS_OK);
-    wait_for_machines(1, g_pSM);
+    wait_for_machine(&atomicValidatingResult, g_pSM);
 
     SOPC_Toolkit_Clear();
     StateMachine_Delete(&g_pSM);
@@ -55,6 +57,8 @@ END_TEST
 void EventDispatcher_QuitAfterConnect(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
 {
     uintptr_t appCtx = 0;
+    // Set result is still validating since machine state will change on next instruction
+    SOPC_Atomic_Int_Set(&atomicValidatingResult, 1);
     ck_assert(StateMachine_EventDispatcher(g_pSM, &appCtx, event, arg, pParam, smCtx));
 
     switch (event)
@@ -68,6 +72,7 @@ void EventDispatcher_QuitAfterConnect(SOPC_App_Com_Event event, uint32_t arg, vo
         ck_assert_msg(false, "Unexpected event");
         break;
     }
+    SOPC_Atomic_Int_Set(&atomicValidatingResult, 0);
 }
 
 Suite* client_suite_make_session(void)

@@ -20,6 +20,7 @@
 #include <check.h>
 #include <stdbool.h>
 
+#include "sopc_atomic.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 
@@ -28,27 +29,28 @@
 #include "wait_machines.h"
 
 static StateMachine_Machine* g_pSM = NULL;
+static int32_t atomicValidatingResult = 0;
 
 /* Event handlers of the Discovery */
-static void EventDispatcher_ValidateDiscovery(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
+static void EventDispatcher_ValidateGetEndpoints(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
 
-START_TEST(test_discovery)
+START_TEST(test_getEndpoints)
 {
-    ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateDiscovery) == SOPC_STATUS_OK);
+    ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateGetEndpoints) == SOPC_STATUS_OK);
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
     ck_assert(StateMachine_ConfigureMachine(g_pSM) == SOPC_STATUS_OK);
     ck_assert(SOPC_Toolkit_Configured() == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartDiscovery(g_pSM) == SOPC_STATUS_OK);
-    wait_for_machines(1, g_pSM);
+    wait_for_machine(&atomicValidatingResult, g_pSM);
 
     SOPC_Toolkit_Clear();
     StateMachine_Delete(&g_pSM);
 }
 END_TEST
 
-void EventDispatcher_ValidateDiscovery(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
+void EventDispatcher_ValidateGetEndpoints(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
 {
     uintptr_t appCtx = 0;
     OpcUa_GetEndpointsResponse* pResp = NULL;
@@ -64,6 +66,8 @@ void EventDispatcher_ValidateDiscovery(SOPC_App_Com_Event event, uint32_t arg, v
     SOPC_ByteString* pBufCert = NULL;
     SOPC_Certificate* pCert = NULL;
 
+    // Set result is still validating since machine state will change on next instruction
+    SOPC_Atomic_Int_Set(&atomicValidatingResult, 1);
     ck_assert(StateMachine_EventDispatcher(g_pSM, &appCtx, event, arg, pParam, smCtx));
     switch (event)
     {
@@ -76,7 +80,8 @@ void EventDispatcher_ValidateDiscovery(SOPC_App_Com_Event event, uint32_t arg, v
             pEndp = &pResp->Endpoints[i];
             /* As we asked for a GetEndpoints on ENDPOINT_URL, it should only return endpoints with that URL */
             /* TODO: freeopcua translates the given hostname to an IP, so it is not possible to check that */
-            /* ck_assert(strncmp(SOPC_String_GetRawCString(&pEndp->EndpointUrl), ENDPOINT_URL, strlen(ENDPOINT_URL) + 1)
+            /* ck_assert(strncmp(SOPC_String_GetRawCString(&pEndp->EndpointUrl), ENDPOINT_URL, strlen(ENDPOINT_URL)
+             * + 1)
              * == 0); */
             /* Check that SecPol None <=> SecMode None */
             bInconsistentPolicyMode = false;
@@ -142,18 +147,72 @@ void EventDispatcher_ValidateDiscovery(SOPC_App_Com_Event event, uint32_t arg, v
         ck_assert_msg(false, "Unexpected event");
         break;
     }
+
+    SOPC_Atomic_Int_Set(&atomicValidatingResult, 0);
+}
+
+/* Event handlers of the Discovery */
+static void EventDispatcher_ValidateRegisterServer(SOPC_App_Com_Event event,
+                                                   uint32_t arg,
+                                                   void* pParam,
+                                                   uintptr_t smCtx);
+
+START_TEST(test_registerServer)
+{
+    ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateRegisterServer) == SOPC_STATUS_OK);
+    g_pSM = StateMachine_Create();
+    ck_assert(NULL != g_pSM);
+    ck_assert(StateMachine_ConfigureMachine(g_pSM) == SOPC_STATUS_OK);
+    ck_assert(SOPC_Toolkit_Configured() == SOPC_STATUS_OK);
+
+    ck_assert(StateMachine_StartRegisterServer(g_pSM) == SOPC_STATUS_OK);
+    wait_for_machine(&atomicValidatingResult, g_pSM);
+
+    SOPC_Toolkit_Clear();
+    StateMachine_Delete(&g_pSM);
+}
+END_TEST
+
+static void EventDispatcher_ValidateRegisterServer(SOPC_App_Com_Event event,
+                                                   uint32_t arg,
+                                                   void* pParam,
+                                                   uintptr_t smCtx)
+{
+    uintptr_t appCtx = 0;
+    OpcUa_RegisterServerResponse* pResp = NULL;
+
+    // Set result is still validating since machine state will change on next instruction
+    SOPC_Atomic_Int_Set(&atomicValidatingResult, 1);
+    ck_assert(StateMachine_EventDispatcher(g_pSM, &appCtx, event, arg, pParam, smCtx));
+    switch (event)
+    {
+    case SE_RCV_DISCOVERY_RESPONSE:
+        /* Testing the response is, in fact, a test of the server */
+        pResp = (OpcUa_RegisterServerResponse*) pParam;
+        ck_assert((pResp->ResponseHeader.ServiceResult & SOPC_GoodStatusOppositeMask) == 0);
+        break;
+    default:
+        /* TODO: Unhandle "not connected" error" */
+        ck_assert_msg(false, "Unexpected event");
+        break;
+    }
+    SOPC_Atomic_Int_Set(&atomicValidatingResult, 0);
 }
 
 Suite* client_suite_make_discovery(void)
 {
     Suite* s = NULL;
-    TCase* tc_discovery = NULL;
+    TCase* tc_getEndpoints = NULL;
+    TCase* tc_registerServer = NULL;
 
     s = suite_create("Client discovery");
-    tc_discovery = tcase_create("Without session");
+    tc_getEndpoints = tcase_create("GetEndpoints");
+    suite_add_tcase(s, tc_getEndpoints);
+    tcase_add_test(tc_getEndpoints, test_getEndpoints);
 
-    suite_add_tcase(s, tc_discovery);
-    tcase_add_test(tc_discovery, test_discovery);
+    tc_registerServer = tcase_create("RegisterServer");
+    suite_add_tcase(s, tc_registerServer);
+    tcase_add_test(tc_registerServer, test_registerServer);
 
     return s;
 }

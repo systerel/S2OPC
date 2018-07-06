@@ -35,7 +35,16 @@
 #include "sopc_mutexes.h"
 #include "sopc_user_app_itf.h"
 
-typedef enum { stInit, stConfigured, stActivating, stActivated, stClosing, stDiscovering, stError } StateMachine_State;
+typedef enum {
+    stInit,
+    stConfigured,
+    stActivating,
+    stActivated,
+    stClosing,
+    stDiscovering,
+    stRegister,
+    stError
+} StateMachine_State;
 
 typedef struct
 {
@@ -92,6 +101,11 @@ SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM);
  * \brief Send a FindServersRequest.
  */
 SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM);
+
+/**
+ * \brief Send a RegisterServer.
+ */
+SOPC_ReturnStatus StateMachine_StartRegisterServer(StateMachine_Machine* pSM);
 
 /**
  * \brief Close the session. If not StateMachine_IsConnected(), the machine is put in state stError.

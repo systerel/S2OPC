@@ -484,6 +484,14 @@ target_include_directories(ingopcs_findserver PRIVATE "${ADDSPACEGEN_INCLUDE_DIR
                                                        ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
+add_executable(ingopcs_register "tests/demo/ingopcs_register.c"
+                                  "tests/demo/state_machine.c"
+                                  "tests/demo/config.c"
+                                   )
+target_link_libraries(ingopcs_register PRIVATE ${INGOPCS_STATIC_LIB})
+target_include_directories(ingopcs_register PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
+                                                       ${INGOPCS_PUBLIC_INCLUDES}
+                                                       ${INGOPCS_PRIVATE_INCLUDES})
 add_custom_command(
     TARGET toolkit_test_server POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked

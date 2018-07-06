@@ -363,6 +363,124 @@ SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM)
     return status;
 }
 
+static SOPC_ReturnStatus fillRegisterServerRequest(OpcUa_RegisteredServer* pServ,
+                                                   SOPC_LocalizedText* serverName,
+                                                   SOPC_String* discoveryURL)
+{
+    SOPC_ReturnStatus status;
+
+    SOPC_LocalizedText_Initialize(serverName);
+
+    bool fillRequest =
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->ServerUri, APPLICATION_URI)) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->ProductUri, PRODUCT_URI)) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->GatewayServerUri, GATEWAY_SERVER_URI)) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->SemaphoreFilePath, "")) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&serverName->Locale, "Locale")) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&serverName->Text, "Text")) &&
+        (SOPC_STATUS_OK == SOPC_String_InitializeFromCString(discoveryURL, "opc.tcp://test"));
+
+    pServ->NoOfServerNames = 1;
+    pServ->NoOfDiscoveryUrls = 1;
+    pServ->IsOnline = true;
+    pServ->ServerType = OpcUa_ApplicationType_Server;
+
+    if (!fillRequest)
+    {
+        /* clear ressources */
+        SOPC_LocalizedText_Clear(serverName);
+        free(serverName);
+        SOPC_String_Delete(discoveryURL);
+        status = SOPC_STATUS_NOK;
+    }
+    else
+    {
+        pServ->ServerNames = serverName;
+        pServ->DiscoveryUrls = discoveryURL;
+        status = SOPC_STATUS_OK;
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus StateMachine_StartRegisterServer(StateMachine_Machine* pSM)
+{
+    OpcUa_RegisterServerRequest* pReq = NULL;
+    SOPC_LocalizedText* serverName = NULL;
+    SOPC_String* discoveryURL = NULL;
+
+    if (pSM == NULL)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
+
+    if (pSM->state != stConfigured)
+    {
+        status = SOPC_STATUS_NOK;
+        printf("# Error: The state machine shall be in stConfigured state to send a register servers request.\n");
+    }
+    else
+    {
+        serverName = calloc(1, sizeof(SOPC_LocalizedText));
+        discoveryURL = SOPC_String_Create();
+        status = SOPC_Encodeable_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &pReq);
+    }
+
+    if ((NULL == serverName) || (NULL == discoveryURL) || (SOPC_STATUS_OK != status))
+    {
+        free(serverName);
+        SOPC_String_Delete(discoveryURL);
+        status = SOPC_STATUS_NOK;
+    }
+    else
+    {
+        status = fillRegisterServerRequest(&pReq->Server, serverName, discoveryURL);
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("# Error: Could not create the RegisterServersRequest.\n");
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Leave the FindServersRequest's LocaleIds and ServerUris empty */
+
+        /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX pending discoveries */
+        ++nDiscovery;
+        pSM->pCtxRequest = malloc(sizeof(StateMachine_RequestContext));
+        if (NULL == pSM->pCtxRequest)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            pSM->pCtxRequest->uid = nDiscovery;
+            pSM->pCtxRequest->appCtx = 0;
+            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(pSM->iscConfig, pReq, (uintptr_t) pSM->pCtxRequest);
+            pSM->state = stRegister;
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        /* Free all remaining resources */
+        pSM->state = stError;
+        free(pSM->pCtxRequest);
+        pSM->pCtxRequest = NULL;
+        OpcUa_RegisterServerRequest_Clear(pReq);
+        free(pReq);
+    }
+
+    status = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
+
+    return status;
+}
+
 SOPC_ReturnStatus StateMachine_SendRequest(StateMachine_Machine* pSM, void* requestStruct, uintptr_t appCtx)
 {
     if (pSM == NULL)
@@ -609,6 +727,7 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
             break;
         /* Discovery state */
         case stDiscovering:
+        case stRegister:
             switch (event)
             {
             case SE_RCV_DISCOVERY_RESPONSE:
