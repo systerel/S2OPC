@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "sopc_encodeable.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_user_app_itf.h"
@@ -367,12 +368,13 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         }
         *pCliHndl = iCliHndl;
     }
-
-    if (NULL != pNid)
+    else
     {
-        free(pNid);
-        pNid = NULL;
+        SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
     }
+
+    free(pNid);
+    pNid = NULL;
 
     return status;
 }
