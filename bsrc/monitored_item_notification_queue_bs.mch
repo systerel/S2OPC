@@ -73,6 +73,7 @@ OPERATIONS
 
     bres <-- add_first_monitored_item_notification_to_queue (p_queue,
                                                              p_monitoredItem,
+                                                             p_timestampToReturn,
                                                              p_nid,
                                                              p_aid,
                                                              p_VariantValuePointer,
@@ -82,6 +83,8 @@ OPERATIONS
         p_queue : s_notificationQueue &
         p_monitoredItem : t_monitoredItemPointer_i &
         p_monitoredItem : t_monitoredItemPointer &
+        p_timestampToReturn : t_TimestampsToReturn_i &
+        p_timestampToReturn : t_TimestampsToReturn &
         p_nid : t_NodeId_i &
         p_nid : t_NodeId &
         p_aid : t_AttributeId_i &
@@ -111,12 +114,15 @@ OPERATIONS
 
     bres <-- add_monitored_item_notification_to_queue (p_queue,
                                                        p_monitoredItem,
+                                                       p_timestampToReturn,
                                                        p_writeValuePointer) =
     PRE
         p_queue : t_notificationQueue_i &
         p_queue : s_notificationQueue &
         p_monitoredItem : t_monitoredItemPointer_i &
         p_monitoredItem : t_monitoredItemPointer &
+        p_timestampToReturn : t_TimestampsToReturn_i &
+        p_timestampToReturn : t_TimestampsToReturn &
         p_writeValuePointer : t_WriteValuePointer_i &
         p_writeValuePointer : t_WriteValuePointer
     THEN

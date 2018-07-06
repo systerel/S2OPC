@@ -634,7 +634,7 @@ OPERATIONS
               <--getall_monitoredItemPointer (l_monitoredItemPointer);
             IF l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting
             THEN
-                server_subscription_add_notification (l_subscription, l_monitoredItemPointer, p_new_wv_pointer)
+                server_subscription_add_notification (l_subscription, l_monitoredItemPointer, l_timestampToReturn, p_new_wv_pointer)
             END
         INVARIANT
             s_mi_to_iterate_it <: t_monitoredItemPointer &

@@ -1081,12 +1081,14 @@ OPERATIONS
     END
     ;
 
-    server_subscription_add_notification (p_subscription, p_monitoredItemPointer, p_writeValuePointer) =
+    server_subscription_add_notification (p_subscription, p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
         p_monitoredItemPointer : t_monitoredItemPointer_i &
         p_monitoredItemPointer : s_monitoredItemPointer &
+        p_timestampToReturn : t_TimestampsToReturn_i &
+        p_timestampToReturn : t_TimestampsToReturn &
         p_writeValuePointer : t_WriteValuePointer_i &
         p_writeValuePointer : t_WriteValuePointer
     THEN

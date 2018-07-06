@@ -783,7 +783,7 @@ OPERATIONS
         l_node_monitIt_queue,
         l_sub_notif_queue
     IN
-        StatusCode_service := e_sc_bad_too_many_monitored_items;
+        StatusCode_service := e_sc_ok;
         /* Create monitored item */
         l_bres, monitoredItemPointer, monitoredItemId
           <-- create_monitored_item_pointer(p_subscription,
@@ -811,15 +811,15 @@ OPERATIONS
                     END
                 END
                 ;
-                IF l_bres = TRUE & p_monitoringMode = e_monitoringMode_reporting
+                IF l_bres = TRUE
                 THEN
-                    /* Generate a notification for new monitored item */
                     l_sub_notif_queue <-- get_subscription_notificationQueue (p_subscription);
                     IF p_monitoringMode = e_monitoringMode_reporting
                     THEN
                         /* Generate a notification for new monitored item */
                         l_bres <-- add_first_monitored_item_notification_to_queue (l_sub_notif_queue,
                                                                                    monitoredItemPointer,
+                                                                                   p_timestampToReturn,
                                                                                    p_nid,
                                                                                    p_aid,
                                                                                    p_value,
@@ -832,13 +832,12 @@ OPERATIONS
                         l_bres <-- remove_monitored_item (l_node_monitIt_queue, monitoredItemPointer);
                         l_bres <-- remove_monitored_item (l_sub_monitIt_queue, monitoredItemPointer);
                         l_bres := FALSE
-                    ELSE
-                        StatusCode_service := e_sc_ok
                     END
                 END
             END;
             IF l_bres = FALSE
             THEN
+                StatusCode_service := e_sc_bad_too_many_monitored_items;
                 delete_monitored_item_pointer(monitoredItemPointer)
             END
         END
@@ -1091,13 +1090,14 @@ OPERATIONS
     END
     ;
 
-    server_subscription_add_notification (p_subscription, p_monitoredItemPointer, p_writeValuePointer) =
+    server_subscription_add_notification (p_subscription, p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer) =
     VAR
         l_notif_queue,
         l_res
     IN
         l_notif_queue <-- get_subscription_notificationQueue (p_subscription);
-        l_res <-- add_monitored_item_notification_to_queue (l_notif_queue, p_monitoredItemPointer, p_writeValuePointer)
+        l_res <-- add_monitored_item_notification_to_queue
+          (l_notif_queue, p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer)
         /* TODO: manage l_res == FALSE*/
     END
     ;

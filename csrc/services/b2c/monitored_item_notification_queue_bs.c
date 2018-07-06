@@ -76,6 +76,7 @@ void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_n
 void monitored_item_notification_queue_bs__add_first_monitored_item_notification_to_queue(
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
+    const constants__t_TimestampsToReturn_i monitored_item_notification_queue_bs__p_timestampToReturn,
     const constants__t_NodeId_i monitored_item_notification_queue_bs__p_nid,
     const constants__t_AttributeId_i monitored_item_notification_queue_bs__p_aid,
     const constants__t_Variant_i monitored_item_notification_queue_bs__p_VariantValuePointer,
@@ -92,8 +93,28 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
     {
         util_status_code__B_to_C(monitored_item_notification_queue_bs__p_ValueSc, &wv->Value.Status);
         wv->AttributeId = monitored_item_notification_queue_bs__p_aid;
+        /* TODO: manage timestamp in address space instead of giving current time */
         wv->Value.SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
-        wv->Value.ServerTimestamp = SOPC_Time_GetCurrentTimeUTC();
+        wv->Value.ServerTimestamp = wv->Value.SourceTimestamp;
+
+        /* Complying with timestamp to return configured */
+        switch (monitored_item_notification_queue_bs__p_timestampToReturn)
+        {
+        case constants__e_ttr_source:
+            wv->Value.ServerTimestamp = 0;
+            break;
+        case constants__e_ttr_server:
+            wv->Value.SourceTimestamp = 0;
+            break;
+        case constants__e_ttr_neither:
+            wv->Value.ServerTimestamp = 0;
+            wv->Value.SourceTimestamp = 0;
+            break;
+        default:
+            // Keep both in other cases
+            break;
+        }
+
         retStatus = SOPC_NodeId_Copy(&wv->NodeId, monitored_item_notification_queue_bs__p_nid);
         if (SOPC_STATUS_OK == retStatus)
         {
@@ -135,6 +156,7 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
 void monitored_item_notification_queue_bs__add_monitored_item_notification_to_queue(
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
+    const constants__t_TimestampsToReturn_i monitored_item_notification_queue_bs__p_timestampToReturn,
     const constants__t_WriteValuePointer_i monitored_item_notification_queue_bs__p_writeValuePointer,
     t_bool* const monitored_item_notification_queue_bs__bres)
 {
@@ -177,8 +199,26 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
         if (notifElt->value->Value.SourceTimestamp == 0)
         {
             notifElt->value->Value.SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
-        }
+        } // else use the source timestamp of the writeValue request
         notifElt->value->Value.ServerTimestamp = SOPC_Time_GetCurrentTimeUTC();
+
+        /* Complying with timestamp to return configured */
+        switch (monitored_item_notification_queue_bs__p_timestampToReturn)
+        {
+        case constants__e_ttr_source:
+            wv->Value.ServerTimestamp = 0;
+            break;
+        case constants__e_ttr_server:
+            wv->Value.SourceTimestamp = 0;
+            break;
+        case constants__e_ttr_neither:
+            wv->Value.ServerTimestamp = 0;
+            wv->Value.SourceTimestamp = 0;
+            break;
+        default:
+            // Keep both in other cases
+            break;
+        }
 
         checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
         if (checkAdded == notifElt)
