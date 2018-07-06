@@ -32,6 +32,9 @@ from common import sUri, variantInfoList
 #from tap_logger import TapLogger
 from opcua.crypto import security_policies
 
+# Overrides sUri to force IPv4
+sUri = 'opc.tcp://127.0.0.1:4841'
+
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description='FreeOpcUa test server')
     parser.add_argument('msTimeout', nargs='?', default=10000., type=float,
