@@ -717,12 +717,12 @@ install(TARGETS client_subscription
 if(ENABLE_TESTING)
 
 # s2opc_subscription_client is not built on Windows
-if(WIN32)
+if(NOT WIN32)
 # Demo client
 add_executable(s2opc_subscription_client "${LIBSUBSCRIBE_PATH}/client.c"
                                          )
 target_link_libraries(s2opc_subscription_client PRIVATE client_subscription)
-endif(WIN32)
+endif(NOT WIN32)
 
 # Helpers unit tests
 add_executable(check_libsub "${LIBSUBSCRIBE_PATH}/check_libsub.c")
