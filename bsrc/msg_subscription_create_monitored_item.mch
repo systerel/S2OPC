@@ -32,6 +32,7 @@ DEFINITIONS
 
         MonitoredItemReq_NodeId      : t_monitoredItemReqIndex +-> t_NodeId &
         MonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId_i &
+        MonitoredItemReq_HasIndexRange : t_monitoredItemReqIndex +-> BOOL &
         MonitoredItemReq_ValidMonitoringMode : t_monitoredItemReqIndex +-> BOOL &
         MonitoredItemReq_FilterPresence : t_monitoredItemReqIndex +-> BOOL &
 
@@ -44,6 +45,7 @@ ABSTRACT_VARIABLES
     nb_monitored_items,
     MonitoredItemReq_NodeId,
     MonitoredItemReq_AttributeId,
+    MonitoredItemReq_HasIndexRange,
     MonitoredItemReq_ValidMonitoringMode,
     MonitoredItemReq_FilterPresence,
     MonitoredItemResp_Allocated,
@@ -57,6 +59,7 @@ INITIALISATION
     nb_monitored_items           := 0  ||
     MonitoredItemReq_NodeId      := {} ||
     MonitoredItemReq_AttributeId := {} ||
+    MonitoredItemReq_HasIndexRange := {} ||
     MonitoredItemReq_ValidMonitoringMode := {} ||
     MonitoredItemReq_FilterPresence := {} ||
     MonitoredItemResp_Allocated := FALSE ||
@@ -79,6 +82,7 @@ OPERATIONS
         nb_monitored_items,
         MonitoredItemReq_NodeId,
         MonitoredItemReq_AttributeId,
+        MonitoredItemReq_HasIndexRange,
         MonitoredItemReq_ValidMonitoringMode,
         MonitoredItemReq_FilterPresence
         :(  p_sc                 : t_StatusCode &
@@ -94,10 +98,9 @@ OPERATIONS
                 dom(MonitoredItemReq_NodeId) = 1..nb_monitored_items &
                 MonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId_i &
                 dom(MonitoredItemReq_AttributeId) = 1..nb_monitored_items &
-                MonitoredItemReq_ValidMonitoringMode : t_monitoredItemReqIndex +-> BOOL &
-                dom(MonitoredItemReq_ValidMonitoringMode) = 1..nb_monitored_items &
-                MonitoredItemReq_FilterPresence : t_monitoredItemReqIndex +-> BOOL &
-                dom(MonitoredItemReq_FilterPresence) = 1..nb_monitored_items &
+                MonitoredItemReq_HasIndexRange : 1..nb_monitored_items --> BOOL &
+                MonitoredItemReq_ValidMonitoringMode : 1..nb_monitored_items --> BOOL &
+                MonitoredItemReq_FilterPresence : 1..nb_monitored_items --> BOOL &
                 p_timestampToRet : t_TimestampsToReturn) &
             (p_sc /= e_sc_ok
                 => p_sc : {e_sc_bad_decoding_error, e_sc_bad_nothing_to_do, e_sc_bad_timestamps_to_return_invalid, e_sc_bad_too_many_ops})
@@ -135,11 +138,24 @@ OPERATIONS
            MonitoredItemReq_AttributeId(p_index) : t_AttributeId &
            p_aid = MonitoredItemReq_AttributeId(p_index) &
            p_monitMode : t_monitoringMode) &
+          (p_bres = FALSE => p_sc /= e_sc_ok) &
           (p_index /: dom(MonitoredItemReq_AttributeId) =>
            p_sc = e_sc_bad_attribute_id_invalid) &
-          (MonitoredItemReq_ValidMonitoringMode(p_index) = FALSE =>
+
+          (p_index : dom(MonitoredItemReq_AttributeId) &
+           MonitoredItemReq_HasIndexRange(p_index) = TRUE
+           =>
+           p_sc = e_sc_bad_index_range_invalid) &
+
+          (p_index : dom(MonitoredItemReq_AttributeId) &
+           MonitoredItemReq_HasIndexRange(p_index) = FALSE &
+           MonitoredItemReq_ValidMonitoringMode(p_index) = FALSE =>
            p_sc = e_sc_bad_monitoring_mode_invalid) &
-          (MonitoredItemReq_FilterPresence(p_index) = TRUE =>
+
+          (p_index : dom(MonitoredItemReq_AttributeId) &
+           MonitoredItemReq_HasIndexRange(p_index) = FALSE &
+           MonitoredItemReq_ValidMonitoringMode(p_index) = TRUE &
+           MonitoredItemReq_FilterPresence(p_index) = TRUE =>
            p_sc = e_sc_bad_monitored_item_filter_unsupported)
          )
     END
