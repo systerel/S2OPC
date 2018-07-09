@@ -82,19 +82,6 @@ void response_write_bs__reset_ResponseWrite(void)
     nb_req = 0;
 }
 
-void response_write_bs__getall_ResponseWrite_StatusCode(const constants__t_WriteValue_i response_write_bs__wvi,
-                                                        t_bool* const response_write_bs__isvalid,
-                                                        constants__t_StatusCode_i* const response_write_bs__sc)
-{
-    *response_write_bs__isvalid = false;
-
-    if (response_write_bs__wvi <= nb_req) /* It is not necessary to test arr_StatusCode */
-    {
-        *response_write_bs__isvalid = true;
-        util_status_code__C_to_B(arr_StatusCode[response_write_bs__wvi], response_write_bs__sc);
-    }
-}
-
 void response_write_bs__set_ResponseWrite_StatusCode(const constants__t_WriteValue_i response_write_bs__wvi,
                                                      const constants__t_StatusCode_i response_write_bs__sc)
 {

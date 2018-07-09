@@ -71,25 +71,6 @@ OPERATIONS
     END
     ;
 
-    /* TODO: jamais utilisé depuis le B, à conserver ? */
-    isvalid, sc <-- getall_ResponseWrite_StatusCode(wvi) =
-    PRE
-        wvi : t_WriteValue_i &
-        wvi : t_WriteValue
-    THEN
-        isvalid := bool(wvi : dom(ResponseWrite_StatusCode)) ||
-        IF wvi : dom(ResponseWrite_StatusCode) THEN
-            sc
-            :(
-                sc : t_StatusCode_i &
-                sc = ResponseWrite_StatusCode(wvi)
-            )
-        ELSE
-            sc :: t_StatusCode_i
-        END
-    END
-    ;
-
     write_WriteResponse_msg_out(msg_out) =
     PRE
         msg_out : t_msg_i &
