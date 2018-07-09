@@ -27,7 +27,6 @@
 
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_endianness_cfg.h"
-#include "sopc_toolkit_config_internal.h"
 
 #include "sopc_types.h"
 
