@@ -330,8 +330,10 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
             status = SOPC_STATUS_NOK;
         }
     }
-    else
+
+    if (SOPC_STATUS_OK != status && NULL != pSM)
     {
+        assert(pSM == SOPC_SLinkedList_RemoveFromId(pListClient, *pCliId));
         SOPC_StaMac_Delete(&pSM);
     }
 
