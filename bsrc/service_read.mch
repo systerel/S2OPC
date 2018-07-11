@@ -32,7 +32,7 @@ DEFINITIONS
         nb_ReadValue          : NAT                           &
         nb_ReadValue         <= k_n_read_resp_max             &
         ReadValue_NodeId      : t_ReadValue +-> t_NodeId      &
-        ReadValue_AttributeId : t_ReadValue +-> t_AttributeId
+        ReadValue_AttributeId : t_ReadValue +-> t_AttributeId_i
     )
     ;
     d_inv_response == (
@@ -64,9 +64,9 @@ OPERATIONS
 
     p_read_ok, p_nb_ReadValue, p_tsToReturn, p_statusCode <-- check_ReadRequest(p_msg) =
     PRE
-        p_msg    : t_msg_i  &
-        p_msg    = c_msg_in &
-        c_msg_in : t_msg    &
+        p_msg  : t_msg_i &
+        p_msg  = c_msg_in &
+        c_msg_in : t_msg &
         a_msg_in_type = e_msg_attribute_read_req
     THEN
         p_read_ok,
@@ -76,13 +76,25 @@ OPERATIONS
         nb_ReadValue,
         ReadValue_NodeId,
         ReadValue_AttributeId
-        :(  p_read_ok             : BOOL                         &
-            p_nb_ReadValue        : INT                          &
-            p_tsToReturn          : t_TimestampsToReturn_i       &
-            p_statusCode          : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops,
-                                     e_sc_bad_max_age_invalid, e_sc_bad_timestamps_to_return_invalid} &
-            data_Value_Value      : t_ReadValue +-> t_Variant    &
-            data_Value_StatusCode : t_ReadValue +-> t_StatusCode
+        :(  p_read_ok      : BOOL & /* Error code, for now a simple bool */
+            p_nb_ReadValue : INT  &
+            p_tsToReturn   : t_TimestampsToReturn_i &
+            p_statusCode   : {e_sc_ok, e_sc_bad_too_many_ops, e_sc_bad_nothing_to_do,
+                              e_sc_bad_timestamps_to_return_invalid, e_sc_bad_max_age_invalid} &
+            (p_read_ok = TRUE =>
+             d_inv_read &
+             nb_ReadValue > 0 &
+             ReadValue_NodeId      : cast_t_ReadValue[1..nb_ReadValue] --> t_NodeId &
+             ReadValue_AttributeId : cast_t_ReadValue[1..nb_ReadValue] --> t_AttributeId_i &
+             p_nb_ReadValue = nb_ReadValue &
+             p_tsToReturn : t_TimestampsToReturn &
+             p_statusCode = e_sc_ok) &
+            (p_read_ok = FALSE =>
+             nb_ReadValue = 0 &
+             ReadValue_NodeId = {} &
+             ReadValue_AttributeId = {} &
+             p_statusCode /= e_sc_ok
+            )
         )
     END
     ;

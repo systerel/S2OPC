@@ -30,7 +30,7 @@ DEFINITIONS
         nb_ReadValue          : NAT                      &
         nb_ReadValue         <= k_n_read_resp_max        &
         ReadValue_NodeId      : t_ReadValue +-> t_NodeId &
-        ReadValue_AttributeId : t_ReadValue +-> t_AttributeId
+        ReadValue_AttributeId : t_ReadValue +-> t_AttributeId_i
     )
 
 ABSTRACT_VARIABLES
@@ -48,8 +48,7 @@ INITIALISATION
 
 OPERATIONS
 
-    /* Makes the ReadRequest available to the machine (if possible)
-     * This "read" does not have the meaning of the other reads, which are accessors... */
+    /* Makes the ReadRequest available to the machine (if possible) */
     p_read_ok, p_nb_ReadValue, p_tsToReturn, p_statusCode <-- check_ReadRequest(p_msg) =
     PRE
         p_msg  : t_msg_i &
@@ -67,50 +66,58 @@ OPERATIONS
         :(  p_read_ok      : BOOL & /* Error code, for now a simple bool */
             p_nb_ReadValue : INT  &
             p_tsToReturn   : t_TimestampsToReturn_i &
-            p_statusCode   : t_StatusCode &
-            d_inv          &
-            (p_read_ok = TRUE
-             =>
+            p_statusCode   : {e_sc_ok, e_sc_bad_too_many_ops, e_sc_bad_nothing_to_do,
+                              e_sc_bad_timestamps_to_return_invalid, e_sc_bad_max_age_invalid} &
+            (p_read_ok = TRUE =>
+             d_inv &
+             nb_ReadValue > 0 &
+             ReadValue_NodeId      : cast_t_ReadValue[1..nb_ReadValue] --> t_NodeId &
+             ReadValue_AttributeId : cast_t_ReadValue[1..nb_ReadValue] --> t_AttributeId_i &
              p_nb_ReadValue = nb_ReadValue &
              p_tsToReturn : t_TimestampsToReturn &
-             p_statusCode = e_sc_ok)
+             p_statusCode = e_sc_ok) &
+            (p_read_ok = FALSE =>
+             nb_ReadValue = 0 &
+             ReadValue_NodeId = {} &
+             ReadValue_AttributeId = {} &
+             p_statusCode /= e_sc_ok
+            )
         )
     END
     ;
 
-    p_isvalid, p_nid, p_aid <-- getall_ReadValue_NodeId_AttributeId(p_msg, p_rvi) =
+    p_sc, p_nid, p_aid <-- getall_ReadValue_NodeId_AttributeId(p_msg, p_rvi) =
     PRE
+        nb_ReadValue > 0 &
         p_msg    : t_msg_i                     &
         p_msg    = c_msg_in                    &
         c_msg_in : t_msg                       &
         a_msg_in_type = e_msg_attribute_read_req &
         p_rvi : t_ReadValue_i                  &
         p_rvi : t_ReadValue                    &
-        p_rvi : cast_t_ReadValue[0..nb_ReadValue]
+        p_rvi : cast_t_ReadValue[0..nb_ReadValue] &
+        p_rvi : dom(ReadValue_NodeId) &
+        p_rvi : dom(ReadValue_AttributeId)
     THEN
-       IF  p_rvi : dom(ReadValue_NodeId) &
-           p_rvi : dom(ReadValue_AttributeId)
-       THEN
-           p_isvalid := TRUE ||
-           p_nid,
-           p_aid
-           :(p_nid : t_NodeId_i                   &
-             p_nid : t_NodeId                     &
-             p_aid : t_AttributeId_i              &
-             p_aid : t_AttributeId                &
-             p_nid = ReadValue_NodeId(p_rvi)      &
-             p_aid = ReadValue_AttributeId(p_rvi)
-            )
-       ELSE
-           p_isvalid := FALSE           ||
-           p_nid     :: t_NodeId_i      ||
-           p_aid     :: t_AttributeId_i
-       END
+        p_sc,
+        p_nid,
+        p_aid
+        :(p_sc : t_StatusCode_i &
+          p_sc : {e_sc_ok, e_sc_bad_node_id_invalid, e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid} &
+            p_nid : t_NodeId_i                   &
+            p_nid : t_NodeId                     &
+            p_aid : t_AttributeId_i              &
+            p_nid = ReadValue_NodeId(p_rvi)      &
+            p_aid = ReadValue_AttributeId(p_rvi) &
+            (p_sc = e_sc_ok => p_aid : t_AttributeId)
+        )
     END
     ;
 
     p_nb_ReadValue <-- get_nb_ReadValue =
-    BEGIN
+    PRE
+        nb_ReadValue > 0
+    THEN
         p_nb_ReadValue := nb_ReadValue
     END
 

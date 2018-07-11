@@ -58,8 +58,8 @@ bool util_NodeClass__C_to_B(OpcUa_NodeClass cncl, constants__t_NodeClass_i* bncl
 /* Returns true or false upon failure (c_TimestampsToReturn_indet or invalid pcttr) */
 bool util_TimestampsToReturn__B_to_C(constants__t_TimestampsToReturn_i bttr, OpcUa_TimestampsToReturn* pcttr);
 
-/* Returns true or false upon failure (invalid pbttr) */
-bool util_TimestampsToReturn__C_to_B(OpcUa_TimestampsToReturn cttr, constants__t_TimestampsToReturn_i* pbttr);
+/* Returns B enum value corresponding to C enum value of timestamps to return */
+constants__t_TimestampsToReturn_i util_TimestampsToReturn__C_to_B(OpcUa_TimestampsToReturn cttr);
 
 /* Returns true or false upon failure (c_AttributeId_indet or invalid pcaid) */
 bool util_AttributeId__B_to_C(constants__t_AttributeId_i baid, uint32_t* pcaid);

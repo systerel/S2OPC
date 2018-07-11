@@ -42,57 +42,40 @@ void msg_read_request_bs__INITIALISATION(void) {}
   --------------------*/
 void msg_read_request_bs__getall_req_ReadValue_AttributeId(const constants__t_msg_i msg_read_request_bs__msg,
                                                            const constants__t_ReadValue_i msg_read_request_bs__rvi,
-                                                           t_bool* const msg_read_request_bs__isvalid,
+                                                           constants__t_StatusCode_i* const msg_read_request_bs__sc,
                                                            constants__t_AttributeId_i* const msg_read_request_bs__aid)
 {
     /* TODO: is message type checked at this point? */
     OpcUa_ReadRequest* msg_read_req = (OpcUa_ReadRequest*) msg_read_request_bs__msg;
     static bool bWarned = false;
-    bool isvalid = NULL != msg_read_req;
+    *msg_read_request_bs__sc = constants__e_sc_ok;
 
     *msg_read_request_bs__aid = constants__c_AttributeId_indet;
-    if (isvalid)
+    bool isvalid = util_AttributeId__C_to_B(msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].AttributeId,
+                                            msg_read_request_bs__aid);
+
+    if (!isvalid)
     {
-        isvalid = msg_read_request_bs__rvi <= msg_read_req->NoOfNodesToRead;
-    }
-    if (isvalid)
-    {
-        isvalid = NULL != msg_read_req->NodesToRead;
+        *msg_read_request_bs__sc = constants__e_sc_bad_attribute_id_invalid;
+        if (!bWarned)
+        {
+            SOPC_Logger_TraceWarning("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id");
+            bWarned = true;
+        }
     }
 
-    if (isvalid)
+    if (isvalid && msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].IndexRange.Length > 0)
     {
-        isvalid = util_AttributeId__C_to_B(msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].AttributeId,
-                                           msg_read_request_bs__aid);
+        isvalid = false;
+        *msg_read_request_bs__sc = constants__e_sc_bad_index_range_invalid;
     }
-    if (!isvalid && !bWarned)
-    {
-        SOPC_Logger_TraceWarning("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id");
-        bWarned = true;
-    }
-
-    *msg_read_request_bs__isvalid = isvalid;
 }
 
 void msg_read_request_bs__getall_req_ReadValue_NodeId(const constants__t_msg_i msg_read_request_bs__msg,
                                                       const constants__t_ReadValue_i msg_read_request_bs__rvi,
-                                                      t_bool* const msg_read_request_bs__isvalid,
                                                       constants__t_NodeId_i* const msg_read_request_bs__nid)
 {
-    *msg_read_request_bs__nid = constants__c_NodeId_indet;
-    /* TODO: is message type checked at this point? */
     OpcUa_ReadRequest* msg_read_req = (OpcUa_ReadRequest*) msg_read_request_bs__msg;
-
-    *msg_read_request_bs__isvalid = false;
-    if (!msg_read_req)
-        return;
-    if (msg_read_request_bs__rvi > msg_read_req->NoOfNodesToRead)
-        return;
-    if (!msg_read_req->NodesToRead)
-        return;
-
-    /* TODO: this should raise a warning, constants__t_NodeId_i IS the void *... No need to cast to a (void **) */
-    *msg_read_request_bs__isvalid = true;
     *msg_read_request_bs__nid = &msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].NodeId;
 }
 
@@ -101,40 +84,19 @@ void msg_read_request_bs__read_req_TimestampsToReturn(
     constants__t_TimestampsToReturn_i* const msg_read_request_bs__p_tsToReturn)
 {
     OpcUa_ReadRequest* msg_read_req = (OpcUa_ReadRequest*) msg_read_request_bs__p_msg;
-    bool status = NULL != msg_read_req;
-
-    if (status)
-    {
-        status = util_TimestampsToReturn__C_to_B(msg_read_req->TimestampsToReturn, msg_read_request_bs__p_tsToReturn);
-    }
-
-    if (!status)
-    {
-        *msg_read_request_bs__p_tsToReturn = constants__c_TimestampsToReturn_indet;
-    }
+    *msg_read_request_bs__p_tsToReturn = util_TimestampsToReturn__C_to_B(msg_read_req->TimestampsToReturn);
 }
 
 void msg_read_request_bs__read_req_MaxAge(const constants__t_msg_i msg_read_request_bs__p_msg,
                                           t_bool* const msg_read_request_bs__p_maxAge_valid)
 {
     OpcUa_ReadRequest* msg_read_req = (OpcUa_ReadRequest*) msg_read_request_bs__p_msg;
-    *msg_read_request_bs__p_maxAge_valid = false;
-
-    if (NULL != msg_read_req)
-    {
-        *msg_read_request_bs__p_maxAge_valid = msg_read_req->MaxAge >= 0;
-    }
+    *msg_read_request_bs__p_maxAge_valid = msg_read_req->MaxAge >= 0;
 }
 
 void msg_read_request_bs__read_req_nb_ReadValue(const constants__t_msg_i msg_read_request_bs__msg,
                                                 t_entier4* const msg_read_request_bs__nb)
 {
-    *msg_read_request_bs__nb = 0;
-    /* TODO: is message type checked at this point? */
     OpcUa_ReadRequest* msg_read_req = (OpcUa_ReadRequest*) msg_read_request_bs__msg;
-
-    if (!msg_read_req)
-        return;
-
     *msg_read_request_bs__nb = msg_read_req->NoOfNodesToRead;
 }

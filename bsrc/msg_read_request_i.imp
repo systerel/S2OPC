@@ -65,19 +65,16 @@ OPERATIONS
                 p_statusCode := e_sc_bad_nothing_to_do
             ELSIF p_nb_ReadValue > k_n_read_resp_max THEN
                 p_statusCode := e_sc_bad_too_many_ops
-            END
+            END;
+            nb_ReadValue := 0
         END
     END
     ;
 
-    p_isvalid, p_nid, p_aid <-- getall_ReadValue_NodeId_AttributeId(p_msg, p_rvi) =
+    p_sc, p_nid, p_aid <-- getall_ReadValue_NodeId_AttributeId(p_msg, p_rvi) =
     BEGIN
-        p_isvalid, p_nid <-- getall_req_ReadValue_NodeId(p_msg, p_rvi);
-        IF  p_isvalid = TRUE THEN
-            p_isvalid, p_aid <-- getall_req_ReadValue_AttributeId(p_msg, p_rvi)
-        ELSE
-            p_aid := c_AttributeId_indet
-        END
+        p_nid <-- getall_req_ReadValue_NodeId(p_msg, p_rvi);
+        p_sc, p_aid <-- getall_req_ReadValue_AttributeId(p_msg, p_rvi)
     END
     ;
 

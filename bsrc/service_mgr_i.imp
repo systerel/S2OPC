@@ -102,11 +102,13 @@ LOCAL_OPERATIONS
           nb_ReadValue          : NAT                           &
           nb_ReadValue         <= k_n_read_resp_max             &
           ReadValue_NodeId      : t_ReadValue +-> t_NodeId      &
-          ReadValue_AttributeId : t_ReadValue +-> t_AttributeId &
+          ReadValue_AttributeId : t_ReadValue +-> t_AttributeId_i &
           data_Value_Value      : t_ReadValue +-> t_Variant     &
           data_Value_StatusCode : t_ReadValue +-> t_StatusCode  &
           StatusCode_service    : t_StatusCode_i &
-          StatusCode_service    : t_StatusCode /* {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops} */
+          StatusCode_service    : {e_sc_ok, e_sc_bad_too_many_ops, e_sc_bad_nothing_to_do,
+                                   e_sc_bad_timestamps_to_return_invalid, e_sc_bad_max_age_invalid,
+                                   e_sc_bad_out_of_memory}
          )
     END
     ;
@@ -164,7 +166,7 @@ LOCAL_OPERATIONS
             nb_ReadValue             : NAT                           &
             nb_ReadValue            <= k_n_read_resp_max             &
             ReadValue_NodeId         : t_ReadValue +-> t_NodeId      &
-            ReadValue_AttributeId    : t_ReadValue +-> t_AttributeId &
+            ReadValue_AttributeId    : t_ReadValue +-> t_AttributeId_i &
             data_Value_Value         : t_ReadValue +-> t_Variant     &
             data_Value_StatusCode    : t_ReadValue +-> t_StatusCode  &
             StatusCode_service       : t_StatusCode_i                &
@@ -394,7 +396,6 @@ OPERATIONS
                 write_WriteResponse_msg_out(resp_msg);
                 dealloc_write_request_responses
             OR e_msg_view_browse_req THEN
-                /* TODO: l_req_msg is the decoded struct */
                 StatusCode_service <-- decode_browse_request(req_msg);
                 IF StatusCode_service = e_sc_ok THEN
                     StatusCode_service <-- treat_browse_request_BrowseValues;

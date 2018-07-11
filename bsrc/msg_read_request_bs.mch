@@ -26,18 +26,22 @@ SEES
 
 ABSTRACT_VARIABLES
     ReadValue_NodeId,
-    ReadValue_AttributeId
+    ReadValue_AttributeId,
+    ReadValue_HasIndexRange
 
 INVARIANT
     ReadValue_NodeId      : t_ReadValue +-> t_NodeId &
-    ReadValue_AttributeId : t_ReadValue +-> t_AttributeId
+    ReadValue_AttributeId : t_ReadValue +-> t_AttributeId_i &
+    ReadValue_HasIndexRange : t_ReadValue +-> BOOL
 
 INITIALISATION
     ReadValue_NodeId,
-    ReadValue_AttributeId
+    ReadValue_AttributeId,
+    ReadValue_HasIndexRange
     :(
         ReadValue_NodeId      = {} &
-        ReadValue_AttributeId = {}
+        ReadValue_AttributeId = {} &
+        ReadValue_HasIndexRange = {}
      )
 
 OPERATIONS
@@ -48,7 +52,15 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_attribute_read_req
     THEN
-        nb :: INT
+        nb :(nb : INT &
+             (nb > 0 =>
+               ReadValue_NodeId      : cast_t_ReadValue[1..nb] --> t_NodeId &
+               ReadValue_AttributeId : cast_t_ReadValue[1..nb] --> t_AttributeId_i &
+               ReadValue_HasIndexRange : t_ReadValue --> BOOL) &
+             (nb <= 0 =>
+               ReadValue_NodeId      = {} &
+               ReadValue_AttributeId = {} &
+               ReadValue_HasIndexRange = {}))
     END
     ;
 
@@ -76,45 +88,43 @@ OPERATIONS
 
     /* Returns the NodeId (pointer or hash_id, or...)
      * Does not check if there is a node in the AddressSpace corresponding to this nid */
-    isvalid, nid <-- getall_req_ReadValue_NodeId(msg, rvi) =
+    nid <-- getall_req_ReadValue_NodeId(msg, rvi) =
     PRE
         msg  : t_msg_i &
         msg  = c_msg_in &
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_attribute_read_req &
         rvi : t_ReadValue_i &
-        rvi : t_ReadValue
+        rvi : t_ReadValue &
+        rvi : dom(ReadValue_NodeId)
     THEN
-        IF  rvi : dom(ReadValue_NodeId) THEN
-            isvalid := TRUE ||
-            nid :(nid : t_NodeId_i &
-                  nid : t_NodeId &
-                  nid = ReadValue_NodeId(rvi))
-        ELSE
-            isvalid := FALSE ||
-            nid     :: t_NodeId_i
-        END
+        nid :(nid : t_NodeId_i &
+              nid : t_NodeId &
+              nid = ReadValue_NodeId(rvi))
     END
     ;
 
-    /* Returns the AttributeId if it is valid */
-    /* ... Could have merged them */
-    isvalid, aid <-- getall_req_ReadValue_AttributeId(msg, rvi) =
+    p_sc, aid <-- getall_req_ReadValue_AttributeId(msg, rvi) =
     PRE
         msg  : t_msg_i &
         msg  = c_msg_in &
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_attribute_read_req &
         rvi : t_ReadValue_i &
-        rvi : t_ReadValue
+        rvi : t_ReadValue &
+        rvi : dom(ReadValue_AttributeId)
     THEN
-        IF  rvi : dom(ReadValue_AttributeId) THEN
-            isvalid := TRUE ||
-            aid :(aid : t_AttributeId_i &
-                  aid = ReadValue_AttributeId(rvi))
+        aid := ReadValue_AttributeId(rvi) ||
+        IF ReadValue_AttributeId(rvi) = c_AttributeId_indet THEN
+            p_sc := e_sc_bad_attribute_id_invalid
         ELSE
-            isvalid := FALSE ||
-            aid     :: t_AttributeId_i
+            IF ReadValue_HasIndexRange(rvi) = TRUE
+            THEN
+                /* Index range not supported or should not be defined */
+                p_sc := e_sc_bad_index_range_invalid
+            ELSE
+                p_sc := e_sc_ok
+            END
         END
     END
 

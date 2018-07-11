@@ -43,10 +43,11 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    fill_read_response_1(p_resp_msg, p_isvalid, p_nid, p_aid, p_rvi) =
+    fill_read_response_1(p_resp_msg, p_sc, p_nid, p_aid, p_rvi) =
     PRE
         p_resp_msg : t_msg_i         &
-        p_isvalid  : BOOL            &
+        p_sc       : t_StatusCode_i &
+        p_sc       : t_StatusCode &
         p_nid      : t_NodeId_i      &
         p_aid      : t_AttributeId_i &
         p_rvi      : t_ReadValue_i
@@ -56,7 +57,7 @@ LOCAL_OPERATIONS
         :(data_Value_Value      : t_ReadValue +-> t_Variant    &
           data_Value_StatusCode : t_ReadValue +-> t_StatusCode &
 
-          (p_isvalid = TRUE &
+          (p_sc = e_sc_ok &
            p_nid : dom(a_NodeId~)
            =>
            data_Value_Value = data_Value_Value$0 <+
@@ -69,7 +70,7 @@ LOCAL_OPERATIONS
             =>
             data_Value_StatusCode = data_Value_StatusCode$0 <+
                                     {p_rvi |-> e_sc_ok})) &
-          (not(p_isvalid = TRUE &
+          (not(p_sc = e_sc_ok &
                p_nid : dom(a_NodeId~))
            =>
            data_Value_Value = {p_rvi} <<| data_Value_Value$0 &
@@ -80,7 +81,7 @@ LOCAL_OPERATIONS
 
 OPERATIONS
 
-    fill_read_response_1(p_resp_msg, p_isvalid, p_nid, p_aid, p_rvi) =
+    fill_read_response_1(p_resp_msg, p_sc, p_nid, p_aid, p_rvi) =
     VAR
         l_is_valid,
         l_node,
@@ -88,7 +89,7 @@ OPERATIONS
         l_value,
         l_sc
     IN
-        IF  p_isvalid = TRUE & p_aid /= c_AttributeId_indet
+        IF  p_sc = e_sc_ok
         THEN
             l_is_valid, l_node <-- readall_AddressSpace_Node(p_nid);
             IF l_is_valid = TRUE THEN
@@ -110,12 +111,7 @@ OPERATIONS
                 set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_node_id_unknown, p_aid)
             END
         ELSE
-            IF p_nid = c_NodeId_indet THEN
-                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_node_id_invalid, p_aid)
-            ELSE
-                /* It shall be p_aid = c_AttributeId_indet case */
-                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_attribute_id_invalid, p_aid)
-            END
+            set_read_response(p_resp_msg, p_rvi, c_Variant_indet, p_sc, p_aid)
         END
     END
     ;
@@ -124,7 +120,7 @@ OPERATIONS
     VAR
         l_nb_ReadValue,
         l_continue,
-        l_isvalid,
+        l_sc,
         l_rvi,
         l_nid,
         l_aid
@@ -133,8 +129,8 @@ OPERATIONS
         l_continue <-- init_iter_write_request(l_nb_ReadValue);
         WHILE l_continue = TRUE DO
             l_continue, l_rvi <-- continue_iter_write_request;
-            l_isvalid, l_nid, l_aid <-- getall_ReadValue_NodeId_AttributeId(req_msg, l_rvi);
-            fill_read_response_1(resp_msg, l_isvalid, l_nid, l_aid, l_rvi)
+            l_sc, l_nid, l_aid <-- getall_ReadValue_NodeId_AttributeId(req_msg, l_rvi);
+            fill_read_response_1(resp_msg, l_sc, l_nid, l_aid, l_rvi)
         INVARIANT
             rreqs_to_iterate <: t_ReadValue &
             rreqs_iterated   <: t_ReadValue &
