@@ -46,37 +46,29 @@ void service_write_decode_bs__decode_write_request(
     const constants__t_msg_i service_write_decode_bs__write_msg,
     constants__t_StatusCode_i* const service_write_decode_bs__StatusCode_service)
 {
-    /* TODO: actually decode something */
-    SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) service_write_decode_bs__write_msg;
-    *service_write_decode_bs__StatusCode_service = constants__e_sc_bad_unexpected_error;
+    OpcUa_WriteRequest* req = (OpcUa_WriteRequest*) service_write_decode_bs__write_msg;
 
-    if (encType == &OpcUa_WriteRequest_EncodeableType)
+    if (0 < req->NoOfNodesToWrite && req->NoOfNodesToWrite <= constants__k_n_WriteResponse_max)
     {
-        OpcUa_WriteRequest* req = (OpcUa_WriteRequest*) service_write_decode_bs__write_msg;
-
-        if (0 < req->NoOfNodesToWrite && req->NoOfNodesToWrite <= constants__k_n_WriteResponse_max)
+        /* TODO: req shall not be freed before request is null... */
+        request = req;
+        *service_write_decode_bs__StatusCode_service = constants__e_sc_ok;
+    }
+    else
+    {
+        if (req->NoOfNodesToWrite <= 0)
         {
-            /* TODO: req shall not be freed before request is null... */
-            request = req;
-            *service_write_decode_bs__StatusCode_service = constants__e_sc_ok;
+            *service_write_decode_bs__StatusCode_service = constants__e_sc_bad_nothing_to_do;
         }
-        else
+        else if (req->NoOfNodesToWrite > constants__k_n_WriteResponse_max)
         {
-            if (req->NoOfNodesToWrite <= 0)
-            {
-                *service_write_decode_bs__StatusCode_service = constants__e_sc_bad_nothing_to_do;
-            }
-            else if (req->NoOfNodesToWrite > constants__k_n_WriteResponse_max)
-            {
-                *service_write_decode_bs__StatusCode_service = constants__e_sc_bad_too_many_ops;
-            }
+            *service_write_decode_bs__StatusCode_service = constants__e_sc_bad_too_many_ops;
         }
     }
 }
 
 void service_write_decode_bs__free_write_request(void)
 {
-    /* TODO: don't free the request that you did not initialize */
     request = NULL;
 }
 
@@ -101,44 +93,39 @@ void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i 
                                                 constants__t_AttributeId_i* const service_write_decode_bs__aid,
                                                 constants__t_Variant_i* const service_write_decode_bs__value)
 {
-    /* Failure reasons:
-       - wvi is too high
-       - invalid attribute id
-       - TODO: does B prevent this operation from being called before decode ?
-    */
-    uint32_t aid;
-    OpcUa_WriteValue* wv;
+    *service_write_decode_bs__nid = constants__c_NodeId_indet;
+    *service_write_decode_bs__value = constants__c_Variant_indet;
 
-    *service_write_decode_bs__isvalid = false;
-    *service_write_decode_bs__status = constants__c_StatusCode_indet;
-
-    if (NULL != request && service_write_decode_bs__wvi <= request->NoOfNodesToWrite)
+    OpcUa_WriteValue* wv = &request->NodesToWrite[service_write_decode_bs__wvi - 1];
+    *service_write_decode_bs__isvalid = true;
+    switch (wv->AttributeId)
     {
-        wv = &request->NodesToWrite[service_write_decode_bs__wvi - 1];
-        *service_write_decode_bs__isvalid = true;
-        *service_write_decode_bs__nid = &wv->NodeId;
-        aid = wv->AttributeId;
-        switch (aid)
-        {
-        case e_aid_NodeId:
-            *service_write_decode_bs__aid = constants__e_aid_NodeId;
-            break;
-        case e_aid_NodeClass:
-            *service_write_decode_bs__aid = constants__e_aid_NodeClass;
-            break;
-        case e_aid_Value:
-            *service_write_decode_bs__aid = constants__e_aid_Value;
-            break;
-        default:
-            *service_write_decode_bs__isvalid = false;
-            *service_write_decode_bs__status = constants__e_sc_bad_attribute_id_invalid;
-            break;
-        }
-        *service_write_decode_bs__value = &wv->Value.Value;
+    case e_aid_NodeId:
+        *service_write_decode_bs__aid = constants__e_aid_NodeId;
+        break;
+    case e_aid_NodeClass:
+        *service_write_decode_bs__aid = constants__e_aid_NodeClass;
+        break;
+    case e_aid_Value:
+        *service_write_decode_bs__aid = constants__e_aid_Value;
+        break;
+    default:
+        *service_write_decode_bs__isvalid = false;
+        *service_write_decode_bs__status = constants__e_sc_bad_attribute_id_invalid;
+        break;
     }
-    else
+    if (*service_write_decode_bs__isvalid == true)
     {
-        *service_write_decode_bs__status = constants__e_sc_bad_internal_error;
+        if (wv->IndexRange.Length > 0)
+        {
+            *service_write_decode_bs__isvalid = false;
+            *service_write_decode_bs__status = constants__e_sc_bad_index_range_invalid;
+        }
+    }
+    if (*service_write_decode_bs__isvalid == true)
+    {
+        *service_write_decode_bs__nid = &wv->NodeId;
+        *service_write_decode_bs__value = &wv->Value.Value;
     }
 }
 

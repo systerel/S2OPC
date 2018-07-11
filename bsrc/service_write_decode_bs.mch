@@ -29,21 +29,24 @@ DEFINITIONS
         nb_WriteValue,
         WriteValue_NodeId,
         WriteValue_AttributeId,
-        WriteValue_Value /* The field value of the DataValue */
+        WriteValue_Value, /* The field value of the DataValue */
+        WriteValue_HasIndexRange
         /* TODO: StatusCode, SourceTimestamp (determine if ServerTimestamp is useful) */
     ;
     d_inv ==
         nb_WriteValue : NAT &
         nb_WriteValue <= k_n_WriteResponse_max &
         WriteValue_NodeId : t_WriteValue +-> t_NodeId &
-        WriteValue_AttributeId : t_WriteValue +-> t_AttributeId &
-        WriteValue_Value : t_WriteValue +-> t_Variant
+        WriteValue_AttributeId : t_WriteValue +-> t_AttributeId_i &
+        WriteValue_Value : t_WriteValue +-> t_Variant &
+        WriteValue_HasIndexRange : t_WriteValue +-> BOOL
     ;
     d_init ==
         nb_WriteValue := 0 ||
         WriteValue_NodeId :: {{}} ||
         WriteValue_AttributeId :: {{}} ||
-        WriteValue_Value :: {{}}
+        WriteValue_Value :: {{}} ||
+        WriteValue_HasIndexRange :: {{}}
 
 ABSTRACT_VARIABLES
     d_variables
@@ -55,6 +58,7 @@ INITIALISATION
     d_init
 
 OPERATIONS
+
     StatusCode_service <-- decode_write_request(write_msg) =
     PRE
         write_msg : t_msg_i &
@@ -66,8 +70,20 @@ OPERATIONS
         d_variables
         :(
             StatusCode_service : t_StatusCode_i &
-            StatusCode_service : t_StatusCode &
-            d_inv
+            StatusCode_service : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops} &
+            d_inv &
+            (StatusCode_service = e_sc_ok =>
+              nb_WriteValue > 0 &
+              WriteValue_NodeId : cast_t_WriteValue[1..nb_WriteValue] --> t_NodeId &
+              WriteValue_AttributeId : cast_t_WriteValue[1..nb_WriteValue] --> t_AttributeId_i &
+              WriteValue_Value : cast_t_WriteValue[1..nb_WriteValue] --> t_Variant &
+              WriteValue_HasIndexRange : cast_t_WriteValue[1..nb_WriteValue] --> BOOL) &
+            (StatusCode_service /= e_sc_ok =>
+                nb_WriteValue = 0 &
+                WriteValue_NodeId = {} &
+                WriteValue_AttributeId = {} &
+                WriteValue_Value = {} &
+                WriteValue_HasIndexRange = {})
         )
     END
     ;
@@ -79,41 +95,46 @@ OPERATIONS
     ;
 
     nb_req <-- get_nb_WriteValue =
-    BEGIN
+    PRE
+        nb_WriteValue > 0
+    THEN
         nb_req := nb_WriteValue
     END
     ;
 
     isvalid, status, nid, aid, value <-- getall_WriteValue(wvi) =
     PRE
+        nb_WriteValue > 0 &
         wvi : t_WriteValue_i &
-        wvi : cast_t_WriteValue[1..nb_WriteValue]
+        wvi : cast_t_WriteValue[1..nb_WriteValue] &
+        wvi : dom(WriteValue_NodeId) &
+        wvi : dom(WriteValue_AttributeId) &
+        wvi : dom(WriteValue_Value) &
+        wvi : dom(WriteValue_HasIndexRange)
     THEN
-        IF wvi : dom(WriteValue_NodeId) &
-            wvi : dom(WriteValue_AttributeId) &
-            wvi : dom(WriteValue_Value)
+        IF WriteValue_AttributeId(wvi) : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value} &
+            WriteValue_HasIndexRange(wvi) = FALSE
         THEN
-            IF WriteValue_AttributeId(wvi) : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value} THEN
-                isvalid := TRUE ||
-                status :: t_StatusCode_i ||
-                nid,
-                aid,
-                value :(nid : t_NodeId_i  & nid = WriteValue_NodeId(wvi) &
-                        aid : t_AttributeId_i & aid = WriteValue_AttributeId(wvi) &
-                        value : t_Variant_i & value = WriteValue_Value(wvi))
-            ELSE
-                isvalid := FALSE ||
-                status := e_sc_bad_attribute_id_invalid ||
-                nid := WriteValue_NodeId(wvi) ||
-                aid := WriteValue_AttributeId(wvi) ||
-                value := WriteValue_Value(wvi)
-            END
+            isvalid := TRUE ||
+            status := e_sc_ok ||
+            nid,
+            aid,
+            value
+            :(nid : t_NodeId_i  & nid = WriteValue_NodeId(wvi) &
+                aid : t_AttributeId_i & aid : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value} &
+                value : t_Variant_i & value = WriteValue_Value(wvi))
         ELSE
             isvalid := FALSE ||
-            status := e_sc_bad_internal_error ||
-            nid :: t_NodeId_i ||
-            aid :: t_AttributeId_i ||
-            value :: t_Variant_i
+
+            nid := c_NodeId_indet ||
+            aid := c_AttributeId_indet ||
+            value := c_Variant_indet ||
+            IF WriteValue_AttributeId(wvi) /: {e_aid_NodeId, e_aid_NodeClass, e_aid_Value}
+            THEN
+                status := e_sc_bad_attribute_id_invalid
+            ELSE
+                status := e_sc_bad_index_range_invalid
+            END
         END
     END
     ;
