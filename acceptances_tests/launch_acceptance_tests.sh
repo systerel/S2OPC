@@ -32,6 +32,7 @@ TAP_FILE=server_acceptance_tests.tap
 #SELECTION=./Acceptation_INGOPCS/Acceptation_INGOPCS_nonreg.selection.xml
 SELECTION=Acceptation_INGOPCS/Acceptation_INGOPCS.selection.xml
 UACTT_ERROR_FILE=uactt_error.log
+SERVER_ERROR=server_error.log
 
 
 SKIPPED_TESTS_FILE=skipped_tests.cfg
@@ -79,7 +80,7 @@ fi
 rm -f $LOG_FILE $TAP_FILE
 echo "Launching server"
 pushd ${ROOT_DIR}/build/bin
-./toolkit_test_server &
+./toolkit_test_server 2> $SERVER_ERROR &
 SERVER_PID=$!
 # wait for server to be up
 ${ROOT_DIR}/tests/scripts/wait_server.py
@@ -95,6 +96,8 @@ echo "Closing Acceptance Test Tool"
 kill -9 $XVFB_PID
 # kill server not necessary anymore
 kill $SERVER_PID
+wait $SERVER_PID
+mv ${ROOT_DIR}/build/bin/$SERVER_ERROR .
 
 # test that log file is available
 if [ ! -f $LOG_FILE ];then
@@ -201,6 +204,11 @@ echo "There were $n_err not oks"
 # check TAP file
 mv $TAP_FILE ${ROOT_DIR}/build/bin/
 ${ROOT_DIR}/tests/scripts/check-tap.py ${ROOT_DIR}/build/bin/$TAP_FILE && echo "TAP file is well formed and free of failed tests" || exit 1
+
+if grep -q '==' $SERVER_ERROR; then
+    echo "ERROR: Asan issues detected"
+    exit 2
+fi
 
 
 

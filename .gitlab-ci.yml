@@ -180,6 +180,7 @@ test-uactt:
     name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
       - 'build/'
+      - 'acceptances_tests/*.log'
     when: on_failure
     expire_in: '1 month'
 
