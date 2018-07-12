@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
     /* Secure Channel and Session creation */
     if (SOPC_STATUS_OK == status)
     {
-        status = StateMachine_StartSession(g_pSM);
+        status = StateMachine_StartSession_Anonymous(g_pSM, ANONYMOUS_POLICY_ID);
     }
 
     /* Active wait */

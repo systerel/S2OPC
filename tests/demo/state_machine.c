@@ -105,7 +105,16 @@ SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM)
     return status;
 }
 
-SOPC_ReturnStatus StateMachine_StartSession(StateMachine_Machine* pSM)
+typedef struct
+{
+    bool anonymous;
+    const char* policyId;
+    const char* username;
+    const uint8_t* password;
+    int32_t length;
+} activation_type;
+
+static SOPC_ReturnStatus ActivateSession(StateMachine_Machine* pSM, activation_type activation_parameters)
 {
     if (NULL == pSM)
     {
@@ -122,12 +131,42 @@ SOPC_ReturnStatus StateMachine_StartSession(StateMachine_Machine* pSM)
         return SOPC_STATUS_NOK;
     }
 
-    SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, (uintptr_t) pSM->pCtxSession,
-                                                      ANONYMOUS_POLICY_ID);
+    if (activation_parameters.anonymous)
+    {
+        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, (uintptr_t) pSM->pCtxSession,
+                                                          activation_parameters.policyId);
+    }
+    else
+    {
+        SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
+            pSM->iscConfig, (uintptr_t) pSM->pCtxSession, activation_parameters.policyId,
+            activation_parameters.username, activation_parameters.password, activation_parameters.length);
+    }
+
     pSM->state = stActivating;
     assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
 
     return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus StateMachine_StartSession_Anonymous(StateMachine_Machine* pSM, const char* policyId)
+{
+    activation_type activ = {.anonymous = true, .policyId = policyId};
+    return ActivateSession(pSM, activ);
+}
+
+SOPC_ReturnStatus StateMachine_StartSession_UsernamePassword(StateMachine_Machine* pSM,
+                                                             const char* policyId,
+                                                             const char* username,
+                                                             const uint8_t* password,
+                                                             int32_t length_password)
+{
+    activation_type activ = {.anonymous = false,
+                             .policyId = policyId,
+                             .username = username,
+                             .password = password,
+                             .length = length_password};
+    return ActivateSession(pSM, activ);
 }
 
 static bool is_connected_unlocked(StateMachine_Machine* pSM)
