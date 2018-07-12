@@ -205,7 +205,7 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
         {
             status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
                 pSM->iscConfig, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pSM->szUsername,
-                (const uint8_t*) pSM->szPassword, (int32_t) strlen(pSM->szPassword));
+                (const uint8_t*) pSM->szPassword, pSM->szPassword != NULL ? (int32_t) strlen(pSM->szPassword) : 0);
         }
     }
     if (SOPC_STATUS_OK == status)

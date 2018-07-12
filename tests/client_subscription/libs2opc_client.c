@@ -176,11 +176,6 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Cannot configure connection with NULL policyId.");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (NULL != pCfg->username && NULL == pCfg->password)
-    {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Cannot configure connection with non NULL user name but NULL password.");
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
 
     /* Create the new configuration */
     status = Helpers_NewSCConfigFromLibSubCfg(pCfg->server_url, pCfg->security_policy, pCfg->security_mode,
