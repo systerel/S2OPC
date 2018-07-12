@@ -81,6 +81,9 @@ if __name__ == '__main__':
     server_ret = server_process.wait()
 
     log('Done')
-    sys.exit(test_ret)
+    if test_ret == 0:
+        sys.exit(server_ret)
+    else:
+        sys.exit(test_ret)
 
 # vim: set et ts=4 sw=4:

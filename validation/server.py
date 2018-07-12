@@ -26,11 +26,23 @@ import argparse
 import os.path
 import time
 import logging
+import signal
+import sys
 
 from opcua import ua, Server
 from common import sUri, variantInfoList
 #from tap_logger import TapLogger
 from opcua.crypto import security_policies
+
+stopFlag = False
+
+def signal_handler(sig, frame):
+    global stopFlag
+    print('Stopping server due to SIGINT/SIGTERM')
+    if stopFlag:
+        sys.exit(0)
+    else:
+        stopFlag = True
 
 # Overrides sUri to force IPv4
 sUri = 'opc.tcp://127.0.0.1:4841'
@@ -40,6 +52,9 @@ if __name__=='__main__':
     parser.add_argument('msTimeout', nargs='?', default=10000., type=float,
                         help='Server timeout (ms)')
     args = parser.parse_args()
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
     # Open server
     print('Configuring FreeOpcUa test server')
@@ -73,7 +88,7 @@ if __name__=='__main__':
         t0 = time.time()+args.msTimeout/1000.
         # The freeopcua toolkit is heavily an asyncio thing, which is run in another thread
         i = 0
-        while time.time() < t0:
+        while time.time() < t0 and not stopFlag:
             # The counter is updated every ~100ms
             i += 1
             nodeCnt.set_value(i, varianttype=ua.VariantType.UInt64)
