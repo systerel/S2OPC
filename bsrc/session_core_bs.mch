@@ -28,7 +28,7 @@ SEES
     channel_mgr
 
 ABSTRACT_VARIABLES
-    a_client_to_activate_context,
+    a_client_app_context,
     a_client_token,
     a_server_token,
     a_user_server,
@@ -37,7 +37,7 @@ ABSTRACT_VARIABLES
     a_NonceClient
 
 INVARIANT
-    a_client_to_activate_context : t_session       +-> t_application_context_i &
+    a_client_app_context         : t_session +-> t_application_context_i       &
     a_client_token               : t_session       +-> t_session_token         &
     a_server_token               : t_session_token +-> t_session               &
     a_user_server                : t_session       +-> t_user                  &
@@ -46,7 +46,7 @@ INVARIANT
     a_NonceClient                : t_session       +-> t_Nonce
 
 INITIALISATION
-    a_client_to_activate_context :: {{}} ||
+    a_client_app_context         :: {{}} ||
     a_client_token               :: {{}} ||
     a_server_token               :: {{}} ||
     a_user_server                :: {{}} ||
@@ -73,7 +73,7 @@ OPERATIONS
         p_session : t_session_i &
         p_session : t_session
     THEN
-        a_client_to_activate_context := {p_session} <<| a_client_to_activate_context
+        a_client_app_context := {p_session} <<| a_client_app_context
     END
     ;
 
@@ -484,13 +484,13 @@ OPERATIONS
     END
     ;
 
-    set_session_to_activate(p_session, p_app_context) =
+    set_session_app_context(p_session, p_app_context) =
     PRE
         p_session     : t_session_i    &
         p_session     : t_session      &
         p_app_context : t_application_context_i
     THEN
-        a_client_to_activate_context(p_session) := p_app_context
+        a_client_app_context(p_session) := p_app_context
     END
     ;
 

@@ -69,7 +69,7 @@ PROMOTES
     client_close_session_resp_msg,
     server_close_session_check_req,
     session_do_nothing,
-    set_session_to_activate,
+    set_session_app_context,
     client_gen_create_session_internal_event,
     client_gen_activate_orphaned_session_internal_event,
     client_gen_activate_user_session_internal_event,
@@ -180,7 +180,7 @@ OPERATIONS
         reset_session_to_create(session);
         // a_client_to_create
         delete_session_application_context(session);
-        // a_client_to_activate_context
+        // a_client_app_context
         reset_session_orphaned(session);
         // a_client_orphaned
         drop_NonceClient(session);

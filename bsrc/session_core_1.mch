@@ -33,7 +33,7 @@ DEFINITIONS
     a_state,
     a_channel,
     a_client_to_create,
-    a_client_to_activate_context,
+    a_client_app_context,
     a_client_orphaned,
     a_client_token,
     a_server_token,
@@ -47,7 +47,7 @@ DEFINITIONS
     a_state                      : t_session +-> t_sessionState          &
     a_channel                    : t_session +-> t_channel               &
     a_client_to_create           : t_session +-> t_channel_config_idx_i  &
-    a_client_to_activate_context : t_session +-> t_application_context_i &
+    a_client_app_context         : t_session +-> t_application_context_i &
     a_client_orphaned            : t_session +-> t_channel_config_idx_i  &
     a_client_token               : t_session +-> t_session_token         &
     a_server_token               : t_session_token +-> t_session         &
@@ -67,7 +67,7 @@ INITIALISATION
     a_state                      := {} ||
     a_channel                    := {} ||
     a_client_to_create           := {} ||
-    a_client_to_activate_context := {} ||
+    a_client_app_context         := {} ||
     a_client_orphaned            := {} ||
     a_client_token               := {} ||
     a_server_token               := {} ||
@@ -227,7 +227,7 @@ OPERATIONS
         a_state                      := {session} <<| a_state                      ||
         a_channel                    := {session} <<| a_channel                    || /* If session had a channel, remove this relation */
         a_client_to_create           := {session} <<| a_client_to_create           ||
-        a_client_to_activate_context := {session} <<| a_client_to_activate_context ||
+        a_client_app_context         := {session} <<| a_client_app_context         ||
         a_client_orphaned            := {session} <<| a_client_orphaned            || /* If session was orphaned, remove this relation */
         a_user_server                := {session} <<| a_user_server                || /* If session had a user, remove this relation */
         a_user_client                := {session} <<| a_user_client                ||
@@ -322,13 +322,13 @@ OPERATIONS
     END
     ;
 
-    set_session_to_activate(p_session, p_app_context) =
+    set_session_app_context(p_session, p_app_context) =
     PRE
         p_session : t_session_i       &
         p_session : t_session         &
         p_app_context : t_application_context_i
     THEN
-        a_client_to_activate_context(p_session) := p_app_context
+        a_client_app_context(p_session) := p_app_context
     END
     ;
 

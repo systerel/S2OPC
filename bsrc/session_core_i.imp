@@ -43,7 +43,7 @@ PROMOTES
     getall_session_channel,
     get_session_channel,
     set_session_to_create,
-    set_session_to_activate,
+    set_session_app_context,
     getall_to_create,
     getall_orphaned,
     reset_session_to_create,
@@ -115,7 +115,7 @@ LOCAL_OPERATIONS
         a_state,
         a_channel,
         a_client_to_create,
-        a_client_to_activate_context,
+        a_client_app_context,
         a_client_orphaned,
         a_user_server,
         a_user_client,
@@ -128,7 +128,7 @@ LOCAL_OPERATIONS
             a_state                      : t_session +-> t_sessionState          &
             a_channel                    : t_session +-> t_channel               &
             a_client_to_create           : t_session +-> t_channel_config_idx_i  &
-            a_client_to_activate_context : t_session +-> t_application_context_i &
+            a_client_app_context         : t_session +-> t_application_context_i &
             a_client_orphaned            : t_session +-> t_channel_config_idx_i  &
             a_client_token               : t_session +-> t_session_token         &
             a_server_token               : t_session_token +-> t_session         &
@@ -146,7 +146,7 @@ LOCAL_OPERATIONS
                     a_state                      = a_state$0 <+ {p_session |-> e_session_scOrphaned} &
                     s_session                    = s_session$0 &
                     a_client_to_create           = a_client_to_create$0 &
-                    a_client_to_activate_context = a_client_to_activate_context$0 &
+                    a_client_app_context         = a_client_app_context$0 &
                     a_user_server                = a_user_server$0 &
                     a_user_client                = a_user_client$0 &
                     a_server_token               = a_server_token$0 &
@@ -161,7 +161,7 @@ LOCAL_OPERATIONS
                     a_state                      = {p_session} <<| a_state$0 &
                     a_channel                    = {p_session} <<| a_channel$0 &
                     a_client_to_create           = {p_session} <<| a_client_to_create$0 &
-                    a_client_to_activate_context = {p_session} <<| a_client_to_activate_context$0 &
+                    a_client_app_context         = {p_session} <<| a_client_app_context$0 &
                     a_client_orphaned            = {p_session} <<| a_client_orphaned$0 &
                     a_user_server                = {p_session} <<| a_user_server$0 &
                     a_user_client                = {p_session} <<| a_user_client$0 &
@@ -178,7 +178,7 @@ LOCAL_OPERATIONS
                 a_state                      = a_state$0 &
                 a_channel                    = a_channel$0 &
                 a_client_to_create           = a_client_to_create$0 &
-                a_client_to_activate_context = a_client_to_activate_context$0 &
+                a_client_app_context         = a_client_app_context$0 &
                 a_client_orphaned            = a_client_orphaned$0 &
                 a_user_server                = a_user_server$0 &
                 a_user_client                = a_user_client$0 &
@@ -208,7 +208,7 @@ LOCAL_OPERATIONS
         a_state,
         a_channel,
         a_client_to_create,
-        a_client_to_activate_context,
+        a_client_app_context,
         a_client_orphaned,
         a_user_server,
         a_user_client,
@@ -221,7 +221,7 @@ LOCAL_OPERATIONS
             a_state                      : t_session +-> t_sessionState          &
             a_channel                    : t_session +-> t_channel               &
             a_client_to_create           : t_session +-> t_channel_config_idx_i  &
-            a_client_to_activate_context : t_session +-> t_application_context_i &
+            a_client_app_context         : t_session +-> t_application_context_i &
             a_client_orphaned            : t_session +-> t_channel_config_idx_i  &
             a_client_token               : t_session +-> t_session_token         &
             a_server_token               : t_session_token +-> t_session         &
@@ -239,7 +239,7 @@ LOCAL_OPERATIONS
                     a_state                      = a_state$0 <+ {p_session |-> e_session_scOrphaned} &
                     s_session                    = s_session$0 &
                     a_client_to_create           = a_client_to_create$0 &
-                    a_client_to_activate_context = a_client_to_activate_context$0 &
+                    a_client_app_context         = a_client_app_context$0 &
                     a_user_server                = a_user_server$0 &
                     a_user_client                = a_user_client$0 &
                     a_server_token               = a_server_token$0 &
@@ -254,7 +254,7 @@ LOCAL_OPERATIONS
                     a_state                      = {p_session} <<| a_state$0 &
                     a_channel                    = {p_session} <<| a_channel$0 &
                     a_client_to_create           = {p_session} <<| a_client_to_create$0 &
-                    a_client_to_activate_context = {p_session} <<| a_client_to_activate_context$0 &
+                    a_client_app_context         = {p_session} <<| a_client_app_context$0 &
                     a_client_orphaned            = {p_session} <<| a_client_orphaned$0 &
                     a_user_server                = {p_session} <<| a_user_server$0 &
                     a_user_client                = {p_session} <<| a_user_client$0 &
@@ -271,7 +271,7 @@ LOCAL_OPERATIONS
                 a_state                      = a_state$0 &
                 a_channel                    = a_channel$0 &
                 a_client_to_create           = a_client_to_create$0 &
-                a_client_to_activate_context = a_client_to_activate_context$0 &
+                a_client_app_context         = a_client_app_context$0 &
                 a_client_orphaned            = a_client_orphaned$0 &
                 a_user_server                = a_user_server$0 &
                 a_user_client                = a_user_client$0 &
@@ -636,7 +636,7 @@ OPERATIONS
                 a_state                      = d_inactive_sessions <<| a_state$0 <+ d_active_sessions * {e_session_scOrphaned}           &
                 a_channel                    = d_inactive_sessions <<| a_channel$0 |>> {p_lost_channel}                                  &
                 a_client_to_create           = d_inactive_sessions <<| a_client_to_create$0                                              &
-                a_client_to_activate_context = d_inactive_sessions <<| a_client_to_activate_context$0                                    &
+                a_client_app_context         = d_inactive_sessions <<| a_client_app_context$0                                            &
                 a_client_orphaned            = d_inactive_sessions <<| a_client_orphaned$0 <+ d_active_sessions * {p_channel_config_idx} &
                 a_user_server                = d_inactive_sessions <<| a_user_server$0                                                   &
                 a_user_client                = d_inactive_sessions <<| a_user_client$0                                                   &
@@ -695,7 +695,7 @@ OPERATIONS
                 a_state                      = d_inactive_sessions <<| a_state$0 <+ d_active_sessions * {e_session_scOrphaned} &
                 a_channel                    = d_inactive_sessions <<| a_channel$0 |>> {p_lost_channel}                        &
                 a_client_to_create           = d_inactive_sessions <<| a_client_to_create$0                                    &
-                a_client_to_activate_context = d_inactive_sessions <<| a_client_to_activate_context$0                          &
+                a_client_app_context         = d_inactive_sessions <<| a_client_app_context$0                                  &
                 a_client_orphaned            = d_inactive_sessions <<| a_client_orphaned$0                                     &
                 a_user_server                = d_inactive_sessions <<| a_user_server$0                                         &
                 a_user_client                = d_inactive_sessions <<| a_user_client$0                                         &

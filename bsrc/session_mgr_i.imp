@@ -607,7 +607,7 @@ OPERATIONS
             bres := TRUE;
             /* channel did not exist or is not connected anymore: add async session creation on SC connection */
             set_session_to_create(l_session, channel_config_idx);
-            set_session_to_activate(l_session, app_context);
+            set_session_app_context(l_session, app_context);
             set_session_user_client(l_session, p_user_token)
         ELSE
             bres := FALSE
@@ -630,7 +630,7 @@ OPERATIONS
             /* Generate event to create the session next and then waiting to be activated */
             client_gen_create_session_internal_event (l_session, channel_config_idx);
             set_session_user_client(l_session, p_user_token);
-            set_session_to_activate(l_session, app_context)
+            set_session_app_context(l_session, app_context)
         ELSE
             bres := FALSE
         END

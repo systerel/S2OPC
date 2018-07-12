@@ -60,7 +60,7 @@ typedef struct SessionData
 
 static SessionData sessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
 
-static constants__t_application_context_i session_to_activate_context[SOPC_MAX_SESSIONS + 1];
+static constants__t_application_context_i session_client_app_context[SOPC_MAX_SESSIONS + 1];
 
 static uint32_t session_expiration_timer[SOPC_MAX_SESSIONS + 1];
 static uint64_t session_RevisedSessionTimeout[SOPC_MAX_SESSIONS + 1];
@@ -84,7 +84,7 @@ void session_core_bs__INITIALISATION(void)
     }
 
     assert(SOPC_MAX_SESSIONS + 1 <= SIZE_MAX / sizeof(constants__t_user_i));
-    memset(session_to_activate_context, (int) 0, sizeof(constants__t_application_context_i) * (SOPC_MAX_SESSIONS + 1));
+    memset(session_client_app_context, (int) 0, sizeof(constants__t_application_context_i) * (SOPC_MAX_SESSIONS + 1));
     memset(session_expiration_timer, (int) 0, sizeof(uint32_t) * (SOPC_MAX_SESSIONS + 1));
     memset(session_RevisedSessionTimeout, (int) 0, sizeof(uint64_t) * (SOPC_MAX_SESSIONS + 1));
     memset(server_session_latest_msg_receveived, (int) 0, sizeof(SOPC_TimeReference) * (SOPC_MAX_SESSIONS + 1));
@@ -105,7 +105,7 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
         {
             SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
                                             (uint32_t) session_core_bs__session, NULL,
-                                            session_to_activate_context[session_core_bs__session]);
+                                            session_client_app_context[session_core_bs__session]);
         }
         else if (session_core_bs__state == constants__e_session_scOrphaned ||
                  ((session_core_bs__state == constants__e_session_userActivating ||
@@ -119,7 +119,7 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
             // application
             SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_REACTIVATING),
                                             session_core_bs__session, NULL,
-                                            session_to_activate_context[session_core_bs__session]);
+                                            session_client_app_context[session_core_bs__session]);
         }
         else if (session_core_bs__state == constants__e_session_closed)
         {
@@ -130,9 +130,9 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
                 // => notify activation failed
                 SOPC_ServicesToApp_EnqueueEvent(
                     SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
-                    session_core_bs__session,                               // session id
-                    NULL,                                                   // user ?
-                    session_to_activate_context[session_core_bs__session]); // user application session context
+                    session_core_bs__session,                              // session id
+                    NULL,                                                  // user ?
+                    session_client_app_context[session_core_bs__session]); // user application session context
             }
             else
             {
@@ -141,7 +141,7 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
                     SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
                     session_core_bs__session, // session id
                     NULL,
-                    session_to_activate_context[session_core_bs__session]); // user application session context
+                    session_client_app_context[session_core_bs__session]); // user application session context
             }
         }
     }
@@ -227,7 +227,7 @@ void session_core_bs__delete_session_token(const constants__t_session_i session_
 
 void session_core_bs__delete_session_application_context(const constants__t_session_i session_core_bs__p_session)
 {
-    session_to_activate_context[session_core_bs__p_session] = 0;
+    session_client_app_context[session_core_bs__p_session] = 0;
 }
 
 void session_core_bs__is_valid_user(const constants__t_user_i session_core_bs__user, t_bool* const session_core_bs__ret)
@@ -903,10 +903,10 @@ void session_core_bs__session_do_nothing(const constants__t_session_i session_co
     (void) session_core_bs__session;
 }
 
-void session_core_bs__set_session_to_activate(const constants__t_session_i session_core_bs__p_session,
+void session_core_bs__set_session_app_context(const constants__t_session_i session_core_bs__p_session,
                                               const constants__t_application_context_i session_core_bs__p_app_context)
 {
-    session_to_activate_context[session_core_bs__p_session] = session_core_bs__p_app_context;
+    session_client_app_context[session_core_bs__p_session] = session_core_bs__p_app_context;
 }
 
 void session_core_bs__client_gen_activate_orphaned_session_internal_event(
