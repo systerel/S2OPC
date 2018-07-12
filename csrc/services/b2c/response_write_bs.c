@@ -110,8 +110,6 @@ void response_write_bs__write_WriteResponse_msg_out(const constants__t_msg_i res
     if (nb_req > 0 && (uint64_t) SIZE_MAX / sizeof(SOPC_StatusCode) >= (uint64_t) nb_req)
     {
         lsc = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * (size_t) nb_req);
-
-        memcpy((void*) lsc, (void*) (arr_StatusCode + 1), sizeof(SOPC_StatusCode) * (size_t) nb_req);
     }
 
     if (NULL == lsc)
@@ -121,6 +119,8 @@ void response_write_bs__write_WriteResponse_msg_out(const constants__t_msg_i res
     }
     else
     {
+        memcpy(lsc, (void*) (arr_StatusCode + 1), sizeof(SOPC_StatusCode) * (size_t) nb_req);
+
         msg_write_resp->NoOfResults = nb_req;
     }
 
