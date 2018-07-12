@@ -51,4 +51,6 @@ Suite* tests_make_suite_dict(void);
 
 Suite* tests_make_suite_array(void);
 
+Suite* tests_make_suite_event_handler(void);
+
 #endif // CHECK_HELPERS_H
