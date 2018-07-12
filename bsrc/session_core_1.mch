@@ -33,7 +33,6 @@ DEFINITIONS
     a_state,
     a_channel,
     a_client_to_create,
-    a_client_to_activate,
     a_client_to_activate_context,
     a_client_orphaned,
     a_client_token,
@@ -48,7 +47,6 @@ DEFINITIONS
     a_state                      : t_session +-> t_sessionState          &
     a_channel                    : t_session +-> t_channel               &
     a_client_to_create           : t_session +-> t_channel_config_idx_i  &
-    a_client_to_activate         : t_session +-> t_user_token            &
     a_client_to_activate_context : t_session +-> t_application_context_i &
     a_client_orphaned            : t_session +-> t_channel_config_idx_i  &
     a_client_token               : t_session +-> t_session_token         &
@@ -69,7 +67,6 @@ INITIALISATION
     a_state                      := {} ||
     a_channel                    := {} ||
     a_client_to_create           := {} ||
-    a_client_to_activate         := {} ||
     a_client_to_activate_context := {} ||
     a_client_orphaned            := {} ||
     a_client_token               := {} ||
@@ -190,15 +187,6 @@ OPERATIONS
     END
     ;
 
-    reset_session_to_activate(p_session) =
-    PRE
-        p_session : t_session_i &
-        p_session : t_session
-    THEN
-        a_client_to_activate := {p_session} <<| a_client_to_activate
-    END
-    ;
-
     ret <-- is_valid_session (session) =
     PRE
         session : t_session_i
@@ -239,7 +227,6 @@ OPERATIONS
         a_state                      := {session} <<| a_state                      ||
         a_channel                    := {session} <<| a_channel                    || /* If session had a channel, remove this relation */
         a_client_to_create           := {session} <<| a_client_to_create           ||
-        a_client_to_activate         := {session} <<| a_client_to_activate         ||
         a_client_to_activate_context := {session} <<| a_client_to_activate_context ||
         a_client_orphaned            := {session} <<| a_client_orphaned            || /* If session was orphaned, remove this relation */
         a_user_server                := {session} <<| a_user_server                || /* If session had a user, remove this relation */
@@ -307,20 +294,6 @@ OPERATIONS
     END
     ;
 
-    p_dom, p_user_token <-- getall_to_activate(p_session) =
-    PRE
-        p_session : t_session_i &
-        p_session : t_session
-    THEN
-        p_dom := bool(p_session : dom(a_client_to_activate)) ||
-        IF  p_session /: dom(a_client_to_activate) THEN
-            p_user_token := c_user_token_indet
-        ELSE
-            p_user_token := a_client_to_activate(p_session)
-        END
-    END
-    ;
-
     p_dom, p_channel_config_idx <-- getall_orphaned(p_session) =
     PRE
         p_session : t_session_i &
@@ -349,15 +322,12 @@ OPERATIONS
     END
     ;
 
-    set_session_to_activate(p_session, p_user_token, p_app_context) =
+    set_session_to_activate(p_session, p_app_context) =
     PRE
         p_session : t_session_i       &
         p_session : t_session         &
-        p_user_token : t_user_token_i &
-        p_user_token : t_user_token   &
         p_app_context : t_application_context_i
     THEN
-        a_client_to_activate(p_session) := p_user_token ||
         a_client_to_activate_context(p_session) := p_app_context
     END
     ;

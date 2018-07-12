@@ -36,7 +36,6 @@ IMPORTS
 
 PROMOTES
     is_valid_session,
-    get_session_user_or_indet,
     client_secure_channel_lost_session_sm,
     server_secure_channel_lost_session_sm,
     server_close_session_sm
@@ -263,11 +262,9 @@ OPERATIONS
                             l_session_state <-- get_session_state_or_closed (session);
                             IF l_session_state = e_session_created
                             THEN
-                                l_bret, l_session_user_token <-- getall_to_activate (session);
-                                IF l_bret = TRUE &
-                                    l_session_user_token /= c_user_token_indet
+                                l_session_user_token <-- get_session_user_client (session);
+                                IF l_session_user_token /= c_user_token_indet
                                 THEN
-                                    reset_session_to_activate (session);
                                     client_gen_activate_user_session_internal_event (session, l_session_user_token)
                                 END
                             ELSE
@@ -610,7 +607,8 @@ OPERATIONS
             bres := TRUE;
             /* channel did not exist or is not connected anymore: add async session creation on SC connection */
             set_session_to_create(l_session, channel_config_idx);
-            set_session_to_activate(l_session, p_user_token, app_context)
+            set_session_to_activate(l_session, app_context);
+            set_session_user_client(l_session, p_user_token)
         ELSE
             bres := FALSE
         END
@@ -631,7 +629,8 @@ OPERATIONS
             bres := TRUE;
             /* Generate event to create the session next and then waiting to be activated */
             client_gen_create_session_internal_event (l_session, channel_config_idx);
-            set_session_to_activate(l_session, p_user_token, app_context)
+            set_session_user_client(l_session, p_user_token);
+            set_session_to_activate(l_session, app_context)
         ELSE
             bres := FALSE
         END

@@ -28,7 +28,6 @@ SEES
     channel_mgr
 
 ABSTRACT_VARIABLES
-    a_client_to_activate,
     a_client_to_activate_context,
     a_client_token,
     a_server_token,
@@ -38,7 +37,6 @@ ABSTRACT_VARIABLES
     a_NonceClient
 
 INVARIANT
-    a_client_to_activate         : t_session       +-> t_user_token            &
     a_client_to_activate_context : t_session       +-> t_application_context_i &
     a_client_token               : t_session       +-> t_session_token         &
     a_server_token               : t_session_token +-> t_session               &
@@ -48,7 +46,6 @@ INVARIANT
     a_NonceClient                : t_session       +-> t_Nonce
 
 INITIALISATION
-    a_client_to_activate         :: {{}} ||
     a_client_to_activate_context :: {{}} ||
     a_client_token               :: {{}} ||
     a_server_token               :: {{}} ||
@@ -487,39 +484,13 @@ OPERATIONS
     END
     ;
 
-    set_session_to_activate(p_session, p_user_token, p_app_context) =
+    set_session_to_activate(p_session, p_app_context) =
     PRE
         p_session     : t_session_i    &
         p_session     : t_session      &
-        p_user_token  : t_user_token_i &
-        p_user_token  : t_user_token   &
         p_app_context : t_application_context_i
     THEN
-        a_client_to_activate(p_session) := p_user_token ||
         a_client_to_activate_context(p_session) := p_app_context
-    END
-    ;
-
-    p_dom, p_user_token <-- getall_to_activate(p_session) =
-    PRE
-        p_session : t_session_i &
-        p_session : t_session
-    THEN
-        p_dom := bool(p_session : dom(a_client_to_activate)) ||
-        IF  p_session /: dom(a_client_to_activate) THEN
-            p_user_token := c_user_token_indet
-        ELSE
-            p_user_token := a_client_to_activate(p_session)
-        END
-    END
-    ;
-
-    reset_session_to_activate(p_session) =
-    PRE
-        p_session : t_session_i &
-        p_session : t_session
-    THEN
-        a_client_to_activate := {p_session} <<| a_client_to_activate
     END
     ;
 

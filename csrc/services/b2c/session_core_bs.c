@@ -60,8 +60,6 @@ typedef struct SessionData
 
 static SessionData sessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
 
-static constants__t_user_token_i session_to_activate_user[SOPC_MAX_SESSIONS + 1];
-
 static constants__t_application_context_i session_to_activate_context[SOPC_MAX_SESSIONS + 1];
 
 static uint32_t session_expiration_timer[SOPC_MAX_SESSIONS + 1];
@@ -86,8 +84,6 @@ void session_core_bs__INITIALISATION(void)
     }
 
     assert(SOPC_MAX_SESSIONS + 1 <= SIZE_MAX / sizeof(constants__t_user_i));
-    memset(session_to_activate_user, (int) constants__c_user_token_indet,
-           sizeof(constants__t_user_token_i) * (SOPC_MAX_SESSIONS + 1));
     memset(session_to_activate_context, (int) 0, sizeof(constants__t_application_context_i) * (SOPC_MAX_SESSIONS + 1));
     memset(session_expiration_timer, (int) 0, sizeof(uint32_t) * (SOPC_MAX_SESSIONS + 1));
     memset(session_RevisedSessionTimeout, (int) 0, sizeof(uint64_t) * (SOPC_MAX_SESSIONS + 1));
@@ -908,32 +904,9 @@ void session_core_bs__session_do_nothing(const constants__t_session_i session_co
 }
 
 void session_core_bs__set_session_to_activate(const constants__t_session_i session_core_bs__p_session,
-                                              const constants__t_user_token_i session_core_bs__p_user_token,
                                               const constants__t_application_context_i session_core_bs__p_app_context)
 {
-    session_to_activate_user[session_core_bs__p_session] = session_core_bs__p_user_token;
     session_to_activate_context[session_core_bs__p_session] = session_core_bs__p_app_context;
-}
-
-void session_core_bs__getall_to_activate(const constants__t_session_i session_core_bs__p_session,
-                                         t_bool* const session_core_bs__p_dom,
-                                         constants__t_user_token_i* const session_core_bs__p_user_token)
-{
-    if (session_to_activate_user[session_core_bs__p_session] != constants__c_user_token_indet)
-    {
-        *session_core_bs__p_dom = true;
-        *session_core_bs__p_user_token = session_to_activate_user[session_core_bs__p_session];
-    }
-    else
-    {
-        *session_core_bs__p_dom = false;
-        *session_core_bs__p_user_token = constants__c_user_token_indet;
-    }
-}
-
-void session_core_bs__reset_session_to_activate(const constants__t_session_i session_core_bs__p_session)
-{
-    session_to_activate_user[session_core_bs__p_session] = constants__c_user_indet;
 }
 
 void session_core_bs__client_gen_activate_orphaned_session_internal_event(

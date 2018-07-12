@@ -360,13 +360,5 @@ OPERATIONS
     THEN
         skip
     END
-    ;
-
-    p_user_token <-- get_session_user_or_indet (session) =
-    PRE
-        session : t_session_i
-    THEN
-        p_user_token :: t_user_token_i
-    END
 
 END

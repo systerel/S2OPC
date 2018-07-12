@@ -70,8 +70,6 @@ PROMOTES
     server_close_session_check_req,
     session_do_nothing,
     set_session_to_activate,
-    getall_to_activate,
-    reset_session_to_activate,
     client_gen_create_session_internal_event,
     client_gen_activate_orphaned_session_internal_event,
     client_gen_activate_user_session_internal_event,
@@ -181,8 +179,6 @@ OPERATIONS
         // a_client_token
         reset_session_to_create(session);
         // a_client_to_create
-        reset_session_to_activate(session);
-        // a_client_to_activate
         delete_session_application_context(session);
         // a_client_to_activate_context
         reset_session_orphaned(session);
