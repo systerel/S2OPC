@@ -23,32 +23,36 @@
 #include <assert.h>
 #include <stdlib.h>
 
-SOPC_AsyncQueue* socketsEvents = NULL;
+SOPC_AsyncQueue* socketsInputEvents = NULL;
+SOPC_EventHandler* socketsEventHandler = NULL;
 
 void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent scEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_StubSC_SocketsEventParams* scParams = calloc(1, sizeof(SOPC_StubSC_SocketsEventParams));
-    assert(scParams != NULL && socketsEvents != NULL);
-    scParams->event = scEvent;
+    SOPC_Event* scParams = calloc(1, sizeof(SOPC_Event));
+    assert(scParams != NULL && socketsInputEvents != NULL);
+    scParams->event = (int32_t) scEvent;
     scParams->eltId = id;
     scParams->params = params;
     scParams->auxParam = auxParam;
 
-    status = SOPC_AsyncQueue_BlockingEnqueue(socketsEvents, (void*) scParams);
+    status = SOPC_AsyncQueue_BlockingEnqueue(socketsInputEvents, (void*) scParams);
     (void) status; // status is not used if asserts are not compiled in
     assert(status == SOPC_STATUS_OK);
 }
 
 void SOPC_Sockets_Initialize()
 {
-    SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&socketsEvents, "StubsSC_SocketsEventQueue");
-    (void) status; // status is not used if asserts are not compiled in
+    SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&socketsInputEvents, "StubsSC_SocketsEventQueue");
     assert(status == SOPC_STATUS_OK);
 }
 
 void SOPC_Sockets_Clear()
 {
-    SOPC_AsyncQueue_Free(&socketsEvents);
-    socketsEvents = NULL;
+    SOPC_AsyncQueue_Free(&socketsInputEvents);
+}
+
+void SOPC_Sockets_SetEventHandler(SOPC_EventHandler* handler)
+{
+    socketsEventHandler = handler;
 }

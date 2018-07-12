@@ -17,20 +17,38 @@
  * under the License.
  */
 
+#include <assert.h>
 #include <stddef.h>
 #include <string.h>
 
 #include "sopc_secure_channels_internal_ctx.h"
+#include "sopc_sockets_api.h"
 
 SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1];
 SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS + 1];
 uint32_t lastSecureConnectionArrayIdx = 0;
+
+SOPC_Looper* secureChannelsLooper = NULL;
+SOPC_EventHandler* secureChannelsInputEventHandler = NULL;
+SOPC_EventHandler* secureChannelsSocketsEventHandler = NULL;
 
 void SOPC_SecureChannelsInternalContext_Initialize()
 {
     memset(secureListenersArray, 0, sizeof(SOPC_SecureListener) * (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1));
     memset(secureConnectionsArray, 0, sizeof(SOPC_SecureConnection) * (SOPC_MAX_SECURE_CONNECTIONS + 1));
     lastSecureConnectionArrayIdx = 0;
+
+    secureChannelsLooper = SOPC_Looper_Create();
+    assert(secureChannelsLooper != NULL);
+
+    secureChannelsInputEventHandler = SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnInputEvent);
+    assert(secureChannelsInputEventHandler != NULL);
+
+    secureChannelsSocketsEventHandler =
+        SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnSocketsEvent);
+    assert(secureChannelsSocketsEventHandler != NULL);
+
+    SOPC_Sockets_SetEventHandler(secureChannelsSocketsEventHandler);
 }
 
 SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx)
@@ -43,7 +61,10 @@ SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx)
     return scConnection;
 }
 
-void SOPC_SecureChannelsInternalContext_Clear() {}
+void SOPC_SecureChannelsInternalContext_Clear()
+{
+    SOPC_Looper_Delete(secureChannelsLooper);
+}
 
 const SOPC_Certificate* SC_OwnCertificate(SOPC_SecureConnection* conn)
 {

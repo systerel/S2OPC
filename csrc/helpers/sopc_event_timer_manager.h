@@ -30,7 +30,7 @@
 #ifndef SOPC_EVENT_TIMER_MANAGER_H_
 #define SOPC_EVENT_TIMER_MANAGER_H_
 
-#include "sopc_event_dispatcher_manager.h"
+#include "sopc_event_handler.h"
 #include "sopc_time.h"
 
 /**
@@ -49,30 +49,26 @@ void SOPC_EventTimer_Clear(void);
  * \brief Create a timer which will raise the given event parameters to the given event
  * dispatch manager
  *
- * \param eventMgr    the event dispatch manager to which event params will be provided on timeout
- * \param eventParams the event parameters that will be provided on timeout to the event dispatch manager
- * \param msDelay     the delay from current time before timeout in milliseconds
+ * \param eventHandler  the event handler where to dispatch the event on timeout
+ * \param event         the event to dispatch on timeout
+ * \param msDelay       the delay from current time before timeout in milliseconds
  *
  * \return the timer identifier (or value 0 if operation failed)
  *
  * */
-uint32_t SOPC_EventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
-                                SOPC_EventDispatcherParams eventParams,
-                                uint64_t msDelay);
+uint32_t SOPC_EventTimer_Create(SOPC_EventHandler* eventHandler, SOPC_Event event, uint64_t msDelay);
 
 /**
  * \brief Creates a periodic timer raising an event on a dispatch manager every msPeriod milliseconds.
  *
- * \param eventMgr    the event dispatch manager to which event params will be provided on timeout
- * \param eventParams the event parameters that will be provided on timeout to the event dispatch manager
+ * \param eventHandler  the event handler where to dispatch the event on timeout
+ * \param event         the event to dispatch on timeout
  * \param msPeriod    the period in milliseconds
  *
  * \return the timer identifier (or value 0 if operation failed)
  *
  * */
-uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventDispatcherManager* eventMgr,
-                                        SOPC_EventDispatcherParams eventParams,
-                                        uint64_t msPeriod);
+uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventHandler* eventHandler, SOPC_Event event, uint64_t msPeriod);
 
 /**
  * \brief Modifies an existing periodic timer period

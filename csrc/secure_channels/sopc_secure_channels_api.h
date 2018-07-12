@@ -35,23 +35,6 @@
  *  */
 typedef enum {
     /* External events */
-    /*  Socket events */
-    SOCKET_LISTENER_OPENED,     /* id = endpoint description config index,
-                                   auxParam = (uint32_t) socket index
-                               */
-    SOCKET_LISTENER_CONNECTION, /* id = endpoint description config index,
-                                   auxParam = (uint32_t) new connection socket index
-                               */
-    SOCKET_LISTENER_FAILURE,    /* id = endpoint description config index */
-
-    SOCKET_CONNECTION, /* id = secure channel connection index,
-                          auxParam = (uint32_t) socket index */
-
-    SOCKET_FAILURE,   /* id = secure channel connection index,
-                         auxParam = (uint32_t) socket index */
-    SOCKET_RCV_BYTES, /* id = secure channel connection index,
-                         params = (SOPC_Buffer*) received buffer containing complete TCP UA chunk
-                       */
     /* Services events */
     EP_OPEN,            /* id = endpoint description configuration index */
     EP_CLOSE,           /* id = endpoint description configuration index */

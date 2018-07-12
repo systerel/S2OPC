@@ -79,8 +79,14 @@ tConfig = {.initDone = false,
 static SOPC_ComEvent_Fct* appFct = NULL;
 static SOPC_AddressSpaceNotif_Fct* pAddSpaceFct = NULL;
 
-void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id, void* params, uintptr_t auxParam)
+void SOPC_Internal_ApplicationEventDispatcher(SOPC_EventHandler* handler,
+                                              int32_t eventAndType,
+                                              uint32_t id,
+                                              void* params,
+                                              uintptr_t auxParam)
 {
+    (void) handler;
+
     SOPC_EncodeableType* encType = NULL;
     char* nodeId = NULL;
     switch (SOPC_AppEvent_AppEventType_Get(eventAndType))

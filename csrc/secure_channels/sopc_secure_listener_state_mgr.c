@@ -141,6 +141,79 @@ static void SOPC_SecureListenerStateMgr_RemoveConnection(SOPC_SecureListener* sc
     } while (idx < SOPC_MAX_SOCKETS_CONNECTIONS && false == result);
 }
 
+void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
+                                               uint32_t eltId,
+                                               void* params,
+                                               uintptr_t auxParam)
+{
+    (void) params;
+
+    switch (event)
+    {
+    /* Sockets manager -> SC listener state manager */
+    case SOCKET_LISTENER_OPENED:
+    {
+        /* id = endpoint description config index,
+           auxParam = socket index */
+        assert(auxParam <= UINT32_MAX);
+
+        SOPC_Logger_TraceDebug("ScListenerMgr: SOCKET_LISTENER_OPENED epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId,
+                               auxParam);
+        SOPC_SecureListener* scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
+
+        if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENING)
+        {
+            // Error case: require socket closure
+            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
+        }
+        else
+        {
+            scListener->state = SECURE_LISTENER_STATE_OPENED;
+            scListener->socketIndex = (uint32_t) auxParam;
+        }
+        break;
+    }
+    case SOCKET_LISTENER_CONNECTION:
+    {
+        /* id = endpoint description config index,
+           auxParam = new connection socket index */
+        assert(auxParam <= UINT32_MAX);
+
+        SOPC_Logger_TraceDebug("ScListenerMgr: SOCKET_LISTENER_CONNECTION epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR,
+                               eltId, auxParam);
+        SOPC_SecureListener* scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
+
+        if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENED)
+        {
+            // Error case: require socket closure
+            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
+        }
+        else
+        {
+            // Request creation of a new secure connection with given socket
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATE, eltId, NULL, auxParam);
+        }
+        break;
+    }
+    case SOCKET_LISTENER_FAILURE:
+    {
+        SOPC_Logger_TraceDebug("ScListenerMgr: SOCKET_LISTENER_FAILURE epCfgIdx=%" PRIu32, eltId);
+        /* id = endpoint description configuration index */
+        SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
+
+        if (epConfig != NULL)
+        {
+            SOPC_SecureListenerStateMgr_CloseListener(eltId);
+        }
+        // Notify Services layer that EP_OPEN failed
+        SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED, eltId, NULL, SOPC_STATUS_CLOSED);
+        break;
+    }
+    default:
+        assert(false);
+    }
+}
+
 void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                             uint32_t eltId,
                                             void* params,
@@ -153,59 +226,6 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     switch (event)
     {
-    /* Sockets events: */
-    /* Sockets manager -> SC listener state manager */
-    case SOCKET_LISTENER_OPENED:
-        SOPC_Logger_TraceDebug("ScListenerMgr: SOCKET_LISTENER_OPENED epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId,
-                               auxParam);
-        /* id = endpoint description config index,
-           auxParam = socket index */
-        if (auxParam <= UINT32_MAX)
-        {
-            scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
-            if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENING)
-            {
-                // Error case: require socket closure
-                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
-            }
-            else
-            {
-                scListener->state = SECURE_LISTENER_STATE_OPENED;
-                scListener->socketIndex = (uint32_t) auxParam;
-            }
-        }
-        break;
-    case SOCKET_LISTENER_CONNECTION:
-        SOPC_Logger_TraceDebug("ScListenerMgr: SOCKET_LISTENER_CONNECTION epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR,
-                               eltId, auxParam);
-        /* id = endpoint description config index,
-           auxParam = new connection socket index */
-        scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
-        if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENED)
-        {
-            if (auxParam <= UINT32_MAX)
-            {
-                // Error case: require socket closure
-                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
-            }
-        }
-        else
-        {
-            // Request creation of a new secure connection with given socket
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATE, eltId, NULL, auxParam);
-        }
-        break;
-    case SOCKET_LISTENER_FAILURE:
-        SOPC_Logger_TraceDebug("ScListenerMgr: SOCKET_LISTENER_FAILURE epCfgIdx=%" PRIu32, eltId);
-        /* id = endpoint description configuration index */
-        epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
-        if (epConfig != NULL)
-        {
-            SOPC_SecureListenerStateMgr_CloseListener(eltId);
-        }
-        // Notify Services layer that EP_OPEN failed
-        SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED, eltId, NULL, SOPC_STATUS_CLOSED);
-        break;
     /* Services events: */
     /* Services manager -> SC listener state manager */
     case EP_OPEN:

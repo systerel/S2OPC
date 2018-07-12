@@ -62,18 +62,16 @@ static SOPC_SecureChannel_Config scConfig;
 // Configuration SC idx provided on configuration (used also as socket / scIdx)
 uint32_t scConfigIdx = 0;
 
-static SOPC_StubSC_SocketsEventParams* Check_Socket_Event_Received(SOPC_Sockets_InputEvent event,
-                                                                   uint32_t eltId,
-                                                                   uintptr_t auxParam)
+static SOPC_Event* Check_Socket_Event_Received(SOPC_Sockets_InputEvent event, uint32_t eltId, uintptr_t auxParam)
 {
-    SOPC_StubSC_SocketsEventParams* socketEvent = NULL;
+    SOPC_Event* socketEvent = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t loopCpt = 0;
 
     while ((SOPC_STATUS_OK == status || SOPC_STATUS_WOULD_BLOCK == status) && socketEvent == NULL &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
-        status = SOPC_AsyncQueue_NonBlockingDequeue(socketsEvents, (void**) &socketEvent);
+        status = SOPC_AsyncQueue_NonBlockingDequeue(socketsInputEvents, (void**) &socketEvent);
         if (SOPC_STATUS_OK != status)
         {
             loopCpt++;
@@ -85,7 +83,7 @@ static SOPC_StubSC_SocketsEventParams* Check_Socket_Event_Received(SOPC_Sockets_
     {
         status = SOPC_STATUS_TIMEOUT;
     }
-    else if (SOPC_STATUS_OK == status && socketsEvents == NULL)
+    else if (SOPC_STATUS_OK == status && socketsInputEvents == NULL)
     {
         status = SOPC_STATUS_NOK;
     }
@@ -93,7 +91,7 @@ static SOPC_StubSC_SocketsEventParams* Check_Socket_Event_Received(SOPC_Sockets_
 
     if (SOPC_STATUS_OK == status)
     {
-        if (socketEvent->event == event && socketEvent->auxParam == auxParam && socketEvent->eltId == eltId)
+        if (socketEvent->event == (int32_t) event && socketEvent->auxParam == auxParam && socketEvent->eltId == eltId)
         {
             // OK
         }
@@ -109,7 +107,7 @@ static SOPC_StubSC_SocketsEventParams* Check_Socket_Event_Received(SOPC_Sockets_
     }
     else
     {
-        socketsEvents = NULL;
+        socketsInputEvents = NULL;
     }
     return socketEvent;
 }
@@ -172,7 +170,7 @@ static SOPC_ReturnStatus Check_Expected_Sent_Message(uint32_t socketIdx,
                                                      uint16_t start,
                                                      uint16_t length)
 {
-    SOPC_StubSC_SocketsEventParams* socketEvent = NULL;
+    SOPC_Event* socketEvent = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = NULL;
     char hexOutput[512];
@@ -245,7 +243,7 @@ static SOPC_ReturnStatus Simulate_Received_Message(uint32_t scIdx, char* hexInpu
         }
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_SecureChannels_EnqueueEvent(SOCKET_RCV_BYTES, scIdx, (void*) buffer, 0);
+            SOPC_EventHandler_Post(socketsEventHandler, SOCKET_RCV_BYTES, scIdx, (void*) buffer, 0);
         }
     }
     else
@@ -266,7 +264,7 @@ static SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx, uint32_t socketI
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = NULL;
     SOPC_StubSC_ServicesEventParams* serviceEvent = NULL;
-    SOPC_StubSC_SocketsEventParams* socketEvent = NULL;
+    SOPC_Event* socketEvent = NULL;
     int res = 0;
     char hexOutput[512];
 
@@ -354,7 +352,7 @@ void establishSC(void)
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StubSC_ServicesEventParams* serviceEvent = NULL;
-    SOPC_StubSC_SocketsEventParams* socketEvent = NULL;
+    SOPC_Event* socketEvent = NULL;
     int res = 0;
     SOPC_Buffer* buffer = NULL;
     char hexOutput[512];
@@ -415,7 +413,7 @@ void establishSC(void)
     socketEvent = NULL;
 
     // Simulate event from socket
-    SOPC_SecureChannels_EnqueueEvent(SOCKET_CONNECTION, scConfigIdx, NULL, scConfigIdx);
+    SOPC_EventHandler_Post(socketsEventHandler, SOCKET_CONNECTION, scConfigIdx, NULL, scConfigIdx);
     printf("SC_Rcv_Buffer Init: Simulating socket connection\n");
 
     printf("SC_Rcv_Buffer Init: Checking correct HEL message requested to be sent\n");
@@ -714,7 +712,7 @@ START_TEST(test_too_large_msg_size)
     status = SOPC_Buffer_SetDataLength(buffer, 500);
     ck_assert(SOPC_STATUS_OK == status);
 
-    SOPC_SecureChannels_EnqueueEvent(SOCKET_RCV_BYTES, scConfigIdx, (void*) buffer, 0);
+    SOPC_EventHandler_Post(socketsEventHandler, SOCKET_RCV_BYTES, scConfigIdx, (void*) buffer, 0);
 
     status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadTcpMessageTooLarge);
     ck_assert(SOPC_STATUS_OK == status);

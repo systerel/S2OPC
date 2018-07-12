@@ -64,7 +64,8 @@ void gen_subscription_event_bs__gen_data_changed_event(
         /* Generate data changed event with old & new WriteValue */
         if (SOPC_STATUS_OK == retStatus)
         {
-            SOPC_Services_InternalEnqueueEvent(SE_TO_SE_SERVER_DATA_CHANGED, 0, oldValue, (uintptr_t) newValue);
+            SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_DATA_CHANGED, 0, oldValue,
+                                   (uintptr_t) newValue);
         }
         else
         {

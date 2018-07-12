@@ -32,7 +32,6 @@
 
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
-#include "sopc_event_dispatcher_manager.h"
 #include "sopc_event_timer_manager.h"
 
 #define NB_TIMERS 5
@@ -55,8 +54,10 @@ static SOPC_DateTime dateTimeResultsWithCancel[NB_TIMERS_WITH_CANCEL] = {0, 0, 0
 
 uint32_t timersId[NB_TIMERS];
 
-void timeout_event(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
+void timeout_event(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
+    (void) handler;
+
     uint32_t triggered = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &timersTriggered);
 
     ck_assert(EVENT == event);
@@ -75,25 +76,27 @@ START_TEST(test_timers)
     uint8_t i = 0;
     uint32_t timerId = 0;
     uint64_t elapsedMs = 0;
-    SOPC_EventDispatcherParams eventParams;
-    SOPC_EventDispatcherManager* eventMgr =
-        SOPC_EventDispatcherManager_CreateAndStart(timeout_event, "Test event timers");
-    ck_assert(eventMgr != NULL);
+    SOPC_Event event;
+    SOPC_Looper* looper = SOPC_Looper_Create();
+    ck_assert_ptr_nonnull(looper);
+
+    SOPC_EventHandler* eventHandler = SOPC_EventHandler_Create(looper, timeout_event);
+    ck_assert_ptr_nonnull(eventHandler);
 
     // Initialize event timers
     SOPC_EventTimer_Initialize();
     // Set event value
-    memset(&eventParams, 0, sizeof(SOPC_EventDispatcherParams));
-    eventParams.event = EVENT;
+    memset(&event, 0, sizeof(SOPC_Event));
+    event.event = EVENT;
     // Set start time reference
     startTime = SOPC_Time_GetCurrentTimeUTC();
 
     for (i = 0; i < NB_TIMERS; i++)
     {
-        eventParams.eltId = i;
-        eventParams.auxParam = i;
-        eventParams.params = &dateTimeResults[i];
-        timerId = SOPC_EventTimer_Create(eventMgr, eventParams, timersDelay[i]);
+        event.eltId = i;
+        event.auxParam = i;
+        event.params = &dateTimeResults[i];
+        timerId = SOPC_EventTimer_Create(eventHandler, event, timersDelay[i]);
         ck_assert(timerId != 0);
     }
 
@@ -111,13 +114,15 @@ START_TEST(test_timers)
         ck_assert(timersDelay[i] - 50 < elapsedMs && elapsedMs < timersDelay[i] + 50);
     }
 
-    SOPC_EventDispatcherManager_StopAndDelete(&eventMgr);
+    SOPC_Looper_Delete(looper);
     SOPC_EventTimer_Clear();
 }
 END_TEST
 
-void canceled_timeout_event(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
+void canceled_timeout_event(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
+    (void) handler;
+
     uint32_t triggeredWithCancel = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &timersTriggeredWithCancel);
 
     ck_assert(EVENT == event);
@@ -135,25 +140,27 @@ START_TEST(test_timers_with_cancellation)
 {
     uint8_t i = 0;
     uint64_t elapsedMs = 0;
-    SOPC_EventDispatcherParams eventParams;
-    SOPC_EventDispatcherManager* eventMgr =
-        SOPC_EventDispatcherManager_CreateAndStart(canceled_timeout_event, "Test event timers");
-    ck_assert(eventMgr != NULL);
+    SOPC_Event event;
+    SOPC_Looper* looper = SOPC_Looper_Create();
+    ck_assert_ptr_nonnull(looper);
+
+    SOPC_EventHandler* eventHandler = SOPC_EventHandler_Create(looper, canceled_timeout_event);
+    ck_assert_ptr_nonnull(eventHandler);
 
     // Initialize event timers
     SOPC_EventTimer_Initialize();
     // Set event value
-    memset(&eventParams, 0, sizeof(SOPC_EventDispatcherParams));
-    eventParams.event = EVENT;
+    memset(&event, 0, sizeof(SOPC_Event));
+    event.event = EVENT;
     // Set start time reference
     startTime = SOPC_Time_GetCurrentTimeUTC();
 
     for (i = 0; i < NB_TIMERS_WITH_CANCEL; i++)
     {
-        eventParams.eltId = i;
-        eventParams.auxParam = i;
-        eventParams.params = &dateTimeResultsWithCancel[i];
-        timersId[i] = SOPC_EventTimer_Create(eventMgr, eventParams, timersDelayWithCancel[i]);
+        event.eltId = i;
+        event.auxParam = i;
+        event.params = &dateTimeResultsWithCancel[i];
+        timersId[i] = SOPC_EventTimer_Create(eventHandler, event, timersDelayWithCancel[i]);
         ck_assert(timersId[i] != 0);
     }
 
@@ -180,7 +187,7 @@ START_TEST(test_timers_with_cancellation)
         ck_assert(timersDelayWithCancel[i] - 50 < elapsedMs && elapsedMs < timersDelayWithCancel[i] + 50);
     }
 
-    SOPC_EventDispatcherManager_StopAndDelete(&eventMgr);
+    SOPC_Looper_Delete(looper);
     SOPC_EventTimer_Clear();
 }
 END_TEST

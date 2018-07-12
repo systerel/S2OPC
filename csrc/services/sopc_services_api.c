@@ -39,9 +39,11 @@
 #include "toolkit_header_init.h"
 #include "util_b2c.h"
 
-static SOPC_EventDispatcherManager* servicesEventDispatcherMgr = NULL;
+static SOPC_Looper* servicesLooper = NULL;
+static SOPC_EventHandler* servicesEventHandler = NULL;
 
-static SOPC_EventDispatcherManager* applicationEventDispatcherMgr = NULL;
+static SOPC_Looper* applicationLooper = NULL;
+static SOPC_EventHandler* applicationEventHandler = NULL;
 
 // Structure used to close all connections in a synchronous way
 // (necessary on toolkit clear)
@@ -53,9 +55,14 @@ static struct
     bool requestedFlag;
 } closeAllConnectionsSync = {.requestedFlag = false, .allDisconnectedFlag = false};
 
-SOPC_EventDispatcherManager* SOPC_Services_GetEventDispatcher()
+SOPC_EventHandler* SOPC_Services_GetEventHandler()
 {
-    return servicesEventDispatcherMgr;
+    return servicesEventHandler;
+}
+
+SOPC_EventHandler* SOPC_ApplicationCallback_GetEventHandler()
+{
+    return applicationEventHandler;
 }
 
 static void SOPC_Internal_AllClientSecureChannelsDisconnected(void)
@@ -69,7 +76,7 @@ static void SOPC_Internal_AllClientSecureChannelsDisconnected(void)
     Mutex_Unlock(&closeAllConnectionsSync.mutex);
 }
 
-void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, uintptr_t auxParam)
+static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
     SOPC_Services_Event event = (SOPC_Services_Event) scEvent;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -110,9 +117,8 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         // params = NULL
         // auxParam == status
         // => B model entry point to add
-        status = SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
-                                                      SOPC_AppEvent_ComEvent_Create(SE_CLOSED_ENDPOINT), id, NULL,
-                                                      auxParam, "Endpoint is closed !");
+        status = SOPC_EventHandler_Post(applicationEventHandler, SOPC_AppEvent_ComEvent_Create(SE_CLOSED_ENDPOINT), id,
+                                        NULL, auxParam);
         break;
     case SC_TO_SE_SC_CONNECTED:
         SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_CONNECTED scIdx=%" PRIu32 " scCfgIdx=%" PRIuPTR, id, auxParam);
@@ -301,9 +307,8 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(id);
         if (NULL == epConfig)
         {
-            status = SOPC_EventDispatcherManager_AddEvent(
-                applicationEventDispatcherMgr, SOPC_AppEvent_ComEvent_Create(SE_CLOSED_ENDPOINT), id, NULL,
-                SOPC_STATUS_INVALID_PARAMETERS, "Endpoint configuration is invalid !");
+            status = SOPC_EventHandler_Post(applicationEventHandler, SOPC_AppEvent_ComEvent_Create(SE_CLOSED_ENDPOINT),
+                                            id, NULL, SOPC_STATUS_INVALID_PARAMETERS);
         }
         else
         {
@@ -321,9 +326,8 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(id);
         if (NULL == epConfig)
         {
-            status = SOPC_EventDispatcherManager_AddEvent(
-                applicationEventDispatcherMgr, SOPC_AppEvent_ComEvent_Create(SE_CLOSED_ENDPOINT), id, NULL,
-                SOPC_STATUS_INVALID_PARAMETERS, "Endpoint configuration is invalid !");
+            status = SOPC_EventHandler_Post(applicationEventHandler, SOPC_AppEvent_ComEvent_Create(SE_CLOSED_ENDPOINT),
+                                            id, NULL, SOPC_STATUS_INVALID_PARAMETERS);
         }
         else
         {
@@ -460,7 +464,7 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
         if (bres == false)
         {
             // All connections considered closed: simulate new service event
-            SOPC_ServicesEventDispatcher(SE_TO_SE_SC_ALL_DISCONNECTED, id, params, auxParam);
+            onServiceEvent(handler, SE_TO_SE_SC_ALL_DISCONNECTED, id, params, auxParam);
         }
         break;
     default:
@@ -470,93 +474,32 @@ void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, ui
 
 void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
-    if (servicesEventDispatcherMgr != NULL)
-    {
-        switch (seEvent)
-        {
-        case SC_TO_SE_EP_SC_CONNECTED:
-        case SC_TO_SE_EP_CLOSED:
-        case SC_TO_SE_SC_CONNECTED:
-        case SC_TO_SE_SC_CONNECTION_TIMEOUT:
-        case SC_TO_SE_SC_DISCONNECTED:
-        case SC_TO_SE_SC_SERVICE_RCV_MSG:
-        case SC_TO_SE_SND_FAILURE:
-        case SC_TO_SE_REQUEST_TIMEOUT:
-        case APP_TO_SE_OPEN_ENDPOINT:
-        case APP_TO_SE_CLOSE_ENDPOINT:
-        case APP_TO_SE_LOCAL_SERVICE_REQUEST:
-        case APP_TO_SE_ACTIVATE_SESSION:
-        case APP_TO_SE_SEND_SESSION_REQUEST:
-        case APP_TO_SE_SEND_DISCOVERY_REQUEST:
-        case APP_TO_SE_CLOSE_SESSION:
-        case APP_TO_SE_CLOSE_ALL_CONNECTIONS:
-            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr, (int32_t) seEvent, id, params, auxParam,
-                                                 NULL);
-            break;
-        default:
-            assert(false);
-        }
-    }
-}
-
-void SOPC_Services_InternalEnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uintptr_t auxParam)
-{
-    if (servicesEventDispatcherMgr != NULL)
-    {
-        switch (seEvent)
-        {
-        case SE_TO_SE_SC_ALL_DISCONNECTED:
-        case SE_TO_SE_ACTIVATE_ORPHANED_SESSION:
-        case SE_TO_SE_CREATE_SESSION:
-        case SE_TO_SE_ACTIVATE_SESSION:
-        case SE_TO_SE_SERVER_DATA_CHANGED:
-        case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
-        case SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO:
-        case TIMER_SE_EVAL_SESSION_TIMEOUT:
-        case TIMER_SE_PUBLISH_CYCLE_TIMEOUT:
-            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr, (int32_t) seEvent, id, params, auxParam,
-                                                 NULL);
-            break;
-        default:
-            assert(false);
-        }
-    }
-}
-
-void SOPC_Services_InternalEnqueuePrioEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uintptr_t auxParam)
-{
-    if (servicesEventDispatcherMgr != NULL)
-    {
-        switch (seEvent)
-        {
-        case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
-        case SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO:
-            SOPC_EventDispatcherManager_AddEventAsNext(servicesEventDispatcherMgr, (int32_t) seEvent, id, params,
-                                                       auxParam, NULL);
-            break;
-        default:
-            // Other events not authorized to be enqueued in priority
-            assert(false);
-        }
-    }
+    assert(servicesEventHandler != NULL);
+    SOPC_EventHandler_Post(servicesEventHandler, (int32_t) seEvent, id, params, auxParam);
 }
 
 void SOPC_ServicesToApp_EnqueueEvent(int32_t appEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
-    if (applicationEventDispatcherMgr != NULL)
-    {
-        SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr, appEvent, id, params, auxParam, NULL);
-    }
+    assert(applicationEventHandler != NULL);
+    SOPC_EventHandler_Post(applicationEventHandler, appEvent, id, params, auxParam);
 }
 
 void SOPC_Services_Initialize()
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    servicesEventDispatcherMgr =
-        SOPC_EventDispatcherManager_CreateAndStart(SOPC_ServicesEventDispatcher, "Services event dispatcher manager");
-    applicationEventDispatcherMgr = SOPC_EventDispatcherManager_CreateAndStart(
-        SOPC_Internal_ApplicationEventDispatcher, "(Services) Application event dispatcher manager");
+    servicesLooper = SOPC_Looper_Create();
+    assert(servicesLooper != NULL);
+
+    servicesEventHandler = SOPC_EventHandler_Create(servicesLooper, onServiceEvent);
+    assert(servicesEventHandler != NULL);
+
+    applicationLooper = SOPC_Looper_Create();
+    assert(applicationLooper != NULL);
+
+    applicationEventHandler = SOPC_EventHandler_Create(applicationLooper, SOPC_Internal_ApplicationEventDispatcher);
+    assert(applicationEventHandler != NULL);
+
     // Init async close management flag
     status = Mutex_Initialization(&closeAllConnectionsSync.mutex);
     assert(status == SOPC_STATUS_OK);
@@ -576,8 +519,7 @@ void SOPC_Services_PreClear()
     Mutex_Lock(&closeAllConnectionsSync.mutex);
     closeAllConnectionsSync.requestedFlag = true;
     // Do a synchronous connections closed (effective on client only)
-    SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr, APP_TO_SE_CLOSE_ALL_CONNECTIONS, 0, NULL, 0,
-                                         "Services: Close all channel !");
+    SOPC_EventHandler_Post(servicesEventHandler, APP_TO_SE_CLOSE_ALL_CONNECTIONS, 0, NULL, 0);
     while (closeAllConnectionsSync.allDisconnectedFlag == false)
     {
         Mutex_UnlockAndWaitCond(&closeAllConnectionsSync.cond, &closeAllConnectionsSync.mutex);
@@ -591,15 +533,9 @@ void SOPC_Services_Clear()
 {
     io_dispatch_mgr__UNINITIALISATION();
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError("Services event mgr: error status when stopping '%d'", status);
-    }
-    status = SOPC_EventDispatcherManager_StopAndDelete(&applicationEventDispatcherMgr);
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError("Application event mgr: error status when stopping '%d'", status);
-    }
+    SOPC_Looper_Delete(servicesLooper);
+    SOPC_Looper_Delete(applicationLooper);
+
+    closeAllConnectionsSync.allDisconnectedFlag = false;
+    closeAllConnectionsSync.requestedFlag = false;
 }

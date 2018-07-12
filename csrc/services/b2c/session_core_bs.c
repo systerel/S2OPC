@@ -30,6 +30,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_encodeable.h"
+#include "sopc_event_handler.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_key_manager.h"
 #include "sopc_logger.h"
@@ -152,9 +153,8 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
         if (session_core_bs__prec_state == constants__e_session_userActivated &&
             session_core_bs__state != constants__e_session_userActivated)
         {
-            SOPC_Services_InternalEnqueuePrioEvent(SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO,
-                                                   (uint32_t) session_core_bs__session, NULL,
-                                                   (uintptr_t) session_core_bs__state);
+            SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO,
+                                         (uint32_t) session_core_bs__session, NULL, (uintptr_t) session_core_bs__state);
         }
     }
 }
@@ -925,24 +925,24 @@ void session_core_bs__client_gen_activate_orphaned_session_internal_event(
     const constants__t_session_i session_core_bs__session,
     const constants__t_channel_config_idx_i session_core_bs__channel_config_idx)
 {
-    SOPC_Services_InternalEnqueueEvent(SE_TO_SE_ACTIVATE_ORPHANED_SESSION, (uint32_t) session_core_bs__session, NULL,
-                                       (uintptr_t) session_core_bs__channel_config_idx);
+    SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_ACTIVATE_ORPHANED_SESSION,
+                           (uint32_t) session_core_bs__session, NULL, (uintptr_t) session_core_bs__channel_config_idx);
 }
 
 void session_core_bs__client_gen_activate_user_session_internal_event(
     const constants__t_session_i session_core_bs__session,
     const constants__t_user_token_i session_core_bs__p_user_token)
 {
-    SOPC_Services_InternalEnqueueEvent(SE_TO_SE_ACTIVATE_SESSION, session_core_bs__session,
-                                       (void*) session_core_bs__p_user_token, 0);
+    SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_ACTIVATE_SESSION, session_core_bs__session,
+                           (void*) session_core_bs__p_user_token, 0);
 }
 
 void session_core_bs__client_gen_create_session_internal_event(
     const constants__t_session_i session_core_bs__session,
     const constants__t_channel_config_idx_i session_core_bs__channel_config_idx)
 {
-    SOPC_Services_InternalEnqueueEvent(SE_TO_SE_CREATE_SESSION, (uint32_t) session_core_bs__session, NULL,
-                                       (uintptr_t) session_core_bs__channel_config_idx);
+    SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_CREATE_SESSION,
+                           (uint32_t) session_core_bs__session, NULL, (uintptr_t) session_core_bs__channel_config_idx);
 }
 
 void session_core_bs__server_session_timeout_evaluation(const constants__t_session_i session_core_bs__session,
@@ -952,7 +952,7 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
     SOPC_TimeReference current = 0;
     SOPC_TimeReference latestMsg = 0;
     SOPC_TimeReference elapsedSinceLatestMsg = 0;
-    SOPC_EventDispatcherParams eventParams;
+    SOPC_Event event;
     uint32_t timerId = 0;
 
     if (constants__c_session_indet != session_core_bs__session)
@@ -968,14 +968,13 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
                 // Session is not expired
                 *session_core_bs__expired = false;
                 // Re-activate timer for next verification
-                eventParams.eltId = session_core_bs__session;
-                eventParams.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
-                eventParams.params = NULL;
-                eventParams.auxParam = 0;
-                eventParams.debugName = NULL;
+                event.eltId = session_core_bs__session;
+                event.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
+                event.params = NULL;
+                event.auxParam = 0;
                 // Note: next timer is not revised session timeout but revised timeout - latest msg received time
                 timerId = SOPC_EventTimer_Create(
-                    SOPC_Services_GetEventDispatcher(), eventParams,
+                    SOPC_Services_GetEventHandler(), event,
                     session_RevisedSessionTimeout[session_core_bs__session] - elapsedSinceLatestMsg);
                 session_expiration_timer[session_core_bs__session] = timerId;
                 if (0 == timerId)
@@ -1006,7 +1005,7 @@ void session_core_bs__server_session_timeout_start_timer(const constants__t_sess
 {
     const OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) session_core_bs__resp_msg;
     uint32_t timerId = 0;
-    SOPC_EventDispatcherParams eventParams;
+    SOPC_Event event;
     if (constants__c_session_indet != session_core_bs__session)
     {
         if (NULL == pResp || pResp->RevisedSessionTimeout < SOPC_MIN_SESSION_TIMEOUT)
@@ -1018,12 +1017,11 @@ void session_core_bs__server_session_timeout_start_timer(const constants__t_sess
             session_RevisedSessionTimeout[session_core_bs__session] =
                 (uint64_t) pResp->RevisedSessionTimeout; // nb milliseconds
         }
-        eventParams.eltId = session_core_bs__session;
-        eventParams.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
-        eventParams.params = NULL;
-        eventParams.auxParam = 0;
-        eventParams.debugName = NULL;
-        timerId = SOPC_EventTimer_Create(SOPC_Services_GetEventDispatcher(), eventParams,
+        event.eltId = session_core_bs__session;
+        event.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
+        event.params = NULL;
+        event.auxParam = 0;
+        timerId = SOPC_EventTimer_Create(SOPC_Services_GetEventHandler(), event,
                                          session_RevisedSessionTimeout[session_core_bs__session]);
         session_expiration_timer[session_core_bs__session] = timerId;
         if (0 == timerId)

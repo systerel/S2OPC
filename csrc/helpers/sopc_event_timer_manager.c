@@ -31,8 +31,8 @@
 typedef struct SOPC_EventTimer
 {
     uint32_t id;
-    SOPC_EventDispatcherManager* eventMgr;
-    SOPC_EventDispatcherParams eventParams;
+    SOPC_EventHandler* eventHandler;
+    SOPC_Event event;
     SOPC_TimeReference endTime;
     /* Rest is used only for periodic timers */
     bool isPeriodicTimer;
@@ -164,8 +164,8 @@ void SOPC_EventTimer_Clear()
     Mutex_Clear(&timersMutex);
 }
 
-static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
-                                               SOPC_EventDispatcherParams eventParams,
+static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
+                                               SOPC_Event event,
                                                uint64_t msDelay,
                                                bool isPeriodic)
 {
@@ -191,8 +191,8 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventDispatcherManager* even
 
     // Configure timeout parameters
     newTimer->endTime = targetTime;
-    newTimer->eventMgr = eventMgr;
-    newTimer->eventParams = eventParams;
+    newTimer->eventHandler = eventHandler;
+    newTimer->event = event;
     newTimer->isPeriodicTimer = isPeriodic;
     newTimer->periodMs = msDelay;
 
@@ -220,18 +220,14 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventDispatcherManager* even
     return result;
 }
 
-uint32_t SOPC_EventTimer_Create(SOPC_EventDispatcherManager* eventMgr,
-                                SOPC_EventDispatcherParams eventParams,
-                                uint64_t msDelay)
+uint32_t SOPC_EventTimer_Create(SOPC_EventHandler* eventHandler, SOPC_Event event, uint64_t msDelay)
 {
-    return SOPC_InternalEventTimer_Create(eventMgr, eventParams, msDelay, false);
+    return SOPC_InternalEventTimer_Create(eventHandler, event, msDelay, false);
 }
 
-uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventDispatcherManager* eventMgr,
-                                        SOPC_EventDispatcherParams eventParams,
-                                        uint64_t msPeriod)
+uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventHandler* eventHandler, SOPC_Event event, uint64_t msPeriod)
 {
-    return SOPC_InternalEventTimer_Create(eventMgr, eventParams, msPeriod, true);
+    return SOPC_InternalEventTimer_Create(eventHandler, event, msPeriod, true);
 }
 
 bool SOPC_EventTimer_ModifyPeriodic(uint32_t timerId, uint64_t msPeriod)
@@ -292,7 +288,7 @@ static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventT
             usedTimerIds[timer->id] = false;
             SOPC_Logger_TraceError("EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
                                    " with event=%" PRIi32 " and associated id=%" PRIu32,
-                                   timer->id, timer->eventParams.event, timer->eventParams.eltId);
+                                   timer->id, timer->event.event, timer->event.eltId);
             free(timer);
         }
     }
@@ -300,7 +296,7 @@ static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventT
     {
         SOPC_Logger_TraceError("EventTimerManager: failed to restart the disabled periodic timer id=%" PRIu32
                                " with event=%" PRIi32 " and associated id=%" PRIu32,
-                               timer->id, timer->eventParams.event, timer->eventParams.eltId);
+                               timer->id, timer->event.event, timer->event.eltId);
         free(timer);
     }
 }
@@ -332,9 +328,9 @@ void SOPC_EventTimer_CyclicTimersEvaluation()
     {
         // Trigger timeout event to dispatch event manager
         timerId = timer->id;
-        SOPC_EventDispatcherManager_AddEvent(timer->eventMgr, timer->eventParams.event, timer->eventParams.eltId,
-                                             timer->eventParams.params, timer->eventParams.auxParam,
-                                             timer->eventParams.debugName);
+        SOPC_ReturnStatus status = SOPC_EventHandler_Post(timer->eventHandler, timer->event.event, timer->event.eltId,
+                                                          timer->event.params, timer->event.auxParam);
+        assert(status == SOPC_STATUS_OK);
 
         if (timer->isPeriodicTimer)
         {
@@ -346,7 +342,7 @@ void SOPC_EventTimer_CyclicTimersEvaluation()
                 SOPC_Logger_TraceError(
                     "EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
                     " with event=%" PRIi32 " and associated id=%" PRIu32,
-                    timer->id, timer->eventParams.event, timer->eventParams.eltId);
+                    timer->id, timer->event.event, timer->event.eltId);
             }
         }
         else

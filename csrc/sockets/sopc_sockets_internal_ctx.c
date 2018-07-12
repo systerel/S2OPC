@@ -29,6 +29,7 @@
 
 SOPC_Socket socketsArray[SOPC_MAX_SOCKETS];
 Mutex socketsMutex;
+SOPC_EventHandler* socketsEventHandler = NULL;
 
 void SOPC_SocketsInternalContext_Initialize()
 {
@@ -124,4 +125,11 @@ void SOPC_SocketsInternalContext_CloseSocketLock(uint32_t socketIdx)
     Mutex_Lock(&socketsMutex);
     SOPC_SocketsInternalContext_CloseSocketNoLock(socketIdx);
     Mutex_Unlock(&socketsMutex);
+}
+
+void SOPC_Sockets_Emit(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
+{
+    assert(socketsEventHandler != NULL);
+    SOPC_ReturnStatus status = SOPC_EventHandler_Post(socketsEventHandler, event, eltId, params, auxParam);
+    assert(status == SOPC_STATUS_OK);
 }

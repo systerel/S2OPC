@@ -31,6 +31,7 @@
 #include <stdint.h>
 
 #include "sopc_event_dispatcher_manager.h"
+#include "sopc_event_handler.h"
 
 /* Sockets input events */
 typedef enum {
@@ -59,10 +60,31 @@ typedef enum {
     INT_SOCKET_READY_TO_WRITE
 } SOPC_Sockets_InputEvent;
 
+typedef enum {
+    SOCKET_LISTENER_OPENED,     /* id = endpoint description config index,
+                                   auxParam = (uint32_t) socket index
+                               */
+    SOCKET_LISTENER_CONNECTION, /* id = endpoint description config index,
+                                   auxParam = (uint32_t) new connection socket index
+                               */
+    SOCKET_LISTENER_FAILURE,    /* id = endpoint description config index */
+
+    SOCKET_CONNECTION, /* id = secure channel connection index,
+                          auxParam = (uint32_t) socket index */
+
+    SOCKET_FAILURE,   /* id = secure channel connection index,
+                         auxParam = (uint32_t) socket index */
+    SOCKET_RCV_BYTES, /* id = secure channel connection index,
+                         params = (SOPC_Buffer*) received buffer containing complete TCP UA chunk
+                       */
+} SOPC_Sockets_OutputEvent;
+
 /* Sockets event enqueue function */
 void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id, void* params, uintptr_t auxParam);
 
 void SOPC_Sockets_Initialize(void);
+
+void SOPC_Sockets_SetEventHandler(SOPC_EventHandler* handler);
 
 void SOPC_Sockets_Clear(void);
 

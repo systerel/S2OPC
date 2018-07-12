@@ -28,6 +28,7 @@
 #define SOPC_TOOLKIT_CONFIG_INTERNAL_H_
 
 #include "sopc_address_space.h"
+#include "sopc_event_handler.h"
 #include "sopc_user_app_itf.h"
 
 /**
@@ -91,7 +92,11 @@ void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addres
 
 typedef enum SOPC_App_EventType { SOPC_APP_COM_EVENT = 0x0, SOPC_APP_ADDRESS_SPACE_NOTIF = 0x01 } SOPC_App_EventType;
 
-void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id, void* params, uintptr_t auxParam);
+void SOPC_Internal_ApplicationEventDispatcher(SOPC_EventHandler* handler,
+                                              int32_t eventAndType,
+                                              uint32_t id,
+                                              void* params,
+                                              uintptr_t auxParam);
 
 int32_t SOPC_AppEvent_ComEvent_Create(SOPC_App_Com_Event event);
 int32_t SOPC_AppEvent_AddSpaceEvent_Create(SOPC_App_AddSpace_Event event);

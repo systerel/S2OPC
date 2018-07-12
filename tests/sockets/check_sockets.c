@@ -32,22 +32,46 @@
 
 #include "sopc_buffer.h"
 
+#include "sopc_async_queue.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_sockets_api.h"
-#include "stub_sockets_sopc_secure_channels_api.h"
 
 const char* uri = "opc.tcp://localhost:4841/myEndPoint";
 const uint32_t endpointDescConfigId = 10;
 const uint32_t serverSecureChannelConnectionId = 100;
 const uint32_t clientSecureChannelConnectionId = 200;
 
+static SOPC_AsyncQueue* socketEvents = NULL;
+
+static void onSocketEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, void* params, uintptr_t auxParam)
+{
+    (void) handler;
+
+    SOPC_Event* ev = calloc(1, sizeof(SOPC_Event));
+    ck_assert_ptr_nonnull(ev);
+
+    ev->event = event;
+    ev->eltId = id;
+    ev->params = params;
+    ev->auxParam = auxParam;
+
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(socketEvents, ev));
+}
+
+static SOPC_Event* expect_event(int32_t event, uint32_t id)
+{
+    SOPC_Event* ev = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingDequeue(socketEvents, (void**) &ev));
+    ck_assert_int_eq(event, ev->event);
+    ck_assert_uint_eq(id, ev->eltId);
+    return ev;
+}
+
 START_TEST(test_sockets)
 {
     uint32_t serverSocketIdx = 0;
     uint32_t clientSocketIdx = 0;
-
-    SOPC_StubSockets_SecureChannelsEventParams* scEventParams = NULL;
 
     SOPC_Buffer* sendBuffer = SOPC_Buffer_Create(1000);
     SOPC_Buffer* receivedBuffer = NULL;
@@ -61,6 +85,16 @@ START_TEST(test_sockets)
     SOPC_SecureChannels_Initialize();
     SOPC_Sockets_Initialize();
 
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_Init(&socketEvents, ""));
+
+    SOPC_Looper* looper = SOPC_Looper_Create();
+    ck_assert_ptr_nonnull(looper);
+
+    SOPC_EventHandler* event_handler = SOPC_EventHandler_Create(looper, onSocketEvent);
+    ck_assert_ptr_nonnull(event_handler);
+
+    SOPC_Sockets_SetEventHandler(event_handler);
+
     /* SERVER SIDE: listener creation */
 
     // const URI is not modified but generic API cannot guarantee it
@@ -68,15 +102,7 @@ START_TEST(test_sockets)
     SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER, endpointDescConfigId, (void*) uri, (uint32_t) true);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    // Retrieve event of listener creation
-    SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
-    // Check event
-    ck_assert(scEventParams->event == SOCKET_LISTENER_OPENED);
-    // Check configuration index is preserved
-    ck_assert(scEventParams->eltId == endpointDescConfigId);
-
-    free(scEventParams);
-    scEventParams = NULL;
+    free(expect_event(SOCKET_LISTENER_OPENED, endpointDescConfigId));
 
     /* CLIENT SIDE: connection establishment */
     // Create client connection
@@ -86,26 +112,18 @@ START_TEST(test_sockets)
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /* SERVER SIDE: accepted connection (socket level only) */
-    SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
-    // Check event
-    ck_assert(scEventParams->event == SOCKET_LISTENER_CONNECTION);
-    // Check configuration index is preserved
-    ck_assert(scEventParams->eltId == endpointDescConfigId);
-    serverSocketIdx = (uint32_t) scEventParams->auxParam;
-
-    free(scEventParams);
-    scEventParams = NULL;
+    {
+        SOPC_Event* ev = expect_event(SOCKET_LISTENER_CONNECTION, endpointDescConfigId);
+        serverSocketIdx = (uint32_t) ev->auxParam;
+        free(ev);
+    }
 
     /* CLIENT SIDE: accepted socket connection */
-    SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
-    // Check event
-    ck_assert(scEventParams->event == SOCKET_CONNECTION);
-    // Check configuration index is preserved
-    ck_assert(scEventParams->eltId == clientSecureChannelConnectionId);
-    clientSocketIdx = (uint32_t) scEventParams->auxParam;
-
-    free(scEventParams);
-    scEventParams = NULL;
+    {
+        SOPC_Event* ev = expect_event(SOCKET_CONNECTION, clientSecureChannelConnectionId);
+        clientSocketIdx = (uint32_t) ev->auxParam;
+        free(ev);
+    }
 
     /* SERVER SIDE: finish accepting connection (secure channel level) */
     // Note: a new secure channel (with associated connection index) has been created and
@@ -128,15 +146,9 @@ START_TEST(test_sockets)
     attempts = 0;
     while (receivedBytes < 1000 && attempts < 5)
     {
-        SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
-        // Check event
-        ck_assert(scEventParams->event == SOCKET_RCV_BYTES);
-        // Check configuration index is preserved
-        ck_assert(scEventParams->eltId == serverSecureChannelConnectionId);
-        receivedBuffer = (SOPC_Buffer*) scEventParams->params;
-
-        free(scEventParams);
-        scEventParams = NULL;
+        SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
+        receivedBuffer = (SOPC_Buffer*) ev->params;
+        free(ev);
 
         ck_assert(receivedBuffer->length <= 1000);
         receivedBytes = receivedBytes + receivedBuffer->length;
@@ -176,15 +188,9 @@ START_TEST(test_sockets)
     attempts = 0;
     while (receivedBytes < 1000 && attempts < 5)
     {
-        SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
-        // Check event
-        ck_assert(scEventParams->event == SOCKET_RCV_BYTES);
-        // Check configuration index is preserved
-        ck_assert(scEventParams->eltId == clientSecureChannelConnectionId);
-        receivedBuffer = (SOPC_Buffer*) scEventParams->params;
-
-        free(scEventParams);
-        scEventParams = NULL;
+        SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, clientSecureChannelConnectionId);
+        receivedBuffer = (SOPC_Buffer*) ev->params;
+        free(ev);
 
         ck_assert(receivedBuffer->length <= 1000);
         receivedBytes = receivedBytes + receivedBuffer->length;
@@ -227,15 +233,9 @@ START_TEST(test_sockets)
     attempts = 0;
     while (receivedBytes < 2 * SOPC_MAX_MESSAGE_LENGTH && attempts < 10)
     {
-        SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
-        // Check event
-        ck_assert(scEventParams->event == SOCKET_RCV_BYTES);
-        // Check configuration index is preserved
-        ck_assert(scEventParams->eltId == serverSecureChannelConnectionId);
-        receivedBuffer = (SOPC_Buffer*) scEventParams->params;
-
-        free(scEventParams);
-        scEventParams = NULL;
+        SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
+        receivedBuffer = (SOPC_Buffer*) ev->params;
+        free(ev);
 
         ck_assert(receivedBuffer->length <= 2 * SOPC_MAX_MESSAGE_LENGTH);
         receivedBytes = receivedBytes + receivedBuffer->length;
@@ -263,15 +263,11 @@ START_TEST(test_sockets)
     SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, clientSocketIdx, NULL, 0);
 
     /* SERVER SIDE: accepted connection (socket level only) */
-    SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
-    // Check event
-    ck_assert(scEventParams->event == SOCKET_FAILURE);
-    // Check configuration index is preserved
-    ck_assert(scEventParams->eltId == serverSecureChannelConnectionId);
-    ck_assert(scEventParams->auxParam == serverSocketIdx);
-
-    free(scEventParams);
-    scEventParams = NULL;
+    {
+        SOPC_Event* ev = expect_event(SOCKET_FAILURE, serverSecureChannelConnectionId);
+        ck_assert_uint_eq(serverSocketIdx, ev->auxParam);
+        free(ev);
+    }
 
     SOPC_Sockets_Clear();
     SOPC_EventTimer_Clear();

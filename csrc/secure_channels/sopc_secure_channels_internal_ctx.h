@@ -25,6 +25,7 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_decl.h"
+#include "sopc_event_handler.h"
 #include "sopc_key_sets.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_singly_linked_list.h"
@@ -200,6 +201,10 @@ extern SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CO
 extern SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS + 1];
 extern uint32_t lastSecureConnectionArrayIdx; // last secure connection index used for a new secure connection
 
+extern SOPC_Looper* secureChannelsLooper;
+extern SOPC_EventHandler* secureChannelsInputEventHandler;
+extern SOPC_EventHandler* secureChannelsSocketsEventHandler;
+
 /** @brief Initialize the array of secure listeners/connections */
 void SOPC_SecureChannelsInternalContext_Initialize(void);
 
@@ -210,5 +215,16 @@ SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx);
 
 const SOPC_Certificate* SC_OwnCertificate(SOPC_SecureConnection* conn);
 const SOPC_Certificate* SC_PeerCertificate(SOPC_SecureConnection* conn);
+
+void SOPC_SecureChannels_OnSocketsEvent(SOPC_EventHandler* handler,
+                                        int32_t event,
+                                        uint32_t id,
+                                        void* params,
+                                        uintptr_t auxParam);
+void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
+                                      int32_t event,
+                                      uint32_t id,
+                                      void* params,
+                                      uintptr_t auxParam);
 
 #endif /* SOPC_SECURE_CHANNELS_INTERNAL_CTX_H_ */

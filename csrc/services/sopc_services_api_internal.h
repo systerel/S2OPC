@@ -28,15 +28,6 @@
 
 #include "sopc_services_api.h"
 
-/* API to enqueue an internal event for services */
-void SOPC_Services_InternalEnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uintptr_t auxParam);
-
-/* API to enqueue an internal event in priority for services */
-void SOPC_Services_InternalEnqueuePrioEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uintptr_t auxParam);
-
-// Internal use only (timers)
-SOPC_EventDispatcherManager* SOPC_Services_GetEventDispatcher(void);
-
 typedef struct SOPC_Internal_AsyncSendMsgData
 {
     uint32_t requestId;     // t_request_context

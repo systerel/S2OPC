@@ -512,24 +512,12 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/server_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/server_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/)
 
-# Sockets layer (stubbed) tests
-file(GLOB_RECURSE SOCKETS_SRC
-    ${PLATFORM_SRCS}
-    "csrc/helpers/*.c"
-    "csrc/opcua_types/sopc_builtintypes.c"
-    "csrc/sockets/*.c"
-)
-
-file(GLOB_RECURSE SOCKETS_TEST
-     "tests/sockets/*.c")
-
-add_executable(check_sockets ${SOCKETS_SRC}
-                             ${SOCKETS_TEST})
-target_include_directories(check_sockets PRIVATE "tests/sockets/stubs"
-                                                 ${INGOPCS_PUBLIC_INCLUDES}
+# Sockets layer tests
+add_executable(check_sockets "tests/sockets/check_sockets.c")
+target_include_directories(check_sockets PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
                                                  ${INGOPCS_PRIVATE_INCLUDES}
                                                  ${CHECK_INCLUDE_DIRS})
-target_link_libraries(check_sockets PRIVATE ${CHECK_LIBRARIES} ${INGOPCS_STATIC_DEP_LIBS})
+target_link_libraries(check_sockets PRIVATE ${CHECK_LIBRARIES} ${INGOPCS_STATIC_LIB})
 s2opc_unit_test(check_sockets)
 
 # Secure channels (stubbed on services side) tests
@@ -538,14 +526,18 @@ file(GLOB_RECURSE SECURE_CHANNELS_SRC
     "csrc/secure_channels/*.c"
     "csrc/opcua_types/*.c"
     "csrc/crypto/*.c"
+    "csrc/helpers/*.c"
+    ${PLATFORM_SRCS}
 )
 
 file(GLOB_RECURSE SECURE_CHANNELS_CLIENT_TEST
+     "csrc/sockets/*.c"
      "tests/secure_channels/test_secure_channels_client.c"
      "tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
      "tests/secure_channels/stubs/stub_sc_sopc_services_api.c")
 
 file(GLOB_RECURSE SECURE_CHANNELS_SERVER_TEST
+     "csrc/sockets/*.c"
      "tests/secure_channels/test_secure_channels_server.c"
      "tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
      "tests/secure_channels/stubs/stub_sc_sopc_services_api.c")

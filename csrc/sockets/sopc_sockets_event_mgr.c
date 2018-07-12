@@ -28,7 +28,6 @@
 #include "sopc_buffer.h"
 #include "sopc_helper_uri.h"
 #include "sopc_logger.h"
-#include "sopc_secure_channels_api.h"
 #include "sopc_sockets_api.h"
 #include "sopc_sockets_internal_ctx.h"
 
@@ -502,11 +501,11 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         if (NULL != socketElt)
         {
             socketElt->connectionId = eltId;
-            SOPC_SecureChannels_EnqueueEvent(SOCKET_LISTENER_OPENED, eltId, NULL, socketElt->socketIdx);
+            SOPC_Sockets_Emit(SOCKET_LISTENER_OPENED, eltId, NULL, socketElt->socketIdx);
         }
         else
         {
-            SOPC_SecureChannels_EnqueueEvent(SOCKET_LISTENER_FAILURE, eltId, NULL, 0);
+            SOPC_Sockets_Emit(SOCKET_LISTENER_FAILURE, eltId, NULL, 0);
         }
         break;
     case SOCKET_ACCEPTED_CONNECTION:
@@ -543,7 +542,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
         else
         {
-            SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE, eltId, NULL, 0);
+            SOPC_Sockets_Emit(SOCKET_FAILURE, eltId, NULL, 0);
         }
         break;
     case SOCKET_CLOSE:
@@ -606,7 +605,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         if (false == result)
         {
-            SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
+            SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
             // Definitively close the socket
             SOPC_SocketsInternalContext_CloseSocketLock(eltId);
         }
@@ -652,9 +651,9 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
                 // Send to the secure channel listener state manager and wait for SOCKET_ACCEPTED_CONNECTION for
                 // association with connection index
-                SOPC_SecureChannels_EnqueueEvent(SOCKET_LISTENER_CONNECTION,
-                                                 acceptSock->connectionId, // endpoint description config index
-                                                 NULL, acceptSock->socketIdx);
+                SOPC_Sockets_Emit(SOCKET_LISTENER_CONNECTION,
+                                  acceptSock->connectionId, // endpoint description config index
+                                  NULL, acceptSock->socketIdx);
             }
         }
 
@@ -675,9 +674,9 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         if (false == result)
         {
             // No new attempt possible, indicates socket connection failed and close the socket
-            SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE,
-                                             socketElt->connectionId, // endpoint description config index
-                                             NULL, 0);
+            SOPC_Sockets_Emit(SOCKET_FAILURE,
+                              socketElt->connectionId, // endpoint description config index
+                              NULL, 0);
             // Definitively close the socket
             SOPC_SocketsInternalContext_CloseSocketLock(eltId);
         }
@@ -703,9 +702,9 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
 
         // Notify connection
-        SOPC_SecureChannels_EnqueueEvent(SOCKET_CONNECTION,
-                                         socketElt->connectionId, // secure channel connection index
-                                         NULL, eltId);
+        SOPC_Sockets_Emit(SOCKET_CONNECTION,
+                          socketElt->connectionId, // secure channel connection index
+                          NULL, eltId);
 
         Mutex_Lock(&socketsMutex);
         // Event treated
@@ -721,7 +720,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
         if (socketElt->state == SOCKET_STATE_LISTENING)
         {
-            SOPC_SecureChannels_EnqueueEvent(SOCKET_LISTENER_FAILURE, socketElt->connectionId, NULL, eltId);
+            SOPC_Sockets_Emit(SOCKET_LISTENER_FAILURE, socketElt->connectionId, NULL, eltId);
         }
         else if (socketElt->state != SOCKET_STATE_CLOSED)
         {
@@ -736,7 +735,7 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
                     socketsArray[socketElt->listenerSocketIdx].listenerConnections--;
                 }
             }
-            SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
+            SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
         }
 
         SOPC_SocketsInternalContext_CloseSocketLock(eltId);
@@ -768,13 +767,13 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
                 // Update buffer lengtn
                 SOPC_Buffer_SetDataLength(buffer, (uint32_t) readBytes);
                 // Transmit to secure channel connection associated
-                SOPC_SecureChannels_EnqueueEvent(SOCKET_RCV_BYTES, socketElt->connectionId, (void*) buffer, eltId);
+                SOPC_Sockets_Emit(SOCKET_RCV_BYTES, socketElt->connectionId, (void*) buffer, eltId);
             }
             else
             {
                 SOPC_Buffer_Delete(buffer);
                 buffer = NULL;
-                SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
+                SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
                 SOPC_SocketsInternalContext_CloseSocketLock(eltId);
             }
 

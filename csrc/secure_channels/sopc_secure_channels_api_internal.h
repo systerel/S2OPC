@@ -21,7 +21,6 @@
 #define SOPC_SECURE_CHANNELS_API_INTERNAL_H_
 
 #include <stdint.h>
-#include "sopc_event_dispatcher_manager.h"
 #include "sopc_secure_channels_api.h"
 
 /* Secure channel internal event enqueue function
@@ -38,8 +37,5 @@ void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InputEve
                                                     uint32_t id,
                                                     void* params,
                                                     uintptr_t auxParam);
-
-// Internal use only (timers)
-SOPC_EventDispatcherManager* SOPC_SecureChannels_GetEventDispatcher(void);
 
 #endif /* SOPC_SECURE_CHANNELS_API_INTERNAL_H_ */

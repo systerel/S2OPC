@@ -212,13 +212,12 @@ void subscription_core_bs__create_periodic_publish_timer(
     *subscription_core_bs__bres = false;
 
     uint64_t msCycle = 0;
-    SOPC_EventDispatcherParams eventParams;
+    SOPC_Event event;
 
-    eventParams.eltId = (uint32_t) subscription_core_bs__p_subscription;
-    eventParams.event = TIMER_SE_PUBLISH_CYCLE_TIMEOUT;
-    eventParams.params = NULL;
-    eventParams.auxParam = 0;
-    eventParams.debugName = NULL;
+    event.eltId = (uint32_t) subscription_core_bs__p_subscription;
+    event.event = TIMER_SE_PUBLISH_CYCLE_TIMEOUT;
+    event.params = NULL;
+    event.auxParam = 0;
 
     if (subscription_core_bs__p_publishInterval > UINT64_MAX)
     {
@@ -233,8 +232,7 @@ void subscription_core_bs__create_periodic_publish_timer(
         msCycle = (uint64_t) subscription_core_bs__p_publishInterval;
     }
 
-    *subscription_core_bs__timerId =
-        SOPC_EventTimer_CreatePeriodic(SOPC_Services_GetEventDispatcher(), eventParams, msCycle);
+    *subscription_core_bs__timerId = SOPC_EventTimer_CreatePeriodic(SOPC_Services_GetEventHandler(), event, msCycle);
 
     if (constants__c_timer_id_indet != *subscription_core_bs__timerId)
     {

@@ -49,13 +49,12 @@ static const uint8_t SOPC_CLO[3] = {'C', 'L', 'O'};
 
 static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t requestId)
 {
-    SOPC_EventDispatcherParams eventParams;
-    eventParams.event = TIMER_SC_REQUEST_TIMEOUT;
-    eventParams.eltId = connectionIdx;
-    eventParams.params = NULL;
-    eventParams.auxParam = requestId;
-    eventParams.debugName = NULL;
-    return SOPC_EventTimer_Create(SOPC_SecureChannels_GetEventDispatcher(), eventParams, SOPC_REQUEST_TIMEOUT_MS);
+    SOPC_Event event;
+    event.event = TIMER_SC_REQUEST_TIMEOUT;
+    event.eltId = connectionIdx;
+    event.params = NULL;
+    event.auxParam = requestId;
+    return SOPC_EventTimer_Create(secureChannelsInputEventHandler, event, SOPC_REQUEST_TIMEOUT_MS);
 }
 
 static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx, SOPC_StatusCode* errorStatus)
@@ -3338,13 +3337,53 @@ static bool SC_Chunks_TreatSendBuffer(
     return result;
 }
 
+void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId, void* params, uintptr_t auxParam)
+{
+    (void) auxParam;
+
+    SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+    SOPC_Buffer* buffer = params;
+
+    if (scConnection == NULL || buffer == NULL || scConnection->state == SECURE_CONNECTION_STATE_SC_CLOSED)
+    {
+        return;
+    }
+
+    switch (event)
+    {
+    /* Sockets events: */
+    case SOCKET_RCV_BYTES:
+        /* id = secure channel connection index,
+           params = (SOPC_Buffer*) received buffer */
+
+        SOPC_Logger_TraceDebug("ScChunksMgr: SOCKET_RCV_BYTES scIdx=%" PRIu32, eltId);
+
+        // Ensure the buffer position is 0 to treat it
+        if (SOPC_Buffer_SetPosition(buffer, 0) != SOPC_STATUS_OK)
+        {
+            SOPC_Buffer_Delete(buffer);
+
+            SOPC_Logger_TraceError("ChunksMgr: raised INT_SC_RCV_FAILURE: %X: (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32
+                                   ")",
+                                   OpcUa_BadInvalidArgument, scConnection->serverEndpointConfigIdx,
+                                   scConnection->endpointConnectionConfigIdx);
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, eltId, NULL, OpcUa_BadInvalidArgument);
+            return;
+        }
+
+        SC_Chunks_TreatReceivedBuffer(scConnection, eltId, buffer);
+        break;
+    default:
+        assert(false);
+    }
+}
+
 void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
     SOPC_Msg_Type sendMsgType = SOPC_MSG_TYPE_INVALID;
     SOPC_Buffer* buffer = (SOPC_Buffer*) params;
     SOPC_Buffer* outputBuffer = NULL;
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
-    SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
     bool isSendCase = false;
     bool isSendTcpOnly = false;
     bool isOPN = false;
@@ -3358,40 +3397,6 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
     {
         switch (event)
         {
-        /* Sockets events: */
-        case SOCKET_RCV_BYTES:
-            SOPC_Logger_TraceDebug("ScChunksMgr: SOCKET_RCV_BYTES scIdx=%" PRIu32, eltId);
-            /* id = secure channel connection index,
-           params = (SOPC_Buffer*) received buffer */
-            if (scConnection != NULL)
-            {
-                if (NULL != buffer)
-                {
-                    // Ensure the buffer position is 0 to treat it
-                    retStatus = SOPC_Buffer_SetPosition(buffer, 0);
-                    if (SOPC_STATUS_OK != retStatus)
-                    {
-                        result = false;
-                    }
-                    else
-                    {
-                        result = true;
-                        SC_Chunks_TreatReceivedBuffer(scConnection, eltId, buffer);
-                        buffer = NULL;
-                    }
-                }
-
-                if (result == false)
-                {
-                    SOPC_Logger_TraceError("ChunksMgr: raised INT_SC_RCV_FAILURE: %X: (epCfgIdx=%" PRIu32
-                                           ", scCfgIdx=%" PRIu32 ")",
-                                           OpcUa_BadInvalidArgument, scConnection->serverEndpointConfigIdx,
-                                           scConnection->endpointConnectionConfigIdx);
-                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, eltId, NULL,
-                                                                   OpcUa_BadInvalidArgument);
-                }
-            } // else: socket should already receive close request
-            break;
             /* SC connection manager -> OPC UA chunks message manager */
             // id = secure channel connection index,
             // params = (SOPC_Buffer*) buffer positioned to message payload

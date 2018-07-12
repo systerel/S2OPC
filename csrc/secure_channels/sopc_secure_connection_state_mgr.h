@@ -23,6 +23,12 @@
 #include <stdint.h>
 
 #include "sopc_secure_channels_api.h"
+#include "sopc_sockets_api.h"
+
+void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
+                                                 uint32_t eltId,
+                                                 void* params,
+                                                 uintptr_t auxParam);
 
 void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                               uint32_t eltId,

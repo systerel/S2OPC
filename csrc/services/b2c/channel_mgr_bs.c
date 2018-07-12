@@ -117,7 +117,7 @@ void channel_mgr_bs__finalize_close_secure_channel(const constants__t_channel_i 
 
 void channel_mgr_bs__last_connected_channel_lost()
 {
-    SOPC_Services_InternalEnqueueEvent(SE_TO_SE_SC_ALL_DISCONNECTED, 0, NULL, 0);
+    SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_SC_ALL_DISCONNECTED, 0, NULL, 0);
 }
 
 void channel_mgr_bs__send_channel_msg_buffer(const constants__t_channel_i channel_mgr_bs__channel,

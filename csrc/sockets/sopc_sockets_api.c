@@ -21,6 +21,7 @@
 
 #include <assert.h>
 
+#include "sopc_atomic.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_sockets_event_mgr.h"
 #include "sopc_sockets_internal_ctx.h"
@@ -50,6 +51,11 @@ void SOPC_Sockets_Initialize()
     socketsEventDispatcherMgr =
         SOPC_EventDispatcherManager_CreateAndStart(SOPC_SocketsEventMgr_Dispatcher, "Sockets event manager dispatcher");
     SOPC_SocketsNetworkEventMgr_Initialize();
+}
+
+void SOPC_Sockets_SetEventHandler(SOPC_EventHandler* handler)
+{
+    SOPC_Atomic_Ptr_Set((void**) &socketsEventHandler, handler);
 }
 
 void SOPC_Sockets_Clear()

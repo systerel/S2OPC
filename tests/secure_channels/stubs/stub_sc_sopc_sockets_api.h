@@ -23,19 +23,8 @@
 #include "sopc_async_queue.h"
 #include "sopc_sockets_api.h"
 
-void SOPC_Sockets_Initialize(void);
-
-void SOPC_Sockets_Clear(void);
-
-typedef struct SOPC_StubSC_SocketsEventParams
-{
-    SOPC_Sockets_InputEvent event;
-    uint32_t eltId;
-    void* params;
-    uintptr_t auxParam;
-} SOPC_StubSC_SocketsEventParams;
-
 // Async queue simulating the services dispatcher and containing SOPC_StubSC_ServicesEventParams elements
-extern SOPC_AsyncQueue* socketsEvents;
+extern SOPC_AsyncQueue* socketsInputEvents;
+extern SOPC_EventHandler* socketsEventHandler;
 
 #endif /* STUBS_SC_SOPC_SOCKETS_API_H_ */

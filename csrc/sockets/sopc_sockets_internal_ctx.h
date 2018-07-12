@@ -23,6 +23,7 @@
 #include <stdbool.h>
 
 #include "sopc_async_queue.h"
+#include "sopc_event_handler.h"
 #include "sopc_mutexes.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_toolkit_constants.h"
@@ -72,6 +73,8 @@ extern SOPC_Socket socketsArray[SOPC_MAX_SOCKETS];
  *        in addition to the event dispatcher thread */
 extern Mutex socketsMutex;
 
+extern SOPC_EventHandler* socketsEventHandler;
+
 /** @brief Initialize the array of sockets */
 void SOPC_SocketsInternalContext_Initialize(void);
 
@@ -95,5 +98,7 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx);
  *  Note: defined here since it modifies validity of socket in array
  */
 void SOPC_SocketsInternalContext_CloseSocketLock(uint32_t socketIdx);
+
+void SOPC_Sockets_Emit(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam);
 
 #endif /* SOPC_SOCKETS_INTERNAL_CTX_H_ */

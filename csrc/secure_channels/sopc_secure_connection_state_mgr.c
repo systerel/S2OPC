@@ -225,25 +225,23 @@ bool SC_CloseConnection(uint32_t connectionIdx)
 static uint32_t SC_StartConnectionEstablishTimer(uint32_t connectionIdx)
 {
     assert(connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS);
-    SOPC_EventDispatcherParams eventParams;
-    eventParams.eltId = connectionIdx;
-    eventParams.event = TIMER_SC_CONNECTION_TIMEOUT;
-    eventParams.params = NULL;
-    eventParams.auxParam = 0;
-    eventParams.debugName = NULL;
-    return SOPC_EventTimer_Create(SOPC_SecureChannels_GetEventDispatcher(), eventParams, SOPC_SC_CONNECTION_TIMEOUT_MS);
+    SOPC_Event event;
+    event.eltId = connectionIdx;
+    event.event = TIMER_SC_CONNECTION_TIMEOUT;
+    event.params = NULL;
+    event.auxParam = 0;
+    return SOPC_EventTimer_Create(secureChannelsInputEventHandler, event, SOPC_SC_CONNECTION_TIMEOUT_MS);
 }
 
 static uint32_t SC_Client_StartOPNrenewTimer(uint32_t connectionIdx, uint32_t timeoutMs)
 {
     assert(connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS);
-    SOPC_EventDispatcherParams eventParams;
-    eventParams.eltId = connectionIdx;
-    eventParams.event = TIMER_SC_CLIENT_OPN_RENEW;
-    eventParams.params = NULL;
-    eventParams.auxParam = 0;
-    eventParams.debugName = NULL;
-    return SOPC_EventTimer_Create(SOPC_SecureChannels_GetEventDispatcher(), eventParams, timeoutMs);
+    SOPC_Event event;
+    event.eltId = connectionIdx;
+    event.event = TIMER_SC_CLIENT_OPN_RENEW;
+    event.params = NULL;
+    event.auxParam = 0;
+    return SOPC_EventTimer_Create(secureChannelsInputEventHandler, event, timeoutMs);
 }
 
 static char* SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBuffer, SOPC_StatusCode* errorStatus)
@@ -2302,6 +2300,60 @@ static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
     return true;
 }
 
+void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
+                                                 uint32_t eltId,
+                                                 void* params,
+                                                 uintptr_t auxParam)
+{
+    (void) params;
+
+    switch (event)
+    {
+    case SOCKET_CONNECTION:
+        // CLIENT side only
+        /* id = secure channel connection index,
+           auxParam = socket index */
+
+        SOPC_Logger_TraceDebug("ScStateMgr: SOCKET_CONNECTION scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
+        assert(auxParam <= UINT32_MAX);
+
+        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+
+        if (scConnection == NULL || scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT)
+        {
+            // In case of unidentified secure connection problem or wrong state,
+            // close the socket
+            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
+            return;
+        }
+
+        if (!SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId, (uint32_t) auxParam))
+        {
+            // Error case: close the secure connection if invalid state or unexpected error.
+            //  (client case only on SOCKET_CONNECTION event)
+            SC_CloseSecureConnection(scConnection, eltId, false, 0, "SecureConnection: closed on SOCKET_CONNECTION");
+        }
+
+        break;
+    case SOCKET_FAILURE:
+        SOPC_Logger_TraceDebug("ScStateMgr: SOCKET_FAILURE scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
+
+        /* id = secure channel connection index,
+           auxParam = socket index */
+        scConnection = SC_GetConnection(eltId);
+        if (scConnection != NULL)
+        {
+            // Since there was a socket failure, consider the socket close now
+            SC_CloseSecureConnection(scConnection, eltId, true, 0,
+                                     "SecureConnection: disconnected (SOCKET_FAILURE event)");
+        }
+        break;
+
+    default:
+        assert(false);
+    }
+}
+
 void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                               uint32_t eltId,
                                               void* params,
@@ -2321,54 +2373,6 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     {
     /* Sockets events: */
     /* Sockets manager -> SC connection state manager */
-    case SOCKET_CONNECTION:
-        SOPC_Logger_TraceDebug("ScStateMgr: SOCKET_CONNECTION scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
-
-        // CLIENT side only
-        /* id = secure channel connection index,
-           auxParam = socket index */
-        if (auxParam <= UINT32_MAX)
-        {
-            scConnection = SC_GetConnection(eltId);
-            if (scConnection != NULL)
-            {
-                if (scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT)
-                {
-                    result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId, (uint32_t) auxParam);
-                    if (false == result)
-                    {
-                        // Error case: close the secure connection if invalid state or unexpected error.
-                        //  (client case only on SOCKET_CONNECTION event)
-                        SC_CloseSecureConnection(scConnection, eltId, false, 0,
-                                                 "SecureConnection: closed on SOCKET_CONNECTION");
-                    }
-                }
-                else
-                {
-                    // No socket connection expected just close the socket
-                    SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
-                }
-            }
-            else
-            {
-                // In case of unidentified secure connection problem, close the socket just connected
-                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
-            }
-        }
-        break;
-    case SOCKET_FAILURE:
-        SOPC_Logger_TraceDebug("ScStateMgr: SOCKET_FAILURE scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
-
-        /* id = secure channel connection index,
-           auxParam = socket index */
-        scConnection = SC_GetConnection(eltId);
-        if (scConnection != NULL)
-        {
-            // Since there was a socket failure, consider the socket close now
-            SC_CloseSecureConnection(scConnection, eltId, true, 0,
-                                     "SecureConnection: disconnected (SOCKET_FAILURE event)");
-        }
-        break;
 
     /* Services events: */
     /* Services manager -> SC connection state manager */
