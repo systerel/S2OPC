@@ -32,7 +32,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_log_manager.h"
-#include "sopc_time.h" /* SOPC_Sleep */
+#include "sopc_time.h" /* SOPC_Sleep, SOPC_TimeReference */
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
 #define SKIP_S2OPC_DEFINITIONS
@@ -41,7 +41,9 @@
 #include "toolkit_helpers.h"
 
 #define SLEEP_TIME 10
-#define TEST_TIMEOUT 10000
+#define CONNECTION_TIMEOUT 10000
+#define ROBUSTNESS_TIMEOUT 20000
+#define ROBUSTNESS_RETRY_PERIOD 2000
 
 START_TEST(test_time_conversion)
 {
@@ -102,6 +104,7 @@ START_TEST(test_subscription)
     SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = "opc.tcp://localhost:4841",
                                          .security_policy = SOPC_SecurityPolicy_None_URI,
                                          .security_mode = OpcUa_MessageSecurityMode_None,
+                                         .disable_certificate_verification = false,
                                          .path_cert_auth = "./trusted/cacert.der",
                                          .path_cert_srv = NULL,
                                          .path_cert_cli = NULL,
@@ -111,8 +114,10 @@ START_TEST(test_subscription)
                                          .username = NULL,
                                          .password = NULL,
                                          .publish_period_ms = 100,
+                                         .n_max_keepalive = 3,
+                                         .n_max_lifetime = 1000,
                                          .data_change_callback = datachange_callback,
-                                         .timeout_ms = TEST_TIMEOUT,
+                                         .timeout_ms = CONNECTION_TIMEOUT,
                                          .sc_lifetime = 60000,
                                          .token_target = 3};
     SOPC_LibSub_ConfigurationId cfg_id = 0;
@@ -127,13 +132,161 @@ START_TEST(test_subscription)
     /* Wait for deconnection, failed assert, or subscription success */
     int iCnt = 0;
     /* TODO: use SOPC_Atomic_Int_Get */
-    while (iCnt * SLEEP_TIME <= TEST_TIMEOUT && bValueChanged == 0 && bDisconnected == 0)
+    while (iCnt * SLEEP_TIME <= CONNECTION_TIMEOUT && bValueChanged == 0 && bDisconnected == 0)
     {
         SOPC_Sleep(SLEEP_TIME);
     }
 
     ck_assert(bDisconnected == 0);
     ck_assert(SOPC_LibSub_Disconnect(con_id) == SOPC_STATUS_OK);
+    SOPC_LibSub_Clear();
+}
+END_TEST
+
+#define N_CONNECTIONS 3
+SOPC_LibSub_ConfigurationId cfg_ids[N_CONNECTIONS] = {0, 0, 0};
+SOPC_LibSub_DataId dat_ids[N_CONNECTIONS] = {0, 0, 0};
+SOPC_LibSub_ConnectionId con_ids[N_CONNECTIONS] = {0, 0, 0};
+bool connect_statuses[N_CONNECTIONS] = {false, false, false};
+SOPC_TimeReference disconnect_times[N_CONNECTIONS] = {0, 0, 0};
+
+static void datachange_callback_do_nothing(const SOPC_LibSub_ConnectionId c_id,
+                                           const SOPC_LibSub_DataId d_id,
+                                           const SOPC_LibSub_Value* value)
+{
+    (void) c_id;
+    (void) d_id;
+    (void) value;
+}
+
+static void disconnect_callback_multi(const SOPC_LibSub_ConnectionId c_id)
+{
+    /* Search index of connection */
+    int idx = 0;
+    bool found = false;
+    for (; idx < N_CONNECTIONS; ++idx)
+    {
+        if (con_ids[idx] == c_id)
+        {
+            found = true;
+            break;
+        }
+    }
+    ck_assert(found);
+
+    connect_statuses[idx] = false;
+    disconnect_times[idx] = SOPC_TimeReference_GetCurrent();
+}
+
+/* This test reproduce a potentially erroneuous situation where connections are not always made */
+START_TEST(test_half_broken_subscriptions)
+{
+    SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = Helpers_LoggerStdout,
+                                     .disconnect_callback = disconnect_callback_multi};
+    SOPC_LibSub_ConnectionCfg cfg_con[N_CONNECTIONS] = {
+        {.server_url = "opc.tcp://localhost:4841",
+         .security_policy = SOPC_SecurityPolicy_None_URI,
+         .security_mode = OpcUa_MessageSecurityMode_None,
+         .disable_certificate_verification = true,
+         .path_cert_auth = NULL,
+         .path_cert_srv = NULL,
+         .path_cert_cli = NULL,
+         .path_key_cli = NULL,
+         .path_crl = NULL,
+         .policyId = "UserName",
+         .username = "user",
+         .password = NULL,
+         .publish_period_ms = 500,
+         .n_max_keepalive = 3,
+         .n_max_lifetime = 1000,
+         .data_change_callback = datachange_callback_do_nothing,
+         .timeout_ms = CONNECTION_TIMEOUT,
+         .sc_lifetime = 3600000,
+         .token_target = 3},
+        {.server_url = "opc.tcp://localhost:4842", /* Do not connect this one */
+         .security_policy = SOPC_SecurityPolicy_None_URI,
+         .security_mode = OpcUa_MessageSecurityMode_None,
+         .disable_certificate_verification = true,
+         .path_cert_auth = NULL,
+         .path_cert_srv = NULL,
+         .path_cert_cli = NULL,
+         .path_key_cli = NULL,
+         .path_crl = NULL,
+         .policyId = "UserName",
+         .username = "user",
+         .password = NULL,
+         .publish_period_ms = 500,
+         .n_max_keepalive = 3,
+         .n_max_lifetime = 1000,
+         .data_change_callback = datachange_callback_do_nothing,
+         .timeout_ms = CONNECTION_TIMEOUT,
+         .sc_lifetime = 3600000,
+         .token_target = 3},
+        {.server_url = "opc.tcp://localhost:4843", /* Do not connect this one */
+         .security_policy = SOPC_SecurityPolicy_None_URI,
+         .security_mode = OpcUa_MessageSecurityMode_None,
+         .disable_certificate_verification = false,
+         .path_cert_auth = "./trusted/cacert.der",
+         .path_cert_srv = NULL,
+         .path_cert_cli = NULL,
+         .path_key_cli = NULL,
+         .path_crl = NULL,
+         .policyId = "UserName",
+         .username = "user",
+         .password = NULL,
+         .publish_period_ms = 500,
+         .n_max_keepalive = 3,
+         .n_max_lifetime = 1000,
+         .data_change_callback = datachange_callback_do_nothing,
+         .timeout_ms = CONNECTION_TIMEOUT,
+         .sc_lifetime = 3600000,
+         .token_target = 3}};
+
+    ck_assert(SOPC_LibSub_Initialize(&cfg_cli) == SOPC_STATUS_OK);
+    for (int i = 0; i < N_CONNECTIONS; ++i)
+    {
+        ck_assert(SOPC_LibSub_ConfigureConnection(&cfg_con[i], &cfg_ids[i]) == SOPC_STATUS_OK);
+    }
+    ck_assert(SOPC_LibSub_Configured() == SOPC_STATUS_OK);
+
+    /* Wait for deconnection, failed assert, or subscription success */
+    SOPC_TimeReference timeout =
+        SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference_GetCurrent(), ROBUSTNESS_TIMEOUT);
+    while (SOPC_TimeReference_Compare(SOPC_TimeReference_GetCurrent(), timeout) <= 0)
+    {
+        SOPC_TimeReference curTime = SOPC_TimeReference_GetCurrent();
+        for (int i = 0; i < N_CONNECTIONS; ++i)
+        {
+            /* Disconnection time is used as a time reference.
+             * As connect() is blocking, there cannot be two connection request for the same i in the same time */
+            if (!connect_statuses[i] &&
+                SOPC_TimeReference_Compare(
+                    SOPC_TimeReference_AddMilliseconds(disconnect_times[i], ROBUSTNESS_RETRY_PERIOD), curTime) <= 0)
+            {
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "New connection with cfg_id %i.", cfg_ids[i]);
+                if (SOPC_LibSub_Connect(cfg_ids[i], &con_ids[i]) == SOPC_STATUS_OK)
+                {
+                    ck_assert(SOPC_LibSub_AddToSubscription(con_ids[i], "s=Counter", SOPC_LibSub_AttributeId_Value,
+                                                            &dat_ids[i]) == SOPC_STATUS_OK);
+                    connect_statuses[i] = true;
+                }
+                else
+                {
+                    connect_statuses[i] = false;
+                    disconnect_times[i] = SOPC_TimeReference_GetCurrent();
+                }
+            }
+        }
+
+        SOPC_Sleep(SLEEP_TIME);
+    }
+
+    ck_assert(SOPC_LibSub_Disconnect(con_ids[0]) == SOPC_STATUS_OK);
+    /* The following two assert that the connections are not in the client list anymore,
+     * hence having been correctly removed when connection failed. */
+    ck_assert(SOPC_LibSub_Disconnect(con_ids[1]) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_LibSub_Disconnect(con_ids[2]) == SOPC_STATUS_INVALID_PARAMETERS);
+
     SOPC_LibSub_Clear();
 }
 END_TEST
@@ -151,6 +304,8 @@ Suite* tests_make_suite_libsub(void)
 
     tc_libsub = tcase_create("LibSub");
     tcase_add_test(tc_libsub, test_subscription);
+    tcase_add_test(tc_libsub, test_half_broken_subscriptions);
+    tcase_set_timeout(tc_libsub, 0);
     suite_add_tcase(s, tc_libsub);
 
     return s;
