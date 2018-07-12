@@ -17,22 +17,12 @@
  * under the License.
  */
 
-#include <check.h>
-#include <stdlib.h>
+#ifndef WAIT_MACHINES_H_
+#define WAIT_MACHINES_H_
 
-Suite* client_suite_make_discovery(void);
-Suite* client_suite_make_session(void);
+/**
+ * \brief   Test helper, waits for \p count machines to finish, up to SC_LIFETIME millisecs
+ */
+void wait_for_machines(int count, ...);
 
-int main(void)
-{
-    int number_failed;
-    SRunner* sr;
-
-    sr = srunner_create(client_suite_make_discovery());
-    srunner_add_suite(sr, client_suite_make_session());
-
-    srunner_run_all(sr, CK_NORMAL);
-    number_failed = srunner_ntests_failed(sr);
-    srunner_free(sr);
-    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
+#endif /* WAIT_MACHINES_H_ */

@@ -413,7 +413,9 @@ target_include_directories(toolkit_test_client PRIVATE ${INGOPCS_PUBLIC_INCLUDES
 add_executable(toolkit_test_suite_client "tests/demo/test_suite_client.c"
                                          "tests/demo/test_discovery.c"
                                          "tests/demo/config.c"
-                                         "tests/demo/state_machine.c")
+                                         "tests/demo/state_machine.c"
+                                         "tests/demo/wait_machines.c"
+                                         "tests/demo/test_session.c")
 target_link_libraries(toolkit_test_suite_client PRIVATE ${INGOPCS_STATIC_LIB} ${CHECK_LIBRARIES})
 target_include_directories(toolkit_test_suite_client PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
                                                              ${INGOPCS_PRIVATE_INCLUDES}

@@ -17,22 +17,30 @@
  * under the License.
  */
 
-#include <check.h>
-#include <stdlib.h>
+#include <stdarg.h>
 
-Suite* client_suite_make_discovery(void);
-Suite* client_suite_make_session(void);
+#include "sopc_time.h"
 
-int main(void)
+#include "config.h"
+#include "state_machine.h"
+#include "wait_machines.h"
+
+void wait_for_machines(int count, ...)
 {
-    int number_failed;
-    SRunner* sr;
+    va_list args;
+    int i = 0;
+    StateMachine_Machine* pSM = NULL;
+    uint32_t iWait = 0;
 
-    sr = srunner_create(client_suite_make_discovery());
-    srunner_add_suite(sr, client_suite_make_session());
-
-    srunner_run_all(sr, CK_NORMAL);
-    number_failed = srunner_ntests_failed(sr);
-    srunner_free(sr);
-    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    va_start(args, count);
+    for (i = 0; i < count; ++i)
+    {
+        pSM = va_arg(args, StateMachine_Machine*);
+        while (NULL != pSM && !StateMachine_IsIdle(pSM) && iWait * SLEEP_LENGTH <= SC_LIFETIME)
+        {
+            iWait += 1;
+            SOPC_Sleep(SLEEP_LENGTH);
+        }
+    }
+    va_end(args);
 }

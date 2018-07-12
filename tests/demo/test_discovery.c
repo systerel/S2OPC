@@ -18,7 +18,6 @@
  */
 
 #include <check.h>
-#include <stdarg.h>
 #include <stdbool.h>
 
 #include "sopc_time.h"
@@ -26,29 +25,9 @@
 
 #include "config.h"
 #include "state_machine.h"
+#include "wait_machines.h"
 
-StateMachine_Machine* g_pSM = NULL;
-
-/* Global helper */
-void wait_for_machine(int count, ...)
-{
-    va_list args;
-    int i = 0;
-    StateMachine_Machine* pSM = NULL;
-    uint32_t iWait = 0;
-
-    va_start(args, count);
-    for (i = 0; i < count; ++i)
-    {
-        pSM = va_arg(args, StateMachine_Machine*);
-        while (NULL != pSM && !StateMachine_IsIdle(g_pSM) && iWait * SLEEP_LENGTH <= SC_LIFETIME)
-        {
-            iWait += 1;
-            SOPC_Sleep(SLEEP_LENGTH);
-        }
-    }
-    va_end(args);
-}
+static StateMachine_Machine* g_pSM = NULL;
 
 /* Event handlers of the Discovery */
 static void EventDispatcher_ValidateDiscovery(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
@@ -62,7 +41,7 @@ START_TEST(test_discovery)
     ck_assert(SOPC_Toolkit_Configured() == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartDiscovery(g_pSM) == SOPC_STATUS_OK);
-    wait_for_machine(1, g_pSM);
+    wait_for_machines(1, g_pSM);
 
     SOPC_Toolkit_Clear();
     StateMachine_Delete(&g_pSM);
