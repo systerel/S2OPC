@@ -751,6 +751,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
             }
             break;
         default:
+            bProcess = false;
             Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unexpected event received by a machine.");
             break;
         }
