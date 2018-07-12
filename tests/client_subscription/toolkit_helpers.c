@@ -214,6 +214,11 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 
 void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
 {
+    if (NULL == ppscConfig || NULL == *ppscConfig)
+    {
+        return;
+    }
+
     SOPC_SecureChannel_Config* pscConfig = *ppscConfig;
 
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
@@ -223,6 +228,8 @@ void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
     SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&pscConfig->pki));
     SOPC_String_Delete((SOPC_String*) pscConfig->applicationUri);
     SOPC_GCC_DIAGNOSTIC_RESTORE
+
+    free(pscConfig);
 
     *ppscConfig = NULL;
 }
