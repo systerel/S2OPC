@@ -44,8 +44,6 @@ def signal_handler(sig, frame):
     else:
         stopFlag = True
 
-# Overrides sUri to force IPv4
-sUri = 'opc.tcp://127.0.0.1:4841'
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description='FreeOpcUa test server')

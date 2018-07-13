@@ -20,8 +20,11 @@
 
 import random
 import string
+import sys
 from opcua import ua
 from opcua.ua import XmlElement
+
+running_in_linux=sys.platform.startswith('linux')
 
 sUri = 'opc.tcp://localhost:4841'
 
