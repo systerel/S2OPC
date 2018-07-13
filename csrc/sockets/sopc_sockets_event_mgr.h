@@ -22,6 +22,12 @@
 
 #include <stdint.h>
 
-void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam);
+#include "sopc_event_handler.h"
+
+void SOPC_SocketsEventMgr_Dispatcher(SOPC_EventHandler* handler,
+                                     int32_t event,
+                                     uint32_t eltId,
+                                     void* params,
+                                     uintptr_t auxParam);
 
 #endif /* SOPC_SOCKETS_EVENT_MGR_H_ */

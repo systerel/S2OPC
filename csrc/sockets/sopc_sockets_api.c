@@ -27,20 +27,10 @@
 #include "sopc_sockets_internal_ctx.h"
 #include "sopc_sockets_network_event_mgr.h"
 
-static SOPC_EventDispatcherManager* socketsEventDispatcherMgr = NULL;
-
-SOPC_EventDispatcherManager* SOPC_Sockets_GetEventDispatcher()
-{
-    return socketsEventDispatcherMgr;
-}
-
 void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
-    if (NULL != socketsEventDispatcherMgr)
-    {
-        SOPC_EventDispatcherManager_AddEvent(socketsEventDispatcherMgr, (int32_t) socketEvent, id, params, auxParam,
-                                             NULL);
-    }
+    assert(socketsInputEventHandler != NULL);
+    SOPC_EventHandler_Post(socketsInputEventHandler, (int32_t) socketEvent, id, params, auxParam);
 }
 
 void SOPC_Sockets_Initialize()
@@ -48,8 +38,6 @@ void SOPC_Sockets_Initialize()
     bool init = Socket_Network_Initialize();
     assert(true == init);
     SOPC_SocketsInternalContext_Initialize();
-    socketsEventDispatcherMgr =
-        SOPC_EventDispatcherManager_CreateAndStart(SOPC_SocketsEventMgr_Dispatcher, "Sockets event manager dispatcher");
     SOPC_SocketsNetworkEventMgr_Initialize();
 }
 
@@ -61,10 +49,6 @@ void SOPC_Sockets_SetEventHandler(SOPC_EventHandler* handler)
 void SOPC_Sockets_Clear()
 {
     SOPC_SocketsNetworkEventMgr_Clear();
-    if (NULL != socketsEventDispatcherMgr)
-    {
-        SOPC_EventDispatcherManager_StopAndDelete(&socketsEventDispatcherMgr);
-    }
     SOPC_SocketsInternalContext_Clear();
     Socket_Network_Clear();
 }

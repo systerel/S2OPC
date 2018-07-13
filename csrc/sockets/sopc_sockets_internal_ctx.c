@@ -26,9 +26,12 @@
 #include "sopc_async_queue.h"
 #include "sopc_buffer.h"
 #include "sopc_raw_sockets.h"
+#include "sopc_sockets_event_mgr.h"
 
 SOPC_Socket socketsArray[SOPC_MAX_SOCKETS];
 Mutex socketsMutex;
+SOPC_Looper* socketsLooper = NULL;
+SOPC_EventHandler* socketsInputEventHandler = NULL;
 SOPC_EventHandler* socketsEventHandler = NULL;
 
 void SOPC_SocketsInternalContext_Initialize()
@@ -41,6 +44,12 @@ void SOPC_SocketsInternalContext_Initialize()
         Socket_Clear(&(socketsArray[idx].sock));
     }
     Mutex_Initialization(&socketsMutex);
+
+    socketsLooper = SOPC_Looper_Create();
+    assert(socketsLooper != NULL);
+
+    socketsInputEventHandler = SOPC_EventHandler_Create(socketsLooper, SOPC_SocketsEventMgr_Dispatcher);
+    assert(socketsInputEventHandler != NULL);
 }
 
 void SOPC_SocketsInternalContext_Clear()
@@ -56,6 +65,9 @@ void SOPC_SocketsInternalContext_Clear()
             socketsArray[idx].isUsed = false;
         }
     }
+
+    SOPC_Looper_Delete(socketsLooper);
+
     Mutex_Unlock(&socketsMutex);
     Mutex_Clear(&socketsMutex);
 }

@@ -73,6 +73,7 @@ extern SOPC_Socket socketsArray[SOPC_MAX_SOCKETS];
  *        in addition to the event dispatcher thread */
 extern Mutex socketsMutex;
 
+extern SOPC_EventHandler* socketsInputEventHandler;
 extern SOPC_EventHandler* socketsEventHandler;
 
 /** @brief Initialize the array of sockets */

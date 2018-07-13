@@ -30,7 +30,6 @@
 
 #include <stdint.h>
 
-#include "sopc_event_dispatcher_manager.h"
 #include "sopc_event_handler.h"
 
 /* Sockets input events */
@@ -87,8 +86,5 @@ void SOPC_Sockets_Initialize(void);
 void SOPC_Sockets_SetEventHandler(SOPC_EventHandler* handler);
 
 void SOPC_Sockets_Clear(void);
-
-// Internal use only (timers)
-SOPC_EventDispatcherManager* SOPC_Sockets_GetEventDispatcher(void);
 
 #endif /* SOPC_SOCKETS_API_H_ */

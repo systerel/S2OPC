@@ -477,8 +477,14 @@ static void SOPC_SocketsEventMgr_SetInternalEventAsTreated_Lock(SOPC_Socket* soc
     Mutex_Unlock(&socketsMutex);
 }
 
-void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
+void SOPC_SocketsEventMgr_Dispatcher(SOPC_EventHandler* handler,
+                                     int32_t event,
+                                     uint32_t eltId,
+                                     void* params,
+                                     uintptr_t auxParam)
 {
+    (void) handler;
+
     bool result = false;
     SOPC_Sockets_InputEvent socketEvent = (SOPC_Sockets_InputEvent) event;
     SOPC_Socket* socketElt = NULL;
