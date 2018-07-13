@@ -33,6 +33,8 @@
  * SOPC_StaMac_EventDispatcher() shall be called on the state machine from the callback given to
  * SOPC_Toolkit_Initialize().
  *
+ * The machine API is thread safe.
+ *
  */
 
 #ifndef STATE_MACHINE_H_
@@ -76,13 +78,16 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
 /**
  * \brief Creates a new state machine, initialized in state stInit.
  *
- * \param iscConfig
- * \param cbkDataChanged    The callback to trigger when a PublishResponse is received
- * \param fPublishInterval  Subscription publish interval, in milliseconds
- * \param iTokenTarget      Number of subscription tokens the server should always have
+ * \param iscConfig         The configuration identifier to use with this machine
+ * \param iCliId            The client id of the machine
  * \param szPolicyId        Zero-terminated user identity policy id, see SOPC_LibSub_ConnectionCfg
  * \param szUsername        Zero-terminated username, see SOPC_LibSub_ConnectionCfg
  * \param szPassword        Zero-terminated password, see SOPC_LibSub_ConnectionCfg
+ * \param cbkDataChanged    The callback to trigger when a PublishResponse is received
+ * \param fPublishInterval  Subscription publish interval, in milliseconds
+ * \param iCntMaxKeepAlive  The number of times an empty PublishResponse is not sent
+ * \param iCntLifetime      The number of times a PublishResponse cannot be sent before killing the subscription
+ * \param iTokenTarget      Number of subscription tokens the server should always have
  * \param ppSM              The returned machine, when successful
  */
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,

@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include "sopc_encodeable.h"
+#include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_user_app_itf.h"
@@ -51,6 +52,7 @@ struct SOPC_StaMac_ReqCtx
 
 struct SOPC_StaMac_Machine
 {
+    Mutex mutex;
     SOPC_StaMac_State state;
     uint32_t iscConfig;                       /* Toolkit scConfig ID */
     uint32_t iCliId;                          /* LibSub connection ID, used by the callback */
@@ -107,13 +109,13 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      SOPC_StaMac_Machine** ppSM)
 {
     SOPC_StaMac_Machine* pSM = malloc(sizeof(SOPC_StaMac_Machine));
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     if (NULL == pSM)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
+    SOPC_ReturnStatus status = Mutex_Initialization(&pSM->mutex);
     if (SOPC_STATUS_OK == status)
     {
         pSM->state = stInit;
@@ -161,10 +163,13 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
     if (NULL != ppSM && NULL != *ppSM)
     {
         SOPC_StaMac_Machine* pSM = *ppSM;
+        assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
         SOPC_SLinkedList_Delete(pSM->pListReqCtx);
         pSM->pListReqCtx = NULL;
         SOPC_SLinkedList_Delete(pSM->pListMonIt);
         pSM->pListMonIt = NULL;
+        Mutex_Clear(&pSM->mutex);
+        assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
         free(pSM);
         *ppSM = NULL;
     }
@@ -183,6 +188,8 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+
     if (pSM->state != stInit)
     {
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "The state machine shall be in stInit state to start a session.");
@@ -215,12 +222,15 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
         pSM->state = stError;
     }
 
+    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+
     return status;
 }
 
 SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
 
     if (!SOPC_StaMac_IsConnected(pSM))
     {
@@ -234,6 +244,8 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
         SOPC_ToolkitClient_AsyncCloseSession(pSM->iSessionID);
         pSM->state = stClosing;
     }
+
+    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
 
     return status;
 }
@@ -253,6 +265,8 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* reques
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
+
+    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
 
     /* Adds it to the list of yet-to-be-answered requests */
     ++nSentReqs;
@@ -276,6 +290,8 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* reques
         pSM->state = stError;
         free(pReqCtx);
     }
+
+    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
 
     return status;
 }
@@ -322,6 +338,8 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         return SOPC_STATUS_NOK;
     }
 
+    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+
     if (stActivated != pSM->state)
     {
         Helpers_Log(SOPC_LOG_LEVEL_ERROR,
@@ -362,6 +380,8 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     free(pNid);
     pNid = NULL;
 
+    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+
     return status;
 }
 
@@ -371,7 +391,10 @@ bool SOPC_StaMac_IsConnectable(SOPC_StaMac_Machine* pSM)
     {
         return false;
     }
+
+    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
     bool return_code = (stInit == pSM->state);
+    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
 
     return return_code;
 }
@@ -382,6 +405,9 @@ bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM)
     {
         return false;
     }
+
+    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+
     bool bConnected = false;
     switch (pSM->state)
     {
@@ -396,6 +422,8 @@ bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM)
         break;
     }
 
+    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+
     return bConnected;
 }
 
@@ -406,7 +434,9 @@ bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM)
         return false;
     }
 
+    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
     bool return_code = (stError == pSM->state);
+    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
 
     return return_code;
 }
@@ -418,7 +448,9 @@ bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM)
         return false;
     }
 
+    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
     bool return_code = (0 != pSM->iSubscriptionID);
+    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
 
     return return_code;
 }
@@ -429,6 +461,8 @@ bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx)
     {
         return false;
     }
+
+    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
     bool bHasMonIt = false;
     SOPC_SLinkedListIterator pIter = NULL;
     pIter = SOPC_SLinkedList_GetIterator(pSM->pListMonIt);
@@ -440,6 +474,8 @@ bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx)
             bHasMonIt = true;
         }
     }
+
+    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
 
     return bHasMonIt;
 }
@@ -464,6 +500,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
     SOPC_LibSub_Value* plsVal = NULL;
     SOPC_StaMac_State oldState = stError;
 
+    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
     bProcess = StaMac_IsEventTargeted(pSM, &intAppCtx, event, arg, pParam, appCtx);
 
     if (bProcess)
@@ -682,6 +719,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
         StaMac_PostProcessActions(pSM, oldState);
     }
 
+    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+
     return bProcess;
 }
 
@@ -694,6 +733,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
  * \brief Tells whether the event is targeted to this machine.
  *
  * It also unwraps the appCtx if it is a SOPC_StaMac_ReqCtx*, and set *pAppCtx to pReqCtx->appCtx.
+ * Machine's mutex shall already be locked by the caller.
  */
 static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                                    uintptr_t* pAppCtx,
@@ -769,6 +809,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
 /**
  * \brief Do the post process actions: create a subscription, keep the target number of PublishRequest, ...
  *
+ * Machine's mutex shall already be locked by the caller.
  */
 static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_State oldState)
 {
