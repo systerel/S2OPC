@@ -28,6 +28,8 @@
 #include <stdbool.h>
 
 #include "sopc_array.h"
+#include "sopc_atomic.h"
+#include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_user_app_itf.h"
@@ -52,8 +54,8 @@
 /* Client structures */
 
 /* Global library variables */
-static bool bLibInitialized = false;
-static bool bLibConfigured = false;
+static int32_t libInitialized = 0;
+static int32_t libConfigured = 0;
 static SOPC_LibSub_DisconnectCbk cbkDisco = NULL;
 static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId, value is SOPC_LibSub_ConnectionCfg */
 static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
@@ -81,7 +83,7 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (bLibInitialized || bLibConfigured)
+    else if (SOPC_Atomic_Int_Get(&libInitialized) != 0 || SOPC_Atomic_Int_Get(&libConfigured) != 0)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
@@ -101,11 +103,11 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
     {
         Helpers_SetLogger(pCfg->host_log_callback);
         cbkDisco = pCfg->disconnect_callback;
-        bLibInitialized = true;
+        SOPC_Atomic_Int_Set(&libInitialized, 1);
         status = SOPC_Toolkit_Initialize(ToolkitEventCallback);
     }
 
-    if (!bLibInitialized)
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0)
     {
         /* Clean partial mallocs */
         SOPC_SLinkedList_Delete(pListConfig);
@@ -121,9 +123,17 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
 
 void SOPC_LibSub_Clear(void)
 {
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0)
+    {
+        return;
+    }
+
     SOPC_SLinkedListIterator pIter = NULL;
     SOPC_StaMac_Machine* pSM = NULL;
     SOPC_LibSub_ConnectionCfg* pCfg = NULL;
+
+    SOPC_Atomic_Int_Set(&libInitialized, 0);
+    SOPC_Atomic_Int_Set(&libConfigured, 0);
 
     SOPC_Toolkit_Clear();
 
@@ -149,9 +159,6 @@ void SOPC_LibSub_Clear(void)
 
     SOPC_Array_Delete(pArrScConfig);
     pArrScConfig = NULL;
-
-    bLibInitialized = false;
-    bLibConfigured = false;
 }
 
 SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
@@ -162,7 +169,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
     uint32_t cfgId = 0;
     SOPC_LibSub_ConnectionCfg* pCfgCpy = NULL;
 
-    if (!bLibInitialized || bLibConfigured)
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) != 0)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -244,7 +251,7 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    if (!bLibInitialized || bLibConfigured)
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) != 0)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
@@ -253,7 +260,7 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void)
         status = SOPC_Toolkit_Configured();
         if (SOPC_STATUS_OK == status)
         {
-            bLibConfigured = true;
+            SOPC_Atomic_Int_Set(&libConfigured, 1);
         }
     }
 
@@ -266,7 +273,8 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
     SOPC_LibSub_ConnectionCfg* pCfg = NULL;
     SOPC_StaMac_Machine* pSM = NULL;
 
-    if (!bLibInitialized || !bLibConfigured || UINT32_MAX == nCreatedClient)
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) != 0 ||
+        UINT32_MAX == nCreatedClient)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
@@ -344,7 +352,7 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
     SOPC_StaMac_Machine* pSM = NULL;
     uintptr_t appCtx = 0;
 
-    if (!bLibInitialized || !bLibConfigured)
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
@@ -387,7 +395,7 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
 
-    if (!bLibInitialized || !bLibConfigured)
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
