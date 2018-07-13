@@ -22,6 +22,7 @@ import argparse
 import shlex
 import subprocess
 import sys
+import sys
 
 import wait_server
 
@@ -81,8 +82,10 @@ if __name__ == '__main__':
     server_ret = server_process.wait()
 
     log('Done')
+    running_in_windows = sys.platform.startswith('win32')
     if test_ret == 0:
-        sys.exit(server_ret)
+        # server return code can be checked on Linux only
+        sys.exit(0 if running_in_windows else server_ret)
     else:
         sys.exit(test_ret)
 
