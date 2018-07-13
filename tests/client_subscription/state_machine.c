@@ -106,13 +106,12 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      uint32_t iTokenTarget,
                                      SOPC_StaMac_Machine** ppSM)
 {
+    SOPC_StaMac_Machine* pSM = malloc(sizeof(SOPC_StaMac_Machine));
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_StaMac_Machine* pSM = NULL;
 
-    pSM = malloc(sizeof(SOPC_StaMac_Machine));
     if (NULL == pSM)
     {
-        status = SOPC_STATUS_OUT_OF_MEMORY;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     if (SOPC_STATUS_OK == status)
@@ -173,22 +172,21 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
 
 SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
     if (NULL == pSM)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (SOPC_STATUS_OK == status && UINT32_MAX == nSentReqs)
+    if (UINT32_MAX == nSentReqs)
     {
-        status = SOPC_STATUS_INVALID_STATE;
+        return SOPC_STATUS_INVALID_STATE;
     }
 
-    if (SOPC_STATUS_OK == status && pSM->state != stInit)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (pSM->state != stInit)
     {
-        status = SOPC_STATUS_INVALID_STATE;
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "The state machine shall be in stInit state to start a session.");
+        status = SOPC_STATUS_INVALID_STATE;
     }
 
     /* Sends the request */
@@ -226,9 +224,9 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
 
     if (!SOPC_StaMac_IsConnected(pSM))
     {
-        status = SOPC_STATUS_NOK;
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "StopSession on a disconnected machine.");
         pSM->state = stError;
+        status = SOPC_STATUS_NOK;
     }
 
     if (SOPC_STATUS_OK == status)
@@ -247,32 +245,24 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* reques
 
     if (NULL == pSM || !SOPC_StaMac_IsConnected(pSM) || UINT32_MAX == nSentReqs)
     {
-        status = SOPC_STATUS_INVALID_STATE;
+        return SOPC_STATUS_INVALID_STATE;
     }
 
-    /* Allocate a request context */
-    if (SOPC_STATUS_OK == status)
+    pReqCtx = malloc(sizeof(SOPC_StaMac_ReqCtx));
+    if (NULL == pReqCtx)
     {
-        pReqCtx = malloc(sizeof(SOPC_StaMac_ReqCtx));
-        if (NULL == pReqCtx)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     /* Adds it to the list of yet-to-be-answered requests */
-    if (SOPC_STATUS_OK == status)
+    ++nSentReqs;
+    pReqCtx->uid = nSentReqs;
+    pReqCtx->appCtx = appCtx;
+    /* Asserts that there cannot be two requests with the same id when receiving a response */
+    assert(SOPC_SLinkedList_FindFromId(pSM->pListReqCtx, pReqCtx->uid) == NULL);
+    if (SOPC_SLinkedList_Append(pSM->pListReqCtx, pReqCtx->uid, (void*) pReqCtx) != pReqCtx)
     {
-        ++nSentReqs;
-        pReqCtx->uid = nSentReqs;
-        pReqCtx->appCtx = appCtx;
-        /* Asserts that there cannot be two requests with the same id when receiving a response */
-        assert(SOPC_SLinkedList_FindFromId(pSM->pListReqCtx, pReqCtx->uid) == NULL);
-        if (SOPC_SLinkedList_Append(pSM->pListReqCtx, pReqCtx->uid, (void*) pReqCtx) != pReqCtx)
-        {
-            status = SOPC_STATUS_NOK;
-            free(pReqCtx);
-        }
+        status = SOPC_STATUS_NOK;
     }
 
     /* Sends the request */
@@ -281,9 +271,10 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* reques
         SOPC_ToolkitClient_AsyncSendRequestOnSession(pSM->iSessionID, requestStruct, (uintptr_t) pReqCtx);
     }
 
-    if (SOPC_STATUS_OK != status && NULL != pSM)
+    if (SOPC_STATUS_OK != status)
     {
         pSM->state = stError;
+        free(pReqCtx);
     }
 
     return status;
@@ -303,44 +294,39 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
 
     if (NULL == pSM || NULL == szNodeId || NULL == pCliHndl)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (SOPC_STATUS_OK == status && stActivated != pSM->state)
+    if (!SOPC_StaMac_HasSubscription(pSM))
     {
-        status = SOPC_STATUS_INVALID_STATE;
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
-                    "creating monitored item, the machine should be in the stActivated state (is in %i).", pSM->state);
-    }
-    if (SOPC_STATUS_OK == status && !SOPC_StaMac_HasSubscription(pSM))
-    {
-        status = SOPC_STATUS_INVALID_STATE;
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "the machine shall have a created subscription.");
+        return SOPC_STATUS_INVALID_STATE;
     }
-    if (SOPC_STATUS_OK == status && UINT32_MAX == nSentReqs)
+    if (UINT32_MAX == nSentReqs)
     {
-        status = SOPC_STATUS_INVALID_STATE;
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, too much sent requests.");
+        return SOPC_STATUS_INVALID_STATE;
     }
 
     /* Create the NodeId */
-    if (SOPC_STATUS_OK == status)
+    szLen = strlen(szNodeId);
+    if (INT32_MAX < szLen)
     {
-        szLen = strlen(szNodeId);
-        if (INT32_MAX < szLen)
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, szNodeId is too long.");
-        }
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, szNodeId is too long.");
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (SOPC_STATUS_OK == status)
+    pNid = SOPC_NodeId_FromCString(szNodeId, (int32_t) szLen);
+    if (NULL == pNid)
     {
-        pNid = SOPC_NodeId_FromCString(szNodeId, (int32_t) szLen);
-        if (NULL == pNid)
-        {
-            status = SOPC_STATUS_NOK;
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, could not convert \"%s\" to NodeId.", szNodeId);
-        }
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, could not convert \"%s\" to NodeId.", szNodeId);
+        return SOPC_STATUS_NOK;
+    }
+
+    if (stActivated != pSM->state)
+    {
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                    "creating monitored item, the machine should be in the stActivated state (is in %i).", pSM->state);
+        status = SOPC_STATUS_INVALID_STATE;
     }
 
     /* Create the CreateMonitoredItemRequest */
@@ -381,27 +367,33 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
 
 bool SOPC_StaMac_IsConnectable(SOPC_StaMac_Machine* pSM)
 {
-    return NULL != pSM && stInit == pSM->state;
+    if (NULL == pSM)
+    {
+        return false;
+    }
+    bool return_code = (stInit == pSM->state);
+
+    return return_code;
 }
 
 bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM)
 {
-    bool bConnected = false;
-
-    if (NULL != pSM)
+    if (NULL == pSM)
     {
-        switch (pSM->state)
-        {
-        case stActivated:
-        case stCreatingSubscr:
-        case stCreatingMonIt:
-        case stCreatingPubReq:
-        case stClosing:
-            bConnected = true;
-            break;
-        default:
-            break;
-        }
+        return false;
+    }
+    bool bConnected = false;
+    switch (pSM->state)
+    {
+    case stActivated:
+    case stCreatingSubscr:
+    case stCreatingMonIt:
+    case stCreatingPubReq:
+    case stClosing:
+        bConnected = true;
+        break;
+    default:
+        break;
     }
 
     return bConnected;
@@ -409,23 +401,37 @@ bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM)
 
 bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM)
 {
-    return NULL != pSM && stError == pSM->state;
+    if (NULL == pSM)
+    {
+        return false;
+    }
+
+    bool return_code = (stError == pSM->state);
+
+    return return_code;
 }
 
 bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM)
 {
-    return NULL != pSM && 0 != pSM->iSubscriptionID;
+    if (NULL == pSM)
+    {
+        return false;
+    }
+
+    bool return_code = (0 != pSM->iSubscriptionID);
+
+    return return_code;
 }
 
 bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx)
 {
+    if (NULL == pSM || NULL == pSM->pListMonIt)
+    {
+        return false;
+    }
     bool bHasMonIt = false;
     SOPC_SLinkedListIterator pIter = NULL;
-
-    if (NULL != pSM || NULL != pSM->pListMonIt)
-    {
-        pIter = SOPC_SLinkedList_GetIterator(pSM->pListMonIt);
-    }
+    pIter = SOPC_SLinkedList_GetIterator(pSM->pListMonIt);
 
     while (!bHasMonIt && NULL != pIter)
     {
