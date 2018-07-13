@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "sopc_atomic.h"
 #include "sopc_encodeable.h"
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
@@ -79,7 +80,7 @@ struct SOPC_StaMac_Machine
 };
 
 /* Global variables */
-static uint32_t nSentReqs = 0;     /* Number of sent requests, used to uniquely associate a response to its request. */
+static int32_t nSentReqs = 0;      /* Number of sent requests, used to uniquely associate a response to its request. */
 static uintptr_t nPublishReqs = 0; /* Number of sent publish requests */
 
 /* Internal functions */
@@ -182,7 +183,7 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (UINT32_MAX == nSentReqs)
+    if (INT32_MAX == nSentReqs)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -199,8 +200,9 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
     /* Sends the request */
     if (SOPC_STATUS_OK == status)
     {
-        ++nSentReqs;
-        pSM->iSessionCtx = nSentReqs; /* Record the session context, must be reset when connection is closed. */
+        SOPC_Atomic_Int_Add(&nSentReqs, 1);
+        pSM->iSessionCtx =
+            (uintptr_t) nSentReqs; /* Record the session context, must be reset when connection is closed. */
         if (NULL == pSM->szUsername)
         {
             status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, (uintptr_t) pSM->iSessionCtx,
@@ -255,7 +257,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* reques
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_ReqCtx* pReqCtx = NULL;
 
-    if (NULL == pSM || !SOPC_StaMac_IsConnected(pSM) || UINT32_MAX == nSentReqs)
+    if (NULL == pSM || !SOPC_StaMac_IsConnected(pSM) || INT32_MAX == nSentReqs)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -269,8 +271,8 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* reques
     assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
 
     /* Adds it to the list of yet-to-be-answered requests */
-    ++nSentReqs;
-    pReqCtx->uid = nSentReqs;
+    SOPC_Atomic_Int_Add(&nSentReqs, 1);
+    pReqCtx->uid = (uint32_t) nSentReqs;
     pReqCtx->appCtx = appCtx;
     /* Asserts that there cannot be two requests with the same id when receiving a response */
     assert(SOPC_SLinkedList_FindFromId(pSM->pListReqCtx, pReqCtx->uid) == NULL);
@@ -318,7 +320,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "the machine shall have a created subscription.");
         return SOPC_STATUS_INVALID_STATE;
     }
-    if (UINT32_MAX == nSentReqs)
+    if (INT32_MAX == nSentReqs)
     {
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, too much sent requests.");
         return SOPC_STATUS_INVALID_STATE;
@@ -350,8 +352,8 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     /* Create the CreateMonitoredItemRequest */
     if (SOPC_STATUS_OK == status)
     {
-        ++nSentReqs;
-        iCliHndl = nSentReqs;
+        SOPC_Atomic_Int_Add(&nSentReqs, 1);
+        iCliHndl = (uint32_t) nSentReqs;
         status = Helpers_NewCreateMonitoredItemsRequest(pNid, iAttrId, pSM->iSubscriptionID, MONIT_TIMESTAMPS_TO_RETURN,
                                                         iCliHndl, MONIT_QSIZE, &pReq);
     }
@@ -856,7 +858,9 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
                 {
                     if (nPublishReqs < UINTPTR_MAX)
                     {
-                        ++nPublishReqs;
+                        /* TODO: This addition is not atomic */
+                        uintptr_t new_val = (uintptr_t)(SOPC_Atomic_Ptr_Get((void**) &nPublishReqs)) + 1;
+                        SOPC_Atomic_Ptr_Set((void**) &nPublishReqs, (void*) new_val);
                         status = SOPC_StaMac_SendRequest(pSM, pRequest, nPublishReqs);
                     }
                     else
