@@ -43,6 +43,17 @@ typedef struct _SOPC_EventHandler SOPC_EventHandler;
 typedef struct _SOPC_Looper SOPC_Looper;
 
 /**
+ * \brief Struct describing the various parts of an event.
+ */
+typedef struct
+{
+    int32_t event;
+    uint32_t eltId;
+    void* params;
+    uintptr_t auxParam;
+} SOPC_Event;
+
+/**
  * \brief Function prototype for message processing callbacks.
  *
  * \p handler is a pointer to the \c SOPC_EventHandler invoking this callback,
