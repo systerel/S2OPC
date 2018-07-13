@@ -64,6 +64,17 @@ void* test_thread_mutex_fct(void* args)
     return NULL;
 }
 
+void* test_thread_mutex_recursive_fct(void* args)
+{
+    SOPC_Atomic_Int_Add((int32_t*) args, 1);
+    Mutex_Lock(&gmutex);
+    Mutex_Lock(&gmutex);
+    SOPC_Atomic_Int_Add((int32_t*) args, 1);
+    Mutex_Unlock(&gmutex);
+    Mutex_Unlock(&gmutex);
+    return NULL;
+}
+
 START_TEST(test_thread_exec)
 {
     Thread thread;
@@ -112,14 +123,37 @@ START_TEST(test_thread_mutex)
     ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Clear(&gmutex));
 
     // Degraded behavior
-    SOPC_StatusCode status = Mutex_Initialization(NULL);
-    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_Lock(NULL);
+    SOPC_StatusCode status = Mutex_Lock(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_Unlock(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_Clear(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
+}
+END_TEST
+
+START_TEST(test_thread_mutex_recursive)
+{
+    Thread thread;
+    int32_t cpt = 0;
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Initialization(&gmutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Lock(&gmutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Create(&thread, test_thread_mutex_recursive_fct, &cpt));
+
+    // Wait until the thread reaches the "lock mutex" statement
+    ck_assert(wait_value(&cpt, 1));
+
+    // Wait a bit, this is not really deterministic anyway as the thread could
+    // have been put to sleep by the OS...
+    SOPC_Sleep(10);
+    ck_assert_int_eq(1, SOPC_Atomic_Int_Get(&cpt));
+
+    // Unlock the mutex and check that the thread can go forward.
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Unlock(&gmutex));
+    ck_assert(wait_value(&cpt, 2));
+
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(thread));
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Clear(&gmutex));
 }
 END_TEST
 
@@ -331,6 +365,7 @@ Suite* tests_make_suite_threads(void)
     suite_add_tcase(s, tc_thread_mutex);
     tc_thread_mutex = tcase_create("Threads and mutexes");
     tcase_add_test(tc_thread_mutex, test_thread_mutex);
+    tcase_add_test(tc_thread_mutex, test_thread_mutex_recursive);
     suite_add_tcase(s, tc_thread_mutex);
     tc_thread_mutex = tcase_create("Threads and condition variables");
     tcase_add_test(tc_thread_mutex, test_thread_condvar);

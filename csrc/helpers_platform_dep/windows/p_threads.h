@@ -26,7 +26,7 @@
 
 #include <windows.h>
 
-typedef SRWLOCK Mutex;
+typedef CRITICAL_SECTION Mutex;
 
 typedef CONDITION_VARIABLE Condition;
 

@@ -21,6 +21,9 @@
  *  \file
  *
  *  \brief A platform independent API to use mutexes and condition variables.
+ *
+ *  Mutexes are recursive, and lock can be called inside a thread where the lock is already held
+ *  without blocking.
  */
 
 #ifndef SOPC_MUTEXES_H_

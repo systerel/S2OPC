@@ -58,7 +58,7 @@ SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
-        InitializeSRWLock(mut);
+        InitializeCriticalSection(mut);
         status = SOPC_STATUS_OK;
     }
     return status;
@@ -79,7 +79,7 @@ SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
-        AcquireSRWLockExclusive(mut);
+        EnterCriticalSection(mut);
         status = SOPC_STATUS_OK;
     }
     return status;
@@ -90,7 +90,7 @@ SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
-        ReleaseSRWLockExclusive(mut);
+        LeaveCriticalSection(mut);
         status = SOPC_STATUS_OK;
     }
     return status;
@@ -101,7 +101,7 @@ SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (cond != NULL && mut != NULL)
     {
-        BOOL res = SleepConditionVariableSRW(cond, mut, INFINITE, 0);
+        BOOL res = SleepConditionVariableCS(cond, mut, INFINITE);
         if (res == 0)
         {
             // Possible to retrieve error with GetLastError (see msdn doc)
@@ -120,7 +120,7 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (cond != NULL && mut != NULL && milliSecs > 0)
     {
-        BOOL res = SleepConditionVariableSRW(cond, mut, (DWORD) milliSecs, 0);
+        BOOL res = SleepConditionVariableCS(cond, mut, (DWORD) milliSecs);
         if (res == 0)
         {
             status = SOPC_STATUS_NOK;

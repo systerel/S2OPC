@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -83,20 +84,30 @@ SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
 
 SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    int retCode = 0;
-    if (mut != NULL)
+    assert(NULL != mut);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    pthread_mutexattr_t attr;
+
+    if (pthread_mutexattr_init(&attr) != 0)
     {
-        retCode = pthread_mutex_init(mut, NULL);
-        if (retCode == 0)
-        {
-            status = SOPC_STATUS_OK;
-        }
-        else
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE) != 0)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        if (pthread_mutex_init(mut, &attr) != 0)
         {
             status = SOPC_STATUS_NOK;
         }
     }
+
+    pthread_mutexattr_destroy(&attr);
+
     return status;
 }
 
