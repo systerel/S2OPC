@@ -34,7 +34,6 @@
 
 #include "sopc_async_queue.h"
 #include "sopc_event_timer_manager.h"
-#include "sopc_secure_channels_api.h"
 #include "sopc_sockets_api.h"
 
 const char* uri = "opc.tcp://localhost:4841/myEndPoint";
@@ -82,7 +81,6 @@ START_TEST(test_sockets)
     uint8_t attempts = 0;
 
     SOPC_EventTimer_Initialize();
-    SOPC_SecureChannels_Initialize();
     SOPC_Sockets_Initialize();
 
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_Init(&socketEvents, ""));
@@ -271,7 +269,6 @@ START_TEST(test_sockets)
 
     SOPC_Sockets_Clear();
     SOPC_EventTimer_Clear();
-    SOPC_SecureChannels_Clear();
 }
 END_TEST
 
