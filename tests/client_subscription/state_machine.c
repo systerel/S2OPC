@@ -857,8 +857,12 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
                     if (nPublishReqs < UINTPTR_MAX)
                     {
                         ++nPublishReqs;
+                        status = SOPC_StaMac_SendRequest(pSM, pRequest, nPublishReqs);
                     }
-                    status = SOPC_StaMac_SendRequest(pSM, pRequest, nPublishReqs);
+                    else
+                    {
+                        status = SOPC_STATUS_INVALID_STATE;
+                    }
                 }
                 if (SOPC_STATUS_OK == status)
                 {
