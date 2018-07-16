@@ -81,13 +81,12 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
 
     if (NULL == pCfg || NULL == pCfg->host_log_callback || NULL == pCfg->disconnect_callback)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (SOPC_Atomic_Int_Get(&libInitialized) != 0 || SOPC_Atomic_Int_Get(&libConfigured) != 0)
+    if (SOPC_Atomic_Int_Get(&libInitialized) != 0 || SOPC_Atomic_Int_Get(&libConfigured) != 0)
     {
-        status = SOPC_STATUS_INVALID_STATE;
+        return SOPC_STATUS_INVALID_STATE;
     }
-    else
     {
         pListConfig = SOPC_SLinkedList_Create(0);
         pListClient = SOPC_SLinkedList_Create(0);
@@ -103,11 +102,10 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
     {
         Helpers_SetLogger(pCfg->host_log_callback);
         cbkDisco = pCfg->disconnect_callback;
-        SOPC_Atomic_Int_Set(&libInitialized, 1);
         status = SOPC_Toolkit_Initialize(ToolkitEventCallback);
     }
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0)
+    if (SOPC_STATUS_OK != status)
     {
         /* Clean partial mallocs */
         SOPC_SLinkedList_Delete(pListConfig);
@@ -116,6 +114,10 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
         pListClient = NULL;
         SOPC_Array_Delete(pArrScConfig);
         pArrScConfig = NULL;
+    }
+    else
+    {
+        SOPC_Atomic_Int_Set(&libInitialized, 1);
     }
 
     return status;
@@ -176,19 +178,22 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
 
     if (NULL == pCfg || NULL == pCfgId)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
     if (NULL == pCfg->policyId)
     {
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Cannot configure connection with NULL policyId.");
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     /* Create the new configuration */
-    status = Helpers_NewSCConfigFromLibSubCfg(pCfg->server_url, pCfg->security_policy, pCfg->security_mode,
-                                              pCfg->disable_certificate_verification, pCfg->path_cert_auth,
-                                              pCfg->path_cert_srv, pCfg->path_cert_cli, pCfg->path_key_cli,
-                                              pCfg->path_crl, pCfg->sc_lifetime, &pscConfig);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Helpers_NewSCConfigFromLibSubCfg(pCfg->server_url, pCfg->security_policy, pCfg->security_mode,
+                                                  pCfg->disable_certificate_verification, pCfg->path_cert_auth,
+                                                  pCfg->path_cert_srv, pCfg->path_cert_cli, pCfg->path_key_cli,
+                                                  pCfg->path_crl, pCfg->sc_lifetime, &pscConfig);
+    }
 
     /* Store it to free it on SOPC_LibSub_Clear() */
     if (SOPC_STATUS_OK == status)
@@ -273,8 +278,11 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
     SOPC_LibSub_ConnectionCfg* pCfg = NULL;
     SOPC_StaMac_Machine* pSM = NULL;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) != 0 ||
-        UINT32_MAX == nCreatedClient)
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (UINT32_MAX == nCreatedClient)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
@@ -354,17 +362,14 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
 
     if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
     {
-        status = SOPC_STATUS_INVALID_STATE;
+        return SOPC_STATUS_INVALID_STATE;
     }
 
     /* Finds the state machine */
-    if (SOPC_STATUS_OK == status)
+    pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
+    if (NULL == pSM)
     {
-        pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
-        if (NULL == pSM)
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     /* Create the monitored item and wait for its creation */
@@ -397,17 +402,14 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId)
 
     if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
     {
-        status = SOPC_STATUS_INVALID_STATE;
+        return SOPC_STATUS_INVALID_STATE;
     }
 
     /* Retrieve the machine to disconnect */
-    if (SOPC_STATUS_OK == status)
+    pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
+    if (NULL == pSM)
     {
-        pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
-        if (NULL == pSM)
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     if (SOPC_STATUS_OK == status && SOPC_StaMac_IsConnected(pSM))
