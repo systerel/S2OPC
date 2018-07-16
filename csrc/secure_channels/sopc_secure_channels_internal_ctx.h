@@ -203,6 +203,7 @@ extern uint32_t lastSecureConnectionArrayIdx; // last secure connection index us
 
 extern SOPC_Looper* secureChannelsLooper;
 extern SOPC_EventHandler* secureChannelsInputEventHandler;
+extern SOPC_EventHandler* secureChannelsInternalEventHandler;
 extern SOPC_EventHandler* secureChannelsSocketsEventHandler;
 
 /** @brief Initialize the array of secure listeners/connections */
@@ -216,6 +217,11 @@ SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx);
 const SOPC_Certificate* SC_OwnCertificate(SOPC_SecureConnection* conn);
 const SOPC_Certificate* SC_PeerCertificate(SOPC_SecureConnection* conn);
 
+void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
+                                         int32_t event,
+                                         uint32_t id,
+                                         void* params,
+                                         uintptr_t auxParam);
 void SOPC_SecureChannels_OnSocketsEvent(SOPC_EventHandler* handler,
                                         int32_t event,
                                         uint32_t id,

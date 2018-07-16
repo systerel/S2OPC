@@ -188,33 +188,31 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
     return result;
 }
 
-static SOPC_SecureChannels_InputEvent SC_Chunks_MsgTypeToRcvEvent(SOPC_Msg_Type msgType)
+static SOPC_SecureChannels_InternalEvent SC_Chunks_MsgTypeToRcvEvent(SOPC_Msg_Type msgType)
 {
-    SOPC_SecureChannels_InputEvent scEvent;
     switch (msgType)
     {
     case SOPC_MSG_TYPE_HEL:
-        scEvent = INT_SC_RCV_HEL;
+        return INT_SC_RCV_HEL;
         break;
     case SOPC_MSG_TYPE_ACK:
-        scEvent = INT_SC_RCV_ACK;
+        return INT_SC_RCV_ACK;
         break;
     case SOPC_MSG_TYPE_ERR:
-        scEvent = INT_SC_RCV_ERR;
+        return INT_SC_RCV_ERR;
         break;
     case SOPC_MSG_TYPE_SC_OPN:
-        scEvent = INT_SC_RCV_OPN;
+        return INT_SC_RCV_OPN;
         break;
     case SOPC_MSG_TYPE_SC_CLO:
-        scEvent = INT_SC_RCV_CLO;
+        return INT_SC_RCV_CLO;
         break;
     case SOPC_MSG_TYPE_SC_MSG:
-        scEvent = INT_SC_RCV_MSG_CHUNKS;
+        return INT_SC_RCV_MSG_CHUNKS;
         break;
     default:
         assert(false);
     }
-    return scEvent;
 }
 
 static bool SC_Chunks_IsMsgEncrypted(OpcUa_MessageSecurityMode securityMode, bool isOPN)
@@ -1780,7 +1778,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
         if (SC_Chunks_TreatTcpPayload(scConnection, &requestId, &errorStatus))
         {
             // Transmit OPC UA message to secure connection state manager
-            SOPC_SecureChannels_InputEvent scEvent = SC_Chunks_MsgTypeToRcvEvent(chunkCtx->currentMsgType);
+            SOPC_SecureChannels_InternalEvent scEvent = SC_Chunks_MsgTypeToRcvEvent(chunkCtx->currentMsgType);
             if (scEvent == INT_SC_RCV_ERR || scEvent == INT_SC_RCV_CLO)
             {
                 // Treat as prio events
@@ -3378,7 +3376,10 @@ void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId
     }
 }
 
-void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t eltId, void* params, uintptr_t auxParam)
+void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
+                               uint32_t eltId,
+                               void* params,
+                               uintptr_t auxParam)
 {
     SOPC_Msg_Type sendMsgType = SOPC_MSG_TYPE_INVALID;
     SOPC_Buffer* buffer = (SOPC_Buffer*) params;

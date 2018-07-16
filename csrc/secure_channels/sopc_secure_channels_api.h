@@ -30,6 +30,8 @@
 
 #include <stdint.h>
 
+#include "sopc_event_handler.h"
+
 /**
  *  \brief Secure channel input events
  *  */
@@ -52,52 +54,6 @@ typedef enum {
     TIMER_SC_REQUEST_TIMEOUT,    /* id = secure channel connection index
                                     auxParam = (uint32_t) requestId
                                   */
-
-    /* Internal events */
-    /* SC listener manager -> SC connection manager */
-    INT_EP_SC_CREATE, /* id = endpoint description configuration index,
-                         auxParam = socket index */
-    INT_EP_SC_CLOSE,  /* id = secure channel connection index,
-                         auxParam = (uint32_t) endpoint description configuration index */
-    /* SC connection manager -> SC listener manager */
-    INT_EP_SC_CREATED,      /* id = endpoint description configuration index,
-                               auxParam = (uint32_t) secure channel connection index */
-    INT_EP_SC_DISCONNECTED, /* id = endpoint description configuration index,
-                               auxParam = (uint32_t) secure channel connection index */
-
-    /* OPC UA chunks message manager -> SC connection manager */
-    INT_SC_RCV_HEL, /* >------------------------- */
-    INT_SC_RCV_ACK, // id = secure channel connection index,
-                    // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_RCV_ERR, /* -------------------------< */
-
-    INT_SC_RCV_OPN,        /* >------------------------- */
-                           // id = secure channel connection index,
-                           // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_RCV_CLO,        // auxParam = (uint32_t) request Id context if request
-    INT_SC_RCV_MSG_CHUNKS, /* -------------------------< */
-
-    INT_SC_RCV_FAILURE, /* id = secure channel connection index,
-                           auxParam = error status */
-    INT_SC_SND_FAILURE, /* id = secure channel connection index,
-                           params = (uint32_t *) requestId,
-                           auxParam = (SOPC_StatusCode) error status in case of client */
-    /* SC connection manager -> OPC UA chunks message manager */
-    INT_SC_SND_HEL, /* >------------------------- */
-    INT_SC_SND_ACK, // id = secure channel connection index,
-                    // params = (SOPC_Buffer*) buffer positioned to message payload
-                    /* -------------------------< */
-    INT_SC_SND_ERR,
-    INT_SC_SND_OPN,        /* >------------------------- */
-                           // id = secure channel connection index,
-                           // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_SND_CLO,        // auxParam = (uint32_t) request Id context if response / request Handle if request when MSG
-    INT_SC_SND_MSG_CHUNKS, /* -------------------------< */
-
-    /* SC connection manager -> SC connection manager */
-    INT_SC_CLOSE // id = secure channel connection index,
-                 // params = (char*) reason,
-                 // auxParam = (SOPC_StatusCode) errorStatus
 
 } SOPC_SecureChannels_InputEvent;
 

@@ -30,6 +30,7 @@ uint32_t lastSecureConnectionArrayIdx = 0;
 
 SOPC_Looper* secureChannelsLooper = NULL;
 SOPC_EventHandler* secureChannelsInputEventHandler = NULL;
+SOPC_EventHandler* secureChannelsInternalEventHandler = NULL;
 SOPC_EventHandler* secureChannelsSocketsEventHandler = NULL;
 
 void SOPC_SecureChannelsInternalContext_Initialize()
@@ -43,6 +44,10 @@ void SOPC_SecureChannelsInternalContext_Initialize()
 
     secureChannelsInputEventHandler = SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnInputEvent);
     assert(secureChannelsInputEventHandler != NULL);
+
+    secureChannelsInternalEventHandler =
+        SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnInternalEvent);
+    assert(secureChannelsInternalEventHandler != NULL);
 
     secureChannelsSocketsEventHandler =
         SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnSocketsEvent);

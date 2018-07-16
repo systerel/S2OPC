@@ -141,6 +141,65 @@ static void SOPC_SecureListenerStateMgr_RemoveConnection(SOPC_SecureListener* sc
     } while (idx < SOPC_MAX_SOCKETS_CONNECTIONS && false == result);
 }
 
+void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEvent event,
+                                                 uint32_t eltId,
+                                                 void* params,
+                                                 uintptr_t auxParam)
+{
+    (void) params;
+
+    switch (event)
+    {
+    /* SC connection manager -> SC listener state manager */
+    case INT_EP_SC_CREATED:
+    {
+        assert(auxParam <= UINT32_MAX);
+
+        SOPC_Logger_TraceDebug("ScListenerMgr: INT_EP_SC_CREATED epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
+                               auxParam);
+        /* id = endpoint description configuration index,
+           auxParam = socket index for connection */
+        SOPC_SecureListener* scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
+
+        if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENED)
+        {
+            // Error case: require secure channel closure
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, NULL, eltId);
+        }
+        else
+        {
+            // Associates the secure channel connection to the secure listener
+            if (!SOPC_SecureListenerStateMgr_AddConnection(scListener, (uint32_t) auxParam))
+            {
+                // Error case: require secure channel closure
+                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, NULL, eltId);
+            }
+        }
+        break;
+    }
+    case INT_EP_SC_DISCONNECTED:
+    {
+        assert(auxParam <= UINT32_MAX);
+
+        SOPC_Logger_TraceDebug("ScListenerMgr: INT_EP_SC_DISCONNECTED epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
+                               auxParam);
+
+        /* id = endpoint description configuration index,
+           auxParam = secure channel connection index */
+        SOPC_SecureListener* scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
+
+        if (scListener != NULL && scListener->state == SECURE_LISTENER_STATE_OPENED)
+        {
+            SOPC_SecureListenerStateMgr_RemoveConnection(scListener, (uint32_t) auxParam);
+        }
+        break;
+    }
+    default:
+        // Already filtered by secure channels API module
+        assert(false);
+    }
+}
+
 void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                                                uint32_t eltId,
                                                void* params,
@@ -220,9 +279,9 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
                                             uintptr_t auxParam)
 {
     (void) params;
+    (void) auxParam;
     bool result = false;
     SOPC_Endpoint_Config* epConfig = NULL;
-    SOPC_SecureListener* scListener = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     switch (event)
     {
@@ -269,45 +328,6 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         }
         // Notify Services layer that EP_OPEN failed
         SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED, eltId, NULL, status);
-        break;
-    /* Internal events: */
-    /* SC connection manager -> SC listener state manager */
-    case INT_EP_SC_CREATED:
-        SOPC_Logger_TraceDebug("ScListenerMgr: INT_EP_SC_CREATED epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
-                               auxParam);
-        /* id = endpoint description configuration index,
-           auxParam = socket index for connection */
-        if (auxParam <= UINT32_MAX)
-        {
-            scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
-            if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENED)
-            {
-                // Error case: require secure channel closure
-                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, NULL, eltId);
-            }
-            else
-            {
-                // Associates the secure channel connection to the secure listener
-                result = SOPC_SecureListenerStateMgr_AddConnection(scListener, (uint32_t) auxParam);
-                if (false == result)
-                {
-                    // Error case: require secure channel closure
-                    SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, NULL, eltId);
-                }
-            }
-        }
-        break;
-    case INT_EP_SC_DISCONNECTED:
-        SOPC_Logger_TraceDebug("ScListenerMgr: INT_EP_SC_DISCONNECTED epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
-                               auxParam);
-
-        /* id = endpoint description configuration index,
-           auxParam = secure channel connection index */
-        scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
-        if (scListener != NULL && scListener->state == SECURE_LISTENER_STATE_OPENED && auxParam <= UINT32_MAX)
-        {
-            SOPC_SecureListenerStateMgr_RemoveConnection(scListener, (uint32_t) auxParam);
-        }
         break;
     default:
         // Already filtered by secure channels API module
