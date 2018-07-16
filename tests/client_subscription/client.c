@@ -95,6 +95,7 @@ typedef struct
     uint32_t n_max_keepalive;
 } cmd_line_options_t;
 static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv);
+static void free_options(cmd_line_options_t* o);
 static void print_usage(const char* exe);
 
 /* Callbacks */
@@ -212,6 +213,8 @@ int main(int argc, char* const argv[])
     SOPC_LibSub_Clear();
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Toolkit closed.");
 
+    free_options(&options);
+
     if (SOPC_STATUS_OK != status)
     {
         return 3;
@@ -258,10 +261,6 @@ static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
     log_callback(SOPC_LOG_LEVEL_INFO, sz);
 }
 
-static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
-{
-    memset(o, 0, sizeof(cmd_line_options_t));
-
 #define FOREACH_OPT(x)                                                                                            \
     /* name of flag, is flag required, does flag requires argument, internal flag value, field of the C struct */ \
     x("endpoint", false, required_argument, OPT_ENDPOINT, endpoint_url)                                           \
@@ -271,6 +270,10 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
                     x("publish-period", false, required_argument, OPT_PUBLISH_PERIOD, publish_period_str)         \
                         x("token-target", false, required_argument, OPT_TOKEN_TARGET, token_target_str)           \
                             x("max-keepalive-count", false, required_argument, OPT_KEEPALIVE, n_max_keepalive_str)
+
+static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
+{
+    memset(o, 0, sizeof(cmd_line_options_t));
 
 #define OPT_DEFINITION(name, req, arg_req, val, field) {name, arg_req, NULL, val},
 
@@ -338,18 +341,19 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
 
     if (NULL == o->endpoint_url)
     {
-        o->endpoint_url = ENDPOINT_URL;
+        o->endpoint_url = malloc(strlen(ENDPOINT_URL) + 1);
+        strcpy(o->endpoint_url, ENDPOINT_URL);
     }
     if (NULL == o->policyId)
     {
-        o->policyId = POLICY_ID;
+        o->policyId = malloc(strlen(POLICY_ID) + 1);
+        strcpy(o->policyId, POLICY_ID);
     }
     CONVERT_STR_OPT(publish_period, int64_t, PUBLISH_PERIOD_MS)
     CONVERT_STR_OPT(token_target, uint16_t, PUBLISH_N_TOKEN)
     CONVERT_STR_OPT(n_max_keepalive, uint32_t, MAX_KEEP_ALIVE_COUNT)
 
 #undef CONVERT_STR_OPT
-#undef FOREACH_OPT
 
     o->node_ids_sz = argc - optind;
     if (o->node_ids_sz < 1)
@@ -358,7 +362,7 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
         print_usage(argv[0]);
         return false;
     }
-    o->node_ids = malloc(sizeof(char*) * (size_t) o->node_ids_sz);
+    o->node_ids = malloc(sizeof(char*) * (size_t)(o->node_ids_sz));
     if (NULL == o->node_ids)
     {
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Out of memory.");
@@ -366,12 +370,29 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     }
     for (int i = 0; i < o->node_ids_sz; ++i)
     {
-        o->node_ids[i] = malloc(strlen(argv[optind + i]));
+        o->node_ids[i] = malloc(strlen(argv[optind + i]) + 1);
         strcpy(o->node_ids[i], argv[optind + i]);
     }
 
     return true;
 }
+
+static void free_options(cmd_line_options_t* o)
+{
+    for (int i = 0; i < o->node_ids_sz; ++i)
+    {
+        free(o->node_ids[i]);
+    }
+    free(o->node_ids);
+
+#define FREE_STR_OPT_CASE(name, req, arg_req, val, field) free(o->field);
+
+    FOREACH_OPT(FREE_STR_OPT_CASE)
+
+#undef FREE_STR_OPT_CASE
+}
+
+#undef FOREACH_OPT
 
 static void print_usage(const char* exe)
 {
