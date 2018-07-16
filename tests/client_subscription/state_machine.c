@@ -169,8 +169,8 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
         pSM->pListReqCtx = NULL;
         SOPC_SLinkedList_Delete(pSM->pListMonIt);
         pSM->pListMonIt = NULL;
-        Mutex_Clear(&pSM->mutex);
         assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+        Mutex_Clear(&pSM->mutex);
         free(pSM);
         *ppSM = NULL;
     }

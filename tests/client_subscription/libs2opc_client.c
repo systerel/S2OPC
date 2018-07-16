@@ -56,6 +56,7 @@
 /* Global library variables */
 static int32_t libInitialized = 0;
 static int32_t libConfigured = 0;
+static Mutex mutex; /* Mutex which protects global variables except libInitialized and libConfigured */
 static SOPC_LibSub_DisconnectCbk cbkDisco = NULL;
 static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId, value is SOPC_LibSub_ConnectionCfg */
 static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
@@ -77,8 +78,6 @@ SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void)
 
 SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
     if (NULL == pCfg || NULL == pCfg->host_log_callback || NULL == pCfg->disconnect_callback)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -87,6 +86,10 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
+
+    SOPC_ReturnStatus status = Mutex_Initialization(&mutex);
+
+    if (SOPC_STATUS_OK == status)
     {
         pListConfig = SOPC_SLinkedList_Create(0);
         pListClient = SOPC_SLinkedList_Create(0);
@@ -130,6 +133,8 @@ void SOPC_LibSub_Clear(void)
         return;
     }
 
+    assert(Mutex_Lock(&mutex) == SOPC_STATUS_OK);
+
     SOPC_SLinkedListIterator pIter = NULL;
     SOPC_StaMac_Machine* pSM = NULL;
     SOPC_LibSub_ConnectionCfg* pCfg = NULL;
@@ -161,6 +166,9 @@ void SOPC_LibSub_Clear(void)
 
     SOPC_Array_Delete(pArrScConfig);
     pArrScConfig = NULL;
+
+    assert(Mutex_Unlock(&mutex) == SOPC_STATUS_OK);
+    Mutex_Clear(&mutex);
 }
 
 SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
@@ -175,6 +183,8 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
     {
         return SOPC_STATUS_INVALID_STATE;
     }
+
+    assert(Mutex_Lock(&mutex) == SOPC_STATUS_OK);
 
     if (NULL == pCfg || NULL == pCfgId)
     {
@@ -249,6 +259,8 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
         free(pCfgCpy);
     }
 
+    assert(Mutex_Unlock(&mutex) == SOPC_STATUS_OK);
+
     return status;
 }
 
@@ -282,6 +294,9 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
     {
         return SOPC_STATUS_INVALID_STATE;
     }
+
+    assert(Mutex_Lock(&mutex) == SOPC_STATUS_OK);
+
     if (UINT32_MAX == nCreatedClient)
     {
         status = SOPC_STATUS_INVALID_STATE;
@@ -328,6 +343,9 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
         status = SOPC_StaMac_StartSession(pSM);
     }
 
+    /* Release the lock so that the event handler can work properly while waiting */
+    assert(Mutex_Unlock(&mutex) == SOPC_STATUS_OK);
+
     /* Wait for the subscription to be created */
     /* TODO: use Mutex and CV */
     if (SOPC_STATUS_OK == status)
@@ -344,8 +362,10 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
 
     if (SOPC_STATUS_OK != status && NULL != pSM)
     {
+        assert(Mutex_Lock(&mutex) == SOPC_STATUS_OK);
         assert(pSM == SOPC_SLinkedList_RemoveFromId(pListClient, *pCliId));
         SOPC_StaMac_Delete(&pSM);
+        assert(Mutex_Unlock(&mutex) == SOPC_STATUS_OK);
     }
 
     return status;
@@ -365,6 +385,8 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
         return SOPC_STATUS_INVALID_STATE;
     }
 
+    assert(Mutex_Lock(&mutex) == SOPC_STATUS_OK);
+
     /* Finds the state machine */
     pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
     if (NULL == pSM)
@@ -377,6 +399,9 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
     {
         status = SOPC_StaMac_CreateMonitoredItem(pSM, szNodeId, attrId, &appCtx, pDataId);
     }
+
+    /* Release the lock so that the event handler can work properly while waiting */
+    assert(Mutex_Unlock(&mutex) == SOPC_STATUS_OK);
 
     /* Wait for the monitored item to be created */
     /* TODO: use Mutex and CV */
@@ -405,6 +430,8 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId)
         return SOPC_STATUS_INVALID_STATE;
     }
 
+    assert(Mutex_Lock(&mutex) == SOPC_STATUS_OK);
+
     /* Retrieve the machine to disconnect */
     pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
     if (NULL == pSM)
@@ -416,6 +443,9 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId)
     {
         status = SOPC_StaMac_StopSession(pSM);
     }
+
+    /* Release the lock so that the event handler can work properly while waiting */
+    assert(Mutex_Unlock(&mutex) == SOPC_STATUS_OK);
 
     /* Wait for the connection to be closed */
     /* TODO: use Mutex and CV */
@@ -442,6 +472,13 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
     SOPC_StaMac_Machine* pSM = NULL;
     bool bProcessed = false;
 
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
+    {
+        return;
+    }
+
+    assert(Mutex_Lock(&mutex) == SOPC_STATUS_OK);
+
     /* List through known clients and call state machine event callback */
     pIterCli = SOPC_SLinkedList_GetIterator(pListClient);
     while (NULL != pIterCli)
@@ -463,4 +500,6 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
 
     /* At least one machine should have processed the event */
     assert(bProcessed);
+
+    assert(Mutex_Unlock(&mutex) == SOPC_STATUS_OK);
 }

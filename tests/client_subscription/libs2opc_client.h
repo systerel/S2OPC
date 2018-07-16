@@ -21,6 +21,7 @@
  *
  * \brief Interface of an example client library supporting the subscription management.
  *
+ * The functions of this interface are threadsafe, except stated otherwise.
  */
 
 #ifndef LIBS2OPC_CLIENT_H_
@@ -311,6 +312,8 @@ SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void);
  @description
     Configure the library. This function shall be called once by the host application
     before any other service can be used.
+ @warning
+    This function is not threadsafe.
  @param pCfg
     Non null pointer to the static configuration. The content of the configuration is copied
     and the object pointed by /p pCfg can be freed by the caller.
@@ -342,6 +345,8 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
     Mark the library as configured. All calls to SOPC_LibSub_ConfigureConnection() shall
     be done prior to calling this function. All calls to SOPC_LibSub_Connect() shall be done
     after calling this function.
+ @warning
+    As this function should be called only once, it is not threadsafe.
  @return
     The operation status */
 SOPC_ReturnStatus SOPC_LibSub_Configured(void);
