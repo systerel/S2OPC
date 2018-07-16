@@ -139,9 +139,9 @@ void SOPC_SocketsInternalContext_CloseSocketLock(uint32_t socketIdx)
     Mutex_Unlock(&socketsMutex);
 }
 
-void SOPC_Sockets_Emit(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
+void SOPC_Sockets_Emit(SOPC_Sockets_OutputEvent event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
     assert(socketsEventHandler != NULL);
-    SOPC_ReturnStatus status = SOPC_EventHandler_Post(socketsEventHandler, event, eltId, params, auxParam);
+    SOPC_ReturnStatus status = SOPC_EventHandler_Post(socketsEventHandler, (int32_t) event, eltId, params, auxParam);
     assert(status == SOPC_STATUS_OK);
 }

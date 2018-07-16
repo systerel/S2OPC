@@ -26,6 +26,7 @@
 #include "sopc_event_handler.h"
 #include "sopc_mutexes.h"
 #include "sopc_raw_sockets.h"
+#include "sopc_sockets_api.h"
 #include "sopc_toolkit_constants.h"
 
 typedef enum {
@@ -100,6 +101,6 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx);
  */
 void SOPC_SocketsInternalContext_CloseSocketLock(uint32_t socketIdx);
 
-void SOPC_Sockets_Emit(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam);
+void SOPC_Sockets_Emit(SOPC_Sockets_OutputEvent event, uint32_t eltId, void* params, uintptr_t auxParam);
 
 #endif /* SOPC_SOCKETS_INTERNAL_CTX_H_ */
