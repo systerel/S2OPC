@@ -2561,6 +2561,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                     // Other cases are also covered by the SC establishment timeout: no other action to do
                     break;
                 }
+                free(msgCtx);
             }
         }
         break;
