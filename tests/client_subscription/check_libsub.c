@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_log_manager.h"
@@ -64,16 +65,16 @@ END_TEST
 
 static SOPC_LibSub_ConnectionId con_id = 0;
 static SOPC_LibSub_DataId dat_id = 0;
-static bool bFirstValue = true;
-static int64_t iFirstValue = 0;
-static int32_t bValueChanged = 0; /* TODO: use sopc_atomic.h */
-static int32_t bDisconnected = 0;
+static int32_t firstValueIsUninit = 1;
+static int32_t iFirstValue = 0;
+static int32_t valueChanged = 0;
+static int32_t disconnected = 0;
 
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
 {
     /* This is not just assert(false), as the disconnection shall happen when closing the lib */
     ck_assert(c_id == con_id);
-    bDisconnected = 1; /* TODO: use SOPC_Atomit_Int_Set */
+    SOPC_Atomic_Int_Set(&disconnected, 1);
 }
 
 static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
@@ -85,15 +86,21 @@ static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
     ck_assert(value->type == SOPC_LibSub_DataType_integer);
     ck_assert(value->quality == 0);
 
-    if (bFirstValue)
+    /* TODO: Atomic flip bit is not atomic */
+    if (SOPC_Atomic_Int_Get(&firstValueIsUninit) == 1)
     {
-        bFirstValue = false;
-        iFirstValue = *(int64_t*) (value->value);
+        SOPC_Atomic_Int_Set(&firstValueIsUninit, 0);
+        int64_t val = *(int64_t*) (value->value);
+        val %= (INT32_MAX + 1LL);
+        SOPC_Atomic_Int_Set(&iFirstValue, (int32_t) val);
     }
-    else if (0 == bValueChanged)
+    /* TODO: Atomic flip bit is not atomic */
+    else if (SOPC_Atomic_Int_Get(&valueChanged) == 0)
     {
-        bValueChanged = 1; /* TODO: use SOPC_Atomit_Int_Set */
-        ck_assert(*(int64_t*) (value->value) == iFirstValue + 1);
+        SOPC_Atomic_Int_Set(&valueChanged, 1);
+        int64_t val = *(int64_t*) (value->value);
+        /* Once every 2%32, this would fail, but the server always starts at 0 */
+        ck_assert((val % (INT32_MAX + 1LL)) == SOPC_Atomic_Int_Get(&iFirstValue) + 1);
     }
 }
 
@@ -132,12 +139,13 @@ START_TEST(test_subscription)
     /* Wait for deconnection, failed assert, or subscription success */
     int iCnt = 0;
     /* TODO: use SOPC_Atomic_Int_Get */
-    while (iCnt * SLEEP_TIME <= CONNECTION_TIMEOUT && bValueChanged == 0 && bDisconnected == 0)
+    while (iCnt * SLEEP_TIME <= CONNECTION_TIMEOUT && SOPC_Atomic_Int_Get(&valueChanged) == 0 &&
+           SOPC_Atomic_Int_Get(&disconnected) == 0)
     {
         SOPC_Sleep(SLEEP_TIME);
     }
 
-    ck_assert(bDisconnected == 0);
+    ck_assert(SOPC_Atomic_Int_Get(&disconnected) == 0);
     ck_assert(SOPC_LibSub_Disconnect(con_id) == SOPC_STATUS_OK);
     SOPC_LibSub_Clear();
 }
