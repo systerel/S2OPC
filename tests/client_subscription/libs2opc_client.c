@@ -133,6 +133,8 @@ void SOPC_LibSub_Clear(void)
         return;
     }
 
+    SOPC_Toolkit_Clear();
+
     assert(Mutex_Lock(&mutex) == SOPC_STATUS_OK);
 
     SOPC_SLinkedListIterator pIter = NULL;
@@ -141,8 +143,6 @@ void SOPC_LibSub_Clear(void)
 
     SOPC_Atomic_Int_Set(&libInitialized, 0);
     SOPC_Atomic_Int_Set(&libConfigured, 0);
-
-    SOPC_Toolkit_Clear();
 
     pIter = SOPC_SLinkedList_GetIterator(pListClient);
     while (NULL != pIter)

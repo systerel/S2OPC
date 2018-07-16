@@ -323,7 +323,9 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg);
 
 /*
  @description
-    Clears the connections, configurations, and clears the Toolkit. */
+    Clears the connections, configurations, and clears the Toolkit.
+ @warning
+    As this function should be called only once, it is not threadsafe. */
 void SOPC_LibSub_Clear(void);
 
 /*
