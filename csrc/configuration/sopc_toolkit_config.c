@@ -244,7 +244,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
                    (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) * sizeof(SOPC_Endpoint_Config*));
             SOPC_EventTimer_Initialize();
             SOPC_Sockets_Initialize();
-            SOPC_SecureChannels_Initialize();
+            SOPC_SecureChannels_Initialize(SOPC_Sockets_SetEventHandler);
             SOPC_Services_Initialize();
         }
 

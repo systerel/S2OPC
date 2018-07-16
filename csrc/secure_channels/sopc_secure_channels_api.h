@@ -64,7 +64,7 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
                                       void* params,
                                       uintptr_t auxParam);
 
-void SOPC_SecureChannels_Initialize(void);
+void SOPC_SecureChannels_Initialize(SOPC_SetListenerFunc setSocketsListener);
 
 void SOPC_SecureChannels_Clear(void);
 

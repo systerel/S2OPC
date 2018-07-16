@@ -54,6 +54,11 @@ typedef struct
 } SOPC_Event;
 
 /**
+ * \brief Function prototype for connecting an event emitter to a listener.
+ */
+typedef void (*SOPC_SetListenerFunc)(SOPC_EventHandler* handler);
+
+/**
  * \brief Function prototype for message processing callbacks.
  *
  * \p handler is a pointer to the \c SOPC_EventHandler invoking this callback,

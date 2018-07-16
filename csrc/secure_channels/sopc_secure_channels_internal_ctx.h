@@ -204,10 +204,9 @@ extern uint32_t lastSecureConnectionArrayIdx; // last secure connection index us
 extern SOPC_Looper* secureChannelsLooper;
 extern SOPC_EventHandler* secureChannelsInputEventHandler;
 extern SOPC_EventHandler* secureChannelsInternalEventHandler;
-extern SOPC_EventHandler* secureChannelsSocketsEventHandler;
 
 /** @brief Initialize the array of secure listeners/connections */
-void SOPC_SecureChannelsInternalContext_Initialize(void);
+void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc setSocketsListener);
 
 /** @brief Clear the array of secure listeners/connections */
 void SOPC_SecureChannelsInternalContext_Clear(void);
