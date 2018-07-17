@@ -36,6 +36,11 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                                                  void* params,
                                                  uintptr_t auxParam);
 
+void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent event,
+                                                uint32_t eltId,
+                                                void* params,
+                                                uintptr_t auxParam);
+
 void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                               uint32_t eltId,
                                               void* params,

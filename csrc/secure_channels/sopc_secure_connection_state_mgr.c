@@ -230,7 +230,7 @@ static uint32_t SC_StartConnectionEstablishTimer(uint32_t connectionIdx)
     event.event = TIMER_SC_CONNECTION_TIMEOUT;
     event.params = NULL;
     event.auxParam = 0;
-    return SOPC_EventTimer_Create(secureChannelsInputEventHandler, event, SOPC_SC_CONNECTION_TIMEOUT_MS);
+    return SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, SOPC_SC_CONNECTION_TIMEOUT_MS);
 }
 
 static uint32_t SC_Client_StartOPNrenewTimer(uint32_t connectionIdx, uint32_t timeoutMs)
@@ -241,7 +241,7 @@ static uint32_t SC_Client_StartOPNrenewTimer(uint32_t connectionIdx, uint32_t ti
     event.event = TIMER_SC_CLIENT_OPN_RENEW;
     event.params = NULL;
     event.auxParam = 0;
-    return SOPC_EventTimer_Create(secureChannelsInputEventHandler, event, timeoutMs);
+    return SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, timeoutMs);
 }
 
 static char* SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBuffer, SOPC_StatusCode* errorStatus)
@@ -2839,6 +2839,110 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
     }
 }
 
+void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent event,
+                                                uint32_t eltId,
+                                                void* params,
+                                                uintptr_t auxParam)
+{
+    (void) params;
+
+    switch (event)
+    {
+    /* Timer events */
+    case TIMER_SC_CONNECTION_TIMEOUT:
+    {
+        SOPC_Logger_TraceDebug("ScStateMgr: TIMER_SC_CONNECTION_TIMEOUT scIdx=%" PRIu32, eltId);
+
+        /* id = secure channel connection index*/
+        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+
+        if (scConnection == NULL)
+        {
+            return;
+        }
+
+        scConnection->connectionTimeoutTimerId = 0; // Timer is expired, do not keep reference on it
+
+        // Check SC valid + avoid to close a secure channel established just after timeout
+        if (scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
+            scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
+        {
+            // SC_TO_SE_SC_CONNECTION_TIMEOUT will be generated in close SC function fpr client side
+            SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadTimeout,
+                                     "SecureConnection: disconnected (TIMER_SC_CONNECTION_TIMEOUT event)");
+        }
+        break;
+    }
+    case TIMER_SC_CLIENT_OPN_RENEW:
+    {
+        SOPC_Logger_TraceDebug("ScStateMgr: TIMER_SC_CLIENT_OPN_RENEW scIdx=%" PRIu32, eltId);
+
+        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+
+        if (scConnection == NULL)
+        {
+            return;
+        }
+
+        scConnection->secuTokenRenewTimerId = 0; // Timer is expired, do not keep reference on it
+
+        if (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED && !scConnection->isServerConnection &&
+            !SC_ClientTransition_ScConnected_To_ScConnectedRenew(scConnection, eltId))
+        {
+            // Error case: close the connection
+            SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadTcpInternalError,
+                                     "Open secure channel forced renew failed");
+        }
+        break;
+    }
+    case TIMER_SC_REQUEST_TIMEOUT:
+    {
+        assert(auxParam <= UINT32_MAX);
+
+        SOPC_Logger_TraceDebug("ScStateMgr: TIMER_SC_REQUEST_TIMEOUT scIdx=%" PRIu32 " reqId=%" PRIuPTR, eltId,
+                               auxParam);
+
+        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+
+        if (scConnection == NULL)
+        {
+            return;
+        }
+
+        assert(scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED);
+
+        SOPC_SentRequestMsg_Context* msgCtx =
+            SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, (uint32_t) auxParam);
+
+        if (msgCtx == NULL)
+        {
+            return;
+        }
+
+        switch (msgCtx->msgType)
+        {
+        case SOPC_MSG_TYPE_SC_MSG:
+            // Notifies the upper layer
+            SOPC_Services_EnqueueEvent(SC_TO_SE_REQUEST_TIMEOUT, eltId, NULL, msgCtx->requestHandle);
+            break;
+        case SOPC_MSG_TYPE_SC_OPN:
+            SOPC_Logger_TraceError("ScStateMgr: OPN request timeout for response on scId=%" PRIu32, eltId);
+            // The secure channel will then stay in RENEW if no response received
+            break;
+        default:
+            // Other cases are also covered by the SC establishment timeout: no other action to do
+            break;
+        }
+
+        free(msgCtx);
+
+        break;
+    }
+    default:
+        assert(false);
+    }
+}
+
 void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                               uint32_t eltId,
                                               void* params,
@@ -2961,79 +3065,6 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         else
         {
             SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_MSG_CHUNKS, eltId, params, auxParam);
-        }
-        break;
-    /* Timer events */
-    case TIMER_SC_CONNECTION_TIMEOUT:
-        SOPC_Logger_TraceDebug("ScStateMgr: TIMER_SC_CONNECTION_TIMEOUT scIdx=%" PRIu32, eltId);
-
-        /* id = secure channel connection index*/
-        scConnection = SC_GetConnection(eltId);
-
-        if (scConnection != NULL)
-        {
-            scConnection->connectionTimeoutTimerId = 0; // Timer is expired, do not keep reference on it
-            // Check SC valid + avoid to close a secure channel established just after timeout
-            if (scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
-                scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
-            {
-                // SC_TO_SE_SC_CONNECTION_TIMEOUT will be generated in close SC function fpr client side
-                SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadTimeout,
-                                         "SecureConnection: disconnected (TIMER_SC_CONNECTION_TIMEOUT event)");
-            }
-        }
-        break;
-
-    case TIMER_SC_CLIENT_OPN_RENEW:
-        SOPC_Logger_TraceDebug("ScStateMgr: TIMER_SC_CLIENT_OPN_RENEW scIdx=%" PRIu32, eltId);
-
-        scConnection = SC_GetConnection(eltId);
-        if (scConnection != NULL)
-        {
-            scConnection->secuTokenRenewTimerId = 0; // Timer is expired, do not keep reference on it
-            if (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED &&
-                false == scConnection->isServerConnection)
-            {
-                result = SC_ClientTransition_ScConnected_To_ScConnectedRenew(scConnection, eltId);
-            }
-
-            if (false == result)
-            {
-                // Error case: close the connection
-                SC_CloseSecureConnection(scConnection, eltId, false, OpcUa_BadTcpInternalError,
-                                         "Open secure channel forced renew failed");
-            }
-        }
-        break;
-
-    case TIMER_SC_REQUEST_TIMEOUT:
-        SOPC_Logger_TraceDebug("ScStateMgr: TIMER_SC_REQUEST_TIMEOUT scIdx=%" PRIu32 " reqId=%" PRIuPTR, eltId,
-                               auxParam);
-
-        scConnection = SC_GetConnection(eltId);
-        if (scConnection != NULL && auxParam <= UINT32_MAX)
-        {
-            assert(scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED);
-
-            SOPC_SentRequestMsg_Context* msgCtx = NULL;
-            msgCtx = SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, (uint32_t) auxParam);
-            if (NULL != msgCtx)
-            {
-                switch (msgCtx->msgType)
-                {
-                case SOPC_MSG_TYPE_SC_MSG:
-                    // Notifies the upper layer
-                    SOPC_Services_EnqueueEvent(SC_TO_SE_REQUEST_TIMEOUT, eltId, NULL, msgCtx->requestHandle);
-                    break;
-                case SOPC_MSG_TYPE_SC_OPN:
-                    SOPC_Logger_TraceError("ScStateMgr: OPN request timeout for response on scId=%" PRIu32, eltId);
-                    // The secure channel will then stay in RENEW if no response received
-                    break;
-                default:
-                    // Other cases are also covered by the SC establishment timeout: no other action to do
-                    break;
-                }
-            }
         }
         break;
     default:

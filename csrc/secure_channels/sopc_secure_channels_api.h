@@ -36,8 +36,6 @@
  *  \brief Secure channel input events
  *  */
 typedef enum {
-    /* External events */
-    /* Services events */
     EP_OPEN,            /* id = endpoint description configuration index */
     EP_CLOSE,           /* id = endpoint description configuration index */
     SC_CONNECT,         /* id = secure channel connection configuration index */
@@ -47,14 +45,6 @@ typedef enum {
                           followed by encoded OpcUa message,
                           auxParam = (uint32_t) request Id context if response (server) / request Handle context if
                           request (client) */
-
-    /* Timer events */
-    TIMER_SC_CONNECTION_TIMEOUT, /* id = secure channel connection index */
-    TIMER_SC_CLIENT_OPN_RENEW,   /* id = secure channel connection index */
-    TIMER_SC_REQUEST_TIMEOUT,    /* id = secure channel connection index
-                                    auxParam = (uint32_t) requestId
-                                  */
-
 } SOPC_SecureChannels_InputEvent;
 
 /* Secure channel external event enqueue function

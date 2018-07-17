@@ -70,6 +70,13 @@ typedef enum {
                  // auxParam = (SOPC_StatusCode) errorStatus
 } SOPC_SecureChannels_InternalEvent;
 
+typedef enum {
+    TIMER_SC_CONNECTION_TIMEOUT, /* id = secure channel connection index */
+    TIMER_SC_CLIENT_OPN_RENEW,   /* id = secure channel connection index */
+    TIMER_SC_REQUEST_TIMEOUT,    /* id = secure channel connection index
+                                    auxParam = (uint32_t) requestId */
+} SOPC_SecureChannels_TimerEvent;
+
 // Secure channel internal event enqueue function
 void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InternalEvent event,
                                               uint32_t id,

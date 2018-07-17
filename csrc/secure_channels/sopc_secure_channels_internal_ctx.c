@@ -32,6 +32,7 @@ SOPC_Looper* secureChannelsLooper = NULL;
 SOPC_EventHandler* secureChannelsInputEventHandler = NULL;
 SOPC_EventHandler* secureChannelsInternalEventHandler = NULL;
 SOPC_EventHandler* secureChannelsSocketsEventHandler = NULL;
+SOPC_EventHandler* secureChannelsTimerEventHandler = NULL;
 
 void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc setSocketsListener)
 {
@@ -52,6 +53,9 @@ void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc setSocke
     secureChannelsSocketsEventHandler =
         SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnSocketsEvent);
     assert(secureChannelsSocketsEventHandler != NULL);
+
+    secureChannelsTimerEventHandler = SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnTimerEvent);
+    assert(secureChannelsTimerEventHandler != NULL);
 
     setSocketsListener(secureChannelsSocketsEventHandler);
 }

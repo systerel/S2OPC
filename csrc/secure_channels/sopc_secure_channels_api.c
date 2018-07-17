@@ -109,6 +109,16 @@ void SOPC_SecureChannels_OnSocketsEvent(SOPC_EventHandler* handler,
     }
 }
 
+void SOPC_SecureChannels_OnTimerEvent(SOPC_EventHandler* handler,
+                                      int32_t event,
+                                      uint32_t id,
+                                      void* params,
+                                      uintptr_t auxParam)
+{
+    (void) handler;
+    SOPC_SecureConnectionStateMgr_OnTimerEvent((SOPC_SecureChannels_TimerEvent) event, id, params, auxParam);
+}
+
 void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
                                       int32_t event,
                                       uint32_t eltId,
@@ -128,9 +138,6 @@ void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
         break;
     /* Services manager -> SC connection state manager */
     case SC_CONNECT:
-    case TIMER_SC_CONNECTION_TIMEOUT:
-    case TIMER_SC_CLIENT_OPN_RENEW:
-    case TIMER_SC_REQUEST_TIMEOUT:
     case SC_DISCONNECT:
     case SC_SERVICE_SND_MSG:
         SOPC_SecureConnectionStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
@@ -153,8 +160,6 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
     case EP_OPEN:
     case EP_CLOSE:
     case SC_CONNECT:
-    case TIMER_SC_CLIENT_OPN_RENEW:
-    case TIMER_SC_CONNECTION_TIMEOUT:
     case SC_DISCONNECT:
     case SC_SERVICE_SND_MSG:
         SOPC_EventHandler_Post(secureChannelsInputEventHandler, (int32_t) scEvent, id, params, auxParam);
