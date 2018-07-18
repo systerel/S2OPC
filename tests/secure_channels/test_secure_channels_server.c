@@ -28,6 +28,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
 #include "sopc_pki_stack.h"
+#include "sopc_protocol_constants.h"
 
 #include "sopc_encoder.h"
 #include "sopc_secure_channels_api.h"

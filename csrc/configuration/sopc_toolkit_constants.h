@@ -38,37 +38,6 @@
 
 #define SOPC_TOOLKIT_VERSION "0.5.0*"
 
-/* OPC UA SPECIFICATION CONFIGURATION */
-
-/** @brief Version of the used protocol */
-#define SOPC_PROTOCOL_VERSION 0
-
-#define SOPC_TCP_UA_MIN_BUFFER_SIZE \
-    8192 // now defined only for OPC UA Secure Conversation (minimum chunk size): see mantis #3447
-
-#define SOPC_TCP_UA_MAX_URL_LENGTH 4096 // see Part 6 Table 35
-
-/* Length of a TCP UA message Header */
-#define SOPC_TCP_UA_HEADER_LENGTH 8
-/* Length of a TCP UA ACK message */
-#define SOPC_TCP_UA_ACK_MSG_LENGTH 28
-/* Minimum length of a TCP UA HELLO message (without including URL string content but only its size)*/
-#define SOPC_TCP_UA_HEL_MIN_MSG_LENGTH 32
-/* Minimum length of a TCP UA ERROR message */
-#define SOPC_TCP_UA_ERR_MIN_MSG_LENGTH 16
-
-/* Position of MessageSize header field in a UA message chunk*/
-#define SOPC_UA_HEADER_LENGTH_POSITION 4
-/* Position of IsFinal header field in a UA message chunk*/
-#define SOPC_UA_HEADER_ISFINAL_POSITION 3
-
-/* Length of an UA secure message chunk header */
-#define SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH 12
-/* Length of an UA symmetric security header chunk header */
-#define SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH 4
-/* Length of an UA secure message chunk sequence header */
-#define SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
-
 /* SOPC return statuses */
 typedef enum SOPC_ReturnStatus
 {

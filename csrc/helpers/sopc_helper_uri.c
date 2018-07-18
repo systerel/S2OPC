@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "sopc_helper_string.h"
+#include "sopc_protocol_constants.h"
 #include "sopc_toolkit_constants.h"
 
 bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size_t* portIdx, size_t* portLength)
