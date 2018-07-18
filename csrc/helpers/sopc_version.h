@@ -17,30 +17,24 @@
  * under the License.
  */
 
-/** \file
+/**
  *
- * \brief Contains the constants used by the Tookit. Those constants are not intended to be modified.
+ * \brief Holds the version of the toolkit.
  *
  */
 
-#ifndef SOPC_TOOLKIT_CONSTANTS_H_
-#define SOPC_TOOLKIT_CONSTANTS_H_
+#ifndef SOPC_VERSION_H_
+#define SOPC_VERSION_H_
 
-#include "sopc_toolkit_config_constants.h"
+/** @brief Version of the toolkit */
+#define SOPC_TOOLKIT_VERSION_MAJOR 0
+#define SOPC_TOOLKIT_VERSION_MEDIUM 5
+#define SOPC_TOOLKIT_VERSION_MINOR 0
 
-/* SOPC return statuses */
-typedef enum SOPC_ReturnStatus
-{
-    SOPC_STATUS_OK = 0,
-    SOPC_STATUS_NOK,
-    SOPC_STATUS_INVALID_PARAMETERS,
-    SOPC_STATUS_INVALID_STATE,
-    SOPC_STATUS_ENCODING_ERROR,
-    SOPC_STATUS_WOULD_BLOCK,
-    SOPC_STATUS_TIMEOUT,
-    SOPC_STATUS_OUT_OF_MEMORY,
-    SOPC_STATUS_CLOSED,
-    SOPC_STATUS_NOT_SUPPORTED
-} SOPC_ReturnStatus;
+#define Q(x) #x
+#define QUOTE(x) Q(x)
 
-#endif /* SOPC_TOOLKIT_CONSTANTS_H_ */
+#define SOPC_TOOLKIT_VERSION \
+    QUOTE(SOPC_TOOLKIT_VERSION_MAJOR) "." QUOTE(SOPC_TOOLKIT_VERSION_MEDIUM) "." QUOTE(SOPC_TOOLKIT_VERSION_MINOR) "*"
+
+#endif /* SOPC_VERSION_H_ */

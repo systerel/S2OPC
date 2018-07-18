@@ -21,6 +21,7 @@
 #define _sopc_toolkit_build_info_h
 #include "sopc_toolkit_constants.h"
 #include "sopc_user_app_itf.h"
+#include "sopc_version.h"
 const SOPC_Build_Info toolkit_build_info = {
 .toolkitVersion = SOPC_TOOLKIT_VERSION,
 .toolkitSrcCommit = "Unknown_Revision",
