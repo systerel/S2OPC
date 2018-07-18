@@ -30,6 +30,7 @@
 
 #include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
+#include "sopc_macros.h"
 #include "sopc_pki_stack.h"
 
 #include "pki_permissive.h"

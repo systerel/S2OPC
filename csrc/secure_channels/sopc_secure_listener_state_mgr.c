@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_secure_channels_api_internal.h"
 #include "sopc_secure_channels_internal_ctx.h"

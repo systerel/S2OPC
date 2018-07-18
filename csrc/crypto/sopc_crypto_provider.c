@@ -25,6 +25,7 @@
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
+#include "sopc_macros.h"
 #include "sopc_pki.h"
 #include "sopc_secret_buffer.h"
 

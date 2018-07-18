@@ -21,6 +21,8 @@
 
 #include "pki_permissive.h"
 
+#include "sopc_macros.h"
+
 static SOPC_ReturnStatus PKIPermissive_ValidateAnything(const SOPC_PKIProvider* pPKI,
                                                         const SOPC_Certificate* pToValidate)
 {

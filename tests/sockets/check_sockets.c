@@ -31,6 +31,7 @@
 #include <stdlib.h>
 
 #include "sopc_buffer.h"
+#include "sopc_macros.h"
 
 #include "sopc_async_queue.h"
 #include "sopc_event_timer_manager.h"

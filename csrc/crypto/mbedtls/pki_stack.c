@@ -27,6 +27,8 @@
 
 #include <stdlib.h>
 
+#include "sopc_macros.h"
+
 #include "../sopc_crypto_provider.h"
 #include "../sopc_key_manager.h"
 #include "../sopc_pki.h"

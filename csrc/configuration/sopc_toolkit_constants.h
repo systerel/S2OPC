@@ -53,12 +53,4 @@ typedef enum SOPC_ReturnStatus
     SOPC_STATUS_NOT_SUPPORTED
 } SOPC_ReturnStatus;
 
-#if defined(__GNUC__) && (__GNUC__ > 4) && !defined(__clang__)
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST _Pragma("GCC diagnostic ignored \"-Wcast-qual\"");
-#define SOPC_GCC_DIAGNOSTIC_RESTORE _Pragma("GCC diagnostic pop")
-#else
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-#define SOPC_GCC_DIAGNOSTIC_RESTORE
-#endif
-
 #endif /* SOPC_TOOLKIT_CONSTANTS_H_ */

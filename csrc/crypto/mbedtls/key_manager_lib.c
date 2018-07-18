@@ -22,6 +22,8 @@
 
 #include "key_manager_lib.h"
 
+#include "sopc_macros.h"
+
 #include "../sopc_crypto_profiles.h"
 #include "../sopc_crypto_provider.h"
 #include "../sopc_key_manager.h"

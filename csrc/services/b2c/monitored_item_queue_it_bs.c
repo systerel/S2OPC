@@ -21,6 +21,8 @@
 
 #include <assert.h>
 
+#include "sopc_macros.h"
+
 /*--------------
    SEES Clause
   --------------*/
