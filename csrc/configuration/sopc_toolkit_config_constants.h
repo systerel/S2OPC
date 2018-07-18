@@ -179,4 +179,6 @@
 #define SOPC_MAX_OPERATIONS_PER_MSG 100000
 #endif
 
+#include "sopc_config_constants_check.h"
+
 #endif /* SOPC_TOOLKIT_CONFIG_CONSTANTS_H_ */

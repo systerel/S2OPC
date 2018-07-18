@@ -28,9 +28,6 @@
 
 #include "sopc_toolkit_config_constants.h"
 
-/* Check configured constants values */
-#include "sopc_config_constants_check.h"
-
 /** @brief Version of the toolkit */
 #define SOPC_TOOLKIT_VERSION_MAJOR 0
 #define SOPC_TOOLKIT_VERSION_MEDIUM 5
