@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 
-#include "sopc_toolkit_constants.h"
+#include "sopc_enums.h"
 
 /**
  * \brief Processes messages from a queue.

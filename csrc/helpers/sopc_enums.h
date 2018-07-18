@@ -17,16 +17,14 @@
  * under the License.
  */
 
-/** \file
+/**
  *
- * \brief Contains the constants used by the Tookit. Those constants are not intended to be modified.
+ * \brief Common enumerations for S2OPC.
  *
  */
 
-#ifndef SOPC_TOOLKIT_CONSTANTS_H_
-#define SOPC_TOOLKIT_CONSTANTS_H_
-
-#include "sopc_toolkit_config_constants.h"
+#ifndef SOPC_ENUMS_H_
+#define SOPC_ENUMS_H_
 
 /* SOPC return statuses */
 typedef enum SOPC_ReturnStatus
@@ -43,4 +41,4 @@ typedef enum SOPC_ReturnStatus
     SOPC_STATUS_NOT_SUPPORTED
 } SOPC_ReturnStatus;
 
-#endif /* SOPC_TOOLKIT_CONSTANTS_H_ */
+#endif // SOPC_ENUMS_H_

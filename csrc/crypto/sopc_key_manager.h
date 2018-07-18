@@ -33,7 +33,6 @@
 #include "sopc_buffer.h"
 #include "sopc_crypto_decl.h"
 #include "sopc_secret_buffer.h"
-#include "sopc_toolkit_constants.h"
 
 /**
  * \brief A serialized representation of an asymmetric key.

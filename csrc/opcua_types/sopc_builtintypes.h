@@ -26,8 +26,8 @@
 
 #include "sopc_dict.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_enums.h"
 #include "sopc_numeric_range.h"
-#include "sopc_toolkit_constants.h"
 
 typedef uint32_t SOPC_StatusCode;
 

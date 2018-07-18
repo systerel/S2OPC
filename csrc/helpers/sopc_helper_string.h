@@ -23,7 +23,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
-#include "sopc_toolkit_constants.h"
+#include "sopc_enums.h"
 
 /**
  *  \brief Compare 2 string in a case-insensitive manner.

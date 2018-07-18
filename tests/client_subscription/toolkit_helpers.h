@@ -32,13 +32,12 @@
 #include <stdbool.h>
 
 #include "sopc_key_manager.h"
-#include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
 
 /* The following includes are required to fetch the SOPC_LibSub_Value, SOPC_LibSub_DataTime and logger types */
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
-#include "sopc_toolkit_constants.h"
+#include "sopc_log_manager.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 #define SKIP_S2OPC_DEFINITIONS

@@ -34,7 +34,7 @@
 #include <stdint.h>
 
 #include "sopc_builtintypes.h"
-#include "sopc_toolkit_constants.h"
+#include "sopc_enums.h"
 #include "sopc_user_app_itf.h"
 
 /**

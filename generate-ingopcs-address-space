@@ -123,8 +123,8 @@ c_header = '''
 
 #include "opcua_statuscodes.h"
 
-#include "sopc_toolkit_constants.h"
 #include "sopc_builtintypes.h"
+#include "sopc_enums.h"
 #include "sopc_types.h"
 
 '''.lstrip()

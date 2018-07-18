@@ -33,7 +33,6 @@
 #include "sopc_sockets_api.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
-#include "sopc_toolkit_constants.h"
 
 #include "sopc_services_api.h"
 

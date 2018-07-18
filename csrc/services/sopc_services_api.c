@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "sopc_enums.h"
 #include "sopc_logger.h"
 #include "sopc_mutexes.h"
 #include "sopc_secure_channels_api.h"
@@ -30,7 +31,6 @@
 #include "sopc_services_api_internal.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
-#include "sopc_toolkit_constants.h"
 #include "sopc_user_app_itf.h"
 
 #include "io_dispatch_mgr.h"

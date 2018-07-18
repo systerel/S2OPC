@@ -30,7 +30,6 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
-#include "sopc_toolkit_constants.h"
 
 /**
  *  \brief           Instantiate and initialize an encodeable object of the given encodeable type

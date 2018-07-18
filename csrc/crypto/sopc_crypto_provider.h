@@ -32,7 +32,7 @@
 #include "sopc_pki.h"
 #include "sopc_secret_buffer.h"
 
-#include "sopc_toolkit_constants.h"
+#include "sopc_enums.h"
 
 /**
  * \brief   The CryptoProvider context.

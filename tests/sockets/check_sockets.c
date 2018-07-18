@@ -36,6 +36,7 @@
 #include "sopc_async_queue.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_sockets_api.h"
+#include "sopc_toolkit_config_constants.h"
 
 const char* uri = "opc.tcp://localhost:4841/myEndPoint";
 const uint32_t endpointDescConfigId = 10;

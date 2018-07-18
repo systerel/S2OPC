@@ -30,7 +30,7 @@
 #include <stdint.h>
 
 #include "sopc_buffer.h"
-#include "sopc_toolkit_constants.h"
+#include "sopc_enums.h"
 
 /**
  *  \brief Initialization function generic signature for an encodeable object

@@ -37,9 +37,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_time.h"
-#include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
-#include "sopc_user_app_itf.h"
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
 

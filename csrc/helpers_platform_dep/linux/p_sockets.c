@@ -26,6 +26,7 @@
 #include <linux/in6.h>
 #endif
 #include <netinet/tcp.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 

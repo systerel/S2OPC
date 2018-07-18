@@ -39,7 +39,6 @@
 #include "sopc_singly_linked_list.h"
 #include "sopc_sockets_api.h"
 #include "sopc_toolkit_config_internal.h"
-#include "sopc_toolkit_constants.h"
 
 static const uint8_t SOPC_HEL[3] = {'H', 'E', 'L'};
 static const uint8_t SOPC_ACK[3] = {'A', 'C', 'K'};

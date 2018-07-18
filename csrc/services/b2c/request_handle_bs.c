@@ -28,7 +28,6 @@
 
 #include "sopc_event_timer_manager.h"
 #include "sopc_services_api.h"
-#include "sopc_toolkit_constants.h"
 
 typedef struct
 {

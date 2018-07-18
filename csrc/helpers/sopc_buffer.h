@@ -26,9 +26,10 @@
 #ifndef SOPC_BUFFER_H_
 #define SOPC_BUFFER_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 
-#include "sopc_toolkit_constants.h"
+#include "sopc_enums.h"
 
 /**
  *  \brief Bytes buffer structure

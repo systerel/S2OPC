@@ -21,8 +21,9 @@
 #define SOPC_NUMERIC_RANGE_H
 
 #include <stddef.h>
+#include <stdint.h>
 
-#include "sopc_toolkit_constants.h"
+#include "sopc_enums.h"
 
 typedef struct _SOPC_Dimension
 {

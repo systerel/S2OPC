@@ -32,8 +32,6 @@
 #ifndef OpcUa_Identifiers_H_
 #define OpcUa_Identifiers_H_ 1
 
-#include "sopc_toolkit_constants.h"
-
 #define OPCUA_NAMESPACE_INDEX 0
 /*============================================================================
  * DataType Identifiers

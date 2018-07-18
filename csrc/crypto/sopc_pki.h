@@ -38,7 +38,6 @@
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_key_manager.h"
-#include "sopc_toolkit_constants.h"
 
 typedef void (*SOPC_PKIProvider_Free_Func)(SOPC_PKIProvider* pPKI);
 typedef SOPC_ReturnStatus (*SOPC_FnValidateCertificate)(const struct SOPC_PKIProvider* pPKI,

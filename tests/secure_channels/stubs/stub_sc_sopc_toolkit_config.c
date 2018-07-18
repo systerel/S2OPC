@@ -39,6 +39,7 @@
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_time.h"
+#include "sopc_toolkit_config_constants.h"
 
 #include "util_b2c.h"
 

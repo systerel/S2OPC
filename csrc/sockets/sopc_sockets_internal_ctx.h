@@ -27,7 +27,7 @@
 #include "sopc_mutexes.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_sockets_api.h"
-#include "sopc_toolkit_constants.h"
+#include "sopc_toolkit_config_constants.h"
 
 typedef enum
 {

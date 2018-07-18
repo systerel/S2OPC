@@ -27,7 +27,7 @@
 
 #include <stdbool.h>
 #include "../sopc_crypto_decl.h"
-#include "sopc_toolkit_constants.h"
+#include "sopc_enums.h"
 
 #include "mbedtls/pk.h"
 #include "mbedtls/x509_crt.h"

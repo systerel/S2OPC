@@ -28,7 +28,7 @@
 #define SOPC_CRYPTO_PROFILES_H_
 
 #include "sopc_crypto_decl.h"
-#include "sopc_toolkit_constants.h"
+#include "sopc_enums.h"
 
 // API
 const SOPC_CryptoProfile* SOPC_CryptoProfile_Get(const char* uri);

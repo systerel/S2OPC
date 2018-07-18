@@ -32,8 +32,6 @@
 #ifndef OpcUa_StatusCodes_H_
 #define OpcUa_StatusCodes_H_ 1
 
-#include "sopc_toolkit_constants.h"
-
 /*============================================================================
  * An unexpected error occurred.
  *===========================================================================*/

@@ -49,7 +49,6 @@
  * To use the LibSub with other parts of the S2OPC Toolkit, you shall define SKIP_S2OPC_DEFINITIONS
  * and includes the following files before including this header:
  *  sopc_builtintypes.h
- *  sopc_toolkit_constants.h
  *  sopc_user_app_itf.h
  */
 #ifndef SKIP_S2OPC_DEFINITIONS

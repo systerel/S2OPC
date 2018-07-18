@@ -28,8 +28,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sopc_toolkit_constants.h"
-
 /* Note: due to request handle generation on client side, request handle is unique regardless the session */
 /* Same size of array than request handles array */
 static constants__t_session_i client_requests[SOPC_MAX_PENDING_REQUESTS + 1];

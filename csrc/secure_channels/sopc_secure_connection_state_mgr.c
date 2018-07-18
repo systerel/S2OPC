@@ -44,7 +44,6 @@
 #include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
-#include "sopc_toolkit_constants.h"
 
 bool SC_InitNewConnection(uint32_t* newConnectionIdx)
 {
