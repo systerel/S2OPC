@@ -29,6 +29,15 @@
 #include "sopc_builtintypes.h"
 
 /**
+ * \brief the toolkit provide and use monotonic clock for time references (used for timers)
+ * Note: it is possible to set the clock as non monotonic defining variable on configuration. Otherwise default value is
+ * true.
+ */
+#ifndef SOPC_MONOTONIC_CLOCK
+#define SOPC_MONOTONIC_CLOCK true
+#endif
+
+/**
  * Time reference type (milliseconds)
  */
 typedef uint64_t SOPC_TimeReference;
