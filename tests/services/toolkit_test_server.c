@@ -292,11 +292,14 @@ int main(int argc, char* argv[])
         }
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
+    }
+
     // Define server address space
     if (SOPC_STATUS_OK == status)
     {
-        assert(SOPC_STATUS_OK == SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG));
-
 #ifdef WITH_EXPAT
         const char* xml_file_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
 

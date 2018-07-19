@@ -69,7 +69,8 @@ SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     /* Add the SecureChannel configuration */
     if (SOPC_STATUS_OK == status)
@@ -100,7 +101,8 @@ SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM)
         pSM->state = stError;
     }
 
-    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -121,13 +123,15 @@ static SOPC_ReturnStatus ActivateSession(StateMachine_Machine* pSM, activation_t
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     if (pSM->state != stConfigured)
     {
         printf("# Error: The state machine shall be in stConfigured state to start a session.\n");
         pSM->state = stError;
-        assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+        mutStatus = Mutex_Unlock(&pSM->mutex);
+        assert(SOPC_STATUS_OK == mutStatus);
         return SOPC_STATUS_NOK;
     }
 
@@ -144,7 +148,8 @@ static SOPC_ReturnStatus ActivateSession(StateMachine_Machine* pSM, activation_t
     }
 
     pSM->state = stActivating;
-    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     return SOPC_STATUS_OK;
 }
@@ -189,7 +194,8 @@ SOPC_ReturnStatus StateMachine_StopSession(StateMachine_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -209,7 +215,8 @@ SOPC_ReturnStatus StateMachine_StopSession(StateMachine_Machine* pSM)
         pSM->state = stError;
     }
 
-    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -221,7 +228,8 @@ SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     OpcUa_GetEndpointsRequest* pReq = NULL;
@@ -277,7 +285,8 @@ SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM)
         }
     }
 
-    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -289,7 +298,8 @@ SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     OpcUa_FindServersRequest* pReq = NULL;
@@ -347,7 +357,8 @@ SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM)
         }
     }
 
-    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -359,7 +370,8 @@ SOPC_ReturnStatus StateMachine_SendRequest(StateMachine_Machine* pSM, void* requ
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     StateMachine_RequestContext* ctx = calloc(1, sizeof(StateMachine_RequestContext));
 
@@ -380,7 +392,8 @@ SOPC_ReturnStatus StateMachine_SendRequest(StateMachine_Machine* pSM, void* requ
     pSM->pCtxRequest->appCtx = appCtx;
     SOPC_ToolkitClient_AsyncSendRequestOnSession(pSM->iSessionID, requestStruct, (uintptr_t) pSM->pCtxRequest);
 
-    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     return SOPC_STATUS_OK;
 }
@@ -392,9 +405,11 @@ bool StateMachine_IsConnectable(StateMachine_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
     bool is_connectable = stConfigured == pSM->state;
-    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+    status = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
 
     return is_connectable;
 }
@@ -406,9 +421,11 @@ bool StateMachine_IsConnected(StateMachine_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
     bool bConnected = is_connected_unlocked(pSM);
-    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+    status = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
 
     return bConnected;
 }
@@ -420,9 +437,11 @@ bool StateMachine_IsDiscovering(StateMachine_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
     bool is_discovering = stDiscovering == pSM->state;
-    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+    status = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
 
     return is_discovering;
 }
@@ -434,7 +453,8 @@ bool StateMachine_IsIdle(StateMachine_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
 
     bool bIdle = false;
 
@@ -449,7 +469,8 @@ bool StateMachine_IsIdle(StateMachine_Machine* pSM)
         break;
     }
 
-    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+    status = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
 
     return bIdle;
 }
@@ -465,13 +486,15 @@ void StateMachine_Delete(StateMachine_Machine** ppSM)
 
     pSM = *ppSM;
 
-    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
     free(pSM->pCtxSession);
     pSM->pCtxSession = NULL;
     free(pSM->pCtxRequest);
     pSM->pCtxRequest = NULL;
     Config_DeleteSCConfig(&(pSM->pscConfig));
-    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+    status = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
     Mutex_Clear(&pSM->mutex);
     free(pSM);
     *ppSM = NULL;
@@ -492,7 +515,8 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
         return false;
     }
 
-    assert(Mutex_Lock(&pSM->mutex) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
 
     /* Is this event targeted to the machine? */
     if (bProcess)
@@ -629,7 +653,8 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
         }
     }
 
-    assert(Mutex_Unlock(&pSM->mutex) == SOPC_STATUS_OK);
+    status = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
 
     return bProcess;
 }

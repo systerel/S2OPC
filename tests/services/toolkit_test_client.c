@@ -360,11 +360,14 @@ int main(void)
         }
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
+    }
+
     // Set an address space (to could check test result valid)
     if (SOPC_STATUS_OK == status)
     {
-        assert(SOPC_STATUS_OK == SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG));
-
         // NECESSARY ONLY FOR TEST PURPOSES: a client should not define an @ space in a nominal case
         status = SOPC_ToolkitServer_SetAddressSpaceConfig(address_space);
         if (SOPC_STATUS_OK != status)

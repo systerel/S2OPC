@@ -43,11 +43,13 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 
     SOPC_Buffer* sopc_buffer = SOPC_Buffer_Create((uint32_t) len);
     assert(sopc_buffer != NULL);
-    assert(SOPC_Buffer_Write(sopc_buffer, buf, (uint32_t) len) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(sopc_buffer, buf, (uint32_t) len);
+    assert(SOPC_STATUS_OK == status);
     SOPC_Buffer_SetPosition(sopc_buffer, 0);
 
     uint32_t conn_idx;
-    assert(SC_InitNewConnection(&conn_idx));
+    bool init = SC_InitNewConnection(&conn_idx);
+    assert(init);
     SOPC_SecureConnection* sc = SC_GetConnection(conn_idx);
     sc->isServerConnection = true;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &sc->chunksCtx;

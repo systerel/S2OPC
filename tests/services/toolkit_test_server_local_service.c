@@ -246,10 +246,14 @@ int main(int argc, char* argv[])
         }
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
+    }
+
     // Define server address space
     if (SOPC_STATUS_OK == status)
     {
-        assert(SOPC_STATUS_OK == SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG));
         status = SOPC_ToolkitServer_SetAddressSpaceConfig(address_space);
         if (SOPC_STATUS_OK != status)
         {

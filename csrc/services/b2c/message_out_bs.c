@@ -332,8 +332,8 @@ void message_out_bs__write_activate_msg_user(const constants__t_msg_i message_ou
 {
     OpcUa_ActivateSessionRequest* req = (OpcUa_ActivateSessionRequest*) message_out_bs__msg;
 
-    /* TODO: deal with this runtime error without assert */
-    assert(SOPC_STATUS_OK == SOPC_ExtensionObject_Copy(&req->UserIdentityToken, message_out_bs__p_user_token));
+    SOPC_ReturnStatus status = SOPC_ExtensionObject_Copy(&req->UserIdentityToken, message_out_bs__p_user_token);
+    assert(SOPC_STATUS_OK == status);
     /* SOPC_ExtensionObject_Copy does only a shallow copy, and generated OPC-UA types don't have a copy function */
     /* TODO: invent a better copy */
     assert(SOPC_ExtObjBodyEncoding_Object == req->UserIdentityToken.Encoding);
@@ -343,7 +343,8 @@ void message_out_bs__write_activate_msg_user(const constants__t_msg_i message_ou
             (OpcUa_AnonymousIdentityToken*) (message_out_bs__p_user_token->Body.Object.Value);
         OpcUa_AnonymousIdentityToken* dst = (OpcUa_AnonymousIdentityToken*) (req->UserIdentityToken.Body.Object.Value);
         SOPC_String_Initialize(&dst->PolicyId);
-        assert(SOPC_STATUS_OK == SOPC_String_Copy(&dst->PolicyId, &src->PolicyId));
+        status = SOPC_String_Copy(&dst->PolicyId, &src->PolicyId);
+        assert(SOPC_STATUS_OK == status);
     }
     else if (req->UserIdentityToken.Body.Object.ObjType == &OpcUa_UserNameIdentityToken_EncodeableType)
     {
@@ -354,10 +355,14 @@ void message_out_bs__write_activate_msg_user(const constants__t_msg_i message_ou
         SOPC_String_Initialize(&dst->UserName);
         SOPC_ByteString_Initialize(&dst->Password);
         SOPC_String_Initialize(&dst->EncryptionAlgorithm);
-        assert(SOPC_STATUS_OK == SOPC_String_Copy(&dst->PolicyId, &src->PolicyId));
-        assert(SOPC_STATUS_OK == SOPC_String_Copy(&dst->UserName, &src->UserName));
-        assert(SOPC_STATUS_OK == SOPC_ByteString_Copy(&dst->Password, &src->Password));
-        assert(SOPC_STATUS_OK == SOPC_String_Copy(&dst->EncryptionAlgorithm, &src->EncryptionAlgorithm));
+        status = SOPC_String_Copy(&dst->PolicyId, &src->PolicyId);
+        assert(SOPC_STATUS_OK == status);
+        status = SOPC_String_Copy(&dst->UserName, &src->UserName);
+        assert(SOPC_STATUS_OK == status);
+        status = SOPC_ByteString_Copy(&dst->Password, &src->Password);
+        assert(SOPC_STATUS_OK == status);
+        status = SOPC_String_Copy(&dst->EncryptionAlgorithm, &src->EncryptionAlgorithm);
+        assert(SOPC_STATUS_OK == status);
     }
     else
     {

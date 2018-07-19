@@ -354,7 +354,8 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
     if (shutdown)
     {
         assert(ctx->status != BENCH_RUNNING);
-        assert(Condition_SignalAll(&ctx->run_cond) == SOPC_STATUS_OK);
+        SOPC_ReturnStatus status = Condition_SignalAll(&ctx->run_cond);
+        assert(SOPC_STATUS_OK == status);
     }
 }
 
@@ -572,9 +573,12 @@ int main(int argc, char** argv)
     struct app_ctx_t ctx;
     memset(&ctx, 0, sizeof(struct app_ctx_t));
 
-    assert(Mutex_Initialization(&ctx.run_mutex) == SOPC_STATUS_OK);
-    assert(Mutex_Lock(&ctx.run_mutex) == SOPC_STATUS_OK);
-    assert(Condition_Init(&ctx.run_cond) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus mutStatus = Mutex_Initialization(&ctx.run_mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
+    mutStatus = Mutex_Lock(&ctx.run_mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
+    mutStatus = Condition_Init(&ctx.run_cond);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     ctx.address_space_size = (size_t) as_size;
     ctx.request_size = (size_t) request_size;
@@ -627,7 +631,8 @@ int main(int argc, char** argv)
     printf("Connecting to the server...\n");
     SOPC_ToolkitClient_AsyncActivateSession_Anonymous(configIdx, (uintptr_t) &ctx, "anonymous");
 
-    assert(Mutex_UnlockAndWaitCond(&ctx.run_cond, &ctx.run_mutex) == SOPC_STATUS_OK);
+    mutStatus = Mutex_UnlockAndWaitCond(&ctx.run_cond, &ctx.run_mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     SOPC_Toolkit_Clear();
     SOPC_PKIProvider_Free(&pki);

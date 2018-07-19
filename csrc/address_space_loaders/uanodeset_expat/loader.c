@@ -473,7 +473,8 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
     }
 
     // Should not fail since we reserved space for one element above
-    assert(SOPC_Array_Append(ctx->references, ref));
+    bool append = SOPC_Array_Append(ctx->references, ref);
+    assert(append);
 
     ctx->state = PARSE_NODE_REFERENCE;
 
