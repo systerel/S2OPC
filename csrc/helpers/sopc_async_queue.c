@@ -179,6 +179,8 @@ void SOPC_AsyncQueue_Free(SOPC_AsyncQueue** queue)
         {
             SOPC_SLinkedList_Apply((*queue)->queueList, SOPC_SLinkedList_EltGenericFree);
             SOPC_SLinkedList_Delete((*queue)->queueList);
+            Mutex_Clear(&(*queue)->queueMutex);
+            Condition_Clear(&(*queue)->queueCond);
         }
         free(*queue);
         *queue = NULL;

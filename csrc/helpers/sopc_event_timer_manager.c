@@ -161,6 +161,7 @@ void SOPC_EventTimer_Clear()
     periodicTimersToRestart = NULL;
     SOPC_Atomic_Int_Set(&initialized, 0);
     Mutex_Unlock(&timersMutex);
+    Mutex_Clear(&timersMutex);
 }
 
 static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventDispatcherManager* eventMgr,

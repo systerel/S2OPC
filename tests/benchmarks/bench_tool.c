@@ -636,6 +636,9 @@ int main(int argc, char** argv)
     SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
     SOPC_KeyManager_SerializedCertificate_Delete(ca);
 
+    Mutex_Clear(&ctx.run_mutex);
+    Condition_Clear(&ctx.run_cond);
+
     if (ctx.status == BENCH_FINISHED_OK)
     {
         printf("Finished benchmarking.\n");
