@@ -766,14 +766,14 @@ SOPC_ReturnStatus SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteStr
     if (dest != NULL && NULL == dest->Data && src != NULL)
     {
         dest->Length = src->Length;
-        if ((uint64_t) dest->Length * sizeof(SOPC_Byte) <= SIZE_MAX)
+        if (dest->Length > 0)
         {
-            status = SOPC_STATUS_OK;
-            if (dest->Length > 0)
+            if ((uint64_t) dest->Length * sizeof(SOPC_Byte) <= SIZE_MAX)
             {
                 dest->Data = malloc(sizeof(SOPC_Byte) * (size_t) dest->Length);
                 if (dest->Data != NULL)
                 {
+                    status = SOPC_STATUS_OK;
                     // No need of secure copy, both have same size here
                     memcpy(dest->Data, src->Data, (size_t) dest->Length);
                 }
@@ -782,14 +782,11 @@ SOPC_ReturnStatus SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteStr
                     status = SOPC_STATUS_NOK;
                 }
             }
-            else
-            {
-                dest->Data = NULL;
-            }
         }
         else
         {
-            dest->Data = NULL;
+            // NULL ByteString
+            status = SOPC_STATUS_OK;
         }
     }
     return status;
