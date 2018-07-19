@@ -69,6 +69,7 @@ SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
+        DeleteCriticalSection(mut);
         status = SOPC_STATUS_OK;
     }
     return status;
