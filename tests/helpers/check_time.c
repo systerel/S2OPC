@@ -44,7 +44,7 @@ static const int64_t SOPC_SECONDS_TO_100_NANOSECONDS = 10000000; // 10^7
 START_TEST(test_current_time)
 {
     /* Check date is between 01/01/2017 and 01/01/2020 */
-    SOPC_DateTime vDate = SOPC_Time_GetCurrentTimeUTC();
+    int64_t vDate = SOPC_Time_GetCurrentTimeUTC();
     ck_assert(vDate != 0);
     ck_assert(vDate > (UNIX_EPOCH_01012017_SECS + SOPC_SECONDS_BETWEEN_EPOCHS) * SOPC_SECONDS_TO_100_NANOSECONDS);
     ck_assert(vDate < (UNIX_EPOCH_01012020_SECS + SOPC_SECONDS_BETWEEN_EPOCHS) * SOPC_SECONDS_TO_100_NANOSECONDS);
@@ -53,8 +53,8 @@ END_TEST
 
 START_TEST(test_elapsed_time)
 {
-    SOPC_DateTime tdate = SOPC_Time_GetCurrentTimeUTC();
-    SOPC_DateTime tdate2;
+    int64_t tdate = SOPC_Time_GetCurrentTimeUTC();
+    int64_t tdate2;
     uint64_t elapsedMs = 0;
     int8_t compareResult = 0;
     SOPC_TimeReference tref = 0;

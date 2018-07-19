@@ -24,6 +24,8 @@
 
 #include "sopc_time.h"
 
+#include "sopc_enums.h"
+
 /*
  * It represents the number of seconds between the OPC-UA (Windows) which starts on 1601/01/01 (supposedly 00:00:00
  * UTC), and Linux times starts on epoch, 1970/01/01 00:00:00 UTC.
@@ -31,10 +33,10 @@
 static const uint64_t SOPC_SECOND_TO_NANOSECONDS = 1000000000;   // 10^9
 static const uint64_t SOPC_MILLISECOND_TO_NANOSECONDS = 1000000; // 10^6
 
-SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
+int64_t SOPC_Time_GetCurrentTimeUTC()
 {
     struct timespec currentTime;
-    SOPC_DateTime dt = 0;
+    int64_t dt = 0;
 
     /*
      * Extract from clock_gettime documentation:
@@ -49,7 +51,7 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
 
     int64_t ns100 = currentTime.tv_nsec / 100;
 
-    if ((SOPC_DateTime_FromTimeT(currentTime.tv_sec, &dt) != SOPC_STATUS_OK) || (INT64_MAX - ns100 < dt))
+    if ((SOPC_Time_FromTimeT(currentTime.tv_sec, &dt) != SOPC_STATUS_OK) || (INT64_MAX - ns100 < dt))
     {
         // Time overflow...
         return INT64_MAX;

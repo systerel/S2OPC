@@ -18,12 +18,16 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 #include "sopc_time.h"
+
+static const int64_t SOPC_SECONDS_BETWEEN_EPOCHS = 11644473600;
+static const int64_t SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7
 
 static char* get_time_string(bool local, bool compact)
 {
@@ -33,18 +37,18 @@ static char* get_time_string(bool local, bool compact)
     static const char* format_milliseconds_compact = "_%03lu";
     static const size_t buf_size = 24;
 
-    SOPC_DateTime dt = SOPC_Time_GetCurrentTimeUTC();
+    int64_t dt_100ns = SOPC_Time_GetCurrentTimeUTC();
 
-    if (dt == 0)
+    if (dt_100ns == 0)
     {
         return NULL;
     }
 
     time_t seconds;
-    SOPC_ReturnStatus status = SOPC_DateTime_ToTimeT(dt, &seconds);
+    SOPC_ReturnStatus status = SOPC_Time_ToTimeT(dt_100ns, &seconds);
     assert(status == SOPC_STATUS_OK);
 
-    time_t milliseconds = (time_t)((dt / 10000) % 1000);
+    time_t milliseconds = (time_t)((dt_100ns / 10000) % 1000);
     struct tm tm;
 
     if (local)
@@ -120,4 +124,59 @@ int8_t SOPC_TimeReference_Compare(SOPC_TimeReference left, SOPC_TimeReference ri
         result = 1;
     }
     return result;
+}
+
+SOPC_ReturnStatus SOPC_Time_FromTimeT(time_t time, int64_t* res)
+{
+    assert(time >= 0);
+
+    if (time > INT64_MAX)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    int64_t dt = time;
+
+    if (INT64_MAX - SOPC_SECONDS_BETWEEN_EPOCHS < dt)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    dt += SOPC_SECONDS_BETWEEN_EPOCHS;
+
+    if (INT64_MAX / SOPC_SECOND_TO_100_NANOSECONDS < dt)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    dt *= SOPC_SECOND_TO_100_NANOSECONDS;
+    *res = dt;
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_Time_ToTimeT(int64_t dateTime, time_t* res)
+{
+    int64_t secs = dateTime / SOPC_SECOND_TO_100_NANOSECONDS;
+
+    if (secs < SOPC_SECONDS_BETWEEN_EPOCHS)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    secs -= SOPC_SECONDS_BETWEEN_EPOCHS;
+
+    if (secs > LONG_MAX)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    if (secs == (int64_t)(time_t) secs)
+    {
+        *res = (time_t) secs;
+        return SOPC_STATUS_OK;
+    }
+    else
+    {
+        return SOPC_STATUS_NOK;
+    }
 }

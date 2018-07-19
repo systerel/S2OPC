@@ -92,7 +92,7 @@ static bool set_server_server_status_build_info_variables(SOPC_Array* write_valu
 {
     OpcUa_WriteValue* values = append_write_values(write_values, 6);
     SOPC_DateTime build_date;
-    SOPC_ReturnStatus status = SOPC_DateTime_FromTimeT(build_info->build_date, &build_date);
+    SOPC_ReturnStatus status = SOPC_Time_FromTimeT(build_info->build_date, &build_date);
 
     return values != NULL && status == SOPC_STATUS_OK &&
            set_write_value_string(&values[0], OpcUaId_Server_ServerStatus_BuildInfo_ProductUri,

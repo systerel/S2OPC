@@ -1259,66 +1259,6 @@ void SOPC_DateTime_ClearAux(void* value)
     SOPC_DateTime_Clear((SOPC_DateTime*) value);
 }
 
-static const int64_t SOPC_SECONDS_BETWEEN_EPOCHS = 11644473600;
-static const int64_t SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7
-
-SOPC_ReturnStatus SOPC_DateTime_FromTimeT(time_t time, SOPC_DateTime* res)
-{
-    assert(time >= 0);
-
-#if (SOPC_TIME_T_SIZE > 4)
-    if (time > INT64_MAX)
-    {
-        return SOPC_STATUS_NOK;
-    }
-#endif
-
-    int64_t dt = time;
-
-    if (INT64_MAX - SOPC_SECONDS_BETWEEN_EPOCHS < dt)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    dt += SOPC_SECONDS_BETWEEN_EPOCHS;
-
-    if (INT64_MAX / SOPC_SECOND_TO_100_NANOSECONDS < dt)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    dt *= SOPC_SECOND_TO_100_NANOSECONDS;
-    *res = dt;
-    return SOPC_STATUS_OK;
-}
-
-SOPC_ReturnStatus SOPC_DateTime_ToTimeT(SOPC_DateTime dateTime, time_t* res)
-{
-    int64_t secs = dateTime / SOPC_SECOND_TO_100_NANOSECONDS;
-
-    if (secs < SOPC_SECONDS_BETWEEN_EPOCHS)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    secs -= SOPC_SECONDS_BETWEEN_EPOCHS;
-
-    if (secs > LONG_MAX)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    if (secs == (int64_t)(time_t) secs)
-    {
-        *res = (time_t) secs;
-        return SOPC_STATUS_OK;
-    }
-    else
-    {
-        return SOPC_STATUS_NOK;
-    }
-}
-
 void SOPC_DateTime_Clear(SOPC_DateTime* dateTime)
 {
     SOPC_DateTime_Initialize(dateTime);

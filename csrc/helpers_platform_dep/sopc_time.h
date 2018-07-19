@@ -26,7 +26,11 @@
 #ifndef SOPC_TIME_H_
 #define SOPC_TIME_H_
 
-#include "sopc_builtintypes.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <time.h>
+
+#include "sopc_enums.h"
 
 /**
  * \brief the toolkit provide and use monotonic clock for time references (used for timers)
@@ -57,7 +61,7 @@ void SOPC_Sleep(unsigned int milliseconds);
  * \return the current time in DateTime format
  *
  */
-SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void);
+int64_t SOPC_Time_GetCurrentTimeUTC(void);
 
 /**
  * \brief return the current local time as a C String, e.g.:
@@ -134,5 +138,25 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm);
  * \return \ref SOPC_STATUS_OK in case of success, \ref SOPC_STATUS_NOK in case of error.
  */
 SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm);
+
+/**
+ * \brief Converts a UNIX timestamp to a time expressed in 100ns slices since
+ *        1601/01/01 00:00:00 UTC.
+ *
+ * \param dt   the UNIX timestamp
+ * \param res  the resulting time
+ * \return     \ref SOPC_STATUS_OK on success, an error code on failure
+ */
+SOPC_ReturnStatus SOPC_Time_FromTimeT(time_t time, int64_t* res);
+
+/**
+ * \brief Converts a time expressed in 100ns slices since 1601/01/01 00:00:00 UTC
+ *        to a UNIX timestamp.
+ *
+ * \param dt   the input time
+ * \param res  the resulting time_t
+ * \return     \ref SOPC_STATUS_OK on success, an error code on failure
+ */
+SOPC_ReturnStatus SOPC_Time_ToTimeT(int64_t dt, time_t* res);
 
 #endif /* SOPC_TIME_H_ */
