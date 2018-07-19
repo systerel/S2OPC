@@ -23,7 +23,6 @@
 #include <string.h>
 
 #include "sopc_helper_string.h"
-#include "sopc_protocol_constants.h"
 
 bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size_t* portIdx, size_t* portLength)
 {
@@ -40,7 +39,7 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size
         *hostnameLength = 0;
         *portIdx = 0;
         *portLength = 0;
-        if (strlen(uri) + 4 > SOPC_TCP_UA_MAX_URL_LENGTH)
+        if (strlen(uri) + 4 > TCP_UA_MAX_URL_LENGTH)
         {
             // Encoded value shall be less than 4096 bytes
         }
