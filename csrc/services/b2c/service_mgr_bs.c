@@ -30,6 +30,7 @@
 #include "service_mgr_bs.h"
 #include "util_b2c.h"
 
+#include "sopc_internal_app_dispatcher.h"
 #include "sopc_services_api.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_config_internal.h"
@@ -142,8 +143,7 @@ static void SOPC_ServiceMgrBs_DicoveryReqSendingFailure(uint32_t id, void* val)
         {
             reqEncType = NULL; // request type expected
         }
-        SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED), SOPC_STATUS_CLOSED, NULL,
-                                        elt->msgAppContext);
+        SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, SOPC_STATUS_CLOSED, NULL, elt->msgAppContext);
         message_out_bs__dealloc_msg_out(elt->msgToSend);
         free(elt);
     }

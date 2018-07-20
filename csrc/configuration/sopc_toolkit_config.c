@@ -19,6 +19,7 @@
 
 #include "sopc_toolkit_config.h"
 #include "opcua_identifiers.h"
+#include "sopc_internal_app_dispatcher.h"
 #include "sopc_services_api.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
@@ -77,131 +78,6 @@ tConfig = {.initDone = false,
            .logMaxFiles = 50,
            .logLevel = SOPC_LOG_LEVEL_ERROR};
 
-static SOPC_ComEvent_Fct* appFct = NULL;
-static SOPC_AddressSpaceNotif_Fct* pAddSpaceFct = NULL;
-
-void SOPC_Internal_ApplicationEventDispatcher(SOPC_EventHandler* handler,
-                                              int32_t eventAndType,
-                                              uint32_t id,
-                                              void* params,
-                                              uintptr_t auxParam)
-{
-    (void) handler;
-
-    SOPC_EncodeableType* encType = NULL;
-    char* nodeId = NULL;
-    switch (SOPC_AppEvent_AppEventType_Get(eventAndType))
-    {
-    case SOPC_APP_COM_EVENT:
-        switch (SOPC_AppEvent_ComEvent_Get(eventAndType))
-        {
-        case SE_SESSION_ACTIVATION_FAILURE:
-            SOPC_Logger_TraceDebug("App: SE_SESSION_ACTIVATION_FAILURE session=%" PRIu32 " context=%" PRIuPTR, id,
-                                   auxParam);
-            break;
-        case SE_ACTIVATED_SESSION:
-            SOPC_Logger_TraceDebug("App: SE_ACTIVATED_SESSION session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
-            break;
-        case SE_SESSION_REACTIVATING:
-            SOPC_Logger_TraceDebug("App: SE_SESSION_REACTIVATING session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
-            break;
-        case SE_RCV_SESSION_RESPONSE:
-            if (params != NULL)
-            {
-                encType = *(SOPC_EncodeableType**) params;
-            }
-            SOPC_Logger_TraceDebug("App: SE_RCV_SESSION_RESPONSE  session=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
-                                   SOPC_EncodeableType_GetName(encType), auxParam);
-            break;
-        case SE_CLOSED_SESSION:
-            SOPC_Logger_TraceDebug("App: SE_CLOSED_SESSION session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
-            break;
-        case SE_RCV_DISCOVERY_RESPONSE:
-            if (params != NULL)
-            {
-                encType = *(SOPC_EncodeableType**) params;
-            }
-            SOPC_Logger_TraceDebug("App: SE_RCV_DISCOVERY_RESPONSE msgTyp=%s context=%" PRIuPTR,
-                                   SOPC_EncodeableType_GetName(encType), auxParam);
-            break;
-        case SE_SND_REQUEST_FAILED:
-            SOPC_Logger_TraceDebug("App: SE_SND_REQUEST_FAILED retStatus=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
-                                   SOPC_EncodeableType_GetName((SOPC_EncodeableType*) params), auxParam);
-            break;
-        case SE_CLOSED_ENDPOINT:
-            SOPC_Logger_TraceDebug("App: SE_CLOSED_ENDPOINT idx=%" PRIu32 " retStatus=%" PRIuPTR, id, auxParam);
-            break;
-        case SE_LOCAL_SERVICE_RESPONSE:
-            if (params != NULL)
-            {
-                encType = *(SOPC_EncodeableType**) params;
-            }
-            SOPC_Logger_TraceDebug("App: SE_LOCAL_SERVICE_RESPONSE  idx=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
-                                   SOPC_EncodeableType_GetName(encType), auxParam);
-            break;
-        default:
-            SOPC_Logger_TraceDebug("App: UNKOWN EVENT");
-            break;
-        }
-        if (NULL != appFct)
-        {
-            if (SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_ACTIVATED_SESSION)
-            {
-                appFct(SOPC_AppEvent_ComEvent_Get(eventAndType),
-                       id, // session id
-                       NULL,
-                       auxParam); // session context
-            }
-            else
-            {
-                appFct(SOPC_AppEvent_ComEvent_Get(eventAndType), id,
-                       params,    // see event definition of params
-                       auxParam); // application context
-            }
-        }
-        if (NULL != encType && NULL != params)
-        {
-            // Message to deallocate => if not application shall deallocate !
-            SOPC_Encodeable_Delete(encType, &params);
-        }
-        break;
-    case SOPC_APP_ADDRESS_SPACE_NOTIF:
-        switch (SOPC_AppEvent_AddSpaceEvent_Get(eventAndType))
-        {
-        case AS_WRITE_EVENT:
-            if (params != NULL)
-            {
-                nodeId = SOPC_NodeId_ToCString(&((OpcUa_WriteValue*) params)->NodeId);
-            }
-            if (nodeId != NULL)
-            {
-                SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT on nodeId '%s'", nodeId);
-                free(nodeId);
-            }
-            else
-            {
-                SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT (WriteValue or NodeId string invalid)");
-            }
-            if (NULL != pAddSpaceFct)
-            {
-                pAddSpaceFct(SOPC_AppEvent_AddSpaceEvent_Get(eventAndType), params, (SOPC_StatusCode) auxParam);
-            }
-            if (NULL != params)
-            {
-                OpcUa_WriteValue_Clear((OpcUa_WriteValue*) params);
-                free(params);
-            }
-            break;
-        default:
-            SOPC_Logger_TraceDebug("App: UNKOWN AS EVENT");
-            break;
-        }
-        break;
-    default:
-        assert(false);
-    }
-}
-
 SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -227,7 +103,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         Mutex_Lock(&tConfig.mut);
         tConfig.initDone = true;
 
-        appFct = pAppFct;
+        appEventCallback = pAppFct;
 
         SOPC_Helper_EndiannessCfg_Initialize();
 
@@ -243,6 +119,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
             memset(tConfig.serverScConfigs, 0, (SOPC_MAX_SECURE_CONNECTIONS + 1) * sizeof(SOPC_SecureChannel_Config*));
             memset(tConfig.epConfigs, 0,
                    (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) * sizeof(SOPC_Endpoint_Config*));
+            SOPC_App_Initialize();
             SOPC_EventTimer_Initialize();
             SOPC_Sockets_Initialize();
             SOPC_SecureChannels_Initialize(SOPC_Sockets_SetEventHandler);
@@ -332,13 +209,14 @@ void SOPC_Toolkit_Clear()
         SOPC_EventTimer_Clear();
         SOPC_SecureChannels_Clear();
         SOPC_Services_Clear();
+        SOPC_App_Clear();
 
         Mutex_Lock(&tConfig.mut);
 
         SOPC_Toolkit_ClearServerScConfigs_WithoutLock();
         SOPC_Logger_Clear();
-        appFct = NULL;
-        pAddSpaceFct = NULL;
+        appEventCallback = NULL;
+        appAddressSpaceNotificationCallback = NULL;
         // Reset values to init value
         tConfig.initDone = false;
         tConfig.locked = false;
@@ -517,34 +395,6 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
     return res;
 }
 
-int32_t SOPC_AppEvent_ComEvent_Create(SOPC_App_Com_Event event)
-{
-    return (int32_t)(SOPC_APP_COM_EVENT + (event << 8));
-}
-
-int32_t SOPC_AppEvent_AddSpaceEvent_Create(SOPC_App_AddSpace_Event event)
-{
-    return (int32_t)(SOPC_APP_ADDRESS_SPACE_NOTIF + (event << 8));
-}
-
-SOPC_App_EventType SOPC_AppEvent_AppEventType_Get(int32_t iEvent)
-{
-    assert(iEvent >= 0); // Ensure bitwise operation is not implem defined (it is the case on signed values)
-    return (SOPC_App_EventType)((uint32_t) iEvent & 0xFF);
-}
-
-SOPC_App_Com_Event SOPC_AppEvent_ComEvent_Get(int32_t iEvent)
-{
-    assert(iEvent >= 0); // Ensure bitwise operation is not implem defined (it is the case on signed values)
-    return (SOPC_App_Com_Event)((uint32_t) iEvent >> 8);
-}
-
-SOPC_App_AddSpace_Event SOPC_AppEvent_AddSpaceEvent_Get(int32_t iEvent)
-{
-    assert(iEvent >= 0); // Ensure bitwise operation is not implem defined (it is the case on signed values)
-    return (SOPC_App_AddSpace_Event)((uint32_t) iEvent >> 8);
-}
-
 void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
 {
     address_space_bs__nodes = addressSpace;
@@ -580,10 +430,10 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNot
         if (tConfig.initDone != false)
         {
             Mutex_Lock(&tConfig.mut);
-            if (false == tConfig.locked && pAddSpaceFct == NULL)
+            if (false == tConfig.locked && appAddressSpaceNotificationCallback == NULL)
             {
                 status = SOPC_STATUS_OK;
-                pAddSpaceFct = pAddSpaceNotifFct;
+                appAddressSpaceNotificationCallback = pAddSpaceNotifFct;
             }
             Mutex_Unlock(&tConfig.mut);
         }

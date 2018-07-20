@@ -31,7 +31,6 @@
 #include <stdint.h>
 
 #include "sopc_event_handler.h"
-#include "sopc_user_app_itf.h"
 
 typedef enum SOPC_Services_Event
 {
@@ -128,10 +127,6 @@ typedef enum SOPC_Services_Event
 /* API to enqueue an event for services */
 void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uintptr_t auxParam);
 
-/* API to enqueue an event for application */
-// Note: appEvent value shall be created using SOPC_AppEvent_*Event_Create functions
-void SOPC_ServicesToApp_EnqueueEvent(int32_t appEvent, uint32_t eventType, void* params, uintptr_t auxParam);
-
 /**
  *  \brief Initializes the services and application event dispatcher threads
  */
@@ -155,8 +150,5 @@ void SOPC_Services_Clear(void);
 
 // Internal use only (timers)
 SOPC_EventHandler* SOPC_Services_GetEventHandler(void);
-
-// Internal use only (timers)
-SOPC_EventHandler* SOPC_ApplicationCallback_GetEventHandler(void);
 
 #endif /* SOPC_SERVICES_API_H_ */

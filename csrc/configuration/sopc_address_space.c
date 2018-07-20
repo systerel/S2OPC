@@ -25,7 +25,6 @@
 #include "opcua_statuscodes.h"
 #include "sopc_address_space.h"
 #include "sopc_types.h"
-#include "sopc_user_app_itf.h"
 
 #define ELEMENT_ATTRIBUTE_INITIALIZE_CASE(val, field, extra) \
     case OpcUa_NodeClass_##val:                              \

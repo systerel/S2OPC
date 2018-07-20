@@ -19,6 +19,7 @@
 
 #include "service_response_cb_bs.h"
 
+#include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
 #include "sopc_services_api.h"
 #include "sopc_toolkit_config_internal.h"
@@ -38,14 +39,13 @@ void service_response_cb_bs__cli_service_response(
 {
     if (constants__c_session_indet != service_response_cb_bs__session)
     {
-        SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_RCV_SESSION_RESPONSE),
-                                        service_response_cb_bs__session, service_response_cb_bs__resp_msg,
-                                        service_response_cb_bs__app_context);
+        SOPC_App_EnqueueComEvent(SE_RCV_SESSION_RESPONSE, service_response_cb_bs__session,
+                                 service_response_cb_bs__resp_msg, service_response_cb_bs__app_context);
     }
     else
     {
-        SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_RCV_DISCOVERY_RESPONSE), 0,
-                                        service_response_cb_bs__resp_msg, service_response_cb_bs__app_context);
+        SOPC_App_EnqueueComEvent(SE_RCV_DISCOVERY_RESPONSE, 0, service_response_cb_bs__resp_msg,
+                                 service_response_cb_bs__app_context);
     }
 }
 
@@ -62,9 +62,9 @@ void service_response_cb_bs__cli_snd_failure(
     {
         reqEncType = NULL; // request type expected
     }
-    SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
-                                    util_status_code__B_to_return_status_C(service_response_cb_bs__error_status),
-                                    reqEncType, service_response_cb_bs__app_context);
+    SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED,
+                             util_status_code__B_to_return_status_C(service_response_cb_bs__error_status), reqEncType,
+                             service_response_cb_bs__app_context);
 }
 
 void service_response_cb_bs__srv_service_response(
@@ -72,9 +72,8 @@ void service_response_cb_bs__srv_service_response(
     const constants__t_msg_i service_response_cb_bs__resp_msg,
     const constants__t_application_context_i service_response_cb_bs__app_context)
 {
-    SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_LOCAL_SERVICE_RESPONSE),
-                                    service_response_cb_bs__endpoint_config_idx, service_response_cb_bs__resp_msg,
-                                    service_response_cb_bs__app_context);
+    SOPC_App_EnqueueComEvent(SE_LOCAL_SERVICE_RESPONSE, service_response_cb_bs__endpoint_config_idx,
+                             service_response_cb_bs__resp_msg, service_response_cb_bs__app_context);
 }
 
 void service_response_cb_bs__srv_write_notification(
@@ -87,8 +86,7 @@ void service_response_cb_bs__srv_write_notification(
     {
         util_status_code__B_to_C(service_response_cb_bs__write_status, &sc);
         // Trigger notification event
-        SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_AddSpaceEvent_Create(AS_WRITE_EVENT), 0, (void*) wv,
-                                        (uintptr_t) sc);
+        SOPC_App_EnqueueAddressSpaceNotification(AS_WRITE_EVENT, 0, (void*) wv, (uintptr_t) sc);
     }
     else
     {

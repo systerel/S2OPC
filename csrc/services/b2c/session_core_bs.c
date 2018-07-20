@@ -32,6 +32,7 @@
 #include "sopc_encodeable.h"
 #include "sopc_event_handler.h"
 #include "sopc_event_timer_manager.h"
+#include "sopc_internal_app_dispatcher.h"
 #include "sopc_key_manager.h"
 #include "sopc_logger.h"
 #include "sopc_secret_buffer.h"
@@ -105,9 +106,8 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
         /* CLIENT SIDE ONLY */
         if (session_core_bs__state == constants__e_session_userActivated)
         {
-            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
-                                            (uint32_t) session_core_bs__session, NULL,
-                                            session_client_app_context[session_core_bs__session]);
+            SOPC_App_EnqueueComEvent(SE_ACTIVATED_SESSION, (uint32_t) session_core_bs__session, NULL,
+                                     session_client_app_context[session_core_bs__session]);
         }
         else if (session_core_bs__state == constants__e_session_scOrphaned ||
                  ((session_core_bs__state == constants__e_session_userActivating ||
@@ -119,9 +119,8 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
 
             // if orphaned will be reactivated or closed => notify as reactivating to avoid use of session by
             // application
-            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_REACTIVATING),
-                                            session_core_bs__session, NULL,
-                                            session_client_app_context[session_core_bs__session]);
+            SOPC_App_EnqueueComEvent(SE_SESSION_REACTIVATING, session_core_bs__session, NULL,
+                                     session_client_app_context[session_core_bs__session]);
         }
         else if (session_core_bs__state == constants__e_session_closed)
         {
@@ -130,19 +129,15 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
             {
                 // If session not in closing state or already activated, it is in activation state regarding user app
                 // => notify activation failed
-                SOPC_ServicesToApp_EnqueueEvent(
-                    SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
-                    session_core_bs__session,                              // session id
-                    NULL,                                                  // user ?
+                SOPC_App_EnqueueComEvent(
+                    SE_SESSION_ACTIVATION_FAILURE, session_core_bs__session, NULL,
                     session_client_app_context[session_core_bs__session]); // user application session context
             }
             else
             {
                 // Activated session closing
-                SOPC_ServicesToApp_EnqueueEvent(
-                    SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
-                    session_core_bs__session, // session id
-                    NULL,
+                SOPC_App_EnqueueComEvent(
+                    SE_CLOSED_SESSION, session_core_bs__session, NULL,
                     session_client_app_context[session_core_bs__session]); // user application session context
             }
         }
