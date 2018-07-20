@@ -64,19 +64,33 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
     /* int64 */
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+      OpcUa_WriteValue tis_tmp =
+#else
         lwv[i] =
+#endif
             (OpcUa_WriteValue){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = i + 1000 + 1},
                                .AttributeId = e_aid_Value,
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_Int64_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
                                                    .Value.Int64 = (10000 + i) * (i % 2 ? 1 : -1)}}};
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+        lwv[i] = tis_tmp;
+#endif
     }
 
     /* uint32 */
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+      OpcUa_WriteValue tis_tmp =
+#else
         lwv[i + (N_VARS / N_GROUPS)] =
+#endif
             (OpcUa_WriteValue){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                           .Data.Numeric = i + (N_VARS / N_GROUPS) + 1000 + 1},
                                .AttributeId = e_aid_Value,
@@ -84,12 +98,21 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
                                .Value = {.Value = {.BuiltInTypeId = SOPC_UInt32_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
                                                    .Value.Uint32 = 1000 + i}}};
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+      lwv[i+(N_VARS/N_GROUPS)] = tis_tmp;
+#endif
     }
 
     /* double */
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+      OpcUa_WriteValue tis_tmp =
+#else
         lwv[i + (N_VARS / N_GROUPS) * 2] =
+#endif
             (OpcUa_WriteValue){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                           .Data.Numeric = i + 2 * (N_VARS / N_GROUPS) + 1000 + 1},
                                .AttributeId = e_aid_Value,
@@ -97,6 +120,10 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
                                .Value = {.Value = {.BuiltInTypeId = SOPC_Double_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
                                                    .Value.Doublev = pow(2, i + 1)}}};
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+        lwv[i + (N_VARS / N_GROUPS) * 2] = tis_tmp;
+#endif
     }
 
     /* String */
@@ -110,7 +137,12 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
         memcpy((void*) (buf.Data), "FOO ", 4);
         memcpy((void*) (buf.Data + 4), (void*) &j, 4);
 
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+      OpcUa_WriteValue tis_tmp =
+#else
         lwv[i + 3 * (N_VARS / N_GROUPS)] =
+#endif
             (OpcUa_WriteValue){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                           .Data.Numeric = i + 3 * (N_VARS / N_GROUPS) + 1000 + 1},
                                .AttributeId = e_aid_Value,
@@ -118,6 +150,10 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
                                .Value = {.Value = {.BuiltInTypeId = SOPC_String_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
                                                    .Value.String = buf}}};
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+        lwv[i + 3 * (N_VARS / N_GROUPS)] = tis_tmp;
+#endif
     }
 
     /* ByteString */
@@ -131,7 +167,12 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
         memcpy((void*) (buf.Data), "BySt", 4);
         memcpy((void*) (buf.Data + 4), (void*) &j, 4);
 
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+      OpcUa_WriteValue tis_tmp =
+#else
         lwv[i + 4 * (N_VARS / N_GROUPS)] =
+#endif
             (OpcUa_WriteValue){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                           .Data.Numeric = i + 4 * (N_VARS / N_GROUPS) + 1000 + 1},
                                .AttributeId = e_aid_Value,
@@ -139,6 +180,10 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
                                .Value = {.Value = {.BuiltInTypeId = SOPC_ByteString_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
                                                    .Value.Bstring = buf}}};
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+        lwv[i + 4 * (N_VARS / N_GROUPS)] = tis_tmp;
+#endif
     }
 
     /* XmlElt */
@@ -152,7 +197,12 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
         memcpy((void*) (buf.Data), "XML ", 4);
         memcpy((void*) (buf.Data + 4), (void*) &j, 4);
 
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+      OpcUa_WriteValue tis_tmp =
+#else
         lwv[i + 5 * (N_VARS / N_GROUPS)] =
+#endif
             (OpcUa_WriteValue){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                           .Data.Numeric = i + 5 * (N_VARS / N_GROUPS) + 1000 + 1},
                                .AttributeId = e_aid_Value,
@@ -160,12 +210,26 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
                                .Value = {.Value = {.BuiltInTypeId = SOPC_XmlElement_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
                                                    .Value.XmlElt = buf}}};
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+        lwv[i + 5 * (N_VARS / N_GROUPS)] = tis_tmp;
+#endif
     }
 
+#ifdef __TRUSTINSOFT_BUGFIX__
+  // fix missing test of malloc return (TODO: report!) + TRUS-1281
+  OpcUa_WriteRequest* pReq = malloc (sizeof (OpcUa_WriteRequest));
+    if (NULL == pReq)
+        exit(1);
+    OpcUa_WriteRequest tis_tmp = (OpcUa_WriteRequest) { .encodeableType = &OpcUa_WriteRequest_EncodeableType,
+                                             .NoOfNodesToWrite = N_VARS, .NodesToWrite = lwv};
+    *pReq = tis_tmp;
+#else
     OpcUa_WriteRequest* pReq = DESIGNATE_NEW(OpcUa_WriteRequest, .encodeableType = &OpcUa_WriteRequest_EncodeableType,
                                              .NoOfNodesToWrite = N_VARS, .NodesToWrite = lwv);
     if (NULL == pReq)
         exit(1);
+#endif
 
     return pReq;
 }
@@ -228,7 +292,13 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest* pWriteReq)
         response_write_bs__getall_ResponseWrite_StatusCode(i + 1, &isvalid, &sc);
         if (!isvalid || constants__e_sc_ok != sc)
         {
+#ifdef __TRUSTINSOFT_BUGFIX__
+          // initialize sc to a dummy value to avoid alarm (+minor: printf)
+          sc = constants__c_StatusCode_indet;
+            printf("Response[wvi = %" PRIi32 "] is invalid (isvalid = %d, sc = %d)\n", i + 1, isvalid, (int)sc);
+#else
             printf("Response[wvi = %" PRIi32 "] is invalid (isvalid = %d, sc = %d)\n", i + 1, isvalid, sc);
+#endif
             bVerif = false;
         }
         /* Directly checks in the address space that the request [i] is effective */
@@ -258,9 +328,18 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest* pWriteReq)
          * ignored. So its test is different. The request shall not be taken into account. */
         if (status != SOPC_STATUS_OK || cmp != 0)
         {
+#ifdef __TRUSTINSOFT_BUGFIX__
+          // initialize cmp to a dummy value to avoid alarm
+          cmp = -1000;
+#endif
             printf("Request[wvi = %" PRIi32 "] did not change the address space (Compare sc = %d, cmp = %" PRIi32
                    ")\n+ Expected value:\n",
+#ifdef __TRUSTINSOFT_BUGFIX__
+                   //minor (printf format)
+                   i, (int)status, cmp);
+#else
                    i, status, cmp);
+#endif
             util_variant__print_SOPC_Variant(&lwv[i].Value.Value);
             printf("+ Read value:\n");
             util_variant__print_SOPC_Variant(pVariant);

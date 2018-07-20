@@ -1,0 +1,59 @@
+VERIF OK: no function with neither code nor specification
+VERIF OK: no degeneration(s)
+VERIF TODO: 16 other non-terminating statements (excluding '_ck_assert_failed' '__FC_assert' )
+SOPC_AsyncQueue_BlockingDequeue         1    function call  direct call: SOPC_AsyncQueue_Dequeue                 non-terminating
+SOPC_ThreadStartEventDispatcherManager  14   function call  direct call: SOPC_AsyncQueue_BlockingDequeue         non-terminating
+TIS_Sockets_Dispatch                    1    function call  direct call: SOPC_ThreadStartEventDispatcherManager  non-terminating
+_tcase_add_test                         3    function call  indirect call (test_sockets_fn)                      never-terminating
+main                                    3    function call  direct call: tests_make_suite_sockets                never-terminating
+test_sockets_fn                         21   function call  direct call: TIS_Sockets_Dispatch                    non-terminating
+test_sockets_fn                         39   function call  direct call: TIS_Sockets_Dispatch                    non-terminating
+test_sockets_fn                         41   function call  direct call: TIS_Sockets_Dispatch                    non-terminating
+test_sockets_fn                         59   function call  direct call: TIS_Sockets_Dispatch                    non-terminating
+test_sockets_fn                         78   function call  direct call: TIS_Sockets_Dispatch                    non-terminating
+test_sockets_fn                         89   function call  direct call: TIS_Sockets_Dispatch                    non-terminating
+test_sockets_fn                         100  function call  direct call: TIS_Sockets_Dispatch                    non-terminating
+test_sockets_fn                         159  function call  direct call: TIS_Sockets_Dispatch                    non-terminating
+test_sockets_fn                         161  function call  direct call: TIS_Sockets_Dispatch                    non-terminating
+test_sockets_fn                         240  function call  direct call: SOPC_AsyncQueue_BlockingDequeue         never-terminating
+tests_make_suite_sockets                3    function call  direct call: _tcase_add_test                         never-terminating
+VERIF OK: no message(s) in the log file (excluding 
+	"found two contracts for fcntl"
+	"found two contracts for tis_memcpy_bounded"
+	"ignoring missing assigns for all variadic functions"
+	)
+VERIF OK: no generated alarms
+VERIF TODO: 3 hypotheses to verify (excluding '\w*accept:NONAME' '\w*allocates' '\w*assigns' )
+sources/csrc/helpers/sopc_buffer.c                   SOPC_Buffer_Write  assert                bw_a_pos_uint_val  unknown
+sources/csrc/helpers_platform_dep/linux/p_sockets.c  Socket_Read@24     instance of requires  fflush:valid_file  never tried
+tis_src/stubs.c                                      accept             disjoint behaviors                       never tried
+VERIF OK: no functions with no code, but specifications
+VERIF OK: no functions with code, but use specification
+VERIF INFO: 19 used libc and buitins from tis-analyzer
+TIS_KERNEL_SHARE/libc/__fc_builtin.h     Frama_C_abort              specification
+TIS_KERNEL_SHARE/libc/assert.c           Frama_C_show_each_warning  built-in
+TIS_KERNEL_SHARE/libc/assert.c           __FC_assert                body
+TIS_KERNEL_SHARE/libc/ctype.c            isupper                    body
+TIS_KERNEL_SHARE/libc/ctype.c            tolower                    body
+TIS_KERNEL_SHARE/libc/stdio.h            fflush                     specification
+TIS_KERNEL_SHARE/libc/stdio.h            flockfile                  specification
+TIS_KERNEL_SHARE/libc/stdio.h            funlockfile                specification
+TIS_KERNEL_SHARE/libc/stdio.h            printf                     built-in
+TIS_KERNEL_SHARE/libc/stdlib.c           calloc                     body
+TIS_KERNEL_SHARE/libc/stdlib.h           abort                      specification
+TIS_KERNEL_SHARE/libc/stdlib.h           free                       built-in
+TIS_KERNEL_SHARE/libc/stdlib.h           malloc                     built-in
+TIS_KERNEL_SHARE/libc/string.h           memcpy                     built-in
+TIS_KERNEL_SHARE/libc/string.h           memset                     built-in
+TIS_KERNEL_SHARE/libc/string.h           strlen                     built-in
+TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_make_unknown           specification
+TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_variable_split         built-in
+TIS_KERNEL_SHARE/libc/tis_mem_bounded.c  tis_memcpy_bounded         body
+VERIF INFO: 4 useless files
+File                                               #DefinedFun  #Reachable  #DefinedVar
+sources/csrc/helpers/sopc_helper_endianness_cfg.c  7            0           0
+sources/csrc/helpers/sopc_log_manager.c            13           0           5
+sources/csrc/helpers_platform_dep/linux/p_time.c   2            0           0
+VERIF INFO: Coverage (without libc functions):
+Functions: 106/199 (53.3%) - All statements: 1434/2809 (51.1%) - Statements in reachable functions: 1434/1817 (78.9%)
+VERIF INFO: Lost precision on 8 statements  (reached slevel: 8, widened loop: 1, merged loop: 0)

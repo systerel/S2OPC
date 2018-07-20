@@ -381,6 +381,9 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer_NoLock(SOPC_Socket* sock)
     while (writeQueueResult != false && nothingToDequeue == false && writeBlocked == false)
     {
         status = SOPC_AsyncQueue_NonBlockingDequeue(sock->writeQueue, (void**) &buffer);
+#ifdef __TRUSTINSOFT_DEBUG__
+        printf ("TIS: TreatWriteBuffer:Dequeue (from writeQueue)\n");
+#endif
         if (SOPC_STATUS_WOULD_BLOCK == status)
         {
             nothingToDequeue = true;
@@ -443,6 +446,11 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
     int32_t readBytes = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: SOPC_SocketsEventMgr_Dispatcher "
+        "(TIS_Sockets_Dispatch): event='%d', id='%u'\n",
+        event, eltId);
+#endif
     switch (socketEvent)
     {
     case SOCKET_CREATE_SERVER:
@@ -457,6 +465,9 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         if (NULL != socketElt)
         {
             socketElt->connectionId = eltId;
+#ifdef __TRUSTINSOFT_DEBUG__
+        printf ("TIS: SecureChannels_Enqueue SOCKET_LISTENER_OPENED\n");
+#endif
             SOPC_SecureChannels_EnqueueEvent(SOCKET_LISTENER_OPENED, eltId, NULL, socketElt->socketIdx);
         }
         else
@@ -602,6 +613,9 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
 
                 // Send to the secure channel listener state manager and wait for SOCKET_ACCEPTED_CONNECTION for
                 // association with connection index
+#ifdef __TRUSTINSOFT_DEBUG__
+        printf ("TIS: SecureChannels_Enqueue SOCKET_LISTENER_CONNECTION\n");
+#endif
                 SOPC_SecureChannels_EnqueueEvent(SOCKET_LISTENER_CONNECTION,
                                                  acceptSock->connectionId, // endpoint description config index
                                                  NULL, acceptSock->socketIdx);
@@ -651,6 +665,9 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
         }
 
         // Notify connection
+#ifdef __TRUSTINSOFT_DEBUG__
+        printf ("TIS: SecureChannels_Enqueue SOCKET_CONNECTION\n");
+#endif
         SOPC_SecureChannels_EnqueueEvent(SOCKET_CONNECTION,
                                          socketElt->connectionId, // secure channel connection index
                                          NULL, eltId);
@@ -712,6 +729,9 @@ void SOPC_SocketsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params
                 // Update buffer lengtn
                 SOPC_Buffer_SetDataLength(buffer, readBytes);
                 // Transmit to secure channel connection associated
+#ifdef __TRUSTINSOFT_DEBUG__
+            printf ("TIS: SecureChannels_Enqueue SOCKET_RCV_BYTES\n");
+#endif
                 SOPC_SecureChannels_EnqueueEvent(SOCKET_RCV_BYTES, socketElt->connectionId, (void*) buffer, eltId);
             }
             else

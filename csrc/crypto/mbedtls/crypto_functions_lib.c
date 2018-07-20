@@ -27,6 +27,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+#ifdef __TRUSTINSOFT_DEBUG__
+#include <stdio.h>
+void flockfile(FILE *filehandle);
+void funlockfile(FILE *filehandle);
+#endif
 
 #include "../sopc_crypto_profiles.h"
 #include "../sopc_crypto_provider.h"
@@ -178,6 +183,24 @@ SOPC_ReturnStatus CryptoProvider_GenTrueRnd(const SOPC_CryptoProvider* pProvider
     if (mbedtls_ctr_drbg_random(&(pCtx->ctxDrbg), pData, lenData) != 0)
         return SOPC_STATUS_NOK;
 
+#ifdef __TRUSTINSOFT_DEBUG__
+    // prepare tis_force_pData
+    static size_t tis_cpt_call = 0; tis_cpt_call++;
+#ifdef __TRUSTINSOFT_HELPER__
+    // use tis_force_pData
+    void tis_force_pData (uint8_t * pData, uint32_t lenData, size_t call);
+    tis_force_pData (pData, lenData, tis_cpt_call);
+#endif
+    flockfile (stdout);
+    printf ("uint8_t pData_%zu[] = {", tis_cpt_call);
+    for (uint8_t i = 0; i < lenData; i++) {
+      if (i%16 == 0) printf ("\n");
+      printf ("0x%hhx,", pData[i]);
+    }
+    printf ("};\n");
+    fflush (stdout);
+    funlockfile (stdout);
+#endif
     return SOPC_STATUS_OK;
 }
 
@@ -226,6 +249,24 @@ SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA256(const SOPC_CryptoProvider
         return SOPC_STATUS_NOK;
 
     lenHash = mbedtls_md_get_size(pmd_info);
+#ifdef __TRUSTINSOFT_DEBUG__
+    // force input preparation
+    static size_t tis_cpt_call = 0; tis_cpt_call++;
+#ifdef __TRUSTINSOFT_HELPER__
+    // force input
+    int tis_force_value (const char * f, const char * id, size_t n, int old);
+    lenHash = tis_force_value ("CryptoProvider_DeriveData_PRF_SHA256",
+                               "lenHash",
+                               tis_cpt_call,
+                               lenHash);
+    lenSeed = tis_force_value ("CryptoProvider_DeriveData_PRF_SHA256",
+                               "lenSeed",
+                               tis_cpt_call,
+                               lenSeed);
+#endif
+    printf ("[tis-input] warning: CryptoProvider_DeriveData_PRF_SHA256:lenHash:%zu = %u\n", tis_cpt_call, lenHash);
+    printf ("[tis-input] warning: CryptoProvider_DeriveData_PRF_SHA256:lenSeed:%zu = %u\n", tis_cpt_call, lenSeed);
+#endif
     lenBufA = lenHash + lenSeed;
     if (lenHash == 0 || lenBufA <= lenSeed) // Test uint overflow
         return SOPC_STATUS_NOK;
@@ -235,9 +276,19 @@ SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA256(const SOPC_CryptoProvider
         return SOPC_STATUS_NOK;
 
     // bufA contains A(i) + seed where + is the concatenation.
+#ifdef __TRUSTINSOFT_HELPER__
+    // use tis_memcpy_bounded instead of memcpy
+    size_t tis_block_size(const void *p);
+    void *tis_memcpy_bounded(void *dest, const void *src, size_t n,
+                             void * dest_bound, void * src_bound);
+    tis_memcpy_bounded(bufA + lenHash, pSeed, lenSeed,
+                       bufA + tis_block_size (bufA),
+                       pSeed + tis_block_size (pSeed));
+#else
     // length(A(i)) and the content of seed do not change, so seed is written only once. The beginning of bufA is
     // initialized later.
     memcpy(bufA + lenHash, pSeed, lenSeed);
+#endif
 
     // Next stage generates a context for the PSHA
     status = PSHA_outer(pmd_info, bufA, lenBufA, pSecret, lenSecret, pSeed, lenSeed, pOutput, lenOutput);
@@ -331,7 +382,21 @@ static inline SOPC_ReturnStatus PSHA(mbedtls_md_context_t* pmd,
             // Copies P_SHA256 to A because we are not using A again afterwards.
             if (mbedtls_md_hmac_finish(pmd, bufA) != 0)
                 return SOPC_STATUS_NOK;
+#ifdef __TRUSTINSOFT_HELPER__
+            // use tis_memcpy_bounded instead of memcpy
+            size_t tis_block_size(const void *p);
+            void *tis_base_addr(void *p);
+            void *tis_memcpy_bounded(void *dest, const void *src, size_t n,
+                                     void * dest_bound, void * src_bound);
+            tis_memcpy_bounded(pOutput + offsetOutput,
+                               bufA,
+                               lenOutput - offsetOutput,
+                               (char*)tis_base_addr (pOutput)
+                               + tis_block_size (pOutput),
+                               bufA + tis_block_size (bufA));
+#else
             memcpy(pOutput + offsetOutput, bufA, lenOutput - offsetOutput);
+#endif
             offsetOutput = lenOutput;
         }
     }
@@ -353,7 +418,12 @@ SOPC_ReturnStatus CryptoProvider_AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider*
     if (mbedtls_pk_get_type(&pKey->pk) != MBEDTLS_PK_RSA) // TODO: maybe we should accept RSASSA_PSS... Undocumented.
         return SOPC_STATUS_INVALID_PARAMETERS;
 
+#ifdef __TRUSTINSOFT_NO_MBEDTLS__
+    // skip the call to mbedtls_pk_rsa which read an object that we don't have
+    prsa = NULL;
+#else
     prsa = mbedtls_pk_rsa(pKey->pk);
+#endif
 
     // Sets the appropriate padding mode (SHA-1 for encryption/decryption but SHA-256 for signing/verifying)
     mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA1);
@@ -407,7 +477,12 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider*
     if (mbedtls_pk_get_type(&pKey->pk) != MBEDTLS_PK_RSA) // TODO: maybe we should accept RSASSA_PSS... Undocumented.
         return SOPC_STATUS_INVALID_PARAMETERS;
 
+#ifdef __TRUSTINSOFT_NO_MBEDTLS__
+    // skip the call to mbedtls_pk_rsa which read an object that we don't have
+    prsa = NULL;
+#else
     prsa = mbedtls_pk_rsa(pKey->pk);
+#endif
 
     // Sets the appropriate padding mode (SHA-1 for encryption/decryption but SHA-256 for signing/verifying)
     mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA1);
@@ -437,6 +512,15 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider*
 
         // Advance pointers
         lenCipherText -= lenMsgCiph;
+#ifdef __TRUSTINSOFT_HELPER__
+        // local assertion (cpadro_a_lenMsgCiph)
+        /*@ assert cpadro_a_lenMsgCiph:
+            lenCipherText == 0
+            || lenMsgCiph == lenCipherText
+            || lenCipherText > lenMsgCiph &&
+               lenMsgCiph <= \block_length(pInput) + \offset(pInput);
+        */
+#endif
         if (0 == lenCipherText)
             break;
         pInput += lenMsgCiph;
@@ -495,8 +579,13 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const SOPC_C
 
     if (NewMsgDigestBuffer(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
     {
+#ifdef __TRUSTINSOFT_NO_MBEDTLS__
+      // skip the call to mbedtls_pk_rsa which read an object that we don't have
+      prsa = NULL;
+#else
         // Sets the appropriate padding mode (no hash-id for PKCS_V15)
         prsa = mbedtls_pk_rsa(pKey->pk);
+#endif
         mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V15, 0);
 
         if (mbedtls_rsa_rsassa_pkcs1_v15_sign(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
@@ -527,8 +616,13 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256(const SOPC
 
     if (NewMsgDigestBuffer(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
     {
+#ifdef __TRUSTINSOFT_NO_MBEDTLS__
+      // skip the call to mbedtls_pk_rsa which read an object that we don't have
+      prsa = NULL;
+#else
         // Sets the appropriate padding mode (no hash-id for PKCS_V15)
         prsa = mbedtls_pk_rsa(pKey->pk);
+#endif
         mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V15, 0);
 
         if (mbedtls_rsa_rsassa_pkcs1_v15_verify(prsa, NULL, NULL,
@@ -667,6 +761,17 @@ SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA1(const SOPC_CryptoProvider* 
         return SOPC_STATUS_NOK;
 
     lenHash = mbedtls_md_get_size(pmd_info);
+#ifdef __TRUSTINSOFT_DEBUG__
+    // force input preparation
+    static size_t tis_cpt_call = 0; tis_cpt_call++;
+#ifdef __TRUSTINSOFT_HELPER__
+    // force input
+    int tis_force_value (const char * f, const char * id, size_t n, int old);
+    lenHash = tis_force_value ("CryptoProvider_SymmVerify_HMAC_SHA1",
+                               "lenHash", tis_cpt_call, lenHash);
+#endif
+    printf ("[tis-input] warning: CryptoProvider_SymmVerify_HMAC_SHA1:lenHash:%zu = %u\n", tis_cpt_call, lenHash);
+#endif
     lenBufA = lenHash + lenSeed;
     if (lenHash == 0 || lenBufA <= lenSeed) // Test uint overflow
         return SOPC_STATUS_NOK;

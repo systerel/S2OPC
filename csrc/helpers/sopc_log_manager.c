@@ -64,8 +64,17 @@ struct SOPC_Log_Instance
 
 void SOPC_Log_Initialize()
 {
+#ifdef __TRUSTINSOFT_BUGFIX__
+  // test SOPC_Time_GetStringOfCurrentTimeUTC result (may be NULL)
+    char * prefix = SOPC_Time_GetStringOfCurrentTimeUTC(true);
+    if (prefix) {
+      SOPC_CSTRING_UNIQUE_LOG_PREFIX = prefix;
+      uniquePrefixSet = true;
+    }
+#else
     SOPC_CSTRING_UNIQUE_LOG_PREFIX = SOPC_Time_GetStringOfCurrentTimeUTC(true);
     uniquePrefixSet = true;
+#endif
 }
 
 static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
@@ -174,7 +183,11 @@ SOPC_Log_Instance* SOPC_Log_CreateInstance(const char* logDirPath,
     if (logDirPath != NULL && logFileName != NULL && strlen(logFileName) > 0 &&
         maxBytes > RESERVED_BYTES_PRINT_FILE_CHANGE && maxFiles > 0)
     {
+#ifdef __TRUSTINSOFT_HELPER__
+        // don't use log functions
+#else
         result = calloc(1, sizeof(SOPC_Log_Instance));
+#endif
     }
     if (result != NULL)
     {

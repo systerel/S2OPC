@@ -128,8 +128,12 @@ int8_t SOPC_Internal_SLinkedList_EventTimerCompare(void* left, void* right)
 void SOPC_EventTimer_Clear()
 {
     Mutex_Lock(&timersMutex);
+#ifdef __TRUSTINSOFT_HELPER__
+    // skip free on the LinkedList for the moment (TODO)
+#else
     SOPC_SLinkedList_Apply(timers, SOPC_SLinkedList_EltGenericFree);
     SOPC_SLinkedList_Delete(timers);
+#endif
     timers = NULL;
     Mutex_Unlock(&timersMutex);
     initialized = false;

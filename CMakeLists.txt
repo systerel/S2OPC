@@ -1,6 +1,11 @@
 cmake_minimum_required (VERSION 2.8)
 project (INGOPCS)
 
+include_directories( ${CMAKE_SOURCE_DIR}/../mbedtls/include )
+include_directories( ${CMAKE_SOURCE_DIR}/../check_lib/include )
+link_directories( ${CMAKE_SOURCE_DIR}/../mbedtls/library )
+link_directories( ${CMAKE_SOURCE_DIR}/../check_lib/lib )
+
 # Define runtime output directory
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
@@ -20,6 +25,9 @@ else()
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Wextra -O0")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__TRUSTINSOFT_DEBUG__")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__TRUSTINSOFT_PATCH__")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSOPC_DEBUG_PRINTING=true")
 
 # Source files of INGOPCS library
 

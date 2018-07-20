@@ -206,7 +206,12 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
 
     if (NULL == pvar)
         return;
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // minor fix (printf format)
+    printf(":\n  TypeId %i: ", (int)pvar->BuiltInTypeId);
+#else
     printf(":\n  TypeId %i: ", pvar->BuiltInTypeId);
+#endif
 
     switch (pvar->BuiltInTypeId)
     {

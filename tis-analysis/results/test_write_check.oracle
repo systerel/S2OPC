@@ -1,0 +1,36 @@
+VERIF OK: no function with neither code nor specification
+VERIF OK: no degeneration(s)
+VERIF OK: no other non-terminating statements (excluding '__FC_assert' 'exit' )
+VERIF TODO: 1 message(s) in the log file (excluding 
+	"found two contracts for tis_memcpy_bounded"
+	"this seems innocuous"
+	"ignoring missing assigns for all variadic functions"
+	)
+[value] warning: argument (int)c has type int but format indicates
+VERIF OK: no generated alarms
+VERIF OK: no hypotheses to verify (excluding '\w*assigns' )
+VERIF OK: no functions with no code, but specifications
+VERIF OK: no functions with code, but use specification
+VERIF INFO: 11 used libc and buitins from tis-analyzer
+TIS_KERNEL_SHARE/libc/__fc_builtin.h  Frama_C_abort              specification
+TIS_KERNEL_SHARE/libc/assert.c        Frama_C_show_each_warning  built-in
+TIS_KERNEL_SHARE/libc/assert.c        __FC_assert                body
+TIS_KERNEL_SHARE/libc/stdio.h         printf                     built-in
+TIS_KERNEL_SHARE/libc/stdlib.h        exit                       specification
+TIS_KERNEL_SHARE/libc/stdlib.h        free                       built-in
+TIS_KERNEL_SHARE/libc/stdlib.h        malloc                     built-in
+TIS_KERNEL_SHARE/libc/string.h        memcmp                     built-in
+TIS_KERNEL_SHARE/libc/string.h        memcpy                     built-in
+TIS_KERNEL_SHARE/libc/string.h        memset                     built-in
+TIS_KERNEL_SHARE/libc/string.h        strcmp                     built-in
+VERIF INFO: 7 useless files
+File                                                 #DefinedFun  #Reachable  #DefinedVar
+sources/csrc/configuration/sopc_ieee_check.c         1            0           0
+sources/csrc/opcua_types/sopc_encodeable.c           3            0           0
+sources/csrc/opcua_types/sopc_encodeabletype.c       2            0           2
+sources/csrc/opcua_types/sopc_encoder.c              136          0           0
+sources/csrc/opcua_types/sopc_namespace_table.c      8            0           1
+sources/csrc/services/b2c/util_discovery_services.c  4            0           2
+VERIF INFO: Coverage (without libc functions):
+Functions: 130/1800 (7.2%) - All statements: 1217/21004 (5.8%) - Statements in reachable functions: 1217/2025 (60.1%)
+VERIF INFO: Did not lose precision.

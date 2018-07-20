@@ -35,13 +35,20 @@ int main(void)
     SRunner* sr;
 
     sr = srunner_create(tests_make_suite_crypto_B256S256());
+#ifdef __TRUSTINSOFT_DEBUG__
+    srunner_set_fork_status (sr, CK_NOFORK);
+#endif
     srunner_add_suite(sr, tests_make_suite_crypto_B256());
     srunner_add_suite(sr, tests_make_suite_crypto_None());
     srunner_add_suite(sr, tests_make_suite_tools());
+#ifdef __TRUSTINSOFT_HELPER__
+    // skip threads, logger and time tests
+#else
     srunner_add_suite(sr, tests_make_suite_threads());
     srunner_add_suite(sr, tests_make_suite_time());
     srunner_add_suite(sr, tests_make_suite_timers());
     srunner_add_suite(sr, tests_make_suite_logger());
+#endif
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);

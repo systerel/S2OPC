@@ -756,7 +756,12 @@ Suite* tests_make_suite_crypto_None()
     tcase_add_test(tc_km, test_cert_lengths_None);
     tcase_add_test(tc_km, test_cert_thumbprint_None);
     tcase_add_test(tc_km, test_cert_loadkey_None);
+#ifdef __TRUSTINSOFT_SKIP_CRYPTO_TESTS__
+    // skip 'test_cert_copyder_None' test analysis, because
+    // it needs to specify valid allocation in 'mbedtls_x509_crt_parse'.
+#else
     tcase_add_test(tc_km, test_cert_copyder_None);
+#endif
 
     suite_add_tcase(s, tc_crypto_asym);
     tcase_add_checked_fixture(tc_crypto_asym, setup_asym_keys, teardown_asym_keys);

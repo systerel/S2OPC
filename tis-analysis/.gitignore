@@ -1,0 +1,5 @@
+check_lib
+results/*
+!results/*.oracle
+!results/*.meta
+xunit.xml

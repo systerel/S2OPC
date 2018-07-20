@@ -1,0 +1,98 @@
+VERIF OK: no function with neither code nor specification
+VERIF OK: no degeneration(s)
+VERIF TODO: 1 other non-terminating statements (excluding '_ck_assert_failed' )
+PSHA  58  function call  direct call: tis_memcpy_bounded  non-terminating
+VERIF OK: no message(s) in the log file (excluding 
+	"found two contracts for gmtime"
+	"found two contracts for tis_memcpy_bounded"
+	"def'n of func tis_force_value"
+	"\[tis-input]"
+	"no assigns clauses for function .*printf"
+	"no assigns clauses for function .*scanf"
+	"ignoring missing assigns for all variadic functions"
+	)
+VERIF OK: no generated alarms
+VERIF TODO: 29 hypotheses to verify (excluding '\w*strncpy:.*' '\w*strtoul:.*' '\w*allocates' '\w*assigns' '\w*from' )
+sources/csrc/crypto/mbedtls/crypto_functions_lib.c  CryptoProvider_AsymDecrypt_RSA_OAEP  assert                cpadro_a_lenMsgCiph                                    unknown
+tis_src/mbedtls_spec.acsl                           CryptoProvider_AsymDecrypt_RSA_OAEP  ensures               cpadro_e_init                                          unknown
+sources/csrc/crypto/mbedtls/crypto_functions_lib.c  CryptoProvider_GenTrueRnd@22         instance of requires  fflush:valid_file                                      never tried
+tis_src/mbedtls_spec.acsl                           PSHA                                 ensures               psha_e_init                                            unknown
+sources/csrc/crypto/mbedtls/crypto_functions_lib.c  PSHA@58                              instance of requires  tis_memcpy_bounded:mcpb_r_n                            unknown
+sources/csrc/helpers/sopc_buffer.c                  SOPC_Buffer_Read                     ensures               br_e_position                                          unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_1   unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_10  unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_11  unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_2   unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_3   unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_4   unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_5   unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_6   unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_7   unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_8   unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_9   unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_SymmVerify_HMAC_SHA1_lenHash_1    unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_SymmVerify_HMAC_SHA1_lenHash_10   unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_SymmVerify_HMAC_SHA1_lenHash_11   unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_SymmVerify_HMAC_SHA1_lenHash_2    unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_SymmVerify_HMAC_SHA1_lenHash_3    unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_SymmVerify_HMAC_SHA1_lenHash_4    unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_SymmVerify_HMAC_SHA1_lenHash_5    unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_SymmVerify_HMAC_SHA1_lenHash_6    unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_SymmVerify_HMAC_SHA1_lenHash_7    unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_SymmVerify_HMAC_SHA1_lenHash_8    unknown
+results/helpers_inputs.c                            tis_force_value                      assert                force_CryptoProvider_SymmVerify_HMAC_SHA1_lenHash_9    unknown
+tis_src/stubs.c                                     tis_memcpy_bounded                   ensures               mcpb_e_init                                            unknown
+VERIF OK: no functions with no code, but specifications (excluding 'mbedtls_[a-z_0-9]*' )
+VERIF OK: no functions with code, but use specification
+VERIF INFO: 28 used libc and buitins from tis-analyzer
+TIS_KERNEL_SHARE/libc/ctype.c            isspace             body
+TIS_KERNEL_SHARE/libc/ctype.c            isupper             body
+TIS_KERNEL_SHARE/libc/ctype.c            tolower             body
+TIS_KERNEL_SHARE/libc/stdio.h            fflush              specification
+TIS_KERNEL_SHARE/libc/stdio.h            flockfile           specification
+TIS_KERNEL_SHARE/libc/stdio.h            funlockfile         specification
+TIS_KERNEL_SHARE/libc/stdio.h            printf              built-in
+TIS_KERNEL_SHARE/libc/stdio.h            sprintf             built-in
+TIS_KERNEL_SHARE/libc/stdio.h            sscanf              built-in
+TIS_KERNEL_SHARE/libc/stdlib.c           calloc              body
+TIS_KERNEL_SHARE/libc/stdlib.h           abort               specification
+TIS_KERNEL_SHARE/libc/stdlib.h           free                built-in
+TIS_KERNEL_SHARE/libc/stdlib.h           malloc              built-in
+TIS_KERNEL_SHARE/libc/string.c           strncpy             body
+TIS_KERNEL_SHARE/libc/string.h           memcmp              built-in
+TIS_KERNEL_SHARE/libc/string.h           memcpy              built-in
+TIS_KERNEL_SHARE/libc/string.h           memset              built-in
+TIS_KERNEL_SHARE/libc/string.h           strchr              built-in
+TIS_KERNEL_SHARE/libc/string.h           strcmp              built-in
+TIS_KERNEL_SHARE/libc/string.h           strlen              built-in
+TIS_KERNEL_SHARE/libc/string.h           strncmp             built-in
+TIS_KERNEL_SHARE/libc/string.h           strnlen             built-in
+TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_base_addr       built-in
+TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_block_size      built-in
+TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_variable_split  built-in
+TIS_KERNEL_SHARE/libc/tis_mem_bounded.c  tis_memcpy_bounded  body
+TIS_KERNEL_SHARE/libc/tis_stdlib.c       strtoul             body
+TIS_KERNEL_SHARE/libc/tis_stdlib.c       strtoull            body
+VERIF INFO: 19 useless files
+File                                                  #DefinedFun  #Reachable  #DefinedVar
+sources/csrc/crypto/sopc_key_manager.c                1            0           0
+sources/csrc/crypto/sopc_key_sets.c                   2            0           0
+sources/csrc/helpers/sopc_event_dispatcher_manager.c  6            0           0
+sources/csrc/helpers/sopc_event_timer_manager.c       8            0           0
+sources/csrc/helpers/sopc_log_manager.c               13           0           5
+sources/csrc/helpers/sopc_logger.c                    12           0           0
+sources/csrc/helpers_platform_dep/linux/p_sockets.c   20           0           0
+sources/csrc/helpers_platform_dep/linux/p_time.c      2            0           0
+sources/csrc/helpers_platform_dep/sopc_time.c         4            0           0
+sources/csrc/opcua_types/sopc_encodeable.c            3            0           0
+sources/csrc/opcua_types/sopc_encodeabletype.c        2            0           2
+sources/csrc/opcua_types/sopc_namespace_table.c       8            0           1
+sources/csrc/opcua_types/sopc_types.c                 868          0           217
+sources/tests/helpers/check_logger.c                  6            0           0
+sources/tests/helpers/check_threads.c                 8            0           0
+sources/tests/helpers/check_time.c                    3            0           0
+sources/tests/helpers/check_timers.c                  5            0           4
+tis_src/tis_time.c                                    4            0           0
+VERIF INFO: Coverage (without libc functions):
+Functions: 639/1873 (34.1%) - All statements: 15467/39683 (39.0%) - Statements in reachable functions: 15467/25316 (61.1%)
+VERIF INFO: Lost precision on 32 statements  (reached slevel: 32, widened loop: 2, merged loop: 0)

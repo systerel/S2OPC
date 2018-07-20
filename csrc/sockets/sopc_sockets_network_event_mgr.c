@@ -20,6 +20,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __TRUSTINSOFT_DEBUG__
+#include <stdio.h>
+#endif
 
 #include "sopc_sockets_network_event_mgr.h"
 
@@ -53,7 +56,12 @@ static void SOPC_Internal_TriggerEventToSocketsManager(SOPC_Socket* socket,
 }
 
 // Treat sockets events if some are present or wait for events (until timeout)
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+// rm 'static' to SOPC_SocketsNetworkEventMgr_TreatSocketsEvents
+/* static */ bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
+#else
 static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
+#endif
 {
     bool result = true;
     uint32_t idx = 0;
@@ -67,6 +75,9 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
     SocketSet_Clear(&writeSet);
     SocketSet_Clear(&exceptSet);
 
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: TreatSocketsEvents: begin\n");
+#endif
     Mutex_Lock(&socketsMutex);
 
     // Add used sockets in the correct socket sets
@@ -119,14 +130,23 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
     }
     else if (nbReady > 0)
     {
+#ifdef __TRUSTINSOFT_DEBUG__
+      printf ("TIS: TreatSocketsEvents: nbReady = %d\n", nbReady);
+#endif
         for (idx = 0; idx < SOPC_MAX_SOCKETS; idx++)
         {
             uaSock = &(socketsArray[idx]);
             if (uaSock->isUsed != false)
             {
+#ifdef __TRUSTINSOFT_DEBUG__
+              printf ("TIS: TreatSocketsEvents: process %u - sock=%d\n", idx, uaSock->sock);
+#endif
                 if (uaSock->state == SOCKET_STATE_CONNECTING)
                 {
                     /* Socket is currently in connecting attempt: check WRITE events */
+#ifdef __TRUSTINSOFT_DEBUG__
+                      printf ("TIS: TreatSocketsEvents: state(%u) = %d (SOCKET_STATE_CONNECTING)\n", idx, (int)uaSock->state);
+#endif
 
                     if (SocketSet_IsPresent(uaSock->sock, &writeSet) != false)
                     {
@@ -134,11 +154,17 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                         status = Socket_CheckAckConnect(uaSock->sock);
                         if (SOPC_STATUS_OK != status)
                         {
+#ifdef __TRUSTINSOFT_DEBUG__
+                          printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_CONNECTION_ATTEMPT_FAILED for %u\n", idx);
+#endif
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CONNECTION_ATTEMPT_FAILED,
                                                                        idx);
                         }
                         else
                         {
+#ifdef __TRUSTINSOFT_DEBUG__
+                          printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_CONNECTED for %u\n", idx);
+#endif
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CONNECTED, idx);
                         }
                     }
@@ -149,17 +175,29 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
 
                     if (SocketSet_IsPresent(uaSock->sock, &readSet) != false)
                     {
+#ifdef __TRUSTINSOFT_DEBUG__
+                      printf ("TIS: TreatSocketsEvents: state(%u) = %d (and in readSet)\n", idx, (int)uaSock->state);
+#endif
                         if (uaSock->state == SOCKET_STATE_CONNECTED)
                         {
+#ifdef __TRUSTINSOFT_DEBUG__
+                          printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_READY_TO_READ for %u\n", idx);
+#endif
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_READY_TO_READ, idx);
                         }
                         else if (uaSock->state == SOCKET_STATE_LISTENING)
                         {
+#ifdef __TRUSTINSOFT_DEBUG__
+                          printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_LISTENER_CONNECTION_ATTEMPT for %u\n", idx);
+#endif
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_LISTENER_CONNECTION_ATTEMPT,
                                                                        uaSock->socketIdx);
                         }
                         else
                         {
+#ifdef __TRUSTINSOFT_DEBUG__
+                          printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_CLOSE(1) for %u\n", idx);
+#endif
                             SOPC_Logger_TraceError("SocketNetworkMgr: unexpected read event on socketIdx=%" PRIu32,
                                                    idx);
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
@@ -169,10 +207,16 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                     {
                         if (uaSock->state == SOCKET_STATE_CONNECTED)
                         {
+#ifdef __TRUSTINSOFT_DEBUG__
+                          printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_READY_TO_WRITE for %u\n", idx);
+#endif
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_READY_TO_WRITE, idx);
                         }
                         else
                         {
+#ifdef __TRUSTINSOFT_DEBUG__
+                          printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_CLOSE(2) for %u\n", idx);
+#endif
                             SOPC_Logger_TraceError("SocketNetworkMgr: unexpected write event on socketIdx=%" PRIu32,
                                                    idx);
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
@@ -183,6 +227,9 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                 // In any state check EXCEPT events
                 if (SocketSet_IsPresent(uaSock->sock, &exceptSet) != false)
                 {
+#ifdef __TRUSTINSOFT_DEBUG__
+                          printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_CLOSE(3) for %u\n", idx);
+#endif
                     // TODO: retrieve exception code
                     SOPC_Logger_TraceError("SocketNetworkMgr: exception event on socketIdx=%" PRIu32, idx);
                     SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
@@ -192,6 +239,9 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
     }
 
     Mutex_Unlock(&socketsMutex);
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: TreatSocketsEvents: end\n");
+#endif
 
     return result;
 }
@@ -218,6 +268,9 @@ static bool SOPC_SocketsNetworkEventMgr_CyclicThreadStart(void)
         Mutex_Lock(&receptionThread.tMutex);
         receptionThread.initDone = true;
         receptionThread.stopFlag = false;
+#ifdef __TRUSTINSOFT_DEBUG__
+        printf ("TIS: SOPC_Thread_Create to call SOPC_SocketsNetworkEventMgr_CyclicThreadLoop\n");
+#endif
         SOPC_Thread_Create(&receptionThread.thread, SOPC_SocketsNetworkEventMgr_CyclicThreadLoop, NULL);
         Mutex_Unlock(&receptionThread.tMutex);
         result = true;

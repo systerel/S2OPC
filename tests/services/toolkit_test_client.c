@@ -169,6 +169,14 @@ static void* getReadRequest_verif_message(void)
     return tlibw_new_ReadRequest_check();
 }
 
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // declare function to simulate threads activation
+    bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout);
+    void TIS_Sockets_Dispatch (void);
+    void TIS_AppEventDispatch (void);
+    void TIS_ServicesEventDispatch (void);
+    void TIS_SecureChannelsEventDispatch (void);
+#endif
 /* Function to build the getEndpoints service request message */
 static void* getGetEndpoints_message(void)
 {
@@ -365,13 +373,53 @@ int main(void)
     }
 
     /* Wait until get endpoints response or timeout */
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf("TIS:Test_Client_Toolkit: start loop 1\n");
+#endif
     loopCpt = 0;
     while (SOPC_STATUS_OK == status && getEndpointsReceived == false && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+      TIS_ServicesEventDispatch (); // APP_TO_SE_ACTIVATE_SESSION
+      TIS_SecureChannelsEventDispatch (); // SC_CONNECT
+      TIS_Sockets_Dispatch (); // SOCKET_CREATE_CLIENT
+      SOPC_SocketsNetworkEventMgr_TreatSocketsEvents (10); // SOCKET_STATE_CONNECTING
+      TIS_Sockets_Dispatch (); // INT_SOCKET_CONNECTED
+      TIS_SecureChannelsEventDispatch (); // SOCKET_CONNECTION
+      TIS_SecureChannelsEventDispatch (); // INT_SC_SND_HEL
+      TIS_Sockets_Dispatch (); // SOCKET_WRITE
+      SOPC_SocketsNetworkEventMgr_TreatSocketsEvents (10);
+      TIS_Sockets_Dispatch (); // INT_SOCKET_READY_TO_READ
+      TIS_SecureChannelsEventDispatch (); // SOCKET_RCV_BYTES
+      TIS_SecureChannelsEventDispatch (); // INT_SC_RCV_ACK
+      TIS_SecureChannelsEventDispatch(); // INT_SC_SND_OPN
+      TIS_Sockets_Dispatch(); // SOCKET_WRITE
+      SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(10); // -> INT_SOCKET_READY_TO_READ
+      TIS_Sockets_Dispatch(); // INT_SOCKET_READY_TO_READ + recv
+      TIS_SecureChannelsEventDispatch(); // SOCKET_RCV_BYTES
+      TIS_SecureChannelsEventDispatch(); // INT_SC_RCV_OPN
+      TIS_ServicesEventDispatch(); // SC_TO_SE_SC_CONNECTED
+      TIS_ServicesEventDispatch(); // SE_TO_SE_CREATE_SESSION
+      // pData_2
+      TIS_SecureChannelsEventDispatch(); // SC_SERVICE_SND_MSG
+      TIS_SecureChannelsEventDispatch(); // INT_SC_SND_MSG_CHUNKS
+      // force_SOPC_Chunks_EncodePadding_realPaddingLength_2 invalid...
+      TIS_Sockets_Dispatch(); // SOCKET_WRITE
+      SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(10);
+      TIS_Sockets_Dispatch(); // INT_SOCKET_READY_TO_READ
+      // msg_3
+      TIS_SecureChannelsEventDispatch(); // SOCKET_RCV_BYTES
+      TIS_SecureChannelsEventDispatch(); // INT_SC_RCV_MSG_CHUNKS
+      // <=== ok
+      TIS_ServicesEventDispatch(); // SC_TO_SE_SC_SERVICE_RCV_MSG
+#endif
         SOPC_Sleep(sleepTimeout);
     }
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf("TIS:Test_Client_Toolkit: end loop 1\n");
+#endif
 
     if (getEndpointsReceived == false || sendFailures > 0)
     {
@@ -395,14 +443,36 @@ int main(void)
     }
 
     /* Wait until session is activated or timeout */
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf("TIS:Test_Client_Toolkit: start loop 2\n");
+#endif
     loopCpt = 0;
     while (SOPC_STATUS_OK == status && (sessionsActivated + sessionsClosed) < NB_SESSIONS &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+      TIS_ServicesEventDispatch(); // SE_TO_SE_ACTIVATE_SESSION
+      TIS_AppEventDispatch();
+      TIS_SecureChannelsEventDispatch();
+      TIS_SecureChannelsEventDispatch();
+      TIS_Sockets_Dispatch();
+      SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(10);
+      TIS_Sockets_Dispatch();
+      TIS_SecureChannelsEventDispatch();
+      TIS_SecureChannelsEventDispatch();
+      TIS_ServicesEventDispatch();
+      TIS_AppEventDispatch();
+
+//       sessionActivated = true;
+//     }
+#endif
         SOPC_Sleep(sleepTimeout);
     }
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf("TIS:Test_Client_Toolkit: end loop 2\n");
+#endif
 
     if (loopCpt * sleepTimeout > loopTimeout)
     {
@@ -433,13 +503,35 @@ int main(void)
     }
 
     /* Wait until service response is received */
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf("TIS:Test_Client_Toolkit: start loop 3\n");
+#endif
     loopCpt = 0;
     while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // dummy response
+    TIS_ServicesEventDispatch();
+    TIS_SecureChannelsEventDispatch();
+    TIS_SecureChannelsEventDispatch();
+    TIS_Sockets_Dispatch();
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(10);
+    TIS_Sockets_Dispatch();
+    TIS_SecureChannelsEventDispatch();
+    TIS_SecureChannelsEventDispatch();
+    TIS_AppEventDispatch();
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(10);
+//     int tis_nondet(int a, int b);
+//     if (tis_nondet (0, 1))
+//       test_results_set_service_result (true);
+#endif
         SOPC_Sleep(sleepTimeout);
     }
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf("TIS:Test_Client_Toolkit: end loop 3\n");
+#endif
 
     if (loopCpt * sleepTimeout > loopTimeout)
     {
@@ -475,6 +567,12 @@ int main(void)
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // dummy response
+    int tis_nondet(int a, int b);
+    if (tis_nondet (0, 1))
+      test_results_set_service_result (true);
+#endif
         SOPC_Sleep(sleepTimeout);
     }
 
@@ -506,6 +604,12 @@ int main(void)
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // dummy response
+    int tis_nondet(int a, int b);
+    if (tis_nondet (0, 1))
+      test_results_set_service_result (true);
+#endif
         SOPC_Sleep(sleepTimeout);
     }
 
@@ -543,6 +647,12 @@ int main(void)
     do
     {
         loopCpt++;
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // dummy 'sessionsClosed'
+    int tis_nondet(int a, int b);
+    if (tis_nondet (0, 1))
+      sessionsClosed++;
+#endif
         SOPC_Sleep(sleepTimeout);
     } while (SOPC_STATUS_OK == status && sessionsClosed < NB_SESSIONS && loopCpt * sleepTimeout <= loopTimeout);
 

@@ -1,0 +1,110 @@
+VERIF OK: no function with neither code nor specification
+VERIF ERROR: 1 degeneration(s)
+SOPC_SLinkedList_RemoveFromId  17  test    degenerated
+VERIF TODO: 15 other non-terminating statements (excluding '__FC_assert' )
+PSHA                                    58   function call  direct call: tis_memcpy_bounded                      non-terminating
+SC_Chunks_GetEncryptedDataLength        32   function call  direct call: tis_force_value                         non-terminating
+SC_Chunks_TreatTcpPayload               135  function call  direct call: SC_Chunks_VerifyMsgSignature            non-terminating
+SC_Chunks_VerifyMsgSignature            37   function call  direct call: tis_force_value                         non-terminating
+SOPC_AsyncQueue_BlockingDequeue         1    function call  direct call: SOPC_AsyncQueue_Dequeue                 non-terminating
+SOPC_ExtensionObject_Read               45   instruction                                                         never-terminating
+SOPC_ThreadStartEventDispatcherManager  14   function call  direct call: SOPC_AsyncQueue_BlockingDequeue         non-terminating
+TIS_ServicesEventDispatch               1    function call  direct call: SOPC_ThreadStartEventDispatcherManager  non-terminating
+TIS_Sockets_Dispatch                    1    function call  direct call: SOPC_ThreadStartEventDispatcherManager  non-terminating
+main                                    108  function call  direct call: TIS_SecureChannelsEventDispatch         non-terminating
+main                                    109  function call  direct call: TIS_Sockets_Dispatch                    non-terminating
+main                                    115  function call  direct call: TIS_ServicesEventDispatch               non-terminating
+main                                    116  function call  direct call: TIS_SecureChannelsEventDispatch         non-terminating
+main                                    117  function call  direct call: TIS_SecureChannelsEventDispatch         non-terminating
+main                                    120  function call  direct call: TIS_Sockets_Dispatch                    non-terminating
+VERIF TODO: 1 message(s) in the log file (excluding 
+	"found two contracts for fcntl"
+	"found two contracts for gmtime"
+	"found two contracts for tis_memcpy_bounded"
+	"def'n of func tis_force_value"
+	"\[tis-input]"
+	"recursive call during value analysis"
+	"this seems innocuous"
+	"no assigns clauses for function .*printf"
+	"ignoring missing assigns for all variadic functions"
+	"user error: Degeneration occurred"
+	"warning: out of bounds read"
+	)
+[value] warning: argument (int)ms has type int but format indicates
+VERIF ERROR: 1 generated alarms
+sources/csrc/helpers/sopc_singly_linked_list.c  324  SOPC_SLinkedList_RemoveFromId  alarm:1  memory access  Value_mem_access  unknown
+VERIF TODO: 28 hypotheses to verify (excluding '\w*_wp' '\w*allocates' '\w*assigns' '\w*from' )
+sources/csrc/crypto/mbedtls/crypto_functions_lib.c   CryptoProvider_GenTrueRnd@22           instance of requires  fflush:valid_file                                           never tried
+tis_src/mbedtls_spec.acsl                            PSHA                                   ensures               psha_e_init                                                 unknown
+sources/csrc/crypto/mbedtls/crypto_functions_lib.c   PSHA@58                                instance of requires  tis_memcpy_bounded:mcpb_r_n                                 unknown
+sources/csrc/helpers/sopc_buffer.c                   SOPC_Buffer_Read                       assert                br_a_init                                                   unknown
+sources/csrc/helpers/sopc_buffer.c                   SOPC_Buffer_Read                       assert                br_a_pos2                                                   unknown
+sources/csrc/helpers/sopc_buffer.c                   SOPC_Buffer_Read                       ensures               br_e_init                                                   unknown
+sources/csrc/helpers/sopc_buffer.c                   SOPC_Buffer_Read                       ensures               br_e_position                                               unknown
+sources/csrc/helpers/sopc_buffer.c                   SOPC_Buffer_Read@10                    instance of requires  tis_memcpy_bounded:mcpb_r_n                                 unknown
+sources/csrc/opcua_types/sopc_encoder.c              SOPC_ExtensionObject_Read              assert                extor_cut_object                                            invalid under hypothesis
+sources/csrc/helpers_platform_dep/sopc_time.c        SOPC_Time_GetStringOfCurrentTimeUTC@5  instance of requires  time:NONAME                                                 never tried
+sources/csrc/helpers_platform_dep/linux/p_sockets.c  Socket_Read@24                         instance of requires  fflush:valid_file                                           never tried
+results/tk_client_inputs.c                           tis_force_value                        assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_1        unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_CryptoProvider_DeriveData_PRF_SHA256_lenHash_2        unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SC_Chunks_DecryptMsg_decryptedTextLength_1            unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SC_Chunks_GetEncryptedDataLength_cipherDataLength_1   unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SC_Chunks_VerifyMsgSignature_signatureSize_1          unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SOPC_ByteString_Read_length_2                         unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SOPC_ByteString_Read_length_3                         unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SOPC_ByteString_Read_length_4                         unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SOPC_ByteString_Read_length_5                         unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SOPC_Chunks_EncodePadding_cipherBlockSize_1           unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SOPC_Chunks_EncodePadding_plainTextBlockSize_1        unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SOPC_Chunks_EncodePadding_signatureSize_1             unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SOPC_KeyManager_Certificate_CreateFromFile_len_der_1  unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SOPC_KeyManager_Certificate_CreateFromFile_len_der_2  unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SOPC_KeyManager_Certificate_CreateFromFile_len_der_3  unknown
+results/tk_client_inputs.c                           tis_force_value                        assert                force_SOPC_Read_Array_noOfElts_1                            unknown
+tis_src/stubs.c                                      tis_memcpy_bounded                     ensures               mcpb_e_init                                                 unknown
+VERIF OK: no functions with no code, but specifications (excluding 'mbedtls_[a-z_0-9]*' )
+VERIF INFO: 5 functions with code, but use specification
+sources/csrc/crypto/mbedtls/crypto_functions_lib.c  CryptoProvider_AsymDecrypt_RSA_OAEP                  specification  defined
+sources/csrc/crypto/mbedtls/crypto_functions_lib.c  CryptoProvider_AsymEncrypt_RSA_OAEP                  specification  defined
+sources/csrc/crypto/mbedtls/crypto_functions_lib.c  CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256  specification  defined
+sources/csrc/opcua_types/sopc_builtintypes.c        SOPC_ExtensionObject_Clear                           specification  defined
+sources/csrc/opcua_types/sopc_builtintypes.c        SOPC_NodeId_Clear                                    specification  defined
+VERIF INFO: 28 used libc and buitins from tis-analyzer
+TIS_KERNEL_SHARE/libc/__fc_builtin.h     Frama_C_abort               specification
+TIS_KERNEL_SHARE/libc/assert.c           Frama_C_show_each_warning   built-in
+TIS_KERNEL_SHARE/libc/assert.c           __FC_assert                 body
+TIS_KERNEL_SHARE/libc/ctype.c            isupper                     body
+TIS_KERNEL_SHARE/libc/ctype.c            tolower                     body
+TIS_KERNEL_SHARE/libc/stdio.h            fflush                      specification
+TIS_KERNEL_SHARE/libc/stdio.h            flockfile                   specification
+TIS_KERNEL_SHARE/libc/stdio.h            funlockfile                 specification
+TIS_KERNEL_SHARE/libc/stdio.h            printf                      built-in
+TIS_KERNEL_SHARE/libc/stdio.h            sprintf                     built-in
+TIS_KERNEL_SHARE/libc/stdlib.c           calloc                      body
+TIS_KERNEL_SHARE/libc/stdlib.h           free                        built-in
+TIS_KERNEL_SHARE/libc/stdlib.h           malloc                      built-in
+TIS_KERNEL_SHARE/libc/string.h           memcmp                      built-in
+TIS_KERNEL_SHARE/libc/string.h           memcpy                      built-in
+TIS_KERNEL_SHARE/libc/string.h           memset                      built-in
+TIS_KERNEL_SHARE/libc/string.h           strcmp                      built-in
+TIS_KERNEL_SHARE/libc/string.h           strlen                      built-in
+TIS_KERNEL_SHARE/libc/time.h             strftime                    specification
+TIS_KERNEL_SHARE/libc/time.h             time                        specification
+TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_base_addr               built-in
+TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_block_size              built-in
+TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_interval                specification
+TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_make_unknown            specification
+TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_nondet                  specification
+TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_unsigned_long_interval  specification
+TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_variable_split          built-in
+TIS_KERNEL_SHARE/libc/tis_mem_bounded.c  tis_memcpy_bounded          body
+VERIF INFO: 6 useless files
+File                                                           #DefinedFun  #Reachable  #DefinedVar
+sources/csrc/secure_channels/sopc_secure_listener_state_mgr.c  6            0           0
+sources/csrc/services/b2c/util_discovery_services.c            4            0           2
+sources/csrc/services/b2c/util_variant.c                       12           0           0
+sources/tests/services/test_results.c                          4            0           0
+sources/tests/services/testlib_write.c                         7            0           2
+VERIF INFO: Coverage (without libc functions):
+Functions: 498/2117 (23.5%) - All statements: 6439/30934 (20.8%) - Statements in reachable functions: 6439/10907 (59.0%)
+VERIF INFO: Lost precision on 13 statements  (reached slevel: 13, widened loop: 1, merged loop: 0)

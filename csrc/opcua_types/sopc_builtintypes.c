@@ -833,6 +833,15 @@ SOPC_ReturnStatus SOPC_ByteString_Compare(const SOPC_ByteString* left,
             }
             else
             {
+#ifdef __TRUSTINSOFT_HELPER__
+          // local annotations
+          /*@
+            assert sbscmp_a_init_right:
+            \initialized((char*) right->Data + (0..right->Length-1)); */
+          /*@ assert sbscmp_a_init_left:
+            \initialized((char*) left->Data + (0..left->Length-1));
+           */
+#endif
                 *comparison = memcmp(left->Data, right->Data, left->Length);
             }
         }
@@ -976,6 +985,12 @@ void SOPC_String_ClearAux(void* value)
     SOPC_String_Clear((SOPC_String*) value);
 }
 
+#ifdef __TRUSTINSOFT_HELPER__
+// spec for SOPC_String_Clear
+/*@ requires sscl_r_data: string->DoNotClear ||
+    string->Data == \null || \valid (string->Data);
+*/
+#endif
 void SOPC_String_Clear(SOPC_String* string)
 {
     if (string != NULL)
@@ -1125,6 +1140,12 @@ SOPC_ReturnStatus SOPC_String_Compare(const SOPC_String* left,
         }
         else
         {
+#ifdef __TRUSTINSOFT_HELPER__
+          // local annotation
+          /*@ assert sscmp_a_init:
+            \initialized((char*) right->Data + (0..right->Length-1));
+           */
+#endif
             *comparison = SOPC_strncmp_ignore_case((char*) left->Data, (char*) right->Data, left->Length);
         }
     }
@@ -1431,6 +1452,10 @@ void SOPC_NodeId_ClearAux(void* value)
     SOPC_NodeId_Clear((SOPC_NodeId*) value);
 }
 
+#ifdef __TRUSTINSOFT_HELPER__
+// spec for SOPC_NodeId_Clear (-val-use-spec)
+//@ assigns *nodeId \from \nothing;
+#endif
 void SOPC_NodeId_Clear(SOPC_NodeId* nodeId)
 {
     if (nodeId != NULL)
@@ -1622,11 +1647,20 @@ char* SOPC_NodeId_ToCString(SOPC_NodeId* nodeId)
                     if (nodeId->Data.Guid != NULL)
                     {
                         res = sprintf(&result[res], "g=%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+#ifdef __TRUSTINSOFT_BUGFIX__
+   // minor: printf format
+                                      (unsigned int)nodeId->Data.Guid->Data1, (unsigned int)nodeId->Data.Guid->Data2, (unsigned int)nodeId->Data.Guid->Data3,
+                                      (unsigned int)nodeId->Data.Guid->Data4[0], (unsigned int)nodeId->Data.Guid->Data4[1],
+                                      (unsigned int)nodeId->Data.Guid->Data4[2], (unsigned int)nodeId->Data.Guid->Data4[3],
+                                      (unsigned int)nodeId->Data.Guid->Data4[4], (unsigned int)nodeId->Data.Guid->Data4[5],
+                                      (unsigned int)nodeId->Data.Guid->Data4[6], (unsigned int)nodeId->Data.Guid->Data4[7]);
+#else
                                       nodeId->Data.Guid->Data1, nodeId->Data.Guid->Data2, nodeId->Data.Guid->Data3,
                                       nodeId->Data.Guid->Data4[0], nodeId->Data.Guid->Data4[1],
                                       nodeId->Data.Guid->Data4[2], nodeId->Data.Guid->Data4[3],
                                       nodeId->Data.Guid->Data4[4], nodeId->Data.Guid->Data4[5],
                                       nodeId->Data.Guid->Data4[6], nodeId->Data.Guid->Data4[7]);
+#endif
                     }
                     else
                     {
@@ -2115,6 +2149,10 @@ void SOPC_DiagnosticInfo_ClearAux(void* value)
     SOPC_DiagnosticInfo_Clear((SOPC_DiagnosticInfo*) value);
 }
 
+#ifdef __TRUSTINSOFT_HELPER__
+// assigns for recursive function (SOPC_DiagnosticInfo_Clear)
+//@ assigns *diagInfo \from *diagInfo;
+#endif
 void SOPC_DiagnosticInfo_Clear(SOPC_DiagnosticInfo* diagInfo)
 {
     if (diagInfo != NULL)
@@ -2412,6 +2450,10 @@ void SOPC_ExtensionObject_ClearAux(void* value)
     SOPC_ExtensionObject_Clear((SOPC_ExtensionObject*) value);
 }
 
+#ifdef __TRUSTINSOFT_HELPER__
+// spec for SOPC_ExtensionObject_Clear (-val-use-spec)
+//@ assigns *extObj \from \nothing;
+#endif
 void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj)
 {
     if (extObj != NULL)

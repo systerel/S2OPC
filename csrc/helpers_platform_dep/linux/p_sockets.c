@@ -17,6 +17,9 @@
 
 #include "sopc_raw_sockets.h"
 
+#ifdef __TRUSTINSOFT_DEBUG__
+#include <stdio.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/tcp.h>
@@ -134,6 +137,9 @@ SOPC_ReturnStatus Socket_CreateNew(Socket_AddressInfo* addr, bool setReuseAddr, 
     if (addr != NULL && sock != NULL)
     {
         *sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+#ifdef __TRUSTINSOFT_DEBUG__
+        printf ("TIS: Socket_CreateNew = %d\n", *sock);
+#endif
 
         if (*sock != SOPC_INVALID_SOCKET)
         {
@@ -318,6 +324,14 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketS
         val = &timeout;
     }
     nbReady = select(fdmax + 1, &readSet->set, &writeSet->set, &exceptSet->set, val);
+#ifdef __TRUSTINSOFT_DEBUG__
+    // print 'select' result to inject in stubs (TODO: use tis_force mecanism?)
+    static int tis_nb_call = 0; tis_nb_call++;
+    printf ("TIS: Socket_WaitSocketEvents:%d: nbReady=%d/%d\n", tis_nb_call, nbReady, fdmax+1);
+    for (int fd = 0; fd < fdmax+1; fd++) {
+      printf ("TIS: Socket_WaitSocketEvents(%d): read=%d write=%d except=%d\n", fd, FD_ISSET (fd, &readSet->set), FD_ISSET (fd, &writeSet->set), FD_ISSET (fd, &exceptSet->set));
+    }
+#endif
     if (nbReady > INT32_MAX || nbReady < INT32_MIN)
         return -1;
     return (int32_t) nbReady;
@@ -355,6 +369,23 @@ SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, int
     if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0)
     {
         *readCount = recv(sock, data, dataSize, 0);
+#ifdef __TRUSTINSOFT_DEBUG__
+            // printf message from socket to build revc stub
+            static size_t tis_cpt_call = 0; tis_cpt_call++;
+            static uint32_t total = 0;
+            total += *readCount;
+            printf ("TIS: recv on sock:%d dataSize = %u ; read = %d ; total = %u\n",
+                sock, dataSize, *readCount, total);
+            flockfile (stdout);
+            printf ("uint8_t msg_%zu[] = {", tis_cpt_call);
+            for (int i = 0; i < *readCount; i++) {
+              if (i%16 == 0) printf ("\n");
+              printf ("0x%hhx,", data[i]);
+            }
+            printf ("};\n");
+            fflush (stdout);
+            funlockfile (stdout);
+#endif
 
         /* Extract of man recv (release 3.54 of the Linux man-pages project):
          * RETURN VALUE

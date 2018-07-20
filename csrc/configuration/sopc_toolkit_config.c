@@ -25,6 +25,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __TRUSTINSOFT_DEBUG__
+#include <stdio.h>
+#endif
 
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_secure_channels_api.h"
@@ -87,6 +90,10 @@ void SOPC_Internal_ApplicationEventDispatcher(int32_t eventAndType, uint32_t id,
 {
     SOPC_EncodeableType* encType = NULL;
     char* nodeId = NULL;
+#ifdef __TRUSTINSOFT_DEBUG__
+  printf ("TIS: SOPC_Internal_ApplicationEventDispatcher (TIS_AppEventDispatch)\n");
+  printf("Application event dispatcher: event='%d', id='%d', params='%p'\n", eventAndType, id, params);
+#endif
     switch (SOPC_AppEvent_AppEventType_Get(eventAndType))
     {
     case SOPC_APP_COM_EVENT:

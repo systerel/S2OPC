@@ -148,7 +148,19 @@ SOPC_ReturnStatus SOPC_Buffer_Write(SOPC_Buffer* buffer, const uint8_t* data_src
         }
         else
         {
+#ifdef __TRUSTINSOFT_HELPER__
+      // use tis_memcpy_bounded instead of memcpy
+      void *tis_memcpy_bounded(void *dest, const void *src, size_t n,
+                               void * dest_bound, void * src_bound);
+      //@ assert bw_a_count: val: 0 < count <= 65535;
+      //@ assert bw_a_pos_uint: val: buffer->position < 65535;
+      //@ assert bw_a_pos: wp: buffer->position < buffer->max_size;
+      //@ assert bw_a_pos2: buffer->position <= buffer->max_size - count;
+      //@ assert bw_a_count: wp: count <= buffer->max_size - buffer->position;
+            if (tis_memcpy_bounded(&(buffer->data[buffer->position]), data_src, count, buffer->data + buffer->max_size, data_src+count) == &(buffer->data[buffer->position]))
+#else
             if (memcpy(&(buffer->data[buffer->position]), data_src, count) == &(buffer->data[buffer->position]))
+#endif
             {
                 buffer->position = buffer->position + count;
                 // In case we write in existing buffer position: does not change length
@@ -167,13 +179,39 @@ SOPC_ReturnStatus SOPC_Buffer_Write(SOPC_Buffer* buffer, const uint8_t* data_src
     return status;
 }
 
+#ifdef __TRUSTINSOFT_HELPER__
+// spec for SOPC_Buffer_Read (TODO: remove ?)
+/*@
+//   assigns data_dest[0..count-1] \from count, buffer->data[0..count-1];
+//   assigns \result \from buffer->length, count, buffer->position,
+//                   indirect:buffer, indirect:data_dest; // TODO: enhance ?
+//   assigns buffer->position \from buffer->position, count;
+  ensures br_e_status: \result > 0 || \result == 0;
+  ensures br_e_init:  \result != 0
+          || (\result == 0 && \initialized (data_dest + (0..count-1)));
+  ensures br_e_position:
+    (\result != 0 && buffer->position == \old (buffer->position))
+    || (\result == 0 && buffer->position == \old (buffer->position) + count);
+*/
+#endif
 SOPC_ReturnStatus SOPC_Buffer_Read(uint8_t* data_dest, SOPC_Buffer* buffer, uint32_t count)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (buffer != NULL && buffer->data != NULL && buffer->position + count <= buffer->length)
     {
+#ifdef __TRUSTINSOFT_HELPER__
+      // use tis_memcpy_bounded instead of memcpy
+      void *tis_memcpy_bounded(void *dest, const void *src, size_t n,
+                               void * dest_bound, void * src_bound);
+      //@ assert br_a_pos: wp: buffer->position < buffer->length;
+      //@ assert br_a_pos2: buffer->position <= buffer->length - count;
+      //@ assert br_a_count: wp: count <= buffer->length - buffer->position;
+        if(tis_memcpy_bounded(data_dest, &(buffer->data[buffer->position]), count, data_dest+count, buffer->data + buffer->max_size) == data_dest){
+          //@ assert br_a_init: \initialized (data_dest + (0..count-1));
+#else
         if (memcpy(data_dest, &(buffer->data[buffer->position]), count) == data_dest)
         {
+#endif
             buffer->position = buffer->position + count;
             status = SOPC_STATUS_OK;
         }

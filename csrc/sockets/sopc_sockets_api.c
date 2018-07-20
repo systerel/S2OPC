@@ -18,6 +18,9 @@
 #include "sopc_sockets_api.h"
 
 #include <assert.h>
+#ifdef __TRUSTINSOFT_DEBUG__
+#include <stdio.h>
+#endif
 
 #include "sopc_raw_sockets.h"
 #include "sopc_sockets_event_mgr.h"
@@ -26,6 +29,13 @@
 
 static SOPC_EventDispatcherManager* socketsEventDispatcherMgr = NULL;
 
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+// TIS_Sockets_Dispatch function to call EventDispatcherManager
+void* SOPC_ThreadStartEventDispatcherManager(void* pEventMgr);
+void TIS_Sockets_Dispatch (void) {
+  SOPC_ThreadStartEventDispatcherManager (socketsEventDispatcherMgr);
+}
+#endif
 SOPC_EventDispatcherManager* SOPC_Sockets_GetEventDispatcher()
 {
     return socketsEventDispatcherMgr;
@@ -37,6 +47,9 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id,
     {
         SOPC_EventDispatcherManager_AddEvent(socketsEventDispatcherMgr, socketEvent, id, params, auxParam, NULL);
     }
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS:: SOPC_Sockets_EnqueueEvent: id=%u - SOPC_Sockets_InputEvent=%d\n", id, (int)socketEvent);
+#endif
 }
 
 void SOPC_Sockets_Initialize()

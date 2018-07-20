@@ -3171,8 +3171,12 @@ void OpcUa_ResponseHeader_Clear(void* pValue)
         SOPC_UInt32_Clear(&a_pValue->RequestHandle);
         SOPC_StatusCode_Clear(&a_pValue->ServiceResult);
         SOPC_DiagnosticInfo_Clear(&a_pValue->ServiceDiagnostics);
+#ifdef __TRUSTINSOFT_HELPER__
+        // skip call to SOPC_Clear_Array (tk_client)
+#else
         SOPC_Clear_Array(&a_pValue->NoOfStringTable, (void**) &a_pValue->StringTable, sizeof(SOPC_String),
                          (SOPC_EncodeableObject_PfnClear*) SOPC_String_ClearAux);
+#endif
         SOPC_ExtensionObject_Clear(&a_pValue->AdditionalHeader);
     }
 }
@@ -3265,7 +3269,11 @@ SOPC_ReturnStatus OpcUa_ResponseHeader_Decode(void* pValue, SOPC_Buffer* buf)
 
     if (status != SOPC_STATUS_OK && a_pValue != NULL)
     {
+#ifdef __TRUSTINSOFT_HELPER__
+            // skip OpcUa_ResponseHeader_Clear that gives alarms (TODO: put it back!)
+#else
         OpcUa_ResponseHeader_Clear(a_pValue);
+#endif
     }
 
     return status;

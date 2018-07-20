@@ -19,6 +19,9 @@
 #include "sopc_secure_channels_api_internal.h"
 
 #include <assert.h>
+#ifdef __TRUSTINSOFT_DEBUG__
+#include <stdio.h>
+#endif
 #include <stdbool.h>
 
 #include "sopc_chunks_mgr.h"
@@ -28,6 +31,13 @@
 #include "sopc_secure_listener_state_mgr.h"
 
 static SOPC_EventDispatcherManager* secureChannelsEventDispatcherMgr = NULL;
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+// TIS_SecureChannelsEventDispatch function to call EventDispatcherManager
+void* SOPC_ThreadStartEventDispatcherManager(void* pEventMgr);
+void TIS_SecureChannelsEventDispatch (void) {
+  SOPC_ThreadStartEventDispatcherManager (secureChannelsEventDispatcherMgr);
+}
+#endif
 
 SOPC_EventDispatcherManager* SOPC_SecureChannels_GetEventDispatcher()
 {
@@ -36,6 +46,11 @@ SOPC_EventDispatcherManager* SOPC_SecureChannels_GetEventDispatcher()
 
 static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
+#ifdef __TRUSTINSOFT_DEBUG__
+  printf ("TIS: SOPC_SecureChannelsEventMgr_Dispatcher "
+          "(TIS_SecureChannelsEventDispatch): event='%d', id='%u'\n",
+          event, eltId);
+#endif
     SOPC_SecureChannels_InputEvent scEvent = event;
     switch (scEvent)
     {

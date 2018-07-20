@@ -36,6 +36,12 @@
 #include "opcua_statuscodes.h"
 
 #include "sopc_time.h"
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+// declare function to simulate threads activation
+bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout);
+void TIS_Sockets_Dispatch (void);
+void TIS_SecureChannelsEventDispatch (void);
+#endif
 
 /*
  * Expected arguments (based on arguments order, last arguments can be unused (default value used)):
@@ -275,9 +281,33 @@ int main(int argc, char* argv[])
         printf(">>Stub_Client: Establishing connection to server...\n");
     }
 
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf("Stub_Client:TIS: start loop 1\n");
+#endif
     while ((SOPC_STATUS_OK == status || SOPC_STATUS_WOULD_BLOCK == status) && serviceEvent == NULL &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // dummy activation
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(10);
+    TIS_SecureChannelsEventDispatch(); // SC_CONNECT
+    TIS_Sockets_Dispatch(); // SOCKET_CREATE_CLIENT
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(10); // SOCKET_STATE_CONNECTING
+    TIS_Sockets_Dispatch(); // INT_SOCKET_CONNECTED
+    TIS_SecureChannelsEventDispatch(); // SOCKET_CONNECTION
+    TIS_SecureChannelsEventDispatch(); // INT_SC_SND_HEL
+    TIS_Sockets_Dispatch(); // SOCKET_WRITE
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(10);
+    TIS_Sockets_Dispatch(); // INT_SOCKET_READY_TO_READ + recv
+    TIS_SecureChannelsEventDispatch(); // SOCKET_RCV_BYTES
+    TIS_SecureChannelsEventDispatch(); // INT_SC_RCV_ACKA + generated pData
+    TIS_SecureChannelsEventDispatch(); // INT_SC_SND_OPN
+    TIS_Sockets_Dispatch(); // SOCKET_WRITE
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(10); // -> INT_SOCKET_READY_TO_READ
+    TIS_Sockets_Dispatch(); // INT_SOCKET_READY_TO_READ + recv
+    TIS_SecureChannelsEventDispatch(); // SOCKET_RCV_BYTES
+    TIS_SecureChannelsEventDispatch(); // INT_SC_RCV_OPN
+#endif
         status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
         if (SOPC_STATUS_OK != status)
         {
@@ -285,6 +315,9 @@ int main(int argc, char* argv[])
             SOPC_Sleep(sleepTimeout);
         }
     }
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf("Stub_Client:TIS: end of loop 1\n");
+#endif
 
     if (SOPC_STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout)
     {
@@ -305,7 +338,12 @@ int main(int argc, char* argv[])
         }
         else
         {
+#ifdef __TRUSTINSOFT_BUGFIX__
+          // minor: fix printf format
+          printf(">>Stub_Client: Unexpected event received '%d'\n", (int)serviceEvent->event);
+#else
             printf(">>Stub_Client: Unexpected event received '%d'\n", serviceEvent->event);
+#endif
             status = SOPC_STATUS_CLOSED;
         }
         free(serviceEvent);
@@ -358,9 +396,23 @@ int main(int argc, char* argv[])
         printf(">>Stub_Client: Calling GetEndpoint service...\n");
     }
 
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf("Stub_Client:TIS: start loop 2\n");
+#endif
     while ((SOPC_STATUS_OK == status || SOPC_STATUS_WOULD_BLOCK == status) && serviceEvent == NULL &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // dummy activation
+    TIS_SecureChannelsEventDispatch(); // SC_SERVICE_SND_MSG
+    TIS_SecureChannelsEventDispatch(); // INT_SC_SND_MSG_CHUNKS
+    TIS_Sockets_Dispatch(); // SOCKET_WRITE
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(10); // INT_SOCKET_READY_TO_READ
+    TIS_Sockets_Dispatch(); // SOCKET_RCV_BYTES
+    TIS_SecureChannelsEventDispatch();
+    TIS_SecureChannelsEventDispatch();
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(10);
+#endif
         status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
         if (SOPC_STATUS_OK != status)
         {
@@ -368,6 +420,9 @@ int main(int argc, char* argv[])
             SOPC_Sleep(sleepTimeout);
         }
     }
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf("Stub_Client:TIS: end of loop 2\n");
+#endif
 
     if (SOPC_STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout)
     {
@@ -429,9 +484,21 @@ int main(int argc, char* argv[])
         printf(">>Stub_Client: Closing secure connection\n");
     }
 
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf("Stub_Client:TIS: start loop 3\n");
+#endif
     while ((SOPC_STATUS_OK == status || SOPC_STATUS_WOULD_BLOCK == status) && serviceEvent == NULL &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // dummy activation
+    TIS_SecureChannelsEventDispatch();
+    TIS_SecureChannelsEventDispatch();
+    TIS_SecureChannelsEventDispatch();
+    TIS_Sockets_Dispatch();
+    TIS_Sockets_Dispatch();
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(10);
+#endif
         status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
         if (SOPC_STATUS_OK != status)
         {
@@ -439,6 +506,9 @@ int main(int argc, char* argv[])
             SOPC_Sleep(sleepTimeout);
         }
     }
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf("Stub_Client:TIS: end of loop 3\n");
+#endif
 
     if (SOPC_STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout)
     {
@@ -458,7 +528,12 @@ int main(int argc, char* argv[])
         }
         else
         {
+#ifdef __TRUSTINSOFT_BUGFIX__
+          // minor: printf format
+            printf(">>Stub_Client: Unexpected event received '%d'\n", (int)serviceEvent->event);
+#else
             printf(">>Stub_Client: Unexpected event received '%d'\n", serviceEvent->event);
+#endif
             status = SOPC_STATUS_CLOSED;
         }
         free(serviceEvent);
@@ -470,7 +545,11 @@ int main(int argc, char* argv[])
     }
 
     printf(">>Stub_Client: Final status: %" PRIu32 "\n", status);
+#ifdef __TRUSTINSOFT_HELPER__
+// skip SOPC_Toolkit_Clear
+#else
     SOPC_Toolkit_Clear();
+#endif
 
     SOPC_PKIProviderStack_Free(pki);
     SOPC_String_Clear(&stEndpointUrl);

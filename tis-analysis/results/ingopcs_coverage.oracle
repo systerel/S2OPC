@@ -1,0 +1,2098 @@
+Function, Reached, #statements, Ratio, #tests, Comment
+AllocVariantArrayBuiltInType, 0, 131, NA, 0/1, not reached
+AllocVariantNonArrayBuiltInType, 13, 62, 21%, 1/1, partial
+ApplyOpToVariantArrayBuiltInType, 0, 81, NA, 0/1, not reached
+ApplyOpToVariantNonArrayBuiltInType, 15, 54, 28%, 1/1, partial
+ApplyToVariantNonArrayBuiltInType, 19, 53, 36%, 1/1, partial
+ClearToVariantArrayBuiltInType, 6, 54, 11%, 1/1, partial
+CompareUint8_T, 12, 17, 71%, 1/1, partial
+CompareVariantArrayBuiltInType, 0, 81, NA, 0/1, not reached
+CompareVariantsNonArrayBuiltInType, 19, 54, 35%, 1/1, partial
+Condition_Clear, 0, 8, NA, 0/1, not reached
+Condition_Init, 7, 8, 88%, 1/1, partial
+Condition_SignalAll, 0, 8, NA, 0/1, not reached
+CryptoProvider_AsymDecrypt_RSA_OAEP, 39, 41, 95%, 1/1, partial
+CryptoProvider_AsymEncrypt_RSA_OAEP, 33, 35, 94%, 1/1, partial
+CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1, 15, 15, 100%, 1/1, total
+CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256, 15, 15, 100%, 1/1, total
+CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1, 16, 16, 100%, 1/1, total
+CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256, 16, 16, 100%, 1/1, total
+CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048, 25, 28, 89%, 1/1, partial
+CryptoProvider_CertVerify_RSA_SHA256_2048_4096, 23, 25, 92%, 1/1, partial
+CryptoProvider_DeriveData_PRF_SHA1, 32, 50, 64%, 1/1, partial
+CryptoProvider_DeriveData_PRF_SHA256, 44, 62, 71%, 1/1, partial
+CryptoProvider_GenTrueRnd, 25, 25, 100%, 1/1, total
+CryptoProvider_SymmDecrypt_AES256, 16, 18, 89%, 1/1, partial
+CryptoProvider_SymmEncrypt_AES256, 15, 17, 88%, 1/1, partial
+CryptoProvider_SymmSign_HMAC_SHA1, 14, 26, 54%, 1/1, partial
+CryptoProvider_SymmSign_HMAC_SHA256, 14, 26, 54%, 1/1, partial
+CryptoProvider_SymmVerify_HMAC_SHA1, 33, 47, 70%, 1/1, partial
+CryptoProvider_SymmVerify_HMAC_SHA256, 33, 47, 70%, 1/1, partial
+DeriveKS, 20, 26, 77%, 1/1, partial
+FD_CLR, 0, 3, NA, 0/1, not reached
+FD_ISSET, 3, 3, 100%, 1/1, total
+FD_SET, 3, 3, 100%, 1/1, total
+FD_ZERO, 2, 2, 100%, 1/1, total
+FreeVariantNonArrayBuiltInType, 24, 61, 39%, 1/1, partial
+GetBuiltInTypeClearFunction, 23, 56, 41%, 1/1, partial
+GetBuiltInTypeCompFunction, 19, 56, 34%, 1/1, partial
+GetBuiltInTypeCopyFunction, 15, 56, 27%, 1/1, partial
+GetDataValueEncodingMask, 12, 19, 63%, 1/1, partial
+GetDiagInfoEncodingByte, 13, 20, 65%, 1/1, partial
+GetKnownEncodeableTypesLength, 0, 8, NA, 0/1, not reached
+GetLocalizedTextEncodingByte, 0, 10, NA, 0/1, not reached
+GetNodeIdDataEncoding, 16, 22, 73%, 1/1, partial
+GetVariantEncodingMask, 9, 11, 82%, 1/1, partial
+INITIALISATION, 41, 41, 100%, 1/1, total
+Internal_NodeId_Read, 51, 56, 91%, 1/1, partial
+Internal_NodeId_Write, 33, 58, 57%, 1/1, partial
+KeyManager_Certificate_GetPublicKey, 5, 9, 56%, 1/1, partial
+Mutex_Clear, 0, 8, NA, 0/1, not reached
+Mutex_Initialization, 7, 8, 88%, 1/1, partial
+Mutex_Lock, 7, 8, 88%, 1/1, partial
+Mutex_Unlock, 7, 8, 88%, 1/1, partial
+Mutex_UnlockAndTimedWaitCond, 0, 15, NA, 0/1, not reached
+Mutex_UnlockAndWaitCond, 8, 9, 89%, 1/1, partial
+NewMsgDigestBuffer, 17, 21, 81%, 1/1, partial
+OpcUa_ActivateSessionRequest_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_ActivateSessionRequest_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_ActivateSessionRequest_Encode, 0, 17, NA, 0/1, not reached
+OpcUa_ActivateSessionRequest_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_ActivateSessionResponse_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_ActivateSessionResponse_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_ActivateSessionResponse_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_ActivateSessionResponse_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_AddNodesItem_Clear, 0, 10, NA, 0/1, not reached
+OpcUa_AddNodesItem_Decode, 0, 23, NA, 0/1, not reached
+OpcUa_AddNodesItem_Encode, 0, 19, NA, 0/1, not reached
+OpcUa_AddNodesItem_Initialize, 0, 11, NA, 0/1, not reached
+OpcUa_AddNodesRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_AddNodesRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_AddNodesRequest_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_AddNodesRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_AddNodesResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_AddNodesResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_AddNodesResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_AddNodesResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_AddNodesResult_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_AddNodesResult_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_AddNodesResult_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_AddNodesResult_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_AddReferencesItem_Clear, 0, 9, NA, 0/1, not reached
+OpcUa_AddReferencesItem_Decode, 0, 21, NA, 0/1, not reached
+OpcUa_AddReferencesItem_Encode, 0, 17, NA, 0/1, not reached
+OpcUa_AddReferencesItem_Initialize, 0, 10, NA, 0/1, not reached
+OpcUa_AddReferencesRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_AddReferencesRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_AddReferencesRequest_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_AddReferencesRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_AddReferencesResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_AddReferencesResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_AddReferencesResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_AddReferencesResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_AggregateConfiguration_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_AggregateConfiguration_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_AggregateConfiguration_Encode, 0, 15, NA, 0/1, not reached
+OpcUa_AggregateConfiguration_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_AggregateFilterResult_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_AggregateFilterResult_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_AggregateFilterResult_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_AggregateFilterResult_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_AggregateFilter_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_AggregateFilter_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_AggregateFilter_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_AggregateFilter_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_Annotation_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_Annotation_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_Annotation_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_Annotation_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_AnonymousIdentityToken_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_AnonymousIdentityToken_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_AnonymousIdentityToken_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_AnonymousIdentityToken_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_ApplicationDescription_Clear, 0, 10, NA, 0/1, not reached
+OpcUa_ApplicationDescription_Decode, 0, 23, NA, 0/1, not reached
+OpcUa_ApplicationDescription_Encode, 0, 20, NA, 0/1, not reached
+OpcUa_ApplicationDescription_Initialize, 0, 11, NA, 0/1, not reached
+OpcUa_Argument_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_Argument_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_Argument_Encode, 0, 16, NA, 0/1, not reached
+OpcUa_Argument_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_AttributeOperand_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_AttributeOperand_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_AttributeOperand_Encode, 0, 15, NA, 0/1, not reached
+OpcUa_AttributeOperand_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_AxisInformation_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_AxisInformation_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_AxisInformation_Encode, 0, 16, NA, 0/1, not reached
+OpcUa_AxisInformation_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_BrowseDescription_Clear, 0, 9, NA, 0/1, not reached
+OpcUa_BrowseDescription_Decode, 0, 21, NA, 0/1, not reached
+OpcUa_BrowseDescription_Encode, 0, 17, NA, 0/1, not reached
+OpcUa_BrowseDescription_Initialize, 0, 10, NA, 0/1, not reached
+OpcUa_BrowseNextRequest_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_BrowseNextRequest_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_BrowseNextRequest_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_BrowseNextRequest_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_BrowseNextResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_BrowseNextResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_BrowseNextResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_BrowseNextResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_BrowsePathResult_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_BrowsePathResult_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_BrowsePathResult_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_BrowsePathResult_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_BrowsePathTarget_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_BrowsePathTarget_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_BrowsePathTarget_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_BrowsePathTarget_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_BrowsePath_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_BrowsePath_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_BrowsePath_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_BrowsePath_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_BrowseRequest_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_BrowseRequest_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_BrowseRequest_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_BrowseRequest_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_BrowseResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_BrowseResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_BrowseResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_BrowseResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_BrowseResult_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_BrowseResult_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_BrowseResult_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_BrowseResult_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_BuildInfo_Clear, 0, 9, NA, 0/1, not reached
+OpcUa_BuildInfo_Decode, 0, 21, NA, 0/1, not reached
+OpcUa_BuildInfo_Encode, 0, 17, NA, 0/1, not reached
+OpcUa_BuildInfo_Initialize, 0, 10, NA, 0/1, not reached
+OpcUa_CallMethodRequest_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_CallMethodRequest_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_CallMethodRequest_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_CallMethodRequest_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_CallMethodResult_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_CallMethodResult_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_CallMethodResult_Encode, 0, 16, NA, 0/1, not reached
+OpcUa_CallMethodResult_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_CallRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_CallRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_CallRequest_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_CallRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_CallResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_CallResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_CallResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_CallResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_CancelRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_CancelRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_CancelRequest_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_CancelRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_CancelResponse_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_CancelResponse_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_CancelResponse_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_CancelResponse_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_ChannelSecurityToken_Clear, 7, 7, 100%, 1/1, total
+OpcUa_ChannelSecurityToken_Decode, 17, 17, 100%, 1/1, total
+OpcUa_ChannelSecurityToken_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_ChannelSecurityToken_Initialize, 8, 8, 100%, 1/1, total
+OpcUa_CloseSecureChannelRequest_Clear, 4, 4, 100%, 1/1, total
+OpcUa_CloseSecureChannelRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_CloseSecureChannelRequest_Encode, 7, 7, 100%, 1/1, total
+OpcUa_CloseSecureChannelRequest_Initialize, 5, 5, 100%, 1/1, total
+OpcUa_CloseSecureChannelResponse_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_CloseSecureChannelResponse_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_CloseSecureChannelResponse_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_CloseSecureChannelResponse_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_CloseSessionRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_CloseSessionRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_CloseSessionRequest_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_CloseSessionRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_CloseSessionResponse_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_CloseSessionResponse_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_CloseSessionResponse_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_CloseSessionResponse_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_ComplexNumberType_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_ComplexNumberType_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_ComplexNumberType_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_ComplexNumberType_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_ContentFilterElementResult_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_ContentFilterElementResult_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_ContentFilterElementResult_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_ContentFilterElementResult_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_ContentFilterElement_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_ContentFilterElement_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_ContentFilterElement_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_ContentFilterElement_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_ContentFilterResult_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_ContentFilterResult_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_ContentFilterResult_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_ContentFilterResult_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_ContentFilter_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_ContentFilter_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_ContentFilter_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_ContentFilter_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_CreateMonitoredItemsRequest_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_CreateMonitoredItemsRequest_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_CreateMonitoredItemsRequest_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_CreateMonitoredItemsRequest_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_CreateMonitoredItemsResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_CreateMonitoredItemsResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_CreateMonitoredItemsResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_CreateMonitoredItemsResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_CreateSessionRequest_Clear, 0, 11, NA, 0/1, not reached
+OpcUa_CreateSessionRequest_Decode, 0, 25, NA, 0/1, not reached
+OpcUa_CreateSessionRequest_Encode, 0, 21, NA, 0/1, not reached
+OpcUa_CreateSessionRequest_Initialize, 0, 12, NA, 0/1, not reached
+OpcUa_CreateSessionResponse_Clear, 0, 13, NA, 0/1, not reached
+OpcUa_CreateSessionResponse_Decode, 0, 27, NA, 0/1, not reached
+OpcUa_CreateSessionResponse_Encode, 0, 25, NA, 0/1, not reached
+OpcUa_CreateSessionResponse_Initialize, 0, 14, NA, 0/1, not reached
+OpcUa_CreateSubscriptionRequest_Clear, 0, 9, NA, 0/1, not reached
+OpcUa_CreateSubscriptionRequest_Decode, 0, 21, NA, 0/1, not reached
+OpcUa_CreateSubscriptionRequest_Encode, 0, 17, NA, 0/1, not reached
+OpcUa_CreateSubscriptionRequest_Initialize, 0, 10, NA, 0/1, not reached
+OpcUa_CreateSubscriptionResponse_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_CreateSubscriptionResponse_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_CreateSubscriptionResponse_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_CreateSubscriptionResponse_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_DataChangeFilter_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_DataChangeFilter_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_DataChangeFilter_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_DataChangeFilter_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_DataChangeNotification_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_DataChangeNotification_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_DataChangeNotification_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_DataChangeNotification_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_DataTypeAttributes_Clear, 0, 9, NA, 0/1, not reached
+OpcUa_DataTypeAttributes_Decode, 0, 21, NA, 0/1, not reached
+OpcUa_DataTypeAttributes_Encode, 0, 17, NA, 0/1, not reached
+OpcUa_DataTypeAttributes_Initialize, 0, 10, NA, 0/1, not reached
+OpcUa_DataTypeNode_Clear, 0, 12, NA, 0/1, not reached
+OpcUa_DataTypeNode_Decode, 0, 27, NA, 0/1, not reached
+OpcUa_DataTypeNode_Encode, 0, 24, NA, 0/1, not reached
+OpcUa_DataTypeNode_Initialize, 0, 13, NA, 0/1, not reached
+OpcUa_DeleteAtTimeDetails_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_DeleteAtTimeDetails_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_DeleteAtTimeDetails_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_DeleteAtTimeDetails_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_DeleteEventDetails_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_DeleteEventDetails_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_DeleteEventDetails_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_DeleteEventDetails_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_DeleteMonitoredItemsRequest_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_DeleteMonitoredItemsRequest_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_DeleteMonitoredItemsRequest_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_DeleteMonitoredItemsRequest_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_DeleteMonitoredItemsResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_DeleteMonitoredItemsResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_DeleteMonitoredItemsResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_DeleteMonitoredItemsResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_DeleteNodesItem_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_DeleteNodesItem_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_DeleteNodesItem_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_DeleteNodesItem_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_DeleteNodesRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_DeleteNodesRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_DeleteNodesRequest_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_DeleteNodesRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_DeleteNodesResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_DeleteNodesResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_DeleteNodesResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_DeleteNodesResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_DeleteRawModifiedDetails_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_DeleteRawModifiedDetails_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_DeleteRawModifiedDetails_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_DeleteRawModifiedDetails_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_DeleteReferencesItem_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_DeleteReferencesItem_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_DeleteReferencesItem_Encode, 0, 15, NA, 0/1, not reached
+OpcUa_DeleteReferencesItem_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_DeleteReferencesRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_DeleteReferencesRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_DeleteReferencesRequest_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_DeleteReferencesRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_DeleteReferencesResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_DeleteReferencesResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_DeleteReferencesResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_DeleteReferencesResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_DeleteSubscriptionsRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_DeleteSubscriptionsRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_DeleteSubscriptionsRequest_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_DeleteSubscriptionsRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_DeleteSubscriptionsResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_DeleteSubscriptionsResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_DeleteSubscriptionsResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_DeleteSubscriptionsResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_DoubleComplexNumberType_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_DoubleComplexNumberType_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_DoubleComplexNumberType_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_DoubleComplexNumberType_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_EUInformation_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_EUInformation_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_EUInformation_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_EUInformation_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_ElementOperand_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_ElementOperand_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_ElementOperand_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_ElementOperand_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_EndpointConfiguration_Clear, 0, 12, NA, 0/1, not reached
+OpcUa_EndpointConfiguration_Decode, 0, 27, NA, 0/1, not reached
+OpcUa_EndpointConfiguration_Encode, 0, 23, NA, 0/1, not reached
+OpcUa_EndpointConfiguration_Initialize, 0, 13, NA, 0/1, not reached
+OpcUa_EndpointDescription_Clear, 0, 11, NA, 0/1, not reached
+OpcUa_EndpointDescription_Decode, 0, 25, NA, 0/1, not reached
+OpcUa_EndpointDescription_Encode, 0, 22, NA, 0/1, not reached
+OpcUa_EndpointDescription_Initialize, 0, 12, NA, 0/1, not reached
+OpcUa_EndpointUrlListDataType_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_EndpointUrlListDataType_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_EndpointUrlListDataType_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_EndpointUrlListDataType_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_EnumField_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_EnumField_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_EnumField_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_EnumField_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_EnumValueType_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_EnumValueType_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_EnumValueType_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_EnumValueType_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_EventFieldList_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_EventFieldList_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_EventFieldList_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_EventFieldList_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_EventFilterResult_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_EventFilterResult_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_EventFilterResult_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_EventFilterResult_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_EventFilter_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_EventFilter_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_EventFilter_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_EventFilter_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_EventNotificationList_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_EventNotificationList_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_EventNotificationList_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_EventNotificationList_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_FindServersOnNetworkRequest_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_FindServersOnNetworkRequest_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_FindServersOnNetworkRequest_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_FindServersOnNetworkRequest_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_FindServersOnNetworkResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_FindServersOnNetworkResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_FindServersOnNetworkResponse_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_FindServersOnNetworkResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_FindServersRequest_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_FindServersRequest_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_FindServersRequest_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_FindServersRequest_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_FindServersResponse_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_FindServersResponse_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_FindServersResponse_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_FindServersResponse_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_GetEndpointsRequest_Clear, 6, 6, 100%, 1/1, total
+OpcUa_GetEndpointsRequest_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_GetEndpointsRequest_Encode, 13, 13, 100%, 1/1, total
+OpcUa_GetEndpointsRequest_Initialize, 7, 7, 100%, 1/1, total
+OpcUa_GetEndpointsResponse_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_GetEndpointsResponse_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_GetEndpointsResponse_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_GetEndpointsResponse_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_HistoryData_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_HistoryData_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_HistoryData_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_HistoryData_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_HistoryEventFieldList_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_HistoryEventFieldList_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_HistoryEventFieldList_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_HistoryEventFieldList_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_HistoryEvent_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_HistoryEvent_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_HistoryEvent_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_HistoryEvent_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_HistoryModifiedData_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_HistoryModifiedData_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_HistoryModifiedData_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_HistoryModifiedData_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_HistoryReadRequest_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_HistoryReadRequest_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_HistoryReadRequest_Encode, 0, 14, NA, 0/1, not reached
+OpcUa_HistoryReadRequest_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_HistoryReadResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_HistoryReadResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_HistoryReadResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_HistoryReadResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_HistoryReadResult_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_HistoryReadResult_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_HistoryReadResult_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_HistoryReadResult_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_HistoryReadValueId_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_HistoryReadValueId_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_HistoryReadValueId_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_HistoryReadValueId_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_HistoryUpdateDetails_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_HistoryUpdateDetails_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_HistoryUpdateDetails_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_HistoryUpdateDetails_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_HistoryUpdateRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_HistoryUpdateRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_HistoryUpdateRequest_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_HistoryUpdateRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_HistoryUpdateResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_HistoryUpdateResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_HistoryUpdateResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_HistoryUpdateResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_HistoryUpdateResult_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_HistoryUpdateResult_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_HistoryUpdateResult_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_HistoryUpdateResult_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_InstanceNode_Clear, 0, 11, NA, 0/1, not reached
+OpcUa_InstanceNode_Decode, 0, 25, NA, 0/1, not reached
+OpcUa_InstanceNode_Encode, 0, 22, NA, 0/1, not reached
+OpcUa_InstanceNode_Initialize, 0, 12, NA, 0/1, not reached
+OpcUa_IssuedIdentityToken_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_IssuedIdentityToken_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_IssuedIdentityToken_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_IssuedIdentityToken_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_KerberosIdentityToken_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_KerberosIdentityToken_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_KerberosIdentityToken_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_KerberosIdentityToken_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_LiteralOperand_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_LiteralOperand_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_LiteralOperand_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_LiteralOperand_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_MdnsDiscoveryConfiguration_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_MdnsDiscoveryConfiguration_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_MdnsDiscoveryConfiguration_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_MdnsDiscoveryConfiguration_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_MethodAttributes_Clear, 0, 10, NA, 0/1, not reached
+OpcUa_MethodAttributes_Decode, 0, 23, NA, 0/1, not reached
+OpcUa_MethodAttributes_Encode, 0, 19, NA, 0/1, not reached
+OpcUa_MethodAttributes_Initialize, 0, 11, NA, 0/1, not reached
+OpcUa_MethodNode_Clear, 0, 13, NA, 0/1, not reached
+OpcUa_MethodNode_Decode, 0, 29, NA, 0/1, not reached
+OpcUa_MethodNode_Encode, 0, 26, NA, 0/1, not reached
+OpcUa_MethodNode_Initialize, 0, 14, NA, 0/1, not reached
+OpcUa_ModelChangeStructureDataType_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_ModelChangeStructureDataType_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_ModelChangeStructureDataType_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_ModelChangeStructureDataType_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_ModificationInfo_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_ModificationInfo_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_ModificationInfo_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_ModificationInfo_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_ModifyMonitoredItemsRequest_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_ModifyMonitoredItemsRequest_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_ModifyMonitoredItemsRequest_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_ModifyMonitoredItemsRequest_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_ModifyMonitoredItemsResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_ModifyMonitoredItemsResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_ModifyMonitoredItemsResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_ModifyMonitoredItemsResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_ModifySubscriptionRequest_Clear, 0, 9, NA, 0/1, not reached
+OpcUa_ModifySubscriptionRequest_Decode, 0, 21, NA, 0/1, not reached
+OpcUa_ModifySubscriptionRequest_Encode, 0, 17, NA, 0/1, not reached
+OpcUa_ModifySubscriptionRequest_Initialize, 0, 10, NA, 0/1, not reached
+OpcUa_ModifySubscriptionResponse_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_ModifySubscriptionResponse_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_ModifySubscriptionResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_ModifySubscriptionResponse_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_MonitoredItemCreateRequest_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_MonitoredItemCreateRequest_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_MonitoredItemCreateRequest_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_MonitoredItemCreateRequest_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_MonitoredItemCreateResult_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_MonitoredItemCreateResult_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_MonitoredItemCreateResult_Encode, 0, 15, NA, 0/1, not reached
+OpcUa_MonitoredItemCreateResult_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_MonitoredItemModifyRequest_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_MonitoredItemModifyRequest_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_MonitoredItemModifyRequest_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_MonitoredItemModifyRequest_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_MonitoredItemModifyResult_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_MonitoredItemModifyResult_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_MonitoredItemModifyResult_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_MonitoredItemModifyResult_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_MonitoredItemNotification_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_MonitoredItemNotification_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_MonitoredItemNotification_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_MonitoredItemNotification_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_MonitoringParameters_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_MonitoringParameters_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_MonitoringParameters_Encode, 0, 15, NA, 0/1, not reached
+OpcUa_MonitoringParameters_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_NetworkGroupDataType_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_NetworkGroupDataType_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_NetworkGroupDataType_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_NetworkGroupDataType_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_NodeAttributes_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_NodeAttributes_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_NodeAttributes_Encode, 0, 15, NA, 0/1, not reached
+OpcUa_NodeAttributes_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_NodeReference_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_NodeReference_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_NodeReference_Encode, 0, 14, NA, 0/1, not reached
+OpcUa_NodeReference_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_NodeTypeDescription_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_NodeTypeDescription_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_NodeTypeDescription_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_NodeTypeDescription_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_Node_Clear, 0, 11, NA, 0/1, not reached
+OpcUa_Node_Decode, 0, 25, NA, 0/1, not reached
+OpcUa_Node_Encode, 0, 22, NA, 0/1, not reached
+OpcUa_Node_Initialize, 0, 12, NA, 0/1, not reached
+OpcUa_NotificationMessage_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_NotificationMessage_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_NotificationMessage_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_NotificationMessage_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_ObjectAttributes_Clear, 0, 9, NA, 0/1, not reached
+OpcUa_ObjectAttributes_Decode, 0, 21, NA, 0/1, not reached
+OpcUa_ObjectAttributes_Encode, 0, 17, NA, 0/1, not reached
+OpcUa_ObjectAttributes_Initialize, 0, 10, NA, 0/1, not reached
+OpcUa_ObjectNode_Clear, 0, 12, NA, 0/1, not reached
+OpcUa_ObjectNode_Decode, 0, 27, NA, 0/1, not reached
+OpcUa_ObjectNode_Encode, 0, 24, NA, 0/1, not reached
+OpcUa_ObjectNode_Initialize, 0, 13, NA, 0/1, not reached
+OpcUa_ObjectTypeAttributes_Clear, 0, 9, NA, 0/1, not reached
+OpcUa_ObjectTypeAttributes_Decode, 0, 21, NA, 0/1, not reached
+OpcUa_ObjectTypeAttributes_Encode, 0, 17, NA, 0/1, not reached
+OpcUa_ObjectTypeAttributes_Initialize, 0, 10, NA, 0/1, not reached
+OpcUa_ObjectTypeNode_Clear, 0, 12, NA, 0/1, not reached
+OpcUa_ObjectTypeNode_Decode, 0, 27, NA, 0/1, not reached
+OpcUa_ObjectTypeNode_Encode, 0, 24, NA, 0/1, not reached
+OpcUa_ObjectTypeNode_Initialize, 0, 13, NA, 0/1, not reached
+OpcUa_OpenSecureChannelRequest_Clear, 8, 8, 100%, 1/1, total
+OpcUa_OpenSecureChannelRequest_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_OpenSecureChannelRequest_Encode, 15, 15, 100%, 1/1, total
+OpcUa_OpenSecureChannelRequest_Initialize, 9, 9, 100%, 1/1, total
+OpcUa_OpenSecureChannelResponse_Clear, 7, 7, 100%, 1/1, total
+OpcUa_OpenSecureChannelResponse_Decode, 15, 15, 100%, 1/1, total
+OpcUa_OpenSecureChannelResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_OpenSecureChannelResponse_Initialize, 8, 8, 100%, 1/1, total
+OpcUa_OptionSet_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_OptionSet_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_OptionSet_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_OptionSet_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_ParsingResult_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_ParsingResult_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_ParsingResult_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_ParsingResult_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_ProgramDiagnosticDataType_Clear, 0, 13, NA, 0/1, not reached
+OpcUa_ProgramDiagnosticDataType_Decode, 0, 29, NA, 0/1, not reached
+OpcUa_ProgramDiagnosticDataType_Encode, 0, 27, NA, 0/1, not reached
+OpcUa_ProgramDiagnosticDataType_Initialize, 0, 14, NA, 0/1, not reached
+OpcUa_PublishRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_PublishRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_PublishRequest_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_PublishRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_PublishResponse_Clear, 0, 10, NA, 0/1, not reached
+OpcUa_PublishResponse_Decode, 0, 21, NA, 0/1, not reached
+OpcUa_PublishResponse_Encode, 0, 20, NA, 0/1, not reached
+OpcUa_PublishResponse_Initialize, 0, 11, NA, 0/1, not reached
+OpcUa_QueryDataDescription_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_QueryDataDescription_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_QueryDataDescription_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_QueryDataDescription_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_QueryDataSet_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_QueryDataSet_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_QueryDataSet_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_QueryDataSet_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_QueryFirstRequest_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_QueryFirstRequest_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_QueryFirstRequest_Encode, 0, 16, NA, 0/1, not reached
+OpcUa_QueryFirstRequest_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_QueryFirstResponse_Clear, 0, 9, NA, 0/1, not reached
+OpcUa_QueryFirstResponse_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_QueryFirstResponse_Encode, 0, 18, NA, 0/1, not reached
+OpcUa_QueryFirstResponse_Initialize, 0, 10, NA, 0/1, not reached
+OpcUa_QueryNextRequest_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_QueryNextRequest_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_QueryNextRequest_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_QueryNextRequest_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_QueryNextResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_QueryNextResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_QueryNextResponse_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_QueryNextResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_Range_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_Range_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_Range_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_Range_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_ReadAtTimeDetails_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_ReadAtTimeDetails_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_ReadAtTimeDetails_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_ReadAtTimeDetails_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_ReadEventDetails_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_ReadEventDetails_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_ReadEventDetails_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_ReadEventDetails_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_ReadProcessedDetails_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_ReadProcessedDetails_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_ReadProcessedDetails_Encode, 0, 16, NA, 0/1, not reached
+OpcUa_ReadProcessedDetails_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_ReadRawModifiedDetails_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_ReadRawModifiedDetails_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_ReadRawModifiedDetails_Encode, 0, 15, NA, 0/1, not reached
+OpcUa_ReadRawModifiedDetails_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_ReadRequest_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_ReadRequest_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_ReadRequest_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_ReadRequest_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_ReadResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_ReadResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_ReadResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_ReadResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_ReadValueId_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_ReadValueId_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_ReadValueId_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_ReadValueId_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_RedundantServerDataType_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_RedundantServerDataType_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_RedundantServerDataType_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_RedundantServerDataType_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_ReferenceDescription_Clear, 0, 10, NA, 0/1, not reached
+OpcUa_ReferenceDescription_Decode, 0, 23, NA, 0/1, not reached
+OpcUa_ReferenceDescription_Encode, 0, 19, NA, 0/1, not reached
+OpcUa_ReferenceDescription_Initialize, 0, 11, NA, 0/1, not reached
+OpcUa_ReferenceNode_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_ReferenceNode_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_ReferenceNode_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_ReferenceNode_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_ReferenceTypeAttributes_Clear, 0, 11, NA, 0/1, not reached
+OpcUa_ReferenceTypeAttributes_Decode, 0, 25, NA, 0/1, not reached
+OpcUa_ReferenceTypeAttributes_Encode, 0, 21, NA, 0/1, not reached
+OpcUa_ReferenceTypeAttributes_Initialize, 0, 12, NA, 0/1, not reached
+OpcUa_ReferenceTypeNode_Clear, 0, 14, NA, 0/1, not reached
+OpcUa_ReferenceTypeNode_Decode, 0, 31, NA, 0/1, not reached
+OpcUa_ReferenceTypeNode_Encode, 0, 28, NA, 0/1, not reached
+OpcUa_ReferenceTypeNode_Initialize, 0, 15, NA, 0/1, not reached
+OpcUa_RegisterNodesRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_RegisterNodesRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_RegisterNodesRequest_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_RegisterNodesRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_RegisterNodesResponse_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_RegisterNodesResponse_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_RegisterNodesResponse_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_RegisterNodesResponse_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_RegisterServer2Request_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_RegisterServer2Request_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_RegisterServer2Request_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_RegisterServer2Request_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_RegisterServer2Response_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_RegisterServer2Response_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_RegisterServer2Response_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_RegisterServer2Response_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_RegisterServerRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_RegisterServerRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_RegisterServerRequest_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_RegisterServerRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_RegisterServerResponse_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_RegisterServerResponse_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_RegisterServerResponse_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_RegisterServerResponse_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_RegisteredServer_Clear, 0, 11, NA, 0/1, not reached
+OpcUa_RegisteredServer_Decode, 0, 25, NA, 0/1, not reached
+OpcUa_RegisteredServer_Encode, 0, 23, NA, 0/1, not reached
+OpcUa_RegisteredServer_Initialize, 0, 12, NA, 0/1, not reached
+OpcUa_RelativePathElement_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_RelativePathElement_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_RelativePathElement_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_RelativePathElement_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_RelativePath_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_RelativePath_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_RelativePath_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_RelativePath_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_RepublishRequest_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_RepublishRequest_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_RepublishRequest_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_RepublishRequest_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_RepublishResponse_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_RepublishResponse_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_RepublishResponse_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_RepublishResponse_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_RequestHeader_Clear, 10, 10, 100%, 1/1, total
+OpcUa_RequestHeader_Decode, 0, 23, NA, 0/1, not reached
+OpcUa_RequestHeader_Encode, 19, 19, 100%, 1/1, total
+OpcUa_RequestHeader_Initialize, 11, 11, 100%, 1/1, total
+OpcUa_ResponseHeader_Clear, 8, 8, 100%, 1/1, total
+OpcUa_ResponseHeader_Decode, 20, 20, 100%, 1/1, total
+OpcUa_ResponseHeader_Encode, 0, 18, NA, 0/1, not reached
+OpcUa_ResponseHeader_Initialize, 10, 10, 100%, 1/1, total
+OpcUa_SamplingIntervalDiagnosticsDataType_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_SamplingIntervalDiagnosticsDataType_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_SamplingIntervalDiagnosticsDataType_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_SamplingIntervalDiagnosticsDataType_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_SemanticChangeStructureDataType_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_SemanticChangeStructureDataType_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_SemanticChangeStructureDataType_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_SemanticChangeStructureDataType_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_ServerDiagnosticsSummaryDataType_Clear, 0, 15, NA, 0/1, not reached
+OpcUa_ServerDiagnosticsSummaryDataType_Decode, 0, 33, NA, 0/1, not reached
+OpcUa_ServerDiagnosticsSummaryDataType_Encode, 0, 29, NA, 0/1, not reached
+OpcUa_ServerDiagnosticsSummaryDataType_Initialize, 0, 16, NA, 0/1, not reached
+OpcUa_ServerOnNetwork_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_ServerOnNetwork_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_ServerOnNetwork_Encode, 0, 14, NA, 0/1, not reached
+OpcUa_ServerOnNetwork_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_ServerStatusDataType_Clear, 0, 9, NA, 0/1, not reached
+OpcUa_ServerStatusDataType_Decode, 0, 21, NA, 0/1, not reached
+OpcUa_ServerStatusDataType_Encode, 0, 17, NA, 0/1, not reached
+OpcUa_ServerStatusDataType_Initialize, 0, 10, NA, 0/1, not reached
+OpcUa_ServiceCounterDataType_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_ServiceCounterDataType_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_ServiceCounterDataType_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_ServiceCounterDataType_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_ServiceFault_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_ServiceFault_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_ServiceFault_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_ServiceFault_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_SessionDiagnosticsDataType_Clear, 0, 46, NA, 0/1, not reached
+OpcUa_SessionDiagnosticsDataType_Decode, 0, 95, NA, 0/1, not reached
+OpcUa_SessionDiagnosticsDataType_Encode, 0, 92, NA, 0/1, not reached
+OpcUa_SessionDiagnosticsDataType_Initialize, 0, 47, NA, 0/1, not reached
+OpcUa_SessionSecurityDiagnosticsDataType_Clear, 0, 12, NA, 0/1, not reached
+OpcUa_SessionSecurityDiagnosticsDataType_Decode, 0, 27, NA, 0/1, not reached
+OpcUa_SessionSecurityDiagnosticsDataType_Encode, 0, 24, NA, 0/1, not reached
+OpcUa_SessionSecurityDiagnosticsDataType_Initialize, 0, 13, NA, 0/1, not reached
+OpcUa_SetMonitoringModeRequest_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_SetMonitoringModeRequest_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_SetMonitoringModeRequest_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_SetMonitoringModeRequest_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_SetMonitoringModeResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_SetMonitoringModeResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_SetMonitoringModeResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_SetMonitoringModeResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_SetPublishingModeRequest_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_SetPublishingModeRequest_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_SetPublishingModeRequest_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_SetPublishingModeRequest_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_SetPublishingModeResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_SetPublishingModeResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_SetPublishingModeResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_SetPublishingModeResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_SetTriggeringRequest_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_SetTriggeringRequest_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_SetTriggeringRequest_Encode, 0, 15, NA, 0/1, not reached
+OpcUa_SetTriggeringRequest_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_SetTriggeringResponse_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_SetTriggeringResponse_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_SetTriggeringResponse_Encode, 0, 17, NA, 0/1, not reached
+OpcUa_SetTriggeringResponse_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_SignatureData_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_SignatureData_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_SignatureData_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_SignatureData_Initialize, 6, 6, 100%, 1/1, total
+OpcUa_SignedSoftwareCertificate_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_SignedSoftwareCertificate_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_SignedSoftwareCertificate_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_SignedSoftwareCertificate_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_SimpleAttributeOperand_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_SimpleAttributeOperand_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_SimpleAttributeOperand_Encode, 0, 14, NA, 0/1, not reached
+OpcUa_SimpleAttributeOperand_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_SoftwareCertificate_Clear, 0, 13, NA, 0/1, not reached
+OpcUa_SoftwareCertificate_Decode, 0, 29, NA, 0/1, not reached
+OpcUa_SoftwareCertificate_Encode, 0, 26, NA, 0/1, not reached
+OpcUa_SoftwareCertificate_Initialize, 0, 14, NA, 0/1, not reached
+OpcUa_StatusChangeNotification_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_StatusChangeNotification_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_StatusChangeNotification_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_StatusChangeNotification_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_StatusResult_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_StatusResult_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_StatusResult_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_StatusResult_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_SubscriptionAcknowledgement_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_SubscriptionAcknowledgement_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_SubscriptionAcknowledgement_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_SubscriptionAcknowledgement_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_SubscriptionDiagnosticsDataType_Clear, 0, 34, NA, 0/1, not reached
+OpcUa_SubscriptionDiagnosticsDataType_Decode, 0, 71, NA, 0/1, not reached
+OpcUa_SubscriptionDiagnosticsDataType_Encode, 0, 67, NA, 0/1, not reached
+OpcUa_SubscriptionDiagnosticsDataType_Initialize, 0, 35, NA, 0/1, not reached
+OpcUa_SupportedProfile_Clear, 0, 9, NA, 0/1, not reached
+OpcUa_SupportedProfile_Decode, 0, 21, NA, 0/1, not reached
+OpcUa_SupportedProfile_Encode, 0, 18, NA, 0/1, not reached
+OpcUa_SupportedProfile_Initialize, 0, 10, NA, 0/1, not reached
+OpcUa_TimeZoneDataType_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_TimeZoneDataType_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_TimeZoneDataType_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_TimeZoneDataType_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_TransferResult_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_TransferResult_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_TransferResult_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_TransferResult_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_TransferSubscriptionsRequest_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_TransferSubscriptionsRequest_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_TransferSubscriptionsRequest_Encode, 0, 10, NA, 0/1, not reached
+OpcUa_TransferSubscriptionsRequest_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_TransferSubscriptionsResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_TransferSubscriptionsResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_TransferSubscriptionsResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_TransferSubscriptionsResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_TypeNode_Clear, 0, 11, NA, 0/1, not reached
+OpcUa_TypeNode_Decode, 0, 25, NA, 0/1, not reached
+OpcUa_TypeNode_Encode, 0, 22, NA, 0/1, not reached
+OpcUa_TypeNode_Initialize, 0, 12, NA, 0/1, not reached
+OpcUa_UnregisterNodesRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_UnregisterNodesRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_UnregisterNodesRequest_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_UnregisterNodesRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_UnregisterNodesResponse_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_UnregisterNodesResponse_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_UnregisterNodesResponse_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_UnregisterNodesResponse_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_UpdateDataDetails_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_UpdateDataDetails_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_UpdateDataDetails_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_UpdateDataDetails_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_UpdateEventDetails_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_UpdateEventDetails_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_UpdateEventDetails_Encode, 0, 14, NA, 0/1, not reached
+OpcUa_UpdateEventDetails_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_UpdateStructureDataDetails_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_UpdateStructureDataDetails_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_UpdateStructureDataDetails_Encode, 0, 12, NA, 0/1, not reached
+OpcUa_UpdateStructureDataDetails_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_UserIdentityToken_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_UserIdentityToken_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_UserIdentityToken_Encode, 0, 7, NA, 0/1, not reached
+OpcUa_UserIdentityToken_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_UserNameIdentityToken_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_UserNameIdentityToken_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_UserNameIdentityToken_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_UserNameIdentityToken_Initialize, 0, 8, NA, 0/1, not reached
+OpcUa_UserTokenPolicy_Clear, 0, 8, NA, 0/1, not reached
+OpcUa_UserTokenPolicy_Decode, 0, 19, NA, 0/1, not reached
+OpcUa_UserTokenPolicy_Encode, 0, 15, NA, 0/1, not reached
+OpcUa_UserTokenPolicy_Initialize, 0, 9, NA, 0/1, not reached
+OpcUa_VariableAttributes_Clear, 0, 16, NA, 0/1, not reached
+OpcUa_VariableAttributes_Decode, 0, 35, NA, 0/1, not reached
+OpcUa_VariableAttributes_Encode, 0, 32, NA, 0/1, not reached
+OpcUa_VariableAttributes_Initialize, 0, 17, NA, 0/1, not reached
+OpcUa_VariableNode_Clear, 0, 19, NA, 0/1, not reached
+OpcUa_VariableNode_Decode, 0, 41, NA, 0/1, not reached
+OpcUa_VariableNode_Encode, 0, 39, NA, 0/1, not reached
+OpcUa_VariableNode_Initialize, 0, 20, NA, 0/1, not reached
+OpcUa_VariableTypeAttributes_Clear, 0, 13, NA, 0/1, not reached
+OpcUa_VariableTypeAttributes_Decode, 0, 29, NA, 0/1, not reached
+OpcUa_VariableTypeAttributes_Encode, 0, 26, NA, 0/1, not reached
+OpcUa_VariableTypeAttributes_Initialize, 0, 14, NA, 0/1, not reached
+OpcUa_VariableTypeNode_Clear, 0, 16, NA, 0/1, not reached
+OpcUa_VariableTypeNode_Decode, 0, 35, NA, 0/1, not reached
+OpcUa_VariableTypeNode_Encode, 0, 33, NA, 0/1, not reached
+OpcUa_VariableTypeNode_Initialize, 0, 17, NA, 0/1, not reached
+OpcUa_ViewAttributes_Clear, 0, 10, NA, 0/1, not reached
+OpcUa_ViewAttributes_Decode, 0, 23, NA, 0/1, not reached
+OpcUa_ViewAttributes_Encode, 0, 19, NA, 0/1, not reached
+OpcUa_ViewAttributes_Initialize, 0, 11, NA, 0/1, not reached
+OpcUa_ViewDescription_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_ViewDescription_Decode, 0, 15, NA, 0/1, not reached
+OpcUa_ViewDescription_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_ViewDescription_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_ViewNode_Clear, 0, 13, NA, 0/1, not reached
+OpcUa_ViewNode_Decode, 0, 29, NA, 0/1, not reached
+OpcUa_ViewNode_Encode, 0, 26, NA, 0/1, not reached
+OpcUa_ViewNode_Initialize, 0, 14, NA, 0/1, not reached
+OpcUa_WriteRequest_Clear, 0, 4, NA, 0/1, not reached
+OpcUa_WriteRequest_Decode, 0, 11, NA, 0/1, not reached
+OpcUa_WriteRequest_Encode, 0, 8, NA, 0/1, not reached
+OpcUa_WriteRequest_Initialize, 0, 5, NA, 0/1, not reached
+OpcUa_WriteResponse_Clear, 0, 6, NA, 0/1, not reached
+OpcUa_WriteResponse_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_WriteResponse_Encode, 0, 11, NA, 0/1, not reached
+OpcUa_WriteResponse_Initialize, 0, 7, NA, 0/1, not reached
+OpcUa_WriteValue_Clear, 0, 7, NA, 0/1, not reached
+OpcUa_WriteValue_Decode, 0, 17, NA, 0/1, not reached
+OpcUa_WriteValue_Encode, 0, 13, NA, 0/1, not reached
+OpcUa_WriteValue_Initialize, 8, 8, 100%, 1/1, total
+OpcUa_X509IdentityToken_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_X509IdentityToken_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_X509IdentityToken_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_X509IdentityToken_Initialize, 0, 6, NA, 0/1, not reached
+OpcUa_XVType_Clear, 0, 5, NA, 0/1, not reached
+OpcUa_XVType_Decode, 0, 13, NA, 0/1, not reached
+OpcUa_XVType_Encode, 0, 9, NA, 0/1, not reached
+OpcUa_XVType_Initialize, 0, 6, NA, 0/1, not reached
+PKIProviderStack_ValidateCertificate, 17, 27, 63%, 1/1, partial
+PSHA, 61, 61, 100%, 1/1, total
+PSHA_outer, 10, 10, 100%, 1/1, total
+ParseURI, 37, 48, 77%, 1/1, partial
+ReadVariantArrayBuiltInType, 7, 55, 13%, 1/1, partial
+ReadVariantNonArrayBuiltInType, 14, 114, 12%, 1/1, partial
+SC_Chunks_CheckAsymmetricSecurityHeader, 66, 142, 46%, 1/1, partial
+SC_Chunks_CheckMaxSenderCertificateSize, 9, 10, 90%, 1/1, partial
+SC_Chunks_CheckSeqNumReceived, 15, 17, 88%, 1/1, partial
+SC_Chunks_CheckSequenceHeaderRequestId, 21, 28, 75%, 1/1, partial
+SC_Chunks_CheckSequenceHeaderSN, 14, 18, 78%, 1/1, partial
+SC_Chunks_CheckSymmetricSecurityHeader, 24, 55, 44%, 1/1, partial
+SC_Chunks_ComputeMaxBodySize, 16, 22, 73%, 1/1, partial
+SC_Chunks_DecodeAsymSecurityHeader_Certificates, 117, 188, 62%, 1/1, partial
+SC_Chunks_DecodeTcpMsgHeader, 47, 89, 53%, 1/1, partial
+SC_Chunks_DecryptMsg, 79, 103, 77%, 1/1, partial
+SC_Chunks_EncodeAsymSecurityHeader, 69, 121, 57%, 1/1, partial
+SC_Chunks_EncodeSignature, 29, 40, 72%, 1/1, partial
+SC_Chunks_EncodeTcpMsgHeader, 36, 51, 71%, 1/1, partial
+SC_Chunks_EncryptMsg, 51, 76, 67%, 1/1, partial
+SC_Chunks_GetEncryptedDataLength, 35, 44, 80%, 1/1, partial
+SC_Chunks_GetPaddingSize, 5, 6, 83%, 1/1, partial
+SC_Chunks_GetSendingCryptoSizes, 54, 77, 70%, 1/1, partial
+SC_Chunks_GetSendingMaxBodySize, 15, 19, 79%, 1/1, partial
+SC_Chunks_IsMsgEncrypted, 6, 12, 50%, 1/1, partial
+SC_Chunks_IsMsgSigned, 3, 4, 75%, 1/1, partial
+SC_Chunks_IsSecuTokenValid, 10, 10, 100%, 1/1, total
+SC_Chunks_Is_ExtraPaddingSizePresent, 5, 5, 100%, 1/1, total
+SC_Chunks_MsgTypeToRcvEvent, 8, 15, 53%, 1/1, partial
+SC_Chunks_ReadDataFromReceivedBuffer, 11, 13, 85%, 1/1, partial
+SC_Chunks_TreatReceivedBuffer, 77, 108, 71%, 1/1, partial
+SC_Chunks_TreatSendBuffer, 160, 240, 67%, 1/1, partial
+SC_Chunks_TreatTcpPayload, 90, 147, 61%, 1/1, partial
+SC_Chunks_VerifyMsgSignature, 44, 54, 81%, 1/1, partial
+SC_ClientTransitionHelper_ReceiveOPN, 62, 90, 69%, 1/1, partial
+SC_ClientTransitionHelper_SendOPN, 50, 59, 85%, 1/1, partial
+SC_ClientTransition_Connected_To_Disconnected, 7, 12, 58%, 1/1, partial
+SC_ClientTransition_ReceivedErrorMsg, 0, 18, NA, 0/1, not reached
+SC_ClientTransition_ScConnectedRenew_To_ScConnected, 0, 26, NA, 0/1, not reached
+SC_ClientTransition_ScConnected_To_ScConnectedRenew, 0, 13, NA, 0/1, not reached
+SC_ClientTransition_ScConnecting_To_ScConnected, 16, 26, 62%, 1/1, partial
+SC_ClientTransition_ScInit_To_ScConnecting, 9, 13, 69%, 1/1, partial
+SC_ClientTransition_TcpInit_To_TcpNegotiate, 38, 46, 83%, 1/1, partial
+SC_ClientTransition_TcpNegotiate_To_ScInit, 39, 63, 62%, 1/1, partial
+SC_Client_ClearPendingRequest, 9, 9, 100%, 1/1, total
+SC_Client_SendCloseSecureChannelRequestAndClose, 24, 31, 77%, 1/1, partial
+SC_Client_StartOPNrenewTimer, 14, 17, 82%, 1/1, partial
+SC_Client_StartRequestTimeout, 10, 10, 100%, 1/1, total
+SC_CloseConnection, 36, 47, 77%, 1/1, partial
+SC_CloseSecureConnection, 27, 47, 57%, 1/1, partial
+SC_DeriveSymmetricKeySets, 46, 67, 69%, 1/1, partial
+SC_GetConnection, 5, 5, 100%, 1/1, total
+SC_InitNewConnection, 28, 33, 85%, 1/1, partial
+SC_ReadAndCheckOpcUaMessageType, 10, 13, 77%, 1/1, partial
+SC_ServerTransition_ScConnectedRenew_To_ScConnected, 0, 97, NA, 0/1, not reached
+SC_ServerTransition_ScConnected_To_ScConnectedRenew, 0, 89, NA, 0/1, not reached
+SC_ServerTransition_ScConnecting_To_ScConnected, 0, 89, NA, 0/1, not reached
+SC_ServerTransition_ScInit_To_ScConnecting, 0, 134, NA, 0/1, not reached
+SC_ServerTransition_TcpInit_To_TcpNegotiate, 0, 104, NA, 0/1, not reached
+SC_ServerTransition_TcpNegotiate_To_ScInit, 0, 40, NA, 0/1, not reached
+SC_Server_GenerateFreshSecureChannelAndTokenId, 0, 68, NA, 0/1, not reached
+SC_Server_GenerateFreshTokenId, 0, 38, NA, 0/1, not reached
+SC_Server_SendErrorMsgAndClose, 0, 22, NA, 0/1, not reached
+SC_StartConnectionEstablishTimer, 13, 16, 81%, 1/1, partial
+SOPC_AppEvent_AddSpaceEvent_Create, 2, 2, 100%, 1/1, total
+SOPC_AppEvent_AddSpaceEvent_Get, 0, 6, NA, 0/1, not reached
+SOPC_AppEvent_AppEventType_Get, 0, 6, NA, 0/1, not reached
+SOPC_AppEvent_ComEvent_Create, 2, 2, 100%, 1/1, total
+SOPC_AppEvent_ComEvent_Get, 0, 6, NA, 0/1, not reached
+SOPC_ApplicationCallback_GetEventDispatcher, 0, 1, NA, 0/1, not reached
+SOPC_AsyncQueue_BlockingDequeue, 2, 2, 100%, 1/1, total
+SOPC_AsyncQueue_BlockingEnqueue, 2, 2, 100%, 1/1, total
+SOPC_AsyncQueue_BlockingEnqueueFirstOrLast, 14, 15, 93%, 1/1, partial
+SOPC_AsyncQueue_BlockingEnqueueFirstOut, 2, 2, 100%, 1/1, total
+SOPC_AsyncQueue_Dequeue, 19, 22, 86%, 1/1, partial
+SOPC_AsyncQueue_Free, 8, 8, 100%, 1/1, total
+SOPC_AsyncQueue_Init, 20, 25, 80%, 1/1, partial
+SOPC_AsyncQueue_NonBlockingDequeue, 2, 2, 100%, 1/1, total
+SOPC_Boolean_Clear, 3, 3, 100%, 1/1, total
+SOPC_Boolean_ClearAux, 2, 2, 100%, 1/1, total
+SOPC_Boolean_CompareAux, 0, 13, NA, 0/1, not reached
+SOPC_Boolean_CopyAux, 0, 6, NA, 0/1, not reached
+SOPC_Boolean_Initialize, 3, 3, 100%, 1/1, total
+SOPC_Boolean_InitializeAux, 2, 2, 100%, 1/1, total
+SOPC_Boolean_Read, 8, 8, 100%, 1/1, total
+SOPC_Boolean_ReadAux, 2, 2, 100%, 1/1, total
+SOPC_Boolean_Write, 14, 14, 100%, 1/1, total
+SOPC_Boolean_WriteAux, 2, 2, 100%, 1/1, total
+SOPC_Buffer_Clear, 5, 5, 100%, 1/1, total
+SOPC_Buffer_Copy, 4, 4, 100%, 1/1, total
+SOPC_Buffer_CopyWithLength, 17, 19, 89%, 1/1, partial
+SOPC_Buffer_Create, 9, 9, 100%, 1/1, total
+SOPC_Buffer_Delete, 4, 4, 100%, 1/1, total
+SOPC_Buffer_Init, 12, 12, 100%, 1/1, total
+SOPC_Buffer_Read, 16, 17, 94%, 1/1, partial
+SOPC_Buffer_Reset, 6, 6, 100%, 1/1, total
+SOPC_Buffer_ResetAfterPosition, 9, 9, 100%, 1/1, total
+SOPC_Buffer_SetDataLength, 12, 12, 100%, 1/1, total
+SOPC_Buffer_SetPosition, 7, 7, 100%, 1/1, total
+SOPC_Buffer_Write, 26, 26, 100%, 1/1, total
+SOPC_ByteString_Clear, 2, 2, 100%, 1/1, total
+SOPC_ByteString_ClearAux, 2, 2, 100%, 1/1, total
+SOPC_ByteString_Compare, 18, 24, 75%, 1/1, partial
+SOPC_ByteString_CompareAux, 2, 2, 100%, 1/1, total
+SOPC_ByteString_Copy, 13, 15, 87%, 1/1, partial
+SOPC_ByteString_CopyAux, 2, 2, 100%, 1/1, total
+SOPC_ByteString_CopyFromBytes, 12, 15, 80%, 1/1, partial
+SOPC_ByteString_Create, 2, 2, 100%, 1/1, total
+SOPC_ByteString_Delete, 2, 2, 100%, 1/1, total
+SOPC_ByteString_Equal, 6, 6, 100%, 1/1, total
+SOPC_ByteString_Initialize, 2, 2, 100%, 1/1, total
+SOPC_ByteString_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_ByteString_InitializeFixedSize, 10, 12, 83%, 1/1, partial
+SOPC_ByteString_Read, 33, 31, 106%, 1/1, partial
+SOPC_ByteString_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_ByteString_Write, 19, 20, 95%, 1/1, partial
+SOPC_ByteString_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_Byte_Clear, 0, 3, NA, 0/1, not reached
+SOPC_Byte_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_Byte_CompareAux, 0, 13, NA, 0/1, not reached
+SOPC_Byte_CopyAux, 0, 6, NA, 0/1, not reached
+SOPC_Byte_Initialize, 0, 3, NA, 0/1, not reached
+SOPC_Byte_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_Byte_Read, 11, 11, 100%, 1/1, total
+SOPC_Byte_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_Byte_Write, 11, 11, 100%, 1/1, total
+SOPC_Byte_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_ChunksMgr_Dispatcher, 64, 82, 78%, 1/1, partial
+SOPC_Chunks_EncodePadding, 61, 82, 74%, 1/1, partial
+SOPC_Clear_Array, 21, 21, 100%, 1/1, total
+SOPC_Clear_EnumeratedType, 2, 2, 100%, 1/1, total
+SOPC_Comp_Array, 0, 28, NA, 0/1, not reached
+SOPC_CryptoProfile_Get, 23, 24, 96%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricDecrypt, 43, 62, 69%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricEncrypt, 43, 62, 69%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricGetLength_Decryption, 17, 26, 65%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricGetLength_Encryption, 17, 26, 65%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricGetLength_KeyBits, 13, 23, 57%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes, 5, 5, 100%, 1/1, total
+SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText, 14, 18, 78%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText, 28, 43, 65%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricGetLength_Msgs, 18, 22, 82%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength, 14, 24, 58%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricGetLength_Signature, 6, 12, 50%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm, 12, 21, 57%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricSign, 43, 62, 69%, 1/1, partial
+SOPC_CryptoProvider_AsymmetricVerify, 43, 62, 69%, 1/1, partial
+SOPC_CryptoProvider_CertificateGetLength_Thumbprint, 14, 22, 64%, 1/1, partial
+SOPC_CryptoProvider_Certificate_Validate, 17, 25, 68%, 1/1, partial
+SOPC_CryptoProvider_Create, 12, 12, 100%, 1/1, total
+SOPC_CryptoProvider_Deinit, 9, 11, 82%, 1/1, partial
+SOPC_CryptoProvider_DeriveGetLengths, 15, 23, 65%, 1/1, partial
+SOPC_CryptoProvider_DeriveKeySets, 57, 91, 63%, 1/1, partial
+SOPC_CryptoProvider_DeriveKeySetsClient, 25, 36, 69%, 1/1, partial
+SOPC_CryptoProvider_DeriveKeySetsServer, 0, 36, NA, 0/1, not reached
+SOPC_CryptoProvider_DerivePseudoRandomData, 15, 33, 45%, 1/1, partial
+SOPC_CryptoProvider_Free, 4, 4, 100%, 1/1, total
+SOPC_CryptoProvider_GenerateRandomBytes, 23, 24, 96%, 1/1, partial
+SOPC_CryptoProvider_GenerateRandomID, 11, 15, 73%, 1/1, partial
+SOPC_CryptoProvider_GenerateSecureChannelNonce, 22, 26, 85%, 1/1, partial
+SOPC_CryptoProvider_Init, 16, 18, 89%, 1/1, partial
+SOPC_CryptoProvider_SymmetricDecrypt, 50, 71, 70%, 1/1, partial
+SOPC_CryptoProvider_SymmetricEncrypt, 50, 71, 70%, 1/1, partial
+SOPC_CryptoProvider_SymmetricGetLength_Blocks, 22, 26, 85%, 1/1, partial
+SOPC_CryptoProvider_SymmetricGetLength_CryptoKey, 13, 21, 62%, 1/1, partial
+SOPC_CryptoProvider_SymmetricGetLength_Decryption, 14, 21, 67%, 1/1, partial
+SOPC_CryptoProvider_SymmetricGetLength_Encryption, 14, 21, 67%, 1/1, partial
+SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce, 11, 18, 61%, 1/1, partial
+SOPC_CryptoProvider_SymmetricGetLength_SignKey, 13, 21, 62%, 1/1, partial
+SOPC_CryptoProvider_SymmetricGetLength_Signature, 15, 21, 71%, 1/1, partial
+SOPC_CryptoProvider_SymmetricSign, 35, 45, 78%, 1/1, partial
+SOPC_CryptoProvider_SymmetricVerify, 35, 45, 78%, 1/1, partial
+SOPC_DataValue_Clear, 8, 8, 100%, 1/1, total
+SOPC_DataValue_ClearAux, 2, 2, 100%, 1/1, total
+SOPC_DataValue_Compare, 0, 34, NA, 0/1, not reached
+SOPC_DataValue_CompareAux, 0, 2, NA, 0/1, not reached
+SOPC_DataValue_Copy, 0, 11, NA, 0/1, not reached
+SOPC_DataValue_CopyAux, 0, 2, NA, 0/1, not reached
+SOPC_DataValue_Initialize, 3, 3, 100%, 1/1, total
+SOPC_DataValue_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_DataValue_Read, 0, 2, NA, 0/1, not reached
+SOPC_DataValue_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_DataValue_ReadAux_Nested, 2, 2, 100%, 1/1, total
+SOPC_DataValue_Read_Internal, 39, 47, 83%, 1/1, partial
+SOPC_DataValue_Write, 0, 2, NA, 0/1, not reached
+SOPC_DataValue_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_DataValue_WriteAux_Nested, 2, 2, 100%, 1/1, total
+SOPC_DataValue_Write_Internal, 19, 24, 79%, 1/1, partial
+SOPC_DateTime_Clear, 2, 2, 100%, 1/1, total
+SOPC_DateTime_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_DateTime_Compare, 0, 10, NA, 0/1, not reached
+SOPC_DateTime_CompareAux, 0, 2, NA, 0/1, not reached
+SOPC_DateTime_CopyAux, 0, 6, NA, 0/1, not reached
+SOPC_DateTime_Initialize, 3, 3, 100%, 1/1, total
+SOPC_DateTime_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_DateTime_Read, 4, 4, 100%, 1/1, total
+SOPC_DateTime_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_DateTime_Write, 5, 5, 100%, 1/1, total
+SOPC_DateTime_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_DecodeMsg_HeaderOrBody, 8, 9, 89%, 1/1, partial
+SOPC_DiagnosticInfo_Clear, 12, 12, 100%, 1/1, total
+SOPC_DiagnosticInfo_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_DiagnosticInfo_Compare, 0, 40, NA, 0/1, not reached
+SOPC_DiagnosticInfo_CompareAux, 0, 2, NA, 0/1, not reached
+SOPC_DiagnosticInfo_Copy, 0, 14, NA, 0/1, not reached
+SOPC_DiagnosticInfo_CopyAux, 0, 2, NA, 0/1, not reached
+SOPC_DiagnosticInfo_Initialize, 9, 9, 100%, 1/1, total
+SOPC_DiagnosticInfo_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_DiagnosticInfo_Read, 2, 2, 100%, 1/1, total
+SOPC_DiagnosticInfo_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_DiagnosticInfo_Read_Internal, 45, 46, 98%, 1/1, partial
+SOPC_DiagnosticInfo_Write, 2, 2, 100%, 1/1, total
+SOPC_DiagnosticInfo_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_DiagnosticInfo_Write_Internal, 25, 32, 78%, 1/1, partial
+SOPC_Discovery_ContainsBinaryProfileURI, 0, 12, NA, 0/1, not reached
+SOPC_Discovery_GetEndPointsDescriptions, 0, 96, NA, 0/1, not reached
+SOPC_Double_Clear, 3, 3, 100%, 1/1, total
+SOPC_Double_ClearAux, 2, 2, 100%, 1/1, total
+SOPC_Double_CompareAux, 11, 13, 85%, 1/1, partial
+SOPC_Double_CopyAux, 6, 6, 100%, 1/1, total
+SOPC_Double_Initialize, 0, 3, NA, 0/1, not reached
+SOPC_Double_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_Double_Read, 8, 8, 100%, 1/1, total
+SOPC_Double_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_Double_Write, 9, 9, 100%, 1/1, total
+SOPC_Double_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_EncodeDecode_Double, 13, 16, 81%, 1/1, partial
+SOPC_EncodeDecode_Float, 12, 15, 80%, 1/1, partial
+SOPC_EncodeDecode_Int16, 8, 10, 80%, 1/1, partial
+SOPC_EncodeDecode_Int32, 8, 10, 80%, 1/1, partial
+SOPC_EncodeDecode_Int64, 8, 10, 80%, 1/1, partial
+SOPC_EncodeDecode_UInt16, 7, 9, 78%, 1/1, partial
+SOPC_EncodeDecode_UInt32, 7, 9, 78%, 1/1, partial
+SOPC_EncodeDecode_UInt64, 7, 9, 78%, 1/1, partial
+SOPC_EncodeMsg_Type_Header_Body, 20, 21, 95%, 1/1, partial
+SOPC_EncodeableType_GetEncodeableType, 37, 41, 90%, 1/1, partial
+SOPC_EncodeableType_GetName, 5, 7, 71%, 1/1, partial
+SOPC_Encodeable_Create, 11, 12, 92%, 1/1, partial
+SOPC_Encodeable_CreateExtension, 0, 9, NA, 0/1, not reached
+SOPC_Encodeable_Delete, 10, 10, 100%, 1/1, total
+SOPC_EventDispatcherManager_AddEvent, 2, 2, 100%, 1/1, total
+SOPC_EventDispatcherManager_AddEventAsNext, 2, 2, 100%, 1/1, total
+SOPC_EventDispatcherManager_AddEventInternal, 17, 17, 100%, 1/1, total
+SOPC_EventDispatcherManager_CreateAndStart, 20, 21, 95%, 1/1, partial
+SOPC_EventDispatcherManager_StopAndDelete, 0, 14, NA, 0/1, not reached
+SOPC_EventTimer_Cancel, 6, 6, 100%, 1/1, total
+SOPC_EventTimer_Clear, 0, 5, NA, 0/1, not reached
+SOPC_EventTimer_Create, 25, 27, 93%, 1/1, partial
+SOPC_EventTimer_CyclicTimersEvaluation, 0, 26, NA, 0/1, not reached
+SOPC_EventTimer_Initialize, 6, 6, 100%, 1/1, total
+SOPC_ExpandedNodeId_Clear, 0, 5, NA, 0/1, not reached
+SOPC_ExpandedNodeId_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_ExpandedNodeId_Compare, 0, 16, NA, 0/1, not reached
+SOPC_ExpandedNodeId_CompareAux, 0, 2, NA, 0/1, not reached
+SOPC_ExpandedNodeId_Copy, 0, 11, NA, 0/1, not reached
+SOPC_ExpandedNodeId_CopyAux, 0, 2, NA, 0/1, not reached
+SOPC_ExpandedNodeId_Initialize, 5, 5, 100%, 1/1, total
+SOPC_ExpandedNodeId_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_ExpandedNodeId_Read, 0, 15, NA, 0/1, not reached
+SOPC_ExpandedNodeId_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_ExpandedNodeId_Write, 0, 18, NA, 0/1, not reached
+SOPC_ExpandedNodeId_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_ExtensionObject_Clear, 0, 14, NA, 1/1, used specification
+SOPC_ExtensionObject_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_ExtensionObject_Compare, 0, 20, NA, 0/1, not reached
+SOPC_ExtensionObject_CompareAux, 0, 2, NA, 0/1, not reached
+SOPC_ExtensionObject_Copy, 0, 28, NA, 0/1, not reached
+SOPC_ExtensionObject_CopyAux, 0, 2, NA, 0/1, not reached
+SOPC_ExtensionObject_Initialize, 5, 5, 100%, 1/1, total
+SOPC_ExtensionObject_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_ExtensionObject_Read, 52, 60, 87%, 2/1, partial
+SOPC_ExtensionObject_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_ExtensionObject_Write, 19, 41, 46%, 1/1, partial
+SOPC_ExtensionObject_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_Float_Clear, 0, 3, NA, 0/1, not reached
+SOPC_Float_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_Float_CompareAux, 0, 13, NA, 0/1, not reached
+SOPC_Float_CopyAux, 0, 6, NA, 0/1, not reached
+SOPC_Float_Initialize, 0, 3, NA, 0/1, not reached
+SOPC_Float_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_Float_Read, 8, 8, 100%, 1/1, total
+SOPC_Float_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_Float_Write, 9, 9, 100%, 1/1, total
+SOPC_Float_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_Guid_Clear, 3, 3, 100%, 1/1, total
+SOPC_Guid_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_Guid_Compare, 0, 28, NA, 0/1, not reached
+SOPC_Guid_CompareAux, 0, 2, NA, 0/1, not reached
+SOPC_Guid_Copy, 0, 6, NA, 0/1, not reached
+SOPC_Guid_CopyAux, 0, 2, NA, 0/1, not reached
+SOPC_Guid_Initialize, 3, 3, 100%, 1/1, total
+SOPC_Guid_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_Guid_Read, 16, 16, 100%, 1/1, total
+SOPC_Guid_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_Guid_Write, 13, 13, 100%, 1/1, total
+SOPC_Guid_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_Helper_EndiannessCfg_Initialize, 3, 3, 100%, 1/1, total
+SOPC_Helper_Endianness_GetFloat, 1, 1, 100%, 1/1, total
+SOPC_Helper_Endianness_GetInteger, 1, 1, 100%, 1/1, total
+SOPC_Helper_Endianness_SetFloat, 2, 2, 100%, 1/1, total
+SOPC_Helper_Endianness_SetInteger, 2, 2, 100%, 1/1, total
+SOPC_Helper_URI_ParseTcpUaUri, 71, 74, 96%, 1/1, partial
+SOPC_IEEE_Check, 3, 4, 75%, 1/1, partial
+SOPC_Initialize_Array, 5, 5, 100%, 1/1, total
+SOPC_Initialize_EnumeratedType, 2, 2, 100%, 1/1, total
+SOPC_Int16_Clear, 0, 3, NA, 0/1, not reached
+SOPC_Int16_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_Int16_CompareAux, 0, 13, NA, 0/1, not reached
+SOPC_Int16_CopyAux, 0, 6, NA, 0/1, not reached
+SOPC_Int16_Initialize, 0, 3, NA, 0/1, not reached
+SOPC_Int16_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_Int16_Read, 12, 12, 100%, 1/1, total
+SOPC_Int16_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_Int16_Write, 9, 9, 100%, 1/1, total
+SOPC_Int16_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_Int32_Clear, 3, 3, 100%, 1/1, total
+SOPC_Int32_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_Int32_CompareAux, 11, 13, 85%, 1/1, partial
+SOPC_Int32_CopyAux, 0, 6, NA, 0/1, not reached
+SOPC_Int32_Initialize, 0, 3, NA, 0/1, not reached
+SOPC_Int32_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_Int32_Read, 8, 8, 100%, 1/1, total
+SOPC_Int32_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_Int32_Write, 9, 9, 100%, 1/1, total
+SOPC_Int32_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_Int64_Clear, 3, 3, 100%, 1/1, total
+SOPC_Int64_ClearAux, 2, 2, 100%, 1/1, total
+SOPC_Int64_CompareAux, 12, 13, 92%, 1/1, partial
+SOPC_Int64_CopyAux, 6, 6, 100%, 1/1, total
+SOPC_Int64_Initialize, 0, 3, NA, 0/1, not reached
+SOPC_Int64_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_Int64_Read, 8, 8, 100%, 1/1, total
+SOPC_Int64_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_Int64_Write, 9, 9, 100%, 1/1, total
+SOPC_Int64_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_Internal_AllClientSecureChannelsDisconnected, 0, 6, NA, 0/1, not reached
+SOPC_Internal_ApplicationEventDispatcher, 0, 104, NA, 0/1, not reached
+SOPC_Internal_EventTimer_Cancel_WithoutLock, 7, 7, 100%, 1/1, total
+SOPC_Internal_GetFreshTimerId_WithoutLock, 20, 24, 83%, 1/1, partial
+SOPC_Internal_SLinkedList_EventTimerCompare, 6, 11, 55%, 1/1, partial
+SOPC_Internal_ToolkitServer_SetAddressSpaceConfig, 27, 29, 93%, 1/1, partial
+SOPC_Internal_TriggerEventToSocketsManager, 3, 3, 100%, 1/1, total
+SOPC_KeyManager_AsymmetricKey_CreateFromBuffer, 18, 24, 75%, 1/1, partial
+SOPC_KeyManager_AsymmetricKey_CreateFromCertificate, 11, 15, 73%, 1/1, partial
+SOPC_KeyManager_AsymmetricKey_CreateFromFile, 18, 32, 56%, 1/1, partial
+SOPC_KeyManager_AsymmetricKey_Free, 6, 6, 100%, 1/1, total
+SOPC_KeyManager_AsymmetricKey_ToDER, 28, 36, 78%, 1/1, partial
+SOPC_KeyManager_Certificate_CopyDER, 12, 22, 55%, 1/1, partial
+SOPC_KeyManager_Certificate_CreateFromDER, 27, 33, 82%, 1/1, partial
+SOPC_KeyManager_Certificate_CreateFromFile, 27, 35, 77%, 1/1, partial
+SOPC_KeyManager_Certificate_Free, 7, 7, 100%, 1/1, total
+SOPC_KeyManager_Certificate_GetThumbprint, 29, 48, 60%, 1/1, partial
+SOPC_KeySet_Create, 2, 2, 100%, 1/1, total
+SOPC_KeySet_Delete, 6, 6, 100%, 1/1, total
+SOPC_LocalizedText_Clear, 0, 4, NA, 0/1, not reached
+SOPC_LocalizedText_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_LocalizedText_Compare, 0, 8, NA, 0/1, not reached
+SOPC_LocalizedText_CompareAux, 0, 2, NA, 0/1, not reached
+SOPC_LocalizedText_Copy, 0, 9, NA, 0/1, not reached
+SOPC_LocalizedText_CopyAux, 0, 2, NA, 0/1, not reached
+SOPC_LocalizedText_Initialize, 0, 4, NA, 0/1, not reached
+SOPC_LocalizedText_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_LocalizedText_Read, 0, 14, NA, 0/1, not reached
+SOPC_LocalizedText_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_LocalizedText_Write, 0, 12, NA, 0/1, not reached
+SOPC_LocalizedText_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_Log_CheckFileChangeNoLock, 0, 21, NA, 0/1, not reached
+SOPC_Log_Clear, 0, 4, NA, 0/1, not reached
+SOPC_Log_ClearInstance, 0, 22, NA, 0/1, not reached
+SOPC_Log_CreateInstance, 14, 68, 21%, 1/1, partial
+SOPC_Log_CreateInstanceAssociation, 0, 34, NA, 0/1, not reached
+SOPC_Log_GetFilePathPrefix, 0, 8, NA, 0/1, not reached
+SOPC_Log_Initialize, 5, 5, 100%, 1/1, total
+SOPC_Log_SetConsoleOutput, 0, 23, NA, 0/1, not reached
+SOPC_Log_SetLogLevel, 0, 24, NA, 0/1, not reached
+SOPC_Log_Start, 0, 17, NA, 0/1, not reached
+SOPC_Log_Trace, 0, 3, NA, 0/1, not reached
+SOPC_Log_TracePrefixNoLock, 0, 32, NA, 0/1, not reached
+SOPC_Log_VTrace, 0, 28, NA, 0/1, not reached
+SOPC_Logger_Clear, 0, 8, NA, 0/1, not reached
+SOPC_Logger_Initialize, 7, 17, 41%, 1/1, partial
+SOPC_Logger_SetConsoleOutput, 0, 7, NA, 0/1, not reached
+SOPC_Logger_SetTraceLogLevel, 2, 3, 67%, 1/1, partial
+SOPC_Logger_TraceDebug, 2, 4, 50%, 1/1, partial
+SOPC_Logger_TraceError, 2, 4, 50%, 1/1, partial
+SOPC_Logger_TraceInfo, 0, 4, NA, 0/1, not reached
+SOPC_Logger_TraceOpcUaAudit, 0, 4, NA, 0/1, not reached
+SOPC_Logger_TraceOpcUaAuditWarning, 0, 4, NA, 0/1, not reached
+SOPC_Logger_TraceSecurityAudit, 0, 4, NA, 0/1, not reached
+SOPC_Logger_TraceSecurityAuditWarning, 0, 4, NA, 0/1, not reached
+SOPC_Logger_TraceWarning, 2, 4, 50%, 1/1, partial
+SOPC_MsgBodyType_Read, 19, 20, 95%, 1/1, partial
+SOPC_Namespace_AllocateTable, 0, 9, NA, 0/1, not reached
+SOPC_Namespace_AttachTable, 0, 10, NA, 0/1, not reached
+SOPC_Namespace_Clear, 0, 5, NA, 0/1, not reached
+SOPC_Namespace_CreateTable, 0, 9, NA, 0/1, not reached
+SOPC_Namespace_Delete, 0, 4, NA, 0/1, not reached
+SOPC_Namespace_GetIndex, 0, 23, NA, 0/1, not reached
+SOPC_Namespace_GetName, 4, 15, 27%, 1/1, partial
+SOPC_Namespace_Initialize, 2, 5, 40%, 1/1, partial
+SOPC_NodeId_Clear, 16, 16, 100%, 1/1, total
+SOPC_NodeId_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_NodeId_Compare, 37, 38, 97%, 1/1, partial
+SOPC_NodeId_CompareAux, 2, 2, 100%, 1/1, total
+SOPC_NodeId_Copy, 0, 23, NA, 0/1, not reached
+SOPC_NodeId_CopyAux, 0, 2, NA, 0/1, not reached
+SOPC_NodeId_FromCString, 97, 114, 85%, 1/1, partial
+SOPC_NodeId_Initialize, 3, 3, 100%, 1/1, total
+SOPC_NodeId_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_NodeId_Read, 5, 5, 100%, 1/1, total
+SOPC_NodeId_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_NodeId_ToCString, 49, 59, 83%, 1/1, partial
+SOPC_NodeId_Write, 11, 11, 100%, 1/1, total
+SOPC_NodeId_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_Null_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_Null_CompareAux, 0, 7, NA, 0/1, not reached
+SOPC_Null_CopyAux, 0, 4, NA, 0/1, not reached
+SOPC_Op_Array, 0, 25, NA, 0/1, not reached
+SOPC_PKIProviderStack_Create, 16, 18, 89%, 1/1, partial
+SOPC_PKIProviderStack_Free, 3, 3, 100%, 1/1, total
+SOPC_QualifiedName_Clear, 0, 4, NA, 0/1, not reached
+SOPC_QualifiedName_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_QualifiedName_Compare, 0, 12, NA, 0/1, not reached
+SOPC_QualifiedName_CompareAux, 0, 2, NA, 0/1, not reached
+SOPC_QualifiedName_Copy, 0, 7, NA, 0/1, not reached
+SOPC_QualifiedName_CopyAux, 0, 2, NA, 0/1, not reached
+SOPC_QualifiedName_Initialize, 0, 4, NA, 0/1, not reached
+SOPC_QualifiedName_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_QualifiedName_Read, 0, 9, NA, 0/1, not reached
+SOPC_QualifiedName_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_QualifiedName_Write, 0, 6, NA, 0/1, not reached
+SOPC_QualifiedName_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_Read_Array, 50, 45, 111%, 1/1, partial
+SOPC_Read_Array_WithNestedLevel, 48, 54, 89%, 1/1, partial
+SOPC_Read_EnumeratedType, 0, 2, NA, 0/1, not reached
+SOPC_SByte_Clear, 0, 3, NA, 0/1, not reached
+SOPC_SByte_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_SByte_CompareAux, 0, 13, NA, 0/1, not reached
+SOPC_SByte_CopyAux, 0, 6, NA, 0/1, not reached
+SOPC_SByte_Initialize, 0, 3, NA, 0/1, not reached
+SOPC_SByte_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_SByte_Read, 11, 11, 100%, 1/1, total
+SOPC_SByte_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_SByte_Write, 11, 11, 100%, 1/1, total
+SOPC_SByte_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_SLinkedList_Append, 23, 23, 100%, 2/1, total
+SOPC_SLinkedList_Apply, 11, 13, 85%, 1/1, partial
+SOPC_SLinkedList_Clear, 15, 15, 100%, 1/1, total
+SOPC_SLinkedList_Create, 5, 5, 100%, 1/1, total
+SOPC_SLinkedList_Delete, 4, 4, 100%, 1/1, total
+SOPC_SLinkedList_EltGenericFree, 3, 3, 100%, 1/1, total
+SOPC_SLinkedList_FindFromId, 5, 5, 100%, 1/1, total
+SOPC_SLinkedList_GetIterator, 2, 2, 100%, 1/1, total
+SOPC_SLinkedList_GetLength, 4, 4, 100%, 1/1, total
+SOPC_SLinkedList_InternalFind, 11, 11, 100%, 1/1, total
+SOPC_SLinkedList_Next, 2, 2, 100%, 1/1, total
+SOPC_SLinkedList_NextWithId, 10, 10, 100%, 1/1, total
+SOPC_SLinkedList_PopHead, 18, 18, 100%, 2/1, total
+SOPC_SLinkedList_Prepend, 19, 19, 100%, 1/1, total
+SOPC_SLinkedList_RemoveFromId, 30, 30, 100%, 1/1, total
+SOPC_SLinkedList_SortedInsert, 56, 59, 95%, 1/1, partial
+SOPC_SecretBuffer_DeleteClear, 6, 6, 100%, 1/1, total
+SOPC_SecretBuffer_Expose, 4, 5, 80%, 1/1, partial
+SOPC_SecretBuffer_GetLength, 3, 5, 60%, 1/1, partial
+SOPC_SecretBuffer_New, 10, 10, 100%, 1/1, total
+SOPC_SecretBuffer_NewFromExposedBuffer, 7, 7, 100%, 1/1, total
+SOPC_SecretBuffer_Unexpose, 3, 3, 100%, 1/1, total
+SOPC_SecureChannelsEventMgr_Dispatcher, 32, 55, 58%, 1/1, partial
+SOPC_SecureChannelsInternalContext_Clear, 0, 1, NA, 0/1, not reached
+SOPC_SecureChannelsInternalContext_Initialize, 4, 4, 100%, 1/1, total
+SOPC_SecureChannels_Clear, 0, 4, NA, 0/1, not reached
+SOPC_SecureChannels_EnqueueEvent, 18, 39, 46%, 2/1, partial
+SOPC_SecureChannels_EnqueueInternalEvent, 18, 40, 45%, 1/1, partial
+SOPC_SecureChannels_EnqueueInternalEventAsNext, 13, 40, 32%, 1/1, partial
+SOPC_SecureChannels_GetEventDispatcher, 1, 1, 100%, 1/1, total
+SOPC_SecureChannels_Initialize, 5, 6, 83%, 2/1, partial
+SOPC_SecureConnectionStateMgr_Dispatcher, 128, 296, 43%, 1/1, partial
+SOPC_SecureListenerStateMgr_AddConnection, 0, 22, NA, 0/1, not reached
+SOPC_SecureListenerStateMgr_CloseListener, 0, 23, NA, 0/1, not reached
+SOPC_SecureListenerStateMgr_Dispatcher, 0, 70, NA, 0/1, not reached
+SOPC_SecureListenerStateMgr_GetListener, 0, 5, NA, 0/1, not reached
+SOPC_SecureListenerStateMgr_OpeningListener, 0, 10, NA, 0/1, not reached
+SOPC_SecureListenerStateMgr_RemoveConnection, 0, 19, NA, 0/1, not reached
+SOPC_ServiceMgrBs_DeallocateMsgs, 0, 6, NA, 0/1, not reached
+SOPC_ServiceMgrBs_DicoveryReqSendingFailure, 15, 16, 94%, 1/1, partial
+SOPC_ServicesEventDispatcher, 40, 213, 19%, 1/1, partial
+SOPC_ServicesToApp_EnqueueEvent, 3, 3, 100%, 1/1, total
+SOPC_Services_Clear, 0, 3, NA, 0/1, not reached
+SOPC_Services_EnqueueEvent, 12, 3, 400%, 2/1, partial
+SOPC_Services_GetEventDispatcher, 0, 1, NA, 0/1, not reached
+SOPC_Services_Initialize, 6, 5, 120%, 2/1, partial
+SOPC_Services_PreClear, 0, 12, NA, 0/1, not reached
+SOPC_Services_ToolkitConfigured, 2, 2, 100%, 2/1, total
+SOPC_SetServerApplicationDescription, 0, 23, NA, 0/1, not reached
+SOPC_SetServerCertificate, 0, 12, NA, 0/1, not reached
+SOPC_Sleep, 2, 2, 100%, 1/1, total
+SOPC_SocketsEventMgr_ConnectClient_NoLock, 15, 17, 88%, 1/1, partial
+SOPC_SocketsEventMgr_CreateClientSocket_Lock, 45, 51, 88%, 1/1, partial
+SOPC_SocketsEventMgr_CreateServerSocket_Lock, 66, 75, 88%, 1/1, partial
+SOPC_SocketsEventMgr_Dispatcher, 118, 170, 69%, 1/1, partial
+SOPC_SocketsEventMgr_NextConnectClientAttempt_Lock, 0, 17, NA, 0/1, not reached
+SOPC_SocketsEventMgr_SetInternalEventAsTreated_Lock, 4, 4, 100%, 1/1, total
+SOPC_SocketsEventMgr_TreatWriteBuffer_NoLock, 35, 55, 64%, 1/1, partial
+SOPC_SocketsInternalContext_Clear, 0, 14, NA, 0/1, not reached
+SOPC_SocketsInternalContext_CloseSocketLock, 4, 4, 100%, 1/1, total
+SOPC_SocketsInternalContext_CloseSocketNoLock, 23, 30, 77%, 1/1, partial
+SOPC_SocketsInternalContext_GetFreeSocketNoLock, 19, 21, 90%, 1/1, partial
+SOPC_SocketsInternalContext_Initialize, 12, 12, 100%, 1/1, total
+SOPC_SocketsNetworkEventMgr_Clear, 0, 2, NA, 0/1, not reached
+SOPC_SocketsNetworkEventMgr_CyclicThreadLoop, 0, 10, NA, 0/1, not reached
+SOPC_SocketsNetworkEventMgr_CyclicThreadStart, 11, 11, 100%, 1/1, total
+SOPC_SocketsNetworkEventMgr_CyclicThreadStop, 0, 9, NA, 0/1, not reached
+SOPC_SocketsNetworkEventMgr_Initialize, 2, 2, 100%, 1/1, total
+SOPC_SocketsNetworkEventMgr_TreatSocketsEvents, 79, 94, 84%, 1/1, partial
+SOPC_Sockets_Clear, 0, 6, NA, 0/1, not reached
+SOPC_Sockets_EnqueueEvent, 4, 4, 100%, 1/1, total
+SOPC_Sockets_GetEventDispatcher, 0, 1, NA, 0/1, not reached
+SOPC_Sockets_Initialize, 7, 9, 78%, 1/1, partial
+SOPC_StatusCode_Clear, 3, 3, 100%, 1/1, total
+SOPC_StatusCode_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_StatusCode_CompareAux, 0, 13, NA, 0/1, not reached
+SOPC_StatusCode_CopyAux, 0, 6, NA, 0/1, not reached
+SOPC_StatusCode_Initialize, 3, 3, 100%, 1/1, total
+SOPC_StatusCode_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_StatusCode_Read, 2, 2, 100%, 1/1, total
+SOPC_StatusCode_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_StatusCode_Write, 0, 2, NA, 0/1, not reached
+SOPC_StatusCode_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_String_AttachFrom, 0, 10, NA, 0/1, not reached
+SOPC_String_AttachFromCstring, 14, 16, 88%, 1/1, partial
+SOPC_String_Clear, 6, 6, 100%, 1/1, total
+SOPC_String_ClearAux, 2, 2, 100%, 1/1, total
+SOPC_String_Compare, 18, 28, 64%, 1/1, partial
+SOPC_String_CompareAux, 2, 2, 100%, 1/1, total
+SOPC_String_Copy, 17, 18, 94%, 1/1, partial
+SOPC_String_CopyAux, 2, 2, 100%, 1/1, total
+SOPC_String_CopyFromCString, 17, 27, 63%, 1/1, partial
+SOPC_String_Create, 5, 5, 100%, 1/1, total
+SOPC_String_Delete, 4, 4, 100%, 1/1, total
+SOPC_String_Equal, 6, 6, 100%, 1/1, total
+SOPC_String_GetCString, 0, 16, NA, 0/1, not reached
+SOPC_String_GetRawCString, 9, 12, 75%, 1/1, partial
+SOPC_String_Initialize, 5, 5, 100%, 1/1, total
+SOPC_String_InitializeAux, 2, 2, 100%, 1/1, total
+SOPC_String_InitializeFromCString, 5, 5, 100%, 1/1, total
+SOPC_String_Read, 34, 33, 103%, 2/1, partial
+SOPC_String_ReadAux, 2, 2, 100%, 1/1, total
+SOPC_String_Write, 16, 16, 100%, 1/1, total
+SOPC_String_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_ThreadStartEventDispatcherManager, 21, 29, 72%, 1/1, partial
+SOPC_Thread_Create, 7, 8, 88%, 1/1, partial
+SOPC_Thread_Join, 0, 5, NA, 0/1, not reached
+SOPC_TimeReference_AddMilliseconds, 5, 5, 100%, 1/1, total
+SOPC_TimeReference_Compare, 6, 6, 100%, 1/1, total
+SOPC_TimeReference_GetCurrent, 18, 27, 67%, 1/1, partial
+SOPC_Time_GetCurrentTimeUTC, 14, 15, 93%, 1/1, partial
+SOPC_Time_GetStringOfCurrentLocalTime, 0, 23, NA, 0/1, not reached
+SOPC_Time_GetStringOfCurrentTimeUTC, 15, 23, 65%, 1/1, partial
+SOPC_ToolkitClient_AddSecureChannelConfig, 12, 14, 86%, 1/1, partial
+SOPC_ToolkitClient_AsyncActivateSession, 0, 2, NA, 0/1, not reached
+SOPC_ToolkitClient_AsyncCloseSession, 0, 2, NA, 0/1, not reached
+SOPC_ToolkitClient_AsyncSendDiscoveryRequest, 2, 2, 100%, 1/1, total
+SOPC_ToolkitClient_AsyncSendRequestOnSession, 0, 2, NA, 0/1, not reached
+SOPC_ToolkitClient_GetSecureChannelConfig, 9, 9, 100%, 1/1, total
+SOPC_ToolkitConfig_AddTypes, 0, 44, NA, 0/1, not reached
+SOPC_ToolkitConfig_GetBuildInfo, 1, 1, 100%, 1/1, total
+SOPC_ToolkitConfig_GetEncodeableTypes, 9, 12, 75%, 1/1, partial
+SOPC_ToolkitConfig_GetNamespaces, 7, 7, 100%, 1/1, total
+SOPC_ToolkitConfig_SetLogLevel, 0, 20, NA, 0/1, not reached
+SOPC_ToolkitConfig_SetLogPath, 0, 14, NA, 0/1, not reached
+SOPC_ToolkitConfig_SetNamespaceUris, 0, 8, NA, 0/1, not reached
+SOPC_ToolkitServer_AddEndpointConfig, 0, 15, NA, 0/1, not reached
+SOPC_ToolkitServer_AddSecureChannelConfig, 0, 21, NA, 0/1, not reached
+SOPC_ToolkitServer_AsyncCloseEndpoint, 0, 2, NA, 0/1, not reached
+SOPC_ToolkitServer_AsyncLocalServiceRequest, 0, 2, NA, 0/1, not reached
+SOPC_ToolkitServer_AsyncOpenEndpoint, 0, 2, NA, 0/1, not reached
+SOPC_ToolkitServer_ClearScConfig_WithoutLock, 0, 10, NA, 0/1, not reached
+SOPC_ToolkitServer_GetEndpointConfig, 0, 7, NA, 0/1, not reached
+SOPC_ToolkitServer_GetSecureChannelConfig, 0, 9, NA, 0/1, not reached
+SOPC_ToolkitServer_RemoveSecureChannelConfig, 0, 11, NA, 0/1, not reached
+SOPC_ToolkitServer_SetAddressSpaceConfig, 11, 3, 367%, 1/1, partial
+SOPC_ToolkitServer_SetAddressSpaceNotifCb, 0, 3, NA, 0/1, not reached
+SOPC_ToolkitServer_TranslateSecureChannelConfigIdxOffset, 0, 5, NA, 0/1, not reached
+SOPC_Toolkit_Clear, 0, 21, NA, 0/1, not reached
+SOPC_Toolkit_ClearServerScConfigs_WithoutLock, 0, 8, NA, 0/1, not reached
+SOPC_Toolkit_Configured, 19, 24, 79%, 2/1, partial
+SOPC_Toolkit_Initialize, 28, 32, 88%, 2/1, partial
+SOPC_UInt16_Clear, 3, 3, 100%, 1/1, total
+SOPC_UInt16_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_UInt16_CompareAux, 0, 13, NA, 0/1, not reached
+SOPC_UInt16_CopyAux, 0, 6, NA, 0/1, not reached
+SOPC_UInt16_Initialize, 0, 3, NA, 0/1, not reached
+SOPC_UInt16_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_UInt16_Read, 11, 11, 100%, 1/1, total
+SOPC_UInt16_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_UInt16_Write, 9, 9, 100%, 1/1, total
+SOPC_UInt16_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_UInt32_Clear, 3, 3, 100%, 1/1, total
+SOPC_UInt32_ClearAux, 2, 2, 100%, 1/1, total
+SOPC_UInt32_CompareAux, 11, 13, 85%, 1/1, partial
+SOPC_UInt32_CopyAux, 6, 6, 100%, 1/1, total
+SOPC_UInt32_Initialize, 3, 3, 100%, 1/1, total
+SOPC_UInt32_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_UInt32_Read, 8, 8, 100%, 1/1, total
+SOPC_UInt32_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_UInt32_Write, 9, 9, 100%, 1/1, total
+SOPC_UInt32_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_UInt64_Clear, 0, 3, NA, 0/1, not reached
+SOPC_UInt64_ClearAux, 0, 2, NA, 0/1, not reached
+SOPC_UInt64_CompareAux, 0, 13, NA, 0/1, not reached
+SOPC_UInt64_CopyAux, 0, 6, NA, 0/1, not reached
+SOPC_UInt64_Initialize, 0, 3, NA, 0/1, not reached
+SOPC_UInt64_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_UInt64_Read, 8, 8, 100%, 1/1, total
+SOPC_UInt64_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_UInt64_Write, 9, 9, 100%, 1/1, total
+SOPC_UInt64_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_Variant_Clear, 33, 40, 82%, 1/1, partial
+SOPC_Variant_ClearAux, 2, 2, 100%, 1/1, total
+SOPC_Variant_Compare, 16, 66, 24%, 1/1, partial
+SOPC_Variant_CompareAux, 0, 2, NA, 0/1, not reached
+SOPC_Variant_Copy, 19, 77, 25%, 1/1, partial
+SOPC_Variant_CopyAux, 0, 2, NA, 0/1, not reached
+SOPC_Variant_Initialize, 3, 3, 100%, 1/1, total
+SOPC_Variant_InitializeAux, 2, 2, 100%, 1/1, total
+SOPC_Variant_Read, 2, 2, 100%, 1/1, total
+SOPC_Variant_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_Variant_ReadAux_Nested, 2, 2, 100%, 1/1, total
+SOPC_Variant_Read_Internal, 47, 83, 57%, 1/1, partial
+SOPC_Variant_ShallowCopy, 7, 7, 100%, 1/1, total
+SOPC_Variant_Write, 2, 2, 100%, 1/1, total
+SOPC_Variant_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_Variant_WriteAux_Nested, 2, 2, 100%, 1/1, total
+SOPC_Variant_Write_Internal, 46, 58, 79%, 1/1, partial
+SOPC_Write_Array, 26, 27, 96%, 1/1, partial
+SOPC_Write_Array_WithNestedLevel, 25, 27, 93%, 1/1, partial
+SOPC_Write_EnumeratedType, 2, 2, 100%, 1/1, total
+SOPC_XmlElement_Clear, 2, 2, 100%, 1/1, total
+SOPC_XmlElement_ClearAux, 2, 2, 100%, 1/1, total
+SOPC_XmlElement_Compare, 0, 2, NA, 0/1, not reached
+SOPC_XmlElement_CompareAux, 2, 2, 100%, 1/1, total
+SOPC_XmlElement_Copy, 2, 2, 100%, 1/1, total
+SOPC_XmlElement_CopyAux, 2, 2, 100%, 1/1, total
+SOPC_XmlElement_Initialize, 3, 3, 100%, 1/1, total
+SOPC_XmlElement_InitializeAux, 0, 2, NA, 0/1, not reached
+SOPC_XmlElement_Read, 2, 2, 100%, 1/1, total
+SOPC_XmlElement_ReadAux, 0, 2, NA, 0/1, not reached
+SOPC_XmlElement_Write, 2, 2, 100%, 1/1, total
+SOPC_XmlElement_WriteAux, 0, 2, NA, 0/1, not reached
+SOPC_strncmp_ignore_case, 23, 23, 100%, 1/1, total
+SOPC_strtouint16_t, 20, 21, 95%, 1/1, partial
+SOPC_strtouint32_t, 24, 27, 89%, 1/1, partial
+SOPC_strtouint8_t, 20, 21, 95%, 1/1, partial
+SocketSet_Add, 6, 6, 100%, 1/1, total
+SocketSet_Clear, 4, 4, 100%, 1/1, total
+SocketSet_IsPresent, 9, 10, 90%, 1/1, partial
+Socket_Accept, 8, 8, 100%, 1/1, total
+Socket_AddrInfoDelete, 4, 4, 100%, 1/1, total
+Socket_AddrInfo_Get, 11, 12, 92%, 1/1, partial
+Socket_AddrInfo_IsIPV6, 2, 2, 100%, 1/1, total
+Socket_AddrInfo_IterNext, 4, 4, 100%, 1/1, total
+Socket_CheckAckConnect, 9, 12, 75%, 1/1, partial
+Socket_Clear, 2, 2, 100%, 1/1, total
+Socket_Close, 6, 6, 100%, 1/1, total
+Socket_Configure, 11, 12, 92%, 1/1, partial
+Socket_Connect, 9, 11, 82%, 1/1, partial
+Socket_CreateNew, 18, 22, 82%, 1/1, partial
+Socket_Listen, 9, 9, 100%, 1/1, total
+Socket_Network_Clear, 0, 2, NA, 0/1, not reached
+Socket_Network_Initialize, 2, 2, 100%, 1/1, total
+Socket_Read, 28, 37, 76%, 1/1, partial
+Socket_WaitSocketEvents, 30, 36, 83%, 1/1, partial
+Socket_Write, 15, 22, 68%, 1/1, partial
+TIS_AppEventDispatch, 0, 2, NA, 0/1, not reached
+TIS_SecureChannelsEventDispatch, 2, 2, 100%, 1/1, total
+TIS_ServicesEventDispatch, 2, 2, 100%, 1/1, total
+TIS_Sockets_Dispatch, 2, 2, 100%, 1/1, total
+Test_ComEvent_FctClient, 0, 81, NA, 0/1, not reached
+WriteVariantArrayBuiltInType, 10, 81, 12%, 1/1, partial
+WriteVariantNonArrayBuiltInType, 7, 56, 12%, 1/1, partial
+__FC_assert, 0, 3, NA, 1/1, library?
+_ck_assert_failed, 2, 3, 67%, 1/1, partial
+_mark_point, 2, 2, 100%, 1/1, total
+_tcase_add_test, 6, 6, 100%, 1/1, total
+accept, 5, 5, 100%, 1/1, total
+address_space__INITIALISATION, 2, 2, 100%, 1/1, total
+address_space__alloc_write_request_responses, 4, 5, 80%, 1/1, partial
+address_space__dealloc_write_request_responses, 0, 3, NA, 0/1, not reached
+address_space__read_NodeClass_Attribute, 3, 3, 100%, 1/1, total
+address_space__treat_write_1, 3, 4, 75%, 1/1, partial
+address_space__treat_write_2, 9, 10, 90%, 1/1, partial
+address_space__treat_write_request_WriteValues, 16, 16, 100%, 1/1, total
+address_space_bs__INITIALISATION, 36, 64, 56%, 1/1, partial
+address_space_bs__UNINITIALISATION, 10, 10, 100%, 1/1, total
+address_space_bs__get_BrowseName, 0, 6, NA, 0/1, not reached
+address_space_bs__get_DisplayName, 0, 11, NA, 0/1, not reached
+address_space_bs__get_NodeClass, 5, 8, 62%, 1/1, partial
+address_space_bs__get_Node_RefIndexBegin, 0, 6, NA, 0/1, not reached
+address_space_bs__get_Node_RefIndexEnd, 0, 6, NA, 0/1, not reached
+address_space_bs__get_RefIndex_Reference, 0, 2, NA, 0/1, not reached
+address_space_bs__get_Reference_IsForward, 0, 2, NA, 0/1, not reached
+address_space_bs__get_Reference_ReferenceType, 0, 2, NA, 0/1, not reached
+address_space_bs__get_Reference_TargetNode, 0, 2, NA, 0/1, not reached
+address_space_bs__get_TypeDefinition, 0, 12, NA, 0/1, not reached
+address_space_bs__get_Value_StatusCode, 6, 10, 60%, 1/1, partial
+address_space_bs__read_AddressSpace_Attribute_value, 23, 52, 44%, 1/1, partial
+address_space_bs__read_AddressSpace_free_value, 2, 2, 100%, 1/1, total
+address_space_bs__readall_AddressSpace_Node, 18, 22, 82%, 1/1, partial
+address_space_bs__set_Value, 12, 17, 71%, 1/1, partial
+address_space_it__INITIALISATION, 2, 2, 100%, 1/1, total
+address_space_it__continue_iter_write_request, 4, 4, 100%, 1/1, total
+address_space_it__init_iter_write_request, 3, 3, 100%, 1/1, total
+bind, 2, 2, 100%, 1/1, total
+calloc, 0, 8, NA, 1/1, library?
+canceled_timeout_event, 0, 29, NA, 0/1, not reached
+channel_mgr_1__INITIALISATION, 51, 51, 100%, 1/1, total
+channel_mgr_1__add_channel_connected, 5, 5, 100%, 1/1, total
+channel_mgr_1__add_cli_channel_connecting, 5, 5, 100%, 1/1, total
+channel_mgr_1__add_cli_channel_disconnecting, 0, 2, NA, 0/1, not reached
+channel_mgr_1__get_card_channel_connected, 2, 2, 100%, 1/1, total
+channel_mgr_1__get_card_cli_channel_connecting, 2, 2, 100%, 1/1, total
+channel_mgr_1__get_channel_info, 0, 5, NA, 0/1, not reached
+channel_mgr_1__get_connected_channel, 5, 5, 100%, 1/1, total
+channel_mgr_1__getall_channel_connected, 0, 5, NA, 0/1, not reached
+channel_mgr_1__getall_config_inv, 5, 5, 100%, 1/1, total
+channel_mgr_1__is_channel_connected, 2, 2, 100%, 1/1, total
+channel_mgr_1__is_cli_channel_connecting, 2, 2, 100%, 1/1, total
+channel_mgr_1__is_client_channel, 0, 6, NA, 0/1, not reached
+channel_mgr_1__is_connected_channel, 2, 2, 100%, 1/1, total
+channel_mgr_1__is_disconnecting_channel, 0, 2, NA, 0/1, not reached
+channel_mgr_1__remove_channel_connected, 0, 5, NA, 0/1, not reached
+channel_mgr_1__remove_cli_channel_connecting, 5, 5, 100%, 1/1, total
+channel_mgr_1__remove_cli_channel_disconnecting, 0, 2, NA, 0/1, not reached
+channel_mgr_1__reset_config, 0, 4, NA, 0/1, not reached
+channel_mgr_1__reset_endpoint, 0, 2, NA, 0/1, not reached
+channel_mgr_1__server_get_endpoint_config, 0, 5, NA, 0/1, not reached
+channel_mgr_1__set_config, 3, 3, 100%, 1/1, total
+channel_mgr_1__set_endpoint, 0, 2, NA, 0/1, not reached
+channel_mgr__INITIALISATION, 2, 2, 100%, 1/1, total
+channel_mgr__channel_lost, 0, 9, NA, 0/1, not reached
+channel_mgr__cli_open_secure_channel, 15, 16, 94%, 1/1, partial
+channel_mgr__cli_set_connected_channel, 12, 13, 92%, 1/1, partial
+channel_mgr__cli_set_connection_timeout_channel, 6, 6, 100%, 1/1, total
+channel_mgr__close_all_channel, 0, 13, NA, 0/1, not reached
+channel_mgr__close_secure_channel, 0, 2, NA, 0/1, not reached
+channel_mgr__l_check_all_channel_lost, 0, 14, NA, 0/1, not reached
+channel_mgr__l_close_secure_channel, 0, 5, NA, 0/1, not reached
+channel_mgr__srv_new_secure_channel, 0, 13, NA, 0/1, not reached
+channel_mgr_bs__INITIALISATION, 1, 1, 100%, 1/1, total
+channel_mgr_bs__channel_do_nothing, 2, 2, 100%, 1/1, total
+channel_mgr_bs__define_SecurityPolicy, 2, 2, 100%, 1/1, total
+channel_mgr_bs__finalize_close_secure_channel, 0, 2, NA, 0/1, not reached
+channel_mgr_bs__get_SecurityPolicy, 0, 12, NA, 0/1, not reached
+channel_mgr_bs__is_valid_channel_config_idx, 5, 7, 71%, 1/1, partial
+channel_mgr_bs__is_valid_endpoint_config_idx, 0, 5, NA, 0/1, not reached
+channel_mgr_bs__last_connected_channel_lost, 0, 2, NA, 0/1, not reached
+channel_mgr_bs__prepare_cli_open_secure_channel, 4, 4, 100%, 1/1, total
+channel_mgr_bs__reset_SecurityPolicy, 0, 2, NA, 0/1, not reached
+channel_mgr_bs__send_channel_msg_buffer, 2, 2, 100%, 1/1, total
+channel_mgr_it__INITIALISATION, 2, 2, 100%, 1/1, total
+channel_mgr_it__continue_iter_channel, 0, 4, NA, 0/1, not reached
+channel_mgr_it__init_iter_channel, 0, 3, NA, 0/1, not reached
+clear, 0, 2, NA, 0/1, not reached
+clock_gettime, 6, 6, 100%, 1/1, total
+close, 2, 2, 100%, 1/1, total
+compareLocalizedText, 8, 12, 67%, 1/1, partial
+compute_endianness_float, 15, 47, 32%, 1/1, partial
+compute_endianness_integer, 15, 30, 50%, 1/1, partial
+connect, 2, 2, 100%, 1/1, total
+constants__INITIALISATION, 1, 1, 100%, 1/1, total
+constants__get_Is_Dir_Forward_Compatible, 0, 8, NA, 0/1, not reached
+constants__get_cast_t_BrowseResult, 0, 2, NA, 0/1, not reached
+constants__get_cast_t_BrowseValue, 0, 2, NA, 0/1, not reached
+constants__get_cast_t_WriteValue, 2, 2, 100%, 1/1, total
+constants__read_cast_t_ReadValue, 2, 2, 100%, 1/1, total
+constants_bs__INITIALISATION, 1, 1, 100%, 1/1, total
+constants_bs__get_Is_SubType, 0, 4, NA, 0/1, not reached
+constants_bs__get_card_t_channel, 2, 2, 100%, 1/1, total
+constants_bs__get_card_t_session, 2, 2, 100%, 1/1, total
+constants_bs__get_cast_t_channel, 0, 2, NA, 0/1, not reached
+constants_bs__get_cast_t_session, 2, 2, 100%, 1/1, total
+constants_bs__getall_conv_ExpandedNodeId_NodeId, 0, 7, NA, 0/1, not reached
+constants_bs__is_t_channel, 9, 11, 82%, 1/1, partial
+constants_bs__is_t_channel_config_idx, 6, 11, 55%, 1/1, partial
+constants_bs__is_t_endpoint_config_idx, 0, 11, NA, 0/1, not reached
+fcntl, 2, 2, 100%, 1/1, total
+freeaddrinfo, 1, 1, 100%, 1/1, total
+getGetEndpoints_message, 7, 7, 100%, 1/1, total
+getReadRequest_message, 0, 2, NA, 0/1, not reached
+getReadRequest_verif_message, 0, 2, NA, 0/1, not reached
+get_rvi, 15, 25, 60%, 1/1, partial
+getaddrinfo, 12, 13, 92%, 1/1, partial
+getsockopt, 2, 2, 100%, 1/1, total
+gettimeofday, 0, 7, NA, 0/1, not reached
+gmtime, 7, 7, 100%, 1/1, total
+hexlify, 12, 16, 75%, 1/1, partial
+init, 0, 2, NA, 0/1, not reached
+io_dispatch_mgr__INITIALISATION, 1, 1, 100%, 1/1, total
+io_dispatch_mgr__client_activate_new_session, 0, 10, NA, 0/1, not reached
+io_dispatch_mgr__client_channel_connected_event, 5, 5, 100%, 1/1, total
+io_dispatch_mgr__client_reactivate_session_new_user, 0, 11, NA, 0/1, not reached
+io_dispatch_mgr__client_secure_channel_timeout, 4, 4, 100%, 1/1, total
+io_dispatch_mgr__client_send_close_session_request, 0, 12, NA, 0/1, not reached
+io_dispatch_mgr__client_send_discovery_request, 18, 27, 67%, 1/1, partial
+io_dispatch_mgr__client_send_service_request, 0, 19, NA, 0/1, not reached
+io_dispatch_mgr__close_all_active_connections, 0, 2, NA, 0/1, not reached
+io_dispatch_mgr__get_msg_header_type, 0, 83, NA, 0/1, not reached
+io_dispatch_mgr__get_msg_service_class, 0, 86, NA, 0/1, not reached
+io_dispatch_mgr__internal_client_activate_orphaned_session, 0, 9, NA, 0/1, not reached
+io_dispatch_mgr__internal_client_create_session, 0, 10, NA, 0/1, not reached
+io_dispatch_mgr__internal_server_evaluate_session_timeout, 0, 4, NA, 0/1, not reached
+io_dispatch_mgr__receive_msg_buffer, 0, 45, NA, 0/1, not reached
+io_dispatch_mgr__secure_channel_lost, 0, 17, NA, 0/1, not reached
+io_dispatch_mgr__server_channel_connected_event, 0, 2, NA, 0/1, not reached
+io_dispatch_mgr__server_treat_local_service_request, 0, 8, NA, 0/1, not reached
+io_dispatch_mgr__snd_msg_failure, 0, 7, NA, 0/1, not reached
+isspace, 0, 14, NA, 1/1, library?
+isupper, 0, 6, NA, 1/1, library?
+listen, 2, 2, 100%, 1/1, total
+message_in_bs__INITIALISATION, 1, 1, 100%, 1/1, total
+message_in_bs__bless_msg_in, 0, 2, NA, 0/1, not reached
+message_in_bs__copy_msg_resp_header_into_msg, 0, 2, NA, 0/1, not reached
+message_in_bs__dealloc_msg_in, 0, 2, NA, 0/1, not reached
+message_in_bs__dealloc_msg_in_buffer, 0, 2, NA, 0/1, not reached
+message_in_bs__dealloc_msg_in_header, 0, 6, NA, 0/1, not reached
+message_in_bs__decode_msg, 0, 15, NA, 0/1, not reached
+message_in_bs__decode_msg_header, 0, 9, NA, 0/1, not reached
+message_in_bs__decode_msg_type, 0, 9, NA, 0/1, not reached
+message_in_bs__forget_resp_msg_in, 0, 3, NA, 0/1, not reached
+message_in_bs__get_msg_in_type, 0, 2, NA, 0/1, not reached
+message_in_bs__is_valid_app_msg_in, 0, 7, NA, 0/1, not reached
+message_in_bs__is_valid_msg_in, 0, 2, NA, 0/1, not reached
+message_in_bs__is_valid_msg_in_header, 0, 2, NA, 0/1, not reached
+message_in_bs__is_valid_msg_in_type, 0, 2, NA, 0/1, not reached
+message_in_bs__is_valid_request_context, 0, 2, NA, 0/1, not reached
+message_in_bs__read_activate_req_msg_user, 0, 18, NA, 0/1, not reached
+message_in_bs__read_create_session_msg_session_token, 0, 3, NA, 0/1, not reached
+message_in_bs__read_msg_header_req_handle, 0, 6, NA, 0/1, not reached
+message_in_bs__read_msg_req_header_session_token, 0, 3, NA, 0/1, not reached
+message_in_bs__read_msg_resp_header_service_status, 0, 2, NA, 0/1, not reached
+message_out_bs__INITIALISATION, 1, 1, 100%, 1/1, total
+message_out_bs__alloc_app_req_msg_header, 5, 6, 83%, 1/1, partial
+message_out_bs__alloc_req_msg, 0, 2, NA, 0/1, not reached
+message_out_bs__alloc_resp_msg, 0, 2, NA, 0/1, not reached
+message_out_bs__bless_msg_out, 2, 2, 100%, 1/1, total
+message_out_bs__copy_msg_resp_header_into_msg_out, 0, 4, NA, 0/1, not reached
+message_out_bs__dealloc_msg_header_out, 4, 6, 67%, 1/1, partial
+message_out_bs__dealloc_msg_out, 5, 5, 100%, 1/1, total
+message_out_bs__encode_msg, 26, 31, 84%, 1/1, partial
+message_out_bs__forget_resp_msg_out, 0, 3, NA, 0/1, not reached
+message_out_bs__get_msg_out_type, 3, 3, 100%, 1/1, total
+message_out_bs__is_valid_app_msg_out, 7, 7, 100%, 1/1, total
+message_out_bs__is_valid_buffer_out, 2, 2, 100%, 1/1, total
+message_out_bs__is_valid_msg_out, 8, 8, 100%, 1/1, total
+message_out_bs__is_valid_msg_out_header, 8, 9, 89%, 1/1, partial
+message_out_bs__write_activate_msg_user, 0, 6, NA, 0/1, not reached
+message_out_bs__write_activate_session_req_msg_crypto, 0, 10, NA, 0/1, not reached
+message_out_bs__write_activate_session_resp_msg_crypto, 0, 8, NA, 0/1, not reached
+message_out_bs__write_create_session_msg_server_endpoints, 0, 4, NA, 0/1, not reached
+message_out_bs__write_create_session_msg_session_revised_timeout, 0, 8, NA, 0/1, not reached
+message_out_bs__write_create_session_msg_session_token, 0, 14, NA, 0/1, not reached
+message_out_bs__write_create_session_req_msg_crypto, 0, 25, NA, 0/1, not reached
+message_out_bs__write_create_session_req_msg_endpointUrl, 0, 10, NA, 0/1, not reached
+message_out_bs__write_create_session_req_msg_sessionTimeout, 0, 3, NA, 0/1, not reached
+message_out_bs__write_create_session_resp_msg_crypto, 0, 25, NA, 0/1, not reached
+message_out_bs__write_msg_out_header_req_handle, 4, 6, 67%, 1/1, partial
+message_out_bs__write_msg_out_header_session_token, 0, 7, NA, 0/1, not reached
+message_out_bs__write_msg_resp_header_service_status, 0, 4, NA, 0/1, not reached
+msg_browse_response_bs__INITIALISATION, 12, 12, 100%, 1/1, total
+msg_browse_response_bs__free_browse_result, 0, 57, NA, 0/1, not reached
+msg_browse_response_bs__malloc_browse_response, 0, 40, NA, 0/1, not reached
+msg_browse_response_bs__malloc_browse_result, 0, 87, NA, 0/1, not reached
+msg_browse_response_bs__reset_ResponseBrowse_ContinuationPoint, 0, 5, NA, 0/1, not reached
+msg_browse_response_bs__reset_ResponseBrowse_Res_BrowseName, 0, 18, NA, 0/1, not reached
+msg_browse_response_bs__reset_ResponseBrowse_Res_DisplayName, 0, 18, NA, 0/1, not reached
+msg_browse_response_bs__reset_ResponseBrowse_Res_NodeClass, 0, 18, NA, 0/1, not reached
+msg_browse_response_bs__reset_ResponseBrowse_Res_TypeDefinition, 0, 18, NA, 0/1, not reached
+msg_browse_response_bs__set_ResponseBrowse_BrowseStatus, 0, 6, NA, 0/1, not reached
+msg_browse_response_bs__set_ResponseBrowse_ContinuationPoint, 0, 6, NA, 0/1, not reached
+msg_browse_response_bs__set_ResponseBrowse_Res_BrowseName, 0, 23, NA, 0/1, not reached
+msg_browse_response_bs__set_ResponseBrowse_Res_DisplayName, 0, 23, NA, 0/1, not reached
+msg_browse_response_bs__set_ResponseBrowse_Res_Forwards, 0, 18, NA, 0/1, not reached
+msg_browse_response_bs__set_ResponseBrowse_Res_NodeClass, 0, 22, NA, 0/1, not reached
+msg_browse_response_bs__set_ResponseBrowse_Res_NodeId, 0, 28, NA, 0/1, not reached
+msg_browse_response_bs__set_ResponseBrowse_Res_ReferenceTypeId, 0, 23, NA, 0/1, not reached
+msg_browse_response_bs__set_ResponseBrowse_Res_TypeDefinition, 0, 25, NA, 0/1, not reached
+msg_browse_response_bs__write_BrowseResponse_msg_out, 0, 79, NA, 0/1, not reached
+msg_read_request__INITIALISATION, 2, 2, 100%, 1/1, total
+msg_read_request__check_ReadRequest, 17, 26, 65%, 1/1, partial
+msg_read_request__get_nb_ReadValue, 2, 2, 100%, 1/1, total
+msg_read_request__getall_ReadValue_NodeId_AttributeId, 4, 5, 80%, 1/1, partial
+msg_read_request_bs__INITIALISATION, 1, 1, 100%, 1/1, total
+msg_read_request_bs__getall_req_ReadValue_AttributeId, 12, 15, 80%, 1/1, partial
+msg_read_request_bs__getall_req_ReadValue_NodeId, 9, 12, 75%, 1/1, partial
+msg_read_request_bs__read_req_MaxAge, 5, 5, 100%, 1/1, total
+msg_read_request_bs__read_req_TimestampsToReturn, 6, 7, 86%, 1/1, partial
+msg_read_request_bs__read_req_nb_ReadValue, 5, 6, 83%, 1/1, partial
+msg_read_response_bs__INITIALISATION, 1, 1, 100%, 1/1, total
+msg_read_response_bs__alloc_read_response, 18, 21, 86%, 1/1, partial
+msg_read_response_bs__set_read_response, 16, 23, 70%, 1/1, partial
+new_variant_rvi, 24, 42, 57%, 1/1, partial
+pow, 5, 7, 71%, 1/1, partial
+pthread_cond_broadcast, 0, 3, NA, 0/1, not reached
+pthread_cond_destroy, 0, 2, NA, 0/1, not reached
+pthread_cond_init, 6, 2, 300%, 2/1, partial
+pthread_cond_wait, 2, 7, 29%, 1/1, partial
+pthread_create, 2, 2, 100%, 1/1, total
+pthread_join, 0, 2, NA, 0/1, not reached
+pthread_mutex_destroy, 0, 2, NA, 0/1, not reached
+pthread_mutex_init, 6, 6, 100%, 1/1, total
+pthread_mutex_lock, 2, 2, 100%, 1/1, total
+pthread_mutex_unlock, 2, 2, 100%, 1/1, total
+read_new_read_request, 67, 69, 97%, 1/1, partial
+read_service_test, 6, 6, 100%, 1/1, total
+recv, 18, 9, 200%, 3/1, partial
+request_handle_bs__INITIALISATION, 3, 3, 100%, 1/1, total
+request_handle_bs__client_fresh_req_handle, 19, 21, 90%, 1/1, partial
+request_handle_bs__client_remove_req_handle, 0, 4, NA, 0/1, not reached
+request_handle_bs__client_req_handle_to_request_id, 2, 2, 100%, 1/1, total
+request_handle_bs__client_request_id_to_req_handle, 0, 2, NA, 0/1, not reached
+request_handle_bs__client_validate_response_request_handle, 0, 9, NA, 0/1, not reached
+request_handle_bs__get_req_handle_app_context, 0, 3, NA, 0/1, not reached
+request_handle_bs__get_req_handle_channel, 0, 2, NA, 0/1, not reached
+request_handle_bs__get_req_handle_req_typ, 0, 2, NA, 0/1, not reached
+request_handle_bs__get_req_handle_resp_typ, 0, 2, NA, 0/1, not reached
+request_handle_bs__is_valid_req_handle, 2, 2, 100%, 1/1, total
+request_handle_bs__req_handle_do_nothing, 0, 2, NA, 0/1, not reached
+request_handle_bs__set_req_handle_channel, 2, 2, 100%, 1/1, total
+response_write_bs__INITIALISATION, 3, 3, 100%, 1/1, total
+response_write_bs__alloc_write_request_responses_malloc, 17, 20, 85%, 1/1, partial
+response_write_bs__getall_ResponseWrite_StatusCode, 5, 5, 100%, 1/1, total
+response_write_bs__reset_ResponseWrite, 4, 4, 100%, 1/1, total
+response_write_bs__set_ResponseWrite_StatusCode, 2, 2, 100%, 1/1, total
+response_write_bs__write_WriteResponse_msg_out, 0, 12, NA, 0/1, not reached
+select, 28, 30, 93%, 3/1, partial
+send, 2, 2, 100%, 1/1, total
+service_browse__INITIALISATION, 1, 1, 100%, 1/1, total
+service_browse__Is_RefTypes_Compatible, 0, 8, NA, 0/1, not reached
+service_browse__alloc_browse_response, 0, 2, NA, 0/1, not reached
+service_browse__alloc_browse_result, 0, 8, NA, 0/1, not reached
+service_browse__copy_target_node_browse_result, 0, 25, NA, 0/1, not reached
+service_browse__fill_continuation_point, 0, 5, NA, 0/1, not reached
+service_browse__getall_SourceNode_NbRef, 0, 9, NA, 0/1, not reached
+service_browse_decode_bs__INITIALISATION, 2, 2, 100%, 1/1, total
+service_browse_decode_bs__decode_browse_request, 0, 11, NA, 0/1, not reached
+service_browse_decode_bs__free_browse_request, 0, 2, NA, 0/1, not reached
+service_browse_decode_bs__get_BrowseView, 0, 10, NA, 0/1, not reached
+service_browse_decode_bs__get_nb_BrowseTargetMax, 0, 8, NA, 0/1, not reached
+service_browse_decode_bs__get_nb_BrowseValue, 0, 4, NA, 0/1, not reached
+service_browse_decode_bs__getall_BrowseValue, 0, 23, NA, 0/1, not reached
+service_browse_seq__INITIALISATION, 1, 1, 100%, 1/1, total
+service_browse_seq__fill_browse_response, 0, 16, NA, 0/1, not reached
+service_browse_seq__fill_browse_response_ref, 0, 12, NA, 0/1, not reached
+service_browse_seq__treat_browse_request_BrowseValue_1, 0, 14, NA, 0/1, not reached
+service_browse_seq__treat_browse_request_BrowseValues, 0, 19, NA, 0/1, not reached
+service_browse_seq_it__INITIALISATION, 7, 7, 100%, 1/1, total
+service_browse_seq_it__continue_iter_browse_request, 0, 4, NA, 0/1, not reached
+service_browse_seq_it__continue_iter_browse_result, 0, 4, NA, 0/1, not reached
+service_browse_seq_it__continue_iter_reference, 0, 4, NA, 0/1, not reached
+service_browse_seq_it__init_iter_browse_request, 0, 4, NA, 0/1, not reached
+service_browse_seq_it__init_iter_browse_result, 0, 4, NA, 0/1, not reached
+service_browse_seq_it__init_iter_reference, 0, 4, NA, 0/1, not reached
+service_get_endpoints_bs__INITIALISATION, 1, 1, 100%, 1/1, total
+service_get_endpoints_bs__treat_get_endpoints_request, 0, 12, NA, 0/1, not reached
+service_mgr_1__INITIALISATION, 2, 2, 100%, 1/1, total
+service_mgr_1__is_local_service_treatment, 2, 2, 100%, 1/1, total
+service_mgr_1__set_local_service_treatment, 0, 2, NA, 0/1, not reached
+service_mgr_1__unset_local_service_treatment, 0, 2, NA, 0/1, not reached
+service_mgr__INITIALISATION, 1, 1, 100%, 1/1, total
+service_mgr__client_discovery_service_request, 2, 2, 100%, 1/1, total
+service_mgr__client_receive_discovery_service_resp, 0, 21, NA, 0/1, not reached
+service_mgr__client_receive_session_service_resp, 0, 24, NA, 0/1, not reached
+service_mgr__client_receive_session_treatment_resp, 0, 17, NA, 0/1, not reached
+service_mgr__client_service_activate_orphaned_session, 0, 28, NA, 0/1, not reached
+service_mgr__client_service_activate_session, 0, 37, NA, 0/1, not reached
+service_mgr__client_service_close_session, 0, 33, NA, 0/1, not reached
+service_mgr__client_service_create_session, 0, 27, NA, 0/1, not reached
+service_mgr__client_service_request, 0, 79, NA, 0/1, not reached
+service_mgr__client_snd_msg_failure, 0, 19, NA, 0/1, not reached
+service_mgr__get_response_type, 5, 78, 6%, 1/1, partial
+service_mgr__internal_client_request_timeout, 0, 10, NA, 0/1, not reached
+service_mgr__local_client_discovery_service_request, 29, 39, 74%, 1/1, partial
+service_mgr__server_receive_discovery_service_req, 0, 31, NA, 0/1, not reached
+service_mgr__server_receive_local_service_req, 0, 34, NA, 0/1, not reached
+service_mgr__server_receive_session_service_req, 0, 54, NA, 0/1, not reached
+service_mgr__server_receive_session_treatment_req, 0, 34, NA, 0/1, not reached
+service_mgr__treat_discovery_service_req, 0, 8, NA, 0/1, not reached
+service_mgr__treat_read_request, 6, 7, 86%, 1/1, partial
+service_mgr__treat_session_service_req, 0, 20, NA, 0/1, not reached
+service_mgr__treat_write_request, 9, 9, 100%, 1/1, total
+service_mgr_bs__INITIALISATION, 2, 2, 100%, 1/1, total
+service_mgr_bs__UNINITIALISATION, 0, 14, NA, 0/1, not reached
+service_mgr_bs__client_async_discovery_request_without_channel, 22, 22, 100%, 1/1, total
+service_mgr_bs__client_channel_connected_event_discovery, 20, 20, 100%, 1/1, total
+service_mgr_bs__client_discovery_req_failures_on_final_connection_failure, 7, 7, 100%, 1/1, total
+service_read__INITIALISATION, 1, 1, 100%, 1/1, total
+service_read__fill_read_response, 10, 10, 100%, 1/1, total
+service_read__fill_read_response_1, 14, 21, 67%, 1/1, partial
+service_read_it__INITIALISATION, 2, 2, 100%, 1/1, total
+service_read_it__continue_iter_write_request, 4, 4, 100%, 1/1, total
+service_read_it__init_iter_write_request, 3, 3, 100%, 1/1, total
+service_response_cb_bs__INITIALISATION, 1, 1, 100%, 1/1, total
+service_response_cb_bs__cli_request_timeout, 0, 12, NA, 0/1, not reached
+service_response_cb_bs__cli_service_response, 0, 13, NA, 0/1, not reached
+service_response_cb_bs__cli_snd_failure, 0, 13, NA, 0/1, not reached
+service_response_cb_bs__srv_service_response, 0, 7, NA, 0/1, not reached
+service_response_cb_bs__srv_write_notification, 10, 10, 100%, 1/1, total
+service_write_decode_bs__INITIALISATION, 2, 2, 100%, 1/1, total
+service_write_decode_bs__decode_write_request, 9, 15, 60%, 1/1, partial
+service_write_decode_bs__free_write_request, 2, 2, 100%, 1/1, total
+service_write_decode_bs__getAndClean_WriteValuePointer, 9, 9, 100%, 1/1, total
+service_write_decode_bs__get_nb_WriteValue, 3, 4, 75%, 1/1, partial
+service_write_decode_bs__getall_WriteValue, 13, 23, 57%, 1/1, partial
+session_core_1__INITIALISATION, 1, 1, 100%, 1/1, total
+session_core_1__create_session, 0, 3, NA, 0/1, not reached
+session_core_1__delete_session, 0, 6, NA, 0/1, not reached
+session_core_1__init_new_session, 0, 16, NA, 0/1, not reached
+session_core_1__l_set_session_state, 0, 4, NA, 0/1, not reached
+session_core_1__set_session_orphaned, 0, 5, NA, 0/1, not reached
+session_core_1__set_session_state, 0, 2, NA, 0/1, not reached
+session_core_1__set_session_state_closed, 0, 13, NA, 0/1, not reached
+session_core_1_it__INITIALISATION, 2, 2, 100%, 1/1, total
+session_core_1_it__continue_iter_session, 0, 4, NA, 0/1, not reached
+session_core_1_it__init_iter_session, 0, 3, NA, 0/1, not reached
+session_core_2__INITIALISATION, 41, 41, 100%, 1/1, total
+session_core_2__add_session, 0, 2, NA, 0/1, not reached
+session_core_2__get_session_channel, 0, 2, NA, 0/1, not reached
+session_core_2__get_session_state, 0, 2, NA, 0/1, not reached
+session_core_2__getall_orphaned, 3, 3, 100%, 1/1, total
+session_core_2__getall_session_channel, 0, 3, NA, 0/1, not reached
+session_core_2__getall_to_create, 3, 3, 100%, 1/1, total
+session_core_2__is_valid_session, 0, 2, NA, 0/1, not reached
+session_core_2__remove_session, 0, 2, NA, 0/1, not reached
+session_core_2__reset_session_channel, 0, 2, NA, 0/1, not reached
+session_core_2__reset_session_orphaned, 0, 2, NA, 0/1, not reached
+session_core_2__reset_session_to_create, 0, 2, NA, 0/1, not reached
+session_core_2__set_session_channel, 0, 2, NA, 0/1, not reached
+session_core_2__set_session_orphaned_1, 0, 2, NA, 0/1, not reached
+session_core_2__set_session_state_1, 0, 2, NA, 0/1, not reached
+session_core_2__set_session_to_create, 0, 2, NA, 0/1, not reached
+session_core__INITIALISATION, 1, 1, 100%, 1/1, total
+session_core__client_activate_session_resp_sm, 0, 7, NA, 0/1, not reached
+session_core__client_close_session_req_sm, 0, 11, NA, 0/1, not reached
+session_core__client_close_session_resp_sm, 0, 4, NA, 0/1, not reached
+session_core__client_close_session_sm, 0, 2, NA, 0/1, not reached
+session_core__client_create_session_req_sm, 0, 10, NA, 0/1, not reached
+session_core__client_create_session_resp_sm, 0, 14, NA, 0/1, not reached
+session_core__client_init_session_sm, 0, 2, NA, 0/1, not reached
+session_core__client_sc_activate_session_req_sm, 0, 6, NA, 0/1, not reached
+session_core__client_secure_channel_lost_session_sm, 0, 18, NA, 0/1, not reached
+session_core__client_user_activate_session_req_sm, 0, 24, NA, 0/1, not reached
+session_core__get_session_state_or_closed, 0, 5, NA, 0/1, not reached
+session_core__get_session_user_or_indet, 0, 10, NA, 0/1, not reached
+session_core__is_session_valid_for_service, 0, 4, NA, 0/1, not reached
+session_core__server_activate_session_req_and_resp_sm, 0, 41, NA, 0/1, not reached
+session_core__server_close_session_req_and_resp_sm, 0, 5, NA, 0/1, not reached
+session_core__server_close_session_sm, 0, 2, NA, 0/1, not reached
+session_core__server_create_session_req_and_resp_sm, 0, 29, NA, 0/1, not reached
+session_core__server_internal_activate_req_and_resp, 0, 13, NA, 0/1, not reached
+session_core__server_secure_channel_lost_session_sm, 0, 15, NA, 0/1, not reached
+session_core_bs__INITIALISATION, 22, 24, 92%, 1/1, partial
+session_core_bs__client_activate_session_req_do_crypto, 0, 80, NA, 0/1, not reached
+session_core_bs__client_activate_session_resp_check, 0, 5, NA, 0/1, not reached
+session_core_bs__client_close_session_req_msg, 0, 2, NA, 0/1, not reached
+session_core_bs__client_close_session_resp_msg, 0, 2, NA, 0/1, not reached
+session_core_bs__client_create_session_check_crypto, 0, 60, NA, 0/1, not reached
+session_core_bs__client_create_session_req_do_crypto, 0, 30, NA, 0/1, not reached
+session_core_bs__client_gen_activate_orphaned_session_internal_event, 0, 2, NA, 0/1, not reached
+session_core_bs__client_gen_activate_user_session_internal_event, 0, 5, NA, 0/1, not reached
+session_core_bs__client_gen_create_session_internal_event, 0, 2, NA, 0/1, not reached
+session_core_bs__client_get_token_from_session, 0, 4, NA, 0/1, not reached
+session_core_bs__client_set_session_token, 0, 9, NA, 0/1, not reached
+session_core_bs__delete_session_application_context, 0, 2, NA, 0/1, not reached
+session_core_bs__delete_session_token, 0, 2, NA, 0/1, not reached
+session_core_bs__drop_NonceClient, 0, 3, NA, 0/1, not reached
+session_core_bs__get_NonceClient, 0, 4, NA, 0/1, not reached
+session_core_bs__get_NonceServer, 0, 4, NA, 0/1, not reached
+session_core_bs__get_session_user, 0, 4, NA, 0/1, not reached
+session_core_bs__getall_to_activate, 0, 6, NA, 0/1, not reached
+session_core_bs__is_valid_user, 0, 6, NA, 0/1, not reached
+session_core_bs__notify_set_session_state, 0, 33, NA, 0/1, not reached
+session_core_bs__prepare_close_session, 0, 16, NA, 0/1, not reached
+session_core_bs__reset_session_to_activate, 0, 2, NA, 0/1, not reached
+session_core_bs__server_activate_session_check_crypto, 0, 64, NA, 0/1, not reached
+session_core_bs__server_close_session_check_req, 0, 3, NA, 0/1, not reached
+session_core_bs__server_create_session_req_do_crypto, 0, 85, NA, 0/1, not reached
+session_core_bs__server_get_fresh_session_token, 0, 6, NA, 0/1, not reached
+session_core_bs__server_get_session_from_token, 0, 8, NA, 0/1, not reached
+session_core_bs__server_is_valid_session_token, 0, 2, NA, 0/1, not reached
+session_core_bs__server_session_timeout_evaluation, 0, 32, NA, 0/1, not reached
+session_core_bs__server_session_timeout_msg_received, 0, 3, NA, 0/1, not reached
+session_core_bs__server_session_timeout_start_timer, 0, 26, NA, 0/1, not reached
+session_core_bs__server_session_timeout_stop_timer, 0, 6, NA, 0/1, not reached
+session_core_bs__session_do_nothing, 0, 2, NA, 0/1, not reached
+session_core_bs__set_session_to_activate, 0, 3, NA, 0/1, not reached
+session_core_bs__set_session_user, 0, 3, NA, 0/1, not reached
+session_core_it__INITIALISATION, 2, 2, 100%, 1/1, total
+session_core_it__continue_iter_session, 0, 4, NA, 0/1, not reached
+session_core_it__init_iter_session, 0, 3, NA, 0/1, not reached
+session_mgr__INITIALISATION, 1, 1, 100%, 1/1, total
+session_mgr__client_async_activate_new_session_with_channel, 0, 9, NA, 0/1, not reached
+session_mgr__client_async_activate_new_session_without_channel, 0, 8, NA, 0/1, not reached
+session_mgr__client_channel_connected_event_session, 3, 3, 100%, 1/1, total
+session_mgr__client_close_session, 0, 2, NA, 0/1, not reached
+session_mgr__client_close_session_req, 0, 23, NA, 0/1, not reached
+session_mgr__client_close_sessions_on_final_connection_failure, 2, 2, 100%, 1/1, total
+session_mgr__client_create_session_req, 0, 11, NA, 0/1, not reached
+session_mgr__client_receive_session_resp, 0, 46, NA, 0/1, not reached
+session_mgr__client_sc_activate_session_req, 0, 16, NA, 0/1, not reached
+session_mgr__client_user_activate_session_req, 0, 18, NA, 0/1, not reached
+session_mgr__client_validate_session_service_req, 0, 11, NA, 0/1, not reached
+session_mgr__client_validate_session_service_resp, 0, 17, NA, 0/1, not reached
+session_mgr__local_client_activate_sessions_on_SC_connection, 11, 16, 69%, 1/1, partial
+session_mgr__local_client_close_session, 0, 3, NA, 0/1, not reached
+session_mgr__local_client_close_sessions_on_SC_final_connection_failure, 11, 15, 73%, 1/1, partial
+session_mgr__server_evaluate_session_timeout, 0, 4, NA, 0/1, not reached
+session_mgr__server_receive_session_req, 0, 55, NA, 0/1, not reached
+session_mgr__server_validate_session_service_req, 0, 26, NA, 0/1, not reached
+session_mgr__server_validate_session_service_resp, 0, 18, NA, 0/1, not reached
+session_mgr_it__INITIALISATION, 2, 2, 100%, 1/1, total
+session_mgr_it__continue_iter_session, 4, 4, 100%, 1/1, total
+session_mgr_it__init_iter_session, 3, 3, 100%, 1/1, total
+session_request_handle_bs__INITIALISATION, 3, 3, 100%, 1/1, total
+session_request_handle_bs__client_add_session_request_handle, 0, 17, NA, 0/1, not reached
+session_request_handle_bs__client_get_session_and_remove_request_handle, 0, 16, NA, 0/1, not reached
+session_request_handle_bs__client_remove_all_request_handles, 0, 17, NA, 0/1, not reached
+setsockopt, 9, 18, 50%, 1/1, partial
+setup_asym_keys, 25, 32, 78%, 1/1, partial
+setup_asym_keys_0, 25, 32, 78%, 1/1, partial
+setup_asym_keys_1, 25, 32, 78%, 1/1, partial
+setup_certificate, 11, 14, 79%, 1/1, partial
+setup_certificate_0, 11, 14, 79%, 1/1, partial
+setup_certificate_1, 11, 14, 79%, 1/1, partial
+setup_crypto, 6, 7, 86%, 1/1, partial
+setup_crypto_0, 6, 7, 86%, 1/1, partial
+setup_crypto_1, 6, 7, 86%, 1/1, partial
+setup_pki_stack, 16, 20, 80%, 1/1, partial
+setup_pki_stack_0, 16, 20, 80%, 1/1, partial
+setup_pki_stack_1, 16, 20, 80%, 1/1, partial
+socket, 5, 5, 100%, 1/1, total
+strncpy, 0, 6, NA, 1/1, library?
+strtoul, 0, 6, NA, 1/1, library?
+strtoull, 0, 113, NA, 1/1, library?
+timeout_event, 0, 29, NA, 0/1, not reached
+tolower, 0, 6, NA, 1/1, library?
+toolkit_header__INITIALISATION, 1, 1, 100%, 1/1, total
+unhexlify, 13, 19, 68%, 1/1, partial
+usleep, 2, 2, 100%, 1/1, total
+util_AttributeId__B_to_C, 0, 20, NA, 0/1, not reached
+util_AttributeId__C_to_B, 10, 18, 56%, 1/1, partial
+util_BrowseDirection__B_to_C, 0, 16, NA, 0/1, not reached
+util_BrowseDirection__C_to_B, 0, 14, NA, 0/1, not reached
+util_NodeClass__B_to_C, 0, 26, NA, 0/1, not reached
+util_NodeClass__C_to_B, 8, 24, 33%, 1/1, partial
+util_TimestampsToReturn__B_to_C, 0, 21, NA, 0/1, not reached
+util_TimestampsToReturn__C_to_B, 6, 14, 43%, 1/1, partial
+util_channel__SecurityPolicy_C_to_B, 0, 32, NA, 0/1, not reached
+util_message__get_encodeable_type, 6, 267, 2%, 1/1, partial
+util_message__get_message_type, 5, 155, 3%, 1/1, partial
+util_message_out_bs__alloc_msg, 0, 27, NA, 0/1, not reached
+util_status_code__B_to_C, 4, 59, 7%, 1/1, partial
+util_status_code__B_to_return_status_C, 5, 38, 13%, 1/1, partial
+util_status_code__C_to_B, 5, 60, 8%, 1/1, partial
+util_variant__new_Variant_from_Byte, 0, 7, NA, 0/1, not reached
+util_variant__new_Variant_from_ByteString, 0, 10, NA, 0/1, not reached
+util_variant__new_Variant_from_Indet, 0, 9, NA, 0/1, not reached
+util_variant__new_Variant_from_LocalizedText, 0, 10, NA, 0/1, not reached
+util_variant__new_Variant_from_NodeClass, 8, 10, 80%, 1/1, partial
+util_variant__new_Variant_from_NodeId, 8, 10, 80%, 1/1, partial
+util_variant__new_Variant_from_QualifiedName, 0, 10, NA, 0/1, not reached
+util_variant__new_Variant_from_Variant, 10, 16, 62%, 1/1, partial
+util_variant__new_Variant_from_double, 0, 10, NA, 0/1, not reached
+util_variant__new_Variant_from_int64, 0, 10, NA, 0/1, not reached
+util_variant__new_Variant_from_uint32, 0, 10, NA, 0/1, not reached
+util_variant__print_SOPC_Variant, 50, 77, 65%, 1/1, partial
+TOTAL (functions), 678, 2094, 32%,
+TOTAL (in perimeter), 9123, 13258, 69%,
+TOTAL (statements), 9123, 29797, 31%,

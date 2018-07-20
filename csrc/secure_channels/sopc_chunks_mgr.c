@@ -1174,6 +1174,25 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
 
         if (result != false && decryptedTextLength <= scConnection->tcpMsgProperties.receiveBufferSize)
         {
+#ifdef __TRUSTINSOFT_DEBUG__
+    // force input preparation
+          static size_t tis_cpt_call = 0; tis_cpt_call++;
+#ifdef __TRUSTINSOFT_HELPER__
+    // force input
+    int tis_force_value (const char * f, const char * id, size_t n, int old);
+    decryptedTextLength = tis_force_value ("SC_Chunks_DecryptMsg",
+                                           "decryptedTextLength",
+                                           tis_cpt_call,
+                                           decryptedTextLength);
+    sequenceNumberPosition = tis_force_value ("SC_Chunks_DecryptMsg",
+                                           "sequenceNumberPosition",
+                                           tis_cpt_call,
+                                           sequenceNumberPosition);
+
+#endif
+            printf ("[tis-input] warning: SC_Chunks_DecryptMsg:sequenceNumberPosition:%zu = %u\n", tis_cpt_call, sequenceNumberPosition);
+            printf ("[tis-input] warning: SC_Chunks_DecryptMsg:decryptedTextLength:%zu = %u\n", tis_cpt_call, decryptedTextLength);
+#endif
             // Allocate a new plain buffer of the size of the non encrypted length + decryptedTextLength
             plainBuffer = SOPC_Buffer_Create(sequenceNumberPosition + decryptedTextLength);
             if (NULL == plainBuffer)
@@ -1347,6 +1366,19 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection, bo
         {
             status = SOPC_CryptoProvider_AsymmetricGetLength_Signature(scConnection->cryptoProvider, publicKey,
                                                                        &signatureSize);
+#ifdef __TRUSTINSOFT_DEBUG__
+    // force input preparation
+          static size_t tis_cpt_call = 0; tis_cpt_call++;
+#ifdef __TRUSTINSOFT_HELPER__
+    // force input
+    int tis_force_value (const char * f, const char * id, size_t n, int old);
+    signatureSize = tis_force_value ("SC_Chunks_VerifyMsgSignature",
+                                     "signatureSize",
+                                     tis_cpt_call,
+                                     signatureSize);
+#endif
+            printf ("[tis-input] warning: SC_Chunks_VerifyMsgSignature:signatureSize:%zu = %u\n", tis_cpt_call, signatureSize);
+#endif
         }
 
         if (status == SOPC_STATUS_OK)
@@ -1806,11 +1838,20 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                 }
                 else
                 {
+#ifdef __TRUSTINSOFT_BUGFIX__
+                      // minor (printf format)
+                    SOPC_Logger_TraceDebug("ChunksMgr: received TCP UA message type SOPC_Msg_Type=%d (epCfgIdx=%" PRIu32
+                                           ", scCfgIdx=%" PRIu32 ")",
+                                           (int)scConnection->chunksCtx.currentMsgType,
+                                           scConnection->serverEndpointConfigIdx,
+                                           scConnection->endpointConnectionConfigIdx);
+#else
                     SOPC_Logger_TraceDebug("ChunksMgr: received TCP UA message type SOPC_Msg_Type=%d (epCfgIdx=%" PRIu32
                                            ", scCfgIdx=%" PRIu32 ")",
                                            scConnection->chunksCtx.currentMsgType,
                                            scConnection->serverEndpointConfigIdx,
                                            scConnection->endpointConnectionConfigIdx);
+#endif
                 }
             }
         } /* END OF OPC UA TCP MESSAGE HEADER TREATMENT */
@@ -2485,8 +2526,64 @@ static bool SOPC_Chunks_EncodePadding(SOPC_SecureConnection* scConnection,
 
     if (result != false && toEncrypt != false)
     {
+#ifdef __TRUSTINSOFT_DEBUG__
+    // force input preparation
+    static size_t tis_cpt_call = 0; tis_cpt_call++;
+#ifdef __TRUSTINSOFT_HELPER__
+    // force input
+    int tis_force_value (const char * f, const char * id, size_t n, int old);
+    *signatureSize = tis_force_value ("SOPC_Chunks_EncodePadding",
+                                      "signatureSize",
+                                      tis_cpt_call,
+                                      *signatureSize);
+#endif
+    printf ("[tis-input] warning: SOPC_Chunks_EncodePadding:signatureSize:%zu = %u\n", tis_cpt_call, *signatureSize);
+
+#endif
+#ifdef __TRUSTINSOFT_DEBUG__
+    // force input preparation
+#ifdef __TRUSTINSOFT_HELPER__
+        // force input
+        cipherBlockSize = tis_force_value ("SOPC_Chunks_EncodePadding",
+                                              "cipherBlockSize",
+                                              tis_cpt_call,
+                                              cipherBlockSize);
+#endif
+            printf ("[tis-input] warning: SOPC_Chunks_EncodePadding:cipherBlockSize:%zu = %u\n", tis_cpt_call, cipherBlockSize);
+#endif
+#ifdef __TRUSTINSOFT_DEBUG__
+    // force input preparation
+#ifdef __TRUSTINSOFT_HELPER__
+        // force input
+        plainTextBlockSize = tis_force_value ("SOPC_Chunks_EncodePadding",
+                                              "plainTextBlockSize",
+                                              tis_cpt_call,
+                                              plainTextBlockSize);
+#endif
+            printf ("[tis-input] warning: SOPC_Chunks_EncodePadding:plainTextBlockSize:%zu = %u\n", tis_cpt_call, plainTextBlockSize);
+#endif
+#ifdef __TRUSTINSOFT_DEBUG__
+#ifdef __TRUSTINSOFT_HELPER__
+        // force input
+        sequenceNumberPosition = tis_force_value ("SOPC_Chunks_EncodePadding",
+                                              "sequenceNumberPosition",
+                                              tis_cpt_call,
+                                              sequenceNumberPosition);
+#endif
+            printf ("[tis-input] warning: SOPC_Chunks_EncodePadding:sequenceNumberPosition:%zu = %u\n", tis_cpt_call, sequenceNumberPosition);
+#endif
         *realPaddingLength =
             SC_Chunks_GetPaddingSize(buffer->length - sequenceNumberPosition, plainTextBlockSize, *signatureSize);
+#ifdef __TRUSTINSOFT_DEBUG__
+#ifdef __TRUSTINSOFT_HELPER__
+        // force input
+        *realPaddingLength = tis_force_value ("SOPC_Chunks_EncodePadding",
+                                              "realPaddingLength",
+                                              tis_cpt_call,
+                                              *realPaddingLength);
+#endif
+            printf ("[tis-input] warning: SOPC_Chunks_EncodePadding:realPaddingLength:%zu = %hu\n", tis_cpt_call, *realPaddingLength);
+#endif
         // Little endian conversion of padding:
         SOPC_EncodeDecode_UInt16(realPaddingLength);
         status = SOPC_Buffer_Write(buffer, (SOPC_Byte*) realPaddingLength, 1);
@@ -2619,6 +2716,19 @@ static bool SC_Chunks_GetEncryptedDataLength(SOPC_SecureConnection* scConnection
                 {
                     result = false;
                 }
+#ifdef __TRUSTINSOFT_DEBUG__
+    // force input preparation
+    static size_t tis_cpt_call = 0; tis_cpt_call++;
+#ifdef __TRUSTINSOFT_HELPER__
+    // force input
+    int tis_force_value (const char * f, const char * id, size_t n, int old);
+    *cipherDataLength = tis_force_value ("SC_Chunks_GetEncryptedDataLength",
+                                         "cipherDataLength",
+                                         tis_cpt_call,
+                                         *cipherDataLength);
+#endif
+            printf ("[tis-input] warning: SC_Chunks_GetEncryptedDataLength:cipherDataLength:%zu = %u\n", tis_cpt_call, *cipherDataLength);
+#endif
             }
 
             SOPC_KeyManager_AsymmetricKey_Free(otherAppPublicKey);
@@ -3507,9 +3617,16 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event, uint32_t el
                 }
                 else
                 {
+#ifdef __TRUSTINSOFT_BUGFIX__
+                      // minor: printf format
+                    SOPC_Logger_TraceError(
+                        "ScChunksMgr: Failed sending message type SOPC_Msg_Type=%d before socket closed scIdx=%" PRIu32,
+                        (int)sendMsgType, eltId);
+#else
                     SOPC_Logger_TraceError(
                         "ScChunksMgr: Failed sending message type SOPC_Msg_Type=%d before socket closed scIdx=%" PRIu32,
                         sendMsgType, eltId);
+#endif
                 }
             }
             else

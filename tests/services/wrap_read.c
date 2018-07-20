@@ -61,17 +61,32 @@ OpcUa_ReadRequest* read_new_read_request(void)
     for (i = 0; i < N_READ_NODES; ++i)
     {
         /* Request for the NodeId (...) */
+#ifdef __TRUSTINSOFT_TMPBUG__
+      // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+        OpcUa_ReadValueId tis_tmp_1 =
+#else
         lrv[2 * i + 0] =
+#endif
             (OpcUa_ReadValueId){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = i + 1000},
                                 .AttributeId = e_aid_NodeId,
                                 .IndexRange = {.Length = 0},
                                 .DataEncoding = {.Name.Length = 0}};
         /* Request for the NodeClass */
+#ifdef __TRUSTINSOFT_TMPBUG__
+        // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+        lrv[2*i+0] = tis_tmp_1;
+        OpcUa_ReadValueId tis_tmp_2 =
+#else
         lrv[2 * i + 1] =
+#endif
             (OpcUa_ReadValueId){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = i + 1000},
                                 .AttributeId = e_aid_NodeClass,
                                 .IndexRange = {.Length = 0},
                                 .DataEncoding = {.Name.Length = 0}};
+#ifdef __TRUSTINSOFT_TMPBUG__
+        // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+        lrv[2*i+1] = tis_tmp_2;
+#endif
     }
 
     /* Note: variables have the last numeric node ids in the @space used for this test*/
@@ -79,18 +94,38 @@ OpcUa_ReadRequest* read_new_read_request(void)
     for (i = 0; i < N_READ_VARS; ++i)
     {
         /* Request for the Value */
+#ifdef __TRUSTINSOFT_TMPBUG__
+        // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+        OpcUa_ReadValueId tis_tmp = (OpcUa_ReadValueId) {
+#else
         lrv[2 * N_READ_NODES + i] = (OpcUa_ReadValueId){
+#endif
             .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = (N_READ_NODES - 1 - i) + 1000},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
             .DataEncoding = {.Name.Length = 0}};
+#ifdef __TRUSTINSOFT_TMPBUG__
+        // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+        lrv[2 * N_READ_NODES + i] = tis_tmp;
+#endif
     }
 
+#ifdef __TRUSTINSOFT_BUGFIX__
+  // fix missing test of malloc return (TODO: report!) + TRUS-1281
+    OpcUa_ReadRequest* pReadReq = malloc (sizeof (OpcUa_ReadRequest));
+    if (NULL == pReadReq)
+        exit(1);
+    OpcUa_ReadRequest tis_tmp = (OpcUa_ReadRequest) { .encodeableType = &OpcUa_ReadRequest_EncodeableType,
+                                                .MaxAge = 0., .TimestampsToReturn = OpcUa_TimestampsToReturn_Neither,
+                                                .NoOfNodesToRead = N_REQUESTS, .NodesToRead = lrv};
+    *pReadReq = tis_tmp;
+#else
     OpcUa_ReadRequest* pReadReq = DESIGNATE_NEW(OpcUa_ReadRequest, .encodeableType = &OpcUa_ReadRequest_EncodeableType,
                                                 .MaxAge = 0., .TimestampsToReturn = OpcUa_TimestampsToReturn_Neither,
                                                 .NoOfNodesToRead = N_REQUESTS, .NodesToRead = lrv);
     if (NULL == pReadReq)
         exit(1);
+#endif
 
     return pReadReq;
 }

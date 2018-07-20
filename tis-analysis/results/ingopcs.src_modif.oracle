@@ -1,0 +1,257 @@
+csrc/configuration/sopc_ieee_check.h:29 | _HELPER__ | // force FLT_ROUNDS to 1 to avoid error below
+csrc/configuration/sopc_toolkit_config.c:29 | _DEBUG__ | #include <stdio.h>
+csrc/configuration/sopc_toolkit_config.c:94 | _DEBUG__ | printf ("TIS: SOPC_Internal_ApplicationEventDispatcher (TIS_AppEventDispatch)\n");
+csrc/crypto/mbedtls/crypto_functions_lib.c:31 | _DEBUG__ | #include <stdio.h>
+csrc/crypto/mbedtls/crypto_functions_lib.c:187 | _DEBUG__ | // prepare tis_force_pData
+csrc/crypto/mbedtls/crypto_functions_lib.c:190 | _HELPER__ | // use tis_force_pData
+csrc/crypto/mbedtls/crypto_functions_lib.c:253 | _DEBUG__ | // force input preparation
+csrc/crypto/mbedtls/crypto_functions_lib.c:256 | _HELPER__ | // force input
+csrc/crypto/mbedtls/crypto_functions_lib.c:280 | _HELPER__ | // use tis_memcpy_bounded instead of memcpy
+csrc/crypto/mbedtls/crypto_functions_lib.c:386 | _HELPER__ | // use tis_memcpy_bounded instead of memcpy
+csrc/crypto/mbedtls/crypto_functions_lib.c:422 | _NO_MBEDTLS__ | // skip the call to mbedtls_pk_rsa which read an object that we don't have
+csrc/crypto/mbedtls/crypto_functions_lib.c:481 | _NO_MBEDTLS__ | // skip the call to mbedtls_pk_rsa which read an object that we don't have
+csrc/crypto/mbedtls/crypto_functions_lib.c:516 | _HELPER__ | // local assertion (cpadro_a_lenMsgCiph)
+csrc/crypto/mbedtls/crypto_functions_lib.c:583 | _NO_MBEDTLS__ | // skip the call to mbedtls_pk_rsa which read an object that we don't have
+csrc/crypto/mbedtls/crypto_functions_lib.c:620 | _NO_MBEDTLS__ | // skip the call to mbedtls_pk_rsa which read an object that we don't have
+csrc/crypto/mbedtls/crypto_functions_lib.c:765 | _DEBUG__ | // force input preparation
+csrc/crypto/mbedtls/crypto_functions_lib.c:768 | _HELPER__ | // force input
+csrc/crypto/mbedtls/crypto_provider_lib.c:131 | _BUGFIX__ | // add a test to ensure *pLenMsg > 0 (in report v1)
+csrc/crypto/mbedtls/key_manager_lib.c:159 | _HELPER__ | // use tis_memcpy_bounded instead of memcpy
+csrc/crypto/mbedtls/key_manager_lib.c:252 | _DEBUG__ | // force input preparation
+csrc/crypto/mbedtls/key_manager_lib.c:255 | _HELPER__ | // force input
+csrc/helpers/sopc_buffer.c:152      | _HELPER__ | // use tis_memcpy_bounded instead of memcpy
+csrc/helpers/sopc_buffer.c:183      | _HELPER__ | // spec for SOPC_Buffer_Read (TODO: remove ?)
+csrc/helpers/sopc_buffer.c:203      | _HELPER__ | // use tis_memcpy_bounded instead of memcpy
+csrc/helpers/sopc_event_dispatcher_manager.c:37 | _NO_MTHREAD__ | // enable external call of the EventDispatcherManager
+csrc/helpers/sopc_event_dispatcher_manager.c:72 | _NO_MTHREAD__ | // just one iteration of the EventDispatcherManager
+csrc/helpers/sopc_event_dispatcher_manager.c:110 | _BUGFIX__ | // check pEventMgr != NULL
+csrc/helpers/sopc_event_timer_manager.c:132 | _HELPER__ | // skip free on the LinkedList for the moment (TODO)
+csrc/helpers/sopc_log_manager.c:68  | _BUGFIX__ | // test SOPC_Time_GetStringOfCurrentTimeUTC result (may be NULL)
+csrc/helpers/sopc_log_manager.c:187 | _HELPER__ | // don't use log functions
+csrc/helpers/sopc_singly_linked_list.c:90 | _HELPER__ | // use tis_variable_split to handle malloc-returns-null in sockets
+csrc/helpers/sopc_singly_linked_list.c:116 | _HELPER__ | // try to remove NULL value
+csrc/helpers/sopc_singly_linked_list.c:123 | _HELPER__ | // try to remove NULL value
+csrc/helpers/sopc_singly_linked_list.c:230 | _HELPER__ | // use tis_variable_split to handle malloc-returns-null in sockets
+csrc/helpers_platform_dep/linux/p_sockets.c:21 | _DEBUG__ | #include <stdio.h>
+csrc/helpers_platform_dep/linux/p_sockets.c:141 | _DEBUG__ | printf ("TIS: Socket_CreateNew = %d\n", *sock);
+csrc/helpers_platform_dep/linux/p_sockets.c:328 | _DEBUG__ | // print 'select' result to inject in stubs (TODO: use tis_force mecanism?)
+csrc/helpers_platform_dep/linux/p_sockets.c:373 | _DEBUG__ | // printf message from socket to build revc stub
+csrc/opcua_types/sopc_builtintypes.c:837 | _HELPER__ | // local annotations
+csrc/opcua_types/sopc_builtintypes.c:989 | _HELPER__ | // spec for SOPC_String_Clear
+csrc/opcua_types/sopc_builtintypes.c:1144 | _HELPER__ | // local annotation
+csrc/opcua_types/sopc_builtintypes.c:1456 | _HELPER__ | // spec for SOPC_NodeId_Clear (-val-use-spec)
+csrc/opcua_types/sopc_builtintypes.c:1651 | _BUGFIX__ | // minor: printf format
+csrc/opcua_types/sopc_builtintypes.c:2153 | _HELPER__ | // assigns for recursive function (SOPC_DiagnosticInfo_Clear)
+csrc/opcua_types/sopc_builtintypes.c:2454 | _HELPER__ | // spec for SOPC_ExtensionObject_Clear (-val-use-spec)
+csrc/opcua_types/sopc_encoder.c:24  | _DEBUG__ | #include <stdio.h>
+csrc/opcua_types/sopc_encoder.c:27  | _HELPER__ | #include <tis_builtin.h>
+csrc/opcua_types/sopc_encoder.c:714 | _DEBUG__ | // force input preparation
+csrc/opcua_types/sopc_encoder.c:717 | _HELPER__ | // force input
+csrc/opcua_types/sopc_encoder.c:820 | _DEBUG__ | // force input preparation
+csrc/opcua_types/sopc_encoder.c:823 | _HELPER__ | // force input
+csrc/opcua_types/sopc_encoder.c:838 | // | int32_t malloc_length = length;
+csrc/opcua_types/sopc_encoder.c:843 | _HELPER__ | // fix allocation size
+csrc/opcua_types/sopc_encoder.c:1140 | _HELPER__ | // split variant->BuiltInTypeId and use watchpoint
+csrc/opcua_types/sopc_encoder.c:1226 | _HELPER__ | // spec for SOPC_NodeId_Read (-val-use-spec)
+csrc/opcua_types/sopc_encoder.c:1434 | _HELPER__ | // spec for SOPC_DiagnosticInfo_Read_Internal (recursive call)
+csrc/opcua_types/sopc_encoder.c:1725 | _HELPER__ | // spec for SOPC_ExtensionObject_Read (-val-use-spec)
+csrc/opcua_types/sopc_encoder.c:1749 | _HELPER__ | // local annotation (split encodingByte)
+csrc/opcua_types/sopc_encoder.c:1826 | _HELPER__ | // cut this branch for tk_client because
+csrc/opcua_types/sopc_encoder.c:2716 | _HELPER__ | // split variant->BuiltInTypeId and use watchpoint
+csrc/opcua_types/sopc_encoder.c:2791 | _HELPER__ | // add break when status != STATUS_OK
+csrc/opcua_types/sopc_encoder.c:3054 | _DEBUG__ | // force input preparation
+csrc/opcua_types/sopc_encoder.c:3057 | _HELPER__ | // force input
+csrc/opcua_types/sopc_encoder.c:3098 | _HELPER__ | // skip SOPC_String_Clear that gives alarms (TODO: put it back!)
+csrc/opcua_types/sopc_types.c:3175  | _HELPER__ | // skip call to SOPC_Clear_Array (tk_client)
+csrc/opcua_types/sopc_types.c:3273  | _HELPER__ | // skip OpcUa_ResponseHeader_Clear that gives alarms (TODO: put it back!)
+csrc/secure_channels/sopc_chunks_mgr.c:1178 | _DEBUG__ | // force input preparation
+csrc/secure_channels/sopc_chunks_mgr.c:1181 | _HELPER__ | // force input
+csrc/secure_channels/sopc_chunks_mgr.c:1370 | _DEBUG__ | // force input preparation
+csrc/secure_channels/sopc_chunks_mgr.c:1373 | _HELPER__ | // force input
+csrc/secure_channels/sopc_chunks_mgr.c:1842 | _BUGFIX__ | // minor (printf format)
+csrc/secure_channels/sopc_chunks_mgr.c:2530 | _DEBUG__ | // force input preparation
+csrc/secure_channels/sopc_chunks_mgr.c:2533 | _HELPER__ | // force input
+csrc/secure_channels/sopc_chunks_mgr.c:2544 | _DEBUG__ | // force input preparation
+csrc/secure_channels/sopc_chunks_mgr.c:2546 | _HELPER__ | // force input
+csrc/secure_channels/sopc_chunks_mgr.c:2555 | _DEBUG__ | // force input preparation
+csrc/secure_channels/sopc_chunks_mgr.c:2557 | _HELPER__ | // force input
+csrc/secure_channels/sopc_chunks_mgr.c:2567 | _HELPER__ | // force input
+csrc/secure_channels/sopc_chunks_mgr.c:2579 | _HELPER__ | // force input
+csrc/secure_channels/sopc_chunks_mgr.c:2720 | _DEBUG__ | // force input preparation
+csrc/secure_channels/sopc_chunks_mgr.c:2723 | _HELPER__ | // force input
+csrc/secure_channels/sopc_chunks_mgr.c:3621 | _BUGFIX__ | // minor: printf format
+csrc/secure_channels/sopc_secure_channels_api.c:23 | _DEBUG__ | #include <stdio.h>
+csrc/secure_channels/sopc_secure_channels_api.c:35 | _NO_MTHREAD__ | // TIS_SecureChannelsEventDispatch function to call EventDispatcherManager
+csrc/secure_channels/sopc_secure_channels_api.c:50 | _DEBUG__ | printf ("TIS: SOPC_SecureChannelsEventMgr_Dispatcher "
+csrc/services/b2c/message_out_bs.c:145 | _BUGFIX__ | // remove const because the variable is modified in SOPC_Encodeable_Delete
+csrc/services/b2c/message_out_bs.c:169 | _BUGFIX__ | // remove const because the variable is modified in SOPC_Encodeable_Delete
+csrc/services/b2c/util_variant.c:210 | _BUGFIX__ | // minor fix (printf format)
+csrc/services/bgenc/message_out_bs.h:62 | _BUGFIX__ | // remove const because the variable is modified in SOPC_Encodeable_Delete
+csrc/services/sopc_services_api.c:43 | _NO_MTHREAD__ | // TIS_ServicesEventDispatch and TIS_AppEventDispatch
+csrc/services/sopc_services_api.c:87 | _DEBUG__ | printf ("TIS: SOPC_ServicesEventDispatcher (TIS_ServicesEventDispatch)\n");
+csrc/services/sopc_services_api.c:432 | _NO_MTHREAD__ | // use spec for SOPC_Services_PreClear in order to avoid infinite loop
+csrc/sockets/sopc_sockets_api.c:22  | _DEBUG__ | #include <stdio.h>
+csrc/sockets/sopc_sockets_api.c:33  | _NO_MTHREAD__ | // TIS_Sockets_Dispatch function to call EventDispatcherManager
+csrc/sockets/sopc_sockets_api.c:51  | _DEBUG__ | printf ("TIS:: SOPC_Sockets_EnqueueEvent: id=%u - SOPC_Sockets_InputEvent=%d\n", id, (int)socketEvent);
+csrc/sockets/sopc_sockets_event_mgr.c:385 | _DEBUG__ | printf ("TIS: TreatWriteBuffer:Dequeue (from writeQueue)\n");
+csrc/sockets/sopc_sockets_event_mgr.c:450 | _DEBUG__ | printf ("TIS: SOPC_SocketsEventMgr_Dispatcher "
+csrc/sockets/sopc_sockets_event_mgr.c:469 | _DEBUG__ | printf ("TIS: SecureChannels_Enqueue SOCKET_LISTENER_OPENED\n");
+csrc/sockets/sopc_sockets_event_mgr.c:617 | _DEBUG__ | printf ("TIS: SecureChannels_Enqueue SOCKET_LISTENER_CONNECTION\n");
+csrc/sockets/sopc_sockets_event_mgr.c:669 | _DEBUG__ | printf ("TIS: SecureChannels_Enqueue SOCKET_CONNECTION\n");
+csrc/sockets/sopc_sockets_event_mgr.c:733 | _DEBUG__ | printf ("TIS: SecureChannels_Enqueue SOCKET_RCV_BYTES\n");
+csrc/sockets/sopc_sockets_network_event_mgr.c:24 | _DEBUG__ | #include <stdio.h>
+csrc/sockets/sopc_sockets_network_event_mgr.c:60 | _NO_MTHREAD__ | // rm 'static' to SOPC_SocketsNetworkEventMgr_TreatSocketsEvents
+csrc/sockets/sopc_sockets_network_event_mgr.c:79 | _DEBUG__ | printf ("TIS: TreatSocketsEvents: begin\n");
+csrc/sockets/sopc_sockets_network_event_mgr.c:134 | _DEBUG__ | printf ("TIS: TreatSocketsEvents: nbReady = %d\n", nbReady);
+csrc/sockets/sopc_sockets_network_event_mgr.c:142 | _DEBUG__ | printf ("TIS: TreatSocketsEvents: process %u - sock=%d\n", idx, uaSock->sock);
+csrc/sockets/sopc_sockets_network_event_mgr.c:148 | _DEBUG__ | printf ("TIS: TreatSocketsEvents: state(%u) = %d (SOCKET_STATE_CONNECTING)\n", idx, (int)uaSock->state);
+csrc/sockets/sopc_sockets_network_event_mgr.c:158 | _DEBUG__ | printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_CONNECTION_ATTEMPT_FAILED for %u\n", idx);
+csrc/sockets/sopc_sockets_network_event_mgr.c:166 | _DEBUG__ | printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_CONNECTED for %u\n", idx);
+csrc/sockets/sopc_sockets_network_event_mgr.c:179 | _DEBUG__ | printf ("TIS: TreatSocketsEvents: state(%u) = %d (and in readSet)\n", idx, (int)uaSock->state);
+csrc/sockets/sopc_sockets_network_event_mgr.c:184 | _DEBUG__ | printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_READY_TO_READ for %u\n", idx);
+csrc/sockets/sopc_sockets_network_event_mgr.c:191 | _DEBUG__ | printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_LISTENER_CONNECTION_ATTEMPT for %u\n", idx);
+csrc/sockets/sopc_sockets_network_event_mgr.c:199 | _DEBUG__ | printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_CLOSE(1) for %u\n", idx);
+csrc/sockets/sopc_sockets_network_event_mgr.c:211 | _DEBUG__ | printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_READY_TO_WRITE for %u\n", idx);
+csrc/sockets/sopc_sockets_network_event_mgr.c:218 | _DEBUG__ | printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_CLOSE(2) for %u\n", idx);
+csrc/sockets/sopc_sockets_network_event_mgr.c:231 | _DEBUG__ | printf ("TIS: TreatSocketsEvents -> enqueue INT_SOCKET_CLOSE(3) for %u\n", idx);
+csrc/sockets/sopc_sockets_network_event_mgr.c:243 | _DEBUG__ | printf ("TIS: TreatSocketsEvents: end\n");
+csrc/sockets/sopc_sockets_network_event_mgr.c:272 | _DEBUG__ | printf ("TIS: SOPC_Thread_Create to call SOPC_SocketsNetworkEventMgr_CyclicThreadLoop\n");
+tests/helpers/check_crypto_B256.c:676 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256.c:685 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256.c:793 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256.c:1025 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256.c:1035 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256.c:1143 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256.c:1151 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256.c:1228 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256.c:1288 | _SKIP_CRYPTO_TESTS__ | // skip 'test_cert_thumbprint_B256' because
+tests/helpers/check_crypto_B256.c:1295 | _SKIP_CRYPTO_TESTS__ | // skip 'test_cert_copyder_B256' because
+tests/helpers/check_crypto_B256S256.c:671 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256S256.c:680 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256S256.c:788 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256S256.c:1046 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256S256.c:1056 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256S256.c:1164 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256S256.c:1172 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256S256.c:1249 | _PATCH__ | // cherry-pick 028f9048 from gitlab master (new certiticate)
+tests/helpers/check_crypto_B256S256.c:1309 | _SKIP_CRYPTO_TESTS__ | // skip 'test_cert_thumbprint_B256S256' because
+tests/helpers/check_crypto_B256S256.c:1316 | _SKIP_CRYPTO_TESTS__ | // skip 'test_cert_copyder_B256S256' because
+tests/helpers/check_crypto_None.c:760 | _SKIP_CRYPTO_TESTS__ | // skip 'test_cert_copyder_None' test analysis, because
+tests/helpers/check_helpers.c:39    | _DEBUG__ | srunner_set_fork_status (sr, CK_NOFORK);
+tests/helpers/check_helpers.c:45    | _HELPER__ | // skip threads, logger and time tests
+tests/helpers/check_tools.c:114     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:153     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:175     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:194     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:215     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:240     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:261     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:301     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:375     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:394     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:422     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:487     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:509     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:560     | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:1099    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:1112    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:1130    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:1143    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:1161    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:1174    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:1194    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:1207    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:1581    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:2007    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:2072    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:2198    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:2323    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:2427    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:2860    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:2900    | _BUGFIX__ | // check malloc != NULL
+tests/helpers/check_tools.c:3230    | _BUGFIX__ | // check status ok (ie. malloc != NULL)
+tests/helpers/check_tools.c:3276    | _HELPER__ | // skip threads tests
+tests/helpers/hexlify.c:26          | _HELPER__ | /*@ ensures hxlf_e_init: \initialized (dst + (0 .. 2*n - 1));
+tests/helpers/hexlify.c:39          | _HELPER__ | //@ loop invariant hxlf_li_init: \initialized (dst + (0 .. 2*i - 1));
+tests/secure_channels/test_secure_channels_client.c:40 | _NO_MTHREAD__ | // declare function to simulate threads activation
+tests/secure_channels/test_secure_channels_client.c:285 | _DEBUG__ | printf("Stub_Client:TIS: start loop 1\n");
+tests/secure_channels/test_secure_channels_client.c:291 | _NO_MTHREAD__ | // dummy activation
+tests/secure_channels/test_secure_channels_client.c:319 | _DEBUG__ | printf("Stub_Client:TIS: end of loop 1\n");
+tests/secure_channels/test_secure_channels_client.c:342 | _BUGFIX__ | // minor: fix printf format
+tests/secure_channels/test_secure_channels_client.c:400 | _DEBUG__ | printf("Stub_Client:TIS: start loop 2\n");
+tests/secure_channels/test_secure_channels_client.c:406 | _NO_MTHREAD__ | // dummy activation
+tests/secure_channels/test_secure_channels_client.c:424 | _DEBUG__ | printf("Stub_Client:TIS: end of loop 2\n");
+tests/secure_channels/test_secure_channels_client.c:488 | _DEBUG__ | printf("Stub_Client:TIS: start loop 3\n");
+tests/secure_channels/test_secure_channels_client.c:494 | _NO_MTHREAD__ | // dummy activation
+tests/secure_channels/test_secure_channels_client.c:510 | _DEBUG__ | printf("Stub_Client:TIS: end of loop 3\n");
+tests/secure_channels/test_secure_channels_client.c:532 | _BUGFIX__ | // minor: printf format
+tests/secure_channels/test_secure_channels_client.c:549 | _HELPER__ | // skip SOPC_Toolkit_Clear
+tests/services/testlib_read_response.c:100 | _BUGFIX__ | // minor: fix printf format
+tests/services/testlib_write.c:68   | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/testlib_write.c:80   | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/testlib_write.c:89   | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/testlib_write.c:102  | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/testlib_write.c:111  | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/testlib_write.c:124  | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/testlib_write.c:141  | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/testlib_write.c:154  | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/testlib_write.c:171  | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/testlib_write.c:184  | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/testlib_write.c:201  | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/testlib_write.c:214  | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/testlib_write.c:220  | _BUGFIX__ | // fix missing test of malloc return (TODO: report!) + TRUS-1281
+tests/services/testlib_write.c:296  | _BUGFIX__ | // initialize sc to a dummy value to avoid alarm (+minor: printf)
+tests/services/testlib_write.c:332  | _BUGFIX__ | // initialize cmp to a dummy value to avoid alarm
+tests/services/testlib_write.c:338  | _BUGFIX__ | //minor (printf format)
+tests/services/toolkit_test_client.c:173 | _NO_MTHREAD__ | // declare function to simulate threads activation
+tests/services/toolkit_test_client.c:377 | _DEBUG__ | printf("TIS:Test_Client_Toolkit: start loop 1\n");
+tests/services/toolkit_test_client.c:385 | _NO_MTHREAD__ | TIS_ServicesEventDispatch (); // APP_TO_SE_ACTIVATE_SESSION
+tests/services/toolkit_test_client.c:421 | _DEBUG__ | printf("TIS:Test_Client_Toolkit: end loop 1\n");
+tests/services/toolkit_test_client.c:447 | _DEBUG__ | printf("TIS:Test_Client_Toolkit: start loop 2\n");
+tests/services/toolkit_test_client.c:456 | _NO_MTHREAD__ | TIS_ServicesEventDispatch(); // SE_TO_SE_ACTIVATE_SESSION
+tests/services/toolkit_test_client.c:474 | _DEBUG__ | printf("TIS:Test_Client_Toolkit: end loop 2\n");
+tests/services/toolkit_test_client.c:507 | _DEBUG__ | printf("TIS:Test_Client_Toolkit: start loop 3\n");
+tests/services/toolkit_test_client.c:515 | _NO_MTHREAD__ | // dummy response
+tests/services/toolkit_test_client.c:533 | _DEBUG__ | printf("TIS:Test_Client_Toolkit: end loop 3\n");
+tests/services/toolkit_test_client.c:571 | _NO_MTHREAD__ | // dummy response
+tests/services/toolkit_test_client.c:608 | _NO_MTHREAD__ | // dummy response
+tests/services/toolkit_test_client.c:651 | _NO_MTHREAD__ | // dummy 'sessionsClosed'
+tests/services/wrap_read.c:65       | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/wrap_read.c:76       | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/wrap_read.c:87       | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/wrap_read.c:98       | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/wrap_read.c:108      | _TMPBUG__ | // avoid separated alarm when initializing a struct (maybe TRUS-1281?)
+tests/services/wrap_read.c:114      | _BUGFIX__ | // fix missing test of malloc return (TODO: report!) + TRUS-1281
+tests/sockets/check_sockets.c:59    | _BUGFIX__ | ck_assert(accBuffer != NULL);
+tests/sockets/check_sockets.c:65    | _NO_MTHREAD__ | // call TIS_Sockets_Dispatch and TreatSocketsEvents
+tests/sockets/check_sockets.c:72    | _DEBUG__ | printf ("TIS: call EnqueueEvent: SOCKET_CREATE_SERVER(%d) -> endpointDescConfigId(%u)\n", SOCKET_CREATE_SERVER, endpointDescConfigId);
+tests/sockets/check_sockets.c:80    | _NO_MTHREAD__ | // call TIS_Sockets_Dispatch and TreatSocketsEvents
+tests/sockets/check_sockets.c:87    | _DEBUG__ | printf ("TIS: Dequeue -> id=%u - event=%d\n", scEventParams->eltId, scEventParams->event);
+tests/sockets/check_sockets.c:97    | _DEBUG__ | printf ("TIS: SOCKET_LISTENER_OPENED step OK\n");
+tests/sockets/check_sockets.c:103   | _DEBUG__ | printf ("TIS: call EnqueueEvent: SOCKET_CREATE_CLIENT(%d) -> clientSecureChannelConnectionId(%u)\n", SOCKET_CREATE_CLIENT, clientSecureChannelConnectionId);
+tests/sockets/check_sockets.c:110   | _NO_MTHREAD__ | // call TIS_Sockets_Dispatch and TreatSocketsEvents
+tests/sockets/check_sockets.c:119   | _DEBUG__ | printf ("TIS: Dequeue -> id=%u - event=%d\n", scEventParams->eltId, scEventParams->event);
+tests/sockets/check_sockets.c:131   | _DEBUG__ | printf ("TIS: SOCKET_LISTENER_CONNECTION step OK\n");
+tests/sockets/check_sockets.c:134   | _NO_MTHREAD__ | // call TIS_Sockets_Dispatch and TreatSocketsEvents
+tests/sockets/check_sockets.c:141   | _DEBUG__ | printf ("TIS: Dequeue -> id=%u - event=%d (expected = %d)\n", scEventParams->eltId, scEventParams->event, SOCKET_CONNECTION);
+tests/sockets/check_sockets.c:152   | _DEBUG__ | printf ("TIS: SOCKET_CONNECTION step OK\n");
+tests/sockets/check_sockets.c:160   | _DEBUG__ | printf ("TIS: call EnqueueEvent: SOCKET_ACCEPTED_CONNECTION(%d) -> serverSocketIdx(%u)\n", SOCKET_ACCEPTED_CONNECTION, serverSocketIdx);
+tests/sockets/check_sockets.c:164   | _NO_MTHREAD__ | // call TIS_Sockets_Dispatch and TreatSocketsEvents
+tests/sockets/check_sockets.c:175   | _DEBUG__ | printf ("TIS: call EnqueueEvent: SOCKET_WRITE(%d) -> clientSocketIdx(%u)\n", SOCKET_WRITE, clientSocketIdx);
+tests/sockets/check_sockets.c:179   | _NO_MTHREAD__ | // call TIS_Sockets_Dispatch and TreatSocketsEvents
+tests/sockets/check_sockets.c:193   | _NO_MTHREAD__ | // call TIS_Sockets_Dispatch and TreatSocketsEvents
+tests/sockets/check_sockets.c:198   | _DEBUG__ | printf ("TIS: Dequeue -> id=%u - event=%d\n", scEventParams->eltId, scEventParams->event);
+tests/sockets/check_sockets.c:209   | _DEBUG__ | printf ("TIS: SOCKET_RCV_BYTES step(1-%d) OK\n", attempts);
+tests/sockets/check_sockets.c:241   | _DEBUG__ | printf ("TIS: call EnqueueEvent: SOCKET_WRITE(%d) -> clientSocketIdx(%u)\n", SOCKET_WRITE, clientSocketIdx);
+tests/sockets/check_sockets.c:245   | _NO_MTHREAD__ | // call TIS_Sockets_Dispatch and TreatSocketsEvents
+tests/sockets/check_sockets.c:261   | _DEBUG__ | printf ("TIS: Dequeue -> id=%u - event=%d\n", scEventParams->eltId, scEventParams->event);
+tests/sockets/check_sockets.c:272   | _DEBUG__ | printf ("TIS: SOCKET_RCV_BYTES step(2-%d) OK\n", attempts);
+tests/sockets/check_sockets.c:296   | _DEBUG__ | printf ("TIS: received buffer OK\n");
+tests/sockets/check_sockets.c:299   | _HELPER__ | // set slevel to 0 to allocate only one base.
+tests/sockets/check_sockets.c:308   | _HELPER__ | // reset slevel
+tests/sockets/check_sockets.c:361   | _DEBUG__ | printf ("TIS: call EnqueueEvent: SOCKET_CLOSE(%d) -> clientSocketIdx(%u)\n", SOCKET_CLOSE, clientSocketIdx);
+tests/sockets/check_sockets.c:365   | _NO_MTHREAD__ | // call TIS_Sockets_Dispatch and TreatSocketsEvents
+tests/sockets/check_sockets.c:375   | _DEBUG__ | printf ("TIS: Dequeue -> id=%u - event=%d\n", scEventParams->eltId, scEventParams->event);
+tests/sockets/check_sockets.c:386   | _DEBUG__ | printf ("TIS: SOCKET_FAILURE step OK\n");
+tests/sockets/stubs/stub_sockets_sopc_secure_channels_api.c:23 | _DEBUG__ | #include <stdio.h>
+tests/sockets/stubs/stub_sockets_sopc_secure_channels_api.c:44 | _DEBUG__ | printf ("TIS: SOPC_SecureChannels_EnqueueEvent(stub): id=%u - SOPC_SecureChannels_InputEvent=%d (queue=%p)\n", id, (int)scEvent, (void*)secureChannelsEvents);

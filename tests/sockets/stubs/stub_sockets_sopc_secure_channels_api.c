@@ -19,6 +19,9 @@
 #include "sopc_secure_channels_api.h"
 
 #include <assert.h>
+#ifdef __TRUSTINSOFT_DEBUG__
+#include <stdio.h>
+#endif
 #include <stdlib.h>
 
 SOPC_AsyncQueue* secureChannelsEvents = NULL;
@@ -37,6 +40,9 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
     scParams->auxParam = auxParam;
 
     assert(SOPC_STATUS_OK == SOPC_AsyncQueue_BlockingEnqueue(secureChannelsEvents, (void*) scParams));
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: SOPC_SecureChannels_EnqueueEvent(stub): id=%u - SOPC_SecureChannels_InputEvent=%d (queue=%p)\n", id, (int)scEvent, (void*)secureChannelsEvents);
+#endif
 }
 
 void SOPC_SecureChannels_Initialize()

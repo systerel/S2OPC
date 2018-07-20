@@ -1,0 +1,129 @@
+VERIF OK: no function with neither code nor specification
+VERIF OK: no degeneration(s)
+VERIF OK: no other non-terminating statements
+VERIF OK: no message(s) in the log file (excluding 
+	"found two contracts for fcntl"
+	"def'n of func gettimeofday"
+	)
+VERIF OK: no generated alarms
+VERIF OK: no hypotheses to verify
+VERIF OK: no functions with no code, but specifications
+VERIF OK: no functions with code, but use specification
+VERIF INFO: 12 used libc and buitins from tis-analyzer
+TIS_KERNEL_SHARE/libc/ctype.c   isupper  body
+TIS_KERNEL_SHARE/libc/ctype.c   tolower  body
+TIS_KERNEL_SHARE/libc/stdio.h   sprintf  built-in
+TIS_KERNEL_SHARE/libc/stdio.h   sscanf   built-in
+TIS_KERNEL_SHARE/libc/stdlib.h  free     built-in
+TIS_KERNEL_SHARE/libc/stdlib.h  malloc   built-in
+TIS_KERNEL_SHARE/libc/string.h  memcmp   built-in
+TIS_KERNEL_SHARE/libc/string.h  memcpy   built-in
+TIS_KERNEL_SHARE/libc/string.h  memset   built-in
+TIS_KERNEL_SHARE/libc/string.h  strcmp   built-in
+TIS_KERNEL_SHARE/libc/string.h  strlen   built-in
+TIS_KERNEL_SHARE/libc/string.h  strncmp  built-in
+VERIF INFO: 101 useless files
+File                                                                    #DefinedFun  #Reachable  #DefinedVar
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/aes.c                         14           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/arc4.c                        6            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/asn1parse.c                   14           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/asn1write.c                   14           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/base64.c                      3            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/bignum.c                      56           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/blowfish.c                    11           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/camellia.c                    11           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ccm.c                         8            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/cipher.c                      29           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/cipher_wrap.c                 49           0           2
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ctr_drbg.c                    18           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/debug.c                       10           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/des.c                         22           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/dhm.c                         15           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ecdh.c                        10           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ecdsa.c                       12           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ecp.c                         53           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ecp_curves.c                  20           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/entropy.c                     13           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/entropy_poll.c                2            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/error.c                       1            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/gcm.c                         12           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/hmac_drbg.c                   16           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/md.c                          23           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/md5.c                         10           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/md_wrap.c                     41           0           7
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/net.c                         13           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/oid.c                         24           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/pem.c                         10           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/pk.c                          18           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/pk_wrap.c                     32           0           5
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/pkcs12.c                      7            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/pkcs5.c                       4            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/pkparse.c                     19           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/pkwrite.c                     8            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ripemd160.c                   10           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/rsa.c                         27           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/sha1.c                        10           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/sha256.c                      10           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/sha512.c                      10           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ssl_cache.c                   6            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ssl_ciphersuites.c            8            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ssl_cli.c                     38           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ssl_cookie.c                  8            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ssl_srv.c                     39           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ssl_ticket.c                  11           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/ssl_tls.c                     157          0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/timing.c                      8            0           1
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/version.c                     3            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/version_features.c            1            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/x509.c                        21           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/x509_create.c                 8            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/x509_crl.c                    11           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/x509_crt.c                    39           0           3
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/x509_csr.c                    8            0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/x509write_crt.c               20           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/x509write_csr.c               11           0           0
+INGOPCS-Frama-C/lib/mbedtls-2.3.0/library/xtea.c                        7            0           0
+INGOPCS-Frama-C/src/API/sopc_channel.c                                  16           0           0
+INGOPCS-Frama-C/src/API/sopc_clientapi.c                                74           0           0
+INGOPCS-Frama-C/src/API/sopc_encodeable.c                               3            0           0
+INGOPCS-Frama-C/src/API/sopc_endpoint.c                                 17           0           0
+INGOPCS-Frama-C/src/API/sopc_run.c                                      1            0           0
+INGOPCS-Frama-C/src/API/sopc_serverapi.c                                75           0           37
+INGOPCS-Frama-C/src/API/sopc_stack_config.c                             9            0           2
+INGOPCS-Frama-C/src/APIwrappers/wrapper_builtintypes.c                  47           0           0
+INGOPCS-Frama-C/src/APIwrappers/wrapper_channel.c                       9            0           0
+INGOPCS-Frama-C/src/APIwrappers/wrapper_encodeableobject.c              3            0           0
+INGOPCS-Frama-C/src/APIwrappers/wrapper_endpoint.c                      18           0           0
+INGOPCS-Frama-C/src/APIwrappers/wrapper_proxystub.c                     8            0           2
+INGOPCS-Frama-C/src/APIwrappers/wrapper_sockets.c                       17           0           0
+INGOPCS-Frama-C/src/APIwrappers/wrapper_string.c                        17           0           0
+INGOPCS-Frama-C/src/core_tools/sopc_sockets.c                           19           0           2
+INGOPCS-Frama-C/src/core_types/sopc_encodeabletype.c                    1            0           0
+INGOPCS-Frama-C/src/core_types/sopc_types.c                             868          0           217
+INGOPCS-Frama-C/src/crypto/crypto_profiles.c                            1            0           0
+INGOPCS-Frama-C/src/crypto/crypto_provider.c                            34           0           0
+INGOPCS-Frama-C/src/crypto/key_manager.c                                1            0           0
+INGOPCS-Frama-C/src/crypto/key_sets.c                                   2            0           0
+INGOPCS-Frama-C/src/crypto/mbedtls/crypto_functions_lib.c               22           0           0
+INGOPCS-Frama-C/src/crypto/mbedtls/crypto_provider_lib.c                5            0           0
+INGOPCS-Frama-C/src/crypto/mbedtls/key_manager_lib.c                    10           0           0
+INGOPCS-Frama-C/src/crypto/mbedtls/pki_stack.c                          3            0           0
+INGOPCS-Frama-C/src/crypto/secret_buffer.c                              6            0           0
+INGOPCS-Frama-C/src/platforms/linux/p_sockets.c                         19           0           0
+INGOPCS-Frama-C/src/platforms/linux/p_threads.c                         7            0           0
+INGOPCS-Frama-C/src/stack_core/sopc_secure_channel_client_connection.c  17           0           0
+INGOPCS-Frama-C/src/stack_core/sopc_secure_channel_low_level.c          44           0           0
+INGOPCS-Frama-C/src/stack_core/sopc_secure_channel_server_endpoint.c    18           0           0
+INGOPCS-Frama-C/src/stack_core/sopc_tcp_ua_connection.c                 16           0           0
+INGOPCS-Frama-C/src/stack_core/sopc_tcp_ua_listener.c                   5            0           0
+INGOPCS-Frama-C/test/ingopcs/check_crypto_B256.c                        30           0           0
+INGOPCS-Frama-C/test/ingopcs/check_crypto_B256S256.c                    30           0           0
+INGOPCS-Frama-C/test/ingopcs/check_crypto_None.c                        30           0           0
+INGOPCS-Frama-C/test/ingopcs/check_threads.c                            5            0           0
+TIS_HOME/share/tis-interpreter/common_env.c                             5            0           0
+TIS_HOME/share/tis-interpreter/common_missing.c                         8            0           1
+TIS_HOME/share/tis-interpreter/common_resource.c                        2            0           0
+TIS_HOME/share/tis-interpreter/common_time.c                            6            0           0
+VERIF INFO: Coverage (without libc functions):
+Functions: 151/3003 (5.0%) - All statements: 3804/65010 (5.9%) - Statements in reachable functions: 3804/4875 (78.0%)
+VERIF INFO: Did not lose precision.

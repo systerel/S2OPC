@@ -39,6 +39,16 @@
 static SOPC_EventDispatcherManager* servicesEventDispatcherMgr = NULL;
 
 static SOPC_EventDispatcherManager* applicationEventDispatcherMgr = NULL;
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+// TIS_ServicesEventDispatch and TIS_AppEventDispatch
+void* SOPC_ThreadStartEventDispatcherManager(void* pEventMgr);
+void TIS_ServicesEventDispatch (void) {
+  SOPC_ThreadStartEventDispatcherManager (servicesEventDispatcherMgr);
+}
+void TIS_AppEventDispatch (void) {
+  SOPC_ThreadStartEventDispatcherManager (applicationEventDispatcherMgr);
+}
+#endif
 
 // Structure used to close all connections in a synchronous way
 // (necessary on toolkit clear)
@@ -73,6 +83,9 @@ static void SOPC_Internal_AllClientSecureChannelsDisconnected(void)
 
 void SOPC_ServicesEventDispatcher(int32_t scEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
+#ifdef __TRUSTINSOFT_DEBUG__
+  printf ("TIS: SOPC_ServicesEventDispatcher (TIS_ServicesEventDispatch)\n");
+#endif
     SOPC_Services_Event event = (SOPC_Services_Event) scEvent;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Endpoint_Config* epConfig = NULL;
@@ -415,6 +428,10 @@ void SOPC_Services_ToolkitConfigured()
     INITIALISATION();
 }
 
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+// use spec for SOPC_Services_PreClear in order to avoid infinite loop
+//@ assigns closeAllConnectionsSync \from \nothing;
+#endif
 void SOPC_Services_PreClear()
 {
     Mutex_Lock(&closeAllConnectionsSync.mutex);

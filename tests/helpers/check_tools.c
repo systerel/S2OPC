@@ -110,6 +110,10 @@ START_TEST(test_buffer_create)
     // Test initialization
     //// Test nominal case
     buf = malloc(sizeof(SOPC_Buffer));
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+#endif
     status = SOPC_Buffer_Init(buf, 100);
     ck_assert(status == 0);
     ck_assert(buf->data != NULL);
@@ -145,6 +149,10 @@ START_TEST(test_buffer_read_write)
     buf = SOPC_Buffer_Create(10);
     status = SOPC_Buffer_Write(buf, data, 3);
     ck_assert(status == 0);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+#endif
     ck_assert(buf->length == 3);
     ck_assert(buf->position == 3);
     ck_assert(buf->data[0] == 0x00);
@@ -163,6 +171,10 @@ START_TEST(test_buffer_read_write)
 
     //// Test degraded cases
     buf = malloc(sizeof(SOPC_Buffer));
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+#endif
     memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
     status = SOPC_Buffer_Write(buf, data, 3);
@@ -178,6 +190,10 @@ START_TEST(test_buffer_read_write)
     ////// NULL data pointer
     status = SOPC_Buffer_Write(buf, NULL, 3);
     ck_assert(status != SOPC_STATUS_OK);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+#endif
     ck_assert(buf->length == 0);
     ck_assert(buf->position == 0);
 
@@ -195,6 +211,10 @@ START_TEST(test_buffer_read_write)
     status = SOPC_Buffer_Write(buf, data, 4);
     // Reset position for reading content written
     status = SOPC_Buffer_SetPosition(buf, 0);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+#endif
     ck_assert(buf->position == 0);
     ck_assert(buf->length == 4);
     status = SOPC_Buffer_Read(readData, buf, 2);
@@ -216,6 +236,10 @@ START_TEST(test_buffer_read_write)
 
     //// Test degraded cases
     buf = malloc(sizeof(SOPC_Buffer));
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+#endif
     memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
     status = SOPC_Buffer_Read(readData, buf, 3);
@@ -233,6 +257,10 @@ START_TEST(test_buffer_read_write)
     ////// NULL data pointer
     status = SOPC_Buffer_Read(NULL, buf, 3);
     ck_assert(status != SOPC_STATUS_OK);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+#endif
     ck_assert(buf->length == 0);
     ck_assert(buf->position == 0);
 
@@ -269,6 +297,11 @@ START_TEST(test_buffer_copy)
     buf2 = SOPC_Buffer_Create(5);
     status = SOPC_Buffer_Write(buf, data, 4);
     status = SOPC_Buffer_Copy(buf2, buf);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+    ck_assert(NULL != buf2);
+#endif
     ck_assert(status == SOPC_STATUS_OK);
     ck_assert(buf2->length == 4);
     ck_assert(buf2->position == 4);
@@ -338,6 +371,10 @@ START_TEST(test_buffer_copy)
 
     /////// Non allocated buffer data
     buf = malloc(sizeof(SOPC_Buffer));
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+#endif
     memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
     status = SOPC_Buffer_Copy(buf2, buf);
@@ -353,6 +390,11 @@ START_TEST(test_buffer_copy)
 
     /////// Non allocated buffer data
     buf2 = malloc(sizeof(SOPC_Buffer));
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+    ck_assert(NULL != buf2);
+#endif
     memset(buf2, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
     status = SOPC_Buffer_Copy(buf2, buf);
@@ -376,6 +418,10 @@ START_TEST(test_buffer_reset)
     buf = SOPC_Buffer_Create(10);
     status = SOPC_Buffer_Write(buf, data, 4);
     SOPC_Buffer_Reset(buf);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+#endif
     ck_assert(buf->length == 0);
     ck_assert(buf->position == 0);
     ck_assert(buf->data[0] == 0x00);
@@ -437,6 +483,10 @@ START_TEST(test_buffer_reset)
 
     /////// Non allocated buffer data
     buf = malloc(sizeof(SOPC_Buffer));
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+#endif
     memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
     status = SOPC_Buffer_ResetAfterPosition(buf, 2);
@@ -455,6 +505,10 @@ START_TEST(test_buffer_set_properties)
     // Test copy
     //// Test nominal cases
     buf = SOPC_Buffer_Create(10);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+#endif
     status = SOPC_Buffer_Write(buf, data, 4);
     status = SOPC_Buffer_SetPosition(buf, 2);
     ck_assert(status == SOPC_STATUS_OK);
@@ -502,6 +556,10 @@ START_TEST(test_buffer_set_properties)
 
     /////// Non allocated buffer data
     buf = malloc(sizeof(SOPC_Buffer));
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buf);
+#endif
     memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
     status = SOPC_Buffer_SetPosition(buf, 0);
@@ -1037,6 +1095,10 @@ START_TEST(test_string_nodeid)
     ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
     ck_assert(0 == cmp);
     sNid = SOPC_NodeId_ToCString(pNid);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != sNid);
+#endif
     ck_assert(strncmp(sNid, "i=" NODEID_IS, strlen("i=" NODEID_IS)) == 0);
     free(sNid);
     SOPC_NodeId_Clear(pNid);
@@ -1046,6 +1108,10 @@ START_TEST(test_string_nodeid)
     ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
     ck_assert(0 == cmp);
     sNid = SOPC_NodeId_ToCString(pNid);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != sNid);
+#endif
     ck_assert(strncmp(sNid, "ns=" NODEID_NSS ";i=" NODEID_IS, strlen("ns=" NODEID_NSS ";i=" NODEID_IS)) == 0);
     free(sNid);
     SOPC_NodeId_Clear(pNid);
@@ -1060,6 +1126,10 @@ START_TEST(test_string_nodeid)
     ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
     ck_assert(0 == cmp);
     sNid = SOPC_NodeId_ToCString(pNid);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != sNid);
+#endif
     ck_assert(strncmp(sNid, "s=" NODEID_S, strlen("s=" NODEID_S)) == 0);
     free(sNid);
     SOPC_NodeId_Clear(pNid);
@@ -1069,6 +1139,10 @@ START_TEST(test_string_nodeid)
     ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
     ck_assert(0 == cmp);
     sNid = SOPC_NodeId_ToCString(pNid);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != sNid);
+#endif
     ck_assert(strncmp(sNid, "ns=" NODEID_NSS ";s=" NODEID_S, strlen("ns=" NODEID_NSS ";s=" NODEID_S)) == 0);
     free(sNid);
     SOPC_NodeId_Clear(pNid);
@@ -1083,6 +1157,10 @@ START_TEST(test_string_nodeid)
     ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
     ck_assert(0 == cmp);
     sNid = SOPC_NodeId_ToCString(pNid);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != sNid);
+#endif
     ck_assert(SOPC_strncmp_ignore_case(sNid, "g=" NODEID_GS, strlen("g=" NODEID_GS)) == 0);
     free(sNid);
     SOPC_NodeId_Clear(pNid);
@@ -1092,6 +1170,10 @@ START_TEST(test_string_nodeid)
     ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
     ck_assert(0 == cmp);
     sNid = SOPC_NodeId_ToCString(pNid);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != sNid);
+#endif
     ck_assert(SOPC_strncmp_ignore_case(sNid, "ns=" NODEID_NSS ";g=" NODEID_GS,
                                        strlen("ns=" NODEID_NSS ";g=" NODEID_GS)) == 0);
     free(sNid);
@@ -1108,6 +1190,10 @@ START_TEST(test_string_nodeid)
     ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
     ck_assert(0 == cmp);
     sNid = SOPC_NodeId_ToCString(pNid);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != sNid);
+#endif
     ck_assert(strncmp(sNid, "b=" NODEID_S, strlen("b=" NODEID_S)) == 0);
     free(sNid);
     SOPC_NodeId_Clear(pNid);
@@ -1117,6 +1203,10 @@ START_TEST(test_string_nodeid)
     ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
     ck_assert(0 == cmp);
     sNid = SOPC_NodeId_ToCString(pNid);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != sNid);
+#endif
     ck_assert(strncmp(sNid, "ns=" NODEID_NSS ";b=" NODEID_S, strlen("ns=" NODEID_NSS ";b=" NODEID_S)) == 0);
     free(sNid);
     SOPC_NodeId_Clear(pNid);
@@ -1487,6 +1577,11 @@ START_TEST(test_ua_encoder_basic_types)
 
     SOPC_Buffer* bufferFull = SOPC_Buffer_Create(8);
 
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buffer);
+    ck_assert(NULL != bufferFull);
+#endif
     // Test Byte nominal and degraded cases
     //// Nominal write
     SOPC_Byte byte = 0xAE;
@@ -1908,6 +2003,13 @@ START_TEST(test_ua_encoder_other_types)
     SOPC_ByteString* bs2 = SOPC_ByteString_Create();
     uint8_t boyString[3] = {0x42, 0x6F, 0x79}; // Boy
 
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != buffer);
+    ck_assert(NULL != bufferFull);
+    ck_assert(NULL != bs);
+    ck_assert(NULL != bs2);
+#endif
     ////// Empty string
     bs->Length = 0;
     status = SOPC_ByteString_Write(bs, buffer);
@@ -1966,6 +2068,10 @@ START_TEST(test_ua_encoder_other_types)
     SOPC_ByteString_Clear(bs2);
     SOPC_ByteString_Initialize(bs2);
     status = SOPC_ByteString_Read(bs2, buffer);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != bs2->Data);
+#endif
     ck_assert(status == SOPC_STATUS_OK);
     ck_assert(SOPC_ByteString_Equal(bs, bs2) != false);
     ck_assert(bs2->Length == 3);
@@ -2088,6 +2194,10 @@ START_TEST(test_ua_encoder_other_types)
     SOPC_String_Clear(&str2);
     SOPC_String_Initialize(&str2);
     status = SOPC_String_Read(&str2, buffer);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != str2.Data);
+#endif
     ck_assert(status == SOPC_STATUS_OK);
     ck_assert(SOPC_String_Equal(&str, &str2) != false);
     ck_assert(memcmp(SOPC_String_GetRawCString(&str2), "Boy", 3) == 0);
@@ -2209,6 +2319,10 @@ START_TEST(test_ua_encoder_other_types)
     SOPC_XmlElement_Initialize(&xmlElt2);
     status = SOPC_XmlElement_Read(&xmlElt2, buffer);
     ck_assert(status == SOPC_STATUS_OK);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != xmlElt2.Data);
+#endif
     ck_assert(memcmp(xmlElt.Data, xmlElt2.Data, 3) == 00);
     ck_assert(xmlElt2.Length == 3);
     ck_assert(xmlElt2.Data[0] == 0x3C);
@@ -2309,6 +2423,10 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(status != SOPC_STATUS_OK);
     status = SOPC_Guid_Write(&guid, NULL);
     ck_assert(status != SOPC_STATUS_OK);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != bufferFull);
+#endif
     bufferFull->position = 17; // Set buffer almost full (15 byte left)
     status = SOPC_Guid_Write(&guid, bufferFull);
     ck_assert(status != SOPC_STATUS_OK);
@@ -2738,6 +2856,10 @@ START_TEST(test_ua_decoder_allocation_limit)
     v.ArrayType = SOPC_VariantArrayType_Array;
     v.Value.Array.Length = 1;
     v.Value.Array.Content.VariantArr = malloc(sizeof(SOPC_Variant));
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check malloc != NULL
+    ck_assert(NULL != v.Value.Array.Content.VariantArr);
+#endif
     SOPC_Variant_Initialize(&v.Value.Array.Content.VariantArr[0]);
     v.Value.Array.Content.VariantArr[0].BuiltInTypeId = SOPC_Boolean_Id;
     v.Value.Array.Content.VariantArr[0].ArrayType = SOPC_VariantArrayType_SingleValue;
@@ -2774,6 +2896,10 @@ START_TEST(test_ua_decoder_allocation_limit)
         pvar->ArrayType = SOPC_VariantArrayType_Array;
         pvar->Value.Array.Length = 1;
         pvar->Value.Array.Content.VariantArr = malloc(sizeof(SOPC_Variant));
+#ifdef __TRUSTINSOFT_BUGFIX__
+        // check malloc != NULL
+        ck_assert(NULL != pvar->Value.Array.Content.VariantArr);
+#endif
         ck_assert(pvar->Value.Array.Content.VariantArr != NULL);
         SOPC_Variant_Initialize(&pvar->Value.Array.Content.VariantArr[0]);
         pvar = pvar->Value.Array.Content.VariantArr;
@@ -3100,6 +3226,10 @@ START_TEST(test_ua_string_type)
     result = SOPC_String_Equal(&s1, &s2);
     ck_assert(result == false);
     status = SOPC_String_Copy(&s2, &s1);
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check status ok (ie. malloc != NULL)
+    ck_assert(SOPC_STATUS_OK == status);
+#endif
     result = SOPC_String_Equal(&s1, &s2);
     ck_assert(result != false);
     result = SOPC_String_Compare(&s1, &s2, true, &comp_res);
@@ -3142,7 +3272,11 @@ Suite* tests_make_suite_tools(void)
 
     tc_async_queue = tcase_create("Async queue");
     tcase_add_test(tc_async_queue, test_async_queue);
+#ifdef __TRUSTINSOFT_HELPER__
+    // skip threads tests
+#else
     tcase_add_test(tc_async_queue, test_async_queue_threads);
+#endif
     suite_add_tcase(s, tc_async_queue);
 
     tc_encoder = tcase_create("UA Encoder");

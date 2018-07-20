@@ -33,7 +33,12 @@ struct SOPC_EventDispatcherManager
     Thread mgrThread;
 };
 
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+// enable external call of the EventDispatcherManager
+void* SOPC_ThreadStartEventDispatcherManager(void* pEventMgr)
+#else
 static void* SOPC_ThreadStartEventDispatcherManager(void* pEventMgr)
+#endif
 {
     assert(NULL != pEventMgr);
     SOPC_EventDispatcherManager* pMgr = (SOPC_EventDispatcherManager*) pEventMgr;
@@ -63,6 +68,10 @@ static void* SOPC_ThreadStartEventDispatcherManager(void* pEventMgr)
                 }
             }
         }
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+        // just one iteration of the EventDispatcherManager
+        localStopMgr = true;
+#endif
     }
     return NULL;
 }
@@ -97,6 +106,10 @@ SOPC_EventDispatcherManager* SOPC_EventDispatcherManager_CreateAndStart(SOPC_Eve
             pEventMgr = NULL;
         }
     }
+#ifdef __TRUSTINSOFT_BUGFIX__
+    // check pEventMgr != NULL
+    assert (NULL != pEventMgr);
+#endif
     return pEventMgr;
 }
 

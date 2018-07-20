@@ -1,0 +1,8 @@
+[current-version.sh] master/snapshot:
+e554372d1850d692b60db5feb2331233f4020aee utils/
+b2ff50182708937cb24fb83028ea97b01d50bfc6 utils/opam
+e4777ef6d456caa365728227d90edad73d8ba331 utils/tis-box-installer/e-acsl
+3482372c350b673282b89a6ebe8ca2056ce5c610 utils/tis-doc
+Started at xxx
+Run: tis-interpreter --cc "-isystem ./external_headers -isystem /home/anne/prefix/tis/master/share/tis-kernel/.. -isystem /home/anne/prefix/tis/master/share/tis-kernel/mt -I./mbedtls/include -I./sources/csrc -I./sources/csrc/secure_channels -I./sources/csrc/sockets -I./sources/csrc/helpers_platform_dep -I./sources/csrc/helpers_platform_dep/linux -I./sources/csrc/configuration -I./sources/csrc/crypto -I./sources/csrc/crypto/mbedtls -I./sources/csrc/api_toolkit -I./sources/csrc/services -I./sources/csrc/services/bgenc -I./sources/csrc/services/b2c -I./sources/csrc/helpers -I./sources/csrc/opcua_types -I./sources/address_space_generation/include -I./sources/install_linux/include -I./check_lib/include -D__TRUSTINSOFT_BUGFIX__ -D__TRUSTINSOFT_HELPER__ -D__TRUSTINSOFT_LABEL__ -D__TRUSTINSOFT_TMPBUG__ -DUINTPTR_MAX=4294967295U -D__TRUSTINSOFT_INTERPRETER__ -DUSE_MBEDTLS_SRCS -Dvolatile= " /home/anne/prefix/tis/master/share/tis-kernel/libc/tis_mem_bounded.c -from-verbose 0 -no-val-warn-harmless-function-pointers -acsl-import ./tis_src/empty.acsl -server -val -no-server ./sources/address_space_generation/genc/check_ingopcs_addspace.c ./sources/address_space_generation/genc/ingopcs_addspace.c -then -save ./results/ti_addspace.state  --no-color
+End = Start + 0h00m09s (= 9 seconds)

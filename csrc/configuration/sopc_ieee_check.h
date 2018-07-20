@@ -25,6 +25,11 @@
 #define SOPC_IEEE_CHECK_H_
 
 #include <float.h>
+#ifdef __TRUSTINSOFT_HELPER__
+// force FLT_ROUNDS to 1 to avoid error below
+#undef FLT_ROUNDS
+#define FLT_ROUNDS 1
+#endif
 #include <stdbool.h>
 
 /**

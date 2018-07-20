@@ -20,6 +20,12 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __TRUSTINSOFT_DEBUG__
+#include <stdio.h>
+#endif
+#ifdef __TRUSTINSOFT_HELPER__
+#include <tis_builtin.h>
+#endif
 
 #include "opcua_identifiers.h"
 
@@ -704,6 +710,18 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
         {
             if (length > 0)
             {
+#ifdef __TRUSTINSOFT_DEBUG__
+    // force input preparation
+              static size_t tis_cpt_call = 0; tis_cpt_call++;
+#ifdef __TRUSTINSOFT_HELPER__
+    // force input
+    tis_variable_split (&tis_cpt_call, sizeof(size_t), 5);
+    int tis_force_value (const char * f, const char * id, size_t n, int old);
+    length = tis_force_value ("SOPC_ByteString_Read", "length",
+                              tis_cpt_call, length);
+#endif
+    printf ("[tis-input] warning: SOPC_ByteString_Read:length:%zu = %d\n", tis_cpt_call, length);
+#endif
                 if (length <= SOPC_MAX_STRING_LENGTH && (uint64_t) length * 1 <= SIZE_MAX)
                 {
                     str->Length = length;
@@ -798,9 +816,35 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
             {
                 if (length <= SOPC_MAX_STRING_LENGTH && (uint64_t) length + 1 <= SIZE_MAX)
                 {
+#ifdef __TRUSTINSOFT_DEBUG__
+    // force input preparation
+                  static size_t tis_cpt_call = 0; tis_cpt_call++;
+#ifdef __TRUSTINSOFT_HELPER__
+    // force input
+//     tis_variable_split (&tis_cpt_call, sizeof(size_t), 5);
+    int32_t malloc_length = length;
+#ifdef TEST_SCH_CLIENT
+     malloc_length = SOPC_MAX_STRING_LENGTH;
+#endif
+#ifdef TEST_TK_CLIENT
+    // int tis_force_value (const char * f, const char * id, size_t n, int old);
+    // length = tis_force_value ("SOPC_String_Read", "length",
+    //                          tis_cpt_call, length);
+    malloc_length = SOPC_MAX_STRING_LENGTH;
+#endif
+#endif
+    printf ("[tis-input] warning: SOPC_String_Read:length:%zu = %d\n", tis_cpt_call, length);
+#else // no __TRUSTINSOFT_DEBUG__ for simple tests
+    int32_t malloc_length = length;
+#endif
                     str->Length = length;
                     // +1 to add '\0' character for CString compatibility
+#ifdef __TRUSTINSOFT_HELPER__
+                    // fix allocation size
+                    str->Data = malloc(sizeof(SOPC_Byte) * (size_t)(malloc_length + 1));
+#else
                     str->Data = malloc(sizeof(SOPC_Byte) * (size_t)(length + 1));
+#endif
                     if (str->Data != NULL)
                     {
                         status = SOPC_Buffer_Read(str->Data, buf, length);
@@ -1092,6 +1136,12 @@ static SOPC_ReturnStatus Internal_NodeId_Read(SOPC_Buffer* buf, SOPC_NodeId* nod
     if (SOPC_STATUS_OK == status)
     {
         encodingType = 0x0F & *encodingByte; // Eliminate flags
+#ifdef __TRUSTINSOFT_HELPER__
+        // split variant->BuiltInTypeId and use watchpoint
+        tis_variable_split (&encodingType, sizeof encodingType, 16);
+//         tis_watch_cardinal (&(nodeId->IdentifierType),
+//                             sizeof (nodeId->IdentifierType), 1, 0);
+#endif
         switch (encodingType)
         {
         case SOPC_NodeIdEncoding_Invalid:
@@ -1172,6 +1222,10 @@ SOPC_ReturnStatus SOPC_NodeId_ReadAux(void* value, SOPC_Buffer* buf)
     return SOPC_NodeId_Read((SOPC_NodeId*) value, buf);
 }
 
+#ifdef __TRUSTINSOFT_HELPER__
+// spec for SOPC_NodeId_Read (-val-use-spec)
+//@ assigns \result, *nodeId \from indirect:*buf;
+#endif
 SOPC_ReturnStatus SOPC_NodeId_Read(SOPC_NodeId* nodeId, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -1376,6 +1430,10 @@ SOPC_ReturnStatus SOPC_DiagnosticInfo_ReadAux(void* value, SOPC_Buffer* buf)
     return SOPC_DiagnosticInfo_Read((SOPC_DiagnosticInfo*) value, buf);
 }
 
+#ifdef __TRUSTINSOFT_HELPER__
+// spec for SOPC_DiagnosticInfo_Read_Internal (recursive call)
+//@ assigns \result, *diagInfo \from *buf;
+#endif
 static SOPC_ReturnStatus SOPC_DiagnosticInfo_Read_Internal(SOPC_DiagnosticInfo* diagInfo,
                                                            SOPC_Buffer* buf,
                                                            uint32_t nestedLevel)
@@ -1663,6 +1721,12 @@ SOPC_ReturnStatus SOPC_ExtensionObject_ReadAux(void* value, SOPC_Buffer* buf)
     return SOPC_ExtensionObject_Read((SOPC_ExtensionObject*) value, buf);
 }
 
+#ifdef __TRUSTINSOFT_HELPER__
+// spec for SOPC_ExtensionObject_Read (-val-use-spec)
+/*@
+    assigns \result, *extObj \from indirect:*buf;
+*/
+#endif
 SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -1681,6 +1745,16 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
         status = SOPC_Byte_Read(&encodingByte, buf);
     }
 
+#ifdef __TRUSTINSOFT_HELPER__
+    // local annotation (split encodingByte)
+/*@ assert extor_split_encType:
+           encodingByte == SOPC_ExtObjBodyEncoding_None
+        || encodingByte == SOPC_ExtObjBodyEncoding_ByteString
+        || encodingByte == SOPC_ExtObjBodyEncoding_XMLElement
+        || encodingByte == SOPC_ExtObjBodyEncoding_Object
+        || encodingByte > SOPC_ExtObjBodyEncoding_Object;
+*/
+#endif
     if (SOPC_STATUS_OK == status)
     {
         // Manage Object body decoding
@@ -1748,6 +1822,13 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
             status = SOPC_Int32_Read(&extObj->Length, buf);
             if (SOPC_STATUS_OK == status)
             {
+#ifdef __TRUSTINSOFT_HELPER__
+              // cut this branch for tk_client because
+              // the real execution doesn't go in there
+#ifdef TEST_TK_CLIENT
+              //@ assert extor_cut_object: \false;
+#endif
+#endif
                 /* Allocation size value comes from types defined in Toolkit and is considered as not excessive
                  * value */
                 extObj->Body.Object.Value = malloc(extObj->Body.Object.ObjType->AllocationSize);
@@ -2631,6 +2712,13 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
         }
         // Retrieve builtin type id: avoid 2^7 and 2^6 which are array flags
         variant->BuiltInTypeId = 0x3F & encodingByte;
+#ifdef __TRUSTINSOFT_HELPER__
+        // split variant->BuiltInTypeId and use watchpoint
+        tis_variable_split (&(variant->BuiltInTypeId),
+                      sizeof (variant->BuiltInTypeId), 64);
+//         tis_watch_cardinal (&(variant->BuiltInTypeId),
+//                       sizeof (variant->BuiltInTypeId), 1, 0);
+#endif
     }
 
     if (SOPC_STATUS_OK == status)
@@ -2699,6 +2787,10 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
                     }
                     if (SOPC_STATUS_OK != status)
                     {
+#ifdef __TRUSTINSOFT_HELPER__
+                      // add break when status != STATUS_OK
+                      break;
+#endif
                         free(variant->Value.Matrix.ArrayDimensions);
                         variant->Value.Matrix.ArrayDimensions = NULL;
                     }
@@ -2958,7 +3050,24 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
 
     if (SOPC_STATUS_OK == status && *noOfElts > 0)
     {
+#ifdef __TRUSTINSOFT_DEBUG__
+    // force input preparation
+    static size_t tis_cpt_call = 0; tis_cpt_call++;
+#ifdef __TRUSTINSOFT_HELPER__
+    // force input
+    int tis_force_value (const char * f, const char * id, size_t n, int old);
+    *noOfElts = tis_force_value ("SOPC_Read_Array",
+                                 "noOfElts",
+                                 tis_cpt_call,
+                                 *noOfElts);
+        size_t noOfElts_max = 1000000;
+        //@ assert sra_max: *noOfElts <= noOfElts_max;
+        *eltsArray = malloc(sizeOfElt * noOfElts_max);
+#else
         *eltsArray = malloc(sizeOfElt * (size_t) *noOfElts);
+#endif
+    printf ("[tis-input] warning: SOPC_Read_Array:noOfElts:%zu = %d\n", tis_cpt_call, *noOfElts);
+#endif
         if (NULL == *eltsArray)
         {
             status = SOPC_STATUS_NOK;
@@ -2985,11 +3094,15 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
             size_t clearIdx = 0;
             // idx - 1 => clear only cases in which status was ok since we don't know
             //            the state in which byte array is in the last idx used (decode failed)
+#ifdef __TRUSTINSOFT_HELPER__
+            // skip SOPC_String_Clear that gives alarms (TODO: put it back!)
+#else
             for (clearIdx = 0; clearIdx < (idx - 1); clearIdx++)
             {
                 pos = clearIdx * sizeOfElt;
                 clearFct(&(byteArray[pos]));
             }
+#endif
             free(*eltsArray);
             *eltsArray = NULL;
             *noOfElts = 0;

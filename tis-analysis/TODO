@@ -1,0 +1,16 @@
+
+- see how to be less intrusive:
+
+    - CMakeLists.txt: maybe we can use options in our Makfile to call cmake?
+
+- about submodules:
+
+    - how does Systerel manage check and mbedtls libraries
+      (especially in their CI)?
+
+- skip tests_make_suite_logger (new in v0.5.0): see if we can put it back,
+  but we then have to:
+
+    - remove our ifdef in csrc/helpers/sopc_log_manager.c,
+    - have precise dates to build the log string (and filename)
+    - use tis-mkfs to be able to open the log file.

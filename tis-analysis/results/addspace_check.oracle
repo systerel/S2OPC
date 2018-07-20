@@ -1,0 +1,19 @@
+VERIF OK: no function with neither code nor specification
+VERIF OK: no degeneration(s)
+VERIF OK: no other non-terminating statements
+VERIF OK: no message(s) in the log file (excluding 
+	"no assigns clauses for function .*scanf"
+	"ignoring missing assigns for all variadic functions"
+	)
+VERIF OK: no generated alarms
+VERIF OK: no hypotheses to verify
+VERIF OK: no functions with no code, but specifications
+VERIF OK: no functions with code, but use specification
+VERIF INFO: 3 used libc and buitins from tis-analyzer
+TIS_KERNEL_SHARE/libc/stdio.h   printf  built-in
+TIS_KERNEL_SHARE/libc/stdio.h   sscanf  built-in
+TIS_KERNEL_SHARE/libc/string.h  strcmp  built-in
+VERIF OK: no useless files
+VERIF INFO: Coverage (without libc functions):
+Functions: 7/7 (100.0%) - All statements: 7898/12897 (61.2%) - Statements in reachable functions: 7898/12897 (61.2%)
+VERIF INFO: Did not lose precision.

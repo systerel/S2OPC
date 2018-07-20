@@ -1,0 +1,204 @@
+//**************************************************************************/
+//*                                                                        */
+//*  This file is part of deliverable T3.3 of project INGOPCS              */
+//*                                                                        */
+//*    Copyright (C) 2017 TrustInSoft                                      */
+//*                                                                        */
+//*  All rights reserved.                                                  */
+//*                                                                        */
+//**************************************************************************/
+
+function mbedtls_aes_free:
+  contract:
+    assigns *ctx \from \nothing;
+
+function mbedtls_aes_init:
+  contract:
+    assigns *ctx \from \nothing;
+
+function mbedtls_aes_setkey_dec:
+  contract:
+    assigns *ctx, \result \from key[..], keybits;
+
+function mbedtls_aes_setkey_enc:
+  contract:
+    assigns *ctx, \result \from key[..], keybits;
+
+function mbedtls_aes_crypt_cbc:
+  contract:
+    assigns iv[..], output[..], \result \from mode, length, input[..];
+
+function mbedtls_ctr_drbg_free:
+  contract:
+    assigns *ctx \from \nothing;
+
+function mbedtls_ctr_drbg_init:
+  contract:
+    assigns *ctx \from \nothing;
+
+function mbedtls_ctr_drbg_random:
+  contract:
+    assigns  output[0..output_len-1] \from indirect:p_rng, output_len;
+    assigns  \result \from output_len;
+    ensures mbcdr_e_res: \result == 1
+      || \result == 0 && \initialized (output + (0..output_len-1));
+
+function mbedtls_ctr_drbg_seed:
+  contract:
+    assigns *ctx \from f_entropy, p_entropy, len;
+    assigns \result \from len;
+    ensures mbcds_e_res: \result == 0 || \result == 1;
+
+function mbedtls_entropy_free:
+  contract:
+    assigns *ctx \from \nothing;
+
+function mbedtls_entropy_init:
+  contract:
+    assigns *ctx \from \nothing;
+
+function mbedtls_md:
+  contract:
+    assigns  \result \from indirect:md_info;
+    assigns output[..] \from input[0..ilen-1], indirect:*md_info;
+
+function mbedtls_md_free:
+  contract:
+    assigns *ctx \from \nothing;
+
+function mbedtls_md_get_size:
+  contract:
+    assigns \result \from indirect:*md_info;
+
+function mbedtls_md_hmac:
+  contract:
+    assigns \result, output[..]
+                     \from key[..], keylen, input[..], ilen, indirect:*md_info;
+    ensures \result < 0
+         || \result == 0 && \initialized(output + (0..\block_length(output)-1));
+
+function mbedtls_md_hmac_finish:
+  contract:
+    assigns \result, output[..] \from indirect:*ctx;
+
+function mbedtls_md_hmac_reset:
+  contract:
+    assigns \result, *ctx \from indirect:*ctx;
+
+function mbedtls_md_hmac_starts:
+  contract:
+    assigns \result, *ctx \from indirect:*ctx, key[..], keylen;
+
+function mbedtls_md_hmac_update:
+  contract:
+    assigns \result, *ctx \from indirect:*ctx, input[..], ilen;
+
+function mbedtls_md_info_from_type:
+  contract:
+    assigns \result \from md_type;
+
+function mbedtls_md_init:
+  contract:
+    assigns *ctx \from \nothing;
+
+function mbedtls_md_setup:
+  contract:
+    assigns *ctx \from *ctx, *md_info, hmac;
+    assigns \result \from indirect:*ctx, indirect:*md_info, hmac;
+
+function mbedtls_pk_free:
+  contract:
+    assigns *ctx \from \nothing;
+
+function mbedtls_pk_get_type:
+  contract:
+    assigns \result \from indirect:*ctx;
+
+function mbedtls_pk_init:
+  contract:
+    assigns ctx->pk_info, ctx->pk_ctx \from \nothing;
+    ensures mbpki_e_init: \initialized (ctx);
+
+function mbedtls_pk_get_bitlen:
+  contract:
+    assigns \result \from \nothing;
+
+
+function mbedtls_rsa_rsaes_oaep_decrypt:
+  contract:
+    assigns \result, *ctx, output[0..output_max_len-1], *olen
+      \from mode, label_len, label[0..label_len-1], input[..], indirect:f_rng,
+            indirect:p_rng;
+    ensures mrrod_e_init: \result < 0
+                       || \result == 0
+                           && *olen <= output_max_len
+                           && \initialized (output + (0..output_max_len-1));
+
+function mbedtls_rsa_rsaes_oaep_encrypt:
+  contract:
+    assigns \result, *ctx, output[..]
+    \from mode, indirect:f_rng, indirect:p_rng, indirect:*ctx, mode,
+          label_len, label[0..label_len-1], ilen, input[0..ilen-1];
+
+function mbedtls_rsa_rsassa_pkcs1_v15_sign:
+  contract:
+    assigns \result, *ctx, sig[..] \from indirect:*ctx, indirect:f_rng,
+             indirect:p_rng, mode, md_alg, hashlen, indirect:hash[0..hashlen-1];
+
+function mbedtls_rsa_rsassa_pkcs1_v15_verify:
+  contract:
+    assigns \result, *ctx \from indirect:*ctx, indirect:f_rng,
+             indirect:p_rng, mode, md_alg, hashlen, hash[0..hashlen-1];
+
+function mbedtls_rsa_set_padding:
+  contract:
+    assigns  *ctx \from indirect:*ctx, padding, hash_id;
+
+function mbedtls_x509_crt_free:
+  contract:
+    assigns *crt \from \nothing;
+
+function mbedtls_x509_crt_init:
+  contract:
+    assigns *crt \from \nothing;
+
+function mbedtls_x509_crt_parse:
+  contract:
+    assigns \result, *chain \from *chain, buflen, buf[0..buflen-1];
+    ensures mbxcp_init: \initialized (chain);
+
+function mbedtls_x509_crt_verify_with_profile:
+  contract:
+    assigns \result, *crt, *trust_ca, *ca_crl, *flags
+            \from indirect:f_vrfy, indirect:p_vrfy;
+
+//==============================================================================
+// Spec of functions that are not analyzed (-val-use-spec)
+//==============================================================================
+
+function CryptoProvider_AsymEncrypt_RSA_OAEP:
+  contract:
+    assigns \result, pOutput[..] \from pInput[..];
+                                 // lenPlainText, *pKey, *pPro vider;
+
+function CryptoProvider_AsymDecrypt_RSA_OAEP:
+  contract:
+    assigns \result, pOutput[..], *pLenWritten \from pInput[..]; // TODO
+    ensures cpadro_e_init: \result == SOPC_STATUS_NOK ||
+            \result == SOPC_STATUS_OK
+            && \initialized (pOutput + (0 .. \block_length(pOutput)- 1));
+
+function CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256:
+  contract:
+    assigns \result \from indirect:*pProvider,
+                          pInput[..], lenInput, pSignature[..];
+
+//------------------------------------------------------------------------------
+// More properties
+//------------------------------------------------------------------------------
+
+function PSHA:
+  contract:
+    ensures psha_e_init: \initialized (pOutput + (0 .. lenOutput-1));
+
+//==============================================================================

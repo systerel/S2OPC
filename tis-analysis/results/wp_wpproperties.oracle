@@ -1,0 +1,18 @@
+CryptoProvider_AsymDecrypt_RSA_OAEP|assigns||never tried
+CryptoProvider_AsymEncrypt_RSA_OAEP|assigns||never tried
+CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256|assigns||never tried
+SOPC_Buffer_Read|assert|br_a_count_wp|valid under hypothesis
+SOPC_Buffer_Read|assert|br_a_pos_wp|unknown
+SOPC_Buffer_Write|assert|bw_a_count_wp|valid under hypothesis
+SOPC_Buffer_Write|assert|bw_a_pos_wp|valid under hypothesis
+SOPC_DiagnosticInfo_Clear|assigns||never tried
+SOPC_DiagnosticInfo_Read_Internal|assigns||never tried
+SOPC_ExtensionObject_Clear|assigns||never tried
+SOPC_ExtensionObject_Read|assigns||never tried
+SOPC_NodeId_Clear|assigns||never tried
+SOPC_NodeId_Read|assigns||never tried
+SOPC_SLinkedList_Append|assert|slla_first_not_null_wp|surely valid
+SOPC_SLinkedList_Append|assert|slla_last_not_null_wp|unknown
+pow|assigns||never tried
+pthread_cond_broadcast|assigns||never tried
+pthread_mutex_destroy|assigns||never tried

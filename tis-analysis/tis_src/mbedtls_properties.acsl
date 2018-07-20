@@ -1,0 +1,98 @@
+//**************************************************************************/
+//*                                                                        */
+//*  This file is part of deliverable T3.3 of project INGOPCS              */
+//*                                                                        */
+//*    Copyright (C) 2017 TrustInSoft                                      */
+//*                                                                        */
+//*  All rights reserved.                                                  */
+//*                                                                        */
+//**************************************************************************/
+
+include "mbedtls_spec.acsl" ;
+
+
+function mbedtls_mpi_read_binary:
+  at loop 2:
+    loop invariant mrb_l2_j: j <= buflen - n;
+
+function mbedtls_mpi_lsb:
+  at loop 2: loop invariant mlsb_l2_i: i < X->n;
+
+function mbedtls_rsa_check_privkey:
+  contract:
+    // TODO: add requires ?
+    assigns \result \from *ctx; // TODO: more precise froms
+    ensures rchpk_e_res: \result == 0; // TODO: more values
+
+function mbedtls_asn1_get_len:
+  contract:
+    requires agl_r_split_p:
+      *p >= end ||
+      *p == end - 1 ||
+      *p == end - 2 ||
+      *p == end - 3 ||
+      *p == end - 4 ||
+      *p == end - 5 ||
+     *p < end - 5;
+    requires agl_r_p: *p >= end || \initialized (*p);
+    ensures agl_e_len: val: \result != 0 || (\result == 0 && \initialized (len));
+    ensures agl_e_len_max:
+      \result != 0 || (\result == 0 && *p <= end && *len <= end - *p);
+
+function mbedtls_asn1_get_tag:
+  contract:
+    requires agt_e_split_p: *p < end || *p >= end;
+    ensures agt_e_len: val: \result != 0 ||
+      (\result == 0 && \initialized (len));
+
+function mbedtls_rsa_rsassa_pkcs1_v15_verify:
+  at L: assert rpkvv_a_len: rv: \initialized(&asn1_len);
+                               // direct consequence of agt_e_len
+                               // but cannot be proved with WP
+                               // that doesn't handle \initialized.
+  at L2: assert rpkvv_a2_p: p <= end - hashlen;
+
+function mbedtls_sha256_process:
+  contract:
+    requires shp_r_data_offset: \offset (data) <= \block_length (data) - 64;
+    requires shp_r_data: \valid_read(data+(0 .. 63));
+    requires shp_r_data_init: \initialized (data + (0 .. 63));
+    assigns ctx->state[0..7] \from data[0..63], ctx->state[0..7];
+    ensures shp_e_state: \initialized (ctx->state + (0..7));
+    ensures shp_e_is224: ctx->is224 == \old (ctx->is224);
+
+function mbedtls_sha256_update:
+  contract:
+    requires sha1_update_r_ctx_val: \valid(ctx);
+    requires sha1_update_r_ilen_val: ilen <= 18000;
+    requires sha1_update_r_total_val: \initialized(ctx->total + (0..1));
+    requires sha1_update_r_state_val: \initialized(ctx->state + (0..7));
+    requires sha1_update_r_input_valid_val: \valid_read(input+(0 .. ilen - 1));
+    requires sha1_update_r_input_init_val: \initialized(input+(0 .. ilen - 1));
+    requires sha1_update_r_buffer_rv:
+      \initialized(ctx->buffer + (0..(ctx->total[0] % 64)-1));
+
+    assigns *ctx \from
+        *ctx, ilen, input[0 .. ilen - 1], indirect:ctx, indirect:input ;
+
+    ensures sha1_update_e_total_val: \initialized(ctx->total + (0..1));
+    ensures sha1_update_e_state_val: \initialized(ctx->state + (0..7));
+    ensures sha1_update_e_buffer_val:
+      \initialized(ctx->buffer + (0..(ctx->total[0] % 64)-1));
+//   at L1: assert shu_a1_fill_left: fill + left == 64;
+//   at L1: assert shu_a1_buf: \valid(&ctx->buffer[left]+(0 .. fill-1));
+//   at loop 1:
+//     loop invariant shu_li1_inv: input + ilen == \at(input + ilen, Pre);
+//     loop invariant shu_li1_input: \valid_read (input + (0.. ilen-1));
+
+function oid_md_alg_from_asn1:
+  at loop 1:
+    loop invariant mafa_li1_oid: // would have been better in the loop,
+                                 // but it is a macro...
+      cur->asn1 == \null
+      || (cur->asn1 != \null &&
+            (cur->asn1_len != oid->len
+             || cur->asn1_len == oid->len
+                &&  \offset(oid->p) <= 511 - cur->asn1_len));
+//                 &&  \initialized(oid->p+(0 .. oid->len-1))));
+

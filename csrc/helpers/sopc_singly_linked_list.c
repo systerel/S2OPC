@@ -86,6 +86,13 @@ void* SOPC_SLinkedList_Append(SOPC_SLinkedList* list, uint32_t id, void* value)
     SOPC_SLinkedList_Elt* elt = NULL;
     void* result = NULL;
 
+#ifdef __TRUSTINSOFT_HELPER__
+    // use tis_variable_split to handle malloc-returns-null in sockets
+#ifdef TEST_SOCKETS
+    void tis_variable_split(void *__p, size_t __s, int __limit) __THROW;
+    tis_variable_split (&(list), sizeof(list), 20);
+#endif
+#endif
     if (NULL != list && NULL != value)
     {
         if (list->length < list->maxLength || list->maxLength == 0)
@@ -105,9 +112,17 @@ void* SOPC_SLinkedList_Append(SOPC_SLinkedList* list, uint32_t id, void* value)
         if (NULL == list->first)
         {
             list->first = elt;
+#ifdef __TRUSTINSOFT_HELPER__
+            // try to remove NULL value
+            //@ assert slla_first_not_null: wp: list->first != \null;
+#endif
         }
         else
         {
+#ifdef __TRUSTINSOFT_HELPER__
+            // try to remove NULL value
+            //@ assert slla_last_not_null: wp: list->last != \null;
+#endif
             list->last->next = elt;
         }
         list->last = elt;
@@ -211,6 +226,13 @@ void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list)
     void* result = NULL;
     SOPC_SLinkedList_Elt* nextElt = NULL;
 
+#ifdef __TRUSTINSOFT_HELPER__
+    // use tis_variable_split to handle malloc-returns-null in sockets
+#ifdef TEST_SOCKETS
+    void tis_variable_split(void *__p, size_t __s, int __limit) __THROW;
+    tis_variable_split (&(list), sizeof(list), 20);
+#endif
+#endif
     if (NULL == list || NULL == list->first)
     {
         return NULL;

@@ -141,7 +141,12 @@ void message_out_bs__bless_msg_out(const constants__t_msg_i message_out_bs__msg)
     (void) message_out_bs__msg;
 }
 
+#ifdef __TRUSTINSOFT_BUGFIX__
+// remove const because the variable is modified in SOPC_Encodeable_Delete
+void message_out_bs__dealloc_msg_header_out(constants__t_msg_header_i message_out_bs__msg_header)
+#else
 void message_out_bs__dealloc_msg_header_out(const constants__t_msg_header_i message_out_bs__msg_header)
+#endif
 {
     // Generated header, parameter not really a const. TODO: Check if message should not be a / in a global variable
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
@@ -160,7 +165,12 @@ void message_out_bs__dealloc_msg_header_out(const constants__t_msg_header_i mess
     SOPC_GCC_DIAGNOSTIC_RESTORE
 }
 
+#ifdef __TRUSTINSOFT_BUGFIX__
+// remove const because the variable is modified in SOPC_Encodeable_Delete
+void message_out_bs__dealloc_msg_out(constants__t_msg_i message_out_bs__msg)
+#else
 void message_out_bs__dealloc_msg_out(const constants__t_msg_i message_out_bs__msg)
+#endif
 {
     // First field of each message structure is an encodeable type
     SOPC_EncodeableType* encType = NULL;

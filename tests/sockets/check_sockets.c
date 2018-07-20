@@ -55,19 +55,37 @@ START_TEST(test_sockets)
     uint32_t receivedBytes = 0;
     uint8_t attempts = 0;
 
+#ifdef __TRUSTINSOFT_BUGFIX__
+    ck_assert(accBuffer != NULL);
+#endif
     SOPC_EventTimer_Initialize();
     SOPC_SecureChannels_Initialize();
     SOPC_Sockets_Initialize();
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // call TIS_Sockets_Dispatch and TreatSocketsEvents
+    bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout);
+    void TIS_Sockets_Dispatch (void);
+#endif
 
     /* SERVER SIDE: listener creation */
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: call EnqueueEvent: SOCKET_CREATE_SERVER(%d) -> endpointDescConfigId(%u)\n", SOCKET_CREATE_SERVER, endpointDescConfigId);
+#endif
 
     // const URI is not modified but generic API cannot guarantee it
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER, endpointDescConfigId, (void*) uri, (uint32_t) true);
     SOPC_GCC_DIAGNOSTIC_RESTORE
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // call TIS_Sockets_Dispatch and TreatSocketsEvents
+    TIS_Sockets_Dispatch ();
+#endif
 
     // Retrieve event of listener creation
     SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: Dequeue -> id=%u - event=%d\n", scEventParams->eltId, scEventParams->event);
+#endif
     // Check event
     ck_assert(scEventParams->event == SOCKET_LISTENER_OPENED);
     // Check configuration index is preserved
@@ -75,16 +93,31 @@ START_TEST(test_sockets)
 
     free(scEventParams);
     scEventParams = NULL;
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: SOCKET_LISTENER_OPENED step OK\n");
+#endif
 
     /* CLIENT SIDE: connection establishment */
     // Create client connection
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: call EnqueueEvent: SOCKET_CREATE_CLIENT(%d) -> clientSecureChannelConnectionId(%u)\n", SOCKET_CREATE_CLIENT, clientSecureChannelConnectionId);
+#endif
     // const URI is not modified but generic API cannot guarantee it
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, clientSecureChannelConnectionId, (void*) uri, 0);
     SOPC_GCC_DIAGNOSTIC_RESTORE
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // call TIS_Sockets_Dispatch and TreatSocketsEvents
+    TIS_Sockets_Dispatch ();
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents (10);
+    TIS_Sockets_Dispatch ();
+#endif
 
     /* SERVER SIDE: accepted connection (socket level only) */
     SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: Dequeue -> id=%u - event=%d\n", scEventParams->eltId, scEventParams->event);
+#endif
     // Check event
     ck_assert(scEventParams->event == SOCKET_LISTENER_CONNECTION);
     // Check configuration index is preserved
@@ -94,8 +127,19 @@ START_TEST(test_sockets)
     free(scEventParams);
     scEventParams = NULL;
 
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: SOCKET_LISTENER_CONNECTION step OK\n");
+#endif
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // call TIS_Sockets_Dispatch and TreatSocketsEvents
+     SOPC_SocketsNetworkEventMgr_TreatSocketsEvents (10);
+     TIS_Sockets_Dispatch ();
+#endif
     /* CLIENT SIDE: accepted socket connection */
     SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: Dequeue -> id=%u - event=%d (expected = %d)\n", scEventParams->eltId, scEventParams->event, SOCKET_CONNECTION);
+#endif
     // Check event
     ck_assert(scEventParams->event == SOCKET_CONNECTION);
     // Check configuration index is preserved
@@ -104,11 +148,22 @@ START_TEST(test_sockets)
 
     free(scEventParams);
     scEventParams = NULL;
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: SOCKET_CONNECTION step OK\n");
+    // OK for ti_socket
+#endif
 
     /* SERVER SIDE: finish accepting connection (secure channel level) */
     // Note: a new secure channel (with associated connection index) has been created and
     //       must be recorded by the socket as the connection Id
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: call EnqueueEvent: SOCKET_ACCEPTED_CONNECTION(%d) -> serverSocketIdx(%u)\n", SOCKET_ACCEPTED_CONNECTION, serverSocketIdx);
+#endif
     SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, serverSocketIdx, NULL, serverSecureChannelConnectionId);
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // call TIS_Sockets_Dispatch and TreatSocketsEvents
+    TIS_Sockets_Dispatch ();
+#endif
 
     /* CLIENT SIDE: send a msg buffer through connection */
     for (idx = 0; idx < 1000; idx++)
@@ -116,7 +171,15 @@ START_TEST(test_sockets)
         byte = (idx % 256);
         SOPC_Buffer_Write(sendBuffer, &byte, 1);
     }
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: call EnqueueEvent: SOCKET_WRITE(%d) -> clientSocketIdx(%u)\n", SOCKET_WRITE, clientSocketIdx);
+#endif
     SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (void*) sendBuffer, 0);
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // call TIS_Sockets_Dispatch and TreatSocketsEvents
+    TIS_Sockets_Dispatch();
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents (10);
+#endif
     sendBuffer = NULL; // deallocated by Socket event manager
 
     /* SERVER SIDE: receive a msg buffer through connection */
@@ -126,7 +189,14 @@ START_TEST(test_sockets)
     attempts = 0;
     while (receivedBytes < 1000 && attempts < 5)
     {
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+      // call TIS_Sockets_Dispatch and TreatSocketsEvents
+      TIS_Sockets_Dispatch();
+#endif
         SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: Dequeue -> id=%u - event=%d\n", scEventParams->eltId, scEventParams->event);
+#endif
         // Check event
         ck_assert(scEventParams->event == SOCKET_RCV_BYTES);
         // Check configuration index is preserved
@@ -135,6 +205,9 @@ START_TEST(test_sockets)
 
         free(scEventParams);
         scEventParams = NULL;
+#ifdef __TRUSTINSOFT_DEBUG__
+        printf ("TIS: SOCKET_RCV_BYTES step(1-%d) OK\n", attempts);
+#endif
 
         ck_assert(receivedBuffer->length <= 1000);
         receivedBytes = receivedBytes + receivedBuffer->length;
@@ -164,7 +237,16 @@ START_TEST(test_sockets)
         byte = (idx % 256);
         SOPC_Buffer_Write(sendBuffer, &byte, 1);
     }
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: call EnqueueEvent: SOCKET_WRITE(%d) -> clientSocketIdx(%u)\n", SOCKET_WRITE, clientSocketIdx);
+#endif
     SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, serverSocketIdx, (void*) sendBuffer, 0);
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // call TIS_Sockets_Dispatch and TreatSocketsEvents
+    TIS_Sockets_Dispatch();
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents (10);
+    TIS_Sockets_Dispatch();
+#endif
     sendBuffer = NULL; // deallocated by Socket event manager
 
     /* CLIENT SIDE: receive a msg buffer through connection */
@@ -175,6 +257,9 @@ START_TEST(test_sockets)
     while (receivedBytes < 1000 && attempts < 5)
     {
         SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: Dequeue -> id=%u - event=%d\n", scEventParams->eltId, scEventParams->event);
+#endif
         // Check event
         ck_assert(scEventParams->event == SOCKET_RCV_BYTES);
         // Check configuration index is preserved
@@ -183,6 +268,9 @@ START_TEST(test_sockets)
 
         free(scEventParams);
         scEventParams = NULL;
+#ifdef __TRUSTINSOFT_DEBUG__
+        printf ("TIS: SOCKET_RCV_BYTES step(2-%d) OK\n", attempts);
+#endif
 
         ck_assert(receivedBuffer->length <= 1000);
         receivedBytes = receivedBytes + receivedBuffer->length;
@@ -204,11 +292,22 @@ START_TEST(test_sockets)
     }
 
     SOPC_Buffer_Delete(accBuffer);
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: received buffer OK\n");
+#endif
+#ifdef __TRUSTINSOFT_HELPER__
+    // set slevel to 0 to allocate only one base.
+    //@ slevel 0;
+#endif
 
     /* CLIENT SIDE: send a msg buffer through connection with a length greater than maximum message size
      * => the socket layer shall provide it in several buffers  */
     sendBuffer = SOPC_Buffer_Create(2 * SOPC_MAX_MESSAGE_LENGTH);
     accBuffer = SOPC_Buffer_Create(2 * SOPC_MAX_MESSAGE_LENGTH);
+#ifdef __TRUSTINSOFT_HELPER__
+    // reset slevel
+    //@ slevel default;
+#endif
 
     for (idx = 0; idx < 2 * SOPC_MAX_MESSAGE_LENGTH; idx++)
     {
@@ -258,10 +357,23 @@ START_TEST(test_sockets)
     SOPC_Buffer_Delete(accBuffer);
 
     /* CLIENT SIDE: receive a msg buffer through connection */
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: call EnqueueEvent: SOCKET_CLOSE(%d) -> clientSocketIdx(%u)\n", SOCKET_CLOSE, clientSocketIdx);
+#endif
     SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, clientSocketIdx, NULL, 0);
+#ifdef __TRUSTINSOFT_NO_MTHREAD__
+    // call TIS_Sockets_Dispatch and TreatSocketsEvents
+    TIS_Sockets_Dispatch();
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents (10);
+    SOPC_SocketsNetworkEventMgr_TreatSocketsEvents (10);
+    TIS_Sockets_Dispatch();
+#endif
 
     /* SERVER SIDE: accepted connection (socket level only) */
     SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: Dequeue -> id=%u - event=%d\n", scEventParams->eltId, scEventParams->event);
+#endif
     // Check event
     ck_assert(scEventParams->event == SOCKET_FAILURE);
     // Check configuration index is preserved
@@ -270,6 +382,9 @@ START_TEST(test_sockets)
 
     free(scEventParams);
     scEventParams = NULL;
+#ifdef __TRUSTINSOFT_DEBUG__
+    printf ("TIS: SOCKET_FAILURE step OK\n");
+#endif
 
     SOPC_Sockets_Clear();
     SOPC_EventTimer_Clear();

@@ -127,6 +127,11 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText(const SOP
     case SOPC_SecurityPolicy_Basic256_ID:
         if (SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(pProvider, &lenHash) != SOPC_STATUS_OK)
             return SOPC_STATUS_NOK;
+#ifdef __TRUSTINSOFT_BUGFIX__
+        // add a test to ensure *pLenMsg > 0 (in report v1)
+        if (2*lenHash + 2 >= *pLenMsg)
+          return SOPC_STATUS_NOK;
+#endif
         *pLenMsg -= 2 * lenHash + 2; // TODO: check for underflow?
         break;
     }

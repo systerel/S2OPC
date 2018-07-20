@@ -96,7 +96,12 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode s
 
     /* Check the service StatusCode */
     if (verbose > 0)
+#ifdef __TRUSTINSOFT_BUGFIX__
+      // minor: fix printf format
+        printf("Service status code: %d (should be %d)\n", (int)statusCode, SOPC_STATUS_OK);
+#else
         printf("Service status code: %" PRIX32 " (should be %d)\n", statusCode, SOPC_STATUS_OK);
+#endif
     bTestOk = SOPC_STATUS_OK == statusCode;
 
     /* Creates a Request */

@@ -667,10 +667,44 @@ static SOPC_Certificate* crt_pub = NULL;
 
 static inline void setup_certificate(void)
 {
+#ifdef __TRUSTINSOFT_PATCH__
+   // cherry-pick 028f9048 from gitlab master (new certiticate)
+    uint8_t der_cert[1069];
+#else
     uint8_t der_cert[1215];
+#endif
 
     setup_crypto();
 
+#ifdef __TRUSTINSOFT_PATCH__
+   // cherry-pick 028f9048 from gitlab master (new certiticate)
+    // Loads a certificate. This is server_public/server_2k.der.
+    ck_assert(unhexlify("3082042930820311a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652"
+                        "310c300a06035504080c03494446310e300c06035504070c0550415249533110300e060355040a0c07494e474f5043"
+                        "533110300e060355040b0c07494e474f5043533113301106035504030c0a494e474f5043532043413122302006092a"
+                        "864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d3137313130323136353835345a17"
+                        "0d3138313130323136353835345a3068310b3009060355040613024652310c300a06035504080c03494446310e300c"
+                        "06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f5043"
+                        "533117301506035504030c0e494e474f5043532053455256455230820122300d06092a864886f70d01010105000382"
+                        "010f003082010a0282010100b245842f18a25870b4bdcf162ca5b2d48cb531f0c5ba5d509e5051b892fe535d6dbfba"
+                        "fc6f3e430af250468659476cfd8381c57a9dc4063d14ef48b6ede87b1a15e3560a8a759a4cda397a71034c812142c7"
+                        "43d16685b6fe2f2bb3a56570a88f87452121ecb6bce7865e14ef83a5bd436661995a8a0635d3ba9b22324bd2d06f3c"
+                        "f117418d6e9e2fa3e1d317c77ba00972e622d602d8f1c07a720ba7d064150ee0533f256ccc0bb6fa0447dcacc97462"
+                        "7c54bb544c60cbef5aeb70ebfe8c07acaf64f315088e8461a4af2f9d8846065c416d0c1cc4075e4baa2d7f44c1be2b"
+                        "d1e2d8dec1f9796b8727cac05f5e931069192fae496298a549bae6df699e2638270203010001a381bc3081b9301d06"
+                        "03551d0e0416041449da0583068c3c894ac32777d92ba84e8763f722301f0603551d2304183016801431ae8e653364"
+                        "06e4379b518fc3379dce459bb61f300f0603551d130101ff040530030101ff300b0603551d0f040403020106302b06"
+                        "03551d1104243022861575726e3a494e474f5043533a6c6f63616c686f737482096c6f63616c686f7374302c060960"
+                        "86480186f842010d041f161d4f70656e53534c2047656e657261746564204365727469666963617465300d06092a86"
+                        "4886f70d01010b0500038201010053e982480661e4bffb4af3f1b37d663e4191a3b0cfb590e9f50008634c63d3b442"
+                        "97b7544dee44f103f589c15f59b080e037603309e0afe6b9d294f61ad85f5de27275983d6d81353e97dfc30bbbcc3b"
+                        "359a8720206bc298bc9f0da97a4dbd24c0c07a9607071c3d729ad2849ee0c3d2b410ee9e066aef3a9bf3e755f19270"
+                        "808c5efbaf46a8c8ca7d290162a818c1e6abba08c973e4d6857487a62e0a34a61930150e2e2639fc5ec8234f5a86a3"
+                        "8bd9e7454f8157732f6028adbcb1525770671c0443724270d4bf8fa530193e033712a2e2f2b8581d3dcaa974cb3504"
+                        "c475582322b8f0ffb212a714fea2b6016eb928ef523ec65f0b160063ba207c45caa2d7",
+                        der_cert, 1069) == 1069);
+    ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(der_cert, 1069, &crt_pub) == SOPC_STATUS_OK);
+#else
     // Loads a certificate. This is the server/server.der.
     ck_assert(unhexlify("308204bb308202a3a003020102020102300d06092a864886f70d01010b0500308188310b3009060355040613024652"
                         "310c300a06035504080c03494446310e30"
@@ -712,6 +746,7 @@ static inline void setup_certificate(void)
                         "87dae9d67ee148d1662ca139446a8de3",
                         der_cert, 1215) == 1215);
     ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(der_cert, 1215, &crt_pub) == SOPC_STATUS_OK);
+#endif
 }
 
 static inline void teardown_certificate(void)
@@ -749,7 +784,12 @@ START_TEST(test_cert_thumbprint_B256S256)
     ck_assert(SOPC_KeyManager_Certificate_GetThumbprint(crypto, crt_pub, thumb, 20) == SOPC_STATUS_OK);
     ck_assert(hexlify(thumb, hexoutput, 20) == 20);
     // The expected thumbprint for this certificate was calculated with openssl tool, and mbedtls API.
+#ifdef __TRUSTINSOFT_PATCH__
+   // cherry-pick 028f9048 from gitlab master (new certiticate)
+    ck_assert(memcmp(hexoutput, "8bbe16605756eebcb6e10756bc17c57df3f1ef01", 40) == 0);
+#else
     ck_assert(memcmp(hexoutput, "80968e5e796b36c6c5cc8546092c36f72137d8b0", 40) == 0);
+#endif
 }
 END_TEST
 
@@ -1002,11 +1042,43 @@ static SOPC_PKIProvider* pki = NULL;
 
 static inline void setup_pki_stack(void)
 {
+#ifdef __TRUSTINSOFT_PATCH__
+   // cherry-pick 028f9048 from gitlab master (new certiticate)
+    uint8_t der_ca[1017];
+#else
     uint8_t der_ca[1529];
+#endif
 
     setup_certificate();
 
     // Loads CA cert which signed server.der. This is trusted/cacert.der.
+#ifdef __TRUSTINSOFT_PATCH__
+   // cherry-pick 028f9048 from gitlab master (new certiticate)
+    ck_assert(unhexlify("308203f5308202dda003020102020900ccd2d9ade3419143300d06092a864886f70d01010b0500308188310b300906"
+                        "0355040613024652310c300a06035504080c03494446310e300c06035504070c0550415249533110300e060355040a"
+                        "0c07494e474f5043533110300e060355040b0c07494e474f5043533113301106035504030c0a494e474f5043532043"
+                        "413122302006092a864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d313730393237"
+                        "3135353032355a170d3138303932373135353032355a308188310b3009060355040613024652310c300a0603550408"
+                        "0c03494446310e300c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e06035504"
+                        "0b0c07494e474f5043533113301106035504030c0a494e474f5043532043413122302006092a864886f70d01090116"
+                        "13696e676f70637340737973746572656c2e667230820122300d06092a864886f70d01010105000382010f00308201"
+                        "0a02820101009b3ba50f9a27b27370513de979667a3a4b24b3cc0fbd90fb03c6b19395a7a11eadc6aefeab54cb9c86"
+                        "3c9b52eb8a48cd187c02b598f2e8d611ef56c18009701e480f4bcdfba3a339d79453fb0897b89e20f5ae5381f2a0bd"
+                        "a97599c5e4167d243b03caa5b4bc7a05a424e2176ea04b2ef71ac273b20bd7c727e1a716f07e4ec1251debc6c98409"
+                        "c8eafa16c05254495a7833bee269aa0fdb4c98e30fef2345afa65d1630e657e6a4c10ab51b9c34a4ddbd0e70909848"
+                        "59bb2565b3fd10497ede6274ee7968a3bfc503a6f380e292a4c46f2e37e01a89dbd5af6e9af7f9fb34bbda53e62a87"
+                        "a0427823c4866e5877d5c2660d6cd2649ccbd57265e6b56c1ad2570203010001a360305e301d0603551d0e04160414"
+                        "31ae8e65336406e4379b518fc3379dce459bb61f301f0603551d2304183016801431ae8e65336406e4379b518fc337"
+                        "9dce459bb61f300f0603551d130101ff040530030101ff300b0603551d0f040403020106300d06092a864886f70d01"
+                        "010b050003820101004edb4347e6ae979f1df03965bf831d3e70de123b8dbd93c0a262347948b25ba93ab893f26f22"
+                        "9c41485198f2f6e4bcb5236516906318e3e00555ba11f27343e689078d87fda403b94f54cbe12fa50eecb98af00305"
+                        "19260bd5cba4fef5254087ad8cd63306d481ca3bb883587e1bb2f23bd2b8e9e0c434a140bdba510099e6d64adbb586"
+                        "28bbca257785f72db559dbf291fd6c43a5701f63d7805d705b3387cb032724cb8e0e949b9dc376e730a2d977c3838b"
+                        "cea74ee9ed2b6997ae0f2dd268ced21cd1d698481f56b3206721a5937cceb5a79241335a259d49d38b550e39901707"
+                        "81d5b6d6817476c9389f75293254515b64a9419d6e1cda971d79578906ce",
+                        der_ca, 1017) == 1017);
+    ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(der_ca, 1017, &crt_ca) == SOPC_STATUS_OK);
+#else
     ck_assert(unhexlify("308205f5308203dda003020102020900a5d3e9dfcf8e3f74300d06092a864886f70d01010b0500308188310b300906"
                         "0355040613024652310c300a0603550408"
                         "0c03494446310e300c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e06035504"
@@ -1057,6 +1129,7 @@ static inline void setup_pki_stack(void)
                         "148895383afb8f581493",
                         der_ca, 1529) == 1529);
     ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(der_ca, 1529, &crt_ca) == SOPC_STATUS_OK);
+#endif
 
     // Creates PKI with ca
     ck_assert(SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki) == SOPC_STATUS_OK);
@@ -1087,9 +1160,42 @@ END_TEST
 START_TEST(test_cert_copyder_B256S256)
 {
     uint8_t *buffer0 = NULL, *buffer1 = NULL;
+#ifdef __TRUSTINSOFT_PATCH__
+   // cherry-pick 028f9048 from gitlab master (new certiticate)
+    uint8_t der_cert[1069];
+#else
     uint8_t der_cert[1215];
+#endif
     uint32_t lenAlloc0 = 0, lenAlloc1 = 0;
 
+#ifdef __TRUSTINSOFT_PATCH__
+  // cherry-pick 028f9048 from gitlab master (new certiticate)
+   // Reference certificate. This is server_public/server_2k.der.
+    ck_assert(unhexlify("3082042930820311a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652"
+                        "310c300a06035504080c03494446310e300c06035504070c0550415249533110300e060355040a0c07494e474f5043"
+                        "533110300e060355040b0c07494e474f5043533113301106035504030c0a494e474f5043532043413122302006092a"
+                        "864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d3137313130323136353835345a17"
+                        "0d3138313130323136353835345a3068310b3009060355040613024652310c300a06035504080c03494446310e300c"
+                        "06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f5043"
+                        "533117301506035504030c0e494e474f5043532053455256455230820122300d06092a864886f70d01010105000382"
+                        "010f003082010a0282010100b245842f18a25870b4bdcf162ca5b2d48cb531f0c5ba5d509e5051b892fe535d6dbfba"
+                        "fc6f3e430af250468659476cfd8381c57a9dc4063d14ef48b6ede87b1a15e3560a8a759a4cda397a71034c812142c7"
+                        "43d16685b6fe2f2bb3a56570a88f87452121ecb6bce7865e14ef83a5bd436661995a8a0635d3ba9b22324bd2d06f3c"
+                        "f117418d6e9e2fa3e1d317c77ba00972e622d602d8f1c07a720ba7d064150ee0533f256ccc0bb6fa0447dcacc97462"
+                        "7c54bb544c60cbef5aeb70ebfe8c07acaf64f315088e8461a4af2f9d8846065c416d0c1cc4075e4baa2d7f44c1be2b"
+                        "d1e2d8dec1f9796b8727cac05f5e931069192fae496298a549bae6df699e2638270203010001a381bc3081b9301d06"
+                        "03551d0e0416041449da0583068c3c894ac32777d92ba84e8763f722301f0603551d2304183016801431ae8e653364"
+                        "06e4379b518fc3379dce459bb61f300f0603551d130101ff040530030101ff300b0603551d0f040403020106302b06"
+                        "03551d1104243022861575726e3a494e474f5043533a6c6f63616c686f737482096c6f63616c686f7374302c060960"
+                        "86480186f842010d041f161d4f70656e53534c2047656e657261746564204365727469666963617465300d06092a86"
+                        "4886f70d01010b0500038201010053e982480661e4bffb4af3f1b37d663e4191a3b0cfb590e9f50008634c63d3b442"
+                        "97b7544dee44f103f589c15f59b080e037603309e0afe6b9d294f61ad85f5de27275983d6d81353e97dfc30bbbcc3b"
+                        "359a8720206bc298bc9f0da97a4dbd24c0c07a9607071c3d729ad2849ee0c3d2b410ee9e066aef3a9bf3e755f19270"
+                        "808c5efbaf46a8c8ca7d290162a818c1e6abba08c973e4d6857487a62e0a34a61930150e2e2639fc5ec8234f5a86a3"
+                        "8bd9e7454f8157732f6028adbcb1525770671c0443724270d4bf8fa530193e033712a2e2f2b8581d3dcaa974cb3504"
+                        "c475582322b8f0ffb212a714fea2b6016eb928ef523ec65f0b160063ba207c45caa2d7",
+                        der_cert, 1069) == 1069);
+#else
     // Reference certificate, this is server.der
     ck_assert(unhexlify("308204bb308202a3a003020102020102300d06092a864886f70d01010b0500308188310b3009060355040613024652"
                         "310c300a06035504080c03494446310e30"
@@ -1130,6 +1236,7 @@ START_TEST(test_cert_copyder_B256S256)
                         "095da188cd50e7f8cd30fce5232cb564dc0bef2d761e12f5dde9ac93a81f67fae30d251a59f578dd6aaa7d3edbc813"
                         "87dae9d67ee148d1662ca139446a8de3",
                         der_cert, 1215) == 1215);
+#endif
 
     // Extract 2 copies from loaded certificate
     ck_assert(SOPC_KeyManager_Certificate_CopyDER(crt_pub, &buffer0, &lenAlloc0) == SOPC_STATUS_OK);
@@ -1138,7 +1245,12 @@ START_TEST(test_cert_copyder_B256S256)
     // Both should be identical, and identical to der_cert
     ck_assert(lenAlloc0 == lenAlloc1);
     ck_assert(memcmp(buffer0, buffer1, lenAlloc0) == 0);
+#ifdef __TRUSTINSOFT_PATCH__
+   // cherry-pick 028f9048 from gitlab master (new certiticate)
+    ck_assert(1069 == lenAlloc0);
+#else
     ck_assert(1215 == lenAlloc0);
+#endif
     ck_assert(memcmp(buffer0, der_cert, lenAlloc0) == 0);
 
     // Modifying 0 should not modify 1
@@ -1193,9 +1305,19 @@ Suite* tests_make_suite_crypto_B256S256()
     tcase_add_checked_fixture(tc_km, setup_certificate, teardown_certificate);
     tcase_add_test(tc_km, test_cert_load_B256S256);
     tcase_add_test(tc_km, test_cert_lengths_B256S256);
+#ifdef __TRUSTINSOFT_SKIP_CRYPTO_TESTS__
+    // skip 'test_cert_thumbprint_B256S256' because
+    // it needs to specify valid allocation in 'mbedtls_x509_crt_parse'.
+#else
     tcase_add_test(tc_km, test_cert_thumbprint_B256S256);
+#endif
     tcase_add_test(tc_km, test_cert_loadkey_B256S256);
+#ifdef __TRUSTINSOFT_SKIP_CRYPTO_TESTS__
+    // skip 'test_cert_copyder_B256S256' because
+    // it needs to specify valid allocation in 'mbedtls_x509_crt_parse'.
+#else
     tcase_add_test(tc_km, test_cert_copyder_B256S256);
+#endif
 
     suite_add_tcase(s, tc_crypto_asym);
     tcase_add_checked_fixture(tc_crypto_asym, setup_asym_keys, teardown_asym_keys);

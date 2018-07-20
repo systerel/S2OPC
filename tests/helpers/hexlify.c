@@ -22,6 +22,11 @@
 
 // You should allocate strlen(src)*2 in dst. n is strlen(src)
 // Returns n the number of translated chars (< 0 for errors)
+#ifdef __TRUSTINSOFT_HELPER__
+/*@ ensures hxlf_e_init: \initialized (dst + (0 .. 2*n - 1));
+  @ ensures hxlf_e_res: \result == n;
+*/
+#endif
 int hexlify(const unsigned char* src, char* dst, size_t n)
 {
     size_t i;
@@ -30,6 +35,9 @@ int hexlify(const unsigned char* src, char* dst, size_t n)
     if (!src || !dst)
         return -1;
 
+#ifdef __TRUSTINSOFT_HELPER__
+    //@ loop invariant hxlf_li_init: \initialized (dst + (0 .. 2*i - 1));
+#endif
     for (i = 0; i < n; ++i)
     {
         sprintf(buffer, "%02hhx", src[i]); // sprintf copies the last \0 too

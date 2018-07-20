@@ -155,7 +155,18 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
     SOPC_GCC_DIAGNOSTIC_RESTORE
     if (*pLenWritten > 0 && *pLenWritten <= lenDest)
     {
+#ifdef __TRUSTINSOFT_HELPER__
+              // use tis_memcpy_bounded instead of memcpy
+              size_t tis_block_size(const void *p);
+              void *tis_base_addr(void *p);
+              void *tis_memcpy_bounded(void *dest, const void *src, size_t n,
+                                       void * dest_bound, void * src_bound);
+        tis_memcpy_bounded(pDest, buffer+lenDest-*pLenWritten, *pLenWritten,
+            pDest + tis_block_size (pDest),
+            buffer + tis_block_size (buffer));
+#else
         memcpy(pDest, buffer + lenDest - *pLenWritten, *pLenWritten);
+#endif
         status = SOPC_STATUS_OK;
     }
 
@@ -237,6 +248,17 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath,
         if (certif->crt.raw.len > UINT32_MAX)
             return SOPC_STATUS_NOK;
         certif->len_der = (uint32_t) certif->crt.raw.len;
+#ifdef __TRUSTINSOFT_DEBUG__
+    // force input preparation
+        static size_t tis_cpt_call = 0; tis_cpt_call++;
+#ifdef __TRUSTINSOFT_HELPER__
+    // force input
+    int tis_force_value (const char * f, const char * id, size_t n, int old);
+    certif->len_der = tis_force_value ("SOPC_KeyManager_Certificate_CreateFromFile", "len_der",
+                              tis_cpt_call, certif->len_der);
+#endif
+    printf ("[tis-input] warning: SOPC_KeyManager_Certificate_CreateFromFile:len_der:%zu = %u\n", tis_cpt_call, certif->len_der);
+#endif
         *ppCert = certif;
         return SOPC_STATUS_OK;
     }
