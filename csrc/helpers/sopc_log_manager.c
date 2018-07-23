@@ -463,8 +463,6 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
 {
     int res = 0;
     int res2 = 0;
-    va_list args_copy;
-    va_copy(args_copy, args);
     if (NULL != pLogInst && false != pLogInst->started && level <= pLogInst->level)
     {
         Mutex_Lock(&pLogInst->file->fileMutex);
@@ -472,13 +470,16 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
         SOPC_Log_TracePrefixNoLock(pLogInst, level, true, false);
         if (NULL != pLogInst->file->pFile)
         {
-            res = vfprintf(pLogInst->file->pFile, format, args);
-            res2 = fprintf(pLogInst->file->pFile, "\n");
             if (pLogInst->consoleFlag != false)
             {
+                va_list args_copy;
+                va_copy(args_copy, args);
                 vprintf(format, args_copy);
+                va_end(args_copy);
                 printf("\n");
             }
+            res = vfprintf(pLogInst->file->pFile, format, args);
+            res2 = fprintf(pLogInst->file->pFile, "\n");
             if (res > 0 && res2 > 0)
             {
                 if (UINT32_MAX - pLogInst->file->nbBytes > (uint64_t) res + (uint64_t) res2)
