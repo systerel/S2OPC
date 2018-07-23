@@ -2298,7 +2298,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_Compare(const SOPC_QualifiedName* left,
             {
                 *comparison = -1;
             }
-            else if (left->NamespaceIndex < right->NamespaceIndex)
+            else if (left->NamespaceIndex > right->NamespaceIndex)
             {
                 *comparison = 1;
             }
