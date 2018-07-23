@@ -111,6 +111,7 @@ int main(int argc, char* const argv[])
     cmd_line_options_t options;
     if (!parse_options(&options, argc, argv))
     {
+        free_options(&options);
         return 1;
     }
 
@@ -156,6 +157,7 @@ int main(int argc, char* const argv[])
     if (SOPC_STATUS_OK != SOPC_LibSub_Initialize(&cfg_cli))
     {
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not initialize library.");
+        free_options(&options);
         return 2;
     }
 
@@ -285,6 +287,7 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
 
 #define STR_OPT_CASE(name, req, arg_req, val, field) \
     case val:                                        \
+        free(o->field);                              \
         o->field = calloc(strlen(optarg) + 1, 1);    \
         strcpy(o->field, optarg);                    \
         break;
