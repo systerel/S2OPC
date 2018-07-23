@@ -34,7 +34,8 @@
      ((x) &0x0000FF0000000000) >> 24 | ((x) &0x000000FF00000000) >> 8)
 #define SWAP_2_DWORDS(x) (((x) &0x00000000FFFFFFFF) << 32 | ((x) &0xFFFFFFFF00000000) >> 32)
 
-typedef enum {
+typedef enum
+{
     SOPC_NodeIdEncoding_TwoBytes = 0x00,
     SOPC_NodeIdEncoding_FourBytes = 0x01,
     SOPC_NodeIdEncoding_Numeric = 0x02,
@@ -46,7 +47,8 @@ typedef enum {
     SOPC_NodeIdEncoding_Invalid = 0xFF
 } SOPC_NodeId_DataEncoding;
 
-typedef enum {
+typedef enum
+{
     SOPC_DiagInfoEncoding_SymbolicId = 0x01,
     SOPC_DiagInfoEncoding_Namespace = 0x02,
     SOPC_DiagInfoEncoding_LocalizedTest = 0x04,
@@ -56,9 +58,14 @@ typedef enum {
     SOPC_DiagInfoEncoding_InnerDianosticInfo = 0x40,
 } SOPC_DiagInfo_EncodingFlag;
 
-typedef enum { SOPC_LocalizedText_Locale = 0x01, SOPC_LocalizedText_Text = 0x02 } SOPC_LocalizedText_EncodingFlag;
+typedef enum
+{
+    SOPC_LocalizedText_Locale = 0x01,
+    SOPC_LocalizedText_Text = 0x02
+} SOPC_LocalizedText_EncodingFlag;
 
-typedef enum {
+typedef enum
+{
     SOPC_DataValue_NotNullValue = 0x01,
     SOPC_DataValue_NotGoodStatusCode = 0x02,
     SOPC_DataValue_NotMinSourceDate = 0x04,

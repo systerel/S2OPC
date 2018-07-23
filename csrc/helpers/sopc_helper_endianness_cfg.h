@@ -29,7 +29,8 @@
 /**
  * \brief Supported endianness configurations.
  */
-typedef enum {
+typedef enum
+{
     SOPC_Endianness_Undefined,
     SOPC_Endianness_LittleEndian,
     SOPC_Endianness_BigEndian,

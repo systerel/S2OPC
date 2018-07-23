@@ -56,7 +56,8 @@
 #include "libs2opc_client.h"
 
 /* Machine states */
-typedef enum {
+typedef enum
+{
     stError, /* stError is both error and closed state */
     stInit,
     stActivating,

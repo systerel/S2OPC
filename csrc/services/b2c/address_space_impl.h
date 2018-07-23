@@ -33,7 +33,8 @@
 
 /* AttributeIds: they are #defined by the SDK... */
 /* TODO: move them to util_*.*, and make conversion functions */
-typedef enum {
+typedef enum
+{
     c_aid_indet = 0,
     e_aid_NodeId,
     e_aid_NodeClass,

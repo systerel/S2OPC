@@ -33,7 +33,8 @@
 #include "sopc_event_handler.h"
 #include "sopc_user_app_itf.h"
 
-typedef enum SOPC_Services_Event {
+typedef enum SOPC_Services_Event
+{
     /* SC to Services events */
     SC_TO_SE_EP_SC_CONNECTED,       /* id = endpoint description config index,
                                        params = endpoint connection config index pointer,

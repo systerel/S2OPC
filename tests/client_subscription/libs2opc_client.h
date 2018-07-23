@@ -61,7 +61,8 @@
 typedef uint32_t SOPC_StatusCode;
 
 /* Result, taken from "sopc_toolkit_constants.h" */
-typedef enum SOPC_ReturnStatus {
+typedef enum SOPC_ReturnStatus
+{
     SOPC_STATUS_OK = 0,
     SOPC_STATUS_NOK = 1,
     SOPC_STATUS_INVALID_PARAMETERS = 2,
@@ -75,7 +76,8 @@ typedef enum SOPC_ReturnStatus {
 } SOPC_ReturnStatus;
 
 /* Log levels, taken from "sopc_user_app_itf.h" */
-typedef enum {
+typedef enum
+{
     SOPC_TOOLKIT_LOG_LEVEL_ERROR = 0,
     SOPC_TOOLKIT_LOG_LEVEL_WARNING = 1,
     SOPC_TOOLKIT_LOG_LEVEL_INFO = 2,
@@ -84,7 +86,8 @@ typedef enum {
 
 /* SecurityMode, directly compatible with the encoded OPC-UA type,
  * taken from "sopc_types.h" */
-typedef enum {
+typedef enum
+{
     OpcUa_MessageSecurityMode_Invalid = 0,
     OpcUa_MessageSecurityMode_None = 1,
     OpcUa_MessageSecurityMode_Sign = 2,
@@ -119,7 +122,8 @@ typedef uint32_t SOPC_LibSub_DataId;
 typedef uint64_t SOPC_LibSub_Timestamp;
 
 /* Data value type */
-typedef enum {
+typedef enum
+{
     SOPC_LibSub_DataType_bool = 1,
     SOPC_LibSub_DataType_integer = 2,
     SOPC_LibSub_DataType_string = 3,
@@ -148,7 +152,8 @@ typedef struct
 /*
   @description
     AttributeIds, as defined in the OPC UA Reference, Part 6 Annex A */
-typedef enum {
+typedef enum
+{
     SOPC_LibSub_AttributeId_NodeId = 1,
     SOPC_LibSub_AttributeId_NodeClass = 2,
     SOPC_LibSub_AttributeId_BrowseName = 3,

@@ -35,7 +35,8 @@
 /**
  *  \brief Secure channel input events
  *  */
-typedef enum {
+typedef enum
+{
     EP_OPEN,            /* id = endpoint description configuration index */
     EP_CLOSE,           /* id = endpoint description configuration index */
     SC_CONNECT,         /* id = secure channel connection configuration index */

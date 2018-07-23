@@ -33,13 +33,15 @@
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
 
-typedef enum {
+typedef enum
+{
     SECURE_LISTENER_STATE_CLOSED = 0,
     SECURE_LISTENER_STATE_OPENING,
     SECURE_LISTENER_STATE_OPENED
 } SOPC_SecureListener_State;
 
-typedef enum {
+typedef enum
+{
     SECURE_CONNECTION_STATE_SC_CLOSED = 0,
     SECURE_CONNECTION_STATE_TCP_INIT,
     SECURE_CONNECTION_STATE_TCP_NEGOTIATE,
@@ -52,7 +54,8 @@ typedef enum {
 /**
  *  \brief TCP UA Message types
  */
-typedef enum {
+typedef enum
+{
     SOPC_MSG_TYPE_INVALID = 0,
     SOPC_MSG_TYPE_HEL,
     SOPC_MSG_TYPE_ACK,
@@ -76,7 +79,8 @@ typedef struct
 /**
  *  \brief UA Message Chunk IsFinal type
  */
-typedef enum {
+typedef enum
+{
     SOPC_MSG_ISFINAL_INVALID = 0,
     SOPC_MSG_ISFINAL_INTERMEDIATE, /**< C type */
     SOPC_MSG_ISFINAL_FINAL,        /**< F type */

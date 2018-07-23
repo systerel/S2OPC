@@ -29,7 +29,8 @@
 #include "sopc_sockets_api.h"
 #include "sopc_toolkit_constants.h"
 
-typedef enum {
+typedef enum
+{
     SOCKET_STATE_CLOSED = 0,
     SOCKET_STATE_CONNECTING, // Client connect waiting for write event
                              // && SO_ERROR to be verified on event to confirm connection accepted

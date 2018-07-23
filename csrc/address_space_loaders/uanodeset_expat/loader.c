@@ -50,7 +50,8 @@
 
 #define LOG_MEMORY_ALLOCATION_FAILURE LOG("Memory allocation failure")
 
-typedef enum {
+typedef enum
+{
     PARSE_START,             // Beginning of file
     PARSE_NODESET,           // In a UANodeSet
     PARSE_ALIASES,           // In an Aliases tag

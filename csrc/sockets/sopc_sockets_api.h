@@ -33,7 +33,8 @@
 #include "sopc_event_handler.h"
 
 /* Sockets input events */
-typedef enum {
+typedef enum
+{
     /* External events */
     SOCKET_CREATE_SERVER,       /* id = endpoint description config index,
                                    params = (const char*) URI,
@@ -59,7 +60,8 @@ typedef enum {
     INT_SOCKET_READY_TO_WRITE
 } SOPC_Sockets_InputEvent;
 
-typedef enum {
+typedef enum
+{
     SOCKET_LISTENER_OPENED,     /* id = endpoint description config index,
                                    auxParam = (uint32_t) socket index
                                */

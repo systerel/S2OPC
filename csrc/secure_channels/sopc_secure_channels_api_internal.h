@@ -23,7 +23,8 @@
 #include <stdint.h>
 #include "sopc_secure_channels_api.h"
 
-typedef enum {
+typedef enum
+{
     /* SC listener manager -> SC connection manager */
     INT_EP_SC_CREATE, /* id = endpoint description configuration index,
                          auxParam = socket index */
@@ -70,7 +71,8 @@ typedef enum {
                  // auxParam = (SOPC_StatusCode) errorStatus
 } SOPC_SecureChannels_InternalEvent;
 
-typedef enum {
+typedef enum
+{
     TIMER_SC_CONNECTION_TIMEOUT, /* id = secure channel connection index */
     TIMER_SC_CLIENT_OPN_RENEW,   /* id = secure channel connection index */
     TIMER_SC_REQUEST_TIMEOUT,    /* id = secure channel connection index

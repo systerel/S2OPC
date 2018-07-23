@@ -40,7 +40,8 @@
 /*============================================================================
  * The IdType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_IdType {
+typedef enum _OpcUa_IdType
+{
     OpcUa_IdType_Numeric = 0,
     OpcUa_IdType_String = 1,
     OpcUa_IdType_Guid = 2,
@@ -53,7 +54,8 @@ typedef enum _OpcUa_IdType {
 /*============================================================================
  * The NodeClass enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_NodeClass {
+typedef enum _OpcUa_NodeClass
+{
     OpcUa_NodeClass_Unspecified = 0,
     OpcUa_NodeClass_Object = 1,
     OpcUa_NodeClass_Variable = 2,
@@ -623,7 +625,8 @@ SOPC_ReturnStatus OpcUa_TimeZoneDataType_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ApplicationType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_ApplicationType {
+typedef enum _OpcUa_ApplicationType
+{
     OpcUa_ApplicationType_Server = 0,
     OpcUa_ApplicationType_Client = 1,
     OpcUa_ApplicationType_ClientAndServer = 2,
@@ -900,7 +903,8 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The MessageSecurityMode enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_MessageSecurityMode {
+typedef enum _OpcUa_MessageSecurityMode
+{
     OpcUa_MessageSecurityMode_Invalid = 0,
     OpcUa_MessageSecurityMode_None = 1,
     OpcUa_MessageSecurityMode_Sign = 2,
@@ -913,7 +917,8 @@ typedef enum _OpcUa_MessageSecurityMode {
 /*============================================================================
  * The UserTokenType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_UserTokenType {
+typedef enum _OpcUa_UserTokenType
+{
     OpcUa_UserTokenType_Anonymous = 0,
     OpcUa_UserTokenType_UserName = 1,
     OpcUa_UserTokenType_Certificate = 2,
@@ -1218,7 +1223,8 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The SecurityTokenRequestType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_SecurityTokenRequestType {
+typedef enum _OpcUa_SecurityTokenRequestType
+{
     OpcUa_SecurityTokenRequestType_Issue = 0,
     OpcUa_SecurityTokenRequestType_Renew = 1
 } OpcUa_SecurityTokenRequestType;
@@ -1814,7 +1820,8 @@ SOPC_ReturnStatus OpcUa_CancelResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The NodeAttributesMask enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_NodeAttributesMask {
+typedef enum _OpcUa_NodeAttributesMask
+{
     OpcUa_NodeAttributesMask_None = 0,
     OpcUa_NodeAttributesMask_AccessLevel = 1,
     OpcUa_NodeAttributesMask_ArrayDimensions = 2,
@@ -2511,7 +2518,8 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The AttributeWriteMask enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_AttributeWriteMask {
+typedef enum _OpcUa_AttributeWriteMask
+{
     OpcUa_AttributeWriteMask_None = 0,
     OpcUa_AttributeWriteMask_AccessLevel = 1,
     OpcUa_AttributeWriteMask_ArrayDimensions = 2,
@@ -2543,7 +2551,8 @@ typedef enum _OpcUa_AttributeWriteMask {
 /*============================================================================
  * The BrowseDirection enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_BrowseDirection {
+typedef enum _OpcUa_BrowseDirection
+{
     OpcUa_BrowseDirection_Forward = 0,
     OpcUa_BrowseDirection_Inverse = 1,
     OpcUa_BrowseDirection_Both = 2
@@ -2612,7 +2621,8 @@ SOPC_ReturnStatus OpcUa_BrowseDescription_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The BrowseResultMask enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_BrowseResultMask {
+typedef enum _OpcUa_BrowseResultMask
+{
     OpcUa_BrowseResultMask_None = 0,
     OpcUa_BrowseResultMask_ReferenceTypeId = 1,
     OpcUa_BrowseResultMask_IsForward = 2,
@@ -3138,7 +3148,8 @@ SOPC_ReturnStatus OpcUa_EndpointConfiguration_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The ComplianceLevel enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_ComplianceLevel {
+typedef enum _OpcUa_ComplianceLevel
+{
     OpcUa_ComplianceLevel_Untested = 0,
     OpcUa_ComplianceLevel_Partial = 1,
     OpcUa_ComplianceLevel_SelfTested = 2,
@@ -3272,7 +3283,8 @@ SOPC_ReturnStatus OpcUa_NodeTypeDescription_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The FilterOperator enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_FilterOperator {
+typedef enum _OpcUa_FilterOperator
+{
     OpcUa_FilterOperator_Equals = 0,
     OpcUa_FilterOperator_IsNull = 1,
     OpcUa_FilterOperator_GreaterThan = 2,
@@ -3724,7 +3736,8 @@ SOPC_ReturnStatus OpcUa_QueryNextResponse_Decode(void* pValue, SOPC_Buffer* buf)
 /*============================================================================
  * The TimestampsToReturn enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_TimestampsToReturn {
+typedef enum _OpcUa_TimestampsToReturn
+{
     OpcUa_TimestampsToReturn_Source = 0,
     OpcUa_TimestampsToReturn_Server = 1,
     OpcUa_TimestampsToReturn_Both = 2,
@@ -4075,7 +4088,8 @@ SOPC_ReturnStatus OpcUa_HistoryData_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The HistoryUpdateType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_HistoryUpdateType {
+typedef enum _OpcUa_HistoryUpdateType
+{
     OpcUa_HistoryUpdateType_Insert = 1,
     OpcUa_HistoryUpdateType_Replace = 2,
     OpcUa_HistoryUpdateType_Update = 3,
@@ -4365,7 +4379,8 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateDetails_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The PerformUpdateType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_PerformUpdateType {
+typedef enum _OpcUa_PerformUpdateType
+{
     OpcUa_PerformUpdateType_Insert = 1,
     OpcUa_PerformUpdateType_Replace = 2,
     OpcUa_PerformUpdateType_Update = 3,
@@ -4747,7 +4762,8 @@ SOPC_ReturnStatus OpcUa_CallResponse_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The MonitoringMode enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_MonitoringMode {
+typedef enum _OpcUa_MonitoringMode
+{
     OpcUa_MonitoringMode_Disabled = 0,
     OpcUa_MonitoringMode_Sampling = 1,
     OpcUa_MonitoringMode_Reporting = 2
@@ -4759,7 +4775,8 @@ typedef enum _OpcUa_MonitoringMode {
 /*============================================================================
  * The DataChangeTrigger enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_DataChangeTrigger {
+typedef enum _OpcUa_DataChangeTrigger
+{
     OpcUa_DataChangeTrigger_Status = 0,
     OpcUa_DataChangeTrigger_StatusValue = 1,
     OpcUa_DataChangeTrigger_StatusValueTimestamp = 2
@@ -4771,7 +4788,8 @@ typedef enum _OpcUa_DataChangeTrigger {
 /*============================================================================
  * The DeadbandType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_DeadbandType {
+typedef enum _OpcUa_DeadbandType
+{
     OpcUa_DeadbandType_None = 0,
     OpcUa_DeadbandType_Absolute = 1,
     OpcUa_DeadbandType_Percent = 2
@@ -5957,7 +5975,8 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The EnumeratedTestType enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_EnumeratedTestType {
+typedef enum _OpcUa_EnumeratedTestType
+{
     OpcUa_EnumeratedTestType_Red = 1,
     OpcUa_EnumeratedTestType_Yellow = 4,
     OpcUa_EnumeratedTestType_Green = 5
@@ -5999,7 +6018,8 @@ SOPC_ReturnStatus OpcUa_BuildInfo_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The RedundancySupport enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_RedundancySupport {
+typedef enum _OpcUa_RedundancySupport
+{
     OpcUa_RedundancySupport_None = 0,
     OpcUa_RedundancySupport_Cold = 1,
     OpcUa_RedundancySupport_Warm = 2,
@@ -6014,7 +6034,8 @@ typedef enum _OpcUa_RedundancySupport {
 /*============================================================================
  * The ServerState enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_ServerState {
+typedef enum _OpcUa_ServerState
+{
     OpcUa_ServerState_Running = 0,
     OpcUa_ServerState_Failed = 1,
     OpcUa_ServerState_NoConfiguration = 2,
@@ -6414,7 +6435,8 @@ SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue, SOP
 /*============================================================================
  * The ModelChangeStructureVerbMask enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_ModelChangeStructureVerbMask {
+typedef enum _OpcUa_ModelChangeStructureVerbMask
+{
     OpcUa_ModelChangeStructureVerbMask_NodeAdded = 1,
     OpcUa_ModelChangeStructureVerbMask_NodeDeleted = 2,
     OpcUa_ModelChangeStructureVerbMask_ReferenceAdded = 4,
@@ -6535,7 +6557,8 @@ SOPC_ReturnStatus OpcUa_EUInformation_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The AxisScaleEnumeration enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_AxisScaleEnumeration {
+typedef enum _OpcUa_AxisScaleEnumeration
+{
     OpcUa_AxisScaleEnumeration_Linear = 0,
     OpcUa_AxisScaleEnumeration_Log = 1,
     OpcUa_AxisScaleEnumeration_Ln = 2
@@ -6718,7 +6741,8 @@ SOPC_ReturnStatus OpcUa_Annotation_Decode(void* pValue, SOPC_Buffer* buf);
 /*============================================================================
  * The ExceptionDeviationFormat enumeration.
  *===========================================================================*/
-typedef enum _OpcUa_ExceptionDeviationFormat {
+typedef enum _OpcUa_ExceptionDeviationFormat
+{
     OpcUa_ExceptionDeviationFormat_AbsoluteValue = 0,
     OpcUa_ExceptionDeviationFormat_PercentOfValue = 1,
     OpcUa_ExceptionDeviationFormat_PercentOfRange = 2,

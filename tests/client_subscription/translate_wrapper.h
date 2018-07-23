@@ -20,7 +20,8 @@
 #ifndef LIBS2OPC_CLIENT_WRAPPER_H_
 #define LIBS2OPC_CLIENT_WRAPPER_H_
 
-extern "C" {
+extern "C"
+{
 #include "libs2opc_client.h"
 }
 

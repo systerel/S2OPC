@@ -70,7 +70,8 @@
 #define SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
 
 /* SOPC return statuses */
-typedef enum SOPC_ReturnStatus {
+typedef enum SOPC_ReturnStatus
+{
     SOPC_STATUS_OK = 0,
     SOPC_STATUS_NOK,
     SOPC_STATUS_INVALID_PARAMETERS,

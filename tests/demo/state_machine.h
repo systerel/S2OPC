@@ -35,7 +35,8 @@
 #include "sopc_mutexes.h"
 #include "sopc_user_app_itf.h"
 
-typedef enum {
+typedef enum
+{
     stInit,
     stConfigured,
     stActivating,

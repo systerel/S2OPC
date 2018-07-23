@@ -47,7 +47,8 @@ static const char* DEFAULT_SERVER_URL = "opc.tcp://localhost:4841";
 // representative.
 #define REASONABLE_RMOE 10.
 
-typedef enum {
+typedef enum
+{
     BENCH_RUNNING,
     BENCH_FINISHED_OK,
     BENCH_FINISHED_ERROR,

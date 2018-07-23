@@ -71,7 +71,8 @@ typedef struct SOPC_Endpoint_Config
 } SOPC_Endpoint_Config;
 
 /* Client and Server communication events to be managed by applicative code*/
-typedef enum SOPC_App_Com_Event {
+typedef enum SOPC_App_Com_Event
+{
     /* Client application events */
     SE_SESSION_ACTIVATION_FAILURE, /* id = internal session id (or 0 if not yet defined)
                                       auxParam = user application session context
@@ -115,7 +116,8 @@ typedef enum SOPC_App_Com_Event {
 /* Server only interfaces */
 
 /* Server address space access/modification notifications to applicative code */
-typedef enum SOPC_App_AddSpace_Event {
+typedef enum SOPC_App_AddSpace_Event
+{
     /* Server application events */
     AS_WRITE_EVENT, /* opParam = (OpcUa_WriteValue*) single write value operation
                        opStatus = status of the write operation
@@ -128,7 +130,8 @@ typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event, uint32_t IdOrStatus, vo
 /* Toolkit address space notification events callback type */
 typedef void SOPC_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus);
 
-typedef enum {
+typedef enum
+{
     SOPC_TOOLKIT_LOG_LEVEL_ERROR,
     SOPC_TOOLKIT_LOG_LEVEL_WARNING,
     SOPC_TOOLKIT_LOG_LEVEL_INFO,

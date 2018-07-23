@@ -53,7 +53,8 @@ static bool secuActive = true;
 
 volatile sig_atomic_t stopServer = 0;
 
-typedef enum {
+typedef enum
+{
     AS_LOADER_EMBEDDED,
 #ifdef WITH_EXPAT
     AS_LOADER_EXPAT,
