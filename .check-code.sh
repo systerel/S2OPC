@@ -51,23 +51,13 @@ if [[ $? != 0 ]]; then
     EXITCODE=1
 fi
 
-#### Compile C sources with clang ####
-echo "Compilation of project with Clang compiler to check specific CERT rules" | tee -a $LOGPATH
-CLANG_BUILD_DIR=build_clang
-CLANG_BIN_DIR=$PWD/bin_clang
-\rm -fr $CLANG_BUILD_DIR
-\mkdir -p $CLANG_BUILD_DIR
-cd $CLANG_BUILD_DIR
-CC=clang cmake -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=$CLANG_BIN_DIR .. >> $LOGPATH | tee -a $LOGPATH
-make all -j$(nproc) >> $LOGPATH
-if [[ $? != 0 ]]; then
-    cd - >> $LOGPATH
-    echo "ERROR: compiling project with Clang compiler: see log $LOGPATH / use make clean all in $CLANG_BUILD_DIR" | tee -a $LOGPATH
+#### Clang static analyzer ####
+echo "Compilation with Clang static analyzer" | tee -a $LOGPATH
+rm -fr build-analyzer && ./run-clang-static-analyzer.sh 2>&1 | tee -a $LOGPATH
+if [[ ${PIPESTATUS[0]} != 0 ]]; then
     EXITCODE=1
 else
-    cd - >> $LOGPATH
-    \rm -fr $CLANG_BUILD_DIR
-    \rm -fr $CLANG_BIN_DIR
+    rm -fr build-analyzer
 fi
 
 #### Analyze C sources with clang-tidy ####

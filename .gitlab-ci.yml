@@ -151,6 +151,7 @@ test-check:
     paths:
       - 'pre-build-check.log'
       - 'clang_tidy.log'
+      - 'build-analyzer/analyzer-report'
     when: on_failure
     expire_in: '1 month'
 
