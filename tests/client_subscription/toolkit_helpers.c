@@ -390,7 +390,7 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
 
     if (SOPC_STATUS_OK == status)
     {
-        plsVal = malloc(sizeof(SOPC_LibSub_Value));
+        plsVal = calloc(1, sizeof(SOPC_LibSub_Value));
         if (NULL == plsVal)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
