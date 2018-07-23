@@ -513,21 +513,8 @@ static bool SC_ReadAndCheckOpcUaMessageType(SOPC_EncodeableType* msgType, SOPC_B
 {
     assert(msgBuffer != NULL);
     SOPC_EncodeableType* msgEncType = NULL;
-    bool result = false;
-    // Read msg type
     SOPC_ReturnStatus status = SOPC_MsgBodyType_Read(msgBuffer, &msgEncType);
-    if (SOPC_STATUS_OK == status)
-    {
-        if (msgEncType == msgType)
-        {
-            result = true;
-        }
-        else if (msgEncType == msgType)
-        {
-            result = true;
-        }
-    }
-    return result;
+    return (status == SOPC_STATUS_OK) && (msgEncType == msgType);
 }
 
 // TODO: for each use case (client/server) the secret buffer is not adapted => avoid useless copy of nonces
