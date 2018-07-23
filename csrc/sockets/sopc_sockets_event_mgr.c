@@ -52,7 +52,7 @@ static bool ParseURI(const char* uri, char** hostname, char** port)
     {
         if (portIdx != 0 && hostnameLength != 0 && portLength != 0)
         {
-            lHostname = malloc(sizeof(char) * (hostnameLength + 1));
+            lHostname = calloc(1u + hostnameLength, sizeof(char));
             if (NULL == lHostname)
                 return false;
             if (lHostname != memcpy(lHostname, &(uri[10]), hostnameLength))
@@ -62,7 +62,7 @@ static bool ParseURI(const char* uri, char** hostname, char** port)
             }
             lHostname[hostnameLength] = '\0';
 
-            lPort = malloc(sizeof(char) * (portLength + 1));
+            lPort = calloc(1u + portLength, sizeof(char));
             if (NULL == lPort)
             {
                 free(lHostname);

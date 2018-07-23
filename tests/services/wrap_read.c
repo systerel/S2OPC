@@ -53,7 +53,7 @@ OpcUa_ReadRequest* read_new_read_request(void)
     const uint32_t N_REQUESTS =
         N_READ_NODES * 2 + N_READ_VARS; // Read 2 attributes on each node + value attribute on each variable
 
-    OpcUa_ReadValueId* lrv = (OpcUa_ReadValueId*) malloc(N_REQUESTS * sizeof(OpcUa_ReadValueId));
+    OpcUa_ReadValueId* lrv = (OpcUa_ReadValueId*) calloc(N_REQUESTS, sizeof(OpcUa_ReadValueId));
     uint32_t i;
 
     if (NULL == lrv)

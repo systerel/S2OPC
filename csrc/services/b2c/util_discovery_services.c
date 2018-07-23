@@ -134,7 +134,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
          * and securityLevel with all other parameters set to null. */
 
         // TODO: this code section can probably be optimized
-        currentConfig_EndpointDescription = malloc(sizeof(OpcUa_EndpointDescription) * 3 * nbSecuConfigs);
+        currentConfig_EndpointDescription = calloc(3u * nbSecuConfigs, sizeof(OpcUa_EndpointDescription));
         nbEndpointDescription = 0;
         OpcUa_EndpointDescription newEndPointDescription;
         OpcUa_EndpointDescription_Initialize(&newEndPointDescription);
