@@ -5,6 +5,26 @@ including an OPC UA communication stack, B model and C source code
 implementation for a minimal set of services and a cryptographic
 library adaptation for OPC UA needs (using mbedtls).
 
+The S2OPC UA Toolkit is the result of the Research and Development project INGOPCS (2016-2018).
+Systematic and Minalogic centers of innovation supported the project as part of the French FUI CFP.
+
+INGOPCS goals:
+- Develop an open-source and secure implementation of the OPC-UA standard (IEC 62541),
+- Verify the implementation with specialized tools (applying formal methods),
+- Demonstrate conformance to OPC-UA interoperability requirements,
+- Demonstrate compliance of the OPC-UA standard with the security requirements of sensitive Industrial Control Systems.
+
+INGOPCS initial consortium:
+- Systerel (leader)
+- ARC Informatique
+- Atos Worldgrid
+- CEA List
+- EDF
+- Eolane
+- Schneider Electric Automation
+- Telecom ParisTech
+- TrustInSoft
+
 ## S2OPC Toolkit features
 
 Common features:
