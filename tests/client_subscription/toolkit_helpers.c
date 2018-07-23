@@ -226,7 +226,7 @@ void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
     SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) pscConfig->key_priv_cli);
     SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->crt_srv);
     SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&pscConfig->pki));
-    SOPC_String_Delete((SOPC_String*) pscConfig->applicationUri);
+    free((char*) pscConfig->applicationUri);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     free(pscConfig);
