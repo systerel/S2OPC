@@ -3975,7 +3975,7 @@ SOPC_ReturnStatus SOPC_Variant_Compare(const SOPC_Variant* left, const SOPC_Vari
                         status = SOPC_STATUS_OK;
                         *comparison = -1;
                     }
-                    else if (left->Value.Matrix.Dimensions < right->Value.Matrix.Dimensions)
+                    else if (left->Value.Matrix.Dimensions > right->Value.Matrix.Dimensions)
                     {
                         status = SOPC_STATUS_OK;
                         *comparison = 1;
