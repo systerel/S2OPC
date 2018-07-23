@@ -186,18 +186,19 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
-
     if (NULL == pCfg || NULL == pCfgId)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
     if (NULL == pCfg->policyId)
     {
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Cannot configure connection with NULL policyId.");
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     /* Create the new configuration */
     if (SOPC_STATUS_OK == status)
