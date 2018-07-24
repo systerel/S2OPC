@@ -67,6 +67,7 @@ UA_VALUE_TYPE_STRING = UA_TYPES_NS + 'String'
 UA_VALUE_TYPE_BYTESTRING = UA_TYPES_NS + 'ByteString'
 UA_VALUE_TYPE_XMLELEMENT = UA_TYPES_NS + 'XmlElement'
 UA_VALUE_TYPE_DATETIME = UA_TYPES_NS + 'DateTime'
+UA_VALUE_TYPE_LISTOFSTRINGS = UA_TYPES_NS + 'ListOfString'
 
 VALUE_TYPE_BOOL = 0
 VALUE_TYPE_BYTE = 1
@@ -85,6 +86,7 @@ VALUE_TYPE_STRING = 13
 VALUE_TYPE_BYTESTRING = 14
 VALUE_TYPE_XMLELEMENT = 15
 VALUE_TYPE_DATETIME = 16
+VALUE_TYPE_LISTOFSTRINGS = 17
 
 C_IDENTIFIER_TYPES = [
     'SOPC_IdentifierType_Numeric',
@@ -379,6 +381,11 @@ def collect_node_references(node, aliases):
     return refs
 
 
+# Collects all the uax:String items in a uax:ListOfString element
+def collect_string_list_items(n):
+    return list(map(lambda x: x.text, n.findall(UA_VALUE_TYPE_STRING)))
+
+
 # Returns a VariableValue object
 def collect_variable_value(n):
     value_node = n.find(UA_VALUE_TAG)
@@ -446,6 +453,9 @@ def collect_variable_value(n):
     elif value.tag == UA_VALUE_TYPE_DATETIME:
         ty = VALUE_TYPE_DATETIME
         val = value.text
+    elif value.tag == UA_VALUE_TYPE_LISTOFSTRINGS:
+        ty = VALUE_TYPE_LISTOFSTRINGS
+        val = collect_string_list_items(value)
     else:
         raise ParseError('Unknown value type %s for node %s' % (value.tag, n.attrib['NodeId']))
 
@@ -510,6 +520,10 @@ def generate_variant(ty, field, val):
     return '{false, %s, SOPC_VariantArrayType_SingleValue, {.%s = %s}}' % (ty, field, val)
 
 
+def generate_list_of_strings(strings):
+    return '{true, SOPC_String_Id, SOPC_VariantArrayType_Array, {.Array = {%d, {.StringArr = (SOPC_String[]){%s}}}}}' % (len(strings), ','.join(map(generate_string, strings)))
+
+
 POINTER_VARIANT_TYPES = {VALUE_TYPE_GUID, VALUE_TYPE_NODEID, VALUE_TYPE_DATETIME}
 
 
@@ -545,6 +559,8 @@ def generate_value_variant(val):
         return generate_variant('SOPC_ByteString_Id', 'Bstring', generate_string(val.val))
     elif val.ty == VALUE_TYPE_XMLELEMENT:
         return generate_variant('SOPC_XmlElement_Id', 'XmlElt', generate_string(val.val))
+    elif val.ty == VALUE_TYPE_LISTOFSTRINGS:
+        return generate_list_of_strings(val.val)
     elif val.ty in POINTER_VARIANT_TYPES:
         # FIXME: The variant requires a pointer here, we need to wrap the value inside a 1-sized
         # array to trick the compiler.
