@@ -42,16 +42,18 @@
 #define LOG_MEMORY_ALLOCATION_FAILURE LOG("Memory allocation failure")
 
 typedef enum {
-    PARSE_START,            // Beginning of file
-    PARSE_NODESET,          // In a UANodeSet
-    PARSE_ALIASES,          // In an Aliases tag
-    PARSE_ALIAS,            // ... in its Alias
-    PARSE_NODE,             // In a UANode subtype tag
-    PARSE_NODE_DISPLAYNAME, // ... in its DisplayName
-    PARSE_NODE_DESCRIPTION, // ... in its Description
-    PARSE_NODE_REFERENCES,  // ... in its References
-    PARSE_NODE_REFERENCE,   // ... in its References/Reference
-    PARSE_NODE_VALUE,       // In the Value tag of a UAVariable/UAVariableType tag
+    PARSE_START,             // Beginning of file
+    PARSE_NODESET,           // In a UANodeSet
+    PARSE_ALIASES,           // In an Aliases tag
+    PARSE_ALIAS,             // ... in its Alias
+    PARSE_NODE,              // In a UANode subtype tag
+    PARSE_NODE_DISPLAYNAME,  // ... in its DisplayName
+    PARSE_NODE_DESCRIPTION,  // ... in its Description
+    PARSE_NODE_REFERENCES,   // ... in its References
+    PARSE_NODE_REFERENCE,    // ... in its References/Reference
+    PARSE_NODE_VALUE,        // In the Value tag of a UAVariable/UAVariableType tag
+    PARSE_NODE_VALUE_SCALAR, // ... for a scalar type
+    PARSE_NODE_VALUE_ARRAY,  // ... for an array type
 } parse_state_t;
 
 #define SKIP_TAG_LEN 256
@@ -77,9 +79,11 @@ struct parse_context_t
     SOPC_Dict* aliases;
     char* current_alias_alias;
     SOPC_BuiltinId current_value_type;
+    SOPC_VariantArrayType current_array_type;
     SOPC_AddressSpace_Item item;
     // Temporary array to store the references.
     SOPC_Array* references;
+    SOPC_Array* list_items;
 };
 
 #define NS_SEPARATOR "|"
@@ -502,6 +506,30 @@ static bool start_node_value(struct parse_context_t* ctx, const XML_Char** attrs
     return true;
 }
 
+static bool start_node_value_array(struct parse_context_t* ctx, const char* name)
+{
+    assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
+    assert(ctx->list_items == NULL);
+
+    if (ctx->current_value_type == SOPC_String_Id)
+    {
+        ctx->list_items = SOPC_Array_Create(sizeof(SOPC_String), 0, (SOPC_Array_Free_Func) SOPC_String_Clear);
+
+        if (ctx->list_items == NULL)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+    }
+    else
+    {
+        LOGF("Unsupported array type: %s", name);
+        return false;
+    }
+
+    return true;
+}
+
 static void skip_tag(struct parse_context_t* ctx, const char* name)
 {
     assert(ctx->skip_tag[0] == 0);
@@ -521,12 +549,12 @@ static bool current_element_has_value(struct parse_context_t* ctx)
     }
 }
 
-static SOPC_BuiltinId type_id_from_tag(const char* tag)
+static bool type_id_from_tag(const char* tag, SOPC_BuiltinId* type_id, SOPC_VariantArrayType* array_type)
 {
     // tag should have the correct namespace
     if (strncmp(tag, UA_TYPES_NS NS_SEPARATOR, strlen(UA_TYPES_NS NS_SEPARATOR)) != 0)
     {
-        return SOPC_Null_Id;
+        return false;
     }
 
     const char* name = tag + strlen(UA_TYPES_NS NS_SEPARATOR);
@@ -535,37 +563,41 @@ static SOPC_BuiltinId type_id_from_tag(const char* tag)
     {
         const char* name;
         SOPC_BuiltinId id;
+        SOPC_VariantArrayType array_type;
     } TYPE_IDS[] = {
-        {"Boolean", SOPC_Boolean_Id},
-        {"SByte", SOPC_SByte_Id},
-        {"Byte", SOPC_Byte_Id},
-        {"Int16", SOPC_Int16_Id},
-        {"Int32", SOPC_Int32_Id},
-        {"Int64", SOPC_Int64_Id},
-        {"UInt16", SOPC_UInt16_Id},
-        {"UInt32", SOPC_UInt32_Id},
-        {"UInt64", SOPC_UInt64_Id},
-        {"Float", SOPC_Float_Id},
-        {"Double", SOPC_Double_Id},
-        {"String", SOPC_String_Id},
-        {"ByteString", SOPC_ByteString_Id},
-        {"Guid", SOPC_Guid_Id},
-        {"NodeId", SOPC_NodeId_Id},
-        {"QualifiedName", SOPC_QualifiedName_Id},
-        {"LocalizedText", SOPC_LocalizedText_Id},
-        {"XmlElement", SOPC_XmlElement_Id},
-        {NULL, SOPC_Null_Id},
+        {"Boolean", SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue},
+        {"SByte", SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue},
+        {"Byte", SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue},
+        {"Int16", SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue},
+        {"Int32", SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue},
+        {"Int64", SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue},
+        {"UInt16", SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue},
+        {"UInt32", SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue},
+        {"UInt64", SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue},
+        {"Float", SOPC_Float_Id, SOPC_VariantArrayType_SingleValue},
+        {"Double", SOPC_Double_Id, SOPC_VariantArrayType_SingleValue},
+        {"String", SOPC_String_Id, SOPC_VariantArrayType_SingleValue},
+        {"ByteString", SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue},
+        {"Guid", SOPC_Guid_Id, SOPC_VariantArrayType_SingleValue},
+        {"NodeId", SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue},
+        {"QualifiedName", SOPC_QualifiedName_Id, SOPC_VariantArrayType_SingleValue},
+        {"LocalizedText", SOPC_LocalizedText_Id, SOPC_VariantArrayType_SingleValue},
+        {"XmlElement", SOPC_XmlElement_Id, SOPC_VariantArrayType_SingleValue},
+        {"ListOfString", SOPC_String_Id, SOPC_VariantArrayType_Array},
+        {NULL, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue},
     };
 
     for (size_t i = 0; TYPE_IDS[i].name != NULL; ++i)
     {
         if (strcmp(name, TYPE_IDS[i].name) == 0)
         {
-            return TYPE_IDS[i].id;
+            *type_id = TYPE_IDS[i].id;
+            *array_type = TYPE_IDS[i].array_type;
+            return true;
         }
     }
 
-    return SOPC_Null_Id;
+    return false;
 }
 
 static uint32_t element_id_from_tag(const char* tag)
@@ -707,18 +739,64 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     {
         assert(current_element_has_value(ctx));
 
-        SOPC_BuiltinId type_id = type_id_from_tag(name);
+        SOPC_BuiltinId type_id;
+        SOPC_VariantArrayType array_type;
 
-        if (type_id != SOPC_Null_Id)
-        {
-            assert(ctx->current_value_type == SOPC_Null_Id);
-            ctx->current_value_type = type_id;
-        }
-        else
+        if (!type_id_from_tag(name, &type_id, &array_type))
         {
             LOGF("Unsupported value type: %s", name);
             skip_tag(ctx, name);
+            return;
         }
+
+        assert(ctx->current_value_type == SOPC_Null_Id);
+        ctx->current_value_type = type_id;
+        ctx->current_array_type = array_type;
+
+        if (array_type == SOPC_VariantArrayType_Array && !start_node_value_array(ctx, name))
+        {
+            XML_StopParser(ctx->parser, false);
+            return;
+        }
+
+        ctx->state =
+            (array_type == SOPC_VariantArrayType_SingleValue) ? PARSE_NODE_VALUE_SCALAR : PARSE_NODE_VALUE_ARRAY;
+        break;
+    }
+    case PARSE_NODE_VALUE_SCALAR:
+        LOG("Unexpected tag while parsing scalar value");
+        XML_StopParser(ctx->parser, false);
+        return;
+    case PARSE_NODE_VALUE_ARRAY:
+    {
+        assert(current_element_has_value(ctx));
+        assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
+
+        SOPC_BuiltinId type_id;
+        SOPC_VariantArrayType array_type;
+
+        if (!type_id_from_tag(name, &type_id, &array_type))
+        {
+            LOGF("Unsupported value type: %s", name);
+            skip_tag(ctx, name);
+            return;
+        }
+
+        if (type_id != ctx->current_value_type)
+        {
+            LOGF("Array value of type %s does not match array type", name);
+            skip_tag(ctx, name);
+            return;
+        }
+
+        if (array_type != SOPC_VariantArrayType_SingleValue)
+        {
+            LOG("Arrays cannot be nested");
+            skip_tag(ctx, name);
+            return;
+        }
+
+        ctx->state = PARSE_NODE_VALUE_SCALAR;
         break;
     }
     default:
@@ -990,8 +1068,10 @@ static bool set_variant_value(SOPC_Variant* var, SOPC_BuiltinId type_id, const c
     }
 }
 
-static bool set_element_value(struct parse_context_t* ctx)
+static bool set_element_value_scalar(struct parse_context_t* ctx)
 {
+    assert(ctx->current_array_type == SOPC_VariantArrayType_SingleValue);
+
     SOPC_Variant* var = SOPC_AddressSpace_Item_Get_Value(&ctx->item);
     bool ok = set_variant_value(var, ctx->current_value_type, ctx_char_data_stripped(ctx));
     ctx_char_data_reset(ctx);
@@ -1002,6 +1082,57 @@ static bool set_element_value(struct parse_context_t* ctx)
     }
 
     return ok;
+}
+
+static bool append_element_value(struct parse_context_t* ctx)
+{
+    assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
+
+    if (ctx->current_value_type == SOPC_String_Id)
+    {
+        SOPC_String str;
+        SOPC_String_Initialize(&str);
+        if ((SOPC_String_CopyFromCString(&str, ctx_char_data_stripped(ctx)) != SOPC_STATUS_OK) ||
+            !SOPC_Array_Append(ctx->list_items, str))
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            SOPC_String_Clear(&str);
+            return false;
+        }
+    }
+    else
+    {
+        assert(false); // We shouldn't have started parsing an unsupported type
+    }
+
+    return true;
+}
+
+static void set_element_value_array(struct parse_context_t* ctx)
+{
+    assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
+    assert(ctx->list_items != NULL);
+
+    size_t n_items = SOPC_Array_Size(ctx->list_items);
+    SOPC_Variant* var = SOPC_AddressSpace_Item_Get_Value(&ctx->item);
+
+    var->ArrayType = SOPC_VariantArrayType_Array;
+    var->BuiltInTypeId = ctx->current_value_type;
+    var->DoNotClear = false;
+    assert(n_items <= INT32_MAX);
+    var->Value.Array.Length = (int32_t) n_items;
+
+    if (ctx->current_value_type == SOPC_String_Id)
+    {
+        var->Value.Array.Content.StringArr = SOPC_Array_Into_Raw(ctx->list_items);
+    }
+    else
+    {
+        assert(false); // We shouldn't have started parsing an unsupported type
+    }
+
+    ctx->list_items = NULL;
+    ctx->item.value_status = 0x00;
 }
 
 static bool finalize_node(struct parse_context_t* ctx)
@@ -1089,14 +1220,45 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_NODE_REFERENCES:
         ctx->state = PARSE_NODE;
         break;
-    case PARSE_NODE_VALUE:
-        if ((ctx->current_value_type != SOPC_Null_Id) && !set_element_value(ctx))
+    case PARSE_NODE_VALUE_SCALAR:
+        assert(ctx->current_value_type != SOPC_Null_Id);
+
+        if (ctx->current_array_type == SOPC_VariantArrayType_SingleValue)
         {
-            XML_StopParser(ctx->parser, false);
-            return;
+            if (!set_element_value_scalar(ctx))
+            {
+                XML_StopParser(ctx->parser, false);
+                return;
+            }
+
+            ctx->current_value_type = SOPC_Null_Id;
+            ctx->state = PARSE_NODE_VALUE;
+        }
+        else if (ctx->current_array_type == SOPC_VariantArrayType_Array)
+        {
+            if (!append_element_value(ctx))
+            {
+                XML_StopParser(ctx->parser, false);
+                return;
+            }
+
+            ctx->state = PARSE_NODE_VALUE_ARRAY;
+        }
+        else
+        {
+            assert(false);
         }
 
+        break;
+    case PARSE_NODE_VALUE_ARRAY:
+        assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
+
+        set_element_value_array(ctx);
+        ctx->current_array_type = SOPC_VariantArrayType_SingleValue;
         ctx->current_value_type = SOPC_Null_Id;
+        ctx->state = PARSE_NODE_VALUE;
+        break;
+    case PARSE_NODE_VALUE:
         ctx->state = PARSE_NODE;
         break;
     case PARSE_NODE:
@@ -1143,7 +1305,7 @@ static void char_data_handler(void* user_data, const XML_Char* s, int len)
     case PARSE_NODE_DESCRIPTION:
     case PARSE_ALIAS:
     case PARSE_NODE_REFERENCE:
-    case PARSE_NODE_VALUE:
+    case PARSE_NODE_VALUE_SCALAR:
         if (!ctx_char_data_append(ctx, s, (size_t) len))
         {
             XML_StopParser(ctx->parser, false);
@@ -1204,6 +1366,7 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
     free(ctx.current_alias_alias);
     free(ctx.char_data_buffer);
     SOPC_Array_Delete(ctx.references);
+    SOPC_Array_Delete(ctx.list_items);
 
     if (res == SOPC_STATUS_OK)
     {
