@@ -169,7 +169,7 @@ static const char* ctx_char_data_stripped(struct parse_context_t* ctx)
     return strip_whitespace(ctx->char_data_buffer, ctx->char_data_len);
 }
 
-static SOPC_StatusCode parse(XML_Parser parser, FILE* fd)
+static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 {
     char buf[65365];
 
@@ -456,7 +456,7 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
                 return false;
             }
 
-            SOPC_StatusCode status = SOPC_NodeId_Copy(&ref.ReferenceTypeId, nodeid);
+            SOPC_ReturnStatus status = SOPC_NodeId_Copy(&ref.ReferenceTypeId, nodeid);
             SOPC_NodeId_Clear(nodeid);
             free(nodeid);
 
@@ -1369,7 +1369,7 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
     XML_SetElementHandler(parser, start_element_handler, end_element_handler);
     XML_SetCharacterDataHandler(parser, char_data_handler);
 
-    SOPC_StatusCode res = parse(parser, fd);
+    SOPC_ReturnStatus res = parse(parser, fd);
     XML_ParserFree(parser);
     SOPC_Dict_Delete(aliases);
     free(ctx.current_alias_alias);
