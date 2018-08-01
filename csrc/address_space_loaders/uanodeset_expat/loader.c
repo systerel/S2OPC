@@ -1394,6 +1394,7 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
     }
     else
     {
+        SOPC_AddressSpace_Item_Clear(&ctx.item);
         SOPC_AddressSpace_Delete(space);
         return NULL;
     }
