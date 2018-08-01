@@ -387,6 +387,13 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
         if (strcmp("NodeId", attr) == 0)
         {
             const char* attr_val = attrs[++i];
+
+            if (attr_val == NULL)
+            {
+                LOG_XML_ERROR("Missing value for NodeId attribute");
+                return false;
+            }
+
             SOPC_NodeId* id = SOPC_NodeId_FromCString(attr_val, (int32_t) strlen(attr_val));
 
             if (id == NULL)
