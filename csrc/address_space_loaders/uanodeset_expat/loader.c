@@ -420,6 +420,10 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
                 return false;
             }
         }
+        else
+        {
+            ++i; // Skip value of unknown attribute
+        }
     }
 
     ctx->state = PARSE_NODE;
