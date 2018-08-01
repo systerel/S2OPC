@@ -33,10 +33,19 @@
 
 #ifdef UANODESET_LOADER_LOG
 #define LOG(str) fprintf(stderr, "UANODESET_LOADER: %s:%d: %s\n", __FILE__, __LINE__, (str))
+#define LOG_XML_ERROR(str)                                                                        \
+    fprintf(stderr, "UANODESET_LOADER: %s:%d: at line %lu, column %lu: %s\n", __FILE__, __LINE__, \
+            XML_GetCurrentLineNumber(ctx->parser), XML_GetCurrentColumnNumber(ctx->parser), (str))
+
 #define LOGF(format, ...) fprintf(stderr, "UANODESET_LOADER: %s:%d: " format "\n", __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_XML_ERRORF(format, ...)                                                                       \
+    fprintf(stderr, "UANODESET_LOADER: %s:%d: at line %lu, column %lu: " format "\n", __FILE__, __LINE__, \
+            XML_GetCurrentLineNumber(ctx->parser), XML_GetCurrentColumnNumber(ctx->parser), __VA_ARGS__)
 #else
 #define LOG(str)
+#define LOG_XML_ERROR(str)
 #define LOGF(format, ...)
+#define LOG_XML_ERRORF(format, ...)
 #endif
 
 #define LOG_MEMORY_ALLOCATION_FAILURE LOG("Memory allocation failure")
@@ -382,7 +391,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 
             if (id == NULL)
             {
-                LOGF("Invalid variable NodeId: %s", attr_val);
+                LOG_XML_ERRORF("Invalid variable NodeId: %s", attr_val);
                 return false;
             }
 
@@ -407,7 +416,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 
             if (status != SOPC_STATUS_OK)
             {
-                LOGF("Invalid browse name: %s", attr_val);
+                LOG_XML_ERRORF("Invalid browse name: %s", attr_val);
                 return false;
             }
         }
@@ -443,7 +452,7 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
 
             if (nodeid == NULL)
             {
-                LOGF("Error while parsing ReferenceType '%s' into a NodeId\n.", val);
+                LOG_XML_ERRORF("Error while parsing ReferenceType '%s' into a NodeId\n.", val);
                 return false;
             }
 
@@ -497,7 +506,7 @@ static bool start_node_value(struct parse_context_t* ctx, const XML_Char** attrs
 
             if (!parse_unsigned_value(val, strlen(val), 8, &ctx->item.data.variable.AccessLevel))
             {
-                LOGF("Invalid AccessLevel on node value: '%s", val);
+                LOG_XML_ERRORF("Invalid AccessLevel on node value: '%s", val);
                 return false;
             }
         }
@@ -523,7 +532,7 @@ static bool start_node_value_array(struct parse_context_t* ctx, const char* name
     }
     else
     {
-        LOGF("Unsupported array type: %s", name);
+        LOG_XML_ERRORF("Unsupported array type: %s", name);
         return false;
     }
 
@@ -650,7 +659,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     case PARSE_START:
         if (strcmp(name, NS(UA_NODESET_NS, "UANodeSet")) != 0)
         {
-            LOGF("Unexpected tag %s", name);
+            LOG_XML_ERRORF("Unexpected tag %s", name);
             XML_StopParser(ctx->parser, 0);
             return;
         }
@@ -744,7 +753,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         if (!type_id_from_tag(name, &type_id, &array_type))
         {
-            LOGF("Unsupported value type: %s", name);
+            LOG_XML_ERRORF("Unsupported value type: %s", name);
             skip_tag(ctx, name);
             return;
         }
@@ -764,7 +773,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         break;
     }
     case PARSE_NODE_VALUE_SCALAR:
-        LOG("Unexpected tag while parsing scalar value");
+        LOG_XML_ERROR("Unexpected tag while parsing scalar value");
         XML_StopParser(ctx->parser, false);
         return;
     case PARSE_NODE_VALUE_ARRAY:
@@ -777,21 +786,21 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         if (!type_id_from_tag(name, &type_id, &array_type))
         {
-            LOGF("Unsupported value type: %s", name);
+            LOG_XML_ERRORF("Unsupported value type: %s", name);
             skip_tag(ctx, name);
             return;
         }
 
         if (type_id != ctx->current_value_type)
         {
-            LOGF("Array value of type %s does not match array type", name);
+            LOG_XML_ERRORF("Array value of type %s does not match array type", name);
             skip_tag(ctx, name);
             return;
         }
 
         if (array_type != SOPC_VariantArrayType_SingleValue)
         {
-            LOG("Arrays cannot be nested");
+            LOG_XML_ERROR("Arrays cannot be nested");
             skip_tag(ctx, name);
             return;
         }
@@ -808,7 +817,7 @@ static bool finalize_alias(struct parse_context_t* ctx)
 {
     if (ctx->current_alias_alias == NULL)
     {
-        LOG("Missing Alias attribute on Alias.");
+        LOG_XML_ERROR("Missing Alias attribute on Alias.");
         return false;
     }
 
@@ -838,7 +847,7 @@ static bool finalize_reference(struct parse_context_t* ctx)
 
     if (target_id == NULL)
     {
-        LOGF("Cannot parse reference target '%s' into a NodeId.", text);
+        LOG_XML_ERRORF("Cannot parse reference target '%s' into a NodeId.", text);
         return false;
     }
 
