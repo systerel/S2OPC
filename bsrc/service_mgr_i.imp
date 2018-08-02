@@ -39,7 +39,8 @@ IMPORTS
     service_write_decode_bs,
     service_get_endpoints_bs,
     service_browse_seq,
-    subscription_mgr
+    subscription_mgr,
+    service_find_servers_bs
 
 PROMOTES
     /* message_in_bs */
@@ -514,6 +515,8 @@ OPERATIONS
         CASE req_typ OF
             EITHER e_msg_discovery_get_endpoints_req THEN
                 l_ret <-- treat_get_endpoints_request (req_msg, resp_msg, endpoint_config_idx)
+            OR e_msg_discovery_find_servers_req THEN
+                l_ret <-- treat_find_servers_request (req_msg, resp_msg, endpoint_config_idx)
             ELSE
                 /* Cases shall cover all session services req types */
                 l_ret := e_sc_bad_service_unsupported
