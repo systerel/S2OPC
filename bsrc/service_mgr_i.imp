@@ -931,7 +931,7 @@ OPERATIONS
         ELSE
             ret := e_sc_bad_out_of_memory
         END;
-        set_local_service_treatment
+        unset_local_service_treatment
     END
     ;
 
