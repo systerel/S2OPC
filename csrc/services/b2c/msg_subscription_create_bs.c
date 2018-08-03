@@ -36,6 +36,47 @@ void msg_subscription_create_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+
+static void SOPC_InternalCommonCreateModifySubscription(
+    double RequestedPublishingInterval,
+    uint32_t RequestedLifetimeCount,
+    uint32_t RequestedMaxKeepAliveCount,
+    uint32_t MaxNotificationsPerPublish,
+    constants__t_opcua_duration_i* const msg_subscription_create_bs__reqPublishInterval,
+    t_entier4* const msg_subscription_create_bs__reqLifetimeCount,
+    t_entier4* const msg_subscription_create_bs__reqMaxKeepAlive,
+    t_entier4* const msg_subscription_create_bs__maxNotificationsPerPublish)
+{
+    *msg_subscription_create_bs__reqPublishInterval = RequestedPublishingInterval;
+
+    if (RequestedLifetimeCount <= INT32_MAX)
+    {
+        *msg_subscription_create_bs__reqLifetimeCount = (int32_t) RequestedLifetimeCount;
+    }
+    else
+    {
+        *msg_subscription_create_bs__reqLifetimeCount = INT32_MAX;
+    }
+
+    if (RequestedMaxKeepAliveCount <= INT32_MAX)
+    {
+        *msg_subscription_create_bs__reqMaxKeepAlive = (int32_t) RequestedMaxKeepAliveCount;
+    }
+    else
+    {
+        *msg_subscription_create_bs__reqMaxKeepAlive = INT32_MAX;
+    }
+
+    if (MaxNotificationsPerPublish <= INT32_MAX)
+    {
+        *msg_subscription_create_bs__maxNotificationsPerPublish = (int32_t) MaxNotificationsPerPublish;
+    }
+    else
+    {
+        *msg_subscription_create_bs__maxNotificationsPerPublish = INT32_MAX;
+    }
+}
+
 void msg_subscription_create_bs__get_msg_create_subscription_req_params(
     const constants__t_msg_i msg_subscription_create_bs__p_req_msg,
     constants__t_opcua_duration_i* const msg_subscription_create_bs__reqPublishInterval,
@@ -45,36 +86,13 @@ void msg_subscription_create_bs__get_msg_create_subscription_req_params(
     t_bool* const msg_subscription_create_bs__publishEnabled)
 {
     OpcUa_CreateSubscriptionRequest* req = (OpcUa_CreateSubscriptionRequest*) msg_subscription_create_bs__p_req_msg;
-    *msg_subscription_create_bs__reqPublishInterval = req->RequestedPublishingInterval;
-
-    if (req->RequestedLifetimeCount <= INT32_MAX)
-    {
-        *msg_subscription_create_bs__reqLifetimeCount = (int32_t) req->RequestedLifetimeCount;
-    }
-    else
-    {
-        *msg_subscription_create_bs__reqLifetimeCount = INT32_MAX;
-    }
-
-    if (req->RequestedMaxKeepAliveCount <= INT32_MAX)
-    {
-        *msg_subscription_create_bs__reqMaxKeepAlive = (int32_t) req->RequestedMaxKeepAliveCount;
-    }
-    else
-    {
-        *msg_subscription_create_bs__reqMaxKeepAlive = INT32_MAX;
-    }
-
-    if (req->MaxNotificationsPerPublish <= INT32_MAX)
-    {
-        *msg_subscription_create_bs__maxNotificationsPerPublish = (int32_t) req->MaxNotificationsPerPublish;
-    }
-    else
-    {
-        *msg_subscription_create_bs__maxNotificationsPerPublish = INT32_MAX;
-    }
-
     *msg_subscription_create_bs__publishEnabled = req->PublishingEnabled;
+
+    SOPC_InternalCommonCreateModifySubscription(
+        req->RequestedPublishingInterval, req->RequestedLifetimeCount, req->RequestedMaxKeepAliveCount,
+        req->MaxNotificationsPerPublish, msg_subscription_create_bs__reqPublishInterval,
+        msg_subscription_create_bs__reqLifetimeCount, msg_subscription_create_bs__reqMaxKeepAlive,
+        msg_subscription_create_bs__maxNotificationsPerPublish);
 }
 
 void msg_subscription_create_bs__get_msg_modify_subscription_req_params(
@@ -86,36 +104,13 @@ void msg_subscription_create_bs__get_msg_modify_subscription_req_params(
     t_entier4* const msg_subscription_create_bs__maxNotificationsPerPublish)
 {
     OpcUa_ModifySubscriptionRequest* req = (OpcUa_ModifySubscriptionRequest*) msg_subscription_create_bs__p_req_msg;
-    *msg_subscription_create_bs__reqPublishInterval = req->RequestedPublishingInterval;
-
     *msg_subscription_create_bs__subscription = req->SubscriptionId;
 
-    if (req->RequestedLifetimeCount <= INT32_MAX)
-    {
-        *msg_subscription_create_bs__reqLifetimeCount = (int32_t) req->RequestedLifetimeCount;
-    }
-    else
-    {
-        *msg_subscription_create_bs__reqLifetimeCount = INT32_MAX;
-    }
-
-    if (req->RequestedMaxKeepAliveCount <= INT32_MAX)
-    {
-        *msg_subscription_create_bs__reqMaxKeepAlive = (int32_t) req->RequestedMaxKeepAliveCount;
-    }
-    else
-    {
-        *msg_subscription_create_bs__reqMaxKeepAlive = INT32_MAX;
-    }
-
-    if (req->MaxNotificationsPerPublish <= INT32_MAX)
-    {
-        *msg_subscription_create_bs__maxNotificationsPerPublish = (int32_t) req->MaxNotificationsPerPublish;
-    }
-    else
-    {
-        *msg_subscription_create_bs__maxNotificationsPerPublish = INT32_MAX;
-    }
+    SOPC_InternalCommonCreateModifySubscription(
+        req->RequestedPublishingInterval, req->RequestedLifetimeCount, req->RequestedMaxKeepAliveCount,
+        req->MaxNotificationsPerPublish, msg_subscription_create_bs__reqPublishInterval,
+        msg_subscription_create_bs__reqLifetimeCount, msg_subscription_create_bs__reqMaxKeepAlive,
+        msg_subscription_create_bs__maxNotificationsPerPublish);
 }
 
 void msg_subscription_create_bs__set_msg_create_subscription_resp_params(

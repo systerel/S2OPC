@@ -22,6 +22,8 @@
 
 #include <assert.h>
 
+#include "sopc_logger.h"
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -108,14 +110,15 @@ void notification_republish_queue_bs__add_republish_notif_to_queue(
     notifMsgCpy->NotificationData = malloc(1 * sizeof(SOPC_ExtensionObject)); /* Deep copy for notification data */
     if (notifMsgCpy->NotificationData == NULL)
     {
+        free(notifMsgCpy);
         return;
     }
     SOPC_ExtensionObject_Initialize(notifMsgCpy->NotificationData);
     if (SOPC_ExtensionObject_Copy(notifMsgCpy->NotificationData,
                                   notification_republish_queue_bs__p_notif_msg->NotificationData) != SOPC_STATUS_OK)
     {
-        /* TODO: remove assertion */
-        assert(false);
+        SOPC_Logger_TraceError(
+            "notification_republish_queue_bs__add_republish_notif_to_queue: SOPC_ExtensionObject_Copy failure");
         return;
     }
     else
@@ -126,7 +129,8 @@ void notification_republish_queue_bs__add_republish_notif_to_queue(
                 (OpcUa_DataChangeNotification*) notification_republish_queue_bs__p_notif_msg->NotificationData->Body
                     .Object.Value) != SOPC_STATUS_OK)
         {
-            assert(false);
+            SOPC_Logger_TraceError(
+                "notification_republish_queue_bs__add_republish_notif_to_queue: SOPC_ExtensionObject_Copy failure");
             return;
         }
     }

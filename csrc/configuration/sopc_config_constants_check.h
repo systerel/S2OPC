@@ -87,12 +87,12 @@
 
 /** Minimum number of publish intervals before lifetime expired shall be 3 times bigger than keep alive max value */
 #if SOPC_MIN_LIFETIME_PUBLISH_INTERVALS < 3 * SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS
-#error "Minimum subscription lifetime intervals < 3"
+#error "Minimum subscription lifetime intervals < 3 * SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS"
 #endif
 
 /** Maximum number of publish intervals before lifetime expired shall be 3 times bigger than keep alive max value */
 #if SOPC_MAX_LIFETIME_PUBLISH_INTERVALS < 3 * SOPC_MAX_KEEPALIVE_PUBLISH_INTERVALS
-#error "Maximum subscription lifetime intervals > INT32_MAX"
+#error "Maximum subscription lifetime intervals < 3 * SOPC_MAX_KEEPALIVE_PUBLISH_INTERVALS"
 #endif
 
 /** @brief Maximum number of monitored items per subscription */

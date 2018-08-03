@@ -24,6 +24,8 @@
 
 #include <assert.h>
 
+#include "sopc_logger.h"
+
 static const uint64_t SOPC_MILLISECOND_TO_100_NANOSECONDS = 10000; // 10^4
 
 /*------------------------
@@ -155,23 +157,24 @@ void msg_subscription_publish_ack_bs__getall_msg_republish_request(
 
 void msg_subscription_publish_ack_bs__setall_msg_republish_response(
     const constants__t_msg_i msg_subscription_publish_ack_bs__p_resp_msg,
-    const constants__t_notif_msg_i msg_subscription_publish_ack_bs__l_notifMsg)
+    const constants__t_notif_msg_i msg_subscription_publish_ack_bs__p_notifMsg,
+    constants__t_StatusCode_i* const msg_subscription_publish_ack_bs__sc)
 {
+    *msg_subscription_publish_ack_bs__sc = constants__e_sc_bad_out_of_memory;
     OpcUa_RepublishResponse* resp = (OpcUa_RepublishResponse*) msg_subscription_publish_ack_bs__p_resp_msg;
-    resp->NotificationMessage = *msg_subscription_publish_ack_bs__l_notifMsg; /* Shallow copy */
+    resp->NotificationMessage = *msg_subscription_publish_ack_bs__p_notifMsg; /* Shallow copy */
     resp->NotificationMessage.NotificationData =
         malloc(1 * sizeof(SOPC_ExtensionObject)); /* Deep copy for notification data */
     if (resp->NotificationMessage.NotificationData == NULL)
     {
-        assert(false); /* TODO: change model to return error in this case OR implement reference count to avoid copy */
         return;
     }
     SOPC_ExtensionObject_Initialize(resp->NotificationMessage.NotificationData);
     if (SOPC_ExtensionObject_Copy(resp->NotificationMessage.NotificationData,
-                                  msg_subscription_publish_ack_bs__l_notifMsg->NotificationData) != SOPC_STATUS_OK)
+                                  msg_subscription_publish_ack_bs__p_notifMsg->NotificationData) != SOPC_STATUS_OK)
     {
-        /* TODO: remove assertion */
-        assert(false);
+        SOPC_Logger_TraceError(
+            "msg_subscription_publish_ack_bs__setall_msg_republish_response: SOPC_ExtensionObject_Copy failure");
         return;
     }
     else
@@ -180,10 +183,13 @@ void msg_subscription_publish_ack_bs__setall_msg_republish_response(
         if (SOPC_InternalOpcUa_DataChangeNotification_Copy(
                 (OpcUa_DataChangeNotification*) resp->NotificationMessage.NotificationData->Body.Object.Value,
                 (OpcUa_DataChangeNotification*)
-                    msg_subscription_publish_ack_bs__l_notifMsg->NotificationData->Body.Object.Value) != SOPC_STATUS_OK)
+                    msg_subscription_publish_ack_bs__p_notifMsg->NotificationData->Body.Object.Value) != SOPC_STATUS_OK)
         {
-            assert(false);
+            SOPC_Logger_TraceError(
+                "msg_subscription_publish_ack_bs__setall_msg_republish_response: "
+                "SOPC_InternalOpcUa_DataChangeNotification_Copy failure");
             return;
         }
     }
+    *msg_subscription_publish_ack_bs__sc = constants__e_sc_ok;
 }

@@ -19,8 +19,11 @@
 
 #include "msg_subscription_publish_bs.h"
 
+#include <inttypes.h>
+
 #include "util_b2c.h"
 
+#include "sopc_logger.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
@@ -72,7 +75,7 @@ void msg_subscription_publish_bs__alloc_notification_message_items(
             if (SOPC_STATUS_OK != status)
             {
                 free(notifMsg->NotificationData);
-                SOPC_Encodeable_Delete(&OpcUa_NotificationMessage_EncodeableType, (void**) &notifMsg);
+                notifMsg->NotificationData = NULL;
             }
         }
 
@@ -130,7 +133,11 @@ void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
     }
     else
     {
-        // TODO: log ?
+        SOPC_Logger_TraceError(
+            "generate_internal_send_publish_response_event: out of memory error sending publish response "
+            "session=%" PRIu32 ", requestId/Handle=%" PRIu32 "/%" PRIu32 "",
+            msg_subscription_publish_bs__p_session, msg_subscription_publish_bs__p_req_context,
+            msg_subscription_publish_bs__p_req_handle);
     }
 }
 

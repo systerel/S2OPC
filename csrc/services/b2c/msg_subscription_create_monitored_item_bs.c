@@ -125,6 +125,10 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
 {
     *msg_subscription_create_monitored_item_bs__p_sc = constants__c_StatusCode_indet;
     *msg_subscription_create_monitored_item_bs__p_aid = constants__c_AttributeId_indet;
+    *msg_subscription_create_monitored_item_bs__p_monitMode = constants__c_monitoringMode_indet;
+    *msg_subscription_create_monitored_item_bs__p_clientHandle = 0;
+    *msg_subscription_create_monitored_item_bs__p_samplingItv = 0;
+    *msg_subscription_create_monitored_item_bs__p_queueSize = 0;
     OpcUa_CreateMonitoredItemsRequest* createReq =
         (OpcUa_CreateMonitoredItemsRequest*) msg_subscription_create_monitored_item_bs__p_req_msg;
     OpcUa_MonitoredItemCreateRequest* monitReq =

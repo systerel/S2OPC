@@ -169,16 +169,20 @@ OPERATIONS
     END
     ;
 
-    setall_msg_republish_response (p_resp_msg, l_notifMsg) =
+    sc <-- setall_msg_republish_response (p_resp_msg, p_notifMsg) =
     PRE
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_subscription_republish_resp &
-        l_notifMsg : t_notif_msg_i &
-        l_notifMsg : t_notif_msg
+        p_notifMsg : t_notif_msg_i &
+        p_notifMsg : t_notif_msg
     THEN
-        skip
+        CHOICE
+            sc := e_sc_ok
+        OR
+            sc := e_sc_bad_out_of_memory
+        END
     END
 
 END

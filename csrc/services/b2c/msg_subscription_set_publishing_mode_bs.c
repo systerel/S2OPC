@@ -101,19 +101,3 @@ void msg_subscription_set_publishing_mode_bs__setall_msg_subscription_set_publis
         resp->Results[msg_subscription_set_publishing_mode_bs__p_index - 1] = OpcUa_BadSubscriptionIdInvalid;
     }
 }
-
-void msg_subscription_set_publishing_mode_bs__get_msg_subscription_set_publishing_mode_req_first_subscription(
-    const constants__t_msg_i msg_subscription_set_publishing_mode_bs__p_req_msg,
-    t_entier4* const msg_subscription_set_publishing_mode_bs__l_nb_subs,
-    constants__t_subscription_i* const msg_subscription_set_publishing_mode_bs__p_first_sub_in_request,
-    t_bool* const msg_subscription_set_publishing_mode_bs__p_pub_enabled)
-{
-    OpcUa_SetPublishingModeRequest* req =
-        (OpcUa_SetPublishingModeRequest*) msg_subscription_set_publishing_mode_bs__p_req_msg;
-    *msg_subscription_set_publishing_mode_bs__l_nb_subs = req->NoOfSubscriptionIds;
-    if (req->NoOfSubscriptionIds > 0)
-    {
-        *msg_subscription_set_publishing_mode_bs__p_first_sub_in_request = req->SubscriptionIds[0];
-        *msg_subscription_set_publishing_mode_bs__p_pub_enabled = req->PublishingEnabled;
-    }
-}

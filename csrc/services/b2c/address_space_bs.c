@@ -87,6 +87,7 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_Node
                                                          constants__t_StatusCode_i* const address_space_bs__sc,
                                                          constants__t_Variant_i* const address_space_bs__variant)
 {
+    assert(NULL != address_space_bs__node);
     SOPC_AddressSpace_Item* item = address_space_bs__node;
 
     /* Note: conv_* variables are abstract, we must be confident */
@@ -182,6 +183,7 @@ void address_space_bs__get_DisplayName(const constants__t_Node_i address_space_b
 void address_space_bs__get_NodeClass(const constants__t_Node_i address_space_bs__p_node,
                                      constants__t_NodeClass_i* const address_space_bs__p_node_class)
 {
+    assert(NULL != address_space_bs__p_node);
     SOPC_AddressSpace_Item* item = address_space_bs__p_node;
 
     bool res = util_NodeClass__C_to_B(item->node_class, address_space_bs__p_node_class);
@@ -205,6 +207,7 @@ static bool is_type_definition(const OpcUa_ReferenceNode* ref)
 void address_space_bs__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
                                           constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def)
 {
+    assert(NULL != address_space_bs__p_node);
     SOPC_AddressSpace_Item* item = address_space_bs__p_node;
     int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(item);
     OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Item_Get_References(item);
@@ -246,6 +249,7 @@ void address_space_bs__get_Reference_IsForward(const constants__t_Reference_i ad
 void address_space_bs__get_Node_RefIndexEnd(const constants__t_Node_i address_space_bs__p_node,
                                             t_entier4* const address_space_bs__p_ref_index)
 {
+    assert(NULL != address_space_bs__p_node);
     SOPC_AddressSpace_Item* item = address_space_bs__p_node;
     int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(item);
     *address_space_bs__p_ref_index = *n_refs - 1;
@@ -255,6 +259,7 @@ void address_space_bs__get_RefIndex_Reference(const constants__t_Node_i address_
                                               const t_entier4 address_space_bs__p_ref_index,
                                               constants__t_Reference_i* const address_space_bs__p_ref)
 {
+    assert(NULL != address_space_bs__p_node);
     SOPC_AddressSpace_Item* item = address_space_bs__p_node;
     OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Item_Get_References(item);
     int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(item);

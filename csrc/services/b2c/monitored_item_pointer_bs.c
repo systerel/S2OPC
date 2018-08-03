@@ -26,6 +26,7 @@
 #include "constants.h"
 
 #include <assert.h>
+#include <inttypes.h>
 
 #include "sopc_dict.h"
 #include "sopc_logger.h"
@@ -70,24 +71,13 @@ static uintptr_t monitoredItemIdMax = 0;
   ------------------------*/
 void monitored_item_pointer_bs__INITIALISATION(void)
 {
-    if (monitoredItemIdDict != NULL)
-    {
-        SOPC_Dict_Delete(monitoredItemIdDict);
-        monitoredItemIdDict = NULL;
-    }
-
-    if (monitoredItemIdFreed != NULL)
-    {
-        SOPC_SLinkedList_Delete(monitoredItemIdFreed);
-        monitoredItemIdFreed = NULL;
-    }
+    monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION();
 
     monitoredItemIdDict = SOPC_Dict_Create(0, SOPC_InternalMontitoredItemId_Hash, SOPC_InternalMontitoredItemId_Equal,
                                            SOPC_InternalMontitoredItemId_Free, SOPC_InternalMontitoredItem_Free);
     assert(monitoredItemIdDict != NULL);
     monitoredItemIdFreed = SOPC_SLinkedList_Create(0);
     assert(monitoredItemIdFreed != NULL);
-    monitoredItemIdMax = 0;
 }
 
 void monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION(void)
@@ -153,10 +143,8 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
             {
                 monitoredItemIdMax++;
                 monitItem->monitoredItemId = (uint32_t) monitoredItemIdMax;
-                SOPC_Dict_Insert(monitoredItemIdDict, (void*) monitoredItemIdMax, monitItem);
-                *monitored_item_pointer_bs__bres = true;
-                *monitored_item_pointer_bs__monitoredItemPointer = monitItem;
-                *monitored_item_pointer_bs__monitoredItemId = monitItem->monitoredItemId;
+                *monitored_item_pointer_bs__bres =
+                    SOPC_Dict_Insert(monitoredItemIdDict, (void*) monitoredItemIdMax, monitItem);
             } // else: all Ids already in use
         }
         else
@@ -166,15 +154,17 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
             if (freshId != 0)
             {
                 monitItem->monitoredItemId = (uint32_t) freshId;
-                SOPC_Dict_Insert(monitoredItemIdDict, (void*) freshId, monitItem);
-                *monitored_item_pointer_bs__bres = true;
-                *monitored_item_pointer_bs__monitoredItemPointer = monitItem;
-                *monitored_item_pointer_bs__monitoredItemId = monitItem->monitoredItemId;
+                *monitored_item_pointer_bs__bres = SOPC_Dict_Insert(monitoredItemIdDict, (void*) freshId, monitItem);
             }
         }
     }
 
-    if (false == *monitored_item_pointer_bs__bres)
+    if (*monitored_item_pointer_bs__bres)
+    {
+        *monitored_item_pointer_bs__monitoredItemPointer = monitItem;
+        *monitored_item_pointer_bs__monitoredItemId = monitItem->monitoredItemId;
+    }
+    else
     {
         free(monitItem);
         free(nid);
@@ -186,10 +176,26 @@ void monitored_item_pointer_bs__delete_monitored_item_pointer(
 {
     SOPC_InternalMontitoredItem* monitItem =
         (SOPC_InternalMontitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
-    SOPC_SLinkedList_Append(monitoredItemIdFreed, monitItem->monitoredItemId,
-                            (void*) (uintptr_t) monitItem->monitoredItemId);
+    uintptr_t appended = (uintptr_t) SOPC_SLinkedList_Append(monitoredItemIdFreed, monitItem->monitoredItemId,
+                                                             (void*) (uintptr_t) monitItem->monitoredItemId);
+
+    if (appended != (uintptr_t) monitItem->monitoredItemId)
+    {
+        SOPC_Logger_TraceError("monitored_item_pointer_bs__delete_monitored_item_pointer: monitoredItemId %" PRIu32
+                               " cannot be added to freed set",
+                               monitItem->monitoredItemId);
+    }
+
     // Reset monitored item associated
-    SOPC_Dict_Insert(monitoredItemIdDict, (void*) (uintptr_t) monitItem->monitoredItemId, NULL);
+    // (Caution: it frees the monitItem pointer)
+    bool inserted = SOPC_Dict_Insert(monitoredItemIdDict, (void*) (uintptr_t) monitItem->monitoredItemId, NULL);
+
+    if (!inserted)
+    {
+        SOPC_Logger_TraceError("monitored_item_pointer_bs__delete_monitored_item_pointer: monitoredItemId %" PRIu32
+                               " cannot be removed from defined set",
+                               monitItem->monitoredItemId);
+    }
 }
 
 void monitored_item_pointer_bs__getall_monitoredItemPointer(

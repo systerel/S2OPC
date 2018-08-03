@@ -173,7 +173,7 @@ OPERATIONS
     THEN
         StatusCode_service
         :(StatusCode_service : t_StatusCode_i &
-          StatusCode_service : {e_sc_ok, e_sc_bad_subscription_id_invalid, e_sc_bad_message_not_available})
+          StatusCode_service : {e_sc_ok, e_sc_bad_subscription_id_invalid, e_sc_bad_message_not_available, e_sc_bad_out_of_memory})
     END
     ;
 

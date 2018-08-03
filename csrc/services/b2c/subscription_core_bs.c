@@ -45,7 +45,8 @@ static uint64_t nodeid_hash(const void* id)
 static bool nodeid_equal(const void* a, const void* b)
 {
     int32_t cmp;
-    SOPC_NodeId_Compare((const SOPC_NodeId*) a, (const SOPC_NodeId*) b, &cmp);
+    SOPC_ReturnStatus status = SOPC_NodeId_Compare((const SOPC_NodeId*) a, (const SOPC_NodeId*) b, &cmp);
+    assert(SOPC_STATUS_OK == status);
 
     return cmp == 0;
 }
