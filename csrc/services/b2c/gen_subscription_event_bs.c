@@ -19,6 +19,7 @@
 
 #include "gen_subscription_event_bs.h"
 
+#include "sopc_logger.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_types.h"
 #include "util_b2c.h"
@@ -76,10 +77,24 @@ void gen_subscription_event_bs__gen_data_changed_event(
     }
     else
     {
-        // TODO: logger ?
         SOPC_Variant_Clear(oldVariantValue);
         free(oldVariantValue);
         OpcUa_WriteValue_Clear(newValue);
         free(newValue);
+
+        SOPC_Logger_TraceError(
+            "gen_subscription_event_bs__gen_data_changed_event: failed to generate a data changed event (out of "
+            "memory for wv alloc)");
     }
+}
+
+void gen_subscription_event_bs__gen_data_changed_event_failed(
+    const constants__t_Variant_i gen_subscription_event_bs__p_prev_value)
+{
+    SOPC_Variant_Clear(gen_subscription_event_bs__p_prev_value);
+    free(gen_subscription_event_bs__p_prev_value);
+
+    SOPC_Logger_TraceError(
+        "gen_subscription_event_bs__gen_data_changed_event_failed: failed to generate a data changed event (out of "
+        "memory for wv copy)");
 }

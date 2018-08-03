@@ -754,7 +754,6 @@ OPERATIONS
                 async_resp_msg := FALSE
             END
         ELSE
-            subscription := l_subscription;
             StatusCode_service := e_sc_bad_invalid_state;
             async_resp_msg := FALSE
 

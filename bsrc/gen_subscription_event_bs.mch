@@ -39,5 +39,15 @@ OPERATIONS
         /* Generates a data changed event */
         skip
     END
+    ;
+
+    gen_data_changed_event_failed (p_prev_value) =
+    PRE
+        p_prev_value : t_Variant_i &
+        p_prev_value : t_Variant
+    THEN
+        /* Failed to generate data event, clear the prev value and generate trace */
+        skip
+    END
 
 END

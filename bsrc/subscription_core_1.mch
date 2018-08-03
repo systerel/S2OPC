@@ -70,11 +70,9 @@ DEFINITIONS
     /* a_PublishingReqQueued <: s_subscription & */ /* <=> a_publish_responses~[{queue}] /= {} */
     /* a_RequestedMessageFound <: s_subscription */   /* <=> seqNum in a_retransmissionQueue[subscription] */
     a_SeqNum : s_subscription --> t_sub_seq_num &
-    /* a_SubscriptionAssignedToClient <: s_subscription */             /* Not really a state machine variable: local variable or function */
 
     /* Subscription Implementation variables */
     a_pendingNotificationQueue : s_subscription --> t_notificationQueue &
-    /* a_retransmissionQueue : s_subscription --> t_notificationMsgQueue */ /* not implemented */
     a_monitoredItemQueue : s_subscription --> t_monitoredItemQueue &
 
     a_publishTimer : s_subscription --> t_timer_id &

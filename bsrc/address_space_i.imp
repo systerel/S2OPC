@@ -208,8 +208,7 @@ OPERATIONS
                 IF l_bres_wv_copy = TRUE THEN
                     gen_data_changed_event (l_prev_value, l_prev_value_status, l_wv_copy)
                 ELSE
-                    /* TODO: Generates an out of memory service result or error trace ? */
-                    skip
+                    gen_data_changed_event_failed (l_prev_value)
                 END
             END;
             l_local_treatment <-- is_local_service_treatment;

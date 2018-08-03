@@ -203,7 +203,7 @@ DEFINITIONS
     ;
 
     /* Dequeuing invalid publish requests and check for a valid request still enqueued */
-    d_check_for_valid_publish_req_queue(p_subsciption, l_PublishingReqQueued, l_new_publish_response) ==
+    d_check_for_valid_publish_req_queue(p_subscription, l_PublishingReqQueued, l_new_publish_response) ==
         l_new_publish_response : t_msg +-> t_publishReqQueue &
         l_new_publish_response <: a_publish_responses &
         l_new_publish_response |>> {a_publishRequestQueue(p_subscription)} =
@@ -236,7 +236,7 @@ DEFINITIONS
     d_publish_timeout_no_msg_sent ==
     p_msg_to_send := FALSE ||
     p_session := c_session_indet ||
-    p_req_handle :(p_req_handle : t_server_request_handle_i) ||
+    p_req_handle :: t_server_request_handle_i ||
     p_req_context := c_request_context_indet ||
     p_publish_resp_msg := c_msg_indet
     ;
@@ -473,7 +473,7 @@ OPERATIONS
     PRE
         p_session : t_session_i &
         p_session : t_session &
-        p_session /: ran(a_subscription_session) & /* session is not part of any suscription (=> 1 subscription / session) */
+        p_session /: ran(a_subscription_session) & /* session is not part of any subscription (=> 1 subscription / session) */
         p_revPublishInterval : t_opcua_duration_i &
         p_revLifetimeCount : t_counter &
         p_revLifetimeCount > 0 &
@@ -797,7 +797,7 @@ OPERATIONS
             ELSE
                 StatusCode_service := e_sc_bad_invalid_state ||
                 async_resp_msg := FALSE ||
-                subscription := l_subscription ||
+                subscription := c_subscription_indet ||
                 moreNotifs := FALSE
             END
         END
@@ -935,130 +935,130 @@ OPERATIONS
         p_validPublishReqQueued = validPublishReqQueued
     THEN
         /* State table evaluation case (Publish Timer Expires: #6, #7, #8, #9, #12, #14, #15, #16, #17 (+ #27 => see previous operation)) */
-            LET l_PublishingEnabled, l_NotificationAvailable, l_MessageSent BE
-                l_PublishingEnabled = bool (p_subscription : a_PublishingEnabled) &
-                l_NotificationAvailable = bool (a_monitored_item_notifications [{a_pendingNotificationQueue(p_subscription)}] /= {}) &
-                l_MessageSent = bool (p_subscription : a_MessageSent)
-            IN
-                /* #6 transition */
-                IF a_subscription_state (p_subscription) = e_subscriptionState_normal &
-                   p_validPublishReqQueued = TRUE &
-                   l_PublishingEnabled = TRUE &
-                   l_NotificationAvailable = TRUE
-                THEN
-                    /* reset lifetime counter */
-                    a_LifetimeCounter (p_subscription) := a_lifetimeExpCount (p_subscription) ||
-                    d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
-                    /* return notifications (dequeue notifications) + update MoreNotification variable */
-                    d_publish_timeout_notif_msg_sent_dequeuing_notifications (p_subscription, p_msg_sc, p_moreNotifs,
-                                                                              p_session, p_req_handle, p_req_context,
-                                                                              p_msg_to_send)
+        LET l_PublishingEnabled, l_NotificationAvailable, l_MessageSent BE
+            l_PublishingEnabled = bool (p_subscription : a_PublishingEnabled) &
+            l_NotificationAvailable = bool (a_monitored_item_notifications [{a_pendingNotificationQueue(p_subscription)}] /= {}) &
+            l_MessageSent = bool (p_subscription : a_MessageSent)
+        IN
+            /* #6 transition */
+            IF a_subscription_state (p_subscription) = e_subscriptionState_normal &
+               p_validPublishReqQueued = TRUE &
+               l_PublishingEnabled = TRUE &
+               l_NotificationAvailable = TRUE
+            THEN
+                /* reset lifetime counter */
+                a_LifetimeCounter (p_subscription) := a_lifetimeExpCount (p_subscription) ||
+                d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
+                /* return notifications (dequeue notifications) + update MoreNotification variable */
+                d_publish_timeout_notif_msg_sent_dequeuing_notifications (p_subscription, p_msg_sc, p_moreNotifs,
+                                                                          p_session, p_req_handle, p_req_context,
+                                                                          p_msg_to_send)
 
-                /* #7 transition */
-                ELSIF a_subscription_state (p_subscription) = e_subscriptionState_normal &
-                      p_validPublishReqQueued = TRUE &
-                      l_MessageSent = FALSE &
-                      (l_PublishingEnabled = FALSE
-                       or
-                       (l_PublishingEnabled = TRUE &
-                        l_NotificationAvailable = FALSE)
-                      )
-                THEN
-                    /* reset lifetime counter */
-                    a_LifetimeCounter (p_subscription) := a_lifetimeExpCount (p_subscription) ||
-                    d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
-                    d_publish_timeout_keepAlive_msg_sent
+            /* #7 transition */
+            ELSIF a_subscription_state (p_subscription) = e_subscriptionState_normal &
+                  p_validPublishReqQueued = TRUE &
+                  l_MessageSent = FALSE &
+                  (l_PublishingEnabled = FALSE
+                   or
+                   (l_PublishingEnabled = TRUE &
+                    l_NotificationAvailable = FALSE)
+                  )
+            THEN
+                /* reset lifetime counter */
+                a_LifetimeCounter (p_subscription) := a_lifetimeExpCount (p_subscription) ||
+                d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
+                d_publish_timeout_keepAlive_msg_sent
 
-                /* #8 transition */
-                ELSIF a_subscription_state (p_subscription) = e_subscriptionState_normal &
-                      p_validPublishReqQueued = FALSE &
-                      (l_MessageSent = FALSE
-                       or
-                       (l_PublishingEnabled = TRUE &
-                        l_NotificationAvailable = TRUE)
-                      )
-                THEN
-                    a_subscription_state (p_subscription) := e_subscriptionState_late ||
-                    d_publish_timeout_no_msg_sent_setMoreNotifs
+            /* #8 transition */
+            ELSIF a_subscription_state (p_subscription) = e_subscriptionState_normal &
+                  p_validPublishReqQueued = FALSE &
+                  (l_MessageSent = FALSE
+                   or
+                   (l_PublishingEnabled = TRUE &
+                    l_NotificationAvailable = TRUE)
+                  )
+            THEN
+                a_subscription_state (p_subscription) := e_subscriptionState_late ||
+                d_publish_timeout_no_msg_sent_setMoreNotifs
 
-                /* #9 transition */
-                ELSIF a_subscription_state (p_subscription) = e_subscriptionState_normal &
-                      l_MessageSent = TRUE &
-                      (l_PublishingEnabled = FALSE
-                       or
-                       (l_PublishingEnabled = TRUE &
-                        l_NotificationAvailable = FALSE)
-                      )
-                THEN
-                    a_subscription_state (p_subscription) := e_subscriptionState_keepAlive ||
-                    /* reset keepAlive counter */
-                    a_KeepAliveCounter (p_subscription) := a_keepAliveExpCount (p_subscription) ||
-                    d_publish_timeout_no_msg_sent_setMoreNotifs
+            /* #9 transition */
+            ELSIF a_subscription_state (p_subscription) = e_subscriptionState_normal &
+                  l_MessageSent = TRUE &
+                  (l_PublishingEnabled = FALSE
+                   or
+                   (l_PublishingEnabled = TRUE &
+                    l_NotificationAvailable = FALSE)
+                  )
+            THEN
+                a_subscription_state (p_subscription) := e_subscriptionState_keepAlive ||
+                /* reset keepAlive counter */
+                a_KeepAliveCounter (p_subscription) := a_keepAliveExpCount (p_subscription) ||
+                d_publish_timeout_no_msg_sent_setMoreNotifs
 
-                /* #12 transition */
-                ELSIF a_subscription_state (p_subscription) = e_subscriptionState_late
-                THEN
-                    d_publish_timeout_no_msg_sent_setMoreNotifs
+            /* #12 transition */
+            ELSIF a_subscription_state (p_subscription) = e_subscriptionState_late
+            THEN
+                d_publish_timeout_no_msg_sent_setMoreNotifs
 
-                /* #14 transition */
-                ELSIF a_subscription_state (p_subscription) = e_subscriptionState_keepAlive &
-                      l_PublishingEnabled = TRUE &
-                      l_NotificationAvailable = TRUE &
-                      p_validPublishReqQueued = TRUE
-                THEN
-                    a_subscription_state (p_subscription) := e_subscriptionState_normal ||
-                    /* reset lifetime counter */
-                    a_LifetimeCounter (p_subscription) := a_lifetimeExpCount (p_subscription) ||
-                    d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
-                    /* return notifications (dequeue notifications) + update MoreNotification variable */
-                    d_publish_timeout_notif_msg_sent_dequeuing_notifications (p_subscription, p_msg_sc, p_moreNotifs,
-                                                                              p_session, p_req_handle, p_req_context,
-                                                                              p_msg_to_send)
+            /* #14 transition */
+            ELSIF a_subscription_state (p_subscription) = e_subscriptionState_keepAlive &
+                  l_PublishingEnabled = TRUE &
+                  l_NotificationAvailable = TRUE &
+                  p_validPublishReqQueued = TRUE
+            THEN
+                a_subscription_state (p_subscription) := e_subscriptionState_normal ||
+                /* reset lifetime counter */
+                a_LifetimeCounter (p_subscription) := a_lifetimeExpCount (p_subscription) ||
+                d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
+                /* return notifications (dequeue notifications) + update MoreNotification variable */
+                d_publish_timeout_notif_msg_sent_dequeuing_notifications (p_subscription, p_msg_sc, p_moreNotifs,
+                                                                          p_session, p_req_handle, p_req_context,
+                                                                          p_msg_to_send)
 
-                /* #15 transition */
-                ELSIF a_subscription_state (p_subscription) = e_subscriptionState_keepAlive &
-                      p_validPublishReqQueued = TRUE &
-                      a_KeepAliveCounter (p_subscription) = 1 &
-                      (l_PublishingEnabled = FALSE
-                       or
-                       (l_PublishingEnabled = TRUE &
-                        l_NotificationAvailable = FALSE)
-                      )
-                THEN
-                    /* reset keepAlive counter */
-                    a_KeepAliveCounter (p_subscription) := a_keepAliveExpCount (p_subscription) ||
-                    d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
-                    d_publish_timeout_keepAlive_msg_sent
+            /* #15 transition */
+            ELSIF a_subscription_state (p_subscription) = e_subscriptionState_keepAlive &
+                  p_validPublishReqQueued = TRUE &
+                  a_KeepAliveCounter (p_subscription) = 1 &
+                  (l_PublishingEnabled = FALSE
+                   or
+                   (l_PublishingEnabled = TRUE &
+                    l_NotificationAvailable = FALSE)
+                  )
+            THEN
+                /* reset keepAlive counter */
+                a_KeepAliveCounter (p_subscription) := a_keepAliveExpCount (p_subscription) ||
+                d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
+                d_publish_timeout_keepAlive_msg_sent
 
-                /* #16 transition */
-                ELSIF a_subscription_state (p_subscription) = e_subscriptionState_keepAlive &
-                      a_KeepAliveCounter (p_subscription) > 1 &
-                      (l_PublishingEnabled = FALSE
-                       or
-                       (l_PublishingEnabled = TRUE &
-                        l_NotificationAvailable = FALSE)
-                      )
-                THEN
-                    a_KeepAliveCounter (p_subscription) := a_KeepAliveCounter (p_subscription) - 1 ||
-                    d_publish_timeout_no_msg_sent_setMoreNotifs
+            /* #16 transition */
+            ELSIF a_subscription_state (p_subscription) = e_subscriptionState_keepAlive &
+                  a_KeepAliveCounter (p_subscription) > 1 &
+                  (l_PublishingEnabled = FALSE
+                   or
+                   (l_PublishingEnabled = TRUE &
+                    l_NotificationAvailable = FALSE)
+                  )
+            THEN
+                a_KeepAliveCounter (p_subscription) := a_KeepAliveCounter (p_subscription) - 1 ||
+                d_publish_timeout_no_msg_sent_setMoreNotifs
 
-                /* #17 transition */
-                ELSIF a_subscription_state (p_subscription) = e_subscriptionState_keepAlive &
-                      p_validPublishReqQueued = FALSE &
-                      (a_KeepAliveCounter (p_subscription) = 1
-                       or
-                       (a_KeepAliveCounter (p_subscription) > 1 &
-                        l_PublishingEnabled = TRUE &
-                        l_NotificationAvailable = TRUE)
-                      )
-                THEN
-                    a_subscription_state (p_subscription) := e_subscriptionState_late ||
-                    d_publish_timeout_no_msg_sent_setMoreNotifs
+            /* #17 transition */
+            ELSIF a_subscription_state (p_subscription) = e_subscriptionState_keepAlive &
+                  p_validPublishReqQueued = FALSE &
+                  (a_KeepAliveCounter (p_subscription) = 1
+                   or
+                   (a_KeepAliveCounter (p_subscription) > 1 &
+                    l_PublishingEnabled = TRUE &
+                    l_NotificationAvailable = TRUE)
+                  )
+            THEN
+                a_subscription_state (p_subscription) := e_subscriptionState_late ||
+                d_publish_timeout_no_msg_sent_setMoreNotifs
 
-                ELSE
-                    d_publish_timeout_no_msg_sent_setMoreNotifs
-                END
+            ELSE
+                d_publish_timeout_no_msg_sent_setMoreNotifs
             END
+        END
     END
     ;
 
