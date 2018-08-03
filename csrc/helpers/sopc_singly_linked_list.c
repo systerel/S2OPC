@@ -248,6 +248,8 @@ static bool SOPC_InternalSLinkedList_IsEqualToEltToRemove(SOPC_SLinkedList_Elt* 
 
 static bool SOPC_InternalSLinkedList_IsEltIdEqualToEltToRemove(SOPC_SLinkedList_Elt* left, SOPC_SLinkedList_Elt* right)
 {
+    assert(left != NULL);
+    assert(right != NULL);
     return left->id == right->id;
 }
 
@@ -257,6 +259,8 @@ static void* SOPC_SLinkedList_RemoveFromElt(SOPC_SLinkedList* list,
                                                                  SOPC_SLinkedList_Elt* right))
 {
     assert(list != NULL);
+    assert(eltToRemove != NULL);
+    assert(isElementFct != NULL);
 
     SOPC_SLinkedList_Elt* elt = NULL;
     SOPC_SLinkedList_Elt* nextElt = NULL;
@@ -314,13 +318,13 @@ void* SOPC_SLinkedList_PopLast(SOPC_SLinkedList* list)
     return SOPC_SLinkedList_RemoveFromElt(list, list->last, SOPC_InternalSLinkedList_IsEqualToEltToRemove);
 }
 
-SOPC_SLinkedList_Elt* SOPC_SLinkedList_InternalFind(SOPC_SLinkedList* list, uint32_t id)
+static SOPC_SLinkedList_Elt* SOPC_SLinkedList_InternalFind(SOPC_SLinkedList* list, uint32_t id)
 {
     assert(list != NULL);
 
     SOPC_SLinkedList_Elt* elt = list->first;
 
-    while (elt != 0 && elt->id != id)
+    while (elt != NULL && elt->id != id)
     {
         elt = elt->next;
     }

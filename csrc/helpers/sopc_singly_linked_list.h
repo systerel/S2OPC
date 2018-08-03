@@ -103,7 +103,7 @@ void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list);
 
 /**
  *  \brief          Get and remove the last element of the list
- *  \note           This function iterate on the whole list to could remove the last element
+ *  \note           This function iterate on the whole list to remove the last element
  *
  *  \param list     Pointer on the linked list from which head element must be returned and removed
  *
