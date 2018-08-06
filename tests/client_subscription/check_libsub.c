@@ -32,10 +32,10 @@
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
-#include "sopc_log_manager.h"
 #include "sopc_time.h" /* SOPC_Sleep, SOPC_TimeReference */
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
+#include "sopc_user_app_itf.h"
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
 
@@ -271,7 +271,7 @@ START_TEST(test_half_broken_subscriptions)
                 SOPC_TimeReference_Compare(
                     SOPC_TimeReference_AddMilliseconds(disconnect_times[i], ROBUSTNESS_RETRY_PERIOD), curTime) <= 0)
             {
-                Helpers_Log(SOPC_LOG_LEVEL_INFO, "New connection with cfg_id %i.", cfg_ids[i]);
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "New connection with cfg_id %i.", cfg_ids[i]);
                 if (SOPC_LibSub_Connect(cfg_ids[i], &con_ids[i]) == SOPC_STATUS_OK)
                 {
                     ck_assert(SOPC_LibSub_AddToSubscription(con_ids[i], "s=Counter", SOPC_LibSub_AttributeId_Value,

@@ -50,7 +50,7 @@
  * and includes the following files before including this header:
  *  sopc_builtintypes.h
  *  sopc_toolkit_constants.h
- *  sopc_log_manager.h
+ *  sopc_user_app_itf.h
  */
 #ifndef SKIP_S2OPC_DEFINITIONS
 
@@ -74,13 +74,13 @@ typedef enum SOPC_ReturnStatus {
     SOPC_STATUS_NOT_SUPPORTED = 9
 } SOPC_ReturnStatus;
 
-/* Log levels, taken from "sopc_log_manager.h" */
+/* Log levels, taken from "sopc_user_app_itf.h" */
 typedef enum {
-    SOPC_LOG_LEVEL_ERROR = 0,
-    SOPC_LOG_LEVEL_WARNING = 1,
-    SOPC_LOG_LEVEL_INFO = 2,
-    SOPC_LOG_LEVEL_DEBUG = 3
-} SOPC_Log_Level;
+    SOPC_TOOLKIT_LOG_LEVEL_ERROR = 0,
+    SOPC_TOOLKIT_LOG_LEVEL_WARNING = 1,
+    SOPC_TOOLKIT_LOG_LEVEL_INFO = 2,
+    SOPC_TOOLKIT_LOG_LEVEL_DEBUG = 3
+} SOPC_Toolkit_Log_Level;
 
 /* SecurityMode, directly compatible with the encoded OPC-UA type,
  * taken from "sopc_types.h" */
@@ -177,10 +177,10 @@ typedef enum {
   @description
     Log callback type
   @param log_level
-    The Log level (SOPC_Log_Level). Note: SOPC_log_error shall be non-returning.
+    The Log level (SOPC_Toolkit_Log_Level). Note: SOPC_log_error shall be non-returning.
   @param text
     The text string to log (shall not be null) */
-typedef void (*SOPC_LibSub_LogCbk)(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
+typedef void (*SOPC_LibSub_LogCbk)(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text);
 
 /*
   @description
@@ -404,11 +404,11 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId);
  * \brief Buffers a log message, then calls the callback configured with the LibSub.
  *
  */
-void Helpers_Log(const SOPC_Log_Level log_level, const char* format, ...);
+void Helpers_Log(const SOPC_Toolkit_Log_Level log_level, const char* format, ...);
 
 /**
  * \brief Helper logger, prints a log message to stdout, with the following format "# log_level: text\n".
  */
-void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstString text);
+void Helpers_LoggerStdout(const SOPC_Toolkit_Log_Level log_level, const SOPC_LibSub_CstString text);
 
 #endif /* LIBS2OPC_CLIENT_H_ */

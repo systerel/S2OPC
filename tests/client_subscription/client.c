@@ -99,7 +99,7 @@ static void free_options(cmd_line_options_t* o);
 static void print_usage(const char* exe);
 
 /* Callbacks */
-static void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
+static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text);
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
 static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
                                 const SOPC_LibSub_DataId d_id,
@@ -151,12 +151,12 @@ int main(int argc, char* const argv[])
         cfg_con.path_cert_auth = PATH_CACERT_PUBL;
     }
 
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, SOPC_LibSub_GetVersion());
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Connecting to \"%s\"", cfg_con.server_url);
+    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, SOPC_LibSub_GetVersion());
+    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Connecting to \"%s\"", cfg_con.server_url);
 
     if (SOPC_STATUS_OK != SOPC_LibSub_Initialize(&cfg_cli))
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not initialize library.");
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not initialize library.");
         free_options(&options);
         return 2;
     }
@@ -164,7 +164,7 @@ int main(int argc, char* const argv[])
     status = SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id);
     if (SOPC_STATUS_OK != status)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure connection.");
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure connection.");
     }
 
     if (SOPC_STATUS_OK == status)
@@ -172,7 +172,7 @@ int main(int argc, char* const argv[])
         status = SOPC_LibSub_Configured();
         if (SOPC_STATUS_OK != status)
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit.");
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure the toolkit.");
         }
     }
 
@@ -181,13 +181,13 @@ int main(int argc, char* const argv[])
         status = SOPC_LibSub_Connect(cfg_id, &con_id);
         if (SOPC_STATUS_OK != status)
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not connect with given configuration id.");
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not connect with given configuration id.");
         }
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Connected.");
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Connected.");
     }
 
     for (int i = 0; SOPC_STATUS_OK == status && i < options.node_ids_sz; ++i)
@@ -195,25 +195,25 @@ int main(int argc, char* const argv[])
         status = SOPC_LibSub_AddToSubscription(con_id, options.node_ids[i], SOPC_LibSub_AttributeId_Value, &d_id);
         if (SOPC_STATUS_OK != status)
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not create monitored item.");
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not create monitored item.");
         }
         else
         {
-            Helpers_Log(SOPC_LOG_LEVEL_INFO, "created MonIt for \"%s\" with data_id %" PRIu32 ".", options.node_ids[i],
-                        d_id);
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "created MonIt for \"%s\" with data_id %" PRIu32 ".",
+                        options.node_ids[i], d_id);
         }
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Sleep(10 * 1000);
+        SOPC_Sleep(1000 * 1000);
     }
 
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the connections.");
+    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the connections.");
     SOPC_LibSub_Disconnect(con_id);
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the Toolkit.");
+    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the Toolkit.");
     SOPC_LibSub_Clear();
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Toolkit closed.");
+    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Toolkit closed.");
 
     free_options(&options);
 
@@ -224,14 +224,14 @@ int main(int argc, char* const argv[])
     return 0;
 }
 
-static void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text)
+static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text)
 {
     Helpers_LoggerStdout(log_level, text);
 }
 
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
 {
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
+    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
 }
 
 static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
@@ -260,7 +260,7 @@ static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
         snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%s", (SOPC_LibSub_CstString) value->value);
     }
 
-    log_callback(SOPC_LOG_LEVEL_INFO, sz);
+    log_callback(SOPC_TOOLKIT_LOG_LEVEL_INFO, sz);
 }
 
 #define FOREACH_OPT(x)                                                                                            \
@@ -313,33 +313,33 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     }
 #undef STR_OPT_CASE
 
-#define CHECK_REQUIRED_STR_OPT(name, req, arg_req, val, field)            \
-    if (req && o->field == NULL)                                          \
-    {                                                                     \
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Missing option: --" name "."); \
-        print_usage(argv[0]);                                             \
-        return false;                                                     \
+#define CHECK_REQUIRED_STR_OPT(name, req, arg_req, val, field)                    \
+    if (req && o->field == NULL)                                                  \
+    {                                                                             \
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Missing option: --" name "."); \
+        print_usage(argv[0]);                                                     \
+        return false;                                                             \
     }
 
     FOREACH_OPT(CHECK_REQUIRED_STR_OPT)
 
 #undef CHECK_REQUIRED_STR_OPT
 
-#define CONVERT_STR_OPT(name, type, default_val)                                     \
-    if (o->name##_str != NULL)                                                       \
-    {                                                                                \
-        char* endptr;                                                                \
-        o->name = (type) strtoul(o->name##_str, &endptr, 10);                        \
-                                                                                     \
-        if (*endptr != '\0')                                                         \
-        {                                                                            \
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Invalid name: %s.\n", o->name##_str); \
-            return false;                                                            \
-        }                                                                            \
-    }                                                                                \
-    else                                                                             \
-    {                                                                                \
-        o->name = default_val;                                                       \
+#define CONVERT_STR_OPT(name, type, default_val)                                             \
+    if (o->name##_str != NULL)                                                               \
+    {                                                                                        \
+        char* endptr;                                                                        \
+        o->name = (type) strtoul(o->name##_str, &endptr, 10);                                \
+                                                                                             \
+        if (*endptr != '\0')                                                                 \
+        {                                                                                    \
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Invalid name: %s.\n", o->name##_str); \
+            return false;                                                                    \
+        }                                                                                    \
+    }                                                                                        \
+    else                                                                                     \
+    {                                                                                        \
+        o->name = default_val;                                                               \
     }
 
     if (NULL == o->endpoint_url)
@@ -361,14 +361,14 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     o->node_ids_sz = argc - optind;
     if (o->node_ids_sz < 1)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "No node to subscribe to were specified.");
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "No node to subscribe to were specified.");
         print_usage(argv[0]);
         return false;
     }
     o->node_ids = malloc(sizeof(char*) * (size_t)(o->node_ids_sz));
     if (NULL == o->node_ids)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Out of memory.");
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Out of memory.");
         return false;
     }
     for (int i = 0; i < o->node_ids_sz; ++i)

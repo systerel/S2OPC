@@ -32,14 +32,13 @@
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_config.h"
-#include "sopc_user_app_itf.h"
 
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
-#include "sopc_log_manager.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
+#include "sopc_user_app_itf.h"
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
 
@@ -193,7 +192,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
 
     if (NULL == pCfg->policyId)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Cannot configure connection with NULL policyId.");
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Cannot configure connection with NULL policyId.");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -320,7 +319,7 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
         if (pCfg == NULL)
         {
             status = SOPC_STATUS_INVALID_PARAMETERS;
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Connect: unknown configuration id: %" PRIu32 ".", cfgId);
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Connect: unknown configuration id: %" PRIu32 ".", cfgId);
         }
     }
 

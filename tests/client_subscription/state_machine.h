@@ -49,13 +49,11 @@
 /* The following includes are required to fetch the SOPC_LibSub_DataChangeCbk type */
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
-#include "sopc_log_manager.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
+#include "sopc_user_app_itf.h"
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
-
-#include "sopc_user_app_itf.h"
 
 /* Machine states */
 typedef enum {

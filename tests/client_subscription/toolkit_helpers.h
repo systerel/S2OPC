@@ -28,19 +28,19 @@
 
 #define MAX_NOTIFICATIONS_PER_REQUEST 1000
 
+#include <stdarg.h>
 #include <stdbool.h>
 
 #include "sopc_key_manager.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
-#include "sopc_user_app_itf.h"
 
 /* The following includes are required to fetch the SOPC_LibSub_Value, SOPC_LibSub_DataTime and logger types */
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
-#include "sopc_log_manager.h"
 #include "sopc_toolkit_constants.h"
 #include "sopc_types.h"
+#include "sopc_user_app_itf.h"
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
 
@@ -108,7 +108,7 @@ SOPC_LibSub_Timestamp Helpers_OPCTimeToNTP(SOPC_DateTime ts);
  * See Helpers_SetLogger().
  *
  */
-void Helpers_Log(const SOPC_Log_Level log_level, const char* format, ...);
+void Helpers_Log(const SOPC_Toolkit_Log_Level log_level, const char* format, ...);
 
 /**
  * \brief Sets the \p cbk function as the called callback by Helpers_Log().
@@ -120,6 +120,6 @@ void Helpers_SetLogger(SOPC_LibSub_LogCbk cbk);
 /**
  * \brief Prints a log message to stdout, with the following format "# log_level: text\n".
  */
-void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstString text);
+void Helpers_LoggerStdout(const SOPC_Toolkit_Log_Level log_level, const SOPC_LibSub_CstString text);
 
 #endif /* TOOLKIT_HELPERS_H_ */

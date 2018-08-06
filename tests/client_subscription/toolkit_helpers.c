@@ -71,7 +71,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         if (OpcUa_MessageSecurityMode_None != msgSecurityMode || NULL != szPathCertClient || NULL != szPathCertClient ||
             NULL != szPathCertServer)
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR,
                         "Invalid parameters: security policy is None, but security mode is not None or path to "
                         "certificates are not NULL.");
             return SOPC_STATUS_INVALID_PARAMETERS;
@@ -83,7 +83,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         if (OpcUa_MessageSecurityMode_None == msgSecurityMode || NULL == szPathCertClient || NULL == szPathCertClient ||
             NULL == szPathCertServer)
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR,
                         "Invalid parameters: security policy is not None, but security mode is None or path to "
                         "certificates are NULL.");
             return SOPC_STATUS_INVALID_PARAMETERS;
@@ -93,7 +93,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     if ((bDisablePKI && NULL != szPathCertifAuth) || ((!bDisablePKI) && NULL == szPathCertifAuth))
     {
         Helpers_Log(
-            SOPC_LOG_LEVEL_ERROR,
+            SOPC_TOOLKIT_LOG_LEVEL_ERROR,
             "Invalid parameters: path to PKI can be NULL if and only if PKI security verifications are disabled.");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -104,7 +104,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(szPathCertifAuth, &pCrtCAu);
         if (SOPC_STATUS_OK != status)
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load the CA.");
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed to load the CA.");
         }
     }
     /* TODO: handle Revocation list */
@@ -113,7 +113,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         status = SOPC_STATUS_INVALID_PARAMETERS;
         if (SOPC_STATUS_OK != status)
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load Certificate Revocation List.");
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed to load Certificate Revocation List.");
         }
     }
     if (SOPC_STATUS_OK == status)
@@ -123,7 +123,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             status = SOPC_PKIProviderStack_Create(pCrtCAu, NULL, &pPki);
             if (SOPC_STATUS_OK != status)
             {
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to create PKI.");
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed to create PKI.");
             }
             else
             {
@@ -133,11 +133,11 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         }
         else
         {
-            Helpers_Log(SOPC_LOG_LEVEL_WARNING, "DISABLED CERTIFICATE VERIFICATION.");
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "DISABLED CERTIFICATE VERIFICATION.");
             status = SOPC_PKIPermissive_Create(&pPki);
             if (SOPC_STATUS_OK != status)
             {
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to create PKI.");
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed to create PKI.");
             }
         }
     }
@@ -148,7 +148,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(szPathCertServer, &pCrtSrv);
             if (SOPC_STATUS_OK != status)
             {
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load server certificate.");
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed to load server certificate.");
             }
         }
 
@@ -157,7 +157,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(szPathCertClient, &pCrtCli);
             if (SOPC_STATUS_OK != status)
             {
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load client certificate.");
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed to load client certificate.");
             }
         }
 
@@ -166,7 +166,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(szPathKeyClient, &pKeyCli);
             if (SOPC_STATUS_OK != status)
             {
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load client private key.");
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed to load client private key.");
             }
         }
     }
@@ -548,7 +548,7 @@ SOPC_LibSub_Timestamp Helpers_OPCTimeToNTP(SOPC_DateTime ts)
     return seconds | fraction;
 }
 
-void Helpers_Log(const SOPC_Log_Level log_level, const char* format, ...)
+void Helpers_Log(const SOPC_Toolkit_Log_Level log_level, const char* format, ...)
 {
     va_list args;
     char buffer[2048];
@@ -565,21 +565,21 @@ void Helpers_SetLogger(SOPC_LibSub_LogCbk cbk)
     cbkLog = cbk;
 }
 
-void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstString text)
+void Helpers_LoggerStdout(const SOPC_Toolkit_Log_Level log_level, const SOPC_LibSub_CstString text)
 {
     printf("# ");
     switch (log_level)
     {
-    case SOPC_LOG_LEVEL_ERROR:
+    case SOPC_TOOLKIT_LOG_LEVEL_ERROR:
         printf("Error");
         break;
-    case SOPC_LOG_LEVEL_WARNING:
+    case SOPC_TOOLKIT_LOG_LEVEL_WARNING:
         printf("Warning");
         break;
-    case SOPC_LOG_LEVEL_INFO:
+    case SOPC_TOOLKIT_LOG_LEVEL_INFO:
         printf("Info");
         break;
-    case SOPC_LOG_LEVEL_DEBUG:
+    case SOPC_TOOLKIT_LOG_LEVEL_DEBUG:
         printf("Debug");
         break;
     }
