@@ -518,10 +518,7 @@ SOPC_ReturnStatus StateMachine_SendRequest(StateMachine_Machine* pSM, void* requ
 
 bool StateMachine_IsConnectable(StateMachine_Machine* pSM)
 {
-    if (pSM == NULL)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    assert(pSM != NULL);
 
     SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
     assert(SOPC_STATUS_OK == status);
@@ -534,10 +531,7 @@ bool StateMachine_IsConnectable(StateMachine_Machine* pSM)
 
 bool StateMachine_IsConnected(StateMachine_Machine* pSM)
 {
-    if (pSM == NULL)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    assert(pSM != NULL);
 
     SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
     assert(SOPC_STATUS_OK == status);
@@ -550,10 +544,7 @@ bool StateMachine_IsConnected(StateMachine_Machine* pSM)
 
 bool StateMachine_IsDiscovering(StateMachine_Machine* pSM)
 {
-    if (pSM == NULL)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    assert(pSM != NULL);
 
     SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
     assert(SOPC_STATUS_OK == status);
@@ -566,10 +557,7 @@ bool StateMachine_IsDiscovering(StateMachine_Machine* pSM)
 
 bool StateMachine_IsIdle(StateMachine_Machine* pSM)
 {
-    if (pSM == NULL)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    assert(pSM != NULL);
 
     SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
     assert(SOPC_STATUS_OK == status);
