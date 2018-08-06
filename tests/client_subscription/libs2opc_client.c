@@ -281,6 +281,11 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void)
         status = SOPC_Toolkit_Configured();
         if (SOPC_STATUS_OK == status)
         {
+            /* TODO: make this value configurable through SOPC_LibSub_StaticCfg */
+            status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
             SOPC_Atomic_Int_Set(&libConfigured, 1);
         }
     }
