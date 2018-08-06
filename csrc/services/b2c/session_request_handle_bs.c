@@ -66,14 +66,19 @@ void session_request_handle_bs__client_get_session_and_remove_request_handle(
     const constants__t_client_request_handle_i session_request_handle_bs__req_handle,
     constants__t_session_i* const session_request_handle_bs__session)
 {
-    assert(session_request_handle_bs__req_handle != constants__c_client_request_handle_indet);
-    assert(client_requests[session_request_handle_bs__req_handle] != constants__c_session_indet);
+    *session_request_handle_bs__session = constants__c_session_indet;
 
-    *session_request_handle_bs__session = client_requests[session_request_handle_bs__req_handle];
-    client_requests[session_request_handle_bs__req_handle] = constants__c_session_indet;
+    if (session_request_handle_bs__req_handle != constants__c_client_request_handle_indet)
+    {
+        if (client_requests[session_request_handle_bs__req_handle] != constants__c_session_indet)
+        {
+            *session_request_handle_bs__session = client_requests[session_request_handle_bs__req_handle];
+            client_requests[session_request_handle_bs__req_handle] = constants__c_session_indet;
 
-    assert(session_pending_requests_nb[*session_request_handle_bs__session] > 0);
-    session_pending_requests_nb[*session_request_handle_bs__session]--;
+            assert(session_pending_requests_nb[*session_request_handle_bs__session] > 0);
+            session_pending_requests_nb[*session_request_handle_bs__session]--;
+        }
+    }
 }
 
 void session_request_handle_bs__client_remove_all_request_handles(
