@@ -300,7 +300,7 @@ OPERATIONS
     END
     ;
 
-    internal_client_request_timeout (channel, request_handle) =
+    client_request_timeout (channel, request_handle) =
     PRE
         channel : t_channel_i &
         channel : t_channel &

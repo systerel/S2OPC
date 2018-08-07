@@ -27,9 +27,6 @@ IMPORTS
     service_mgr,
     channel_mgr
 
-PROMOTES
-    internal_client_request_timeout
-
 LOCAL_OPERATIONS
 
     header_type <-- get_msg_header_type (msg_typ) =
@@ -361,9 +358,27 @@ OPERATIONS
             END
             /* ELSE
             Note: in case of server message not sent, session state could be inconsistent with sent message.
-            But it is necessary to have session id to could close it
+            But it is necessary to have session id to close it
             => reqId / reqHandle is not necessary unique on server side since client provided it
             */
+        END
+    END
+    ;
+
+    client_request_timeout (channel, request_handle) =
+    VAR
+        l_connected_channel,
+        l_is_client_channel
+    IN
+        /* Ignore the message if the secure channel is not connected or not a client SC */
+        l_connected_channel <-- is_connected_channel (channel);
+        IF l_connected_channel = TRUE
+        THEN
+            l_is_client_channel <-- is_client_channel (channel);
+            IF l_is_client_channel = TRUE
+            THEN
+                client_snd_msg_failure (channel, request_handle, e_sc_bad_timeout)
+            END
         END
     END
     ;

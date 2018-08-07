@@ -432,16 +432,6 @@ OPERATIONS
     END
     ;
 
-    internal_client_request_timeout (channel, request_handle) =
-    PRE
-        channel : t_channel_i &
-        channel : t_channel &
-        request_handle : t_client_request_handle_i
-    THEN
-        skip
-    END
-    ;
-
     /* PROMOTES */
 
     bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg, app_context) =

@@ -1306,6 +1306,7 @@ OPERATIONS
     client_snd_msg_failure (channel, request_handle, error_status) =
     VAR
         l_valid_req_handle,
+        l_req_handle_channel,
         l_req_typ,
         l_is_applicative,
         l_app_context,
@@ -1314,7 +1315,9 @@ OPERATIONS
         l_session
     IN
         l_valid_req_handle <-- is_valid_req_handle (request_handle);
-        IF l_valid_req_handle = TRUE
+        l_req_handle_channel <-- get_req_handle_channel (request_handle);
+        IF l_valid_req_handle = TRUE &
+            l_req_handle_channel = channel
         THEN
             l_exp_resp_msg_typ <-- get_req_handle_resp_typ (request_handle);
             CASE l_exp_resp_msg_typ OF
@@ -1341,30 +1344,6 @@ OPERATIONS
                         cli_snd_failure (l_req_typ, l_app_context, error_status)
                     END
                 END
-            END
-        END
-    END
-    ;
-
-    internal_client_request_timeout (channel, request_handle) =
-    VAR
-        l_valid_req_handle,
-        l_req_handle_channel,
-        l_req_typ,
-        l_is_applicative,
-        l_app_context
-    IN
-        l_valid_req_handle <-- is_valid_req_handle (request_handle);
-        l_req_handle_channel <-- get_req_handle_channel (request_handle);
-        IF l_valid_req_handle = TRUE &
-            l_req_handle_channel = channel
-        THEN
-            l_is_applicative, l_app_context <-- get_req_handle_app_context (request_handle);
-            l_req_typ <-- get_req_handle_req_typ (request_handle);
-            client_remove_req_handle (request_handle);
-            IF l_is_applicative = TRUE
-            THEN
-                cli_request_timeout (l_req_typ, l_app_context)
             END
         END
     END
