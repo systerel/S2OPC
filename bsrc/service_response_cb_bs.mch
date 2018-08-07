@@ -51,16 +51,6 @@ OPERATIONS
     END
     ;
 
-    cli_request_timeout (req_typ, app_context) =
-    PRE
-        req_typ : t_msg_type_i &
-        req_typ : s_service_reqs &
-        app_context : t_application_context_i
-    THEN
-        skip
-    END
-    ;
-
     srv_service_response (endpoint_config_idx, resp_msg, app_context) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
