@@ -1224,7 +1224,9 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     {
         SOPC_LocalizedText* lt = element_localized_text_for_state(ctx);
         SOPC_String_Clear(&lt->Text);
-        SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&lt->Text, ctx_char_data_stripped(ctx));
+        const char* stripped = ctx_char_data_stripped(ctx);
+        SOPC_ReturnStatus status =
+            (strlen(stripped) == 0) ? SOPC_STATUS_OK : SOPC_String_CopyFromCString(&lt->Text, stripped);
         ctx_char_data_reset(ctx);
 
         if (status != SOPC_STATUS_OK)
