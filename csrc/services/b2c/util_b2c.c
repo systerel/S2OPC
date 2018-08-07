@@ -711,6 +711,9 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_index_range_invalid:
         *status = OpcUa_BadIndexRangeInvalid;
         break;
+    case constants__e_sc_bad_timeout:
+        *status = OpcUa_BadTimeout;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -771,6 +774,9 @@ SOPC_ReturnStatus util_status_code__B_to_return_status_C(constants__t_StatusCode
         break;
     case constants__e_sc_bad_too_many_ops:
         result = SOPC_STATUS_OUT_OF_MEMORY;
+        break;
+    case constants__e_sc_bad_timeout:
+        result = SOPC_STATUS_TIMEOUT;
         break;
     default:
         result = SOPC_STATUS_NOK;
@@ -859,6 +865,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         break;
     case OpcUa_BadIndexRangeInvalid:
         *bstatus = constants__e_sc_bad_index_range_invalid;
+        break;
+    case OpcUa_BadTimeout:
+        *bstatus = constants__e_sc_bad_timeout;
         break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)

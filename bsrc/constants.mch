@@ -74,7 +74,8 @@ SETS
                       e_sc_bad_browse_direction_invalid,
                       e_sc_bad_service_unsupported,
                       e_sc_bad_write_not_supported,
-                      e_sc_bad_index_range_invalid};
+                      e_sc_bad_index_range_invalid,
+                      e_sc_bad_timeout};
 
     t_BrowseDirection_i = {e_bd_indet,
                            e_bd_forward,
