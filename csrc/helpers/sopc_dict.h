@@ -49,6 +49,13 @@ typedef uint64_t (*SOPC_Dict_KeyHash_Fct)(const void* data);
 typedef bool (*SOPC_Dict_KeyEqual_Fct)(const void* a, const void* b);
 
 /**
+ * \brief Type of callback functions for \ref SOPC_Dict_ForEach. Both the key and
+ * value belong to the dictionary and shall not be modified. The value of
+ * \p user_data is set when calling \ref SOPC_Dict_ForEach.
+ */
+typedef void (*SOPC_Dict_ForEach_Fct)(const void* key, const void* value, void* user_data);
+
+/**
  * \brief Creates a new, empty dictionary.
  *
  * \param empty_key   The key used to mark empty buckets. When using pointers as
@@ -205,5 +212,19 @@ size_t SOPC_Dict_Size(const SOPC_Dict* d);
  * reduce it after enough items are removed.
  */
 size_t SOPC_Dict_Capacity(const SOPC_Dict* d);
+
+/**
+ * \brief Iterates over the dictionary, calling the given function for each
+ *        (key, value) pair.
+ *
+ * \param d         The dictionary.
+ * \param func      The function to call on each (key, value) pair.
+ * \param user_data A user chose pointer to pass as last parameter to the
+ *                  callback function.
+ *
+ * The order of the iteration is implementation defined, and should not be relied
+ * on.
+ */
+void SOPC_Dict_ForEach(SOPC_Dict* d, SOPC_Dict_ForEach_Fct func, void* user_data);
 
 #endif /* SOPC_DICT_H_ */

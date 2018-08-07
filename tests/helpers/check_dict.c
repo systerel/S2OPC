@@ -304,6 +304,75 @@ START_TEST(test_dict_compact)
 }
 END_TEST
 
+static void dict_callback_increment_u32(const void* key, const void* value, void* user_data)
+{
+    (void) key;
+    (void) value;
+
+    uint32_t* val = user_data;
+    ++(*val);
+}
+
+START_TEST(test_dict_foreach_empty)
+{
+    SOPC_Dict* d = SOPC_Dict_Create(NULL, uintptr_hash, direct_equal, NULL, NULL);
+    ck_assert_ptr_nonnull(d);
+
+    uint32_t iteration_counter = 0;
+    SOPC_Dict_ForEach(d, dict_callback_increment_u32, &iteration_counter);
+    SOPC_Dict_Delete(d);
+    ck_assert_uint_eq(0, iteration_counter);
+}
+END_TEST
+
+typedef struct
+{
+    size_t size;
+    bool* keys_iterated;
+    bool* values_iterated;
+} foreach_data_t;
+
+static void dict_callback_mark(const void* key, const void* value, void* user_data)
+{
+    foreach_data_t* cb_data = user_data;
+    size_t _key = (size_t) key;
+    size_t _value = (size_t) value;
+
+    ck_assert_uint_lt(_key, cb_data->size);
+    ck_assert_uint_lt(_value, cb_data->size);
+    cb_data->keys_iterated[_key] = true;
+    cb_data->values_iterated[_value] = true;
+}
+
+START_TEST(test_dict_foreach)
+{
+    SOPC_Dict* d = SOPC_Dict_Create((void*) UINTPTR_MAX, uintptr_hash, direct_equal, NULL, NULL);
+    ck_assert_ptr_nonnull(d);
+
+    ck_assert(SOPC_Dict_Insert(d, (void*) 0, (void*) 2));
+    ck_assert(SOPC_Dict_Insert(d, (void*) 1, (void*) 1));
+    ck_assert(SOPC_Dict_Insert(d, (void*) 2, (void*) 0));
+
+    bool keys_iterated[3];
+    bool values_iterated[3];
+
+    foreach_data_t cb_data = {
+        .size = 3,
+        .keys_iterated = keys_iterated,
+        .values_iterated = values_iterated,
+    };
+
+    SOPC_Dict_ForEach(d, dict_callback_mark, &cb_data);
+    SOPC_Dict_Delete(d);
+
+    for (size_t i = 0; i < 3; ++i)
+    {
+        ck_assert(keys_iterated[i]);
+        ck_assert(values_iterated[i]);
+    }
+}
+END_TEST
+
 Suite* tests_make_suite_dict(SRunner* sr)
 {
     Suite* s;
@@ -330,6 +399,8 @@ Suite* tests_make_suite_dict(SRunner* sr)
     tcase_add_test(tc_dict, test_dict_remove);
     tcase_add_test(tc_dict, test_dict_tombstone_reuse);
     tcase_add_test(tc_dict, test_dict_compact);
+    tcase_add_test(tc_dict, test_dict_foreach_empty);
+    tcase_add_test(tc_dict, test_dict_foreach);
     suite_add_tcase(s, tc_dict);
 
     return s;
