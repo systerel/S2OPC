@@ -151,6 +151,7 @@ void address_space_bs__set_Value(const constants__t_Node_i address_space_bs__nod
     /* Deep-copy the new value to set */
     status = SOPC_Variant_Copy(pvar, address_space_bs__value);
     assert(SOPC_STATUS_OK == status);
+    item->value_status = SOPC_GoodGenericStatus;
     *address_space_bs__serviceStatusCode = constants__e_sc_ok;
 }
 
