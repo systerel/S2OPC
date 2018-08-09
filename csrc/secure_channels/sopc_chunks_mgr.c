@@ -212,6 +212,7 @@ static SOPC_SecureChannels_InternalEvent SC_Chunks_MsgTypeToRcvEvent(SOPC_Msg_Ty
         break;
     default:
         assert(false);
+        return INT_SC_RCV_ERR;
     }
 }
 
