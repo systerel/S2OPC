@@ -259,14 +259,14 @@ void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notifi
     *monitored_item_notification_queue_bs__p_continue = false;
     SOPC_InternalNotificationElement* notifElt =
         SOPC_SLinkedList_PopHead(monitored_item_notification_queue_bs__p_queue);
-    if (NULL != notifElt)
-    {
-        *monitored_item_notification_queue_bs__p_monitoredItem = notifElt->monitoredItemPointer;
-        *monitored_item_notification_queue_bs__p_writeValuePointer = notifElt->value;
-        free(notifElt);
-        *monitored_item_notification_queue_bs__p_continue =
-            SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) > 0;
-    }
+
+    assert(notifElt != NULL);
+
+    *monitored_item_notification_queue_bs__p_monitoredItem = notifElt->monitoredItemPointer;
+    *monitored_item_notification_queue_bs__p_writeValuePointer = notifElt->value;
+    free(notifElt);
+    *monitored_item_notification_queue_bs__p_continue =
+        SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) > 0;
 }
 
 void monitored_item_notification_queue_bs__free_first_monitored_item_notification_value(
