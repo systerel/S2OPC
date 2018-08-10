@@ -770,10 +770,14 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_EventHandler* handler,
             }
             else if (SOPC_STATUS_OK == status)
             {
-                // Update buffer lengtn
-                SOPC_Buffer_SetDataLength(buffer, (uint32_t) readBytes);
-                // Transmit to secure channel connection associated
-                SOPC_Sockets_Emit(SOCKET_RCV_BYTES, socketElt->connectionId, (void*) buffer, eltId);
+                // Update buffer length
+                status = SOPC_Buffer_SetDataLength(buffer, (uint32_t) readBytes);
+
+                if (status == SOPC_STATUS_OK)
+                {
+                    // Transmit to secure channel connection associated
+                    SOPC_Sockets_Emit(SOCKET_RCV_BYTES, socketElt->connectionId, (void*) buffer, eltId);
+                }
             }
             else
             {
