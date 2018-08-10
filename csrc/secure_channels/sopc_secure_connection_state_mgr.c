@@ -1392,6 +1392,7 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     if (ackMsgBuffer == NULL || SOPC_Buffer_SetPosition(helloMsgBuffer, 0) != SOPC_STATUS_OK ||
         SOPC_Buffer_CopyWithLength(ackMsgBuffer, helloMsgBuffer, SOPC_TCP_UA_HEADER_LENGTH) != SOPC_STATUS_OK)
     {
+        SOPC_Buffer_Delete(ackMsgBuffer);
         *errorStatus = OpcUa_BadEncodingError;
         return false;
     }
