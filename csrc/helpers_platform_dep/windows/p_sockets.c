@@ -23,7 +23,7 @@
 
 static WSADATA wsaData;
 
-bool Socket_Network_Initialize()
+bool SOPC_Socket_Network_Initialize()
 {
     bool status = true;
     int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -34,7 +34,7 @@ bool Socket_Network_Initialize()
     return status;
 }
 
-bool Socket_Network_Clear()
+bool SOPC_Socket_Network_Clear()
 {
     bool status = true;
     int result = WSACleanup();
@@ -45,11 +45,11 @@ bool Socket_Network_Clear()
     return status;
 }
 
-SOPC_ReturnStatus Socket_AddrInfo_Get(char* hostname, char* port, Socket_AddressInfo** addrs)
+SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Socket_AddressInfo** addrs)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    Socket_AddressInfo hints;
-    memset(&hints, 0, sizeof(Socket_AddressInfo));
+    SOPC_Socket_AddressInfo hints;
+    memset(&hints, 0, sizeof(SOPC_Socket_AddressInfo));
     hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6  can be use to force IPV4 or IPV6
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
@@ -68,9 +68,9 @@ SOPC_ReturnStatus Socket_AddrInfo_Get(char* hostname, char* port, Socket_Address
     return status;
 }
 
-Socket_AddressInfo* Socket_AddrInfo_IterNext(Socket_AddressInfo* addr)
+SOPC_Socket_AddressInfo* SOPC_Socket_AddrInfo_IterNext(SOPC_Socket_AddressInfo* addr)
 {
-    Socket_AddressInfo* res = NULL;
+    SOPC_Socket_AddressInfo* res = NULL;
     if (addr != NULL)
     {
         res = addr->ai_next;
@@ -78,12 +78,12 @@ Socket_AddressInfo* Socket_AddrInfo_IterNext(Socket_AddressInfo* addr)
     return res;
 }
 
-uint8_t Socket_AddrInfo_IsIPV6(Socket_AddressInfo* addr)
+uint8_t SOPC_Socket_AddrInfo_IsIPV6(SOPC_Socket_AddressInfo* addr)
 {
     return addr->ai_family == AF_INET6;
 }
 
-void Socket_AddrInfoDelete(Socket_AddressInfo** addrs)
+void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs)
 {
     if (addrs != NULL)
     {
@@ -92,7 +92,7 @@ void Socket_AddrInfoDelete(Socket_AddressInfo** addrs)
     }
 }
 
-void Socket_Clear(Socket* sock)
+void SOPC_Socket_Clear(Socket* sock)
 {
     *sock = SOPC_INVALID_SOCKET;
 }
@@ -135,7 +135,10 @@ SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
     return status;
 }
 
-SOPC_ReturnStatus Socket_CreateNew(Socket_AddressInfo* addr, bool setReuseAddr, bool setNonBlocking, Socket* sock)
+SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
+                                        bool setReuseAddr,
+                                        bool setNonBlocking,
+                                        Socket* sock)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const int trueInt = true;
@@ -173,7 +176,7 @@ SOPC_ReturnStatus Socket_CreateNew(Socket_AddressInfo* addr, bool setReuseAddr, 
     return status;
 }
 
-SOPC_ReturnStatus Socket_Listen(Socket sock, Socket_AddressInfo* addr)
+SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int bindListenStatus = -1;
@@ -192,7 +195,7 @@ SOPC_ReturnStatus Socket_Listen(Socket sock, Socket_AddressInfo* addr)
     return status;
 }
 
-SOPC_ReturnStatus Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock)
+SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (listeningSock != SOPC_INVALID_SOCKET && acceptedSock != NULL)
@@ -206,7 +209,7 @@ SOPC_ReturnStatus Socket_Accept(Socket listeningSock, bool setNonBlocking, Socke
     return status;
 }
 
-SOPC_ReturnStatus Socket_Connect(Socket sock, Socket_AddressInfo* addr)
+SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int connectStatus = -1;
@@ -231,7 +234,7 @@ SOPC_ReturnStatus Socket_Connect(Socket sock, Socket_AddressInfo* addr)
     return status;
 }
 
-SOPC_ReturnStatus Socket_CheckAckConnect(Socket sock)
+SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int error = 0;
@@ -250,7 +253,7 @@ SOPC_ReturnStatus Socket_CheckAckConnect(Socket sock)
     return status;
 }
 
-void SocketSet_Add(Socket sock, SocketSet* sockSet)
+void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
 {
     if (sock != SOPC_INVALID_SOCKET && sockSet != NULL)
     {
@@ -258,7 +261,7 @@ void SocketSet_Add(Socket sock, SocketSet* sockSet)
     }
 }
 
-bool SocketSet_IsPresent(Socket sock, SocketSet* sockSet)
+bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
 {
     if (sock != SOPC_INVALID_SOCKET && sockSet != NULL)
     {
@@ -274,7 +277,7 @@ bool SocketSet_IsPresent(Socket sock, SocketSet* sockSet)
     return false;
 }
 
-void SocketSet_Clear(SocketSet* sockSet)
+void SOPC_SocketSet_Clear(SOPC_SocketSet* sockSet)
 {
     if (sockSet != NULL)
     {
@@ -282,7 +285,10 @@ void SocketSet_Clear(SocketSet* sockSet)
     }
 }
 
-int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketSet* exceptSet, uint32_t waitMs)
+int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
+                                     SOPC_SocketSet* writeSet,
+                                     SOPC_SocketSet* exceptSet,
+                                     uint32_t waitMs)
 {
     int32_t nbReady = 0;
     const int ignored = 0; // ignored in winsocks
@@ -319,7 +325,7 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketS
     return (int32_t) nbReady;
 }
 
-SOPC_ReturnStatus Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
+SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int res = 0;
@@ -355,7 +361,7 @@ SOPC_ReturnStatus Socket_Write(Socket sock, const uint8_t* data, uint32_t count,
     return status;
 }
 
-SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
+SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int res = 0;
@@ -384,7 +390,7 @@ SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uin
     return status;
 }
 
-void Socket_Close(Socket* sock)
+void SOPC_Socket_Close(Socket* sock)
 {
     if (sock != NULL && *sock != SOPC_INVALID_SOCKET)
     {

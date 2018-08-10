@@ -86,23 +86,23 @@ static bool ParseURI(const char* uri, char** hostname, char** port)
     return result;
 }
 
-static bool SOPC_SocketsEventMgr_ConnectClient_NoLock(SOPC_Socket* connectSocket, Socket_AddressInfo* addr)
+static bool SOPC_SocketsEventMgr_ConnectClient_NoLock(SOPC_Socket* connectSocket, SOPC_Socket_AddressInfo* addr)
 {
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (connectSocket != NULL && addr != NULL && connectSocket->state == SOCKET_STATE_CLOSED)
     {
-        status = Socket_CreateNew(addr,
-                                  false, // Do not reuse
-                                  true,  // Non blocking socket
-                                  &connectSocket->sock);
+        status = SOPC_Socket_CreateNew(addr,
+                                       false, // Do not reuse
+                                       true,  // Non blocking socket
+                                       &connectSocket->sock);
         if (SOPC_STATUS_OK == status)
         {
             result = true;
         }
         if (result != false)
         {
-            status = Socket_Connect(connectSocket->sock, addr);
+            status = SOPC_Socket_Connect(connectSocket->sock, addr);
             if (SOPC_STATUS_OK != status)
             {
                 result = false;
@@ -128,12 +128,12 @@ static bool SOPC_SocketsEventMgr_NextConnectClientAttempt_Lock(SOPC_Socket* conn
     {
         Mutex_Lock(&socketsMutex);
         // Close precedently created socket
-        Socket_Close(&connectSocket->sock);
+        SOPC_Socket_Close(&connectSocket->sock);
         // Set state closed but do not reset rest of data (contains next attempt configuration
         connectSocket->state = SOCKET_STATE_CLOSED;
 
         // Check if next connection attempt available
-        Socket_AddressInfo* nextAddr = (Socket_AddressInfo*) connectSocket->nextConnectAttemptAddr;
+        SOPC_Socket_AddressInfo* nextAddr = (SOPC_Socket_AddressInfo*) connectSocket->nextConnectAttemptAddr;
         if (nextAddr != NULL)
         {
             result = SOPC_SocketsEventMgr_ConnectClient_NoLock(connectSocket, nextAddr);
@@ -143,13 +143,13 @@ static bool SOPC_SocketsEventMgr_NextConnectClientAttempt_Lock(SOPC_Socket* conn
             }
             else
             {
-                connectSocket->nextConnectAttemptAddr = Socket_AddrInfo_IterNext(nextAddr);
+                connectSocket->nextConnectAttemptAddr = SOPC_Socket_AddrInfo_IterNext(nextAddr);
             }
 
             // No more attempts possible: free the attempts addresses
             if (NULL == connectSocket->nextConnectAttemptAddr)
             {
-                Socket_AddrInfoDelete((Socket_AddressInfo**) &connectSocket->connectAddrs);
+                SOPC_Socket_AddrInfoDelete((SOPC_Socket_AddressInfo**) &connectSocket->connectAddrs);
                 connectSocket->connectAddrs = NULL;
             }
         }
@@ -161,7 +161,7 @@ static bool SOPC_SocketsEventMgr_NextConnectClientAttempt_Lock(SOPC_Socket* conn
 static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket_Lock(const char* uri)
 {
     SOPC_Socket* resultSocket = NULL;
-    Socket_AddressInfo *res = NULL, *p = NULL;
+    SOPC_Socket_AddressInfo *res = NULL, *p = NULL;
     SOPC_Socket* freeSocket = NULL;
     bool result = false;
     bool connectResult = false;
@@ -184,7 +184,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket_Lock(const char* uri
 
         if (result != false)
         {
-            status = Socket_AddrInfo_Get(hostname, port, &res);
+            status = SOPC_Socket_AddrInfo_Get(hostname, port, &res);
             if (SOPC_STATUS_OK != status)
             {
                 result = false;
@@ -194,7 +194,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket_Lock(const char* uri
         if (result != false)
         {
             // Try to connect on IP addresses provided (IPV4 and IPV6)
-            for (p = res; p != NULL && false == connectResult; p = Socket_AddrInfo_IterNext(p))
+            for (p = res; p != NULL && false == connectResult; p = SOPC_Socket_AddrInfo_IterNext(p))
             {
                 connectResult = SOPC_SocketsEventMgr_ConnectClient_NoLock(freeSocket, p);
             }
@@ -218,7 +218,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket_Lock(const char* uri
              NULL == freeSocket->connectAddrs) || // async connecting but NO next attempts remaining (if current fails)
             (NULL == p))                          // result is true but res is no more used
         {
-            Socket_AddrInfoDelete(&res);
+            SOPC_Socket_AddrInfoDelete(&res);
         }
 
         if (false == result && freeSocket != NULL)
@@ -247,7 +247,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket_Lock(const char* uri
 {
     SOPC_Socket* resultSocket = NULL;
     bool result = false;
-    Socket_AddressInfo *res = NULL, *p = NULL;
+    SOPC_Socket_AddressInfo *res = NULL, *p = NULL;
     bool attemptWithIPV6 = true;
     SOPC_Socket* freeSocket = NULL;
     bool listenResult = false;
@@ -276,7 +276,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket_Lock(const char* uri
                 hostname = NULL;
             }
 
-            status = Socket_AddrInfo_Get(hostname, port, &res);
+            status = SOPC_Socket_AddrInfo_Get(hostname, port, &res);
             if (SOPC_STATUS_OK != status)
             {
                 result = false;
@@ -298,13 +298,13 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket_Lock(const char* uri
                 }
                 else
                 {
-                    if ((attemptWithIPV6 != false && Socket_AddrInfo_IsIPV6(p) != false) ||
-                        (attemptWithIPV6 == false && Socket_AddrInfo_IsIPV6(p) == false))
+                    if ((attemptWithIPV6 != false && SOPC_Socket_AddrInfo_IsIPV6(p) != false) ||
+                        (attemptWithIPV6 == false && SOPC_Socket_AddrInfo_IsIPV6(p) == false))
                     {
-                        status = Socket_CreateNew(p,
-                                                  true, // Reuse
-                                                  true, // Non blocking socket
-                                                  &freeSocket->sock);
+                        status = SOPC_Socket_CreateNew(p,
+                                                       true, // Reuse
+                                                       true, // Non blocking socket
+                                                       &freeSocket->sock);
                         if (SOPC_STATUS_OK == status)
                         {
                             result = true;
@@ -316,7 +316,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket_Lock(const char* uri
 
                         if (result != false)
                         {
-                            status = Socket_Listen(freeSocket->sock, p);
+                            status = SOPC_Socket_Listen(freeSocket->sock, p);
                             if (SOPC_STATUS_OK != status)
                             {
                                 result = false;
@@ -329,7 +329,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket_Lock(const char* uri
                             listenResult = true;
                         }
                     }
-                    p = Socket_AddrInfo_IterNext(p);
+                    p = SOPC_Socket_AddrInfo_IterNext(p);
                 }
             }
         }
@@ -358,7 +358,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket_Lock(const char* uri
         Mutex_Unlock(&socketsMutex);
     }
 
-    Socket_AddrInfoDelete(&res);
+    SOPC_Socket_AddrInfoDelete(&res);
 
     return resultSocket;
 }
@@ -384,7 +384,7 @@ static SOPC_ReturnStatus SOPC_SocketsEventMgr_Socket_WriteAll(SOPC_Socket* sock,
 
     do // While not blocking and bytes sent on socket
     {
-        status = Socket_Write(sock->sock, data + totalSentBytes, count - totalSentBytes, &sentBytes);
+        status = SOPC_Socket_Write(sock->sock, data + totalSentBytes, count - totalSentBytes, &sentBytes);
         if (SOPC_STATUS_OK == status)
         {
             totalSentBytes += sentBytes;
@@ -493,7 +493,7 @@ static SOPC_ReturnStatus on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
     }
 
     uint32_t readBytes;
-    SOPC_ReturnStatus status = Socket_Read(socket->sock, buffer->data, SOPC_MAX_MESSAGE_LENGTH, &readBytes);
+    SOPC_ReturnStatus status = SOPC_Socket_Read(socket->sock, buffer->data, SOPC_MAX_MESSAGE_LENGTH, &readBytes);
 
     if (status != SOPC_STATUS_OK)
     {
@@ -668,9 +668,9 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_EventHandler* handler,
         }
         else
         {
-            status = Socket_Accept(socketElt->sock,
-                                   1, // Non blocking socket
-                                   &acceptSock->sock);
+            status = SOPC_Socket_Accept(socketElt->sock,
+                                        1, // Non blocking socket
+                                        &acceptSock->sock);
             if (SOPC_STATUS_OK == status)
             {
                 acceptSock->isUsed = true;
@@ -732,7 +732,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_EventHandler* handler,
         // No more attempts expected: free the attempts addresses
         if (socketElt->connectAddrs != NULL)
         {
-            Socket_AddrInfoDelete((Socket_AddressInfo**) &socketElt->connectAddrs);
+            SOPC_Socket_AddrInfoDelete((SOPC_Socket_AddressInfo**) &socketElt->connectAddrs);
             socketElt->connectAddrs = NULL;
             socketElt->nextConnectAttemptAddr = NULL;
         }

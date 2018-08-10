@@ -35,12 +35,12 @@
 /**
  *  \brief Initialize the network communication allowing to use sockets
  */
-bool Socket_Network_Initialize(void);
+bool SOPC_Socket_Network_Initialize(void);
 
 /**
  *  \brief Clear the network communication when sockets not used anymore
  */
-bool Socket_Network_Clear(void);
+bool SOPC_Socket_Network_Clear(void);
 
 /**
  *  \brief Provide a linked list of socket addressing information for establishing TCP connections over IPV4 and IPV6
@@ -52,7 +52,7 @@ bool Socket_Network_Clear(void);
  *
  *  \return            GOOD if operation succeeded, BAD otherwise.
  */
-SOPC_ReturnStatus Socket_AddrInfo_Get(char* hostname, char* port, Socket_AddressInfo** addrs);
+SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Socket_AddressInfo** addrs);
 
 /**
  *  \brief Given a socket addressing information element of a linked list,
@@ -62,7 +62,7 @@ SOPC_ReturnStatus Socket_AddrInfo_Get(char* hostname, char* port, Socket_Address
  *
  *  \return        Next socket adressing information element or NULL if no more are present.
  */
-Socket_AddressInfo* Socket_AddrInfo_IterNext(Socket_AddressInfo* addr);
+SOPC_Socket_AddressInfo* SOPC_Socket_AddrInfo_IterNext(SOPC_Socket_AddressInfo* addr);
 
 /**
  *  \brief Given a socket addressing information element,
@@ -72,7 +72,7 @@ Socket_AddressInfo* Socket_AddrInfo_IterNext(Socket_AddressInfo* addr);
  *
  *  \return        0 if address is not IPV6 and not 0 value otherwise.
  */
-uint8_t Socket_AddrInfo_IsIPV6(Socket_AddressInfo* addr);
+uint8_t SOPC_Socket_AddrInfo_IsIPV6(SOPC_Socket_AddressInfo* addr);
 
 /**
  *  \brief Deallocate a linked list of socket addressing information.
@@ -81,14 +81,14 @@ uint8_t Socket_AddrInfo_IsIPV6(Socket_AddressInfo* addr);
  * operation.
  *
  */
-void Socket_AddrInfoDelete(Socket_AddressInfo** addrs);
+void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs);
 
 /**
  *  \brief Clear socket state to an invalid socket
  *
  *  \param sock              (Out) Value pointed is set to invalid socket value
  */
-void Socket_Clear(Socket* sock);
+void SOPC_Socket_Clear(Socket* sock);
 
 /**
  *  \brief Create a new socket using the addressing information provided
@@ -100,7 +100,10 @@ void Socket_Clear(Socket* sock);
  *
  *  \return                  GOOD if operation succeeded, BAD otherwise.
  */
-SOPC_ReturnStatus Socket_CreateNew(Socket_AddressInfo* addr, bool setReuseAddr, bool setNonBlocking, Socket* sock);
+SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
+                                        bool setReuseAddr,
+                                        bool setNonBlocking,
+                                        Socket* sock);
 
 /**
  *  \brief Configure the socket to listen connections using the given addressing information
@@ -110,7 +113,7 @@ SOPC_ReturnStatus Socket_CreateNew(Socket_AddressInfo* addr, bool setReuseAddr, 
  *
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
-SOPC_ReturnStatus Socket_Listen(Socket sock, Socket_AddressInfo* addr);
+SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr);
 
 /**
  *  \brief Operation to accept a connection on a listening socket
@@ -122,30 +125,31 @@ SOPC_ReturnStatus Socket_Listen(Socket sock, Socket_AddressInfo* addr);
  *
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
-SOPC_ReturnStatus Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock);
+SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock);
 
 /**
  *  \brief Operation to establish a connection using the given socket and addressing information
  *  Connection establishment result must be detected when receiving a read event on the socket and
- *  then by calling the Socket_CheckAckConnect operation
+ *  then by calling the SOPC_Socket_CheckAckConnect operation
  *
  *  \param addr    The addressing information used to establish connection (IP and port)
  *  \param sock    The socket used for establishing the connection
  *
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
-SOPC_ReturnStatus Socket_Connect(Socket sock, Socket_AddressInfo* addr);
+SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr);
 
 /**
  *  \brief Operation to check connection establishment result on a connecting socket
- *  After using Socket_Connect on a socket and receiving a write event on the socket this operation returns
+ *  After using SOPC_Socket_Connect on a socket and receiving a write event on the socket this operation returns
  *  the failure or success of the connection
  *
- *  \param sock    The socket on which the first read event has been received after calling Socket_Connect operation.
+ *  \param sock    The socket on which the first read event has been received after calling SOPC_Socket_Connect
+ * operation.
  *
  *  \return        GOOD if connection succeeded, BAD otherwise.
  */
-SOPC_ReturnStatus Socket_CheckAckConnect(Socket sock);
+SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock);
 
 /**
  *  \brief Add a socket to the given socket set
@@ -153,7 +157,7 @@ SOPC_ReturnStatus Socket_CheckAckConnect(Socket sock);
  *  \param sock       The socket to add to the set (not NULL)
  *  \param sockSet    The socket set to use for the operation (not NULL)
  */
-void SocketSet_Add(Socket sock, SocketSet* sockSet);
+void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet);
 
 /**
  *  \brief Returns if a socket is present in the given socket set
@@ -163,13 +167,13 @@ void SocketSet_Add(Socket sock, SocketSet* sockSet);
  *
  *  \return           true (!= false) if present, false otherwise
  */
-bool SocketSet_IsPresent(Socket sock, SocketSet* sockSet);
+bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet);
 /**
  *  \brief Clear a socket set
  *
  *  \param sockSet    The socket set to use for the operation (not NULL)
  */
-void SocketSet_Clear(SocketSet* sockSet);
+void SOPC_SocketSet_Clear(SOPC_SocketSet* sockSet);
 
 /**
  *  \brief Wait for events (read, write and exception) on the sockets in the given sets for a given duration.
@@ -184,7 +188,10 @@ void SocketSet_Clear(SocketSet* sockSet);
  *
  *  \return             The number of sockets with events contained by sets or -1 if failed
  */
-int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketSet* exceptSet, uint32_t waitMs);
+int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
+                                     SOPC_SocketSet* writeSet,
+                                     SOPC_SocketSet* exceptSet,
+                                     uint32_t waitMs);
 
 /**
  *  \brief Write data through the socket
@@ -199,7 +206,7 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketS
  *                   SOPC_STATUS_WOULD_BLOCK if socket write operation would block,
  *                   SOPC_STATUS_NOK if it failed and
  */
-SOPC_ReturnStatus Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes);
+SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes);
 
 /**
  *  \brief Read data through the socket
@@ -213,13 +220,13 @@ SOPC_ReturnStatus Socket_Write(Socket sock, const uint8_t* data, uint32_t count,
  *  \return         SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_CLOSED in case of disconnection and
  * SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount);
+SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount);
 
 /**
  *  \brief Close the socket connection and/or clear the socket
  *
  *  \param sock     The socket to disconnect and/or clear
  */
-void Socket_Close(Socket* sock);
+void SOPC_Socket_Close(Socket* sock);
 
 #endif /* SOPC_RAW_SOCKETS_H_ */

@@ -41,7 +41,7 @@ void SOPC_SocketsInternalContext_Initialize()
     for (idx = 0; idx < SOPC_MAX_SOCKETS; idx++)
     {
         socketsArray[idx].socketIdx = idx;
-        Socket_Clear(&(socketsArray[idx].sock));
+        SOPC_Socket_Clear(&(socketsArray[idx].sock));
     }
     Mutex_Initialization(&socketsMutex);
 
@@ -61,7 +61,7 @@ void SOPC_SocketsInternalContext_Clear()
     {
         if (false != socketsArray[idx].isUsed)
         {
-            Socket_Close(&(socketsArray[idx].sock));
+            SOPC_Socket_Close(&(socketsArray[idx].sock));
             socketsArray[idx].isUsed = false;
         }
     }
@@ -103,7 +103,7 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx)
     if (socketIdx < SOPC_MAX_SOCKETS && socketsArray[socketIdx].isUsed != false)
     {
         sock = &socketsArray[socketIdx];
-        Socket_Close(&sock->sock);
+        SOPC_Socket_Close(&sock->sock);
         sock->isUsed = false;
         sock->state = SOCKET_STATE_CLOSED;
         sock->waitTreatNetworkEvent = false;
@@ -112,7 +112,7 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx)
         sock->listenerConnections = 0;
         if (sock->connectAddrs != NULL)
         {
-            Socket_AddrInfoDelete((Socket_AddressInfo**) &sock->connectAddrs);
+            SOPC_Socket_AddrInfoDelete((SOPC_Socket_AddressInfo**) &sock->connectAddrs);
         }
         sock->connectAddrs = NULL;
         sock->nextConnectAttemptAddr = NULL;

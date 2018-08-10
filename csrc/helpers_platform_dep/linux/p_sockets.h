@@ -33,7 +33,7 @@ typedef int Socket;
 /**
  *  \brief Socket addressing information for listening or connecting operation type
  */
-typedef struct addrinfo Socket_AddressInfo;
+typedef struct addrinfo SOPC_Socket_AddressInfo;
 
 /**
  *  \brief Set of sockets type
@@ -42,6 +42,6 @@ typedef struct
 {
     int fdmax;  /**< max of the set */
     fd_set set; /**< set */
-} SocketSet;
+} SOPC_SocketSet;
 
 #endif /* SOPC_P_SOCKETS_H_ */

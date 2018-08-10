@@ -36,11 +36,11 @@ typedef SOCKET Socket;
 /**
  *  \brief Socket addressing information for listening or connecting operation type
  */
-typedef struct addrinfo Socket_AddressInfo;
+typedef struct addrinfo SOPC_Socket_AddressInfo;
 
 /**
  *  \brief Set of sockets type
  */
-typedef fd_set SocketSet;
+typedef fd_set SOPC_SocketSet;
 
 #endif /* SOPC_P_SOCKETS_H_ */

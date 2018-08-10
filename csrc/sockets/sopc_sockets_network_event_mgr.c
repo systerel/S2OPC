@@ -62,12 +62,12 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
     bool socketsUsed = false;
     int32_t nbReady = 0;
     SOPC_Socket* uaSock = NULL;
-    SocketSet readSet, writeSet, exceptSet;
+    SOPC_SocketSet readSet, writeSet, exceptSet;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    SocketSet_Clear(&readSet);
-    SocketSet_Clear(&writeSet);
-    SocketSet_Clear(&exceptSet);
+    SOPC_SocketSet_Clear(&readSet);
+    SOPC_SocketSet_Clear(&writeSet);
+    SOPC_SocketSet_Clear(&exceptSet);
 
     Mutex_Lock(&socketsMutex);
 
@@ -87,13 +87,13 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
             {
                 // Wait for an event indicating connection succeeded/failed in CONNECTING state
                 // or Wait for an event indicating connection is writable again in CONNECTED state
-                SocketSet_Add(uaSock->sock, &writeSet);
+                SOPC_SocketSet_Add(uaSock->sock, &writeSet);
             }
             else
             {
-                SocketSet_Add(uaSock->sock, &readSet);
+                SOPC_SocketSet_Add(uaSock->sock, &readSet);
             }
-            SocketSet_Add(uaSock->sock, &exceptSet);
+            SOPC_SocketSet_Add(uaSock->sock, &exceptSet);
         }
     }
 
@@ -109,7 +109,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
     else
     {
         // Returns number of ready descriptor or -1 in case of error
-        nbReady = Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, msecTimeout);
+        nbReady = SOPC_Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, msecTimeout);
     }
 
     Mutex_Lock(&socketsMutex);
@@ -130,10 +130,10 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                 {
                     /* Socket is currently in connecting attempt: check WRITE events */
 
-                    if (SocketSet_IsPresent(uaSock->sock, &writeSet) != false)
+                    if (SOPC_SocketSet_IsPresent(uaSock->sock, &writeSet) != false)
                     {
                         // Check connection errors: mandatory when non blocking connection
-                        status = Socket_CheckAckConnect(uaSock->sock);
+                        status = SOPC_Socket_CheckAckConnect(uaSock->sock);
                         if (SOPC_STATUS_OK != status)
                         {
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CONNECTION_ATTEMPT_FAILED,
@@ -149,7 +149,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                 {
                     /* Socket is not in connecting state: check READ and WRITE events */
 
-                    if (SocketSet_IsPresent(uaSock->sock, &readSet) != false)
+                    if (SOPC_SocketSet_IsPresent(uaSock->sock, &readSet) != false)
                     {
                         if (uaSock->state == SOCKET_STATE_CONNECTED)
                         {
@@ -167,7 +167,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                             SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                         }
                     }
-                    else if (SocketSet_IsPresent(uaSock->sock, &writeSet) != false)
+                    else if (SOPC_SocketSet_IsPresent(uaSock->sock, &writeSet) != false)
                     {
                         if (uaSock->state == SOCKET_STATE_CONNECTED)
                         {
@@ -183,7 +183,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                 }
 
                 // In any state check EXCEPT events
-                if (SocketSet_IsPresent(uaSock->sock, &exceptSet) != false)
+                if (SOPC_SocketSet_IsPresent(uaSock->sock, &exceptSet) != false)
                 {
                     // TODO: retrieve exception code
                     SOPC_Logger_TraceError("SocketNetworkMgr: exception event on socketIdx=%" PRIu32, idx);
