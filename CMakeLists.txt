@@ -3,6 +3,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 
 project (INGOPCS LANGUAGES C)
 include(CheckCCompilerFlag)
+include (CheckTypeSize)
 
 # compatibility with CMake 3.1
 if(POLICY CMP0054)
@@ -49,6 +50,8 @@ else()
 endif()
 
 add_definitions(-DSOPC_PTR_SIZE=${CMAKE_SIZEOF_VOID_P})
+check_type_size("time_t" CMAKE_TIME_T_SIZE)
+add_definitions(-DSOPC_TIME_T_SIZE=${CMAKE_TIME_T_SIZE})
 
 # check if compiler support new sanitization options
 set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")

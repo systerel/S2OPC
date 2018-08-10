@@ -319,8 +319,8 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet, SocketSet* writeSet, SocketS
     }
     else
     {
-        timeout.tv_sec = (waitMs / 1000);
-        timeout.tv_usec = 1000 * (waitMs % 1000);
+        timeout.tv_sec = (time_t)(waitMs / 1000);
+        timeout.tv_usec = (suseconds_t)(1000 * (waitMs % 1000));
         val = &timeout;
     }
     nbReady = select(fdmax + 1, &readSet->set, &writeSet->set, &exceptSet->set, val);

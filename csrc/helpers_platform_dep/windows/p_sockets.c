@@ -327,7 +327,7 @@ SOPC_ReturnStatus Socket_Write(Socket sock, const uint8_t* data, uint32_t count,
     if (sock != SOPC_INVALID_SOCKET && data != NULL && count <= INT32_MAX && sentBytes != NULL)
     {
         status = SOPC_STATUS_NOK;
-        res = send(sock, (char*) data, (int) count, 0);
+        res = send(sock, (const char*) data, (int) count, 0);
         if (res >= 0)
         {
             /* MSDN send documentation indicates case res == 0 shall not occur in non blocking mode:

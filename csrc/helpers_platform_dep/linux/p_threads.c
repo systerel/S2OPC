@@ -197,8 +197,8 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
     {
         // Retrieve current time
         clock_gettime(CLOCK_REALTIME, &absoluteTimeout);
-        absoluteTimeout.tv_sec = absoluteTimeout.tv_sec + (milliSecs / 1000);
-        absoluteTimeout.tv_nsec = absoluteTimeout.tv_nsec + (milliSecs % 1000);
+        absoluteTimeout.tv_sec = absoluteTimeout.tv_sec + (time_t)(milliSecs / 1000);
+        absoluteTimeout.tv_nsec = absoluteTimeout.tv_nsec + (long) (milliSecs % 1000);
 
         retCode = pthread_cond_timedwait(cond, mut, &absoluteTimeout);
         if (retCode == 0)

@@ -1266,10 +1266,12 @@ SOPC_ReturnStatus SOPC_DateTime_FromTimeT(time_t time, SOPC_DateTime* res)
 {
     assert(time >= 0);
 
+#if (SOPC_TIME_T_SIZE > 4)
     if (time > INT64_MAX)
     {
         return SOPC_STATUS_NOK;
     }
+#endif
 
     int64_t dt = time;
 

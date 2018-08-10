@@ -76,7 +76,7 @@ static bool insert_item(SOPC_Dict* d, uint64_t hash, void* key, void* value, boo
 {
     for (size_t i = 0; i < d->size; ++i)
     {
-        size_t idx = HASH_I(hash, i) & d->sizemask;
+        size_t idx = (size_t) HASH_I(hash, i) & d->sizemask;
         SOPC_DictBucket* b = &d->buckets[idx];
 
         // Normal insert
