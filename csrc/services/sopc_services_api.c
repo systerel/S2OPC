@@ -292,7 +292,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
 
         /* id = secure channel connection index,
            auxParam = request handle */
-        if (id <= constants__t_channel_config_idx_i_max && auxParam <= SOPC_MAX_PENDING_REQUESTS)
+        if (id <= constants__t_channel_i_max && auxParam <= SOPC_MAX_PENDING_REQUESTS)
         {
             io_dispatch_mgr__client_request_timeout(id, (uint32_t) auxParam);
         }
