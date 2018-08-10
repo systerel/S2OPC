@@ -93,6 +93,39 @@ SOPC_ReturnStatus SOPC_InternalOpcUa_DataChangeNotification_Copy(OpcUa_DataChang
     return SOPC_STATUS_OK;
 }
 
+static bool notification_message_copy(OpcUa_NotificationMessage* dst, const OpcUa_NotificationMessage* src)
+{
+    assert(dst != NULL && src != NULL);
+    assert(src->NoOfNotificationData == 1); // Restricted support for now
+
+    SOPC_ExtensionObject* notification_data = calloc(1, sizeof(SOPC_ExtensionObject));
+
+    if (notification_data == NULL)
+    {
+        return false;
+    }
+
+    SOPC_ExtensionObject_Initialize(notification_data);
+
+    if (SOPC_ExtensionObject_Copy(notification_data, src->NotificationData) != SOPC_STATUS_OK ||
+        SOPC_InternalOpcUa_DataChangeNotification_Copy(
+            (OpcUa_DataChangeNotification*) notification_data->Body.Object.Value,
+            (OpcUa_DataChangeNotification*) src->NotificationData->Body.Object.Value) != SOPC_STATUS_OK)
+    {
+        SOPC_ExtensionObject_Clear(notification_data);
+        free(notification_data);
+        return false;
+    }
+
+    OpcUa_NotificationMessage_Initialize(dst);
+    dst->NotificationData = notification_data;
+    dst->NoOfNotificationData = 1;
+    dst->PublishTime = src->PublishTime;
+    dst->SequenceNumber = src->SequenceNumber;
+
+    return true;
+}
+
 void notification_republish_queue_bs__add_republish_notif_to_queue(
     const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue,
     const constants__t_sub_seq_num_i notification_republish_queue_bs__p_seq_num,
@@ -102,37 +135,12 @@ void notification_republish_queue_bs__add_republish_notif_to_queue(
     assert(notification_republish_queue_bs__p_notif_msg->NoOfNotificationData == 1);
     *notification_republish_queue_bs__bres = false;
     OpcUa_NotificationMessage* notifMsgCpy = malloc(sizeof(OpcUa_NotificationMessage));
-    if (notifMsgCpy == NULL)
-    {
-        return;
-    }
-    *notifMsgCpy = *notification_republish_queue_bs__p_notif_msg;             /* Shallow copy */
-    notifMsgCpy->NotificationData = malloc(1 * sizeof(SOPC_ExtensionObject)); /* Deep copy for notification data */
-    if (notifMsgCpy->NotificationData == NULL)
-    {
-        free(notifMsgCpy);
-        return;
-    }
-    SOPC_ExtensionObject_Initialize(notifMsgCpy->NotificationData);
-    if (SOPC_ExtensionObject_Copy(notifMsgCpy->NotificationData,
-                                  notification_republish_queue_bs__p_notif_msg->NotificationData) != SOPC_STATUS_OK)
+    if (notifMsgCpy == NULL || !notification_message_copy(notifMsgCpy, notification_republish_queue_bs__p_notif_msg))
     {
         SOPC_Logger_TraceError(
-            "notification_republish_queue_bs__add_republish_notif_to_queue: SOPC_ExtensionObject_Copy failure");
+            "notification_republish_queue_bs__add_republish_notif_to_queue: Error while copying notification message");
+        free(notifMsgCpy);
         return;
-    }
-    else
-    {
-        /* TODO: deep copy not managed by SOPC_ExtensionObject_Copy, do it manually */
-        if (SOPC_InternalOpcUa_DataChangeNotification_Copy(
-                (OpcUa_DataChangeNotification*) notifMsgCpy->NotificationData->Body.Object.Value,
-                (OpcUa_DataChangeNotification*) notification_republish_queue_bs__p_notif_msg->NotificationData->Body
-                    .Object.Value) != SOPC_STATUS_OK)
-        {
-            SOPC_Logger_TraceError(
-                "notification_republish_queue_bs__add_republish_notif_to_queue: SOPC_ExtensionObject_Copy failure");
-            return;
-        }
     }
     void* res = SOPC_SLinkedList_Append(notification_republish_queue_bs__p_queue,
                                         notification_republish_queue_bs__p_seq_num, (void*) notifMsgCpy);
