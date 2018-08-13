@@ -1375,7 +1375,6 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
                                                        SOPC_Buffer* helloMsgBuffer,
                                                        SOPC_StatusCode* errorStatus)
 {
-    bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     assert(scConnection != NULL);
@@ -1425,20 +1424,17 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
 
     if (SOPC_STATUS_OK == status)
     {
-        result = true;
+        *errorStatus = SOPC_GoodGenericStatus;
+        scConnection->state = SECURE_CONNECTION_STATE_SC_INIT;
+        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_ACK, scConnectionIdx, ackMsgBuffer, 0);
     }
     else
     {
         *errorStatus = OpcUa_BadEncodingError;
+        SOPC_Buffer_Delete(ackMsgBuffer);
     }
 
-    if (result != false)
-    {
-        scConnection->state = SECURE_CONNECTION_STATE_SC_INIT;
-        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_ACK, scConnectionIdx, ackMsgBuffer, 0);
-    }
-
-    return result;
+    return status == SOPC_STATUS_OK;
 }
 
 static bool get_certificate_der(SOPC_Certificate* cert, SOPC_Buffer** buffer)
