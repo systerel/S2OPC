@@ -83,7 +83,6 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
     SOPC_Endpoint_Config* epConfig = NULL;
     constants__t_StatusCode_i sCode = constants__e_sc_ok;
     SOPC_EncodeableType* encType = NULL;
-    SOPC_Internal_AsyncSendMsgData* asyncSendMsgData = NULL;
     bool bres = false;
     void* msg = NULL;
     switch (event)
@@ -97,16 +96,19 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         // id ==  endpoint configuration index
         // params = channel configuration index POINTER
         // auxParam == connection Id
-        if (id <= INT32_MAX && auxParam <= INT32_MAX && params != NULL && *(uint32_t*) params <= INT32_MAX)
-        {
-            io_dispatch_mgr__server_channel_connected_event(id, *(uint32_t*) params, (uint32_t) auxParam, &bres);
-            if (bres == false)
-            {
-                SOPC_Logger_TraceError("Services: channel state incoherent epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, id,
-                                       auxParam);
+        assert(id <= INT32_MAX);
+        assert(params != NULL);
+        uint32_t channel_config_idx = *((uint32_t*) params);
+        assert(channel_config_idx <= constants__t_channel_config_idx_i_max);
+        assert(auxParam <= constants__t_channel_i_max);
 
-                SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, (uint32_t) auxParam, NULL, 0);
-            }
+        io_dispatch_mgr__server_channel_connected_event(id, channel_config_idx, (uint32_t) auxParam, &bres);
+        if (bres == false)
+        {
+            SOPC_Logger_TraceError("Services: channel state incoherent epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, id,
+                                   auxParam);
+
+            SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, (uint32_t) auxParam, NULL, 0);
         }
 
         break;
@@ -125,20 +127,17 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         // id == connection Id
         // auxParam == secure channel configuration index
         // => B model entry point to add
-        if (id <= INT32_MAX && auxParam <= INT32_MAX)
-        {
-            io_dispatch_mgr__client_channel_connected_event((uint32_t) auxParam, id);
-        }
+        assert(id <= constants__t_channel_i_max);
+        assert(auxParam <= constants__t_channel_config_idx_i_max);
+        io_dispatch_mgr__client_channel_connected_event((uint32_t) auxParam, id);
         break;
     case SC_TO_SE_SC_CONNECTION_TIMEOUT:
         SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_CONNECTION_TIMEOUT scCfgIdx=%" PRIu32, id);
 
         // id == secure channel configuration index
         // => B model entry point to add
-        if (id <= constants_bs__t_channel_config_idx_i_max)
-        {
-            io_dispatch_mgr__client_secure_channel_timeout(id);
-        }
+        assert(id <= constants_bs__t_channel_config_idx_i_max);
+        io_dispatch_mgr__client_secure_channel_timeout(id);
         break;
     case SC_TO_SE_SC_DISCONNECTED:
         SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_DISCONNECTED scIdx=%" PRIu32, id);
@@ -158,20 +157,15 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_ACTIVATE_ORPHANED_SESSION session=%" PRIu32 " scCfgIdx=%" PRIuPTR,
                                id, auxParam);
 
-        if (auxParam <= constants__t_channel_config_idx_i_max)
-        {
-            io_dispatch_mgr__internal_client_activate_orphaned_session(id,
-                                                                       (constants__t_channel_config_idx_i) auxParam);
-        }
+        assert(auxParam <= constants__t_channel_config_idx_i_max);
+        io_dispatch_mgr__internal_client_activate_orphaned_session(id, (constants__t_channel_config_idx_i) auxParam);
         break;
     case SE_TO_SE_CREATE_SESSION:
         SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_CREATE_SESSION session=%" PRIu32 " scCfgIdx=%" PRIuPTR, id,
                                auxParam);
-        if (auxParam <= constants__t_channel_config_idx_i_max)
-        {
-            io_dispatch_mgr__internal_client_create_session((constants__t_session_i) id,
-                                                            (constants__t_channel_config_idx_i) auxParam);
-        }
+        assert(auxParam <= constants__t_channel_config_idx_i_max);
+        io_dispatch_mgr__internal_client_create_session((constants__t_session_i) id,
+                                                        (constants__t_channel_config_idx_i) auxParam);
         break;
     case SE_TO_SE_ACTIVATE_SESSION:
         SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_ACTIVATE_SESSION session=%" PRIu32, id);
@@ -194,17 +188,20 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
          */
         SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32, id);
 
-        if (NULL != params && NULL != (void*) auxParam)
-        {
-            /* Note: write values deallocation managed by B model */
-            io_dispatch_mgr__internal_server_data_changed((OpcUa_WriteValue*) params, (OpcUa_WriteValue*) auxParam,
-                                                          &bres);
+        assert(params != NULL);
 
-            if (bres == false)
-            {
-                SOPC_Logger_TraceError("ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32 " treatment failed",
-                                       id);
-            }
+        OpcUa_WriteValue* old_value = params;
+        OpcUa_WriteValue* new_value = (void*) auxParam;
+        assert(old_value != NULL);
+        assert(new_value != NULL);
+
+        /* Note: write values deallocation managed by B model */
+        io_dispatch_mgr__internal_server_data_changed(old_value, new_value, &bres);
+
+        if (bres == false)
+        {
+            SOPC_Logger_TraceError("ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32 " treatment failed",
+                                   id);
         }
         break;
     case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
@@ -232,19 +229,19 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
            auxParams = (constants__t_StatusCode_i) service result code
          */
         SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO session=%" PRIu32, id);
-        if (NULL != params)
-        {
-            asyncSendMsgData = (SOPC_Internal_AsyncSendMsgData*) params;
-            io_dispatch_mgr__internal_server_send_publish_response_prio_event(
-                (constants__t_session_i) id, asyncSendMsgData->requestHandle, asyncSendMsgData->requestId,
-                asyncSendMsgData->msgToSend, (constants__t_StatusCode_i) auxParam, &bres);
-            free(asyncSendMsgData);
 
-            if (bres == false)
-            {
-                SOPC_Logger_TraceError(
-                    "ServicesMgr: SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO session=%" PRIu32 " treatment failed", id);
-            }
+        SOPC_Internal_AsyncSendMsgData* msg_data = params;
+        assert(msg_data != NULL);
+
+        io_dispatch_mgr__internal_server_send_publish_response_prio_event(
+            (constants__t_session_i) id, msg_data->requestHandle, msg_data->requestId, msg_data->msgToSend,
+            (constants__t_StatusCode_i) auxParam, &bres);
+        free(msg_data);
+
+        if (bres == false)
+        {
+            SOPC_Logger_TraceError(
+                "ServicesMgr: SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO session=%" PRIu32 " treatment failed", id);
         }
         break;
     case TIMER_SE_EVAL_SESSION_TIMEOUT:
@@ -292,10 +289,8 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
 
         /* id = secure channel connection index,
            auxParam = request handle */
-        if (id <= constants__t_channel_i_max && auxParam <= SOPC_MAX_PENDING_REQUESTS)
-        {
-            io_dispatch_mgr__client_request_timeout(id, (uint32_t) auxParam);
-        }
+        assert(id <= constants__t_channel_i_max && auxParam <= SOPC_MAX_PENDING_REQUESTS);
+        io_dispatch_mgr__client_request_timeout(id, (uint32_t) auxParam);
         break;
 
     /* App to Services events */
@@ -348,27 +343,26 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         // id =  endpoint configuration index
         // params = local service request
         // auxParam = user application session context
-        if (id <= INT32_MAX)
+        assert(id <= INT32_MAX);
+
+        io_dispatch_mgr__server_treat_local_service_request(id, params, auxParam, &sCode);
+        if (constants__e_sc_ok != sCode)
         {
-            io_dispatch_mgr__server_treat_local_service_request(id, params, auxParam, &sCode);
-            if (constants__e_sc_ok != sCode)
+            // Error case
+            status = SOPC_Encodeable_Create(&OpcUa_ServiceFault_EncodeableType, &msg);
+            if (SOPC_STATUS_OK == status && NULL != msg)
             {
-                // Error case
-                status = SOPC_Encodeable_Create(&OpcUa_ServiceFault_EncodeableType, &msg);
-                if (SOPC_STATUS_OK == status && NULL != msg)
-                {
-                    util_status_code__B_to_C(sCode, &((OpcUa_ServiceFault*) msg)->ResponseHeader.ServiceResult);
-                }
-                else
-                {
-                    msg = NULL;
-                }
-                SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_LOCAL_SERVICE_RESPONSE), id, msg,
-                                                auxParam);
-                SOPC_Logger_TraceWarning("ServicesMgr: APP_TO_SE_LOCAL_SERVICE_REQUEST failed epCfgIdx=%" PRIu32
-                                         " msgType=%s ctx=%" PRIuPTR,
-                                         id, SOPC_EncodeableType_GetName(encType), auxParam);
+                util_status_code__B_to_C(sCode, &((OpcUa_ServiceFault*) msg)->ResponseHeader.ServiceResult);
             }
+            else
+            {
+                msg = NULL;
+            }
+            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_LOCAL_SERVICE_RESPONSE), id, msg,
+                                            auxParam);
+            SOPC_Logger_TraceWarning("ServicesMgr: APP_TO_SE_LOCAL_SERVICE_REQUEST failed epCfgIdx=%" PRIu32
+                                     " msgType=%s ctx=%" PRIuPTR,
+                                     id, SOPC_EncodeableType_GetName(encType), auxParam);
         }
         break;
     case APP_TO_SE_ACTIVATE_SESSION:
@@ -378,10 +372,11 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         // id == secure channel configuration
         // params = user authentication
         // auxParam = user application session context
-        if (id <= constants__t_channel_config_idx_i_max && params != NULL && *(uint32_t*) params <= INT32_MAX)
-        {
-            io_dispatch_mgr__client_activate_new_session(id, (constants__t_user_token_i) params, auxParam, &bres);
-        }
+        assert(id <= constants__t_channel_config_idx_i_max);
+        assert(params != NULL);
+
+        io_dispatch_mgr__client_activate_new_session(id, (constants__t_user_token_i) params, auxParam, &bres);
+
         if (bres == false)
         {
             SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
@@ -403,32 +398,30 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
 
         // id == session id
         // params = request
-        if (id <= constants__t_session_i_max)
-        {
-            io_dispatch_mgr__client_send_service_request(id, params, auxParam, &sCode);
-            if (sCode != constants__e_sc_ok)
-            {
-                SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
-                                                util_status_code__B_to_return_status_C(sCode), encType, auxParam);
-                status = SOPC_STATUS_NOK;
+        assert(id <= constants__t_session_i_max);
 
-                SOPC_Logger_TraceWarning("ServicesMgr: APP_TO_SE_SEND_SESSION_REQUEST failed session=%" PRIu32
-                                         " msgType=%s ctx=%" PRIuPTR,
-                                         id, SOPC_EncodeableType_GetName(encType), auxParam);
-            }
+        io_dispatch_mgr__client_send_service_request(id, params, auxParam, &sCode);
+        if (sCode != constants__e_sc_ok)
+        {
+            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
+                                            util_status_code__B_to_return_status_C(sCode), encType, auxParam);
+            status = SOPC_STATUS_NOK;
+
+            SOPC_Logger_TraceWarning("ServicesMgr: APP_TO_SE_SEND_SESSION_REQUEST failed session=%" PRIu32
+                                     " msgType=%s ctx=%" PRIuPTR,
+                                     id, SOPC_EncodeableType_GetName(encType), auxParam);
         }
         break;
     case APP_TO_SE_CLOSE_SESSION:
         SOPC_Logger_TraceDebug("ServicesMgr: APP_TO_SE_CLOSE_SESSION  session=%" PRIu32, id);
 
         // id == session id
-        if (id <= constants__t_session_i_max)
+        assert(id <= constants__t_session_i_max);
+
+        io_dispatch_mgr__client_send_close_session_request(id, &sCode);
+        if (sCode != constants__e_sc_ok)
         {
-            io_dispatch_mgr__client_send_close_session_request(id, &sCode);
-            if (sCode != constants__e_sc_ok)
-            {
-                SOPC_Logger_TraceError("ServicesMgr: APP_TO_SE_CLOSE_SESSION failed session=%" PRIu32, id);
-            }
+            SOPC_Logger_TraceError("ServicesMgr: APP_TO_SE_CLOSE_SESSION failed session=%" PRIu32, id);
         }
         break;
     case APP_TO_SE_SEND_DISCOVERY_REQUEST:
@@ -442,19 +435,18 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
 
         // id == endpoint connection config idx
         // params = request
-        if (id <= constants_bs__t_channel_config_idx_i_max)
-        {
-            io_dispatch_mgr__client_send_discovery_request(id, params, auxParam, &sCode);
-            if (sCode != constants__e_sc_ok)
-            {
-                SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
-                                                util_status_code__B_to_return_status_C(sCode), encType, auxParam);
-                status = SOPC_STATUS_NOK;
+        assert(id <= constants_bs__t_channel_config_idx_i_max);
 
-                SOPC_Logger_TraceWarning("ServicesMgr: APP_TO_SE_SEND_SESSION_REQUEST failed session=%" PRIu32
-                                         " msgType=%s ctx=%" PRIuPTR,
-                                         id, SOPC_EncodeableType_GetName(encType), auxParam);
-            }
+        io_dispatch_mgr__client_send_discovery_request(id, params, auxParam, &sCode);
+        if (sCode != constants__e_sc_ok)
+        {
+            SOPC_ServicesToApp_EnqueueEvent(SOPC_AppEvent_ComEvent_Create(SE_SND_REQUEST_FAILED),
+                                            util_status_code__B_to_return_status_C(sCode), encType, auxParam);
+            status = SOPC_STATUS_NOK;
+
+            SOPC_Logger_TraceWarning("ServicesMgr: APP_TO_SE_SEND_SESSION_REQUEST failed session=%" PRIu32
+                                     " msgType=%s ctx=%" PRIuPTR,
+                                     id, SOPC_EncodeableType_GetName(encType), auxParam);
         }
         break;
     case APP_TO_SE_CLOSE_ALL_CONNECTIONS:
