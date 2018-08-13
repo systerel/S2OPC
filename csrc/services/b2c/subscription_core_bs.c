@@ -35,14 +35,14 @@
 
 SOPC_Dict* nodeIdToMonitoredItemQueue = NULL;
 
-static uint64_t nodeid_hash(const void* id)
+static uint64_t nodeid_hash_subscription(const void* id)
 {
     uint64_t hash;
     SOPC_NodeId_Hash((const SOPC_NodeId*) id, &hash);
     return hash;
 }
 
-static bool nodeid_equal(const void* a, const void* b)
+static bool nodeid_equal_subscription(const void* a, const void* b)
 {
     int32_t cmp;
     SOPC_ReturnStatus status = SOPC_NodeId_Compare((const SOPC_NodeId*) a, (const SOPC_NodeId*) b, &cmp);
@@ -72,8 +72,8 @@ void subscription_core_bs__INITIALISATION(void)
 {
     assert(nodeIdToMonitoredItemQueue == NULL);
 
-    nodeIdToMonitoredItemQueue =
-        SOPC_Dict_Create(NULL, nodeid_hash, nodeid_equal, free_node_id, free_monitored_item_queue);
+    nodeIdToMonitoredItemQueue = SOPC_Dict_Create(NULL, nodeid_hash_subscription, nodeid_equal_subscription,
+                                                  free_node_id, free_monitored_item_queue);
     assert(nodeIdToMonitoredItemQueue != NULL);
 }
 
