@@ -139,7 +139,15 @@ bool SOPC_Array_Append_Values(SOPC_Array* array, void* data, size_t n_elements)
         return false;
     }
 
-    memcpy(ARRAY_ELT(array, array->sz), data, n_elements * array->element_size);
+    if (data != NULL)
+    {
+        memcpy(ARRAY_ELT(array, array->sz), data, n_elements * array->element_size);
+    }
+    else
+    {
+        memset(ARRAY_ELT(array, array->sz), 0, n_elements * array->element_size);
+    }
+
     array->sz += n_elements;
 
     return true;

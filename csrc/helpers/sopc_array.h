@@ -99,7 +99,8 @@ void SOPC_Array_Delete(SOPC_Array* array);
  * \brief Appends several values contiguous in memory to an array.
  *
  * \param array       The array.
- * \param data        The memory location of the first value.
+ * \param data        The memory location of the first value. If \c NULL, the array
+ *                    grows by \p n_elements items, but does not initialize them.
  * \param n_elements  The number of values present in memory.
  *
  * \return \c TRUE on success, \c FALSE on memory allocation failure.
