@@ -561,13 +561,21 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
         case stClosing:
             switch (event)
             {
+            case SE_SESSION_ACTIVATION_FAILURE:
             case SE_CLOSED_SESSION:
                 /* Put the machine in a correct closed state, events may still be received */
                 pSM->state = stError;
                 break;
+            case SE_SESSION_REACTIVATING:
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Ignoring reactivation notification in stClosing state.");
+                break;
+            case SE_SND_REQUEST_FAILED:
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING,
+                            "Ignoring send request failure notification in stClosing state.");
+                break;
             default:
                 /* This might be a response to a pending request, so this might not an error */
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Unexpected event in stClosing state, ignoring.");
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Unexpected event %i in stClosing state, ignoring.", event);
                 break;
             }
             break;

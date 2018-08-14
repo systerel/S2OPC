@@ -508,8 +508,8 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
         {
             assert(!bProcessed);
             bProcessed = true;
-            /* Post process the event. The only interesting event is for now CLOSED. */
-            if (SE_CLOSED_SESSION == event)
+            /* Post process the event for callbacks. */
+            if (SE_CLOSED_SESSION == event || SE_SESSION_ACTIVATION_FAILURE == event)
             {
                 /* The disconnect callback shall be called after the client has been destroyed */
                 cbkDisco(cliId);
