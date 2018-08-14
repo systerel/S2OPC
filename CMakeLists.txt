@@ -425,7 +425,10 @@ target_include_directories(toolkit_test_suite_client PRIVATE ${INGOPCS_PUBLIC_IN
                                                              ${CHECK_INCLUDE_DIRS})
 
 # Server test
-add_executable(toolkit_test_server "tests/services/toolkit_test_server.c" ${TEST_ADDRESS_SPACE})
+add_executable(toolkit_test_server
+    "tests/services/runtime_variables.c"
+    "tests/services/toolkit_test_server.c"
+    ${TEST_ADDRESS_SPACE})
 target_link_libraries(toolkit_test_server PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
 target_include_directories(toolkit_test_server PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})

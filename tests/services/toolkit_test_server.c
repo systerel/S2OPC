@@ -39,6 +39,7 @@
 #include "sopc_toolkit_config.h"
 
 #include "embedded/loader.h"
+#include "runtime_variables.h"
 
 #ifdef WITH_EXPAT
 #include "uanodeset_expat/loader.h"
@@ -47,6 +48,8 @@
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 #define APPLICATION_URI "urn:INGOPCS:localhost"
 #define PRODUCT_URI "urn:INGOPCS:localhost"
+
+static const char* app_namespace_uris[] = {(const char*) PRODUCT_URI, NULL};
 
 static int32_t endpointClosed = 0;
 static bool secuActive = true;
@@ -84,6 +87,32 @@ void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void
         printf("<Test_Server_Toolkit: closed endpoint event: OK\n");
         SOPC_Atomic_Int_Set(&endpointClosed, 1);
     }
+    else if (event == SE_LOCAL_SERVICE_RESPONSE)
+    {
+        SOPC_EncodeableType* message_type = *((SOPC_EncodeableType**) param);
+
+        if (message_type != &OpcUa_WriteResponse_EncodeableType)
+        {
+            return;
+        }
+
+        OpcUa_WriteResponse* write_response = param;
+
+        bool ok = (write_response->ResponseHeader.ServiceResult == SOPC_GoodGenericStatus);
+
+        for (int32_t i = 0; i < write_response->NoOfResults; ++i)
+        {
+            ok &= (write_response->Results[i] == SOPC_GoodGenericStatus);
+        }
+
+        if (!ok)
+        {
+            printf("<Test_Server_Toolkit: Error while updating address space\n");
+        }
+
+        return;
+    }
+
     else
     {
         printf("<Test_Server_Toolkit: unexpected endpoint event %d : NOK\n", event);
@@ -167,6 +196,27 @@ static SOPC_AddressSpace* load_nodeset_from_file(const char* filename)
     }
 }
 #endif
+
+static time_t parse_build_date(const char* build_date)
+{
+    struct tm time;
+    memset(&time, 0, sizeof(struct tm));
+
+    if (sscanf(build_date, "%4d-%2d-%2d", &time.tm_year, &time.tm_mon, &time.tm_mday) != 3)
+    {
+        return 0;
+    }
+
+    if (time.tm_year < 1900 || time.tm_mon < 0 || time.tm_mon > 11 || time.tm_mday < 0 || time.tm_mday > 31)
+    {
+        return 0;
+    }
+
+    time.tm_year -= 1900;
+    time.tm_mon--;
+
+    return mktime(&time);
+}
 
 int main(int argc, char* argv[])
 {
@@ -380,6 +430,29 @@ int main(int argc, char* argv[])
     {
         printf("<Test_Server_Toolkit: Opening endpoint... \n");
         SOPC_ToolkitServer_AsyncOpenEndpoint(epConfigIdx);
+
+        RuntimeVariables runtime_vars = {
+            .server_uri = PRODUCT_URI,
+            .app_namespace_uris = app_namespace_uris,
+            .server_state = OpcUa_ServerState_Running,
+            .build_info =
+                {
+                    .product_uri = PRODUCT_URI,
+                    .manufacturer_name = "Systerel",
+                    .product_name = "S2OPC",
+                    .software_version = build_info.toolkitVersion,
+                    .build_number = build_info.toolkitSrcCommit,
+                    .build_date = parse_build_date(build_info.toolkitBuildDate),
+                },
+            .service_level = 255,
+            .auditing = true,
+        };
+
+        if (!set_runtime_variables(epConfigIdx, &runtime_vars))
+        {
+            printf("<Test_Server_Toolkit: Failed to populate Server object");
+            status = SOPC_STATUS_NOK;
+        }
     }
 
     // Run the server until notification that endpoint is closed or stop server signal
