@@ -734,6 +734,7 @@ OPERATIONS
                 END
             ELSE
                 l_ret := e_sc_bad_invalid_state;
+                local_client_close_session (session);
                 channel := c_channel_indet;
                 session_token := c_session_token_indet
             END
