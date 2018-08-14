@@ -1,2 +1,4 @@
 # Remove the JS files from acceptance tests from linguist stats
 acceptances_tests/* linguist-vendored
+*.c linguist-language=C
+*.h linguist-language=C
