@@ -53,4 +53,6 @@ Suite* tests_make_suite_array(void);
 
 Suite* tests_make_suite_event_handler(void);
 
+Suite* tests_make_suite_numeric_range(void);
+
 #endif // CHECK_HELPERS_H
