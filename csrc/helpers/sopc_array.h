@@ -105,7 +105,7 @@ void SOPC_Array_Delete(SOPC_Array* array);
  *
  * \return \c TRUE on success, \c FALSE on memory allocation failure.
  */
-bool SOPC_Array_Append_Values(SOPC_Array* array, void* data, size_t n_elements);
+bool SOPC_Array_Append_Values(SOPC_Array* array, const void* data, size_t n_elements);
 
 /**
  * \brief Gets a value from an array by its index.
