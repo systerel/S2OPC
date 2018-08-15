@@ -43,13 +43,15 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    fill_read_response_1(p_resp_msg, p_sc, p_nid, p_aid, p_rvi) =
+    fill_read_response_1(p_resp_msg, p_sc, p_nid, p_aid, p_index_range, p_rvi) =
     PRE
         p_resp_msg : t_msg_i         &
         p_sc       : t_StatusCode_i &
         p_sc       : t_StatusCode &
         p_nid      : t_NodeId_i      &
         p_aid      : t_AttributeId_i &
+        p_index_range : t_IndexRange_i &
+        p_index_range : t_IndexRange &
         p_rvi      : t_ReadValue_i
     THEN
         data_Value_Value,
@@ -81,7 +83,7 @@ LOCAL_OPERATIONS
 
 OPERATIONS
 
-    fill_read_response_1(p_resp_msg, p_sc, p_nid, p_aid, p_rvi) =
+    fill_read_response_1(p_resp_msg, p_sc, p_nid, p_aid, p_index_range, p_rvi) =
     VAR
         l_is_valid,
         l_node,
@@ -93,7 +95,7 @@ OPERATIONS
         THEN
             l_is_valid, l_node <-- readall_AddressSpace_Node(p_nid);
             IF l_is_valid = TRUE THEN
-                l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(l_node, p_aid);
+                l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(l_node, p_aid, p_index_range);
                 IF l_sc = e_sc_ok THEN
                     IF  p_aid = e_aid_Value &
                         l_ncl = e_ncl_Variable
@@ -123,14 +125,15 @@ OPERATIONS
         l_sc,
         l_rvi,
         l_nid,
-        l_aid
+        l_aid,
+        l_index_range
     IN
         l_nb_ReadValue <-- get_nb_ReadValue;
         l_continue <-- init_iter_write_request(l_nb_ReadValue);
         WHILE l_continue = TRUE DO
             l_continue, l_rvi <-- continue_iter_write_request;
-            l_sc, l_nid, l_aid <-- getall_ReadValue_NodeId_AttributeId(req_msg, l_rvi);
-            fill_read_response_1(resp_msg, l_sc, l_nid, l_aid, l_rvi)
+            l_sc, l_nid, l_aid, l_index_range <-- getall_ReadValue_NodeId_AttributeId(req_msg, l_rvi);
+            fill_read_response_1(resp_msg, l_sc, l_nid, l_aid, l_index_range, l_rvi)
         INVARIANT
             rreqs_to_iterate <: t_ReadValue &
             rreqs_iterated   <: t_ReadValue &

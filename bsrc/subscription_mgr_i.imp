@@ -572,7 +572,7 @@ OPERATIONS
             ;
             IF l_sc = e_sc_ok
             THEN
-                l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(l_node, l_aid);
+                l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(l_node, l_aid, c_IndexRange_indet);
                 IF l_ncl = e_ncl_Variable
                 THEN
                     l_valueSc <-- get_Value_StatusCode (l_node)

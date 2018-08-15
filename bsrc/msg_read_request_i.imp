@@ -71,10 +71,11 @@ OPERATIONS
     END
     ;
 
-    p_sc, p_nid, p_aid <-- getall_ReadValue_NodeId_AttributeId(p_msg, p_rvi) =
+    p_sc, p_nid, p_aid, p_index_range <-- getall_ReadValue_NodeId_AttributeId(p_msg, p_rvi) =
     BEGIN
         p_nid <-- getall_req_ReadValue_NodeId(p_msg, p_rvi);
-        p_sc, p_aid <-- getall_req_ReadValue_AttributeId(p_msg, p_rvi)
+        p_sc, p_aid <-- getall_req_ReadValue_AttributeId(p_msg, p_rvi);
+        p_index_range <-- getall_req_ReadValue_IndexRange(p_msg, p_rvi)
     END
     ;
 

@@ -114,7 +114,7 @@ OPERATIONS
     /* Reads any attribute and outputs a variant (valid or not)
      * As this function uses the util_variant__new_Variant_from_* functions, the value must be freed once used
      */
-    sc, variant <-- read_AddressSpace_Attribute_value(node, ncl, aid) =
+    sc, variant <-- read_AddressSpace_Attribute_value(node, ncl, aid, index_range) =
     PRE
         node : t_Node_i         &
         node : t_Node           &
@@ -123,7 +123,9 @@ OPERATIONS
         ncl : t_NodeClass_i &
         ncl = a_NodeClass(node) &
         aid  : t_AttributeId_i  &
-        aid  : t_AttributeId
+        aid  : t_AttributeId    &
+        index_range : t_IndexRange_i &
+        index_range : t_IndexRange
     THEN
         /* TODO: add BrowseName and DisplayName cases */
         SELECT aid = e_aid_NodeId THEN

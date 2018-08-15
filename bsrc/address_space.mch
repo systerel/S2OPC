@@ -105,12 +105,14 @@ INITIALISATION
 
 OPERATIONS
     /* a_NodeClass(node) and any_attribute(node) */
-    sc, ncl, val <-- read_NodeClass_Attribute(node, aid) =
+    sc, ncl, val <-- read_NodeClass_Attribute(node, aid, index_range) =
     PRE
         node : t_Node_i &
         node : t_Node &
         aid : t_AttributeId_i &
-        aid : t_AttributeId
+        aid : t_AttributeId &
+        index_range : t_IndexRange_i &
+        index_range : t_IndexRange
     THEN
         /* TODO: add user-access levels */
         /* TODO: define cases of failure (sc /= e_sc_ok): value requested on non Variable* type */

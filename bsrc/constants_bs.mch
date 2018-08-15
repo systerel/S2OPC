@@ -61,7 +61,8 @@ SETS
     t_monitoredItemPointer_i;
     t_monitoredItemId_i;
     t_client_handle_i;
-    t_timer_id_i
+    t_timer_id_i;
+    t_IndexRange_i
 
 CONCRETE_CONSTANTS
     k_n_read_resp_max,
@@ -73,6 +74,7 @@ CONCRETE_CONSTANTS
     k_n_publishRequestPerSub_max,
     k_n_republishNotifPerSub_max,
     k_n_genericOperationPerReq_max,
+    k_n_IndexRange_max,
 
     c_Variant_indet,
     c_Node_indet,
@@ -114,7 +116,8 @@ CONCRETE_CONSTANTS
     c_monitoredItemPointer_indet,
     c_monitoredItemId_indet,
     c_WriteValuePointer_indet,
-    c_timer_id_indet
+    c_timer_id_indet,
+    c_IndexRange_indet
 
 ABSTRACT_CONSTANTS
     t_Variant,
@@ -156,7 +159,8 @@ ABSTRACT_CONSTANTS
     t_monitoredItemPointer,
     t_monitoredItemId,
     t_WriteValuePointer,
-    t_timer_id
+    t_timer_id,
+    t_IndexRange
 
 PROPERTIES
     k_n_read_resp_max : NAT &
@@ -170,6 +174,7 @@ PROPERTIES
     k_n_republishNotifPerSub_max : NAT &
     k_n_republishNotifPerSub_max > 0 &
     k_n_genericOperationPerReq_max : NAT &
+    k_n_IndexRange_max : NAT &
 
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &
@@ -328,7 +333,11 @@ PROPERTIES
 
     t_timer_id <: t_timer_id_i &
     c_timer_id_indet : t_timer_id_i &
-    c_timer_id_indet /: t_timer_id
+    c_timer_id_indet /: t_timer_id &
+
+    t_IndexRange <: t_IndexRange_i &
+    c_IndexRange_indet : t_IndexRange_i &
+    c_IndexRange_indet /: t_IndexRange_i
 
 OPERATIONS
 

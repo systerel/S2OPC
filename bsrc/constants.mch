@@ -288,7 +288,8 @@ SETS
 
     /* Context provided by application on request and to provide with notifications */
     t_application_context_i; /* uintptr_t */
-    t_timer_id_i /* uint32_t */
+    t_timer_id_i; /* uint32_t */
+    t_IndexRange_i
 
 CONCRETE_CONSTANTS
     /*AddS,*/
@@ -301,6 +302,7 @@ CONCRETE_CONSTANTS
     k_n_publishRequestPerSub_max,
     k_n_republishNotifPerSub_max,
     k_n_genericOperationPerReq_max,
+    k_n_IndexRange_max,
 
     c_Variant_indet,
     c_NodeId_indet,
@@ -347,6 +349,7 @@ CONCRETE_CONSTANTS
     c_server_request_handle_any,
     c_no_application_context,
     c_timer_id_indet,
+    c_IndexRange_indet,
 
     t_counter
 
@@ -418,6 +421,7 @@ ABSTRACT_CONSTANTS
     t_channel,
     t_client_request_handle,
     t_timer_id,
+    t_IndexRange,
 
     s_session_treatment_reqs,
     s_session_treatment_resps,
@@ -491,6 +495,7 @@ PROPERTIES
     k_n_republishNotifPerSub_max : NAT &
     k_n_republishNotifPerSub_max > 0 &
     k_n_genericOperationPerReq_max : NAT &
+    k_n_IndexRange_max : NAT &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
@@ -667,6 +672,10 @@ PROPERTIES
     t_timer_id <: t_timer_id_i &
     c_timer_id_indet : t_timer_id_i &
     c_timer_id_indet /: t_timer_id &
+
+    t_IndexRange <: t_IndexRange_i &
+    c_IndexRange_indet : t_IndexRange_i &
+    c_IndexRange_indet /: t_IndexRange &
 
     t_buffer_in_state = { e_buffer_in_msg_not_read,
         e_buffer_in_msg_type_read,

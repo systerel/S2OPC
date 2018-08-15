@@ -22,6 +22,7 @@
  * Implements the base machine that reads a ReadRequest.
  */
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -63,12 +64,19 @@ void msg_read_request_bs__getall_req_ReadValue_AttributeId(const constants__t_ms
             bWarned = true;
         }
     }
+}
 
-    if (isvalid && msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].IndexRange.Length > 0)
-    {
-        isvalid = false;
-        *msg_read_request_bs__sc = constants__e_sc_bad_index_range_invalid;
-    }
+void msg_read_request_bs__getall_req_ReadValue_IndexRange(
+    const constants__t_msg_i msg_read_request_bs__msg,
+    const constants__t_ReadValue_i msg_read_request_bs__rvi,
+    constants__t_IndexRange_i* const msg_read_request_bs__index_range)
+{
+    assert(msg_read_request_bs__rvi >= 0);
+
+    OpcUa_ReadRequest* request = msg_read_request_bs__msg;
+    size_t node_index = (size_t) msg_read_request_bs__rvi - 1;
+    assert(request->NoOfNodesToRead >= 0 && node_index < ((size_t) request->NoOfNodesToRead));
+    *msg_read_request_bs__index_range = &request->NodesToRead[node_index].IndexRange;
 }
 
 void msg_read_request_bs__getall_req_ReadValue_NodeId(const constants__t_msg_i msg_read_request_bs__msg,

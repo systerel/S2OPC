@@ -83,6 +83,7 @@ typedef uint32_t constants_bs__t_timer_id_i;
 typedef SOPC_TimeReference constants_bs__t_timeref_i;
 #define constants_bs__t_user_i t_entier4
 typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
+typedef SOPC_String* constants_bs__t_IndexRange_i;
 
 /*--------------------------
    Added by the Translator
@@ -180,6 +181,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__k_n_publishRequestPerSub_max SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS
 #define constants_bs__k_n_read_resp_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_republishNotifPerSub_max (2 * SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS)
+#define constants_bs__c_IndexRange_indet 0
 
 /*------------------------
    INITIALISATION Clause

@@ -30,13 +30,15 @@ DEFINITIONS
         nb_ReadValue          : NAT                      &
         nb_ReadValue         <= k_n_read_resp_max        &
         ReadValue_NodeId      : t_ReadValue +-> t_NodeId &
-        ReadValue_AttributeId : t_ReadValue +-> t_AttributeId_i
+        ReadValue_AttributeId : t_ReadValue +-> t_AttributeId_i &
+        ReadValue_IndexRange  : t_ReadValue +-> t_IndexRange
     )
 
 ABSTRACT_VARIABLES
     nb_ReadValue,
     ReadValue_NodeId,
-    ReadValue_AttributeId
+    ReadValue_AttributeId,
+    ReadValue_IndexRange
 
 INVARIANT
     d_inv
@@ -44,7 +46,8 @@ INVARIANT
 INITIALISATION
     nb_ReadValue          := 0  ||
     ReadValue_NodeId      := {} ||
-    ReadValue_AttributeId := {}
+    ReadValue_AttributeId := {} ||
+    ReadValue_IndexRange  := {}
 
 OPERATIONS
 
@@ -62,7 +65,8 @@ OPERATIONS
         p_statusCode,
         nb_ReadValue,
         ReadValue_NodeId,
-        ReadValue_AttributeId
+        ReadValue_AttributeId,
+        ReadValue_IndexRange
         :(  p_read_ok      : BOOL & /* Error code, for now a simple bool */
             p_nb_ReadValue : INT  &
             p_tsToReturn   : t_TimestampsToReturn_i &
@@ -73,6 +77,7 @@ OPERATIONS
              nb_ReadValue > 0 &
              ReadValue_NodeId      : cast_t_ReadValue[1..nb_ReadValue] --> t_NodeId &
              ReadValue_AttributeId : cast_t_ReadValue[1..nb_ReadValue] --> t_AttributeId_i &
+             ReadValue_IndexRange  : cast_t_ReadValue[1..nb_ReadValue] --> t_IndexRange &
              p_nb_ReadValue = nb_ReadValue &
              p_tsToReturn : t_TimestampsToReturn &
              p_statusCode = e_sc_ok) &
@@ -80,13 +85,14 @@ OPERATIONS
              nb_ReadValue = 0 &
              ReadValue_NodeId = {} &
              ReadValue_AttributeId = {} &
+             ReadValue_IndexRange = {} &
              p_statusCode /= e_sc_ok
             )
         )
     END
     ;
 
-    p_sc, p_nid, p_aid <-- getall_ReadValue_NodeId_AttributeId(p_msg, p_rvi) =
+    p_sc, p_nid, p_aid, p_index_range <-- getall_ReadValue_NodeId_AttributeId(p_msg, p_rvi) =
     PRE
         nb_ReadValue > 0 &
         p_msg    : t_msg_i                     &
@@ -97,18 +103,23 @@ OPERATIONS
         p_rvi : t_ReadValue                    &
         p_rvi : cast_t_ReadValue[0..nb_ReadValue] &
         p_rvi : dom(ReadValue_NodeId) &
-        p_rvi : dom(ReadValue_AttributeId)
+        p_rvi : dom(ReadValue_AttributeId) &
+        p_rvi : dom(ReadValue_IndexRange)
     THEN
         p_sc,
         p_nid,
-        p_aid
+        p_aid,
+        p_index_range
         :(p_sc : t_StatusCode_i &
           p_sc : {e_sc_ok, e_sc_bad_node_id_invalid, e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid} &
             p_nid : t_NodeId_i                   &
             p_nid : t_NodeId                     &
             p_aid : t_AttributeId_i              &
+            p_index_range : t_IndexRange_i       &
+            p_index_range : t_IndexRange         &
             p_nid = ReadValue_NodeId(p_rvi)      &
             p_aid = ReadValue_AttributeId(p_rvi) &
+            p_index_range = ReadValue_IndexRange(p_rvi) &
             (p_sc = e_sc_ok => p_aid : t_AttributeId)
         )
     END

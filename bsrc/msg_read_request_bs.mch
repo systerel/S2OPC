@@ -27,21 +27,21 @@ SEES
 ABSTRACT_VARIABLES
     ReadValue_NodeId,
     ReadValue_AttributeId,
-    ReadValue_HasIndexRange
+    ReadValue_IndexRange
 
 INVARIANT
     ReadValue_NodeId      : t_ReadValue +-> t_NodeId &
     ReadValue_AttributeId : t_ReadValue +-> t_AttributeId_i &
-    ReadValue_HasIndexRange : t_ReadValue +-> BOOL
+    ReadValue_IndexRange  : t_ReadValue +-> t_IndexRange
 
 INITIALISATION
     ReadValue_NodeId,
     ReadValue_AttributeId,
-    ReadValue_HasIndexRange
+    ReadValue_IndexRange
     :(
         ReadValue_NodeId      = {} &
         ReadValue_AttributeId = {} &
-        ReadValue_HasIndexRange = {}
+        ReadValue_IndexRange  = {}
      )
 
 OPERATIONS
@@ -56,11 +56,11 @@ OPERATIONS
              (nb > 0 =>
                ReadValue_NodeId      : cast_t_ReadValue[1..nb] --> t_NodeId &
                ReadValue_AttributeId : cast_t_ReadValue[1..nb] --> t_AttributeId_i &
-               ReadValue_HasIndexRange : t_ReadValue --> BOOL) &
+               ReadValue_IndexRange  : cast_t_ReadValue[1..nb] --> t_IndexRange) &
              (nb <= 0 =>
                ReadValue_NodeId      = {} &
                ReadValue_AttributeId = {} &
-               ReadValue_HasIndexRange = {}))
+               ReadValue_IndexRange  = {}))
     END
     ;
 
@@ -104,6 +104,22 @@ OPERATIONS
     END
     ;
 
+    index_range <-- getall_req_ReadValue_IndexRange(msg, rvi) =
+    PRE
+        msg  : t_msg_i &
+        msg  = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_attribute_read_req &
+        rvi : t_ReadValue_i &
+        rvi : t_ReadValue &
+        rvi : dom(ReadValue_IndexRange)
+    THEN
+        index_range :(index_range : t_IndexRange_i &
+                      index_range : t_IndexRange &
+                      index_range = ReadValue_IndexRange(rvi))
+    END
+    ;
+
     p_sc, aid <-- getall_req_ReadValue_AttributeId(msg, rvi) =
     PRE
         msg  : t_msg_i &
@@ -118,13 +134,7 @@ OPERATIONS
         IF ReadValue_AttributeId(rvi) = c_AttributeId_indet THEN
             p_sc := e_sc_bad_attribute_id_invalid
         ELSE
-            IF ReadValue_HasIndexRange(rvi) = TRUE
-            THEN
-                /* Index range not supported or should not be defined */
-                p_sc := e_sc_bad_index_range_invalid
-            ELSE
-                p_sc := e_sc_ok
-            END
+            p_sc := e_sc_ok
         END
     END
 

@@ -150,10 +150,10 @@ LOCAL_OPERATIONS
     END
 
 OPERATIONS
-    sc, ncl, val <-- read_NodeClass_Attribute(node, aid) =
+    sc, ncl, val <-- read_NodeClass_Attribute(node, aid, index_range) =
     BEGIN
         ncl <-- get_NodeClass(node);
-        sc, val <-- read_AddressSpace_Attribute_value(node, ncl, aid)
+        sc, val <-- read_AddressSpace_Attribute_value(node, ncl, aid, index_range)
     END
     ;
 
