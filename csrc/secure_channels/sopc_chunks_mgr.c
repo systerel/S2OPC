@@ -2787,7 +2787,7 @@ static bool SC_Chunks_TreatSendBuffer(
 
     /* PRE-CONFIG PHASE */
 
-    // Set the position at the beginning of the buffer (to be read or to could encode header for which space was
+    // Set the position at the beginning of the buffer (to be read or to encode header for which space was
     // left)
     status = SOPC_Buffer_SetPosition(inputBuffer, 0);
     assert(SOPC_STATUS_OK == status);

@@ -34,7 +34,7 @@
 #include "sopc_time.h"
 
 /**
- * \brief Initialize the event timer manager (necessary to could create timers)
+ * \brief Initialize the event timer manager (necessary to create timers)
  *
  */
 void SOPC_EventTimer_Initialize(void);

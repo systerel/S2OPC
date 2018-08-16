@@ -1476,7 +1476,7 @@ OPERATIONS
         bres := FALSE;
         buffer_out := c_byte_buffer_indet;
         channel := c_channel_indet;
-        /* Set provided message as output message to could be encoded and deallocated*/
+        /* Set provided message as output message to be encoded and deallocated*/
         bless_msg_out (publish_resp_msg);
         l_is_valid_resp, l_ret, l_channel <-- server_validate_session_service_resp (session);
         IF l_is_valid_resp = TRUE

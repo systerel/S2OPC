@@ -1318,7 +1318,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     if (result != false)
     {
         status = SOPC_String_Read(&url, helloMsgBuffer);
-        // Note: this parameter is normally used to could forward to an endpoint sharing the same port
+        // Note: this parameter is normally used to forward to an endpoint sharing the same port
         //       but not in the same process.
         //       This is not supported by INGOPCS secure channels layer, as consequence expected URL is only the one
         //       configured.

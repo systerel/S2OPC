@@ -94,7 +94,7 @@ void SOPC_Socket_Clear(Socket* sock);
  *  \brief Create a new socket using the addressing information provided
  *
  *  \param addr              The addressing information used to instantiate a TCP/IP socket
- *  \param setReuseAddr      If value is not false (0) the socket is configured to could be reused
+ *  \param setReuseAddr      If value is not false (0) the socket is configured to be reused
  *  \param setNonBlocking    If value is not false (0) the socket is configured to be non blocking
  *  \param sock              (Out) Value pointed is set with the newly created socket
  *

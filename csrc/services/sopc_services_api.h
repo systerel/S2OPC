@@ -138,12 +138,12 @@ void SOPC_ServicesToApp_EnqueueEvent(int32_t appEvent, uint32_t eventType, void*
 void SOPC_Services_Initialize(void);
 
 /**
- *  \brief Notify the toolkit configuration is terminated to could initialize the services B model
+ *  \brief Notify the toolkit configuration is complete to initialize the services B model
  */
 void SOPC_Services_ToolkitConfigured(void);
 
 /**
- *  \brief Notify that the clear function will be called to could terminate
+ *  \brief Notify that the clear function will be called to finish
  *         operations using secure channels and sockets services.
  */
 void SOPC_Services_PreClear(void);

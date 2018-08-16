@@ -365,7 +365,7 @@ int main(void)
         status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
     }
 
-    // Set an address space (to could check test result valid)
+    // Set an address space (to check test result valid)
     if (SOPC_STATUS_OK == status)
     {
         // NECESSARY ONLY FOR TEST PURPOSES: a client should not define an @ space in a nominal case

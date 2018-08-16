@@ -232,7 +232,7 @@ START_TEST(test_thread_condvar)
     // Wait thread termination
     status = SOPC_Thread_Join(thread);
     ck_assert(status == SOPC_STATUS_OK);
-    // Check thread successfully terminated on condition
+    // Check condition status after thread termination
     status = Mutex_Lock(&gmutex);
     ck_assert(condRes.successCondition == 1);
     status = Mutex_Unlock(&gmutex);
@@ -265,7 +265,7 @@ START_TEST(test_thread_condvar)
     ck_assert(status == SOPC_STATUS_OK);
     // Signal condition has changed
     status = Condition_SignalAll(&gcond);
-    // Wait thread termination
+    // Wait for thread termination
     status = SOPC_Thread_Join(thread);
     ck_assert(status == SOPC_STATUS_OK);
 

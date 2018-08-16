@@ -18,7 +18,7 @@
 # under the License.
 
 IFS=$'\n\t'
-# Start a virtual display 99 to could run the acceptance test tools which use it
+# Start a virtual display 99 to run the acceptance test tools which use it
 Xvfb :99 -screen 0 800x600x16 -ac &
 # Retrieve PID to kill virtual display after running acceptance tool
 XVFB_PID=$!

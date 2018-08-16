@@ -168,7 +168,7 @@ OPERATIONS
     END
     ;
 
-    /* Operation used to could provide request handle to SC layer
+    /* Operation used to provide request handle to SC layer
     (instead of requestId which is not used for client) */
     request_id <-- client_req_handle_to_request_id (req_handle) =
     PRE
@@ -178,7 +178,7 @@ OPERATIONS
     END
     ;
 
-    /* Operation used to could retrieve request handle from SC layer
+    /* Operation used to retrieve request handle from SC layer
     (stored in place of requestId which is not used for client) */
     request_handle <-- client_request_id_to_req_handle (request_id) =
     PRE
