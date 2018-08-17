@@ -3327,6 +3327,19 @@ SOPC_ReturnStatus CompareVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
     return status;
 }
 
+SOPC_Variant* SOPC_Variant_Create()
+{
+    SOPC_Variant* variant = calloc(1, sizeof(SOPC_Variant));
+
+    if (variant == NULL)
+    {
+        return NULL;
+    }
+
+    SOPC_Variant_Initialize(variant);
+    return variant;
+}
+
 void SOPC_Variant_InitializeAux(void* value)
 {
     SOPC_Variant_Initialize((SOPC_Variant*) value);
@@ -4140,6 +4153,17 @@ void SOPC_Variant_Clear(SOPC_Variant* variant)
         // Reset internal properties
         SOPC_Variant_Initialize(variant);
     }
+}
+
+void SOPC_Variant_Delete(SOPC_Variant* variant)
+{
+    if (variant == NULL)
+    {
+        return;
+    }
+
+    SOPC_Variant_Clear(variant);
+    free(variant);
 }
 
 void SOPC_DataValue_InitializeAux(void* value)

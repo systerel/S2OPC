@@ -528,6 +528,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_CompareAux(const void* left, const void* 
 void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj);
 void SOPC_ExtensionObject_ClearAux(void* value);
 
+SOPC_Variant* SOPC_Variant_Create(void);
 void SOPC_Variant_Initialize(SOPC_Variant* variant);
 void SOPC_Variant_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src);
@@ -542,6 +543,7 @@ SOPC_ReturnStatus SOPC_Variant_Compare(const SOPC_Variant* left, const SOPC_Vari
 SOPC_ReturnStatus SOPC_Variant_CompareAux(const void* left, const void* right, int32_t* comparison);
 void SOPC_Variant_Clear(SOPC_Variant* variant);
 void SOPC_Variant_ClearAux(void* value);
+void SOPC_Variant_Delete(SOPC_Variant* variant);
 
 void SOPC_DataValue_Initialize(SOPC_DataValue* dataValue);
 void SOPC_DataValue_InitializeAux(void* value);
