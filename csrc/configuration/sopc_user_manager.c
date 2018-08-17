@@ -74,3 +74,71 @@ void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAutho
     (pAuthor->pFunctions->pFuncFree)(pAuthor);
     *ppAuthor = NULL;
 }
+
+/** \brief A helper implementation of the validate UserIdentity callback, which always returns OK. */
+static SOPC_ReturnStatus AlwayseValidate(SOPC_UserAuthentication_Manager* pAuthen,
+                                         const SOPC_ExtensionObject* pUserIdentity,
+                                         bool* pbUserAuthentified)
+{
+    (void) (pAuthen);
+    (void) (pUserIdentity);
+    assert(NULL != pbUserAuthentified);
+
+    *pbUserAuthentified = true;
+    return SOPC_STATUS_OK;
+}
+
+/** \brief A helper implementation of the authorize R/W operation callback, which always returns OK. */
+static SOPC_ReturnStatus AlwaysAuthorize(SOPC_UserAuthorization_Manager* pAuthor,
+                                         const bool bWriteOperation,
+                                         const SOPC_NodeId* pNid,
+                                         const uint32_t attributeId,
+                                         const SOPC_User* pUser,
+                                         bool* pbOperationAuthorized)
+{
+    (void) (pAuthor);
+    (void) (bWriteOperation);
+    (void) (pNid);
+    (void) (attributeId);
+    (void) (pUser);
+    assert(NULL != pbOperationAuthorized);
+
+    *pbOperationAuthorized = true;
+    return SOPC_STATUS_OK;
+}
+
+static const SOPC_UserAuthentication_Functions AlwaysAuthenticateFunctions = {
+    .pFuncFree = (SOPC_UserAuthentication_Free_Func) free,
+    .pFuncValidateUserIdentity = AlwayseValidate};
+
+static const SOPC_UserAuthorization_Functions AlwaysAuthorizeFunctions = {
+    .pFuncFree = (SOPC_UserAuthorization_Free_Func) free,
+    .pFuncAuthorizeOperation = AlwaysAuthorize};
+
+SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_UserAlwaysValid(void)
+{
+    SOPC_UserAuthentication_Manager* pAuthen =
+        (SOPC_UserAuthentication_Manager*) calloc(1, sizeof(SOPC_UserAuthentication_Manager));
+
+    if (NULL == pAuthen)
+    {
+        return NULL;
+    }
+
+    pAuthen->pFunctions = &AlwaysAuthenticateFunctions;
+    return pAuthen;
+}
+
+SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_OperationAlwaysValid(void)
+{
+    SOPC_UserAuthorization_Manager* pAuthor =
+        (SOPC_UserAuthorization_Manager*) calloc(1, sizeof(SOPC_UserAuthorization_Manager));
+
+    if (NULL == pAuthor)
+    {
+        return NULL;
+    }
+
+    pAuthor->pFunctions = &AlwaysAuthorizeFunctions;
+    return pAuthor;
+}

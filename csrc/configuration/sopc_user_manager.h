@@ -173,4 +173,10 @@ void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAut
  */
 void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAuthor);
 
+/** \brief A helper implementation that always authentication positively a user. */
+SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_UserAlwaysValid(void);
+
+/** \brief A helper implementation that always authorize an operation. */
+SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_OperationAlwaysValid(void);
+
 #endif /* SOPC_USER_MANAGER_H_ */
