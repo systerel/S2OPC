@@ -3227,6 +3227,146 @@ START_TEST(test_ua_guid_parse)
 }
 END_TEST
 
+START_TEST(test_ua_variant_get_range_scalar)
+{
+    SOPC_NumericRange *array_single = NULL, *array_range = NULL;
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("2", &array_single));
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("3:5", &array_range));
+
+    // Except String and ByteString, we shouldn't be able to dereference scalar types
+    for (SOPC_BuiltinId type_id = SOPC_Null_Id; type_id < SOPC_DiagnosticInfo_Id; ++type_id)
+    {
+        if (type_id == SOPC_String_Id || type_id == SOPC_ByteString_Id)
+        {
+            continue;
+        }
+
+        SOPC_Variant v;
+        SOPC_Variant_Initialize(&v);
+        v.ArrayType = SOPC_VariantArrayType_SingleValue;
+        v.BuiltInTypeId = type_id;
+        v.DoNotClear = false;
+
+        SOPC_Variant deref;
+        SOPC_Variant_Initialize(&deref);
+
+        ck_assert_uint_eq(SOPC_STATUS_INVALID_PARAMETERS, SOPC_Variant_GetRange(&deref, &v, array_range));
+
+        SOPC_Variant_Clear(&deref);
+        SOPC_Variant_Clear(&v);
+    }
+
+    SOPC_String short_string, long_string;
+    SOPC_ByteString short_bstring, long_bstring;
+    SOPC_Variant source, deref;
+
+    SOPC_String_Initialize(&short_string);
+    SOPC_String_Initialize(&long_string);
+    SOPC_ByteString_Initialize(&short_bstring);
+    SOPC_ByteString_Initialize(&long_bstring);
+    SOPC_Variant_Initialize(&source);
+    SOPC_Variant_Initialize(&deref);
+
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_String_CopyFromCString(&short_string, "a"));
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_String_CopyFromCString(&long_string, "alpha"));
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_ByteString_CopyFromBytes(&short_bstring, (const SOPC_Byte*) "a", 1));
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_ByteString_CopyFromBytes(&long_bstring, (const SOPC_Byte*) "alpha", 5));
+
+    source.ArrayType = SOPC_VariantArrayType_SingleValue;
+    source.DoNotClear = true;
+    source.BuiltInTypeId = SOPC_String_Id;
+
+#define STR_COALESCE(str) ((str != NULL) ? str : "")
+#define TEST_STR(source_str, range, expected)                                                               \
+    source.Value.String = source_str;                                                                       \
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_Variant_GetRange(&deref, &source, range));                       \
+    ck_assert_uint_eq(SOPC_VariantArrayType_SingleValue, deref.ArrayType);                                  \
+    ck_assert_uint_eq(false, deref.DoNotClear);                                                             \
+    ck_assert_uint_eq(SOPC_String_Id, deref.BuiltInTypeId);                                                 \
+    ck_assert_str_eq(STR_COALESCE(expected), STR_COALESCE(SOPC_String_GetRawCString(&deref.Value.String))); \
+    SOPC_Variant_Clear(&deref);                                                                             \
+    SOPC_Variant_Initialize(&deref);
+
+    TEST_STR(short_string, array_single, "");
+    TEST_STR(long_string, array_single, "p");
+    TEST_STR(short_string, array_range, "");
+    TEST_STR(long_string, array_range, "ha");
+
+#undef TEST_STR
+#undef STR_COALESCE
+
+    source.BuiltInTypeId = SOPC_ByteString_Id;
+
+#define TEST_BSTR(source_bstr, range, expected)                                        \
+    source.Value.Bstring = source_bstr;                                                \
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_Variant_GetRange(&deref, &source, range));  \
+    ck_assert_uint_eq(SOPC_VariantArrayType_SingleValue, deref.ArrayType);             \
+    ck_assert_uint_eq(false, deref.DoNotClear);                                        \
+    ck_assert_uint_eq(SOPC_ByteString_Id, deref.BuiltInTypeId);                        \
+    ck_assert_uint_eq(strlen(expected), (size_t) deref.Value.Bstring.Length);          \
+    ck_assert_int_eq(0, memcmp(expected, deref.Value.Bstring.Data, strlen(expected))); \
+    SOPC_Variant_Clear(&deref);                                                        \
+    SOPC_Variant_Initialize(&deref);
+
+    TEST_BSTR(short_bstring, array_single, "");
+    TEST_BSTR(long_bstring, array_single, "p");
+    TEST_BSTR(short_bstring, array_range, "");
+    TEST_BSTR(long_bstring, array_range, "ha");
+
+#undef TEST_BSTR
+
+    SOPC_String_Clear(&short_string);
+    SOPC_String_Clear(&long_string);
+    SOPC_ByteString_Clear(&short_bstring);
+    SOPC_ByteString_Clear(&long_bstring);
+    SOPC_Variant_Clear(&deref);
+    SOPC_Variant_Clear(&source);
+    SOPC_NumericRange_Delete(array_range);
+    SOPC_NumericRange_Delete(array_single);
+}
+END_TEST
+
+START_TEST(test_ua_variant_get_range_array)
+{
+    SOPC_NumericRange *array_single = NULL, *array_range = NULL;
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("2", &array_single));
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("3:5", &array_range));
+
+    SOPC_Variant source;
+    SOPC_Variant_Initialize(&source);
+
+    source.ArrayType = SOPC_VariantArrayType_Array;
+    source.BuiltInTypeId = SOPC_UInt16_Id;
+    source.DoNotClear = true;
+    source.Value.Array.Length = 5;
+    source.Value.Array.Content.Uint16Arr = (uint16_t[]){1, 2, 3, 4, 5};
+
+    SOPC_Variant deref;
+    SOPC_Variant_Initialize(&deref);
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_Variant_GetRange(&deref, &source, array_single));
+    ck_assert_uint_eq(SOPC_VariantArrayType_Array, deref.ArrayType);
+    ck_assert_uint_eq(source.BuiltInTypeId, deref.BuiltInTypeId);
+    ck_assert_uint_eq(false, deref.DoNotClear);
+    ck_assert_int_eq(1, deref.Value.Array.Length);
+    ck_assert_uint_eq(3, deref.Value.Array.Content.Uint16Arr[0]);
+    SOPC_Variant_Clear(&deref);
+
+    SOPC_Variant_Initialize(&deref);
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_Variant_GetRange(&deref, &source, array_range));
+    ck_assert_uint_eq(SOPC_VariantArrayType_Array, deref.ArrayType);
+    ck_assert_uint_eq(source.BuiltInTypeId, deref.BuiltInTypeId);
+    ck_assert_uint_eq(false, deref.DoNotClear);
+    ck_assert_int_eq(2, deref.Value.Array.Length);
+    ck_assert_uint_eq(4, deref.Value.Array.Content.Uint16Arr[0]);
+    ck_assert_uint_eq(5, deref.Value.Array.Content.Uint16Arr[1]);
+    SOPC_Variant_Clear(&deref);
+
+    SOPC_Variant_Clear(&source);
+    SOPC_NumericRange_Delete(array_range);
+    SOPC_NumericRange_Delete(array_single);
+}
+END_TEST
+
 Suite* tests_make_suite_tools(void)
 {
     Suite* s;
@@ -3272,6 +3412,8 @@ Suite* tests_make_suite_tools(void)
     tcase_add_test(tc_ua_types, test_ua_string_type);
     tcase_add_test(tc_ua_types, test_ua_qname_parse);
     tcase_add_test(tc_ua_types, test_ua_guid_parse);
+    tcase_add_test(tc_ua_types, test_ua_variant_get_range_scalar);
+    tcase_add_test(tc_ua_types, test_ua_variant_get_range_array);
     suite_add_tcase(s, tc_ua_types);
 
     return s;

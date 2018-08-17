@@ -4377,3 +4377,225 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
         *eltsArray = NULL;
     }
 }
+
+// Common treatment for slicing both strings and bytestrings
+static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
+                                                 const SOPC_String* src,
+                                                 const SOPC_NumericRange* range)
+{
+    assert(range->n_dimensions == 1);
+
+    SOPC_Dimension* dim = &range->dimensions[0];
+    assert(src->Length >= 0);
+    uint32_t src_length = (uint32_t) src->Length;
+    uint32_t start = dim->start;
+
+    if (start >= src_length)
+    {
+        // Nothing to copy
+        dst->Length = 0;
+        return SOPC_STATUS_OK;
+    }
+
+    uint32_t end = (dim->end >= src_length) ? (src_length - 1) : dim->end;
+    assert(end >= start);
+
+    uint32_t dst_len = end - start + 1;
+
+    dst->Data = calloc(1 + dst_len, sizeof(SOPC_Byte));
+
+    if (dst->Data == NULL)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    memcpy(dst->Data, src->Data + start, (size_t) dst_len);
+    dst->Length = (int32_t) dst_len;
+
+    return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus get_range_string(SOPC_Variant* dst, const SOPC_String* src, const SOPC_NumericRange* range)
+{
+    dst->ArrayType = SOPC_VariantArrayType_SingleValue;
+    dst->BuiltInTypeId = SOPC_String_Id;
+    dst->DoNotClear = false;
+
+    SOPC_String_Initialize(&dst->Value.String);
+
+    return get_range_string_helper(&dst->Value.String, src, range);
+}
+
+static SOPC_ReturnStatus get_range_bytestring(SOPC_Variant* dst, const SOPC_String* src, const SOPC_NumericRange* range)
+{
+    dst->ArrayType = SOPC_VariantArrayType_SingleValue;
+    dst->BuiltInTypeId = SOPC_ByteString_Id;
+    dst->DoNotClear = false;
+
+    SOPC_ByteString_Initialize(&dst->Value.Bstring);
+
+    return get_range_string_helper(&dst->Value.Bstring, src, range);
+}
+
+static size_t size_of_builtin_type(SOPC_BuiltinId type_id)
+{
+    switch (type_id)
+    {
+    case SOPC_Null_Id:
+        return 0;
+    case SOPC_Boolean_Id:
+        return sizeof(SOPC_Boolean);
+    case SOPC_SByte_Id:
+        return sizeof(SOPC_SByte);
+    case SOPC_Byte_Id:
+        return sizeof(SOPC_Byte);
+    case SOPC_Int16_Id:
+        return sizeof(int16_t);
+    case SOPC_UInt16_Id:
+        return sizeof(uint16_t);
+    case SOPC_Int32_Id:
+        return sizeof(int32_t);
+    case SOPC_UInt32_Id:
+        return sizeof(uint32_t);
+    case SOPC_Int64_Id:
+        return sizeof(int64_t);
+    case SOPC_UInt64_Id:
+        return sizeof(uint64_t);
+    case SOPC_Float_Id:
+        return sizeof(float);
+    case SOPC_Double_Id:
+        return sizeof(double);
+    case SOPC_String_Id:
+        return sizeof(SOPC_String);
+    case SOPC_DateTime_Id:
+        return sizeof(SOPC_DateTime);
+    case SOPC_Guid_Id:
+        return sizeof(SOPC_Guid);
+    case SOPC_ByteString_Id:
+        return sizeof(SOPC_ByteString);
+    case SOPC_XmlElement_Id:
+        return sizeof(SOPC_XmlElement);
+    case SOPC_NodeId_Id:
+        return sizeof(SOPC_NodeId);
+    case SOPC_ExpandedNodeId_Id:
+        return sizeof(SOPC_ExpandedNodeId);
+    case SOPC_StatusCode_Id:
+        return sizeof(SOPC_StatusCode);
+    case SOPC_QualifiedName_Id:
+        return sizeof(SOPC_QualifiedName);
+    case SOPC_LocalizedText_Id:
+        return sizeof(SOPC_LocalizedText);
+    case SOPC_ExtensionObject_Id:
+        return sizeof(SOPC_ExtensionObject);
+    case SOPC_DataValue_Id:
+        return sizeof(SOPC_DataValue);
+    case SOPC_Variant_Id:
+        return sizeof(SOPC_Variant);
+    case SOPC_DiagnosticInfo_Id:
+        return sizeof(SOPC_DiagnosticInfo);
+    }
+
+    assert(false);
+    return 0;
+}
+
+static SOPC_ReturnStatus get_range_array(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)
+{
+    assert(range->n_dimensions == 1);
+
+    if (src->ArrayType == SOPC_VariantArrayType_SingleValue)
+    {
+        // Dereferencing scalars is allowed for strings and bytestrings
+        if (src->BuiltInTypeId == SOPC_String_Id)
+        {
+            return get_range_string(dst, &src->Value.String, range);
+        }
+        else if (src->BuiltInTypeId == SOPC_ByteString_Id)
+        {
+            return get_range_bytestring(dst, &src->Value.Bstring, range);
+        }
+    }
+
+    if (src->ArrayType != SOPC_VariantArrayType_Array)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_Dimension* dim = &range->dimensions[0];
+    assert(src->Value.Array.Length >= 0);
+    uint32_t start = dim->start;
+    uint32_t array_length = (uint32_t) src->Value.Array.Length;
+
+    dst->BuiltInTypeId = src->BuiltInTypeId;
+    dst->DoNotClear = false;
+    dst->Value.Array.Length = 0;
+
+    if (start >= array_length)
+    {
+        // Nothing to copy
+        return SOPC_STATUS_OK;
+    }
+
+    uint32_t end = (dim->end >= array_length) ? (array_length - 1) : dim->end;
+    assert(end >= start);
+
+    uint32_t dst_len = end - start + 1;
+
+    SOPC_EncodeableObject_PfnCopy* copyFunction = GetBuiltInTypeCopyFunction(src->BuiltInTypeId);
+
+    if (NULL == copyFunction)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    const size_t type_size = size_of_builtin_type(src->BuiltInTypeId);
+
+    // Untyped pointer to the source array data at the correct offset
+    const uint8_t* src_data = *((const uint8_t* const*) &src->Value.Array.Content) + start * type_size;
+
+    SOPC_ReturnStatus status =
+        AllocVariantArrayBuiltInType(src->BuiltInTypeId, &dst->Value.Array.Content, (int32_t) dst_len);
+
+    if (status != SOPC_STATUS_OK)
+    {
+        return status;
+    }
+
+    const uint8_t* src_i = src_data;
+    uint8_t* dst_i = *((uint8_t**) &dst->Value.Array.Content);
+
+    for (uint32_t i = 0; i < dst_len; ++i)
+    {
+        SOPC_ReturnStatus status = copyFunction(dst_i, src_i);
+
+        if (status != SOPC_STATUS_OK)
+        {
+            return status;
+        }
+
+        src_i += type_size;
+        dst_i += type_size;
+
+        // Update array length so that SOPC_Variant_Clear clears the copied
+        // items in case of failure
+        dst->Value.Array.Length = (int32_t)(i + 1);
+    }
+
+    dst->ArrayType = SOPC_VariantArrayType_Array;
+
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_Variant_GetRange(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)
+{
+    switch (range->n_dimensions)
+    {
+    case 0:
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    case 1:
+        return get_range_array(dst, src, range);
+    default:
+        // Matrix will come later
+        return SOPC_STATUS_NOT_SUPPORTED;
+    }
+}

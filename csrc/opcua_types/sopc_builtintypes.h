@@ -26,6 +26,7 @@
 
 #include "sopc_dict.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_numeric_range.h"
 #include "sopc_toolkit_constants.h"
 
 typedef uint32_t SOPC_StatusCode;
@@ -533,6 +534,7 @@ void SOPC_Variant_Initialize(SOPC_Variant* variant);
 void SOPC_Variant_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src);
 SOPC_ReturnStatus SOPC_Variant_CopyAux(void* dest, const void* src);
+SOPC_ReturnStatus SOPC_Variant_GetRange(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range);
 
 // Raw copy of structure content without new allocation: destination variant content will not be freed on clear
 SOPC_ReturnStatus SOPC_Variant_ShallowCopy(SOPC_Variant* dst, const SOPC_Variant* src);

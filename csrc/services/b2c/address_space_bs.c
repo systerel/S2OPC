@@ -32,6 +32,7 @@
 
 #include "address_space_impl.h"
 #include "sopc_dict.h"
+#include "sopc_numeric_range.h"
 #include "util_b2c.h"
 #include "util_variant.h"
 
