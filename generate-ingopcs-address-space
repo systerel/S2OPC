@@ -67,6 +67,7 @@ UA_VALUE_TYPE_STRING = UA_TYPES_NS + 'String'
 UA_VALUE_TYPE_BYTESTRING = UA_TYPES_NS + 'ByteString'
 UA_VALUE_TYPE_XMLELEMENT = UA_TYPES_NS + 'XmlElement'
 UA_VALUE_TYPE_DATETIME = UA_TYPES_NS + 'DateTime'
+UA_VALUE_TYPE_LISTOFBOOLEANS = UA_TYPES_NS + 'ListOfBoolean'
 UA_VALUE_TYPE_LISTOFSTRINGS = UA_TYPES_NS + 'ListOfString'
 
 VALUE_TYPE_BOOL = 0
@@ -86,7 +87,6 @@ VALUE_TYPE_STRING = 13
 VALUE_TYPE_BYTESTRING = 14
 VALUE_TYPE_XMLELEMENT = 15
 VALUE_TYPE_DATETIME = 16
-VALUE_TYPE_LISTOFSTRINGS = 17
 
 C_IDENTIFIER_TYPES = [
     'SOPC_IdentifierType_Numeric',
@@ -255,11 +255,12 @@ class LocalizedText(object):
 
 
 class VariableValue(object):
-    __slots__ = 'ty', 'val'
+    __slots__ = 'ty', 'val', 'is_array'
 
-    def __init__(self, ty, val):
+    def __init__(self, ty, val, is_array):
         self.ty = ty
         self.val = val
+        self.is_array = is_array
 
 
 class Node(object):
@@ -374,16 +375,53 @@ def collect_node_references(node, aliases):
         # In case there is an alias, resolve it
         ref_type = NodeId.parse(aliases.get(ref_type, ref_type))
 
-        is_forward = (n.get('IsForward', 'true') == 'true')
+        is_forward = (parse_boolean_value(n.get('IsForward', 'true')))
 
         refs.append(Reference(ref_type, NodeId.parse(n.text), is_forward))
 
     return refs
 
 
-# Collects all the uax:String items in a uax:ListOfString element
-def collect_string_list_items(n):
-    return list(map(lambda x: x.text, n.findall(UA_VALUE_TYPE_STRING)))
+def parse_boolean_value(text):
+    return text.strip() == 'true'
+
+
+def parse_guid(text):
+    try:
+        return uuid.UUID(text)
+    except ValueError:
+        raise ParseError('Invalid GUID: %s' % text)
+
+
+def boolean_to_string(val):
+    return 'true' if val else 'false'
+
+
+# Collects all the uax:{tag_name} items in a uax:ListOfXXX element
+def collect_list_items(n, tag_name, parse_func):
+    return list(map(lambda x: parse_func(x.text), n.findall(tag_name)))
+
+
+# Parses the base type of a value tag name (eg. uax:Boolean, uax:ListOfString...)
+# and returns the base type (eg. uax:Boolean, uax:String...) and whether the value
+# is an array or not.
+# Returns a (base_type_url, is_array) tuple.
+def parse_value_tag(tag_name):
+    LIST_PREFIX = 'ListOf'
+
+    if not tag_name.startswith(UA_TYPES_NS):
+        return tag_name, False
+
+    base_name = tag_name[len(UA_TYPES_NS):]
+
+    if base_name.startswith(LIST_PREFIX):
+        return UA_TYPES_NS + base_name[len(LIST_PREFIX):], True
+    else:
+        return tag_name, False
+
+
+def identity(x):
+    return x
 
 
 # Returns a VariableValue object
@@ -398,68 +436,65 @@ def collect_variable_value(n):
         raise ParseError('Value tag should have exactly one children')
 
     value = list(value_node)[0]
+    base_type, is_array = parse_value_tag(value.tag)
 
-    if value.tag == UA_VALUE_TYPE_BOOL:
+    if base_type == UA_VALUE_TYPE_BOOL:
         ty = VALUE_TYPE_BOOL
-        val = (value.text == 'true')
-    elif value.tag == UA_VALUE_TYPE_BYTE:
+        parse_func = parse_boolean_value
+    elif base_type == UA_VALUE_TYPE_BYTE:
         ty = VALUE_TYPE_BYTE
-        val = int(value.text)
-    elif value.tag == UA_VALUE_TYPE_INT16:
+        parse_func = int
+    elif base_type == UA_VALUE_TYPE_INT16:
         ty = VALUE_TYPE_INT16
-        val = int(value.text)
-    elif value.tag == UA_VALUE_TYPE_INT32:
+        parse_func = int
+    elif base_type == UA_VALUE_TYPE_INT32:
         ty = VALUE_TYPE_INT32
-        val = int(value.text)
-    elif value.tag == UA_VALUE_TYPE_INT64:
-        ty = VALUE_TYPE_INT32
-        val = int(value.text)
-    elif value.tag == UA_VALUE_TYPE_GUID:
+        parse_func = int
+    elif base_type == UA_VALUE_TYPE_INT64:
+        ty = VALUE_TYPE_INT64
+        parse_func = int
+    elif base_type == UA_VALUE_TYPE_GUID:
         ty = VALUE_TYPE_GUID
-        try:
-            val = uuid.UUID(value.text)
-        except ValueError:
-            raise ParseError('Invalid GUID: %s' % value.text)
-    elif value.tag == UA_VALUE_TYPE_NODEID:
+        parse_func = parse_guid
+    elif base_type == UA_VALUE_TYPE_NODEID:
         ty = VALUE_TYPE_NODEID
-        val = value.text
-    elif value.tag == UA_VALUE_TYPE_SBYTE:
+        parse_func = identity
+    elif base_type == UA_VALUE_TYPE_SBYTE:
         ty = VALUE_TYPE_SBYTE
-        val = int(value.text)
-    elif value.tag == UA_VALUE_TYPE_UINT16:
+        parse_func = int
+    elif base_type == UA_VALUE_TYPE_UINT16:
         ty = VALUE_TYPE_UINT16
-        val = int(value.text)
-    elif value.tag == UA_VALUE_TYPE_UINT32:
+        parse_func = int
+    elif base_type == UA_VALUE_TYPE_UINT32:
         ty = VALUE_TYPE_UINT32
-        val = int(value.text)
-    elif value.tag == UA_VALUE_TYPE_UINT64:
+        parse_func = int
+    elif base_type == UA_VALUE_TYPE_UINT64:
         ty = VALUE_TYPE_UINT64
-        val = int(value.text)
-    elif value.tag == UA_VALUE_TYPE_FLOAT:
+        parse_func = int
+    elif base_type == UA_VALUE_TYPE_FLOAT:
         ty = VALUE_TYPE_FLOAT
-        val = float(value.text)
-    elif value.tag == UA_VALUE_TYPE_DOUBLE:
+        parse_func = float
+    elif base_type == UA_VALUE_TYPE_DOUBLE:
         ty = VALUE_TYPE_DOUBLE
-        val = float(value.text)
-    elif value.tag == UA_VALUE_TYPE_STRING:
+        parse_func = float
+    elif base_type == UA_VALUE_TYPE_STRING:
         ty = VALUE_TYPE_STRING
-        val = value.text
-    elif value.tag == UA_VALUE_TYPE_BYTESTRING:
+        parse_func = identity
+    elif base_type == UA_VALUE_TYPE_BYTESTRING:
         ty = VALUE_TYPE_BYTESTRING
-        val = value.text
-    elif value.tag == UA_VALUE_TYPE_XMLELEMENT:
+        parse_func = identity
+    elif base_type == UA_VALUE_TYPE_XMLELEMENT:
         ty = VALUE_TYPE_XMLELEMENT
-        val = value.text
-    elif value.tag == UA_VALUE_TYPE_DATETIME:
+        parse_func = identity
+    elif base_type == UA_VALUE_TYPE_DATETIME:
         ty = VALUE_TYPE_DATETIME
-        val = value.text
-    elif value.tag == UA_VALUE_TYPE_LISTOFSTRINGS:
-        ty = VALUE_TYPE_LISTOFSTRINGS
-        val = collect_string_list_items(value)
+        parse_func = identity
     else:
         raise ParseError('Unknown value type %s for node %s' % (value.tag, n.attrib['NodeId']))
 
-    return VariableValue(ty, val)
+    val = collect_list_items(value, base_type, parse_func) if is_array else parse_func(value.text)
+
+    return VariableValue(ty, val, is_array)
 
 
 def generate_string(data):
@@ -516,12 +551,13 @@ def generate_localized_text(text):
     return '{%s, %s}' % (generate_string(text.locale), generate_string(text.text))
 
 
-def generate_variant(ty, field, val):
-    return '{false, %s, SOPC_VariantArrayType_SingleValue, {.%s = %s}}' % (ty, field, val)
-
-
-def generate_list_of_strings(strings):
-    return '{true, SOPC_String_Id, SOPC_VariantArrayType_Array, {.Array = {%d, {.StringArr = (SOPC_String[]){%s}}}}}' % (len(strings), ','.join(map(generate_string, strings)))
+def generate_variant(type_id, c_type, field, val, is_array, generate_func):
+    if is_array:
+        field += 'Arr'
+        c_array = '(%s[]){%s}' % (c_type, ','.join(map(generate_func, val))) if val else 'NULL'
+        return '{true, %s, SOPC_VariantArrayType_Array, {.Array = {%d, {.%s = %s}}}}' % (type_id, len(val), field, c_array)
+    else:
+        return '{true, %s, SOPC_VariantArrayType_SingleValue, {.%s = %s}}' % (type_id, field, generate_func(val))
 
 
 POINTER_VARIANT_TYPES = {VALUE_TYPE_GUID, VALUE_TYPE_NODEID, VALUE_TYPE_DATETIME}
@@ -532,35 +568,33 @@ def generate_value_variant(val):
         return '{true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}}'
 
     if val.ty == VALUE_TYPE_BOOL:
-        return generate_variant('SOPC_Boolean_Id', 'Boolean', ('true' if val.val else 'false'))
+        return generate_variant('SOPC_Boolean_Id', 'SOPC_Boolean', 'Boolean', val.val, val.is_array, boolean_to_string)
     elif val.ty == VALUE_TYPE_BYTE:
-        return generate_variant('SOPC_Byte_Id', 'Byte', str(val.val))
+        return generate_variant('SOPC_Byte_Id', 'SOPC_Byte', 'Byte', val.val, val.is_array, str)
     elif val.ty == VALUE_TYPE_INT16:
-        return generate_variant('SOPC_Int16_Id', 'Int16', str(val.val))
+        return generate_variant('SOPC_Int16_Id', 'int16_t', 'Int16', val.val, val.is_array, str)
     elif val.ty == VALUE_TYPE_INT32:
-        return generate_variant('SOPC_Int32_Id', 'Int32', str(val.val))
+        return generate_variant('SOPC_Int32_Id', 'int32_t', 'Int32', val.val, val.is_array, str)
     elif val.ty == VALUE_TYPE_INT64:
-        return generate_variant('SOPC_Int64_Id', 'Int64', str(val.val))
+        return generate_variant('SOPC_Int64_Id', 'int64_t', 'Int64', val.val, val.is_array, lambda x: str(x) + 'L')
     elif val.ty == VALUE_TYPE_SBYTE:
-        return generate_variant('SOPC_SByte_Id', 'Sbyte', str(val.val))
+        return generate_variant('SOPC_SByte_Id', 'SOPC_SByte', 'Sbyte', val.val, val.is_array, str)
     elif val.ty == VALUE_TYPE_UINT16:
-        return generate_variant('SOPC_UInt16_Id', 'Uint16', str(val.val))
+        return generate_variant('SOPC_UInt16_Id', 'uint16_t', 'Uint16', val.val, val.is_array, str)
     elif val.ty == VALUE_TYPE_UINT32:
-        return generate_variant('SOPC_UInt32_Id', 'Uint32', str(val.val))
+        return generate_variant('SOPC_UInt32_Id', 'uint32_t', 'Uint32', val.val, val.is_array, str)
     elif val.ty == VALUE_TYPE_UINT64:
-        return generate_variant('SOPC_UInt64_Id', 'Uint64', str(val.val))
+        return generate_variant('SOPC_UInt64_Id', 'uint64_t', 'Uint64', val.val, val.is_array, lambda x: str(x) + 'UL')
     elif val.ty == VALUE_TYPE_FLOAT:
-        return generate_variant('SOPC_Float_Id', 'Floatv', str(val.val))
+        return generate_variant('SOPC_Float_Id', 'float', 'Floatv', val.val, val.is_array, str)
     elif val.ty == VALUE_TYPE_DOUBLE:
-        return generate_variant('SOPC_Double_Id', 'Doublev', str(val.val))
+        return generate_variant('SOPC_Double_Id', 'double', 'Doublev', val.val, val.is_array, str)
     elif val.ty == VALUE_TYPE_STRING:
-        return generate_variant('SOPC_String_Id', 'String', generate_string(val.val))
+        return generate_variant('SOPC_String_Id', 'SOPC_String', 'String', val.val, val.is_array, generate_string)
     elif val.ty == VALUE_TYPE_BYTESTRING:
-        return generate_variant('SOPC_ByteString_Id', 'Bstring', generate_string(val.val))
+        return generate_variant('SOPC_ByteString_Id', 'SOPC_ByteString', 'Bstring', val.val, val.is_array, generate_string)
     elif val.ty == VALUE_TYPE_XMLELEMENT:
-        return generate_variant('SOPC_XmlElement_Id', 'XmlElt', generate_string(val.val))
-    elif val.ty == VALUE_TYPE_LISTOFSTRINGS:
-        return generate_list_of_strings(val.val)
+        return generate_variant('SOPC_XmlElement_Id', 'SOPC_XmlElement', 'XmlElt', val.val, val.is_array, generate_string)
     elif val.ty in POINTER_VARIANT_TYPES:
         # FIXME: The variant requires a pointer here, we need to wrap the value inside a 1-sized
         # array to trick the compiler.
