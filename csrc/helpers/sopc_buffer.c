@@ -258,7 +258,7 @@ int64_t SOPC_Buffer_ReadFrom(SOPC_Buffer* buffer, SOPC_Buffer* src, uint32_t n)
         n = available;
     }
 
-    memcpy(buffer->data + buffer->position, src->data + src->position, n * sizeof(uint8_t));
+    memcpy(buffer->data + buffer->length, src->data + src->position, n * sizeof(uint8_t));
     buffer->length += n;
     src->position += n;
     return (int64_t) n;
