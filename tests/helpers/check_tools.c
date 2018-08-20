@@ -516,6 +516,39 @@ START_TEST(test_buffer_set_properties)
 }
 END_TEST
 
+START_TEST(test_buffer_append)
+{
+    uint8_t data[4] = {0x00, 0x01, 0x02, 0x03};
+    SOPC_Buffer* bufA = NULL;
+    SOPC_Buffer* bufB = NULL;
+
+    /* After a write, position should change, but after a ReadFrom, it should not */
+    bufA = SOPC_Buffer_Create(4);
+    bufB = SOPC_Buffer_Create(12);
+    ck_assert(SOPC_STATUS_OK == SOPC_Buffer_Write(bufA, data, 4));
+    ck_assert(bufA->position == 4);
+    ck_assert(bufA->length == 4);
+    ck_assert(SOPC_STATUS_OK == SOPC_Buffer_Write(bufB, data, 4));
+    ck_assert(bufB->position == 4);
+    ck_assert(bufB->length == 4);
+    ck_assert(SOPC_STATUS_OK == SOPC_Buffer_SetPosition(bufA, 0));
+    /* bufA is appended 2 times in B */
+    ck_assert(4 == SOPC_Buffer_ReadFrom(bufB, bufA, 8));
+    ck_assert(0 == SOPC_Buffer_ReadFrom(bufB, bufA, 4));
+    ck_assert(bufB->length == 8);
+    ck_assert(SOPC_STATUS_OK == SOPC_Buffer_SetPosition(bufA, 0));
+    ck_assert(4 == SOPC_Buffer_ReadFrom(bufB, bufA, 4));
+    ck_assert(0 == SOPC_Buffer_ReadFrom(bufB, bufA, 0));
+    ck_assert(bufB->position == 4);
+    ck_assert(bufB->length == 12);
+
+    SOPC_Buffer_Delete(bufA);
+    SOPC_Buffer_Delete(bufB);
+    bufA = NULL;
+    bufB = NULL;
+}
+END_TEST
+
 START_TEST(test_linked_list)
 {
     float value1 = 0.0;
@@ -3212,6 +3245,7 @@ Suite* tests_make_suite_tools(void)
     tcase_add_test(tc_buffer, test_buffer_copy);
     tcase_add_test(tc_buffer, test_buffer_reset);
     tcase_add_test(tc_buffer, test_buffer_set_properties);
+    tcase_add_test(tc_buffer, test_buffer_append);
     suite_add_tcase(s, tc_buffer);
     tc_linkedlist = tcase_create("Linked List");
     tcase_add_test(tc_linkedlist, test_linked_list);
