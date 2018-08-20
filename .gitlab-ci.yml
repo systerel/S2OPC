@@ -38,12 +38,12 @@ generation:
 .build-linux: &build_linux
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:8c1898adef0690fa6bd79714c86430eea48d4221f88407e01e537075d2603e16 # build:1.8
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:40386036aadcb405f97e0f03387c117b094eb37fbfaa1097e96ce7e0c3ae0070 # build:1.9
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install && ../tests/scripts/make-ctestfile-relative CTestTestfile.cmake > ./bin/CTestTestfile.cmake || exit 1'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_IMAGE: 'sha256:fa0ca5d087819d99f000fbc3c3ad832ef3e4ee184f1f96901206858fa554f55b'
+    DOCKER_IMAGE: 'sha256:a5c83c23530d5f845927f53926eee4546d473c5ed1f44e0a3e52f9942726a0a5'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
@@ -73,13 +73,13 @@ build-linux64:
 build-win64: &build_win64
   <<: *docker_job
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:0bc0b26a229949b1abac2fb7c26cd6313e59378a5569a0a4d5792407b80fea97 # mingw_build:1.5
+  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:e7406077be95ec42a922ede175ea3de63c6c59cdd5bea7f2be91d7f3a5a019cf # mingw_build:1.6
   script:
     - *build_command_line
   variables: &build_win64_variables
     CMAKE_INSTALL_PREFIX: '../install_win64'
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
-    DOCKER_IMAGE: 'sha256:5d20e9edbc180891c44f88edc2a16c3a7e1eb0e5015c9df67fef36ee8a7933b5'
+    DOCKER_IMAGE: 'sha256:e2b17a02f7d4e4d6150435ca717b4d0691b3d2f4e5c55df9c0f22930e728892b'
     BUILD_SHARED_LIBS: 'true'
     WARNINGS_AS_ERRORS: '0'
     BUILD_DIR: build_toolchain

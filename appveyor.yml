@@ -22,7 +22,7 @@ test_script:
     - set CHECK_DIR_NAME=check-0.12.0
     - set CHECK_DIR="%ROOT_DIR%\%CHECK_DIR_NAME%"
     - set CHECK_BUILD_DIR="%CHECK_DIR%\build"
-    - set MBEDTLS_DIR_NAME=mbedtls-2.9.0
+    - set MBEDTLS_DIR_NAME=mbedtls-2.12.0
     - set MBEDTLS_DIR="%ROOT_DIR%\%MBEDTLS_DIR_NAME%"
     - set MBEDTLS_BUILD_DIR="%MBEDTLS_DIR%\build"
 
@@ -38,7 +38,7 @@ test_script:
         cmake --build . --target ALL_BUILD --config RelWithDebInfo
     # download and build mbedtls
     - cd %ROOT_DIR%
-    - "appveyor.exe DownloadFile https://tls.mbed.org/download/mbedtls-2.9.0-apache.tgz -FileName %MBEDTLS_DIR_NAME%-apache.tgz"
+    - "appveyor.exe DownloadFile https://tls.mbed.org/download/%MBEDTLS_DIR_NAME%-apache.tgz -FileName %MBEDTLS_DIR_NAME%-apache.tgz"
     - tar xvf "%MBEDTLS_DIR_NAME%-apache.tgz"
     - |-
         cd %MBEDTLS_DIR%
