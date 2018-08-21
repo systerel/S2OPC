@@ -165,7 +165,7 @@ void address_space_bs__get_Value_StatusCode(const constants__t_Node_i address_sp
 
 void address_space_bs__read_AddressSpace_free_value(const constants__t_Variant_i address_space_bs__val)
 {
-    free(address_space_bs__val);
+    SOPC_Variant_Delete(address_space_bs__val);
 }
 
 void address_space_bs__get_BrowseName(const constants__t_Node_i address_space_bs__p_node,

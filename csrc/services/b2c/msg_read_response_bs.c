@@ -88,7 +88,6 @@ void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_r
 {
     OpcUa_ReadResponse* pMsgReadResp = (OpcUa_ReadResponse*) msg_read_response_bs__resp_msg;
     SOPC_DataValue* pDataValue = NULL;
-    SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
 
     if (msg_read_response_bs__rvi > 0)
     {
@@ -100,11 +99,7 @@ void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_r
         if (constants__c_Variant_indet != msg_read_response_bs__val)
         {
             /* Note: the following only copies the context of the Variant, not the entire Variant */
-            retStatus = SOPC_Variant_ShallowCopy(&pDataValue->Value, msg_read_response_bs__val);
-        }
-
-        if (retStatus == SOPC_STATUS_OK)
-        {
+            SOPC_Variant_Move(&pDataValue->Value, msg_read_response_bs__val);
             util_status_code__B_to_C(msg_read_response_bs__sc, &pDataValue->Status);
         }
         else
