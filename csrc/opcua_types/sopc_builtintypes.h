@@ -535,7 +535,14 @@ SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src)
 SOPC_ReturnStatus SOPC_Variant_CopyAux(void* dest, const void* src);
 
 // Raw copy of structure content without new allocation: destination variant content will not be freed on clear
-SOPC_ReturnStatus SOPC_Variant_ShallowCopy(SOPC_Variant* dest, const SOPC_Variant* src);
+SOPC_ReturnStatus SOPC_Variant_ShallowCopy(SOPC_Variant* dst, const SOPC_Variant* src);
+
+// Does a shallow copy from src to dst, transfering the ownership to dst.
+//
+// The value of DoNotClear is transfered from src to dst, and src->DoNotClear is
+// set to false after this function returns (since the ownership of the data moved
+// to dst).
+void SOPC_Variant_Move(SOPC_Variant* dest, SOPC_Variant* src);
 
 // Compare only single value for some basic types (integers, statuses, nodeId, string): otherwise
 // SOPC_STATUS_NOT_SUPPORTED

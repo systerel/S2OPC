@@ -3973,6 +3973,15 @@ SOPC_ReturnStatus SOPC_Variant_ShallowCopy(SOPC_Variant* dest, const SOPC_Varian
     return status;
 }
 
+void SOPC_Variant_Move(SOPC_Variant* dst, SOPC_Variant* src)
+{
+    assert(src != NULL);
+    assert(dst != NULL);
+
+    *dst = *src;
+    src->DoNotClear = true;
+}
+
 SOPC_ReturnStatus SOPC_Variant_Compare(const SOPC_Variant* left, const SOPC_Variant* right, int32_t* comparison)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
