@@ -853,6 +853,244 @@
       <uax:Float>109517.875</uax:Float>
     </Value>
   </UAVariable>
+  <UAVariable BrowseName="0:BooleanList" DataType="Boolean" NodeId="i=1015" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>Boolean list DN</DisplayName>
+    <Description>Boolean list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfBoolean>
+        <uax:Boolean>true</uax:Boolean>
+        <uax:Boolean>false</uax:Boolean>
+        <uax:Boolean>true</uax:Boolean>
+        <uax:Boolean>false</uax:Boolean>
+        <uax:Boolean>true</uax:Boolean>
+      </uax:ListOfBoolean>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:ByteList" DataType="Byte" NodeId="i=1016" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>Byte list DN</DisplayName>
+    <Description>Byte list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfByte>
+        <uax:Byte>0</uax:Byte>
+        <uax:Byte>1</uax:Byte>
+        <uax:Byte>2</uax:Byte>
+        <uax:Byte>3</uax:Byte>
+        <uax:Byte>255</uax:Byte>
+      </uax:ListOfByte>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:Int16List" DataType="Int16" NodeId="i=1017" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>Int16 list DN</DisplayName>
+    <Description>Int16 list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfInt16>
+        <uax:Int16>-32768</uax:Int16>
+        <uax:Int16>-1</uax:Int16>
+        <uax:Int16>0</uax:Int16>
+        <uax:Int16>1</uax:Int16>
+        <uax:Int16>32767</uax:Int16>
+      </uax:ListOfInt16>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:Int32List" DataType="Int32" NodeId="i=1018" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>Int32 list DN</DisplayName>
+    <Description>Int32 list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfInt32>
+        <uax:Int32>-2147483648</uax:Int32>
+        <uax:Int32>-1</uax:Int32>
+        <uax:Int32>0</uax:Int32>
+        <uax:Int32>1</uax:Int32>
+        <uax:Int32>2147483647</uax:Int32>
+      </uax:ListOfInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:Int64List" DataType="Int64" NodeId="i=1019" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>Int64 list DN</DisplayName>
+    <Description>Int64 list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfInt64>
+        <uax:Int64>-9223372036854775807</uax:Int64>
+        <uax:Int64>-1</uax:Int64>
+        <uax:Int64>0</uax:Int64>
+        <uax:Int64>1</uax:Int64>
+        <uax:Int64>9223372036854775807</uax:Int64>
+      </uax:ListOfInt64>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:SByteList" DataType="SByte" NodeId="i=1020" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>SByte list DN</DisplayName>
+    <Description>SByte list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfSByte>
+        <uax:SByte>-128</uax:SByte>
+        <uax:SByte>-1</uax:SByte>
+        <uax:SByte>0</uax:SByte>
+        <uax:SByte>1</uax:SByte>
+        <uax:SByte>127</uax:SByte>
+      </uax:ListOfSByte>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:UInt16List" DataType="UInt16" NodeId="i=1021" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>UInt16 list DN</DisplayName>
+    <Description>UInt16 list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfUInt16>
+        <uax:UInt16>0</uax:UInt16>
+        <uax:UInt16>1</uax:UInt16>
+        <uax:UInt16>2</uax:UInt16>
+        <uax:UInt16>3</uax:UInt16>
+        <uax:UInt16>65535</uax:UInt16>
+      </uax:ListOfUInt16>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:UInt32List" DataType="UInt32" NodeId="i=1022" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>UInt32 list DN</DisplayName>
+    <Description>UInt32 list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfUInt32>
+        <uax:UInt32>0</uax:UInt32>
+        <uax:UInt32>1</uax:UInt32>
+        <uax:UInt32>2</uax:UInt32>
+        <uax:UInt32>3</uax:UInt32>
+        <uax:UInt32>4294967295</uax:UInt32>
+      </uax:ListOfUInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:UInt64List" DataType="UInt64" NodeId="i=1023" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>UInt64 list DN</DisplayName>
+    <Description>UInt64 list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfUInt64>
+        <uax:UInt64>0</uax:UInt64>
+        <uax:UInt64>1</uax:UInt64>
+        <uax:UInt64>2</uax:UInt64>
+        <uax:UInt64>3</uax:UInt64>
+        <uax:UInt64>18446744073709551615</uax:UInt64>
+      </uax:ListOfUInt64>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:FloatList" DataType="Float" NodeId="i=1024" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>Float list DN</DisplayName>
+    <Description>Float list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfFloat>
+        <uax:Float>0</uax:Float>
+        <uax:Float>1</uax:Float>
+        <uax:Float>2</uax:Float>
+        <uax:Float>3</uax:Float>
+        <uax:Float>340282346638528859811704183484516925440</uax:Float>
+      </uax:ListOfFloat>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:DoubleList" DataType="Double" NodeId="i=1025" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>Double list DN</DisplayName>
+    <Description>Double list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfDouble>
+        <uax:Double>0</uax:Double>
+        <uax:Double>1</uax:Double>
+        <uax:Double>2</uax:Double>
+        <uax:Double>3</uax:Double>
+        <uax:Double>179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368</uax:Double>
+      </uax:ListOfDouble>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:StringList" DataType="String" NodeId="i=1026" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>String list DN</DisplayName>
+    <Description>String list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfString>
+        <uax:String>The quick</uax:String>
+        <uax:String>brown fox</uax:String>
+        <uax:String>jumps over</uax:String>
+        <uax:String>the lazy</uax:String>
+        <uax:String>dog</uax:String>
+      </uax:ListOfString>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:ByteStringList" DataType="ByteString" NodeId="i=1027" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>ByteString list DN</DisplayName>
+    <Description>ByteString list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfByteString>
+        <uax:ByteString>The quick</uax:ByteString>
+        <uax:ByteString>brown fox</uax:ByteString>
+        <uax:ByteString>jumps over</uax:ByteString>
+        <uax:ByteString>the lazy</uax:ByteString>
+        <uax:ByteString>dog</uax:ByteString>
+      </uax:ListOfByteString>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:XmlElementList" DataType="XmlElement" NodeId="i=1028" ParentNodeId="i=1000" ValueRank="1">
+    <DisplayName>XmlElement list DN</DisplayName>
+    <Description>XmlElement list Description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfXmlElement>
+        <uax:XmlElement>The quick</uax:XmlElement>
+        <uax:XmlElement>brown fox</uax:XmlElement>
+        <uax:XmlElement>jumps over</uax:XmlElement>
+        <uax:XmlElement>the lazy</uax:XmlElement>
+        <uax:XmlElement>dog</uax:XmlElement>
+      </uax:ListOfXmlElement>
+    </Value>
+  </UAVariable>
   <!--UAVariable BrowseName="0:DateTime" DataType="DateTime" NodeId="i=1014" ParentNodeId="i=1000">
     <DisplayName>DateTime_1dn</DisplayName>
     <Description>DateTime_1d</Description>
