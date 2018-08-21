@@ -40,6 +40,7 @@
 #include "sopc_time.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
+#include "sopc_user_app_itf.h"
 
 /*-----------------------------
    SETS Clause: deferred sets
@@ -82,7 +83,7 @@ typedef uint32_t constants_bs__t_sub_seq_num_i;
 typedef uint32_t constants_bs__t_subscription_i;
 typedef uint32_t constants_bs__t_timer_id_i;
 typedef SOPC_TimeReference constants_bs__t_timeref_i;
-#define constants_bs__t_user_i t_entier4
+typedef SOPC_User* constants_bs__t_user_i;
 typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 typedef SOPC_String* constants_bs__t_IndexRange_i;
 

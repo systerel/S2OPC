@@ -214,46 +214,43 @@ void message_in_bs__is_valid_app_msg_in(const constants__t_msg_i message_in_bs__
     }
 }
 
-void message_in_bs__read_activate_req_msg_user(const constants__t_msg_i message_in_bs__msg,
-                                               t_bool* const message_in_bs__valid_user_token,
-                                               constants__t_user_i* const message_in_bs__user)
+void message_in_bs__read_activate_req_msg_identity_token(const constants__t_msg_i message_in_bs__p_msg,
+                                                         t_bool* const message_in_bs__p_valid_user_token,
+                                                         constants__t_user_token_i* const message_in_bs__p_user_token)
 {
-    bool isValid = false;
-    // TODO: define anonymous user in B ? Still 1 in C implem for anym
-    OpcUa_ActivateSessionRequest* activateSessionReq = (OpcUa_ActivateSessionRequest*) message_in_bs__msg;
+    OpcUa_ActivateSessionRequest* activateSessionReq = (OpcUa_ActivateSessionRequest*) message_in_bs__p_msg;
 
     if (activateSessionReq->UserIdentityToken.Length > 0)
     {
         if (activateSessionReq->UserIdentityToken.TypeId.NodeId.IdentifierType == SOPC_IdentifierType_Numeric &&
             activateSessionReq->UserIdentityToken.TypeId.NodeId.Namespace == OPCUA_NAMESPACE_INDEX)
         {
-            if (OpcUaId_AnonymousIdentityToken == activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric ||
+            bool isAnonymous =
+                OpcUaId_AnonymousIdentityToken == activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric ||
                 OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary ==
                     activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric ||
                 OpcUaId_AnonymousIdentityToken_Encoding_DefaultXml ==
-                    activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric)
+                    activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric;
+            bool isUserName =
+                OpcUaId_UserNameIdentityToken == activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric ||
+                OpcUaId_UserNameIdentityToken_Encoding_DefaultBinary ==
+                    activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric ||
+                OpcUaId_UserNameIdentityToken_Encoding_DefaultXml ==
+                    activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric;
+            /* TODO: Add support for X509 user identity token */
+            if (isAnonymous || isUserName)
             {
-                // It is anonymous user token which is the only supported now
-                // Note: we do not check the policy Id since it is not relevant nor configurable for the endpoint
-                isValid = true;
+                *message_in_bs__p_valid_user_token = true;
+                *message_in_bs__p_user_token = &activateSessionReq->UserIdentityToken;
             }
         }
     }
     else
     {
-        // NULL value indicates anonymous user token which is the only supported for now
-        isValid = true;
+        /* NULL value is also the anonymous user identity token */
+        *message_in_bs__p_valid_user_token = true;
+        *message_in_bs__p_user_token = constants__c_user_token_indet;
     }
-
-    if (isValid != false)
-    {
-        *message_in_bs__user = 1;
-    }
-    else
-    {
-        *message_in_bs__user = constants__c_user_indet;
-    }
-    *message_in_bs__valid_user_token = isValid;
 }
 
 void message_in_bs__read_create_session_msg_session_token(

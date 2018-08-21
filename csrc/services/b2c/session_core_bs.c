@@ -22,10 +22,12 @@
   ------------------------*/
 #include <assert.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "opcua_identifiers.h"
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
@@ -41,6 +43,7 @@
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
+#include "sopc_user_manager.h"
 
 #include "session_core_bs.h"
 
@@ -237,10 +240,77 @@ void session_core_bs__delete_session_application_context(const constants__t_sess
     session_client_app_context[session_core_bs__p_session] = 0;
 }
 
-void session_core_bs__is_valid_user(const constants__t_user_i session_core_bs__user, t_bool* const session_core_bs__ret)
+void session_core_bs__allocate_valid_user(
+    const constants__t_user_token_i session_core_bs__p_user_token,
+    const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
+    t_bool* const session_core_bs__p_valid_user,
+    t_bool* const session_core_bs__p_alloc_failed,
+    constants__t_user_i* const session_core_bs__p_user)
 {
-    assert(session_core_bs__user == 1);
-    *session_core_bs__ret = true;
+    /* TODO: change alloc_failed to a status code to cover more clearly error cases */
+    *session_core_bs__p_alloc_failed = true;
+    *session_core_bs__p_valid_user = false;
+
+    SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
+    if (NULL == epConfig)
+    {
+        return;
+    }
+
+    SOPC_UserAuthentication_Manager* pAuthen = epConfig->authenManager;
+    SOPC_ExtensionObject* pUserIdentity = session_core_bs__p_user_token;
+
+    /* The NULL identity is also the anonymous identity */
+    if (NULL == session_core_bs__p_user_token)
+    {
+        pUserIdentity = (SOPC_ExtensionObject*) calloc(1, sizeof(SOPC_ExtensionObject));
+        if (NULL == pUserIdentity)
+        {
+            return;
+        }
+
+        pUserIdentity->Encoding = SOPC_ExtObjBodyEncoding_Object;
+        pUserIdentity->TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
+        pUserIdentity->TypeId.NodeId.Data.Numeric = OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary;
+        pUserIdentity->Body.Object.ObjType = &OpcUa_AnonymousIdentityToken_EncodeableType;
+        /* When there is no default policyId for the AnonymousIdentityToken, it is unnecessary to even malloc it */
+        pUserIdentity->Body.Object.Value = NULL;
+    }
+
+    SOPC_ReturnStatus status =
+        SOPC_UserAuthentication_IsValidUserIdentity(pAuthen, pUserIdentity, session_core_bs__p_valid_user);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        /* Asserts that the validation did not modify the bool when there is an error */
+        *session_core_bs__p_valid_user = false;
+    }
+    else
+    {
+        if (*session_core_bs__p_valid_user)
+        {
+            *session_core_bs__p_user = SOPC_User_Create(session_core_bs__p_user_token);
+            if (NULL != session_core_bs__p_user)
+            {
+                *session_core_bs__p_alloc_failed = false;
+            }
+        }
+    }
+
+    if (NULL == session_core_bs__p_user_token)
+    {
+        SOPC_ExtensionObject_Clear(pUserIdentity);
+        free(pUserIdentity);
+        pUserIdentity = NULL;
+    }
+}
+
+void session_core_bs__deallocate_user(const constants__t_session_i session_core_bs__p_session)
+{
+    SOPC_User* pUser = sessionDataArray[session_core_bs__p_session].user_server;
+    SOPC_User_Free(&pUser);
+    free(pUser);
+    sessionDataArray[session_core_bs__p_session].user_server = NULL;
 }
 
 void session_core_bs__set_session_user_server(const constants__t_session_i session_core_bs__session,
