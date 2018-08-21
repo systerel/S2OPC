@@ -50,7 +50,8 @@ PROMOTES
     getall_to_create,
     getall_orphaned,
     set_session_to_create,
-    is_valid_user, /* TODO FBA devrait être déplacée dans constants.mch VMO: pour l'instant laisser là pour le C */
+    allocate_valid_user,
+    deallocate_user,
     set_session_user_server,
     set_session_user_client,
     get_session_user_server,
@@ -163,10 +164,12 @@ OPERATIONS
 
     set_session_state_closed (session, is_client) =
     VAR
-        l_prec_state
+        l_prec_state,
+        l_user
     IN
         /* First notify of state change to have access to data before removing all session data */
         l_prec_state <-- get_session_state(session);
+        l_user <-- get_session_user_server(session);
         notify_set_session_state(session, l_prec_state, e_session_closed, is_client);
 
         reset_session_channel(session);
@@ -193,7 +196,8 @@ OPERATIONS
 
         IF is_client = FALSE
         THEN
-            server_session_timeout_stop_timer(session)
+            server_session_timeout_stop_timer(session);
+            deallocate_user(session)
         END
     END
     ;

@@ -346,11 +346,28 @@ OPERATIONS
     END
     ;
 
-    ret <-- is_valid_user (user) = /* TODO FBA devrait être déplacée dans constants.mch VMO: pour l'instant laisser là pour le C */
+    p_valid_user, p_alloc_failed, p_user <-- allocate_valid_user (p_user_token, p_endpoint_config_idx) =
     PRE
-        user : t_user_i
+        p_user_token : t_user_token_i &
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx
     THEN
-        ret := bool(user : t_user)
+        p_valid_user,
+        p_alloc_failed,
+        p_user
+        :(p_valid_user : BOOL &
+          p_alloc_failed : BOOL &
+          p_user : t_user_i &
+          (p_valid_user = TRUE & p_alloc_failed = FALSE => p_user : t_user))
+    END
+    ;
+
+    deallocate_user (p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        a_user_server := {p_session} <<| a_user_server
     END
     ;
 
