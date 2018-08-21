@@ -35,6 +35,20 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
     return (pAuthen->pFunctions->pFuncValidateUserIdentity)(pAuthen, pUser, pbUserAuthentified);
 }
 
+SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthorization_Manager* pAuthor,
+                                                               const bool bWriteOperation,
+                                                               const SOPC_NodeId* pNid,
+                                                               const uint32_t attributeId,
+                                                               const SOPC_User* pUser,
+                                                               bool* pbOperationAuthorized)
+{
+    assert(NULL != pAuthor && NULL != pNid && NULL != pUser && NULL != pbOperationAuthorized);
+    assert(NULL != pAuthor->pFunctions && NULL != pAuthor->pFunctions->pFuncAuthorizeOperation);
+
+    return (pAuthor->pFunctions->pFuncAuthorizeOperation)(pAuthor, bWriteOperation, pNid, attributeId, pUser,
+                                                          pbOperationAuthorized);
+}
+
 void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAuthen)
 {
     if (NULL == ppAuthen || NULL == *ppAuthen)
@@ -46,4 +60,17 @@ void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAut
     assert(NULL != pAuthen->pFunctions && NULL != pAuthen->pFunctions->pFuncFree);
     (pAuthen->pFunctions->pFuncFree)(pAuthen);
     *ppAuthen = NULL;
+}
+
+void SOPC_UserAuthorization_Manager_Free(SOPC_UserAuthorization_Manager** ppAuthor);
+{
+    if (NULL == ppAuthor || NULL == *ppAuthor)
+    {
+        return;
+    }
+
+    SOPC_UserAuthorization_Manager* pAuthor = *ppAuthor;
+    assert(NULL != pAuthor->pFunctions && NULL != pAuthor->pFunctions->pFuncFree);
+    (pAuthor->pFunctions->pFuncFree)(pAuthor);
+    *ppAuthor = NULL;
 }

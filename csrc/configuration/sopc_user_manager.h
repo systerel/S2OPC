@@ -38,12 +38,28 @@
 
 #include "sopc_builtintypes.h"
 
+/** Logged in user structure */
+typedef struct SOPC_User
+{
+    bool anonymous;
+    SOPC_String username;
+} SOPC_User;
+
 typedef struct SOPC_UserAuthentication_Manager SOPC_UserAuthentication_Manager;
+typedef struct SOPC_UserAuthorization_Manager SOPC_UserAuthorization_Manager;
 
 typedef void (*SOPC_UserAuthentication_Free_Func)(SOPC_UserAuthentication_Manager* pAuthen);
 typedef SOPC_ReturnStatus (*SOPC_UserAuthentication_ValidateUserIdentity_Func)(SOPC_UserAuthentication_Manager* pAuthen,
                                                                                const SOPC_ExtensionObject* pUser,
                                                                                bool* pbUserAuthentified);
+
+typedef void (*SOPC_UserAuthorization_Free_Func)(SOPC_UserAuthorization_Manager* pAuthor);
+typedef SOPC_ReturnStatus (*SOPC_UserAuthorization_AuthorizeOperation_Func)(SOPC_UserAuthorization_Manager* pAuthor,
+                                                                            const bool bWriteOperation,
+                                                                            const SOPC_NodeId* pNid,
+                                                                            const uint32_t attributeId,
+                                                                            const SOPC_User* pUser,
+                                                                            bool* pbOperationAuthorized);
 
 typedef struct SOPC_UserAuthentication_Functions
 {
@@ -69,10 +85,46 @@ typedef struct SOPC_UserAuthentication_Functions
     SOPC_UserAuthentication_ValidateUserIdentity_Func pFuncValidateUserIdentity;
 } SOPC_UserAuthentication_Functions;
 
+typedef struct SOPC_UserAuthorization_Functions
+{
+    /**
+     * \brief Deallocation function, called upon SOPC_UserAuthorization_Manager destruction.
+     *
+     * This function can be the standard \p free function if nothing is stored in \p pData.
+     */
+    SOPC_UserAuthorization_Free_Func pFuncFree;
+
+    /**
+     * \brief Called to authorize a read or a write operation in the address space.
+     *
+     * \warning This callback should not block the thread that calls it, and shall return immediately.
+     *
+     * \param pAuthor   The SOPC_UserAuthorization_Manager instance.
+     * \param bWriteOperation  Set to false for a read operation, or true for a write operation.
+     * \param pNid      The operation reads/write this NodeId.
+     * \param attributeId  The operation reads/write this attribute.
+     * \param pUser     The connected SOPC_User which attempts the operation.
+     * \param pbOperationAuthorized  A valid pointer to the uninitialized result of the operation.
+     *                               The callback shall set it to false when the operation is refused.
+     *
+     * \return SOPC_STATUS_OK when \p pbUserAuthorized was set.
+     */
+    SOPC_UserAuthorization_AuthorizeOperation_Func pFuncAuthorizeOperation;
+} SOPC_UserAuthorization_Functions;
+
 struct SOPC_UserAuthentication_Manager
 {
     /** It is recommended to have a pointer to a static const instance */
     const SOPC_UserAuthentication_Functions* pFunctions;
+
+    /** This field may be used to store additional and specific data. */
+    void* pData;
+};
+
+struct SOPC_UserAuthorization_Manager
+{
+    /** It is recommended to have a pointer to a static const instance */
+    const SOPC_UserAuthorization_Functions* pFunctions;
 
     /** This field may be used to store additional and specific data. */
     void* pData;
@@ -93,8 +145,32 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
                                                               bool* pbUserAuthentified);
 
 /**
+ * \brief Authorize an operation with the chosen authorization manager.
+ *
+ * \param pAuthor   The SOPC_UserAuthorization_Manager instance.
+ * \param bWriteOperation  Set to false for a read operation, or true for a write operation.
+ * \param pNid      The operation reads/write this NodeId.
+ * \param attributeId  The operation reads/write this attribute.
+ * \param pUser     The connected SOPC_User which attempts the operation.
+ * \param pbOperationAuthorized  A valid pointer to the uninitialized result of the operation.
+ *                               The callback shall set it to false when the operation is refused.
+ *
+ * \return SOPC_STATUS_OK when \p pbUserAuthorized was set.
+ */
+SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthorization_Manager* pAuthor,
+                                                               const bool bWriteOperation,
+                                                               const SOPC_NodeId* pNid,
+                                                               const uint32_t attributeId,
+                                                               const SOPC_User* pUser,
+                                                               bool* pbOperationAuthorized);
+/**
  * \brief Deletes a SOPC_UserAuthentication_Manager using its pFuncFree.
  */
 void SOPC_UserAuthentication_Manager_Free(SOPC_UserAuthentication_Manager** ppAuthen);
+
+/**
+ * \brief Deletes a SOPC_UserAuthorization_Manager using its pFuncFree.
+ */
+void SOPC_UserAuthorization_Manager_Free(SOPC_UserAuthorization_Manager** ppAuthor);
 
 #endif /* SOPC_USER_MANAGER_H_ */
