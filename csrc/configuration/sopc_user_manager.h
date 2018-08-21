@@ -166,11 +166,11 @@ SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthoriz
 /**
  * \brief Deletes a SOPC_UserAuthentication_Manager using its pFuncFree.
  */
-void SOPC_UserAuthentication_Manager_Free(SOPC_UserAuthentication_Manager** ppAuthen);
+void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAuthen);
 
 /**
  * \brief Deletes a SOPC_UserAuthorization_Manager using its pFuncFree.
  */
-void SOPC_UserAuthorization_Manager_Free(SOPC_UserAuthorization_Manager** ppAuthor);
+void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAuthor);
 
 #endif /* SOPC_USER_MANAGER_H_ */

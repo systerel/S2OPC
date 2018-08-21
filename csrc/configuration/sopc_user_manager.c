@@ -62,7 +62,7 @@ void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAut
     *ppAuthen = NULL;
 }
 
-void SOPC_UserAuthorization_Manager_Free(SOPC_UserAuthorization_Manager** ppAuthor);
+void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAuthor)
 {
     if (NULL == ppAuthor || NULL == *ppAuthor)
     {
