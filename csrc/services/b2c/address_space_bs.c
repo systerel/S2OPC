@@ -201,7 +201,10 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_Node
     }
 }
 
-static constants__t_StatusCode_i set_value_full(SOPC_Variant *node_value, const SOPC_Variant *new_value, SOPC_Variant **previous_value) {
+static constants__t_StatusCode_i set_value_full(SOPC_Variant* node_value,
+                                                const SOPC_Variant* new_value,
+                                                SOPC_Variant** previous_value)
+{
     SOPC_Variant_Move(*previous_value, node_value);
     SOPC_Variant_Clear(node_value);
     SOPC_Variant_Initialize(node_value);
@@ -210,30 +213,39 @@ static constants__t_StatusCode_i set_value_full(SOPC_Variant *node_value, const 
     return (status == SOPC_STATUS_OK) ? constants__e_sc_ok : constants__e_sc_bad_internal_error;
 }
 
-static constants__t_StatusCode_i set_value_indexed(SOPC_Variant *node_value, const SOPC_Variant *new_value, const SOPC_String *range_str, SOPC_Variant **previous_value) {
+static constants__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
+                                                   const SOPC_Variant* new_value,
+                                                   const SOPC_String* range_str,
+                                                   SOPC_Variant** previous_value)
+{
     SOPC_NumericRange* range = NULL;
     SOPC_ReturnStatus status = SOPC_NumericRange_Parse(SOPC_String_GetRawCString(range_str), &range);
 
-    if (status != SOPC_STATUS_OK) {
-        return (status == SOPC_STATUS_NOK) ? constants__e_sc_bad_index_range_invalid : constants__e_sc_bad_internal_error;
+    if (status != SOPC_STATUS_OK)
+    {
+        return (status == SOPC_STATUS_NOK) ? constants__e_sc_bad_index_range_invalid
+                                           : constants__e_sc_bad_internal_error;
     }
 
     bool has_range = false;
     status = SOPC_Variant_HasRange(node_value, range, &has_range);
 
-    if (status != SOPC_STATUS_OK) {
+    if (status != SOPC_STATUS_OK)
+    {
         SOPC_NumericRange_Delete(range);
         return constants__e_sc_bad_internal_error;
     }
 
-    if (!has_range) {
+    if (!has_range)
+    {
         SOPC_NumericRange_Delete(range);
         return constants__e_sc_bad_index_range_no_data;
     }
 
     status = SOPC_Variant_Copy(*previous_value, node_value);
 
-    if (status != SOPC_STATUS_OK) {
+    if (status != SOPC_STATUS_OK)
+    {
         SOPC_NumericRange_Delete(range);
         return constants__e_sc_bad_out_of_memory;
     }
@@ -241,7 +253,8 @@ static constants__t_StatusCode_i set_value_indexed(SOPC_Variant *node_value, con
     status = SOPC_Variant_SetRange(node_value, new_value, range);
     SOPC_NumericRange_Delete(range);
 
-    switch (status) {
+    switch (status)
+    {
     case SOPC_STATUS_OK:
         return constants__e_sc_ok;
     case SOPC_STATUS_NOK:
@@ -253,25 +266,40 @@ static constants__t_StatusCode_i set_value_indexed(SOPC_Variant *node_value, con
 
 void address_space_bs__set_Value(const constants__t_Node_i address_space_bs__node,
                                  const constants__t_Variant_i address_space_bs__value,
+                                 const constants__t_IndexRange_i address_space_bs__index_range,
                                  constants__t_StatusCode_i* const address_space_bs__serviceStatusCode,
                                  constants__t_Variant_i* const address_space_bs__prev_value)
 {
-    *address_space_bs__serviceStatusCode = constants__e_sc_bad_out_of_memory;
     SOPC_AddressSpace_Item* item = address_space_bs__node;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Variant* pvar = SOPC_AddressSpace_Item_Get_Value(item);
-    *address_space_bs__prev_value = malloc(sizeof(SOPC_Variant));
-    if (NULL == *address_space_bs__prev_value)
+    *address_space_bs__prev_value = SOPC_Variant_Create();
+
+    if (*address_space_bs__prev_value == NULL)
     {
+        *address_space_bs__serviceStatusCode = constants__e_sc_bad_out_of_memory;
         return;
     }
-    **address_space_bs__prev_value = *pvar; /* Copy variant content */
-    SOPC_Variant_Initialize(pvar);          /* Re-init content without clear since content just copied */
-    /* Deep-copy the new value to set */
-    status = SOPC_Variant_Copy(pvar, address_space_bs__value);
-    assert(SOPC_STATUS_OK == status);
-    item->value_status = SOPC_GoodGenericStatus;
-    *address_space_bs__serviceStatusCode = constants__e_sc_ok;
+
+    if (address_space_bs__index_range->Length <= 0)
+    {
+        *address_space_bs__serviceStatusCode =
+            set_value_full(pvar, address_space_bs__value, address_space_bs__prev_value);
+    }
+    else
+    {
+        *address_space_bs__serviceStatusCode = set_value_indexed(
+            pvar, address_space_bs__value, address_space_bs__index_range, address_space_bs__prev_value);
+    }
+
+    if (*address_space_bs__serviceStatusCode == constants__e_sc_ok)
+    {
+        item->value_status = SOPC_GoodGenericStatus;
+    }
+    else
+    {
+        SOPC_Variant_Delete(*address_space_bs__prev_value);
+        *address_space_bs__prev_value = NULL;
+    }
 }
 
 void address_space_bs__get_Value_StatusCode(const constants__t_Node_i address_space_bs__node,

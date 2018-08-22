@@ -102,39 +102,34 @@ OPERATIONS
     END
     ;
 
-    isvalid, status, nid, aid, value <-- getall_WriteValue(wvi) =
+    isvalid, status, nid, aid, value, index_range <-- getall_WriteValue(wvi) =
     PRE
         nb_WriteValue > 0 &
         wvi : t_WriteValue_i &
         wvi : cast_t_WriteValue[1..nb_WriteValue] &
         wvi : dom(WriteValue_NodeId) &
         wvi : dom(WriteValue_AttributeId) &
-        wvi : dom(WriteValue_Value) &
-        wvi : dom(WriteValue_HasIndexRange)
+        wvi : dom(WriteValue_Value)
     THEN
-        IF WriteValue_AttributeId(wvi) : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value} &
-            WriteValue_HasIndexRange(wvi) = FALSE
+        IF WriteValue_AttributeId(wvi) : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value}
         THEN
             isvalid := TRUE ||
             status := e_sc_ok ||
             nid,
             aid,
-            value
+            value,
+            index_range
             :(nid : t_NodeId_i  & nid = WriteValue_NodeId(wvi) &
                 aid : t_AttributeId_i & aid : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value} &
-                value : t_Variant_i & value = WriteValue_Value(wvi))
+                value : t_Variant_i & value = WriteValue_Value(wvi) &
+                index_range : t_IndexRange_i)
         ELSE
             isvalid := FALSE ||
-
             nid := c_NodeId_indet ||
             aid := c_AttributeId_indet ||
             value := c_Variant_indet ||
-            IF WriteValue_AttributeId(wvi) /: {e_aid_NodeId, e_aid_NodeClass, e_aid_Value}
-            THEN
-                status := e_sc_bad_attribute_id_invalid
-            ELSE
-                status := e_sc_bad_index_range_invalid
-            END
+            index_range := c_IndexRange_indet ||
+            status := e_sc_bad_attribute_id_invalid
         END
     END
     ;

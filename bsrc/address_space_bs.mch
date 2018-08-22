@@ -153,12 +153,14 @@ OPERATIONS
     ;
 
     /* a_Value, setter */
-    serviceStatusCode, prev_value <-- set_Value(node, value) =
+    serviceStatusCode, prev_value <-- set_Value(node, value, index_range) =
     PRE
         node  : t_Node_i    &
         node  : t_Node      &
         value : t_Variant_i &
-        value : t_Variant
+        value : t_Variant   &
+        index_range : t_IndexRange_i &
+        index_range : t_IndexRange
     THEN
         CHOICE
             serviceStatusCode := e_sc_ok ||
