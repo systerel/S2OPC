@@ -355,8 +355,7 @@ OPERATIONS
                 THEN
                     IF l_session_state = e_session_created or
                         l_session_state = e_session_userActivated or
-                        l_session_state =  e_session_scOrphaned or
-                        l_session_state = e_session_userActivated
+                        l_session_state = e_session_scOrphaned
                     THEN
                         l_is_valid_user_token, l_user <-- read_activate_req_msg_user (req_msg);
                         IF l_is_valid_user_token = TRUE THEN
