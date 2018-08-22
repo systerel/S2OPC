@@ -52,6 +52,7 @@ PROMOTES
     set_session_to_create,
     allocate_valid_user,
     deallocate_user,
+    drop_user_server,
     set_session_user_server,
     set_session_user_client,
     get_session_user_server,
@@ -197,7 +198,7 @@ OPERATIONS
         IF is_client = FALSE
         THEN
             server_session_timeout_stop_timer(session);
-            deallocate_user(session)
+            drop_user_server(session)
         END
     END
     ;

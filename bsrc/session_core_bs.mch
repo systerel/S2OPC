@@ -172,12 +172,21 @@ OPERATIONS
     END
     ;
 
-    deallocate_user (p_session) =
+    deallocate_user (p_user) =
+    PRE
+        p_user : t_user_i
+    THEN
+        skip
+    END
+    ;
+
+    drop_user_server (p_session) =
     PRE
         p_session : t_session_i &
         p_session : t_session
     THEN
         a_user_server := {p_session} <<| a_user_server
+        /* Also deallocate user */
     END
     ;
 

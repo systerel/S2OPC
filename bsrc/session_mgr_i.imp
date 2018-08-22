@@ -367,7 +367,12 @@ OPERATIONS
                             IF l_is_valid_user = TRUE & l_failed_alloc = FALSE
                             THEN
                                 // TODO: differentiate sc_activate from user_activate directly here
-                                service_ret <-- server_activate_session_req_and_resp_sm (channel, session, l_user, req_msg, resp_msg)
+                                service_ret <-- server_activate_session_req_and_resp_sm (channel, session, l_user, req_msg, resp_msg);
+                                /* User is allocated but stored nowhere; hence it must be freed */
+                                IF service_ret /= e_sc_ok
+                                THEN
+                                    deallocate_user (l_user)
+                                END
                             ELSIF l_is_valid_user_token = FALSE
                             THEN
                                 // invalid user in token

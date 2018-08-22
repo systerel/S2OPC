@@ -50,6 +50,7 @@ PROMOTES
     is_valid_session,
     allocate_valid_user,
     deallocate_user,
+    drop_user_server,
     client_gen_create_session_internal_event,
     client_gen_activate_orphaned_session_internal_event,
     client_gen_activate_user_session_internal_event,

@@ -305,7 +305,14 @@ void session_core_bs__allocate_valid_user(
     }
 }
 
-void session_core_bs__deallocate_user(const constants__t_session_i session_core_bs__p_session)
+void session_core_bs__deallocate_user(const constants__t_user_i session_core_bs__p_user)
+{
+    SOPC_User* pUser = session_core_bs__p_user;
+    SOPC_User_Free(&pUser);
+    free(pUser);
+}
+
+void session_core_bs__drop_user_server(const constants__t_session_i session_core_bs__p_session)
 {
     SOPC_User* pUser = sessionDataArray[session_core_bs__p_session].user_server;
     SOPC_User_Free(&pUser);
