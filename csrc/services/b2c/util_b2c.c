@@ -741,6 +741,9 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_index_range_invalid:
         *status = OpcUa_BadIndexRangeInvalid;
         break;
+    case constants__e_sc_bad_index_range_no_data:
+        *status = OpcUa_BadIndexRangeNoData;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -922,6 +925,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         break;
     case OpcUa_BadIndexRangeInvalid:
         *bstatus = constants__e_sc_bad_index_range_invalid;
+        break;
+    case OpcUa_BadIndexRangeNoData:
+        *bstatus = constants__e_sc_bad_index_range_no_data;
         break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)
