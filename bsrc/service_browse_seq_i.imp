@@ -196,26 +196,22 @@ OPERATIONS
         l_src_node,
         l_nb_bri
     IN
-        l_isvalid, l_SrcNodeId, l_dir, l_isreftype, l_reftype, l_incsubtyp <-- getall_BrowseValue(p_bvi);
-        IF  l_isvalid = TRUE THEN
-            IF l_dir /= e_bd_indet THEN
-                l_isvalid, l_nb_target, l_src_node <-- getall_SourceNode_NbRef(l_SrcNodeId);
+        l_SrcNodeId, l_dir, l_isreftype, l_reftype, l_incsubtyp <-- getall_BrowseValue(p_bvi);
+        IF l_dir /= e_bd_indet THEN
+            l_isvalid, l_nb_target, l_src_node <-- getall_SourceNode_NbRef(l_SrcNodeId);
+            IF  l_isvalid = TRUE THEN
+                l_isvalid, l_nb_bri <-- alloc_browse_result(p_bvi, p_nb_target_max, l_nb_target);
                 IF  l_isvalid = TRUE THEN
-                    l_isvalid, l_nb_bri <-- alloc_browse_result(p_bvi, p_nb_target_max, l_nb_target);
-                    IF  l_isvalid = TRUE THEN
-                        set_ResponseBrowse_BrowseStatus(p_bvi, e_sc_ok);
-                        fill_browse_response(p_bvi, l_nb_bri, l_src_node, l_dir, l_isreftype, l_reftype, l_incsubtyp)
-                    ELSE
-                        set_ResponseBrowse_BrowseStatus(p_bvi, e_sc_bad_out_of_memory)
-                    END
+                    set_ResponseBrowse_BrowseStatus(p_bvi, e_sc_ok);
+                    fill_browse_response(p_bvi, l_nb_bri, l_src_node, l_dir, l_isreftype, l_reftype, l_incsubtyp)
                 ELSE
-                    set_ResponseBrowse_BrowseStatus(p_bvi, e_sc_bad_node_id_unknown)
+                    set_ResponseBrowse_BrowseStatus(p_bvi, e_sc_bad_out_of_memory)
                 END
             ELSE
-                set_ResponseBrowse_BrowseStatus(p_bvi, e_sc_bad_browse_direction_invalid)
+                set_ResponseBrowse_BrowseStatus(p_bvi, e_sc_bad_node_id_unknown)
             END
         ELSE
-            set_ResponseBrowse_BrowseStatus(p_bvi, e_sc_bad_nothing_to_do)
+            set_ResponseBrowse_BrowseStatus(p_bvi, e_sc_bad_browse_direction_invalid)
         END
     END
     ;

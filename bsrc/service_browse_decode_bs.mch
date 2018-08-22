@@ -32,7 +32,8 @@ DEFINITIONS
         BrowseValue_NodeId,
         BrowseValue_BrowseDirection,
         BrowseValue_ReferenceTypeId,
-        BrowseValue_IncludedSubtypes
+        BrowseValue_IncludedSubtypes,
+        isBrowseRequestDecoded
     ;
     d_inv ==
         nb_BrowseValue                : NAT                                 &
@@ -42,7 +43,8 @@ DEFINITIONS
         BrowseValue_NodeId            : t_BrowseValue +-> t_NodeId          &
         BrowseValue_BrowseDirection   : t_BrowseValue +-> t_BrowseDirection &
         BrowseValue_ReferenceTypeId   : t_BrowseValue +-> t_NodeId          &
-        BrowseValue_IncludedSubtypes <: t_BrowseValue
+        BrowseValue_IncludedSubtypes <: t_BrowseValue                       &
+        isBrowseRequestDecoded        : BOOL
     ;
     d_init ==
         d_variables
@@ -53,7 +55,8 @@ DEFINITIONS
             BrowseValue_NodeId           = {} &
             BrowseValue_BrowseDirection  = {} &
             BrowseValue_ReferenceTypeId  = {} &
-            BrowseValue_IncludedSubtypes = {}
+            BrowseValue_IncludedSubtypes = {} &
+            isBrowseRequestDecoded       = FALSE
          )
 
 ABSTRACT_VARIABLES
@@ -68,8 +71,6 @@ INITIALISATION
 OPERATIONS
     StatusCode_service <-- decode_browse_request(req_payload) =
     PRE
-        /*req_payload : t_byte_buffer_i &
-        req_payload : t_byte_buffer*/
         req_payload : t_msg_i &
         req_payload = c_msg_in
     THEN
@@ -78,7 +79,13 @@ OPERATIONS
         :(
             StatusCode_service : t_StatusCode_i &
             StatusCode_service : t_StatusCode &
-            d_inv
+            d_inv &
+            isBrowseRequestDecoded = bool(StatusCode_service = e_sc_ok) &
+            (StatusCode_service = e_sc_ok =>
+                nb_BrowseValue > 0 &
+                BrowseValue_NodeId            : cast_t_BrowseValue[1..nb_BrowseValue] --> t_NodeId &
+                BrowseValue_BrowseDirection   : cast_t_BrowseValue[1..nb_BrowseValue] --> t_BrowseDirection)
+
         )
     END
     ;
@@ -90,55 +97,53 @@ OPERATIONS
     ;
 
     p_nid_view <-- get_BrowseView =
-    BEGIN
+    PRE
+        isBrowseRequestDecoded = TRUE
+    THEN
         p_nid_view := BrowseView
     END
     ;
 
     nb_req <-- get_nb_BrowseValue =
-    BEGIN
+    PRE
+        isBrowseRequestDecoded = TRUE
+    THEN
         nb_req := nb_BrowseValue
     END
     ;
 
     p_nb_BrowseTargetMax <-- get_nb_BrowseTargetMax =
-    BEGIN
+    PRE
+        isBrowseRequestDecoded = TRUE
+    THEN
         p_nb_BrowseTargetMax := nb_BrowseTargetMax
     END
     ;
 
-    p_isvalid, p_NodeId, p_dir, p_isreftype, p_reftype, p_inc_subtype <-- getall_BrowseValue(p_bvi) =
+    p_NodeId, p_dir, p_isreftype, p_reftype, p_inc_subtype <-- getall_BrowseValue(p_bvi) =
     PRE
         p_bvi : t_BrowseValue_i &
-        p_bvi : t_BrowseValue
+        p_bvi : t_BrowseValue &
+        p_bvi : cast_t_BrowseValue[1..nb_BrowseValue] &
+        p_bvi : dom(BrowseValue_NodeId) &
+        p_bvi : dom(BrowseValue_BrowseDirection) &
+        isBrowseRequestDecoded = TRUE
     THEN
-        IF  p_bvi : dom(BrowseValue_NodeId) &
-            p_bvi : dom(BrowseValue_BrowseDirection)
-        THEN
-            p_isvalid := TRUE ||
-            p_NodeId,
-            p_dir,
-            p_isreftype,
-            p_reftype,
-            p_inc_subtype
-            :(  p_NodeId      : t_NodeId_i                                     &
-                p_dir         : t_BrowseDirection_i                            &
-                p_reftype     : t_NodeId_i                                     &
-                p_isreftype   = bool(p_bvi : dom(BrowseValue_ReferenceTypeId)) &
-                p_inc_subtype = bool(p_bvi : BrowseValue_IncludedSubtypes)     &
+        p_NodeId,
+        p_dir,
+        p_isreftype,
+        p_reftype,
+        p_inc_subtype
+        :(  p_NodeId      : t_NodeId_i                                     &
+            p_dir         : t_BrowseDirection_i                            &
+            p_reftype     : t_NodeId_i                                     &
+            p_isreftype   = bool(p_bvi : dom(BrowseValue_ReferenceTypeId)) &
+            p_inc_subtype = bool(p_bvi : BrowseValue_IncludedSubtypes)     &
 
-                (p_isreftype = TRUE
-                 =>
-                 p_reftype = BrowseValue_ReferenceTypeId(p_bvi))
-              )
-        ELSE
-            p_isvalid     := FALSE               ||
-            p_NodeId      :: t_NodeId_i          ||
-            p_dir         :: t_BrowseDirection_i ||
-            p_reftype     :: t_NodeId_i          ||
-            p_isreftype   :: BOOL                ||
-            p_inc_subtype :: BOOL
-        END
+            (p_isreftype = TRUE
+                =>
+                p_reftype = BrowseValue_ReferenceTypeId(p_bvi))
+        )
     END
 
 END
