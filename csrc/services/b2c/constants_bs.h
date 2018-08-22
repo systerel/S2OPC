@@ -214,7 +214,6 @@ extern void constants_bs__get_cast_t_subscription(const t_entier4 constants_bs__
                                                   constants_bs__t_subscription_i* const constants_bs__p_subscription);
 extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
     const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
-    t_bool* const constants_bs__p_isvalid,
     constants_bs__t_NodeId_i* const constants_bs__p_nid);
 extern void constants_bs__is_t_channel(const constants_bs__t_channel_i constants_bs__p_channel,
                                        t_bool* const constants_bs__p_res);

@@ -105,24 +105,17 @@ OPERATIONS
         set_ResponseBrowse_Res_ReferenceTypeId(p_bvi, p_bri, p_RefType);
         set_ResponseBrowse_Res_NodeId(p_bvi, p_bri, p_NodeId);
         set_ResponseBrowse_Res_Forwards(p_bvi, p_bri, p_IsForward);
-        l_isvalid, l_NodeId <-- getall_conv_ExpandedNodeId_NodeId(p_NodeId);
+        l_NodeId <-- getall_conv_ExpandedNodeId_NodeId(p_NodeId);
+        l_isvalid, l_node <-- readall_AddressSpace_Node(l_NodeId);
         IF  l_isvalid = TRUE THEN
-            l_isvalid, l_node <-- readall_AddressSpace_Node(l_NodeId);
-            IF  l_isvalid = TRUE THEN
-                l_BrowseName <-- get_BrowseName(l_node);
-                set_ResponseBrowse_Res_BrowseName (p_bvi, p_bri, l_BrowseName);
-                l_DisplayName <-- get_DisplayName(l_node);
-                set_ResponseBrowse_Res_DisplayName(p_bvi, p_bri, l_DisplayName);
-                l_NodeClass <-- get_NodeClass(l_node);
-                set_ResponseBrowse_Res_NodeClass(p_bvi, p_bri, l_NodeClass);
-                l_TypeDefinition <-- get_TypeDefinition(l_node);
-                set_ResponseBrowse_Res_TypeDefinition(p_bvi, p_bri, l_TypeDefinition)
-            ELSE
-                reset_ResponseBrowse_Res_BrowseName    (p_bvi, p_bri);
-                reset_ResponseBrowse_Res_DisplayName   (p_bvi, p_bri);
-                reset_ResponseBrowse_Res_NodeClass     (p_bvi, p_bri);
-                reset_ResponseBrowse_Res_TypeDefinition(p_bvi, p_bri)
-            END
+            l_BrowseName <-- get_BrowseName(l_node);
+            set_ResponseBrowse_Res_BrowseName (p_bvi, p_bri, l_BrowseName);
+            l_DisplayName <-- get_DisplayName(l_node);
+            set_ResponseBrowse_Res_DisplayName(p_bvi, p_bri, l_DisplayName);
+            l_NodeClass <-- get_NodeClass(l_node);
+            set_ResponseBrowse_Res_NodeClass(p_bvi, p_bri, l_NodeClass);
+            l_TypeDefinition <-- get_TypeDefinition(l_node);
+            set_ResponseBrowse_Res_TypeDefinition(p_bvi, p_bri, l_TypeDefinition)
         ELSE
             reset_ResponseBrowse_Res_BrowseName    (p_bvi, p_bri);
             reset_ResponseBrowse_Res_DisplayName   (p_bvi, p_bri);

@@ -919,19 +919,13 @@ OPERATIONS
     END
     ;
 
-    p_isvalid, p_nid <-- getall_conv_ExpandedNodeId_NodeId(p_expnid) =
+    p_nid <-- getall_conv_ExpandedNodeId_NodeId(p_expnid) =
     PRE
         p_expnid : t_ExpandedNodeId_i &
         p_expnid : t_ExpandedNodeId
     THEN
-        IF  p_expnid : dom(conv_ExpandedNodeId_NodeId) THEN
-            p_isvalid := TRUE ||
-            p_nid :(p_nid : t_NodeId_i &
-                    p_nid = conv_ExpandedNodeId_NodeId(p_expnid))
-        ELSE
-            p_isvalid := FALSE ||
-            p_nid     :: t_NodeId_i
-        END
+        p_nid :(p_nid : t_NodeId_i &
+                p_nid = conv_ExpandedNodeId_NodeId(p_expnid))
     END
     ;
 

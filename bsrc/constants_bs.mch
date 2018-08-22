@@ -420,12 +420,11 @@ OPERATIONS
     /* This "conversion" is a borrow, you shall not clean the given nid */
     /* The borrow is always valid. */
     /* TODOPAB: verify the life cycle of this borrow */
-    p_isvalid, p_nid <-- getall_conv_ExpandedNodeId_NodeId(p_expnid) =
+    p_nid <-- getall_conv_ExpandedNodeId_NodeId(p_expnid) =
     PRE
         p_expnid : t_ExpandedNodeId_i &
         p_expnid : t_ExpandedNodeId
     THEN
-        p_isvalid :: BOOL ||
         p_nid     :: t_NodeId_i
     END
     ;

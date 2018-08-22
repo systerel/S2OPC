@@ -43,20 +43,10 @@ void constants_bs__get_Is_SubType(const constants_bs__t_NodeId_i constants_bs__p
 }
 
 void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
-                                                     t_bool* const constants_bs__p_isvalid,
                                                      constants_bs__t_NodeId_i* const constants_bs__p_nid)
 {
     /* Reminder: This is a borrow */
-    *constants_bs__p_nid = constants_bs__c_NodeId_indet;
-    if (constants_bs__p_expnid != constants_bs__c_ExpandedNodeId_indet)
-    {
-        *constants_bs__p_nid = &constants_bs__p_expnid->NodeId;
-        *constants_bs__p_isvalid = true;
-    }
-    else
-    {
-        *constants_bs__p_isvalid = false;
-    }
+    *constants_bs__p_nid = &constants_bs__p_expnid->NodeId;
 }
 
 void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel)

@@ -169,34 +169,26 @@ OPERATIONS
         ResponseBrowse_Res_ReferenceTypeId(p_bvi)(p_bri) := p_RefType   ||
         ResponseBrowse_Res_NodeId         (p_bvi)(p_bri) := p_NodeId    ||
         ResponseBrowse_Res_Forwards       (p_bvi)(p_bri) := p_IsForward ||
-        IF  p_NodeId : dom(conv_ExpandedNodeId_NodeId) THEN
-            /* Target node p_NodeId is a local node */
-            LET
-                l_NodeId
-            BE
-                /* Local target node ID (in t_NodeId) associated to expanded target node ID p_NodeId
-                   (in t_ExpandedNodeId) */
-                l_NodeId = conv_ExpandedNodeId_NodeId(p_NodeId)
-            IN
-                IF  l_NodeId : dom(a_NodeId~) THEN
-                    /* Local target node ID is associated to an address space node */
-                    ResponseBrowse_Res_BrowseName    (p_bvi)(p_bri) := a_BrowseName         (a_NodeId~(l_NodeId)) ||
-                    ResponseBrowse_Res_DisplayName   (p_bvi)(p_bri) := a_DisplayName        (a_NodeId~(l_NodeId)) ||
-                    ResponseBrowse_Res_NodeClass     (p_bvi)(p_bri) := a_NodeClass          (a_NodeId~(l_NodeId)) ||
-                    ResponseBrowse_Res_TypeDefinition(p_bvi)(p_bri) := Ref_HasTypeDefinition(a_NodeId~(l_NodeId))
-                ELSE
-                    ResponseBrowse_Res_BrowseName    (p_bvi) := {p_bri} <<| ResponseBrowse_Res_BrowseName    (p_bvi) ||
-                    ResponseBrowse_Res_DisplayName   (p_bvi) := {p_bri} <<| ResponseBrowse_Res_DisplayName   (p_bvi) ||
-                    ResponseBrowse_Res_NodeClass     (p_bvi) := {p_bri} <<| ResponseBrowse_Res_NodeClass     (p_bvi) ||
-                    ResponseBrowse_Res_TypeDefinition(p_bvi) := {p_bri} <<| ResponseBrowse_Res_TypeDefinition(p_bvi)
-                END
+        /* Target node p_NodeId is a local node */
+        LET
+            l_NodeId
+        BE
+            /* Local target node ID (in t_NodeId) associated to expanded target node ID p_NodeId
+            (in t_ExpandedNodeId) */
+            l_NodeId = conv_ExpandedNodeId_NodeId(p_NodeId)
+        IN
+            IF  l_NodeId : dom(a_NodeId~) THEN
+                /* Local target node ID is associated to an address space node */
+                ResponseBrowse_Res_BrowseName    (p_bvi)(p_bri) := a_BrowseName         (a_NodeId~(l_NodeId)) ||
+                ResponseBrowse_Res_DisplayName   (p_bvi)(p_bri) := a_DisplayName        (a_NodeId~(l_NodeId)) ||
+                ResponseBrowse_Res_NodeClass     (p_bvi)(p_bri) := a_NodeClass          (a_NodeId~(l_NodeId)) ||
+                ResponseBrowse_Res_TypeDefinition(p_bvi)(p_bri) := Ref_HasTypeDefinition(a_NodeId~(l_NodeId))
+            ELSE
+                ResponseBrowse_Res_BrowseName    (p_bvi) := {p_bri} <<| ResponseBrowse_Res_BrowseName    (p_bvi) ||
+                ResponseBrowse_Res_DisplayName   (p_bvi) := {p_bri} <<| ResponseBrowse_Res_DisplayName   (p_bvi) ||
+                ResponseBrowse_Res_NodeClass     (p_bvi) := {p_bri} <<| ResponseBrowse_Res_NodeClass     (p_bvi) ||
+                ResponseBrowse_Res_TypeDefinition(p_bvi) := {p_bri} <<| ResponseBrowse_Res_TypeDefinition(p_bvi)
             END
-        ELSE
-            /* Target node p_NodeId is a remote node */
-            ResponseBrowse_Res_BrowseName   (p_bvi) := {p_bri} <<| ResponseBrowse_Res_BrowseName    (p_bvi) ||
-            ResponseBrowse_Res_DisplayName  (p_bvi) := {p_bri} <<| ResponseBrowse_Res_DisplayName   (p_bvi) ||
-            ResponseBrowse_Res_NodeClass    (p_bvi) := {p_bri} <<| ResponseBrowse_Res_NodeClass     (p_bvi) ||
-           ResponseBrowse_Res_TypeDefinition(p_bvi) := {p_bri} <<| ResponseBrowse_Res_TypeDefinition(p_bvi)
         END
     END
     ;

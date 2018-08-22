@@ -75,30 +75,22 @@ void service_browse_decode_bs__free_browse_request(void)
 
 void service_browse_decode_bs__get_nb_BrowseValue(t_entier4* const service_browse_decode_bs__nb_req)
 {
-    if (NULL != request)
-        *service_browse_decode_bs__nb_req = request->NoOfNodesToBrowse;
-    else
-        *service_browse_decode_bs__nb_req = 0;
+    *service_browse_decode_bs__nb_req = request->NoOfNodesToBrowse;
 }
 
 void service_browse_decode_bs__get_nb_BrowseTargetMax(t_entier4* const service_browse_decode_bs__p_nb_BrowseTargetMax)
 {
-    if (NULL == request)
-        *service_browse_decode_bs__p_nb_BrowseTargetMax = 0;
+    if (request->RequestedMaxReferencesPerNode < INT32_MAX)
+    {
+        *service_browse_decode_bs__p_nb_BrowseTargetMax = (int32_t) request->RequestedMaxReferencesPerNode;
+    }
     else
     {
-        if (request->RequestedMaxReferencesPerNode < INT32_MAX)
-        {
-            *service_browse_decode_bs__p_nb_BrowseTargetMax = (int32_t) request->RequestedMaxReferencesPerNode;
-        }
-        else
-        {
-            *service_browse_decode_bs__p_nb_BrowseTargetMax = INT32_MAX;
-        }
-        if (0 == *service_browse_decode_bs__p_nb_BrowseTargetMax ||
-            *service_browse_decode_bs__p_nb_BrowseTargetMax > constants__k_n_BrowseTarget_max)
-            *service_browse_decode_bs__p_nb_BrowseTargetMax = constants__k_n_BrowseTarget_max;
+        *service_browse_decode_bs__p_nb_BrowseTargetMax = INT32_MAX;
     }
+    if (0 == *service_browse_decode_bs__p_nb_BrowseTargetMax ||
+        *service_browse_decode_bs__p_nb_BrowseTargetMax > constants__k_n_BrowseTarget_max)
+        *service_browse_decode_bs__p_nb_BrowseTargetMax = constants__k_n_BrowseTarget_max;
 }
 
 extern void service_browse_decode_bs__get_BrowseView(constants__t_NodeId_i* const service_browse_decode_bs__p_nid_view)
@@ -107,18 +99,14 @@ extern void service_browse_decode_bs__get_BrowseView(constants__t_NodeId_i* cons
 
     *service_browse_decode_bs__p_nid_view = constants__c_NodeId_indet;
 
-    if (request != NULL)
+    pVid = &(request->View.ViewId);
+    if (pVid->IdentifierType != SOPC_IdentifierType_Numeric || pVid->Data.Numeric != 0)
     {
-        pVid = &(request->View.ViewId);
-        if (pVid->IdentifierType != SOPC_IdentifierType_Numeric || pVid->Data.Numeric != 0)
-        {
-            *service_browse_decode_bs__p_nid_view = pVid;
-        }
+        *service_browse_decode_bs__p_nid_view = pVid;
     }
 }
 
 void service_browse_decode_bs__getall_BrowseValue(const constants__t_BrowseValue_i service_browse_decode_bs__p_bvi,
-                                                  t_bool* const service_browse_decode_bs__p_isvalid,
                                                   constants__t_NodeId_i* const service_browse_decode_bs__p_NodeId,
                                                   constants__t_BrowseDirection_i* const service_browse_decode_bs__p_dir,
                                                   t_bool* const service_browse_decode_bs__p_isreftype,
@@ -129,31 +117,24 @@ void service_browse_decode_bs__getall_BrowseValue(const constants__t_BrowseValue
     OpcUa_BrowseDescription* pBwseDesc = NULL;
 
     /* Default value for every output */
-    *service_browse_decode_bs__p_isvalid = false;
     *service_browse_decode_bs__p_NodeId = constants__c_NodeId_indet;
     *service_browse_decode_bs__p_dir = constants__e_bd_indet;
     *service_browse_decode_bs__p_isreftype = false;
     *service_browse_decode_bs__p_reftype = constants__c_NodeId_indet;
     *service_browse_decode_bs__p_inc_subtype = false;
 
-    if (NULL != request && service_browse_decode_bs__p_bvi > 0)
-    /* && 0 < service_browse_decode_bs__p_bvi && service_browse_decode_bs__p_bvi <=
-request->NoOfNodesToBrowse) These are already verified by PRE */
+    pBwseDesc = &request->NodesToBrowse[service_browse_decode_bs__p_bvi - 1];
+    *service_browse_decode_bs__p_NodeId = &pBwseDesc->NodeId;
+    /* Invalid direction is tested by the B, so it's is not a reason to unset p_isvalid */
+    util_BrowseDirection__C_to_B(pBwseDesc->BrowseDirection, service_browse_decode_bs__p_dir);
+
+    /* TODO: Have a clearer definition of what a "not specified ReferenceType" is... */
+    pNid = &request->NodesToBrowse[service_browse_decode_bs__p_bvi - 1].ReferenceTypeId;
+
+    if (!(pNid->IdentifierType == SOPC_IdentifierType_Numeric && pNid->Data.Numeric == 0))
     {
-        pBwseDesc = &request->NodesToBrowse[service_browse_decode_bs__p_bvi - 1];
-        *service_browse_decode_bs__p_NodeId = &pBwseDesc->NodeId;
-        /* Invalid direction is tested by the B, so it's is not a reason to unset p_isvalid */
-        util_BrowseDirection__C_to_B(pBwseDesc->BrowseDirection, service_browse_decode_bs__p_dir);
-
-        /* TODO: Have a clearer definition of what a "not specified ReferenceType" is... */
-        pNid = &pBwseDesc->ReferenceTypeId;
-        if (!(pNid->IdentifierType == SOPC_IdentifierType_Numeric && pNid->Data.Numeric == 0))
-        {
-            *service_browse_decode_bs__p_isreftype = true;
-            *service_browse_decode_bs__p_reftype = pNid;
-            *service_browse_decode_bs__p_inc_subtype = pBwseDesc->IncludeSubtypes;
-        }
-
-        *service_browse_decode_bs__p_isvalid = true;
+        *service_browse_decode_bs__p_isreftype = true;
+        *service_browse_decode_bs__p_reftype = pNid;
+        *service_browse_decode_bs__p_inc_subtype = pBwseDesc->IncludeSubtypes;
     }
 }
