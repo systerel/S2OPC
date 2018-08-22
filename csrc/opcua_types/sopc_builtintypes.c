@@ -4378,6 +4378,63 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
     }
 }
 
+static bool has_range_string(const SOPC_String* str, const SOPC_NumericRange* range)
+{
+    assert(range->n_dimensions == 1);
+
+    if (str->Length <= 0)
+    {
+        return false;
+    }
+
+    return range->dimensions[0].start < ((uint32_t) str->Length);
+}
+
+static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange* range)
+{
+    assert(range->n_dimensions == 1);
+
+    if (variant->ArrayType == SOPC_VariantArrayType_SingleValue)
+    {
+        // Dereferencing scalars is allowed for strings and bytestrings
+        if (variant->BuiltInTypeId == SOPC_String_Id)
+        {
+            return has_range_string(&variant->Value.String, range);
+        }
+        else if (variant->BuiltInTypeId == SOPC_ByteString_Id)
+        {
+            return has_range_string(&variant->Value.Bstring, range);
+        }
+    }
+
+    if (variant->ArrayType != SOPC_VariantArrayType_Array)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (variant->Value.Array.Length <= 0)
+    {
+        return false;
+    }
+
+    return range->dimensions[0].start < ((uint32_t) variant->Value.Array.Length);
+}
+
+SOPC_ReturnStatus SOPC_Variant_HasRange(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool* has_range)
+{
+    switch (range->n_dimensions)
+    {
+    case 0:
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    case 1:
+        *has_range = has_range_array(variant, range);
+        return SOPC_STATUS_OK;
+    default:
+        // Matrix will come later
+        return SOPC_STATUS_NOT_SUPPORTED;
+    }
+}
+
 // Common treatment for slicing both strings and bytestrings
 static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
                                                  const SOPC_String* src,

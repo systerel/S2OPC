@@ -534,6 +534,7 @@ void SOPC_Variant_Initialize(SOPC_Variant* variant);
 void SOPC_Variant_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src);
 SOPC_ReturnStatus SOPC_Variant_CopyAux(void* dest, const void* src);
+SOPC_ReturnStatus SOPC_Variant_HasRange(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool* has_range);
 SOPC_ReturnStatus SOPC_Variant_GetRange(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range);
 
 // Raw copy of structure content without new allocation: destination variant content will not be freed on clear
