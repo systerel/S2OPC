@@ -140,7 +140,7 @@ OPERATIONS
         wvi : t_WriteValue_i &
         wvi : cast_t_WriteValue[1..nb_WriteValue]
     THEN
-        wvPointer :: t_WriteValuePointer_i
+        wvPointer :(wvPointer : t_WriteValuePointer_i & wvPointer : t_WriteValuePointer)
     END
 
 END
