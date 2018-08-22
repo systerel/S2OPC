@@ -4656,3 +4656,125 @@ SOPC_ReturnStatus SOPC_Variant_GetRange(SOPC_Variant* dst, const SOPC_Variant* s
         return SOPC_STATUS_NOT_SUPPORTED;
     }
 }
+
+static SOPC_ReturnStatus set_range_string(SOPC_String* variant, const SOPC_String* src, const SOPC_NumericRange* range)
+{
+    assert(range->n_dimensions == 1);
+
+    uint32_t start = range->dimensions[0].start;
+    uint32_t end = range->dimensions[0].end;
+    assert(end >= start);
+
+    if (((uint32_t) src->Length) != (end - start + 1))
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    if (variant->Length <= 0 || ((uint32_t) variant->Length) <= start)
+    {
+        // Nothing to copy
+        return SOPC_STATUS_OK;
+    }
+
+    if (((uint32_t) variant->Length) <= end)
+    {
+        end = (uint32_t)(variant->Length - 1);
+    }
+
+    size_t range_len = (size_t)(end - start + 1);
+    memcpy(variant->Data + ((size_t) start), src->Data, range_len * sizeof(SOPC_Byte));
+
+    return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus set_range_array(SOPC_Variant* variant, const SOPC_Variant* src, const SOPC_NumericRange* range)
+{
+    assert(range->n_dimensions == 1);
+
+    if (variant->BuiltInTypeId != src->BuiltInTypeId)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    if (src->ArrayType == SOPC_VariantArrayType_SingleValue)
+    {
+        // Dereferencing scalars is allowed for strings and bytestrings
+        if (src->BuiltInTypeId == SOPC_String_Id)
+        {
+            return set_range_string(&variant->Value.String, &src->Value.String, range);
+        }
+        else if (src->BuiltInTypeId == SOPC_ByteString_Id)
+        {
+            return set_range_string(&variant->Value.Bstring, &src->Value.Bstring, range);
+        }
+    }
+
+    if (src->ArrayType != SOPC_VariantArrayType_Array)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    uint32_t start = range->dimensions[0].start;
+    uint32_t end = range->dimensions[0].end;
+    assert(end >= start);
+
+    if (((uint32_t) src->Value.Array.Length) != (end - start + 1))
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    if (variant->Value.Array.Length <= 0 || ((uint32_t) variant->Value.Array.Length) <= start)
+    {
+        // Nothing to copy
+        return SOPC_STATUS_OK;
+    }
+
+    if (((uint32_t) variant->Value.Array.Length) <= end)
+    {
+        end = (uint32_t)(variant->Value.Array.Length - 1);
+    }
+
+    SOPC_EncodeableObject_PfnCopy* copyFunction = GetBuiltInTypeCopyFunction(src->BuiltInTypeId);
+    SOPC_EncodeableObject_PfnClear* clearFunction = GetBuiltInTypeClearFunction(src->BuiltInTypeId);
+
+    if (copyFunction == NULL || clearFunction == NULL)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    const size_t type_size = size_of_builtin_type(src->BuiltInTypeId);
+
+    // Untyped pointer to the source array data at the correct offset
+    const uint8_t* src_i = *((const uint8_t* const*) &src->Value.Array.Content);
+    uint8_t* dst_i = *((uint8_t**) &variant->Value.Array.Content) + start * type_size;
+
+    for (uint32_t i = 0; i < (end - start + 1); ++i)
+    {
+        clearFunction(dst_i);
+        SOPC_ReturnStatus status = copyFunction(dst_i, src_i);
+
+        if (status != SOPC_STATUS_OK)
+        {
+            return status;
+        }
+
+        src_i += type_size;
+        dst_i += type_size;
+    }
+
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_Variant_SetRange(SOPC_Variant* variant, const SOPC_Variant* src, const SOPC_NumericRange* range)
+{
+    switch (range->n_dimensions)
+    {
+    case 0:
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    case 1:
+        return set_range_array(variant, src, range);
+    default:
+        // Matrix will come later
+        return SOPC_STATUS_NOT_SUPPORTED;
+    }
+}
