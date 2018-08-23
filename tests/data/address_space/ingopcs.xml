@@ -412,6 +412,36 @@
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
   </UAObject>
+  <UAObjectType NodeId="i=2013" BrowseName="ServerCapabilitiesType">
+    <DisplayName>ServerCapabilitiesType</DisplayName>
+    <Description>Describes the capabilities supported by the server.</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">i=2014</Reference>
+      <Reference ReferenceType="HasProperty">i=2016</Reference>
+      <Reference ReferenceType="HasProperty">i=2017</Reference>
+      <Reference ReferenceType="HasProperty">i=2732</Reference>
+      <Reference ReferenceType="HasProperty">i=2733</Reference>
+      <Reference ReferenceType="HasProperty">i=2734</Reference>
+      <Reference ReferenceType="HasProperty">i=3049</Reference>
+      <Reference ReferenceType="HasProperty">i=11549</Reference>
+      <Reference ReferenceType="HasProperty">i=11550</Reference>
+      <Reference ReferenceType="HasProperty">i=12910</Reference>
+      <Reference ReferenceType="HasComponent">i=11551</Reference>
+      <Reference ReferenceType="HasComponent">i=2019</Reference>
+      <Reference ReferenceType="HasComponent">i=2754</Reference>
+      <Reference ReferenceType="HasComponent">i=11562</Reference>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+    </References>
+  </UAObjectType>
+  <UAObject NodeId="i=2268" BrowseName="ServerCapabilities" ParentNodeId="i=2253">
+    <DisplayName>ServerCapabilities</DisplayName>
+    <Description>Describes capabilities supported by the server.</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">i=2271</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2013</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
+    </References>
+  </UAObject>
   <UAVariable NodeId="i=2271" BrowseName="LocaleIdArray" ParentNodeId="i=2268" DataType="i=295" ValueRank="1">
     <DisplayName>LocaleIdArray</DisplayName>
     <Description>A list of locales supported by the server.</Description>
@@ -433,6 +463,7 @@
       <Reference ReferenceType="HasProperty">i=2255</Reference>
       <Reference ReferenceType="HasComponent">i=2256</Reference>
       <Reference ReferenceType="HasProperty">i=2267</Reference>
+      <Reference ReferenceType="HasComponent">i=2268</Reference>
       <Reference ReferenceType="HasComponent">i=2274</Reference>
       <Reference ReferenceType="HasProperty">i=2994</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
