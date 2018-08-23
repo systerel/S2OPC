@@ -100,12 +100,9 @@ void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_r
         {
             /* Note: the following only copies the context of the Variant, not the entire Variant */
             SOPC_Variant_Move(&pDataValue->Value, msg_read_response_bs__val);
-            util_status_code__B_to_C(msg_read_response_bs__sc, &pDataValue->Status);
         }
-        else
-        {
-            util_status_code__B_to_C(constants__e_sc_bad_unexpected_error, &pDataValue->Status);
-        }
+
+        util_status_code__B_to_C(msg_read_response_bs__sc, &pDataValue->Status);
 
         if (msg_read_response_bs__aid == constants__e_aid_Value &&
             (constants__e_ttr_both == ttrRequested || constants__e_ttr_source == ttrRequested))
