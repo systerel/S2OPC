@@ -123,7 +123,7 @@ START_TEST(test_thread_mutex)
     ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Clear(&gmutex));
 
     // Degraded behavior
-    SOPC_StatusCode status = Mutex_Lock(NULL);
+    SOPC_ReturnStatus status = Mutex_Lock(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_Unlock(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
