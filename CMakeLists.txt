@@ -15,6 +15,8 @@ endif()
 # Python3 is mandatory for compilation
 find_package(PythonInterp 3 REQUIRED)
 
+find_package(Doxygen)
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/lib>)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/lib>)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/bin>)
@@ -739,3 +741,11 @@ target_link_libraries(check_libsub PRIVATE client_subscription ${INGOPCS_STATIC_
 s2opc_client_validation_test(check_libsub)
 
 endif(ENABLE_TESTING)
+
+if(DOXYGEN_FOUND)
+    add_custom_target(doc
+        COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_SOURCE_PREFIX=${CMAKE_SOURCE_DIR}/ ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/doxygen/ingopcs-toolkit.doxyfile
+        COMMENT "Generating API documentation"
+        VERBATIM
+    )
+endif()
