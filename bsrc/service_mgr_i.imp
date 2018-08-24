@@ -431,14 +431,17 @@ OPERATIONS
 
     StatusCode_service <-- treat_session_local_service_req (req_typ, req_msg, resp_msg) =
     VAR
-        l_bret
+        l_bret,
+        l_user
     IN
         CASE req_typ OF
             EITHER e_msg_attribute_read_req THEN
-                StatusCode_service <-- treat_read_request (req_msg, resp_msg)
+                l_user <-- get_local_user;
+                StatusCode_service <-- treat_read_request (l_user, req_msg, resp_msg)
             OR e_msg_attribute_write_req THEN
                 // Write request case
-                StatusCode_service <-- treat_write_request (req_msg);
+                l_user <-- get_local_user;
+                StatusCode_service <-- treat_write_request (l_user, req_msg);
                 /* TODO: the following may fail (malloc) */
                 write_WriteResponse_msg_out(resp_msg);
                 dealloc_write_request_responses
@@ -466,15 +469,18 @@ OPERATIONS
 
     StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
     VAR
-        l_bret
+        l_bret,
+        l_user
     IN
         async_resp_msg := FALSE;
         CASE req_typ OF
             EITHER e_msg_attribute_read_req THEN
-                StatusCode_service <-- treat_read_request (req_msg, resp_msg)
+                l_user <-- get_session_user_server(session);
+                StatusCode_service <-- treat_read_request (l_user, req_msg, resp_msg)
             OR e_msg_attribute_write_req THEN
                 // Write request case
-                StatusCode_service <-- treat_write_request (req_msg);
+                l_user <-- get_session_user_server(session);
+                StatusCode_service <-- treat_write_request (l_user, req_msg);
                 /* TODO: the following may fail (malloc) */
                 write_WriteResponse_msg_out(resp_msg);
                 dealloc_write_request_responses
