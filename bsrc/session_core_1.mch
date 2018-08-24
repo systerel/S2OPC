@@ -380,6 +380,13 @@ OPERATIONS
     END
     ;
 
+    p_user <-- get_local_user =
+    BEGIN
+        p_user :( p_user : t_user_i &
+                  p_user : t_user )
+    END
+    ;
+
     set_session_user_server (session, p_user) =
     PRE
         session : t_session_i &

@@ -180,6 +180,15 @@ OPERATIONS
     END
     ;
 
+    /* This operation does not require a call to deallocate.
+     * It fetches the pointer to the local user, which is a static const. */
+    p_user <-- get_local_user =
+    BEGIN
+        p_user :( p_user : t_user_i &
+                  p_user : t_user )
+    END
+    ;
+
     drop_user_server (p_session) =
     PRE
         p_session : t_session_i &

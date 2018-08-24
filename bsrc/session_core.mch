@@ -724,6 +724,13 @@ OPERATIONS
     END
     ;
 
+    p_user <-- get_local_user =
+    BEGIN
+        p_user :( p_user : t_user_i &
+                  p_user : t_user )
+    END
+    ;
+
     set_session_user_client (session, p_user_token) =
     PRE
         session      : t_session_i    &
@@ -743,6 +750,17 @@ OPERATIONS
     THEN
         p_user_token :(p_user_token : t_user_token_i &
                        p_user_token = a_user_client (session))
+    END
+    ;
+
+    p_user <-- get_session_user_server (session) =
+    PRE
+        session : t_session_i &
+        session : t_session   &
+        session : dom(a_user_server)
+    THEN
+        p_user :(p_user : t_user_i &
+                 p_user = a_user_server (session))
     END
     ;
 

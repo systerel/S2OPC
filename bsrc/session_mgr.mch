@@ -361,5 +361,22 @@ OPERATIONS
     THEN
         skip
     END
+    ;
+
+    p_user <-- get_session_user_server (session) =
+    PRE
+        session : t_session_i &
+        session : t_session
+    THEN
+        p_user :( p_user : t_user_i &
+                  p_user : t_user )
+    END
+    ;
+
+    p_user <-- get_local_user =
+    BEGIN
+        p_user :( p_user : t_user_i &
+                  p_user : t_user )
+    END
 
 END

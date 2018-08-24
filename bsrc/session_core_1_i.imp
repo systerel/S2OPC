@@ -53,6 +53,7 @@ PROMOTES
     allocate_valid_user,
     deallocate_user,
     drop_user_server,
+    get_local_user,
     set_session_user_server,
     set_session_user_client,
     get_session_user_server,

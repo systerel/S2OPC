@@ -72,6 +72,8 @@ PROMOTES
     client_close_sessions_on_final_connection_failure,
     client_close_session,
     server_evaluate_session_timeout,
+    get_session_user_server,
+    get_local_user,
 
     /* subscription_mgr */
     is_valid_subscription,
