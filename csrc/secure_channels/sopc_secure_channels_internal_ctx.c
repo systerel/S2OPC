@@ -33,6 +33,7 @@ SOPC_EventHandler* secureChannelsInputEventHandler = NULL;
 SOPC_EventHandler* secureChannelsInternalEventHandler = NULL;
 SOPC_EventHandler* secureChannelsSocketsEventHandler = NULL;
 SOPC_EventHandler* secureChannelsTimerEventHandler = NULL;
+SOPC_EventHandler* secureChannelsEventHandler = NULL;
 
 void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc setSocketsListener)
 {

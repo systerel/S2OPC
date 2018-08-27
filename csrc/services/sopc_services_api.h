@@ -34,32 +34,6 @@
 
 typedef enum SOPC_Services_Event
 {
-    /* SC to Services events */
-    SC_TO_SE_EP_SC_CONNECTED,       /* id = endpoint description config index,
-                                       params = endpoint connection config index pointer,
-                                       auxParams = (uint32_t) secure channel connection index
-                                    */
-    SC_TO_SE_EP_CLOSED,             /* id = endpoint description config index,
-                                       auxParams = SOPC_ReturnStatus
-                                     */
-    SC_TO_SE_SC_CONNECTED,          /* id = secure channel connection index,
-                                       auxParams = (uint32_t) secure channel configuration index
-                                    */
-    SC_TO_SE_SC_CONNECTION_TIMEOUT, /* id = endpoint connection config index
-                                     */
-    SC_TO_SE_SC_DISCONNECTED,       /* id = secure channel connection index
-                                     */
-    SC_TO_SE_SC_SERVICE_RCV_MSG,    /* id = secure channel connection index,
-                                       params = (SOPC_Buffer*) OPC UA message payload buffer,
-                                       auxParam = (uint32_t) request Id context (server side only, 0 if client)
-                                    */
-    SC_TO_SE_SND_FAILURE,           /* id = secure channel connection index,
-                                       params = (uint32_t*) requestId,
-                                       auxParam = SOPC_StatusCode
-                                     */
-    SC_TO_SE_REQUEST_TIMEOUT,       /* id = secure channel connection index,
-                                       auxParam = (uint32_t) request handle */
-
     /* Services to services events */
     SE_TO_SE_SC_ALL_DISCONNECTED,       // special event sent by services mgr itself (no parameters)
     SE_TO_SE_ACTIVATE_ORPHANED_SESSION, /* Client side only:
@@ -130,7 +104,7 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* 
 /**
  *  \brief Initializes the services and application event dispatcher threads
  */
-void SOPC_Services_Initialize(void);
+void SOPC_Services_Initialize(SOPC_SetListenerFunc setSecureChannelsListener);
 
 /**
  *  \brief Notify the toolkit configuration is complete to initialize the services B model

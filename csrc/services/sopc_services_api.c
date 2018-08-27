@@ -23,8 +23,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sopc_internal_app_dispatcher.h"
 #include "sopc_enums.h"
+#include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
 #include "sopc_mutexes.h"
 #include "sopc_secure_channels_api.h"
@@ -41,6 +41,7 @@
 #include "util_b2c.h"
 
 static SOPC_Looper* servicesLooper = NULL;
+static SOPC_EventHandler* secureChannelsEventHandler = NULL;
 static SOPC_EventHandler* servicesEventHandler = NULL;
 
 // Structure used to close all connections in a synchronous way
@@ -69,20 +70,19 @@ static void SOPC_Internal_AllClientSecureChannelsDisconnected(void)
     Mutex_Unlock(&closeAllConnectionsSync.mutex);
 }
 
-static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t id, void* params, uintptr_t auxParam)
+static void onSecureChannelEvent(SOPC_EventHandler* handler,
+                                 int32_t event,
+                                 uint32_t id,
+                                 void* params,
+                                 uintptr_t auxParam)
 {
-    SOPC_Services_Event event = (SOPC_Services_Event) scEvent;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Endpoint_Config* epConfig = NULL;
-    constants__t_StatusCode_i sCode = constants__e_sc_ok;
-    SOPC_EncodeableType* encType = NULL;
-    bool bres = false;
-    void* msg = NULL;
-    switch (event)
+    (void) handler;
+    SOPC_SecureChannels_OutputEvent scEvent = (SOPC_SecureChannels_OutputEvent) event;
+
+    switch (scEvent)
     {
-    /* SC to Services events */
-    case SC_TO_SE_EP_SC_CONNECTED:
-        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_EP_SC_CONNECTED epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32
+    case EP_CONNECTED:
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_EP_SC_CONNECTED epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32
                                " scIdx=%" PRIuPTR,
                                id, params == NULL ? 0 : *(uint32_t*) params, auxParam);
 
@@ -95,6 +95,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         assert(channel_config_idx <= constants__t_channel_config_idx_i_max);
         assert(auxParam <= constants__t_channel_i_max);
 
+        bool bres = false;
         io_dispatch_mgr__server_channel_connected_event(id, channel_config_idx, (uint32_t) auxParam, &bres);
         if (bres == false)
         {
@@ -105,17 +106,17 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         }
 
         break;
-    case SC_TO_SE_EP_CLOSED:
-        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_EP_CLOSED epCfgIdx=%" PRIu32 " returnStatus=%" PRIdPTR, id,
-                               auxParam);
+    case EP_CLOSED:
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_EP_CLOSED epCfgIdx=%" PRIu32 " returnStatus=%" PRIdPTR, id, auxParam);
         // id == endpoint configuration index
         // params = NULL
         // auxParam == status
         // => B model entry point to add
-        status = SOPC_App_EnqueueComEvent(SE_CLOSED_ENDPOINT, id, NULL, auxParam);
+        SOPC_ReturnStatus status = SOPC_App_EnqueueComEvent(SE_CLOSED_ENDPOINT, id, NULL, auxParam);
+        assert(status == SOPC_STATUS_OK);
         break;
-    case SC_TO_SE_SC_CONNECTED:
-        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_CONNECTED scIdx=%" PRIu32 " scCfgIdx=%" PRIuPTR, id, auxParam);
+    case SC_CONNECTED:
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_SC_CONNECTED scIdx=%" PRIu32 " scCfgIdx=%" PRIuPTR, id, auxParam);
         // id == connection Id
         // auxParam == secure channel configuration index
         // => B model entry point to add
@@ -123,22 +124,67 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         assert(auxParam <= constants__t_channel_config_idx_i_max);
         io_dispatch_mgr__client_channel_connected_event((uint32_t) auxParam, id);
         break;
-    case SC_TO_SE_SC_CONNECTION_TIMEOUT:
-        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_CONNECTION_TIMEOUT scCfgIdx=%" PRIu32, id);
+    case SC_CONNECTION_TIMEOUT:
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_SC_CONNECTION_TIMEOUT scCfgIdx=%" PRIu32, id);
 
         // id == secure channel configuration index
         // => B model entry point to add
         assert(id <= constants_bs__t_channel_config_idx_i_max);
         io_dispatch_mgr__client_secure_channel_timeout(id);
         break;
-    case SC_TO_SE_SC_DISCONNECTED:
-        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_DISCONNECTED scIdx=%" PRIu32, id);
+    case SC_DISCONNECTED:
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_SC_DISCONNECTED scIdx=%" PRIu32, id);
         // id == connection Id ==> TMP: secure channel config idx
         // auxParam = status
         // => B model entry point to add
         // secure_channel_lost call !
         io_dispatch_mgr__secure_channel_lost(id);
         break;
+    case SC_SERVICE_RCV_MSG:
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_SC_SERVICE_RCV_MSG scIdx=%" PRIu32 " reqId=%" PRIuPTR, id, auxParam);
+
+        // id ==  connection Id
+        // params = message content (byte buffer)
+        // auxParam == context (request id)
+        assert(NULL != params);
+        io_dispatch_mgr__receive_msg_buffer(id, (constants__t_byte_buffer_i) params,
+                                            (constants__t_request_context_i) auxParam);
+        // params is freed by services manager
+        break;
+    case SC_SND_FAILURE:
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_SND_FAILURE scIdx=%" PRIu32 " reqId=%" PRIu32 " statusCode=%" PRIXPTR,
+                               id, params == NULL ? 0 : *(uint32_t*) params, auxParam);
+
+        if (NULL != params)
+        {
+            SOPC_StatusCode status;
+            util_status_code__C_to_B((SOPC_StatusCode) auxParam, &status);
+            io_dispatch_mgr__snd_msg_failure(id, (constants__t_request_context_i) * (uint32_t*) params, status);
+            free(params);
+        } // else: without request Id, it cannot be treated
+        break;
+    case SC_REQUEST_TIMEOUT:
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_REQUEST_TIMEOUT scIdx=%" PRIu32 " reqHandle=%" PRIuPTR, id, auxParam);
+
+        /* id = secure channel connection index,
+           auxParam = request handle */
+        assert(id <= constants__t_channel_i_max && auxParam <= SOPC_MAX_PENDING_REQUESTS);
+        io_dispatch_mgr__client_request_timeout(id, (uint32_t) auxParam);
+        break;
+    }
+}
+
+static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t id, void* params, uintptr_t auxParam)
+{
+    SOPC_Services_Event event = (SOPC_Services_Event) scEvent;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Endpoint_Config* epConfig = NULL;
+    constants__t_StatusCode_i sCode = constants__e_sc_ok;
+    SOPC_EncodeableType* encType = NULL;
+    bool bres = false;
+    void* msg = NULL;
+    switch (event)
+    {
     case SE_TO_SE_SC_ALL_DISCONNECTED:
         SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_SC_ALL_DISCONNECTED");
         // Call directly toolkit configuration callback
@@ -249,40 +295,6 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
             SOPC_Logger_TraceError(
                 "ServicesMgr: TIMER_SE_PUBLISH_CYCLE_TIMEOUT subscription=%" PRIu32 " treatment failed", id);
         }
-        break;
-    case SC_TO_SE_SC_SERVICE_RCV_MSG:
-        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SC_SERVICE_RCV_MSG scIdx=%" PRIu32 " reqId=%" PRIuPTR, id,
-                               auxParam);
-
-        // id ==  connection Id
-        // params = message content (byte buffer)
-        // auxParam == context (request id)
-        assert(NULL != params);
-        io_dispatch_mgr__receive_msg_buffer(id, (constants__t_byte_buffer_i) params,
-                                            (constants__t_request_context_i) auxParam);
-        // params is freed by services manager
-        break;
-
-    case SC_TO_SE_SND_FAILURE:
-        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_SND_FAILURE scIdx=%" PRIu32 " reqId=%" PRIu32
-                               " statusCode=%" PRIXPTR,
-                               id, params == NULL ? 0 : *(uint32_t*) params, auxParam);
-
-        if (NULL != params)
-        {
-            util_status_code__C_to_B((SOPC_StatusCode) auxParam, &sCode);
-            io_dispatch_mgr__snd_msg_failure(id, (constants__t_request_context_i) * (uint32_t*) params, sCode);
-            free(params);
-        } // else: without request Id, it cannot be treated
-        break;
-    case SC_TO_SE_REQUEST_TIMEOUT:
-        SOPC_Logger_TraceDebug("ServicesMgr: SC_TO_SE_REQUEST_TIMEOUT scIdx=%" PRIu32 " reqHandle=%" PRIuPTR, id,
-                               auxParam);
-
-        /* id = secure channel connection index,
-           auxParam = request handle */
-        assert(id <= constants__t_channel_i_max && auxParam <= SOPC_MAX_PENDING_REQUESTS);
-        io_dispatch_mgr__client_request_timeout(id, (uint32_t) auxParam);
         break;
 
     /* App to Services events */
@@ -459,7 +471,7 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* 
     SOPC_EventHandler_Post(servicesEventHandler, (int32_t) seEvent, id, params, auxParam);
 }
 
-void SOPC_Services_Initialize()
+void SOPC_Services_Initialize(SOPC_SetListenerFunc setSecureChannelsListener)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
@@ -469,12 +481,17 @@ void SOPC_Services_Initialize()
     servicesEventHandler = SOPC_EventHandler_Create(servicesLooper, onServiceEvent);
     assert(servicesEventHandler != NULL);
 
+    secureChannelsEventHandler = SOPC_EventHandler_Create(servicesLooper, onSecureChannelEvent);
+    assert(secureChannelsEventHandler != NULL);
+
     // Init async close management flag
     status = Mutex_Initialization(&closeAllConnectionsSync.mutex);
     assert(status == SOPC_STATUS_OK);
 
     status = Condition_Init(&closeAllConnectionsSync.cond);
     assert(status == SOPC_STATUS_OK);
+
+    setSecureChannelsListener(secureChannelsEventHandler);
 }
 
 void SOPC_Services_ToolkitConfigured()

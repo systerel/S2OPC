@@ -48,6 +48,27 @@ typedef enum
                           request (client) */
 } SOPC_SecureChannels_InputEvent;
 
+typedef enum
+{
+    EP_CONNECTED,          /* id = endpoint description config index,
+                              params = endpoint connection config index pointer,
+                              auxParams = (uint32_t) secure channel connection index */
+    EP_CLOSED,             /* id = endpoint description config index,
+                                 auxParams = SOPC_ReturnStatus */
+    SC_CONNECTED,          /* id = secure channel connection index,
+                                 auxParams = (uint32_t) secure channel configuration index */
+    SC_CONNECTION_TIMEOUT, /* id = endpoint connection config index */
+    SC_DISCONNECTED,       /* id = secure channel connection index */
+    SC_SERVICE_RCV_MSG,    /* id = secure channel connection index,
+                                 params = (SOPC_Buffer*) OPC UA message payload buffer,
+                                 auxParam = (uint32_t) request Id context (server side only, 0 if client) */
+    SC_SND_FAILURE,        /* id = secure channel connection index,
+                              params = (uint32_t*) requestId,
+                              auxParam = SOPC_StatusCode */
+    SC_REQUEST_TIMEOUT,    /* id = secure channel connection index,
+                              auxParam = (uint32_t) request handle */
+} SOPC_SecureChannels_OutputEvent;
+
 /* Secure channel external event enqueue function
  * IMPORTANT NOTE: internal events use will cause an assertion error */
 void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
@@ -56,6 +77,8 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
                                       uintptr_t auxParam);
 
 void SOPC_SecureChannels_Initialize(SOPC_SetListenerFunc setSocketsListener);
+
+void SOPC_SecureChannels_SetEventHandler(SOPC_EventHandler* handler);
 
 void SOPC_SecureChannels_Clear(void);
 

@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "sopc_atomic.h"
 #include "sopc_chunks_mgr.h"
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_secure_connection_state_mgr.h"
@@ -190,6 +191,11 @@ void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_Internal
 void SOPC_SecureChannels_Initialize(SOPC_SetListenerFunc setSocketsListener)
 {
     SOPC_SecureChannelsInternalContext_Initialize(setSocketsListener);
+}
+
+void SOPC_SecureChannels_SetEventHandler(SOPC_EventHandler* handler)
+{
+    SOPC_Atomic_Ptr_Set((void**) &secureChannelsEventHandler, handler);
 }
 
 void SOPC_SecureChannels_Clear()

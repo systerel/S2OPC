@@ -31,10 +31,7 @@
 #include "sopc_secure_channels_api_internal.h"
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_sockets_api.h"
-#include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
-
-#include "sopc_services_api.h"
 
 static bool SOPC_SecureListenerStateMgr_OpeningListener(uint32_t endpointConfigIdx)
 {
@@ -265,7 +262,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
             SOPC_SecureListenerStateMgr_CloseListener(eltId);
         }
         // Notify Services layer that EP_OPEN failed
-        SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED, eltId, NULL, SOPC_STATUS_CLOSED);
+        SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CLOSED, eltId, NULL, SOPC_STATUS_CLOSED);
         break;
     }
     default:
@@ -327,7 +324,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
             }
         }
         // Notify Services layer that EP_OPEN failed
-        SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED, eltId, NULL, status);
+        SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CLOSED, eltId, NULL, status);
         break;
     default:
         // Already filtered by secure channels API module

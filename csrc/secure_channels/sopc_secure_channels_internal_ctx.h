@@ -209,6 +209,7 @@ extern SOPC_Looper* secureChannelsLooper;
 extern SOPC_EventHandler* secureChannelsInputEventHandler;
 extern SOPC_EventHandler* secureChannelsInternalEventHandler;
 extern SOPC_EventHandler* secureChannelsTimerEventHandler;
+extern SOPC_EventHandler* secureChannelsEventHandler;
 
 /** @brief Initialize the array of secure listeners/connections */
 void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc setSocketsListener);
