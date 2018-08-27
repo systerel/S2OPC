@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "event_helpers.h"
 #include "event_recorder.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
@@ -50,13 +51,6 @@
 int main(int argc, char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    // Sleep timeout in milliseconds
-    const uint32_t sleepTimeout = 500;
-    // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 10000;
-    // Counter to stop waiting responses after 5 seconds
-    uint32_t loopCpt = 0;
 
     SOPC_SecureChannel_Config scConfig;
     uint32_t scConfigIdx = 0;
@@ -289,31 +283,9 @@ int main(int argc, char* argv[])
 
         SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, scConfigIdx, NULL, 0);
         printf(">>Stub_Client: Establishing connection to server...\n");
-    }
 
-    while ((SOPC_STATUS_OK == status || SOPC_STATUS_WOULD_BLOCK == status) && serviceEvent == NULL &&
-           loopCpt * sleepTimeout <= loopTimeout)
-    {
-        status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents->events, (void**) &serviceEvent);
-        if (SOPC_STATUS_OK != status)
-        {
-            loopCpt++;
-            SOPC_Sleep(sleepTimeout);
-        }
-    }
+        WaitEvent(servicesEvents->events, (void**) &serviceEvent);
 
-    if (SOPC_STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
-    }
-    else if (SOPC_STATUS_OK == status && serviceEvent == NULL)
-    {
-        status = SOPC_STATUS_NOK;
-    }
-    loopCpt = 0;
-
-    if (SOPC_STATUS_OK == status)
-    {
         if (serviceEvent->event == SC_CONNECTED && serviceEvent->auxParam == scConfigIdx)
         {
             scConnectionId = serviceEvent->eltId;
@@ -372,31 +344,9 @@ int main(int argc, char* argv[])
         SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConnectionId, (void*) buffer, 0);
 
         printf(">>Stub_Client: Calling GetEndpoint service...\n");
-    }
 
-    while ((SOPC_STATUS_OK == status || SOPC_STATUS_WOULD_BLOCK == status) && serviceEvent == NULL &&
-           loopCpt * sleepTimeout <= loopTimeout)
-    {
-        status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents->events, (void**) &serviceEvent);
-        if (SOPC_STATUS_OK != status)
-        {
-            loopCpt++;
-            SOPC_Sleep(sleepTimeout);
-        }
-    }
+        WaitEvent(servicesEvents->events, (void**) &serviceEvent);
 
-    if (SOPC_STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
-    }
-    else if (SOPC_STATUS_OK == status && serviceEvent == NULL)
-    {
-        status = SOPC_STATUS_NOK;
-    }
-    loopCpt = 0;
-
-    if (SOPC_STATUS_OK == status)
-    {
         if (serviceEvent->event == SC_SERVICE_RCV_MSG)
         {
             if (serviceEvent->eltId == scConnectionId && serviceEvent->params != NULL && serviceEvent->auxParam == 0)
@@ -443,31 +393,9 @@ int main(int argc, char* argv[])
     {
         SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, scConnectionId, NULL, 0);
         printf(">>Stub_Client: Closing secure connection\n");
-    }
 
-    while ((SOPC_STATUS_OK == status || SOPC_STATUS_WOULD_BLOCK == status) && serviceEvent == NULL &&
-           loopCpt * sleepTimeout <= loopTimeout)
-    {
-        status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents->events, (void**) &serviceEvent);
-        if (SOPC_STATUS_OK != status)
-        {
-            loopCpt++;
-            SOPC_Sleep(sleepTimeout);
-        }
-    }
+        WaitEvent(servicesEvents->events, (void**) &serviceEvent);
 
-    if (SOPC_STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
-    }
-    else if (SOPC_STATUS_OK == status && serviceEvent == NULL)
-    {
-        status = SOPC_STATUS_NOK;
-    }
-    loopCpt = 0;
-
-    if (SOPC_STATUS_OK == status)
-    {
         if (serviceEvent->event == SC_DISCONNECTED && serviceEvent->eltId == scConnectionId)
         {
             printf(">>Stub_Client: secure connection closed => OK \n");

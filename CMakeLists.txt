@@ -540,6 +540,7 @@ file(GLOB_RECURSE SECURE_CHANNELS_SRC
 
 file(GLOB_RECURSE SECURE_CHANNELS_CLIENT_TEST
      "csrc/sockets/*.c"
+     "tests/secure_channels/event_helpers.c"
      "tests/secure_channels/event_recorder.c"
      "tests/secure_channels/test_secure_channels_client.c"
      "tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
@@ -547,6 +548,7 @@ file(GLOB_RECURSE SECURE_CHANNELS_CLIENT_TEST
 
 file(GLOB_RECURSE SECURE_CHANNELS_SERVER_TEST
      "csrc/sockets/*.c"
+     "tests/secure_channels/event_helpers.c"
      "tests/secure_channels/event_recorder.c"
      "tests/secure_channels/test_secure_channels_server.c"
      "tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
