@@ -258,6 +258,7 @@ void session_core_bs__allocate_valid_user(
     }
 
     SOPC_UserAuthentication_Manager* pAuthen = epConfig->authenManager;
+    SOPC_UserAuthorization_Manager* pAuthor = epConfig->authorManager;
     SOPC_ExtensionObject* pUserIdentity = session_core_bs__p_user_token;
 
     /* The NULL identity is also the anonymous identity */
@@ -289,7 +290,7 @@ void session_core_bs__allocate_valid_user(
     {
         if (*session_core_bs__p_valid_user)
         {
-            *session_core_bs__p_user = SOPC_User_Create(session_core_bs__p_user_token);
+            *session_core_bs__p_user = SOPC_User_Create(session_core_bs__p_user_token, pAuthor);
             if (NULL != session_core_bs__p_user)
             {
                 *session_core_bs__p_alloc_failed = false;

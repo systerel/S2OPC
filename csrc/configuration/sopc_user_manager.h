@@ -38,15 +38,17 @@
 
 #include "sopc_builtintypes.h"
 
-/** Logged in user structure */
+typedef struct SOPC_UserAuthentication_Manager SOPC_UserAuthentication_Manager;
+typedef struct SOPC_UserAuthorization_Manager SOPC_UserAuthorization_Manager;
+
 typedef struct SOPC_User
 {
     bool anonymous;
     SOPC_String username;
-} SOPC_User;
 
-typedef struct SOPC_UserAuthentication_Manager SOPC_UserAuthentication_Manager;
-typedef struct SOPC_UserAuthorization_Manager SOPC_UserAuthorization_Manager;
+    /** A borrowed pointer to the authorization manager associated with the current endpoint. */
+    SOPC_UserAuthorization_Manager* pAuthor;
+} SOPC_User;
 
 typedef void (*SOPC_UserAuthentication_Free_Func)(SOPC_UserAuthentication_Manager* pAuthen);
 typedef SOPC_ReturnStatus (*SOPC_UserAuthentication_ValidateUserIdentity_Func)(SOPC_UserAuthentication_Manager* pAuthen,
@@ -173,16 +175,16 @@ void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAut
  */
 void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAuthor);
 
-/** \brief User creation */
-SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity);
-
-/** \brief User deletion */
-void SOPC_User_Free(SOPC_User** ppUser);
-
 /** \brief A helper implementation that always authentication positively a user. */
 SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_UserAlwaysValid(void);
 
 /** \brief A helper implementation that always authorize an operation. */
 SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_OperationAlwaysValid(void);
+
+/** \brief User creation, \p pAuthor may be NULL. */
+SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity, SOPC_UserAuthorization_Manager* pAuthor);
+
+/** \brief User deletion */
+void SOPC_User_Free(SOPC_User** ppUser);
 
 #endif /* SOPC_USER_MANAGER_H_ */

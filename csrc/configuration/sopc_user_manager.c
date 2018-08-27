@@ -75,52 +75,6 @@ void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAutho
     *ppAuthor = NULL;
 }
 
-SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity)
-{
-    assert(NULL != pUserIdentity);
-    assert(SOPC_ExtObjBodyEncoding_Object == pUserIdentity->Encoding);
-    assert(&OpcUa_AnonymousIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType ||
-           &OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType);
-
-    SOPC_User* pUser = (SOPC_User*) malloc(sizeof(SOPC_User));
-    if (NULL == pUser)
-    {
-        return NULL;
-    }
-
-    if (&OpcUa_AnonymousIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType)
-    {
-        pUser->anonymous = true;
-        SOPC_String_Initialize(&pUser->username);
-    }
-    else if (&OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType)
-    {
-        pUser->anonymous = false;
-        OpcUa_UserNameIdentityToken* tok = (OpcUa_UserNameIdentityToken*) (pUserIdentity->Body.Object.Value);
-        SOPC_ReturnStatus status = SOPC_String_Copy(&pUser->username, &tok->UserName);
-        if (SOPC_STATUS_OK != status)
-        {
-            free(pUser);
-            pUser = NULL;
-        }
-    }
-
-    return pUser;
-}
-
-void SOPC_User_Free(SOPC_User** ppUser)
-{
-    if (NULL == ppUser || NULL == *ppUser)
-    {
-        return;
-    }
-
-    SOPC_User* pUser = *ppUser;
-    SOPC_String_Clear(&pUser->username);
-    free(pUser);
-    *ppUser = NULL;
-}
-
 /** \brief A helper implementation of the validate UserIdentity callback, which always returns OK. */
 static SOPC_ReturnStatus AlwayseValidate(SOPC_UserAuthentication_Manager* pAuthen,
                                          const SOPC_ExtensionObject* pUserIdentity,
@@ -187,4 +141,58 @@ SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_OperationAl
 
     pAuthor->pFunctions = &AlwaysAuthorizeFunctions;
     return pAuthor;
+}
+
+static SOPC_UserAuthorization_Manager local_author = {.pFunctions = &AlwaysAuthorizeFunctions};
+static const SOPC_User local_user = {.local = true, .pAuthor = &local_author};
+
+SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity, SOPC_UserAuthorization_Manager* pAuthor)
+{
+    assert(NULL != pUserIdentity);
+    assert(SOPC_ExtObjBodyEncoding_Object == pUserIdentity->Encoding);
+    assert(&OpcUa_AnonymousIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType ||
+           &OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType);
+
+    SOPC_User* pUser = (SOPC_User*) calloc(1, sizeof(SOPC_User));
+    if (NULL == pUser)
+    {
+        return NULL;
+    }
+
+    if (&OpcUa_AnonymousIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType)
+    {
+        pUser->anonymous = true;
+        SOPC_String_Initialize(&pUser->username);
+    }
+    else if (&OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType)
+    {
+        pUser->anonymous = false;
+        OpcUa_UserNameIdentityToken* tok = (OpcUa_UserNameIdentityToken*) (pUserIdentity->Body.Object.Value);
+        SOPC_ReturnStatus status = SOPC_String_Copy(&pUser->username, &tok->UserName);
+        if (SOPC_STATUS_OK != status)
+        {
+            free(pUser);
+            pUser = NULL;
+        }
+    }
+
+    if (NULL != pUser)
+    {
+        pUser->pAuthor = pAuthor;
+    }
+
+    return pUser;
+}
+
+void SOPC_User_Free(SOPC_User** ppUser)
+{
+    if (NULL == ppUser || NULL == *ppUser)
+    {
+        return;
+    }
+
+    SOPC_User* pUser = *ppUser;
+    SOPC_String_Clear(&pUser->username);
+    free(pUser);
+    *ppUser = NULL;
 }
