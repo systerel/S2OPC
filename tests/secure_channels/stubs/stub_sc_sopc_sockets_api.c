@@ -18,10 +18,15 @@
  */
 
 #include "stub_sc_sopc_sockets_api.h"
-#include "sopc_services_api.h"
 
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "event_helpers.h"
+#include "hexlify.h"
+#include "sopc_buffer.h"
 
 SOPC_AsyncQueue* socketsInputEvents = NULL;
 SOPC_EventHandler* socketsEventHandler = NULL;
@@ -55,4 +60,128 @@ void SOPC_Sockets_Clear()
 void SOPC_Sockets_SetEventHandler(SOPC_EventHandler* handler)
 {
     socketsEventHandler = handler;
+}
+
+SOPC_Event* Check_Socket_Event_Received(SOPC_Sockets_InputEvent event, uint32_t eltId, uintptr_t auxParam)
+{
+    SOPC_Event* socketEvent = NULL;
+    WaitEvent(socketsInputEvents, (void**) &socketEvent);
+
+    if (CheckEvent("Sockets", socketEvent, (int32_t) event, eltId, auxParam))
+    {
+        return socketEvent;
+    }
+    else
+    {
+        free(socketEvent);
+        return NULL;
+    }
+}
+
+static SOPC_ReturnStatus check_expected_sent_message_helper(const char* hexExpMsg,
+                                                            const SOPC_Buffer* buffer,
+                                                            bool ignoreBytes,
+                                                            uint16_t start,
+                                                            uint16_t length)
+{
+    char hexOutput[5000];
+    int res = 0;
+
+    if (ignoreBytes != false)
+    {
+        assert((start + length) <= buffer->length);
+        // Set bytes to 0
+        memset(buffer->data + start, 0, (size_t) length);
+    }
+
+    res = hexlify(buffer->data, hexOutput, buffer->length);
+
+    if ((uint32_t) res != buffer->length || strlen(hexExpMsg) != 2 * buffer->length)
+    {
+        printf("SC_Rcv_Buffer: ERROR invalid message length\n");
+        return SOPC_STATUS_NOK;
+    }
+
+    res = memcmp(hexOutput, hexExpMsg, strlen(hexExpMsg));
+    if (res != 0)
+    {
+        printf("SC_Rcv_Buffer: ERROR invalid message content\n");
+        printf("expected \n%s\n", hexExpMsg);
+        printf("provided \n%s\n", hexOutput);
+        return SOPC_STATUS_NOK;
+    }
+
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus Check_Expected_Sent_Message(uint32_t socketIdx,
+                                              const char* hexExpMsg,
+                                              bool ignoreBytes,
+                                              uint16_t start,
+                                              uint16_t length)
+{
+    // Retrieve socket event to write message
+    SOPC_Event* socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, socketIdx, 0);
+
+    if (socketEvent == NULL)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    SOPC_Buffer* buffer = (SOPC_Buffer*) socketEvent->params;
+
+    SOPC_ReturnStatus status;
+
+    if (buffer == NULL)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+    else
+    {
+        status = check_expected_sent_message_helper(hexExpMsg, buffer, ignoreBytes, start, length);
+    }
+
+    SOPC_Buffer_Delete(buffer);
+    free(socketEvent);
+    return status;
+}
+
+SOPC_ReturnStatus Simulate_Received_Message(uint32_t scIdx, char* hexInputMsg)
+{
+    assert(strlen(hexInputMsg) <= UINT32_MAX);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Buffer* buffer = SOPC_Buffer_Create((uint32_t) strlen(hexInputMsg) / 2);
+
+    int res = 0;
+
+    if (buffer != NULL)
+    {
+        status = SOPC_Buffer_SetDataLength(buffer, (uint32_t) strlen(hexInputMsg) / 2);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            res = unhexlify(hexInputMsg, buffer->data, buffer->length);
+
+            if ((uint32_t) res != buffer->length)
+            {
+                printf("SC_Rcv_Buffer: ERROR: unhexlify received message error\n");
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_EventHandler_Post(socketsEventHandler, SOCKET_RCV_BYTES, scIdx, (void*) buffer, 0);
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Buffer_Delete(buffer);
+    }
+    return status;
 }

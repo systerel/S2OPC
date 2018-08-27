@@ -540,12 +540,14 @@ file(GLOB_RECURSE SECURE_CHANNELS_SRC
 
 file(GLOB_RECURSE SECURE_CHANNELS_CLIENT_TEST
      "csrc/sockets/*.c"
+     "tests/secure_channels/event_recorder.c"
      "tests/secure_channels/test_secure_channels_client.c"
      "tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
      "tests/secure_channels/stubs/stub_sc_sopc_services_api.c")
 
 file(GLOB_RECURSE SECURE_CHANNELS_SERVER_TEST
      "csrc/sockets/*.c"
+     "tests/secure_channels/event_recorder.c"
      "tests/secure_channels/test_secure_channels_server.c"
      "tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
      "tests/secure_channels/stubs/stub_sc_sopc_services_api.c")
@@ -576,7 +578,10 @@ target_include_directories(test_secure_channels_server PRIVATE "tests/secure_cha
 file(GLOB_RECURSE SECURE_CHANNELS_BUFFER_TEST
      ${PLATFORM_SRCS}
      "csrc/helpers/*.c"
+     "tests/secure_channels/event_recorder.c"
      "tests/secure_channels/check_sc_rcv_buffer.c"
+     "tests/secure_channels/check_sc_rcv_helpers.c"
+     "tests/secure_channels/event_helpers.c"
      "tests/helpers/hexlify.c"
      "tests/secure_channels/stubs/*.c")
 
@@ -585,6 +590,7 @@ add_executable(check_sc_rcv_buffer ${SECURE_CHANNELS_SRC}
 target_link_libraries(check_sc_rcv_buffer PRIVATE ${CHECK_LIBRARIES} ${INGOPCS_STATIC_DEP_LIBS})
 
 target_include_directories(check_sc_rcv_buffer PRIVATE "tests/secure_channels/stubs"
+                                                       "tests/secure_channels"
                                                        "tests/helpers"
                                                        ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES}
@@ -596,7 +602,10 @@ s2opc_unit_test(check_sc_rcv_buffer)
 file(GLOB_RECURSE SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST
      ${PLATFORM_SRCS}
      "csrc/helpers/*.c"
+     "tests/secure_channels/event_recorder.c"
+     "tests/secure_channels/check_sc_rcv_helpers.c"
      "tests/secure_channels/check_sc_rcv_encrypted_buffer.c"
+     "tests/secure_channels/event_helpers.c"
      "tests/helpers/hexlify.c"
      "tests/secure_channels/stubs/*.c")
 
@@ -605,6 +614,7 @@ add_executable(check_sc_rcv_encrypted_buffer ${SECURE_CHANNELS_SRC}
 target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE ${CHECK_LIBRARIES} ${INGOPCS_STATIC_DEP_LIBS})
 
 target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "tests/secure_channels/stubs"
+                                                                 "tests/secure_channels"
                                                                  "tests/helpers"
                                                                  ${INGOPCS_PUBLIC_INCLUDES}
                                                                  ${INGOPCS_PRIVATE_INCLUDES}

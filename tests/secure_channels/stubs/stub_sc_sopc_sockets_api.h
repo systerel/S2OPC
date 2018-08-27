@@ -20,11 +20,21 @@
 #ifndef STUBS_SC_SOPC_SOCKETS_API_H_
 #define STUBS_SC_SOPC_SOCKETS_API_H_
 
+#include <stdbool.h>
+
 #include "sopc_async_queue.h"
 #include "sopc_sockets_api.h"
 
 // Async queue simulating the services dispatcher and containing SOPC_StubSC_ServicesEventParams elements
 extern SOPC_AsyncQueue* socketsInputEvents;
 extern SOPC_EventHandler* socketsEventHandler;
+
+SOPC_Event* Check_Socket_Event_Received(SOPC_Sockets_InputEvent event, uint32_t eltId, uintptr_t auxParam);
+SOPC_ReturnStatus Check_Expected_Sent_Message(uint32_t socketIdx,
+                                              const char* hexExpMsg, // bytes to ignore shall bet set to 00
+                                              bool ignoreBytes,
+                                              uint16_t start,
+                                              uint16_t length);
+SOPC_ReturnStatus Simulate_Received_Message(uint32_t scIdx, char* hexInputMsg);
 
 #endif /* STUBS_SC_SOPC_SOCKETS_API_H_ */

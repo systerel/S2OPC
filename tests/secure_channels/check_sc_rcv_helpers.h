@@ -17,25 +17,24 @@
  * under the License.
  */
 
-#ifndef STUBS_SC_SOPC_SERVICES_API_H_
-#define STUBS_SC_SOPC_SERVICES_API_H_
+#ifndef SOPC_CHECK_SC_RCV_HELPERS_H
+#define SOPC_CHECK_SC_RCV_HELPERS_H
 
-#include "sopc_async_queue.h"
-#include "sopc_services_api.h"
+#include "event_recorder.h"
+#include "sopc_builtintypes.h"
+#include "sopc_event_handler.h"
+#include "sopc_secure_channels_api.h"
+#include "sopc_sockets_api.h"
 
-void SOPC_Services_Initialize(void);
+extern SOPC_EventRecorder* servicesEvents;
 
-void SOPC_Services_Clear(void);
+void Check_SC_Init(void);
+void Check_SC_Clear(void);
+SOPC_Event* Check_Service_Event_Received(SOPC_SecureChannels_OutputEvent event, uint32_t eltId, uintptr_t auxParam);
+SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx,
+                                         uint32_t socketIdx,
+                                         uint32_t scConfigIdx,
+                                         uint32_t pendingRequestHandle,
+                                         SOPC_StatusCode errorStatus);
 
-typedef struct SOPC_StubSC_ServicesEventParams
-{
-    SOPC_Services_Event event;
-    uint32_t eltId;
-    void* params;
-    uintptr_t auxParam;
-} SOPC_StubSC_ServicesEventParams;
-
-// Async queue simulating the services dispatcher and containing SOPC_StubSC_ServicesEventParams elements
-extern SOPC_AsyncQueue* servicesEvents;
-
-#endif /* STUBS_SC_SOPC_SERVICES_API_H_ */
+#endif

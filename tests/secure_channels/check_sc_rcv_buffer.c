@@ -32,26 +32,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "check_sc_rcv_helpers.h"
 #include "hexlify.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
 #include "sopc_pki_stack.h"
 #include "sopc_secure_channels_api.h"
-#include "sopc_services_api.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
-#include "stub_sc_sopc_services_api.h"
 #include "stub_sc_sopc_sockets_api.h"
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
-
-// Sleep timeout in milliseconds
-static const uint32_t sleepTimeout = 10;
-// Loop timeout in milliseconds
-static const uint32_t loopTimeout = 1000;
 
 static const char* sEndpointUrl = "opc.tcp://localhost:8888/myEndPoint";
 
@@ -62,288 +56,15 @@ static SOPC_SecureChannel_Config scConfig;
 // Configuration SC idx provided on configuration (used also as socket / scIdx)
 uint32_t scConfigIdx = 0;
 
-static SOPC_Event* Check_Socket_Event_Received(SOPC_Sockets_InputEvent event, uint32_t eltId, uintptr_t auxParam)
+static SOPC_ReturnStatus Check_Client_Closed_SC_Helper(SOPC_StatusCode status)
 {
-    SOPC_Event* socketEvent = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    uint32_t loopCpt = 0;
-
-    while ((SOPC_STATUS_OK == status || SOPC_STATUS_WOULD_BLOCK == status) && socketEvent == NULL &&
-           loopCpt * sleepTimeout <= loopTimeout)
-    {
-        status = SOPC_AsyncQueue_NonBlockingDequeue(socketsInputEvents, (void**) &socketEvent);
-        if (SOPC_STATUS_OK != status)
-        {
-            loopCpt++;
-            SOPC_Sleep(sleepTimeout);
-        }
-    }
-
-    if (SOPC_STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
-    }
-    else if (SOPC_STATUS_OK == status && socketsInputEvents == NULL)
-    {
-        status = SOPC_STATUS_NOK;
-    }
-    loopCpt = 0;
-
-    if (SOPC_STATUS_OK == status)
-    {
-        if (socketEvent->event == (int32_t) event && socketEvent->auxParam == auxParam && socketEvent->eltId == eltId)
-        {
-            // OK
-        }
-        else
-        {
-            printf("SC_Rcv_Buffer: ERROR unexpected Sockets event received event=%d (expected %d), eltId=%" PRIu32
-                   " (expected "
-                   "%" PRIu32 "), auxParam=%" PRIuPTR " (expected %" PRIuPTR ")\n",
-                   socketEvent->event, event, socketEvent->eltId, eltId, socketEvent->auxParam, auxParam);
-            free(socketEvent);
-            socketEvent = NULL;
-        }
-    }
-    else
-    {
-        socketsInputEvents = NULL;
-    }
-    return socketEvent;
+    return Check_Client_Closed_SC(scConfigIdx, scConfigIdx, scConfigIdx, pendingRequestHandle, status);
 }
 
-static SOPC_StubSC_ServicesEventParams* Check_Service_Event_Received(SOPC_Services_Event event,
-                                                                     uint32_t eltId,
-                                                                     uintptr_t auxParam)
-{
-    SOPC_StubSC_ServicesEventParams* serviceEvent = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    uint32_t loopCpt = 0;
-
-    while ((SOPC_STATUS_OK == status || SOPC_STATUS_WOULD_BLOCK == status) && serviceEvent == NULL &&
-           loopCpt * sleepTimeout <= loopTimeout)
-    {
-        status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
-        if (SOPC_STATUS_OK != status)
-        {
-            loopCpt++;
-            SOPC_Sleep(sleepTimeout);
-        }
-    }
-
-    if (SOPC_STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
-    }
-    else if (SOPC_STATUS_OK == status && servicesEvents == NULL)
-    {
-        status = SOPC_STATUS_NOK;
-    }
-    loopCpt = 0;
-
-    if (SOPC_STATUS_OK == status)
-    {
-        if (serviceEvent->event == event && serviceEvent->auxParam == auxParam && serviceEvent->eltId == eltId)
-        {
-            // OK
-        }
-        else
-        {
-            printf("SC_Rcv_Buffer: ERROR unexpected Services event received event=%d (expected %d), eltId=%" PRIu32
-                   " (expected "
-                   "%" PRIu32 "), auxParam=%" PRIuPTR " (expected %" PRIuPTR ")\n",
-                   serviceEvent->event, event, serviceEvent->eltId, eltId, serviceEvent->auxParam, auxParam);
-            free(serviceEvent);
-            serviceEvent = NULL;
-        }
-    }
-    else
-    {
-        serviceEvent = NULL;
-    }
-    return serviceEvent;
-}
-
-static SOPC_ReturnStatus Check_Expected_Sent_Message(uint32_t socketIdx,
-                                                     const char* hexExpMsg, // bytes to ignore shall set to 00
-                                                     bool ignoreBytes,
-                                                     uint16_t start,
-                                                     uint16_t length)
-{
-    SOPC_Event* socketEvent = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Buffer* buffer = NULL;
-    char hexOutput[512];
-    int res = 0;
-
-    // Retrieve socket event to write message
-    socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, socketIdx, 0);
-
-    if (socketEvent != NULL)
-    {
-        buffer = (SOPC_Buffer*) socketEvent->params;
-
-        if (buffer != NULL)
-        {
-            if (ignoreBytes != false && (uint32_t)(start + length) < buffer->length)
-            {
-                // Set bytes to 0
-                memset(&buffer->data[start], 0, (size_t) length);
-            }
-
-            res = hexlify(buffer->data, hexOutput, buffer->length);
-
-            if ((uint32_t) res != buffer->length || strlen(hexExpMsg) != 2 * buffer->length)
-            {
-                printf("SC_Rcv_Buffer: ERROR invalid message length\n");
-                status = SOPC_STATUS_NOK;
-            }
-            else
-            {
-                res = memcmp(hexOutput, hexExpMsg, strlen(hexExpMsg));
-                if (res != 0)
-                {
-                    printf("SC_Rcv_Buffer: ERROR invalid message content\n");
-                    status = SOPC_STATUS_NOK;
-                }
-            }
-        }
-        SOPC_Buffer_Delete(buffer);
-        free(socketEvent);
-        socketEvent = NULL;
-    }
-    else
-    {
-        status = SOPC_STATUS_NOK;
-    }
-    return status;
-}
-
-static SOPC_ReturnStatus Simulate_Received_Message(uint32_t scIdx, char* hexInputMsg)
-{
-    assert(strlen(hexInputMsg) <= UINT32_MAX);
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Buffer* buffer = SOPC_Buffer_Create((uint32_t) strlen(hexInputMsg) / 2);
-
-    int res = 0;
-
-    if (buffer != NULL)
-    {
-        status = SOPC_Buffer_SetDataLength(buffer, (uint32_t) strlen(hexInputMsg) / 2);
-
-        if (SOPC_STATUS_OK == status)
-        {
-            res = unhexlify(hexInputMsg, buffer->data, buffer->length);
-
-            if ((uint32_t) res != buffer->length)
-            {
-                printf("SC_Rcv_Buffer: ERROR: unhexlify received message error\n");
-                status = SOPC_STATUS_NOK;
-            }
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_EventHandler_Post(socketsEventHandler, SOCKET_RCV_BYTES, scIdx, (void*) buffer, 0);
-        }
-    }
-    else
-    {
-        status = SOPC_STATUS_NOK;
-    }
-
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Buffer_Delete(buffer);
-    }
-    return status;
-}
-
-static SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx, uint32_t socketIdx, SOPC_StatusCode errorStatus)
-{
-    printf("SC_Rcv_Buffer: Checking client closed SC with status %X\n", errorStatus);
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Buffer* buffer = NULL;
-    SOPC_StubSC_ServicesEventParams* serviceEvent = NULL;
-    SOPC_Event* socketEvent = NULL;
-    int res = 0;
-    char hexOutput[512];
-
-    printf("               - CLO message requested to be sent\n");
-    socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
-    if (socketEvent != NULL && socketEvent->params != NULL)
-    {
-        buffer = (SOPC_Buffer*) socketEvent->params;
-    }
-    else
-    {
-        status = SOPC_STATUS_NOK;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        res = hexlify(buffer->data, hexOutput, buffer->length);
-        if ((uint32_t) res != buffer->length)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        SOPC_Buffer_Delete(buffer);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        // Check typ = CLO final = F
-        res = memcmp(hexOutput, "434c4f46", 8);
-        if (res != 0)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
-
-    free(socketEvent);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        printf("               - SOCKET requested to be closed\n");
-        socketEvent = Check_Socket_Event_Received(SOCKET_CLOSE, socketIdx, 0);
-
-        if (NULL == socketEvent)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-
-        free(socketEvent);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        printf("               - pending request indicated as in timeout to Services\n");
-        serviceEvent = Check_Service_Event_Received(SC_TO_SE_REQUEST_TIMEOUT, scIdx, pendingRequestHandle);
-        if (NULL == serviceEvent)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-
-        free(serviceEvent);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        printf("               - SC indicated as disconnected to Services\n");
-        serviceEvent = Check_Service_Event_Received(SC_TO_SE_SC_DISCONNECTED, scIdx, errorStatus);
-        if (NULL == serviceEvent)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-
-        free(serviceEvent);
-    }
-
-    return status;
-}
-
-void clearToolkit(void)
+static void clearToolkit(void)
 {
     SOPC_Toolkit_Clear();
+    Check_SC_Clear();
 }
 
 void establishSC(void)
@@ -351,7 +72,7 @@ void establishSC(void)
     printf("\nSTART UNIT TEST\n");
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_StubSC_ServicesEventParams* serviceEvent = NULL;
+    SOPC_Event* serviceEvent = NULL;
     SOPC_Event* socketEvent = NULL;
     int res = 0;
     SOPC_Buffer* buffer = NULL;
@@ -378,6 +99,8 @@ void establishSC(void)
         printf("SC_Rcv_Buffer Init: Toolkit initialized\n");
     }
     ck_assert(SOPC_STATUS_OK == status);
+
+    Check_SC_Init();
 
     scConfig.isClientSc = true;
     scConfig.msgSecurityMode = messageSecurityMode;
@@ -464,7 +187,7 @@ void establishSC(void)
     // Retrieve expected service event
     ck_assert(SOPC_STATUS_OK == status);
     printf("SC_Rcv_Buffer Init: Checking correct connection established event received by services\n");
-    serviceEvent = Check_Service_Event_Received(SC_TO_SE_SC_CONNECTED, scConfigIdx, scConfigIdx);
+    serviceEvent = Check_Service_Event_Received(SC_CONNECTED, scConfigIdx, scConfigIdx);
 
     ck_assert(NULL != serviceEvent);
     free(serviceEvent);
@@ -518,7 +241,7 @@ START_TEST(test_unexpected_hel_msg)
                                        "a2f2f6c6f63616c686f73743a383838382f6d79456e64506f696e74");
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadTcpMessageTypeInvalid);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTypeInvalid);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -533,7 +256,7 @@ START_TEST(test_unexpected_ack_msg)
     status = Simulate_Received_Message(scConfigIdx, "41434b461c00000000000000ffff0000ffff0000ffff000001000000");
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadTcpMessageTypeInvalid);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTypeInvalid);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -552,7 +275,7 @@ START_TEST(test_unexpected_opn_req_msg_replay)
         "000000000000000000000000000001000000ffffffffa0860100");
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadTcpSecureChannelUnknown); // invalid SC ID == 0
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpSecureChannelUnknown); // invalid SC ID == 0
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -573,7 +296,7 @@ START_TEST(test_unexpected_opn_req_msg)
     ck_assert(SOPC_STATUS_OK == status);
 
     // invalid message type (MSG type expected for given request Id)
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadSecurityChecksFailed);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadSecurityChecksFailed);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -592,7 +315,7 @@ START_TEST(test_unexpected_opn_resp_msg_replay)
         "0000000000a2daa7313fc1046a8ba1ed5700bad301a0860100ffffffff");
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadSecurityChecksFailed); // invalid SN / request Id
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadSecurityChecksFailed); // invalid SN / request Id
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -614,7 +337,7 @@ START_TEST(test_unexpected_opn_resp_msg)
     ck_assert(SOPC_STATUS_OK == status);
 
     // invalid message type (MSG type expected for given request Id)
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadSecurityChecksFailed);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadSecurityChecksFailed);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -629,7 +352,7 @@ START_TEST(test_invalid_msg_typ)
     status = Simulate_Received_Message(scConfigIdx, "4d494c461c000000a2daa7310123456789abcdef0123456789abcdef");
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadTcpMessageTypeInvalid);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTypeInvalid);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -645,7 +368,7 @@ START_TEST(test_unexpected_multi_chunks_final_value)
     status = Simulate_Received_Message(scConfigIdx, "4d5347431c000000a2daa7310123456789abcdef0123456789abcdef");
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadTcpMessageTypeInvalid);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTypeInvalid);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -660,7 +383,7 @@ START_TEST(test_unexpected_abort_chunk_final_value)
     status = Simulate_Received_Message(scConfigIdx, "4d5347411c000000a2daa7310123456789abcdef0123456789abcdef");
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadTcpMessageTypeInvalid);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTypeInvalid);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -675,7 +398,7 @@ START_TEST(test_invalid_final_value)
     status = Simulate_Received_Message(scConfigIdx, "4d53474d1c000000a2daa7310123456789abcdef0123456789abcdef");
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadTcpMessageTypeInvalid);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTypeInvalid);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -714,7 +437,7 @@ START_TEST(test_too_large_msg_size)
 
     SOPC_EventHandler_Post(socketsEventHandler, SOCKET_RCV_BYTES, scConfigIdx, (void*) buffer, 0);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadTcpMessageTooLarge);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTooLarge);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -729,7 +452,7 @@ START_TEST(test_invalid_sc_id)
     status = Simulate_Received_Message(scConfigIdx, "4d5347461c000000010000000123456789abcdef0123456789abcdef");
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadTcpSecureChannelUnknown);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpSecureChannelUnknown);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -744,7 +467,7 @@ START_TEST(test_invalid_sc_token_id)
     status = Simulate_Received_Message(scConfigIdx, "4d5347461c000000a2daa7310123456789abcdef0123456789abcdef");
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadSecureChannelTokenUnknown);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadSecureChannelTokenUnknown);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -759,7 +482,7 @@ START_TEST(test_invalid_sc_sequence_number)
     status = Simulate_Received_Message(scConfigIdx, "4d5347461c000000a2daa7313fc1046a89abcdef0123456789abcdef");
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadSecurityChecksFailed);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadSecurityChecksFailed);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -774,7 +497,7 @@ START_TEST(test_invalid_sc_request_id)
     status = Simulate_Received_Message(scConfigIdx, "4d5347461c000000a2daa7313fc1046a020000000000000089abcdef");
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC(scConfigIdx, scConfigIdx, OpcUa_BadSecurityChecksFailed);
+    status = Check_Client_Closed_SC_Helper(OpcUa_BadSecurityChecksFailed);
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
@@ -783,7 +506,7 @@ START_TEST(test_valid_sc_request_id)
 {
     char msg[57];
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_StubSC_ServicesEventParams* serviceEvent = NULL;
+    SOPC_Event* serviceEvent = NULL;
     SOPC_Buffer* buffer = NULL;
     int res = 0;
 
@@ -793,7 +516,7 @@ START_TEST(test_valid_sc_request_id)
     status = Simulate_Received_Message(scConfigIdx, "4d5347461c000000a2daa7313fc1046a020000000200000089abcdef");
     ck_assert(SOPC_STATUS_OK == status);
 
-    serviceEvent = Check_Service_Event_Received(SC_TO_SE_SC_SERVICE_RCV_MSG, scConfigIdx, 0);
+    serviceEvent = Check_Service_Event_Received(SC_SERVICE_RCV_MSG, scConfigIdx, 0);
     ck_assert(NULL != serviceEvent);
     ck_assert(NULL != serviceEvent->params);
     buffer = (SOPC_Buffer*) serviceEvent->params;

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include "sopc_services_api.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
@@ -117,7 +116,6 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
             SOPC_EventTimer_Initialize();
             SOPC_Sockets_Initialize();
             SOPC_SecureChannels_Initialize(SOPC_Sockets_SetEventHandler);
-            SOPC_Services_Initialize();
         }
 
         Mutex_Unlock(&tConfig.mut);
@@ -138,7 +136,6 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
             if (tConfig.epConfigIdxMax == 0 || tConfig.epConfigIdxMax > 0)
             {
                 tConfig.locked = true;
-                SOPC_Services_ToolkitConfigured();
                 SOPC_Logger_Initialize(tConfig.logDirPath, tConfig.logMaxBytes, tConfig.logMaxFiles);
                 SOPC_Logger_SetTraceLogLevel(tConfig.logLevel);
                 status = SOPC_STATUS_OK;
@@ -185,14 +182,9 @@ void SOPC_Toolkit_Clear()
 {
     if (tConfig.initDone != false)
     {
-        // Services are in charge to gracefully close all connections.
-        // It must be done before stopping the services
-        SOPC_Services_PreClear();
-
         SOPC_Sockets_Clear();
         SOPC_EventTimer_Clear();
         SOPC_SecureChannels_Clear();
-        SOPC_Services_Clear();
 
         Mutex_Lock(&tConfig.mut);
 

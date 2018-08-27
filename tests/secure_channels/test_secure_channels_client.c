@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "event_recorder.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
 #include "sopc_pki_stack.h"
@@ -33,7 +34,6 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
-#include "stub_sc_sopc_services_api.h"
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
@@ -60,7 +60,8 @@ int main(int argc, char* argv[])
 
     SOPC_SecureChannel_Config scConfig;
     uint32_t scConfigIdx = 0;
-    SOPC_StubSC_ServicesEventParams* serviceEvent = NULL;
+    SOPC_Event* serviceEvent = NULL;
+    SOPC_EventRecorder* servicesEvents = NULL;
     uint32_t scConnectionId = 0;
 
     SOPC_PKIProvider* pki = NULL;
@@ -256,6 +257,18 @@ int main(int argc, char* argv[])
         }
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        servicesEvents = SOPC_EventRecorder_Create();
+
+        status = (servicesEvents != NULL) ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_SecureChannels_SetEventHandler(servicesEvents->eventHandler);
+    }
+
     // Start connection to server
     if (SOPC_STATUS_OK == status)
     {
@@ -281,7 +294,7 @@ int main(int argc, char* argv[])
     while ((SOPC_STATUS_OK == status || SOPC_STATUS_WOULD_BLOCK == status) && serviceEvent == NULL &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
-        status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
+        status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents->events, (void**) &serviceEvent);
         if (SOPC_STATUS_OK != status)
         {
             loopCpt++;
@@ -301,7 +314,7 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        if (serviceEvent->event == SC_TO_SE_SC_CONNECTED && serviceEvent->auxParam == scConfigIdx)
+        if (serviceEvent->event == SC_CONNECTED && serviceEvent->auxParam == scConfigIdx)
         {
             scConnectionId = serviceEvent->eltId;
             printf(">>Stub_Client: Connection to server established\n");
@@ -364,7 +377,7 @@ int main(int argc, char* argv[])
     while ((SOPC_STATUS_OK == status || SOPC_STATUS_WOULD_BLOCK == status) && serviceEvent == NULL &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
-        status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
+        status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents->events, (void**) &serviceEvent);
         if (SOPC_STATUS_OK != status)
         {
             loopCpt++;
@@ -384,7 +397,7 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        if (serviceEvent->event == SC_TO_SE_SC_SERVICE_RCV_MSG)
+        if (serviceEvent->event == SC_SERVICE_RCV_MSG)
         {
             if (serviceEvent->eltId == scConnectionId && serviceEvent->params != NULL && serviceEvent->auxParam == 0)
             {
@@ -435,7 +448,7 @@ int main(int argc, char* argv[])
     while ((SOPC_STATUS_OK == status || SOPC_STATUS_WOULD_BLOCK == status) && serviceEvent == NULL &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
-        status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
+        status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents->events, (void**) &serviceEvent);
         if (SOPC_STATUS_OK != status)
         {
             loopCpt++;
@@ -455,7 +468,7 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        if (serviceEvent->event == SC_TO_SE_SC_DISCONNECTED && serviceEvent->eltId == scConnectionId)
+        if (serviceEvent->event == SC_DISCONNECTED && serviceEvent->eltId == scConnectionId)
         {
             printf(">>Stub_Client: secure connection closed => OK \n");
         }
@@ -481,6 +494,7 @@ int main(int argc, char* argv[])
     SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
     SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
+    SOPC_EventRecorder_Delete(servicesEvents);
 
     if (SOPC_STATUS_OK == status)
     {
