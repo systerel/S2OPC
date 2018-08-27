@@ -41,9 +41,22 @@
 typedef struct SOPC_UserAuthentication_Manager SOPC_UserAuthentication_Manager;
 typedef struct SOPC_UserAuthorization_Manager SOPC_UserAuthorization_Manager;
 
+/**
+ * \brief Logged in (successfully) user structure.
+ *
+ * The authorization manager associated with the endpoint on which the user is connection
+ * is embedded in the structure. It is only a reference and should not be deleted.
+ */
 typedef struct SOPC_User
 {
+    /**
+     * Set when this is a request from a local service.
+     * When \p local is true, the other members of the struct shall not be read.
+     */
+    bool local;
+    /** Set when this is an anonymous user. When set, the \p username shall not be read. */
     bool anonymous;
+    /** The username of the not local nor anonymous user. */
     SOPC_String username;
 
     /** A borrowed pointer to the authorization manager associated with the current endpoint. */
@@ -183,6 +196,9 @@ SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_OperationAl
 
 /** \brief User creation, \p pAuthor may be NULL. */
 SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity, SOPC_UserAuthorization_Manager* pAuthor);
+
+/** \brief Returns local user, which shall not be freed. */
+const SOPC_User* SOPC_User_Get_Local(void);
 
 /** \brief User deletion */
 void SOPC_User_Free(SOPC_User** ppUser);

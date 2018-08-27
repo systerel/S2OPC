@@ -184,6 +184,11 @@ SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity, SOPC_UserAuthor
     return pUser;
 }
 
+const SOPC_User* SOPC_User_Get_Local(void)
+{
+    return &local_user;
+}
+
 void SOPC_User_Free(SOPC_User** ppUser)
 {
     if (NULL == ppUser || NULL == *ppUser)
