@@ -96,27 +96,3 @@ OpcUa_ReadRequest* read_new_read_request(void)
 
     return pReadReq;
 }
-
-bool read_service_test(OpcUa_ReadRequest* pReadReq)
-{
-    bool bTest = false;
-    constants__t_StatusCode_i status;
-
-    /* Prepares the response message */
-    OpcUa_ReadResponse readResp;
-
-    /* Calls treat */
-    service_mgr__treat_read_request((constants__t_msg_i) pReadReq, (constants__t_msg_i) &readResp, &status);
-
-    /* Tests the response */
-    if (constants__e_sc_ok == status)
-    {
-        /* TODO: this does not check anymore the service status code (because it is not accessible yet) */
-        bTest = test_read_request_response(&readResp, SOPC_GoodGenericStatus, 1);
-    }
-
-    /* Don't forget to free your response */
-    free(readResp.Results);
-
-    return bTest;
-}

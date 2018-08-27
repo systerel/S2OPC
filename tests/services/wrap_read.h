@@ -25,6 +25,5 @@
 
 /* The lib */
 OpcUa_ReadRequest* read_new_read_request(void);
-bool read_service_test(OpcUa_ReadRequest* pReadReq);
 
 #endif /* WRAP_READ_H_ */
