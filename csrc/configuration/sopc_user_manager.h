@@ -41,6 +41,13 @@
 typedef struct SOPC_UserAuthentication_Manager SOPC_UserAuthentication_Manager;
 typedef struct SOPC_UserAuthorization_Manager SOPC_UserAuthorization_Manager;
 
+/** \brief The operation type to authorize, see /p SOPC_UserAuthorization_IsAuthorizedOperation */
+typedef enum
+{
+    SOPC_USER_AUTHORIZATION_OPERATION_READ,
+    SOPC_USER_AUTHORIZATION_OPERATION_WRITE
+} SOPC_UserAuthorization_OperationType;
+
 /**
  * \brief Logged in (successfully) user structure.
  *
@@ -72,7 +79,7 @@ typedef SOPC_ReturnStatus (*SOPC_UserAuthentication_ValidateUserIdentity_Func)(
 typedef void (*SOPC_UserAuthorization_Free_Func)(SOPC_UserAuthorization_Manager* authorizationManager);
 typedef SOPC_ReturnStatus (*SOPC_UserAuthorization_AuthorizeOperation_Func)(
     SOPC_UserAuthorization_Manager* authorizationManager,
-    const bool bWriteOperation,
+    SOPC_UserAuthorization_OperationType operationType,
     const SOPC_NodeId* pNid,
     const uint32_t attributeId,
     const SOPC_User* pUser,
@@ -117,7 +124,8 @@ typedef struct SOPC_UserAuthorization_Functions
      * \warning This callback should not block the thread that calls it, and shall return immediately.
      *
      * \param authorizationManager   The SOPC_UserAuthorization_Manager instance.
-     * \param bWriteOperation  Set to false for a read operation, or true for a write operation.
+     * \param operationType  Set to SOPC_USER_AUTHORIZATION_OPERATION_READ for a read operation,
+                             or SOPC_USER_AUTHORIZATION_OPERATION_WRITE for a write operation.
      * \param pNid      The operation reads/write this NodeId.
      * \param attributeId  The operation reads/write this attribute.
      * \param pUser     The connected SOPC_User which attempts the operation.
@@ -165,7 +173,8 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
  * \brief Authorize an operation with the chosen authorization manager.
  *
  * \param authorizationManager   The SOPC_UserAuthorization_Manager instance.
- * \param bWriteOperation  Set to false for a read operation, or true for a write operation.
+ * \param operationType  Set to SOPC_USER_AUTHORIZATION_OPERATION_READ for a read operation,
+                         or SOPC_USER_AUTHORIZATION_OPERATION_WRITE for a write operation.
  * \param pNid      The operation reads/write this NodeId.
  * \param attributeId  The operation reads/write this attribute.
  * \param pUser     The connected SOPC_User which attempts the operation.
@@ -175,7 +184,7 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
  * \return SOPC_STATUS_OK when \p pbUserAuthorized was set.
  */
 SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthorization_Manager* authorizationManager,
-                                                               const bool bWriteOperation,
+                                                               SOPC_UserAuthorization_OperationType operationType,
                                                                const SOPC_NodeId* pNid,
                                                                const uint32_t attributeId,
                                                                const SOPC_User* pUser,

@@ -38,7 +38,7 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
 }
 
 SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthorization_Manager* authorizationManager,
-                                                               const bool bWriteOperation,
+                                                               SOPC_UserAuthorization_OperationType operationType,
                                                                const SOPC_NodeId* pNid,
                                                                const uint32_t attributeId,
                                                                const SOPC_User* pUser,
@@ -48,7 +48,7 @@ SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthoriz
     assert(NULL != authorizationManager->pFunctions &&
            NULL != authorizationManager->pFunctions->pFuncAuthorizeOperation);
 
-    return (authorizationManager->pFunctions->pFuncAuthorizeOperation)(authorizationManager, bWriteOperation, pNid,
+    return (authorizationManager->pFunctions->pFuncAuthorizeOperation)(authorizationManager, operationType, pNid,
                                                                        attributeId, pUser, pbOperationAuthorized);
 }
 
@@ -93,14 +93,14 @@ static SOPC_ReturnStatus AlwayseValidate(SOPC_UserAuthentication_Manager* authen
 
 /** \brief A helper implementation of the authorize R/W operation callback, which always returns OK. */
 static SOPC_ReturnStatus AlwaysAuthorize(SOPC_UserAuthorization_Manager* authorizationManager,
-                                         const bool bWriteOperation,
+                                         SOPC_UserAuthorization_OperationType operationType,
                                          const SOPC_NodeId* pNid,
                                          const uint32_t attributeId,
                                          const SOPC_User* pUser,
                                          bool* pbOperationAuthorized)
 {
     (void) (authorizationManager);
-    (void) (bWriteOperation);
+    (void) (operationType);
     (void) (pNid);
     (void) (attributeId);
     (void) (pUser);
