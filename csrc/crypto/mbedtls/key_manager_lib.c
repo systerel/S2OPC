@@ -223,11 +223,9 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* buffe
     certif->len_der = 0;
 
     // Parsing
-    if (mbedtls_x509_crt_parse(crt, bufferDER, lenDER) == 0)
+    if (mbedtls_x509_crt_parse(crt, bufferDER, lenDER) == 0 && crt->raw.len <= UINT32_MAX)
     {
         certif->crt_der = certif->crt.raw.p;
-        if (certif->crt.raw.len > UINT32_MAX)
-            return SOPC_STATUS_NOK;
         certif->len_der = (uint32_t) certif->crt.raw.len;
         *ppCert = certif;
         return SOPC_STATUS_OK;
