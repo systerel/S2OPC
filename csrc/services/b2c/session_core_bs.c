@@ -257,8 +257,8 @@ void session_core_bs__allocate_valid_user(
         return;
     }
 
-    SOPC_UserAuthentication_Manager* pAuthen = epConfig->authenManager;
-    SOPC_UserAuthorization_Manager* pAuthor = epConfig->authorManager;
+    SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
+    SOPC_UserAuthorization_Manager* authorizationManager = epConfig->authorizationManager;
     SOPC_ExtensionObject* pUserIdentity = session_core_bs__p_user_token;
 
     /* The NULL identity is also the anonymous identity */
@@ -278,8 +278,8 @@ void session_core_bs__allocate_valid_user(
         pUserIdentity->Body.Object.Value = NULL;
     }
 
-    SOPC_ReturnStatus status =
-        SOPC_UserAuthentication_IsValidUserIdentity(pAuthen, pUserIdentity, session_core_bs__p_valid_user);
+    SOPC_ReturnStatus status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, pUserIdentity,
+                                                                           session_core_bs__p_valid_user);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -290,7 +290,7 @@ void session_core_bs__allocate_valid_user(
     {
         if (*session_core_bs__p_valid_user)
         {
-            *session_core_bs__p_user = SOPC_User_Create(session_core_bs__p_user_token, pAuthor);
+            *session_core_bs__p_user = SOPC_User_Create(session_core_bs__p_user_token, authorizationManager);
             if (NULL != session_core_bs__p_user)
             {
                 *session_core_bs__p_alloc_failed = false;

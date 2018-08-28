@@ -69,8 +69,8 @@ typedef struct SOPC_Endpoint_Config
     uint8_t nbSecuConfigs;
     SOPC_SecurityPolicy* secuConfigurations;
     OpcUa_ApplicationDescription serverDescription;
-    SOPC_UserAuthentication_Manager* authenManager;
-    SOPC_UserAuthorization_Manager* authorManager;
+    SOPC_UserAuthentication_Manager* authenticationManager;
+    SOPC_UserAuthorization_Manager* authorizationManager;
 } SOPC_Endpoint_Config;
 
 /* Client and Server communication events to be managed by applicative code*/

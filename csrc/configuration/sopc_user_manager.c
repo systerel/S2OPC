@@ -25,62 +25,65 @@
 #include "sopc_types.h"
 #include "sopc_user_manager.h"
 
-SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentication_Manager* pAuthen,
+SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentication_Manager* authenticationManager,
                                                               const SOPC_ExtensionObject* pUser,
                                                               bool* pbUserAuthentified)
 {
-    assert(NULL != pAuthen && NULL != pUser && NULL != pbUserAuthentified);
-    assert(NULL != pAuthen->pFunctions && NULL != pAuthen->pFunctions->pFuncValidateUserIdentity);
+    assert(NULL != authenticationManager && NULL != pUser && NULL != pbUserAuthentified);
+    assert(NULL != authenticationManager->pFunctions &&
+           NULL != authenticationManager->pFunctions->pFuncValidateUserIdentity);
 
-    return (pAuthen->pFunctions->pFuncValidateUserIdentity)(pAuthen, pUser, pbUserAuthentified);
+    return (authenticationManager->pFunctions->pFuncValidateUserIdentity)(authenticationManager, pUser,
+                                                                          pbUserAuthentified);
 }
 
-SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthorization_Manager* pAuthor,
+SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthorization_Manager* authorizationManager,
                                                                const bool bWriteOperation,
                                                                const SOPC_NodeId* pNid,
                                                                const uint32_t attributeId,
                                                                const SOPC_User* pUser,
                                                                bool* pbOperationAuthorized)
 {
-    assert(NULL != pAuthor && NULL != pNid && NULL != pUser && NULL != pbOperationAuthorized);
-    assert(NULL != pAuthor->pFunctions && NULL != pAuthor->pFunctions->pFuncAuthorizeOperation);
+    assert(NULL != authorizationManager && NULL != pNid && NULL != pUser && NULL != pbOperationAuthorized);
+    assert(NULL != authorizationManager->pFunctions &&
+           NULL != authorizationManager->pFunctions->pFuncAuthorizeOperation);
 
-    return (pAuthor->pFunctions->pFuncAuthorizeOperation)(pAuthor, bWriteOperation, pNid, attributeId, pUser,
-                                                          pbOperationAuthorized);
+    return (authorizationManager->pFunctions->pFuncAuthorizeOperation)(authorizationManager, bWriteOperation, pNid,
+                                                                       attributeId, pUser, pbOperationAuthorized);
 }
 
-void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAuthen)
+void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAuthenticationManager)
 {
-    if (NULL == ppAuthen || NULL == *ppAuthen)
+    if (NULL == ppAuthenticationManager || NULL == *ppAuthenticationManager)
     {
         return;
     }
 
-    SOPC_UserAuthentication_Manager* pAuthen = *ppAuthen;
-    assert(NULL != pAuthen->pFunctions && NULL != pAuthen->pFunctions->pFuncFree);
-    (pAuthen->pFunctions->pFuncFree)(pAuthen);
-    *ppAuthen = NULL;
+    SOPC_UserAuthentication_Manager* authenticationManager = *ppAuthenticationManager;
+    assert(NULL != authenticationManager->pFunctions && NULL != authenticationManager->pFunctions->pFuncFree);
+    (authenticationManager->pFunctions->pFuncFree)(authenticationManager);
+    *ppAuthenticationManager = NULL;
 }
 
-void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAuthor)
+void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAuthorizationManager)
 {
-    if (NULL == ppAuthor || NULL == *ppAuthor)
+    if (NULL == ppAuthorizationManager || NULL == *ppAuthorizationManager)
     {
         return;
     }
 
-    SOPC_UserAuthorization_Manager* pAuthor = *ppAuthor;
-    assert(NULL != pAuthor->pFunctions && NULL != pAuthor->pFunctions->pFuncFree);
-    (pAuthor->pFunctions->pFuncFree)(pAuthor);
-    *ppAuthor = NULL;
+    SOPC_UserAuthorization_Manager* authorizationManager = *ppAuthorizationManager;
+    assert(NULL != authorizationManager->pFunctions && NULL != authorizationManager->pFunctions->pFuncFree);
+    (authorizationManager->pFunctions->pFuncFree)(authorizationManager);
+    *ppAuthorizationManager = NULL;
 }
 
 /** \brief A helper implementation of the validate UserIdentity callback, which always returns OK. */
-static SOPC_ReturnStatus AlwayseValidate(SOPC_UserAuthentication_Manager* pAuthen,
+static SOPC_ReturnStatus AlwayseValidate(SOPC_UserAuthentication_Manager* authenticationManager,
                                          const SOPC_ExtensionObject* pUserIdentity,
                                          bool* pbUserAuthentified)
 {
-    (void) (pAuthen);
+    (void) (authenticationManager);
     (void) (pUserIdentity);
     assert(NULL != pbUserAuthentified);
 
@@ -89,14 +92,14 @@ static SOPC_ReturnStatus AlwayseValidate(SOPC_UserAuthentication_Manager* pAuthe
 }
 
 /** \brief A helper implementation of the authorize R/W operation callback, which always returns OK. */
-static SOPC_ReturnStatus AlwaysAuthorize(SOPC_UserAuthorization_Manager* pAuthor,
+static SOPC_ReturnStatus AlwaysAuthorize(SOPC_UserAuthorization_Manager* authorizationManager,
                                          const bool bWriteOperation,
                                          const SOPC_NodeId* pNid,
                                          const uint32_t attributeId,
                                          const SOPC_User* pUser,
                                          bool* pbOperationAuthorized)
 {
-    (void) (pAuthor);
+    (void) (authorizationManager);
     (void) (bWriteOperation);
     (void) (pNid);
     (void) (attributeId);
@@ -117,36 +120,36 @@ static const SOPC_UserAuthorization_Functions AlwaysAuthorizeFunctions = {
 
 SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_UserAlwaysValid(void)
 {
-    SOPC_UserAuthentication_Manager* pAuthen =
+    SOPC_UserAuthentication_Manager* authenticationManager =
         (SOPC_UserAuthentication_Manager*) calloc(1, sizeof(SOPC_UserAuthentication_Manager));
 
-    if (NULL == pAuthen)
+    if (NULL == authenticationManager)
     {
         return NULL;
     }
 
-    pAuthen->pFunctions = &AlwaysAuthenticateFunctions;
-    return pAuthen;
+    authenticationManager->pFunctions = &AlwaysAuthenticateFunctions;
+    return authenticationManager;
 }
 
 SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_OperationAlwaysValid(void)
 {
-    SOPC_UserAuthorization_Manager* pAuthor =
+    SOPC_UserAuthorization_Manager* authorizationManager =
         (SOPC_UserAuthorization_Manager*) calloc(1, sizeof(SOPC_UserAuthorization_Manager));
 
-    if (NULL == pAuthor)
+    if (NULL == authorizationManager)
     {
         return NULL;
     }
 
-    pAuthor->pFunctions = &AlwaysAuthorizeFunctions;
-    return pAuthor;
+    authorizationManager->pFunctions = &AlwaysAuthorizeFunctions;
+    return authorizationManager;
 }
 
-static SOPC_UserAuthorization_Manager local_author = {.pFunctions = &AlwaysAuthorizeFunctions};
-static const SOPC_User local_user = {.local = true, .pAuthor = &local_author};
+static SOPC_UserAuthorization_Manager local_authz = {.pFunctions = &AlwaysAuthorizeFunctions};
+static const SOPC_User local_user = {.local = true, .authorizationManager = &local_authz};
 
-SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity, SOPC_UserAuthorization_Manager* pAuthor)
+SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity, SOPC_UserAuthorization_Manager* authorizationManager)
 {
     assert(NULL != pUserIdentity);
     assert(SOPC_ExtObjBodyEncoding_Object == pUserIdentity->Encoding);
@@ -178,7 +181,7 @@ SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity, SOPC_UserAuthor
 
     if (NULL != pUser)
     {
-        pUser->pAuthor = pAuthor;
+        pUser->authorizationManager = authorizationManager;
     }
 
     return pUser;

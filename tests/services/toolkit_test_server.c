@@ -329,16 +329,16 @@ int main(int argc, char* argv[])
     epConfig.serverDescription.ApplicationType = OpcUa_ApplicationType_Server;
     SOPC_String_AttachFromCstring(&epConfig.serverDescription.ApplicationName.Text, "INGOPCS toolkit server example");
 
-    SOPC_UserAuthentication_Manager* pAuthen = NULL;
-    SOPC_UserAuthorization_Manager* pAuthor = NULL;
+    SOPC_UserAuthentication_Manager* authenticationManager = NULL;
+    SOPC_UserAuthorization_Manager* authorizationManager = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        pAuthen = SOPC_UserAuthentication_CreateManager_UserAlwaysValid();
-        pAuthor = SOPC_UserAuthorization_CreateManager_OperationAlwaysValid();
-        if (NULL == pAuthen || NULL == pAuthor)
+        authenticationManager = SOPC_UserAuthentication_CreateManager_UserAlwaysValid();
+        authorizationManager = SOPC_UserAuthorization_CreateManager_OperationAlwaysValid();
+        if (NULL == authenticationManager || NULL == authorizationManager)
         {
-            SOPC_UserAuthentication_FreeManager(&pAuthen);
-            SOPC_UserAuthorization_FreeManager(&pAuthor);
+            SOPC_UserAuthentication_FreeManager(&authenticationManager);
+            SOPC_UserAuthorization_FreeManager(&authorizationManager);
             status = SOPC_STATUS_OUT_OF_MEMORY;
             printf("<Test_Server_Toolkit: Failed to create the user manager\n");
         }
@@ -346,8 +346,8 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        epConfig.authenManager = pAuthen;
-        epConfig.authorManager = pAuthor;
+        epConfig.authenticationManager = authenticationManager;
+        epConfig.authorizationManager = authorizationManager;
     }
 
     // Init stack configuration
@@ -528,8 +528,8 @@ int main(int argc, char* argv[])
         SOPC_PKIProvider_Free(&pkiProvider);
     }
 
-    SOPC_UserAuthentication_FreeManager(&pAuthen);
-    SOPC_UserAuthorization_FreeManager(&pAuthor);
+    SOPC_UserAuthentication_FreeManager(&authenticationManager);
+    SOPC_UserAuthorization_FreeManager(&authorizationManager);
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }
