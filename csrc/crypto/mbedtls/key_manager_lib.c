@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -352,4 +353,144 @@ SOPC_ReturnStatus KeyManager_Certificate_GetPublicKey(const SOPC_Certificate* pC
     memcpy(&pKey->pk, &pCert->crt.pk, sizeof(mbedtls_pk_context));
 
     return SOPC_STATUS_OK;
+}
+
+static size_t ptr_offset(const void* p, const void* start)
+{
+    assert(p >= start);
+    return (size_t)(((const uint8_t*) p) - ((const uint8_t*) start));
+}
+
+static void* mem_search(const void* mem, size_t mem_len, const void* needle, size_t needle_len)
+{
+    if (mem_len == 0 || needle_len == 0)
+    {
+        return NULL;
+    }
+
+    void* start = memchr(mem, *((const uint8_t*) needle), mem_len);
+
+    if (start == NULL)
+    {
+        return NULL;
+    }
+
+    size_t offset = ptr_offset(start, mem);
+    assert(offset < mem_len);
+
+    if (mem_len - offset < needle_len)
+    {
+        return NULL;
+    }
+
+    if (memcmp(start, needle, needle_len) == 0)
+    {
+        return start;
+    }
+    else
+    {
+        // This is tail recursive, so we could turn this into a loop... I
+        // find the recursive version more readable (at the cost of a potential
+        // stack overflow).
+        return mem_search(((const uint8_t*) mem) + offset + 1, mem_len - offset - 1, needle, needle_len);
+    }
+}
+
+static bool check_application_uri_in_general_names(const void* data, size_t data_len, const char* application_uri)
+{
+    // Each GeneralName (sequence item) has a tag which is (0x80 | index) where
+    // index is the choice index (0x80 is the "context specific tag 0").
+    // We're interested in the uniformResourceIdentifier choice, which has index
+    // 6.
+    //
+    // The tag should be followed by a IA5String, which is one byte for the
+    // string length followed by the string data.
+
+    const void* uri_start = memchr(data, 0x86, data_len);
+
+    if (uri_start == NULL)
+    {
+        return false;
+    }
+
+    size_t remaining_len = data_len - ptr_offset(uri_start, data);
+
+    // tag + string length
+    if (remaining_len < 2)
+    {
+        return false;
+    }
+
+    uint8_t str_len = *(((const uint8_t*) uri_start) + 1);
+
+    // An URI is a scheme + some data, so at least 3 characters.
+    if ((str_len < 3) || (str_len > (remaining_len - 2)))
+    {
+        return false;
+    }
+
+    const void* str_data = (((const uint8_t*) uri_start) + 2);
+
+    return strncmp(application_uri, str_data, str_len) == 0;
+}
+
+bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* crt, const char* application_uri)
+{
+    assert(crt != NULL && application_uri != NULL);
+
+    // Number belows are taken from ASN1 and RFC5280 section 4.2.1.6
+    static const uint8_t ASN_SEQUENCE_TAG = 0x30;
+    // id-ce-subjectAltName
+    static const uint8_t ALT_NAMES_START[] = {0x03, 0x55, 0x1D, 0x11};
+
+    const void* alt_names_start =
+        mem_search(crt->crt.v3_ext.p, crt->crt.v3_ext.len, ALT_NAMES_START, sizeof(ALT_NAMES_START));
+
+    if (alt_names_start == NULL)
+    {
+        return false;
+    }
+
+    size_t remaining_len = crt->crt.v3_ext.len - ptr_offset(alt_names_start, crt->crt.v3_ext.p);
+
+    // We should have:
+    // - id-ce-subjectAltName: 4 bytes
+    // - "critical" flag: 1 byte
+    // - length of object: 1 byte
+    // - sequence tag for GeneralNames: 1 byte
+    // - length of GeneralNames sequence: 1 byte
+    // - sequence data...
+
+    if (remaining_len < 8)
+    {
+        // Probably not the start of subjectAltNames, or invalid encoding
+        return false;
+    }
+
+    uint8_t object_len = *((const uint8_t*) alt_names_start + 5);
+
+    if (object_len < 2 || object_len > (remaining_len - 6))
+    {
+        // Invalid object length
+        return false;
+    }
+
+    uint8_t sequence_tag = *((const uint8_t*) alt_names_start + 6);
+
+    if (sequence_tag != ASN_SEQUENCE_TAG)
+    {
+        return false;
+    }
+
+    uint8_t sequence_len = *((const uint8_t*) alt_names_start + 7);
+
+    if (sequence_len > (object_len - 2))
+    {
+        // Invalid sequence length
+        return false;
+    }
+
+    const void* sequence_data_start = ((const uint8_t*) alt_names_start) + 8;
+
+    return check_application_uri_in_general_names(sequence_data_start, remaining_len - 8, application_uri);
 }

@@ -251,6 +251,25 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
                                                             uint32_t lenDest);
 
 /**
+ * \brief Verify the application URI embedded in a certificate
+ * \param pCert           the certificate.
+ * \param applicationUri  the value that should be stored in the URI subject
+ *                        altName of the certificate.
+ * \return \c TRUE if the values match, \c FALSE else.
+ *
+ * MbedTLS has no way to extract anything else than the DNS altName from the
+ * certificate extensions (see https://github.com/ARMmbed/mbedtls/pull/731).
+ * We have for now a poor man's ASN.1 "parser" that tries to find it. It should
+ * not be considered as secure, as it can produce false positives (ie. extract
+ * the application URI from a field that is not the right one).
+ *
+ * This function does a strict, case sensitive comparison of the URIs and does
+ * not respect the URI comparison rules from RFC3986 (the URI scheme comparison
+ * for example is case sensitive).
+ */
+bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* cert, const char* applicationUri);
+
+/**
  * \brief Creates a serialized asymmetric key from a DER or PEM payload.
  *
  * \param data   the key data in DER or PEM format
