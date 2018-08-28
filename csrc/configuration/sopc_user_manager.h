@@ -81,7 +81,7 @@ typedef SOPC_ReturnStatus (*SOPC_UserAuthorization_AuthorizeOperation_Func)(
     SOPC_UserAuthorization_Manager* authorizationManager,
     SOPC_UserAuthorization_OperationType operationType,
     const SOPC_NodeId* pNid,
-    const uint32_t attributeId,
+    uint32_t attributeId,
     const SOPC_User* pUser,
     bool* pbOperationAuthorized);
 
@@ -188,7 +188,7 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
 SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthorization_Manager* authorizationManager,
                                                                SOPC_UserAuthorization_OperationType operationType,
                                                                const SOPC_NodeId* pNid,
-                                                               const uint32_t attributeId,
+                                                               uint32_t attributeId,
                                                                const SOPC_User* pUser,
                                                                bool* pbOperationAuthorized);
 /** \brief Deletes a SOPC_UserAuthentication_Manager using its pFuncFree. */

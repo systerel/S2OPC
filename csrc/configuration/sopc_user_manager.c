@@ -40,7 +40,7 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
 SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthorization_Manager* authorizationManager,
                                                                SOPC_UserAuthorization_OperationType operationType,
                                                                const SOPC_NodeId* pNid,
-                                                               const uint32_t attributeId,
+                                                               uint32_t attributeId,
                                                                const SOPC_User* pUser,
                                                                bool* pbOperationAuthorized)
 {
@@ -95,7 +95,7 @@ static SOPC_ReturnStatus AlwayseValidate(SOPC_UserAuthentication_Manager* authen
 static SOPC_ReturnStatus AlwaysAuthorize(SOPC_UserAuthorization_Manager* authorizationManager,
                                          SOPC_UserAuthorization_OperationType operationType,
                                          const SOPC_NodeId* pNid,
-                                         const uint32_t attributeId,
+                                         uint32_t attributeId,
                                          const SOPC_User* pUser,
                                          bool* pbOperationAuthorized)
 {
