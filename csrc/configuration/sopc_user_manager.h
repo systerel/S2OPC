@@ -19,16 +19,15 @@
 
 /** \file
  *
- * \brief Defines the user manager, the applicative interface used to authenticate user,
+ * \brief Defines the user manager, the applicative interface used to authenticate users,
  *        and authorize read/write operations in the address space.
  *
- * These structure are only used on the server side.
+ * These structures are only used on the server side.
  *
  * The developer shall follow these steps to use the user authentication and authorization:
  *  - create a static const instance of the _Functions structures,
- *  - define a free function, if needed, which free instance of private data,
- *  - define a creation function which mallocs a new _Manager structure, the private date, if needed
- *    and use the private _Function instance.
+ *  - define a free function, if needed, which frees private data of the instance,
+ *  - define a creation function which mallocs a new _Manager structure and its private data if needed.
  */
 
 #ifndef SOPC_USER_MANAGER_H_
@@ -51,8 +50,9 @@ typedef enum
 /**
  * \brief Logged in (successfully) user structure.
  *
- * The authorization manager associated with the endpoint on which the user is connection
- * is embedded in the structure. It is only a reference and should not be deleted.
+ * An authorization manager is embedded in the structure.
+ * It is the manager associated with the endpoint on which the user is connected.
+ * It is only a reference and should not be freed or cleared.
  */
 typedef struct SOPC_User
 {
@@ -98,11 +98,12 @@ typedef struct SOPC_UserAuthentication_Functions
      * \brief Called to authorize a user connection, when receiving an ActivateSession request.
      *
      * \warning This callback should not block the thread that calls it, and shall return immediately.
+     *          It also needs to be thread safe.
      *
-     * \param authenticationManager   The SOPC_UserAuthentication_Manager instance.
-     * \param pUser     The user identity token which was received in the ActivateSession request.
-     * \param pbUserAuthentified  A valid pointer to the uninitialized result of the operation.
-     *                            The callback shall set it to false when the connection is refused.
+     * \param authenticationManager  The SOPC_UserAuthentication_Manager instance.
+     * \param pUser                  The user identity token which was received in the ActivateSession request.
+     * \param pbUserAuthentified     A valid pointer to the uninitialized result of the operation.
+     *                               The callback shall set it to false when the connection is refused.
      *
      * \return SOPC_STATUS_OK when \p pbUserAuthentified was set.
      */
@@ -122,13 +123,14 @@ typedef struct SOPC_UserAuthorization_Functions
      * \brief Called to authorize a read or a write operation in the address space.
      *
      * \warning This callback should not block the thread that calls it, and shall return immediately.
+     *          It also needs to be thread safe.
      *
      * \param authorizationManager   The SOPC_UserAuthorization_Manager instance.
-     * \param operationType  Set to SOPC_USER_AUTHORIZATION_OPERATION_READ for a read operation,
-                             or SOPC_USER_AUTHORIZATION_OPERATION_WRITE for a write operation.
-     * \param pNid      The operation reads/write this NodeId.
-     * \param attributeId  The operation reads/write this attribute.
-     * \param pUser     The connected SOPC_User which attempts the operation.
+     * \param operationType          Set to SOPC_USER_AUTHORIZATION_OPERATION_READ for a read operation,
+                                     or SOPC_USER_AUTHORIZATION_OPERATION_WRITE for a write operation.
+     * \param pNid                   The operation reads/write this NodeId.
+     * \param attributeId            The operation reads/write this attribute.
+     * \param pUser                  The connected SOPC_User which attempts the operation.
      * \param pbOperationAuthorized  A valid pointer to the uninitialized result of the operation.
      *                               The callback shall set it to false when the operation is refused.
      *
@@ -142,7 +144,7 @@ struct SOPC_UserAuthentication_Manager
     /** It is recommended to have a pointer to a static const instance */
     const SOPC_UserAuthentication_Functions* pFunctions;
 
-    /** This field may be used to store additional and specific data. */
+    /** This field may be used to store instance specific data. */
     void* pData;
 };
 
@@ -151,17 +153,17 @@ struct SOPC_UserAuthorization_Manager
     /** It is recommended to have a pointer to a static const instance */
     const SOPC_UserAuthorization_Functions* pFunctions;
 
-    /** This field may be used to store additional and specific data. */
+    /** This field may be used to store instance specific data. */
     void* pData;
 };
 
 /**
  * \brief Authenticate a user with the chosen authentication manager.
  *
- * \param authenticationManager   The SOPC_UserAuthentication_Manager instance.
- * \param pUser     The user identity token which was received in the ActivateSession request.
- * \param pbUserAuthentified  A valid pointer to the uninitialized result of the operation.
- *                            The callback shall set it to false when the connection is refused.
+ * \param authenticationManager  The SOPC_UserAuthentication_Manager instance.
+ * \param pUser                  The user identity token which was received in the ActivateSession request.
+ * \param pbUserAuthentified     A valid pointer to the uninitialized result of the operation.
+ *                               The callback shall set it to false when the connection is refused.
  *
  * \return SOPC_STATUS_OK when \p pbUserAuthentified was set.
  */
@@ -173,11 +175,11 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
  * \brief Authorize an operation with the chosen authorization manager.
  *
  * \param authorizationManager   The SOPC_UserAuthorization_Manager instance.
- * \param operationType  Set to SOPC_USER_AUTHORIZATION_OPERATION_READ for a read operation,
-                         or SOPC_USER_AUTHORIZATION_OPERATION_WRITE for a write operation.
- * \param pNid      The operation reads/write this NodeId.
- * \param attributeId  The operation reads/write this attribute.
- * \param pUser     The connected SOPC_User which attempts the operation.
+ * \param operationType          Set to SOPC_USER_AUTHORIZATION_OPERATION_READ for a read operation,
+                                 or SOPC_USER_AUTHORIZATION_OPERATION_WRITE for a write operation.
+ * \param pNid                   The operation reads/write this NodeId.
+ * \param attributeId            The operation reads/write this attribute.
+ * \param pUser                  The connected SOPC_User which attempts the operation.
  * \param pbOperationAuthorized  A valid pointer to the uninitialized result of the operation.
  *                               The callback shall set it to false when the operation is refused.
  *
@@ -189,14 +191,10 @@ SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthoriz
                                                                const uint32_t attributeId,
                                                                const SOPC_User* pUser,
                                                                bool* pbOperationAuthorized);
-/**
- * \brief Deletes a SOPC_UserAuthentication_Manager using its pFuncFree.
- */
+/** \brief Deletes a SOPC_UserAuthentication_Manager using its pFuncFree. */
 void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAuthenticationManager);
 
-/**
- * \brief Deletes a SOPC_UserAuthorization_Manager using its pFuncFree.
- */
+/** \brief Deletes a SOPC_UserAuthorization_Manager using its pFuncFree. */
 void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAuthorizationManager);
 
 /** \brief A helper implementation that always authentication positively a user. */
