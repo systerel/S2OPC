@@ -252,10 +252,7 @@ void session_core_bs__allocate_valid_user(
     *session_core_bs__p_valid_user = false;
 
     SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
-    if (NULL == epConfig)
-    {
-        return;
-    }
+    assert(NULL != epConfig);
 
     SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
     SOPC_UserAuthorization_Manager* authorizationManager = epConfig->authorizationManager;
@@ -264,7 +261,7 @@ void session_core_bs__allocate_valid_user(
     /* The NULL identity is also the anonymous identity */
     if (NULL == session_core_bs__p_user_token)
     {
-        pUserIdentity = (SOPC_ExtensionObject*) calloc(1, sizeof(SOPC_ExtensionObject));
+        pUserIdentity = calloc(1, sizeof(SOPC_ExtensionObject));
         if (NULL == pUserIdentity)
         {
             return;
@@ -310,7 +307,6 @@ void session_core_bs__deallocate_user(const constants__t_user_i session_core_bs_
 {
     SOPC_User* pUser = session_core_bs__p_user;
     SOPC_User_Free(&pUser);
-    free(pUser);
 }
 
 void session_core_bs__get_local_user(constants__t_user_i* const session_core_bs__p_user)
@@ -324,7 +320,6 @@ void session_core_bs__drop_user_server(const constants__t_session_i session_core
 {
     SOPC_User* pUser = sessionDataArray[session_core_bs__p_session].user_server;
     SOPC_User_Free(&pUser);
-    free(pUser);
     sessionDataArray[session_core_bs__p_session].user_server = NULL;
 }
 

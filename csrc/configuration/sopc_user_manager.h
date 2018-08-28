@@ -74,7 +74,7 @@ typedef void (*SOPC_UserAuthentication_Free_Func)(SOPC_UserAuthentication_Manage
 typedef SOPC_ReturnStatus (*SOPC_UserAuthentication_ValidateUserIdentity_Func)(
     SOPC_UserAuthentication_Manager* authenticationManager,
     const SOPC_ExtensionObject* pUser,
-    bool* pbUserAuthentified);
+    bool* pbUserAuthenticated);
 
 typedef void (*SOPC_UserAuthorization_Free_Func)(SOPC_UserAuthorization_Manager* authorizationManager);
 typedef SOPC_ReturnStatus (*SOPC_UserAuthorization_AuthorizeOperation_Func)(
@@ -102,10 +102,10 @@ typedef struct SOPC_UserAuthentication_Functions
      *
      * \param authenticationManager  The SOPC_UserAuthentication_Manager instance.
      * \param pUser                  The user identity token which was received in the ActivateSession request.
-     * \param pbUserAuthentified     A valid pointer to the uninitialized result of the operation.
+     * \param pbUserAuthenticated    A valid pointer to the uninitialized result of the operation.
      *                               The callback shall set it to false when the connection is refused.
      *
-     * \return SOPC_STATUS_OK when \p pbUserAuthentified was set.
+     * \return SOPC_STATUS_OK when \p pbUserAuthenticated was set.
      */
     SOPC_UserAuthentication_ValidateUserIdentity_Func pFuncValidateUserIdentity;
 } SOPC_UserAuthentication_Functions;
@@ -162,14 +162,14 @@ struct SOPC_UserAuthorization_Manager
  *
  * \param authenticationManager  The SOPC_UserAuthentication_Manager instance.
  * \param pUser                  The user identity token which was received in the ActivateSession request.
- * \param pbUserAuthentified     A valid pointer to the uninitialized result of the operation.
+ * \param pbUserAuthenticated    A valid pointer to the uninitialized result of the operation.
  *                               The callback shall set it to false when the connection is refused.
  *
- * \return SOPC_STATUS_OK when \p pbUserAuthentified was set.
+ * \return SOPC_STATUS_OK when \p pbUserAuthenticated was set.
  */
 SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentication_Manager* authenticationManager,
                                                               const SOPC_ExtensionObject* pUser,
-                                                              bool* pbUserAuthentified);
+                                                              bool* pbUserAuthenticated);
 
 /**
  * \brief Authorize an operation with the chosen authorization manager.
@@ -198,10 +198,10 @@ void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAut
 void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAuthorizationManager);
 
 /** \brief A helper implementation that always authentication positively a user. */
-SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_UserAlwaysValid(void);
+SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_AllowAll(void);
 
 /** \brief A helper implementation that always authorize an operation. */
-SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_OperationAlwaysValid(void);
+SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_AllowAll(void);
 
 /** \brief User creation, \p authorizationManager may be NULL. */
 SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity, SOPC_UserAuthorization_Manager* authorizationManager);

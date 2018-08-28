@@ -27,14 +27,14 @@
 
 SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentication_Manager* authenticationManager,
                                                               const SOPC_ExtensionObject* pUser,
-                                                              bool* pbUserAuthentified)
+                                                              bool* pbUserAuthenticated)
 {
-    assert(NULL != authenticationManager && NULL != pUser && NULL != pbUserAuthentified);
+    assert(NULL != authenticationManager && NULL != pUser && NULL != pbUserAuthenticated);
     assert(NULL != authenticationManager->pFunctions &&
            NULL != authenticationManager->pFunctions->pFuncValidateUserIdentity);
 
     return (authenticationManager->pFunctions->pFuncValidateUserIdentity)(authenticationManager, pUser,
-                                                                          pbUserAuthentified);
+                                                                          pbUserAuthenticated);
 }
 
 SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthorization_Manager* authorizationManager,
@@ -61,7 +61,7 @@ void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAut
 
     SOPC_UserAuthentication_Manager* authenticationManager = *ppAuthenticationManager;
     assert(NULL != authenticationManager->pFunctions && NULL != authenticationManager->pFunctions->pFuncFree);
-    (authenticationManager->pFunctions->pFuncFree)(authenticationManager);
+    authenticationManager->pFunctions->pFuncFree(authenticationManager);
     *ppAuthenticationManager = NULL;
 }
 
@@ -74,30 +74,30 @@ void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAutho
 
     SOPC_UserAuthorization_Manager* authorizationManager = *ppAuthorizationManager;
     assert(NULL != authorizationManager->pFunctions && NULL != authorizationManager->pFunctions->pFuncFree);
-    (authorizationManager->pFunctions->pFuncFree)(authorizationManager);
+    authorizationManager->pFunctions->pFuncFree(authorizationManager);
     *ppAuthorizationManager = NULL;
 }
 
 /** \brief A helper implementation of the validate UserIdentity callback, which always returns OK. */
-static SOPC_ReturnStatus AlwayseValidate(SOPC_UserAuthentication_Manager* authenticationManager,
-                                         const SOPC_ExtensionObject* pUserIdentity,
-                                         bool* pbUserAuthentified)
+static SOPC_ReturnStatus AuthenticateAllowAll(SOPC_UserAuthentication_Manager* authenticationManager,
+                                              const SOPC_ExtensionObject* pUserIdentity,
+                                              bool* pbUserAuthenticated)
 {
     (void) (authenticationManager);
     (void) (pUserIdentity);
-    assert(NULL != pbUserAuthentified);
+    assert(NULL != pbUserAuthenticated);
 
-    *pbUserAuthentified = true;
+    *pbUserAuthenticated = true;
     return SOPC_STATUS_OK;
 }
 
 /** \brief A helper implementation of the authorize R/W operation callback, which always returns OK. */
-static SOPC_ReturnStatus AlwaysAuthorize(SOPC_UserAuthorization_Manager* authorizationManager,
-                                         SOPC_UserAuthorization_OperationType operationType,
-                                         const SOPC_NodeId* pNid,
-                                         uint32_t attributeId,
-                                         const SOPC_User* pUser,
-                                         bool* pbOperationAuthorized)
+static SOPC_ReturnStatus AuthorizeAllowAll(SOPC_UserAuthorization_Manager* authorizationManager,
+                                           SOPC_UserAuthorization_OperationType operationType,
+                                           const SOPC_NodeId* pNid,
+                                           uint32_t attributeId,
+                                           const SOPC_User* pUser,
+                                           bool* pbOperationAuthorized)
 {
     (void) (authorizationManager);
     (void) (operationType);
@@ -112,16 +112,15 @@ static SOPC_ReturnStatus AlwaysAuthorize(SOPC_UserAuthorization_Manager* authori
 
 static const SOPC_UserAuthentication_Functions AlwaysAuthenticateFunctions = {
     .pFuncFree = (SOPC_UserAuthentication_Free_Func) free,
-    .pFuncValidateUserIdentity = AlwayseValidate};
+    .pFuncValidateUserIdentity = AuthenticateAllowAll};
 
-static const SOPC_UserAuthorization_Functions AlwaysAuthorizeFunctions = {
+static const SOPC_UserAuthorization_Functions AuthorizeAllowAllFunctions = {
     .pFuncFree = (SOPC_UserAuthorization_Free_Func) free,
-    .pFuncAuthorizeOperation = AlwaysAuthorize};
+    .pFuncAuthorizeOperation = AuthorizeAllowAll};
 
-SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_UserAlwaysValid(void)
+SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_AllowAll(void)
 {
-    SOPC_UserAuthentication_Manager* authenticationManager =
-        (SOPC_UserAuthentication_Manager*) calloc(1, sizeof(SOPC_UserAuthentication_Manager));
+    SOPC_UserAuthentication_Manager* authenticationManager = calloc(1, sizeof(SOPC_UserAuthentication_Manager));
 
     if (NULL == authenticationManager)
     {
@@ -132,21 +131,20 @@ SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_UserAlway
     return authenticationManager;
 }
 
-SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_OperationAlwaysValid(void)
+SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_AllowAll(void)
 {
-    SOPC_UserAuthorization_Manager* authorizationManager =
-        (SOPC_UserAuthorization_Manager*) calloc(1, sizeof(SOPC_UserAuthorization_Manager));
+    SOPC_UserAuthorization_Manager* authorizationManager = calloc(1, sizeof(SOPC_UserAuthorization_Manager));
 
     if (NULL == authorizationManager)
     {
         return NULL;
     }
 
-    authorizationManager->pFunctions = &AlwaysAuthorizeFunctions;
+    authorizationManager->pFunctions = &AuthorizeAllowAllFunctions;
     return authorizationManager;
 }
 
-static SOPC_UserAuthorization_Manager local_authz = {.pFunctions = &AlwaysAuthorizeFunctions};
+static SOPC_UserAuthorization_Manager local_authz = {.pFunctions = &AuthorizeAllowAllFunctions};
 static const SOPC_User local_user = {.local = true, .authorizationManager = &local_authz};
 
 SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity, SOPC_UserAuthorization_Manager* authorizationManager)
@@ -156,7 +154,7 @@ SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity, SOPC_UserAuthor
     assert(&OpcUa_AnonymousIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType ||
            &OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType);
 
-    SOPC_User* pUser = (SOPC_User*) calloc(1, sizeof(SOPC_User));
+    SOPC_User* pUser = calloc(1, sizeof(SOPC_User));
     if (NULL == pUser)
     {
         return NULL;

@@ -333,8 +333,8 @@ int main(int argc, char* argv[])
     SOPC_UserAuthorization_Manager* authorizationManager = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        authenticationManager = SOPC_UserAuthentication_CreateManager_UserAlwaysValid();
-        authorizationManager = SOPC_UserAuthorization_CreateManager_OperationAlwaysValid();
+        authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
+        authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
         if (NULL == authenticationManager || NULL == authorizationManager)
         {
             SOPC_UserAuthentication_FreeManager(&authenticationManager);
