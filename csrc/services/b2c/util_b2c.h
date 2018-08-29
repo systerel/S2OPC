@@ -20,6 +20,7 @@
 #ifndef UTIL_B2C_H_
 #define UTIL_B2C_H_
 
+#include <assert.h>
 #include <stdbool.h>
 
 #include "address_space_impl.h"
@@ -27,6 +28,7 @@
 #include "opcua_statuscodes.h"
 #include "sopc_encodeable.h"
 #include "sopc_types.h"
+#include "sopc_user_manager.h"
 
 void util_message__get_encodeable_type(const constants__t_msg_type_i message__msg_type,
                                        SOPC_EncodeableType** reqEncType,
@@ -66,5 +68,8 @@ bool util_AttributeId__B_to_C(constants__t_AttributeId_i baid, uint32_t* pcaid);
 
 /* Returns true or false upon failure (invalid caid or invalid pbaid) */
 bool util_AttributeId__C_to_B(uint32_t caid, constants__t_AttributeId_i* pbaid);
+
+/* Raise exception upon failure (invalid B operation type or invalid pointer) */
+void util_operation_type__B_to_C(constants__t_operation_type_i boptype, SOPC_UserAuthorization_OperationType* pcoptype);
 
 #endif /* UTIL_B2C_H */

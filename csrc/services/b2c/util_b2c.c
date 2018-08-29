@@ -1228,3 +1228,20 @@ bool util_AttributeId__C_to_B(uint32_t caid, constants__t_AttributeId_i* pbaid)
 
     return status;
 }
+
+void util_operation_type__B_to_C(constants__t_operation_type_i boptype, SOPC_UserAuthorization_OperationType* pcoptype)
+{
+    assert(NULL != pcoptype);
+
+    switch (boptype)
+    {
+    case constants__e_operation_type_read:
+        *pcoptype = SOPC_USER_AUTHORIZATION_OPERATION_READ;
+        break;
+    case constants__e_operation_type_write:
+        *pcoptype = SOPC_USER_AUTHORIZATION_OPERATION_WRITE;
+        break;
+    default:
+        assert(false); /* Unexpected operation type */
+    }
+}
