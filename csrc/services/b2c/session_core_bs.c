@@ -254,25 +254,21 @@ void session_core_bs__allocate_valid_user(
     SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
     assert(NULL != epConfig);
 
+    static SOPC_ExtensionObject anonymousIdentityToken = {
+        .Encoding = SOPC_ExtObjBodyEncoding_Object,
+        .TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric,
+        .TypeId.NodeId.Data.Numeric = OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary,
+        .Body.Object.ObjType = &OpcUa_AnonymousIdentityToken_EncodeableType,
+        /* When there is no default policyId for the AnonymousIdentityToken, it is unnecessary to even malloc it */
+        .Body.Object.Value = NULL};
     SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
     SOPC_UserAuthorization_Manager* authorizationManager = epConfig->authorizationManager;
     SOPC_ExtensionObject* pUserIdentity = session_core_bs__p_user_token;
 
     /* The NULL identity is also the anonymous identity */
-    if (NULL == session_core_bs__p_user_token)
+    if (NULL == pUserIdentity)
     {
-        pUserIdentity = calloc(1, sizeof(SOPC_ExtensionObject));
-        if (NULL == pUserIdentity)
-        {
-            return;
-        }
-
-        pUserIdentity->Encoding = SOPC_ExtObjBodyEncoding_Object;
-        pUserIdentity->TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
-        pUserIdentity->TypeId.NodeId.Data.Numeric = OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary;
-        pUserIdentity->Body.Object.ObjType = &OpcUa_AnonymousIdentityToken_EncodeableType;
-        /* When there is no default policyId for the AnonymousIdentityToken, it is unnecessary to even malloc it */
-        pUserIdentity->Body.Object.Value = NULL;
+        pUserIdentity = &anonymousIdentityToken;
     }
 
     SOPC_ReturnStatus status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, pUserIdentity,
@@ -293,13 +289,6 @@ void session_core_bs__allocate_valid_user(
                 *session_core_bs__p_alloc_failed = false;
             }
         }
-    }
-
-    if (NULL == session_core_bs__p_user_token)
-    {
-        SOPC_ExtensionObject_Clear(pUserIdentity);
-        free(pUserIdentity);
-        pUserIdentity = NULL;
     }
 }
 
