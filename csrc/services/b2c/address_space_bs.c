@@ -41,46 +41,6 @@
 bool sopc_addressSpace_configured = false;
 SOPC_AddressSpace* address_space_bs__nodes = NULL;
 
-/* Helper, wraps and logs operation authorization */
-static bool authorize_and_log(SOPC_UserAuthorization_Manager* authorizationManager,
-                              SOPC_UserAuthorization_OperationType operationType,
-                              SOPC_NodeId* node_id,
-                              uint32_t attribute_id,
-                              const SOPC_User* user)
-{
-    bool user_authorized = false;
-    SOPC_ReturnStatus status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        authorizationManager, operationType, node_id, attribute_id, user, &user_authorized);
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError("SOPC_UserAuthorization_IsAuthorizedOperation failed with status %i\n", status);
-        user_authorized = false;
-    }
-    else if (!user_authorized)
-    {
-        char* s_node_id = SOPC_NodeId_ToCString(node_id);
-        const char* operation = NULL;
-        switch (operationType)
-        {
-        case SOPC_USER_AUTHORIZATION_OPERATION_READ:
-            operation = "read";
-            break;
-        case SOPC_USER_AUTHORIZATION_OPERATION_WRITE:
-            operation = "write";
-            break;
-        default:
-            operation = "unknown";
-            break;
-        }
-        SOPC_Logger_TraceWarning(
-            "SOPC_UserAuthorization_IsAuthorizedOperation did not authorize %s operation on value \"%s\"\n", operation,
-            s_node_id);
-        free(s_node_id);
-    }
-
-    return user_authorized;
-}
-
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -195,6 +155,7 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
                                                          constants__t_StatusCode_i* const address_space_bs__sc,
                                                          constants__t_Variant_i* const address_space_bs__variant)
 {
+    (void) (address_space_bs__p_user); /* User is already authorized for this operation */
     assert(NULL != address_space_bs__node);
     SOPC_AddressSpace_Item* item = address_space_bs__node;
     SOPC_Variant* value = NULL;
@@ -219,29 +180,12 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
         if (constants__e_ncl_Variable == address_space_bs__ncl ||
             constants__e_ncl_VariableType == address_space_bs__ncl)
         {
-            bool authorized =
-                authorize_and_log(SOPC_UserWithAuthorization_GetManager(address_space_bs__p_user),
-                                  SOPC_USER_AUTHORIZATION_OPERATION_READ, SOPC_AddressSpace_Item_Get_NodeId(item),
-                                  address_space_bs__aid, SOPC_UserWithAuthorization_GetUser(address_space_bs__p_user));
-            if (authorized)
-            {
-                *address_space_bs__variant =
-                    util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Item_Get_Value(item));
-            }
-            else
-            {
-                *address_space_bs__sc = constants__e_sc_bad_user_access_denied;
-                *address_space_bs__variant = util_variant__new_Variant_from_Indet();
-            }
+            value = util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Item_Get_Value(item));
         }
         else
         {
-            *address_space_bs__sc = constants__e_sc_bad_attribute_id_invalid;
-            *address_space_bs__variant = util_variant__new_Variant_from_Indet();
-            return;
+            value = util_variant__new_Variant_from_Indet();
         }
-
-        value = util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Item_Get_Value(item));
         break;
     case constants__e_aid_AccessLevel:
         value =
@@ -363,18 +307,8 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
                                  constants__t_StatusCode_i* const address_space_bs__serviceStatusCode,
                                  constants__t_Variant_i* const address_space_bs__prev_value)
 {
+    (void) (address_space_bs__p_user); /* User is already authorized for this operation */
     SOPC_AddressSpace_Item* item = address_space_bs__node;
-
-    bool user_authorized =
-        authorize_and_log(SOPC_UserWithAuthorization_GetManager(address_space_bs__p_user),
-                          SOPC_USER_AUTHORIZATION_OPERATION_WRITE, SOPC_AddressSpace_Item_Get_NodeId(item),
-                          constants__e_aid_Value, SOPC_UserWithAuthorization_GetUser(address_space_bs__p_user));
-    if (!user_authorized)
-    {
-        *address_space_bs__serviceStatusCode = constants__e_sc_bad_user_access_denied;
-        return;
-    }
-
     SOPC_Variant* pvar = SOPC_AddressSpace_Item_Get_Value(item);
     *address_space_bs__prev_value = SOPC_Variant_Create();
 
@@ -410,19 +344,9 @@ void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_sp
                                             const constants__t_Node_i address_space_bs__node,
                                             constants__t_StatusCode_i* const address_space_bs__sc)
 {
+    (void) (address_space_bs__p_user); /* User is already authorized for this operation */
     SOPC_AddressSpace_Item* item = address_space_bs__node;
-    bool user_authorized =
-        authorize_and_log(SOPC_UserWithAuthorization_GetManager(address_space_bs__p_user),
-                          SOPC_USER_AUTHORIZATION_OPERATION_READ, SOPC_AddressSpace_Item_Get_NodeId(item),
-                          constants__e_aid_Value, SOPC_UserWithAuthorization_GetUser(address_space_bs__p_user));
-    if (user_authorized)
-    {
-        util_status_code__C_to_B(item->value_status, address_space_bs__sc);
-    }
-    else
-    {
-        *address_space_bs__sc = constants__e_sc_bad_user_access_denied;
-    }
+    util_status_code__C_to_B(item->value_status, address_space_bs__sc);
 }
 
 void address_space_bs__read_AddressSpace_free_value(const constants__t_Variant_i address_space_bs__val)
