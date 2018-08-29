@@ -305,7 +305,7 @@ void session_core_bs__get_local_user(const constants__t_endpoint_config_idx_i se
     SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
     assert(NULL != epConfig);
 
-    *session_core_bs__p_user = SOPC_UserWithAuthorization_CreateLocal(epConfig->authorizationManager);
+    *session_core_bs__p_user = epConfig->userLocal;
 }
 
 void session_core_bs__drop_user_server(const constants__t_session_i session_core_bs__p_session)
