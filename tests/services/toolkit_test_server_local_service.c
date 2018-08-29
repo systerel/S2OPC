@@ -232,6 +232,27 @@ int main(int argc, char* argv[])
     epConfig.serverDescription.ApplicationType = OpcUa_ApplicationType_Server;
     SOPC_String_AttachFromCstring(&epConfig.serverDescription.ApplicationName.Text, "INGOPCS toolkit server example");
 
+    SOPC_UserAuthentication_Manager* authenticationManager = NULL;
+    SOPC_UserAuthorization_Manager* authorizationManager = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
+        authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
+        if (NULL == authenticationManager || NULL == authorizationManager)
+        {
+            SOPC_UserAuthentication_FreeManager(&authenticationManager);
+            SOPC_UserAuthorization_FreeManager(&authorizationManager);
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+            printf("<Test_Server_Toolkit: Failed to create the user manager\n");
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        epConfig.authenticationManager = authenticationManager;
+        epConfig.authorizationManager = authorizationManager;
+    }
+
     // Init stack configuration
     if (SOPC_STATUS_OK == status)
     {
@@ -457,6 +478,9 @@ int main(int argc, char* argv[])
     SOPC_KeyManager_SerializedCertificate_Delete(authCertificate);
     SOPC_PKIProvider_Free(&pkiProvider);
     SOPC_AddressSpace_Delete(address_space);
+
+    SOPC_UserAuthentication_FreeManager(&authenticationManager);
+    SOPC_UserAuthorization_FreeManager(&authorizationManager);
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }

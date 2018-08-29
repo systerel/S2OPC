@@ -139,6 +139,9 @@ int main(int argc, char* argv[])
         }
     }
 
+    epConfig.authenticationManager = NULL;
+    epConfig.authorizationManager = NULL;
+
     // Init toolkit configuration
     if (SOPC_STATUS_OK == status)
     {
