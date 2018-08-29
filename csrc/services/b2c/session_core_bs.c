@@ -299,10 +299,13 @@ void session_core_bs__deallocate_user(const constants__t_user_i session_core_bs_
     SOPC_UserWithAuthorization_Free(&userauthz);
 }
 
-void session_core_bs__get_local_user(constants__t_user_i* const session_core_bs__p_user)
+void session_core_bs__get_local_user(const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
+                                     constants__t_user_i* const session_core_bs__p_user)
 {
-    *session_core_bs__p_user = NULL; /* FIXME: Fetch the authorization manager from the endpoint configuration.
-                                        (SOPC_User*) SOPC_User_Get_Local(); */
+    SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
+    assert(NULL != epConfig);
+
+    *session_core_bs__p_user = SOPC_UserWithAuthorization_CreateLocal(epConfig->authorizationManager);
 }
 
 void session_core_bs__drop_user_server(const constants__t_session_i session_core_bs__p_session)

@@ -724,8 +724,11 @@ OPERATIONS
     END
     ;
 
-    p_user <-- get_local_user =
-    BEGIN
+    p_user <-- get_local_user (endpoint_config_idx) =
+    PRE
+        endpoint_config_idx : t_endpoint_config_idx_i &
+        endpoint_config_idx : t_endpoint_config_idx
+    THEN
         p_user :( p_user : t_user_i &
                   p_user : t_user )
     END

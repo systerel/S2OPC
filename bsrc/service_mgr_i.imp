@@ -151,8 +151,10 @@ LOCAL_OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_session_local_service_req (req_typ, req_msg, resp_msg) =
+    StatusCode_service <-- treat_session_local_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
     PRE
+        endpoint_config_idx : t_endpoint_config_idx_i &
+        endpoint_config_idx : t_endpoint_config_idx &
         req_typ : t_msg_type_i &
         req_typ = a_msg_in_type &
         a_msg_in_type : s_service_on_session_reqs &
@@ -429,18 +431,18 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_session_local_service_req (req_typ, req_msg, resp_msg) =
+    StatusCode_service <-- treat_session_local_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
     VAR
         l_bret,
         l_user
     IN
         CASE req_typ OF
             EITHER e_msg_attribute_read_req THEN
-                l_user <-- get_local_user;
+                l_user <-- get_local_user (endpoint_config_idx);
                 StatusCode_service <-- treat_read_request (l_user, req_msg, resp_msg)
             OR e_msg_attribute_write_req THEN
                 // Write request case
-                l_user <-- get_local_user;
+                l_user <-- get_local_user (endpoint_config_idx);
                 StatusCode_service <-- treat_write_request (l_user, req_msg);
                 /* TODO: the following may fail (malloc) */
                 write_WriteResponse_msg_out(resp_msg);
@@ -1042,7 +1044,7 @@ OPERATIONS
             bless_msg_in (req_msg);
             CASE req_class OF
                 EITHER e_msg_session_service_class THEN
-                    l_ret <-- treat_session_local_service_req (req_typ, req_msg, l_resp_msg)
+                    l_ret <-- treat_session_local_service_req (endpoint_config_idx, req_typ, req_msg, l_resp_msg)
                 OR e_msg_discovery_service_class THEN
                     l_ret <-- treat_discovery_service_req (endpoint_config_idx, req_typ, req_msg, l_resp_msg)
                 ELSE
