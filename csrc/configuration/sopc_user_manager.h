@@ -36,6 +36,7 @@
 #include <stdbool.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_user.h"
 
 typedef struct SOPC_UserAuthentication_Manager SOPC_UserAuthentication_Manager;
 typedef struct SOPC_UserAuthorization_Manager SOPC_UserAuthorization_Manager;
@@ -48,27 +49,10 @@ typedef enum
 } SOPC_UserAuthorization_OperationType;
 
 /**
- * \brief Logged in (successfully) user structure.
- *
- * An authorization manager is embedded in the structure.
- * It is the manager associated with the endpoint on which the user is connected.
- * It is only a reference and should not be freed or cleared.
+ * The server-side user with an authorization manager.
+ * The authorization manager is borrowed when the structure is created.
  */
-typedef struct SOPC_User
-{
-    /**
-     * Set when this is a request from a local service.
-     * When \p local is true, the other members of the struct shall not be read.
-     */
-    bool local;
-    /** Set when this is an anonymous user. When set, the \p username shall not be read. */
-    bool anonymous;
-    /** The username of the not local nor anonymous user. */
-    SOPC_String username;
-
-    /** A borrowed pointer to the authorization manager associated with the current endpoint. */
-    SOPC_UserAuthorization_Manager* authorizationManager;
-} SOPC_User;
+typedef struct SOPC_UserWithAuthorization SOPC_UserWithAuthorization;
 
 typedef void (*SOPC_UserAuthentication_Free_Func)(SOPC_UserAuthentication_Manager* authenticationManager);
 typedef SOPC_ReturnStatus (*SOPC_UserAuthentication_ValidateUserIdentity_Func)(
@@ -203,13 +187,41 @@ SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_AllowAll(
 /** \brief A helper implementation that always authorize an operation. */
 SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_AllowAll(void);
 
-/** \brief User creation, \p authorizationManager may be NULL. */
-SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity, SOPC_UserAuthorization_Manager* authorizationManager);
+/**
+ * \brief Creates a \p SOPC_UserWithAuthorization from an OpcUa_IdentityToken and an authorization manager.
+ *
+ * \note The created user is freed with the \p SOPC_UserWithAuthorization, whereas the manager is not.
+ *
+ * \param pUserIdentity         The user identity supported by an extension object, either a
+ *                              \p OpcUa_AnonymousIdentityToken or a \p OpcUa_UserNameIdentityToken.
+ * \param authorizationManager  A borrowed reference to an authorization manager, may be NULL.
+ *
+ * \return The created object if successful, otherwise NULL.
+ */
+SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateFromIdentityToken(
+    SOPC_ExtensionObject* pUserIdentity,
+    SOPC_UserAuthorization_Manager* authorizationManager);
 
-/** \brief Returns local user, which shall not be freed. */
-const SOPC_User* SOPC_User_Get_Local(void);
+/**
+ * \brief Creates a \p SOPC_UserWithAuthorization for a local user.
+ *
+ * \note The authorization manager is not free with this object.
+ *
+ * \param authorizationManager  A borrowed reference to an authorization manager, may be NULL.
+ *
+ * \return The created object if successful, otherwise NULL.
+ */
+SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateLocal(
+    SOPC_UserAuthorization_Manager* authorizationManager);
 
-/** \brief User deletion */
-void SOPC_User_Free(SOPC_User** ppUser);
+/** \brief Return the user part of the user with authorization manager. */
+SOPC_UserAuthorization_Manager* SOPC_UserWithAuthorization_GetManager(
+    SOPC_UserWithAuthorization* userWithAuthorization);
+
+/** \brief Return the authorization manager associated with the user. */
+const SOPC_User* SOPC_UserWithAuthorization_GetUser(SOPC_UserWithAuthorization* userWithAuthorization);
+
+/** \brief Free a \p SOPC_UserWithAuthorization and its embedded user when needed. */
+void SOPC_UserWithAuthorization_Free(SOPC_UserWithAuthorization** ppUserWithAutorization);
 
 #endif /* SOPC_USER_MANAGER_H_ */

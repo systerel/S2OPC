@@ -25,6 +25,12 @@
 #include "sopc_types.h"
 #include "sopc_user_manager.h"
 
+struct SOPC_UserWithAuthorization
+{
+    SOPC_User* user;
+    SOPC_UserAuthorization_Manager* authorizationManager;
+};
+
 SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentication_Manager* authenticationManager,
                                                               const SOPC_ExtensionObject* pUser,
                                                               bool* pbUserAuthenticated)
@@ -144,61 +150,86 @@ SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_AllowAll(vo
     return authorizationManager;
 }
 
-static SOPC_UserAuthorization_Manager local_authz = {.pFunctions = &AuthorizeAllowAllFunctions};
-static const SOPC_User local_user = {.local = true, .authorizationManager = &local_authz};
-
-SOPC_User* SOPC_User_Create(SOPC_ExtensionObject* pUserIdentity, SOPC_UserAuthorization_Manager* authorizationManager)
+SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateFromIdentityToken(
+    SOPC_ExtensionObject* pUserIdentity,
+    SOPC_UserAuthorization_Manager* authorizationManager)
 {
     assert(NULL != pUserIdentity);
     assert(SOPC_ExtObjBodyEncoding_Object == pUserIdentity->Encoding);
     assert(&OpcUa_AnonymousIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType ||
            &OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType);
 
-    SOPC_User* pUser = calloc(1, sizeof(SOPC_User));
-    if (NULL == pUser)
+    SOPC_UserWithAuthorization* userauthz = calloc(1, sizeof(SOPC_UserWithAuthorization));
+    if (NULL == userauthz)
     {
         return NULL;
     }
 
+    userauthz->authorizationManager = authorizationManager;
     if (&OpcUa_AnonymousIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType)
     {
-        pUser->anonymous = true;
-        SOPC_String_Initialize(&pUser->username);
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        userauthz->user = (SOPC_User*) SOPC_User_GetAnonymous();
+        SOPC_GCC_DIAGNOSTIC_RESTORE
     }
     else if (&OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType)
     {
-        pUser->anonymous = false;
         OpcUa_UserNameIdentityToken* tok = (OpcUa_UserNameIdentityToken*) (pUserIdentity->Body.Object.Value);
-        SOPC_ReturnStatus status = SOPC_String_Copy(&pUser->username, &tok->UserName);
-        if (SOPC_STATUS_OK != status)
-        {
-            free(pUser);
-            pUser = NULL;
-        }
+        userauthz->user = SOPC_User_CreateUsername(&tok->UserName);
     }
 
-    if (NULL != pUser)
+    if (NULL == userauthz->user)
     {
-        pUser->authorizationManager = authorizationManager;
+        free(userauthz);
+        userauthz = NULL;
     }
 
-    return pUser;
+    return userauthz;
 }
 
-const SOPC_User* SOPC_User_Get_Local(void)
+SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateLocal(SOPC_UserAuthorization_Manager* authorizationManager)
 {
-    return &local_user;
+    SOPC_UserWithAuthorization* userauthz = calloc(1, sizeof(SOPC_UserWithAuthorization));
+    if (NULL == userauthz)
+    {
+        return NULL;
+    }
+
+    userauthz->authorizationManager = authorizationManager;
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    userauthz->user = (SOPC_User*) SOPC_User_GetLocal();
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+
+    if (NULL == userauthz->user)
+    {
+        free(userauthz);
+        userauthz = NULL;
+    }
+
+    return userauthz;
 }
 
-void SOPC_User_Free(SOPC_User** ppUser)
+SOPC_UserAuthorization_Manager* SOPC_UserWithAuthorization_GetManager(SOPC_UserWithAuthorization* userWithAuthorization)
 {
-    if (NULL == ppUser || NULL == *ppUser)
+    assert(NULL != userWithAuthorization);
+    return userWithAuthorization->authorizationManager;
+}
+
+const SOPC_User* SOPC_UserWithAuthorization_GetUser(SOPC_UserWithAuthorization* userWithAuthorization)
+{
+    assert(NULL != userWithAuthorization);
+    return userWithAuthorization->user;
+}
+
+void SOPC_UserWithAuthorization_Free(SOPC_UserWithAuthorization** ppUserWithAutorization)
+{
+    if (NULL == ppUserWithAutorization || NULL == *ppUserWithAutorization)
     {
         return;
     }
 
-    SOPC_User* pUser = *ppUser;
-    SOPC_String_Clear(&pUser->username);
-    free(pUser);
-    *ppUser = NULL;
+    SOPC_UserWithAuthorization* userauthz = *ppUserWithAutorization;
+    SOPC_User_Free(&userauthz->user);
+    free(userauthz);
+    *ppUserWithAutorization = NULL;
 }
