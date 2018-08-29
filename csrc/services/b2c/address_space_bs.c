@@ -34,6 +34,7 @@
 #include "sopc_dict.h"
 #include "sopc_logger.h"
 #include "sopc_numeric_range.h"
+#include "sopc_user_manager.h"
 #include "util_b2c.h"
 #include "util_variant.h"
 
@@ -45,7 +46,7 @@ static bool authorize_and_log(SOPC_UserAuthorization_Manager* authorizationManag
                               SOPC_UserAuthorization_OperationType operationType,
                               SOPC_NodeId* node_id,
                               uint32_t attribute_id,
-                              SOPC_User* user)
+                              const SOPC_User* user)
 {
     bool user_authorized = false;
     SOPC_ReturnStatus status = SOPC_UserAuthorization_IsAuthorizedOperation(
@@ -218,9 +219,10 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
         if (constants__e_ncl_Variable == address_space_bs__ncl ||
             constants__e_ncl_VariableType == address_space_bs__ncl)
         {
-            bool authorized = authorize_and_log(
-                address_space_bs__p_user->authorizationManager, SOPC_USER_AUTHORIZATION_OPERATION_READ,
-                SOPC_AddressSpace_Item_Get_NodeId(item), address_space_bs__aid, address_space_bs__p_user);
+            bool authorized =
+                authorize_and_log(SOPC_UserWithAuthorization_GetManager(address_space_bs__p_user),
+                                  SOPC_USER_AUTHORIZATION_OPERATION_READ, SOPC_AddressSpace_Item_Get_NodeId(item),
+                                  address_space_bs__aid, SOPC_UserWithAuthorization_GetUser(address_space_bs__p_user));
             if (authorized)
             {
                 *address_space_bs__variant =
@@ -362,11 +364,11 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
                                  constants__t_Variant_i* const address_space_bs__prev_value)
 {
     SOPC_AddressSpace_Item* item = address_space_bs__node;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     bool user_authorized =
-        authorize_and_log(address_space_bs__p_user->authorizationManager, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
-                          SOPC_AddressSpace_Item_Get_NodeId(item), constants__e_aid_Value, address_space_bs__p_user);
+        authorize_and_log(SOPC_UserWithAuthorization_GetManager(address_space_bs__p_user),
+                          SOPC_USER_AUTHORIZATION_OPERATION_WRITE, SOPC_AddressSpace_Item_Get_NodeId(item),
+                          constants__e_aid_Value, SOPC_UserWithAuthorization_GetUser(address_space_bs__p_user));
     if (!user_authorized)
     {
         *address_space_bs__serviceStatusCode = constants__e_sc_bad_user_access_denied;
@@ -410,8 +412,9 @@ void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_sp
 {
     SOPC_AddressSpace_Item* item = address_space_bs__node;
     bool user_authorized =
-        authorize_and_log(address_space_bs__p_user, SOPC_USER_AUTHORIZATION_OPERATION_READ,
-                          SOPC_AddressSpace_Item_Get_NodeId(item), constants__e_aid_Value, address_space_bs__p_user);
+        authorize_and_log(SOPC_UserWithAuthorization_GetManager(address_space_bs__p_user),
+                          SOPC_USER_AUTHORIZATION_OPERATION_READ, SOPC_AddressSpace_Item_Get_NodeId(item),
+                          constants__e_aid_Value, SOPC_UserWithAuthorization_GetUser(address_space_bs__p_user));
     if (user_authorized)
     {
         util_status_code__C_to_B(item->value_status, address_space_bs__sc);

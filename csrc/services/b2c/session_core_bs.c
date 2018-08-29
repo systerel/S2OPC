@@ -283,7 +283,8 @@ void session_core_bs__allocate_valid_user(
     {
         if (*session_core_bs__p_valid_user)
         {
-            *session_core_bs__p_user = SOPC_User_Create(session_core_bs__p_user_token, authorizationManager);
+            *session_core_bs__p_user =
+                SOPC_UserWithAuthorization_CreateFromIdentityToken(session_core_bs__p_user_token, authorizationManager);
             if (NULL != session_core_bs__p_user)
             {
                 *session_core_bs__p_alloc_failed = false;
@@ -294,21 +295,20 @@ void session_core_bs__allocate_valid_user(
 
 void session_core_bs__deallocate_user(const constants__t_user_i session_core_bs__p_user)
 {
-    SOPC_User* pUser = session_core_bs__p_user;
-    SOPC_User_Free(&pUser);
+    SOPC_UserWithAuthorization* userauthz = session_core_bs__p_user;
+    SOPC_UserWithAuthorization_Free(&userauthz);
 }
 
 void session_core_bs__get_local_user(constants__t_user_i* const session_core_bs__p_user)
 {
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    *session_core_bs__p_user = (SOPC_User*) SOPC_User_Get_Local();
-    SOPC_GCC_DIAGNOSTIC_RESTORE
+    *session_core_bs__p_user = NULL; /* FIXME: Fetch the authorization manager from the endpoint configuration.
+                                        (SOPC_User*) SOPC_User_Get_Local(); */
 }
 
 void session_core_bs__drop_user_server(const constants__t_session_i session_core_bs__p_session)
 {
-    SOPC_User* pUser = sessionDataArray[session_core_bs__p_session].user_server;
-    SOPC_User_Free(&pUser);
+    SOPC_UserWithAuthorization* userauthz = sessionDataArray[session_core_bs__p_session].user_server;
+    SOPC_UserWithAuthorization_Free(&userauthz);
     sessionDataArray[session_core_bs__p_session].user_server = NULL;
 }
 

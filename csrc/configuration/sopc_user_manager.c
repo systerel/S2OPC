@@ -22,6 +22,7 @@
 #include <stdlib.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_macros.h"
 #include "sopc_types.h"
 #include "sopc_user_manager.h"
 
