@@ -54,7 +54,10 @@ DEFINITIONS
 
         /* A special reference, that we model because it is used by Browse.
          * This is the content of the TargetNode of all Variables and Objects. */
-        Ref_HasTypeDefinition
+        Ref_HasTypeDefinition,
+
+        /* User authorization */
+        s_AuthorizedOperations
     ;
 
     d_inv ==
@@ -94,7 +97,10 @@ DEFINITIONS
         ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
         (ResponseWrite_allocated = FALSE
          =>
-         ResponseWrite_StatusCode = {})
+         ResponseWrite_StatusCode = {}) &
+
+        /* User authorization */
+        s_AuthorizedOperations <: t_operation_type * t_NodeId * t_AttributeId * t_user
     )
 
 ABSTRACT_VARIABLES
@@ -338,6 +344,21 @@ OPERATIONS
         msg_out : t_msg
     THEN
         skip
+    END
+    ;
+
+    p_authorized <-- get_user_authorization (p_operation_type, p_node_id, p_attribute_id, p_user) =
+    PRE
+        p_operation_type : t_operation_type_i &
+        p_operation_type : t_operation_type   &
+        p_node_id        : t_NodeId_i         &
+        p_node_id        : t_NodeId           &
+        p_attribute_id   : t_AttributeId_i    &
+        p_attribute_id   : t_AttributeId      &
+        p_user           : t_user_i           &
+        p_user           : t_user
+    THEN
+        p_authorized := bool(p_operation_type |-> p_node_id |-> p_attribute_id |-> p_user : s_AuthorizedOperations)
     END
 
 END

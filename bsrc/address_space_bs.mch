@@ -21,7 +21,8 @@ MACHINE
     address_space_bs
 
 SEES
-    constants
+    constants,
+    user_authorization_bs
 
 DEFINITIONS
 
@@ -139,7 +140,8 @@ OPERATIONS
         aid  : t_AttributeId_i  &
         aid  : t_AttributeId    &
         index_range : t_IndexRange_i &
-        index_range : t_IndexRange
+        index_range : t_IndexRange   &
+        e_operation_type_read |-> a_NodeId(node) |-> aid |-> p_user : s_AuthorizedOperations
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -163,13 +165,8 @@ OPERATIONS
                         sc := e_sc_ok
                     WHEN aid = e_aid_Value &
                          (ncl = e_ncl_Variable or ncl = e_ncl_VariableType) THEN
-                        variant,
-                        sc
-                        :(  variant : t_Variant_i &
-                            sc : t_StatusCode_i &
-                            sc : {e_sc_ok, e_sc_bad_user_access_denied } &
-                            ( sc = e_sc_ok => variant = a_Value(node) ) &
-                            ( sc = e_sc_bad_user_access_denied => variant = c_Variant_indet ))
+                        variant := a_Value(node) ||
+                        sc := e_sc_ok
                     ELSE
                         /* TODO: add BrowseName, DisplayName, AccessLevel cases (a_NodeClass shall not be used) */
                         variant := conv_NodeClass_Variant(a_NodeClass(node)) ||
@@ -202,7 +199,8 @@ OPERATIONS
         value : t_Variant_i &
         value : t_Variant   &
         index_range : t_IndexRange_i &
-        index_range : t_IndexRange
+        index_range : t_IndexRange   &
+        e_operation_type_write |-> a_NodeId(node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
     THEN
         CHOICE
             IF IsValid_VariantIndex(value |-> index_range) = TRUE &
@@ -222,7 +220,7 @@ OPERATIONS
         OR
             serviceStatusCode
             :(serviceStatusCode : t_StatusCode_i &
-                serviceStatusCode : {e_sc_bad_out_of_memory, e_sc_bad_internal_error, e_sc_bad_user_access_denied}) ||
+                serviceStatusCode : {e_sc_bad_out_of_memory, e_sc_bad_internal_error}) ||
             prev_value := c_Variant_indet
         END
     END
@@ -236,10 +234,11 @@ OPERATIONS
         p_user : t_user   &
         node : t_Node_i &
         node : t_Node   &
-        node : dom(a_Value_StatusCode)
+        node : dom(a_Value_StatusCode) &
+        e_operation_type_read |-> a_NodeId(node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
     THEN
         sc :(sc : t_StatusCode_i &
-             sc : {a_Value_StatusCode(node), e_sc_bad_user_access_denied})
+             sc = a_Value_StatusCode(node))
     END
     ;
 

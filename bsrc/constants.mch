@@ -290,7 +290,12 @@ SETS
     /* Context provided by application on request and to provide with notifications */
     t_application_context_i; /* uintptr_t */
     t_timer_id_i; /* uint32_t */
-    t_IndexRange_i
+    t_IndexRange_i;
+
+    /* User authorization operation type, see SOPC_UserAuthorization_Manager */
+    t_operation_type_i = {c_operation_type_indet,
+                          e_operation_type_read,
+                          e_operation_type_write}
 
 CONCRETE_CONSTANTS
     /*AddS,*/
@@ -423,6 +428,7 @@ ABSTRACT_CONSTANTS
     t_client_request_handle,
     t_timer_id,
     t_IndexRange,
+    t_operation_type,
 
     s_session_treatment_reqs,
     s_session_treatment_resps,
@@ -682,6 +688,9 @@ PROPERTIES
         e_buffer_in_msg_type_read,
         e_buffer_in_msg_header_read,
         e_buffer_in_msg_read } &
+
+    t_operation_type = {e_operation_type_read,
+                        e_operation_type_write} &
 
     s_session_treatment_reqs = {e_msg_session_create_req,
         e_msg_session_activate_req,

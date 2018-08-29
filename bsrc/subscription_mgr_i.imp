@@ -551,7 +551,8 @@ OPERATIONS
         l_monitoredItemPointer,
         l_monitoredItemId,
         l_revSamplingItv,
-        l_revQueueSize
+        l_revQueueSize,
+        l_authorized
     IN
         l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
         WHILE l_continue = TRUE DO
@@ -579,7 +580,12 @@ OPERATIONS
                 l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(p_user, l_node, l_aid, c_IndexRange_indet);
                 IF l_ncl = e_ncl_Variable
                 THEN
-                    l_valueSc <-- get_Value_StatusCode (p_user, l_node)
+                    l_authorized <-- get_user_authorization(e_operation_type_read, l_nid, l_aid, p_user);
+                    IF l_authorized = TRUE THEN
+                        l_valueSc <-- get_Value_StatusCode (p_user, l_node)
+                    ELSE
+                        l_sc := e_sc_bad_user_access_denied
+                    END
                 END
             END
             ;

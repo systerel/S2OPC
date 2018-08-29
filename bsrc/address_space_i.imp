@@ -34,7 +34,8 @@ IMPORTS
     address_space_bs,
     response_write_bs,
     address_space_it,
-    write_value_pointer_bs
+    write_value_pointer_bs,
+    user_authorization_bs
 
 PROMOTES
     readall_AddressSpace_Node,
@@ -49,7 +50,8 @@ PROMOTES
     get_RefIndex_Reference,
     get_Value_StatusCode,
     read_AddressSpace_free_value,
-    write_WriteResponse_msg_out
+    write_WriteResponse_msg_out,
+    get_user_authorization
 
 CONCRETE_VARIABLES
     ResponseWrite_allocated
@@ -96,7 +98,8 @@ LOCAL_OPERATIONS
              nid : ran(a_NodeId) &
              aid = e_aid_Value &
              a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable &
-             serviceStatusCode /= e_sc_bad_user_access_denied
+             e_operation_type_write |-> nid |-> aid |-> p_user : s_AuthorizedOperations &
+             e_operation_type_read |-> nid |-> aid |-> p_user : s_AuthorizedOperations
              =>
              serviceStatusCode = e_sc_ok &
              prev_sc = a_Value_StatusCode(a_NodeId~(nid)) &
@@ -244,7 +247,9 @@ OPERATIONS
     VAR
         l_isvalid,
         l_node,
-        l_ncl
+        l_ncl,
+        l_authorized_write,
+        l_authorized_read
     IN
         IF isvalid = TRUE THEN
             prev_sc := c_StatusCode_indet;
@@ -255,12 +260,22 @@ OPERATIONS
                 IF aid = e_aid_Value THEN
                     l_ncl <-- get_NodeClass(l_node);
                     IF l_ncl = e_ncl_Variable THEN
-                        prev_sc <-- get_Value_StatusCode (p_user, l_node);
-                        serviceStatusCode, prev_value <-- set_Value(p_user, l_node, value, index_range)
+                        /* Write authorization is for set_Value, and read authorization is for get_Value_StatusCode */
+                        /* TODO: it should be decided what to do when the value is write only */
+                        l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
+                        l_authorized_read <-- get_user_authorization(e_operation_type_read, nid, aid, p_user);
+                        IF l_authorized_write = TRUE & l_authorized_read = TRUE THEN
+                            prev_sc <-- get_Value_StatusCode (p_user, l_node);
+                            serviceStatusCode, prev_value <-- set_Value(p_user, l_node, value, index_range)
+                        ELSE
+                            serviceStatusCode := e_sc_bad_user_access_denied
+                        END
+                    /* TODO: ELSE clause */
                     END
                 ELSE
                     serviceStatusCode := e_sc_bad_write_not_supported
                 END
+            /* TODO: ELSE clause */
             END
         ELSE
             serviceStatusCode := status;

@@ -51,7 +51,10 @@ DEFINITIONS
 
         /* Service Write */
         ResponseWrite_allocated,
-        ResponseWrite_StatusCode
+        ResponseWrite_StatusCode,
+
+        /* User authorization */
+        s_AuthorizedOperations
     ;
 
     d_inv ==
@@ -87,7 +90,10 @@ DEFINITIONS
 
         /* Service Write */
         ResponseWrite_allocated : BOOL &
-        ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode
+        ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
+
+        /* User authorization */
+        s_AuthorizedOperations <: t_operation_type * t_NodeId * t_AttributeId * t_user
     ;
 
     d_init ==

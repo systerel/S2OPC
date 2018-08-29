@@ -70,6 +70,7 @@ LOCAL_OPERATIONS
             =>
             data_Value_StatusCode = data_Value_StatusCode$0 <+
                                     {p_rvi |-> a_Value_StatusCode(a_NodeId~(p_nid))}) &
+            /* TODO: model e_sc_bad_user_access_level */
            (not(a_NodeClass(a_NodeId~(p_nid)) = e_ncl_Variable)
             =>
             data_Value_StatusCode = data_Value_StatusCode$0 <+
@@ -91,24 +92,31 @@ OPERATIONS
         l_node,
         l_ncl,
         l_value,
-        l_sc
+        l_sc,
+        l_authorized
     IN
         IF  p_sc = e_sc_ok
         THEN
             l_is_valid, l_node <-- readall_AddressSpace_Node(p_nid);
             IF l_is_valid = TRUE THEN
-                l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(p_user, l_node, p_aid, p_index_range);
-                IF l_sc = e_sc_ok THEN
-                    IF  p_aid = e_aid_Value &
-                        l_ncl = e_ncl_Variable
-                    THEN
-                        l_sc <-- get_Value_StatusCode(p_user, l_node)
-                    ELSE
-                        l_sc := e_sc_ok
-                    END
-                END;
-                set_read_response(p_resp_msg, p_rvi, l_value, l_sc, p_aid);
-                read_AddressSpace_free_value(l_value)
+                l_authorized <-- get_user_authorization(e_operation_type_read, p_nid, p_aid, p_user);
+                IF l_authorized = TRUE THEN
+                    l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(p_user, l_node, p_aid, p_index_range);
+                    IF l_sc = e_sc_ok THEN
+                        IF  p_aid = e_aid_Value &
+                            l_ncl = e_ncl_Variable
+                        THEN
+                            l_sc <-- get_Value_StatusCode(p_user, l_node)
+                        ELSE
+                            l_sc := e_sc_ok
+                        END
+                    END;
+                    set_read_response(p_resp_msg, p_rvi, l_value, l_sc, p_aid);
+                    read_AddressSpace_free_value(l_value)
+                ELSE
+                    /* User was not authorized */
+                    set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_user_access_denied, p_aid)
+                END
             ELSE
                 /* Invalid at this level means the node Id is unknown:
                    node Id cannot be invalid in case p_is_valid = TRUE */
