@@ -386,7 +386,7 @@ void session_core_bs__server_create_session_req_do_crypto(
     const constants__t_msg_i session_core_bs__p_req_msg,
     const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
     const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
-    t_bool* const session_core_bs__valid,
+    constants__t_StatusCode_i* const session_core_bs__status,
     constants__t_SignatureData_i* const session_core_bs__signature)
 {
     SOPC_CryptoProvider* pProvider = NULL;
@@ -402,11 +402,11 @@ void session_core_bs__server_create_session_req_do_crypto(
     uint32_t sigLength = 0;
     SOPC_AsymmetricKey* privateKey = NULL;
 
-    *session_core_bs__valid = false;
     *session_core_bs__signature = constants__c_SignatureData_indet;
 
     if (constants__c_session_indet == session_core_bs__p_session)
     {
+        *session_core_bs__status = constants__e_sc_bad_unexpected_error;
         return;
     }
 
@@ -419,6 +419,7 @@ void session_core_bs__server_create_session_req_do_crypto(
 
     if (NULL == pSCCfg || NULL == pECfg)
     {
+        *session_core_bs__status = constants__e_sc_bad_unexpected_error;
         return;
     }
 
@@ -527,10 +528,7 @@ void session_core_bs__server_create_session_req_do_crypto(
         }
     }
 
-    if (SOPC_STATUS_OK == status)
-    {
-        *session_core_bs__valid = true;
-    }
+    *session_core_bs__status = (status == SOPC_STATUS_OK) ? constants__e_sc_ok : constants__e_sc_bad_unexpected_error;
 
     /* Clean */
     if (NULL != pToSign)
