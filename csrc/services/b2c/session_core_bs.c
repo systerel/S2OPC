@@ -381,6 +381,31 @@ void session_core_bs__get_session_user_client(const constants__t_session_i sessi
     }
 }
 
+static SOPC_ReturnStatus check_application_uri(const SOPC_ByteString* certData, const SOPC_String* appUri, bool* ok)
+{
+    SOPC_Certificate* certificate = NULL;
+
+    *ok = false;
+
+    if (certData->Length < 0)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    SOPC_ReturnStatus status =
+        SOPC_KeyManager_Certificate_CreateFromDER(certData->Data, (uint32_t) certData->Length, &certificate);
+
+    if (status != SOPC_STATUS_OK)
+    {
+        return status;
+    }
+
+    *ok = SOPC_KeyManager_Certificate_CheckApplicationUri(certificate, SOPC_String_GetRawCString(appUri));
+    SOPC_KeyManager_Certificate_Free(certificate);
+
+    return SOPC_STATUS_OK;
+}
+
 void session_core_bs__server_create_session_req_do_crypto(
     const constants__t_session_i session_core_bs__p_session,
     const constants__t_msg_i session_core_bs__p_req_msg,
@@ -526,9 +551,29 @@ void session_core_bs__server_create_session_req_do_crypto(
         {
             *session_core_bs__signature = pSign;
         }
-    }
 
-    *session_core_bs__status = (status == SOPC_STATUS_OK) ? constants__e_sc_ok : constants__e_sc_bad_unexpected_error;
+        bool application_uri_ok = false;
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = check_application_uri(&pReq->ClientCertificate, &pReq->ClientDescription.ApplicationUri,
+                                           &application_uri_ok);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            *session_core_bs__status =
+                application_uri_ok ? constants__e_sc_ok : constants__e_sc_bad_certificate_uri_invalid;
+        }
+        else
+        {
+            *session_core_bs__status = constants__e_sc_bad_unexpected_error;
+        }
+    }
+    else
+    {
+        *session_core_bs__status = constants__e_sc_ok;
+    }
 
     /* Clean */
     if (NULL != pToSign)

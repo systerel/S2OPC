@@ -257,6 +257,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
  *                        altName of the certificate.
  * \return \c TRUE if the values match, \c FALSE else.
  *
+ * Some limitations apply when using the MbedTLS crypto backend:
  * MbedTLS has no way to extract anything else than the DNS altName from the
  * certificate extensions (see https://github.com/ARMmbed/mbedtls/pull/731).
  * We have for now a poor man's ASN.1 "parser" that tries to find it. It should

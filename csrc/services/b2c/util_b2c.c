@@ -750,6 +750,9 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_user_access_denied:
         *status = OpcUa_BadUserAccessDenied;
         break;
+    case constants__e_sc_bad_certificate_uri_invalid:
+        *status = OpcUa_BadCertificateUriInvalid;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -943,6 +946,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         break;
     case OpcUa_BadUserAccessDenied:
         *bstatus = constants__e_sc_bad_user_access_denied;
+        break;
+    case OpcUa_BadCertificateUriInvalid:
+        *bstatus = constants__e_sc_bad_certificate_uri_invalid;
         break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)
