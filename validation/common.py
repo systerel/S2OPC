@@ -20,7 +20,7 @@
 
 import random
 import string
-from opcua import ua
+from opcua import ua, Client
 from opcua.ua import XmlElement
 
 sUri = 'opc.tcp://localhost:4841'
@@ -47,3 +47,8 @@ variantInfoList = [ ('Int64', ua.VariantType.Int64, -1000, random.randint(-92233
                     ('UInt64', ua.VariantType.UInt64, 1844674407370955, random.randint(0,18446744073709551615)),
                     ('Float', ua.VariantType.Float, 109517.875, random.uniform(-2**127,2**127)),
                   ]
+
+def create_client(uri=sUri):
+    client = Client(uri)
+    client.application_uri = "urn:INGOPCS:localhost"
+    return client

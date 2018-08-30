@@ -22,7 +22,7 @@
 Simple client to launch validation tests
 """
 
-from opcua import ua, Client
+from opcua import ua
 from opcua.ua import SecurityPolicy
 from attribute_read import attribute_read_tests
 from attribute_write_values import attribute_write_values_tests, attribute_write_values_two_clients_tests
@@ -30,7 +30,7 @@ from safety_secure_channels import secure_channels_connect
 from discovery_get_endpoints import discovery_get_endpoints_tests
 from view_basic import browse_tests
 from sc_renew import secure_channel_renew
-from common import sUri
+from common import sUri, create_client
 from tap_logger import TapLogger
 from opcua.crypto import security_policies
 import re
@@ -40,7 +40,7 @@ if __name__=='__main__':
 
     # tests with one connexion
     print('Connecting to', sUri)
-    client = Client(sUri)
+    client = create_client()
     logger = TapLogger("validation.tap")
     headerString = "******************* Beginning {0} tests with one connexion *********************"
     for sp in [SecurityPolicy, security_policies.SecurityPolicyBasic256]:
@@ -77,7 +77,7 @@ if __name__=='__main__':
 
     # tests with several connexions
     headerString = "******************* Beginning {0} tests with several connexions *********************"
-    client2 = Client(sUri)
+    client2 = create_client()
 
     for sp in [SecurityPolicy, security_policies.SecurityPolicyBasic256]:
         logger.begin_section("security policy {0}".format(re.split("#",sp.URI)[-1]))

@@ -22,11 +22,11 @@
 Simple client to launch sc renew degraded tests
 """
 
-from opcua import ua, Client
+from opcua import ua
 from opcua.ua import SecurityPolicy
 from safety_secure_channels import secure_channels_connect
 from sc_renew import secure_channel_renew
-from common import sUri
+from common import sUri, create_client
 from tap_logger import TapLogger
 from opcua.crypto import security_policies
 import re
@@ -36,7 +36,7 @@ if __name__=='__main__':
 
     # tests with one connexion
     print('Connecting to', sUri)
-    client = Client(sUri)
+    client = create_client()
     logger = TapLogger("sc_renew.tap")
 
     # tests of SC renew with degraded cases
