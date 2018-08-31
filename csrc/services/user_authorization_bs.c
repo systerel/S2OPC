@@ -42,15 +42,12 @@ void user_authorization_bs__get_user_authorization(
     t_bool* const user_authorization_bs__p_authorized)
 {
     /* Authorization */
-    SOPC_UserAuthorization_Manager* authorizationManager =
-        SOPC_UserWithAuthorization_GetManager(user_authorization_bs__p_user);
-    const SOPC_User* user = SOPC_UserWithAuthorization_GetUser(user_authorization_bs__p_user);
     SOPC_UserAuthorization_OperationType operationType = SOPC_USER_AUTHORIZATION_OPERATION_READ;
     util_operation_type__B_to_C(user_authorization_bs__p_operation_type, &operationType);
 
     SOPC_ReturnStatus status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        authorizationManager, operationType, user_authorization_bs__p_node_id, user_authorization_bs__p_attribute_id,
-        user, user_authorization_bs__p_authorized);
+        user_authorization_bs__p_user, operationType, user_authorization_bs__p_node_id,
+        user_authorization_bs__p_attribute_id, user_authorization_bs__p_authorized);
 
     /* Log failures */
     if (SOPC_STATUS_OK != status)

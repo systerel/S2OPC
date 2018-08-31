@@ -44,19 +44,20 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
                                                                           pbUserAuthenticated);
 }
 
-SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthorization_Manager* authorizationManager,
+SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserWithAuthorization* userWithAuthorization,
                                                                SOPC_UserAuthorization_OperationType operationType,
-                                                               const SOPC_NodeId* pNid,
+                                                               const SOPC_NodeId* nodeId,
                                                                uint32_t attributeId,
-                                                               const SOPC_User* pUser,
                                                                bool* pbOperationAuthorized)
 {
-    assert(NULL != authorizationManager && NULL != pNid && NULL != pUser && NULL != pbOperationAuthorized);
-    assert(NULL != authorizationManager->pFunctions &&
+    assert(NULL != userWithAuthorization && NULL != nodeId && NULL != pbOperationAuthorized);
+    SOPC_User* user = userWithAuthorization->user;
+    SOPC_UserAuthorization_Manager* authorizationManager = userWithAuthorization->authorizationManager;
+    assert(NULL != user && NULL != authorizationManager && NULL != authorizationManager->pFunctions &&
            NULL != authorizationManager->pFunctions->pFuncAuthorizeOperation);
 
-    return (authorizationManager->pFunctions->pFuncAuthorizeOperation)(authorizationManager, operationType, pNid,
-                                                                       attributeId, pUser, pbOperationAuthorized);
+    return (authorizationManager->pFunctions->pFuncAuthorizeOperation)(authorizationManager, operationType, nodeId,
+                                                                       attributeId, user, pbOperationAuthorized);
 }
 
 void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAuthenticationManager)
@@ -101,14 +102,14 @@ static SOPC_ReturnStatus AuthenticateAllowAll(SOPC_UserAuthentication_Manager* a
 /** \brief A helper implementation of the authorize R/W operation callback, which always returns OK. */
 static SOPC_ReturnStatus AuthorizeAllowAll(SOPC_UserAuthorization_Manager* authorizationManager,
                                            SOPC_UserAuthorization_OperationType operationType,
-                                           const SOPC_NodeId* pNid,
+                                           const SOPC_NodeId* nodeId,
                                            uint32_t attributeId,
                                            const SOPC_User* pUser,
                                            bool* pbOperationAuthorized)
 {
     (void) (authorizationManager);
     (void) (operationType);
-    (void) (pNid);
+    (void) (nodeId);
     (void) (attributeId);
     (void) (pUser);
     assert(NULL != pbOperationAuthorized);

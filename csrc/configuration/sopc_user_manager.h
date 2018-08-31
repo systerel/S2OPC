@@ -64,7 +64,7 @@ typedef void (*SOPC_UserAuthorization_Free_Func)(SOPC_UserAuthorization_Manager*
 typedef SOPC_ReturnStatus (*SOPC_UserAuthorization_AuthorizeOperation_Func)(
     SOPC_UserAuthorization_Manager* authorizationManager,
     SOPC_UserAuthorization_OperationType operationType,
-    const SOPC_NodeId* pNid,
+    const SOPC_NodeId* nodeId,
     uint32_t attributeId,
     const SOPC_User* pUser,
     bool* pbOperationAuthorized);
@@ -112,7 +112,7 @@ typedef struct SOPC_UserAuthorization_Functions
      * \param authorizationManager   The SOPC_UserAuthorization_Manager instance.
      * \param operationType          Set to SOPC_USER_AUTHORIZATION_OPERATION_READ for a read operation,
                                      or SOPC_USER_AUTHORIZATION_OPERATION_WRITE for a write operation.
-     * \param pNid                   The operation reads/write this NodeId.
+     * \param nodeId                 The operation reads/write this NodeId.
      * \param attributeId            The operation reads/write this attribute.
      * \param pUser                  The connected SOPC_User which attempts the operation.
      * \param pbOperationAuthorized  A valid pointer to the uninitialized result of the operation.
@@ -158,22 +158,20 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
 /**
  * \brief Authorize an operation with the chosen authorization manager.
  *
- * \param authorizationManager   The SOPC_UserAuthorization_Manager instance.
+ * \param userWithAuthorization  The user and authorization manager to use.
  * \param operationType          Set to SOPC_USER_AUTHORIZATION_OPERATION_READ for a read operation,
                                  or SOPC_USER_AUTHORIZATION_OPERATION_WRITE for a write operation.
- * \param pNid                   The operation reads/write this NodeId.
+ * \param nodeId                 The operation reads/write this NodeId.
  * \param attributeId            The operation reads/write this attribute.
- * \param pUser                  The connected SOPC_User which attempts the operation.
  * \param pbOperationAuthorized  A valid pointer to the uninitialized result of the operation.
  *                               The callback shall set it to false when the operation is refused.
  *
  * \return SOPC_STATUS_OK when \p pbUserAuthorized was set.
  */
-SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserAuthorization_Manager* authorizationManager,
+SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserWithAuthorization* userWithAuthorization,
                                                                SOPC_UserAuthorization_OperationType operationType,
-                                                               const SOPC_NodeId* pNid,
+                                                               const SOPC_NodeId* nodeId,
                                                                uint32_t attributeId,
-                                                               const SOPC_User* pUser,
                                                                bool* pbOperationAuthorized);
 /** \brief Deletes a SOPC_UserAuthentication_Manager using its pFuncFree. */
 void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAuthenticationManager);
