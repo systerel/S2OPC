@@ -153,7 +153,7 @@ SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_AllowAll(vo
 }
 
 SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateFromIdentityToken(
-    SOPC_ExtensionObject* pUserIdentity,
+    const SOPC_ExtensionObject* pUserIdentity,
     SOPC_UserAuthorization_Manager* authorizationManager)
 {
     assert(NULL != pUserIdentity);

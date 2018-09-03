@@ -197,7 +197,7 @@ SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_AllowAll(vo
  * \return The created object if successful, otherwise NULL.
  */
 SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateFromIdentityToken(
-    SOPC_ExtensionObject* pUserIdentity,
+    const SOPC_ExtensionObject* pUserIdentity,
     SOPC_UserAuthorization_Manager* authorizationManager);
 
 /**
