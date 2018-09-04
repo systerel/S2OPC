@@ -40,7 +40,8 @@ IMPORTS
     service_get_endpoints_bs,
     service_browse_seq,
     subscription_mgr,
-    service_find_servers_bs
+    service_find_servers_bs,
+    service_register_nodes
 
 PROMOTES
     /* message_in_bs */
@@ -514,6 +515,8 @@ OPERATIONS
             OR e_msg_monitored_items_create_req THEN
                 l_user <-- get_session_user_server(session);
                 StatusCode_service <-- treat_subscription_create_monitored_items_req (session, l_user, req_msg, resp_msg)
+            OR e_msg_view_register_nodes_req THEN
+                StatusCode_service <-- treat_register_nodes_request (req_msg, resp_msg)
             ELSE
                 /* service is not supported */
                 StatusCode_service := e_sc_bad_service_unsupported

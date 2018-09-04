@@ -38,7 +38,9 @@ PROPERTIES
 
     t_monitoredItemReqIndex = 1..k_n_monitoredItem_max &
 
-    t_monitoredItemNotifIndex = 1..k_n_monitoredItemNotif_max
+    t_monitoredItemNotifIndex = 1..k_n_monitoredItemNotif_max &
+
+    t_registerNodesReqIndex = 1..k_n_registerNodes_max
 
 VALUES
 
