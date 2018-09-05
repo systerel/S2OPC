@@ -61,6 +61,9 @@ typedef bool (*SOPC_Dict_KeyEqual_Fct)(const void* a, const void* b);
  *                    Can be \c NULL if the values should not be freed.
  * \return The created dictionary in case of success, or \c NULL on memory
  *         allocation failure.
+ *
+ * Removal of values is not supported by default. To enable removing values from
+ * the dictionary, set a tombstone key using \ref SOPC_Dict_SetTombstoneKey.
  */
 SOPC_Dict* SOPC_Dict_Create(void* empty_key,
                             SOPC_Dict_KeyHash_Fct key_hash,
@@ -86,6 +89,23 @@ void SOPC_Dict_Delete(SOPC_Dict* d);
  *         failure.
  */
 bool SOPC_Dict_Reserve(SOPC_Dict* d, size_t n_items);
+
+/**
+ * \brief Set the key used to mark removed values.
+ * \param d              The dictionary.
+ * \param tombstone_key  The key used to mark removed values.
+ *
+ * When removing values from the dictionary, this key will be used to indicate
+ * that the bucket is now empty. This means that after this function is called,
+ * the tombstone key cannot be used for normal values anymore. If the tombstone
+ * key is not set, removals of values is not supported by the dictionary.
+ *
+ * The tombstone key MUST be different from the empty key.
+ *
+ * As a safeguard, calling this function is only allowed when the dictionary is
+ * completely empty (including tombstones), like right after its creation.
+ */
+void SOPC_Dict_SetTombstoneKey(SOPC_Dict* d, void* tombstone_key);
 
 /**
  * \brief Inserts a new key and value in the dictionary.
@@ -130,6 +150,16 @@ void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found);
 void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found);
 
 /**
+ * \brief Removes a values from the dictionary.
+ * \param d    The dictionary.
+ * \param key  The key to remove.
+ *
+ * For removals to be supported, a tombstone key MUST have been set before using
+ * \ref SOPC_Dict_SetTombstoneKey.
+ */
+void SOPC_Dict_Remove(SOPC_Dict* d, const void* key);
+
+/**
  * \brief Retrieves the free function for this dictionary's keys.
  * \param d  The dictionary.
  * \return The function used to free the keys, or NULL if no such function was
@@ -171,7 +201,8 @@ size_t SOPC_Dict_Size(const SOPC_Dict* d);
  * \param d  The dictionary.
  * \return The number of items the dictionary can hold.
  *
- * The dictionary will grow its capacity as needed when inserting new items.
+ * The dictionary will grow its capacity as needed when inserting new items, and
+ * reduce it after enough items are removed.
  */
 size_t SOPC_Dict_Capacity(const SOPC_Dict* d);
 

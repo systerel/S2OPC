@@ -197,6 +197,113 @@ START_TEST(test_dict_get_key)
 }
 END_TEST
 
+START_TEST(test_dict_remove_no_tombstone)
+{
+    SOPC_Dict* d = SOPC_Dict_Create(NULL, str_hash, str_equal, NULL, NULL);
+    ck_assert_ptr_nonnull(d);
+
+    ck_assert(SOPC_Dict_Insert(d, "Hello", "World"));
+    SOPC_Dict_Remove(d, "Hello"); // Should assert
+
+    SOPC_Dict_Delete(d);
+}
+END_TEST
+
+START_TEST(test_dict_set_tombstone_late)
+{
+    SOPC_Dict* d = SOPC_Dict_Create(NULL, str_hash, str_equal, NULL, NULL);
+    ck_assert_ptr_nonnull(d);
+
+    ck_assert(SOPC_Dict_Insert(d, "Hello", "World"));
+    SOPC_Dict_SetTombstoneKey(d, (void*) 0x01); // Should assert
+
+    SOPC_Dict_Delete(d);
+}
+END_TEST
+
+START_TEST(test_dict_remove)
+{
+    SOPC_Dict* d = SOPC_Dict_Create(NULL, str_hash, str_equal, NULL, NULL);
+    ck_assert_ptr_nonnull(d);
+
+    SOPC_Dict_SetTombstoneKey(d, (void*) 0x01);
+
+    bool found;
+
+    ck_assert(SOPC_Dict_Insert(d, "Hello", "World"));
+    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
+    ck_assert_str_eq("World", SOPC_Dict_Get(d, "Hello", &found));
+    ck_assert(found);
+
+    SOPC_Dict_Remove(d, "Other");
+    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
+    ck_assert_str_eq("World", SOPC_Dict_Get(d, "Hello", &found));
+    ck_assert(found);
+
+    SOPC_Dict_Remove(d, "Hello");
+    ck_assert_uint_eq(0, SOPC_Dict_Size(d));
+    ck_assert_ptr_null(SOPC_Dict_Get(d, "Hello", &found));
+    ck_assert(!found);
+
+    ck_assert(SOPC_Dict_Insert(d, "Hello", "World"));
+    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
+    ck_assert_str_eq("World", SOPC_Dict_Get(d, "Hello", &found));
+    ck_assert(found);
+
+    SOPC_Dict_Delete(d);
+}
+END_TEST
+
+START_TEST(test_dict_tombstone_reuse)
+{
+    SOPC_Dict* d = SOPC_Dict_Create(NULL, str_hash, str_equal, NULL, NULL);
+    ck_assert_ptr_nonnull(d);
+
+    SOPC_Dict_SetTombstoneKey(d, (void*) 0x01);
+
+    size_t initial_cap = SOPC_Dict_Capacity(d);
+
+    for (int i = 0; i < 1024; ++i)
+    {
+        ck_assert(SOPC_Dict_Insert(d, "Hello", "World"));
+        SOPC_Dict_Remove(d, "Hello");
+    }
+
+    ck_assert_uint_eq(0, SOPC_Dict_Size(d));
+    ck_assert_uint_eq(initial_cap, SOPC_Dict_Capacity(d));
+
+    SOPC_Dict_Delete(d);
+}
+END_TEST
+
+START_TEST(test_dict_compact)
+{
+    SOPC_Dict* d = SOPC_Dict_Create(NULL, uintptr_hash, direct_equal, NULL, NULL);
+    ck_assert_ptr_nonnull(d);
+
+    SOPC_Dict_SetTombstoneKey(d, (void*) 0x01);
+
+    size_t initial_cap = SOPC_Dict_Capacity(d);
+
+    for (int i = 0; i < 1024; ++i)
+    {
+        ck_assert(SOPC_Dict_Insert(d, (void*) (uintptr_t)(i + 2), NULL));
+    }
+
+    ck_assert_uint_gt(SOPC_Dict_Capacity(d), initial_cap);
+
+    for (int i = 0; i < 1024; ++i)
+    {
+        SOPC_Dict_Remove(d, (void*) (uintptr_t)(i + 2));
+    }
+
+    ck_assert_uint_eq(0, SOPC_Dict_Size(d));
+    ck_assert_uint_eq(initial_cap, SOPC_Dict_Capacity(d));
+
+    SOPC_Dict_Delete(d);
+}
+END_TEST
+
 Suite* tests_make_suite_dict(void)
 {
     Suite* s;
@@ -212,6 +319,12 @@ Suite* tests_make_suite_dict(void)
     tcase_add_test(tc_dict, test_dict_free);
     tcase_add_test(tc_dict, test_dict_resize);
     tcase_add_test(tc_dict, test_dict_get_key);
+    // 6 == SIGABRT
+    tcase_add_test_raise_signal(tc_dict, test_dict_remove_no_tombstone, 6);
+    tcase_add_test_raise_signal(tc_dict, test_dict_set_tombstone_late, 6);
+    tcase_add_test(tc_dict, test_dict_remove);
+    tcase_add_test(tc_dict, test_dict_tombstone_reuse);
+    tcase_add_test(tc_dict, test_dict_compact);
     suite_add_tcase(s, tc_dict);
 
     return s;

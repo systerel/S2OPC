@@ -41,15 +41,23 @@ typedef struct _SOPC_DictBucket
 struct _SOPC_Dict
 {
     SOPC_DictBucket* buckets;
-    size_t size;     // Always a power of two
+    size_t size;     // Total number of buckets, always a power of two
     size_t sizemask; // sizemask == (size - 1), used to replace (hash % size) by (hash & sizemask)
-    size_t n_items;
+    size_t n_items;  // Number of buckets holding a "real" value (not empty, not tombstone)
+    size_t n_busy;   // Number of buckets where the key is not the empty key
     void* empty_key;
+    void* tombstone_key;
     SOPC_Dict_KeyHash_Fct hash_func;
     SOPC_Dict_KeyEqual_Fct equal_func;
     SOPC_Dict_Free_Fct key_free;
     SOPC_Dict_Free_Fct value_free;
 };
+
+static const size_t DICT_INITIAL_SIZE = 16;
+
+// Shrink the table if the number of items is below SHRINK_FACTOR * (number of buckets)
+// We never shrink below DICT_INITIAL_SIZE.
+static const double SHRINK_FACTOR = 0.4;
 
 static void set_empty_keys(SOPC_DictBucket* buckets, size_t n_buckets, void* empty_key)
 {
@@ -80,11 +88,12 @@ static bool insert_item(SOPC_Dict* d, uint64_t hash, void* key, void* value, boo
         SOPC_DictBucket* b = &d->buckets[idx];
 
         // Normal insert
-        if (b->key == d->empty_key)
+        if (b->key == d->empty_key || b->key == d->tombstone_key)
         {
             b->key = key;
             b->value = value;
             d->n_items++;
+            d->n_busy++;
             return true;
         }
 
@@ -107,6 +116,8 @@ static bool insert_item(SOPC_Dict* d, uint64_t hash, void* key, void* value, boo
 static bool dict_resize(SOPC_Dict* d, size_t size)
 {
     size_t sizemask = size - 1;
+    assert((size & sizemask) == 0); // Ensure we have a power of two
+
     SOPC_DictBucket* buckets = calloc(size, sizeof(SOPC_DictBucket));
 
     if (buckets == NULL)
@@ -119,23 +130,25 @@ static bool dict_resize(SOPC_Dict* d, size_t size)
         set_empty_keys(buckets, size, d->empty_key);
     }
 
-    size_t old_size = d->size;
-    SOPC_DictBucket* old_buckets = d->buckets;
+    SOPC_Dict dict_backup = *d;
 
+    d->n_busy = 0;
+    d->n_items = 0;
     d->buckets = buckets;
     d->size = size;
     d->sizemask = sizemask;
 
     bool ok = true;
 
-    for (size_t i = 0; i < old_size; ++i)
+    for (size_t i = 0; i < dict_backup.size; ++i)
     {
-        if (old_buckets[i].key == d->empty_key)
+        SOPC_DictBucket* b = &dict_backup.buckets[i];
+
+        if ((b->key == d->empty_key) || (b->key == d->tombstone_key))
         {
             continue;
         }
 
-        SOPC_DictBucket* b = &old_buckets[i];
         uint64_t hash = d->hash_func(b->key);
 
         if (!insert_item(d, hash, b->key, b->value, false))
@@ -147,13 +160,11 @@ static bool dict_resize(SOPC_Dict* d, size_t size)
 
     if (ok)
     {
-        free(old_buckets);
+        free(dict_backup.buckets);
     }
     else
     {
-        d->buckets = old_buckets;
-        d->size = old_size;
-        d->sizemask = old_size - 1;
+        *d = dict_backup;
     }
 
     return ok;
@@ -165,8 +176,6 @@ SOPC_Dict* SOPC_Dict_Create(void* empty_key,
                             SOPC_Dict_Free_Fct key_free,
                             SOPC_Dict_Free_Fct value_free)
 {
-    static const size_t DICT_INITIAL_SIZE = 16;
-
     SOPC_Dict* d = calloc(1, sizeof(SOPC_Dict));
 
     if (d == NULL)
@@ -188,6 +197,7 @@ SOPC_Dict* SOPC_Dict_Create(void* empty_key,
     }
 
     d->empty_key = empty_key;
+    d->tombstone_key = empty_key;
     d->hash_func = key_hash;
     d->equal_func = key_equal;
     d->key_free = key_free;
@@ -212,9 +222,11 @@ void SOPC_Dict_Delete(SOPC_Dict* d)
         {
             for (size_t i = 0; i < d->size; ++i)
             {
-                if (d->buckets[i].key != d->empty_key)
+                SOPC_DictBucket* bucket = &d->buckets[i];
+
+                if ((bucket->key != d->empty_key) && (bucket->key != d->tombstone_key))
                 {
-                    free_bucket(&d->buckets[i], d->key_free, d->value_free);
+                    free_bucket(bucket, d->key_free, d->value_free);
                 }
             }
 
@@ -225,26 +237,65 @@ void SOPC_Dict_Delete(SOPC_Dict* d)
     }
 }
 
+// Compute the minimum dictionary size (a power of two) given an initial size
+// and a number of items to store.
+// The computed value is such that dictionary occupation stays under 50%.
+static size_t minimum_dict_size(size_t start_size, size_t n_items)
+{
+    assert((start_size & (start_size - 1)) == 0);
+
+    size_t size = start_size;
+
+    while (size < (2 * n_items))
+    {
+        size *= 2;
+    }
+
+    return size;
+}
+
 bool SOPC_Dict_Reserve(SOPC_Dict* d, size_t n_items)
 {
     assert(d != NULL);
+    return dict_resize(d, minimum_dict_size(d->size, n_items));
+}
 
-    size_t new_size = d->size;
+void SOPC_Dict_SetTombstoneKey(SOPC_Dict* d, void* tombstone_key)
+{
+    assert(d != NULL);
+    assert(d->empty_key != tombstone_key);
+    assert(d->n_busy == 0);
+    d->tombstone_key = tombstone_key;
+}
 
-    while (new_size < n_items)
+// Delta is 1 when adding, 0 when removing
+static bool maybe_resize(SOPC_Dict* d, uint8_t delta)
+{
+    const size_t shrink_limit = (size_t)(SHRINK_FACTOR * ((double) d->size));
+    size_t target_size = d->size;
+
+    if (((delta > 0) && ((d->n_busy + delta) > (d->size / 2))) || ((delta == 0) && (d->n_items < shrink_limit)))
     {
-        new_size *= 2;
+        // One of the two cases:
+        // - Overpopulation when adding items
+        // - Underpopulation while removing items
+        //
+        // Compute the required number of buckets after eliminating tombstones
+        // and resize.
+
+        // Ensure the occupation will be under 50%
+        target_size = minimum_dict_size(DICT_INITIAL_SIZE, d->n_items + delta);
     }
 
-    return dict_resize(d, new_size);
+    return (d->size == target_size) ? true : dict_resize(d, target_size);
 }
 
 bool SOPC_Dict_Insert(SOPC_Dict* d, void* key, void* value)
 {
     assert(d != NULL);
-    assert(key != d->empty_key);
+    assert(key != d->empty_key && key != d->tombstone_key);
 
-    if ((d->n_items >= (d->size / 2)) && !dict_resize(d, 2 * d->size))
+    if (!maybe_resize(d, 1))
     {
         return false;
     }
@@ -254,70 +305,84 @@ bool SOPC_Dict_Insert(SOPC_Dict* d, void* key, void* value)
     return insert_item(d, hash, key, value, true);
 }
 
-static void* get_internal(const SOPC_Dict* d, const void* key, bool* found, void** dict_key)
+static SOPC_DictBucket* get_internal(const SOPC_Dict* d, const void* key)
 {
     uint64_t hash = d->hash_func(key);
-    void* value = NULL;
-
-    if (found != NULL)
-    {
-        *found = false;
-    }
-
-    if (dict_key != NULL)
-    {
-        *dict_key = NULL;
-    }
 
     for (size_t i = 0; i < d->size; ++i)
     {
         uint64_t idx = HASH_I(hash, i) & d->sizemask;
+        const void* bucket_key = d->buckets[idx].key;
 
-        if (d->buckets[idx].key == d->empty_key)
+        if (bucket_key == d->empty_key)
         {
             break;
         }
 
-        if (d->equal_func(key, d->buckets[idx].key))
+        // If removals are not supported, we have empty_key == tombstone_key, so
+        // this if never matches.
+        if (bucket_key == d->tombstone_key)
         {
-            value = d->buckets[idx].value;
+            continue;
+        }
 
-            if (found != NULL)
-            {
-                *found = true;
-            }
-
-            if (dict_key != NULL)
-            {
-                *dict_key = d->buckets[idx].key;
-            }
+        if (d->equal_func(key, bucket_key))
+        {
+            return &d->buckets[idx];
         }
     }
 
-    return value;
+    return NULL;
 }
 
 void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found)
 {
     assert(d != NULL);
-    return get_internal(d, key, found, NULL);
+    SOPC_DictBucket* bucket = get_internal(d, key);
+
+    if (found != NULL)
+    {
+        *found = (bucket != NULL);
+    }
+
+    return (bucket != NULL) ? bucket->value : NULL;
 }
 
 void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found)
 {
     assert(d != NULL);
-
-    void* dict_key;
-    bool _found;
-
-    get_internal(d, key, &_found, &dict_key);
+    SOPC_DictBucket* bucket = get_internal(d, key);
 
     if (found != NULL)
     {
-        *found = _found;
+        *found = (bucket != NULL);
     }
 
-    return dict_key;
+    return (bucket != NULL) ? bucket->key : NULL;
+}
+
+void SOPC_Dict_Remove(SOPC_Dict* d, const void* key)
+{
+    assert(d != NULL);
+
+    // Check that a tombstone key has been defined
+    assert(d->empty_key != d->tombstone_key);
+
+    SOPC_DictBucket* bucket = get_internal(d, key);
+
+    if (bucket == NULL)
+    {
+        return;
+    }
+
+    free_bucket(bucket, d->key_free, d->value_free);
+    bucket->key = d->tombstone_key;
+    bucket->value = NULL;
+    --d->n_items;
+
+    // We can ignore failures here, worst case we fail to compact and will try
+    // later.
+    maybe_resize(d, 0);
 }
 
 SOPC_Dict_Free_Fct SOPC_Dict_GetKeyFreeFunc(const SOPC_Dict* d)
