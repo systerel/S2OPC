@@ -35,34 +35,11 @@
 
 SOPC_Dict* nodeIdToMonitoredItemQueue = NULL;
 
-static uint64_t nodeid_hash_subscription(const void* id)
-{
-    uint64_t hash;
-    SOPC_NodeId_Hash((const SOPC_NodeId*) id, &hash);
-    return hash;
-}
-
-static bool nodeid_equal_subscription(const void* a, const void* b)
-{
-    int32_t cmp;
-    SOPC_ReturnStatus status = SOPC_NodeId_Compare((const SOPC_NodeId*) a, (const SOPC_NodeId*) b, &cmp);
-    assert(SOPC_STATUS_OK == status);
-
-    return cmp == 0;
-}
-
 static void free_monitored_item_queue(void* data)
 {
     SOPC_SLinkedList* miQueue = (SOPC_SLinkedList*) data;
     // No deallocation for queue elements: done in UNINITIALISATION in monitored_item_pointer_bs
     SOPC_SLinkedList_Delete(miQueue);
-}
-
-static void free_node_id(void* data)
-{
-    SOPC_NodeId* nid = (SOPC_NodeId*) data;
-    SOPC_NodeId_Clear(nid);
-    free(nid);
 }
 
 /*------------------------
@@ -72,8 +49,7 @@ void subscription_core_bs__INITIALISATION(void)
 {
     assert(nodeIdToMonitoredItemQueue == NULL);
 
-    nodeIdToMonitoredItemQueue = SOPC_Dict_Create(NULL, nodeid_hash_subscription, nodeid_equal_subscription,
-                                                  free_node_id, free_monitored_item_queue);
+    nodeIdToMonitoredItemQueue = SOPC_NodeId_Dict_Create(true, free_monitored_item_queue);
     assert(nodeIdToMonitoredItemQueue != NULL);
 }
 

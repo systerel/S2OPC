@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <time.h>
 
+#include "sopc_dict.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_toolkit_constants.h"
 
@@ -459,6 +460,8 @@ void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash);
 
 char* SOPC_NodeId_ToCString(SOPC_NodeId* nodeId);
 SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len);
+
+SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct value_free);
 
 void SOPC_ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId);
 void SOPC_ExpandedNodeId_InitializeAux(void* value);

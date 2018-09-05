@@ -24,7 +24,6 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_address_space.h"
-#include "sopc_dict.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
@@ -130,25 +129,9 @@ static void free_description_item(void* data)
     free(item);
 }
 
-static uint64_t nodeid_hash(const void* id)
-{
-    uint64_t hash;
-    SOPC_NodeId_Hash((const SOPC_NodeId*) id, &hash);
-    return hash;
-}
-
-static bool nodeid_equal(const void* a, const void* b)
-{
-    int32_t cmp;
-    SOPC_NodeId_Compare((const SOPC_NodeId*) a, (const SOPC_NodeId*) b, &cmp);
-
-    return cmp == 0;
-}
-
 SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items)
 {
-    return SOPC_Dict_Create(NULL, nodeid_hash, nodeid_equal, NULL,
-                            free_items ? free_description_item : clear_description_item_value);
+    return SOPC_NodeId_Dict_Create(false, free_items ? free_description_item : clear_description_item_value);
 }
 
 SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
