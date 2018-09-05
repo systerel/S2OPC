@@ -352,9 +352,8 @@ void message_out_bs__write_activate_msg_user(const constants__t_msg_i message_ou
     assert(SOPC_ExtObjBodyEncoding_Object == req->UserIdentityToken.Encoding);
     if (req->UserIdentityToken.Body.Object.ObjType == &OpcUa_AnonymousIdentityToken_EncodeableType)
     {
-        OpcUa_AnonymousIdentityToken* src =
-            (OpcUa_AnonymousIdentityToken*) (message_out_bs__p_user_token->Body.Object.Value);
-        OpcUa_AnonymousIdentityToken* dst = (OpcUa_AnonymousIdentityToken*) (req->UserIdentityToken.Body.Object.Value);
+        OpcUa_AnonymousIdentityToken* src = message_out_bs__p_user_token->Body.Object.Value;
+        OpcUa_AnonymousIdentityToken* dst = req->UserIdentityToken.Body.Object.Value;
         SOPC_String_Initialize(&dst->PolicyId);
         status = SOPC_String_Copy(&dst->PolicyId, &src->PolicyId);
         assert(SOPC_STATUS_OK == status);

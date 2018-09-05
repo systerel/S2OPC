@@ -181,7 +181,7 @@ SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateFromIdentityToken(
     }
     else if (&OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType)
     {
-        OpcUa_UserNameIdentityToken* tok = (OpcUa_UserNameIdentityToken*) (pUserIdentity->Body.Object.Value);
+        OpcUa_UserNameIdentityToken* tok = pUserIdentity->Body.Object.Value;
         userauthz->user = SOPC_User_CreateUsername(&tok->UserName);
     }
 
