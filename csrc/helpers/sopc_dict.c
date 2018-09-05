@@ -84,6 +84,7 @@ static bool insert_item(SOPC_Dict* d, uint64_t hash, void* key, void* value, boo
         {
             b->key = key;
             b->value = value;
+            d->n_items++;
             return true;
         }
 
@@ -250,15 +251,7 @@ bool SOPC_Dict_Insert(SOPC_Dict* d, void* key, void* value)
 
     uint64_t hash = d->hash_func(key);
 
-    if (insert_item(d, hash, key, value, true))
-    {
-        d->n_items++;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return insert_item(d, hash, key, value, true);
 }
 
 static void* get_internal(const SOPC_Dict* d, const void* key, bool* found, void** dict_key)
