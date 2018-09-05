@@ -53,7 +53,7 @@ OPERATIONS
     continue <-- init_iter_monitored_item_request(nb_req) =
     PRE
         nb_req : NAT &
-        nb_req <= k_n_read_resp_max
+        nb_req <= k_n_monitoredItem_max
     THEN
         rreqs_nb_reqs := nb_req ||
         rreqs_iterated := {} ||
