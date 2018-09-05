@@ -1,0 +1,46 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    service_unregister_nodes_i
+
+REFINES
+    service_unregister_nodes
+
+SEES
+    constants,
+    message_in_bs,
+    message_out_bs
+
+IMPORTS
+    msg_unregister_nodes,
+    unregister_nodes_it
+
+OPERATIONS
+
+    ret <-- treat_unregister_nodes_request (p_req_msg) =
+    VAR
+        l_nb_nodes
+    IN
+        // Because the RegisterNodes services does not register anything,
+        // we don't need to unregister anything here either.
+        ret, l_nb_nodes <-- getall_msg_unregister_nodes_req_nb_nodes (p_req_msg)
+    END
+
+END

@@ -185,6 +185,7 @@ typedef SOPC_String* constants_bs__t_IndexRange_i;
 #define constants_bs__k_n_republishNotifPerSub_max (2 * SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS)
 #define constants_bs__c_IndexRange_indet 0
 #define constants_bs__k_n_registerNodes_max SOPC_MAX_OPERATIONS_PER_MSG
+#define constants_bs__k_n_unregisterNodes_max SOPC_MAX_OPERATIONS_PER_MSG
 
 /*------------------------
    INITIALISATION Clause

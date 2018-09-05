@@ -312,6 +312,7 @@ CONCRETE_CONSTANTS
     k_n_genericOperationPerReq_max,
     k_n_IndexRange_max,
     k_n_registerNodes_max,
+    k_n_unregisterNodes_max,
 
     c_Variant_indet,
     c_NodeId_indet,
@@ -433,6 +434,7 @@ ABSTRACT_CONSTANTS
     t_IndexRange,
     t_operation_type,
     t_registerNodesReqIndex,
+    t_unregisterNodesReqIndex,
 
     s_session_treatment_reqs,
     s_session_treatment_resps,
@@ -508,6 +510,7 @@ PROPERTIES
     k_n_genericOperationPerReq_max : NAT &
     k_n_IndexRange_max : NAT &
     k_n_registerNodes_max : NAT &
+    k_n_unregisterNodes_max : NAT &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
@@ -545,6 +548,7 @@ PROPERTIES
     t_monitoredItemNotifIndex <: NAT &
 
     t_registerNodesReqIndex <: NAT &
+    t_unregisterNodesReqIndex <: NAT &
 
     t_RefIndex <: NAT &
 
