@@ -60,13 +60,16 @@ START_TEST(test_dict_insert_get)
     bool found;
     SOPC_Dict* d = SOPC_Dict_Create(NULL, str_hash, str_equal, NULL, NULL);
 
+    ck_assert_uint_eq(0, SOPC_Dict_Size(d));
     ck_assert_ptr_null(SOPC_Dict_Get(d, "Hello", &found));
     ck_assert(!found);
     ck_assert(SOPC_Dict_Insert(d, "Hello", "World"));
+    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
     ck_assert_str_eq("World", SOPC_Dict_Get(d, "Hello", &found));
     ck_assert(found);
 
     ck_assert(SOPC_Dict_Insert(d, "Bonjour", "Monde"));
+    ck_assert_uint_eq(2, SOPC_Dict_Size(d));
     ck_assert_str_eq("Monde", SOPC_Dict_Get(d, "Bonjour", &found));
     ck_assert(found);
     ck_assert_str_eq("World", SOPC_Dict_Get(d, "Hello", &found));
@@ -82,10 +85,12 @@ START_TEST(test_dict_insert_overwrite)
     SOPC_Dict* d = SOPC_Dict_Create(NULL, str_hash, str_equal, NULL, NULL);
 
     ck_assert(SOPC_Dict_Insert(d, "Hello", "World"));
+    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
     ck_assert_str_eq("World", SOPC_Dict_Get(d, "Hello", &found));
     ck_assert(found);
 
     ck_assert(SOPC_Dict_Insert(d, "Hello", "What ?"));
+    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
     ck_assert_str_eq("What ?", SOPC_Dict_Get(d, "Hello", &found));
     ck_assert(found);
 
@@ -103,9 +108,11 @@ START_TEST(test_dict_bucket_conflict)
     ck_assert(str_hash(k1) == str_hash(k2));
 
     ck_assert(SOPC_Dict_Insert(d, k1, "World"));
+    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
     ck_assert_str_eq("World", SOPC_Dict_Get(d, k1, NULL));
 
     ck_assert(SOPC_Dict_Insert(d, k2, "Flap flap"));
+    ck_assert_uint_eq(2, SOPC_Dict_Size(d));
     ck_assert_str_eq("Flap flap", SOPC_Dict_Get(d, k2, NULL));
 
     SOPC_Dict_Delete(d);
@@ -117,7 +124,9 @@ START_TEST(test_dict_non_null_empty_key)
     SOPC_Dict* d = SOPC_Dict_Create((void*) UINTPTR_MAX, uintptr_hash, direct_equal, NULL, NULL);
 
     ck_assert(SOPC_Dict_Insert(d, (void*) 0, "Zero"));
+    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
     ck_assert(SOPC_Dict_Insert(d, (void*) 1, "One"));
+    ck_assert_uint_eq(2, SOPC_Dict_Size(d));
 
     ck_assert_str_eq("Zero", SOPC_Dict_Get(d, (void*) 0, NULL));
     ck_assert_str_eq("One", SOPC_Dict_Get(d, (void*) 1, NULL));
@@ -154,11 +163,15 @@ START_TEST(test_dict_resize)
     // Check that many inserts cause a resize by inserting more values than
     // DICT_INITIAL_SIZE in sopc_dict.c
 
+    size_t initial_cap = SOPC_Dict_Capacity(d);
+
     for (uint32_t i = 1; i < 1024; ++i)
     {
         void* v = (void*) (uintptr_t) i;
         ck_assert(SOPC_Dict_Insert(d, v, v));
     }
+
+    ck_assert_uint_gt(SOPC_Dict_Capacity(d), initial_cap);
 
     SOPC_Dict_Delete(d);
 }

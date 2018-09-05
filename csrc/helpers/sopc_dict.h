@@ -159,4 +159,20 @@ SOPC_Dict_Free_Fct SOPC_Dict_GetValueFreeFunc(const SOPC_Dict* d);
  */
 void SOPC_Dict_SetValueFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func);
 
+/**
+ * \brief Returns the number of items in this dictionary.
+ * \param d  The dictionary.
+ * \return The number of items in the dictionary.
+ */
+size_t SOPC_Dict_Size(const SOPC_Dict* d);
+
+/**
+ * \brief Returns the number if items this dictionary can hold.
+ * \param d  The dictionary.
+ * \return The number of items the dictionary can hold.
+ *
+ * The dictionary will grow its capacity as needed when inserting new items.
+ */
+size_t SOPC_Dict_Capacity(const SOPC_Dict* d);
+
 #endif /* SOPC_DICT_H_ */

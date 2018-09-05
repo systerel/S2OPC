@@ -343,3 +343,13 @@ void SOPC_Dict_SetValueFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func)
     assert(d != NULL);
     d->value_free = func;
 }
+
+size_t SOPC_Dict_Size(const SOPC_Dict* d)
+{
+    return d->n_items;
+}
+
+size_t SOPC_Dict_Capacity(const SOPC_Dict* d)
+{
+    return d->size / 2;
+}
