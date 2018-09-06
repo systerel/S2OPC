@@ -572,6 +572,7 @@ OPERATIONS
             ;
             IF l_sc = e_sc_ok
             THEN
+                /* TODO: manage index and propagate new cases of read_NodeClass_Attribute in operation model */
                 l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(l_node, l_aid, c_IndexRange_indet);
                 IF l_ncl = e_ncl_Variable
                 THEN

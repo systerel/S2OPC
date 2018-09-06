@@ -45,6 +45,9 @@ DEFINITIONS
         Node_RefIndexEnd,
         RefIndex_Reference,
 
+        IsValid_VariantIndex,
+        HasRange_VariantIndex,
+
         /* Service Write */
         ResponseWrite_allocated,
         ResponseWrite_StatusCode,
@@ -82,6 +85,9 @@ DEFINITIONS
         Node_Reference          : t_Node     <-> t_Reference &
         Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
         RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference &
+
+        IsValid_VariantIndex : t_Variant * t_IndexRange --> BOOL &
+        HasRange_VariantIndex  : t_Variant * t_IndexRange --> BOOL &
 
         /* Service Write */
         ResponseWrite_allocated : BOOL &

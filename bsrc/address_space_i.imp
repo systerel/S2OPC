@@ -253,15 +253,16 @@ OPERATIONS
                 wvi : wreqs_iterated
                 |
                 {FALSE |-> e_sc_bad_attribute_id_invalid,
-                 TRUE  |-> {TRUE |-> e_sc_bad_index_range_invalid,
-                            FALSE |-> {FALSE |-> e_sc_bad_node_id_unknown,
-                                       TRUE  |-> {FALSE |-> e_sc_bad_write_not_supported,
-                                                  TRUE  |-> e_sc_ok
-                                                 }(bool(WriteValue_AttributeId(wvi) = e_aid_Value &
-                                                        a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi)))
-                                                         = e_ncl_Variable))
-                                      }(bool(WriteValue_NodeId(wvi) : ran(a_NodeId)))
-                           }(bool(WriteValue_HasIndexRange(wvi) = TRUE))
+                 TRUE  |-> {FALSE |-> e_sc_bad_node_id_unknown,
+                            TRUE  |-> {FALSE |-> e_sc_bad_write_not_supported,
+                                       TRUE  |-> {FALSE |-> e_sc_bad_index_range_invalid,
+                                                  TRUE |-> {FALSE |-> e_sc_bad_index_range_no_data,
+                                                            TRUE |-> e_sc_ok
+                                                           }(HasRange_VariantIndex(WriteValue_Value(wvi) |-> WriteValue_IndexRange(wvi)))
+                                                 }(IsValid_VariantIndex(WriteValue_Value(wvi) |-> WriteValue_IndexRange(wvi)))
+                                      }(bool(WriteValue_AttributeId(wvi) = e_aid_Value &
+                                             a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) = e_ncl_Variable))
+                           }(bool(WriteValue_NodeId(wvi) : ran(a_NodeId)))
                 }(bool(WriteValue_AttributeId(wvi) : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value}))
             )
         VARIANT

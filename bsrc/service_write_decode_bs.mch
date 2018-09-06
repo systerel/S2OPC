@@ -30,7 +30,7 @@ DEFINITIONS
         WriteValue_NodeId,
         WriteValue_AttributeId,
         WriteValue_Value, /* The field value of the DataValue */
-        WriteValue_HasIndexRange
+        WriteValue_IndexRange
         /* TODO: StatusCode, SourceTimestamp (determine if ServerTimestamp is useful) */
     ;
     d_inv ==
@@ -39,14 +39,14 @@ DEFINITIONS
         WriteValue_NodeId : t_WriteValue +-> t_NodeId &
         WriteValue_AttributeId : t_WriteValue +-> t_AttributeId_i &
         WriteValue_Value : t_WriteValue +-> t_Variant &
-        WriteValue_HasIndexRange : t_WriteValue +-> BOOL
+        WriteValue_IndexRange : t_WriteValue +-> t_IndexRange
     ;
     d_init ==
         nb_WriteValue := 0 ||
         WriteValue_NodeId :: {{}} ||
         WriteValue_AttributeId :: {{}} ||
         WriteValue_Value :: {{}} ||
-        WriteValue_HasIndexRange :: {{}}
+        WriteValue_IndexRange :: {{}}
 
 ABSTRACT_VARIABLES
     d_variables
@@ -77,13 +77,13 @@ OPERATIONS
               WriteValue_NodeId : cast_t_WriteValue[1..nb_WriteValue] --> t_NodeId &
               WriteValue_AttributeId : cast_t_WriteValue[1..nb_WriteValue] --> t_AttributeId_i &
               WriteValue_Value : cast_t_WriteValue[1..nb_WriteValue] --> t_Variant &
-              WriteValue_HasIndexRange : cast_t_WriteValue[1..nb_WriteValue] --> BOOL) &
+              WriteValue_IndexRange : cast_t_WriteValue[1..nb_WriteValue] --> t_IndexRange) &
             (StatusCode_service /= e_sc_ok =>
                 nb_WriteValue = 0 &
                 WriteValue_NodeId = {} &
                 WriteValue_AttributeId = {} &
                 WriteValue_Value = {} &
-                WriteValue_HasIndexRange = {})
+                WriteValue_IndexRange = {})
         )
     END
     ;
@@ -122,7 +122,7 @@ OPERATIONS
             :(nid : t_NodeId_i  & nid = WriteValue_NodeId(wvi) &
                 aid : t_AttributeId_i & aid : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value} &
                 value : t_Variant_i & value = WriteValue_Value(wvi) &
-                index_range : t_IndexRange_i)
+                index_range : t_IndexRange_i & index_range = WriteValue_IndexRange(wvi))
         ELSE
             isvalid := FALSE ||
             nid := c_NodeId_indet ||

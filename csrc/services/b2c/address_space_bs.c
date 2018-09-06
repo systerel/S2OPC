@@ -32,6 +32,7 @@
 
 #include "address_space_impl.h"
 #include "sopc_dict.h"
+#include "sopc_logger.h"
 #include "sopc_numeric_range.h"
 #include "util_b2c.h"
 #include "util_variant.h"
@@ -79,6 +80,18 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
     }
 }
 
+static constants__t_StatusCode_i index_range_bad_returnstatus_to_service_statuscode(SOPC_ReturnStatus status)
+{
+    switch (status)
+    {
+    case SOPC_STATUS_OUT_OF_MEMORY:
+        return constants__e_sc_bad_out_of_memory;
+    default:
+        SOPC_Logger_TraceWarning("index_range_statuscode: internal error generated from return status code %d", status);
+        return constants__e_sc_bad_internal_error;
+    }
+}
+
 static constants__t_StatusCode_i read_value_indexed(const SOPC_Variant* value,
                                                     const SOPC_String* range_str,
                                                     SOPC_Variant* dereferenced)
@@ -89,7 +102,7 @@ static constants__t_StatusCode_i read_value_indexed(const SOPC_Variant* value,
     if (status != SOPC_STATUS_OK)
     {
         return (status == SOPC_STATUS_NOK) ? constants__e_sc_bad_index_range_invalid
-                                           : constants__e_sc_bad_internal_error;
+                                           : index_range_bad_returnstatus_to_service_statuscode(status);
     }
 
     bool has_range = false;
@@ -97,8 +110,12 @@ static constants__t_StatusCode_i read_value_indexed(const SOPC_Variant* value,
 
     if (status != SOPC_STATUS_OK)
     {
+        if (SOPC_STATUS_NOT_SUPPORTED == status)
+        {
+            SOPC_Logger_TraceWarning("read_value_indexed: matrix index range not supported");
+        }
         SOPC_NumericRange_Delete(range);
-        return constants__e_sc_bad_internal_error;
+        return constants__e_sc_bad_index_range_invalid; // In case we do not support  the range either (matrix)
     }
 
     if (!has_range)
@@ -112,8 +129,7 @@ static constants__t_StatusCode_i read_value_indexed(const SOPC_Variant* value,
 
     if (status != SOPC_STATUS_OK)
     {
-        return (status == SOPC_STATUS_NOK) ? constants__e_sc_bad_index_range_invalid
-                                           : constants__e_sc_bad_internal_error;
+        return index_range_bad_returnstatus_to_service_statuscode(status);
     }
 
     return constants__e_sc_ok;
@@ -173,7 +189,7 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_Node
 
     if (value == NULL)
     {
-        *address_space_bs__sc = constants__e_sc_bad_internal_error;
+        *address_space_bs__sc = constants__e_sc_bad_out_of_memory;
         *address_space_bs__variant = NULL;
         return;
     }
@@ -224,7 +240,7 @@ static constants__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
     if (status != SOPC_STATUS_OK)
     {
         return (status == SOPC_STATUS_NOK) ? constants__e_sc_bad_index_range_invalid
-                                           : constants__e_sc_bad_internal_error;
+                                           : constants__e_sc_bad_out_of_memory;
     }
 
     bool has_range = false;
@@ -232,8 +248,12 @@ static constants__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
 
     if (status != SOPC_STATUS_OK)
     {
+        if (SOPC_STATUS_NOT_SUPPORTED == status)
+        {
+            SOPC_Logger_TraceWarning("set_value_indexed: matrix index range not supported");
+        }
         SOPC_NumericRange_Delete(range);
-        return constants__e_sc_bad_internal_error;
+        return constants__e_sc_bad_index_range_invalid; // In case we do not support  the range either (matrix)
     }
 
     if (!has_range)
@@ -253,15 +273,12 @@ static constants__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
     status = SOPC_Variant_SetRange(node_value, new_value, range);
     SOPC_NumericRange_Delete(range);
 
-    switch (status)
+    if (status != SOPC_STATUS_OK)
     {
-    case SOPC_STATUS_OK:
-        return constants__e_sc_ok;
-    case SOPC_STATUS_NOK:
-        return constants__e_sc_bad_index_range_invalid;
-    default:
-        return constants__e_sc_bad_internal_error;
+        return index_range_bad_returnstatus_to_service_statuscode(status);
     }
+
+    return constants__e_sc_ok;
 }
 
 void address_space_bs__set_Value(const constants__t_Node_i address_space_bs__node,

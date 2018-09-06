@@ -41,7 +41,11 @@ DEFINITIONS
         Reference_IsForward,
 
         Node_RefIndexEnd,
-        RefIndex_Reference
+        RefIndex_Reference,
+
+        Generic_Node_Variant,
+        IsValid_VariantIndex, /* Valid (or none) index range value for Variant */
+        HasRange_VariantIndex /* Valid index range but has no range in  Variant */
     ;
 
     d_inv ==
@@ -64,7 +68,11 @@ DEFINITIONS
         Reference_IsForward     : t_Reference +-> BOOL             &
 
         Node_RefIndexEnd        : t_Node     +-> t_RefIndex  &
-        RefIndex_Reference      : t_Node * t_RefIndex +-> t_Reference
+        RefIndex_Reference      : t_Node * t_RefIndex +-> t_Reference &
+
+        Generic_Node_Variant : t_NodeClass * t_Node * t_AttributeId +-> t_Variant &
+        IsValid_VariantIndex : t_Variant * t_IndexRange +-> BOOL &
+        HasRange_VariantIndex  : t_Variant * t_IndexRange +-> BOOL
     )
 
 ABSTRACT_VARIABLES
@@ -91,7 +99,11 @@ INITIALISATION
         Reference_SourceNode    : t_Reference --> t_NodeId         &
         Reference_ReferenceType : t_Reference --> t_NodeId         &
         Reference_TargetNode    : t_Reference --> t_ExpandedNodeId &
-        Reference_IsForward     : t_Reference --> BOOL
+        Reference_IsForward     : t_Reference --> BOOL &
+
+        Generic_Node_Variant : t_NodeClass * t_Node * t_AttributeId --> t_Variant &
+        IsValid_VariantIndex : t_Variant * t_IndexRange --> BOOL &
+        HasRange_VariantIndex  : t_Variant * t_IndexRange --> BOOL
      )
 
 OPERATIONS
@@ -127,27 +139,48 @@ OPERATIONS
         index_range : t_IndexRange_i &
         index_range : t_IndexRange
     THEN
-        /* TODO: add BrowseName and DisplayName cases */
-        SELECT aid = e_aid_NodeId THEN
-            sc,
-            variant
-            :(  sc = e_sc_ok &
-                variant : t_Variant_i &
-                variant = conv_NodeId_Variant(a_NodeId(node))
-            )
-        WHEN aid = e_aid_NodeClass THEN
-            variant := conv_NodeClass_Variant(a_NodeClass(node)) ||
-            sc := e_sc_ok
-        WHEN aid = e_aid_BrowseName THEN
-            variant := conv_NodeClass_Variant(a_NodeClass(node)) ||
-            sc := e_sc_ok
-        WHEN aid = e_aid_Value &
-             (ncl = e_ncl_Variable or ncl = e_ncl_VariableType) THEN
-            variant := a_Value(node) ||
-            sc := e_sc_ok
-        ELSE
+        CHOICE
             variant := c_Variant_indet ||
-            sc := e_sc_bad_attribute_id_invalid
+            sc
+            :(sc : t_StatusCode_i &
+                sc : {e_sc_bad_out_of_memory, e_sc_bad_internal_error})
+        OR
+            IF aid : t_AttributeId - {e_aid_Description} THEN /* TODO: Description treatment */
+                IF IsValid_VariantIndex(Generic_Node_Variant(ncl |-> node |-> aid) |-> index_range) = TRUE &
+                    HasRange_VariantIndex(Generic_Node_Variant(ncl |-> node |-> aid) |-> index_range) = TRUE
+                THEN
+                    SELECT aid = e_aid_NodeId THEN
+                        sc,
+                        variant
+                        :(  sc = e_sc_ok &
+                            variant : t_Variant_i &
+                            variant = conv_NodeId_Variant(a_NodeId(node))
+                        )
+                    WHEN aid = e_aid_NodeClass THEN
+                        variant := conv_NodeClass_Variant(a_NodeClass(node)) ||
+                        sc := e_sc_ok
+                    WHEN aid = e_aid_Value &
+                        (ncl = e_ncl_Variable or ncl = e_ncl_VariableType) THEN
+                        variant := a_Value(node) ||
+                        sc := e_sc_ok
+                    ELSE
+                        /* TODO: add BrowseName, DisplayName, AccessLevel cases (a_NodeClass shall not be used) */
+                        variant := conv_NodeClass_Variant(a_NodeClass(node)) ||
+                        sc := e_sc_ok
+                    END
+                ELSIF IsValid_VariantIndex(Generic_Node_Variant(ncl |-> node |-> aid) |-> index_range) = FALSE
+                THEN
+                    variant := c_Variant_indet ||
+                    sc := e_sc_bad_index_range_invalid
+                ELSE
+                    variant := c_Variant_indet ||
+                    sc := e_sc_bad_index_range_no_data
+                END
+            ELSE
+
+                variant := c_Variant_indet ||
+                sc := e_sc_bad_attribute_id_invalid
+            END
         END
     END
     ;
@@ -163,11 +196,24 @@ OPERATIONS
         index_range : t_IndexRange
     THEN
         CHOICE
-            serviceStatusCode := e_sc_ok ||
-            prev_value :(prev_value : t_Variant_i & prev_value = a_Value(node)) ||
-            a_Value(node) := value
+            IF IsValid_VariantIndex(value |-> index_range) = TRUE &
+                HasRange_VariantIndex(value |-> index_range) = TRUE
+            THEN
+                serviceStatusCode := e_sc_ok ||
+                prev_value :(prev_value : t_Variant_i & prev_value = a_Value(node)) ||
+                a_Value(node) := value
+            ELSIF IsValid_VariantIndex(value |-> index_range) = FALSE
+            THEN
+                serviceStatusCode := e_sc_bad_index_range_invalid ||
+                prev_value := c_Variant_indet
+            ELSE
+                serviceStatusCode := e_sc_bad_index_range_no_data ||
+                prev_value := c_Variant_indet
+            END
         OR
-            serviceStatusCode := e_sc_bad_out_of_memory ||
+            serviceStatusCode
+            :(serviceStatusCode : t_StatusCode_i &
+                serviceStatusCode : {e_sc_bad_out_of_memory, e_sc_bad_internal_error}) ||
             prev_value := c_Variant_indet
         END
     END
