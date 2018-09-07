@@ -307,6 +307,8 @@ bool SOPC_Dict_Insert(SOPC_Dict* d, void* key, void* value)
 
 static SOPC_DictBucket* get_internal(const SOPC_Dict* d, const void* key)
 {
+    assert(key != d->empty_key && key != d->tombstone_key);
+
     uint64_t hash = d->hash_func(key);
 
     for (size_t i = 0; i < d->size; ++i)
