@@ -37,11 +37,11 @@
 #define ATTRIBUTEID_USERACCESSLEVEL 18
 
 /* Fixtures global variables */
-SOPC_User* user = NULL;
-SOPC_UserAuthentication_Manager* authenticationManager = NULL;
-SOPC_UserAuthentication_Manager* authenticationManagerSelective = NULL;
-SOPC_UserAuthorization_Manager* authorizationManager = NULL;
-SOPC_UserAuthorization_Manager* authorizationManagerSelective = NULL;
+static SOPC_User* user = NULL;
+static SOPC_UserAuthentication_Manager* authenticationManager = NULL;
+static SOPC_UserAuthentication_Manager* authenticationManagerSelective = NULL;
+static SOPC_UserAuthorization_Manager* authorizationManager = NULL;
+static SOPC_UserAuthorization_Manager* authorizationManagerSelective = NULL;
 
 /* Global complex objects */
 static const SOPC_ExtensionObject anonymousIdentityToken = {
