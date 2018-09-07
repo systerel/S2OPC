@@ -92,6 +92,38 @@ static constants__t_StatusCode_i index_range_bad_returnstatus_to_service_statusc
     }
 }
 
+static constants__t_StatusCode_i read_value_indexed_helper(const SOPC_Variant* value,
+                                                           const SOPC_NumericRange* range,
+                                                           SOPC_Variant* dereferenced)
+{
+    bool has_range = false;
+    SOPC_ReturnStatus status = SOPC_Variant_HasRange(value, range, &has_range);
+
+    if (status != SOPC_STATUS_OK)
+    {
+        if (SOPC_STATUS_NOT_SUPPORTED == status)
+        {
+            SOPC_Logger_TraceWarning("read_value_indexed: matrix index range not supported");
+        }
+
+        return constants__e_sc_bad_index_range_invalid; // In case we do not support  the range either (matrix)
+    }
+
+    if (!has_range)
+    {
+        return constants__e_sc_bad_index_range_no_data;
+    }
+
+    status = SOPC_Variant_GetRange(dereferenced, value, range);
+
+    if (status != SOPC_STATUS_OK)
+    {
+        return index_range_bad_returnstatus_to_service_statuscode(status);
+    }
+
+    return constants__e_sc_ok;
+}
+
 static constants__t_StatusCode_i read_value_indexed(const SOPC_Variant* value,
                                                     const SOPC_String* range_str,
                                                     SOPC_Variant* dereferenced)
@@ -105,34 +137,10 @@ static constants__t_StatusCode_i read_value_indexed(const SOPC_Variant* value,
                                            : index_range_bad_returnstatus_to_service_statuscode(status);
     }
 
-    bool has_range = false;
-    status = SOPC_Variant_HasRange(value, range, &has_range);
-
-    if (status != SOPC_STATUS_OK)
-    {
-        if (SOPC_STATUS_NOT_SUPPORTED == status)
-        {
-            SOPC_Logger_TraceWarning("read_value_indexed: matrix index range not supported");
-        }
-        SOPC_NumericRange_Delete(range);
-        return constants__e_sc_bad_index_range_invalid; // In case we do not support  the range either (matrix)
-    }
-
-    if (!has_range)
-    {
-        SOPC_NumericRange_Delete(range);
-        return constants__e_sc_bad_index_range_no_data;
-    }
-
-    status = SOPC_Variant_GetRange(dereferenced, value, range);
+    constants__t_StatusCode_i ret = read_value_indexed_helper(value, range, dereferenced);
     SOPC_NumericRange_Delete(range);
 
-    if (status != SOPC_STATUS_OK)
-    {
-        return index_range_bad_returnstatus_to_service_statuscode(status);
-    }
-
-    return constants__e_sc_ok;
+    return ret;
 }
 
 /* Reads any attribute and outputs a variant (valid or not)
@@ -229,6 +237,46 @@ static constants__t_StatusCode_i set_value_full(SOPC_Variant* node_value,
     return (status == SOPC_STATUS_OK) ? constants__e_sc_ok : constants__e_sc_bad_internal_error;
 }
 
+static constants__t_StatusCode_i set_value_indexed_helper(SOPC_Variant* node_value,
+                                                          const SOPC_Variant* new_value,
+                                                          const SOPC_NumericRange* range,
+                                                          SOPC_Variant** previous_value)
+{
+    bool has_range = false;
+    SOPC_ReturnStatus status = SOPC_Variant_HasRange(node_value, range, &has_range);
+
+    if (status != SOPC_STATUS_OK)
+    {
+        if (SOPC_STATUS_NOT_SUPPORTED == status)
+        {
+            SOPC_Logger_TraceWarning("set_value_indexed: matrix index range not supported");
+        }
+
+        return constants__e_sc_bad_index_range_invalid; // In case we do not support  the range either (matrix)
+    }
+
+    if (!has_range)
+    {
+        return constants__e_sc_bad_index_range_no_data;
+    }
+
+    status = SOPC_Variant_Copy(*previous_value, node_value);
+
+    if (status != SOPC_STATUS_OK)
+    {
+        return constants__e_sc_bad_out_of_memory;
+    }
+
+    status = SOPC_Variant_SetRange(node_value, new_value, range);
+
+    if (status != SOPC_STATUS_OK)
+    {
+        return index_range_bad_returnstatus_to_service_statuscode(status);
+    }
+
+    return constants__e_sc_ok;
+}
+
 static constants__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
                                                    const SOPC_Variant* new_value,
                                                    const SOPC_String* range_str,
@@ -243,42 +291,10 @@ static constants__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
                                            : constants__e_sc_bad_out_of_memory;
     }
 
-    bool has_range = false;
-    status = SOPC_Variant_HasRange(node_value, range, &has_range);
-
-    if (status != SOPC_STATUS_OK)
-    {
-        if (SOPC_STATUS_NOT_SUPPORTED == status)
-        {
-            SOPC_Logger_TraceWarning("set_value_indexed: matrix index range not supported");
-        }
-        SOPC_NumericRange_Delete(range);
-        return constants__e_sc_bad_index_range_invalid; // In case we do not support  the range either (matrix)
-    }
-
-    if (!has_range)
-    {
-        SOPC_NumericRange_Delete(range);
-        return constants__e_sc_bad_index_range_no_data;
-    }
-
-    status = SOPC_Variant_Copy(*previous_value, node_value);
-
-    if (status != SOPC_STATUS_OK)
-    {
-        SOPC_NumericRange_Delete(range);
-        return constants__e_sc_bad_out_of_memory;
-    }
-
-    status = SOPC_Variant_SetRange(node_value, new_value, range);
+    constants__t_StatusCode_i ret = set_value_indexed_helper(node_value, new_value, range, previous_value);
     SOPC_NumericRange_Delete(range);
 
-    if (status != SOPC_STATUS_OK)
-    {
-        return index_range_bad_returnstatus_to_service_statuscode(status);
-    }
-
-    return constants__e_sc_ok;
+    return ret;
 }
 
 void address_space_bs__set_Value(const constants__t_Node_i address_space_bs__node,
