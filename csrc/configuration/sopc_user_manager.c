@@ -24,13 +24,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_macros.h"
 #include "sopc_types.h"
-#include "sopc_user_manager.h"
-
-struct SOPC_UserWithAuthorization
-{
-    SOPC_User* user;
-    SOPC_UserAuthorization_Manager* authorizationManager;
-};
+#include "sopc_user_manager_internal.h"
 
 SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentication_Manager* authenticationManager,
                                                               const SOPC_ExtensionObject* pUser,

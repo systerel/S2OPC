@@ -37,13 +37,14 @@
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_key_manager.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
-#include "sopc_user_manager.h"
+#include "sopc_user_manager_internal.h"
 
 #include "session_core_bs.h"
 
@@ -70,6 +71,10 @@ static constants__t_application_context_i session_client_app_context[SOPC_MAX_SE
 static uint32_t session_expiration_timer[SOPC_MAX_SESSIONS + 1];
 static uint64_t session_RevisedSessionTimeout[SOPC_MAX_SESSIONS + 1];
 static SOPC_TimeReference server_session_latest_msg_receveived[SOPC_MAX_SESSIONS + 1];
+
+/* The local user. This implementation avoids user creation,
+ * but its authorization manager is changed according to the endpoint configuration */
+static SOPC_UserWithAuthorization user_local = {.user = NULL, .authorizationManager = NULL};
 
 /*------------------------
    INITIALISATION Clause
@@ -305,7 +310,11 @@ void session_core_bs__get_local_user(const constants__t_endpoint_config_idx_i se
     SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
     assert(NULL != epConfig);
 
-    *session_core_bs__p_user = epConfig->userLocal;
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    user_local.user = (SOPC_User*) SOPC_User_GetLocal();
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+    user_local.authorizationManager = epConfig->authorizationManager;
+    *session_core_bs__p_user = &user_local;
 }
 
 void session_core_bs__drop_user_server(const constants__t_session_i session_core_bs__p_session)

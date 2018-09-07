@@ -181,7 +181,8 @@ OPERATIONS
     ;
 
     /* This operation does not require a call to deallocate.
-     * It fetches the pointer to the local user, which is a static const. */
+     * It fetches the pointer to the local user, which is static but not const.
+     * Hence, this operation shall be called between endpoint context switches. */
     p_user <-- get_local_user (endpoint_config_idx) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &

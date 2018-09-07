@@ -331,7 +331,6 @@ int main(int argc, char* argv[])
 
     SOPC_UserAuthentication_Manager* authenticationManager = NULL;
     SOPC_UserAuthorization_Manager* authorizationManager = NULL;
-    SOPC_UserWithAuthorization* userLocal = NULL;
     if (SOPC_STATUS_OK == status)
     {
         authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
@@ -345,19 +344,8 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        userLocal = SOPC_UserWithAuthorization_CreateLocal(authorizationManager);
-        if (NULL == userLocal)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-            printf("<Test_Server_Toolkit: Failed to create the local user\n");
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
         epConfig.authenticationManager = authenticationManager;
         epConfig.authorizationManager = authorizationManager;
-        epConfig.userLocal = userLocal;
     }
 
     // Init stack configuration
@@ -540,7 +528,6 @@ int main(int argc, char* argv[])
 
     SOPC_UserAuthentication_FreeManager(&authenticationManager);
     SOPC_UserAuthorization_FreeManager(&authorizationManager);
-    SOPC_UserWithAuthorization_Free(&userLocal);
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }

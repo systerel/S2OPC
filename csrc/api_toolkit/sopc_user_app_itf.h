@@ -71,7 +71,6 @@ typedef struct SOPC_Endpoint_Config
     OpcUa_ApplicationDescription serverDescription;
     SOPC_UserAuthentication_Manager* authenticationManager;
     SOPC_UserAuthorization_Manager* authorizationManager;
-    SOPC_UserWithAuthorization* userLocal;
 } SOPC_Endpoint_Config;
 
 /* Client and Server communication events to be managed by applicative code*/
