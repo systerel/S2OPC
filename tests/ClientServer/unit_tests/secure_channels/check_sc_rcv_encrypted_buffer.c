@@ -214,6 +214,7 @@ static void establishSC(void)
 
     Check_SC_Init();
 
+    memset(&scConfig, 0, sizeof(SOPC_SecureChannel_Config));
     scConfig.isClientSc = true;
     scConfig.msgSecurityMode = messageSecurityMode;
     scConfig.reqSecuPolicyUri = pRequestedSecurityPolicyUri;

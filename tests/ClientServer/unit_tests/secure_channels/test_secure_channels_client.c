@@ -267,6 +267,7 @@ int main(int argc, char* argv[])
     // Start connection to server
     if (SOPC_STATUS_OK == status)
     {
+        memset(&scConfig, 0, sizeof(SOPC_SecureChannel_Config));
         scConfig.isClientSc = true;
         scConfig.msgSecurityMode = messageSecurityMode;
         scConfig.reqSecuPolicyUri = pRequestedSecurityPolicyUri;

@@ -17,9 +17,11 @@
  * under the License.
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 
@@ -29,6 +31,9 @@ char* ENDPOINT_URL = "opc.tcp://localhost:4841";
 bool NONE = false;
 bool ENCRYPT = false;
 uint32_t SC_LIFETIME = 60000;
+
+char* APPLICATION_NAME = "S2OPC_DemoClient";
+char* APPLICATION_URI = "urn:S2OPC:localhost";
 
 char* PATH_CLIENT_PUBL = "./client_public/client_4k_cert.der";
 char* PATH_CLIENT_PRIV = "./client_private/client_4k_key.pem";
@@ -175,11 +180,20 @@ SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcU
     /* Create the configuration */
     if (SOPC_STATUS_OK == status)
     {
-        pscConfig = SOPC_Malloc(sizeof(SOPC_SecureChannel_Config));
-
-        if (NULL != pscConfig)
+        pscConfig = SOPC_Calloc(1, sizeof(*pscConfig));
+        SOPC_Client_Config* clientAppCfg = SOPC_Calloc(1, sizeof(*clientAppCfg));
+        if (NULL != pscConfig && NULL != clientAppCfg)
         {
             pscConfig->isClientSc = true;
+            OpcUa_ApplicationDescription_Initialize(&clientAppCfg->clientDescription);
+            clientAppCfg->clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
+            status = SOPC_String_AttachFromCstring(&clientAppCfg->clientDescription.ApplicationName.defaultText,
+                                                   APPLICATION_NAME);
+            assert(SOPC_STATUS_OK == status);
+            // Note: client ApplicationURI is extracted from certificate if it is used and will replace APPLICATION_URI
+            status = SOPC_String_AttachFromCstring(&clientAppCfg->clientDescription.ApplicationUri, APPLICATION_URI);
+            assert(SOPC_STATUS_OK == status);
+            pscConfig->clientConfigPtr = clientAppCfg;
             pscConfig->url = ENDPOINT_URL;
             pscConfig->crt_cli = NULL;
             pscConfig->key_priv_cli = NULL;
@@ -195,6 +209,13 @@ SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcU
                 pscConfig->crt_srv = pCrtSrv;
                 pscConfig->key_priv_cli = pKeyCli;
             }
+        }
+        else
+        {
+            SOPC_Free(pscConfig);
+            SOPC_Free(clientAppCfg);
+            // Returned value shall be NULL
+            pscConfig = NULL;
         }
     }
 
@@ -212,6 +233,20 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
     }
     nCfgCreated -= 1;
 
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    if (NULL != (*ppscConfig)->expectedEndpoints)
+    {
+        OpcUa_GetEndpointsResponse_Clear((OpcUa_GetEndpointsResponse*) (*ppscConfig)->expectedEndpoints);
+        SOPC_Free((void*) (*ppscConfig)->expectedEndpoints);
+    }
+    SOPC_Client_Config* clientAppConfig = (SOPC_Client_Config*) (*ppscConfig)->clientConfigPtr;
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+
+    if (NULL != clientAppConfig)
+    {
+        OpcUa_ApplicationDescription_Clear(&clientAppConfig->clientDescription);
+    }
+    SOPC_Free(clientAppConfig);
     SOPC_Free(*ppscConfig);
     *ppscConfig = NULL;
 

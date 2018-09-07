@@ -27,12 +27,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "sopc_encodeable.h"
-
 #include "message_out_bs.h"
 #include "util_b2c.h"
-
-#include "constants_bs.h"
 
 #include "sopc_encoder.h"
 #include "sopc_logger.h"

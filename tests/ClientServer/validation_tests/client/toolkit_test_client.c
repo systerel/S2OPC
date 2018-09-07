@@ -44,6 +44,10 @@
 #include "embedded/sopc_addspace_loader.h"
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
+#define APPLICATION_URI "urn:S2OPC:localhost"
+#define APPLICATION_NAME "S2OPC_TestClient"
+
+static char* preferred_locale_ids[] = {"en-US", "fr-FR", NULL};
 
 static int32_t sessionsActivated = 0;
 static int32_t sessionsClosed = 0;
@@ -237,6 +241,8 @@ static void* getGetEndpoints_message(void)
 
 // A Secure channel connection configuration
 SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
+                                      .clientConfigPtr = NULL,
+                                      .expectedEndpoints = NULL,
                                       .url = DEFAULT_ENDPOINT_URL,
                                       .crt_cli = NULL,
                                       .key_priv_cli = NULL,
@@ -259,11 +265,23 @@ int main(void)
     SOPC_SerializedCertificate *crt_cli = NULL, *crt_srv = NULL;
     SOPC_SerializedAsymmetricKey* priv_cli = NULL;
 
+    // Define client application configuration
+    SOPC_S2OPC_Config appConfig;
+    SOPC_S2OPC_Config_Initialize(&appConfig);
+    SOPC_Client_Config* clientAppConfig = &appConfig.clientConfig;
+    clientAppConfig->clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    status = SOPC_String_AttachFromCstring(&clientAppConfig->clientDescription.ApplicationUri, APPLICATION_URI);
+    assert(SOPC_STATUS_OK == status);
+    status = SOPC_String_AttachFromCstring(&clientAppConfig->clientDescription.ApplicationName.defaultText,
+                                           APPLICATION_NAME);
+    assert(SOPC_STATUS_OK == status);
+    clientAppConfig->clientLocaleIds = preferred_locale_ids;
+    scConfig.clientConfigPtr = clientAppConfig;
+
     uint32_t channel_config_idx = 0;
     uint32_t channel_config_idx2 = 0;
     uint32_t channel_config_idx3 = 0;
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     OpcUa_WriteRequest* pWriteReqSent = NULL;
     OpcUa_WriteRequest* pWriteReqCopy = NULL;
@@ -672,6 +690,7 @@ int main(void)
     }
 
     SOPC_AddressSpace_Delete(address_space);
+    SOPC_S2OPC_Config_Clear(&appConfig);
 
     if (SOPC_STATUS_OK == status && test_results_get_service_result() != false)
     {

@@ -43,6 +43,9 @@ extern bool ENCRYPT;
 /* Secure Channel lifetime */
 extern uint32_t SC_LIFETIME;
 
+extern char* APPLICATION_NAME;
+extern char* APPLICATION_URI;
+
 extern char* PATH_CLIENT_PUBL;
 extern char* PATH_CLIENT_PRIV;
 extern char* PATH_SERVER_PUBL;

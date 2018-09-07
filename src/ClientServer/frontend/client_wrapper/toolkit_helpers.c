@@ -54,6 +54,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_SecureChannel_Config* pscConfig = NULL;
+    SOPC_Client_Config* clientAppCfg = NULL;
     SOPC_SerializedCertificate* pCrtSrv = NULL;
     SOPC_SerializedCertificate* pCrtCli = NULL;
     SOPC_SerializedAsymmetricKey* pKeyCli = NULL;
@@ -161,9 +162,10 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     /* Create the configuration */
     if (SOPC_STATUS_OK == status)
     {
-        pscConfig = SOPC_Malloc(sizeof(SOPC_SecureChannel_Config));
+        pscConfig = SOPC_Calloc(1, sizeof(SOPC_SecureChannel_Config));
+        clientAppCfg = SOPC_Calloc(1, sizeof(*clientAppCfg));
 
-        if (NULL != pscConfig)
+        if (NULL != pscConfig && NULL != clientAppCfg)
         {
             pscConfig->isClientSc = true;
             pscConfig->crt_cli = pCrtCli;
@@ -172,6 +174,10 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             pscConfig->pki = pPki;
             pscConfig->requestedLifetime = iScRequestedLifetime;
             pscConfig->msgSecurityMode = msgSecurityMode;
+
+            OpcUa_ApplicationDescription_Initialize(&clientAppCfg->clientDescription);
+            clientAppCfg->clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
+            pscConfig->clientConfigPtr = clientAppCfg;
 
             /* These input strings are verified non NULL */
             pscConfig->url = SOPC_Malloc(strlen(szServerUrl) + 1);
@@ -205,6 +211,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtCli);
         SOPC_KeyManager_SerializedAsymmetricKey_Delete(pKeyCli);
         SOPC_Free(pscConfig);
+        SOPC_Free(clientAppCfg);
     }
 
     return status;
@@ -226,8 +233,9 @@ void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
     SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&pscConfig->pki));
     SOPC_Free((void*) pscConfig->url);
     SOPC_Free((void*) pscConfig->reqSecuPolicyUri);
+    OpcUa_ApplicationDescription_Clear((OpcUa_ApplicationDescription*) &pscConfig->clientConfigPtr->clientDescription);
+    SOPC_Free((void*) pscConfig->clientConfigPtr);
     SOPC_GCC_DIAGNOSTIC_RESTORE
-
     SOPC_Free(pscConfig);
 
     *ppscConfig = NULL;

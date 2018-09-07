@@ -171,6 +171,8 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
 
 // A Secure channel connection configuration
 SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
+                                      .clientConfigPtr = NULL,
+                                      .expectedEndpoints = NULL,
                                       .url = DEFAULT_ENDPOINT_URL,
                                       .crt_cli = NULL,
                                       .key_priv_cli = NULL,

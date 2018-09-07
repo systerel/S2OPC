@@ -181,6 +181,8 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
 SOPC_PKIProvider* clientPki = NULL;
 
 static SOPC_SecureChannel_Config client_sc_config = {.isClientSc = true,
+                                                     .clientConfigPtr = NULL,
+                                                     .expectedEndpoints = NULL,
                                                      .url = DEFAULT_ENDPOINT_URL,
                                                      .crt_cli = NULL,
                                                      .key_priv_cli = NULL,
@@ -191,6 +193,8 @@ static SOPC_SecureChannel_Config client_sc_config = {.isClientSc = true,
                                                      .msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt};
 
 static SOPC_SecureChannel_Config client_user_sc_config = {.isClientSc = true,
+                                                          .clientConfigPtr = NULL,
+                                                          .expectedEndpoints = NULL,
                                                           .url = DEFAULT_ENDPOINT_URL,
                                                           .crt_cli = NULL,
                                                           .key_priv_cli = NULL,

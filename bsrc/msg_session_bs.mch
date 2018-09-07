@@ -99,18 +99,6 @@ OPERATIONS
     END
     ;
 
-    minimize_max_message_length_create_session_msg (p_channel_config_idx, p_create_session_req) =
-    PRE
-        p_channel_config_idx : t_channel_config_idx_i &
-        p_channel_config_idx : t_channel_config_idx &
-        p_create_session_req : t_msg_i &
-        p_create_session_req = c_msg_in &
-        a_msg_in_type = e_msg_session_create_req
-    THEN
-        skip
-    END
-    ;
-
     bret <-- write_create_session_resp_msg_crypto(p_msg, p_channel_config_idx, p_nonce, p_signature) =
     PRE
         p_msg : t_msg_i &
@@ -140,6 +128,19 @@ OPERATIONS
         p_nonce : t_Nonce
     THEN
         bret :: BOOL
+    END
+    ;
+
+    write_activate_req_msg_locales(p_req_msg, p_channel_config_idx) =
+    PRE
+    p_req_msg : t_msg_i &
+        p_req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_activate_req &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx
+    THEN
+        skip
     END
     ;
 
@@ -184,6 +185,57 @@ OPERATIONS
     END
     ;
 
+    write_create_session_req_msg_clientDescription (p_req_msg, p_channel_config_idx) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        a_msg_out_type = e_msg_session_create_req
+    THEN
+        skip
+    END
+    ;
+
+    /*
+    write_create_session_req_msg_sessionName (p_req_msg, p_session, p_channel_config_idx) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        p_session : t_session_i &
+        p_session : t_session &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        a_msg_out_type = e_msg_session_create_req
+    THEN
+        skip
+    END
+    ;
+    */
+
+    write_create_session_req_msg_maxResponseMessageSize (p_req_msg) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_create_req
+    THEN
+        skip
+    END;
+
+    write_create_session_resp_msg_maxRequestMessageSize (p_resp_msg) =
+    PRE
+        p_resp_msg : t_msg_i &
+        p_resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_create_resp
+    THEN
+        skip
+    END
+    ;
+
     valid <-- create_session_resp_check_server_certificate (p_resp_msg, p_channel_config_idx) =
     PRE
         p_channel_config_idx : t_channel_config_idx_i &
@@ -194,6 +246,44 @@ OPERATIONS
         a_msg_in_type = e_msg_session_create_resp
     THEN
         valid :: BOOL
+    END
+    ;
+
+    valid <-- create_session_resp_check_server_endpoints (p_resp_msg, p_channel_config_idx) =
+    PRE
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_resp_msg : t_msg_i &
+        p_resp_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_resp
+    THEN
+        valid :: BOOL
+    END;
+
+    create_session_req_export_maxResponseMessageSize (p_channel_config_idx, p_req_msg) =
+    PRE
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_req_msg : t_msg_i &
+        p_req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_req
+    THEN
+        skip
+    END
+    ;
+
+    create_session_resp_export_maxRequestMessageSize (p_channel_config_idx, p_resp_msg) =
+    PRE
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_resp_msg : t_msg_i &
+        p_resp_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_resp
+    THEN
+        skip
     END
 
 END

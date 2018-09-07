@@ -31,20 +31,30 @@
 //#include "sopc_types.h"
 //#include "sopc_user_manager.h"
 
+typedef struct SOPC_Client_Config SOPC_Client_Config;
+
 typedef struct SOPC_SecureChannel_Config
 {
     uint8_t isClientSc;
+    const SOPC_Client_Config*
+        clientConfigPtr; /**< Pointer to the client configuration containing this secure channel. */
+
+    const OpcUa_GetEndpointsResponse* expectedEndpoints; /**< Response returned by prior call to GetEndpoints service
+                                                             and checked to be the same during session establishment,
+                                                             NULL otherwise (no verification will be done).*/
+
     const char* url;
     const SOPC_SerializedCertificate* crt_cli;
     const SOPC_SerializedAsymmetricKey* key_priv_cli;
     const SOPC_SerializedCertificate* crt_srv;
-    const SOPC_PKIProvider* pki;
+    const SOPC_PKIProvider*
+        pki; /**< PKI shall not be shared between several configurations except if it is thread-safe */
     const char* reqSecuPolicyUri;
     uint32_t requestedLifetime;
     OpcUa_MessageSecurityMode msgSecurityMode;
 
-    /* Internal use only: may be left uninitialized */
-    uintptr_t internalProtocolData; // used to store internal protocol data (set only during connecting phase)
+    uintptr_t internalProtocolData; /**< Internal use only: used to store internal protocol data (set only during
+                                       connecting phase) */
 } SOPC_SecureChannel_Config;
 
 #define SOPC_SECURITY_MODE_NONE_MASK 0x01
@@ -54,6 +64,7 @@ typedef struct SOPC_SecureChannel_Config
 
 extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous;
 extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
+extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy;
 
 #define SOPC_MAX_SECU_POLICIES_CFG 5 /* Maximum number of security policies in a configuration array */
 
@@ -93,6 +104,23 @@ typedef struct SOPC_Endpoint_Config
     SOPC_UserAuthorization_Manager*
         authorizationManager; /**< The user authorization manager: user access level evaluation */
 } SOPC_Endpoint_Config;
+
+struct SOPC_Client_Config
+{
+    OpcUa_ApplicationDescription
+        clientDescription; /**< Application description of the client.
+                            *   \warning: The ApplicationURI is automatically extracted from certificate when the client
+                            *             certificate is used. If no certificate used or URI extraction failed,
+                            *             the ApplicationURI of clientDescription is used.
+                            */
+
+    bool freeCstringsFlag;  /**< A flag to indicate if the following C strings contained in the client configuration
+                                 shall be freed */
+    char** clientLocaleIds; /**< An array of locale ids preferred by the client terminated by a NULL pointer.
+                                 It might be NULL if there are no preferred locale ids.
+                                 The array of locale ids indicates priority order for localized strings.
+                                 The first LocaleId in the array has the highest priority. */
+};
 
 /* OPC UA server configuration structure */
 struct SOPC_Server_Config
@@ -150,6 +178,7 @@ struct SOPC_Server_Config
 typedef struct SOPC_S2OPC_Config
 {
     SOPC_Server_Config serverConfig;
+    SOPC_Client_Config clientConfig;
 } SOPC_S2OPC_Config;
 
 /* Client and Server communication events to be managed by applicative code*/

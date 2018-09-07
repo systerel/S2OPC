@@ -21,7 +21,7 @@
 
  File Name            : msg_session_bs.h
 
- Date                 : 22/11/2021 13:55:18
+ Date                 : 05/01/2022 10:43:29
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -51,16 +51,26 @@ extern void msg_session_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void msg_session_bs__create_session_req_export_maxResponseMessageSize(
+   const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx,
+   const constants__t_msg_i msg_session_bs__p_req_msg);
 extern void msg_session_bs__create_session_resp_check_server_certificate(
    const constants__t_msg_i msg_session_bs__p_resp_msg,
    const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx,
    t_bool * const msg_session_bs__valid);
-extern void msg_session_bs__minimize_max_message_length_create_session_msg(
+extern void msg_session_bs__create_session_resp_check_server_endpoints(
+   const constants__t_msg_i msg_session_bs__p_resp_msg,
    const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx,
-   const constants__t_msg_i msg_session_bs__p_create_session_req);
+   t_bool * const msg_session_bs__valid);
+extern void msg_session_bs__create_session_resp_export_maxRequestMessageSize(
+   const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx,
+   const constants__t_msg_i msg_session_bs__p_resp_msg);
 extern void msg_session_bs__write_activate_msg_user(
    const constants__t_msg_i msg_session_bs__msg,
    const constants__t_user_token_i msg_session_bs__p_user_token);
+extern void msg_session_bs__write_activate_req_msg_locales(
+   const constants__t_msg_i msg_session_bs__p_req_msg,
+   const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx);
 extern void msg_session_bs__write_activate_session_req_msg_crypto(
    const constants__t_msg_i msg_session_bs__activate_req_msg,
    const constants__t_SignatureData_i msg_session_bs__signature,
@@ -80,6 +90,9 @@ extern void msg_session_bs__write_create_session_msg_session_token(
    const constants__t_msg_i msg_session_bs__msg,
    const constants__t_session_i msg_session_bs__session,
    const constants__t_session_token_i msg_session_bs__session_token);
+extern void msg_session_bs__write_create_session_req_msg_clientDescription(
+   const constants__t_msg_i msg_session_bs__p_req_msg,
+   const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx);
 extern void msg_session_bs__write_create_session_req_msg_crypto(
    const constants__t_msg_i msg_session_bs__p_req_msg,
    const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx,
@@ -88,6 +101,8 @@ extern void msg_session_bs__write_create_session_req_msg_crypto(
 extern void msg_session_bs__write_create_session_req_msg_endpointUrl(
    const constants__t_msg_i msg_session_bs__msg,
    const constants__t_channel_config_idx_i msg_session_bs__channel_config_idx);
+extern void msg_session_bs__write_create_session_req_msg_maxResponseMessageSize(
+   const constants__t_msg_i msg_session_bs__p_req_msg);
 extern void msg_session_bs__write_create_session_req_msg_sessionTimeout(
    const constants__t_msg_i msg_session_bs__create_req_msg);
 extern void msg_session_bs__write_create_session_resp_msg_crypto(
@@ -96,5 +111,7 @@ extern void msg_session_bs__write_create_session_resp_msg_crypto(
    const constants__t_Nonce_i msg_session_bs__p_nonce,
    const constants__t_SignatureData_i msg_session_bs__p_signature,
    t_bool * const msg_session_bs__bret);
+extern void msg_session_bs__write_create_session_resp_msg_maxRequestMessageSize(
+   const constants__t_msg_i msg_session_bs__p_resp_msg);
 
 #endif

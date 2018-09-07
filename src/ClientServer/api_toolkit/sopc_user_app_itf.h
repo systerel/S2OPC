@@ -37,11 +37,23 @@
 #include "sopc_user_manager.h"
 
 /**
- *  \brief Client static configuration of a Secure Channel
+ * \brief OPC UA client configuration type
+ */
+typedef struct SOPC_Client_Config SOPC_Client_Config;
+
+/**
+ *  \brief Client configuration of a Secure Channel
  */
 typedef struct SOPC_SecureChannel_Config
 {
     uint8_t isClientSc;
+    const SOPC_Client_Config*
+        clientConfigPtr; /**< Pointer to the client configuration containing this secure channel. */
+
+    const OpcUa_GetEndpointsResponse* expectedEndpoints; /**< Response returned by prior call to GetEndpoints service
+                                                             and checked to be the same during session establishment,
+                                                             NULL otherwise (no verification will be done).*/
+
     const char* url;
     const SOPC_SerializedCertificate* crt_cli;
     const SOPC_SerializedAsymmetricKey* key_priv_cli;
@@ -93,15 +105,18 @@ typedef struct SOPC_SecurityPolicy
                                                         */
 } SOPC_SecurityPolicy;
 
+/**
+ * \brief OPC UA server configuration type
+ */
 typedef struct SOPC_Server_Config SOPC_Server_Config;
 
 /**
- * \brief Server static configuration of a Endpoint listener
+ * \brief Server configuration of a Endpoint connection listener
  */
 typedef struct SOPC_Endpoint_Config
 {
-    struct SOPC_Server_Config* serverConfigPtr; /**< Pointer to the server configuration containing this endpoint */
-    char* endpointURL;                          /**< Endpoint URL: opc.tcp://IP-HOSTNAME:PORT(/NAME)*/
+    SOPC_Server_Config* serverConfigPtr; /**< Pointer to the server configuration containing this endpoint */
+    char* endpointURL;                   /**< Endpoint URL: opc.tcp://IP-HOSTNAME:PORT(/NAME)*/
     bool hasDiscoveryEndpoint; /**< Implicit discovery endpoint with same endpoint URL is added if necessary when set */
     uint8_t nbSecuConfigs;     /**< Number of security configuration (<= SOPC_MAX_SECU_POLICIES_CFG) */
     SOPC_SecurityPolicy
@@ -118,6 +133,26 @@ typedef struct SOPC_Endpoint_Config
     SOPC_UserAuthorization_Manager*
         authorizationManager; /**< The user authorization manager: user access level evaluation */
 } SOPC_Endpoint_Config;
+
+/**
+ * \brief OPC UA client configuration structure
+ */
+struct SOPC_Client_Config
+{
+    OpcUa_ApplicationDescription
+        clientDescription; /**< Application description of the client.
+                            *   \warning: The ApplicationURI is automatically extracted from certificate when the client
+                            *             certificate is used. If no certificate used or URI extraction failed,
+                            *             the ApplicationURI of clientDescription is used.
+                            */
+
+    bool freeCstringsFlag;  /**< A flag to indicate if the following C strings contained in the client configuration
+                                 shall be freed */
+    char** clientLocaleIds; /**< An array of locale ids preferred by the client terminated by a NULL pointer.
+                                 It might be NULL if there are no preferred locale ids.
+                                 The array of locale ids indicates priority order for localized strings.
+                                 The first LocaleId in the array has the highest priority. */
+};
 
 /**
  * \brief OPC UA server configuration structure
@@ -180,6 +215,7 @@ struct SOPC_Server_Config
 typedef struct SOPC_S2OPC_Config
 {
     SOPC_Server_Config serverConfig; /**< server configuration */
+    SOPC_Client_Config clientConfig; /**< client configuration */
 } SOPC_S2OPC_Config;
 
 /**
@@ -280,16 +316,16 @@ typedef struct
 } SOPC_Toolkit_Build_Info;
 
 /**
- * \brief Initalize the content of the SOPC_S2OPC_Config
+ * \brief Initialize the content of the SOPC_S2OPC_Config
  *
- * \param config  The s2opc server configuration to initialize
+ * \param config  The s2opc client/server configuration to initialize
  */
 void SOPC_S2OPC_Config_Initialize(SOPC_S2OPC_Config* config);
 
 /**
  * \brief Clear the content of the SOPC_S2OPC_Config
  *
- * \param config  The s2opc server configuration to clear
+ * \param config  The s2opc client/server configuration to clear
  */
 void SOPC_S2OPC_Config_Clear(SOPC_S2OPC_Config* config);
 
