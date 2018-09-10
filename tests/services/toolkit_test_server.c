@@ -218,6 +218,63 @@ static time_t parse_build_date(const char* build_date)
     return mktime(&time);
 }
 
+/* The toolkit test servers shall pass the UACTT tests. Hence it shall authenticate
+ * (ids and passwords can be changed in the UACTT settings/Server Test/Session):
+ *  - anonymous users
+ *  - user1:password
+ *  - user2:password1
+ * Then it shall accept username:password, but return "access denied".
+ * Otherwise it shall be "identity token rejected".
+ */
+static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* authn,
+                                              const SOPC_ExtensionObject* token,
+                                              SOPC_UserAuthentication_Status* authenticated)
+{
+    (void) (authn);
+    assert(NULL != token && NULL != authenticated);
+
+    *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
+    if (&OpcUa_AnonymousIdentityToken_EncodeableType == token->Body.Object.ObjType)
+    {
+        *authenticated = SOPC_USER_AUTHENTICATION_OK;
+    }
+    else if (&OpcUa_UserNameIdentityToken_EncodeableType == token->Body.Object.ObjType)
+    {
+        OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;
+        SOPC_String* username = &userToken->UserName;
+        if (strcmp(SOPC_String_GetRawCString(username), "user1") == 0)
+        {
+            SOPC_ByteString* pwd = &userToken->Password;
+            if (pwd->Length == strlen("password") && memcmp(pwd->Data, "password", strlen("password")) == 0)
+            {
+                *authenticated = SOPC_USER_AUTHENTICATION_OK;
+            }
+        }
+        else if (strcmp(SOPC_String_GetRawCString(username), "user2") == 0)
+        {
+            SOPC_ByteString* pwd = &userToken->Password;
+            if (pwd->Length == strlen("password1") && memcmp(pwd->Data, "password1", strlen("password1")) == 0)
+            {
+                *authenticated = SOPC_USER_AUTHENTICATION_OK;
+            }
+        }
+        else if (strcmp(SOPC_String_GetRawCString(username), "username") == 0)
+        {
+            SOPC_ByteString* pwd = &userToken->Password;
+            if (pwd->Length == strlen("password") && memcmp(pwd->Data, "password", strlen("password")) == 0)
+            {
+                *authenticated = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
+            }
+        }
+    }
+
+    return SOPC_STATUS_OK;
+}
+
+static const SOPC_UserAuthentication_Functions authentication_uactt_functions = {
+    .pFuncFree = (SOPC_UserAuthentication_Free_Func) free,
+    .pFuncValidateUserIdentity = authentication_uactt};
+
 int main(int argc, char* argv[])
 {
     (void) argc;
@@ -333,7 +390,7 @@ int main(int argc, char* argv[])
     SOPC_UserAuthorization_Manager* authorizationManager = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
+        authenticationManager = calloc(1, sizeof(SOPC_UserAuthentication_Manager));
         authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
         if (NULL == authenticationManager || NULL == authorizationManager)
         {
@@ -344,6 +401,7 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
+        authenticationManager->pFunctions = &authentication_uactt_functions;
         epConfig.authenticationManager = authenticationManager;
         epConfig.authorizationManager = authorizationManager;
     }
