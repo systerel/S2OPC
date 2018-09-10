@@ -27,6 +27,7 @@
 #define SOPC_RAW_SOCKETS_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 #include "sopc_enums.h"
 
 // Platform dependent types
