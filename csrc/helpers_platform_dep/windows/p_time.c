@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <windows.h>
 
+#include "sopc_builtintypes.h"
 #include "sopc_time.h"
 
 SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
