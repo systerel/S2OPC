@@ -313,6 +313,13 @@ void session_core_bs__deallocate_user(const constants__t_user_i session_core_bs_
     free(pUser);
 }
 
+void session_core_bs__get_local_user(constants__t_user_i* const session_core_bs__p_user)
+{
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    *session_core_bs__p_user = (SOPC_User*) SOPC_User_Get_Local();
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+}
+
 void session_core_bs__drop_user_server(const constants__t_session_i session_core_bs__p_session)
 {
     SOPC_User* pUser = sessionDataArray[session_core_bs__p_session].user_server;

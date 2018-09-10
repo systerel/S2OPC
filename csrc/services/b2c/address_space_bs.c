@@ -40,6 +40,33 @@
 bool sopc_addressSpace_configured = false;
 SOPC_AddressSpace* address_space_bs__nodes = NULL;
 
+/* Helper, wraps and logs operation authorization */
+static bool authorize_and_log(SOPC_UserAuthorization_Manager* pAuthor,
+                              bool is_write,
+                              SOPC_NodeId* node_id,
+                              uint32_t attribute_id,
+                              SOPC_User* user)
+{
+    bool user_authorized = false;
+    SOPC_ReturnStatus status =
+        SOPC_UserAuthorization_IsAuthorizedOperation(pAuthor, is_write, node_id, attribute_id, user, &user_authorized);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError("SOPC_UserAuthorization_IsAuthorizedOperation failed with status %i\n", status);
+        user_authorized = false;
+    }
+    else if (!user_authorized)
+    {
+        char* s_node_id = SOPC_NodeId_ToCString(node_id);
+        SOPC_Logger_TraceWarning(
+            "SOPC_UserAuthorization_IsAuthorizedOperation did not authorize %s operation on value \"%s\"\n",
+            is_write ? "write" : "read", s_node_id);
+        free(s_node_id);
+    }
+
+    return user_authorized;
+}
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -146,7 +173,8 @@ static constants__t_StatusCode_i read_value_indexed(const SOPC_Variant* value,
 /* Reads any attribute and outputs a variant (valid or not)
  * As this function uses the *_2_Variant_i functions, the value must be freed once used
  */
-void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_Node_i address_space_bs__node,
+void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user_i address_space_bs__p_user,
+                                                         const constants__t_Node_i address_space_bs__node,
                                                          const constants__t_NodeClass_i address_space_bs__ncl,
                                                          const constants__t_AttributeId_i address_space_bs__aid,
                                                          const constants__t_IndexRange_i address_space_bs__index_range,
@@ -174,8 +202,24 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_Node
         value = util_variant__new_Variant_from_LocalizedText(SOPC_AddressSpace_Item_Get_DisplayName(item));
         break;
     case constants__e_aid_Value:
-        if (constants__e_ncl_Variable != address_space_bs__ncl &&
-            constants__e_ncl_VariableType != address_space_bs__ncl)
+        if (constants__e_ncl_Variable == address_space_bs__ncl ||
+            constants__e_ncl_VariableType == address_space_bs__ncl)
+        {
+            bool authorized =
+                authorize_and_log(address_space_bs__p_user->pAuthor, false, SOPC_AddressSpace_Item_Get_NodeId(item),
+                                  address_space_bs__aid, address_space_bs__p_user);
+            if (authorized)
+            {
+                *address_space_bs__variant =
+                    util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Item_Get_Value(item));
+            }
+            else
+            {
+                *address_space_bs__sc = constants__e_sc_bad_user_access_denied;
+                *address_space_bs__variant = util_variant__new_Variant_from_Indet();
+            }
+        }
+        else
         {
             *address_space_bs__sc = constants__e_sc_bad_attribute_id_invalid;
             *address_space_bs__variant = util_variant__new_Variant_from_Indet();
@@ -297,13 +341,24 @@ static constants__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
     return ret;
 }
 
-void address_space_bs__set_Value(const constants__t_Node_i address_space_bs__node,
+void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_user,
+                                 const constants__t_Node_i address_space_bs__node,
                                  const constants__t_Variant_i address_space_bs__value,
                                  const constants__t_IndexRange_i address_space_bs__index_range,
                                  constants__t_StatusCode_i* const address_space_bs__serviceStatusCode,
                                  constants__t_Variant_i* const address_space_bs__prev_value)
 {
     SOPC_AddressSpace_Item* item = address_space_bs__node;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    bool user_authorized =
+        authorize_and_log(address_space_bs__p_user->pAuthor, true, SOPC_AddressSpace_Item_Get_NodeId(item),
+                          constants__e_aid_Value, address_space_bs__p_user);
+    if (!user_authorized)
+    {
+        return;
+    }
+
     SOPC_Variant* pvar = SOPC_AddressSpace_Item_Get_Value(item);
     *address_space_bs__prev_value = SOPC_Variant_Create();
 
@@ -335,11 +390,22 @@ void address_space_bs__set_Value(const constants__t_Node_i address_space_bs__nod
     }
 }
 
-void address_space_bs__get_Value_StatusCode(const constants__t_Node_i address_space_bs__node,
+void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_space_bs__p_user,
+                                            const constants__t_Node_i address_space_bs__node,
                                             constants__t_StatusCode_i* const address_space_bs__sc)
 {
     SOPC_AddressSpace_Item* item = address_space_bs__node;
-    util_status_code__C_to_B(item->value_status, address_space_bs__sc);
+    bool user_authorized =
+        authorize_and_log(address_space_bs__p_user->pAuthor, false, SOPC_AddressSpace_Item_Get_NodeId(item),
+                          constants__e_aid_Value, address_space_bs__p_user);
+    if (user_authorized)
+    {
+        util_status_code__C_to_B(item->value_status, address_space_bs__sc);
+    }
+    else
+    {
+        *address_space_bs__sc = constants__e_sc_bad_user_access_denied;
+    }
 }
 
 void address_space_bs__read_AddressSpace_free_value(const constants__t_Variant_i address_space_bs__val)
