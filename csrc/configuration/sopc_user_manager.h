@@ -41,7 +41,7 @@
 typedef struct SOPC_UserAuthentication_Manager SOPC_UserAuthentication_Manager;
 typedef struct SOPC_UserAuthorization_Manager SOPC_UserAuthorization_Manager;
 
-/** \brief The operation type to authorize, see /p SOPC_UserAuthorization_IsAuthorizedOperation */
+/** \brief The operation type to authorize, see \p SOPC_UserAuthorization_IsAuthorizedOperation */
 typedef enum
 {
     SOPC_USER_AUTHORIZATION_OPERATION_READ,
@@ -54,11 +54,21 @@ typedef enum
  */
 typedef struct SOPC_UserWithAuthorization SOPC_UserWithAuthorization;
 
+/** \brief The user authentication status code, see \p SOPC_UserAuthentication_IsValidUserIdentity */
+typedef enum
+{
+    SOPC_USER_AUTHENTICATION_INVALID_TOKEN,
+    SOPC_USER_AUTHENTICATION_REJECTED_TOKEN,
+    /** It is strongly discouraged to use this value, prefer \p SOPC_USER_AUTHENTICATION_REJECTED_TOKEN. */
+    SOPC_USER_AUTHENTICATION_ACCESS_DENIED,
+    SOPC_USER_AUTHENTICATION_OK
+} SOPC_UserAuthentication_Status;
+
 typedef void (*SOPC_UserAuthentication_Free_Func)(SOPC_UserAuthentication_Manager* authenticationManager);
 typedef SOPC_ReturnStatus (*SOPC_UserAuthentication_ValidateUserIdentity_Func)(
     SOPC_UserAuthentication_Manager* authenticationManager,
     const SOPC_ExtensionObject* pUser,
-    bool* pbUserAuthenticated);
+    SOPC_UserAuthentication_Status* pUserAuthenticated);
 
 typedef void (*SOPC_UserAuthorization_Free_Func)(SOPC_UserAuthorization_Manager* authorizationManager);
 typedef SOPC_ReturnStatus (*SOPC_UserAuthorization_AuthorizeOperation_Func)(
@@ -87,7 +97,10 @@ typedef struct SOPC_UserAuthentication_Functions
      * \param authenticationManager  The SOPC_UserAuthentication_Manager instance.
      * \param pUser                  The user identity token which was received in the ActivateSession request.
      * \param pbUserAuthenticated    A valid pointer to the uninitialized result of the operation.
-     *                               The callback shall set it to false when the connection is refused.
+     *    The callback shall set it to one of the following values:
+     *    - \p SOPC_USER_AUTHENTICATION_INVALID_TOKEN: the callback could not read the user identity token,
+     *    - \p SOPC_USER_AUTHENTICATION_REJECTED_TOKEN: the proposed identity could not be authenticated,
+     *    - \p SOPC_USER_AUTHENTICATION_OK: the identity token correctly authenticates a user.
      *
      * \return SOPC_STATUS_OK when \p pbUserAuthenticated was set.
      */
@@ -147,13 +160,16 @@ struct SOPC_UserAuthorization_Manager
  * \param authenticationManager  The SOPC_UserAuthentication_Manager instance.
  * \param pUser                  The user identity token which was received in the ActivateSession request.
  * \param pbUserAuthenticated    A valid pointer to the uninitialized result of the operation.
- *                               The callback shall set it to false when the connection is refused.
+ *    The callback sets it to one of the following values:
+ *    - \p SOPC_USER_AUTHENTICATION_INVALID_TOKEN: the callback could not read the user identity token,
+ *    - \p SOPC_USER_AUTHENTICATION_REJECTED_TOKEN: the proposed identity could not be authenticated,
+ *    - \p SOPC_USER_AUTHENTICATION_OK: the identity token correctly authenticates a user.
  *
  * \return SOPC_STATUS_OK when \p pbUserAuthenticated was set.
  */
 SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentication_Manager* authenticationManager,
                                                               const SOPC_ExtensionObject* pUser,
-                                                              bool* pbUserAuthenticated);
+                                                              SOPC_UserAuthentication_Status* pUserAuthenticated);
 
 /**
  * \brief Authorize an operation with the chosen authorization manager.

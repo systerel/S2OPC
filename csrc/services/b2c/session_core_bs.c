@@ -248,14 +248,9 @@ void session_core_bs__delete_session_application_context(const constants__t_sess
 void session_core_bs__allocate_valid_user(
     const constants__t_user_token_i session_core_bs__p_user_token,
     const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
-    t_bool* const session_core_bs__p_valid_user,
-    t_bool* const session_core_bs__p_alloc_failed,
+    constants__t_StatusCode_i* const session_core_bs__p_sc_valid_user,
     constants__t_user_i* const session_core_bs__p_user)
 {
-    /* TODO: change alloc_failed to a status code to cover more clearly error cases */
-    *session_core_bs__p_alloc_failed = true;
-    *session_core_bs__p_valid_user = false;
-
     SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
     assert(NULL != epConfig);
 
@@ -276,24 +271,42 @@ void session_core_bs__allocate_valid_user(
         pUserIdentity = &anonymousIdentityToken;
     }
 
-    SOPC_ReturnStatus status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, pUserIdentity,
-                                                                           session_core_bs__p_valid_user);
+    SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_OK;
+    SOPC_ReturnStatus status =
+        SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, pUserIdentity, &authnStatus);
 
     if (SOPC_STATUS_OK != status)
     {
-        /* Asserts that the validation did not modify the bool when there is an error */
-        *session_core_bs__p_valid_user = false;
+        *session_core_bs__p_sc_valid_user = constants__e_sc_bad_internal_error;
     }
     else
     {
-        if (*session_core_bs__p_valid_user)
+        switch (authnStatus)
         {
+        case SOPC_USER_AUTHENTICATION_OK:
             *session_core_bs__p_user =
                 SOPC_UserWithAuthorization_CreateFromIdentityToken(session_core_bs__p_user_token, authorizationManager);
-            if (NULL != session_core_bs__p_user)
+            if (NULL == session_core_bs__p_user)
             {
-                *session_core_bs__p_alloc_failed = false;
+                *session_core_bs__p_sc_valid_user = constants__e_sc_bad_out_of_memory;
             }
+            else
+            {
+                *session_core_bs__p_sc_valid_user = constants__e_sc_ok;
+            }
+            break;
+        case SOPC_USER_AUTHENTICATION_INVALID_TOKEN:
+            *session_core_bs__p_sc_valid_user = constants__e_sc_bad_identity_token_invalid;
+            break;
+        case SOPC_USER_AUTHENTICATION_REJECTED_TOKEN:
+            *session_core_bs__p_sc_valid_user = constants__e_sc_bad_identity_token_rejected;
+            break;
+        case SOPC_USER_AUTHENTICATION_ACCESS_DENIED:
+            *session_core_bs__p_sc_valid_user = constants__e_sc_bad_user_access_denied;
+            break;
+        default:
+            *session_core_bs__p_sc_valid_user = constants__e_sc_bad_internal_error;
+            break;
         }
     }
 }

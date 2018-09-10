@@ -28,14 +28,25 @@
 
 SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentication_Manager* authenticationManager,
                                                               const SOPC_ExtensionObject* pUser,
-                                                              bool* pbUserAuthenticated)
+                                                              SOPC_UserAuthentication_Status* pUserAuthenticated)
 {
-    assert(NULL != authenticationManager && NULL != pUser && NULL != pbUserAuthenticated);
+    assert(NULL != authenticationManager && NULL != pUser && NULL != pUserAuthenticated);
     assert(NULL != authenticationManager->pFunctions &&
            NULL != authenticationManager->pFunctions->pFuncValidateUserIdentity);
 
+    /* UACTT tests expect that a UserName identity token with empty username is invalid. */
+    if (&OpcUa_UserNameIdentityToken_EncodeableType == pUser->Body.Object.ObjType)
+    {
+        OpcUa_UserNameIdentityToken* token = pUser->Body.Object.Value;
+        if (0 >= token->UserName.Length)
+        {
+            *pUserAuthenticated = SOPC_USER_AUTHENTICATION_INVALID_TOKEN;
+            return SOPC_STATUS_OK;
+        }
+    }
+
     return (authenticationManager->pFunctions->pFuncValidateUserIdentity)(authenticationManager, pUser,
-                                                                          pbUserAuthenticated);
+                                                                          pUserAuthenticated);
 }
 
 SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserWithAuthorization* userWithAuthorization,
@@ -83,13 +94,13 @@ void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAutho
 /** \brief A helper implementation of the validate UserIdentity callback, which always returns OK. */
 static SOPC_ReturnStatus AuthenticateAllowAll(SOPC_UserAuthentication_Manager* authenticationManager,
                                               const SOPC_ExtensionObject* pUserIdentity,
-                                              bool* pbUserAuthenticated)
+                                              SOPC_UserAuthentication_Status* pUserAuthenticated)
 {
     (void) (authenticationManager);
     (void) (pUserIdentity);
-    assert(NULL != pbUserAuthenticated);
+    assert(NULL != pUserAuthenticated);
 
-    *pbUserAuthenticated = true;
+    *pUserAuthenticated = SOPC_USER_AUTHENTICATION_OK;
     return SOPC_STATUS_OK;
 }
 

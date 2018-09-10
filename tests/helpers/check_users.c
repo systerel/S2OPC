@@ -80,13 +80,13 @@ static const SOPC_NodeId unauthorizedNodeId = {.IdentifierType = SOPC_Identifier
 /* Custom authentication and authorization functions */
 static SOPC_ReturnStatus selectiveAuthenticationValidate(SOPC_UserAuthentication_Manager* authn,
                                                          const SOPC_ExtensionObject* token,
-                                                         bool* authenticated)
+                                                         SOPC_UserAuthentication_Status* authenticated)
 {
     (void) (authn);
     assert(NULL != token && NULL != authenticated);
 
     /* Only validates the username with the correct password */
-    *authenticated = false;
+    *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
     if (&OpcUa_UserNameIdentityToken_EncodeableType == token->Body.Object.ObjType)
     {
         OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;
@@ -96,7 +96,7 @@ static SOPC_ReturnStatus selectiveAuthenticationValidate(SOPC_UserAuthentication
             SOPC_ByteString* pwd = &userToken->Password;
             if (pwd->Length == sizeof(PASSWORD) - 1 && memcmp(pwd->Data, PASSWORD, sizeof(PASSWORD) - 1) == 0)
             {
-                *authenticated = true;
+                *authenticated = SOPC_USER_AUTHENTICATION_OK;
             }
         }
     }
@@ -294,17 +294,17 @@ END_TEST
 
 START_TEST(test_authentication_allow_all)
 {
-    bool authenticated = false;
+    SOPC_UserAuthentication_Status authenticated = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
 
 #define TEST_AUTHN(token, expected)                                                                       \
-    authenticated = !expected;                                                                            \
+    authenticated = SOPC_USER_AUTHENTICATION_INVALID_TOKEN;                                               \
     ck_assert(SOPC_STATUS_OK ==                                                                           \
               SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, token, &authenticated)); \
     ck_assert(authenticated == expected);
 
-    TEST_AUTHN(&anonymousIdentityToken, true)
-    TEST_AUTHN(&usernameIdentityToken, true)
-    TEST_AUTHN(&usernameIdentityToken_invalid, true)
+    TEST_AUTHN(&anonymousIdentityToken, SOPC_USER_AUTHENTICATION_OK)
+    TEST_AUTHN(&usernameIdentityToken, SOPC_USER_AUTHENTICATION_OK)
+    TEST_AUTHN(&usernameIdentityToken_invalid, SOPC_USER_AUTHENTICATION_OK)
 
 #undef TEST_AUTHN
 }
@@ -312,17 +312,17 @@ END_TEST
 
 START_TEST(test_authentication_selective)
 {
-    bool authenticated = false;
+    SOPC_UserAuthentication_Status authenticated = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
 
 #define TEST_AUTHN(token, expected)                                                                                \
-    authenticated = !expected;                                                                                     \
+    authenticated = SOPC_USER_AUTHENTICATION_INVALID_TOKEN;                                                        \
     ck_assert(SOPC_STATUS_OK ==                                                                                    \
               SOPC_UserAuthentication_IsValidUserIdentity(authenticationManagerSelective, token, &authenticated)); \
     ck_assert(authenticated == expected);
 
-    TEST_AUTHN(&anonymousIdentityToken, false)
-    TEST_AUTHN(&usernameIdentityToken, true)
-    TEST_AUTHN(&usernameIdentityToken_invalid, false)
+    TEST_AUTHN(&anonymousIdentityToken, SOPC_USER_AUTHENTICATION_REJECTED_TOKEN)
+    TEST_AUTHN(&usernameIdentityToken, SOPC_USER_AUTHENTICATION_OK)
+    TEST_AUTHN(&usernameIdentityToken_invalid, SOPC_USER_AUTHENTICATION_REJECTED_TOKEN)
 
 #undef TEST_AUTHN
 }

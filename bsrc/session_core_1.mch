@@ -346,19 +346,18 @@ OPERATIONS
     END
     ;
 
-    p_valid_user, p_alloc_failed, p_user <-- allocate_valid_user (p_user_token, p_endpoint_config_idx) =
+    p_sc_valid_user, p_user <-- allocate_valid_user (p_user_token, p_endpoint_config_idx) =
     PRE
         p_user_token : t_user_token_i &
         p_endpoint_config_idx : t_endpoint_config_idx_i &
         p_endpoint_config_idx : t_endpoint_config_idx
     THEN
-        p_valid_user,
-        p_alloc_failed,
+        p_sc_valid_user,
         p_user
-        :(p_valid_user : BOOL &
-          p_alloc_failed : BOOL &
+        :(p_sc_valid_user : t_StatusCode_i &
+          p_sc_valid_user : t_StatusCode &
           p_user : t_user_i &
-          (p_valid_user = TRUE & p_alloc_failed = FALSE => p_user : t_user))
+          (p_sc_valid_user = e_sc_ok => p_user : t_user))
     END
     ;
 

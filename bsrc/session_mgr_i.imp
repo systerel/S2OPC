@@ -336,8 +336,6 @@ OPERATIONS
         l_is_valid_user_token,
         l_user_token,
         l_endpoint_config_idx,
-        l_is_valid_user,
-        l_failed_alloc,
         l_user
     IN
         session := c_session_indet;
@@ -365,8 +363,8 @@ OPERATIONS
                         l_is_valid_user_token, l_user_token <-- read_activate_req_msg_identity_token (req_msg);
                         IF l_is_valid_user_token = TRUE THEN
                             l_endpoint_config_idx <-- server_get_endpoint_config (channel);
-                            l_is_valid_user, l_failed_alloc, l_user <-- allocate_valid_user (l_user_token, l_endpoint_config_idx);
-                            IF l_is_valid_user = TRUE & l_failed_alloc = FALSE
+                            service_ret, l_user <-- allocate_valid_user (l_user_token, l_endpoint_config_idx);
+                            IF service_ret = e_sc_ok
                             THEN
                                 // TODO: differentiate sc_activate from user_activate directly here
                                 service_ret <-- server_activate_session_req_and_resp_sm (channel, session, l_user, req_msg, resp_msg);
@@ -375,13 +373,6 @@ OPERATIONS
                                 THEN
                                     deallocate_user (l_user)
                                 END
-                            ELSIF l_is_valid_user_token = FALSE
-                            THEN
-                                // invalid user in token
-                                service_ret := e_sc_bad_identity_token_invalid
-                            ELSE
-                                // Failed alloc
-                                service_ret := e_sc_bad_out_of_memory
                             END
                         ELSE
                             // invalid user token type
