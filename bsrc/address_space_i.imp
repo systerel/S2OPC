@@ -215,6 +215,8 @@ OPERATIONS
                 ELSE
                     gen_data_changed_event_failed (l_prev_value)
                 END
+            ELSE
+                read_AddressSpace_free_value(l_prev_value)
             END;
             l_local_treatment <-- is_local_service_treatment;
             IF l_local_treatment = FALSE
