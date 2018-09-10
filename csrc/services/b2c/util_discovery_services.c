@@ -38,6 +38,14 @@ const OpcUa_UserTokenPolicy anonymousUserTokenPolicy = {
     .SecurityPolicyUri = {0, true, NULL},
 };
 
+const OpcUa_UserTokenPolicy userNameUserTokenPolicy = {
+    .PolicyId = {9, true, (SOPC_Byte*) "username"},
+    .TokenType = OpcUa_UserTokenType_UserName,
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {0, true, NULL},
+};
+
 static void SOPC_SetServerCertificate(SOPC_Endpoint_Config* sopcEndpointConfig, OpcUa_EndpointDescription* epDesc)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -164,11 +172,12 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
                     newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_None;
 
                     // Set userIdentityTokens
-                    newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
+                    newEndPointDescription.UserIdentityTokens = calloc(2, sizeof(OpcUa_UserTokenPolicy));
                     if (NULL != newEndPointDescription.UserIdentityTokens)
                     {
-                        newEndPointDescription.NoOfUserIdentityTokens = 1;
+                        newEndPointDescription.NoOfUserIdentityTokens = 2;
                         newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
+                        newEndPointDescription.UserIdentityTokens[1] = userNameUserTokenPolicy;
                     }
 
                     // Set securityLevel
@@ -199,11 +208,12 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
                     newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_Sign;
 
                     // Set userIdentityTokens
-                    newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
+                    newEndPointDescription.UserIdentityTokens = calloc(2, sizeof(OpcUa_UserTokenPolicy));
                     if (NULL != newEndPointDescription.UserIdentityTokens)
                     {
-                        newEndPointDescription.NoOfUserIdentityTokens = 1;
+                        newEndPointDescription.NoOfUserIdentityTokens = 2;
                         newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
+                        newEndPointDescription.UserIdentityTokens[1] = userNameUserTokenPolicy;
                     }
 
                     // Set securityLevel
@@ -234,11 +244,12 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
                     newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
 
                     // Set userIdentityTokens
-                    newEndPointDescription.UserIdentityTokens = calloc(1, sizeof(OpcUa_UserTokenPolicy));
+                    newEndPointDescription.UserIdentityTokens = calloc(2, sizeof(OpcUa_UserTokenPolicy));
                     if (NULL != newEndPointDescription.UserIdentityTokens)
                     {
-                        newEndPointDescription.NoOfUserIdentityTokens = 1;
+                        newEndPointDescription.NoOfUserIdentityTokens = 2;
                         newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
+                        newEndPointDescription.UserIdentityTokens[1] = userNameUserTokenPolicy;
                     }
 
                     // Set securityLevel
