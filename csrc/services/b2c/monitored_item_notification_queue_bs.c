@@ -194,7 +194,6 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
         OpcUa_WriteValue_Clear(pNewWriteValue);
         free(pNewWriteValue);
     }
-    free(monitored_item_notification_queue_bs__p_VariantValuePointer);
 }
 
 void monitored_item_notification_queue_bs__add_monitored_item_notification_to_queue(

@@ -820,8 +820,6 @@ OPERATIONS
                                                                                    p_aid,
                                                                                    p_value,
                                                                                    p_valueSc)
-                    ELSE
-                        free_first_monitored_item_notification_value (p_value)
                     END;
                     IF l_bres = FALSE
                     THEN

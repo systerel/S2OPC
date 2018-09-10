@@ -600,6 +600,7 @@ OPERATIONS
                                                                                            l_clientHandle);
                 l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize)
             END;
+            read_AddressSpace_free_value(l_value);
             setall_msg_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_monitoredItemId, l_revSamplingItv, l_revQueueSize)
 
         INVARIANT
