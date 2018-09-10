@@ -113,8 +113,10 @@ OPERATIONS
     END
     ;
 
-    fill_read_response(req_msg, resp_msg) =
+    fill_read_response(p_user, req_msg, resp_msg) =
     PRE
+        p_user    : t_user_i &
+        p_user    : t_user   &
         req_msg   : t_msg_i &
         req_msg   = c_msg_in &
         c_msg_in  : t_msg &

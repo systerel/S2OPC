@@ -28,7 +28,8 @@ SEES
     message_out_bs,
     write_value_pointer_bs,
     address_space,
-    request_handle_bs
+    request_handle_bs,
+    session_core
 
 DEFINITIONS
     "definitions.def"
@@ -140,12 +141,14 @@ LOCAL_OPERATIONS
     END
     ;
 
-    fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_user, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
         p_tsToReturn : t_TimestampsToReturn_i &
         p_tsToReturn : t_TimestampsToReturn &
+        p_user : t_user_i &
+        p_user : t_user   &
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
@@ -529,7 +532,7 @@ OPERATIONS
     END
     ;
 
-    fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_user, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     VAR
         l_continue,
         l_index,
@@ -573,10 +576,10 @@ OPERATIONS
             IF l_sc = e_sc_ok
             THEN
                 /* TODO: manage index and propagate new cases of read_NodeClass_Attribute in operation model */
-                l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(l_node, l_aid, c_IndexRange_indet);
+                l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(p_user, l_node, l_aid, c_IndexRange_indet);
                 IF l_ncl = e_ncl_Variable
                 THEN
-                    l_valueSc <-- get_Value_StatusCode (l_node)
+                    l_valueSc <-- get_Value_StatusCode (p_user, l_node)
                 END
             END
             ;
@@ -965,7 +968,8 @@ OPERATIONS
         l_valid_subscription,
         l_timestampToRet,
         l_nb_monitored_items,
-        l_bres
+        l_bres,
+        l_user
     IN
         l_sc, l_subscription, l_timestampToRet, l_nb_monitored_items <-- getall_msg_create_monitored_items_req_params (p_req_msg);
         IF l_sc = e_sc_ok
@@ -976,8 +980,9 @@ OPERATIONS
                 l_bres <-- alloc_msg_create_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
                 IF l_bres = TRUE
                 THEN
+                    l_user <-- get_session_user_server(p_session);
                     fill_response_subscription_create_monitored_items
-                      (l_subscription, l_timestampToRet, p_req_msg, p_resp_msg, l_nb_monitored_items);
+                      (l_subscription, l_timestampToRet, l_user, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory

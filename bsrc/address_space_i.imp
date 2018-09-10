@@ -58,21 +58,25 @@ INITIALISATION
     ResponseWrite_allocated := FALSE
 
 LOCAL_OPERATIONS
-    /* Outer treat operation. Validates isvalid, asks for uid on (nid, aid),
-       calls treat_write_2 which effectively records the write. */
-    serviceStatusCode, prev_value, prev_sc <-- treat_write_1(isvalid, status, nid, aid, value, index_range) =
+    /* Outer treat operation. Validates isvalid, validates user, records the write. */
+    serviceStatusCode, prev_value, prev_sc <-- treat_write_1(isvalid, status, p_user, nid, aid, value, index_range) =
     PRE
         isvalid : BOOL &
         status : t_StatusCode_i &
+        p_user : t_user_i &
+        p_user : t_user   &
         nid : t_NodeId_i &
         aid : t_AttributeId_i &
         value : t_Variant_i &
         (isvalid = TRUE
             =>
-         status : t_StatusCode &
+         status = e_sc_ok & /* TODO: this is redundant with isvalid = TRUE */
          nid : t_NodeId &
          aid : t_AttributeId &
          value : t_Variant) &
+        (isvalid = FALSE
+            =>
+         status : {e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid}) &
         a_NodeId : t_Node >-> t_NodeId &
         a_Value : t_Node +-> t_Variant &
         index_range : t_IndexRange_i &
@@ -89,11 +93,10 @@ LOCAL_OPERATIONS
             prev_value : t_Variant_i &
             a_Value : t_Node +-> t_Variant &
             (isvalid = TRUE &
-             status : t_StatusCode_i &
              nid : ran(a_NodeId) &
              aid = e_aid_Value &
-             a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable
-             /* TODO: & userid valid, which must be supported by some abstract variables */
+             a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable &
+             serviceStatusCode /= e_sc_bad_user_access_denied
              =>
              serviceStatusCode = e_sc_ok &
              prev_sc = a_Value_StatusCode(a_NodeId~(nid)) &
@@ -104,60 +107,20 @@ LOCAL_OPERATIONS
                  status : t_StatusCode &
                  nid : ran(a_NodeId) &
                  aid = e_aid_Value &
-                 a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable)
+                 a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable) &
+                 serviceStatusCode /= e_sc_bad_user_access_denied
              =>
              serviceStatusCode :
-               {e_sc_bad_internal_error, e_sc_bad_attribute_id_invalid, e_sc_bad_node_id_unknown, e_sc_bad_write_not_supported, e_sc_bad_index_range_no_data, e_sc_bad_index_range_invalid} &
-             a_Value = a_Value$0)
-        )
-    END
-    ;
-
-    serviceStatusCode, prev_value, prev_sc <-- treat_write_2(nid, aid, value, index_range) =
-    PRE
-        nid : t_NodeId_i &
-        nid : t_NodeId &
-        aid : t_AttributeId_i &
-        aid : t_AttributeId &
-        value : t_Variant_i &
-        value : t_Variant &
-        a_NodeId : t_Node >-> t_NodeId &
-        a_Value : t_Node +-> t_Variant &
-        index_range : t_IndexRange_i &
-        index_range : t_IndexRange
-    THEN
-        serviceStatusCode,
-        prev_sc,
-        prev_value,
-        a_Value
-        :(
-            serviceStatusCode : t_StatusCode_i &
-            serviceStatusCode : t_StatusCode &
-            prev_sc : t_StatusCode_i &
-            prev_value : t_Variant_i &
-            a_Value : t_Node +-> t_Variant &
-            (nid : ran(a_NodeId) &
-             aid = e_aid_Value &
-             a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable
-             =>
-             serviceStatusCode = e_sc_ok &
-             prev_sc = a_Value_StatusCode(a_NodeId~(nid)) &
-             prev_value = a_Value$0(a_NodeId~(nid)) &
-             a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> value}) &
-            (not(nid : ran(a_NodeId) &
-                 aid = e_aid_Value &
-                 a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable)
-             =>
-             serviceStatusCode : {e_sc_bad_node_id_unknown, e_sc_bad_write_not_supported} &
+               {e_sc_bad_internal_error, e_sc_bad_attribute_id_invalid, e_sc_bad_node_id_unknown, e_sc_bad_write_not_supported, e_sc_bad_user_access_denied, e_sc_bad_index_range_no_data, e_sc_bad_index_range_invalid} &
              a_Value = a_Value$0)
         )
     END
 
 OPERATIONS
-    sc, ncl, val <-- read_NodeClass_Attribute(node, aid, index_range) =
+    sc, ncl, val <-- read_NodeClass_Attribute(p_user, node, aid, index_range) =
     BEGIN
         ncl <-- get_NodeClass(node);
-        sc, val <-- read_AddressSpace_Attribute_value(node, ncl, aid, index_range)
+        sc, val <-- read_AddressSpace_Attribute_value(p_user, node, ncl, aid, index_range)
     END
     ;
 
@@ -175,7 +138,7 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_write_request_WriteValues =
+    StatusCode_service <-- treat_write_request_WriteValues (p_user) =
     VAR
         l_nb_req,
         l_continue,
@@ -200,11 +163,8 @@ OPERATIONS
         WHILE l_continue = TRUE DO
             l_continue, l_wvi <-- continue_iter_write_request;
             l_isvalid, l_status1, l_nid, l_aid, l_value, l_index_range <-- getall_WriteValue(l_wvi);
-            /* Avoids the IF with a local operation. The following local op will use
-               another local op to realize the write. The latter operation can be
-               re-used in another context (e.g. write request from the Application) */
-
-            l_status2, l_prev_value, l_prev_value_status <-- treat_write_1(l_isvalid, l_status1, l_nid, l_aid, l_value, l_index_range);
+            /* Avoids the IFs with a local operation. */
+            l_status2, l_prev_value, l_prev_value_status <-- treat_write_1(l_isvalid, l_status1, p_user, l_nid, l_aid, l_value, l_index_range);
             set_ResponseWrite_StatusCode(l_wvi, l_status2);
             l_wv <-- getall_WriteValuePointer(l_wvi);
             IF l_status2 = e_sc_ok
@@ -280,38 +240,32 @@ OPERATIONS
     END
     ;
 
-    serviceStatusCode, prev_value, prev_sc <-- treat_write_1(isvalid, status, nid, aid, value, index_range) =
-    IF isvalid = TRUE THEN
-        /* TODO: provide and check user id */
-        /* sc <-- check_user(nid, aid, uid) */
-        serviceStatusCode, prev_value, prev_sc <-- treat_write_2(nid, aid, value, index_range)
-    ELSE
-        serviceStatusCode := status;
-        prev_sc := c_StatusCode_indet;
-        prev_value := c_Variant_indet
-    END
-    ;
-
-    serviceStatusCode, prev_value, prev_sc <-- treat_write_2(nid, aid, value, index_range) =
+    serviceStatusCode, prev_value, prev_sc <-- treat_write_1(isvalid, status, p_user, nid, aid, value, index_range) =
     VAR
         l_isvalid,
         l_node,
         l_ncl
     IN
-        prev_sc := c_StatusCode_indet;
-        prev_value := c_Variant_indet;
-        serviceStatusCode := e_sc_bad_node_id_unknown;
-        l_isvalid, l_node <-- readall_AddressSpace_Node(nid);
-        IF l_isvalid = TRUE THEN
-            IF aid = e_aid_Value THEN
-                l_ncl <-- get_NodeClass(l_node);
-                IF l_ncl = e_ncl_Variable THEN
-                    prev_sc <-- get_Value_StatusCode (l_node);
-                    serviceStatusCode, prev_value <-- set_Value(l_node, value, index_range)
+        IF isvalid = TRUE THEN
+            prev_sc := c_StatusCode_indet;
+            prev_value := c_Variant_indet;
+            serviceStatusCode := e_sc_bad_node_id_unknown;
+            l_isvalid, l_node <-- readall_AddressSpace_Node(nid);
+            IF l_isvalid = TRUE THEN
+                IF aid = e_aid_Value THEN
+                    l_ncl <-- get_NodeClass(l_node);
+                    IF l_ncl = e_ncl_Variable THEN
+                        prev_sc <-- get_Value_StatusCode (p_user, l_node);
+                        serviceStatusCode, prev_value <-- set_Value(p_user, l_node, value, index_range)
+                    END
+                ELSE
+                    serviceStatusCode := e_sc_bad_write_not_supported
                 END
-            ELSE
-                serviceStatusCode := e_sc_bad_write_not_supported
             END
+        ELSE
+            serviceStatusCode := status;
+            prev_sc := c_StatusCode_indet;
+            prev_value := c_Variant_indet
         END
     END
 

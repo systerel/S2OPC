@@ -126,8 +126,10 @@ OPERATIONS
     /* Reads any attribute and outputs a variant (valid or not)
      * As this function uses the util_variant__new_Variant_from_* functions, the value must be freed once used
      */
-    sc, variant <-- read_AddressSpace_Attribute_value(node, ncl, aid, index_range) =
+    sc, variant <-- read_AddressSpace_Attribute_value(p_user, node, ncl, aid, index_range) =
     PRE
+        p_user : t_user_i       &
+        p_user : t_user         &
         node : t_Node_i         &
         node : t_Node           &
         node : dom(a_NodeId)    &
@@ -160,9 +162,14 @@ OPERATIONS
                         variant := conv_NodeClass_Variant(a_NodeClass(node)) ||
                         sc := e_sc_ok
                     WHEN aid = e_aid_Value &
-                        (ncl = e_ncl_Variable or ncl = e_ncl_VariableType) THEN
-                        variant := a_Value(node) ||
-                        sc := e_sc_ok
+                         (ncl = e_ncl_Variable or ncl = e_ncl_VariableType) THEN
+                        variant,
+                        sc
+                        :(  variant : t_Variant_i &
+                            sc : t_StatusCode_i &
+                            sc : {e_sc_ok, e_sc_bad_user_access_denied } &
+                            ( sc = e_sc_ok => variant = a_Value(node) ) &
+                            ( sc = e_sc_bad_user_access_denied => variant = c_Variant_indet ))
                     ELSE
                         /* TODO: add BrowseName, DisplayName, AccessLevel cases (a_NodeClass shall not be used) */
                         variant := conv_NodeClass_Variant(a_NodeClass(node)) ||
@@ -186,8 +193,10 @@ OPERATIONS
     ;
 
     /* a_Value, setter */
-    serviceStatusCode, prev_value <-- set_Value(node, value, index_range) =
+    serviceStatusCode, prev_value <-- set_Value(p_user, node, value, index_range) =
     PRE
+        p_user : t_user_i   &
+        p_user : t_user     &
         node  : t_Node_i    &
         node  : t_Node      &
         value : t_Variant_i &
@@ -213,21 +222,24 @@ OPERATIONS
         OR
             serviceStatusCode
             :(serviceStatusCode : t_StatusCode_i &
-                serviceStatusCode : {e_sc_bad_out_of_memory, e_sc_bad_internal_error}) ||
+                serviceStatusCode : {e_sc_bad_out_of_memory, e_sc_bad_internal_error, e_sc_bad_user_access_denied}) ||
             prev_value := c_Variant_indet
         END
     END
     ;
 
     /* a_Value_StatusCode */
-    sc <-- get_Value_StatusCode(node) =
+    /* p_user could be avoided here, but this would put more constraints on the caller */
+    sc <-- get_Value_StatusCode(p_user, node) =
     PRE
+        p_user : t_user_i &
+        p_user : t_user   &
         node : t_Node_i &
         node : t_Node   &
         node : dom(a_Value_StatusCode)
     THEN
         sc :(sc : t_StatusCode_i &
-             sc = a_Value_StatusCode(node))
+             sc : {a_Value_StatusCode(node), e_sc_bad_user_access_denied})
     END
     ;
 

@@ -93,8 +93,10 @@ LOCAL_OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_read_request(p_request_msg, p_response_msg) =
+    StatusCode_service <-- treat_read_request(p_user, p_request_msg, p_response_msg) =
     PRE
+        p_user         : t_user_i  &
+        p_user         : t_user    &
         p_request_msg  : t_msg_i   &
         p_request_msg  = c_msg_in  &
         p_response_msg : t_msg_i   &
@@ -122,11 +124,13 @@ LOCAL_OPERATIONS
     ;
 
     /* TODO: add constraints on userid? */
-    StatusCode_service <-- treat_write_request(write_msg) =
+    StatusCode_service <-- treat_write_request(p_user, write_msg) =
     PRE
-        write_msg : t_msg_i &
+        p_user : t_user_i    &
+        p_user : t_user      &
+        write_msg : t_msg_i  &
         write_msg = c_msg_in &
-        c_msg_in : t_msg &
+        c_msg_in : t_msg     &
         a_msg_in_type = e_msg_attribute_write_req
     THEN
         StatusCode_service,
@@ -384,7 +388,7 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_read_request(p_request_msg, p_response_msg) =
+    StatusCode_service <-- treat_read_request(p_user, p_request_msg, p_response_msg) =
     VAR
         l_nb_ReadValue,
         l_is_valid,
@@ -394,7 +398,7 @@ OPERATIONS
         IF  l_is_valid = TRUE THEN
             l_is_valid <-- alloc_read_response(l_nb_ReadValue, l_TimestampsToReturn, p_response_msg);
             IF  l_is_valid = TRUE THEN
-                fill_read_response(p_request_msg, p_response_msg)
+                fill_read_response(p_user, p_request_msg, p_response_msg)
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory
             END
@@ -402,7 +406,7 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_write_request(write_msg) =
+    StatusCode_service <-- treat_write_request(p_user, write_msg) =
     VAR
         l_nb_req,
         l_bret
@@ -414,7 +418,7 @@ OPERATIONS
             l_bret <-- alloc_write_request_responses(l_nb_req);
             IF l_bret = TRUE
             THEN
-                StatusCode_service <-- treat_write_request_WriteValues
+                StatusCode_service <-- treat_write_request_WriteValues(p_user)
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory
             END

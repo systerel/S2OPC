@@ -111,8 +111,10 @@ INITIALISATION
 
 OPERATIONS
     /* a_NodeClass(node) and any_attribute(node) */
-    sc, ncl, val <-- read_NodeClass_Attribute(node, aid, index_range) =
+    sc, ncl, val <-- read_NodeClass_Attribute(p_user, node, aid, index_range) =
     PRE
+        p_user : t_user_i &
+        p_user : t_user   &
         node : t_Node_i &
         node : t_Node &
         aid : t_AttributeId_i &
@@ -120,7 +122,6 @@ OPERATIONS
         index_range : t_IndexRange_i &
         index_range : t_IndexRange
     THEN
-        /* TODO: add user-access levels */
         /* TODO: define cases of failure (sc /= e_sc_ok): value requested on non Variable* type */
         sc,
         ncl,
@@ -254,8 +255,10 @@ OPERATIONS
     ;
 
     /* Promoted */
-    sc <-- get_Value_StatusCode(node) =
+    sc <-- get_Value_StatusCode(p_user, node) =
     PRE
+        p_user : t_user_i &
+        p_user : t_user   &
         node : t_Node_i &
         node : t_Node &
         a_NodeClass(node) = e_ncl_Variable
@@ -279,9 +282,11 @@ OPERATIONS
     /* --------------------------------------------------------------------- */
     /* Service Write */
 
-    StatusCode_service <-- treat_write_request_WriteValues =
+    StatusCode_service <-- treat_write_request_WriteValues (p_user) =
     PRE
-        ResponseWrite_allocated = TRUE /* TODO & userid /= c_user_local */
+        p_user : t_user_i &
+        p_user : t_user   &
+        ResponseWrite_allocated = TRUE
     THEN
         StatusCode_service,
         a_Value,

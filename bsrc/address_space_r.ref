@@ -41,11 +41,11 @@ DEFINITIONS
         Reference_ReferenceType,
         Reference_TargetNode,
         Reference_IsForward,
-   
+
         Node_Reference,
         Node_RefIndexEnd,
         RefIndex_Reference,
-        
+
         IsValid_VariantIndex,
         HasRange_VariantIndex,
 
@@ -81,7 +81,7 @@ DEFINITIONS
         Node_Reference          : t_Node     <-> t_Reference &
         Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
         RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference &
-        
+
         IsValid_VariantIndex : t_Variant * t_IndexRange --> BOOL &
         HasRange_VariantIndex  : t_Variant * t_IndexRange --> BOOL &
 
@@ -115,8 +115,11 @@ OPERATIONS
     /* --------------------------------------------------------------------- */
     /* Service Write */
 
-    StatusCode_service <-- treat_write_request_WriteValues =
-    BEGIN
+    StatusCode_service <-- treat_write_request_WriteValues (p_user) =
+    PRE
+        p_user : t_user_i &
+        p_user : t_user
+    THEN
         StatusCode_service := e_sc_ok ||
         a_Value,
         ResponseWrite_StatusCode
@@ -134,10 +137,11 @@ OPERATIONS
 
             /* The value requested to be written should be contained in the requested values */
             a_Value <: a_Value$0 <+ d_a_Value_requested &
-            
+
             ResponseWrite_StatusCode = %wvi.(
                 wvi : t_WriteValue &
                 wvi : cast_t_WriteValue[1..nb_WriteValue]
+                /* TODO: out_of_memory handling and user validation */
                 |
                 {FALSE |-> e_sc_bad_attribute_id_invalid,
                  TRUE  |-> {FALSE |-> e_sc_bad_node_id_unknown,
