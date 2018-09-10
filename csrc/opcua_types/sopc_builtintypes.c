@@ -4192,7 +4192,7 @@ SOPC_ReturnStatus SOPC_DataValue_Compare(const SOPC_DataValue* left, const SOPC_
         }
         if (SOPC_STATUS_OK == status && *comparison == 0)
         {
-            SOPC_Variant_Compare(&left->Value, &right->Value, comparison);
+            status = SOPC_Variant_Compare(&left->Value, &right->Value, comparison);
         }
     }
     return status;
