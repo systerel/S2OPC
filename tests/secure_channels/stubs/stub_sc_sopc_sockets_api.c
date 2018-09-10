@@ -89,7 +89,7 @@ static SOPC_ReturnStatus check_expected_sent_message_helper(const char* hexExpMs
 
     if (ignoreBytes != false)
     {
-        assert((start + length) <= buffer->length);
+        assert((uint32_t)(start + length) <= buffer->length);
         // Set bytes to 0
         memset(buffer->data + start, 0, (size_t) length);
     }
