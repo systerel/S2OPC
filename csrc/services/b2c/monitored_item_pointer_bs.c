@@ -37,6 +37,7 @@ void SOPC_InternalMontitoredItem_Free(void* data)
     SOPC_InternalMontitoredItem* mi = (SOPC_InternalMontitoredItem*) data;
     if (NULL != mi)
     {
+        SOPC_NumericRange_Delete(mi->indexRange);
         SOPC_NodeId_Clear(mi->nid);
         free(mi->nid);
         free(mi);
@@ -104,6 +105,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     const constants__t_subscription_i monitored_item_pointer_bs__p_subscription,
     const constants__t_NodeId_i monitored_item_pointer_bs__p_nid,
     const constants__t_AttributeId_i monitored_item_pointer_bs__p_aid,
+    const constants__t_IndexRange_i monitored_item_pointer_bs__p_indexRange,
     const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
     const constants__t_monitoringMode_i monitored_item_pointer_bs__p_monitoringMode,
     const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
@@ -115,6 +117,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     uintptr_t freshId = 0;
     SOPC_InternalMontitoredItem* monitItem = malloc(sizeof(SOPC_InternalMontitoredItem));
     SOPC_NodeId* nid = malloc(sizeof(SOPC_NodeId));
+    SOPC_NumericRange* range = NULL;
     SOPC_ReturnStatus retStatus = SOPC_STATUS_NOK;
 
     if (NULL == monitItem || NULL == nid)
@@ -127,11 +130,17 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     SOPC_NodeId_Initialize(nid);
     retStatus = SOPC_NodeId_Copy(nid, monitored_item_pointer_bs__p_nid);
 
+    if (SOPC_STATUS_OK == retStatus && monitored_item_pointer_bs__p_indexRange != NULL)
+    {
+        retStatus = SOPC_NumericRange_Parse(SOPC_String_GetRawCString(monitored_item_pointer_bs__p_indexRange), &range);
+    }
+
     if (SOPC_STATUS_OK == retStatus)
     {
         monitItem->subId = monitored_item_pointer_bs__p_subscription;
         monitItem->nid = nid;
         monitItem->aid = monitored_item_pointer_bs__p_aid;
+        monitItem->indexRange = range;
         monitItem->timestampToReturn = monitored_item_pointer_bs__p_timestampToReturn;
         monitItem->monitoringMode = monitored_item_pointer_bs__p_monitoringMode;
         monitItem->clientHandle = monitored_item_pointer_bs__p_clientHandle;
@@ -166,6 +175,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     }
     else
     {
+        SOPC_NumericRange_Delete(range);
         free(monitItem);
         free(nid);
     }
@@ -238,8 +248,9 @@ void monitored_item_pointer_bs__is_notification_triggered(
     if (false != res && monitored_item_pointer_bs__p_new_wv_pointer->AttributeId == miAttributeId)
     {
         // Same attribute, now compare values (no filters managed for now)
-        status = SOPC_DataValue_Compare(&monitored_item_pointer_bs__p_old_wv_pointer->Value,
-                                        &monitored_item_pointer_bs__p_new_wv_pointer->Value, &dtCompare);
+        status = SOPC_DataValue_CompareRange(&monitored_item_pointer_bs__p_old_wv_pointer->Value,
+                                             &monitored_item_pointer_bs__p_new_wv_pointer->Value, monitItem->indexRange,
+                                             &dtCompare);
         if (SOPC_STATUS_OK == status)
         {
             if (dtCompare != 0)

@@ -830,6 +830,7 @@ OPERATIONS
     StatusCode_service, monitoredItemPointer, monitoredItemId <-- create_monitored_item (p_subscription,
                                                                                          p_nid,
                                                                                          p_aid,
+                                                                                         p_indexRange,
                                                                                          p_value,
                                                                                          p_valueSc,
                                                                                          p_timestampToReturn,
@@ -842,6 +843,7 @@ OPERATIONS
         p_nid : t_NodeId &
         p_aid : t_AttributeId_i &
         p_aid : t_AttributeId &
+        p_indexRange : t_IndexRange_i &
         p_value : t_Variant_i &
         p_value : t_Variant &
         p_valueSc : t_StatusCode_i &

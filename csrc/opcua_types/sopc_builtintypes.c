@@ -4030,6 +4030,49 @@ SOPC_ReturnStatus SOPC_Variant_CompareAux(const void* left, const void* right, i
     return SOPC_Variant_Compare((const SOPC_Variant*) left, (const SOPC_Variant*) right, comparison);
 }
 
+SOPC_ReturnStatus SOPC_Variant_CompareRange(const SOPC_Variant* left,
+                                            const SOPC_Variant* right,
+                                            const SOPC_NumericRange* range,
+                                            int32_t* comparison)
+{
+    if (left == NULL || right == NULL)
+    {
+        // To be consistent with SOPC_Variant_Compare
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (range == NULL)
+    {
+        return SOPC_Variant_Compare(left, right, comparison);
+    }
+
+    SOPC_Variant *left_sub = SOPC_Variant_Create(), *right_sub = SOPC_Variant_Create();
+
+    if (left_sub == NULL || right_sub == NULL)
+    {
+        SOPC_Variant_Delete(left_sub);
+        SOPC_Variant_Delete(right_sub);
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    SOPC_ReturnStatus status = SOPC_Variant_GetRange(left_sub, left, range);
+
+    if (status == SOPC_STATUS_OK)
+    {
+        status = SOPC_Variant_GetRange(right_sub, right, range);
+    }
+
+    if (status == SOPC_STATUS_OK)
+    {
+        status = SOPC_Variant_Compare(left_sub, right_sub, comparison);
+    }
+
+    SOPC_Variant_Delete(left_sub);
+    SOPC_Variant_Delete(right_sub);
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_Variant_CopyAux(void* dest, const void* src)
 {
     return SOPC_Variant_Copy((SOPC_Variant*) dest, (const SOPC_Variant*) src);
@@ -4143,6 +4186,19 @@ SOPC_ReturnStatus SOPC_DataValue_Copy(SOPC_DataValue* dest, const SOPC_DataValue
 
 SOPC_ReturnStatus SOPC_DataValue_Compare(const SOPC_DataValue* left, const SOPC_DataValue* right, int32_t* comparison)
 {
+    return SOPC_DataValue_CompareRange(left, right, NULL, comparison);
+}
+
+SOPC_ReturnStatus SOPC_DataValue_CompareAux(const void* left, const void* right, int32_t* comparison)
+{
+    return SOPC_DataValue_Compare((const SOPC_DataValue*) left, (const SOPC_DataValue*) right, comparison);
+}
+
+SOPC_ReturnStatus SOPC_DataValue_CompareRange(const SOPC_DataValue* left,
+                                              const SOPC_DataValue* right,
+                                              const SOPC_NumericRange* range,
+                                              int32_t* comparison)
+{
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != left && NULL != right && NULL != comparison)
     {
@@ -4192,15 +4248,10 @@ SOPC_ReturnStatus SOPC_DataValue_Compare(const SOPC_DataValue* left, const SOPC_
         }
         if (SOPC_STATUS_OK == status && *comparison == 0)
         {
-            status = SOPC_Variant_Compare(&left->Value, &right->Value, comparison);
+            status = SOPC_Variant_CompareRange(&left->Value, &right->Value, range, comparison);
         }
     }
     return status;
-}
-
-SOPC_ReturnStatus SOPC_DataValue_CompareAux(const void* left, const void* right, int32_t* comparison)
-{
-    return SOPC_DataValue_Compare((const SOPC_DataValue*) left, (const SOPC_DataValue*) right, comparison);
 }
 
 SOPC_ReturnStatus SOPC_DataValue_CopyAux(void* dest, const void* src)

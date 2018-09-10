@@ -71,7 +71,7 @@ OPERATIONS
     END
     ;
 
-    p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize <-- getall_monitored_item_req_params (p_req_msg, p_index) =
+    p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize, p_indexRange <-- getall_monitored_item_req_params (p_req_msg, p_index) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
@@ -80,7 +80,7 @@ OPERATIONS
         p_index : NAT &
         p_index : t_monitoredItemReqIndex
     THEN
-        p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize
+        p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_indexRange, p_queueSize
         :(p_bres : BOOL &
           p_sc : t_StatusCode_i &
           p_sc : {e_sc_ok, e_sc_bad_attribute_id_invalid,
@@ -92,6 +92,7 @@ OPERATIONS
           p_clientHandle : t_client_handle_i &
           p_samplingItv : t_opcua_duration_i &
           p_queueSize : t_counter &
+          p_indexRange : t_IndexRange_i &
           (p_bres = TRUE =>
            p_sc = e_sc_ok &
            p_nid : t_NodeId &

@@ -121,7 +121,8 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
     constants__t_monitoringMode_i* const msg_subscription_create_monitored_item_bs__p_monitMode,
     constants__t_client_handle_i* const msg_subscription_create_monitored_item_bs__p_clientHandle,
     constants__t_opcua_duration_i* const msg_subscription_create_monitored_item_bs__p_samplingItv,
-    t_entier4* const msg_subscription_create_monitored_item_bs__p_queueSize)
+    t_entier4* const msg_subscription_create_monitored_item_bs__p_queueSize,
+    constants__t_IndexRange_i* const msg_subscription_create_monitored_item_bs__p_indexRange)
 {
     *msg_subscription_create_monitored_item_bs__p_sc = constants__c_StatusCode_indet;
     *msg_subscription_create_monitored_item_bs__p_aid = constants__c_AttributeId_indet;
@@ -145,11 +146,13 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
     }
     else
     {
-        *msg_subscription_create_monitored_item_bs__p_bres = monitReq->ItemToMonitor.IndexRange.Length <= 0;
-        if (*msg_subscription_create_monitored_item_bs__p_bres == false)
+        if (monitReq->ItemToMonitor.IndexRange.Length > 0)
         {
-            // Note: index range not supported
-            *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_index_range_invalid;
+            *msg_subscription_create_monitored_item_bs__p_indexRange = &monitReq->ItemToMonitor.IndexRange;
+        }
+        else
+        {
+            *msg_subscription_create_monitored_item_bs__p_indexRange = NULL;
         }
     }
 

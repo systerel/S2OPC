@@ -550,6 +550,10 @@ void SOPC_Variant_Move(SOPC_Variant* dest, SOPC_Variant* src);
 // SOPC_STATUS_NOT_SUPPORTED
 SOPC_ReturnStatus SOPC_Variant_Compare(const SOPC_Variant* left, const SOPC_Variant* right, int32_t* comparison);
 SOPC_ReturnStatus SOPC_Variant_CompareAux(const void* left, const void* right, int32_t* comparison);
+SOPC_ReturnStatus SOPC_Variant_CompareRange(const SOPC_Variant* left,
+                                            const SOPC_Variant* right,
+                                            const SOPC_NumericRange* range,
+                                            int32_t* comparison);
 void SOPC_Variant_Clear(SOPC_Variant* variant);
 void SOPC_Variant_ClearAux(void* value);
 void SOPC_Variant_Delete(SOPC_Variant* variant);
@@ -560,6 +564,10 @@ SOPC_ReturnStatus SOPC_DataValue_Copy(SOPC_DataValue* dest, const SOPC_DataValue
 SOPC_ReturnStatus SOPC_DataValue_CopyAux(void* dest, const void* src);
 SOPC_ReturnStatus SOPC_DataValue_Compare(const SOPC_DataValue* left, const SOPC_DataValue* right, int32_t* comparison);
 SOPC_ReturnStatus SOPC_DataValue_CompareAux(const void* left, const void* right, int32_t* comparison);
+SOPC_ReturnStatus SOPC_DataValue_CompareRange(const SOPC_DataValue* left,
+                                              const SOPC_DataValue* right,
+                                              const SOPC_NumericRange* range,
+                                              int32_t* comparison);
 void SOPC_DataValue_Clear(SOPC_DataValue* dataValue);
 void SOPC_DataValue_ClearAux(void* value);
 

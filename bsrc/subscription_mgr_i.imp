@@ -548,7 +548,8 @@ OPERATIONS
         l_monitoredItemId,
         l_revSamplingItv,
         l_revQueueSize,
-        l_authorized
+        l_authorized,
+        l_indexRange
     IN
         l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
         WHILE l_continue = TRUE DO
@@ -558,8 +559,9 @@ OPERATIONS
             l_monitoredItemId := c_monitoredItemId_indet;
             l_revSamplingItv := c_opcua_duration_indet;
             l_revQueueSize := 0;
+            l_indexRange := c_IndexRange_indet;
             l_continue, l_index <-- continue_iter_monitored_item_request;
-            l_bres, l_sc, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_queueSize
+            l_bres, l_sc, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_queueSize, l_indexRange
               <-- getall_monitored_item_req_params(p_req_msg, l_index);
             IF l_bres = TRUE
             THEN
@@ -573,7 +575,7 @@ OPERATIONS
             IF l_sc = e_sc_ok
             THEN
                 /* TODO: manage index and propagate new cases of read_NodeClass_Attribute in operation model */
-                l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(p_user, l_node, l_aid, c_IndexRange_indet);
+                l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(p_user, l_node, l_aid, l_indexRange);
                 IF l_ncl = e_ncl_Variable
                 THEN
                     l_authorized <-- get_user_authorization(e_operation_type_read, l_nid, l_aid, p_user);
@@ -593,6 +595,7 @@ OPERATIONS
                 l_sc, l_monitoredItemPointer, l_monitoredItemId <-- create_monitored_item (p_subscription,
                                                                                            l_nid,
                                                                                            l_aid,
+                                                                                           l_indexRange,
                                                                                            l_value,
                                                                                            l_valueSc,
                                                                                            p_tsToReturn,
