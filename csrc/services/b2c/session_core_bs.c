@@ -286,7 +286,7 @@ void session_core_bs__allocate_valid_user(
         case SOPC_USER_AUTHENTICATION_OK:
             *session_core_bs__p_user =
                 SOPC_UserWithAuthorization_CreateFromIdentityToken(session_core_bs__p_user_token, authorizationManager);
-            if (NULL == session_core_bs__p_user)
+            if (NULL == *session_core_bs__p_user)
             {
                 *session_core_bs__p_sc_valid_user = constants__e_sc_bad_out_of_memory;
             }
