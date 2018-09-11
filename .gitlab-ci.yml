@@ -32,6 +32,7 @@ generation:
       - 'csrc/services/bgenc'
     when: always
     expire_in: '1 month'
+    when: always
 
 ###
 # Compilation jobs
