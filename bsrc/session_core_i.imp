@@ -310,6 +310,7 @@ OPERATIONS
         END;
         IF res_activated = TRUE THEN
             set_session_state (session, transitoryState, FALSE);
+            drop_user_server (session); // In case a previous user was set, drop it
             set_session_user_server (session, p_user);
             set_session_channel (session, channel);
             set_session_state (session, e_session_userActivated, FALSE)
