@@ -28,13 +28,13 @@ SEES
     service_write_decode_bs,
     service_mgr_1,
     service_response_cb_bs,
-    gen_subscription_event_bs
+    write_value_pointer_bs
 
 IMPORTS
     address_space_bs,
     response_write_bs,
     address_space_it,
-    write_value_pointer_bs,
+    gen_subscription_event_bs,
     user_authorization_bs
 
 PROMOTES

@@ -21,12 +21,12 @@ IMPLEMENTATION io_dispatch_mgr_i
 REFINES io_dispatch_mgr
 
 SEES
-    constants,
-    write_value_pointer_bs
+    constants
 
 IMPORTS
     service_mgr,
-    channel_mgr
+    channel_mgr,
+    write_value_pointer_bs
 
 LOCAL_OPERATIONS
 

@@ -41,8 +41,7 @@ IMPORTS
     msg_subscription_publish_ack_bs,
     msg_subscription_set_publishing_mode_bs,
     msg_subscription_create_monitored_item,
-    subscription_create_monitored_item_it,
-    monitored_item_queue_it_bs
+    subscription_create_monitored_item_it
 
 PROMOTES
     is_valid_subscription
@@ -465,9 +464,6 @@ OPERATIONS
         END
         ;
         set_msg_publish_resp_subscription (p_resp_msg, p_subscription);
-        /* TODO: fill the availableSeqNum of message: */
-        /* - allocate availableSequenceNumbers
-        - iter on seq nums based on nb_avail_seq_nums */
         set_msg_publish_resp_notificationMsg (p_resp_msg, p_moreNotifs)
     END
     ;
@@ -800,8 +796,8 @@ OPERATIONS
                                                               l_maxNotifPerPublish);
 
             /* Modify subscription */
-            modify_subscription (p_session,
-                                 l_session_sub,
+            /* Guaranteed by getall_subscription: a_subscription_session (p_subscription) = p_session */
+            modify_subscription (l_session_sub,
                                  l_revisedPublishInterval,
                                  l_revisedLifetimeCount,
                                  l_revisedMaxKeepAlive,

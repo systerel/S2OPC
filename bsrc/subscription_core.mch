@@ -75,7 +75,13 @@ DEFINITIONS
     a_monitored_item_notifications,
     /* mi queues */
     s_monitoredItemQueue,
-    a_defined_monitored_items
+    a_defined_monitored_items,
+    /* mi queue iterator */
+    mi_queue_it,
+    mi_iterator_it,
+    nb_monitored_items_it,
+    s_mi_to_iterate_it,
+    s_mi_iterated_it
     ;
 
     d_init ==
@@ -128,7 +134,12 @@ DEFINITIONS
     s_notificationQueue := {} ||
     a_monitored_item_notifications := {} ||
     s_monitoredItemQueue := {} ||
-    a_defined_monitored_items := {}
+    a_defined_monitored_items := {} ||
+    mi_queue_it := c_monitoredItemQueue_indet ||
+    mi_iterator_it := c_monitoredItemQueueIterator_indet ||
+    nb_monitored_items_it := 0 ||
+    s_mi_to_iterate_it :(s_mi_to_iterate_it = {}) ||
+    s_mi_iterated_it :(s_mi_iterated_it = {})
     ;
 
     d_typing ==
@@ -199,7 +210,16 @@ DEFINITIONS
     a_notification_seq_num : t_notif_msg --> t_sub_seq_num &
 
     a_monitored_item_notifications : s_notificationQueue <-> s_monitoredItemPointer &
-    a_defined_monitored_items : s_monitoredItemQueue <-> s_monitoredItemPointer
+    a_defined_monitored_items : s_monitoredItemQueue <-> s_monitoredItemPointer &
+    mi_queue_it : t_monitoredItemQueue_i &
+    mi_iterator_it : t_monitoredItemQueueIterator_i &
+    nb_monitored_items_it : NAT &
+    s_mi_to_iterate_it <: t_monitoredItemPointer_i &
+    s_mi_to_iterate_it <: t_monitoredItemPointer &
+    s_mi_iterated_it <: t_monitoredItemPointer_i &
+    s_mi_iterated_it <: t_monitoredItemPointer &
+    s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
+    card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it
     ;
 
     /* Dequeuing invalid publish requests and check for a valid request still enqueued */
@@ -552,18 +572,14 @@ OPERATIONS
     ;
 
 
-    modify_subscription (p_session,
-                         p_subscription,
+    modify_subscription (p_subscription,
                          p_revPublishInterval,
                          p_revLifetimeCount,
                          p_revMaxKeepAlive,
                          p_revMaxNotifPerPublish) =
     PRE
-        p_session : t_session_i &
-        p_session : t_session &
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
-        a_subscription_session (p_subscription) = p_session &
         p_revPublishInterval : t_opcua_duration_i &
         p_revLifetimeCount : t_counter &
         p_revLifetimeCount > 0 &
@@ -1284,6 +1300,71 @@ OPERATIONS
         notification_republish_iter_queue := c_notifRepublishQueue_indet ||
         s_to_iterate_sub_seq_num := {} ||
         s_iterated_sub_seq_num := {}
-    END
+    END;
 
+    continue, iterator <-- init_iter_monitored_item (p_queue) =
+    PRE
+        p_queue : t_monitoredItemQueue_i &
+        p_queue : t_monitoredItemQueue
+    THEN
+        mi_queue_it,
+        mi_iterator_it,
+        nb_monitored_items_it,
+        s_mi_to_iterate_it,
+        s_mi_iterated_it,
+        continue,
+        iterator
+        :(mi_queue_it : t_monitoredItemQueue_i &
+          mi_iterator_it : t_monitoredItemQueueIterator_i &
+          s_mi_to_iterate_it <: t_monitoredItemPointer &
+          s_mi_iterated_it <: t_monitoredItemPointer &
+          continue : BOOL &
+          iterator : t_monitoredItemQueueIterator_i &
+          (continue = TRUE =>
+              mi_queue_it = p_queue &
+              iterator : t_monitoredItemQueueIterator &
+              mi_iterator_it = iterator &
+              nb_monitored_items_it > 0 &
+              s_mi_to_iterate_it /= {} &
+              card(s_mi_to_iterate_it) = nb_monitored_items_it &
+              s_mi_iterated_it = {}
+          )
+        )
+    END
+    ;
+
+    clear_iter_monitored_item (p_iterator) =
+    PRE
+        p_iterator : t_monitoredItemQueueIterator_i &
+        p_iterator : t_monitoredItemQueueIterator &
+        mi_iterator_it = p_iterator
+    THEN
+        mi_queue_it := c_monitoredItemQueue_indet ||
+        mi_iterator_it := c_monitoredItemQueueIterator_indet ||
+        nb_monitored_items_it := 0 ||
+        s_mi_to_iterate_it :(s_mi_to_iterate_it = {}) ||
+        s_mi_iterated_it :(s_mi_iterated_it = {})
+    END
+    ;
+
+    continue,
+    p_monitoredItem <-- continue_iter_monitored_item (p_iterator, p_queue) =
+    PRE
+        p_iterator : t_monitoredItemQueueIterator_i &
+        mi_iterator_it = p_iterator &
+        p_queue : t_monitoredItemQueue_i &
+        p_queue : t_monitoredItemQueue &
+        mi_queue_it = p_queue &
+        s_mi_to_iterate_it /= {}
+    THEN
+        ANY l_monitoredItem WHERE
+            l_monitoredItem : t_monitoredItemPointer_i &
+            l_monitoredItem : s_mi_to_iterate_it
+        THEN
+            continue := bool(s_mi_to_iterate_it /= {l_monitoredItem}) ||
+            p_monitoredItem := l_monitoredItem ||
+            s_mi_to_iterate_it := s_mi_to_iterate_it - {p_monitoredItem} ||
+            s_mi_iterated_it := s_mi_to_iterate_it \/ {p_monitoredItem}
+        END
+    END
 END
