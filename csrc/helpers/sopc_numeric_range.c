@@ -21,11 +21,13 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "sopc_array.h"
+#include "sopc_helper_string.h"
 
 typedef enum
 {
@@ -135,20 +137,7 @@ static bool parse_index(struct parse_ctx_t* ctx, uint32_t* val)
     memcpy(buf, start, sizeof(char) * ctx->token_len);
     buf[ctx->token_len] = '\0';
 
-    char* endptr;
-    uint64_t val64 = strtoul(buf, &endptr, 10);
-    assert(*endptr == '\0');
-
-    // This also captures values that don't fit into an uint64, since in that
-    // case strtoul returns UINT64_MAX.
-    if (val64 > UINT32_MAX)
-    {
-        return false;
-    }
-
-    *val = (uint32_t) val64;
-
-    return true;
+    return SOPC_strtouint32_t(buf, val, 10, '\0') == SOPC_STATUS_OK;
 }
 
 static bool parse_dimension(struct parse_ctx_t* ctx, SOPC_Dimension* result)
