@@ -304,7 +304,7 @@ START_TEST(test_dict_compact)
 }
 END_TEST
 
-Suite* tests_make_suite_dict(void)
+Suite* tests_make_suite_dict(SRunner* sr)
 {
     Suite* s;
     TCase* tc_dict;
@@ -319,9 +319,14 @@ Suite* tests_make_suite_dict(void)
     tcase_add_test(tc_dict, test_dict_free);
     tcase_add_test(tc_dict, test_dict_resize);
     tcase_add_test(tc_dict, test_dict_get_key);
-    // 6 == SIGABRT
-    tcase_add_test_raise_signal(tc_dict, test_dict_remove_no_tombstone, 6);
-    tcase_add_test_raise_signal(tc_dict, test_dict_set_tombstone_late, 6);
+
+    if (srunner_fork_status(sr) != CK_NOFORK)
+    {
+        // 6 == SIGABRT
+        tcase_add_test_raise_signal(tc_dict, test_dict_remove_no_tombstone, 6);
+        tcase_add_test_raise_signal(tc_dict, test_dict_set_tombstone_late, 6);
+    }
+
     tcase_add_test(tc_dict, test_dict_remove);
     tcase_add_test(tc_dict, test_dict_tombstone_reuse);
     tcase_add_test(tc_dict, test_dict_compact);

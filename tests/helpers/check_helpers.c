@@ -64,7 +64,7 @@ int main(void)
     srunner_add_suite(sr, tests_make_suite_time());
     srunner_add_suite(sr, tests_make_suite_timers());
     srunner_add_suite(sr, tests_make_suite_logger());
-    srunner_add_suite(sr, tests_make_suite_dict());
+    srunner_add_suite(sr, tests_make_suite_dict(sr));
     srunner_add_suite(sr, tests_make_suite_array());
     srunner_add_suite(sr, tests_make_suite_event_handler());
     srunner_add_suite(sr, tests_make_suite_numeric_range());

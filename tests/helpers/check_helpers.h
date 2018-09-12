@@ -47,7 +47,7 @@ Suite* tests_make_suite_timers(void);
 
 Suite* tests_make_suite_logger(void);
 
-Suite* tests_make_suite_dict(void);
+Suite* tests_make_suite_dict(SRunner* sr);
 
 Suite* tests_make_suite_array(void);
 
