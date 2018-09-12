@@ -257,6 +257,32 @@
     <Description>The abstract base type for all references.</Description>
     <References />
   </UAReferenceType>
+  <UAReferenceType NodeId="i=32" BrowseName="NonHierarchicalReferences" IsAbstract="true">
+    <DisplayName>NonHierarchicalReferences</DisplayName>
+    <Description>The abstract base type for all non-hierarchical references.</Description>
+    <References>
+        <Reference ReferenceType="HasSubtype" IsForward="false">i=31</Reference>
+    </References>
+    <InverseName>NonHierarchicalReferences</InverseName>
+  </UAReferenceType>
+  <UAReferenceType NodeId="i=39" BrowseName="HasDescription">
+    <DisplayName>HasDescription</DisplayName>
+    <Description>The type for references from data type encoding nodes to data type description nodes.</Description>
+    <References>
+        <Reference ReferenceType="HasSubtype" IsForward="false">i=32</Reference>
+    </References>
+    <InverseName>DescriptionOf</InverseName>
+  </UAReferenceType>
+  <UAReferenceType NodeId="i=40" BrowseName="HasTypeDefinition">
+    <DisplayName>HasTypeDefinition</DisplayName>
+    <Description>The type for references from a instance node its type definition node.</Description>
+    <References>
+        <Reference ReferenceType="HasSubtype" IsForward="false">i=32</Reference>
+    </References>
+    <InverseName>TypeDefinitionOf</InverseName>
+  </UAReferenceType>
+
+
   <UAVariableType NodeId="i=68" BrowseName="PropertyType" ValueRank="-2">
     <DisplayName>PropertyType</DisplayName>
     <Description>The type for variable that represents a property of another node.</Description>
@@ -416,20 +442,6 @@
     <DisplayName>ServerCapabilitiesType</DisplayName>
     <Description>Describes the capabilities supported by the server.</Description>
     <References>
-      <Reference ReferenceType="HasProperty">i=2014</Reference>
-      <Reference ReferenceType="HasProperty">i=2016</Reference>
-      <Reference ReferenceType="HasProperty">i=2017</Reference>
-      <Reference ReferenceType="HasProperty">i=2732</Reference>
-      <Reference ReferenceType="HasProperty">i=2733</Reference>
-      <Reference ReferenceType="HasProperty">i=2734</Reference>
-      <Reference ReferenceType="HasProperty">i=3049</Reference>
-      <Reference ReferenceType="HasProperty">i=11549</Reference>
-      <Reference ReferenceType="HasProperty">i=11550</Reference>
-      <Reference ReferenceType="HasProperty">i=12910</Reference>
-      <Reference ReferenceType="HasComponent">i=11551</Reference>
-      <Reference ReferenceType="HasComponent">i=2019</Reference>
-      <Reference ReferenceType="HasComponent">i=2754</Reference>
-      <Reference ReferenceType="HasComponent">i=11562</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
     </References>
   </UAObjectType>
@@ -587,7 +599,6 @@
     <References>
       <Reference ReferenceType="HasProperty">i=2294</Reference>
       <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
-      <Reference ReferenceType="HasTypeDefinition">i=2020</Reference>
     </References>
   </UAObject>
   <UAVariable BrowseName="Enabled" NodeId="i=2294" DataType="Boolean">
