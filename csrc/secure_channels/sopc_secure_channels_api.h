@@ -39,7 +39,7 @@ typedef enum
 {
     EP_OPEN,            /* id = endpoint description configuration index */
     EP_CLOSE,           /* id = endpoint description configuration index */
-    SC_CONNECT,         /* id = secure channel connection configuration index */
+    SC_CONNECT,         /* id = secure channel configuration index */
     SC_DISCONNECT,      /* id = secure channel connection index */
     SC_SERVICE_SND_MSG, /* id = secure channel connection index,
                           params = (SOPC_Buffer*) buffer to send containing empty space for TCP UA header (24 bytes)
