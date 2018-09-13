@@ -22,13 +22,15 @@ stages:
 generation:
   <<: *docker_job
   stage: gen
-  image: com2.systerel.fr:5000/c765/gen-ext@sha256:b303ef8934eb99d3023243d05129a463b3f25be310cc1d6e1ea7abd621695465  # gen-ext:1.0
+  image: com2.systerel.fr:5000/c765/gen-ext@sha256:07833aaecbb6de901f2216862d11b96d65b3b0462c3fe9353a951b3c609c6137 # gen-ext:1.1
   script:
     - ./.pre-build-ext.sh
   artifacts:
     name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
+      - 'pre-build.log'
       - 'csrc/services/bgenc'
+    when: always
     expire_in: '1 month'
 
 ###

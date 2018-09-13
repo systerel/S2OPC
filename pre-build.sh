@@ -48,7 +48,7 @@ else
     echo "Prepare B project and tools configuration" | tee -a $LOGPATH
     # Set a pre-build local environment for "m" script
 
-    export ATELIERB_VERSION="4.0.2"
+    export ATELIERB_VERSION="4.2.1"
     export STARTBB=startBB
     export BASE=$(pwd)/$PREBUILD
     # Create pre-build directory to check B modle and generate C code

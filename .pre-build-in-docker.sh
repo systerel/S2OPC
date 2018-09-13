@@ -28,7 +28,7 @@ set -e
 PREBUILD=pre-build
 TMP_TOOLING_DIR=$(pwd)/$PREBUILD/tooling
 
-DOCKER_IMAGE=ca487e4c9dde
+DOCKER_IMAGE=sha256:806b7a2ba70e97e8e2f1ca34a0b1e1f2b412e2babd20c23cb35795c4d27c48f5 # gen:1.1
 
 # Create dir to store tooling directory for generation
 \rm -rf $PREBUILD
