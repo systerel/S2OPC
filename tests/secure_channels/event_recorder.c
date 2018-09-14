@@ -28,7 +28,7 @@ static SOPC_Dict* queues = NULL;
 
 static uint64_t direct_hash(const void* data)
 {
-    return (uint64_t) data;
+    return (uint64_t)(uintptr_t) data;
 }
 
 static bool direct_equal(const void* a, const void* b)
