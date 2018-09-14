@@ -29,6 +29,7 @@
 
 #include "sopc_hash.h"
 #include "sopc_helper_string.h"
+#include "sopc_macros.h"
 
 void SOPC_Boolean_InitializeAux(void* value)
 {
@@ -1384,16 +1385,8 @@ SOPC_ReturnStatus SOPC_Guid_Compare(const SOPC_Guid* left, const SOPC_Guid* righ
         }
         if (*comparison == 0)
         {
-            const uint64_t* guidLeft = (const uint64_t*) left->Data4;
-            const uint64_t* guidRight = (const uint64_t*) right->Data4;
-            if (*guidLeft < *guidRight)
-            {
-                *comparison = -1;
-            }
-            else if (*guidLeft > *guidRight)
-            {
-                *comparison = 1;
-            }
+            /* No matter what the target endianness is, this function will return the same result */
+            *comparison = memcmp(left->Data4, right->Data4, sizeof(uint64_t));
         }
     }
     return status;
