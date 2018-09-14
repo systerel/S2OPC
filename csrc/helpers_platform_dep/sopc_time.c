@@ -130,10 +130,12 @@ SOPC_ReturnStatus SOPC_Time_FromTimeT(time_t time, int64_t* res)
 {
     assert(time >= 0);
 
+#if (SOPC_TIME_T_SIZE > 4)
     if (time > INT64_MAX)
     {
         return SOPC_STATUS_NOK;
     }
+#endif
 
     int64_t dt = time;
 
