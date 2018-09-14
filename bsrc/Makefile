@@ -34,7 +34,7 @@ $(TARGET_GENERATED_FILES): $(SOURCE_FILES)
 	m -remove || true
 	m -c -a
 	$(RM) -f ./bdp/*.nf
-	m -pchk -tc -b0 | tee tc.log
+	m -lonely -incomplete -pchk -tc -b0 | tee tc.log
 	grep -iEc '(warning|error|\bfailed\b)' tc.log | xargs test 0 -eq
 	$(RM) tc.log
 	$(RM) -fr ./$(PATHTRAD)
