@@ -177,10 +177,12 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_subscription_create_monitored_items_req (p_session, p_req_msg, p_resp_msg) =
+    StatusCode_service <-- treat_subscription_create_monitored_items_req (p_session, p_user, p_req_msg, p_resp_msg) =
     PRE
         p_session : t_session_i &
         p_session : t_session &
+        p_user    : t_user_i  &
+        p_user    : t_user    &
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &

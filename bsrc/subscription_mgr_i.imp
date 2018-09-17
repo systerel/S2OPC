@@ -28,8 +28,7 @@ SEES
     message_out_bs,
     write_value_pointer_bs,
     address_space,
-    request_handle_bs,
-    session_core
+    request_handle_bs
 
 DEFINITIONS
     "definitions.def"
@@ -963,15 +962,14 @@ OPERATIONS
     ;
 
 
-    StatusCode_service <-- treat_subscription_create_monitored_items_req (p_session, p_req_msg, p_resp_msg) =
+    StatusCode_service <-- treat_subscription_create_monitored_items_req (p_session, p_user, p_req_msg, p_resp_msg) =
     VAR
         l_sc,
         l_subscription,
         l_valid_subscription,
         l_timestampToRet,
         l_nb_monitored_items,
-        l_bres,
-        l_user
+        l_bres
     IN
         l_sc, l_subscription, l_timestampToRet, l_nb_monitored_items <-- getall_msg_create_monitored_items_req_params (p_req_msg);
         IF l_sc = e_sc_ok
@@ -982,9 +980,8 @@ OPERATIONS
                 l_bres <-- alloc_msg_create_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
                 IF l_bres = TRUE
                 THEN
-                    l_user <-- get_session_user_server(p_session);
                     fill_response_subscription_create_monitored_items
-                      (l_subscription, l_timestampToRet, l_user, p_req_msg, p_resp_msg, l_nb_monitored_items);
+                      (l_subscription, l_timestampToRet, p_user, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory
