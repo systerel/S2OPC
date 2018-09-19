@@ -56,12 +56,13 @@ INVARIANT
     a_subscription_state_i    : t_subscription_i --> t_subscriptionState_i                     &
     s_subscription            = s_subscription_i~[{TRUE}]                                      &
     dom(a_subscription_state) = s_subscription                                                 &
+
     a_subscription_state      = s_subscription <| a_subscription_state_i |> t_subscriptionState_i &
     a_subscription_session_i  : t_subscription_i --> t_session_i                               &
     a_session_subscription_i  : t_session_i --> t_subscription_i                               &
-    dom(a_session_subscription_i |> s_subscription) = ran(s_subscription <| a_subscription_session_i |> t_session) &
-
+    dom(a_subscription_session) = s_subscription                                               &
     a_subscription_session    = s_subscription <| a_subscription_session_i |> t_session        &
+    a_subscription_session~   = t_session <| a_session_subscription_i |> s_subscription        &
 
     a_publishInterval_i       : t_subscription_i --> t_opcua_duration_i                        &
     dom(a_publishInterval)    = s_subscription                                                 &
@@ -153,13 +154,6 @@ OPERATIONS
     BEGIN
         p_subscription := a_session_subscription_i(p_session);
         p_dom := s_subscription_i(p_subscription)
-    END
-    ;
-
-    remove_subscription_session (p_subscription, p_session) =
-    BEGIN
-        a_subscription_session_i(p_subscription) := c_session_indet;
-        a_session_subscription_i(p_session) := c_subscription_indet
     END
     ;
 

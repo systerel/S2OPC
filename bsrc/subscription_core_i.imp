@@ -46,7 +46,6 @@ EXTENDS
 PROMOTES
     /* subscription_core_1 */
     is_valid_subscription,
-    remove_subscription_session,
     getall_subscription,
     set_subscription_PublishingEnabled,
     get_subscription_notifRepublishQueue,

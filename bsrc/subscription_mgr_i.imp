@@ -1110,9 +1110,11 @@ OPERATIONS
                 empty_session_publish_requests (l_sub);
                 IF p_newSessionState = e_session_closed
                 THEN
-                    /* session is not valid anymore */
-                    remove_subscription_session (l_sub, p_session);
-                    /* WE DO NOT SUPPORT SESSION TRANSFER => close subscription */
+                    /* A session transfer is only possible with same user,
+                       which means the previous session still exist.
+                       Only other option is to keep the user waiting for
+                       potential new session for transfer (but OPC UA spec does not state that)
+                     */
                     close_subscription (l_sub)
                 END
             END

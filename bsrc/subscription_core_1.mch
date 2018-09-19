@@ -51,7 +51,7 @@ DEFINITIONS
     s_subscription <: t_subscription &
 
     /* Subscription configuration record */
-    a_subscription_session : s_subscription >+> t_session &                  // a subscription may be associated to a session (=> 1 subscription / session)
+    a_subscription_session : s_subscription >-> t_session &     // a subscription shall be associated to a session (=> 1 subscription / 1 session)
     a_publishInterval : s_subscription --> t_opcua_duration_i & // a subscription shall have a publishing interval value
     a_lifetimeExpCount : s_subscription --> t_counter &       // a subscription shall have a lifetime expiration count value
     a_keepAliveExpCount : s_subscription --> t_counter &      // a subscription shall have a keepAlive expiration count value
@@ -135,17 +135,6 @@ OPERATIONS
         ELSE
             p_subscription := a_subscription_session~(p_session)
         END
-    END
-    ;
-
-    remove_subscription_session (p_subscription, p_session) =
-    PRE
-        p_subscription : t_subscription_i &
-        p_subscription : s_subscription &
-        p_session : t_session_i &
-        p_session : t_session
-    THEN
-        a_subscription_session := a_subscription_session - {p_subscription |-> p_session}
     END
     ;
 
