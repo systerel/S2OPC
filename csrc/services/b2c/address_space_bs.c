@@ -352,6 +352,11 @@ void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_sp
     util_status_code__C_to_B(item->value_status, address_space_bs__sc);
 }
 
+void address_space_bs__read_AddressSpace_clear_value(const constants__t_Variant_i address_space_bs__val)
+{
+    SOPC_Variant_Clear(address_space_bs__val);
+}
+
 void address_space_bs__read_AddressSpace_free_value(const constants__t_Variant_i address_space_bs__val)
 {
     SOPC_Variant_Delete(address_space_bs__val);

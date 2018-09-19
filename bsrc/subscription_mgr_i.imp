@@ -28,7 +28,8 @@ SEES
     message_out_bs,
     write_value_pointer_bs,
     address_space,
-    request_handle_bs
+    request_handle_bs,
+    session_mgr
 
 DEFINITIONS
     "definitions.def"
@@ -579,7 +580,10 @@ OPERATIONS
                     IF l_authorized = TRUE THEN
                         l_valueSc <-- get_Value_StatusCode (p_user, l_node)
                     ELSE
-                        l_sc := e_sc_bad_user_access_denied
+                        /* Clear the value content since the access is denied
+                           (notification will contain an empty value) */
+                        read_AddressSpace_clear_value (l_value);
+                        l_valueSc := e_sc_bad_user_access_denied
                     END
                 END
             END
@@ -621,6 +625,10 @@ OPERATIONS
 
         l_monitoredItemId,
         l_subscription,
+        l_valid_subscription,
+        l_session,
+        l_user,
+        l_valid_user_access,
         l_nid,
         l_aid,
         l_timestampToReturn,
@@ -637,9 +645,21 @@ OPERATIONS
             l_aid,
             l_timestampToReturn,
             l_monitoringMode,
-            l_clientHandle
-              <--getall_monitoredItemPointer (l_monitoredItemPointer);
-            IF l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting
+            l_clientHandle <--getall_monitoredItemPointer (l_monitoredItemPointer);
+            l_valid_subscription <-- is_valid_subscription (l_subscription);
+            IF l_valid_subscription = TRUE
+            THEN
+                l_session <-- getall_session (l_subscription);
+                l_user <-- get_session_user_server(l_session);
+                /* TODO: when user access right property will be modifiable previous user right shall be
+                   checked to notify a user access denied status when it is newly denied for the user
+                */
+                l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user)
+            ELSE
+                l_valid_user_access := FALSE
+            END
+            ;
+            IF l_valid_user_access = TRUE & l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting
             THEN
                 server_subscription_add_notification (l_subscription, l_monitoredItemPointer, l_timestampToReturn, p_new_wv_pointer)
             END

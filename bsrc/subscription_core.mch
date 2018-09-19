@@ -407,6 +407,15 @@ OPERATIONS
     END
     ;
 
+    p_session <-- getall_session (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription
+    THEN
+        p_session :(p_session : t_session_i & p_session = a_subscription_session(p_subscription))
+    END
+    ;
+
     /* To be used if is_session_still_activated (p_subscription) == FALSE
        since requests will not be valid anymore on another SC */
     empty_session_publish_requests (p_subscription) =

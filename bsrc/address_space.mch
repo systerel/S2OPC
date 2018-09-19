@@ -276,6 +276,14 @@ OPERATIONS
     ;
 
     /* Promoted */
+    read_AddressSpace_clear_value(val) =
+    PRE
+        val : t_Variant_i
+    THEN
+        skip
+    END
+    ;
+
     /* Frees a value previously malloced with read_AddressSpace_Attribute_value */
     read_AddressSpace_free_value(val) =
     PRE

@@ -49,6 +49,7 @@ PROMOTES
     get_Node_RefIndexEnd,
     get_RefIndex_Reference,
     get_Value_StatusCode,
+    read_AddressSpace_clear_value,
     read_AddressSpace_free_value,
     write_WriteResponse_msg_out,
     get_user_authorization

@@ -157,6 +157,12 @@ OPERATIONS
     END
     ;
 
+    p_session <-- getall_session (p_subscription) =
+    BEGIN
+        p_session := a_subscription_session_i(p_subscription)
+    END
+    ;
+
     add_subscription (p_subscription,
                       p_session,
                       p_revPublishInterval,

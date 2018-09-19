@@ -47,6 +47,7 @@ PROMOTES
     /* subscription_core_1 */
     is_valid_subscription,
     getall_subscription,
+    getall_session,
     set_subscription_PublishingEnabled,
     get_subscription_notifRepublishQueue,
     /* subscription_core_bs */
