@@ -1111,7 +1111,9 @@ OPERATIONS
                 IF p_newSessionState = e_session_closed
                 THEN
                     /* session is not valid anymore */
-                    remove_subscription_session (l_sub, p_session)
+                    remove_subscription_session (l_sub, p_session);
+                    /* WE DO NOT SUPPORT SESSION TRANSFER => close subscription */
+                    close_subscription (l_sub)
                 END
             END
         END
