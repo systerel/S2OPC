@@ -125,7 +125,6 @@ LOCAL_OPERATIONS
     END
     ;
 
-    /* TODO: add constraints on userid? */
     StatusCode_service <-- treat_write_request(p_user, write_msg) =
     PRE
         p_user : t_user_i    &

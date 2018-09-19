@@ -305,12 +305,14 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
                                  const constants__t_Variant_i address_space_bs__value,
                                  const constants__t_IndexRange_i address_space_bs__index_range,
                                  constants__t_StatusCode_i* const address_space_bs__serviceStatusCode,
-                                 constants__t_Variant_i* const address_space_bs__prev_value)
+                                 constants__t_Variant_i* const address_space_bs__prev_value,
+                                 constants__t_StatusCode_i* const address_space_bs__prev_valueStatus)
 {
     (void) (address_space_bs__p_user); /* User is already authorized for this operation */
     SOPC_AddressSpace_Item* item = address_space_bs__node;
     SOPC_Variant* pvar = SOPC_AddressSpace_Item_Get_Value(item);
     *address_space_bs__prev_value = SOPC_Variant_Create();
+    *address_space_bs__prev_valueStatus = constants__c_StatusCode_indet;
 
     if (*address_space_bs__prev_value == NULL)
     {
@@ -331,6 +333,7 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
 
     if (*address_space_bs__serviceStatusCode == constants__e_sc_ok)
     {
+        util_status_code__C_to_B(item->value_status, address_space_bs__prev_valueStatus);
         item->value_status = SOPC_GoodGenericStatus;
     }
     else

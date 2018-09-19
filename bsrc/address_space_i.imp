@@ -248,8 +248,7 @@ OPERATIONS
         l_isvalid,
         l_node,
         l_ncl,
-        l_authorized_write,
-        l_authorized_read
+        l_authorized_write
     IN
         IF isvalid = TRUE THEN
             prev_sc := c_StatusCode_indet;
@@ -263,10 +262,8 @@ OPERATIONS
                         /* Write authorization is for set_Value, and read authorization is for get_Value_StatusCode */
                         /* TODO: it should be decided what to do when the value is write only */
                         l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
-                        l_authorized_read <-- get_user_authorization(e_operation_type_read, nid, aid, p_user);
-                        IF l_authorized_write = TRUE & l_authorized_read = TRUE THEN
-                            prev_sc <-- get_Value_StatusCode (p_user, l_node);
-                            serviceStatusCode, prev_value <-- set_Value(p_user, l_node, value, index_range)
+                        IF l_authorized_write = TRUE THEN
+                            serviceStatusCode, prev_value, prev_sc <-- set_Value(p_user, l_node, value, index_range)
                         ELSE
                             serviceStatusCode := e_sc_bad_user_access_denied
                         END

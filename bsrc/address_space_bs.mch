@@ -190,7 +190,7 @@ OPERATIONS
     ;
 
     /* a_Value, setter */
-    serviceStatusCode, prev_value <-- set_Value(p_user, node, value, index_range) =
+    serviceStatusCode, prev_value, prev_valueStatus <-- set_Value(p_user, node, value, index_range) =
     PRE
         p_user : t_user_i   &
         p_user : t_user     &
@@ -208,20 +208,25 @@ OPERATIONS
             THEN
                 serviceStatusCode := e_sc_ok ||
                 prev_value :(prev_value : t_Variant_i & prev_value = a_Value(node)) ||
-                a_Value(node) := value
+                a_Value(node) := value ||
+                prev_valueStatus :(prev_valueStatus : t_StatusCode_i &
+                                   prev_valueStatus = a_Value_StatusCode(node))
             ELSIF IsValid_VariantIndex(value |-> index_range) = FALSE
             THEN
                 serviceStatusCode := e_sc_bad_index_range_invalid ||
-                prev_value := c_Variant_indet
+                prev_value := c_Variant_indet ||
+                prev_valueStatus := c_StatusCode_indet
             ELSE
                 serviceStatusCode := e_sc_bad_index_range_no_data ||
-                prev_value := c_Variant_indet
+                prev_value := c_Variant_indet ||
+                prev_valueStatus := c_StatusCode_indet
             END
         OR
             serviceStatusCode
             :(serviceStatusCode : t_StatusCode_i &
                 serviceStatusCode : {e_sc_bad_out_of_memory, e_sc_bad_internal_error}) ||
-            prev_value := c_Variant_indet
+            prev_value := c_Variant_indet ||
+            prev_valueStatus := c_StatusCode_indet
         END
     END
     ;
