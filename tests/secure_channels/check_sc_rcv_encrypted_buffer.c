@@ -222,8 +222,8 @@ void establishSC(void)
     res = strcmp(sEndpointUrl, (char*) socketEvent->params);
     if (res != 0)
     {
-        status = SOPC_STATUS_NOK;
         printf("SC_Rcv_Buffer: Unexpected SOCKET_CREATE_CLIENT params\n");
+        ck_assert(false);
     }
     free(socketEvent);
     socketEvent = NULL;
