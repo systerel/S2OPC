@@ -210,7 +210,7 @@ int main(int argc, char* const argv[])
     }
 
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the connections.");
-    SOPC_LibSub_Disconnect(con_id);
+    status = SOPC_LibSub_Disconnect(con_id);
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the Toolkit.");
     SOPC_LibSub_Clear();
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Toolkit closed.");
