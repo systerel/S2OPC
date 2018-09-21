@@ -96,7 +96,8 @@ static SOPC_Certificate* unpack_certificate(const char* hex_data)
 
     ck_assert(unhexlify(hex_data, der_data, der_len) == (int) der_len);
     SOPC_Certificate* crt = NULL;
-    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_KeyManager_Certificate_CreateFromDER(der_data, 1069, &crt));
+    ck_assert(der_len <= SIZE_MAX);
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_KeyManager_Certificate_CreateFromDER(der_data, (uint32_t) der_len, &crt));
     free(der_data);
 
     return crt;
