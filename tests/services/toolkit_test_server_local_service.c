@@ -190,12 +190,15 @@ int main(int argc, char* argv[])
         secuConfig[0].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
     }
 
-    // Init unique endpoint structure
-    epConfig.endpointURL = ENDPOINT_URL;
+    if (SOPC_STATUS_OK == status)
+    {
+        // Init unique endpoint structure
+        epConfig.endpointURL = ENDPOINT_URL;
 
-    status =
-        SOPC_KeyManager_SerializedCertificate_CreateFromFile("./server_public/server_2k_cert.der", &serverCertificate);
-    epConfig.serverCertificate = serverCertificate;
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./server_public/server_2k_cert.der",
+                                                                      &serverCertificate);
+        epConfig.serverCertificate = serverCertificate;
+    }
 
     if (SOPC_STATUS_OK == status)
     {
