@@ -818,7 +818,7 @@ OPERATIONS
     END
     ;
 
-    revisedSamplingItv, revisedQueueSize <-- compute_create_montitored_item_revised_params (p_reqQueueSize) =
+    revisedSamplingItv, revisedQueueSize <-- compute_create_monitored_item_revised_params (p_reqQueueSize) =
     PRE
         p_reqQueueSize : t_counter
     THEN
@@ -855,8 +855,8 @@ OPERATIONS
         IF t_monitoredItemPointer = s_monitoredItemPointer or
             t_monitoredItemId = s_monitoredItemId
         THEN
-            /* To simplify proof, this includes the case out of memory when adding queues */
-            StatusCode_service := e_sc_bad_too_many_monitored_items ||
+            /* We do not limit the number of MI in C code, so it means we do not have enough memory if it fails */
+            StatusCode_service := e_sc_bad_out_of_memory ||
             monitoredItemPointer := c_monitoredItemPointer_indet ||
             monitoredItemId := c_monitoredItemId_indet
         ELSE

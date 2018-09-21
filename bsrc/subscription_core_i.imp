@@ -758,7 +758,7 @@ OPERATIONS
     END
     ;
 
-    revisedSamplingItv, revisedQueueSize <-- compute_create_montitored_item_revised_params (p_reqQueueSize) =
+    revisedSamplingItv, revisedQueueSize <-- compute_create_monitored_item_revised_params (p_reqQueueSize) =
     BEGIN
         revisedSamplingItv := c_opcua_duration_zero;
         revisedQueueSize := p_reqQueueSize
@@ -833,9 +833,11 @@ OPERATIONS
             END;
             IF l_bres = FALSE
             THEN
-                StatusCode_service := e_sc_bad_too_many_monitored_items;
+                StatusCode_service := e_sc_bad_out_of_memory;
                 delete_monitored_item_pointer(monitoredItemPointer)
             END
+        ELSE
+            StatusCode_service := e_sc_bad_out_of_memory
         END
     END
     ;

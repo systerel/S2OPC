@@ -177,7 +177,7 @@ LOCAL_OPERATIONS
                                       FALSE |-> {TRUE |-> e_sc_bad_monitored_item_filter_unsupported,
                                                  FALSE |-> {TRUE |-> e_sc_bad_node_id_unknown,
                                                             FALSE |-> {TRUE |-> e_sc_bad_attribute_id_invalid,
-                                                                       FALSE |-> {TRUE |-> e_sc_bad_too_many_monitored_items,
+                                                                       FALSE |-> {TRUE |-> e_sc_bad_out_of_memory, /* Since we do not have limit it is the case when no more MI */
                                                                                   FALSE |-> e_sc_ok
                                                                                  }(bool(t_monitoredItemPointer = s_monitoredItemPointer or
                                                                                         t_monitoredItemId = s_monitoredItemId))
@@ -204,7 +204,7 @@ LOCAL_OPERATIONS
                                  mi_index : 1..nb_monitored_items
                                  |
                                  {TRUE |-> l_monitoredItemResp_StatusCode(mi_index), /* Copy if no restriction due to allocation */
-                                  FALSE |-> {TRUE |-> e_sc_bad_too_many_monitored_items, /* Restriction due to allocation */
+                                  FALSE |-> {TRUE |-> e_sc_bad_out_of_memory, /* Since we do not have limit it is the case when no more MI */
                                              FALSE |-> l_monitoredItemResp_StatusCode(mi_index) /* Copy result if not e_sc_ok */
                                             }(bool(l_monitoredItemResp_StatusCode(mi_index) = e_sc_ok))
                                  }(bool(card((1..mi_index <| l_monitoredItemResp_StatusCode |> {e_sc_ok})) <
@@ -598,7 +598,7 @@ OPERATIONS
                                                                                            p_tsToReturn,
                                                                                            l_monitMode,
                                                                                            l_clientHandle);
-                l_revSamplingItv, l_revQueueSize <-- compute_create_montitored_item_revised_params(l_queueSize)
+                l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize)
             END;
             setall_msg_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_monitoredItemId, l_revSamplingItv, l_revQueueSize)
 
