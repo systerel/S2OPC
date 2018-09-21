@@ -2561,6 +2561,7 @@ START_TEST(test_ua_decoder_allocation_limit)
 
     // Reset position to write to buffer
     status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
     // Change string length artificially in buffer
     length = SOPC_MAX_STRING_LENGTH;
     SOPC_Int32_Write(&length, buffer);
