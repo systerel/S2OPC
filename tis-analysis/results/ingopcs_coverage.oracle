@@ -30,7 +30,7 @@ CryptoProvider_SymmVerify_HMAC_SHA1, 33, 47, 70%, 1/1, partial
 CryptoProvider_SymmVerify_HMAC_SHA256, 33, 47, 70%, 1/1, partial
 DeriveKS, 20, 26, 77%, 1/1, partial
 FD_CLR, 0, 3, NA, 0/1, not reached
-FD_ISSET, 3, 3, 100%, 1/1, total
+FD_ISSET, 4, 4, 100%, 1/1, total
 FD_SET, 3, 3, 100%, 1/1, total
 FD_ZERO, 2, 2, 100%, 1/1, total
 FreeVariantNonArrayBuiltInType, 24, 61, 39%, 1/1, partial
@@ -1599,6 +1599,8 @@ Test_ComEvent_FctClient, 0, 81, NA, 0/1, not reached
 WriteVariantArrayBuiltInType, 10, 81, 12%, 1/1, partial
 WriteVariantNonArrayBuiltInType, 7, 56, 12%, 1/1, partial
 __FC_assert, 0, 3, NA, 1/1, library?
+__mutex_get_lock_count, 0, 2, NA, 1/1, library?
+__mutex_set_lock_count, 0, 2, NA, 1/1, library?
 _ck_assert_failed, 2, 3, 67%, 1/1, partial
 _mark_point, 2, 2, 100%, 1/1, total
 _tcase_add_test, 6, 6, 100%, 1/1, total
@@ -1704,7 +1706,10 @@ constants_bs__is_t_channel, 9, 11, 82%, 1/1, partial
 constants_bs__is_t_channel_config_idx, 6, 11, 55%, 1/1, partial
 constants_bs__is_t_endpoint_config_idx, 0, 11, NA, 0/1, not reached
 fcntl, 2, 2, 100%, 1/1, total
+fflush, 0, 3, NA, 1/1, library?
+flockfile, 0, 1, NA, 1/1, library?
 freeaddrinfo, 1, 1, 100%, 1/1, total
+funlockfile, 0, 1, NA, 1/1, library?
 getGetEndpoints_message, 7, 7, 100%, 1/1, total
 getReadRequest_message, 0, 2, NA, 0/1, not reached
 getReadRequest_verif_message, 0, 2, NA, 0/1, not reached
@@ -1820,16 +1825,13 @@ msg_read_response_bs__alloc_read_response, 18, 21, 86%, 1/1, partial
 msg_read_response_bs__set_read_response, 16, 23, 70%, 1/1, partial
 new_variant_rvi, 24, 42, 57%, 1/1, partial
 pow, 5, 7, 71%, 1/1, partial
-pthread_cond_broadcast, 0, 3, NA, 0/1, not reached
-pthread_cond_destroy, 0, 2, NA, 0/1, not reached
-pthread_cond_init, 6, 2, 300%, 2/1, partial
-pthread_cond_wait, 2, 7, 29%, 1/1, partial
+pthread_cond_init, 0, 3, NA, 1/1, library?
+pthread_cond_wait, 0, 17, NA, 1/1, library?
 pthread_create, 2, 2, 100%, 1/1, total
 pthread_join, 0, 2, NA, 0/1, not reached
-pthread_mutex_destroy, 0, 2, NA, 0/1, not reached
-pthread_mutex_init, 6, 6, 100%, 1/1, total
-pthread_mutex_lock, 2, 2, 100%, 1/1, total
-pthread_mutex_unlock, 2, 2, 100%, 1/1, total
+pthread_mutex_init, 0, 7, NA, 1/1, library?
+pthread_mutex_lock, 0, 18, NA, 1/1, library?
+pthread_mutex_unlock, 0, 18, NA, 1/1, library?
 read_new_read_request, 67, 69, 97%, 1/1, partial
 read_service_test, 6, 6, 100%, 1/1, total
 recv, 18, 9, 200%, 3/1, partial
@@ -2093,6 +2095,6 @@ util_variant__new_Variant_from_double, 0, 10, NA, 0/1, not reached
 util_variant__new_Variant_from_int64, 0, 10, NA, 0/1, not reached
 util_variant__new_Variant_from_uint32, 0, 10, NA, 0/1, not reached
 util_variant__print_SOPC_Variant, 50, 77, 65%, 1/1, partial
-TOTAL (functions), 678, 2094, 32%,
-TOTAL (in perimeter), 9123, 13258, 69%,
-TOTAL (statements), 9123, 29797, 31%,
+TOTAL (functions), 692, 2096, 33%,
+TOTAL (in perimeter), 9106, 13488, 68%,
+TOTAL (statements), 9106, 29844, 31%,

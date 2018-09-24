@@ -25,6 +25,4 @@ sources/csrc/opcua_types/sopc_encodeabletype.c       2            0           2
 sources/csrc/opcua_types/sopc_encoder.c              136          0           0
 sources/csrc/opcua_types/sopc_namespace_table.c      8            0           1
 sources/csrc/services/b2c/util_discovery_services.c  4            0           2
-VERIF INFO: Coverage (without libc functions):
-Functions: 128/1803 (7.1%) - All statements: 1138/21008 (5.4%) - Statements in reachable functions: 1138/1944 (58.5%)
 VERIF INFO: Did not lose precision.

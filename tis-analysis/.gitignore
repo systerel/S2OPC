@@ -3,3 +3,4 @@ results/*
 !results/*.oracle
 !results/*.meta
 xunit.xml
+*~

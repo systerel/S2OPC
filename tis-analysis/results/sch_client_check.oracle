@@ -24,7 +24,6 @@ VERIF TODO: 1 message(s) in the log file (excluding
 	"def'n of func tis_force_value"
 	"\[tis-input]"
 	"this seems innocuous"
-	"no assigns clauses for function .*printf"
 	"ignoring missing assigns for all variadic functions"
 	"locals {scConfig} escaping the scope of main"
 	)
@@ -64,15 +63,22 @@ sources/csrc/opcua_types/sopc_builtintypes.c        SOPC_ExtensionObject_Clear  
 sources/csrc/opcua_types/sopc_builtintypes.c        SOPC_NodeId_Clear                                    specification  defined
 sources/csrc/opcua_types/sopc_encoder.c             SOPC_ExtensionObject_Read                            specification  defined
 sources/csrc/opcua_types/sopc_encoder.c             SOPC_NodeId_Read                                     specification  defined
-VERIF INFO: 28 used libc and buitins from tis-analyzer
+VERIF INFO: 36 used libc and buitins from tis-analyzer
 TIS_KERNEL_SHARE/libc/__fc_builtin.h     Frama_C_abort               specification
 TIS_KERNEL_SHARE/libc/assert.c           Frama_C_show_each_warning   built-in
 TIS_KERNEL_SHARE/libc/assert.c           __FC_assert                 body
 TIS_KERNEL_SHARE/libc/ctype.c            isupper                     body
 TIS_KERNEL_SHARE/libc/ctype.c            tolower                     body
-TIS_KERNEL_SHARE/libc/stdio.h            fflush                      specification
-TIS_KERNEL_SHARE/libc/stdio.h            flockfile                   specification
-TIS_KERNEL_SHARE/libc/stdio.h            funlockfile                 specification
+TIS_KERNEL_SHARE/libc/pthread.c          __mutex_get_lock_count      body
+TIS_KERNEL_SHARE/libc/pthread.c          __mutex_set_lock_count      body
+TIS_KERNEL_SHARE/libc/pthread.c          pthread_cond_init           body
+TIS_KERNEL_SHARE/libc/pthread.c          pthread_cond_wait           body
+TIS_KERNEL_SHARE/libc/pthread.c          pthread_mutex_init          body
+TIS_KERNEL_SHARE/libc/pthread.c          pthread_mutex_lock          body
+TIS_KERNEL_SHARE/libc/pthread.c          pthread_mutex_unlock        body
+TIS_KERNEL_SHARE/libc/stdio.c            fflush                      body
+TIS_KERNEL_SHARE/libc/stdio.c            flockfile                   body
+TIS_KERNEL_SHARE/libc/stdio.c            funlockfile                 body
 TIS_KERNEL_SHARE/libc/stdio.h            printf                      built-in
 TIS_KERNEL_SHARE/libc/stdio.h            sprintf                     built-in
 TIS_KERNEL_SHARE/libc/stdlib.c           calloc                      body
@@ -93,9 +99,10 @@ TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_nondet                  specificati
 TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_unsigned_long_interval  specification
 TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_variable_split          built-in
 TIS_KERNEL_SHARE/libc/tis_mem_bounded.c  tis_memcpy_bounded          body
+TIS_KERNEL_SHARE/libc/unistd.h           write                       specification
 VERIF INFO: 2 useless files
 File                                                           #DefinedFun  #Reachable  #DefinedVar
 sources/csrc/secure_channels/sopc_secure_listener_state_mgr.c  6            0           0
 VERIF INFO: Coverage (without libc functions):
-Functions: 386/1651 (23.4%) - All statements: 5817/23918 (24.3%) - Statements in reachable functions: 5817/8774 (66.3%)
+Functions: 381/1645 (23.2%) - All statements: 5800/23899 (24.3%) - Statements in reachable functions: 5800/8757 (66.2%)
 VERIF INFO: Lost precision on 5 statements  (reached slevel: 5, widened loop: 0, merged loop: 0)

@@ -4,12 +4,13 @@
 stages:
   - gen
   - build
+  - tis-analysis
   - test
   - build-cc
 
 generation:
   stage: gen
-  image: com2.systerel.fr:5000/c765/gen-ext@sha256:b303ef8934eb99d3023243d05129a463b3f25be310cc1d6e1ea7abd621695465  # gen-ext:1.0
+  image: com2.systerel.fr:5000/c765/gen-ext@sha256:07833aaecbb6de901f2216862d11b96d65b3b0462c3fe9353a951b3c609c6137 # gen-ext:1.1
   script:
     - ./.pre-build-ext.sh
   # only:
@@ -42,6 +43,7 @@ build-linux64:
     paths:
       - 'bin/'
       - 'install_linux64/'
+      - 'csrc/configuration/sopc_toolkit_build_info.h' # for tis-analysis only
     expire_in: '1 month'
 
 build-win32:
@@ -56,6 +58,8 @@ build-win32:
     BUILD_SHARED_LIBS: 'true'
   # only:
   #   - master
+  except:
+    - TrustInSoft_Analysis
   tags:
     - docker
     - linux
@@ -78,6 +82,8 @@ build-win64:
     BUILD_SHARED_LIBS: 'true'
   # only:
   #   - master
+  except:
+    - TrustInSoft_Analysis
   tags:
     - docker
     - linux
@@ -96,6 +102,8 @@ test-check:
     - ./.check-code.sh
   # only:
   #   - master
+  except:
+    - TrustInSoft_Analysis
   tags:
     - docker
     - linux
@@ -109,6 +117,8 @@ test-unit:
     - ./test-all.sh
   # only:
   #   - master
+  except:
+    - TrustInSoft_Analysis
   tags:
     - docker
     - linux
@@ -122,8 +132,30 @@ test-uactt:
     - 'cd acceptances_tests/ && ./launch_acceptance_tests.sh'
   # only:
   #   - master
+  except:
+    - TrustInSoft_Analysis
   tags:
     - docker
     - linux
   dependencies:
     - build-linux64
+
+tis-analysis:
+  stage: tis-analysis
+  image: tisa:test
+  tags:
+    - trustinsoft
+  dependencies:
+    - generation
+    - build-linux64
+  only:
+    - TrustInSoft_Analysis
+  artifacts:
+    name: 'tis-analysis-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - tis-analysis/results/*_check.log
+    when: on_failure
+    expire_in: '1 month'
+  allow_failure: true
+  script:
+    - 'cd tis-analysis && ./run-analysis.sh'

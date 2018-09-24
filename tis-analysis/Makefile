@@ -49,12 +49,12 @@ BIN_TO_TIS_DIR:=../tis-analysis
 
 #-------------------------------------------------------------------------------
 
-CHECK_DIR:=$(TIS_DIR)/../../check_lib
+CHECK_DIR?=$(TIS_DIR)/../../check_lib
 INCLUDES_CHECK:=$(CHECK_DIR)/include
 
 #--------------
 
-MBEDTLS_DIR=$(TIS_DIR)/../../mbedtls
+MBEDTLS_DIR?=$(TIS_DIR)/../../mbedtls
 MBEDTLS_SRC_FILES=$(shell find $(MBEDTLS_DIR)/library -type f -name "*.c" )
 INCLUDES_MBEDTLS=$(MBEDTLS_DIR)/include
 
@@ -82,7 +82,7 @@ DEFINES:=\
   __TRUSTINSOFT_HELPER__ \
   __TRUSTINSOFT_LABEL__ \
   __TRUSTINSOFT_TMPBUG__ \
-  UINTPTR_MAX=4294967295U \
+
 
 # for tis-interpreter
 TI_CC_ARGS:=\
@@ -101,7 +101,6 @@ SHARED_OPTIONS := \
 
 TI_ARGS := \
   --cc \"$(TI_CC_ARGS)\" \
-  $(FRAMAC_SHARE)/libc/tis_mem_bounded.c \
   $(SHARED_OPTIONS) \
 
 TI_ARGS_WITH_RESULTS = $(TI_ARGS) -server -val -no-server
@@ -600,6 +599,7 @@ CHECK_OPTIONS+= --no-top-dead-called
 CHECK_OPTIONS+= --no-top-dead-not-called
 CHECK_OPTIONS+= --no-top-dead-address
 CHECK_OPTIONS+= --no-top-dead-indirect
+CHECK_OPTIONS+= --no-coverage
 
 CHECK_OPTIONS+= --skip-log "found two contracts for fcntl"
 CHECK_OPTIONS+= --skip-log "found two contracts for gmtime"
@@ -641,7 +641,8 @@ PROJECT:=ingopcs
 .PHONY: modifications
 modifications: diff modif diff_files
 
-UPSTREAM_BRANCH=tags/INGOPCS_Toolkit_0.5.0
+# UPSTREAM_BRANCH=tags/INGOPCS_Toolkit_0.5.0
+UPSTREAM_BRANCH=origin/tis-master
 MODIF_OPTIONS:= --add INTERPRETER
 MODIF_OPTIONS+= --add FIXED_MALLOC
 # __TRUSTINSOFT_DEBUG__ defined for compilation, to add trace to real execution

@@ -29,15 +29,15 @@ sources/csrc/helpers_platform_dep/linux/p_sockets.c  Socket_Read@24     instance
 tis_src/stubs.c                                      accept             disjoint behaviors                       never tried
 VERIF OK: no functions with no code, but specifications
 VERIF OK: no functions with code, but use specification
-VERIF INFO: 19 used libc and buitins from tis-analyzer
+VERIF INFO: 20 used libc and buitins from tis-analyzer
 TIS_KERNEL_SHARE/libc/__fc_builtin.h     Frama_C_abort              specification
 TIS_KERNEL_SHARE/libc/assert.c           Frama_C_show_each_warning  built-in
 TIS_KERNEL_SHARE/libc/assert.c           __FC_assert                body
 TIS_KERNEL_SHARE/libc/ctype.c            isupper                    body
 TIS_KERNEL_SHARE/libc/ctype.c            tolower                    body
-TIS_KERNEL_SHARE/libc/stdio.h            fflush                     specification
-TIS_KERNEL_SHARE/libc/stdio.h            flockfile                  specification
-TIS_KERNEL_SHARE/libc/stdio.h            funlockfile                specification
+TIS_KERNEL_SHARE/libc/stdio.c            fflush                     body
+TIS_KERNEL_SHARE/libc/stdio.c            flockfile                  body
+TIS_KERNEL_SHARE/libc/stdio.c            funlockfile                body
 TIS_KERNEL_SHARE/libc/stdio.h            printf                     built-in
 TIS_KERNEL_SHARE/libc/stdlib.c           calloc                     body
 TIS_KERNEL_SHARE/libc/stdlib.h           abort                      specification
@@ -49,11 +49,10 @@ TIS_KERNEL_SHARE/libc/string.h           strlen                     built-in
 TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_make_unknown           specification
 TIS_KERNEL_SHARE/libc/tis_builtin.h      tis_variable_split         built-in
 TIS_KERNEL_SHARE/libc/tis_mem_bounded.c  tis_memcpy_bounded         body
+TIS_KERNEL_SHARE/libc/unistd.h           write                      specification
 VERIF INFO: 4 useless files
 File                                               #DefinedFun  #Reachable  #DefinedVar
 sources/csrc/helpers/sopc_helper_endianness_cfg.c  7            0           0
 sources/csrc/helpers/sopc_log_manager.c            13           0           5
 sources/csrc/helpers_platform_dep/linux/p_time.c   2            0           0
-VERIF INFO: Coverage (without libc functions):
-Functions: 106/199 (53.3%) - All statements: 1434/2809 (51.1%) - Statements in reachable functions: 1434/1817 (78.9%)
 VERIF INFO: Lost precision on 8 statements  (reached slevel: 8, widened loop: 1, merged loop: 0)

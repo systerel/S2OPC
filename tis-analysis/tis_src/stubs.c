@@ -205,13 +205,6 @@ int close(int fd) {
   return 0;
 }
 
-#ifdef __TRUSTINSOFT_ANALYZER__
-#else // TIS_INTERPRETER
-void flockfile(FILE *filehandle) {}
-void funlockfile(FILE *filehandle) {}
-int fflush(FILE *stream) { return 0; }
-#endif
-
 #ifdef TEST_SOCKETS
 ssize_t recv(int sockfd, void *buf, size_t len, int flags) {
   static const size_t msglen = 1000;

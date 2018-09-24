@@ -14,5 +14,4 @@ SOPC_NodeId_Read|assigns||never tried
 SOPC_SLinkedList_Append|assert|slla_first_not_null_wp|surely valid
 SOPC_SLinkedList_Append|assert|slla_last_not_null_wp|unknown
 pow|assigns||never tried
-pthread_cond_broadcast|assigns||never tried
 pthread_mutex_destroy|assigns||never tried
