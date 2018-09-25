@@ -21,6 +21,7 @@
 #include <check.h>
 #include <stdlib.h>
 
+#include "check_helpers.h"
 #include "sopc_async_queue.h"
 #include "sopc_atomic.h"
 #include "sopc_event_handler.h"

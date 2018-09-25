@@ -2562,9 +2562,9 @@ void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj)
     }
 }
 
-void ApplyToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
-                                       SOPC_VariantValue* val,
-                                       SOPC_EncodeableObject_PfnClear* clearAuxFunction)
+static void ApplyToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+                                              SOPC_VariantValue* val,
+                                              SOPC_EncodeableObject_PfnClear* clearAuxFunction)
 {
     switch (builtInTypeId)
     {
@@ -2652,9 +2652,9 @@ void ApplyToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
     }
 }
 
-SOPC_ReturnStatus AllocVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
-                                               SOPC_VariantArrayValue* array,
-                                               int32_t length)
+static SOPC_ReturnStatus AllocVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+                                                      SOPC_VariantArrayValue* array,
+                                                      int32_t length)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     size_t size = 0;
@@ -2798,10 +2798,10 @@ SOPC_ReturnStatus AllocVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
     return status;
 }
 
-void ClearToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
-                                    SOPC_VariantArrayValue* array,
-                                    int32_t* length,
-                                    SOPC_EncodeableObject_PfnClear* clearAuxFunction)
+static void ClearToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+                                           SOPC_VariantArrayValue* array,
+                                           int32_t* length,
+                                           SOPC_EncodeableObject_PfnClear* clearAuxFunction)
 {
     switch (builtInTypeId)
     {
@@ -2888,10 +2888,10 @@ void ClearToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
     }
 }
 
-SOPC_ReturnStatus ApplyOpToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
-                                                      SOPC_VariantValue* left,
-                                                      const SOPC_VariantValue* right,
-                                                      SOPC_EncodeableObject_PfnCopy* opAuxFunction)
+static SOPC_ReturnStatus ApplyOpToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+                                                             SOPC_VariantValue* left,
+                                                             const SOPC_VariantValue* right,
+                                                             SOPC_EncodeableObject_PfnCopy* opAuxFunction)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     switch (builtInTypeId)
@@ -2981,11 +2981,11 @@ SOPC_ReturnStatus ApplyOpToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInType
     return status;
 }
 
-SOPC_ReturnStatus ApplyOpToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
-                                                   SOPC_VariantArrayValue* arrayLeft,
-                                                   const SOPC_VariantArrayValue* arrayRight,
-                                                   int32_t length,
-                                                   SOPC_EncodeableObject_PfnCopy* opAuxFunction)
+static SOPC_ReturnStatus ApplyOpToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+                                                          SOPC_VariantArrayValue* arrayLeft,
+                                                          const SOPC_VariantArrayValue* arrayRight,
+                                                          int32_t length,
+                                                          SOPC_EncodeableObject_PfnCopy* opAuxFunction)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     switch (builtInTypeId)
@@ -3074,11 +3074,11 @@ SOPC_ReturnStatus ApplyOpToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
     return status;
 }
 
-SOPC_ReturnStatus CompareVariantsNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
-                                                     const SOPC_VariantValue* left,
-                                                     const SOPC_VariantValue* right,
-                                                     int32_t* comparison,
-                                                     SOPC_EncodeableObject_PfnComp* compAuxFunction)
+static SOPC_ReturnStatus CompareVariantsNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+                                                            const SOPC_VariantValue* left,
+                                                            const SOPC_VariantValue* right,
+                                                            int32_t* comparison,
+                                                            SOPC_EncodeableObject_PfnComp* compAuxFunction)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     switch (builtInTypeId)
@@ -3168,12 +3168,12 @@ SOPC_ReturnStatus CompareVariantsNonArrayBuiltInType(SOPC_BuiltinId builtInTypeI
     return status;
 }
 
-SOPC_ReturnStatus CompareVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
-                                                 const SOPC_VariantArrayValue* arrayLeft,
-                                                 const SOPC_VariantArrayValue* arrayRight,
-                                                 int32_t length,
-                                                 SOPC_EncodeableObject_PfnComp* compAuxFunction,
-                                                 int32_t* comparison)
+static SOPC_ReturnStatus CompareVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+                                                        const SOPC_VariantArrayValue* arrayLeft,
+                                                        const SOPC_VariantArrayValue* arrayRight,
+                                                        int32_t length,
+                                                        SOPC_EncodeableObject_PfnComp* compAuxFunction,
+                                                        int32_t* comparison)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     switch (builtInTypeId)
@@ -3293,7 +3293,7 @@ void SOPC_Null_ClearAux(void* value)
     (void) value;
 }
 
-SOPC_EncodeableObject_PfnClear* GetBuiltInTypeClearFunction(SOPC_BuiltinId builtInTypeId)
+static SOPC_EncodeableObject_PfnClear* GetBuiltInTypeClearFunction(SOPC_BuiltinId builtInTypeId)
 {
     SOPC_EncodeableObject_PfnClear* clearFunction = NULL;
     switch (builtInTypeId)
@@ -3389,7 +3389,7 @@ SOPC_ReturnStatus SOPC_Null_CopyAux(void* dest, const void* src)
     return SOPC_STATUS_OK;
 }
 
-SOPC_EncodeableObject_PfnCopy* GetBuiltInTypeCopyFunction(SOPC_BuiltinId builtInTypeId)
+static SOPC_EncodeableObject_PfnCopy* GetBuiltInTypeCopyFunction(SOPC_BuiltinId builtInTypeId)
 {
     SOPC_EncodeableObject_PfnCopy* copyFunction = NULL;
     switch (builtInTypeId)
@@ -3489,7 +3489,7 @@ SOPC_ReturnStatus SOPC_Null_CompareAux(const void* dest, const void* src, int32_
     return status;
 }
 
-SOPC_EncodeableObject_PfnComp* GetBuiltInTypeCompFunction(SOPC_BuiltinId builtInTypeId)
+static SOPC_EncodeableObject_PfnComp* GetBuiltInTypeCompFunction(SOPC_BuiltinId builtInTypeId)
 {
     SOPC_EncodeableObject_PfnComp* compFunction = NULL;
     switch (builtInTypeId)
@@ -3578,7 +3578,7 @@ SOPC_EncodeableObject_PfnComp* GetBuiltInTypeCompFunction(SOPC_BuiltinId builtIn
     return compFunction;
 }
 
-SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId, SOPC_VariantValue* val)
+static SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId, SOPC_VariantValue* val)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     switch (builtInTypeId)
@@ -3698,7 +3698,7 @@ SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId, 
     return status;
 }
 
-void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId, SOPC_VariantValue* val)
+static void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId, SOPC_VariantValue* val)
 {
     switch (builtInTypeId)
     {

@@ -274,7 +274,7 @@ START_TEST(test_sockets)
 }
 END_TEST
 
-Suite* tests_make_suite_sockets(void)
+static Suite* tests_make_suite_sockets(void)
 {
     Suite* s;
     TCase* tc_sockets;

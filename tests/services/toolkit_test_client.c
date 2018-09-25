@@ -60,7 +60,7 @@ static int32_t getEndpointsReceived = 0;
 
 static uint32_t cptReadResps = 0;
 
-void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
+static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
     uintptr_t sessionContext0 = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[0]);
     uintptr_t sessionContext1 = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[1]);

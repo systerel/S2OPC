@@ -1194,7 +1194,7 @@ typedef struct AsyncQueue_Element
     int32_t success;
 } AsyncQueue_Element;
 
-void* test_async_queue_blocking_dequeue_fct(void* args)
+static void* test_async_queue_blocking_dequeue_fct(void* args)
 {
     void* arg = NULL;
     SOPC_ReturnStatus status;
@@ -1224,7 +1224,7 @@ void* test_async_queue_blocking_dequeue_fct(void* args)
     return NULL;
 }
 
-void* test_async_queue_nonblocking_dequeue_fct(void* args)
+static void* test_async_queue_nonblocking_dequeue_fct(void* args)
 {
     void* arg = NULL;
     SOPC_ReturnStatus status;

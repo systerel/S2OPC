@@ -17,21 +17,10 @@
  * under the License.
  */
 
-#include <check.h>
-#include <stdlib.h>
+#ifndef TEST_SUITE_CLIENT_H
+#define TEST_SUITE_CLIENT_H
 
-#include "test_suite_client.h"
+Suite* client_suite_make_discovery(void);
+Suite* client_suite_make_session(void);
 
-int main(void)
-{
-    int number_failed;
-    SRunner* sr;
-
-    sr = srunner_create(client_suite_make_discovery());
-    srunner_add_suite(sr, client_suite_make_session());
-
-    srunner_run_all(sr, CK_NORMAL);
-    number_failed = srunner_ntests_failed(sr);
-    srunner_free(sr);
-    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
+#endif

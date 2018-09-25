@@ -32,7 +32,7 @@
 #include "sopc_logger.h"
 #include "util_b2c.h"
 
-void SOPC_InternalMontitoredItem_Free(void* data)
+static void SOPC_InternalMontitoredItem_Free(void* data)
 {
     SOPC_InternalMontitoredItem* mi = (SOPC_InternalMontitoredItem*) data;
     if (NULL != mi)
@@ -44,19 +44,19 @@ void SOPC_InternalMontitoredItem_Free(void* data)
     }
 }
 
-void SOPC_InternalMontitoredItemId_Free(void* data)
+static void SOPC_InternalMontitoredItemId_Free(void* data)
 {
     (void) data;
     // Nothing to do: uintptr_t value
 }
 
-uint64_t SOPC_InternalMontitoredItemId_Hash(const void* data)
+static uint64_t SOPC_InternalMontitoredItemId_Hash(const void* data)
 {
     uintptr_t id = (uintptr_t) data;
     return (uint64_t) id;
 }
 
-bool SOPC_InternalMontitoredItemId_Equal(const void* a, const void* b)
+static bool SOPC_InternalMontitoredItemId_Equal(const void* a, const void* b)
 {
     // Compare uintptr_t id values
     return a == b;

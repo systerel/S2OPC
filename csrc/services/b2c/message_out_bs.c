@@ -55,9 +55,9 @@ void message_out_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message_out_bs__msg_type,
-                                    constants__t_msg_header_i* const message_out_bs__nmsg_header,
-                                    constants__t_msg_i* const message_out_bs__nmsg)
+static void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message_out_bs__msg_type,
+                                           constants__t_msg_header_i* const message_out_bs__nmsg_header,
+                                           constants__t_msg_i* const message_out_bs__nmsg)
 {
     void* header = NULL;
     void* msg = NULL;

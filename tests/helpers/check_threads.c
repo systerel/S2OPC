@@ -49,13 +49,13 @@ typedef struct CondRes
     uint32_t timeoutCondition;
 } CondRes;
 
-void* test_thread_exec_fct(void* args)
+static void* test_thread_exec_fct(void* args)
 {
     SOPC_Atomic_Int_Add((int32_t*) args, 1);
     return NULL;
 }
 
-void* test_thread_mutex_fct(void* args)
+static void* test_thread_mutex_fct(void* args)
 {
     SOPC_Atomic_Int_Add((int32_t*) args, 1);
     Mutex_Lock(&gmutex);
@@ -64,7 +64,7 @@ void* test_thread_mutex_fct(void* args)
     return NULL;
 }
 
-void* test_thread_mutex_recursive_fct(void* args)
+static void* test_thread_mutex_recursive_fct(void* args)
 {
     SOPC_Atomic_Int_Add((int32_t*) args, 1);
     Mutex_Lock(&gmutex);
@@ -157,7 +157,7 @@ START_TEST(test_thread_mutex_recursive)
 }
 END_TEST
 
-void* test_thread_condvar_fct(void* args)
+static void* test_thread_condvar_fct(void* args)
 {
     CondRes* condRes = (CondRes*) args;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -178,7 +178,7 @@ void* test_thread_condvar_fct(void* args)
     return NULL;
 }
 
-void* test_thread_condvar_timed_fct(void* args)
+static void* test_thread_condvar_timed_fct(void* args)
 {
     CondRes* condRes = (CondRes*) args;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;

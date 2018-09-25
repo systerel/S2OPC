@@ -957,7 +957,7 @@ SOPC_ReturnStatus SOPC_Guid_Read(SOPC_Guid* guid, SOPC_Buffer* buf)
     return status;
 }
 
-SOPC_NodeId_DataEncoding GetNodeIdDataEncoding(const SOPC_NodeId* nodeId)
+static SOPC_NodeId_DataEncoding GetNodeIdDataEncoding(const SOPC_NodeId* nodeId)
 {
     SOPC_NodeId_DataEncoding encodingEnum = SOPC_NodeIdEncoding_Invalid;
     switch (nodeId->IdentifierType)

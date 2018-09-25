@@ -296,9 +296,9 @@ START_TEST(test_authentication_allow_all)
 {
     SOPC_UserAuthentication_Status authenticated = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
 
-#define TEST_AUTHN(token, expected)                                                                       \
-    authenticated = SOPC_USER_AUTHENTICATION_INVALID_TOKEN;                                               \
-    ck_assert(SOPC_STATUS_OK ==                                                                           \
+#define TEST_AUTHN(token, expected)                                                                        \
+    authenticated = SOPC_USER_AUTHENTICATION_INVALID_TOKEN;                                                \
+    ck_assert(SOPC_STATUS_OK ==                                                                            \
               SOPC_UserAuthentication_IsValidUserIdentity(gAuthenticationManager, token, &authenticated)); \
     ck_assert(authenticated == expected);
 
@@ -314,9 +314,9 @@ START_TEST(test_authentication_selective)
 {
     SOPC_UserAuthentication_Status authenticated = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
 
-#define TEST_AUTHN(token, expected)                                                                                \
-    authenticated = SOPC_USER_AUTHENTICATION_INVALID_TOKEN;                                                        \
-    ck_assert(SOPC_STATUS_OK ==                                                                                    \
+#define TEST_AUTHN(token, expected)                                                                                 \
+    authenticated = SOPC_USER_AUTHENTICATION_INVALID_TOKEN;                                                         \
+    ck_assert(SOPC_STATUS_OK ==                                                                                     \
               SOPC_UserAuthentication_IsValidUserIdentity(gAuthenticationManagerSelective, token, &authenticated)); \
     ck_assert(authenticated == expected);
 

@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "check_helpers.h"
 #include "sopc_array.h"
 #include "sopc_numeric_range.h"
 

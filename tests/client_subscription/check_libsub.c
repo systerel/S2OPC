@@ -298,7 +298,7 @@ START_TEST(test_half_broken_subscriptions)
 }
 END_TEST
 
-Suite* tests_make_suite_libsub(void)
+static Suite* tests_make_suite_libsub(void)
 {
     Suite* s = NULL;
     TCase *tc_time = NULL, *tc_libsub;

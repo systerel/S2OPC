@@ -64,7 +64,7 @@ typedef enum
 #endif
 } AddressSpaceLoader;
 
-void Test_StopSignal(int sig)
+static void Test_StopSignal(int sig)
 {
     (void) sig;
     if (stopServer != 0)
@@ -77,7 +77,7 @@ void Test_StopSignal(int sig)
     }
 }
 
-void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
+static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
     (void) idOrStatus;
     (void) param;
@@ -119,7 +119,7 @@ void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void
     }
 }
 
-void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus)
+static void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus)
 {
     OpcUa_WriteValue* wv = NULL;
     if (event == AS_WRITE_EVENT)

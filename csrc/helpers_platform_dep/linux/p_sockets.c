@@ -94,7 +94,7 @@ void SOPC_Socket_Clear(Socket* sock)
     *sock = SOPC_INVALID_SOCKET;
 }
 
-SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
+static SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const int trueInt = true;

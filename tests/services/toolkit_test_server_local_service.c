@@ -51,7 +51,7 @@ static int getEndpointsReceived = false;
 
 static uint32_t cptReadResps = 0;
 
-void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
+static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
     (void) idOrStatus;
     (void) param;
@@ -122,7 +122,7 @@ void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void
     }
 }
 
-void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus)
+static void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus)
 {
     // No notification shall be received when using local services
     (void) event;

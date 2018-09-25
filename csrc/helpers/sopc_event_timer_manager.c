@@ -128,7 +128,7 @@ void SOPC_EventTimer_Initialize()
     SOPC_Atomic_Int_Set(&initialized, 1);
 }
 
-int8_t SOPC_Internal_SLinkedList_EventTimerCompare(void* left, void* right)
+static int8_t SOPC_Internal_SLinkedList_EventTimerCompare(void* left, void* right)
 {
     int8_t result;
     if (NULL == left && NULL == right)

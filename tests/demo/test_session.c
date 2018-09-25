@@ -30,6 +30,7 @@
 
 #include "config.h"
 #include "state_machine.h"
+#include "test_suite_client.h"
 #include "wait_machines.h"
 
 static StateMachine_Machine* g_pSM = NULL;

@@ -395,12 +395,12 @@ START_TEST(test_logger_circular)
 }
 END_TEST
 
-void init(void)
+static void init(void)
 {
     SOPC_Log_Initialize();
 }
 
-void clear(void)
+static void clear(void)
 {
     SOPC_Log_Clear();
 }

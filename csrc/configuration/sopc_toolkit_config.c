@@ -307,7 +307,7 @@ uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
     return idxWithServerOffset;
 }
 
-uint32_t SOPC_ToolkitServer_TranslateSecureChannelConfigIdxOffset(uint32_t serverScConfigIdx)
+static uint32_t SOPC_ToolkitServer_TranslateSecureChannelConfigIdxOffset(uint32_t serverScConfigIdx)
 {
     uint32_t res = 0;
     if (serverScConfigIdx > SOPC_MAX_SECURE_CONNECTIONS &&

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include "sopc_secure_connection_state_mgr.h"
 #include "sopc_secure_connection_state_mgr_internal.h"
 #include "sopc_secure_listener_state_mgr.h"
 

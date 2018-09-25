@@ -67,7 +67,7 @@ static void clearToolkit(void)
     Check_SC_Clear();
 }
 
-void establishSC(void)
+static void establishSC(void)
 {
     printf("\nSTART UNIT TEST\n");
 
@@ -536,7 +536,7 @@ START_TEST(test_valid_sc_request_id)
 }
 END_TEST
 
-Suite* tests_make_suite_invalid_buffers(void)
+static Suite* tests_make_suite_invalid_buffers(void)
 {
     Suite* s;
     TCase* tc_invalid_buf;

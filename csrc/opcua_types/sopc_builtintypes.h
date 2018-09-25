@@ -442,6 +442,7 @@ SOPC_ReturnStatus SOPC_Guid_FromCString(SOPC_Guid* guid, const char* str, size_t
 SOPC_ReturnStatus SOPC_Guid_Copy(SOPC_Guid* dest, const SOPC_Guid* src);
 SOPC_ReturnStatus SOPC_Guid_CompareAux(const void* left, const void* right, int32_t* comparison);
 SOPC_ReturnStatus SOPC_Guid_CopyAux(void* dest, const void* src);
+SOPC_ReturnStatus SOPC_Guid_Compare(const SOPC_Guid* left, const SOPC_Guid* right, int32_t* comparison);
 void SOPC_Guid_Clear(SOPC_Guid* guid);
 void SOPC_Guid_ClearAux(void* value);
 
@@ -529,6 +530,9 @@ void SOPC_ExtensionObject_ClearAux(void* value);
 
 SOPC_Variant* SOPC_Variant_Create(void);
 void SOPC_Variant_Initialize(SOPC_Variant* variant);
+void SOPC_Null_ClearAux(void* value);
+SOPC_ReturnStatus SOPC_Null_CompareAux(const void* dest, const void* src, int32_t* comparison);
+SOPC_ReturnStatus SOPC_Null_CopyAux(void* dest, const void* src);
 void SOPC_Variant_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src);
 SOPC_ReturnStatus SOPC_Variant_CopyAux(void* dest, const void* src);

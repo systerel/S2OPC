@@ -81,7 +81,7 @@ static void PKIStub_Free(SOPC_PKIProvider* pPKI)
     (void) pPKI;
 }
 
-void clearToolkit(void)
+static void clearToolkit(void)
 {
     SOPC_Toolkit_Clear();
     Check_SC_Clear();
@@ -93,7 +93,7 @@ void clearToolkit(void)
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
 }
 
-void establishSC(void)
+static void establishSC(void)
 {
     printf("\nSTART UNIT TEST\n");
 
@@ -698,7 +698,7 @@ START_TEST(test_unexpected_encrypted_aligned_value)
 }
 END_TEST
 
-Suite* tests_make_suite_invalid_encrypted_buffers(void)
+static Suite* tests_make_suite_invalid_encrypted_buffers(void)
 {
     Suite* s;
     TCase* tc_invalid_buf;

@@ -54,7 +54,7 @@ static SOPC_DateTime dateTimeResultsWithCancel[NB_TIMERS_WITH_CANCEL] = {0, 0, 0
 
 uint32_t timersId[NB_TIMERS];
 
-void timeout_event(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
+static void timeout_event(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
     (void) handler;
 
@@ -119,7 +119,11 @@ START_TEST(test_timers)
 }
 END_TEST
 
-void canceled_timeout_event(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
+static void canceled_timeout_event(SOPC_EventHandler* handler,
+                                   int32_t event,
+                                   uint32_t eltId,
+                                   void* params,
+                                   uintptr_t auxParam)
 {
     (void) handler;
 
