@@ -4609,7 +4609,7 @@ static SOPC_ReturnStatus get_range_array(SOPC_Variant* dst, const SOPC_Variant* 
 
     for (uint32_t i = 0; i < dst_len; ++i)
     {
-        SOPC_ReturnStatus status = copyFunction(dst_i, src_i);
+        status = copyFunction(dst_i, src_i);
 
         if (status != SOPC_STATUS_OK)
         {

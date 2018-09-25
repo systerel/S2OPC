@@ -37,11 +37,11 @@
 #define ATTRIBUTEID_USERACCESSLEVEL 18
 
 /* Fixtures global variables */
-static SOPC_User* user = NULL;
-static SOPC_UserAuthentication_Manager* authenticationManager = NULL;
-static SOPC_UserAuthentication_Manager* authenticationManagerSelective = NULL;
-static SOPC_UserAuthorization_Manager* authorizationManager = NULL;
-static SOPC_UserAuthorization_Manager* authorizationManagerSelective = NULL;
+static SOPC_User* gUser = NULL;
+static SOPC_UserAuthentication_Manager* gAuthenticationManager = NULL;
+static SOPC_UserAuthentication_Manager* gAuthenticationManagerSelective = NULL;
+static SOPC_UserAuthorization_Manager* gAuthorizationManager = NULL;
+static SOPC_UserAuthorization_Manager* gAuthorizationManagerSelective = NULL;
 
 /* Global complex objects */
 static const SOPC_ExtensionObject anonymousIdentityToken = {
@@ -161,49 +161,49 @@ static inline void setup_user(void)
     SOPC_String username;
     ck_assert(SOPC_STATUS_OK == SOPC_String_InitializeFromCString(&username, USERNAME));
 
-    user = SOPC_User_CreateUsername(&username);
-    ck_assert_ptr_nonnull(user);
+    gUser = SOPC_User_CreateUsername(&username);
+    ck_assert_ptr_nonnull(gUser);
 
     SOPC_String_Clear(&username);
 }
 
 static inline void teardown_user(void)
 {
-    SOPC_User_Free(&user);
+    SOPC_User_Free(&gUser);
 }
 
 static inline void setup_authentication(void)
 {
-    authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
-    ck_assert_ptr_nonnull(authenticationManager);
-    authenticationManagerSelective = calloc(1, sizeof(SOPC_UserAuthentication_Manager));
-    ck_assert_ptr_nonnull(authenticationManagerSelective);
-    authenticationManagerSelective->pFunctions = &selectiveAuthenticationFunctions;
+    gAuthenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
+    ck_assert_ptr_nonnull(gAuthenticationManager);
+    gAuthenticationManagerSelective = calloc(1, sizeof(SOPC_UserAuthentication_Manager));
+    ck_assert_ptr_nonnull(gAuthenticationManagerSelective);
+    gAuthenticationManagerSelective->pFunctions = &selectiveAuthenticationFunctions;
 }
 
 static inline void teardown_authentication(void)
 {
-    SOPC_UserAuthentication_FreeManager(&authenticationManager);
-    ck_assert_ptr_null(authenticationManager);
-    SOPC_UserAuthentication_FreeManager(&authenticationManagerSelective);
-    ck_assert_ptr_null(authenticationManagerSelective);
+    SOPC_UserAuthentication_FreeManager(&gAuthenticationManager);
+    ck_assert_ptr_null(gAuthenticationManager);
+    SOPC_UserAuthentication_FreeManager(&gAuthenticationManagerSelective);
+    ck_assert_ptr_null(gAuthenticationManagerSelective);
 }
 
 static inline void setup_authorization(void)
 {
-    authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
-    ck_assert_ptr_nonnull(authorizationManager);
-    authorizationManagerSelective = calloc(1, sizeof(SOPC_UserAuthorization_Manager));
-    ck_assert_ptr_nonnull(authorizationManagerSelective);
-    authorizationManagerSelective->pFunctions = &selectiveAuthorizationFunctions;
+    gAuthorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
+    ck_assert_ptr_nonnull(gAuthorizationManager);
+    gAuthorizationManagerSelective = calloc(1, sizeof(SOPC_UserAuthorization_Manager));
+    ck_assert_ptr_nonnull(gAuthorizationManagerSelective);
+    gAuthorizationManagerSelective->pFunctions = &selectiveAuthorizationFunctions;
 }
 
 static inline void teardown_authorization(void)
 {
-    SOPC_UserAuthorization_FreeManager(&authorizationManager);
-    ck_assert_ptr_null(authorizationManager);
-    SOPC_UserAuthorization_FreeManager(&authorizationManagerSelective);
-    ck_assert_ptr_null(authorizationManagerSelective);
+    SOPC_UserAuthorization_FreeManager(&gAuthorizationManager);
+    ck_assert_ptr_null(gAuthorizationManager);
+    SOPC_UserAuthorization_FreeManager(&gAuthorizationManagerSelective);
+    ck_assert_ptr_null(gAuthorizationManagerSelective);
 }
 
 static inline void create_users_with_authorization(SOPC_UserAuthorization_Manager* authorizationManager,
@@ -239,13 +239,13 @@ START_TEST(test_user)
     ck_assert(SOPC_User_IsAnonymous(user_anonymous));
     ck_assert(!SOPC_User_IsUsername(user_anonymous));
 
-    ck_assert(!SOPC_User_IsLocal(user));
-    ck_assert(!SOPC_User_IsAnonymous(user));
-    ck_assert(SOPC_User_IsUsername(user));
+    ck_assert(!SOPC_User_IsLocal(gUser));
+    ck_assert(!SOPC_User_IsAnonymous(gUser));
+    ck_assert(SOPC_User_IsUsername(gUser));
 
     SOPC_String username;
     ck_assert(SOPC_STATUS_OK == SOPC_String_InitializeFromCString(&username, USERNAME));
-    const SOPC_String* new_username = SOPC_User_GetUsername(user);
+    const SOPC_String* new_username = SOPC_User_GetUsername(gUser);
     ck_assert_ptr_nonnull(new_username);
     ck_assert(SOPC_String_Equal(&username, new_username));
     SOPC_String_Clear(&username);
@@ -257,11 +257,11 @@ START_TEST(test_user_with_authorization)
     SOPC_UserWithAuthorization* userLocalWithAuthorization = NULL;
     SOPC_UserWithAuthorization* userAnonymousWithAuthorization = NULL;
     SOPC_UserWithAuthorization* userUsernameWithAuthorization = NULL;
-    create_users_with_authorization(authorizationManager, &userLocalWithAuthorization, &userAnonymousWithAuthorization,
+    create_users_with_authorization(gAuthorizationManager, &userLocalWithAuthorization, &userAnonymousWithAuthorization,
                                     &userUsernameWithAuthorization);
 
     /* Local user with authorization */
-    ck_assert_ptr_eq(authorizationManager, SOPC_UserWithAuthorization_GetManager(userLocalWithAuthorization));
+    ck_assert_ptr_eq(gAuthorizationManager, SOPC_UserWithAuthorization_GetManager(userLocalWithAuthorization));
     const SOPC_User* user = SOPC_UserWithAuthorization_GetUser(userLocalWithAuthorization);
     ck_assert(SOPC_User_IsLocal(user));
     ck_assert(!SOPC_User_IsAnonymous(user));
@@ -299,7 +299,7 @@ START_TEST(test_authentication_allow_all)
 #define TEST_AUTHN(token, expected)                                                                       \
     authenticated = SOPC_USER_AUTHENTICATION_INVALID_TOKEN;                                               \
     ck_assert(SOPC_STATUS_OK ==                                                                           \
-              SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, token, &authenticated)); \
+              SOPC_UserAuthentication_IsValidUserIdentity(gAuthenticationManager, token, &authenticated)); \
     ck_assert(authenticated == expected);
 
     TEST_AUTHN(&anonymousIdentityToken, SOPC_USER_AUTHENTICATION_OK)
@@ -317,7 +317,7 @@ START_TEST(test_authentication_selective)
 #define TEST_AUTHN(token, expected)                                                                                \
     authenticated = SOPC_USER_AUTHENTICATION_INVALID_TOKEN;                                                        \
     ck_assert(SOPC_STATUS_OK ==                                                                                    \
-              SOPC_UserAuthentication_IsValidUserIdentity(authenticationManagerSelective, token, &authenticated)); \
+              SOPC_UserAuthentication_IsValidUserIdentity(gAuthenticationManagerSelective, token, &authenticated)); \
     ck_assert(authenticated == expected);
 
     TEST_AUTHN(&anonymousIdentityToken, SOPC_USER_AUTHENTICATION_REJECTED_TOKEN)
@@ -334,7 +334,7 @@ START_TEST(test_authorization_allow_all)
     SOPC_UserWithAuthorization* userLocal = NULL;
     SOPC_UserWithAuthorization* userAnonymous = NULL;
     SOPC_UserWithAuthorization* userUsername = NULL;
-    create_users_with_authorization(authorizationManager, &userLocal, &userAnonymous, &userUsername);
+    create_users_with_authorization(gAuthorizationManager, &userLocal, &userAnonymous, &userUsername);
 
 #define TEST_AUTHZ(user, operation, nid, attribute, expected)                                              \
     authorized = !expected;                                                                                \
@@ -387,7 +387,7 @@ START_TEST(test_authorization_selective)
     SOPC_UserWithAuthorization* userLocal = NULL;
     SOPC_UserWithAuthorization* userAnonymous = NULL;
     SOPC_UserWithAuthorization* userUsername = NULL;
-    create_users_with_authorization(authorizationManagerSelective, &userLocal, &userAnonymous, &userUsername);
+    create_users_with_authorization(gAuthorizationManagerSelective, &userLocal, &userAnonymous, &userUsername);
 
 #define TEST_AUTHZ(user, operation, nid, attribute, expected)                                              \
     authorized = !expected;                                                                                \

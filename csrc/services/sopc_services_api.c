@@ -157,9 +157,9 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
 
         if (NULL != params)
         {
-            constants__t_StatusCode_i status;
-            util_status_code__C_to_B((SOPC_StatusCode) auxParam, &status);
-            io_dispatch_mgr__snd_msg_failure(id, (constants__t_request_context_i) * (uint32_t*) params, status);
+            constants__t_StatusCode_i statusCode;
+            util_status_code__C_to_B((SOPC_StatusCode) auxParam, &statusCode);
+            io_dispatch_mgr__snd_msg_failure(id, (constants__t_request_context_i) * (uint32_t*) params, statusCode);
             free(params);
         } // else: without request Id, it cannot be treated
         break;

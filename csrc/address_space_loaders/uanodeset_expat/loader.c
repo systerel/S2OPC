@@ -140,15 +140,15 @@ static bool ctx_char_data_append(struct parse_context_t* ctx, const char* data, 
             cap = 2 * cap;
         }
 
-        char* data = realloc(ctx->char_data_buffer, cap * sizeof(char));
+        char* dataBuff = realloc(ctx->char_data_buffer, cap * sizeof(char));
 
-        if (data == NULL)
+        if (dataBuff == NULL)
         {
             LOG_MEMORY_ALLOCATION_FAILURE;
             return false;
         }
 
-        ctx->char_data_buffer = data;
+        ctx->char_data_buffer = dataBuff;
         ctx->char_data_cap = cap;
     }
 

@@ -372,7 +372,7 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
 
     if (SOPC_STATUS_OK != status && NULL != pSM)
     {
-        SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
+        mutStatus = Mutex_Lock(&mutex);
         assert(SOPC_STATUS_OK == mutStatus);
         SOPC_StaMac_Machine* removedSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_RemoveFromId(pListClient, *pCliId);
         assert(pSM == removedSM);
