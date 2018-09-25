@@ -788,58 +788,56 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
 
     if (NULL == pSM)
     {
-        bProcess = false;
+        return false;
     }
 
     /* As long as the appCtx is not surely a SOPC_StaMac_ReqCtx*, it is not possible to dereference it.
      * But it contains the uid of the request, which is the id of the pListReqCtx.
      * The appCtx is a uintptr_t, so it cannot be set as the id of the SOPC_SLinkedList,
      * and searched for easily. */
-    if (bProcess)
+
+    /* Depending on the event, check either by request ctx or session ctx. */
+    switch (event)
     {
-        /* Depending on the event, check either by request ctx or session ctx. */
-        switch (event)
+    /* appCtx is request context */
+    case SE_RCV_SESSION_RESPONSE:
+    case SE_RCV_DISCOVERY_RESPONSE:
+    case SE_SND_REQUEST_FAILED:
+        bProcess = false;
+        pListIter = SOPC_SLinkedList_GetIterator(pSM->pListReqCtx);
+        while (!bProcess && NULL != pListIter)
         {
-        /* appCtx is request context */
-        case SE_RCV_SESSION_RESPONSE:
-        case SE_RCV_DISCOVERY_RESPONSE:
-        case SE_SND_REQUEST_FAILED:
-            bProcess = false;
-            pListIter = SOPC_SLinkedList_GetIterator(pSM->pListReqCtx);
-            while (!bProcess && NULL != pListIter)
+            if ((uintptr_t) SOPC_SLinkedList_Next(&pListIter) == appCtx)
             {
-                if ((uintptr_t) SOPC_SLinkedList_Next(&pListIter) == appCtx)
+                bProcess = true;
+                /* A response with a known pReqCtx shall free it, and return the appCtx to the caller */
+                if (NULL != pAppCtx)
                 {
-                    bProcess = true;
-                    /* A response with a known pReqCtx shall free it, and return the appCtx to the caller */
-                    if (NULL != pAppCtx)
-                    {
-                        *pAppCtx = ((SOPC_StaMac_ReqCtx*) appCtx)->appCtx;
-                    }
-                    if (SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, ((SOPC_StaMac_ReqCtx*) appCtx)->uid) == NULL)
-                    {
-                        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "failed to pop the request from the pListReqCtx.");
-                    }
-                    free((void*) appCtx);
-                    appCtx = 0;
+                    *pAppCtx = ((SOPC_StaMac_ReqCtx*) appCtx)->appCtx;
                 }
+                if (SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, ((SOPC_StaMac_ReqCtx*) appCtx)->uid) == NULL)
+                {
+                    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "failed to pop the request from the pListReqCtx.");
+                }
+                free((void*) appCtx);
+                appCtx = 0;
             }
-            break;
-        /* appCtx is session context */
-        case SE_SESSION_ACTIVATION_FAILURE:
-        case SE_ACTIVATED_SESSION:
-        case SE_SESSION_REACTIVATING:
-        case SE_CLOSED_SESSION:
-            if (pSM->iSessionCtx != appCtx)
-            {
-                bProcess = false;
-            }
-            break;
-        default:
-            bProcess = false;
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Unexpected event received by a machine.");
-            break;
         }
+        break;
+    /* appCtx is session context */
+    case SE_SESSION_ACTIVATION_FAILURE:
+    case SE_ACTIVATED_SESSION:
+    case SE_SESSION_REACTIVATING:
+    case SE_CLOSED_SESSION:
+        if (pSM->iSessionCtx != appCtx)
+        {
+            bProcess = false;
+        }
+        break;
+    default:
+        bProcess = false;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Unexpected event received by a machine.");
+        break;
     }
 
     return bProcess;
