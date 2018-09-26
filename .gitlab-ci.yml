@@ -178,7 +178,7 @@ test-unit:
 
 test-uactt:
   <<: *test_linux
-  image: com2.systerel.fr:5000/c765/uactt@sha256:86b9712edeb458df08980c651b8adfdc150de4d89731d98ae74c05e8bc501d2f  # uactt:1.4
+  image: com2.systerel.fr:5000/c765/uactt@sha256:d986fad99fe526ab81aca1149cd488db85b6a478187239c0ebdd265968d8c4c9  # uactt:1.5
   script:
     - 'cd acceptances_tests/ && ./launch_acceptance_tests.sh'
   artifacts:

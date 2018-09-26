@@ -1,5 +1,5 @@
 <UaTestCaseSelection xsi:noNamespaceSchemaLocation="testcaseselection.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
- <ProjectInfo ProjectType="ServerProject" Version="1.2.336.256"/>
+ <ProjectInfo ProjectType="ServerProject" Version="1.3.340.380"/>
  <ConformanceGroups>
   <ConformanceGroup name="Address Space Model">
    <ConformanceUnit name="Address Space Base">
@@ -85,6 +85,7 @@
      <TestCase name="010.js"/>
      <TestCase name="011.js"/>
      <TestCase name="012.js"/>
+     <TestCase name="013.js"/>
      <TestCase name="Err-001.js"/>
      <TestCase name="Err-002.js"/>
      <TestCase name="Err-003.js"/>
@@ -105,6 +106,7 @@
    <ConformanceUnit name="Base Info Core Structure">
     <TestCases>
      <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
     </TestCases>
    </ConformanceUnit>
    <ConformanceUnit name="Base Info ValueAsText">
@@ -274,8 +276,16 @@
      <TestCase name="037.js"/>
      <TestCase name="038.js"/>
      <TestCase name="039.js"/>
+     <TestCase name="040.js"/>
      <TestCase name="Err-001.js"/>
      <TestCase name="Err-002.js"/>
+    </TestCases>
+   </ConformanceUnit>
+  </ConformanceGroup>
+  <ConformanceGroup name="Protocol and Encoding">
+   <ConformanceUnit name="Protocol TCP Binary UA Security">
+    <TestCases>
+     <TestCase name="manual.js"/>
     </TestCases>
    </ConformanceUnit>
   </ConformanceGroup>
@@ -315,6 +325,24 @@
      <TestCase name="004.js"/>
     </TestCases>
    </ConformanceUnit>
+   <ConformanceUnit name="Security None CreateSession ActivateSession 1.01">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
+     <TestCase name="004.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Security Administration">
+    <TestCases>
+     <TestCase name="manual.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Security - No Application Authentication">
+    <TestCases>
+     <TestCase name="manual.js"/>
+    </TestCases>
+   </ConformanceUnit>
   </ConformanceGroup>
   <ConformanceGroup name="Session Services">
    <ConformanceUnit name="Session Minimum 1">
@@ -336,7 +364,6 @@
      <TestCase name="003.js"/>
      <TestCase name="004.js"/>
      <TestCase name="005.js"/>
-     <TestCase name="007.js"/>
      <TestCase name="008.js"/>
      <TestCase name="009.js"/>
      <TestCase name="010.js"/>
@@ -410,6 +437,7 @@
      <TestCase name="049.js"/>
      <TestCase name="050.js"/>
      <TestCase name="051.js"/>
+     <TestCase name="052.js"/>
      <TestCase name="053.js"/>
      <TestCase name="054.js"/>
      <TestCase name="055.js"/>
@@ -421,6 +449,7 @@
      <TestCase name="061.js"/>
      <TestCase name="062.js"/>
      <TestCase name="063.js"/>
+     <TestCase name="067.js"/>
      <TestCase name="Err-001.js"/>
      <TestCase name="Err-002.js"/>
      <TestCase name="Err-003.js"/>
@@ -465,18 +494,22 @@
      <TestCase name="002.js"/>
      <TestCase name="003.js"/>
      <TestCase name="004.js"/>
+     <TestCase name="005.js"/>
      <TestCase name="Err-001.js"/>
     </TestCases>
    </ConformanceUnit>
    <ConformanceUnit name="Subscription Publish Min 05">
     <TestCases>
      <TestCase name="001.js"/>
+     <TestCase name="003.js"/>
      <TestCase name="005.js"/>
+     <TestCase name="006.js"/>
      <TestCase name="Err-001.js"/>
     </TestCases>
    </ConformanceUnit>
    <ConformanceUnit name="Subscription Publish Min 10">
     <TestCases>
+     <TestCase name="001.js"/>
      <TestCase name="002.js"/>
      <TestCase name="003.js"/>
      <TestCase name="Err-001.js"/>

@@ -87,7 +87,10 @@ popd
 
 echo "Launching Acceptance Test Tool"
 
-/opt/opcfoundation/uactt/uacompliancetest.sh -s ./Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE
+mkdir -p /tmp/wineprefix
+export WINEPREFIX="/tmp/wineprefix"
+export WINEARCH="win32"
+wine /opt/uactt/uacompliancetest.exe -s $(winepath -w ./Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml) --selection $(winepath -w $SELECTION) -h -c -r $(winepath -w ./$LOG_FILE) 2>$UACTT_ERROR_FILE
 
 echo "Closing Acceptance Test Tool"
 
