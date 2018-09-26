@@ -21,16 +21,16 @@ localityName            = Locality Name (eg, city)
 localityName_default        = PARIS
 
 organizationName            = Organization Name (eg, company)
-organizationName_default    = INGOPCS
+organizationName_default    = S2OPC
 
 organizationalUnitName  = Organizational Unit (eg, division)
-organizationalUnitName_default  = INGOPCS
+organizationalUnitName_default  = S2OPC
 
 commonName          = Common Name (e.g. server FQDN or YOUR name)
-commonName_default      = INGOPCS CLIENT
+commonName_default      = S2OPC Test Client
 
 emailAddress            = Email Address
-emailAddress_default        = ingopcs@systerel.fr
+emailAddress_default        = s2opc-support@systerel.fr
 
 ####################################################################
 [ client_extensions ]
@@ -43,5 +43,5 @@ nsComment            = "OpenSSL Generated Certificate"
 ####################################################################
 
 [ alternate_names ]
-URI = urn:INGOPCS:localhost #ApplicationUri
+URI = urn:S2OPC:localhost #ApplicationUri
 DNS.1 = localhost
