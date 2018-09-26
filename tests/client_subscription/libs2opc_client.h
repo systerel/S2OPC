@@ -431,6 +431,21 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
 
 /*
  @description
+    Sends a generic request on the connection. The request must be accepted by the SOPC encoders
+ (OpcUa_<MessageStruct>*) which are defined in "sopc_types.h". Upon response, the SOPC_LibSub_EventCbk callback
+ configured with this connection is called with the OpcUa response.
+ @param cliId
+    The connection id.
+ @param requestStruct
+    OPC UA message payload structure pointer (OpcUa_<MessageStruct>*). Deallocated by toolkit.
+ @param requestContext
+    A context value, it will be provided in the callback alongside the corresponding response.
+ */
+SOPC_ReturnStatus SOPC_LibSub_AsyncSendRequestOnSession(SOPC_LibSub_ConnectionId cliId,
+                                                        void* requestStruct,
+                                                        uintptr_t requestContext);
+/*
+ @description
     Disconnect from a remote OPC server.
     The function waits until the client is effectively disconnected, or the Toolkit times out.
  @param c_id

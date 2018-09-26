@@ -435,6 +435,47 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
     return status;
 }
 
+SOPC_ReturnStatus SOPC_LibSub_AsyncSendRequestOnSession(SOPC_LibSub_ConnectionId cliId,
+                                                        void* requestStruct,
+                                                        uintptr_t requestContext)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_StaMac_Machine* pSM = NULL;
+
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
+
+    /* Retrieve the machine on which the request will be sent */
+    pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
+    if (NULL == pSM)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* IsConnected() returns true when in stActivating. However, as the Connect() is blocking,
+     * it is not possible to be in this state here.
+     */
+    if (SOPC_STATUS_OK == status && !SOPC_StaMac_IsConnected(pSM))
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_StaMac_SendRequest(pSM, requestStruct, requestContext, SOPC_REQUEST_SCOPE_APPLICATION);
+    }
+
+    mutStatus = Mutex_Unlock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
