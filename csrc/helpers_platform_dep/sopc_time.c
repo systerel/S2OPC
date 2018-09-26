@@ -31,10 +31,6 @@ static const int64_t SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7
 
 static char* get_time_string(bool local, bool compact)
 {
-    static const char* format_seconds_terse = "%Y/%m/%d %H:%M:%S";
-    static const char* format_milliseconds_terse = ".%03lu";
-    static const char* format_seconds_compact = "%Y%m%d_%H%M%S";
-    static const char* format_milliseconds_compact = "_%03lu";
     static const size_t buf_size = 24;
 
     int64_t dt_100ns = SOPC_Time_GetCurrentTimeUTC();
@@ -72,7 +68,7 @@ static char* get_time_string(bool local, bool compact)
         return NULL;
     }
 
-    size_t res = strftime(buf, buf_size - 1, compact ? format_seconds_compact : format_seconds_terse, &tm);
+    size_t res = strftime(buf, buf_size - 1, compact ? "%Y%m%d_%H%M%S" : "%Y/%m/%d %H:%M:%S", &tm);
 
     if (res == 0)
     {
@@ -80,7 +76,7 @@ static char* get_time_string(bool local, bool compact)
         return NULL;
     }
 
-    sprintf(buf + 19, compact ? format_milliseconds_compact : format_milliseconds_terse, milliseconds);
+    sprintf(buf + 19, compact ? "_%03lu" : ".%03lu", milliseconds);
 
     return buf;
 }
