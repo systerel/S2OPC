@@ -90,6 +90,36 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                                    uint32_t arg,
                                    void* pParam,
                                    uintptr_t appCtx);
+static void StaMac_ProcessEvent_stActivating(SOPC_StaMac_Machine* pSM,
+                                             SOPC_App_Com_Event event,
+                                             uint32_t arg,
+                                             void* pParam,
+                                             uintptr_t appCtx);
+static void StaMac_ProcessEvent_stClosing(SOPC_StaMac_Machine* pSM,
+                                          SOPC_App_Com_Event event,
+                                          uint32_t arg,
+                                          void* pParam,
+                                          uintptr_t appCtx);
+static void StaMac_ProcessEvent_stActivated(SOPC_StaMac_Machine* pSM,
+                                            SOPC_App_Com_Event event,
+                                            uint32_t arg,
+                                            void* pParam,
+                                            uintptr_t appCtx);
+static void StaMac_ProcessEvent_stCreatingSubscr(SOPC_StaMac_Machine* pSM,
+                                                 SOPC_App_Com_Event event,
+                                                 uint32_t arg,
+                                                 void* pParam,
+                                                 uintptr_t appCtx);
+static void StaMac_ProcessEvent_stCreatingMonIt(SOPC_StaMac_Machine* pSM,
+                                                SOPC_App_Com_Event event,
+                                                uint32_t arg,
+                                                void* pParam,
+                                                uintptr_t appCtx);
+static void StaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
+                                        SOPC_App_Com_Event event,
+                                        uint32_t arg,
+                                        void* pParam,
+                                        uintptr_t appCtx);
 static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_State oldState);
 
 /* ==================
@@ -511,17 +541,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                                  void* pParam,
                                  uintptr_t appCtx)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool bProcess = false;
     uintptr_t intAppCtx = 0; /* Internal appCtx, the one wrapped in the (ReqCtx*)appCtx */
-    int32_t i = 0;
-    OpcUa_CreateMonitoredItemsResponse* pMonItResp = NULL;
-    SOPC_EncodeableType* pEncType = NULL;
-    OpcUa_PublishResponse* pPubResp = NULL;
-    OpcUa_NotificationMessage* pNotifMsg = NULL;
-    OpcUa_DataChangeNotification* pDataNotif = NULL;
-    OpcUa_MonitoredItemNotification* pMonItNotif = NULL;
-    SOPC_LibSub_Value* plsVal = NULL;
     SOPC_StaMac_State oldState = stError;
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
@@ -541,179 +562,21 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
         {
         /* Session states */
         case stActivating:
-            switch (event)
-            {
-            case SE_ACTIVATED_SESSION:
-                pSM->state = stActivated;
-                pSM->iSessionID = arg;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Session activated.");
-                break;
-            case SE_SESSION_ACTIVATION_FAILURE:
-                pSM->state = stError;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed session activation.");
-                break;
-            default:
-                pSM->state = stError;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "In state Activation, unexpected event %i.", event);
-                break;
-            }
+            StaMac_ProcessEvent_stActivating(pSM, event, arg, pParam, intAppCtx);
             break;
         case stClosing:
-            switch (event)
-            {
-            case SE_SESSION_ACTIVATION_FAILURE:
-            case SE_CLOSED_SESSION:
-                /* Put the machine in a correct closed state, events may still be received */
-                pSM->state = stError;
-                break;
-            case SE_SESSION_REACTIVATING:
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Ignoring reactivation notification in stClosing state.");
-                break;
-            case SE_SND_REQUEST_FAILED:
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING,
-                            "Ignoring send request failure notification in stClosing state.");
-                break;
-            default:
-                /* This might be a response to a pending request, so this might not an error */
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Unexpected event %i in stClosing state, ignoring.", event);
-                break;
-            }
+            StaMac_ProcessEvent_stClosing(pSM, event, arg, pParam, intAppCtx);
             break;
         /* Main state */
         case stActivated:
-            switch (event)
-            {
-            case SE_RCV_SESSION_RESPONSE:
-                /* There should be an EncodeableType pointer in the first field of the message struct */
-                pEncType = *(SOPC_EncodeableType**) pParam;
-                if (&OpcUa_PublishResponse_EncodeableType == pEncType)
-                {
-                    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "PublishResponse received.");
-                    /* TODO: move this to an external function */
-                    pPubResp = (OpcUa_PublishResponse*) pParam;
-                    /* Take note to acknowledge later. There is no ack with KeepAlive. */
-                    /* TODO: this limits the benefits of having multiple pending PublishRequest, maybe
-                     * it would be more appropriate to have a list of SeqNumbsToAck... */
-                    assert(!pSM->bAckSubscr);
-                    if (0 < pPubResp->NoOfAvailableSequenceNumbers)
-                    {
-                        pSM->bAckSubscr = true;
-                        /* Only take the last one when more than 1 is available */
-                        pSM->iAckSeqNum =
-                            pPubResp->AvailableSequenceNumbers[pPubResp->NoOfAvailableSequenceNumbers - 1];
-                    }
-                    pSM->nTokenUsable -= 1;
-                    /* Traverse the notifications and calls the callback */
-                    pNotifMsg = &pPubResp->NotificationMessage;
-                    /* For now, only handles at most a NotificationData */
-                    assert(1 >= pNotifMsg->NoOfNotificationData);
-                    if (0 < pNotifMsg->NoOfNotificationData)
-                    {
-                        assert(&OpcUa_DataChangeNotification_EncodeableType ==
-                               pNotifMsg->NotificationData[0].Body.Object.ObjType);
-                        pDataNotif = (OpcUa_DataChangeNotification*) pNotifMsg->NotificationData[0].Body.Object.Value;
-                        for (i = 0; i < pDataNotif->NoOfMonitoredItems; ++i)
-                        {
-                            pMonItNotif = &pDataNotif->MonitoredItems[i];
-                            status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
-                            if (SOPC_STATUS_OK == status)
-                            {
-                                pSM->cbkDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
-                                free(plsVal->value);
-                                free(plsVal);
-                            }
-                        }
-                    }
-                    /* TODO: verify the results[] which contains a status for each Ack */
-                }
-                else
-                {
-                    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Response received.");
-                }
-                break;
-            case SE_SND_REQUEST_FAILED:
-                pSM->state = stError;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Send request failed, type %s, context 0x%" PRIxPTR ".",
-                            ((SOPC_EncodeableType*) pParam)->TypeName, intAppCtx);
-                break;
-            case SE_SESSION_REACTIVATING:
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Session reactivated.");
-                break;
-            default:
-                pSM->state = stError;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "In state stActivated, unexpected event %i.", event);
-                break;
-            }
+            StaMac_ProcessEvent_stActivated(pSM, event, arg, pParam, intAppCtx);
             break;
         /* Creating* states */
         case stCreatingSubscr:
-            switch (event)
-            {
-            case SE_RCV_SESSION_RESPONSE:
-                /* TODO: verify revised values?? */
-                assert(pSM->iSubscriptionID == 0);
-                pSM->iSubscriptionID = ((OpcUa_CreateSubscriptionResponse*) pParam)->SubscriptionId;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Subscription created.");
-                pSM->state = stActivated;
-                break;
-            case SE_SND_REQUEST_FAILED:
-                pSM->state = stError;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Send subscription request failed.");
-                break;
-            default:
-                pSM->state = stError;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "In state stCreatingSubscr, unexpected event %i.", event);
-                break;
-            }
+            StaMac_ProcessEvent_stCreatingSubscr(pSM, event, arg, pParam, intAppCtx);
             break;
         case stCreatingMonIt:
-            switch (event)
-            {
-            case SE_RCV_SESSION_RESPONSE:
-                /* There should be only one result element */
-                pMonItResp = (OpcUa_CreateMonitoredItemsResponse*) pParam;
-                assert(NULL != pMonItResp);
-                for (i = 0; SOPC_STATUS_OK == status && i < pMonItResp->NoOfResults; ++i)
-                {
-                    /* TODO: verify revised values?? */
-                    if (0 != pMonItResp->Results[i].StatusCode) /* OpcUa_Good does not exist... */
-                    {
-                        status = SOPC_STATUS_NOK;
-                        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR,
-                                    "Server could not create monitored item, sc = 0x%08" PRIX32 ".",
-                                    pMonItResp->Results[i].StatusCode);
-                    }
-                    else
-                    {
-                        if (SOPC_SLinkedList_Append(pSM->pListMonIt, pMonItResp->Results[i].MonitoredItemId,
-                                                    (void*) intAppCtx) != (void*) intAppCtx)
-                        {
-                            status = SOPC_STATUS_NOK;
-                        }
-                    }
-                    if (SOPC_STATUS_OK == status)
-                    {
-                        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "MonitoredItem created.");
-                    }
-                }
-                if (SOPC_STATUS_OK == status)
-                {
-                    pSM->state = stActivated;
-                }
-                else
-                {
-                    pSM->state = stError;
-                }
-                break;
-            case SE_SND_REQUEST_FAILED:
-                pSM->state = stError;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Send create monitored items request failed.");
-                break;
-            default:
-                pSM->state = stError;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "In state stCreatingMonIt, unexpected event %i.", event);
-                break;
-            }
+            StaMac_ProcessEvent_stCreatingMonIt(pSM, event, arg, pParam, intAppCtx);
             break;
         case stCreatingPubReq:
             /* TODO: remove this non existing state */
@@ -724,27 +587,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Event received in stInit state.");
             break;
         case stError:
-            switch (event)
-            {
-            case SE_SESSION_ACTIVATION_FAILURE:
-            case SE_CLOSED_SESSION:
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO,
-                            "Received post-closed closed event or activation failure, ignored.");
-                break;
-            case SE_SND_REQUEST_FAILED:
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO,
-                            "Received post-closed send request failure for message of type %s.",
-                            ((SOPC_EncodeableType*) pParam)->TypeName);
-                break;
-            case SE_SESSION_REACTIVATING:
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO,
-                            "Reactivating event received, but closed connection are considered lost.");
-                break;
-            default:
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Receiving unexpected event %i in closed state, ignored.",
-                            event);
-                break;
-            }
+            StaMac_ProcessEvent_stError(pSM, event, arg, pParam, intAppCtx);
             break;
         default:
             pSM->state = stError;
@@ -841,6 +684,263 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
     }
 
     return bProcess;
+}
+
+static void StaMac_ProcessEvent_stActivating(SOPC_StaMac_Machine* pSM,
+                                             SOPC_App_Com_Event event,
+                                             uint32_t arg,
+                                             void* pParam,
+                                             uintptr_t appCtx)
+{
+    (void) (pParam);
+    (void) (appCtx);
+
+    switch (event)
+    {
+    case SE_ACTIVATED_SESSION:
+        pSM->state = stActivated;
+        pSM->iSessionID = arg;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Session activated.");
+        break;
+    case SE_SESSION_ACTIVATION_FAILURE:
+        pSM->state = stError;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed session activation.");
+        break;
+    default:
+        pSM->state = stError;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "In state Activation, unexpected event %i.", event);
+        break;
+    }
+}
+
+static void StaMac_ProcessEvent_stClosing(SOPC_StaMac_Machine* pSM,
+                                          SOPC_App_Com_Event event,
+                                          uint32_t arg,
+                                          void* pParam,
+                                          uintptr_t appCtx)
+{
+    (void) (arg);
+    (void) (pParam);
+    (void) (appCtx);
+
+    switch (event)
+    {
+    case SE_SESSION_ACTIVATION_FAILURE:
+    case SE_CLOSED_SESSION:
+        /* Put the machine in a correct closed state, events may still be received */
+        pSM->state = stError;
+        break;
+    case SE_SESSION_REACTIVATING:
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Ignoring reactivation notification in stClosing state.");
+        break;
+    case SE_SND_REQUEST_FAILED:
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Ignoring send request failure notification in stClosing state.");
+        break;
+    default:
+        /* This might be a response to a pending request, so this might not an error */
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Unexpected event %i in stClosing state, ignoring.", event);
+        break;
+    }
+}
+
+static void StaMac_ProcessEvent_stActivated(SOPC_StaMac_Machine* pSM,
+                                            SOPC_App_Com_Event event,
+                                            uint32_t arg,
+                                            void* pParam,
+                                            uintptr_t appCtx)
+{
+    (void) (arg);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    int32_t i = 0;
+    SOPC_EncodeableType* pEncType = NULL;
+    OpcUa_PublishResponse* pPubResp = NULL;
+    OpcUa_NotificationMessage* pNotifMsg = NULL;
+    OpcUa_DataChangeNotification* pDataNotif = NULL;
+    OpcUa_MonitoredItemNotification* pMonItNotif = NULL;
+    SOPC_LibSub_Value* plsVal = NULL;
+
+    switch (event)
+    {
+    case SE_RCV_SESSION_RESPONSE:
+        /* There should be an EncodeableType pointer in the first field of the message struct */
+        pEncType = *(SOPC_EncodeableType**) pParam;
+        if (&OpcUa_PublishResponse_EncodeableType == pEncType)
+        {
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "PublishResponse received.");
+            pPubResp = (OpcUa_PublishResponse*) pParam;
+            /* Take note to acknowledge later. There is no ack with KeepAlive. */
+            /* TODO: this limits the benefits of having multiple pending PublishRequest, maybe
+             * it would be more appropriate to have a list of SeqNumbsToAck... */
+            assert(!pSM->bAckSubscr);
+            if (0 < pPubResp->NoOfAvailableSequenceNumbers)
+            {
+                pSM->bAckSubscr = true;
+                /* Only take the last one when more than 1 is available */
+                pSM->iAckSeqNum = pPubResp->AvailableSequenceNumbers[pPubResp->NoOfAvailableSequenceNumbers - 1];
+            }
+            pSM->nTokenUsable -= 1;
+            /* Traverse the notifications and calls the callback */
+            pNotifMsg = &pPubResp->NotificationMessage;
+            /* For now, only handles at most a NotificationData */
+            assert(1 >= pNotifMsg->NoOfNotificationData);
+            if (0 < pNotifMsg->NoOfNotificationData)
+            {
+                assert(&OpcUa_DataChangeNotification_EncodeableType ==
+                       pNotifMsg->NotificationData[0].Body.Object.ObjType);
+                pDataNotif = (OpcUa_DataChangeNotification*) pNotifMsg->NotificationData[0].Body.Object.Value;
+                for (i = 0; i < pDataNotif->NoOfMonitoredItems; ++i)
+                {
+                    pMonItNotif = &pDataNotif->MonitoredItems[i];
+                    status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        pSM->cbkDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
+                        free(plsVal->value);
+                        free(plsVal);
+                    }
+                }
+            }
+            /* TODO: verify the results[] which contains a status for each Ack */
+        }
+        else
+        {
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Unknown response received.");
+        }
+        break;
+    case SE_SND_REQUEST_FAILED:
+        pSM->state = stError;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Send request failed, type %s, context 0x%" PRIxPTR ".",
+                    ((SOPC_EncodeableType*) pParam)->TypeName, appCtx);
+        break;
+    case SE_SESSION_REACTIVATING:
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Session reactivated.");
+        break;
+    default:
+        pSM->state = stError;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "In state stActivated, unexpected event %i.", event);
+        break;
+    }
+}
+
+static void StaMac_ProcessEvent_stCreatingSubscr(SOPC_StaMac_Machine* pSM,
+                                                 SOPC_App_Com_Event event,
+                                                 uint32_t arg,
+                                                 void* pParam,
+                                                 uintptr_t appCtx)
+{
+    (void) (arg);
+    (void) (appCtx);
+
+    switch (event)
+    {
+    case SE_RCV_SESSION_RESPONSE:
+        /* TODO: verify revised values?? */
+        assert(pSM->iSubscriptionID == 0);
+        pSM->iSubscriptionID = ((OpcUa_CreateSubscriptionResponse*) pParam)->SubscriptionId;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Subscription created.");
+        pSM->state = stActivated;
+        break;
+    case SE_SND_REQUEST_FAILED:
+        pSM->state = stError;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Send subscription request failed.");
+        break;
+    default:
+        pSM->state = stError;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "In state stCreatingSubscr, unexpected event %i.", event);
+        break;
+    }
+}
+
+static void StaMac_ProcessEvent_stCreatingMonIt(SOPC_StaMac_Machine* pSM,
+                                                SOPC_App_Com_Event event,
+                                                uint32_t arg,
+                                                void* pParam,
+                                                uintptr_t appCtx)
+{
+    (void) (arg);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    int32_t i = 0;
+    OpcUa_CreateMonitoredItemsResponse* pMonItResp = NULL;
+
+    switch (event)
+    {
+    case SE_RCV_SESSION_RESPONSE:
+        /* There should be only one result element */
+        pMonItResp = (OpcUa_CreateMonitoredItemsResponse*) pParam;
+        assert(NULL != pMonItResp);
+        for (i = 0; SOPC_STATUS_OK == status && i < pMonItResp->NoOfResults; ++i)
+        {
+            /* TODO: verify revised values?? */
+            if (0 != pMonItResp->Results[i].StatusCode) /* OpcUa_Good does not exist... */
+            {
+                status = SOPC_STATUS_NOK;
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR,
+                            "Server could not create monitored item, sc = 0x%08" PRIX32 ".",
+                            pMonItResp->Results[i].StatusCode);
+            }
+            else
+            {
+                if (SOPC_SLinkedList_Append(pSM->pListMonIt, pMonItResp->Results[i].MonitoredItemId, (void*) appCtx) !=
+                    (void*) appCtx)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "MonitoredItem created.");
+            }
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            pSM->state = stActivated;
+        }
+        else
+        {
+            pSM->state = stError;
+        }
+        break;
+    case SE_SND_REQUEST_FAILED:
+        pSM->state = stError;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Send create monitored items request failed.");
+        break;
+    default:
+        pSM->state = stError;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "In state stCreatingMonIt, unexpected event %i.", event);
+        break;
+    }
+}
+
+static void StaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
+                                        SOPC_App_Com_Event event,
+                                        uint32_t arg,
+                                        void* pParam,
+                                        uintptr_t appCtx)
+{
+    (void) (pSM);
+    (void) (arg);
+    (void) (appCtx);
+
+    switch (event)
+    {
+    case SE_SESSION_ACTIVATION_FAILURE:
+    case SE_CLOSED_SESSION:
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Received post-closed closed event or activation failure, ignored.");
+        break;
+    case SE_SND_REQUEST_FAILED:
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Received post-closed send request failure for message of type %s.",
+                    ((SOPC_EncodeableType*) pParam)->TypeName);
+        break;
+    case SE_SESSION_REACTIVATING:
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO,
+                    "Reactivating event received, but closed connection are considered lost.");
+        break;
+    default:
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Receiving unexpected event %i in closed state, ignored.", event);
+        break;
+    }
 }
 
 /**
