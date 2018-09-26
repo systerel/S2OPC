@@ -196,14 +196,17 @@ bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx);
  * \brief Handles the events from the Toolkit and changes the state machine state.
  *
  * This function can be called even if the message is not destined to this particular machine.
+ * If the event is a response from a request issued with the SOPC_REQUEST_SCOPE_APPLICATION,
+ * the generic event callback of the machine is called.
  *
  * \param pAppCtx   A pointer to an uintptr_t which will contain the appCtx given to
-                    SOPC_StaMac_SendRequest(). NULL is valid. 0 indicates "appID unavailable".
+ *                  SOPC_StaMac_SendRequest(). NULL is valid. 0 indicates "appID unavailable".
  * \param appCtx    The appCtx given by the Toolkit.
  *
  * \warning This function shall be called upon each event raised by the Toolkit.
  *
- * \return True if the event is targeted to the machine. False otherwise, or when pSM is NULL.
+ * \return True if the event is targeted to the machine (including all request scopes).
+ *         False otherwise, or when pSM is NULL.
  */
 bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                                  uintptr_t* pAppCtx,

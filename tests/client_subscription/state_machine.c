@@ -87,10 +87,12 @@ static uintptr_t nPublishReqs = 0; /* Number of sent publish requests */
 /* Internal functions */
 static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                                    uintptr_t* pAppCtx,
+                                   SOPC_StaMac_RequestScope* pRequestScope,
                                    SOPC_App_Com_Event event,
                                    uint32_t arg,
                                    void* pParam,
                                    uintptr_t appCtx);
+
 static void StaMac_ProcessEvent_stActivating(SOPC_StaMac_Machine* pSM,
                                              SOPC_App_Com_Event event,
                                              uint32_t arg,
@@ -121,6 +123,7 @@ static void StaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
                                         uint32_t arg,
                                         void* pParam,
                                         uintptr_t appCtx);
+
 static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_State oldState);
 
 /* ==================
@@ -551,10 +554,11 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
     bool bProcess = false;
     uintptr_t intAppCtx = 0; /* Internal appCtx, the one wrapped in the (ReqCtx*)appCtx */
     SOPC_StaMac_State oldState = stError;
+    SOPC_StaMac_RequestScope requestScope = SOPC_REQUEST_SCOPE_STATE_MACHINE;
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
     assert(SOPC_STATUS_OK == mutStatus);
-    bProcess = StaMac_IsEventTargeted(pSM, &intAppCtx, event, arg, pParam, appCtx);
+    bProcess = StaMac_IsEventTargeted(pSM, &intAppCtx, &requestScope, event, arg, pParam, appCtx);
 
     if (bProcess)
     {
@@ -564,42 +568,69 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             *pAppCtx = intAppCtx;
         }
 
-        /* Treat event, if needed */
-        switch (pSM->state)
+        /* Treat an event depending on the state of the machine */
+        if (SOPC_REQUEST_SCOPE_STATE_MACHINE == requestScope)
         {
-        /* Session states */
-        case stActivating:
-            StaMac_ProcessEvent_stActivating(pSM, event, arg, pParam, intAppCtx);
-            break;
-        case stClosing:
-            StaMac_ProcessEvent_stClosing(pSM, event, arg, pParam, intAppCtx);
-            break;
-        /* Main state */
-        case stActivated:
-            StaMac_ProcessEvent_stActivated(pSM, event, arg, pParam, intAppCtx);
-            break;
-        /* Creating* states */
-        case stCreatingSubscr:
-            StaMac_ProcessEvent_stCreatingSubscr(pSM, event, arg, pParam, intAppCtx);
-            break;
-        case stCreatingMonIt:
-            StaMac_ProcessEvent_stCreatingMonIt(pSM, event, arg, pParam, intAppCtx);
-            break;
-        case stCreatingPubReq:
-            /* TODO: remove this non existing state */
-            break;
-        /* Invalid states */
-        case stInit:
-            pSM->state = stError;
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Event received in stInit state.");
-            break;
-        case stError:
-            StaMac_ProcessEvent_stError(pSM, event, arg, pParam, intAppCtx);
-            break;
-        default:
-            pSM->state = stError;
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Dispatching in unknown state %i, event %i.", pSM->state, event);
-            break;
+            switch (pSM->state)
+            {
+            /* Session states */
+            case stActivating:
+                StaMac_ProcessEvent_stActivating(pSM, event, arg, pParam, intAppCtx);
+                break;
+            case stClosing:
+                StaMac_ProcessEvent_stClosing(pSM, event, arg, pParam, intAppCtx);
+                break;
+            /* Main state */
+            case stActivated:
+                StaMac_ProcessEvent_stActivated(pSM, event, arg, pParam, intAppCtx);
+                break;
+            /* Creating* states */
+            case stCreatingSubscr:
+                StaMac_ProcessEvent_stCreatingSubscr(pSM, event, arg, pParam, intAppCtx);
+                break;
+            case stCreatingMonIt:
+                StaMac_ProcessEvent_stCreatingMonIt(pSM, event, arg, pParam, intAppCtx);
+                break;
+            case stCreatingPubReq:
+                /* TODO: remove this non existing state */
+                break;
+            /* Invalid states */
+            case stInit:
+                pSM->state = stError;
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Event received in stInit state.");
+                break;
+            case stError:
+                StaMac_ProcessEvent_stError(pSM, event, arg, pParam, intAppCtx);
+                break;
+            default:
+                pSM->state = stError;
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Dispatching in unknown state %i, event %i.", pSM->state,
+                            event);
+                break;
+            }
+        }
+        /* Forward the event to the generic event callback if it is not an error */
+        else
+        {
+            assert(SOPC_REQUEST_SCOPE_APPLICATION == requestScope);
+            if (SE_SND_REQUEST_FAILED == event)
+            {
+                pSM->state = stClosing;
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR,
+                            "Applicative message could not be sent, closing the connection.");
+                if (NULL != pSM->cbkGenericEvent)
+                {
+                    pSM->cbkGenericEvent(pSM->iCliId, SOPC_LibSub_ApplicativeEvent_SendFailed, arg, NULL, intAppCtx);
+                }
+            }
+            else
+            {
+                if (NULL != pSM->cbkGenericEvent)
+                {
+                    pSM->cbkGenericEvent(pSM->iCliId, SOPC_LibSub_ApplicativeEvent_Response, SOPC_STATUS_OK, pParam,
+                                         intAppCtx);
+                }
+            }
         }
 
         StaMac_PostProcessActions(pSM, oldState);
@@ -621,9 +652,13 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
  *
  * It also unwraps the appCtx if it is a SOPC_StaMac_ReqCtx*, and set *pAppCtx to pReqCtx->appCtx.
  * Machine's mutex shall already be locked by the caller.
+ *
+ * When returns true, the event is targeted to this machine, the pAppCtx is set if not NULL,
+ * as well as the request scope.
  */
 static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                                    uintptr_t* pAppCtx,
+                                   SOPC_StaMac_RequestScope* pRequestScope,
                                    SOPC_App_Com_Event event,
                                    uint32_t arg,
                                    void* pParam,
@@ -664,6 +699,10 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                 if (NULL != pAppCtx)
                 {
                     *pAppCtx = ((SOPC_StaMac_ReqCtx*) appCtx)->appCtx;
+                }
+                if (NULL != pRequestScope)
+                {
+                    *pRequestScope = ((SOPC_StaMac_ReqCtx*) appCtx)->requestScope;
                 }
                 if (SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, ((SOPC_StaMac_ReqCtx*) appCtx)->uid) == NULL)
                 {
