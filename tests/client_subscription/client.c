@@ -135,7 +135,8 @@ int main(int argc, char* const argv[])
                                          .data_change_callback = datachange_callback,
                                          .timeout_ms = TIMEOUT_MS,
                                          .sc_lifetime = SC_LIFETIME_MS,
-                                         .token_target = options.token_target};
+                                         .token_target = options.token_target,
+                                         .generic_response_callback = NULL};
     SOPC_LibSub_ConfigurationId cfg_id = 0;
     SOPC_LibSub_ConnectionId con_id = 0;
     SOPC_LibSub_DataId d_id = 0;

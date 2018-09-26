@@ -59,8 +59,9 @@ struct SOPC_StaMac_Machine
     uint32_t iscConfig;                       /* Toolkit scConfig ID */
     uint32_t iCliId;                          /* LibSub connection ID, used by the callback */
     SOPC_LibSub_DataChangeCbk cbkDataChanged; /* Callback when subscribed data changed */
+    SOPC_LibSub_EventCbk cbkGenericEvent;     /* Callback when received event that is out of the LibSub scope */
     uintptr_t iSessionCtx;                    /* Toolkit Session Context, used to identify session events */
-    uint32_t iSessionID;                      /* OPC UA Session ID */
+    uint32_t iSessionID;                      /* S2OPC Session ID */
     SOPC_SLinkedList* pListReqCtx;            /* List of yet-to-be-answered requests,
                                                * id is unique request identifier, value is a SOPC_StaMac_ReqCtx */
     double fPublishInterval;                  /* The publish interval, in ms */
@@ -141,6 +142,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      uint32_t iCntMaxKeepAlive,
                                      uint32_t iCntLifetime,
                                      uint32_t iTokenTarget,
+                                     SOPC_LibSub_EventCbk cbkGenericEvent,
                                      SOPC_StaMac_Machine** ppSM)
 {
     SOPC_StaMac_Machine* pSM = malloc(sizeof(SOPC_StaMac_Machine));
@@ -167,6 +169,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->pListMonIt = SOPC_SLinkedList_Create(0);
         pSM->nTokenTarget = iTokenTarget;
         pSM->nTokenUsable = 0;
+        pSM->cbkGenericEvent = cbkGenericEvent;
         pSM->bAckSubscr = false;
         pSM->iAckSeqNum = 0;
         /* TODO: deep copy the strings */

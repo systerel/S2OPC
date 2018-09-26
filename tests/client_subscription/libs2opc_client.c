@@ -207,7 +207,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
                                                   pCfg->path_crl, pCfg->sc_lifetime, &pscConfig);
     }
 
-    /* Store it to free it on SOPC_LibSub_Clear() */
+    /* Store it to be able to free it on clear in SOPC_LibSub_Clear() */
     if (SOPC_STATUS_OK == status)
     {
         if (!SOPC_Array_Append(pArrScConfig, pscConfig))
@@ -227,7 +227,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
         }
     }
 
-    /* Copy it to append it safely to the internal list */
+    /* Copy the caller's ConnectionCfg to append it safely to the internal list */
     if (SOPC_STATUS_OK == status)
     {
         pCfgCpy = malloc(sizeof(SOPC_LibSub_ConnectionCfg));
@@ -334,7 +334,7 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
         *pCliId = nCreatedClient;
         status = SOPC_StaMac_Create(cfgId, *pCliId, pCfg->policyId, pCfg->username, pCfg->password,
                                     pCfg->data_change_callback, (double) pCfg->publish_period_ms, pCfg->n_max_keepalive,
-                                    pCfg->n_max_lifetime, pCfg->token_target, &pSM);
+                                    pCfg->n_max_lifetime, pCfg->token_target, pCfg->generic_response_callback, &pSM);
     }
 
     /* Adds it to the list */

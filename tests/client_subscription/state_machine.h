@@ -96,6 +96,9 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  * \param iCntLifetime      The number of times a PublishResponse cannot be sent before killing the subscription
  * \param iTokenTarget      Number of subscription tokens the server should always have
  * \param ppSM              The returned machine, when successful
+ *
+ * \return SOPC_STATUS_OK when \p ppSM points to a pointer to a valid machine.
+ *         In other cases, (*ppSM) is not modified.
  */
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      uint32_t iCliId,
@@ -107,6 +110,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      uint32_t iCntMaxKeepAlive,
                                      uint32_t iCntLifetime,
                                      uint32_t iTokenTarget,
+                                     SOPC_LibSub_EventCbk cbkGenericEvent,
                                      SOPC_StaMac_Machine** ppSM);
 
 /**

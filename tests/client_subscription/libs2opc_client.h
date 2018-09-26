@@ -179,6 +179,17 @@ typedef enum
 
 /*
   @description
+    The event passed to the connection SOPC_LibSub_EventCbk.
+    Either an error or a valid response notification.
+*/
+typedef enum SOPC_LibSub_ApplicativeEvent
+{
+    SOPC_LibSub_ApplicativeEvent_SendFailed,
+    SOPC_LibSub_ApplicativeEvent_Response
+} SOPC_LibSub_ApplicativeEvent;
+
+/*
+  @description
     Log callback type
   @param log_level
     The Log level (SOPC_Toolkit_Log_Level). Note: SOPC_log_error shall be non-returning.
@@ -210,6 +221,32 @@ typedef void (*SOPC_LibSub_DataChangeCbk)(const SOPC_LibSub_ConnectionId c_id,
                                           const SOPC_LibSub_Value* value);
 
 /*
+  @description
+    Callback for generic responses to a call to SOPC_LibSub_AsyncSendRequestOnSession().
+  @param c_id
+    The connection id on which the event happened
+  @param event
+    The type of the event:
+    - SOPC_LibSub_ApplicativeEvent_SendFailed: the request was not sent and \p status holds the reason.
+      In this case, response shall be NULL but the responseContext is valid.
+      The underlying connection is about to be closed.
+    - SOPC_LibSub_ApplicativeEvent_Response: the response pointer and the response context are valid
+      and the \p status is Good.
+  @param status
+    The status code for the event
+  @param response
+    An (OpcUa_<MessageStruct>*) pointing to the OPC-UA response structure.
+    This message is freed by the caller and should not be modified by the callback function.
+  @param responseContext
+    The requestContext given in SOPC_LibSub_AsyncSendRequestOnSession().
+*/
+typedef void (*SOPC_LibSub_EventCbk)(SOPC_LibSub_ConnectionId c_id,
+                                     SOPC_LibSub_ApplicativeEvent event,
+                                     SOPC_StatusCode status,
+                                     const void* response,
+                                     uintptr_t responseContext);
+
+/*
  =====================
  STRUCTURES DEFINITION
  ===================== */
@@ -219,7 +256,7 @@ typedef void (*SOPC_LibSub_DataChangeCbk)(const SOPC_LibSub_ConnectionId c_id,
    Static configuration of OPC client libray
  @field host_log_callback
    Host log callback
- @field SOPC_LibSub_DisconnectCbk
+ @field disconnect_callback
    Notification event for disconnection from server */
 typedef struct
 {
@@ -278,6 +315,9 @@ typedef struct
    Time before secure channel renewal (milliseconds). A parameter larger than 60000 is recommended.
  @field token_target
    Number of tokens (PublishRequest) that the client tries to maintain throughout the connection
+ @field generic_response_callback
+   The callback used to transmit generic responses to request passed
+   through SOPC_LibSub_AsyncSendRequestOnSession.
  */
 typedef struct
 {
@@ -300,6 +340,7 @@ typedef struct
     int64_t timeout_ms;
     uint32_t sc_lifetime;
     uint16_t token_target;
+    SOPC_LibSub_EventCbk generic_response_callback;
 } SOPC_LibSub_ConnectionCfg;
 
 /*
