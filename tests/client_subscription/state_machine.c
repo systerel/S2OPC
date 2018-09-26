@@ -47,8 +47,9 @@
 /* Structures */
 struct SOPC_StaMac_ReqCtx
 {
-    uint32_t uid;     /* Unique request identifier */
-    uintptr_t appCtx; /* Application context, chosen outside of the state machine */
+    uint32_t uid;                          /* Unique request identifier */
+    uintptr_t appCtx;                      /* Application context, chosen outside of the state machine */
+    SOPC_StaMac_RequestScope requestScope; /* Whether the request is started by the state machine or the applicative */
 };
 
 struct SOPC_StaMac_Machine
@@ -288,7 +289,10 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* requestStruct, uintptr_t appCtx)
+SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
+                                          void* requestStruct,
+                                          uintptr_t appCtx,
+                                          SOPC_StaMac_RequestScope requestScope)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_ReqCtx* pReqCtx = NULL;
@@ -297,6 +301,8 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* reques
     {
         return SOPC_STATUS_INVALID_STATE;
     }
+
+    assert(SOPC_REQUEST_SCOPE_STATE_MACHINE == requestScope || SOPC_REQUEST_SCOPE_APPLICATION == requestScope);
 
     pReqCtx = malloc(sizeof(SOPC_StaMac_ReqCtx));
     if (NULL == pReqCtx)
@@ -311,6 +317,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* reques
     SOPC_Atomic_Int_Add(&nSentReqs, 1);
     pReqCtx->uid = (uint32_t) nSentReqs;
     pReqCtx->appCtx = appCtx;
+    pReqCtx->requestScope = requestScope;
     /* Asserts that there cannot be two requests with the same id when receiving a response */
     void* found = SOPC_SLinkedList_FindFromId(pSM->pListReqCtx, pReqCtx->uid);
     assert(NULL == found);
@@ -402,7 +409,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     /* Send it */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_StaMac_SendRequest(pSM, pReq, iCliHndl);
+        status = SOPC_StaMac_SendRequest(pSM, pReq, iCliHndl, SOPC_REQUEST_SCOPE_STATE_MACHINE);
     }
 
     /* Update the machine, the *pAppCtx, and *pCliHndl */
@@ -970,7 +977,7 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
                                                           pSM->iCntLifetime, &pRequest);
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_StaMac_SendRequest(pSM, pRequest, 0);
+                status = SOPC_StaMac_SendRequest(pSM, pRequest, 0, SOPC_REQUEST_SCOPE_STATE_MACHINE);
             }
             if (SOPC_STATUS_OK == status)
             {
@@ -996,7 +1003,7 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
                         /* TODO: This addition is not atomic */
                         uintptr_t new_val = (uintptr_t)(SOPC_Atomic_Ptr_Get((void**) &nPublishReqs)) + 1;
                         SOPC_Atomic_Ptr_Set((void**) &nPublishReqs, (void*) new_val);
-                        status = SOPC_StaMac_SendRequest(pSM, pRequest, nPublishReqs);
+                        status = SOPC_StaMac_SendRequest(pSM, pRequest, nPublishReqs, SOPC_REQUEST_SCOPE_STATE_MACHINE);
                     }
                     else
                     {

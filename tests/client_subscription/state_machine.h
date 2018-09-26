@@ -68,6 +68,14 @@ typedef enum
     stClosing
 } SOPC_StaMac_State;
 
+/* Request scopes */
+typedef enum
+{
+    SOPC_REQUEST_SCOPE_STATE_MACHINE, /** The request is part of the inner working of the state machine */
+    SOPC_REQUEST_SCOPE_APPLICATION    /** The request is issued by the applicative layer and the response
+                                       * will be forwarded to the generic event callback */
+} SOPC_StaMac_RequestScope;
+
 /* Machine content is private to the implementation */
 typedef struct SOPC_StaMac_ReqCtx SOPC_StaMac_ReqCtx;
 typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
@@ -136,7 +144,10 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM);
  * \param appCtx        An ID that will be given back through the call to the event handler.
                         The value 0 indicates "no ID".
  */
-SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM, void* requestStruct, uintptr_t appCtx);
+SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
+                                          void* requestStruct,
+                                          uintptr_t appCtx,
+                                          SOPC_StaMac_RequestScope requestScope);
 
 /**
  * \brief Creates a MonitoredItem asynchronously.
