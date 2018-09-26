@@ -50,7 +50,7 @@ class Client2(Client):
         and make your own
         """
         desc = ua.ApplicationDescription()
-        desc.ApplicationUri = "urn:INGOPCS:localhost"
+        desc.ApplicationUri = "urn:S2OPC:localhost"
         desc.ProductUri = self.product_uri
         desc.ApplicationName = ua.LocalizedText(self.name)
         desc.ApplicationType = ua.ApplicationType.Client

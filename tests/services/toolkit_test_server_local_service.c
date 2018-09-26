@@ -43,8 +43,8 @@
 #include "util_variant.h"
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
-#define APPLICATION_URI "urn:INGOPCS:localhost"
-#define PRODUCT_URI "urn:INGOPCS:localhost"
+#define APPLICATION_URI "urn:S2OPC:localhost"
+#define PRODUCT_URI "urn:S2OPC:localhost"
 
 static int endpointClosed = false;
 static int getEndpointsReceived = false;

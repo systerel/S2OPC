@@ -50,5 +50,5 @@ variantInfoList = [ ('Int64', ua.VariantType.Int64, -1000, random.randint(-92233
 
 def create_client(uri=sUri):
     client = Client(uri)
-    client.application_uri = "urn:INGOPCS:localhost"
+    client.application_uri = "urn:S2OPC:localhost"
     return client

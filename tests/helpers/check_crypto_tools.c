@@ -86,12 +86,12 @@ static SOPC_Certificate* unpack_certificate(const char* hex_data)
 START_TEST(test_crypto_check_app_uri)
 {
     SOPC_Certificate* crt_uri = unpack_certificate(CRT_URI);
-    ck_assert(SOPC_KeyManager_Certificate_CheckApplicationUri(crt_uri, "urn:INGOPCS:localhost"));
+    ck_assert(SOPC_KeyManager_Certificate_CheckApplicationUri(crt_uri, "urn:S2OPC:localhost"));
     ck_assert(!SOPC_KeyManager_Certificate_CheckApplicationUri(crt_uri, "urn:INGAPCS:localhost"));
     SOPC_KeyManager_Certificate_Free(crt_uri);
 
     SOPC_Certificate* crt_no_uri = unpack_certificate(CRT_NO_URI);
-    ck_assert(!SOPC_KeyManager_Certificate_CheckApplicationUri(crt_no_uri, "urn:INGOPCS:localhost"));
+    ck_assert(!SOPC_KeyManager_Certificate_CheckApplicationUri(crt_no_uri, "urn:S2OPC:localhost"));
     SOPC_KeyManager_Certificate_Free(crt_no_uri);
 }
 END_TEST

@@ -46,8 +46,8 @@
 #endif
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
-#define APPLICATION_URI "urn:INGOPCS:localhost"
-#define PRODUCT_URI "urn:INGOPCS:localhost"
+#define APPLICATION_URI "urn:S2OPC:localhost"
+#define PRODUCT_URI "urn:S2OPC:localhost"
 
 static const char* app_namespace_uris[] = {(const char*) PRODUCT_URI, NULL};
 
