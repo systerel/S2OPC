@@ -68,6 +68,7 @@ static int32_t firstValueIsUninit = 1;
 static int32_t iFirstValue = 0;
 static int32_t valueChanged = 0;
 static int32_t disconnected = 0;
+static int32_t responseReceived = 0;
 
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
 {
@@ -103,6 +104,26 @@ static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
     }
 }
 
+static void generic_event_callback(SOPC_LibSub_ConnectionId c_id,
+                                   SOPC_LibSub_ApplicativeEvent event,
+                                   SOPC_StatusCode status,
+                                   const void* response,
+                                   uintptr_t responseContext)
+{
+    (void) (event);
+
+    ck_assert(c_id == con_id);
+    ck_assert(SOPC_LibSub_ApplicativeEvent_Response);
+    ck_assert(SOPC_STATUS_OK == status);
+    ck_assert(42 == responseContext);
+
+    const SOPC_EncodeableType* pEncType = *(SOPC_EncodeableType* const*) response;
+    ck_assert(&OpcUa_ReadResponse_EncodeableType == pEncType);
+
+    ck_assert(SOPC_Atomic_Int_Get(&responseReceived) == 0);
+    SOPC_Atomic_Int_Set(&responseReceived, 1);
+}
+
 START_TEST(test_subscription)
 {
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = Helpers_LoggerStdout,
@@ -125,8 +146,21 @@ START_TEST(test_subscription)
                                          .data_change_callback = datachange_callback,
                                          .timeout_ms = CONNECTION_TIMEOUT,
                                          .sc_lifetime = 60000,
-                                         .token_target = 3};
+                                         .token_target = 3,
+                                         .generic_response_callback = generic_event_callback};
+    OpcUa_ReadValueId* lrv = calloc(1, sizeof(OpcUa_ReadValueId));
+    OpcUa_ReadRequest* read_req = calloc(1, sizeof(OpcUa_ReadRequest));
     SOPC_LibSub_ConfigurationId cfg_id = 0;
+
+    ck_assert_ptr_nonnull(lrv);
+    *lrv = (OpcUa_ReadValueId){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = 84},
+                               .AttributeId = SOPC_LibSub_AttributeId_BrowseName};
+    ck_assert_ptr_nonnull(read_req);
+    *read_req = (OpcUa_ReadRequest){.encodeableType = &OpcUa_ReadRequest_EncodeableType,
+                                    .MaxAge = 0.,
+                                    .TimestampsToReturn = OpcUa_TimestampsToReturn_Both,
+                                    .NoOfNodesToRead = 1,
+                                    .NodesToRead = lrv};
 
     ck_assert(SOPC_LibSub_Initialize(&cfg_cli) == SOPC_STATUS_OK);
     ck_assert(SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id) == SOPC_STATUS_OK);
@@ -135,9 +169,10 @@ START_TEST(test_subscription)
     ck_assert(SOPC_LibSub_AddToSubscription(con_id, "s=Counter", SOPC_LibSub_AttributeId_Value, &dat_id) ==
               SOPC_STATUS_OK);
 
-    /* Wait for deconnection, failed assert, or subscription success */
+    ck_assert(SOPC_LibSub_AsyncSendRequestOnSession(con_id, read_req, 42) == SOPC_STATUS_OK);
+
     int iCnt = 0;
-    /* TODO: use SOPC_Atomic_Int_Get */
+    /* Wait for deconnection, failed assert, or subscription success */
     while (iCnt * SLEEP_TIME <= CONNECTION_TIMEOUT && SOPC_Atomic_Int_Get(&valueChanged) == 0 &&
            SOPC_Atomic_Int_Get(&disconnected) == 0)
     {
