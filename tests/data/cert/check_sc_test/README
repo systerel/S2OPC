@@ -1,0 +1,2 @@
+Keep this data for specific test check_sc_rcv_encrypted_buffer which contains hard-coded encrypted buffer to test degraded cases.
+Note: certificates are not validated in this test which allows to keep expired certificates.

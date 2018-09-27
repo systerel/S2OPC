@@ -622,6 +622,13 @@ target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "tests/secure_c
                                                                  ${INGOPCS_PRIVATE_INCLUDES}
                                                                  ${MBEDTLS_INCLUDE_DIRS}
                                                                  ${CHECK_INCLUDE_DIRS})
+add_custom_command(
+    TARGET check_sc_rcv_encrypted_buffer POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/check_sc_rcv_encrypted_buffer_data
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/check_sc_test/check_sc_client_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/check_sc_rcv_encrypted_buffer_data/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/check_sc_test/check_sc_client_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/check_sc_rcv_encrypted_buffer_data/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/check_sc_test/check_sc_server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/check_sc_rcv_encrypted_buffer_data/)
+
 s2opc_unit_test(check_sc_rcv_encrypted_buffer)
 
 # Validation tests

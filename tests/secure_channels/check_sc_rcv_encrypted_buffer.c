@@ -34,8 +34,10 @@
 
 #include "check_sc_rcv_helpers.h"
 #include "hexlify.h"
+#include "sopc_atomic.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
+#include "sopc_macros.h"
 #include "sopc_pki_stack.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_time.h"
@@ -56,13 +58,27 @@ static SOPC_SecureChannel_Config scConfig;
 // Configuration SC idx provided on configuration (used also as socket / scIdx)
 uint32_t scConfigIdx = 0;
 
-static SOPC_PKIProvider* pki = NULL;
+static SOPC_PKIProvider pki;
+static int32_t pkiValidationAsked = false;
 static SOPC_SerializedCertificate *crt_cli = NULL, *crt_srv = NULL, *crt_ca = NULL;
 static SOPC_SerializedAsymmetricKey* priv_cli = NULL;
 
 static SOPC_ReturnStatus Check_Client_Closed_SC_Helper(SOPC_StatusCode status)
 {
     return Check_Client_Closed_SC(scConfigIdx, scConfigIdx, scConfigIdx, pendingRequestHandle, status);
+}
+
+static SOPC_ReturnStatus PKIStub_ValidateAnything(const SOPC_PKIProvider* pPKI, const SOPC_Certificate* pToValidate)
+{
+    (void) (pPKI);
+    (void) (pToValidate);
+    SOPC_Atomic_Int_Set(&pkiValidationAsked, true);
+    return SOPC_STATUS_OK;
+}
+
+static void PKIStub_Free(SOPC_PKIProvider* pPKI)
+{
+    (void) pPKI;
 }
 
 void clearToolkit(void)
@@ -75,7 +91,6 @@ void clearToolkit(void)
     SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
     SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
-    SOPC_PKIProvider_Free(&pki);
 }
 
 void establishSC(void)
@@ -102,11 +117,11 @@ void establishSC(void)
 
     // Paths to client certificate/key and server certificate
     // Client certificate name
-    char* certificateLocation = "./client_public/client_2k_cert.der";
+    char* certificateLocation = "./check_sc_rcv_encrypted_buffer_data/check_sc_client_2k_cert.der";
     // Server certificate name
-    char* certificateSrvLocation = "./server_public/server_2k_cert.der";
+    char* certificateSrvLocation = "./check_sc_rcv_encrypted_buffer_data/check_sc_server_2k_cert.der";
     // Client private key
-    char* keyLocation = "./client_private/client_2k_key.pem";
+    char* keyLocation = "./check_sc_rcv_encrypted_buffer_data/check_sc_client_2k_key.pem";
 
     if (SOPC_STATUS_OK == status)
     {
@@ -152,25 +167,19 @@ void establishSC(void)
         }
     }
 
+    // Init a stub PKI only to check validate certificate function is called
+    // (we do not want to validate the loaded certificates since they may have expired)
     if (SOPC_STATUS_OK == status)
     {
-        // Certificate Authority: load
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./trusted/cacert.der", &crt_ca);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("SC_Rcv_Buffer Init: Failed to load CA\n");
-        }
-        else
-        {
-            printf("SC_Rcv_Buffer Init: CA certificate loaded\n");
-        }
-    }
+        // The pki function pointer shall be const after this init
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        *(SOPC_PKIProvider_Free_Func*) (&pki.pFnFree) = &PKIStub_Free;
+        *(SOPC_FnValidateCertificate*) (&pki.pFnValidateCertificate) = &PKIStub_ValidateAnything;
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+        pki.pUserCertAuthList = NULL;
+        pki.pUserCertRevocList = NULL;
+        pki.pUserData = NULL;
 
-    // Init PKI provider and parse certificate and private key
-    // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki);
         if (SOPC_STATUS_OK != status)
         {
             printf("SC_Rcv_Buffer Init: Failed to create PKI\n");
@@ -203,7 +212,7 @@ void establishSC(void)
     scConfig.crt_cli = crt_cli;
     scConfig.crt_srv = crt_srv;
     scConfig.key_priv_cli = priv_cli;
-    scConfig.pki = pki;
+    scConfig.pki = &pki;
 
     scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
     ck_assert(scConfigIdx != 0);
@@ -252,7 +261,7 @@ void establishSC(void)
     ck_assert(SOPC_STATUS_OK == status);
     printf("SC_Rcv_Buffer Init: Checking correct OPN message requested to be sent\n");
 
-    // Check expected OPN message requested to be sent on socket
+    // Check expected OPN request message to be sent on socket
     status = Check_Expected_Sent_Message(
         scConfigIdx,
         // Expected OPN message
@@ -290,8 +299,16 @@ void establishSC(void)
         "00000000000000000000000000000000000",
         true, 1170, 512); // ignore all encrypted data
 
+    // Note: the content of the OPN request depends on the sender (client) and receiver (server) certificate loaded
+    // here. To define the expected data it may be captured from TCP packet capture to be known as a correct exchange
+    // with same certificates or may be defined "manually" from spec 1.03 part 6. The ciphered part has been set to zero
+    // here.
+
     ck_assert(SOPC_STATUS_OK == status);
     printf("SC_Rcv_Buffer Init: Simulate correct OPN message response received\n");
+
+    /* Check PKI validate function was not called until OPN response sent */
+    ck_assert(false == SOPC_Atomic_Int_Get(&pkiValidationAsked));
 
     // Simulate OPN resp. message received on socket
     status = Simulate_Received_Message(
@@ -334,6 +351,12 @@ void establishSC(void)
         "3b6ace58dd39360c2c8c26ee571b856b2cf7d867c692f4dba00fa1e3d927cde64f6e78d7a021e799f7946ffd20c56b0b1f5b111ad5ff8c"
         "d6be2503af8344ea3bde3e944f3a0795deed71e09aa940ed19ba37fcca16f942");
 
+    // Note: the content of the OPN response depends on the sender (client) and receiver (server) certificate loaded
+    // here but the SC id and security token shall be set in a deterministic way for the rest of the test.
+    // To define the message data it may be captured from TCP packet capture to be known as a correct exchange with
+    // same certificates and pre-determined SC id and security token. It may be done by instrumenting a server
+    // code to force those values or by defining "manually" the non-ciphered data + ciphering "manually" the rest.
+
     // Retrieve expected service event
     ck_assert(SOPC_STATUS_OK == status);
     printf("SC_Rcv_Buffer Init: Checking correct connection established event received by services\n");
@@ -342,6 +365,10 @@ void establishSC(void)
     ck_assert(NULL != serviceEvent);
     free(serviceEvent);
     serviceEvent = NULL;
+
+    /* Check the PKI validate function was called during OPN treatment */
+    ck_assert(true == SOPC_Atomic_Int_Get(&pkiValidationAsked));
+    SOPC_Atomic_Int_Set(&pkiValidationAsked, false);
 
     printf("SC_Rcv_Buffer: request to send an empty MSG and retrieve requestId associated\n");
     buffer = SOPC_Buffer_Create(1000); // Let 24 bytes reserved for the header
