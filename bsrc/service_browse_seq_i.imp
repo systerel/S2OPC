@@ -37,8 +37,7 @@ PROMOTES
     decode_browse_request,
     free_browse_request,
     write_BrowseResponse_msg_out,
-    free_browse_result,
-    set_ResponseBrowse_BrowseStatus
+    free_browse_result
 
 LOCAL_OPERATIONS
 

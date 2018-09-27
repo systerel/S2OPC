@@ -24,13 +24,24 @@ SEES
     constants,
     message_in_bs
 
+ABSTRACT_VARIABLES
+    isBrowseRequestDecoded
+
+INVARIANT
+    isBrowseRequestDecoded : BOOL
+
+INITIALISATION
+    isBrowseRequestDecoded := FALSE
+
 OPERATIONS
 
     StatusCode_service <-- treat_browse_request_BrowseValues =
-    /* TODOPAB: add PRE to ensure decode decode_browse_request is called before this one */
-    /* ... and resets the variable at the end of the op */
-    BEGIN
-        StatusCode_service :: t_StatusCode_i
+    PRE
+        isBrowseRequestDecoded = TRUE
+    THEN
+        StatusCode_service
+        :(StatusCode_service : t_StatusCode_i &
+            StatusCode_service : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_nothing_to_do, e_sc_bad_view_id_unknown})
     END
     ;
 
@@ -40,10 +51,12 @@ OPERATIONS
         req_payload : t_msg_i &
         req_payload = c_msg_in
     THEN
-        StatusCode_service
+        StatusCode_service,
+        isBrowseRequestDecoded
         :(
             StatusCode_service : t_StatusCode_i &
-            StatusCode_service : t_StatusCode
+            StatusCode_service : t_StatusCode &
+            isBrowseRequestDecoded = bool(StatusCode_service = e_sc_ok)
         )
     END
     ;
@@ -51,7 +64,7 @@ OPERATIONS
     /* Browse request cannot be used anymore */
     free_browse_request =
     BEGIN
-        skip
+        isBrowseRequestDecoded := FALSE
     END
     ;
 
@@ -68,18 +81,6 @@ OPERATIONS
     /* Promoted from msg_browse_response_bs */
     free_browse_result =
     BEGIN
-        skip
-    END
-    ;
-
-    /* Promoted from msg_browse_response_bs */
-    set_ResponseBrowse_BrowseStatus(p_bvi, p_sc) =
-    PRE
-        p_bvi  : t_BrowseValue_i &
-        p_bvi  : t_BrowseValue   &
-        p_sc : t_StatusCode_i &
-        p_sc : t_StatusCode
-    THEN
         skip
     END
 
