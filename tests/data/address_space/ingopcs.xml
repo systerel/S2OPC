@@ -615,6 +615,13 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
   </UAVariable>
+  <UAObject NodeId="i=3048" BrowseName="EventTypes" SymbolicName="EventTypesFolder">
+    <DisplayName>EventTypes</DisplayName>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
   <UAVariableType NodeId="i=3051" BrowseName="BuildInfoType" DataType="i=338">
     <DisplayName>BuildInfoType</DisplayName>
     <References>
