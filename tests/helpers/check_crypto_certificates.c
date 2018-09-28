@@ -17,6 +17,14 @@
  * under the License.
  */
 
+#include "check_crypto_certificates.h"
+
+#include <stdlib.h>
+
+#include <check.h>
+
+#include "hexlify.h"
+
 // server_2k.der
 const char* SRV_CRT =
     "308204263082030ea00302010202010c300d06092a864886f70d01010b0500308188310b3009060355040613024652310c300a06035504080c"
@@ -59,3 +67,18 @@ const char* CA_CRT =
     "70677b4741f80944a012d3048826f106f4fad1949f9fde83ccfc9ea595f67f7b36315ca3ded52901de82957541e47cfd490dac547149e6b83c"
     "38477c4ca84f0e47741c9a29e7eedeb6b5384d4033f2ffb694b71aff96d7e6e84674ffa222a6676e739ed626a26842f5ed31502cc298b8f488"
     "01ebf53f7f7515b178f2fce2b1fbb088fe201c7accf6bce4dc0561fa36e01e8221301737e71716f866cb1839500bfc91";
+
+SOPC_Certificate* SOPC_UnhexlifyCertificate(const char* hex_data)
+{
+    size_t der_len = strlen(hex_data) / 2;
+    uint8_t* der_data = calloc(der_len, sizeof(uint8_t));
+    ck_assert_ptr_nonnull(der_data);
+
+    ck_assert(unhexlify(hex_data, der_data, der_len) == (int) der_len);
+    SOPC_Certificate* crt = NULL;
+    ck_assert(der_len <= SIZE_MAX);
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_KeyManager_Certificate_CreateFromDER(der_data, (uint32_t) der_len, &crt));
+    free(der_data);
+
+    return crt;
+}

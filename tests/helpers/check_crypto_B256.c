@@ -696,13 +696,8 @@ static SOPC_Certificate* crt_pub = NULL;
 
 static inline void setup_certificate(void)
 {
-    uint8_t der_cert[1066];
-
     setup_crypto();
-
-    // Loads a certificate. This is server_public/server_2k.der.
-    ck_assert(unhexlify(SRV_CRT, der_cert, 1066) == 1066);
-    ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(der_cert, 1066, &crt_pub) == SOPC_STATUS_OK);
+    crt_pub = SOPC_UnhexlifyCertificate(SRV_CRT);
 }
 
 static inline void teardown_certificate(void)
@@ -1011,11 +1006,13 @@ END_TEST
 START_TEST(test_cert_copyder_B256)
 {
     uint8_t *buffer0 = NULL, *buffer1 = NULL;
-    uint8_t der_cert[1066];
+    size_t der_len = strlen(SRV_CRT) / 2;
+    uint8_t* der_cert = calloc(der_len, sizeof(uint8_t));
+    ck_assert_ptr_nonnull(der_cert);
     uint32_t lenAlloc0 = 0, lenAlloc1 = 0;
 
     // Reference certificate. This is server_public/server_2k.der.
-    ck_assert(unhexlify(SRV_CRT, der_cert, 1066) == 1066);
+    ck_assert(unhexlify(SRV_CRT, der_cert, der_len) == (int) der_len);
 
     // Extract 2 copies from loaded certificate
     ck_assert(SOPC_KeyManager_Certificate_CopyDER(crt_pub, &buffer0, &lenAlloc0) == SOPC_STATUS_OK);
@@ -1024,7 +1021,7 @@ START_TEST(test_cert_copyder_B256)
     // Both should be identical, and identical to der_cert
     ck_assert(lenAlloc0 == lenAlloc1);
     ck_assert(memcmp(buffer0, buffer1, lenAlloc0) == 0);
-    ck_assert(1066 == lenAlloc0);
+    ck_assert(der_len == lenAlloc0);
     ck_assert(memcmp(buffer0, der_cert, lenAlloc0) == 0);
 
     // Modifying 0 should not modify 1
@@ -1033,6 +1030,7 @@ START_TEST(test_cert_copyder_B256)
     // Clear
     free(buffer0);
     free(buffer1);
+    free(der_cert);
 }
 END_TEST
 

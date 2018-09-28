@@ -26,29 +26,14 @@
 #include "hexlify.h"
 #include "sopc_key_manager.h"
 
-static SOPC_Certificate* unpack_certificate(const char* hex_data)
-{
-    size_t der_len = strlen(hex_data) / 2;
-    uint8_t* der_data = calloc(der_len, sizeof(uint8_t));
-    ck_assert_ptr_nonnull(der_data);
-
-    ck_assert(unhexlify(hex_data, der_data, der_len) == (int) der_len);
-    SOPC_Certificate* crt = NULL;
-    ck_assert(der_len <= SIZE_MAX);
-    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_KeyManager_Certificate_CreateFromDER(der_data, (uint32_t) der_len, &crt));
-    free(der_data);
-
-    return crt;
-}
-
 START_TEST(test_crypto_check_app_uri)
 {
-    SOPC_Certificate* crt_uri = unpack_certificate(SRV_CRT);
+    SOPC_Certificate* crt_uri = SOPC_UnhexlifyCertificate(SRV_CRT);
     ck_assert(SOPC_KeyManager_Certificate_CheckApplicationUri(crt_uri, "urn:S2OPC:localhost"));
     ck_assert(!SOPC_KeyManager_Certificate_CheckApplicationUri(crt_uri, "urn:S1OPC:localhost"));
     SOPC_KeyManager_Certificate_Free(crt_uri);
 
-    SOPC_Certificate* crt_no_uri = unpack_certificate(CA_CRT);
+    SOPC_Certificate* crt_no_uri = SOPC_UnhexlifyCertificate(CA_CRT);
     ck_assert(!SOPC_KeyManager_Certificate_CheckApplicationUri(crt_no_uri, "urn:S2OPC:localhost"));
     SOPC_KeyManager_Certificate_Free(crt_no_uri);
 }
