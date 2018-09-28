@@ -478,6 +478,10 @@ START_TEST(test_unexpected_opn_req_msg_replay)
 
     status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpSecureChannelUnknown); // invalid SC ID == 0
     ck_assert(SOPC_STATUS_OK == status);
+
+    /* Check the PKI validate function was not called during OPN treatment
+     * Note: this is due to the fact that SC id == 0 whereas it should be the one defined by server previously */
+    ck_assert(false == SOPC_Atomic_Int_Get(&pkiValidationAsked));
 }
 END_TEST
 
@@ -525,6 +529,10 @@ START_TEST(test_unexpected_opn_resp_msg_replay)
 
     status = Check_Client_Closed_SC_Helper(OpcUa_BadSecurityChecksFailed); // invalid SN / request Id
     ck_assert(SOPC_STATUS_OK == status);
+
+    /* Check the PKI validate function was called during OPN treatment */
+    ck_assert(true == SOPC_Atomic_Int_Get(&pkiValidationAsked));
+    SOPC_Atomic_Int_Set(&pkiValidationAsked, false);
 }
 END_TEST
 
