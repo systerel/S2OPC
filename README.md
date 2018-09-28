@@ -113,9 +113,11 @@ Prerequisites:
 - [mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.12.0)
 - [check](https://libcheck.github.io/check/)(tested with libcheck version 0.12)
 
-To build the Toolkit library and tests with default configuration on current stable release:
+To build the Toolkit library and tests with default configuration on current 
+stable release:
 ```
-  git checkout INGOPCS_Toolkit_0.5.0
+  git clone https://gitlab.com/systerel/S2OPC.git --branch INGOPCS_Toolkit_0.5.0
+  cd S2OPC
   ./build.sh
 ```
 For more information, or to compile the master branch on its latest commit, please refer to the [wiki](https://gitlab.com/systerel/S2OPC/wikis/compilation).
