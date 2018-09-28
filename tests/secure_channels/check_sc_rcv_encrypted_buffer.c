@@ -179,15 +179,6 @@ void establishSC(void)
         pki.pUserCertAuthList = NULL;
         pki.pUserCertRevocList = NULL;
         pki.pUserData = NULL;
-
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("SC_Rcv_Buffer Init: Failed to create PKI\n");
-        }
-        else
-        {
-            printf("SC_Rcv_Buffer Init: PKI created\n");
-        }
     }
 
     // Init toolkit configuration
