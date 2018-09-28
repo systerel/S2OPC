@@ -64,6 +64,7 @@ alpha.core.PointerSub
 SCAN_BUILD="
 scan-build
   -o analyzer-report
+  --use-cc=clang
 "
 
 for c in $EXTRA_CHECKERS; do SCAN_BUILD="${SCAN_BUILD} -enable-checker $c"; done
