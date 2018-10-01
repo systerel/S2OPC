@@ -32,7 +32,7 @@
 #include "sopc_logger.h"
 #include "util_b2c.h"
 
-static void SOPC_InternalMontitoredItem_Free(void* data)
+static void SOPC_InternalMonitoredItem_Free(void* data)
 {
     SOPC_InternalMontitoredItem* mi = (SOPC_InternalMontitoredItem*) data;
     if (NULL != mi)
@@ -44,19 +44,19 @@ static void SOPC_InternalMontitoredItem_Free(void* data)
     }
 }
 
-static void SOPC_InternalMontitoredItemId_Free(void* data)
+static void SOPC_InternalMonitoredItemId_Free(void* data)
 {
     (void) data;
     // Nothing to do: uintptr_t value
 }
 
-static uint64_t SOPC_InternalMontitoredItemId_Hash(const void* data)
+static uint64_t SOPC_InternalMonitoredItemId_Hash(const void* data)
 {
     uintptr_t id = (uintptr_t) data;
     return (uint64_t) id;
 }
 
-static bool SOPC_InternalMontitoredItemId_Equal(const void* a, const void* b)
+static bool SOPC_InternalMonitoredItemId_Equal(const void* a, const void* b)
 {
     // Compare uintptr_t id values
     return a == b;
@@ -74,8 +74,8 @@ void monitored_item_pointer_bs__INITIALISATION(void)
 {
     monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION();
 
-    monitoredItemIdDict = SOPC_Dict_Create(0, SOPC_InternalMontitoredItemId_Hash, SOPC_InternalMontitoredItemId_Equal,
-                                           SOPC_InternalMontitoredItemId_Free, SOPC_InternalMontitoredItem_Free);
+    monitoredItemIdDict = SOPC_Dict_Create(0, SOPC_InternalMonitoredItemId_Hash, SOPC_InternalMonitoredItemId_Equal,
+                                           SOPC_InternalMonitoredItemId_Free, SOPC_InternalMonitoredItem_Free);
     assert(monitoredItemIdDict != NULL);
     monitoredItemIdFreed = SOPC_SLinkedList_Create(0);
     assert(monitoredItemIdFreed != NULL);
