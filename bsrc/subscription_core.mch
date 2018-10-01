@@ -861,7 +861,8 @@ OPERATIONS
             StatusCode_service := e_sc_bad_out_of_memory ||
             monitoredItemPointer := c_monitoredItemPointer_indet ||
             monitoredItemId := c_monitoredItemId_indet
-        ELSE
+        ELSIF p_indexRange : t_IndexRange /* It means it is null or it can be parsed */
+        THEN
             ANY l_monitoredItem, l_monitoredItemId WHERE
                 l_monitoredItem : t_monitoredItemPointer - s_monitoredItemPointer &
                 l_monitoredItemId : t_monitoredItemId - s_monitoredItemId
@@ -882,6 +883,10 @@ OPERATIONS
                 a_defined_monitored_items \/ {a_monitoredItemQueue(p_subscription) |-> l_monitoredItem}
                                           \/ {a_nodeToMonitoredItemQueue(p_nid) |-> l_monitoredItem}
             END
+        ELSE
+            StatusCode_service := e_sc_bad_index_range_invalid ||
+            monitoredItemPointer := c_monitoredItemPointer_indet ||
+            monitoredItemId := c_monitoredItemId_indet
         END
     END
     ;

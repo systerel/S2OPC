@@ -780,9 +780,8 @@ OPERATIONS
         l_node_monitIt_queue,
         l_sub_notif_queue
     IN
-        StatusCode_service := e_sc_ok;
         /* Create monitored item */
-        l_bres, monitoredItemPointer, monitoredItemId
+        StatusCode_service, monitoredItemPointer, monitoredItemId
           <-- create_monitored_item_pointer(p_subscription,
                                             p_nid,
                                             p_aid,
@@ -790,7 +789,7 @@ OPERATIONS
                                             p_timestampToReturn,
                                             p_monitoringMode,
                                             p_clientHandle);
-        IF l_bres = TRUE
+        IF StatusCode_service = e_sc_ok
         THEN
             l_bres, l_node_monitIt_queue <-- get_nodeToMonitoredItemQueue (p_nid);
 
@@ -836,8 +835,6 @@ OPERATIONS
                 StatusCode_service := e_sc_bad_out_of_memory;
                 delete_monitored_item_pointer(monitoredItemPointer)
             END
-        ELSE
-            StatusCode_service := e_sc_bad_out_of_memory
         END
     END
     ;

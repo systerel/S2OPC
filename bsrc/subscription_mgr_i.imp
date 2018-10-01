@@ -172,21 +172,21 @@ LOCAL_OPERATIONS
                 /* TODO: add use-access levels */
                 |
                 {TRUE |-> e_sc_bad_attribute_id_invalid,
-                 FALSE |-> {TRUE |-> e_sc_bad_index_range_invalid, /* index range not managed for now */
-                            FALSE |->{TRUE |-> e_sc_bad_monitoring_mode_invalid,
-                                      FALSE |-> {TRUE |-> e_sc_bad_monitored_item_filter_unsupported,
-                                                 FALSE |-> {TRUE |-> e_sc_bad_node_id_unknown,
-                                                            FALSE |-> {TRUE |-> e_sc_bad_attribute_id_invalid,
-                                                                       FALSE |-> {TRUE |-> e_sc_bad_out_of_memory, /* Since we do not have limit it is the case when no more MI */
+                 FALSE |-> {TRUE |-> e_sc_bad_monitoring_mode_invalid,
+                            FALSE |-> {TRUE |-> e_sc_bad_monitored_item_filter_unsupported,
+                                       FALSE |-> {TRUE |-> e_sc_bad_node_id_unknown,
+                                                  FALSE |-> {TRUE |-> e_sc_bad_attribute_id_invalid,
+                                                             FALSE |-> {FALSE |-> e_sc_bad_index_range_invalid,
+                                                                        TRUE |-> {TRUE |-> e_sc_bad_out_of_memory, /* Since we do not have limit it is the case when no more MI */
                                                                                   FALSE |-> e_sc_ok
                                                                                  }(bool(t_monitoredItemPointer = s_monitoredItemPointer or
                                                                                         t_monitoredItemId = s_monitoredItemId))
-                                                                      }(bool(a_NodeId~(MonitoredItemReq_NodeId(mi_index)) /:
-                                                                             dom(AttributeID_Node_Variant(MonitoredItemReq_AttributeId(mi_index)))))
-                                                           }(bool(MonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~)))
-                                                }(bool(MonitoredItemReq_FilterPresence(mi_index) = TRUE))
-                                     }(bool(MonitoredItemReq_ValidMonitoringMode(mi_index) = FALSE))
-                           }(bool(MonitoredItemReq_HasIndexRange(mi_index) = TRUE))
+                                                                        }(bool(MonitoredItemReq_IndexRange(mi_index) : t_IndexRange))
+                                                           }(bool(a_NodeId~(MonitoredItemReq_NodeId(mi_index)) /:
+                                                             dom(AttributeID_Node_Variant(MonitoredItemReq_AttributeId(mi_index)))))
+                                                }(bool(MonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~)))
+                                     }(bool(MonitoredItemReq_FilterPresence(mi_index) = TRUE))
+                            }(bool(MonitoredItemReq_ValidMonitoringMode(mi_index) = FALSE))
                 }(bool(mi_index /: dom(MonitoredItemReq_AttributeId)))
             )
         IN

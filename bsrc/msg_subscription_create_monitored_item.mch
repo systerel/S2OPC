@@ -32,7 +32,7 @@ DEFINITIONS
 
         MonitoredItemReq_NodeId      : t_monitoredItemReqIndex +-> t_NodeId &
         MonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId_i &
-        MonitoredItemReq_HasIndexRange : t_monitoredItemReqIndex +-> BOOL &
+        MonitoredItemReq_IndexRange  : t_monitoredItemReqIndex +-> t_IndexRange_i &
         MonitoredItemReq_ValidMonitoringMode : t_monitoredItemReqIndex +-> BOOL &
         MonitoredItemReq_FilterPresence : t_monitoredItemReqIndex +-> BOOL &
 
@@ -45,7 +45,7 @@ ABSTRACT_VARIABLES
     nb_monitored_items,
     MonitoredItemReq_NodeId,
     MonitoredItemReq_AttributeId,
-    MonitoredItemReq_HasIndexRange,
+    MonitoredItemReq_IndexRange,
     MonitoredItemReq_ValidMonitoringMode,
     MonitoredItemReq_FilterPresence,
     MonitoredItemResp_Allocated,
@@ -59,7 +59,7 @@ INITIALISATION
     nb_monitored_items           := 0  ||
     MonitoredItemReq_NodeId      := {} ||
     MonitoredItemReq_AttributeId := {} ||
-    MonitoredItemReq_HasIndexRange := {} ||
+    MonitoredItemReq_IndexRange := {} ||
     MonitoredItemReq_ValidMonitoringMode := {} ||
     MonitoredItemReq_FilterPresence := {} ||
     MonitoredItemResp_Allocated := FALSE ||
@@ -82,7 +82,7 @@ OPERATIONS
         nb_monitored_items,
         MonitoredItemReq_NodeId,
         MonitoredItemReq_AttributeId,
-        MonitoredItemReq_HasIndexRange,
+        MonitoredItemReq_IndexRange,
         MonitoredItemReq_ValidMonitoringMode,
         MonitoredItemReq_FilterPresence
         :(  p_sc                 : t_StatusCode &
@@ -94,11 +94,9 @@ OPERATIONS
                 p_nb_monitored_items > 0 &
                 p_nb_monitored_items <= k_n_monitoredItem_max &
                 nb_monitored_items = p_nb_monitored_items &
-                MonitoredItemReq_NodeId : t_monitoredItemReqIndex +-> t_NodeId &
-                dom(MonitoredItemReq_NodeId) = 1..nb_monitored_items &
-                MonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId_i &
-                dom(MonitoredItemReq_AttributeId) = 1..nb_monitored_items &
-                MonitoredItemReq_HasIndexRange : 1..nb_monitored_items --> BOOL &
+                MonitoredItemReq_NodeId : 1..nb_monitored_items +-> t_NodeId &
+                MonitoredItemReq_AttributeId : 1..nb_monitored_items --> t_AttributeId_i &
+                MonitoredItemReq_IndexRange : 1..nb_monitored_items --> t_IndexRange_i &
                 MonitoredItemReq_ValidMonitoringMode : 1..nb_monitored_items --> BOOL &
                 MonitoredItemReq_FilterPresence : 1..nb_monitored_items --> BOOL &
                 p_timestampToRet : t_TimestampsToReturn) &
@@ -137,24 +135,18 @@ OPERATIONS
            p_sc = e_sc_ok &
            p_nid = MonitoredItemReq_NodeId(p_index) &
            MonitoredItemReq_AttributeId(p_index) : t_AttributeId &
+           p_indexRange = MonitoredItemReq_IndexRange(p_index) &
            p_aid = MonitoredItemReq_AttributeId(p_index) &
            p_monitMode : t_monitoringMode) &
           (p_bres = FALSE => p_sc /= e_sc_ok) &
-          (p_index /: dom(MonitoredItemReq_AttributeId) =>
+          (MonitoredItemReq_AttributeId(p_index) /: t_AttributeId =>
            p_sc = e_sc_bad_attribute_id_invalid) &
 
-          (p_index : dom(MonitoredItemReq_AttributeId) &
-           MonitoredItemReq_HasIndexRange(p_index) = TRUE
-           =>
-           p_sc = e_sc_bad_index_range_invalid) &
-
-          (p_index : dom(MonitoredItemReq_AttributeId) &
-           MonitoredItemReq_HasIndexRange(p_index) = FALSE &
+          (MonitoredItemReq_AttributeId(p_index) : t_AttributeId &
            MonitoredItemReq_ValidMonitoringMode(p_index) = FALSE =>
            p_sc = e_sc_bad_monitoring_mode_invalid) &
 
-          (p_index : dom(MonitoredItemReq_AttributeId) &
-           MonitoredItemReq_HasIndexRange(p_index) = FALSE &
+          (MonitoredItemReq_AttributeId(p_index) : t_AttributeId &
            MonitoredItemReq_ValidMonitoringMode(p_index) = TRUE &
            MonitoredItemReq_FilterPresence(p_index) = TRUE =>
            p_sc = e_sc_bad_monitored_item_filter_unsupported)

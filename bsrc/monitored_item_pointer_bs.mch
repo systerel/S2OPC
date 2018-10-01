@@ -55,13 +55,13 @@ OPERATIONS
     END
     ;
 
-    bres, monitoredItemPointer, monitoredItemId <-- create_monitored_item_pointer (p_subscription,
-                                                                                   p_nid,
-                                                                                   p_aid,
-                                                                                   p_indexRange,
-                                                                                   p_timestampToReturn,
-                                                                                   p_monitoringMode,
-                                                                                   p_clientHandle) =
+    StatusCode, monitoredItemPointer, monitoredItemId <-- create_monitored_item_pointer (p_subscription,
+                                                                                         p_nid,
+                                                                                         p_aid,
+                                                                                         p_indexRange,
+                                                                                         p_timestampToReturn,
+                                                                                         p_monitoringMode,
+                                                                                         p_clientHandle) =
     PRE
         p_subscription : t_subscription_i &
         p_nid : t_NodeId_i &
@@ -78,15 +78,16 @@ OPERATIONS
         IF t_monitoredItemPointer = s_monitoredItemPointer or
             t_monitoredItemId = s_monitoredItemId
         THEN
-            bres := FALSE ||
+            StatusCode := e_sc_bad_out_of_memory ||
             monitoredItemPointer := c_monitoredItemPointer_indet ||
             monitoredItemId := c_monitoredItemId_indet
-        ELSE
+        ELSIF p_indexRange : t_IndexRange /* It is null or it can be parsed */
+        THEN
             ANY l_monitoredItem, l_monitoredItemId WHERE
                 l_monitoredItem : t_monitoredItemPointer - s_monitoredItemPointer &
                 l_monitoredItemId : t_monitoredItemId - s_monitoredItemId
             THEN
-                bres := TRUE ||
+                StatusCode := e_sc_ok ||
                 s_monitoredItemPointer := s_monitoredItemPointer \/ {l_monitoredItem} ||
                 s_monitoredItemId := s_monitoredItemId \/ {l_monitoredItemId} ||
                 a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
@@ -95,6 +96,10 @@ OPERATIONS
                 monitoredItemPointer := l_monitoredItem ||
                 monitoredItemId := l_monitoredItemId
             END
+        ELSE
+            StatusCode := e_sc_bad_index_range_invalid ||
+            monitoredItemPointer := c_monitoredItemPointer_indet ||
+            monitoredItemId := c_monitoredItemId_indet
         END
     END
     ;
