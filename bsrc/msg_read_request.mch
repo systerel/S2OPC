@@ -31,7 +31,7 @@ DEFINITIONS
         nb_ReadValue         <= k_n_read_resp_max        &
         ReadValue_NodeId      : t_ReadValue +-> t_NodeId &
         ReadValue_AttributeId : t_ReadValue +-> t_AttributeId_i &
-        ReadValue_IndexRange  : t_ReadValue +-> t_IndexRange
+        ReadValue_IndexRange  : t_ReadValue +-> t_IndexRange_i
     )
 
 ABSTRACT_VARIABLES
@@ -77,7 +77,7 @@ OPERATIONS
              nb_ReadValue > 0 &
              ReadValue_NodeId      : cast_t_ReadValue[1..nb_ReadValue] --> t_NodeId &
              ReadValue_AttributeId : cast_t_ReadValue[1..nb_ReadValue] --> t_AttributeId_i &
-             ReadValue_IndexRange  : cast_t_ReadValue[1..nb_ReadValue] --> t_IndexRange &
+             ReadValue_IndexRange  : cast_t_ReadValue[1..nb_ReadValue] --> t_IndexRange_i &
              p_nb_ReadValue = nb_ReadValue &
              p_tsToReturn : t_TimestampsToReturn &
              p_statusCode = e_sc_ok) &
@@ -116,7 +116,6 @@ OPERATIONS
             p_nid : t_NodeId                     &
             p_aid : t_AttributeId_i              &
             p_index_range : t_IndexRange_i       &
-            p_index_range : t_IndexRange         &
             p_nid = ReadValue_NodeId(p_rvi)      &
             p_aid = ReadValue_AttributeId(p_rvi) &
             p_index_range = ReadValue_IndexRange(p_rvi) &

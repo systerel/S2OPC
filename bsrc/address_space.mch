@@ -89,8 +89,8 @@ DEFINITIONS
         Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
         RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference &
 
-        IsValid_VariantIndex : t_Variant * t_IndexRange --> BOOL &
-        HasRange_VariantIndex  : t_Variant * t_IndexRange --> BOOL &
+        IsValid_VariantIndex : t_Variant * t_IndexRange_i --> BOOL &
+        HasRange_VariantIndex  : t_Variant * t_IndexRange_i --> BOOL &
 
         /* Service Write */
         ResponseWrite_allocated : BOOL &
@@ -125,8 +125,7 @@ OPERATIONS
         node : t_Node &
         aid : t_AttributeId_i &
         aid : t_AttributeId &
-        index_range : t_IndexRange_i &
-        index_range : t_IndexRange
+        index_range : t_IndexRange_i
     THEN
         /* TODO: define cases of failure (sc /= e_sc_ok): value requested on non Variable* type */
         sc,

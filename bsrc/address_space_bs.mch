@@ -103,8 +103,8 @@ INITIALISATION
         Reference_IsForward     : t_Reference --> BOOL &
 
         Generic_Node_Variant : t_NodeClass * t_Node * t_AttributeId --> t_Variant &
-        IsValid_VariantIndex : t_Variant * t_IndexRange --> BOOL &
-        HasRange_VariantIndex  : t_Variant * t_IndexRange --> BOOL
+        IsValid_VariantIndex : t_Variant * t_IndexRange_i --> BOOL &
+        HasRange_VariantIndex  : t_Variant * t_IndexRange_i --> BOOL
      )
 
 OPERATIONS
@@ -140,7 +140,6 @@ OPERATIONS
         aid  : t_AttributeId_i  &
         aid  : t_AttributeId    &
         index_range : t_IndexRange_i &
-        index_range : t_IndexRange   &
         e_operation_type_read |-> a_NodeId(node) |-> aid |-> p_user : s_AuthorizedOperations
     THEN
         CHOICE
@@ -199,7 +198,6 @@ OPERATIONS
         value : t_Variant_i &
         value : t_Variant   &
         index_range : t_IndexRange_i &
-        index_range : t_IndexRange   &
         e_operation_type_write |-> a_NodeId(node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
     THEN
         CHOICE

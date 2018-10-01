@@ -39,7 +39,7 @@ DEFINITIONS
         WriteValue_NodeId : t_WriteValue +-> t_NodeId &
         WriteValue_AttributeId : t_WriteValue +-> t_AttributeId_i &
         WriteValue_Value : t_WriteValue +-> t_Variant &
-        WriteValue_IndexRange : t_WriteValue +-> t_IndexRange
+        WriteValue_IndexRange : t_WriteValue +-> t_IndexRange_i
     ;
     d_init ==
         nb_WriteValue := 0 ||
@@ -77,7 +77,7 @@ OPERATIONS
               WriteValue_NodeId : cast_t_WriteValue[1..nb_WriteValue] --> t_NodeId &
               WriteValue_AttributeId : cast_t_WriteValue[1..nb_WriteValue] --> t_AttributeId_i &
               WriteValue_Value : cast_t_WriteValue[1..nb_WriteValue] --> t_Variant &
-              WriteValue_IndexRange : cast_t_WriteValue[1..nb_WriteValue] --> t_IndexRange) &
+              WriteValue_IndexRange : cast_t_WriteValue[1..nb_WriteValue] --> t_IndexRange_i) &
             (StatusCode_service /= e_sc_ok =>
                 nb_WriteValue = 0 &
                 WriteValue_NodeId = {} &

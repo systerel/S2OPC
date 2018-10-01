@@ -85,8 +85,8 @@ DEFINITIONS
         Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
         RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference &
 
-        IsValid_VariantIndex : t_Variant * t_IndexRange --> BOOL &
-        HasRange_VariantIndex  : t_Variant * t_IndexRange --> BOOL &
+        IsValid_VariantIndex : t_Variant * t_IndexRange_i --> BOOL &
+        HasRange_VariantIndex  : t_Variant * t_IndexRange_i --> BOOL &
 
         /* Service Write */
         ResponseWrite_allocated : BOOL &

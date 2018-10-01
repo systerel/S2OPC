@@ -32,7 +32,7 @@ ABSTRACT_VARIABLES
 INVARIANT
     ReadValue_NodeId      : t_ReadValue +-> t_NodeId &
     ReadValue_AttributeId : t_ReadValue +-> t_AttributeId_i &
-    ReadValue_IndexRange  : t_ReadValue +-> t_IndexRange
+    ReadValue_IndexRange  : t_ReadValue +-> t_IndexRange_i
 
 INITIALISATION
     ReadValue_NodeId,
@@ -56,7 +56,7 @@ OPERATIONS
              (nb > 0 =>
                ReadValue_NodeId      : cast_t_ReadValue[1..nb] --> t_NodeId &
                ReadValue_AttributeId : cast_t_ReadValue[1..nb] --> t_AttributeId_i &
-               ReadValue_IndexRange  : cast_t_ReadValue[1..nb] --> t_IndexRange) &
+               ReadValue_IndexRange  : cast_t_ReadValue[1..nb] --> t_IndexRange_i) &
              (nb <= 0 =>
                ReadValue_NodeId      = {} &
                ReadValue_AttributeId = {} &
@@ -115,7 +115,6 @@ OPERATIONS
         rvi : dom(ReadValue_IndexRange)
     THEN
         index_range :(index_range : t_IndexRange_i &
-                      index_range : t_IndexRange &
                       index_range = ReadValue_IndexRange(rvi))
     END
     ;

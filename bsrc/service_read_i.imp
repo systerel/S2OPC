@@ -53,7 +53,6 @@ LOCAL_OPERATIONS
         p_nid      : t_NodeId_i      &
         p_aid      : t_AttributeId_i &
         p_index_range : t_IndexRange_i &
-        p_index_range : t_IndexRange &
         p_rvi      : t_ReadValue_i
     THEN
         data_Value_Value,
