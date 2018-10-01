@@ -31,7 +31,7 @@ void msg_unregister_nodes_bs__get_msg_unregister_nodes_req_nb_nodes(
     *msg_unregister_nodes_bs__p_nb_nodes = request->NoOfNodesToUnregister;
 }
 
-void msg_unregister_nodes_bs__get_msg_unregister_nodes_node_id(
+void msg_unregister_nodes_bs__get_msg_unregister_nodes_req_node_id(
     const constants__t_msg_i msg_unregister_nodes_bs__p_req_msg,
     const t_entier4 msg_unregister_nodes_bs__p_index,
     constants__t_NodeId_i* const msg_unregister_nodes_bs__p_node_id)
