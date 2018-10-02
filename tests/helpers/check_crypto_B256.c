@@ -728,14 +728,11 @@ START_TEST(test_cert_thumbprint_B256)
     uint8_t thumb[20];
     char hexoutput[40];
 
-    // ck_assert(KeyManager_Certificate_CreateFromFile(keyman, (int8_t *)"./server_public/server_2k.der", &crt_pub) ==
-    // SOPC_STATUS_OK);
-
     // Compute thumbprint
     ck_assert(SOPC_KeyManager_Certificate_GetThumbprint(crypto, crt_pub, thumb, 20) == SOPC_STATUS_OK);
     ck_assert(hexlify(thumb, hexoutput, 20) == 20);
     // The expected thumbprint for this certificate was calculated with openssl tool, and mbedtls API.
-    ck_assert(memcmp(hexoutput, "17fa85b8db9c70592fe72deabd41b8491889036c", 40) == 0);
+    ck_assert(memcmp(hexoutput, SRV_CRT_THUMB, strlen(SRV_CRT_THUMB) / 2) == 0);
 }
 END_TEST
 
@@ -969,13 +966,13 @@ static SOPC_PKIProvider* pki = NULL;
 
 static inline void setup_pki_stack(void)
 {
-    uint8_t der_ca[1017];
+    uint8_t der_ca[939];
 
     setup_certificate();
 
     // Loads CA cert which signed server.der. This is trusted/cacert.der.
-    ck_assert(unhexlify(CA_CRT, der_ca, 1017) == 1017);
-    ck_assert(SOPC_KeyManager_SerializedCertificate_CreateFromDER(der_ca, 1017, &crt_ca) == SOPC_STATUS_OK);
+    ck_assert(unhexlify(CA_CRT, der_ca, 939) == 939);
+    ck_assert(SOPC_KeyManager_SerializedCertificate_CreateFromDER(der_ca, 939, &crt_ca) == SOPC_STATUS_OK);
 
     // Creates PKI with ca
     ck_assert(SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki) == SOPC_STATUS_OK);

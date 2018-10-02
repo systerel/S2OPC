@@ -22,10 +22,11 @@
 
 #include "sopc_key_manager.h"
 
-// server_2k.der
+// test_server.der
 const char* SRV_CRT;
+const char* SRV_CRT_THUMB;
 
-// cacert.der
+// test_ca.der
 const char* CA_CRT;
 
 SOPC_Certificate* SOPC_UnhexlifyCertificate(const char* hex_data);
