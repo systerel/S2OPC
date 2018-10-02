@@ -69,8 +69,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     /* If security policy is None, then security mode shall be None, and paths, except CAuth, shall be NULL */
     if (strncmp(szSecuPolicy, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0)
     {
-        if (OpcUa_MessageSecurityMode_None != msgSecurityMode || NULL != szPathCertClient || NULL != szPathCertClient ||
-            NULL != szPathCertServer)
+        if (OpcUa_MessageSecurityMode_None != msgSecurityMode || NULL != szPathCertClient || NULL != szPathCertServer)
         {
             Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR,
                         "Invalid parameters: security policy is None, but security mode is not None or path to "
@@ -81,8 +80,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     /* Else, the security mode shall not be None, and all paths shall be non NULL (except CRL) */
     else
     {
-        if (OpcUa_MessageSecurityMode_None == msgSecurityMode || NULL == szPathCertClient || NULL == szPathCertClient ||
-            NULL == szPathCertServer)
+        if (OpcUa_MessageSecurityMode_None == msgSecurityMode || NULL == szPathCertClient || NULL == szPathCertServer)
         {
             Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR,
                         "Invalid parameters: security policy is not None, but security mode is None or path to "
