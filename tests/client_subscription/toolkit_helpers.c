@@ -177,20 +177,34 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 
         if (NULL != pscConfig)
         {
-            /* TODO: copy strings elements */
             pscConfig->isClientSc = true;
-            pscConfig->url = szServerUrl;
+            pscConfig->applicationUri = NULL;
             pscConfig->crt_cli = pCrtCli;
             pscConfig->key_priv_cli = pKeyCli;
             pscConfig->crt_srv = pCrtSrv;
             pscConfig->pki = pPki;
             pscConfig->requestedLifetime = iScRequestedLifetime;
-            pscConfig->reqSecuPolicyUri = szSecuPolicy;
             pscConfig->msgSecurityMode = msgSecurityMode;
             pscConfig->applicationUri = NULL;
 
-            /* Handles the config to the caller */
-            *ppNewCfg = pscConfig;
+            /* These strings are verified non NULL */
+            pscConfig->url = malloc(strlen(szServerUrl) + 1);
+            pscConfig->reqSecuPolicyUri = malloc(strlen(szSecuPolicy) + 1);
+            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+            if (NULL != pscConfig->url && NULL != pscConfig->reqSecuPolicyUri)
+            {
+                strcpy((char*) pscConfig->url, szServerUrl);
+                strcpy((char*) pscConfig->reqSecuPolicyUri, szSecuPolicy);
+                /* Handles the config to the caller */
+                *ppNewCfg = pscConfig;
+            }
+            else
+            {
+                free((void*) pscConfig->url);
+                free((void*) pscConfig->reqSecuPolicyUri);
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            SOPC_GCC_DIAGNOSTIC_RESTORE
         }
         else
         {
@@ -225,7 +239,9 @@ void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
     SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) pscConfig->key_priv_cli);
     SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->crt_srv);
     SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&pscConfig->pki));
+    free((void*) pscConfig->url);
     free((char*) pscConfig->applicationUri);
+    free((void*) pscConfig->reqSecuPolicyUri);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     free(pscConfig);

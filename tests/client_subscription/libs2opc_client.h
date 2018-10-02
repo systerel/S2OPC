@@ -297,7 +297,7 @@ typedef struct
  @field username
    Zero-terminated username, NULL for anonymous access, see policyId
  @field password
-   Zero-terminated password, ignored when username is NULL
+   Zero-terminated password, ignored when username is NULL. Password is kept in memory for future reconnections.
  @field publish_period_ms
    The requested publish period for the created subscription (in milliseconds)
  @field n_max_keepalive

@@ -26,9 +26,11 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "sopc_array.h"
 #include "sopc_atomic.h"
+#include "sopc_macros.h"
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_config.h"
@@ -156,9 +158,22 @@ void SOPC_LibSub_Clear(void)
     while (NULL != pIter)
     {
         pCfg = (SOPC_LibSub_ConnectionCfg*) SOPC_SLinkedList_Next(&pIter);
-        /* TODO: Free content of the struct, make a static function that can also be used in
-         * SOPC_LibSub_ConfigureConnection */
-        free(pCfg);
+        if (NULL != pCfg)
+        {
+            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+            free((void*) pCfg->server_url);
+            free((void*) pCfg->security_policy);
+            free((void*) pCfg->path_cert_auth);
+            free((void*) pCfg->path_cert_srv);
+            free((void*) pCfg->path_cert_cli);
+            free((void*) pCfg->path_key_cli);
+            free((void*) pCfg->path_crl);
+            free((void*) pCfg->policyId);
+            free((void*) pCfg->username);
+            free((void*) pCfg->password);
+            SOPC_GCC_DIAGNOSTIC_RESTORE
+            free(pCfg);
+        }
     }
     SOPC_SLinkedList_Delete(pListConfig);
     pListConfig = NULL;
@@ -230,15 +245,127 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
     /* Copy the caller's ConnectionCfg to append it safely to the internal list */
     if (SOPC_STATUS_OK == status)
     {
-        pCfgCpy = malloc(sizeof(SOPC_LibSub_ConnectionCfg));
+        pCfgCpy = calloc(1, sizeof(SOPC_LibSub_ConnectionCfg));
         if (NULL == pCfgCpy)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
         {
-            /* TODO: Make a deep copy of the strings */
-            *pCfgCpy = *pCfg;
+            pCfgCpy->security_mode = pCfg->security_mode;
+            pCfgCpy->disable_certificate_verification = pCfg->disable_certificate_verification;
+            pCfgCpy->publish_period_ms = pCfg->publish_period_ms;
+            pCfgCpy->n_max_keepalive = pCfg->n_max_keepalive;
+            pCfgCpy->n_max_lifetime = pCfg->n_max_lifetime;
+            pCfgCpy->data_change_callback = pCfg->data_change_callback;
+            pCfgCpy->timeout_ms = pCfg->timeout_ms;
+            pCfgCpy->sc_lifetime = pCfg->sc_lifetime;
+            pCfgCpy->token_target = pCfg->token_target;
+            pCfgCpy->generic_response_callback = pCfg->generic_response_callback;
+
+            /* These 3 strings are verified non NULL */
+            pCfgCpy->server_url = malloc(strlen(pCfg->server_url) + 1);
+            pCfgCpy->security_policy = malloc(strlen(pCfg->security_policy) + 1);
+            pCfgCpy->policyId = malloc(strlen(pCfg->policyId) + 1);
+            if (NULL == pCfgCpy->server_url || NULL == pCfgCpy->security_policy || NULL == pCfgCpy->policyId)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+
+            if (NULL != pCfg->path_cert_auth)
+            {
+                pCfgCpy->path_cert_auth = malloc(strlen(pCfg->path_cert_auth) + 1);
+                if (NULL == pCfgCpy->path_cert_auth)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
+            if (NULL != pCfg->path_cert_srv)
+            {
+                pCfgCpy->path_cert_srv = malloc(strlen(pCfg->path_cert_srv) + 1);
+                if (NULL == pCfgCpy->path_cert_srv)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
+            if (NULL != pCfg->path_cert_cli)
+            {
+                pCfgCpy->path_cert_cli = malloc(strlen(pCfg->path_cert_cli) + 1);
+                if (NULL == pCfgCpy->path_cert_cli)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
+            if (NULL != pCfg->path_key_cli)
+            {
+                pCfgCpy->path_key_cli = malloc(strlen(pCfg->path_key_cli) + 1);
+                if (NULL == pCfgCpy->path_key_cli)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
+            if (NULL != pCfg->path_crl)
+            {
+                pCfgCpy->path_crl = malloc(strlen(pCfg->path_crl) + 1);
+                if (NULL == pCfgCpy->path_crl)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
+            if (NULL != pCfg->username)
+            {
+                pCfgCpy->username = malloc(strlen(pCfg->username) + 1);
+                if (NULL == pCfgCpy->username)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
+            if (NULL != pCfg->password)
+            {
+                pCfgCpy->password = malloc(strlen(pCfg->password) + 1);
+                if (NULL == pCfgCpy->password)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+                strcpy((char*) pCfgCpy->server_url, pCfg->server_url);
+                strcpy((char*) pCfgCpy->security_policy, pCfg->security_policy);
+                strcpy((char*) pCfgCpy->policyId, pCfg->policyId);
+
+                if (NULL != pCfgCpy->path_cert_auth)
+                {
+                    strcpy((char*) pCfgCpy->path_cert_auth, pCfg->path_cert_auth);
+                }
+                if (NULL != pCfgCpy->path_cert_srv)
+                {
+                    strcpy((char*) pCfgCpy->path_cert_srv, pCfg->path_cert_srv);
+                }
+                if (NULL != pCfgCpy->path_cert_cli)
+                {
+                    strcpy((char*) pCfgCpy->path_cert_cli, pCfg->path_cert_cli);
+                }
+                if (NULL != pCfgCpy->path_key_cli)
+                {
+                    strcpy((char*) pCfgCpy->path_key_cli, pCfg->path_key_cli);
+                }
+                if (NULL != pCfgCpy->path_crl)
+                {
+                    strcpy((char*) pCfgCpy->path_crl, pCfg->path_crl);
+                }
+                if (NULL != pCfgCpy->username)
+                {
+                    strcpy((char*) pCfgCpy->username, pCfg->username);
+                }
+                if (NULL != pCfgCpy->password)
+                {
+                    strcpy((char*) pCfgCpy->password, pCfg->password);
+                }
+                SOPC_GCC_DIAGNOSTIC_RESTORE
+            }
         }
     }
     /* Append it to the internal list */
@@ -257,7 +384,18 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
     }
     else if (NULL != pCfgCpy)
     {
-        /* TODO: Free strings */
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        free((void*) pCfgCpy->server_url);
+        free((void*) pCfgCpy->security_policy);
+        free((void*) pCfgCpy->path_cert_auth);
+        free((void*) pCfgCpy->path_cert_srv);
+        free((void*) pCfgCpy->path_cert_cli);
+        free((void*) pCfgCpy->path_key_cli);
+        free((void*) pCfgCpy->path_crl);
+        free((void*) pCfgCpy->policyId);
+        free((void*) pCfgCpy->username);
+        free((void*) pCfgCpy->password);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
         free(pCfgCpy);
     }
 

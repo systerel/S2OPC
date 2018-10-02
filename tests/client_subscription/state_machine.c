@@ -31,6 +31,7 @@
 
 #include "sopc_atomic.h"
 #include "sopc_encodeable.h"
+#include "sopc_macros.h"
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_async_api.h"
@@ -145,7 +146,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      SOPC_LibSub_EventCbk cbkGenericEvent,
                                      SOPC_StaMac_Machine** ppSM)
 {
-    SOPC_StaMac_Machine* pSM = malloc(sizeof(SOPC_StaMac_Machine));
+    SOPC_StaMac_Machine* pSM = calloc(1, sizeof(SOPC_StaMac_Machine));
 
     if (NULL == pSM)
     {
@@ -172,10 +173,47 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->cbkGenericEvent = cbkGenericEvent;
         pSM->bAckSubscr = false;
         pSM->iAckSeqNum = 0;
-        /* TODO: deep copy the strings */
-        pSM->szPolicyId = szPolicyId;
-        pSM->szUsername = szUsername;
-        pSM->szPassword = szPassword;
+        pSM->szPolicyId = NULL;
+        pSM->szUsername = NULL;
+        pSM->szPassword = NULL;
+        if (NULL != szPolicyId)
+        {
+            pSM->szPolicyId = malloc(strlen(szPolicyId) + 1);
+            if (NULL == pSM->szPolicyId)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        if (NULL != szUsername)
+        {
+            pSM->szUsername = malloc(strlen(szUsername) + 1);
+            if (NULL == pSM->szUsername)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        if (NULL != szPassword)
+        {
+            pSM->szPassword = malloc(strlen(szPassword) + 1);
+            if (NULL == pSM->szPassword)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        if (NULL != pSM->szPolicyId)
+        {
+            strcpy((char*) pSM->szPolicyId, szPolicyId);
+        }
+        if (NULL != pSM->szUsername)
+        {
+            strcpy((char*) pSM->szUsername, szUsername);
+        }
+        if (NULL != pSM->szPassword)
+        {
+            strcpy((char*) pSM->szPassword, szPassword);
+        }
+        SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 
     if (SOPC_STATUS_OK == status && (NULL == pSM->pListReqCtx || NULL == pSM->pListMonIt))
@@ -210,6 +248,11 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
         status = Mutex_Unlock(&pSM->mutex);
         assert(SOPC_STATUS_OK == status);
         Mutex_Clear(&pSM->mutex);
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        free((void*) pSM->szPolicyId);
+        free((void*) pSM->szUsername);
+        free((void*) pSM->szPassword);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
         free(pSM);
         *ppSM = NULL;
     }

@@ -45,6 +45,8 @@
 
 /**
  * \brief Creates a new Toolkit secure channel configuration from elements of the SOPC_LibSub_ConnectionCfg.
+ *
+ * Parameters are copied where needed, and can be freed after the call to this function.
  */
 SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                                                    const char* szSecuPolicy,
