@@ -547,6 +547,20 @@ bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM)
     return return_code;
 }
 
+void SOPC_StaMac_SetError(SOPC_StaMac_Machine* pSM)
+{
+    if (NULL == pSM)
+    {
+        return;
+    }
+
+    SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
+    pSM->state = stError;
+    status = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == status);
+}
+
 bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM)
 {
     if (NULL == pSM)

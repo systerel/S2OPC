@@ -51,6 +51,8 @@
  * =========
  */
 
+#define CONNECTION_TIMEOUT_MS_STEP 50
+
 /* Client structures */
 
 /* Global library variables */
@@ -495,16 +497,23 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
     assert(SOPC_STATUS_OK == mutStatus);
 
     /* Wait for the subscription to be created */
-    /* TODO: use Mutex and CV */
     if (SOPC_STATUS_OK == status)
     {
-        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM))
+        int count = 0;
+        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM) &&
+               count * CONNECTION_TIMEOUT_MS_STEP < pCfg->timeout_ms)
         {
-            SOPC_Sleep(1);
+            SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
+            ++count;
         }
         if (SOPC_StaMac_IsError(pSM))
         {
             status = SOPC_STATUS_NOK;
+        }
+        else if (count * CONNECTION_TIMEOUT_MS_STEP >= pCfg->timeout_ms)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+            SOPC_StaMac_SetError(pSM);
         }
     }
 

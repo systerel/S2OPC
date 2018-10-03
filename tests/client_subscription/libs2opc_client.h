@@ -410,7 +410,8 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void);
  @param pCliId [out, not null]
     The connection id of the newly created client, set when return is SOPC_STATUS_OK.
  @return
-    The operation status */
+    The operation status and SOPC_STATUS_TIMEOUT when connection hanged for more than
+    connection_cfg->timeout_ms milliseconds */
 SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, SOPC_LibSub_ConnectionId* pCliId);
 
 /*

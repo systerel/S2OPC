@@ -187,6 +187,11 @@ bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM);
 bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM);
 
 /**
+ * \brief Put the state machine in error state (without closing). This avoids additional notifications.
+ */
+void SOPC_StaMac_SetError(SOPC_StaMac_Machine* pSM);
+
+/**
  * \brief Returns a bool whether the machine has an active subscription or not.
  */
 bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM);
