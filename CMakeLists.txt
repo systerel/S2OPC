@@ -119,6 +119,7 @@ if (WITH_CLANG_SOURCE_COVERAGE)
 endif()
 
 option(ENABLE_TESTING "Build the S2OPC tests" ON)
+option(FORCE_CHECK_STATIC_LIB "Force the use of static check lib" ON)
 
 option(WARNINGS_AS_ERRORS "Treat warnings as errors when building" ON)
 
@@ -207,7 +208,11 @@ find_package(MbedTLS REQUIRED)
 
 # We always link check statically, so that our test binaries are standalone
 if(ENABLE_TESTING)
-	set(CHECK_USE_STATIC_LIBS 1)
+	if(FORCE_CHECK_STATIC_LIB)
+		set(CHECK_USE_STATIC_LIBS 1)
+	else()
+		set(CHECK_USE_STATIC_LIBS 0)
+	endif()
 	find_package(Check REQUIRED)
 endif()
 
