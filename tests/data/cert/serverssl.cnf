@@ -3,33 +3,21 @@ RANDFILE        = $ENV::HOME/.rnd
 
 ####################################################################
 [ req ]
-default_bits        = 4096
-default_keyfile     = server_4k_key.pem
 distinguished_name  = server_distinguished_name
 req_extensions      = server_extensions
 string_mask         = utf8only
 
 ####################################################################
 [ server_distinguished_name ]
-countryName         = Country Name (2 letter code)
-countryName_default     = FR
-
-stateOrProvinceName     = State or Province Name (full name)
-stateOrProvinceName_default = IDF
-
-localityName            = Locality Name (eg, city)
-localityName_default        = PARIS
-
+countryName                 = Country Name (2 letter code)
+countryName_default         = FR
+stateOrProvinceName         = State or Province Name (full name)
+stateOrProvinceName_default = France
 organizationName            = Organization Name (eg, company)
-organizationName_default    = S2OPC
-
-organizationalUnitName  = Organizational Unit (eg, division)
-organizationalUnitName_default  = S2OPC
-
-commonName          = Common Name (e.g. server FQDN or YOUR name)
-commonName_default      = S2OPC Test Server
-
-emailAddress            = Email Address
+organizationName_default    = Systerel
+commonName                  = Common Name (e.g. server FQDN or YOUR name)
+commonName_default          = S2OPC Century Certificate for Test Servers
+emailAddress                = Email Address
 emailAddress_default        = s2opc-support@systerel.fr
 
 ####################################################################
@@ -38,10 +26,8 @@ subjectKeyIdentifier = hash
 basicConstraints     = CA:FALSE
 keyUsage             = digitalSignature, keyEncipherment
 subjectAltName       = @alternate_names
-nsComment            = "OpenSSL Generated Certificate"
 
 ####################################################################
-
 [ alternate_names ]
-URI = urn:S2OPC:localhost #ApplicationUri
-DNS.1 = localhost
+URI     = urn:S2OPC:localhost  # ApplicationUri
+DNS.1   = localhost

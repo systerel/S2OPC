@@ -966,13 +966,14 @@ static SOPC_PKIProvider* pki = NULL;
 
 static inline void setup_pki_stack(void)
 {
-    uint8_t der_ca[939];
+    uint8_t der_ca[CA_CRT_LEN];
 
     setup_certificate();
 
     // Loads CA cert which signed server.der. This is trusted/cacert.der.
-    ck_assert(unhexlify(CA_CRT, der_ca, 939) == 939);
-    ck_assert(SOPC_KeyManager_SerializedCertificate_CreateFromDER(der_ca, 939, &crt_ca) == SOPC_STATUS_OK);
+    ck_assert(unhexlify(CA_CRT, der_ca, CA_CRT_LEN) == (int) (CA_CRT_LEN));
+    ck_assert(SOPC_KeyManager_SerializedCertificate_CreateFromDER(der_ca, (uint32_t)(CA_CRT_LEN), &crt_ca) ==
+              SOPC_STATUS_OK);
 
     // Creates PKI with ca
     ck_assert(SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki) == SOPC_STATUS_OK);

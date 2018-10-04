@@ -20,14 +20,17 @@
 #ifndef SOPC_CHECK_CRYPTO_CERTIFICATES_H_
 #define SOPC_CHECK_CRYPTO_CERTIFICATES_H_
 
+#include <stddef.h>
+
 #include "sopc_key_manager.h"
 
-// test_server.der
+// server_2k_cert.der
 const char* SRV_CRT;
 const char* SRV_CRT_THUMB;
 
-// test_ca.der
+// cacert.der
 const char* CA_CRT;
+const size_t CA_CRT_LEN;
 
 SOPC_Certificate* SOPC_UnhexlifyCertificate(const char* hex_data);
 
