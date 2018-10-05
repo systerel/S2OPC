@@ -44,10 +44,12 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    local_client_close_session (session) =
+    local_client_close_session (session, sc_reason) =
     PRE
         session : t_session_i &
-        session : s_session
+        session : s_session &
+        sc_reason : t_StatusCode_i &
+        sc_reason : t_StatusCode
     THEN
         a_cli_pending_requests,
         a_state,
@@ -71,11 +73,13 @@ LOCAL_OPERATIONS
         )
     END;
 
-    local_client_close_session_if_needed (cond, session) =
+    local_client_close_session_if_needed (cond, session, sc_reason) =
     PRE
         cond    : BOOL &
         session : t_session_i &
-        session : s_session
+        session : s_session &
+        sc_reason : t_StatusCode_i &
+        (cond = TRUE => sc_reason : t_StatusCode)
     THEN
         a_cli_pending_requests,
         a_state,
@@ -150,15 +154,15 @@ LOCAL_OPERATIONS
 
 OPERATIONS
 
-    local_client_close_session (session) =
+    local_client_close_session (session, sc_reason) =
     BEGIN
         client_remove_all_request_handles (session);
-        client_close_session_sm (session)
+        client_close_session_sm (session, sc_reason)
     END;
 
-    local_client_close_session_if_needed (cond, session) =
+    local_client_close_session_if_needed (cond, session, sc_reason) =
     IF cond = FALSE THEN
-        local_client_close_session (session)
+        local_client_close_session (session, sc_reason)
     END
     ;
 
@@ -214,13 +218,13 @@ OPERATIONS
                 IF  l_dom = TRUE &
                     l_channel_config_idx = channel_config_idx
                 THEN
-                    local_client_close_session(l_session)
+                    local_client_close_session(l_session, e_sc_bad_secure_channel_closed)
                 END;
                 l_dom, l_channel_config_idx <-- getall_to_create(l_session);
                 IF  l_dom = TRUE &
                     l_channel_config_idx = channel_config_idx
                 THEN
-                    local_client_close_session(l_session)
+                    local_client_close_session(l_session, e_sc_bad_secure_channel_closed)
                 END
             INVARIANT
                 sessions_to_iterate <: t_session &
@@ -255,6 +259,7 @@ OPERATIONS
         l_session_channel,
         l_resp_status,
         l_session_user_token,
+        l_status_reason,
         l_bret
     IN
         l_bret := FALSE;
@@ -271,26 +276,27 @@ OPERATIONS
                         IF l_session_channel = channel THEN
                             l_session_token <-- read_create_session_msg_session_token (resp_msg);
                             l_bret <-- client_create_session_resp_sm (channel, session, l_session_token, resp_msg);
+                            // If we fail it shall be for security reason
+                            l_status_reason := e_sc_bad_security_checks_failed;
                             /* TODO: react if error: must drop the nonce, but do we close the connexion? */
                             // If session is created, trigger event for activation of session with async data
                             l_session_state <-- get_session_state_or_closed (session);
                             IF l_session_state = e_session_created
                             THEN
                                 l_session_user_token <-- get_session_user_client (session);
-                                IF l_session_user_token /= c_user_token_indet
-                                THEN
-                                    client_gen_activate_user_session_internal_event (session, l_session_user_token)
-                                END
+                                client_gen_activate_user_session_internal_event (session, l_session_user_token)
                             ELSE
                                 /* The session may be not e_session_created when Nonce generation failed */
                                 l_bret := FALSE
                             END
                         ELSE
                             /* Bad secure channel */
+                            l_status_reason := e_sc_bad_secure_channel_id_invalid;
                             skip
                         END
                     ELSE
                         /* Session invalid state */
+                        l_status_reason := e_sc_bad_invalid_state;
                         skip
                     END
                 OR e_msg_session_activate_resp THEN
@@ -299,13 +305,17 @@ OPERATIONS
                     THEN
                         l_session_channel <-- get_session_channel (session);
                         IF l_session_channel = channel THEN
-                            l_bret <-- client_activate_session_resp_sm (channel, session, resp_msg)
+                            l_bret <-- client_activate_session_resp_sm (channel, session, resp_msg);
+                            // If we fail it shall be for security reason
+                            l_status_reason := e_sc_bad_security_checks_failed
                         ELSE
                             /* Bad secure channel */
+                            l_status_reason := e_sc_bad_secure_channel_id_invalid;
                             skip
                         END
                     ELSE
                         /* Session invalid state */
+                        l_status_reason := e_sc_bad_invalid_state;
                         skip
                     END
                 OR e_msg_session_close_resp THEN
@@ -315,28 +325,34 @@ OPERATIONS
                         IF l_session_channel = channel THEN
                             client_remove_all_request_handles (session);
                             client_close_session_resp_sm (channel, session, resp_msg);
-                            l_bret := TRUE
+                            l_bret := TRUE;
+                            l_status_reason := e_sc_ok
                         ELSE
                             /* Bad secure channel */
+                            l_status_reason := e_sc_bad_secure_channel_id_invalid;
                             skip
                         END
                     ELSE
                         /* Session invalid state */
+                        l_status_reason := e_sc_bad_invalid_state;
                         skip
                     END
                 OR e_msg_session_cancel_resp THEN
                     /* Service not supported */
+                    l_status_reason := e_sc_bad_service_unsupported;
                     skip
                 ELSE
                     /* Service unknown */
+                    l_status_reason := e_sc_bad_service_unsupported;
                     skip
                 END
             END;
-            local_client_close_session_if_needed (l_bret, session)
+            /* TODO: retrieve a more precise reason */
+            local_client_close_session_if_needed (l_bret, session, l_status_reason)
         ELSIF l_session_state /= e_session_closed
         THEN
             /* Bad service code returned, close the session */
-            local_client_close_session (session)
+            local_client_close_session (session, l_resp_status)
         ELSE
             // Session is closed
             skip
@@ -397,13 +413,13 @@ OPERATIONS
                         IF service_ret /= e_sc_ok
                         THEN
                             // Invalid user or parameters in received request: choice is to close the session in this case (not specified)
-                            server_close_session_sm (session)
+                            server_close_session_sm (session, service_ret)
                         ELSE
                             server_session_timeout_msg_received (session)
                         END
                     ELSE
                         // if session is not in a correct state to be activated => close session
-                        server_close_session_sm (session);
+                        server_close_session_sm (session, e_sc_bad_invalid_state);
                         service_ret := e_sc_bad_invalid_state
                     END
                 ELSE
@@ -429,13 +445,13 @@ OPERATIONS
                             service_ret <-- server_close_session_req_and_resp_sm (channel, session, req_msg, resp_msg)
                         ELSE
                             // Close anyway since incorrect channel usage is unexpected
-                            server_close_session_sm (session);
+                            server_close_session_sm (session, e_sc_bad_secure_channel_id_invalid);
                             // Use closest error code corresponding for response
                             service_ret := e_sc_bad_secure_channel_id_invalid
                         END
                     ELSE
                         // Close session and return error
-                        server_close_session_sm (session);
+                        server_close_session_sm (session, e_sc_bad_invalid_state);
                         service_ret := e_sc_bad_invalid_state
                     END
                 ELSE
@@ -494,7 +510,12 @@ OPERATIONS
             IF bres = FALSE
             THEN
                 // session in invalid state or invalid channel used => close session
-                local_client_close_session (l_session)
+                IF l_session_state /= e_session_userActivated
+                THEN
+                    local_client_close_session (l_session, e_sc_bad_invalid_state)
+                ELSE
+                    local_client_close_session (l_session, e_sc_bad_secure_channel_id_invalid)
+                END
             ELSE
                 session := l_session
             END
@@ -530,8 +551,6 @@ OPERATIONS
                 END
             ELSE
                 // Unexpected access to session (wrong state or channel): close it
-                server_close_session_sm (l_session);
-                is_valid_res := FALSE;
                 IF l_session_channel /= channel THEN
                     status_code_err := e_sc_bad_secure_channel_id_invalid
                 ELSE
@@ -540,7 +559,9 @@ OPERATIONS
                     ELSE
                         status_code_err := e_sc_bad_invalid_state
                     END
-                END
+                END;
+                is_valid_res := FALSE;
+                server_close_session_sm (l_session, status_code_err)
             END
         ELSE
             is_valid_res := FALSE;
@@ -746,7 +767,7 @@ OPERATIONS
                 IF l_ret /= e_sc_ok
                 THEN
                     /* Unexpected case: associated channel shall be connected for those session states */
-                    local_client_close_session (session);
+                    local_client_close_session (session, l_ret);
                     l_ret := e_sc_bad_unexpected_error
                 END;
                 IF l_ret = e_sc_ok
@@ -755,7 +776,7 @@ OPERATIONS
                 END
             ELSE
                 l_ret := e_sc_bad_invalid_state;
-                local_client_close_session (session);
+                local_client_close_session (session, l_ret);
                 channel := c_channel_indet;
                 session_token := c_session_token_indet
             END
@@ -775,9 +796,9 @@ OPERATIONS
     END
     ;
 
-    client_close_session (session) =
+    client_close_session (session, sc_reason) =
     BEGIN
-        local_client_close_session (session)
+        local_client_close_session (session, sc_reason)
     END
     ;
 
@@ -788,7 +809,7 @@ OPERATIONS
         l_session_expired <-- server_session_timeout_evaluation (session);
         IF l_session_expired = TRUE
         THEN
-            server_close_session_sm (session)
+            server_close_session_sm (session, e_sc_bad_timeout)
         END
     END
 

@@ -324,9 +324,11 @@ OPERATIONS
     END
     ;
 
-    client_close_session (session) =
+    client_close_session (session, sc_reason) =
     PRE
-        session : t_session_i
+        session : t_session_i &
+        sc_reason : t_StatusCode_i &
+        sc_reason : t_StatusCode
     THEN
         skip
     END
@@ -369,9 +371,11 @@ OPERATIONS
     END
     ;
 
-    server_close_session_sm (session) =
+    server_close_session_sm (session, sc_reason) =
     PRE
-        session : t_session_i
+        session : t_session_i &
+        sc_reason : t_StatusCode_i &
+        sc_reason : t_StatusCode
     THEN
         skip
     END

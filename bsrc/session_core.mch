@@ -517,20 +517,24 @@ OPERATIONS
     ;
 
 
-    client_close_session_sm (session) =
+    client_close_session_sm (session, sc_reason) =
     PRE
         session : t_session_i &
-        session : s_session
+        session : s_session &
+        sc_reason : t_StatusCode_i &
+        sc_reason : t_StatusCode
     THEN
         // In any case session is closed, invalid cases or valid cases have same result
         d_close_session(session)
     END
     ;
 
-    server_close_session_sm (session) =
+    server_close_session_sm (session, sc_reason) =
     PRE
         session : t_session_i &
-        session : s_session
+        session : s_session &
+        sc_reason : t_StatusCode_i &
+        sc_reason : t_StatusCode
     THEN
         // In any case session is closed, invalid cases or valid cases have same result
         // In any case session is closed, but behavior different:

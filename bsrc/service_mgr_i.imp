@@ -680,7 +680,7 @@ OPERATIONS
                     IF l_valid_buffer = FALSE
                     THEN
                         /* invalid encoding => close session */
-                        server_close_session_sm (l_session)
+                        server_close_session_sm (l_session, e_sc_bad_encoding_error)
                     END;
 
                     /* response message structures not necessary anymore */
@@ -1124,14 +1124,14 @@ OPERATIONS
                     THEN
                         /* Close session if impossible to create session */
                         client_remove_req_handle (l_req_handle);
-                        client_close_session (session)
+                        client_close_session (session, e_sc_bad_encoding_error)
                     END
                 ELSE
                     client_remove_req_handle (l_req_handle);
-                    client_close_session (session)
+                    client_close_session (session, e_sc_bad_internal_error)
                 END
             ELSE
-                client_close_session (session)
+                client_close_session (session, e_sc_bad_out_of_memory)
             END;
             dealloc_msg_header_out (l_msg_header);
             dealloc_msg_out (l_req_msg)
@@ -1181,14 +1181,14 @@ OPERATIONS
                     THEN
                         /* If reactivation encoding failed, close the session */
                         client_remove_req_handle (l_req_handle);
-                        client_close_session (session)
+                        client_close_session (session, e_sc_bad_encoding_error)
                     END
                 END
             END;
             dealloc_msg_header_out (l_msg_header);
             dealloc_msg_out (l_req_msg)
         ELSE
-            client_close_session (session)
+            client_close_session (session, e_sc_bad_out_of_memory)
         END;
         buffer_out := l_buffer;
         req_handle := l_req_handle
@@ -1238,19 +1238,19 @@ OPERATIONS
                         client_remove_req_handle (l_req_handle);
                         l_ret := e_sc_bad_encoding_error;
                         l_channel := c_channel_indet;
-                        client_close_session (session)
+                        client_close_session (session, e_sc_bad_encoding_error)
                     END
                 ELSE
-                    client_close_session (session)
+                    client_close_session (session, e_sc_bad_internal_error)
                 END
             ELSE
-                client_close_session (session);
+                client_close_session (session, e_sc_bad_out_of_memory);
                 l_ret := e_sc_bad_out_of_memory
             END;
             dealloc_msg_header_out (l_msg_header);
             dealloc_msg_out (l_req_msg)
         ELSE
-            client_close_session (session);
+            client_close_session (session, e_sc_bad_out_of_memory);
             l_ret := e_sc_bad_out_of_memory
         END;
         ret := l_ret;
@@ -1303,7 +1303,7 @@ OPERATIONS
                         l_channel := c_channel_indet;
                         ret := e_sc_bad_encoding_error;
                         client_remove_req_handle (l_req_handle);
-                        client_close_session (session)
+                        client_close_session (session, e_sc_bad_encoding_error)
                     END
                 END
             ELSE
@@ -1488,7 +1488,7 @@ OPERATIONS
                     IF l_bres = TRUE
                     THEN
                         /* Close session since state is now invalid (req message not sent) */
-                        client_close_session (l_session)
+                        client_close_session (l_session, e_sc_bad_request_interrupted)
                     END
                 ELSE
                     /*It means it's application request and we have an app context that can be used*/

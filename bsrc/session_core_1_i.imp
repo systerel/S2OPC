@@ -104,7 +104,7 @@ OPERATIONS
     IN
         l_prec_state <-- get_session_state(p_session);
         set_session_state_1(p_session, p_state);
-        notify_set_session_state(p_session, l_prec_state, p_state, is_client)
+        notify_set_session_state(p_session, l_prec_state, p_state, c_StatusCode_indet, is_client)
     END
     ;
 
@@ -146,7 +146,7 @@ OPERATIONS
             p_session := c_session_indet
         ELSE
             add_session(p_session, e_session_init);
-            notify_set_session_state(p_session, e_session_closed, e_session_init, is_client)
+            notify_set_session_state(p_session, e_session_closed, e_session_init, c_StatusCode_indet, is_client)
         END
     END
     ;
@@ -164,7 +164,7 @@ OPERATIONS
     END
     ;
 
-    set_session_state_closed (session, is_client) =
+    set_session_state_closed (session, sc_reason, is_client) =
     VAR
         l_prec_state,
         l_user
@@ -172,7 +172,7 @@ OPERATIONS
         /* First notify of state change to have access to data before removing all session data */
         l_prec_state <-- get_session_state(session);
         l_user <-- get_session_user_server(session);
-        notify_set_session_state(session, l_prec_state, e_session_closed, is_client);
+        notify_set_session_state(session, l_prec_state, e_session_closed, sc_reason, is_client);
 
         reset_session_channel(session);
         // a_channel

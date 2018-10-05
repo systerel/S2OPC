@@ -78,6 +78,7 @@ typedef enum SOPC_App_Com_Event
 {
     /* Client application events */
     SE_SESSION_ACTIVATION_FAILURE, /* id = internal session id (or 0 if not yet defined)
+                                      params = (SOPC_StatusCode)(uintptr_t) status code reason
                                       auxParam = user application session context
                                    */
     SE_ACTIVATED_SESSION,          /* id = internal session id
@@ -93,6 +94,7 @@ typedef enum SOPC_App_Com_Event
                                       auxParam = user application request context
                                    */
     SE_CLOSED_SESSION,             /* id = internal session id
+                                      params = (SOPC_StatusCode)(uintptr_t) status code reason
                                       auxParam = user application session context
                                     */
     SE_RCV_DISCOVERY_RESPONSE, /* params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload structure

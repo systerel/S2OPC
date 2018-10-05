@@ -651,7 +651,7 @@ OPERATIONS
         IF l_connected_channel = FALSE
         THEN
             /* In case internal event to create session cannot be done => close session */
-            client_close_session (session)
+            client_close_session (session, e_sc_bad_secure_channel_closed)
         ELSE
             l_buffer_out, l_req_handle <-- client_service_create_session (session, l_channel);
             /* Send the response message on secure channel if available */

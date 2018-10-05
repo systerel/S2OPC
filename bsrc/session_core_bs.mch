@@ -142,12 +142,14 @@ OPERATIONS
     END
     ;
 
-    notify_set_session_state (session, prec_state, state, is_client) =
+    notify_set_session_state (session, prec_state, state, sc_reason, is_client) =
     PRE
         session    : t_session_i    &
         session    : t_session      &
         prec_state : t_sessionState &
         state      : t_sessionState &
+        sc_reason : t_StatusCode_i  &
+        (state = e_session_closed => sc_reason : t_StatusCode) &
         is_client : BOOL
     THEN
         /* Generates events on session state change (application, internal events) */

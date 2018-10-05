@@ -49,8 +49,8 @@
 #include "session_core_bs.h"
 
 #include "channel_mgr_bs.h"
-
 #include "session_core_1.h"
+#include "util_b2c.h"
 
 #define LENGTH_NONCE 32
 
@@ -107,6 +107,7 @@ void session_core_bs__INITIALISATION(void)
 void session_core_bs__notify_set_session_state(const constants__t_session_i session_core_bs__session,
                                                const constants__t_sessionState session_core_bs__prec_state,
                                                const constants__t_sessionState session_core_bs__state,
+                                               const constants__t_StatusCode_i session_core_bs__sc_reason,
                                                const t_bool session_core_bs__is_client)
 {
     if (session_core_bs__is_client)
@@ -132,20 +133,22 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
         }
         else if (session_core_bs__state == constants__e_session_closed)
         {
+            SOPC_StatusCode scReason;
+            util_status_code__B_to_C(session_core_bs__sc_reason, &scReason);
             if (session_core_bs__prec_state != constants__e_session_closing &&
                 session_core_bs__prec_state != constants__e_session_userActivated)
             {
                 // If session not in closing state or already activated, it is in activation state regarding user app
                 // => notify activation failed
                 SOPC_App_EnqueueComEvent(
-                    SE_SESSION_ACTIVATION_FAILURE, session_core_bs__session, NULL,
+                    SE_SESSION_ACTIVATION_FAILURE, session_core_bs__session, (void*) (uintptr_t) scReason,
                     session_client_app_context[session_core_bs__session]); // user application session context
             }
             else
             {
                 // Activated session closing
                 SOPC_App_EnqueueComEvent(
-                    SE_CLOSED_SESSION, session_core_bs__session, NULL,
+                    SE_CLOSED_SESSION, session_core_bs__session, (void*) (uintptr_t) scReason,
                     session_client_app_context[session_core_bs__session]); // user application session context
             }
         }
@@ -158,6 +161,14 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
         {
             SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO,
                                          (uint32_t) session_core_bs__session, NULL, (uintptr_t) session_core_bs__state);
+        }
+
+        if (session_core_bs__state == constants__e_session_closed && constants__e_sc_ok != session_core_bs__sc_reason)
+        {
+            SOPC_StatusCode scReason;
+            util_status_code__B_to_C(session_core_bs__sc_reason, &scReason);
+            SOPC_Logger_TraceInfo("Services: session=%" PRId32 " closed with bad status code '%X'",
+                                  session_core_bs__session, scReason);
         }
     }
 }

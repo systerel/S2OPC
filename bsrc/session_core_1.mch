@@ -217,10 +217,12 @@ OPERATIONS
     END
     ;
 
-    set_session_state_closed (session, is_client) =
+    set_session_state_closed (session, sc_reason, is_client) =
     PRE
         session   : t_session_i  &
         session   : dom(a_state) &
+        sc_reason : t_StatusCode_i &
+        sc_reason : t_StatusCode &
         is_client : BOOL
     THEN
         s_session                    := s_session - {session}                      ||

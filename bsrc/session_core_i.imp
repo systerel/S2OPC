@@ -398,7 +398,7 @@ OPERATIONS
                 END
             ELSE
                 service_ret := e_sc_bad_out_of_memory;
-                set_session_state_closed (l_nsession, FALSE);
+                set_session_state_closed (l_nsession, e_sc_bad_session_id_invalid, FALSE);
                 l_nsession := c_session_indet
             END
         ELSE
@@ -632,7 +632,7 @@ OPERATIONS
                 set_session_state (p_session, e_session_scOrphaned, TRUE)
             ELSE
                 /* Inactive sessions or all orphaned sessions (if no new channel can be associated) */
-                set_session_state_closed (p_session, TRUE)
+                set_session_state_closed (p_session, e_sc_bad_secure_channel_closed , TRUE)
             END
         END
     END
@@ -691,7 +691,7 @@ OPERATIONS
                 set_session_orphaned (p_session, c_channel_config_idx_indet);
                 set_session_state (p_session, e_session_scOrphaned, FALSE)
             ELSE
-                set_session_state_closed (p_session, FALSE)
+                set_session_state_closed (p_session, e_sc_bad_secure_channel_closed , FALSE)
             END
         END
     END
@@ -768,7 +768,7 @@ OPERATIONS
         /* TODO: actions on pending requests or current subscriptions to manage (see request) */
         server_close_session_check_req (close_req_msg, close_resp_msg);
         /* No need to store the handle since we will send response in same step */
-        set_session_state_closed (session, FALSE);
+        set_session_state_closed (session, e_sc_ok , FALSE);
         ret := e_sc_ok
     END
     ;
@@ -779,19 +779,19 @@ OPERATIONS
         channel_do_nothing (channel); /* Avoid unused variable */
         client_close_session_resp_msg(close_resp_msg); /* Avoid unused variable*/
         /* In any case we close the session: correct channel or not  */
-        set_session_state_closed (session, TRUE)
+        set_session_state_closed (session, e_sc_ok, TRUE)
     END
     ;
 
-    client_close_session_sm (session) =
+    client_close_session_sm (session, sc_reason) =
     BEGIN
-        set_session_state_closed (session, TRUE)
+        set_session_state_closed (session, sc_reason, TRUE)
     END
     ;
 
-    server_close_session_sm (session) =
+    server_close_session_sm (session, sc_reason) =
     BEGIN
-        set_session_state_closed (session, FALSE)
+        set_session_state_closed (session, sc_reason, FALSE)
     END
     ;
 

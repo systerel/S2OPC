@@ -88,7 +88,9 @@ SETS
                       e_sc_bad_index_range_invalid,
                       e_sc_bad_index_range_no_data,
                       e_sc_bad_user_access_denied,
-                      e_sc_bad_certificate_uri_invalid};
+                      e_sc_bad_certificate_uri_invalid,
+                      e_sc_bad_security_checks_failed,
+                      e_sc_bad_request_interrupted};
 
     t_BrowseDirection_i = {e_bd_indet,
                            e_bd_forward,
