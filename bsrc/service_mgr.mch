@@ -58,6 +58,26 @@ INITIALISATION
 
 OPERATIONS
 
+    valid, resp_typ <-- client_service_fault_to_resp_type (msg_buffer) =
+    PRE
+        a_msg_in_type = e_msg_service_fault_resp &
+        msg_buffer : t_byte_buffer_i &
+        msg_buffer : t_byte_buffer &
+        a_buffer_in_state = e_buffer_in_msg_type_read
+    THEN
+        CHOICE
+            valid := TRUE ||
+            resp_typ
+            :(resp_typ : t_msg_type_i &
+              resp_typ : s_service_resps - {e_msg_service_fault_resp}) ||
+            a_msg_in_type := resp_typ
+        OR
+            valid := FALSE ||
+            resp_typ := c_msg_type_indet
+        END
+    END
+    ;
+
     buffer_out <-- server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
@@ -94,7 +114,7 @@ OPERATIONS
         channel : s_channel_connected &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
-        a_msg_in_type : s_session_treatment_resps &
+        a_msg_in_type : s_session_treatment_resps \/ {e_msg_service_fault_resp} &
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer  &
         a_buffer_in_state = e_buffer_in_msg_type_read &
@@ -148,7 +168,7 @@ OPERATIONS
         channel : s_channel_connected &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
-        a_msg_in_type : s_service_on_session_resps &
+        a_msg_in_type : s_service_on_session_resps \/ {e_msg_service_fault_resp} &
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer  &
         a_buffer_in_state = e_buffer_in_msg_type_read &
@@ -200,7 +220,7 @@ OPERATIONS
         channel  : t_channel &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
-        a_msg_in_type : s_discovery_service_resps &
+        a_msg_in_type : s_discovery_service_resps \/ {e_msg_service_fault_resp} &
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer  &
         a_buffer_in_state = e_buffer_in_msg_type_read &

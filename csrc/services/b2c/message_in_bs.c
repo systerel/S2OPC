@@ -135,6 +135,25 @@ void message_in_bs__decode_msg_header(const t_bool message_in_bs__is_request,
     }
 }
 
+void message_in_bs__decode_service_fault_msg_req_handle(
+    const constants__t_byte_buffer_i message_in_bs__msg_buffer,
+    constants__t_client_request_handle_i* const message_in_bs__handle)
+{
+    *message_in_bs__handle = constants__c_client_request_handle_indet;
+    constants__t_msg_header_i message_in_bs__msg_header;
+    // Backup buffer position
+    uint32_t positionBackup = message_in_bs__msg_buffer->position;
+    message_in_bs__decode_msg_header(false, message_in_bs__msg_buffer, &message_in_bs__msg_header);
+    if (constants__c_msg_header_indet != message_in_bs__msg_header)
+    {
+        message_in_bs__client_read_msg_header_req_handle(message_in_bs__msg_header, message_in_bs__handle);
+        message_in_bs__dealloc_msg_in_header(message_in_bs__msg_header);
+        // Restore initial position
+        SOPC_ReturnStatus retStatus = SOPC_Buffer_SetPosition(message_in_bs__msg_buffer, positionBackup);
+        assert(SOPC_STATUS_OK == retStatus);
+    }
+}
+
 void message_in_bs__decode_msg(const constants__t_msg_type_i message_in_bs__msg_type,
                                const constants__t_byte_buffer_i message_in_bs__msg_buffer,
                                constants__t_msg_i* const message_in_bs__msg)

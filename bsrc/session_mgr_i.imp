@@ -333,8 +333,12 @@ OPERATIONS
                 END
             END;
             local_client_close_session_if_needed (l_bret, session)
+        ELSIF l_session_state /= e_session_closed
+        THEN
+            /* Bad service code returned, close the session */
+            local_client_close_session (session)
         ELSE
-            // Response error => session will be closed
+            // Session is closed
             skip
         END
     END

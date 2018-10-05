@@ -615,6 +615,21 @@ OPERATIONS
 
     /* END OF LOCAL OPERATIONS */
 
+    valid, resp_typ <-- client_service_fault_to_resp_type (msg_buffer) =
+    VAR
+        l_request_handle
+    IN
+        l_request_handle <-- decode_service_fault_msg_req_handle (msg_buffer);
+        valid <-- is_valid_req_handle (l_request_handle);
+        IF valid = TRUE
+        THEN
+            resp_typ <-- get_req_handle_resp_typ (l_request_handle)
+        ELSE
+            resp_typ := c_msg_type_indet
+        END
+    END
+    ;
+
     buffer_out <-- server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
     VAR
         l_req_msg_header,

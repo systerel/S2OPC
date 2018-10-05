@@ -62,8 +62,9 @@ void request_handle_bs__client_validate_response_request_handle(
     t_bool* const request_handle_bs__ret)
 {
     if (request_handle_bs__resp_typ != constants__c_msg_type_indet &&
-        client_requests_context[request_handle_bs__req_handle].response == request_handle_bs__resp_typ &&
-        client_requests_channel[request_handle_bs__req_handle] == request_handle_bs__channel)
+        client_requests_channel[request_handle_bs__req_handle] == request_handle_bs__channel &&
+        (client_requests_context[request_handle_bs__req_handle].response == request_handle_bs__resp_typ ||
+         constants__e_msg_service_fault_resp == request_handle_bs__resp_typ))
     {
         *request_handle_bs__ret = true;
     }

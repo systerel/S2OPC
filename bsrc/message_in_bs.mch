@@ -66,6 +66,26 @@ OPERATIONS
     END
     ;
 
+    req_handle <-- decode_service_fault_msg_req_handle (msg_buffer) =
+    PRE
+        msg_buffer : t_byte_buffer_i &
+        msg_buffer : t_byte_buffer &
+        a_buffer_in_state = e_buffer_in_msg_type_read &
+        c_msg_in_header = c_msg_header_indet &
+        c_msg_in = c_msg_indet &
+        a_msg_in_type = e_msg_service_fault_resp
+    THEN
+        CHOICE
+            // Keep same buffer state at the end
+            req_handle :: t_client_request_handle_i
+        OR
+            // Buffer not valid anymore
+            a_buffer_in_state := c_buffer_in_state_indet ||
+            req_handle := c_client_request_handle_indet
+        END
+    END
+    ;
+
     msg_header <-- decode_msg_header (is_request, msg_buffer) =
     PRE
         is_request : BOOL &
