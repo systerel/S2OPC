@@ -403,33 +403,27 @@ SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId** lpNid,
 
 SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSub_Value** pplsVal)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_LibSub_Value* plsVal = NULL;
 
     if (NULL == pVal)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (SOPC_STATUS_OK == status)
+    plsVal = calloc(1, sizeof(SOPC_LibSub_Value));
+    if (NULL == plsVal)
     {
-        plsVal = calloc(1, sizeof(SOPC_LibSub_Value));
-        if (NULL == plsVal)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     /* Create the value, according to the type of the DataValue, only for non arrays and non matrix */
-    if(NULL != plsVal)
-    {
-        plsVal->value = NULL;
-    }
+    plsVal->value = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (SOPC_VariantArrayType_SingleValue != pVal->Value.ArrayType)
     {
         plsVal->type = SOPC_LibSub_DataType_other;
     }
-    else if (SOPC_STATUS_OK == status)
+    else
     {
         switch (pVal->Value.BuiltInTypeId)
         {
