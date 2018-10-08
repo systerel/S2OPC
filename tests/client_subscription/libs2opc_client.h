@@ -126,7 +126,8 @@ typedef enum
     SOPC_LibSub_DataType_bool = 1,
     SOPC_LibSub_DataType_integer = 2,
     SOPC_LibSub_DataType_string = 3,
-    SOPC_LibSub_DataType_bytestring = 4
+    SOPC_LibSub_DataType_bytestring = 4,
+    SOPC_LibSub_DataType_other = 5
 } SOPC_LibSub_DataType;
 
 /*

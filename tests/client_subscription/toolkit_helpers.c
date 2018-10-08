@@ -398,7 +398,7 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_LibSub_Value* plsVal = NULL;
 
-    if (NULL == pVal || SOPC_VariantArrayType_SingleValue != pVal->Value.ArrayType)
+    if (NULL == pVal)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -412,8 +412,16 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
         }
     }
 
-    /* Create the value, according to the type of the DataValue */
-    if (SOPC_STATUS_OK == status)
+    /* Create the value, according to the type of the DataValue, only for non arrays and non matrix */
+    if(NULL != plsVal)
+    {
+        plsVal->value = NULL;
+    }
+    if (SOPC_VariantArrayType_SingleValue != pVal->Value.ArrayType)
+    {
+        plsVal->type = SOPC_LibSub_DataType_other;
+    }
+    else if (SOPC_STATUS_OK == status)
     {
         switch (pVal->Value.BuiltInTypeId)
         {
@@ -479,10 +487,18 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
         case SOPC_String_Id:
             plsVal->type = SOPC_LibSub_DataType_string;
             plsVal->value = SOPC_String_GetCString(&pVal->Value.Value.String);
+            if (NULL == plsVal->value)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
             break;
         case SOPC_ByteString_Id:
             plsVal->type = SOPC_LibSub_DataType_bytestring;
             plsVal->value = SOPC_String_GetCString((SOPC_String*) &pVal->Value.Value.Bstring);
+            if (NULL == plsVal->value)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
             break;
         case SOPC_Null_Id:
         case SOPC_Float_Id:
@@ -500,30 +516,21 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
         case SOPC_Variant_Id:
         case SOPC_DiagnosticInfo_Id:
         default:
-            status = SOPC_STATUS_NOK;
+            plsVal->type = SOPC_LibSub_DataType_other;
             break;
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            /* Maybe string copy failed */
-            if (NULL == plsVal->value)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
         }
     }
 
     /* Always copy the raw value */
-    if(SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         plsVal->raw_value = SOPC_Variant_Create();
-        if(NULL == plsVal->raw_value)
+        if (NULL == plsVal->raw_value)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
-    if(SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Variant_Copy(plsVal->raw_value, &pVal->Value);
     }
