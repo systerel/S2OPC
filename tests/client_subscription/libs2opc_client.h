@@ -138,6 +138,9 @@ typedef enum
     The value type. Specifies the type of '*value' amongst:
     - SOPC_LibSub_CstString (SOPC_LibSub_DataType_string / SOPC_LibSub_DataType_bytestring)
     - int64_t (SOPC_LibSub_DataType_bool / SOPC_LibSub_DataType_integer)
+    - NULL (SOPC_LibSub_DataType_other)
+  @field raw_value
+    A pointer to the SOPC_Variant
 */
 typedef struct
 {
@@ -146,6 +149,7 @@ typedef struct
     void* value;
     SOPC_LibSub_Timestamp source_timestamp;
     SOPC_LibSub_Timestamp server_timestamp;
+    void* raw_value;
 } SOPC_LibSub_Value;
 
 /*

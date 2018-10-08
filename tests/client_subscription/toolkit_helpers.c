@@ -514,6 +514,20 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
         }
     }
 
+    /* Always copy the raw value */
+    if(SOPC_STATUS_OK == status)
+    {
+        plsVal->raw_value = SOPC_Variant_Create();
+        if(NULL == plsVal->raw_value)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    if(SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Variant_Copy(plsVal->raw_value, &pVal->Value);
+    }
+
     /* Quality and Timestamps */
     if (SOPC_STATUS_OK == status)
     {
@@ -534,6 +548,7 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
                 free(plsVal->value);
                 plsVal->value = NULL;
             }
+            SOPC_Variant_Delete(plsVal->raw_value);
             free(plsVal);
             plsVal = NULL;
         }
