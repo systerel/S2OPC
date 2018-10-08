@@ -159,13 +159,16 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
  * The optional \p pAppCtx may be used to test the effective creation of the MonitoredItem with
  * SOPC_StaMac_HasMonitoredItem().
  *
+ * \param lCliHndl  An array of client handles to be filled.
+ *
  * \warning The szNodeId must be \0-terminated.
  */
 SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
-                                                  const char* szNodeId,
-                                                  uint32_t iAttrId,
+                                                  char const* const* lszNodeId,
+                                                  const uint32_t* liAttrId,
+                                                  int32_t nElems,
                                                   uintptr_t* pAppCtx,
-                                                  uint32_t* pCliHndl);
+                                                  uint32_t* lCliHndl);
 
 /**
  * \brief Returns a bool whether the machine is configured and ready for a new SecureChannel.

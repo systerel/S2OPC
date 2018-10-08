@@ -23,6 +23,7 @@
  *
  */
 
+#include <assert.h>
 #include <getopt.h>
 #include <inttypes.h>
 #include <stdbool.h>
@@ -88,7 +89,7 @@ typedef struct
     int64_t publish_period;
     char* token_target_str;
     uint16_t token_target;
-    int node_ids_sz;
+    int node_ids_size;
     char** node_ids;
     bool disable_certificate_verification;
     char* n_max_keepalive_str;
@@ -139,7 +140,6 @@ int main(int argc, char* const argv[])
                                          .generic_response_callback = NULL};
     SOPC_LibSub_ConfigurationId cfg_id = 0;
     SOPC_LibSub_ConnectionId con_id = 0;
-    SOPC_LibSub_DataId d_id = 0;
 
     if (cfg_con.security_mode != OpcUa_MessageSecurityMode_None)
     {
@@ -191,18 +191,32 @@ int main(int argc, char* const argv[])
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Connected.");
     }
 
-    for (int i = 0; SOPC_STATUS_OK == status && i < options.node_ids_sz; ++i)
+    if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_LibSub_AddToSubscription(con_id, options.node_ids[i], SOPC_LibSub_AttributeId_Value, &d_id);
+        SOPC_LibSub_AttributeId* lAttrIds = calloc((size_t)(options.node_ids_size), sizeof(SOPC_LibSub_AttributeId));
+        assert(NULL != lAttrIds);
+        for (int i = 0; i < options.node_ids_size; ++i)
+        {
+            lAttrIds[i] = SOPC_LibSub_AttributeId_Value;
+        }
+        SOPC_LibSub_DataId* lDataId = calloc((size_t)(options.node_ids_size), sizeof(SOPC_LibSub_DataId));
+        assert(NULL != lDataId);
+        status = SOPC_LibSub_AddToSubscription(con_id, (const char* const*) options.node_ids, lAttrIds,
+                                               options.node_ids_size, lDataId);
         if (SOPC_STATUS_OK != status)
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not create monitored item.");
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not create monitored items.");
         }
         else
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "created MonIt for \"%s\" with data_id %" PRIu32 ".",
-                        options.node_ids[i], d_id);
+            for (int i = 0; i < options.node_ids_size; ++i)
+            {
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Created MonIt for \"%s\" with data_id %" PRIu32 ".",
+                            options.node_ids[i], lDataId[i]);
+            }
         }
+        free(lAttrIds);
+        free(lDataId);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -359,20 +373,20 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
 
 #undef CONVERT_STR_OPT
 
-    o->node_ids_sz = argc - optind;
-    if (o->node_ids_sz < 1)
+    o->node_ids_size = argc - optind;
+    if (o->node_ids_size < 1)
     {
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "No node to subscribe to were specified.");
         print_usage(argv[0]);
         return false;
     }
-    o->node_ids = malloc(sizeof(char*) * (size_t)(o->node_ids_sz));
+    o->node_ids = malloc(sizeof(char*) * (size_t)(o->node_ids_size));
     if (NULL == o->node_ids)
     {
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Out of memory.");
         return false;
     }
-    for (int i = 0; i < o->node_ids_sz; ++i)
+    for (int i = 0; i < o->node_ids_size; ++i)
     {
         o->node_ids[i] = malloc(strlen(argv[optind + i]) + 1);
         strcpy(o->node_ids[i], argv[optind + i]);
@@ -383,7 +397,7 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
 
 static void free_options(cmd_line_options_t* o)
 {
-    for (int i = 0; i < o->node_ids_sz; ++i)
+    for (int i = 0; i < o->node_ids_size; ++i)
     {
         free(o->node_ids[i]);
     }

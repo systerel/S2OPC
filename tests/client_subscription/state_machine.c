@@ -394,18 +394,15 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
 }
 
 SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
-                                                  const char* szNodeId,
-                                                  uint32_t iAttrId,
+                                                  char const* const* lszNodeId,
+                                                  const uint32_t* liAttrId,
+                                                  int32_t nElems,
                                                   uintptr_t* pAppCtx,
-                                                  uint32_t* pCliHndl)
+                                                  uint32_t* lCliHndl)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_NodeId* pNid = NULL;
-    size_t szLen = 0;
     void* pReq = NULL;
-    uint32_t iCliHndl = 0;
 
-    if (NULL == pSM || NULL == szNodeId || NULL == pCliHndl)
+    if (NULL == pSM || NULL == lszNodeId || NULL == liAttrId || NULL == lCliHndl || 0 >= nElems)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -421,19 +418,29 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    /* Create the NodeId */
-    szLen = strlen(szNodeId);
-    if (INT32_MAX < szLen)
+    /* Create the NodeIds from the strings */
+    SOPC_NodeId** lpNid = calloc((size_t) nElems, sizeof(SOPC_NodeId*));
+    if (NULL == lpNid)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "creating monitored item, szNodeId is too long.");
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    pNid = SOPC_NodeId_FromCString(szNodeId, (int32_t) szLen);
-    if (NULL == pNid)
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    for (int i = 0; i < nElems; ++i)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "creating monitored item, could not convert \"%s\" to NodeId.",
-                    szNodeId);
-        return SOPC_STATUS_NOK;
+        size_t szLen = strlen(lszNodeId[i]);
+        if (INT32_MAX < szLen)
+        {
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "creating monitored item, NodeId string is too long.");
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        lpNid[i] = SOPC_NodeId_FromCString(lszNodeId[i], (int32_t) szLen);
+        if (NULL == lpNid[i])
+        {
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "creating monitored item, could not convert \"%s\" to NodeId.",
+                        lszNodeId[i]);
+            status = SOPC_STATUS_NOK;
+        }
     }
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
@@ -449,16 +456,20 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     /* Create the CreateMonitoredItemRequest */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Atomic_Int_Add(&nSentReqs, 1);
-        iCliHndl = (uint32_t) nSentReqs;
-        status = Helpers_NewCreateMonitoredItemsRequest(pNid, iAttrId, pSM->iSubscriptionID, MONIT_TIMESTAMPS_TO_RETURN,
-                                                        iCliHndl, MONIT_QSIZE, &pReq);
+        for (int i = 0; i < nElems; ++i)
+        {
+            SOPC_Atomic_Int_Add(&nSentReqs, 1);
+            lCliHndl[i] = (uint32_t) nSentReqs;
+        }
+
+        status = Helpers_NewCreateMonitoredItemsRequest(lpNid, liAttrId, nElems, pSM->iSubscriptionID,
+                                                        MONIT_TIMESTAMPS_TO_RETURN, lCliHndl, MONIT_QSIZE, &pReq);
     }
 
     /* Send it */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_StaMac_SendRequest(pSM, pReq, iCliHndl, SOPC_REQUEST_SCOPE_STATE_MACHINE);
+        status = SOPC_StaMac_SendRequest(pSM, pReq, lCliHndl[0], SOPC_REQUEST_SCOPE_STATE_MACHINE);
     }
 
     /* Update the machine, the *pAppCtx, and *pCliHndl */
@@ -467,17 +478,21 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         pSM->state = stCreatingMonIt;
         if (NULL != pAppCtx)
         {
-            *pAppCtx = iCliHndl;
+            *pAppCtx = lCliHndl[0];
         }
-        *pCliHndl = iCliHndl;
     }
     else
     {
         SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
     }
 
-    free(pNid);
-    pNid = NULL;
+    for (int i = 0; NULL != lpNid && i < nElems; ++i)
+    {
+        free(lpNid[i]);
+        lpNid[i] = NULL;
+    }
+    free(lpNid);
+    lpNid = NULL;
 
     mutStatus = Mutex_Unlock(&pSM->mutex);
     assert(SOPC_STATUS_OK == mutStatus);

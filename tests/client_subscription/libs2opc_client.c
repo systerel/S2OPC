@@ -532,9 +532,10 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
 }
 
 SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId cliId,
-                                                SOPC_LibSub_CstString szNodeId,
-                                                SOPC_LibSub_AttributeId attrId,
-                                                SOPC_LibSub_DataId* pDataId)
+                                                const SOPC_LibSub_CstString* lszNodeId,
+                                                const SOPC_LibSub_AttributeId* lattrId,
+                                                int32_t nElements,
+                                                SOPC_LibSub_DataId* lDataId)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
@@ -558,7 +559,7 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
     /* Create the monitored item and wait for its creation */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_StaMac_CreateMonitoredItem(pSM, szNodeId, attrId, &appCtx, pDataId);
+        status = SOPC_StaMac_CreateMonitoredItem(pSM, lszNodeId, lattrId, nElements, &appCtx, lDataId);
     }
 
     /* Release the lock so that the event handler can work properly while waiting */
@@ -566,7 +567,6 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
     assert(SOPC_STATUS_OK == mutStatus);
 
     /* Wait for the monitored item to be created */
-    /* TODO: use Mutex and CV */
     if (SOPC_STATUS_OK == status)
     {
         while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasMonItByAppCtx(pSM, appCtx))

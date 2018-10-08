@@ -79,13 +79,14 @@ SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs
 SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t iSeqNum, void** ppRequest);
 
 /**
- * \brief Creates a new CreateMonitoredItemsRequest with a single ItemToCreate.
+ * \brief Creates a new CreateMonitoredItemsRequest with multiple ItemToCreate.
  */
-SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId* pNid,
-                                                         uint32_t iAttrId,
+SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId** lpNid,
+                                                         const uint32_t* liAttrId,
+                                                         int32_t nElems,
                                                          uint32_t iSubId,
                                                          OpcUa_TimestampsToReturn tsToReturn,
-                                                         uint32_t iCliHndl,
+                                                         uint32_t* liCliHndl,
                                                          uint32_t iQueueSize,
                                                          void** ppRequest);
 

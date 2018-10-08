@@ -335,31 +335,36 @@ SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t
     return status;
 }
 
-SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId* pNid,
-                                                         uint32_t iAttrId,
+SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId** lpNid,
+                                                         const uint32_t* liAttrId,
+                                                         int32_t nElems,
                                                          uint32_t iSubId,
                                                          OpcUa_TimestampsToReturn tsToReturn,
-                                                         uint32_t iCliHndl,
+                                                         uint32_t* liCliHndl,
                                                          uint32_t iQueueSize,
                                                          void** ppRequest)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     OpcUa_CreateMonitoredItemsRequest* pReq = NULL;
     OpcUa_MonitoredItemCreateRequest* pitc = NULL;
 
-    if (NULL == pNid || NULL == ppRequest || 0 == iAttrId || 22 < iAttrId)
+    if (NULL == ppRequest || NULL == lpNid || NULL == liAttrId || NULL == liCliHndl || 0 >= nElems)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
+    for (int i = 0; i < nElems; ++i)
+    {
+        if (NULL == lpNid[i] || 0 == liAttrId[i] || 22 < liAttrId[i])
+        {
+            return SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    SOPC_ReturnStatus status =
+        SOPC_Encodeable_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Encodeable_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        pitc = malloc(sizeof(OpcUa_MonitoredItemCreateRequest));
+        pitc = calloc((size_t) nElems, sizeof(OpcUa_MonitoredItemCreateRequest));
         if (NULL == pitc)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -370,18 +375,21 @@ SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId* pNid,
     {
         pReq->SubscriptionId = iSubId;
         pReq->TimestampsToReturn = tsToReturn;
-        pReq->NoOfItemsToCreate = 1;
+        pReq->NoOfItemsToCreate = nElems;
         pReq->ItemsToCreate = pitc;
-        pitc->ItemToMonitor.NodeId = *pNid;
-        pitc->ItemToMonitor.AttributeId = iAttrId;
-        SOPC_String_Initialize(&pitc->ItemToMonitor.IndexRange);
-        SOPC_QualifiedName_Initialize(&pitc->ItemToMonitor.DataEncoding);
-        pitc->MonitoringMode = OpcUa_MonitoringMode_Reporting;
-        pitc->RequestedParameters.ClientHandle = iCliHndl;
-        pitc->RequestedParameters.SamplingInterval = 0;
-        SOPC_ExtensionObject_Initialize(&pitc->RequestedParameters.Filter);
-        pitc->RequestedParameters.QueueSize = iQueueSize;
-        pitc->RequestedParameters.DiscardOldest = true;
+        for (int i = 0; i < nElems; ++i)
+        {
+            pitc[i].ItemToMonitor.NodeId = *lpNid[i];
+            pitc[i].ItemToMonitor.AttributeId = liAttrId[i];
+            SOPC_String_Initialize(&pitc[i].ItemToMonitor.IndexRange);
+            SOPC_QualifiedName_Initialize(&pitc[i].ItemToMonitor.DataEncoding);
+            pitc[i].MonitoringMode = OpcUa_MonitoringMode_Reporting;
+            pitc[i].RequestedParameters.ClientHandle = liCliHndl[i];
+            pitc[i].RequestedParameters.SamplingInterval = 0;
+            SOPC_ExtensionObject_Initialize(&pitc[i].RequestedParameters.Filter);
+            pitc[i].RequestedParameters.QueueSize = iQueueSize;
+            pitc[i].RequestedParameters.DiscardOldest = true;
+        }
 
         *ppRequest = (void*) pReq;
     }

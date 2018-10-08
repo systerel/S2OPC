@@ -166,8 +166,9 @@ START_TEST(test_subscription)
     ck_assert(SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id) == SOPC_STATUS_OK);
     ck_assert(SOPC_LibSub_Configured() == SOPC_STATUS_OK);
     ck_assert(SOPC_LibSub_Connect(cfg_id, &con_id) == SOPC_STATUS_OK);
-    ck_assert(SOPC_LibSub_AddToSubscription(con_id, "s=Counter", SOPC_LibSub_AttributeId_Value, &dat_id) ==
-              SOPC_STATUS_OK);
+    SOPC_LibSub_AttributeId attribute_id_value = SOPC_LibSub_AttributeId_Value;
+    const char* nid = "s=Counter";
+    ck_assert(SOPC_LibSub_AddToSubscription(con_id, &nid, &attribute_id_value, 1, &dat_id) == SOPC_STATUS_OK);
 
     ck_assert(SOPC_LibSub_AsyncSendRequestOnSession(con_id, read_req, 42) == SOPC_STATUS_OK);
 
@@ -295,6 +296,8 @@ START_TEST(test_half_broken_subscriptions)
     /* Wait for deconnection, failed assert, or subscription success */
     SOPC_TimeReference timeout =
         SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference_GetCurrent(), ROBUSTNESS_TIMEOUT);
+    SOPC_LibSub_AttributeId attribute_id_value = SOPC_LibSub_AttributeId_Value;
+    const char* nid = "s=Counter";
     while (SOPC_TimeReference_Compare(SOPC_TimeReference_GetCurrent(), timeout) <= 0)
     {
         SOPC_TimeReference curTime = SOPC_TimeReference_GetCurrent();
@@ -309,8 +312,8 @@ START_TEST(test_half_broken_subscriptions)
                 Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "New connection with cfg_id %i.", cfg_ids[i]);
                 if (SOPC_LibSub_Connect(cfg_ids[i], &con_ids[i]) == SOPC_STATUS_OK)
                 {
-                    ck_assert(SOPC_LibSub_AddToSubscription(con_ids[i], "s=Counter", SOPC_LibSub_AttributeId_Value,
-                                                            &dat_ids[i]) == SOPC_STATUS_OK);
+                    ck_assert(SOPC_LibSub_AddToSubscription(con_ids[i], &nid, &attribute_id_value, 1, &dat_ids[i]) ==
+                              SOPC_STATUS_OK);
                     connect_statuses[i] = true;
                 }
                 else

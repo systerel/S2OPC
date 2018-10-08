@@ -424,16 +424,24 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
     Add a variable to an existing subscription
  @param cliId
     The connection id.
- @param szNodeId
-    A zero-terminated string describing the NodeId to add.
- @param pDataId [out, not null]
-    The unique variable data identifier. Will be used in call to data_change_callback.
+ @param lszNodeId
+    An array of zero-terminated strings describing the NodeIds to add.
+    It should be at least \p nElements long.
+ @param lattrId
+    An array of attributes id. The subscription is created for the attribute lAttrId[i]
+    for the node id lszNodeId[i].
+    It should be at least \p nElements long.
+ @param lDataId [out, not null]
+    A pre-allocated array to the output unique variable data identifiers.
+    It should be at least \p nElements long.
+    The values will be used in call to data_change_callback.
  @return
-    The operation status */
+    The operation status. lDataId is only valid when the return status is SOPC_STATUS_OK. */
 SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId cliId,
-                                                SOPC_LibSub_CstString szNodeId,
-                                                SOPC_LibSub_AttributeId attrId,
-                                                SOPC_LibSub_DataId* pDataId);
+                                                const SOPC_LibSub_CstString* lszNodeId,
+                                                const SOPC_LibSub_AttributeId* lattrId,
+                                                int32_t nElements,
+                                                SOPC_LibSub_DataId* lDataId);
 
 /*
  @description
