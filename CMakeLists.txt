@@ -420,6 +420,12 @@ target_link_libraries(toolkit_test_client PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-
 target_include_directories(toolkit_test_client PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
                                                        ${INGOPCS_PRIVATE_INCLUDES})
 
+
+add_executable(toolkit_test_client_service_faults "tests/services/toolkit_test_client_service_faults.c")
+target_link_libraries(toolkit_test_client_service_faults PRIVATE ${INGOPCS_STATIC_LIB})
+target_include_directories(toolkit_test_client_service_faults PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
+                                                                      ${INGOPCS_PRIVATE_INCLUDES})
+
 add_executable(toolkit_test_suite_client "tests/demo/test_suite_client.c"
                                          "tests/demo/test_discovery.c"
                                          "tests/demo/config.c"
@@ -454,6 +460,16 @@ add_test(NAME "validation::client_server_test"
 	"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
 	"./toolkit_test_client${FILE_EXT}")
 set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_server_test.tap")
+
+add_test(NAME "validation::client_service_faults_test"
+	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+	COMMAND
+	"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap.py"
+	"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
+	"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+	"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
+	"./toolkit_test_client_service_faults${FILE_EXT}")
+set_tests_properties("validation::client_service_faults_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_service_faults_test.tap")
 
 # Demo clients
 add_executable(ingopcs_browse "tests/demo/ingopcs_browse.c"
