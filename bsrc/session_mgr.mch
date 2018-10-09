@@ -29,6 +29,20 @@ SEES
 
 OPERATIONS
 
+    bres, channel <-- getall_valid_session_channel (session) =
+    PRE
+        session  : t_session_i
+    THEN
+        CHOICE
+            bres := FALSE ||
+            channel := c_channel_indet
+        OR
+            bres := TRUE ||
+            channel :(channel : t_channel_i & channel : t_channel)
+        END
+    END
+    ;
+
     session <-- client_receive_session_resp (channel, req_handle, resp_typ, resp_header, resp_msg) =
     PRE
         channel : t_channel_i &
@@ -149,7 +163,7 @@ OPERATIONS
         CHOICE
             is_valid_res := TRUE ||
             status_code_err := e_sc_ok ||
-            channel :(channel : t_channel_i & channel : s_channel_connected)
+            channel :(channel : t_channel_i & channel : t_channel)
         OR
             is_valid_res := FALSE ||
             status_code_err :: {e_sc_bad_session_id_invalid, e_sc_bad_invalid_state, e_sc_bad_secure_channel_id_invalid} ||

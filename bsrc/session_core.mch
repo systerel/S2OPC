@@ -542,7 +542,7 @@ OPERATIONS
     ret <-- is_session_valid_for_service (channel, session) =
     PRE
         channel : t_channel_i &
-        channel : s_channel_connected   &
+        channel : t_channel &
         session : t_session_i &
         session : s_session &
         a_channel(session) = channel &
@@ -614,7 +614,7 @@ OPERATIONS
         session : s_session &
         session : dom(a_channel)
     THEN
-            channel :(channel : t_channel_i & channel = a_channel(session))
+        channel :(channel : t_channel_i & channel = a_channel(session))
     END
     ;
 

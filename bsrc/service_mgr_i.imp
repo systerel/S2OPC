@@ -1317,7 +1317,8 @@ OPERATIONS
         l_valid_req_handle,
         l_session_token,
         l_buffer,
-        l_valid_buffer
+        l_valid_buffer,
+        l_valid_channel
     IN
         l_channel := c_channel_indet;
         l_buffer := c_byte_buffer_indet;
@@ -1397,13 +1398,19 @@ OPERATIONS
                     e_msg_discovery_register_server_req,
                     e_msg_discovery_register_server2_req
                 THEN
-                    /* Use discovery operation since header shall not contain session information (see part 4) */
-                    ret, l_buffer, l_req_handle <-- local_client_discovery_service_request (l_channel, req_msg, app_context);
-                    l_valid_buffer <-- is_valid_buffer_out (l_buffer);
-                    IF l_valid_buffer = FALSE
+                    l_valid_channel, l_channel <-- getall_valid_session_channel (session);
+                    IF l_valid_channel = TRUE
                     THEN
-                        ret := e_sc_bad_encoding_error;
-                        l_channel := c_channel_indet
+                        /* Use discovery operation since header shall not contain session information (see part 4) */
+                        ret, l_buffer, l_req_handle <-- local_client_discovery_service_request (l_channel, req_msg, app_context);
+                        l_valid_buffer <-- is_valid_buffer_out (l_buffer);
+                        IF l_valid_buffer = FALSE
+                        THEN
+                            ret := e_sc_bad_encoding_error;
+                            l_channel := c_channel_indet
+                        END
+                    ELSE
+                        ret := e_sc_bad_invalid_argument
                     END
                 ELSE
                     ret := e_sc_bad_invalid_argument

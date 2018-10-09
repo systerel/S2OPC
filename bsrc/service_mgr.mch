@@ -453,7 +453,7 @@ OPERATIONS
         CHOICE
             bres := TRUE ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            channel :(channel : t_channel_i & channel : s_channel_connected)
+            channel :(channel : t_channel_i & channel : t_channel)
         OR
             bres := FALSE ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||

@@ -236,6 +236,18 @@ OPERATIONS
 
     /* END OF LOCAL OPERATIONS */
 
+    bres, channel <-- getall_valid_session_channel (session) =
+    BEGIN
+        bres <-- is_valid_session (session);
+        IF bres = TRUE
+        THEN
+            channel <-- get_session_channel (session)
+        ELSE
+            bres, channel <-- getall_session_channel (session)
+        END
+    END
+    ;
+
     session <-- client_receive_session_resp (channel, req_handle, resp_typ, resp_header, resp_msg) =
     VAR
         l_session_token,
