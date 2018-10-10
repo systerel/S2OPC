@@ -59,7 +59,7 @@
   Taken from sop "sopc_builtintypes.h" */
 typedef uint32_t SOPC_StatusCode;
 
-/* Result, taken from "sopc_toolkit_constants.h" */
+/* Result, taken from "sopc_enums.h" */
 typedef enum SOPC_ReturnStatus
 {
     SOPC_STATUS_OK = 0,
