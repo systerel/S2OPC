@@ -45,7 +45,9 @@
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
+typedef SOPC_DataValue* constants_bs__t_DataValue_i;
 typedef SOPC_ExpandedNodeId* constants_bs__t_ExpandedNodeId_i;
+typedef SOPC_String* constants_bs__t_IndexRange_i;
 typedef SOPC_LocalizedText* constants_bs__t_LocalizedText_i;
 typedef SOPC_NodeId* constants_bs__t_NodeId_i;
 typedef SOPC_AddressSpace_Item* constants_bs__t_Node_i;
@@ -85,12 +87,13 @@ typedef uint32_t constants_bs__t_timer_id_i;
 typedef SOPC_TimeReference constants_bs__t_timeref_i;
 typedef SOPC_UserWithAuthorization* constants_bs__t_user_i;
 typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
-typedef SOPC_String* constants_bs__t_IndexRange_i;
 
 /*--------------------------
    Added by the Translator
   --------------------------*/
+#define constants_bs__t_DataValue_i_max (-1)
 #define constants_bs__t_ExpandedNodeId_i_max (-1)
+#define constants_bs__t_IndexRange_i_max (-1)
 #define constants_bs__t_LocalizedText_i_max (-1)
 #define constants_bs__t_NodeId_i_max (-1)
 #define constants_bs__t_Node_i_max (-1)
@@ -134,7 +137,9 @@ typedef SOPC_String* constants_bs__t_IndexRange_i;
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
+#define constants_bs__c_DataValue_indet NULL
 #define constants_bs__c_ExpandedNodeId_indet NULL
+#define constants_bs__c_IndexRange_indet 0
 #define constants_bs__c_LocalizedText_indet 0
 #define constants_bs__c_NodeId_indet 0
 #define constants_bs__c_Node_indet 0

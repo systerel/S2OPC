@@ -24,6 +24,7 @@ SETS
     t_Node_i;
     t_NodeId_i;
     t_Variant_i;
+    t_DataValue_i;
     t_byte_buffer_i;
     t_WriteValuePointer_i;
 
@@ -79,6 +80,7 @@ CONCRETE_CONSTANTS
     k_n_unregisterNodes_max,
 
     c_Variant_indet,
+    c_DataValue_indet,
     c_Node_indet,
     c_NodeId_indet,
     c_byte_buffer_indet,
@@ -123,6 +125,7 @@ CONCRETE_CONSTANTS
 
 ABSTRACT_CONSTANTS
     t_Variant,
+    t_DataValue,
     t_Node,
     t_NodeId,
     t_byte_buffer,
@@ -183,6 +186,10 @@ PROPERTIES
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &
     c_Variant_indet /: t_Variant &
+
+    t_DataValue <: t_DataValue_i &
+    c_DataValue_indet : t_DataValue_i &
+    c_DataValue_indet /: t_DataValue &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &

@@ -762,6 +762,9 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_request_interrupted:
         *status = OpcUa_BadRequestInterrupted;
         break;
+    case constants__e_sc_bad_data_unavailable:
+        *status = OpcUa_BadDataUnavailable;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -968,6 +971,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
     case OpcUa_BadRequestInterrupted:
         *bstatus = constants__e_sc_bad_request_interrupted;
         break;
+    case OpcUa_BadDataUnavailable:
+        *bstatus = constants__e_sc_bad_data_unavailable;
+        break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)
         {
@@ -983,8 +989,8 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         }
         else
         {
-            // Not identified status code
-            *bstatus = constants__c_StatusCode_indet;
+            // Not identified status code => Use severity Bad
+            *bstatus = constants__e_sc_bad_generic;
         }
     }
 }

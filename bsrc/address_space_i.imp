@@ -35,7 +35,8 @@ IMPORTS
     response_write_bs,
     address_space_it,
     gen_subscription_event_bs,
-    user_authorization_bs
+    user_authorization_bs,
+    data_value_pointer_bs
 
 PROMOTES
     readall_AddressSpace_Node,
@@ -62,7 +63,7 @@ INITIALISATION
 
 LOCAL_OPERATIONS
     /* Outer treat operation. Validates isvalid, validates user, records the write. */
-    serviceStatusCode, prev_value, prev_sc <-- treat_write_1(isvalid, status, p_user, nid, aid, value, index_range) =
+    serviceStatusCode, prev_value, prev_sc <-- treat_write_1(isvalid, status, p_user, nid, aid, dataValue, index_range) =
     PRE
         isvalid : BOOL &
         status : t_StatusCode_i &
@@ -70,13 +71,13 @@ LOCAL_OPERATIONS
         p_user : t_user   &
         nid : t_NodeId_i &
         aid : t_AttributeId_i &
-        value : t_Variant_i &
+        dataValue : t_DataValue_i &
         (isvalid = TRUE
             =>
          status = e_sc_ok & /* TODO: this is redundant with isvalid = TRUE */
          nid : t_NodeId &
          aid : t_AttributeId &
-         value : t_Variant) &
+         dataValue : t_DataValue) &
         (isvalid = FALSE
             =>
          status : {e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid}) &
@@ -104,7 +105,7 @@ LOCAL_OPERATIONS
              serviceStatusCode = e_sc_ok &
              prev_sc = a_Value_StatusCode(a_NodeId~(nid)) &
              prev_value = a_Value$0(a_NodeId~(nid)) &
-             a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> value}) &
+             a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> DataValue_Variant(dataValue)}) &
             (not(isvalid = TRUE &
                  status : t_StatusCode_i &
                  status : t_StatusCode &
@@ -147,7 +148,7 @@ OPERATIONS
         l_continue,
         l_aid,
         l_nid,
-        l_value,
+        l_dataValue,
         l_index_range,
         l_wvi,
         l_status1,
@@ -165,9 +166,9 @@ OPERATIONS
         l_continue <-- init_iter_write_request(l_nb_req);
         WHILE l_continue = TRUE DO
             l_continue, l_wvi <-- continue_iter_write_request;
-            l_isvalid, l_status1, l_nid, l_aid, l_value, l_index_range <-- getall_WriteValue(l_wvi);
+            l_isvalid, l_status1, l_nid, l_aid, l_dataValue, l_index_range <-- getall_WriteValue(l_wvi);
             /* Avoids the IFs with a local operation. */
-            l_status2, l_prev_value, l_prev_value_status <-- treat_write_1(l_isvalid, l_status1, p_user, l_nid, l_aid, l_value, l_index_range);
+            l_status2, l_prev_value, l_prev_value_status <-- treat_write_1(l_isvalid, l_status1, p_user, l_nid, l_aid, l_dataValue, l_index_range);
             set_ResponseWrite_StatusCode(l_wvi, l_status2);
             l_wv <-- getall_WriteValuePointer(l_wvi);
             IF l_status2 = e_sc_ok
@@ -205,13 +206,15 @@ OPERATIONS
                                (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
                                                                             WriteValue_NodeId~ ;
                                 (wreqs_iterated /\
-                                 WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_Value)) &
+                                 WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_DataValue;
+                                                                            DataValue_Variant)) &
 
             a_Value <: a_Value$0 <+
                        (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
                                                                     WriteValue_NodeId~ ;
                         (cast_t_WriteValue[1..nb_WriteValue] /\
-                         WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_Value) &
+                         WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_DataValue;
+                                                                    DataValue_Variant) &
 
             ResponseWrite_StatusCode = %wvi.(
                 wvi : t_WriteValue &
@@ -223,8 +226,12 @@ OPERATIONS
                                        TRUE  |-> {FALSE |-> e_sc_bad_index_range_invalid,
                                                   TRUE |-> {FALSE |-> e_sc_bad_index_range_no_data,
                                                             TRUE |-> e_sc_ok
-                                                           }(HasRange_VariantIndex(WriteValue_Value(wvi) |-> WriteValue_IndexRange(wvi)))
-                                                 }(IsValid_VariantIndex(WriteValue_Value(wvi) |-> WriteValue_IndexRange(wvi)))
+                                                           }(HasRange_VariantIndex(
+                                                              DataValue_Variant(
+                                                               WriteValue_DataValue(wvi)) |-> WriteValue_IndexRange(wvi)))
+                                                 }(IsValid_VariantIndex(
+                                                    DataValue_Variant(
+                                                     WriteValue_DataValue(wvi)) |-> WriteValue_IndexRange(wvi)))
                                       }(bool(WriteValue_AttributeId(wvi) = e_aid_Value &
                                              a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) = e_ncl_Variable))
                            }(bool(WriteValue_NodeId(wvi) : ran(a_NodeId)))
@@ -243,7 +250,7 @@ OPERATIONS
     END
     ;
 
-    serviceStatusCode, prev_value, prev_sc <-- treat_write_1(isvalid, status, p_user, nid, aid, value, index_range) =
+    serviceStatusCode, prev_value, prev_sc <-- treat_write_1(isvalid, status, p_user, nid, aid, dataValue, index_range) =
     VAR
         l_isvalid,
         l_node,
@@ -263,7 +270,7 @@ OPERATIONS
                         /* TODO: it should be decided what to do when the value is write only */
                         l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
                         IF l_authorized_write = TRUE THEN
-                            serviceStatusCode, prev_value, prev_sc <-- set_Value(p_user, l_node, value, index_range)
+                            serviceStatusCode, prev_value, prev_sc <-- set_Value(p_user, l_node, dataValue, index_range)
                         ELSE
                             serviceStatusCode := e_sc_bad_user_access_denied
                         END

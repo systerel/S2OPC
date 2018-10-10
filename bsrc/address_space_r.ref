@@ -25,6 +25,9 @@ REFINES
 SEES
     constants,
     service_write_decode_bs
+    
+EXTENDS
+    data_value_pointer_bs
 
 DEFINITIONS
     d_variables ==
@@ -108,7 +111,8 @@ DEFINITIONS
         (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
                                                      WriteValue_NodeId~ ;
          (cast_t_WriteValue[1..nb_WriteValue] /\
-          WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_Value)
+          WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_DataValue;
+                                                     DataValue_Variant)
 
 ABSTRACT_VARIABLES
     d_variables
@@ -156,8 +160,12 @@ OPERATIONS
                                                   TRUE |-> {FALSE |-> e_sc_bad_index_range_invalid,
                                                             TRUE |-> {FALSE |-> e_sc_bad_index_range_no_data,
                                                                       TRUE |-> e_sc_ok
-                                                                      }(HasRange_VariantIndex(WriteValue_Value(wvi) |-> WriteValue_IndexRange(wvi)))
-                                                           }(IsValid_VariantIndex(WriteValue_Value(wvi) |-> WriteValue_IndexRange(wvi)))
+                                                                      }(HasRange_VariantIndex(
+                                                                         DataValue_Variant(
+                                                                          WriteValue_DataValue(wvi)) |-> WriteValue_IndexRange(wvi)))
+                                                           }(IsValid_VariantIndex(
+                                                              DataValue_Variant(
+                                                               WriteValue_DataValue(wvi)) |-> WriteValue_IndexRange(wvi)))
                                                  }(bool(e_operation_type_write |-> WriteValue_NodeId(wvi) |-> WriteValue_AttributeId(wvi) |-> p_user : s_AuthorizedOperations))
                                       }(bool(WriteValue_AttributeId(wvi) = e_aid_Value &
                                              a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) = e_ncl_Variable))

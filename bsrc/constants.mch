@@ -38,6 +38,7 @@ SETS
                      e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType,
                      e_ncl_View};
     t_Variant_i; /* (SOPC_Variant*) */
+    t_DataValue_i; /* (SOPC_DataValue*) */
     t_AttributeId_i = {c_AttributeId_indet,
                        e_aid_NodeId,
                        e_aid_NodeClass,
@@ -91,7 +92,8 @@ SETS
                       e_sc_bad_user_access_denied,
                       e_sc_bad_certificate_uri_invalid,
                       e_sc_bad_security_checks_failed,
-                      e_sc_bad_request_interrupted};
+                      e_sc_bad_request_interrupted,
+                      e_sc_bad_data_unavailable};
 
     t_BrowseDirection_i = {e_bd_indet,
                            e_bd_forward,
@@ -318,6 +320,7 @@ CONCRETE_CONSTANTS
     k_n_unregisterNodes_max,
 
     c_Variant_indet,
+    c_DataValue_indet,
     c_NodeId_indet,
     c_ExpandedNodeId_indet,
     c_Reference_indet,
@@ -378,6 +381,7 @@ ABSTRACT_CONSTANTS
     t_AttributeId,
     t_NodeClass,
     t_Variant,
+    t_DataValue,
     t_NodeId,
     t_ExpandedNodeId,
     t_Reference,
@@ -457,6 +461,10 @@ PROPERTIES
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &
     c_Variant_indet /: t_Variant &
+
+    t_DataValue <: t_DataValue_i &
+    c_DataValue_indet : t_DataValue_i &
+    c_DataValue_indet /: t_DataValue &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &

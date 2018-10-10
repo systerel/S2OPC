@@ -198,7 +198,7 @@ LOCAL_OPERATIONS
         nb_WriteValue,
         WriteValue_NodeId,
         WriteValue_AttributeId,
-        WriteValue_Value,
+        WriteValue_DataValue,
 
         nb_ReadValue,
         ReadValue_NodeId,
@@ -225,7 +225,7 @@ LOCAL_OPERATIONS
             nb_WriteValue <= k_n_WriteResponse_max                   &
             WriteValue_NodeId        : t_WriteValue +-> t_NodeId     &
             WriteValue_AttributeId   : t_WriteValue +-> t_AttributeId &
-            WriteValue_Value         : t_WriteValue +-> t_Variant    &
+            WriteValue_DataValue     : t_WriteValue +-> t_DataValue  &
             a_Value                  : t_Node +-> t_Variant          &
             dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value)       &
             dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &

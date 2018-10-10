@@ -91,11 +91,11 @@ void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i 
                                                 constants__t_StatusCode_i* const service_write_decode_bs__status,
                                                 constants__t_NodeId_i* const service_write_decode_bs__nid,
                                                 constants__t_AttributeId_i* const service_write_decode_bs__aid,
-                                                constants__t_Variant_i* const service_write_decode_bs__value,
+                                                constants__t_DataValue_i* const service_write_decode_bs__dataValue,
                                                 constants__t_IndexRange_i* const service_write_decode_bs__index_range)
 {
     *service_write_decode_bs__nid = constants__c_NodeId_indet;
-    *service_write_decode_bs__value = constants__c_Variant_indet;
+    *service_write_decode_bs__dataValue = constants__c_DataValue_indet;
 
     OpcUa_WriteValue* wv = &request->NodesToWrite[service_write_decode_bs__wvi - 1];
     switch (wv->AttributeId)
@@ -116,7 +116,7 @@ void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i 
     }
 
     *service_write_decode_bs__nid = &wv->NodeId;
-    *service_write_decode_bs__value = &wv->Value.Value;
+    *service_write_decode_bs__dataValue = &wv->Value;
     *service_write_decode_bs__index_range = &wv->IndexRange;
     *service_write_decode_bs__isvalid = true;
     *service_write_decode_bs__status = constants__e_sc_ok;

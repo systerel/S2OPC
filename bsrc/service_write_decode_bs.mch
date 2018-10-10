@@ -29,7 +29,7 @@ DEFINITIONS
         nb_WriteValue,
         WriteValue_NodeId,
         WriteValue_AttributeId,
-        WriteValue_Value, /* The field value of the DataValue */
+        WriteValue_DataValue, /* The field value of the DataValue */
         WriteValue_IndexRange
         /* TODO: StatusCode, SourceTimestamp (determine if ServerTimestamp is useful) */
     ;
@@ -38,14 +38,14 @@ DEFINITIONS
         nb_WriteValue <= k_n_WriteResponse_max &
         WriteValue_NodeId : t_WriteValue +-> t_NodeId &
         WriteValue_AttributeId : t_WriteValue +-> t_AttributeId_i &
-        WriteValue_Value : t_WriteValue +-> t_Variant &
+        WriteValue_DataValue : t_WriteValue +-> t_DataValue_i &
         WriteValue_IndexRange : t_WriteValue +-> t_IndexRange_i
     ;
     d_init ==
         nb_WriteValue := 0 ||
         WriteValue_NodeId :: {{}} ||
         WriteValue_AttributeId :: {{}} ||
-        WriteValue_Value :: {{}} ||
+        WriteValue_DataValue :: {{}} ||
         WriteValue_IndexRange :: {{}}
 
 ABSTRACT_VARIABLES
@@ -76,13 +76,13 @@ OPERATIONS
               nb_WriteValue > 0 &
               WriteValue_NodeId : cast_t_WriteValue[1..nb_WriteValue] --> t_NodeId &
               WriteValue_AttributeId : cast_t_WriteValue[1..nb_WriteValue] --> t_AttributeId_i &
-              WriteValue_Value : cast_t_WriteValue[1..nb_WriteValue] --> t_Variant &
+              WriteValue_DataValue : cast_t_WriteValue[1..nb_WriteValue] --> t_DataValue &
               WriteValue_IndexRange : cast_t_WriteValue[1..nb_WriteValue] --> t_IndexRange_i) &
             (StatusCode_service /= e_sc_ok =>
                 nb_WriteValue = 0 &
                 WriteValue_NodeId = {} &
                 WriteValue_AttributeId = {} &
-                WriteValue_Value = {} &
+                WriteValue_DataValue = {} &
                 WriteValue_IndexRange = {})
         )
     END
@@ -102,14 +102,14 @@ OPERATIONS
     END
     ;
 
-    isvalid, status, nid, aid, value, index_range <-- getall_WriteValue(wvi) =
+    isvalid, status, nid, aid, dataValue, index_range <-- getall_WriteValue(wvi) =
     PRE
         nb_WriteValue > 0 &
         wvi : t_WriteValue_i &
         wvi : cast_t_WriteValue[1..nb_WriteValue] &
         wvi : dom(WriteValue_NodeId) &
         wvi : dom(WriteValue_AttributeId) &
-        wvi : dom(WriteValue_Value)
+        wvi : dom(WriteValue_DataValue)
     THEN
         IF WriteValue_AttributeId(wvi) : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value}
         THEN
@@ -117,17 +117,17 @@ OPERATIONS
             status := e_sc_ok ||
             nid,
             aid,
-            value,
+            dataValue,
             index_range
             :(nid : t_NodeId_i  & nid = WriteValue_NodeId(wvi) &
                 aid : t_AttributeId_i & aid : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value} &
-                value : t_Variant_i & value = WriteValue_Value(wvi) &
+                dataValue : t_DataValue_i & dataValue = WriteValue_DataValue(wvi) &
                 index_range : t_IndexRange_i & index_range = WriteValue_IndexRange(wvi))
         ELSE
             isvalid := FALSE ||
             nid := c_NodeId_indet ||
             aid := c_AttributeId_indet ||
-            value := c_Variant_indet ||
+            dataValue := c_DataValue_indet ||
             index_range := c_IndexRange_indet ||
             status := e_sc_bad_attribute_id_invalid
         END

@@ -302,7 +302,7 @@ static constants__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
 
 void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_user,
                                  const constants__t_Node_i address_space_bs__node,
-                                 const constants__t_Variant_i address_space_bs__value,
+                                 const constants__t_DataValue_i address_space_bs__dataValue,
                                  const constants__t_IndexRange_i address_space_bs__index_range,
                                  constants__t_StatusCode_i* const address_space_bs__serviceStatusCode,
                                  constants__t_Variant_i* const address_space_bs__prev_value,
@@ -323,18 +323,18 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
     if (address_space_bs__index_range->Length <= 0)
     {
         *address_space_bs__serviceStatusCode =
-            set_value_full(pvar, address_space_bs__value, address_space_bs__prev_value);
+            set_value_full(pvar, &address_space_bs__dataValue->Value, address_space_bs__prev_value);
     }
     else
     {
         *address_space_bs__serviceStatusCode = set_value_indexed(
-            pvar, address_space_bs__value, address_space_bs__index_range, address_space_bs__prev_value);
+            pvar, &address_space_bs__dataValue->Value, address_space_bs__index_range, address_space_bs__prev_value);
     }
 
     if (*address_space_bs__serviceStatusCode == constants__e_sc_ok)
     {
         util_status_code__C_to_B(item->value_status, address_space_bs__prev_valueStatus);
-        item->value_status = SOPC_GoodGenericStatus;
+        item->value_status = address_space_bs__dataValue->Status;
     }
     else
     {

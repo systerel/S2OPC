@@ -22,7 +22,8 @@ MACHINE
 
 SEES
     constants,
-    user_authorization_bs
+    user_authorization_bs,
+    data_value_pointer_bs
 
 DEFINITIONS
 
@@ -189,27 +190,29 @@ OPERATIONS
     ;
 
     /* a_Value, setter */
-    serviceStatusCode, prev_value, prev_valueStatus <-- set_Value(p_user, node, value, index_range) =
+    serviceStatusCode, prev_value, prev_valueStatus <-- set_Value(p_user, node, dataValue, index_range) =
     PRE
         p_user : t_user_i   &
         p_user : t_user     &
         node  : t_Node_i    &
         node  : t_Node      &
-        value : t_Variant_i &
-        value : t_Variant   &
+        node : dom(a_Value) &
+        node : dom(a_Value_StatusCode) &
+        dataValue : t_DataValue_i &
+        dataValue : t_DataValue   &
         index_range : t_IndexRange_i &
         e_operation_type_write |-> a_NodeId(node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
     THEN
         CHOICE
-            IF IsValid_VariantIndex(value |-> index_range) = TRUE &
-                HasRange_VariantIndex(value |-> index_range) = TRUE
+            IF IsValid_VariantIndex(DataValue_Variant(dataValue) |-> index_range) = TRUE &
+                HasRange_VariantIndex(DataValue_Variant(dataValue) |-> index_range) = TRUE
             THEN
                 serviceStatusCode := e_sc_ok ||
                 prev_value :(prev_value : t_Variant_i & prev_value = a_Value(node)) ||
-                a_Value(node) := value ||
+                a_Value(node) := DataValue_Variant(dataValue) ||
                 prev_valueStatus :(prev_valueStatus : t_StatusCode_i &
                                    prev_valueStatus = a_Value_StatusCode(node))
-            ELSIF IsValid_VariantIndex(value |-> index_range) = FALSE
+            ELSIF IsValid_VariantIndex(DataValue_Variant(dataValue) |-> index_range) = FALSE
             THEN
                 serviceStatusCode := e_sc_bad_index_range_invalid ||
                 prev_value := c_Variant_indet ||
