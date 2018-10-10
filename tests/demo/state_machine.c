@@ -613,7 +613,9 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
                                   void* pParam,
                                   uintptr_t appCtx)
 {
+    /* avoid unused parameter compiler warning */
     (void) pParam;
+
     bool bProcess = true;
 
     if (NULL == pSM)

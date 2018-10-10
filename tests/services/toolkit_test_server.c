@@ -66,7 +66,9 @@ typedef enum
 
 static void Test_StopSignal(int sig)
 {
+    /* avoid unused parameter compiler warning */
     (void) sig;
+
     if (stopServer != 0)
     {
         exit(1);
@@ -79,9 +81,10 @@ static void Test_StopSignal(int sig)
 
 static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
+    /* avoid unused parameter compiler warning */
     (void) idOrStatus;
-    (void) param;
     (void) appContext;
+
     if (event == SE_CLOSED_ENDPOINT)
     {
         printf("<Test_Server_Toolkit: closed endpoint event: OK\n");
@@ -230,7 +233,9 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
                                               const SOPC_ExtensionObject* token,
                                               SOPC_UserAuthentication_Status* authenticated)
 {
+    /* avoid unused parameter compiler warning */
     (void) (authn);
+
     assert(NULL != token && NULL != authenticated);
 
     *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
@@ -277,6 +282,7 @@ static const SOPC_UserAuthentication_Functions authentication_uactt_functions = 
 
 int main(int argc, char* argv[])
 {
+    /* avoid unused parameter compiler warning */
     (void) argc;
     (void) argv;
 

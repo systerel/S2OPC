@@ -70,14 +70,17 @@ static SOPC_ReturnStatus Check_Client_Closed_SC_Helper(SOPC_StatusCode status)
 
 static SOPC_ReturnStatus PKIStub_ValidateAnything(const SOPC_PKIProvider* pPKI, const SOPC_Certificate* pToValidate)
 {
+    /* avoid unused parameter compiler warning */
     (void) (pPKI);
     (void) (pToValidate);
+
     SOPC_Atomic_Int_Set(&pkiValidationAsked, true);
     return SOPC_STATUS_OK;
 }
 
 static void PKIStub_Free(SOPC_PKIProvider* pPKI)
 {
+    /* avoid unused parameter compiler warning */
     (void) pPKI;
 }
 

@@ -26,6 +26,7 @@
 static SOPC_ReturnStatus PKIPermissive_ValidateAnything(const SOPC_PKIProvider* pPKI,
                                                         const SOPC_Certificate* pToValidate)
 {
+    /* avoid unused parameter compiler warning */
     (void) (pPKI);
     (void) (pToValidate);
     return SOPC_STATUS_OK;

@@ -53,9 +53,10 @@ static uint32_t cptReadResps = 0;
 
 static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
+    /* avoid unused parameter compiler warning */
     (void) idOrStatus;
-    (void) param;
     (void) appContext;
+
     SOPC_EncodeableType* encType = NULL;
 
     if (event == SE_CLOSED_ENDPOINT)
@@ -125,6 +126,7 @@ static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatu
 static void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus)
 {
     // No notification shall be received when using local services
+    /* avoid unused parameter compiler warning */
     (void) event;
     (void) opParam;
     (void) opStatus;
@@ -158,8 +160,10 @@ static void* getReadRequest_verif_message(void)
 
 int main(int argc, char* argv[])
 {
+    /* avoid unused parameter compiler warning */
     (void) argc;
     (void) argv;
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     OpcUa_WriteRequest* pWriteReqSent = NULL;
     OpcUa_WriteRequest* pWriteReqCopy = NULL;

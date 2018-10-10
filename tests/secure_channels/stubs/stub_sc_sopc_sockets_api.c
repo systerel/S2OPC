@@ -42,7 +42,8 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent scEvent, uint32_t id, voi
     scParams->auxParam = auxParam;
 
     status = SOPC_AsyncQueue_BlockingEnqueue(socketsInputEvents, (void*) scParams);
-    (void) status; // status is not used if asserts are not compiled in
+
+    (void) status; // avoid unused parameter compiler warning: status is not used if asserts are not compiled in
     assert(status == SOPC_STATUS_OK);
 }
 

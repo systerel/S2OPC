@@ -56,6 +56,7 @@ uint32_t timersId[NB_TIMERS];
 
 static void timeout_event(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
+    /* avoid unused parameter compiler warning */
     (void) handler;
 
     uint32_t triggered = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &timersTriggered);

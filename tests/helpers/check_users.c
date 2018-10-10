@@ -82,6 +82,7 @@ static SOPC_ReturnStatus selectiveAuthenticationValidate(SOPC_UserAuthentication
                                                          const SOPC_ExtensionObject* token,
                                                          SOPC_UserAuthentication_Status* authenticated)
 {
+    /* avoid unused parameter compiler warning */
     (void) (authn);
     assert(NULL != token && NULL != authenticated);
 
@@ -115,7 +116,9 @@ static SOPC_ReturnStatus selectiveAuthorizationAllow(SOPC_UserAuthorization_Mana
                                                      const SOPC_User* user,
                                                      bool* authorized)
 {
+    /* avoid unused parameter compiler warning */
     (void) (authz);
+
     assert(NULL != nodeId && NULL != user && NULL != authorized && 1 <= attributeId && attributeId <= 22);
 
     /* Only the USERNAME is authorized */

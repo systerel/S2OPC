@@ -161,6 +161,7 @@ static void datachange_callback_do_nothing(const SOPC_LibSub_ConnectionId c_id,
                                            const SOPC_LibSub_DataId d_id,
                                            const SOPC_LibSub_Value* value)
 {
+    /* avoid unused parameter compiler warning */
     (void) c_id;
     (void) d_id;
     (void) value;

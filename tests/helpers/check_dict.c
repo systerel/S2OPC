@@ -306,6 +306,7 @@ END_TEST
 
 static void dict_callback_increment_u32(const void* key, const void* value, void* user_data)
 {
+    /* avoid unused parameter compiler warning */
     (void) key;
     (void) value;
 

@@ -779,8 +779,10 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                                    void* pParam,
                                    uintptr_t appCtx)
 {
+    /* avoid unused parameter compiler warning */
     (void) arg;
     (void) pParam;
+
     bool bProcess = true;
     SOPC_SLinkedListIterator pListIter = NULL;
 

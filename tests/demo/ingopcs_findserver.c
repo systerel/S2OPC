@@ -46,8 +46,10 @@ static void PrintServers(OpcUa_FindServersResponse* pResp);
 
 int main(int argc, char* argv[])
 {
+    /* avoid unused parameter compiler warning */
     (void) argc;
     (void) argv;
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t iWait = 0;
 

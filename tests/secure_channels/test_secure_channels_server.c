@@ -221,9 +221,11 @@ int main(int argc, char* argv[])
                 serviceEvent->auxParam != 0)
             { // SC connection index
 
+                /* avoid unused parameter compiler warning */
+                (void) scConfigIdx;
+
                 scConfigIdx = *(uint32_t*) serviceEvent->params;
                 scConnectionId = (uint32_t) serviceEvent->auxParam;
-                (void) scConfigIdx;
                 printf("<Stub_Server: Connection established from a client\n");
             }
             else
