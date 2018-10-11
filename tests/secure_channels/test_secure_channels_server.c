@@ -53,12 +53,6 @@ int main(int argc, char* argv[])
     SOPC_SerializedCertificate *crt_srv = NULL, *crt_ca = NULL;
     SOPC_SerializedAsymmetricKey* priv_srv = NULL;
 
-    // Secu policy configuration: empty
-    SOPC_SecurityPolicy secuConfig[NB_SECU_POLICY_CONFIGS];
-    SOPC_String_Initialize(&secuConfig[0].securityPolicy);
-    SOPC_String_Initialize(&secuConfig[1].securityPolicy);
-    SOPC_String_Initialize(&secuConfig[2].securityPolicy);
-
     // Services side stub code
     SOPC_Endpoint_Config epConfig;
     uint32_t epConfigIdx = 0;
@@ -170,12 +164,22 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy, SOPC_SecurityPolicy_Basic256_URI);
-        secuConfig[0].securityModes = SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
-        status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy, SOPC_SecurityPolicy_Basic256Sha256_URI);
-        secuConfig[1].securityModes = SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
-        status = SOPC_String_AttachFromCstring(&secuConfig[2].securityPolicy, SOPC_SecurityPolicy_None_URI);
-        secuConfig[2].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
+        SOPC_String_Initialize(&epConfig.secuConfigurations[0].securityPolicy);
+        status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[0].securityPolicy,
+                                               SOPC_SecurityPolicy_Basic256_URI);
+        epConfig.secuConfigurations[0].securityModes =
+            SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+
+        SOPC_String_Initialize(&epConfig.secuConfigurations[1].securityPolicy);
+        status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[1].securityPolicy,
+                                               SOPC_SecurityPolicy_Basic256Sha256_URI);
+        epConfig.secuConfigurations[1].securityModes =
+            SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+
+        SOPC_String_Initialize(&epConfig.secuConfigurations[2].securityPolicy);
+        status =
+            SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[2].securityPolicy, SOPC_SecurityPolicy_None_URI);
+        epConfig.secuConfigurations[2].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
     }
 
     // Init PKI provider and parse certificate and private key
@@ -197,7 +201,6 @@ int main(int argc, char* argv[])
     {
         epConfig.endpointURL = endpointUrl;
         epConfig.nbSecuConfigs = NB_SECU_POLICY_CONFIGS;
-        epConfig.secuConfigurations = secuConfig;
         epConfig.serverCertificate = crt_srv;
         epConfig.serverKey = priv_srv;
         epConfig.pki = pki;

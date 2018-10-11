@@ -37,14 +37,12 @@
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_key_manager.h"
 #include "sopc_logger.h"
-#include "sopc_macros.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
-#include "sopc_user_manager_internal.h"
 
 #include "session_core_bs.h"
 
@@ -71,10 +69,6 @@ static constants__t_application_context_i session_client_app_context[SOPC_MAX_SE
 static uint32_t session_expiration_timer[SOPC_MAX_SESSIONS + 1];
 static uint64_t session_RevisedSessionTimeout[SOPC_MAX_SESSIONS + 1];
 static SOPC_TimeReference server_session_latest_msg_receveived[SOPC_MAX_SESSIONS + 1];
-
-/* The local user. This implementation avoids user creation,
- * but its authorization manager is changed according to the endpoint configuration */
-static SOPC_UserWithAuthorization user_local = {.user = NULL, .authorizationManager = NULL};
 
 /*------------------------
    INITIALISATION Clause
@@ -254,91 +248,6 @@ void session_core_bs__delete_session_token(const constants__t_session_i session_
 void session_core_bs__delete_session_application_context(const constants__t_session_i session_core_bs__p_session)
 {
     session_client_app_context[session_core_bs__p_session] = 0;
-}
-
-void session_core_bs__allocate_valid_user(
-    const constants__t_user_token_i session_core_bs__p_user_token,
-    const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
-    constants__t_StatusCode_i* const session_core_bs__p_sc_valid_user,
-    constants__t_user_i* const session_core_bs__p_user)
-{
-    SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
-    assert(NULL != epConfig);
-
-    static SOPC_ExtensionObject anonymousIdentityToken = {
-        .Encoding = SOPC_ExtObjBodyEncoding_Object,
-        .TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric,
-        .TypeId.NodeId.Data.Numeric = OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary,
-        .Body.Object.ObjType = &OpcUa_AnonymousIdentityToken_EncodeableType,
-        /* When there is no default policyId for the AnonymousIdentityToken, it is unnecessary to even malloc it */
-        .Body.Object.Value = NULL};
-    SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
-    SOPC_UserAuthorization_Manager* authorizationManager = epConfig->authorizationManager;
-    SOPC_ExtensionObject* pUserIdentity = session_core_bs__p_user_token;
-
-    /* The NULL identity is also the anonymous identity */
-    if (NULL == pUserIdentity)
-    {
-        pUserIdentity = &anonymousIdentityToken;
-    }
-
-    SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_OK;
-    SOPC_ReturnStatus status =
-        SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, pUserIdentity, &authnStatus);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        *session_core_bs__p_sc_valid_user = constants__e_sc_bad_internal_error;
-    }
-    else
-    {
-        switch (authnStatus)
-        {
-        case SOPC_USER_AUTHENTICATION_OK:
-            *session_core_bs__p_user =
-                SOPC_UserWithAuthorization_CreateFromIdentityToken(session_core_bs__p_user_token, authorizationManager);
-            if (NULL == *session_core_bs__p_user)
-            {
-                *session_core_bs__p_sc_valid_user = constants__e_sc_bad_out_of_memory;
-            }
-            else
-            {
-                *session_core_bs__p_sc_valid_user = constants__e_sc_ok;
-            }
-            break;
-        case SOPC_USER_AUTHENTICATION_INVALID_TOKEN:
-            *session_core_bs__p_sc_valid_user = constants__e_sc_bad_identity_token_invalid;
-            break;
-        case SOPC_USER_AUTHENTICATION_REJECTED_TOKEN:
-            *session_core_bs__p_sc_valid_user = constants__e_sc_bad_identity_token_rejected;
-            break;
-        case SOPC_USER_AUTHENTICATION_ACCESS_DENIED:
-            *session_core_bs__p_sc_valid_user = constants__e_sc_bad_user_access_denied;
-            break;
-        default:
-            *session_core_bs__p_sc_valid_user = constants__e_sc_bad_internal_error;
-            break;
-        }
-    }
-}
-
-void session_core_bs__deallocate_user(const constants__t_user_i session_core_bs__p_user)
-{
-    SOPC_UserWithAuthorization* userauthz = session_core_bs__p_user;
-    SOPC_UserWithAuthorization_Free(&userauthz);
-}
-
-void session_core_bs__get_local_user(const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
-                                     constants__t_user_i* const session_core_bs__p_user)
-{
-    SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
-    assert(NULL != epConfig);
-
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    user_local.user = (SOPC_User*) SOPC_User_GetLocal();
-    SOPC_GCC_DIAGNOSTIC_RESTORE
-    user_local.authorizationManager = epConfig->authorizationManager;
-    *session_core_bs__p_user = &user_local;
 }
 
 void session_core_bs__drop_user_server(const constants__t_session_i session_core_bs__p_session)

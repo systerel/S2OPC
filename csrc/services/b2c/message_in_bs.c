@@ -233,6 +233,14 @@ void message_in_bs__is_valid_app_msg_in(const constants__t_msg_i message_in_bs__
     }
 }
 
+static SOPC_ExtensionObject nullAnonymousIdentityToken = {
+    .Encoding = SOPC_ExtObjBodyEncoding_Object,
+    .TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric,
+    .TypeId.NodeId.Data.Numeric = OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary,
+    .Body.Object.ObjType = &OpcUa_AnonymousIdentityToken_EncodeableType,
+    /* When there is no default policyId for the AnonymousIdentityToken, it is unnecessary to even malloc it */
+    .Body.Object.Value = NULL};
+
 void message_in_bs__read_activate_req_msg_identity_token(const constants__t_msg_i message_in_bs__p_msg,
                                                          t_bool* const message_in_bs__p_valid_user_token,
                                                          constants__t_user_token_i* const message_in_bs__p_user_token)
@@ -268,7 +276,7 @@ void message_in_bs__read_activate_req_msg_identity_token(const constants__t_msg_
     {
         /* NULL value is also the anonymous user identity token */
         *message_in_bs__p_valid_user_token = true;
-        *message_in_bs__p_user_token = constants__c_user_token_indet;
+        *message_in_bs__p_user_token = &nullAnonymousIdentityToken;
     }
 }
 

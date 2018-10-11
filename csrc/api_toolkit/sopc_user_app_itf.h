@@ -28,6 +28,7 @@
 
 #include <stdbool.h>
 
+#include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
 #include "sopc_types.h"
 #include "sopc_user_manager.h"
@@ -52,11 +53,51 @@ typedef struct SOPC_SecureChannel_Config
 #define SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
 #define SOPC_SECURITY_MODE_ANY_MASK 0x07
 
+/* Anonymous user security policy supported configuration */
+static const OpcUa_UserTokenPolicy c_userTokenPolicy_Anonymous = {
+    .TokenType = OpcUa_UserTokenType_Anonymous,
+    .PolicyId = {9, true, (SOPC_Byte*) "anonymous"},
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {0, true, NULL},
+};
+
+/* Username security policy supported with security policy None configuration */
+static const OpcUa_UserTokenPolicy c_userTokenPolicy_UserName_NoneSecurityPolicy = {
+    .TokenType = OpcUa_UserTokenType_UserName,
+    .PolicyId = {8, true, (SOPC_Byte*) "username"},
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {sizeof(SOPC_SecurityPolicy_None_URI) - 1, true,
+                          (SOPC_Byte*) SOPC_SecurityPolicy_None_URI}, /* None security policy shall be used only when
+                         secure channel security policy is non-None since password will be non-encrypted */
+};
+
+/* Username security policy supported default configuration */
+static const OpcUa_UserTokenPolicy c_userTokenPolicy_UserName_NullSecurityPolicy = {
+    .TokenType = OpcUa_UserTokenType_UserName,
+    .PolicyId = {8, true, (SOPC_Byte*) "username"},
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {0, true,
+                          NULL}, /* Null security policy will use the secure channel security policy. It shall not be
+                                    used when secure channel security policy is None. It is responsibility of
+                                    authorization manager to deal with encryption if necessary in this case. */
+};
+
+#define SOPC_MAX_SECU_POLICIES_CFG 5 /* Maximum number of security policies in a configuration array */
+
 typedef struct SOPC_SecurityPolicy
 {
     SOPC_String securityPolicy; /**< Security policy URI supported */
-    uint16_t securityModes; /**< Mask of security modes supported (use combination of SECURITY_MODE_*_MASK values) */
-    void* padding;          /**< Binary compatibility */
+    uint16_t securityModes;     /**< Mask of security modes supported (use combination of SOPC_SECURITY_MODE_*_MASK) */
+    uint8_t nbOfUserTokenPolicies; /**< The number elements in the user security policies supported array (<= 10) */
+    OpcUa_UserTokenPolicy
+        userTokenPolicies[SOPC_MAX_SECU_POLICIES_CFG]; /**< The array of user security policies supported,
+                                                        * use the constant predefined policies provided
+                                                        * (password encryption is not provided and shall be implemented
+                                                        *  by authorization manager if applicable)
+                                                        */
 } SOPC_SecurityPolicy;
 
 /* Server static configuration of a Endpoint listener */
@@ -67,7 +108,7 @@ typedef struct SOPC_Endpoint_Config
     SOPC_SerializedAsymmetricKey* serverKey;
     SOPC_PKIProvider* pki;
     uint8_t nbSecuConfigs;
-    SOPC_SecurityPolicy* secuConfigurations;
+    SOPC_SecurityPolicy secuConfigurations[SOPC_MAX_SECU_POLICIES_CFG];
     OpcUa_ApplicationDescription serverDescription;
     SOPC_UserAuthentication_Manager* authenticationManager;
     SOPC_UserAuthorization_Manager* authorizationManager;

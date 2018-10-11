@@ -305,11 +305,6 @@ int main(int argc, char* argv[])
     AddressSpaceLoader address_space_loader = AS_LOADER_EMBEDDED;
     SOPC_AddressSpace* address_space = NULL;
 
-    SOPC_SecurityPolicy secuConfig[3];
-    SOPC_String_Initialize(&secuConfig[0].securityPolicy);
-    SOPC_String_Initialize(&secuConfig[1].securityPolicy);
-    SOPC_String_Initialize(&secuConfig[2].securityPolicy);
-
     // Get Toolkit Configuration
     SOPC_Build_Info build_info = SOPC_ToolkitConfig_GetBuildInfo();
     printf("toolkitVersion: %s\n", build_info.toolkitVersion);
@@ -319,18 +314,46 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy, SOPC_SecurityPolicy_None_URI);
-        secuConfig[0].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
+        /*
+         * 1st Security policy is None with anonymous and username (non encrypted) authentication allowed
+         * (for tests only, otherwise users on unsecure channel shall be forbidden)
+         */
+        SOPC_String_Initialize(&epConfig.secuConfigurations[0].securityPolicy);
+        status =
+            SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[0].securityPolicy, SOPC_SecurityPolicy_None_URI);
+        epConfig.secuConfigurations[0].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
+        epConfig.secuConfigurations[0].nbOfUserTokenPolicies = 2;
+        epConfig.secuConfigurations[0].userTokenPolicies[0] =
+            c_userTokenPolicy_Anonymous; /* Necessary for tests only */
+        epConfig.secuConfigurations[0].userTokenPolicies[1] =
+            c_userTokenPolicy_UserName_NoneSecurityPolicy; /* Necessary for UACTT tests only */
+
+        /*
+         * 2nd Security policy is Basic256 with anonymous and username (non encrypted) authentication allowed
+         */
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy, SOPC_SecurityPolicy_Basic256_URI);
-            secuConfig[1].securityModes = SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+            SOPC_String_Initialize(&epConfig.secuConfigurations[1].securityPolicy);
+            status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[1].securityPolicy,
+                                                   SOPC_SecurityPolicy_Basic256_URI);
+            epConfig.secuConfigurations[1].securityModes =
+                SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+            epConfig.secuConfigurations[1].nbOfUserTokenPolicies = 2;
+            epConfig.secuConfigurations[1].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
+            epConfig.secuConfigurations[1].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
         }
+        /*
+         * 2nd Security policy is Basic256 with anonymous and username (non encrypted) authentication allowed
+         */
         if (SOPC_STATUS_OK == status)
         {
-            status =
-                SOPC_String_AttachFromCstring(&secuConfig[2].securityPolicy, SOPC_SecurityPolicy_Basic256Sha256_URI);
-            secuConfig[2].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+            SOPC_String_Initialize(&epConfig.secuConfigurations[2].securityPolicy);
+            status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[2].securityPolicy,
+                                                   SOPC_SecurityPolicy_Basic256Sha256_URI);
+            epConfig.secuConfigurations[2].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+            epConfig.secuConfigurations[2].nbOfUserTokenPolicies = 2;
+            epConfig.secuConfigurations[2].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
+            epConfig.secuConfigurations[2].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
         }
     }
 
@@ -375,7 +398,6 @@ int main(int argc, char* argv[])
         epConfig.pki = NULL;
     }
 
-    epConfig.secuConfigurations = secuConfig;
     if (secuActive)
     {
         epConfig.nbSecuConfigs = 3;
@@ -577,10 +599,6 @@ int main(int argc, char* argv[])
 
     // Deallocate locally allocated data
     SOPC_AddressSpace_Delete(address_space);
-
-    SOPC_String_Clear(&secuConfig[0].securityPolicy);
-    SOPC_String_Clear(&secuConfig[1].securityPolicy);
-    SOPC_String_Clear(&secuConfig[2].securityPolicy);
 
     if (secuActive != false)
     {

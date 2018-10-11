@@ -129,7 +129,13 @@ SETS
     t_session_i;
     t_session_token_i; /* (SOPC_NodeId*) */
     t_user_i; /* Server-side user */
-    t_user_token_i; /* Client-side user */
+    t_user_token_i; /* Raw OPC UA user token */
+    t_user_token_type_i = {c_userTokenType_indet,
+                           e_userTokenType_anonymous,
+                           e_userTokenType_userName,
+                           e_userTokenType_x509,
+                           e_userTokenType_issued
+                          };
     t_Nonce_i; /* (SOPC_ByteString*) */
     t_SignatureData_i; /* (OpcUa_SignatureData*) */
     t_msg_header_i; /* (OpcUa_RequestHeader*) OR (OpcUa_ResponseHeader*) */

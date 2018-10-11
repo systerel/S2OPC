@@ -157,43 +157,6 @@ OPERATIONS
     END
     ;
 
-    /* Server-side validation */
-    p_sc_valid_user, p_user <-- allocate_valid_user (p_user_token, p_endpoint_config_idx) =
-    PRE
-        p_user_token : t_user_token_i &
-        p_endpoint_config_idx : t_endpoint_config_idx_i &
-        p_endpoint_config_idx : t_endpoint_config_idx
-    THEN
-        p_sc_valid_user,
-        p_user
-        :(p_sc_valid_user : t_StatusCode_i &
-          p_sc_valid_user : t_StatusCode &
-          p_user : t_user_i &
-          (p_sc_valid_user = e_sc_ok => p_user : t_user))
-    END
-    ;
-
-    deallocate_user (p_user) =
-    PRE
-        p_user : t_user_i
-    THEN
-        skip
-    END
-    ;
-
-    /* This operation does not require a call to deallocate.
-     * It fetches the pointer to the local user, which is static but not const.
-     * Hence, this operation shall be called between endpoint context switches. */
-    p_user <-- get_local_user (endpoint_config_idx) =
-    PRE
-        endpoint_config_idx : t_endpoint_config_idx_i &
-        endpoint_config_idx : t_endpoint_config_idx
-    THEN
-        p_user :( p_user : t_user_i &
-                  p_user : t_user )
-    END
-    ;
-
     drop_user_server (p_session) =
     PRE
         p_session : t_session_i &

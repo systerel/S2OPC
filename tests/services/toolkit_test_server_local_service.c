@@ -185,13 +185,14 @@ int main(int argc, char* argv[])
 
     SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_Load();
 
-    SOPC_SecurityPolicy secuConfig[1];
-    SOPC_String_Initialize(&secuConfig[0].securityPolicy);
-
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy, SOPC_SecurityPolicy_Basic256Sha256_URI);
-        secuConfig[0].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+        SOPC_String_Initialize(&epConfig.secuConfigurations[0].securityPolicy);
+        status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[0].securityPolicy,
+                                               SOPC_SecurityPolicy_Basic256Sha256_URI);
+        epConfig.secuConfigurations[0].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+        epConfig.secuConfigurations[0].nbOfUserTokenPolicies = 1;
+        epConfig.secuConfigurations[0].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
     }
 
     if (SOPC_STATUS_OK == status)
@@ -229,7 +230,6 @@ int main(int argc, char* argv[])
         printf("<Test_Server_Local_Service: Certificates and key loaded\n");
     }
 
-    epConfig.secuConfigurations = secuConfig;
     epConfig.nbSecuConfigs = 1;
 
     // Application description configuration
@@ -491,8 +491,6 @@ int main(int argc, char* argv[])
     }
 
     // Deallocate locally allocated data
-
-    SOPC_String_Clear(&secuConfig[0].securityPolicy);
 
     SOPC_KeyManager_SerializedCertificate_Delete(serverCertificate);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(serverKey);
