@@ -190,7 +190,7 @@ OPERATIONS
     ;
 
     /* a_Value, setter */
-    serviceStatusCode, prev_value, prev_valueStatus <-- set_Value(p_user, node, dataValue, index_range) =
+    serviceStatusCode, prev_dataValue <-- set_Value(p_user, node, dataValue, index_range) =
     PRE
         p_user : t_user_i   &
         p_user : t_user     &
@@ -208,32 +208,29 @@ OPERATIONS
                 HasRange_VariantIndex(DataValue_Variant(dataValue) |-> index_range) = TRUE
             THEN
                 serviceStatusCode := e_sc_ok ||
-                prev_value :(prev_value : t_Variant_i & prev_value = a_Value(node)) ||
-                a_Value(node) := DataValue_Variant(dataValue) ||
-                prev_valueStatus :(prev_valueStatus : t_StatusCode_i &
-                                   prev_valueStatus = a_Value_StatusCode(node))
+                prev_dataValue :(prev_dataValue : t_DataValue_i &
+                                 prev_dataValue : t_DataValue &
+                                 DataValue_Variant(prev_dataValue) = a_Value(node) &
+                                 DataValue_StatusCode(prev_dataValue) = a_Value_StatusCode(node)) ||
+                a_Value(node) := DataValue_Variant(dataValue)
             ELSIF IsValid_VariantIndex(DataValue_Variant(dataValue) |-> index_range) = FALSE
             THEN
                 serviceStatusCode := e_sc_bad_index_range_invalid ||
-                prev_value := c_Variant_indet ||
-                prev_valueStatus := c_StatusCode_indet
+                prev_dataValue := c_DataValue_indet
             ELSE
                 serviceStatusCode := e_sc_bad_index_range_no_data ||
-                prev_value := c_Variant_indet ||
-                prev_valueStatus := c_StatusCode_indet
+                prev_dataValue := c_DataValue_indet
             END
         OR
             serviceStatusCode
             :(serviceStatusCode : t_StatusCode_i &
                 serviceStatusCode : {e_sc_bad_out_of_memory, e_sc_bad_internal_error}) ||
-            prev_value := c_Variant_indet ||
-            prev_valueStatus := c_StatusCode_indet
+            prev_dataValue := c_DataValue_indet
         END
     END
     ;
 
     /* a_Value_StatusCode */
-    /* p_user could be avoided here, but this would put more constraints on the caller */
     sc <-- get_Value_StatusCode(p_user, node) =
     PRE
         p_user : t_user_i &
@@ -257,9 +254,18 @@ OPERATIONS
     ;
 
     /* Frees a value previously malloced with read_AddressSpace_Attribute_value */
-    read_AddressSpace_free_value(val) =
+    read_AddressSpace_free_variant(val) =
     PRE
         val : t_Variant_i
+    THEN
+        skip
+    END
+    ;
+
+    /* Frees a value previously malloced with set_Value */
+    write_AddressSpace_free_dataValue(data) =
+    PRE
+        data : t_DataValue_i
     THEN
         skip
     END

@@ -111,7 +111,7 @@ OPERATIONS
                         END
                     END;
                     set_read_response(p_resp_msg, p_rvi, l_value, l_sc, p_aid);
-                    read_AddressSpace_free_value(l_value)
+                    read_AddressSpace_free_variant(l_value)
                 ELSE
                     /* User was not authorized */
                     set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_user_access_denied, p_aid)

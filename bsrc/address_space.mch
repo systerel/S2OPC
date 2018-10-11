@@ -284,7 +284,7 @@ OPERATIONS
     ;
 
     /* Frees a value previously malloced with read_AddressSpace_Attribute_value */
-    read_AddressSpace_free_value(val) =
+    read_AddressSpace_free_variant(val) =
     PRE
         val : t_Variant_i
     THEN

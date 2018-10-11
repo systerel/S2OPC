@@ -27,12 +27,10 @@ SEES
 
 OPERATIONS
 
-    gen_data_changed_event (p_prev_value, p_prev_value_status, p_new_value_pointer) =
+    gen_data_changed_event (p_prev_dataValue, p_new_value_pointer) =
     PRE
-        p_prev_value : t_Variant_i &
-        p_prev_value : t_Variant &
-        p_prev_value_status : t_StatusCode_i &
-        p_prev_value_status : t_StatusCode &
+        p_prev_dataValue : t_DataValue_i &
+        p_prev_dataValue : t_DataValue &
         p_new_value_pointer : t_WriteValuePointer_i &
         p_new_value_pointer : t_WriteValuePointer
     THEN
@@ -41,10 +39,10 @@ OPERATIONS
     END
     ;
 
-    gen_data_changed_event_failed (p_prev_value) =
+    gen_data_changed_event_failed (p_prev_dataValue) =
     PRE
-        p_prev_value : t_Variant_i &
-        p_prev_value : t_Variant
+        p_prev_dataValue : t_DataValue_i &
+        p_prev_dataValue : t_DataValue_i
     THEN
         /* Failed to generate data event, clear the prev value and generate trace */
         skip

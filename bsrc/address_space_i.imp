@@ -51,7 +51,7 @@ PROMOTES
     get_RefIndex_Reference,
     get_Value_StatusCode,
     read_AddressSpace_clear_value,
-    read_AddressSpace_free_value,
+    read_AddressSpace_free_variant,
     write_WriteResponse_msg_out,
     get_user_authorization
 
@@ -63,7 +63,7 @@ INITIALISATION
 
 LOCAL_OPERATIONS
     /* Outer treat operation. Validates isvalid, validates user, records the write. */
-    serviceStatusCode, prev_value, prev_sc <-- treat_write_1(isvalid, status, p_user, nid, aid, dataValue, index_range) =
+    serviceStatusCode, prev_dataValue <-- treat_write_1(isvalid, status, p_user, nid, aid, dataValue, index_range) =
     PRE
         isvalid : BOOL &
         status : t_StatusCode_i &
@@ -86,14 +86,12 @@ LOCAL_OPERATIONS
         index_range : t_IndexRange_i
     THEN
         serviceStatusCode,
-        prev_sc,
-        prev_value,
+        prev_dataValue,
         a_Value
         :(
             serviceStatusCode : t_StatusCode_i &
             serviceStatusCode : t_StatusCode &
-            prev_sc : t_StatusCode_i &
-            prev_value : t_Variant_i &
+            prev_dataValue : t_DataValue_i &
             a_Value : t_Node +-> t_Variant &
             (isvalid = TRUE &
              nid : ran(a_NodeId) &
@@ -103,8 +101,9 @@ LOCAL_OPERATIONS
              e_operation_type_read |-> nid |-> aid |-> p_user : s_AuthorizedOperations
              =>
              serviceStatusCode = e_sc_ok &
-             prev_sc = a_Value_StatusCode(a_NodeId~(nid)) &
-             prev_value = a_Value$0(a_NodeId~(nid)) &
+             prev_dataValue : t_DataValue &
+             DataValue_StatusCode(prev_dataValue) = a_Value_StatusCode(a_NodeId~(nid)) &
+             DataValue_Variant(prev_dataValue) = a_Value$0(a_NodeId~(nid)) &
              a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> DataValue_Variant(dataValue)}) &
             (not(isvalid = TRUE &
                  status : t_StatusCode_i &
@@ -153,8 +152,7 @@ OPERATIONS
         l_wvi,
         l_status1,
         l_status2,
-        l_prev_value_status,
-        l_prev_value,
+        l_prev_dataValue,
         l_isvalid,
         l_local_treatment,
         l_wv,
@@ -168,19 +166,19 @@ OPERATIONS
             l_continue, l_wvi <-- continue_iter_write_request;
             l_isvalid, l_status1, l_nid, l_aid, l_dataValue, l_index_range <-- getall_WriteValue(l_wvi);
             /* Avoids the IFs with a local operation. */
-            l_status2, l_prev_value, l_prev_value_status <-- treat_write_1(l_isvalid, l_status1, p_user, l_nid, l_aid, l_dataValue, l_index_range);
+            l_status2, l_prev_dataValue <-- treat_write_1(l_isvalid, l_status1, p_user, l_nid, l_aid, l_dataValue, l_index_range);
             set_ResponseWrite_StatusCode(l_wvi, l_status2);
             l_wv <-- getall_WriteValuePointer(l_wvi);
             IF l_status2 = e_sc_ok
             THEN
                 l_bres_wv_copy, l_wv_copy <-- copy_write_value_pointer_content (l_wv);
                 IF l_bres_wv_copy = TRUE THEN
-                    gen_data_changed_event (l_prev_value, l_prev_value_status, l_wv_copy)
+                    gen_data_changed_event (l_prev_dataValue, l_wv_copy)
                 ELSE
-                    gen_data_changed_event_failed (l_prev_value)
+                    gen_data_changed_event_failed (l_prev_dataValue)
                 END
             ELSE
-                read_AddressSpace_free_value(l_prev_value)
+                write_AddressSpace_free_dataValue (l_prev_dataValue)
             END;
             l_local_treatment <-- is_local_service_treatment;
             IF l_local_treatment = FALSE
@@ -250,16 +248,15 @@ OPERATIONS
     END
     ;
 
-    serviceStatusCode, prev_value, prev_sc <-- treat_write_1(isvalid, status, p_user, nid, aid, dataValue, index_range) =
+    serviceStatusCode, prev_dataValue <-- treat_write_1(isvalid, status, p_user, nid, aid, dataValue, index_range) =
     VAR
         l_isvalid,
         l_node,
         l_ncl,
         l_authorized_write
     IN
+        prev_dataValue := c_DataValue_indet;
         IF isvalid = TRUE THEN
-            prev_sc := c_StatusCode_indet;
-            prev_value := c_Variant_indet;
             serviceStatusCode := e_sc_bad_node_id_unknown;
             l_isvalid, l_node <-- readall_AddressSpace_Node(nid);
             IF l_isvalid = TRUE THEN
@@ -270,7 +267,7 @@ OPERATIONS
                         /* TODO: it should be decided what to do when the value is write only */
                         l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
                         IF l_authorized_write = TRUE THEN
-                            serviceStatusCode, prev_value, prev_sc <-- set_Value(p_user, l_node, dataValue, index_range)
+                            serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, dataValue, index_range)
                         ELSE
                             serviceStatusCode := e_sc_bad_user_access_denied
                         END
@@ -282,9 +279,7 @@ OPERATIONS
             /* TODO: ELSE clause */
             END
         ELSE
-            serviceStatusCode := status;
-            prev_sc := c_StatusCode_indet;
-            prev_value := c_Variant_indet
+            serviceStatusCode := status
         END
     END
 

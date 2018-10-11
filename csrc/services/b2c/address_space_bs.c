@@ -155,7 +155,8 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
                                                          constants__t_StatusCode_i* const address_space_bs__sc,
                                                          constants__t_Variant_i* const address_space_bs__variant)
 {
-    (void) (address_space_bs__p_user); /* User is already authorized for this operation */
+    (void) (address_space_bs__p_user); /* Keep for B precondition: User is already authorized for this operation */
+
     assert(NULL != address_space_bs__node);
     SOPC_AddressSpace_Item* item = address_space_bs__node;
     SOPC_Variant* value = NULL;
@@ -230,9 +231,9 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
 
 static constants__t_StatusCode_i set_value_full(SOPC_Variant* node_value,
                                                 const SOPC_Variant* new_value,
-                                                SOPC_Variant** previous_value)
+                                                SOPC_Variant* previous_value)
 {
-    SOPC_Variant_Move(*previous_value, node_value);
+    SOPC_Variant_Move(previous_value, node_value);
     SOPC_Variant_Clear(node_value);
     SOPC_Variant_Initialize(node_value);
     SOPC_ReturnStatus status = SOPC_Variant_Copy(node_value, new_value);
@@ -243,7 +244,7 @@ static constants__t_StatusCode_i set_value_full(SOPC_Variant* node_value,
 static constants__t_StatusCode_i set_value_indexed_helper(SOPC_Variant* node_value,
                                                           const SOPC_Variant* new_value,
                                                           const SOPC_NumericRange* range,
-                                                          SOPC_Variant** previous_value)
+                                                          SOPC_Variant* previous_value)
 {
     bool has_range = false;
     SOPC_ReturnStatus status = SOPC_Variant_HasRange(node_value, range, &has_range);
@@ -263,7 +264,7 @@ static constants__t_StatusCode_i set_value_indexed_helper(SOPC_Variant* node_val
         return constants__e_sc_bad_index_range_no_data;
     }
 
-    status = SOPC_Variant_Copy(*previous_value, node_value);
+    status = SOPC_Variant_Copy(previous_value, node_value);
 
     if (status != SOPC_STATUS_OK)
     {
@@ -283,7 +284,7 @@ static constants__t_StatusCode_i set_value_indexed_helper(SOPC_Variant* node_val
 static constants__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
                                                    const SOPC_Variant* new_value,
                                                    const SOPC_String* range_str,
-                                                   SOPC_Variant** previous_value)
+                                                   SOPC_Variant* previous_value)
 {
     SOPC_NumericRange* range = NULL;
     SOPC_ReturnStatus status = SOPC_NumericRange_Parse(SOPC_String_GetRawCString(range_str), &range);
@@ -305,16 +306,14 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
                                  const constants__t_DataValue_i address_space_bs__dataValue,
                                  const constants__t_IndexRange_i address_space_bs__index_range,
                                  constants__t_StatusCode_i* const address_space_bs__serviceStatusCode,
-                                 constants__t_Variant_i* const address_space_bs__prev_value,
-                                 constants__t_StatusCode_i* const address_space_bs__prev_valueStatus)
+                                 constants__t_DataValue_i* const address_space_bs__prev_dataValue)
 {
-    (void) (address_space_bs__p_user); /* User is already authorized for this operation */
+    (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Item* item = address_space_bs__node;
     SOPC_Variant* pvar = SOPC_AddressSpace_Item_Get_Value(item);
-    *address_space_bs__prev_value = SOPC_Variant_Create();
-    *address_space_bs__prev_valueStatus = constants__c_StatusCode_indet;
+    *address_space_bs__prev_dataValue = calloc(1, sizeof(SOPC_DataValue));
 
-    if (*address_space_bs__prev_value == NULL)
+    if (*address_space_bs__prev_dataValue == NULL)
     {
         *address_space_bs__serviceStatusCode = constants__e_sc_bad_out_of_memory;
         return;
@@ -323,23 +322,25 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
     if (address_space_bs__index_range->Length <= 0)
     {
         *address_space_bs__serviceStatusCode =
-            set_value_full(pvar, &address_space_bs__dataValue->Value, address_space_bs__prev_value);
+            set_value_full(pvar, &address_space_bs__dataValue->Value, &(*address_space_bs__prev_dataValue)->Value);
     }
     else
     {
-        *address_space_bs__serviceStatusCode = set_value_indexed(
-            pvar, &address_space_bs__dataValue->Value, address_space_bs__index_range, address_space_bs__prev_value);
+        *address_space_bs__serviceStatusCode =
+            set_value_indexed(pvar, &address_space_bs__dataValue->Value, address_space_bs__index_range,
+                              &(*address_space_bs__prev_dataValue)->Value);
     }
 
     if (*address_space_bs__serviceStatusCode == constants__e_sc_ok)
     {
-        util_status_code__C_to_B(item->value_status, address_space_bs__prev_valueStatus);
+        (*address_space_bs__prev_dataValue)->Status = item->value_status;
         item->value_status = address_space_bs__dataValue->Status;
     }
     else
     {
-        SOPC_Variant_Delete(*address_space_bs__prev_value);
-        *address_space_bs__prev_value = NULL;
+        SOPC_DataValue_Clear(*address_space_bs__prev_dataValue);
+        free(*address_space_bs__prev_dataValue);
+        *address_space_bs__prev_dataValue = NULL;
     }
 }
 
@@ -357,9 +358,15 @@ void address_space_bs__read_AddressSpace_clear_value(const constants__t_Variant_
     SOPC_Variant_Clear(address_space_bs__val);
 }
 
-void address_space_bs__read_AddressSpace_free_value(const constants__t_Variant_i address_space_bs__val)
+void address_space_bs__read_AddressSpace_free_variant(const constants__t_Variant_i address_space_bs__val)
 {
     SOPC_Variant_Delete(address_space_bs__val);
+}
+
+void address_space_bs__write_AddressSpace_free_dataValue(const constants__t_DataValue_i address_space_bs__data)
+{
+    SOPC_DataValue_Clear(address_space_bs__data);
+    free(address_space_bs__data);
 }
 
 void address_space_bs__get_BrowseName(const constants__t_Node_i address_space_bs__p_node,

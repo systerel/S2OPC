@@ -33,24 +33,20 @@ void gen_subscription_event_bs__INITIALISATION(void) {}
    OPERATIONS Clause
   --------------------*/
 void gen_subscription_event_bs__gen_data_changed_event(
-    const constants__t_Variant_i gen_subscription_event_bs__p_prev_value,
-    const constants__t_StatusCode_i gen_subscription_event_bs__p_prev_value_status,
+    const constants__t_DataValue_i gen_subscription_event_bs__p_prev_dataValue,
     const constants__t_WriteValuePointer_i gen_subscription_event_bs__p_new_value_pointer)
 {
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
     OpcUa_WriteValue* newValue = gen_subscription_event_bs__p_new_value_pointer;
     OpcUa_WriteValue* oldValue = malloc(sizeof(OpcUa_WriteValue));
     OpcUa_WriteValue_Initialize((void*) oldValue);
-    SOPC_Variant* oldVariantValue = gen_subscription_event_bs__p_prev_value;
 
     if (NULL != oldValue)
     {
         /* Set old data in old WriteValue */
-        oldValue->Value.Value = *oldVariantValue;
+        oldValue->Value = *gen_subscription_event_bs__p_prev_dataValue;
         // Free variant structure container only, content copied in WriteValue
-        free(oldVariantValue);
-        // TODO: set timestamps (not available: current time always returned)
-        util_status_code__B_to_C(gen_subscription_event_bs__p_prev_value_status, &oldValue->Value.Status);
+        free(gen_subscription_event_bs__p_prev_dataValue);
 
         /* Copy common fields with new WriteValue */
         oldValue->AttributeId = newValue->AttributeId;
@@ -78,8 +74,8 @@ void gen_subscription_event_bs__gen_data_changed_event(
     }
     else
     {
-        SOPC_Variant_Clear(oldVariantValue);
-        free(oldVariantValue);
+        SOPC_DataValue_Clear(gen_subscription_event_bs__p_prev_dataValue);
+        free(gen_subscription_event_bs__p_prev_dataValue);
         OpcUa_WriteValue_Clear(newValue);
         free(newValue);
 
@@ -90,10 +86,10 @@ void gen_subscription_event_bs__gen_data_changed_event(
 }
 
 void gen_subscription_event_bs__gen_data_changed_event_failed(
-    const constants__t_Variant_i gen_subscription_event_bs__p_prev_value)
+    const constants__t_DataValue_i gen_subscription_event_bs__p_prev_dataValue)
 {
-    SOPC_Variant_Clear(gen_subscription_event_bs__p_prev_value);
-    free(gen_subscription_event_bs__p_prev_value);
+    SOPC_DataValue_Clear(gen_subscription_event_bs__p_prev_dataValue);
+    free(gen_subscription_event_bs__p_prev_dataValue);
 
     SOPC_Logger_TraceError(
         "gen_subscription_event_bs__gen_data_changed_event_failed: failed to generate a data changed event (out of "
