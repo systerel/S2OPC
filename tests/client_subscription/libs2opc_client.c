@@ -653,7 +653,6 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId)
     assert(SOPC_STATUS_OK == mutStatus);
 
     /* Wait for the connection to be closed */
-    /* TODO: use Mutex and CV */
     if (SOPC_STATUS_OK == status)
     {
         while (!SOPC_StaMac_IsError(pSM) && SOPC_StaMac_IsConnected(pSM))

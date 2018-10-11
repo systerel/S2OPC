@@ -465,7 +465,10 @@ SOPC_ReturnStatus SOPC_LibSub_AsyncSendRequestOnSession(SOPC_LibSub_ConnectionId
  @param c_id
     The connection id to disconnect
  @return
-    The operation status */
+    The operation status. Erroneous case are:
+    - unitialized or unconfigured toolkit (SOPC_STATUS_INVALID_STATE),
+    - inexisting connection (SOPC_STATUS_INVALID_PARAMETERS),
+    - already closed connection (SOPC_STATUS_NOK). */
 SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId);
 
 /*--------------------------------

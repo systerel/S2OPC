@@ -316,9 +316,10 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
 
 SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
 {
-    SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (!SOPC_StaMac_IsConnected(pSM))
     {
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "StopSession on a disconnected machine.");
@@ -332,8 +333,8 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
         pSM->state = stClosing;
     }
 
-    status = Mutex_Unlock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
