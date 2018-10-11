@@ -49,9 +49,15 @@ typedef enum
     OpcUa_MessageSecurityMode_SignAndEncrypt = 3
 } OpcUa_MessageSecurityMode;
 
-//#define SOPC_SecurityPolicy_None_URI "http://opcfoundation.org/UA/SecurityPolicy#None"
-//#define SOPC_SecurityPolicy_Basic256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
-//#define SOPC_SecurityPolicy_Basic256Sha256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
+const char* SOPC_SecurityPolicy_None_URI =
+    "http:/"
+    "/opcfoundation.org/UA/SecurityPolicy#None";
+const char* SOPC_SecurityPolicy_Basic256_URI =
+    "http:/"
+    "/opcfoundation.org/UA/SecurityPolicy#Basic256";
+const char* SOPC_SecurityPolicy_Basic256Sha256_URI =
+    "http:/"
+    "/opcfoundation.org/UA/SecurityPolicy#Basic256Sha256";
 
 void SOPC_Sleep(unsigned int milliseconds);
 
