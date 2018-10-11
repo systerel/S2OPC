@@ -73,7 +73,8 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
             .IndexRange = {.Length = 0},
             .Value = {.Value = {.BuiltInTypeId = SOPC_Int64_Id,
                                 .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                .Value.Int64 = (10000 + (int64_t) i) * ((int64_t) i % 2 ? 1 : -1)}}};
+                                .Value.Int64 = (10000 + (int64_t) i) * ((int64_t) i % 2 ? 1 : -1)},
+                      .Status = SOPC_GoodGenericStatus}};
     }
 
     /* uint32 */
@@ -86,7 +87,8 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_UInt32_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                   .Value.Uint32 = 1000 + (uint32_t) i}}};
+                                                   .Value.Uint32 = 1000 + (uint32_t) i},
+                                         .Status = SOPC_GoodGenericStatus}};
     }
 
     /* double */
@@ -99,7 +101,8 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_Double_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                   .Value.Doublev = pow(2, (double) (i + 1))}}};
+                                                   .Value.Doublev = pow(2, (double) (i + 1))},
+                                         .Status = SOPC_GoodGenericStatus}};
     }
 
     /* String */
@@ -120,7 +123,8 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_String_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                   .Value.String = buf}}};
+                                                   .Value.String = buf},
+                                         .Status = SOPC_GoodGenericStatus}};
     }
 
     /* ByteString */
@@ -141,7 +145,8 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_ByteString_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                   .Value.Bstring = buf}}};
+                                                   .Value.Bstring = buf},
+                                         .Status = SOPC_GoodGenericStatus}};
     }
 
     /* XmlElt */
@@ -162,7 +167,8 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_XmlElement_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                   .Value.XmlElt = buf}}};
+                                                   .Value.XmlElt = buf},
+                                         .Status = OpcUa_BadDataUnavailable}};
     }
 
     OpcUa_WriteRequest* pReq = DESIGNATE_NEW(OpcUa_WriteRequest, .encodeableType = &OpcUa_WriteRequest_EncodeableType,
@@ -271,7 +277,7 @@ bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, OpcUa_ReadRespo
 {
     bool bVerif = true;
     int32_t i;
-    int32_t cmp;
+    int32_t cmp = -1;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     if (NULL == pWriteReq || NULL == pReadResp)
@@ -290,9 +296,22 @@ bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, OpcUa_ReadRespo
     /* Verify that the read value is the requested write value */
     for (i = 0; i < pReadResp->NoOfResults; ++i)
     {
-        status = SOPC_Variant_Compare(&pReadResp->Results[i].Value,            /* <-- Variant */
-                                      &pWriteReq->NodesToWrite[i].Value.Value, /* <-- Variant */
-                                      &cmp);
+        // Check statusCode of the value is the same
+        if (pReadResp->Results[i].Status == pWriteReq->NodesToWrite[i].Value.Status)
+        {
+            status = SOPC_STATUS_OK;
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        // Check value is the same
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_Variant_Compare(&pReadResp->Results[i].Value,            /* <-- Variant */
+                                          &pWriteReq->NodesToWrite[i].Value.Value, /* <-- Variant */
+                                          &cmp);
+        }
         if (status != SOPC_STATUS_OK || cmp != 0)
         {
             printf("Response[rvi = %" PRIi32 "] is different from Request[wvi = %" PRIi32 "] (Compare sc = %" PRIi32
@@ -300,8 +319,10 @@ bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, OpcUa_ReadRespo
                    ")\n+ Expected "
                    "value:\n",
                    i, i, status, cmp);
+            printf("Value status = 0x%X\n", pWriteReq->NodesToWrite[i].Value.Status);
             util_variant__print_SOPC_Variant(&pWriteReq->NodesToWrite[i].Value.Value);
             printf("+ Read value:\n");
+            printf("Value status = 0x%X\n", pReadResp->Results[i].Status);
             util_variant__print_SOPC_Variant(&pReadResp->Results[i].Value);
             bVerif = false;
         }

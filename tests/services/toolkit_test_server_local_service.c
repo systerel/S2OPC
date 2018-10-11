@@ -334,6 +334,10 @@ int main(int argc, char* argv[])
         SOPC_ToolkitServer_AsyncOpenEndpoint(epConfigIdx);
     }
 
+    /*
+     * LOCAL SERVICE: GetEndpoints
+     */
+
     /* Asynchronous request to get endpoints */
     if (SOPC_STATUS_OK == status)
     {
@@ -362,6 +366,10 @@ int main(int argc, char* argv[])
         printf("<Test_Client_Toolkit: GetEndpoints Response received: OK\n");
     }
 
+    /*
+     * LOCAL SERVICE: Read initial node attributes values
+     */
+
     if (SOPC_STATUS_OK == status)
     {
         /* Create a service request message and send it through session (read service)*/
@@ -379,6 +387,10 @@ int main(int argc, char* argv[])
         loopCpt++;
         SOPC_Sleep(sleepTimeout);
     }
+
+    /*
+     * LOCAL SERVICE: Write node values
+     */
 
     if (SOPC_STATUS_OK == status)
     {
@@ -411,6 +423,10 @@ int main(int argc, char* argv[])
     {
         status = SOPC_STATUS_TIMEOUT;
     }
+
+    /*
+     * LOCAL SERVICE: Read node values that were written and check values are modified as requested
+     */
 
     if (SOPC_STATUS_OK == status)
     {
