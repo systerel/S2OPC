@@ -104,6 +104,10 @@ typedef int64_t SOPC_DateTime;
 
 typedef struct SOPC_Guid
 {
+    /* Reproduces the specification memory format:
+     * - Data1 to Data3 are local-endian
+     * - Data4 is big endian and spans across the 16 last digits.
+     */
     uint32_t Data1;
     uint16_t Data2;
     uint16_t Data3;
