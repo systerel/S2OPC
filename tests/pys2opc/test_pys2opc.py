@@ -19,7 +19,7 @@
 # under the License.
 
 
-from pys2opc import PyS2OPC, BaseConnectionHandler, ffi, libsub
+from pys2opc import PyS2OPC, BaseConnectionHandler
 import time
 
 
