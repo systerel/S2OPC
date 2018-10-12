@@ -25,7 +25,7 @@ import time
 
 class PrintSubs(BaseConnectionHandler):
     def on_datachanged(self, nodeId, dataValue):
-        print('Data changed "{}" -> {}'.format(nodeId, dataValue.value.python_value))
+        print('Data changed "{}" -> {}'.format(nodeId, dataValue.value))
 
 
 if __name__ == '__main__':
