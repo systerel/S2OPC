@@ -20,6 +20,8 @@
 
 
 from functools import total_ordering
+import uuid
+from binascii import hexlify, unhexlify
 
 from _pys2opc import ffi, lib as libsub
 
@@ -29,7 +31,7 @@ class Request:
     Base class for Requests. Adds a timestamp to ease the performance measurement.
 
     Args:
-        paylaod: An OpcUa_*Request.
+        payload: An OpcUa_*Request.
 
     Attributes:
         eventResponseReceived: Event that is set when the response is received and the on_generic_response()
@@ -52,6 +54,9 @@ class Response:
     """
     Base class for Responses.
     Adds a reference to the request and the timestamp of the received time.
+
+    Args:
+        payload: An OpcUa_*Response.
     """
     def __init__(self, payload):
         self.timestampReceived = None  # The receiver sets the timestamp
@@ -60,6 +65,44 @@ class Response:
 
     def get_roundtrip_time(self):
         return self.timestampReceived - self.request.timestampSent
+
+
+
+def bytestring_to_bytes(bstring):
+    """SOPC_ByteString or SOPC_ByteString* to python bytes()"""
+    return ffi.string(bstring.Data, bstring.Length)
+
+def string_to_str(string):
+    """SOPC_String or SOPC_String* to python str()"""
+    return ffi.string(string.Data, string.Length).decode()
+
+def nodeid_to_str(node):
+    """SOPC_NodeId or SOPC_NodeId* to its str representation in the OPC-UA XML syntax."""
+    snid = 'ns={};'.format(node.Namespace) if node.Namespace != 0 else ''
+    if node.IdentifierType == libsub.SOPC_IdentifierType_Numeric:
+        snid += 'i={}'.format(node.Data.Numeric)
+    elif node.IdentifierType == libsub.SOPC_IdentifierType_String:
+        snid += 's=' + string_to_str(node.Data.String)
+    elif node.IdentifierType == libsub.SOPC_IdentifierType_Guid:
+        # TODO
+        raise ValueError('TODO')
+    elif node.IdentifierType == libsub.SOPC_IdentifierType_ByteString:
+        # This operation may fail, as it may not be possible to represent the ByteString in the string,
+        #  but this is how the OPC-UA XML representation of the NodeId works,
+        #  so there should not be unrepresentable bytestring NodeId in your AddressSpace anyway.
+        snid += 'b=' + bytestring_to_bytes(node.Data.Bstring).decode()
+    else:
+        raise ValueError('Unknown NodeId type: {}'.format(node.IdentifierType))
+    return snid
+
+def guid_to_uuid(guid):
+    """SOPC_Guid or SOPC_Guid* to the Python's uuid."""
+    # S2OPC internal representation is local-endian, except for Data4,
+    #  which is always big endian.
+    a = '{:08X}-{:04X}-{:04X}-'.format(guid.Data1, guid.Data2, guid.Data3)
+    b = hexlify(bytes(guid.Data4)).decode()
+    c = b[:4]+'-'+b[4:]
+    return uuid.UUID(a+c)
 
 
 
@@ -293,6 +336,9 @@ class Variant:
 
     @staticmethod
     def from_sopc_variant(variant):
+        """
+        Returns a Variant initialized from a SOPC_Variant or a SOPC_Variant* (or a void*).
+        """
         variant = ffi.cast('SOPC_Variant *', variant)
         sopc_type = variant.BuiltInTypeId
 
@@ -322,39 +368,97 @@ class Variant:
             elif sopc_type == libsub.SOPC_Double_Id:
                 return Variant(variant.Value.Doublev)
             elif sopc_type == libsub.SOPC_String_Id:
-                return Variant(ffi.string(variant.Value.String.Data, variant.Value.String.Length).decode())
+                return Variant(string_to_str(variant.Value.String))
             elif sopc_type == libsub.SOPC_DateTime_Id:
                 return Variant(variant.Value.Date)  # int64_t
-            #elif sopc_type == libsub.SOPC_Guid_Id:
-            #    return Variant(variant.Value.)
+            elif sopc_type == libsub.SOPC_Guid_Id:
+                return Variant(guid_to_uuid(variant.Value.Guid))
             elif sopc_type == libsub.SOPC_ByteString_Id:
-                return Variant(ffi.string(variant.Value.Bstring.Data, variant.Value.Bstring.Length))
-            #elif sopc_type == libsub.SOPC_XmlElement_Id:
-            #    return Variant(variant.Value.)
-            #elif sopc_type == libsub.SOPC_NodeId_Id:
-            #    # TODO: NodeId
-            #    return Variant(variant.Value.)
+                return Variant(bytestring_to_bytes(variant.Value.Bstring))
+            elif sopc_type == libsub.SOPC_XmlElement_Id:
+                return Variant(bytestring_to_bytes(variant.Value.XmlElt))
+            elif sopc_type == libsub.SOPC_NodeId_Id:
+                return Variant(nodeid_to_str(variant.Value.NodeId))
             #elif sopc_type == libsub.SOPC_ExpandedNodeId_Id:
             #    return Variant(variant.Value.)
-            ##elif sopc_type == libsub.SOPC_StatusCode_Id:
-            ##    return Variant(variant.Value.Status)
-            ##elif sopc_type == libsub.SOPC_QualifiedName_Id:
-            ##    Qname = variant.Value.Qname
-            ##    return Variant((Qname.NamespaceIndex, ffi.string(Qname.Name.Data, Qname.Name.Length)))
-            ##elif sopc_type == libsub.SOPC_LocalizedText_Id:
-            ##    return Variant(variant.Value.)
-            ##elif sopc_type == libsub.SOPC_ExtensionObject_Id:
-            ##    return Variant(variant.Value.)
-            ##elif sopc_type == libsub.SOPC_DataValue_Id:
-            ##    return Variant(variant.Value.)
-            ##elif sopc_type == libsub.SOPC_Variant_Id:
-            ##    return Variant(variant.Value.)
-            ##elif sopc_type == libsub.SOPC_DiagnosticInfo_Id:
-            ##    return Variant(variant.Value.)
+            elif sopc_type == libsub.SOPC_StatusCode_Id:
+                return Variant(variant.Value.Status)
+            elif sopc_type == libsub.SOPC_QualifiedName_Id:
+                Qname = variant.Value.Qname
+                return Variant((Qname.NamespaceIndex, string_to_str(Qname.Name.Data)))
+            elif sopc_type == libsub.SOPC_LocalizedText_Id:
+                LocalizedText = variant.Value.LocalizedText
+                return Variant((string_to_str(LocalizedText.Locale), string_to_str(LocalizedText.Text)))
+            #elif sopc_type == libsub.SOPC_ExtensionObject_Id:
+            #    return Variant(variant.Value.)
+            #elif sopc_type == libsub.SOPC_DataValue_Id:
+            #    return Variant(variant.Value.)
+            #elif sopc_type == libsub.SOPC_Variant_Id:
+            #    return Variant(variant.Value.)
+            #elif sopc_type == libsub.SOPC_DiagnosticInfo_Id:
+            #    return Variant(variant.Value.)
+            raise ValueError('SOPC_Variant to Python conversion not supported for built-in type {}.'.format(sopc_type))
         elif variant.ArrayType == libsub.SOPC_VariantArrayType_Array:
-            raise NotImplementedError
+            sopc_array = variant.Value.Array
+            length = sopc_array.Length
+            content = sopc_array.Content
+            if sopc_type == libsub.SOPC_Null_Id:
+                return [Variant(None) for i in range(length)]
+            elif sopc_type == libsub.SOPC_Boolean_Id:
+                return [Variant(content.BooleanArr[i]) for i in range(length)]
+            elif sopc_type == libsub.SOPC_SByte_Id:
+                return [Variant(content.SbyteArr[i]) for i in range(length)]
+            elif sopc_type == libsub.SOPC_Byte_Id:
+                return [Variant(content.ByteArr[i]) for i in range(length)]
+            elif sopc_type == libsub.SOPC_Int16_Id:
+                return [Variant(content.Int16Arr[i]) for i in range(length)]
+            elif sopc_type == libsub.SOPC_UInt16_Id:
+                return [Variant(content.Uint16Arr[i]) for i in range(length)]
+            elif sopc_type == libsub.SOPC_Int32_Id:
+                return [Variant(content.Int32Arr[i]) for i in range(length)]
+            elif sopc_type == libsub.SOPC_UInt32_Id:
+                return [Variant(content.Uint32Arr[i]) for i in range(length)]
+            elif sopc_type == libsub.SOPC_Int64_Id:
+                return [Variant(content.Int64Arr[i]) for i in range(length)]
+            elif sopc_type == libsub.SOPC_UInt64_Id:
+                return [Variant(content.Uint64Arr[i]) for i in range(length)]
+            elif sopc_type == libsub.SOPC_Float_Id:
+                return [Variant(content.FloatvArr[i]) for i in range(length)]
+            elif sopc_type == libsub.SOPC_Double_Id:
+                return [Variant(content.DoublevArr[i]) for i in range(length)]
+            elif sopc_type == libsub.SOPC_String_Id:
+                return [Variant(string_to_str(content.StringArr[i])) for i in range(length)]
+            elif sopc_type == libsub.SOPC_DateTime_Id:
+                return [Variant(content.DateArr[i]) for i in range(length)]  # int64_t
+            elif sopc_type == libsub.SOPC_Guid_Id:
+                return [Variant(guid_to_uuid(content.GuidArr[i])) for i in range(length)]
+            elif sopc_type == libsub.SOPC_ByteString_Id:
+                return [Variant(bytestring_to_bytes(content.BstringArr[i])) for i in range(length)]
+            elif sopc_type == libsub.SOPC_XmlElement_Id:
+                return [Variant(bytestring_to_bytes(content.XmlEltArr[i])) for i in range(length)]
+            elif sopc_type == libsub.SOPC_NodeId_Id:
+                return [Variant(nodeid_to_str(content.NodeIdArr[i])) for i in range(length)]
+            #elif sopc_type == libsub.SOPC_ExpandedNodeId_Id:
+            #    return [Variant(content.) for i in range(length)]
+            elif sopc_type == libsub.SOPC_StatusCode_Id:
+                return [Variant(content.StatusArr[i]) for i in range(length)]
+            elif sopc_type == libsub.SOPC_QualifiedName_Id:
+                Qname = content.QnameArr[i]
+                return [Variant((Qname.NamespaceIndex, string_to_str(Qname.Name.Data))) for i in range(length)]
+            elif sopc_type == libsub.SOPC_LocalizedText_Id:
+                LocalizedText = content.LocalizedTextArr[i]
+                return [Variant((string_to_str(LocalizedText.Locale), string_to_str(LocalizedText.Text))) for i in range(length)]
+            #elif sopc_type == libsub.SOPC_ExtensionObject_Id:
+            #    return [Variant(content.) for i in range(length)]
+            #elif sopc_type == libsub.SOPC_DataValue_Id:
+            #    return [Variant(content.) for i in range(length)]
+            #elif sopc_type == libsub.SOPC_Variant_Id:
+            #    return [Variant(content.) for i in range(length)]
+            #elif sopc_type == libsub.SOPC_DiagnosticInfo_Id:
+            #    return [Variant(content.) for i in range(length)]
+            raise ValueError('SOPC_Variant to Python conversion not supported for built-in type {}.'.format(sopc_type))
         elif variant.ArrayType == libsub.SOPC_VariantArrayType_Matrix:
-            raise NotImplementedError
+            raise ValueError('SOPC_Variant matrices are not supported.')
         else:
             raise ValueError('Invalid SOPC_Variant.ArrayType')
 
@@ -374,3 +478,12 @@ class DataValue:
     @staticmethod
     def from_sopc_libsub_value(libsub_value):
         return DataValue(libsub_value.source_timestamp, libsub_value.server_timestamp, libsub_value.quality, Variant.from_sopc_variant(libsub_value.raw_value))
+
+
+if __name__ == '__main__':
+    # Auto-test
+    import struct
+    guid = ffi.new('SOPC_Guid *')
+    guid.Data1, guid.Data2, guid.Data3 = struct.unpack('>IHH', unhexlify(b'72962B91FA754AE6'))
+    guid.Data4 = [0x8D, 0x28, 0xB4, 0x04, 0xDC, 0x7D, 0xAF, 0x63]
+    assert uuid.UUID('72962b91-fa75-4ae6-8d28-b404dc7daf63') == guid_to_uuid(guid)
