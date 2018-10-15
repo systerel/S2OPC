@@ -31,13 +31,22 @@ ffibuilder.cdef(header + r'''
     extern "Python" void _callback_generic_event(SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_ApplicativeEvent event, SOPC_StatusCode status, const void* response, uintptr_t responseContext);
 ''')
 
+source = r'''
+    #include "libs2opc_client_cffi.h"
+
+    const char* SOPC_SecurityPolicy_None_URI = "http://opcfoundation.org/UA/SecurityPolicy#None";
+    const char* SOPC_SecurityPolicy_Basic256_URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256";
+    const char* SOPC_SecurityPolicy_Basic256Sha256_URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256";
+
+'''
+
 # It (is said to) produces faster code with set_source, and checks what it can on the types.
 # However, it requires a gcc.
 # The other way, dlopen, loads the ABI, is less safe, slower, but only requires the .so/.dll
 # TODO: automatize configuration
 ffibuilder.set_source('_pys2opc',
                       #'#include "libs2opc_client.h"',
-                      '#include "libs2opc_client_cffi.h"',
+                      source,
                       libraries=['client_subscription', 'ingopcs', 'mbedcrypto', 'mbedtls', 'mbedx509'],
                       include_dirs=['../../csrc/address_space_loaders/',
                                     '../../csrc/api_toolkit/',
