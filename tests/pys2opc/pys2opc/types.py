@@ -751,15 +751,35 @@ class VariantType:
 
 class DataValue:
     # The value is stored as Variant().
-    def __init__(self, timestampSource, timestampServer, statusCode, python_value):
+    def __init__(self, timestampSource, timestampServer, statusCode, variant):
         self.timestampSource = timestampSource
         self.timestampServer = timestampServer
         self.statusCode = statusCode
-        self.value = python_value
+        self.variant = variant
 
     @staticmethod
     def from_sopc_libsub_value(libsub_value):
+        """
+        Converts a SOPC_LibSub_Value* or a SOPC_LibSub_Value to a Python DataValue.
+        See also from_sopc_datavalue().
+        """
         return DataValue(libsub_value.source_timestamp, libsub_value.server_timestamp, libsub_value.quality, Variant.from_sopc_variant(libsub_value.raw_value))
+
+    def to_sopc_datavalue(self, *, copy_type_from_variant=None, sopc_variant_type=None):
+        """
+        Converts a new SOPC_DataValue from the Python DataValue.
+        See :func:`Variant.to_sopc_variant` for a documentation of the arguments.
+
+        The returned value is garbage collected when the returned value is not referenced anymore.
+        """
+        datavalue = ffi.new('SOPC_DataValue *')
+        sopc_variant = self.variant.to_sopc_variant(copy_type_from_variant=copy_type_from_variant, sopc_variant_type=sopc_variant_type)
+        ffi.gc(sopc_variant, None)
+        datavalue.Value = sopc_variant
+        datavalue.Status = self.statusCode
+        datavalue.SourceTimestamp = self.timestampSource
+        datavalue.ServerTimestamp = self.timestampServer
+        return datavalue
 
 
 if __name__ == '__main__':
