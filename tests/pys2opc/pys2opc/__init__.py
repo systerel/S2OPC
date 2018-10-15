@@ -21,6 +21,6 @@
 
 from .s2opc import PyS2OPC, ClientConfiguration
 from .connection import BaseConnectionHandler
-from .types import Request, Response, Variant, DataValue
+from .types import Request, Response, Variant, VariantType, DataValue
 
 
