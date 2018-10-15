@@ -67,6 +67,9 @@ const SOPC_String* SOPC_User_GetUsername(const SOPC_User* user);
 /** \brief Returns true if the type of the user is username */
 bool SOPC_User_IsUsername(const SOPC_User* user);
 
+/** \brief Returns true if the users are the same type and content (if applicable) */
+bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right);
+
 /** \brief User deletion, should not be called on local and anonymous users. */
 void SOPC_User_Free(SOPC_User** ppUser);
 

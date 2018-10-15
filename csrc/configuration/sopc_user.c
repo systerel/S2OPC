@@ -94,6 +94,26 @@ bool SOPC_User_IsUsername(const SOPC_User* user)
     return USER_USERNAME == user->type;
 }
 
+bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right)
+{
+    assert(NULL != left);
+    assert(NULL != right);
+
+    if (left->type == right->type)
+    {
+        switch (left->type)
+        {
+        case USER_LOCAL:
+        case USER_ANONYMOUS:
+            return true;
+            break;
+        case USER_USERNAME:
+            return SOPC_String_Equal(&left->data.username, &right->data.username);
+        }
+    }
+    return false;
+}
+
 void SOPC_User_Free(SOPC_User** ppUser)
 {
     if (NULL == ppUser || NULL == *ppUser)

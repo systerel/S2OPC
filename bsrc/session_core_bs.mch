@@ -211,6 +211,17 @@ OPERATIONS
     END
     ;
 
+    p_bres <-- is_same_user_server (p_user_left, p_user_right) =
+    PRE
+        p_user_left : t_user_i &
+        p_user_left : t_user &
+        p_user_right : t_user_i &
+        p_user_right : t_user
+    THEN
+        p_bres :: BOOL
+    END
+    ;
+
     /* This implements the crypto challenge in CreateSession.
      * valid tracks the alloc and success of both the a_NonceServer() and signature
      * TODO? split to gather common Nonce-generation code with others using it

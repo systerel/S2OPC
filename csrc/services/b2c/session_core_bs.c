@@ -43,6 +43,7 @@
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
+#include "sopc_user_manager.h"
 
 #include "session_core_bs.h"
 
@@ -286,6 +287,15 @@ void session_core_bs__get_session_user_server(const constants__t_session_i sessi
     {
         *session_core_bs__p_user = constants__c_user_indet;
     }
+}
+
+void session_core_bs__is_same_user_server(const constants__t_user_i session_core_bs__p_user_left,
+                                          const constants__t_user_i session_core_bs__p_user_right,
+                                          t_bool* const session_core_bs__p_bres)
+{
+    *session_core_bs__p_bres = SOPC_User_Equal(SOPC_UserWithAuthorization_GetUser(session_core_bs__p_user_left),
+                                               SOPC_UserWithAuthorization_GetUser(session_core_bs__p_user_right));
+    return;
 }
 
 void session_core_bs__get_session_user_client(const constants__t_session_i session_core_bs__session,

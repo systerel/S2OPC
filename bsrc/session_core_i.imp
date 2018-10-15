@@ -503,13 +503,13 @@ OPERATIONS
     ret <-- server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
     VAR
         l_channel,
-        l_user,
         l_state,
+        l_user,
+        l_is_same_user,
         l_valid,
         l_ret
     IN
         l_channel <-- get_session_channel (session);
-        l_user <-- get_session_user_server (session);
         l_state <-- get_session_state (session);
         IF l_state = e_session_created
         THEN
@@ -533,9 +533,11 @@ OPERATIONS
             END
         ELSIF l_state = e_session_userActivated
         THEN
+            l_user <-- get_session_user_server (session);
+            l_is_same_user <-- is_same_user_server (l_user, user);
             /* User changed XOR channel changed */
             IF l_channel = channel &
-                l_user /= user
+                l_is_same_user = FALSE
             THEN
                 l_valid <-- server_internal_activate_req_and_resp (channel,
                                                                    session,
@@ -550,7 +552,7 @@ OPERATIONS
                     l_ret := e_sc_bad_unexpected_error
                 END
             ELSIF l_channel /= channel &
-                l_user = user
+                l_is_same_user = TRUE
             THEN
                 l_valid <-- server_internal_activate_req_and_resp (channel,
                                                                    session,
@@ -569,9 +571,11 @@ OPERATIONS
             END
         ELSIF l_state = e_session_scOrphaned
         THEN
+            l_user <-- get_session_user_server (session);
+            l_is_same_user <-- is_same_user_server (l_user, user);
             /* Channel changed */
             IF l_channel /= channel &
-                l_user = user
+                l_is_same_user = TRUE
             THEN
                 l_valid <-- server_internal_activate_req_and_resp (channel,
                                                                    session,
