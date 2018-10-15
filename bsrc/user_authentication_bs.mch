@@ -59,10 +59,12 @@ OPERATIONS
     END
     ;
 
-    p_sc_valid_user <-- is_valid_user_authentication (p_endpoint_config_idx, p_user_token) =
+    p_sc_valid_user <-- is_valid_user_authentication (p_endpoint_config_idx, p_token_type, p_user_token) =
     PRE
         p_endpoint_config_idx : t_endpoint_config_idx_i &
         p_endpoint_config_idx : t_endpoint_config_idx &
+        p_token_type : t_user_token_type_i &
+        p_token_type : t_user_token_type_i - {c_userTokenType_indet, e_userTokenType_anonymous} &
         p_user_token : t_user_token_i &
         p_user_token : t_user_token
     THEN

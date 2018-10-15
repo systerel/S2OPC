@@ -239,11 +239,7 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
     assert(NULL != token && NULL != authenticated);
 
     *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
-    if (&OpcUa_AnonymousIdentityToken_EncodeableType == token->Body.Object.ObjType)
-    {
-        *authenticated = SOPC_USER_AUTHENTICATION_OK;
-    }
-    else if (&OpcUa_UserNameIdentityToken_EncodeableType == token->Body.Object.ObjType)
+    if (&OpcUa_UserNameIdentityToken_EncodeableType == token->Body.Object.ObjType)
     {
         OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;
         SOPC_String* username = &userToken->UserName;

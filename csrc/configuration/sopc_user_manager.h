@@ -95,7 +95,8 @@ typedef struct SOPC_UserAuthentication_Functions
      *          It also needs to be thread safe.
      *
      * \param authenticationManager  The SOPC_UserAuthentication_Manager instance.
-     * \param pUser                  The user identity token which was received in the ActivateSession request.
+     * \param pUser                  The user identity token which was received in the ActivateSession request
+     *                               (except if it is Anonymous user identity)
      * \param pbUserAuthenticated    A valid pointer to the uninitialized result of the operation.
      *    The callback shall set it to one of the following values:
      *    - \p SOPC_USER_AUTHENTICATION_INVALID_TOKEN: the callback could not read the user identity token,

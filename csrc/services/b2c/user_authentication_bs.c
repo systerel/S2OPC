@@ -191,31 +191,23 @@ void user_authentication_bs__is_user_token_supported(
 
 void user_authentication_bs__is_valid_user_authentication(
     const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
+    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
     const constants__t_user_token_i user_authentication_bs__p_user_token,
     constants__t_StatusCode_i* const user_authentication_bs__p_sc_valid_user)
 {
+    (void) user_authentication_bs__p_token_type; // Only for B precondition corresponding to asserts:
+    assert(user_authentication_bs__p_token_type != constants__c_userTokenType_indet);
+    assert(user_authentication_bs__p_token_type != constants__e_userTokenType_anonymous);
+
     SOPC_Endpoint_Config* epConfig =
         SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
     assert(NULL != epConfig);
 
-    static SOPC_ExtensionObject anonymousIdentityToken = {
-        .Encoding = SOPC_ExtObjBodyEncoding_Object,
-        .TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric,
-        .TypeId.NodeId.Data.Numeric = OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary,
-        .Body.Object.ObjType = &OpcUa_AnonymousIdentityToken_EncodeableType,
-        /* When there is no default policyId for the AnonymousIdentityToken, it is unnecessary to even malloc it */
-        .Body.Object.Value = NULL};
     SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
-    SOPC_ExtensionObject* pUserIdentity = user_authentication_bs__p_user_token;
-    /* The NULL identity is also the anonymous identity */
-    if (NULL == pUserIdentity)
-    {
-        pUserIdentity = &anonymousIdentityToken;
-    }
 
     SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_OK;
-    SOPC_ReturnStatus status =
-        SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, pUserIdentity, &authnStatus);
+    SOPC_ReturnStatus status = SOPC_UserAuthentication_IsValidUserIdentity(
+        authenticationManager, user_authentication_bs__p_user_token, &authnStatus);
 
     if (SOPC_STATUS_OK != status)
     {

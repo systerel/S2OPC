@@ -94,7 +94,12 @@ OPERATIONS
         l_is_supported_user_token_type <-- is_user_token_supported (l_user_token_type, p_user_token, p_channel_config_idx, p_endpoint_config_idx);
         IF l_is_supported_user_token_type = TRUE
         THEN
-            l_sc_user_authentication <-- is_valid_user_authentication (p_endpoint_config_idx, p_user_token);
+            IF l_user_token_type /= e_userTokenType_anonymous THEN
+                l_sc_user_authentication <-- is_valid_user_authentication (p_endpoint_config_idx, l_user_token_type, p_user_token)
+            ELSE
+                /* It is not necessary to authenticate Anonymous user */
+                l_sc_user_authentication := e_sc_ok
+            END;
             p_sc_valid_user, p_user <-- allocate_user_if_authenticated (p_endpoint_config_idx, p_user_token, l_sc_user_authentication)
         ELSE
             p_user := c_user_indet;
