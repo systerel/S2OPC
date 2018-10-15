@@ -106,6 +106,30 @@ static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpo
     }
 }
 
+static void copyUserIdTokens(SOPC_SecurityPolicy* currentSecurityPolicy,
+                             OpcUa_EndpointDescription* newEndPointDescription)
+{
+    // Set userIdentityTokens
+    newEndPointDescription->UserIdentityTokens =
+        calloc(currentSecurityPolicy->nbOfUserTokenPolicies, sizeof(OpcUa_UserTokenPolicy));
+    if (NULL != newEndPointDescription->UserIdentityTokens)
+    {
+        newEndPointDescription->NoOfUserIdentityTokens = (int32_t) currentSecurityPolicy->nbOfUserTokenPolicies;
+        for (int32_t userIdTokenIdx = 0; userIdTokenIdx < newEndPointDescription->NoOfUserIdentityTokens;
+             userIdTokenIdx++)
+        {
+            OpcUa_UserTokenPolicy* srcUserTokenPolicy = &currentSecurityPolicy->userTokenPolicies[userIdTokenIdx];
+            OpcUa_UserTokenPolicy* destUserTokenPolicy = &newEndPointDescription->UserIdentityTokens[userIdTokenIdx];
+            OpcUa_UserTokenPolicy_Initialize(destUserTokenPolicy);
+            SOPC_String_AttachFrom(&destUserTokenPolicy->IssuedTokenType, &srcUserTokenPolicy->IssuedTokenType);
+            SOPC_String_AttachFrom(&destUserTokenPolicy->IssuerEndpointUrl, &srcUserTokenPolicy->IssuerEndpointUrl);
+            SOPC_String_AttachFrom(&destUserTokenPolicy->PolicyId, &srcUserTokenPolicy->PolicyId);
+            SOPC_String_AttachFrom(&destUserTokenPolicy->SecurityPolicyUri, &srcUserTokenPolicy->SecurityPolicyUri);
+            destUserTokenPolicy->TokenType = srcUserTokenPolicy->TokenType;
+        }
+    }
+}
+
 constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
     const constants__t_endpoint_config_idx_i endpoint_config_idx,
     bool isCreateSessionResponse,
@@ -183,13 +207,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
                     newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_None;
 
                     // Set userIdentityTokens
-                    newEndPointDescription.UserIdentityTokens = calloc(2, sizeof(OpcUa_UserTokenPolicy));
-                    if (NULL != newEndPointDescription.UserIdentityTokens)
-                    {
-                        newEndPointDescription.NoOfUserIdentityTokens = 2;
-                        newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
-                        newEndPointDescription.UserIdentityTokens[1] = userNameUserTokenPolicy;
-                    }
+                    copyUserIdTokens(&currentSecurityPolicy, &newEndPointDescription);
 
                     // Set securityLevel
                     /* see §7.10 Part4 - Value 0 is for not recommended endPoint.
@@ -219,13 +237,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
                     newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_Sign;
 
                     // Set userIdentityTokens
-                    newEndPointDescription.UserIdentityTokens = calloc(2, sizeof(OpcUa_UserTokenPolicy));
-                    if (NULL != newEndPointDescription.UserIdentityTokens)
-                    {
-                        newEndPointDescription.NoOfUserIdentityTokens = 2;
-                        newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
-                        newEndPointDescription.UserIdentityTokens[1] = userNameUserTokenPolicy;
-                    }
+                    copyUserIdTokens(&currentSecurityPolicy, &newEndPointDescription);
 
                     // Set securityLevel
                     newEndPointDescription.SecurityLevel = 1;
@@ -255,13 +267,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
                     newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
 
                     // Set userIdentityTokens
-                    newEndPointDescription.UserIdentityTokens = calloc(2, sizeof(OpcUa_UserTokenPolicy));
-                    if (NULL != newEndPointDescription.UserIdentityTokens)
-                    {
-                        newEndPointDescription.NoOfUserIdentityTokens = 2;
-                        newEndPointDescription.UserIdentityTokens[0] = anonymousUserTokenPolicy;
-                        newEndPointDescription.UserIdentityTokens[1] = userNameUserTokenPolicy;
-                    }
+                    copyUserIdTokens(&currentSecurityPolicy, &newEndPointDescription);
 
                     // Set securityLevel
                     newEndPointDescription.SecurityLevel = 1;
