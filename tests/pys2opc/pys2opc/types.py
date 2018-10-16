@@ -132,6 +132,16 @@ def str_to_nodeid(nid, no_gc=True):
             libsub.free(no)
         return ffi.gc(node, nodeid_cleaner)
     return node
+def fill_nodeid(node, snid):
+    """
+    Internal. Updates an existing NodeId to the content of the string snid.
+    """
+    # Create a new NodeId, brutal extract its content, then free the new NodeId without freeing its content.
+    onode = str_to_nodeid(snid, no_gc=True)
+    node.IdentifierType = onode.IdentifierType
+    node.Namespace = onode.Namespace
+    node.Data = onode.Data
+    libsub.free(onode)
 
 def guid_to_uuid(guid):
     """SOPC_Guid or SOPC_Guid* to the Python's uuid."""
@@ -746,13 +756,27 @@ class DataValue:
         self.statusCode = statusCode
         self.variant = variant
 
+    def __repr__(self):
+        return 'DataValue('+repr(self.variant)+')'
+    def __str__(self):
+        return repr(self)
+
     @staticmethod
     def from_sopc_libsub_value(libsub_value):
         """
         Converts a SOPC_LibSub_Value* or a SOPC_LibSub_Value to a Python DataValue.
-        See also from_sopc_datavalue().
+        Its main usage is in the data change callback used with subscriptions.
+        See from_sopc_datavalue() for a more generic SOPC_DataValue conversion.
         """
         return DataValue(libsub_value.source_timestamp, libsub_value.server_timestamp, libsub_value.quality, Variant.from_sopc_variant(libsub_value.raw_value))
+
+    @staticmethod
+    def from_sopc_datavalue(datavalue):
+        """
+        Converts a SOPC_DataValue* or SOPC_DataValue to a Python DataValue.
+        """
+        return DataValue(datavalue.SourceTimestamp, datavalue.ServerTimestamp, datavalue.Status,
+                         Variant.from_sopc_variant(ffi.addressof(datavalue.Value)))
 
     def to_sopc_datavalue(self, *, copy_type_from_variant=None, sopc_variant_type=None):
         """
@@ -768,6 +792,8 @@ class DataValue:
         datavalue.Status = self.statusCode
         datavalue.SourceTimestamp = self.timestampSource
         datavalue.ServerTimestamp = self.timestampServer
+        datavalue.SourcePicoSeconds = 0
+        datavalue.ServerPicoSeconds = 0
         return datavalue
 
 
