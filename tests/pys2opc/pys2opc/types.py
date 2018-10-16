@@ -19,6 +19,7 @@
 # under the License.
 
 
+import threading
 from functools import total_ordering
 import uuid
 from binascii import hexlify, unhexlify
@@ -42,11 +43,14 @@ class Request:
         self.timestampSent = None  # The sender of the request sets the timestamp
         self.response = None
         self.eventResponseReceived = threading.Event()
-        self._requestContext = ffi.new_handle(self)
+        # Does not use the ffi.new_handle and from_handle capabilities because from_handle is subject to "undefined behavior"
+        #  when it is given an unknown pointer...
+        self._requestContext = ffi.cast('uintptr_t', ffi.new_handle(self))
         self.payload = payload
 
     @property
     def requestContext(self):
+        """Returns an uintptr_t, that is castable to Python int and usable by the libsub API"""
         return self._requestContext
 
 
@@ -80,7 +84,7 @@ def bytes_to_bytestring(b):
                either manually deleted with a call to SOPC_String_Delete or passed to an object
                which will call SOPC_String_Delete for you.
     """
-    bstring = new.ffi('SOPC_ByteString *')
+    bstring = ffi.new('SOPC_ByteString *')
     bstring.Length = len(b)
     bstring.Data = ffi.new('char[{}]'.format(len(b)), b)
     if no_gc:
@@ -134,7 +138,7 @@ def str_to_nodeid(nid, no_gc=True):
                either manually deleted with a call to SOPC_String_Delete or passed to an object
                which will call SOPC_String_Delete for you.
     """
-    node = libsub.SOPC_NodeId_FromCString(new.ffi('char []', nid), len(nid))
+    node = libsub.SOPC_NodeId_FromCString(ffi.new('char []', nid.encode()), len(nid))
     if not no_gc:
         # There is no SOPC_NodeId_Delete, so we must make this Deleter.
         # In fact, it is only required for GUID NodeIds...
