@@ -32,6 +32,8 @@ ffibuilder.cdef(header + r'''
     extern "Python" void _callback_disconnected(SOPC_LibSub_ConnectionId c_id);
     extern "Python" void _callback_datachanged(SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_DataId d_id, SOPC_LibSub_Value* value);
     extern "Python" void _callback_generic_event(SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_ApplicativeEvent event, SOPC_StatusCode status, const void* response, uintptr_t responseContext);
+
+    void SOPC_DataValue_Delete(SOPC_DataValue *datavalue);
 ''')
 
 source = r'''
@@ -41,6 +43,11 @@ source = r'''
     const char* SOPC_SecurityPolicy_Basic256_URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256";
     const char* SOPC_SecurityPolicy_Basic256Sha256_URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256";
 
+    void SOPC_DataValue_Delete(SOPC_DataValue *datavalue)
+    {
+        SOPC_DataValue_Clear(datavalue);
+        free(datavalue);
+    }
 '''
 
 # It (is said to) produces faster code with set_source, and checks what it can on the types.

@@ -69,11 +69,10 @@ def bytes_to_bytestring(b):
                either manually deleted with a call to SOPC_String_Delete or passed to an object
                which will call SOPC_String_Delete for you.
     """
-    bstring = ffi.new('SOPC_ByteString *')
+    alloc = allocator_no_gc if no_gc else ffi.new
+    bstring = alloc('SOPC_ByteString *')
     bstring.Length = len(b)
     bstring.Data = ffi.new('char[{}]'.format(len(b)), b)
-    if no_gc:
-        ffi.gc(bstring, None)
     return bstring
 
 def string_to_str(string):
@@ -88,11 +87,10 @@ def str_to_string(s, no_gc=False):
                either manually deleted with a call to SOPC_String_Delete or passed to an object
                which will call SOPC_String_Delete for you.
     """
-    string = ffi.new('SOPC_String *')
+    alloc = allocator_no_gc if no_gc else ffi.new
+    string = alloc('SOPC_String *')
     status = libsub.SOPC_String_CopyFromCString(string, ffi.new('char[]', s))
     assert status == SOPC_STATUS_OK
-    if no_gc:
-        ffi.gc(string, None)
     return string
 
 def nodeid_to_str(node):
@@ -160,12 +158,11 @@ def uuid_to_guid(uid, no_gc=False):
                either manually deleted with a call to SOPC_String_Delete or passed to an object
                which will call SOPC_String_Delete for you.
     """
-    guid = ffi.new('SOPC_Guid*')
+    alloc = allocator_no_gc if no_gc else ffi.new
+    guid = alloc('SOPC_Guid*')
     guid.Data1, guid.Data2, guid.Data3 = uid.fields[:3]
     for i,b in enumerate(guid.bytes[-8:]):
         guid.Data4[i] = b
-    if no_gc:
-        ffi.gc(guid, None)
     return guid
 
 
@@ -531,7 +528,7 @@ class Variant:
 
     allocator = ffi.new_allocator(alloc=libsub.malloc, free=libsub.SOPC_Variant_Delete, should_clear_after_alloc=True)
 
-    def to_sopc_variant(self, *, copy_type_from_variant=None, sopc_variant_type=None):
+    def to_sopc_variant(self, *, copy_type_from_variant=None, sopc_variant_type=None, no_gc=False):
         """
         Converts the current Variant to a SOPC_Variant*.
         Handles both single values and array values.
@@ -541,6 +538,9 @@ class Variant:
             copy_type_from_variant: A C SOPC_Variant* or a Python Variant from which the type is copied.
             sopc_variant_type: A VariantType constant. If both copy_type_from_variant and sopc_variant_type are given,
                                they must yield the same type.
+            no_gc: When True, the Python garbage collection mechanism is omited and the string must be
+                   either manually deleted with a call to SOPC_String_Delete or passed to an object
+                   which will call SOPC_String_Delete for you.
         """
         # Detect type
         sopc_type = None
@@ -556,7 +556,10 @@ class Variant:
                 raise ValueError('Both copy_type_from_variant and sopc_variant_type are given, but they are different: '
                     'copy_type_from_variant gives {} and sopc_variant_type is {}'.format(sopc_type, sopc_variant_type))
         # Create and fill variant
-        variant = Variant.allocator()
+        if no_gc:
+            variant = allocator_no_gc('SOPC_Variant*')
+        else:
+            variant = Variant.allocator('SOPC_Variant*')
         variant.BuiltInTypeId = sopc_type
         if not isinstance(self._value, (list, tuple)):
             # Single values
@@ -602,15 +605,13 @@ class Variant:
             elif sopc_type == libsub.SOPC_StatusCode_Id:
                 variant.Value.Status = self._value
             elif sopc_type == libsub.SOPC_QualifiedName_Id:
-                qname = ffi.new('SOPC_QualifiedName *')
+                qname = allocator_no_gc('SOPC_QualifiedName *')
                 qname.NamespaceIndex = self._value[0]
                 qname.Name = str_to_string(self._value[1], no_gc=True)
-                ffi.gc(qname, None)
                 variant.Value.Qname = qname
             elif sopc_type == libsub.SOPC_LocalizedText_Id:
-                loc = ffi.new('SOPC_LocalizedText *')
+                loc = allocator_no_gc('SOPC_LocalizedText *')
                 loc.Locale, loc.Text = map(lambda s:str_to_string(s, no_gc=True), self._value)
-                ffi.gc(loc, None)
                 variant.Value.LocalizedText = loc
             #elif sopc_type == libsub.SOPC_ExtensionObject_Id:
             #    variant.Value. = self._value
@@ -631,86 +632,62 @@ class Variant:
             if sopc_type == libsub.SOPC_Null_Id:
                 pass
             elif sopc_type == libsub.SOPC_Boolean_Id:
-                content.BooleanArr = ffi.new('SOPC_Boolean[]', self._value)
-                ffi.gc(content.BooleanArr, None)
+                content.BooleanArr = allocator_no_gc('SOPC_Boolean[]', self._value)
             elif sopc_type == libsub.SOPC_SByte_Id:
-                content.SbyteArr = ffi.new('SOPC_SByte[]', self._value)
-                ffi.gc(content.SbyteArr, None)
+                content.SbyteArr = allocator_no_gc('SOPC_SByte[]', self._value)
             elif sopc_type == libsub.SOPC_Byte_Id:
-                content.ByteArr = ffi.new('SOPC_Byte[]', self._value)
-                ffi.gc(content.ByteArr, None)
+                content.ByteArr = allocator_no_gc('SOPC_Byte[]', self._value)
             elif sopc_type == libsub.SOPC_Int16_Id:
-                content.Int16Arr = ffi.new('int16_t[]', self._value)
-                ffi.gc(content.Int16Arr, None)
+                content.Int16Arr = allocator_no_gc('int16_t[]', self._value)
             elif sopc_type == libsub.SOPC_UInt16_Id:
-                content.Uint16Arr = ffi.new('uint16_t[]', self._value)
-                ffi.gc(content.Uint16Arr, None)
+                content.Uint16Arr = allocator_no_gc('uint16_t[]', self._value)
             elif sopc_type == libsub.SOPC_Int32_Id:
-                content.Int32Arr = ffi.new('int32_t[]', self._value)
-                ffi.gc(content.Int32Arr, None)
+                content.Int32Arr = allocator_no_gc('int32_t[]', self._value)
             elif sopc_type == libsub.SOPC_UInt32_Id:
-                content.Uint32Arr = ffi.new('uint32_t[]', self._value)
-                ffi.gc(content.Uint32Arr, None)
+                content.Uint32Arr = allocator_no_gc('uint32_t[]', self._value)
             elif sopc_type == libsub.SOPC_Int64_Id:
-                content.Int64Arr = ffi.new('int64_t[]', self._value)
-                ffi.gc(content.Int64Arr, None)
+                content.Int64Arr = allocator_no_gc('int64_t[]', self._value)
             elif sopc_type == libsub.SOPC_UInt64_Id:
-                content.Uint64Arr = ffi.new('uint64_t[]', self._value)
-                ffi.gc(content.Uint64Arr, None)
+                content.Uint64Arr = allocator_no_gc('uint64_t[]', self._value)
             elif sopc_type == libsub.SOPC_Float_Id:
-                content.FloatvArr = ffi.new('float[]', self._value)
-                ffi.gc(content.FloatvArr, None)
+                content.FloatvArr = allocator_no_gc('float[]', self._value)
             elif sopc_type == libsub.SOPC_Double_Id:
-                content.DoublevArr = ffi.new('double[]', self._value)
-                ffi.gc(content.DoublevArr, None)
+                content.DoublevArr = allocator_no_gc('double[]', self._value)
             elif sopc_type == libsub.SOPC_String_Id:
-                content.StringArr = ffi.new('SOPC_String[]', map(lambda s:str_to_string(s, no_gc=True), self._value))
-                ffi.gc(content.StringArr, None)
+                content.StringArr = allocator_no_gc('SOPC_String[]', map(lambda s:str_to_string(s, no_gc=True), self._value))
             elif sopc_type == libsub.SOPC_DateTime_Id:
-                content.DateArr = ffi.new('SOPC_DateTime[]', self._value)  # int64_t
-                ffi.gc(content.DateArr, None)
+                content.DateArr = allocator_no_gc('SOPC_DateTime[]', self._value)  # int64_t
             elif sopc_type == libsub.SOPC_Guid_Id:
-                content.GuidArr = ffi.new('SOPC_Guid[]', uuid_to_guid(self._value, no_gc=True))
-                ffi.gc(content.GuidArr, None)
+                content.GuidArr = allocator_no_gc('SOPC_Guid[]', uuid_to_guid(self._value, no_gc=True))
             elif sopc_type == libsub.SOPC_ByteString_Id:
-                content.BstringArr = ffi.new('SOPC_ByteString[]', map(lambda v:bytes_to_bytestring(v, no_gc=True), self._value))
-                ffi.gc(content.BstringArr, None)
+                content.BstringArr = allocator_no_gc('SOPC_ByteString[]', map(lambda v:bytes_to_bytestring(v, no_gc=True), self._value))
             elif sopc_type == libsub.SOPC_XmlElement_Id:
-                content.XmlEltArr = ffi.new('SOPC_XmlElement[]', map(lambda v:bytes_to_bytestring(v, no_gc=True), self._value))
-                ffi.gc(content.XmlEltArr, None)
+                content.XmlEltArr = allocator_no_gc('SOPC_XmlElement[]', map(lambda v:bytes_to_bytestring(v, no_gc=True), self._value))
             elif sopc_type == libsub.SOPC_NodeId_Id:
-                content.NodeIdArr = ffi.new('SOPC_NodeId[]', map(lambda v:str_to_nodeid(v, no_gc=True), self._value))
-                ffi.gc(content.NodeIdArr, None)
+                content.NodeIdArr = allocator_no_gc('SOPC_NodeId[]', map(lambda v:str_to_nodeid(v, no_gc=True), self._value))
             #elif sopc_type == libsub.SOPC_ExpandedNodeId_Id:
-            #    content.Arr = ffi.new('[]', self._value)
+            #    content.Arr = allocator_no_gc('[]', self._value)
             elif sopc_type == libsub.SOPC_StatusCode_Id:
-                content.StatusArr = ffi.new('SOPC_StatusCode[]', self._value)
-                ffi.gc(content.StatusArr, None)
+                content.StatusArr = allocator_no_gc('SOPC_StatusCode[]', self._value)
             elif sopc_type == libsub.SOPC_QualifiedName_Id:
-                qnames = ffi.new('SOPC_QualifiedName[{}]'.format(len(self._value)))
+                qnames = allocator_no_gc('SOPC_QualifiedName[{}]'.format(len(self._value)))
                 for i,v in enumerate(self._value):
                     qnames[i].NamespaceIndex = v[0]
                     qnames[i].Name = str_to_string(v[1], no_gc=True)
-                ffi.gc(qnames, None)
                 content.QnameArr = qnames
             elif sopc_type == libsub.SOPC_LocalizedText_Id:
-                locs = ffi.new('SOPC_LocalizedText[{}]'.format(len(self._value)))
+                locs = allocator_no_gc('SOPC_LocalizedText[{}]'.format(len(self._value)))
                 for i,v in enumerate(self._value):
                     locs[i].Locale, locs[i].Text = map(lambda s:str_to_string(s, no_gc=True), v)
-                ffi.gc(locs, None)
                 content.LocalizedTextArr = locs
             #elif sopc_type == libsub.SOPC_ExtensionObject_Id:
-            #    content.Arr = ffi.new('[]', self._value)
-            #    ffi.gc(content.Arr, None)
+            #    content.Arr = allocator_no_gc('[]', self._value)
             #elif sopc_type == libsub.SOPC_DataValue_Id:
-            #    content.Arr = ffi.new('[]', self._value)
-            #    ffi.gc(content.Arr, None)
+            #    content.Arr = allocator_no_gc('[]', self._value)
             #elif sopc_type == libsub.SOPC_Variant_Id:
-            #    content.Arr = ffi.new('[]', self._value)
-            #    ffi.gc(content.Arr, None)
+            #    content.Arr = allocator_no_gc('[]', self._value)
             #elif sopc_type == libsub.SOPC_DiagnosticInfo_Id:
-            #    content.Arr = ffi.new('[]', self._value)
-            #    ffi.gc(content.Arr, None)
+            #    content.Arr = allocator_no_gc('[]', self._value)
             else:
                 raise ValueError('Python to SOPC_Variant conversion not supported for the given type {}.'.format(sopc_type))
         return variant
@@ -778,16 +755,20 @@ class DataValue:
         return DataValue(datavalue.SourceTimestamp, datavalue.ServerTimestamp, datavalue.Status,
                          Variant.from_sopc_variant(ffi.addressof(datavalue.Value)))
 
-    def to_sopc_datavalue(self, *, copy_type_from_variant=None, sopc_variant_type=None):
+    allocator = ffi.new_allocator(alloc=libsub.malloc, free=libsub.SOPC_DataValue_Delete, should_clear_after_alloc=True)
+
+    def to_sopc_datavalue(self, *, copy_type_from_variant=None, sopc_variant_type=None, no_gc=False):
         """
         Converts a new SOPC_DataValue from the Python DataValue.
         See :func:`Variant.to_sopc_variant` for a documentation of the arguments.
 
         The returned value is garbage collected when the returned value is not referenced anymore.
         """
-        datavalue = ffi.new('SOPC_DataValue *')
-        sopc_variant = self.variant.to_sopc_variant(copy_type_from_variant=copy_type_from_variant, sopc_variant_type=sopc_variant_type)
-        ffi.gc(sopc_variant, None)
+        if no_gc:
+            datavalue = allocator_no_gc('SOPC_DataValue *')
+        else:
+            datavalue = DataValue.allocator('SOPC_DataValue *')
+        sopc_variant = self.variant.to_sopc_variant(copy_type_from_variant=copy_type_from_variant, sopc_variant_type=sopc_variant_type, no_gc=True)
         datavalue.Value = sopc_variant
         datavalue.Status = self.statusCode
         datavalue.SourceTimestamp = self.timestampSource
