@@ -243,12 +243,10 @@ class PyS2OPC:
 
     @staticmethod
     def _callback_generic_event(connectionId, event, status, responsePayload, responseContext):
-        ts = time.time()
-        assert connectionId in PyS2OPC._dConnections, 'Data change notification on unknown connection'
+        assert connectionId in PyS2OPC._dConnections, 'Event notification on unknown connection'
         connection = PyS2OPC._dConnections[connectionId]
-        response = Response(responsePayload)
-        response.timestampReceived = ts
-        connection._on_response(event, status, response, responseContext)
+        # It is not possible to store the payload, as it is freed by the caller of the callback.
+        connection._on_response(event, status, responsePayload, responseContext)
 
 
 

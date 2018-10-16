@@ -797,6 +797,44 @@ class DataValue:
         return datavalue
 
 
+class AttributeId:
+    """
+    A copy of the SOPC_LibSub_AttributeId enum.
+    """
+    NodeId                  = libsub.SOPC_LibSub_AttributeId_NodeId
+    NodeClass               = libsub.SOPC_LibSub_AttributeId_NodeClass
+    BrowseName              = libsub.SOPC_LibSub_AttributeId_BrowseName
+    DisplayName             = libsub.SOPC_LibSub_AttributeId_DisplayName
+    Description             = libsub.SOPC_LibSub_AttributeId_Description
+    WriteMask               = libsub.SOPC_LibSub_AttributeId_WriteMask
+    UserWriteMask           = libsub.SOPC_LibSub_AttributeId_UserWriteMask
+    IsAbstract              = libsub.SOPC_LibSub_AttributeId_IsAbstract
+    Symmetric               = libsub.SOPC_LibSub_AttributeId_Symmetric
+    InverseName             = libsub.SOPC_LibSub_AttributeId_InverseName
+    ContainsNoLoops         = libsub.SOPC_LibSub_AttributeId_ContainsNoLoops
+    EventNotifier           = libsub.SOPC_LibSub_AttributeId_EventNotifier
+    Value                   = libsub.SOPC_LibSub_AttributeId_Value
+    DataType                = libsub.SOPC_LibSub_AttributeId_DataType
+    ValueRank               = libsub.SOPC_LibSub_AttributeId_ValueRank
+    ArrayDimensions         = libsub.SOPC_LibSub_AttributeId_ArrayDimensions
+    AccessLevel             = libsub.SOPC_LibSub_AttributeId_AccessLevel
+    UserAccessLevel         = libsub.SOPC_LibSub_AttributeId_UserAccessLevel
+    MinimumSamplingInterval = libsub.SOPC_LibSub_AttributeId_MinimumSamplingInterval
+    Historizing             = libsub.SOPC_LibSub_AttributeId_Historizing
+    Executable              = libsub.SOPC_LibSub_AttributeId_Executable
+    UserExecutable          = libsub.SOPC_LibSub_AttributeId_UserExecutable
+
+
+class EncodeableType:
+    """
+    A copy of the known SOPC_EncodeableTypes, give these address a readable name.
+    """
+    ReadValueId = ffi.addressof(libsub.OpcUa_ReadValueId_EncodeableType)
+    ReadRequest = ffi.addressof(libsub.OpcUa_ReadRequest_EncodeableType)
+    ReadResponse = ffi.addressof(libsub.OpcUa_ReadResponse_EncodeableType)
+    ReadResponse = libsub.OpcUa_ReadResponse_EncodeableType
+
+
 if __name__ == '__main__':
     # Auto-test
     import struct

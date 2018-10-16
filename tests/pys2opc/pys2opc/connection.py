@@ -51,21 +51,38 @@ class BaseConnectionHandler:
         assert dataId in self._dSubscription, 'Data change notification on unknown NodeId'
         self.on_datachanged(self._dSubscription[dataId], value)
 
-    def _on_response(self, event, status, response, responseContext):
+    _dResponseClasses = {EncodeableType.ReadResponse: ReadResponse}
+
+    def _on_response(self, event, status, responsePayload, responseContext):
         """
-        Receive a Response, associates it to a Request both-ways.
-        Shall be called for every response received through callback_generic_event.
+        Receives an OpcUa_*Response, creates a Response, associates it to a Request both-ways.
+        It is called for every response received through the LibSub callback_generic_event.
+        The dictionary _dResponseClasses contains classes that will be instantiated with the OpcUa_*Response as parameter.
+        It is possible to add new elements to this dict to support more response decoders, or override existing decoders.
+
+        Warning: responsePayload is freed by the caller, so the structure or its content must be copied before returning.
         """
+        ts = time.time()
         assert responseContext in self._dRequestContexts, 'Unknown requestContext {}.'.format(responseContext)
         request = self._dRequestContexts[responseContext]
-        response.timestampReceived = time.time()
-        request.response = response
-        response.request = request
-        if responseContext not in self._sSkipResponse:
-            self.on_generic_response(response)
-        else:
-            del self._sSkipResponse[responseContext]
-        request.eventResponseReceived.set()
+        try:
+            if event == libsub.SOPC_LibSub_ApplicativeEvent_SendFailed:
+                raise RuntimeError('Request was not sent with status 0x{:08X}'.format(status))
+            assert event == libsub.SOPC_LibSub_ApplicativeEvent_Response
+            # Build typed response
+            encType = ffi.cast('SOPC_EncodeableType**', responsePayload)
+            response = self._dResponseClasses.get(encType[0], Response)(responsePayload)
+            response.timestampReceived = ts
+            request.response = response
+            response.request = request
+            if responseContext not in self._sSkipResponse:
+                self.on_generic_response(response)
+            else:
+                self._sSkipResponse.remove(responseContext)
+        finally:
+            # Hopefully the Toolkit always notifies the application, and it is caught here.
+            # Also, if the processing of the response fails, it is caught here.
+            request.eventResponseReceived.set()
     def _wait_for_response(self, request):
         request.eventResponseReceived.wait()
         return request.response
@@ -160,14 +177,38 @@ class BaseConnectionHandler:
         return self._dPendingResponses.pop(request.requestContext, None)
 
     # Specialized request sender
-    def read_nodes(self, nodeidsAttributes, bWaitResponse=False):
+    def read_nodes(self, nodeIds, attributes=None, bWaitResponse=True):
         """
+        Forges a ReadRequest and send it.
         When bWaitResponse, waits for the response and returns it. Otherwise, returns the request.
+
+        Args:
+            nodeIds: NodeId described as a string "[ns=x;]t=y" where x is the namespace index, t is the NodeId type
+                     (s for a string NodeId, i for integer, b for bytestring, g for GUID), and y is typed content.
+            attributes: Optional: a list of attributes to read. The list has the same length as nodeIds. When omited,
+                        reads the attribute Value (see :class:`AttributeId` for a list of attributes).
+
+        Return:
+            A list which has the same size as the input lists, and stores the response as a DataValue for each nodeId.
         """
-        request = ReadRequest(params)
-        obj = self.send_generic_request(request, bWaitResponse=False)
-        #if bWaitResponse:
-        #    return zip(*zip(*nodeidsAttributes), response.values)
+        if attributes is None:
+            attributes = [AttributeId.Value for _ in nodeIds]
+        assert len(nodeIds) == len(attributes)
+        # TODO: protect this from invalid attributes ?
+        payload = allocator_no_gc('OpcUa_ReadRequest *')  # The Toolkit takes ownership of this struct
+        payload.encodeableType = EncodeableType.ReadRequest
+        payload.MaxAge = 0.
+        payload.TimestampsToReturn = libsub.OpcUa_TimestampsToReturn_Both
+        payload.NoOfNodesToRead = len(nodeIds)
+        nodesToRead = allocator_no_gc('OpcUa_ReadValueId[{}]'.format(len(nodeIds)))
+        for i, (snid, attr) in enumerate(zip(nodeIds, attributes)):
+            nodesToRead[i].encodeableType = EncodeableType.ReadValueId
+            fill_nodeid(nodesToRead[i].NodeId, snid)
+            nodesToRead[i].AttributeId = attr
+        payload.NodesToRead = nodesToRead
+
+        request = Request(payload)
+        return self.send_generic_request(request, bWaitResponse=bWaitResponse)
     def write_nodes(self, nodeidsAttributesValues, bWaitResponse=False):
         # TODO:
         request = WriteRequest(params)

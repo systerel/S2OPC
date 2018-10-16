@@ -36,5 +36,6 @@ if __name__ == '__main__':
         config = PyS2OPC.add_configuration_unsecured()
         PyS2OPC.configured()
         with PyS2OPC.connect(config, PrintSubs) as connection:
-            connection.add_nodes_to_subscription(['s=Counter', 's=StatusString', 'i=2255'])
+            #connection.add_nodes_to_subscription(['s=Counter', 's=StatusString', 'i=2255'])
+            print(connection.read_nodes(['s=Counter', 's=StatusString', 'i=2255']).results)
             time.sleep(2)
