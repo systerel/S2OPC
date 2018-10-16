@@ -57,24 +57,6 @@ class Request:
         return self._requestContext
 
 
-class Response:
-    """
-    Base class for Responses.
-    Adds a reference to the request and the timestamp of the received time.
-
-    Args:
-        payload: An OpcUa_*Response.
-    """
-    def __init__(self, payload):
-        self.timestampReceived = None  # The receiver sets the timestamp
-        self.request = request
-        self.payload = payload
-
-    def get_roundtrip_time(self):
-        return self.timestampReceived - self.request.timestampSent
-
-
-
 def bytestring_to_bytes(bstring):
     """SOPC_ByteString or SOPC_ByteString* to python bytes()"""
     return ffi.string(bstring.Data, bstring.Length)

@@ -22,6 +22,8 @@
 import time
 
 from _pys2opc import ffi, lib as libsub
+from .types import Request, AttributeId, fill_nodeid, allocator_no_gc, EncodeableType
+from .responses import Response, ReadResponse
 
 
 class BaseConnectionHandler:

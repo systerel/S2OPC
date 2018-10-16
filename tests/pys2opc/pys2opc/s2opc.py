@@ -25,6 +25,7 @@ import time
 from _pys2opc import ffi, lib as libsub
 from .connection import BaseConnectionHandler
 from .types import DataValue
+from .responses import Response
 
 
 NULL = ffi.NULL
