@@ -25,6 +25,7 @@ ffibuilder = FFI()
 # TODO: generate this file
 header = open('./libs2opc_client_cffi.h').read()
 ffibuilder.cdef(header + r'''
+    void *malloc(size_t size);
     void free(void *ptr);
 
     extern "Python" void _callback_log(SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text);
