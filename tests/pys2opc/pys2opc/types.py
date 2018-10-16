@@ -60,7 +60,7 @@ class Request:
 def bytestring_to_bytes(bstring):
     """SOPC_ByteString or SOPC_ByteString* to python bytes()"""
     return ffi.string(bstring.Data, bstring.Length)
-def bytes_to_bytestring(b):
+def bytes_to_bytestring(b, no_gc=False):
     """
     Python bytes to SOPC_ByteString*.
 
@@ -89,29 +89,13 @@ def str_to_string(s, no_gc=False):
     """
     alloc = allocator_no_gc if no_gc else ffi.new
     string = alloc('SOPC_String *')
-    status = libsub.SOPC_String_CopyFromCString(string, ffi.new('char[]', s))
-    assert status == SOPC_STATUS_OK
+    status = libsub.SOPC_String_CopyFromCString(string, ffi.new('char[]', s.encode()))
+    assert status == libsub.SOPC_STATUS_OK
     return string
 
 def nodeid_to_str(node):
     """SOPC_NodeId or SOPC_NodeId* to its str representation in the OPC-UA XML syntax."""
-    snid = 'ns={};'.format(node.Namespace) if node.Namespace != 0 else ''
-    if node.IdentifierType == libsub.SOPC_IdentifierType_Numeric:
-        snid += 'i={}'.format(node.Data.Numeric)
-    elif node.IdentifierType == libsub.SOPC_IdentifierType_String:
-        snid += 's=' + string_to_str(node.Data.String)
-    elif node.IdentifierType == libsub.SOPC_IdentifierType_Guid:
-        # TODO
-        # TODO: use SOPC_NodeId_ToCString
-        raise ValueError('TODO')
-    elif node.IdentifierType == libsub.SOPC_IdentifierType_ByteString:
-        # This operation may fail, as it may not be possible to represent the ByteString in the string,
-        #  but this is how the OPC-UA XML representation of the NodeId works,
-        #  so there should not be unrepresentable bytestring NodeId in your AddressSpace anyway.
-        snid += 'b=' + bytestring_to_bytes(node.Data.Bstring).decode()
-    else:
-        raise ValueError('Unknown NodeId type: {}'.format(node.IdentifierType))
-    return snid
+    return ffi.string(libsub.SOPC_NodeId_ToCString(node)).decode()
 def str_to_nodeid(nid, no_gc=True):
     """
     Python string to SOPC_NodeId*.
@@ -161,7 +145,7 @@ def uuid_to_guid(uid, no_gc=False):
     alloc = allocator_no_gc if no_gc else ffi.new
     guid = alloc('SOPC_Guid*')
     guid.Data1, guid.Data2, guid.Data3 = uid.fields[:3]
-    for i,b in enumerate(guid.bytes[-8:]):
+    for i,b in enumerate(uid.bytes[-8:]):
         guid.Data4[i] = b
     return guid
 
@@ -626,9 +610,9 @@ class Variant:
         else:
             # Arrays or Matrices values (but not Matrices)
             assert not any(map(lambda n:isinstance(n, (list, tuple)), self._value)), 'Multi dimensional arrays are not supported.'
-            variant.ArrayType = libsub.SOPC_VariantArrayType_ArrayValue
-            variant.Array.Length = len(self._value)
-            content = variant.Array.Content
+            variant.ArrayType = libsub.SOPC_VariantArrayType_Array
+            variant.Value.Array.Length = len(self._value)
+            content = variant.Value.Array.Content
             if sopc_type == libsub.SOPC_Null_Id:
                 pass
             elif sopc_type == libsub.SOPC_Boolean_Id:
@@ -822,4 +806,20 @@ if __name__ == '__main__':
     guid = ffi.new('SOPC_Guid *')
     guid.Data1, guid.Data2, guid.Data3 = struct.unpack('>IHH', unhexlify(b'72962B91FA754AE6'))
     guid.Data4 = [0x8D, 0x28, 0xB4, 0x04, 0xDC, 0x7D, 0xAF, 0x63]
-    assert uuid.UUID('72962b91-fa75-4ae6-8d28-b404dc7daf63') == guid_to_uuid(guid)
+    uid = uuid.UUID('72962b91-fa75-4ae6-8d28-b404dc7daf63')
+    assert uid == guid_to_uuid(guid)
+    assert uid == guid_to_uuid(uuid_to_guid(uid))
+
+    snids = ['s=Counter', 'ns=40001;s=Counter', 'i=2255', 'g=72962b91-fa75-4ae6-8d28-b404dc7daf63', 'b=foobar']
+    assert all([snid == nodeid_to_str(str_to_nodeid(snid)) for snid in snids])
+
+    s = 'S2OPC foobar test string'
+    assert s == string_to_str(str_to_string(s))
+    assert s.encode() == bytestring_to_bytes(bytes_to_bytestring(s.encode()))
+
+    # TODO: test without sopc_variant_type then with copy_type_from_variant
+    vals = Variant([2*i - 4 for i in range(64)])
+    assert vals == Variant.from_sopc_variant(vals.to_sopc_variant(sopc_variant_type=VariantType.Int16))
+    val = Variant('i=81')
+    assert val == Variant.from_sopc_variant(val.to_sopc_variant(sopc_variant_type=VariantType.NodeId))
+    vals = Variant(['i={}'.format(i) for i in range(64)])
