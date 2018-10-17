@@ -517,29 +517,30 @@ class Variant:
         """
         Converts the current Variant to a SOPC_Variant*.
         Handles both single values and array values.
-        The type may be specified by either copy_type_from_variant, or sopc_variant_type.
+        The type may be specified by either self.variant_type, copy_type_from_variant, or sopc_variant_type.
+        If types is specified by multiple means, the type must be the same in all cases.
 
         Args:
             copy_type_from_variant: A C SOPC_Variant* or a Python Variant from which the type is copied.
-            sopc_variant_type: A VariantType constant. If both copy_type_from_variant and sopc_variant_type are given,
-                               they must yield the same type.
+            sopc_variant_type: A VariantType constant.
             no_gc: When True, the Python garbage collection mechanism is omited and the string must be
                    either manually deleted with a call to SOPC_String_Delete or passed to an object
                    which will call SOPC_String_Delete for you.
         """
         # Detect type
-        sopc_type = None
+        sPossibleTypes = {self.variant_type, sopc_variant_type}
         if copy_type_from_variant is not None:
             if isinstance(copy_type_from_variant, Variant):
-                sopc_type = copy_type_from_variant.variant_type
+                sPossibleTypes.add(copy_type_from_variant.variant_type)
             else:
-                sopc_type = copy_type_from_variant.BuiltInTypeId
-        if sopc_variant_type is not None:
-            if sopc_type is None:
-                sopc_type = sopc_variant_type
-            elif sopc_type != sopc_variant_type:
-                raise ValueError('Both copy_type_from_variant and sopc_variant_type are given, but they are different: '
-                    'copy_type_from_variant gives {} and sopc_variant_type is {}'.format(sopc_type, sopc_variant_type))
+                sPossibleTypes.add(copy_type_from_variant.BuiltInTypeId)
+        sPossibleTypes.remove(None)
+        if not sPossibleTypes:
+            raise ValueError('No type detected, please supply self.variant_type or sopc_variant_type or sopy_type_from_variant.')
+        if len(sPossibleTypes) > 1:
+            raise ValueError('More than one type detected, please supply self.variant_type or sopc_variant_type or sopy_type_from_variant.')
+        sopc_type, = sPossibleTypes
+
         # Create and fill variant
         if no_gc:
             variant = allocator_no_gc('SOPC_Variant*')
