@@ -19,7 +19,7 @@
 # under the License.
 
 
-from pys2opc import PyS2OPC, BaseConnectionHandler
+from pys2opc import PyS2OPC, BaseConnectionHandler, DataValue
 import time
 
 
@@ -37,5 +37,7 @@ if __name__ == '__main__':
         PyS2OPC.configured()
         with PyS2OPC.connect(config, PrintSubs) as connection:
             #connection.add_nodes_to_subscription(['s=Counter', 's=StatusString', 'i=2255'])
-            print(connection.read_nodes(['s=Counter', 's=StatusString', 'i=2255']).results)
+            #print(connection.read_nodes(['s=Counter', 's=StatusString', 'i=2255']).results)
+            if connection.write_nodes(['s=StatusString'], list(map(DataValue.from_python, ['Everything is Foobar.']))).is_ok():
+                print('Write Ok')
             time.sleep(2)

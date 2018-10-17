@@ -180,7 +180,7 @@ class BaseConnectionHandler:
     # Specialized request sender
     def read_nodes(self, nodeIds, attributes=None, bWaitResponse=True):
         """
-        Forges a ReadRequest and send it.
+        Forges an OpcUa_ReadRequest and sends it.
         When bWaitResponse, waits for the response and returns it. Otherwise, returns the request.
 
         Args:
@@ -190,7 +190,7 @@ class BaseConnectionHandler:
                         reads the attribute Value (see :class:`AttributeId` for a list of attributes).
 
         Return:
-            A list which has the same size as the input lists, and stores the response as a DataValue for each nodeId.
+            The ReadResponse object contains the attribute results which stores the read value for the ith element.
         """
         if attributes is None:
             attributes = [AttributeId.Value for _ in nodeIds]
@@ -210,13 +210,76 @@ class BaseConnectionHandler:
 
         request = Request(payload)
         return self.send_generic_request(request, bWaitResponse=bWaitResponse)
-    def write_nodes(self, nodeidsAttributesValues, bWaitResponse=False):
-        # TODO:
-        request = WriteRequest(params)
-        return self.send_generic_request(request, bWaitResponse=False)
-    def browse_nodes(self, nodeids, bWaitResponse):
-        request = BrowseRequest(params)
-        return self.send_generic_request(request, bWaitResponse=False)
-    def history_read_nodes(self, nodeids, bWaitResponse):
-        request = HistoryReadRequest(params)
-        return self.send_generic_request(request, bWaitResponse=False)
+
+    def write_nodes(self, nodeIds, datavalues, attributes=None, types=None, bWaitResponse=True):
+        """
+        Forges an OpcUa_WriteResponse and sends it.
+        When bWaitResponse, waits for the response and returns it. Otherwise, returns the request.
+
+        Types are found in 3 places, for each NodeId and DataValue :
+        - in each datavalue.variant_type,
+        - in the `types` list,
+        - in a ReadResponse that is sent and waited upon if both previous sources are set to None.
+
+        The Read request is only sent when at least one datavalue lacks type in both datavalue.variant_type and `types`.
+        If both datavalue.variant_type and the type in `types` are given, they must be equal.
+
+        Args:
+            nodeIds: NodeId described as a string "[ns=x;]t=y" where x is the namespace index, t is the NodeId type
+                     (s for a string NodeId, i for integer, b for bytestring, g for GUID), and y is typed content.
+            datavalues: A list of DataValue to write for each NodeId
+            attributes: Optional: a list of attributes to write. The list has the same length as nodeIds. When omitted,
+                        reads the attribute Value (see :class:`AttributeId` for a list of attributes).
+            types: Optional: a list of VariantType for each value to write.
+
+        Return:
+            A WriteResponse, which has accessors to check whether the writes were successful or not.
+        """
+        if attributes is None:
+            attributes = [AttributeId.Value for _ in nodeIds]
+        assert len(nodeIds) == len(attributes) == len(datavalues)
+        if types:
+            assert len(nodeIds) == len(types)
+
+        # Compute types
+        sopc_types = []
+        types = types or [None] * len(nodeIds)
+        for dv, ty in zip(datavalues, types):
+            if dv.variant_type is not None:
+                if ty is not None or ty != dv.variant_type:
+                    raise ValueError('Inconsistent type, type of datavalue is different from type given in types list')
+                sopc_types.append(dv.variant_type)
+            else:
+                sopc_types.append(ty)
+
+        # Where there is still None types, make a read request
+        missingTypesInfo = [(i, snid, attr) for i,(snid,attr,ty) in enumerate(zip(nodeIds, attributes, sopc_types)) if ty is None]
+        if missingTypesInfo:
+            _, readNids, readAttrs = zip(*missingTypesInfo)
+            readDatavalues = self.read_nodes(readNids, readAttrs, bWaitResponse=True)
+            for (i, _, _), dv in zip(missingTypesInfo, readDatavalues.results):
+                sopc_types[i] = dv.variant_type
+
+        # Overwrite values' type
+        for dv, ty in zip(datavalues, sopc_types):
+            dv.variant_type = ty
+
+        # Prepare the request, it will be freed by the Toolkit
+        payload = allocator_no_gc('OpcUa_WriteRequest *')
+        payload.encodeableType = EncodeableType.WriteRequest
+        payload.NoOfNodesToWrite = len(nodeIds)
+        nodesToWrite = allocator_no_gc('OpcUa_WriteValue[{}]'.format(len(nodeIds)))
+        for i, (snid, attr, val) in enumerate(zip(nodeIds, attributes, datavalues)):
+            nodesToWrite[i].encodeableType = EncodeableType.WriteValue
+            fill_nodeid(nodesToWrite[i].NodeId, snid)
+            nodesToWrite[i].AttributeId = attr
+            val.fill_sopc_datavalue(nodesToWrite[i].Value)
+        payload.NodesToWrite = nodesToWrite
+
+        request = Request(payload)
+        return self.send_generic_request(request, bWaitResponse=bWaitResponse)
+
+    #def browse_nodes(self, nodeids, bWaitResponse=True):
+    #    return self.send_generic_request(request, bWaitResponse=bWaitResponse)
+    #def history_read_nodes(self, nodeids, bWaitResponse=True):
+    #    return self.send_generic_request(request, bWaitResponse=bWaitResponse)
