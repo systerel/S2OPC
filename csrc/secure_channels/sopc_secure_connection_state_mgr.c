@@ -1343,8 +1343,9 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
                     {
                         if (compareValue != 0)
                         {
-                            result = false;
-                            *errorStatus = OpcUa_BadTcpEndpointUrlInvalid;
+                            SOPC_Logger_TraceWarning(
+                                "Endpoint URL is not identical to requested URL : %s instead of %s",
+                                epConfig->endpointURL, (char*) url.Data);
                         }
                     }
                 }
