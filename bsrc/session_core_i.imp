@@ -397,12 +397,12 @@ OPERATIONS
                     END
                 END
             ELSE
-                service_ret := e_sc_bad_out_of_memory;
+                service_ret := e_sc_bad_too_many_sessions;
                 set_session_state_closed (l_nsession, e_sc_bad_session_id_invalid, FALSE);
                 l_nsession := c_session_indet
             END
         ELSE
-            service_ret := e_sc_bad_out_of_memory
+            service_ret := e_sc_bad_too_many_sessions
         END;
         nsession := l_nsession
     END

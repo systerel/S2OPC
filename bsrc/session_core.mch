@@ -193,7 +193,7 @@ OPERATIONS
         THEN
             // Maximum number of sessions already allocated
             nsession := c_session_indet ||
-            service_ret := e_sc_bad_out_of_memory
+            service_ret := e_sc_bad_too_many_sessions
         ELSE
             ANY l_nsession, l_nsession_token, l_nonce WHERE
                 l_nsession : t_session_i &
@@ -218,7 +218,7 @@ OPERATIONS
                     // sends error response
                     nsession := c_session_indet ||
                     // TODO: could return at least all result codes from table 15
-                    service_ret :: {e_sc_bad_out_of_memory, e_sc_bad_unexpected_error}
+                    service_ret :: {e_sc_bad_too_many_sessions, e_sc_bad_out_of_memory, e_sc_bad_unexpected_error}
                 END
             END
         END
