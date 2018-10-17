@@ -23,6 +23,7 @@ import threading
 from functools import total_ordering
 import uuid
 from binascii import hexlify, unhexlify
+import time
 
 from _pys2opc import ffi, lib as libsub
 
@@ -710,7 +711,16 @@ class VariantType:
 
 
 class DataValue:
-    # The value is stored as Variant().
+    """
+    A Python representation of the DataValue.
+
+    Attributes:
+        timestampSource: The last time the value changed, specified by the writer.
+        timestampServer: The last time the value changed, according to the server.
+        statusCode: The quality associated to the value OR the reason why there is no available value (e.g. BadAttributeInvalid).
+        variant: The Variant storing the value.
+        variant_type: An accessor to the :attr:`Variant.variant_type`, see Variant.
+    """
     def __init__(self, timestampSource, timestampServer, statusCode, variant):
         self.timestampSource = timestampSource
         self.timestampServer = timestampServer
@@ -721,6 +731,13 @@ class DataValue:
         return 'DataValue('+repr(self.variant)+')'
     def __str__(self):
         return repr(self)
+
+    @property
+    def variant_type(self):
+        return self.variant.variant_type
+    @variant_type.setter
+    def variant_type(self, ty):
+        self.variant.variant_type = ty
 
     @staticmethod
     def from_sopc_libsub_value(libsub_value):
@@ -739,6 +756,15 @@ class DataValue:
         return DataValue(datavalue.SourceTimestamp, datavalue.ServerTimestamp, datavalue.Status,
                          Variant.from_sopc_variant(ffi.addressof(datavalue.Value)))
 
+    @staticmethod
+    def from_python(val):
+        """
+        Creates a DataValue from the Python value.
+        Creates the Variant, sets the status code to OK, and set source timestamp to now.
+        """
+        # TODO: handle SOPC_Time and Python time, which are different.
+        return DataValue(int(time.time()), 0, libsub.SOPC_STATUS_OK, Variant(val))
+
     allocator = ffi.new_allocator(alloc=libsub.malloc, free=libsub.SOPC_DataValue_Delete, should_clear_after_alloc=True)
 
     def to_sopc_datavalue(self, *, copy_type_from_variant=None, sopc_variant_type=None, no_gc=False):
@@ -753,13 +779,25 @@ class DataValue:
         else:
             datavalue = DataValue.allocator('SOPC_DataValue *')
         sopc_variant = self.variant.to_sopc_variant(copy_type_from_variant=copy_type_from_variant, sopc_variant_type=sopc_variant_type, no_gc=True)
-        datavalue.Value = sopc_variant
+        datavalue.Value = sopc_variant[0]
         datavalue.Status = self.statusCode
         datavalue.SourceTimestamp = self.timestampSource
         datavalue.ServerTimestamp = self.timestampServer
         datavalue.SourcePicoSeconds = 0
         datavalue.ServerPicoSeconds = 0
         return datavalue
+
+    def fill_sopc_datavalue(self, datavalue, **kwargs):
+        # Create a new DataValue to extract its internals
+        kwargs['no_gc'] = True
+        odatavalue = self.to_sopc_datavalue(**kwargs)
+        datavalue.Value = odatavalue.Value
+        datavalue.Status = odatavalue.Status
+        datavalue.SourceTimestamp = odatavalue.SourceTimestamp
+        datavalue.ServerTimestamp = odatavalue.ServerTimestamp
+        datavalue.SourcePicoSeconds = odatavalue.SourcePicoSeconds
+        datavalue.ServerPicoSeconds = odatavalue.ServerPicoSeconds
+        libsub.free(odatavalue)
 
 
 class AttributeId:
