@@ -1065,9 +1065,6 @@ extern struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType;
 typedef struct _OpcUa_ResponseHeader
 {
     SOPC_EncodeableType* encodeableType;
-    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
-     *  for giving a copy of the header to application.
-     */
     SOPC_DateTime Timestamp;
     uint32_t RequestHandle;
     SOPC_StatusCode ServiceResult;
@@ -1087,3 +1084,32 @@ typedef struct _OpcUa_ReadResponse
     int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
 } OpcUa_ReadResponse;
+
+extern struct SOPC_EncodeableType OpcUa_WriteValue_EncodeableType;
+typedef struct _OpcUa_WriteValue
+{
+    SOPC_EncodeableType* encodeableType;
+    SOPC_NodeId NodeId;
+    uint32_t AttributeId;
+    SOPC_String IndexRange;
+    SOPC_DataValue Value;
+} OpcUa_WriteValue;
+
+extern struct SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType;
+typedef struct _OpcUa_WriteRequest
+{
+    SOPC_EncodeableType* encodeableType;
+    int32_t NoOfNodesToWrite;
+    OpcUa_WriteValue* NodesToWrite;
+} OpcUa_WriteRequest;
+
+extern struct SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType;
+typedef struct _OpcUa_WriteResponse
+{
+    SOPC_EncodeableType* encodeableType;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfResults;
+    SOPC_StatusCode* Results;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
+} OpcUa_WriteResponse;

@@ -23,7 +23,7 @@ import time
 
 from _pys2opc import ffi, lib as libsub
 from .types import Request, AttributeId, fill_nodeid, allocator_no_gc, EncodeableType
-from .responses import Response, ReadResponse
+from .responses import Response, ReadResponse, WriteResponse
 
 
 class BaseConnectionHandler:
@@ -51,7 +51,8 @@ class BaseConnectionHandler:
         assert dataId in self._dSubscription, 'Data change notification on unknown NodeId'
         self.on_datachanged(self._dSubscription[dataId], value)
 
-    _dResponseClasses = {EncodeableType.ReadResponse: ReadResponse}
+    _dResponseClasses = {EncodeableType.ReadResponse: ReadResponse,
+                         EncodeableType.WriteResponse: WriteResponse}
 
     def _on_response(self, event, status, responsePayload, responseContext):
         """

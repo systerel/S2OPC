@@ -797,7 +797,9 @@ class EncodeableType:
     ReadValueId = ffi.addressof(libsub.OpcUa_ReadValueId_EncodeableType)
     ReadRequest = ffi.addressof(libsub.OpcUa_ReadRequest_EncodeableType)
     ReadResponse = ffi.addressof(libsub.OpcUa_ReadResponse_EncodeableType)
-    ReadResponse = libsub.OpcUa_ReadResponse_EncodeableType
+    WriteValue = ffi.addressof(libsub.OpcUa_WriteValue_EncodeableType)
+    WriteRequest = ffi.addressof(libsub.OpcUa_WriteRequest_EncodeableType)
+    WriteResponse = ffi.addressof(libsub.OpcUa_WriteResponse_EncodeableType)
 
 
 if __name__ == '__main__':

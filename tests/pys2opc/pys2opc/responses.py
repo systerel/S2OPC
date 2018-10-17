@@ -54,3 +54,22 @@ class ReadResponse(Response):
         assert payload.encodeableType == EncodeableType.ReadResponse
         self.results = [DataValue.from_sopc_datavalue(payload.Results[i]) for i in range(payload.NoOfResults)]
 
+
+class WriteResponse(Response):
+    """
+    Parses an OpcUa_WriteResponse.
+
+    Attributes:
+        results: List of StatusCode corresponding to the written values. See is_ok().
+    """
+    def __init__(self, payload):
+        super().__init__(None)
+        payload = ffi.cast('OpcUa_WriteResponse*', payload)
+        assert payload.encodeableType == EncodeableType.WriteResponse
+        self.results = [payload.Results[i] for i in range(payload.NoOfResults)]
+
+    def is_ok(self):
+        """
+        Returns True if all writes were done successfully.
+        """
+        return all(res == libsub.SOPC_STATUS_OK for res in self.results)
