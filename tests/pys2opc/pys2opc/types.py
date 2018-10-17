@@ -475,17 +475,17 @@ class Variant:
             elif sopc_type == libsub.SOPC_Double_Id:
                 return [Variant(content.DoublevArr[i], sopc_type) for i in range(length)]
             elif sopc_type == libsub.SOPC_String_Id:
-                return [Variant(string_to_str(content.StringArr[i]), sopc_type) for i in range(length)]
+                return [Variant(string_to_str(ffi.addressof(content.StringArr[i])), sopc_type) for i in range(length)]
             elif sopc_type == libsub.SOPC_DateTime_Id:
                 return [Variant(content.DateArr[i], sopc_type) for i in range(length)]  # int64_t
             elif sopc_type == libsub.SOPC_Guid_Id:
-                return [Variant(guid_to_uuid(content.GuidArr[i]), sopc_type) for i in range(length)]
+                return [Variant(guid_to_uuid(ffi.addressof(content.GuidArr[i])), sopc_type) for i in range(length)]
             elif sopc_type == libsub.SOPC_ByteString_Id:
-                return [Variant(bytestring_to_bytes(content.BstringArr[i]), sopc_type) for i in range(length)]
+                return [Variant(bytestring_to_bytes(ffi.addressof(content.BstringArr[i])), sopc_type) for i in range(length)]
             elif sopc_type == libsub.SOPC_XmlElement_Id:
-                return [Variant(bytestring_to_bytes(content.XmlEltArr[i]), sopc_type) for i in range(length)]
+                return [Variant(bytestring_to_bytes(ffi.addressof(content.XmlEltArr[i])), sopc_type) for i in range(length)]
             elif sopc_type == libsub.SOPC_NodeId_Id:
-                return [Variant(nodeid_to_str(content.NodeIdArr[i]), sopc_type) for i in range(length)]
+                return [Variant(nodeid_to_str(ffi.addressof(content.NodeIdArr[i])), sopc_type) for i in range(length)]
             #elif sopc_type == libsub.SOPC_ExpandedNodeId_Id:
             #    return [Variant(content., sopc_type) for i in range(length)]
             elif sopc_type == libsub.SOPC_StatusCode_Id:
@@ -573,15 +573,15 @@ class Variant:
             elif sopc_type == libsub.SOPC_Double_Id:
                 variant.Value.Doublev = self._value
             elif sopc_type == libsub.SOPC_String_Id:
-                variant.Value.String = str_to_string(self._value, no_gc=True)
+                variant.Value.String = str_to_string(self._value, no_gc=True)[0]
             elif sopc_type == libsub.SOPC_DateTime_Id:
                 variant.Value.Date = self._value  # int64_t
             elif sopc_type == libsub.SOPC_Guid_Id:
-                variant.Value.Guid = uuid_to_guid(self._value, no_gc=True)
+                variant.Value.Guid = uuid_to_guid(self._value, no_gc=True)[0]
             elif sopc_type == libsub.SOPC_ByteString_Id:
-                variant.Value.Bstring = bytes_to_bytestring(self._value, no_gc=True)
+                variant.Value.Bstring = bytes_to_bytestring(self._value, no_gc=True)[0]
             elif sopc_type == libsub.SOPC_XmlElement_Id:
-                variant.Value.XmlElt = bytes_to_bytestring(self._value, no_gc=True)
+                variant.Value.XmlElt = bytes_to_bytestring(self._value, no_gc=True)[0]
             elif sopc_type == libsub.SOPC_NodeId_Id:
                 variant.Value.NodeId = str_to_nodeid(self._value, no_gc=True)
             #elif sopc_type == libsub.SOPC_ExpandedNodeId_Id:
@@ -591,11 +591,11 @@ class Variant:
             elif sopc_type == libsub.SOPC_QualifiedName_Id:
                 qname = allocator_no_gc('SOPC_QualifiedName *')
                 qname.NamespaceIndex = self._value[0]
-                qname.Name = str_to_string(self._value[1], no_gc=True)
+                qname.Name = str_to_string(self._value[1], no_gc=True)[0]
                 variant.Value.Qname = qname
             elif sopc_type == libsub.SOPC_LocalizedText_Id:
                 loc = allocator_no_gc('SOPC_LocalizedText *')
-                loc.Locale, loc.Text = map(lambda s:str_to_string(s, no_gc=True), self._value)
+                loc.Locale, loc.Text = map(lambda s:str_to_string(s, no_gc=True)[0], self._value)
                 variant.Value.LocalizedText = loc
             #elif sopc_type == libsub.SOPC_ExtensionObject_Id:
             #    variant.Value. = self._value
@@ -638,17 +638,17 @@ class Variant:
             elif sopc_type == libsub.SOPC_Double_Id:
                 content.DoublevArr = allocator_no_gc('double[]', self._value)
             elif sopc_type == libsub.SOPC_String_Id:
-                content.StringArr = allocator_no_gc('SOPC_String[]', map(lambda s:str_to_string(s, no_gc=True), self._value))
+                content.StringArr = allocator_no_gc('SOPC_String[]', [str_to_string(s, no_gc=True)[0] for s in self._value])
             elif sopc_type == libsub.SOPC_DateTime_Id:
                 content.DateArr = allocator_no_gc('SOPC_DateTime[]', self._value)  # int64_t
             elif sopc_type == libsub.SOPC_Guid_Id:
                 content.GuidArr = allocator_no_gc('SOPC_Guid[]', uuid_to_guid(self._value, no_gc=True))
             elif sopc_type == libsub.SOPC_ByteString_Id:
-                content.BstringArr = allocator_no_gc('SOPC_ByteString[]', map(lambda v:bytes_to_bytestring(v, no_gc=True), self._value))
+                content.BstringArr = allocator_no_gc('SOPC_ByteString[]', [bytes_to_bytestring(v, no_gc=True)[0] for v in self._value])
             elif sopc_type == libsub.SOPC_XmlElement_Id:
-                content.XmlEltArr = allocator_no_gc('SOPC_XmlElement[]', map(lambda v:bytes_to_bytestring(v, no_gc=True), self._value))
+                content.XmlEltArr = allocator_no_gc('SOPC_XmlElement[]', [bytes_to_bytestring(v, no_gc=True)[0] for v in self._value])
             elif sopc_type == libsub.SOPC_NodeId_Id:
-                content.NodeIdArr = allocator_no_gc('SOPC_NodeId[]', map(lambda v:str_to_nodeid(v, no_gc=True), self._value))
+                content.NodeIdArr = allocator_no_gc('SOPC_NodeId[]', [str_to_nodeid(v, no_gc=True)[0] for v in self._value])
             #elif sopc_type == libsub.SOPC_ExpandedNodeId_Id:
             #    content.Arr = allocator_no_gc('[]', self._value)
             elif sopc_type == libsub.SOPC_StatusCode_Id:
@@ -823,3 +823,8 @@ if __name__ == '__main__':
     val = Variant('i=81')
     assert val == Variant.from_sopc_variant(val.to_sopc_variant(sopc_variant_type=VariantType.NodeId))
     vals = Variant(['i={}'.format(i) for i in range(64)])
+    assert vals == Variant.from_sopc_variant(vals.to_sopc_variant(sopc_variant_type=VariantType.NodeId))
+    val = Variant('Foo')
+    assert val == Variant.from_sopc_variant(val.to_sopc_variant(sopc_variant_type=VariantType.String))
+    vals = Variant(['Foo', 'Bar'])
+    assert vals == Variant.from_sopc_variant(vals.to_sopc_variant(sopc_variant_type=VariantType.String))
