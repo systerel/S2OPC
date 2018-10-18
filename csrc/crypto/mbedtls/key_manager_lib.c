@@ -23,6 +23,7 @@
 
 #include "key_manager_lib.h"
 
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 
 #include "../sopc_crypto_profiles.h"
@@ -226,7 +227,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* buffe
     certif->len_der = 0;
 
     // Parsing
-    if (mbedtls_x509_crt_parse(crt, bufferDER, lenDER) == 0 && crt->raw.len <= UINT32_MAX)
+    int status_code = mbedtls_x509_crt_parse(crt, bufferDER, lenDER);
+    if (status_code == 0 && crt->raw.len <= UINT32_MAX)
     {
         certif->crt_der = certif->crt.raw.p;
         certif->len_der = (uint32_t) certif->crt.raw.len;
@@ -235,6 +237,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* buffe
     }
     else
     {
+        SOPC_Logger_TraceError("Crypto: certificate parse failed with error code: %i", status_code);
         SOPC_KeyManager_Certificate_Free(certif);
         return SOPC_STATUS_NOK;
     }
