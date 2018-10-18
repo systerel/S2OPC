@@ -28,7 +28,7 @@
 // Sleep timeout in milliseconds
 static const uint32_t sleepTimeout = 10;
 // Loop timeout in milliseconds
-static const uint32_t loopTimeout = 1000;
+static const uint32_t loopTimeout = 2000;
 
 void WaitEvent(SOPC_AsyncQueue* queue, void** event)
 {
