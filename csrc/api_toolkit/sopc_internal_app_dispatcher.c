@@ -83,8 +83,8 @@ static void onComEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, v
         {
             encType = *(SOPC_EncodeableType**) params;
         }
-        SOPC_Logger_TraceDebug("App: SE_LOCAL_SERVICE_RESPONSE  idx=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
-                               SOPC_EncodeableType_GetName(encType), auxParam);
+        /*SOPC_Logger_TraceDebug("App: SE_LOCAL_SERVICE_RESPONSE  idx=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
+                               SOPC_EncodeableType_GetName(encType), auxParam);*/
         break;
     default:
         SOPC_Logger_TraceDebug("App: UNKOWN EVENT");

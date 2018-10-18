@@ -224,7 +224,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
            id = session id
            auxParam = (int32_t) session state
          */
-        SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32, id);
+        //SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32, id);
 
         assert(params != NULL);
 
@@ -287,7 +287,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         io_dispatch_mgr__internal_server_evaluate_session_timeout((constants__t_session_i) id);
         break;
     case TIMER_SE_PUBLISH_CYCLE_TIMEOUT:
-        SOPC_Logger_TraceDebug("ServicesMgr: TIMER_SE_PUBLISH_CYCLE_TIMEOUT subscription=%" PRIu32, id);
+        // SOPC_Logger_TraceDebug("ServicesMgr: TIMER_SE_PUBLISH_CYCLE_TIMEOUT subscription=%" PRIu32, id);
         /* Server side only: id = subscription id */
         io_dispatch_mgr__internal_server_subscription_publish_timeout((constants__t_subscription_i) id, &bres);
         if (bres == false)
@@ -338,9 +338,10 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         {
             encType = *(SOPC_EncodeableType**) params;
         }
-        SOPC_Logger_TraceDebug("ServicesMgr: APP_TO_SE_LOCAL_SERVICE_REQUEST epCfgIdx=%" PRIu32
+        /*SOPC_Logger_TraceDebug("ServicesMgr: APP_TO_SE_LOCAL_SERVICE_REQUEST epCfgIdx=%" PRIu32
                                " msgType=%s ctx=%" PRIuPTR,
                                id, SOPC_EncodeableType_GetName(encType), auxParam);
+         */
 
         // id =  endpoint configuration index
         // params = local service request

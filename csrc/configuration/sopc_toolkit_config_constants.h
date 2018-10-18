@@ -88,7 +88,7 @@
 
 /** @brief Maximum number of secure channel connections (and configurations) established */
 #ifndef SOPC_MAX_SECURE_CONNECTIONS
-#define SOPC_MAX_SECURE_CONNECTIONS 20
+#define SOPC_MAX_SECURE_CONNECTIONS 60
 #endif /* SOPC_MAX_SECURE_CONNECTIONS */
 
 /* Minimum value for OPN requestedLifetime parameter */
@@ -117,7 +117,7 @@
 
 /** @brief Maximum number of sessions (and subscriptions: 1 per session) established */
 #ifndef SOPC_MAX_SESSIONS
-#define SOPC_MAX_SESSIONS 20
+#define SOPC_MAX_SESSIONS 60
 #endif /* SOPC_MAX_SESSIONS */
 
 /* @brief Client requested timeout for which a session shall remain open without activity */
@@ -132,7 +132,7 @@
 
 /* @brief Maximum session timeout accepted by server */
 #ifndef SOPC_MAX_SESSION_TIMEOUT
-#define SOPC_MAX_SESSION_TIMEOUT 600000 // 10 minutes
+#define SOPC_MAX_SESSION_TIMEOUT 120000 // 2 minutes
 #endif
 
 /* SUBSCRIPTION CONFIGURATION */
