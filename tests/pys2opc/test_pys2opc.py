@@ -19,7 +19,7 @@
 # under the License.
 
 
-from pys2opc import PyS2OPC, BaseConnectionHandler, DataValue
+from pys2opc import PyS2OPC, BaseConnectionHandler, DataValue, Variant, AttributeId
 import time
 
 
@@ -27,6 +27,10 @@ class PrintSubs(BaseConnectionHandler):
     def on_datachanged(self, nodeId, dataValue):
         print('Data changed "{}" -> {}'.format(nodeId, dataValue.variant))
 
+def read_browsenames(connection, nids):
+    response = connection.read_nodes(nids, [AttributeId.BrowseName]*len(nids))
+    for dv in response.results:
+        yield dv.variant[1] if dv.variant != Variant(None) else '(no browse name)'
 
 if __name__ == '__main__':
     print(PyS2OPC.get_version())
@@ -36,8 +40,15 @@ if __name__ == '__main__':
         config = PyS2OPC.add_configuration_unsecured()
         PyS2OPC.configured()
         with PyS2OPC.connect(config, PrintSubs) as connection:
-            #connection.add_nodes_to_subscription(['s=Counter', 's=StatusString', 'i=2255'])
-            #print(connection.read_nodes(['s=Counter', 's=StatusString', 'i=2255']).results)
-            if connection.write_nodes(['s=StatusString'], list(map(DataValue.from_python, ['Everything is Foobar.']))).is_ok():
-                print('Write Ok')
+            nids = ['i=84', 's=Counter', 's=StatusString', 'i=2255']
+            #connection.add_nodes_to_subscription(nids)
+            #print(connection.read_nodes(nids).results)
+            #if connection.write_nodes(['s=StatusString'], list(map(DataValue.from_python, ['Everything is Foobar.']))).is_ok():
+            #    print('Write Ok')
+            response = connection.browse_nodes(nids)
+            browseNames = read_browsenames(connection, nids)
+            for a, bwsr in zip(browseNames, response.results):
+                sA = '  {}'.format(a)
+                print(sA, end='' if bwsr.references else '\n')
+                print((' '*len(sA)).join((' -> ' if ref.isForward else ' <- ') + ref.browseName[1] + '\n' for ref in bwsr.references), end='')
             time.sleep(2)

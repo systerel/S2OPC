@@ -20,7 +20,7 @@
 
 
 from _pys2opc import ffi, lib as libsub
-from .types import EncodeableType, DataValue
+from .types import EncodeableType, DataValue, BrowseResult
 
 
 class Response:
@@ -73,3 +73,17 @@ class WriteResponse(Response):
         Returns True if all writes were done successfully.
         """
         return all(res == libsub.SOPC_STATUS_OK for res in self.results)
+
+
+class BrowseResponse(Response):
+    """
+    Parses an OpcUa_BrowseResponse.
+
+    Attributes:
+        results: A list of BrowseResults.
+    """
+    def __init__(self, payload):
+        super().__init__(None)
+        payload = ffi.cast('OpcUa_BrowseResponse*', payload)
+        assert payload.encodeableType == EncodeableType.BrowseResponse
+        self.results = [BrowseResult(payload.Results[i]) for i in range(payload.NoOfResults)]

@@ -22,8 +22,8 @@
 import time
 
 from _pys2opc import ffi, lib as libsub
-from .types import Request, AttributeId, fill_nodeid, allocator_no_gc, EncodeableType
-from .responses import Response, ReadResponse, WriteResponse
+from .types import Request, AttributeId, fill_nodeid, allocator_no_gc, EncodeableType, str_to_nodeid
+from .responses import Response, ReadResponse, WriteResponse, BrowseResponse
 
 
 class BaseConnectionHandler:
@@ -52,7 +52,9 @@ class BaseConnectionHandler:
         self.on_datachanged(self._dSubscription[dataId], value)
 
     _dResponseClasses = {EncodeableType.ReadResponse: ReadResponse,
-                         EncodeableType.WriteResponse: WriteResponse}
+                         EncodeableType.WriteResponse: WriteResponse,
+                         EncodeableType.BrowseResponse: BrowseResponse,
+                         }
 
     def _on_response(self, event, status, responsePayload, responseContext):
         """
@@ -181,16 +183,15 @@ class BaseConnectionHandler:
     def read_nodes(self, nodeIds, attributes=None, bWaitResponse=True):
         """
         Forges an OpcUa_ReadRequest and sends it.
-        When bWaitResponse, waits for the response and returns it. Otherwise, returns the request.
+        When bWaitResponse, waits for and returns the ReadResponse,
+        which contains the attribute results storing the read value for the ith element.
+        Otherwise, returns the request.
 
         Args:
             nodeIds: NodeId described as a string "[ns=x;]t=y" where x is the namespace index, t is the NodeId type
                      (s for a string NodeId, i for integer, b for bytestring, g for GUID), and y is typed content.
             attributes: Optional: a list of attributes to read. The list has the same length as nodeIds. When omited,
                         reads the attribute Value (see :class:`AttributeId` for a list of attributes).
-
-        Return:
-            The ReadResponse object contains the attribute results which stores the read value for the ith element.
         """
         if attributes is None:
             attributes = [AttributeId.Value for _ in nodeIds]
@@ -214,7 +215,9 @@ class BaseConnectionHandler:
     def write_nodes(self, nodeIds, datavalues, attributes=None, types=None, bWaitResponse=True):
         """
         Forges an OpcUa_WriteResponse and sends it.
-        When bWaitResponse, waits for the response and returns it. Otherwise, returns the request.
+        When bWaitResponse, waits for  and returns the WriteResponse,
+        which has accessors to check whether the writes were successful or not.
+        Otherwise, returns the request.
 
         Types are found in 3 places, for each NodeId and DataValue :
         - in each datavalue.variant_type,
@@ -231,9 +234,6 @@ class BaseConnectionHandler:
             attributes: Optional: a list of attributes to write. The list has the same length as nodeIds. When omitted,
                         reads the attribute Value (see :class:`AttributeId` for a list of attributes).
             types: Optional: a list of VariantType for each value to write.
-
-        Return:
-            A WriteResponse, which has accessors to check whether the writes were successful or not.
         """
         if attributes is None:
             attributes = [AttributeId.Value for _ in nodeIds]
@@ -279,7 +279,33 @@ class BaseConnectionHandler:
         request = Request(payload)
         return self.send_generic_request(request, bWaitResponse=bWaitResponse)
 
-    #def browse_nodes(self, nodeids, bWaitResponse=True):
-    #    return self.send_generic_request(request, bWaitResponse=bWaitResponse)
-    #def history_read_nodes(self, nodeids, bWaitResponse=True):
+    def browse_nodes(self, nodeIds, bWaitResponse=True):
+        """
+        Forges an OpcUa_BrowseResponse and sends it.
+        When bWaitResponse, waits for  and returns the BrowseResponse,
+        which has a list BrowseResults in its `results` list.
+        Otherwise, returns the request.
+        """
+        # Prepare the request, it will be freed by the Toolkit
+        payload = allocator_no_gc('OpcUa_BrowseRequest *')
+        payload.encodeableType = EncodeableType.BrowseRequest
+        view = allocator_no_gc('OpcUa_ViewDescription *')
+        view.encodeableType = EncodeableType.ViewDescription  # Leave the ViewDescription filled with NULLs
+        payload.View = view[0]  # TODO: If this works, maybe delete fill_nodeid, and fill_sopc_datavalue
+        payload.RequestedMaxReferencesPerNode = 1000
+        payload.NoOfNodesToBrowse = len(nodeIds)
+        nodesToBrowse = allocator_no_gc('OpcUa_BrowseDescription[]', len(nodeIds))  # TODO: change '[{}]'.format(len) to this
+        for i, snid in enumerate(nodeIds):
+            nodesToBrowse[i].encodeableType = EncodeableType.BrowseDescription
+            nodesToBrowse[i].NodeId = str_to_nodeid(snid, no_gc=True)[0]  # TODO: delete fill_nodeid and fill_*
+            nodesToBrowse[i].BrowseDirection = libsub.OpcUa_BrowseDirection_Both
+            nodesToBrowse[i].IncludeSubtypes = False
+            nodesToBrowse[i].NodeClassMask = 0xFF  # See Part4 §5.8.2 Browse, §.2 Parameters
+            nodesToBrowse[i].ResultMask = libsub.OpcUa_BrowseResultMask_All
+        payload.NodesToBrowse = nodesToBrowse
+
+        request = Request(payload)
+        return self.send_generic_request(request, bWaitResponse=bWaitResponse)
+
+    #def history_read_nodes(self, nodeIds, bWaitResponse=True):
     #    return self.send_generic_request(request, bWaitResponse=bWaitResponse)

@@ -126,6 +126,12 @@ def fill_nodeid(node, snid):
     node.Data = onode.Data
     libsub.free(onode)
 
+def expandednodeid_to_str(exnode):
+    """SOPC_ExpandedNodeId or SOPC_ExpandedNodeId* to its str representation in the OPC-UA XML syntax."""
+    a = 'srv={};nsu={};'.format(exnode.ServerIndex, string_to_str(ffi.addressof(exnode.NamespaceUri)))
+    b = ffi.string(libsub.SOPC_NodeId_ToCString(ffi.addressof(exnode.NodeId))).decode()
+    return a + b
+
 def guid_to_uuid(guid):
     """SOPC_Guid or SOPC_Guid* to the Python's uuid."""
     # S2OPC internal representation is local-endian, except for Data4,
@@ -845,6 +851,53 @@ class EncodeableType:
     BrowseDescription    = ffi.addressof(libsub.OpcUa_BrowseDescription_EncodeableType)
     ReferenceDescription = ffi.addressof(libsub.OpcUa_ReferenceDescription_EncodeableType)
     BrowseResult         = ffi.addressof(libsub.OpcUa_BrowseResult_EncodeableType)
+
+
+class BrowseResult:
+    """
+    The BrowseResult is a low-level structures that contains the list of references for a node,
+    but also the status code of the Browse operation, and, if needed, a continuation point.
+    """
+    def __init__(self, sopc_browseresult):
+        assert sopc_browseresult.encodeableType == EncodeableType.BrowseResult
+        self.status = sopc_browseresult.StatusCode
+        self.continuationPoint = bytestring_to_bytes(ffi.addressof(sopc_browseresult.ContinuationPoint))
+        self.references = []
+        for sopc_ref in [sopc_browseresult.References[i] for i in range(sopc_browseresult.NoOfReferences)]:
+            assert sopc_ref.encodeableType == EncodeableType.ReferenceDescription
+            refType = nodeid_to_str(ffi.addressof(sopc_ref.ReferenceTypeId))
+            fwd = sopc_ref.IsForward
+            expNid = expandednodeid_to_str(ffi.addressof(sopc_ref.NodeId))
+            bwsName = (sopc_ref.BrowseName.NamespaceIndex, string_to_str(sopc_ref.BrowseName.Name))
+            dispName = (string_to_str(sopc_ref.DisplayName.Locale), string_to_str(sopc_ref.DisplayName.Text))
+            nodCls = sopc_ref.NodeClass
+            typeDef = expandednodeid_to_str(ffi.addressof(sopc_ref.TypeDefinition))
+            self.references.append(Reference(refType, fwd, expNid, bwsName, dispName, nodCls, typeDef))
+
+class Reference:
+    """
+    A Python version for the OpcUa_ReferenceDescription, a low level representation of the references.
+    Does not contain the source of the Reference.
+
+    Attributes:
+        referenceTypeId: The string NodeId that defines the type of the Reference.
+        isForward: True when the reference is forward (going from the browsed node to nodeId),
+                   False when the reference is in the inverse direction (from the nodeId to the browsed node).
+        nodeId: Target nodeId of the Reference.
+        browseName: Browse name of the nodeId, as a qualified name, i.e. a couple (namespaceIndex, str).
+        displayName: Display name of the nodeId, as a localized text, i.e. a couple (str of the chosen locale, str in this locale).
+        nodeClass: NodeClass of the nodeId.
+        typeDefinition: NodeId of the type of the target node, when the target NodeId is a Variable or an Object.
+                        It defines which VariableType or ObjectType node was used to instantiate the target node.
+    """
+    def __init__(self, referenceTypeId, isForward, nodeId, browseName, displayName, nodeClass, typeDefinition):
+        self.referenceTypeId = referenceTypeId
+        self.isForward       = isForward
+        self.nodeId          = nodeId
+        self.browseName      = browseName
+        self.displayName     = displayName
+        self.nodeClass       = nodeClass
+        self.typeDefinition  = typeDefinition
 
 
 if __name__ == '__main__':
