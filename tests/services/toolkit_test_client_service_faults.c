@@ -286,7 +286,7 @@ int main(void)
         SOPC_Atomic_Int_Set(&sessionActivationFault, 0);
         // Use 1, 2, 3 as session contexts
         SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-            channel_config_idx, 1, "UserName", "user1", (const uint8_t*) "password", (int32_t) strlen("password"));
+            channel_config_idx, 1, "username", "user1", (const uint8_t*) "password", (int32_t) strlen("password"));
         printf(">>Test_Client_Toolkit: Creating/Activating 1 session with valid user identity\n");
     }
 
