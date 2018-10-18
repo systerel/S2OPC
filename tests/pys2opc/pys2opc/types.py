@@ -389,6 +389,22 @@ class Variant:
     def __ceil__(s):
         return ceil(s._value)
 
+    # Containers
+    def __len__(s):
+        return len(s._value)
+    def __getitem__(s, k):
+        return s._value[k]
+    def __setitem__(s, k, v):
+        s._value[k] = v
+    def __delitem__(s, k):
+        del s._value[k]
+    def __iter__(s):
+        yield from iter(s._value)  # Requires Python3 >= 3.3
+    def __reversed__(s):
+        yield from reversed(s._value)
+    def __contains__(s, k):
+        return k in s._value
+
     @staticmethod
     def from_sopc_variant(variant):
         """
