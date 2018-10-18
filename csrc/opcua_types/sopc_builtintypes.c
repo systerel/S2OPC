@@ -1673,7 +1673,7 @@ char* SOPC_NodeId_ToCString(SOPC_NodeId* nodeId)
         default:
             break;
         }
-        result = malloc(sizeof(char) * maxSize);
+        result = calloc(maxSize, sizeof(char));
         if (result != NULL)
         {
             if (nodeId->Namespace != 0)
