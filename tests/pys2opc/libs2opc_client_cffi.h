@@ -1033,34 +1033,6 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
  * end of builtintypes.h
  *******************************************************************/
 
-extern struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType;
-typedef struct _OpcUa_ReadValueId
-{
-    SOPC_EncodeableType* encodeableType;
-    SOPC_NodeId NodeId;
-    uint32_t AttributeId;
-    SOPC_String IndexRange;
-    SOPC_QualifiedName DataEncoding;
-} OpcUa_ReadValueId;
-
-typedef enum _OpcUa_TimestampsToReturn
-{
-    OpcUa_TimestampsToReturn_Source = 0,
-    OpcUa_TimestampsToReturn_Server = 1,
-    OpcUa_TimestampsToReturn_Both = 2,
-    OpcUa_TimestampsToReturn_Neither = 3
-} OpcUa_TimestampsToReturn;
-
-extern struct SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType;
-typedef struct _OpcUa_ReadRequest
-{
-    SOPC_EncodeableType* encodeableType;
-    double MaxAge;
-    OpcUa_TimestampsToReturn TimestampsToReturn;
-    int32_t NoOfNodesToRead;
-    OpcUa_ReadValueId* NodesToRead;
-} OpcUa_ReadRequest;
-
 extern struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType;
 typedef struct _OpcUa_ResponseHeader
 {
@@ -1074,6 +1046,49 @@ typedef struct _OpcUa_ResponseHeader
     SOPC_ExtensionObject AdditionalHeader;
 } OpcUa_ResponseHeader;
 
+typedef enum _OpcUa_TimestampsToReturn
+{
+    OpcUa_TimestampsToReturn_Source = 0,
+    OpcUa_TimestampsToReturn_Server = 1,
+    OpcUa_TimestampsToReturn_Both = 2,
+    OpcUa_TimestampsToReturn_Neither = 3
+} OpcUa_TimestampsToReturn;
+
+typedef enum _OpcUa_NodeClass
+{
+    OpcUa_NodeClass_Unspecified = 0,
+    OpcUa_NodeClass_Object = 1,
+    OpcUa_NodeClass_Variable = 2,
+    OpcUa_NodeClass_Method = 4,
+    OpcUa_NodeClass_ObjectType = 8,
+    OpcUa_NodeClass_VariableType = 16,
+    OpcUa_NodeClass_ReferenceType = 32,
+    OpcUa_NodeClass_DataType = 64,
+    OpcUa_NodeClass_View = 128
+} OpcUa_NodeClass;
+
+/* Read */
+
+extern struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType;
+typedef struct _OpcUa_ReadValueId
+{
+    SOPC_EncodeableType* encodeableType;
+    SOPC_NodeId NodeId;
+    uint32_t AttributeId;
+    SOPC_String IndexRange;
+    SOPC_QualifiedName DataEncoding;
+} OpcUa_ReadValueId;
+
+extern struct SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType;
+typedef struct _OpcUa_ReadRequest
+{
+    SOPC_EncodeableType* encodeableType;
+    double MaxAge;
+    OpcUa_TimestampsToReturn TimestampsToReturn;
+    int32_t NoOfNodesToRead;
+    OpcUa_ReadValueId* NodesToRead;
+} OpcUa_ReadRequest;
+
 extern struct SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType;
 typedef struct _OpcUa_ReadResponse
 {
@@ -1084,6 +1099,8 @@ typedef struct _OpcUa_ReadResponse
     int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
 } OpcUa_ReadResponse;
+
+/* Write */
 
 extern struct SOPC_EncodeableType OpcUa_WriteValue_EncodeableType;
 typedef struct _OpcUa_WriteValue
@@ -1113,3 +1130,91 @@ typedef struct _OpcUa_WriteResponse
     int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
 } OpcUa_WriteResponse;
+
+/* Browse */
+
+typedef enum _OpcUa_BrowseDirection
+{
+    OpcUa_BrowseDirection_Forward = 0,
+    OpcUa_BrowseDirection_Inverse = 1,
+    OpcUa_BrowseDirection_Both = 2
+} OpcUa_BrowseDirection;
+
+extern struct SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType;
+typedef struct _OpcUa_ViewDescription
+{
+    SOPC_EncodeableType* encodeableType;
+    SOPC_NodeId ViewId;
+    SOPC_DateTime Timestamp;
+    uint32_t ViewVersion;
+} OpcUa_ViewDescription;
+
+typedef enum _OpcUa_BrowseResultMask
+{
+    OpcUa_BrowseResultMask_None = 0,
+    OpcUa_BrowseResultMask_ReferenceTypeId = 1,
+    OpcUa_BrowseResultMask_IsForward = 2,
+    OpcUa_BrowseResultMask_NodeClass = 4,
+    OpcUa_BrowseResultMask_BrowseName = 8,
+    OpcUa_BrowseResultMask_DisplayName = 16,
+    OpcUa_BrowseResultMask_TypeDefinition = 32,
+    OpcUa_BrowseResultMask_All = 63,
+    OpcUa_BrowseResultMask_ReferenceTypeInfo = 3,
+    OpcUa_BrowseResultMask_TargetInfo = 60
+} OpcUa_BrowseResultMask;
+
+extern struct SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType;
+typedef struct _OpcUa_BrowseDescription
+{
+    SOPC_EncodeableType* encodeableType;
+    SOPC_NodeId NodeId;
+    OpcUa_BrowseDirection BrowseDirection;
+    SOPC_NodeId ReferenceTypeId;
+    SOPC_Boolean IncludeSubtypes;
+    uint32_t NodeClassMask;
+    uint32_t ResultMask;
+} OpcUa_BrowseDescription;
+
+typedef struct _OpcUa_BrowseRequest
+{
+    SOPC_EncodeableType* encodeableType;
+    OpcUa_ViewDescription View;
+    uint32_t RequestedMaxReferencesPerNode;
+    int32_t NoOfNodesToBrowse;
+    OpcUa_BrowseDescription* NodesToBrowse;
+} OpcUa_BrowseRequest;
+extern struct SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType;
+
+extern struct SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType;
+typedef struct _OpcUa_ReferenceDescription
+{
+    SOPC_EncodeableType* encodeableType;
+    SOPC_NodeId ReferenceTypeId;
+    SOPC_Boolean IsForward;
+    SOPC_ExpandedNodeId NodeId;
+    SOPC_QualifiedName BrowseName;
+    SOPC_LocalizedText DisplayName;
+    OpcUa_NodeClass NodeClass;
+    SOPC_ExpandedNodeId TypeDefinition;
+} OpcUa_ReferenceDescription;
+
+extern struct SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType;
+typedef struct _OpcUa_BrowseResult
+{
+    SOPC_EncodeableType* encodeableType;
+    SOPC_StatusCode StatusCode;
+    SOPC_ByteString ContinuationPoint;
+    int32_t NoOfReferences;
+    OpcUa_ReferenceDescription* References;
+} OpcUa_BrowseResult;
+
+extern struct SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType;
+typedef struct _OpcUa_BrowseResponse
+{
+    SOPC_EncodeableType* encodeableType;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfResults;
+    OpcUa_BrowseResult* Results;
+    int32_t NoOfDiagnosticInfos;
+    SOPC_DiagnosticInfo* DiagnosticInfos;
+} OpcUa_BrowseResponse;

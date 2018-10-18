@@ -833,12 +833,18 @@ class EncodeableType:
     """
     A copy of the known SOPC_EncodeableTypes, give these address a readable name.
     """
-    ReadValueId = ffi.addressof(libsub.OpcUa_ReadValueId_EncodeableType)
-    ReadRequest = ffi.addressof(libsub.OpcUa_ReadRequest_EncodeableType)
-    ReadResponse = ffi.addressof(libsub.OpcUa_ReadResponse_EncodeableType)
-    WriteValue = ffi.addressof(libsub.OpcUa_WriteValue_EncodeableType)
-    WriteRequest = ffi.addressof(libsub.OpcUa_WriteRequest_EncodeableType)
-    WriteResponse = ffi.addressof(libsub.OpcUa_WriteResponse_EncodeableType)
+    ReadValueId          = ffi.addressof(libsub.OpcUa_ReadValueId_EncodeableType)
+    ReadRequest          = ffi.addressof(libsub.OpcUa_ReadRequest_EncodeableType)
+    ReadResponse         = ffi.addressof(libsub.OpcUa_ReadResponse_EncodeableType)
+    WriteValue           = ffi.addressof(libsub.OpcUa_WriteValue_EncodeableType)
+    WriteRequest         = ffi.addressof(libsub.OpcUa_WriteRequest_EncodeableType)
+    WriteResponse        = ffi.addressof(libsub.OpcUa_WriteResponse_EncodeableType)
+    BrowseRequest        = ffi.addressof(libsub.OpcUa_BrowseRequest_EncodeableType)
+    BrowseResponse       = ffi.addressof(libsub.OpcUa_BrowseResponse_EncodeableType)
+    ViewDescription      = ffi.addressof(libsub.OpcUa_ViewDescription_EncodeableType)
+    BrowseDescription    = ffi.addressof(libsub.OpcUa_BrowseDescription_EncodeableType)
+    ReferenceDescription = ffi.addressof(libsub.OpcUa_ReferenceDescription_EncodeableType)
+    BrowseResult         = ffi.addressof(libsub.OpcUa_BrowseResult_EncodeableType)
 
 
 if __name__ == '__main__':
