@@ -156,31 +156,30 @@ typedef struct
 /*
   @description
     AttributeIds, as defined in the OPC UA Reference, Part 6 Annex A */
-typedef enum
-{
-    SOPC_LibSub_AttributeId_NodeId = 1,
-    SOPC_LibSub_AttributeId_NodeClass = 2,
-    SOPC_LibSub_AttributeId_BrowseName = 3,
-    SOPC_LibSub_AttributeId_DisplayName = 4,
-    SOPC_LibSub_AttributeId_Description = 5,
-    SOPC_LibSub_AttributeId_WriteMask = 6,
-    SOPC_LibSub_AttributeId_UserWriteMask = 7,
-    SOPC_LibSub_AttributeId_IsAbstract = 8,
-    SOPC_LibSub_AttributeId_Symmetric = 9,
-    SOPC_LibSub_AttributeId_InverseName = 10,
-    SOPC_LibSub_AttributeId_ContainsNoLoops = 11,
-    SOPC_LibSub_AttributeId_EventNotifier = 12,
-    SOPC_LibSub_AttributeId_Value = 13,
-    SOPC_LibSub_AttributeId_DataType = 14,
-    SOPC_LibSub_AttributeId_ValueRank = 15,
-    SOPC_LibSub_AttributeId_ArrayDimensions = 16,
-    SOPC_LibSub_AttributeId_AccessLevel = 17,
-    SOPC_LibSub_AttributeId_UserAccessLevel = 18,
-    SOPC_LibSub_AttributeId_MinimumSamplingInterval = 19,
-    SOPC_LibSub_AttributeId_Historizing = 20,
-    SOPC_LibSub_AttributeId_Executable = 21,
-    SOPC_LibSub_AttributeId_UserExecutable = 22
-} SOPC_LibSub_AttributeId;
+typedef uint32_t SOPC_LibSub_AttributeId;
+
+#define SOPC_LibSub_AttributeId_NodeId 1
+#define SOPC_LibSub_AttributeId_NodeClass 2
+#define SOPC_LibSub_AttributeId_BrowseName 3
+#define SOPC_LibSub_AttributeId_DisplayName 4
+#define SOPC_LibSub_AttributeId_Description 5
+#define SOPC_LibSub_AttributeId_WriteMask 6
+#define SOPC_LibSub_AttributeId_UserWriteMask 7
+#define SOPC_LibSub_AttributeId_IsAbstract 8
+#define SOPC_LibSub_AttributeId_Symmetric 9
+#define SOPC_LibSub_AttributeId_InverseName 10
+#define SOPC_LibSub_AttributeId_ContainsNoLoops 11
+#define SOPC_LibSub_AttributeId_EventNotifier 12
+#define SOPC_LibSub_AttributeId_Value 13
+#define SOPC_LibSub_AttributeId_DataType 14
+#define SOPC_LibSub_AttributeId_ValueRank 15
+#define SOPC_LibSub_AttributeId_ArrayDimensions 16
+#define SOPC_LibSub_AttributeId_AccessLevel 17
+#define SOPC_LibSub_AttributeId_UserAccessLevel 18
+#define SOPC_LibSub_AttributeId_MinimumSamplingInterval 19
+#define SOPC_LibSub_AttributeId_Historizing 20
+#define SOPC_LibSub_AttributeId_Executable 21
+#define SOPC_LibSub_AttributeId_UserExecutable 22
 
 /*
   @description
