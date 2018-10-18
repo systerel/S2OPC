@@ -60,6 +60,8 @@ class Request:
 
 def bytestring_to_bytes(bstring):
     """SOPC_ByteString or SOPC_ByteString* to python bytes()"""
+    if bstring == ffi.NULL or bstring.Data == ffi.NULL or bstring.Length <= 0:
+        return b''
     return ffi.string(bstring.Data, bstring.Length)
 def bytes_to_bytestring(b, no_gc=False):
     """
@@ -78,6 +80,8 @@ def bytes_to_bytestring(b, no_gc=False):
 
 def string_to_str(string):
     """SOPC_String or SOPC_String* to python str()"""
+    if string == ffi.NULL or string.Data == ffi.NULL:
+        return ''
     return ffi.string(string.Data, string.Length).decode()
 def str_to_string(s, no_gc=False):
     """
