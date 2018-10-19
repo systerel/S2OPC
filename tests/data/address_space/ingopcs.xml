@@ -756,6 +756,21 @@
       <Reference ReferenceType="HasComponent">i=1011</Reference>
       <Reference ReferenceType="HasComponent">i=1012</Reference>
       <Reference ReferenceType="HasComponent">i=1013</Reference>
+
+      <Reference ReferenceType="HasComponent">i=1015</Reference>
+      <Reference ReferenceType="HasComponent">i=1016</Reference>
+      <Reference ReferenceType="HasComponent">i=1017</Reference>
+      <Reference ReferenceType="HasComponent">i=1018</Reference>
+      <Reference ReferenceType="HasComponent">i=1019</Reference>
+      <Reference ReferenceType="HasComponent">i=1020</Reference>
+      <Reference ReferenceType="HasComponent">i=1021</Reference>
+      <Reference ReferenceType="HasComponent">i=1022</Reference>
+      <Reference ReferenceType="HasComponent">i=1023</Reference>
+      <Reference ReferenceType="HasComponent">i=1024</Reference>
+      <Reference ReferenceType="HasComponent">i=1025</Reference>
+      <Reference ReferenceType="HasComponent">i=1026</Reference>
+      <Reference ReferenceType="HasComponent">i=1027</Reference>
+      <Reference ReferenceType="HasComponent">i=1028</Reference>
     </References>
   </UAObject>
   <UAVariable BrowseName="0:Int64" DataType="Int64" NodeId="i=1001" ParentNodeId="i=1000">
