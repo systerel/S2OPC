@@ -76,21 +76,32 @@ static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpo
     SOPC_String_AttachFrom(&appDesc->GatewayServerUri, &sopcEndpointConfig->serverDescription.GatewayServerUri);
     SOPC_String_AttachFrom(&appDesc->DiscoveryProfileUri, &sopcEndpointConfig->serverDescription.DiscoveryProfileUri);
 
-    if (sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls >= 0)
+    if (sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls > 0)
     {
         appDesc->DiscoveryUrls =
             calloc((size_t) sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls, sizeof(SOPC_String));
     }
     else
     {
-        appDesc->DiscoveryUrls = NULL;
+        appDesc->DiscoveryUrls = calloc(1, sizeof(SOPC_String));
     }
     if (appDesc->DiscoveryUrls != NULL)
     {
-        for (idx = 0; idx < sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls; idx++)
+        if (sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls > 0)
         {
-            SOPC_String_AttachFrom(&appDesc->DiscoveryUrls[idx],
-                                   &sopcEndpointConfig->serverDescription.DiscoveryUrls[idx]);
+            appDesc->NoOfDiscoveryUrls = sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls;
+            // Copy the discovery URLs provided by configuration
+            for (idx = 0; idx < sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls; idx++)
+            {
+                SOPC_String_AttachFrom(&appDesc->DiscoveryUrls[idx],
+                                       &sopcEndpointConfig->serverDescription.DiscoveryUrls[idx]);
+            }
+        }
+        else
+        {
+            appDesc->NoOfDiscoveryUrls = 1;
+            // If not provided by configuration: we set the endpoint URL as default discovery URL since it is mandatory
+            SOPC_String_AttachFromCstring(&appDesc->DiscoveryUrls[0], sopcEndpointConfig->endpointURL);
         }
     }
 }
