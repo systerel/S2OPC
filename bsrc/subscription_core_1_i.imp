@@ -205,8 +205,9 @@ OPERATIONS
         s_subscription_i(p_subscription) := FALSE;
         a_subscription_state_i(p_subscription) := c_subscriptionState_indet;
 
-        a_subscription_session_i(p_subscription) := c_session_indet;
         a_session_subscription_i(a_subscription_session_i(p_subscription)) := c_subscription_indet;
+        a_subscription_session_i(p_subscription) := c_session_indet;
+
         a_publishInterval_i(p_subscription) := c_opcua_duration_indet;
         a_lifetimeExpCount_i(p_subscription) := 0;
         a_LifetimeCounter_i(p_subscription) := 0;
