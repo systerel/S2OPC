@@ -150,6 +150,35 @@ def uuid_to_guid(uid, no_gc=False):
         guid.Data4[i] = b
     return guid
 
+def datetime_to_float(datetime):
+    """
+    SOPC_DateTime* (the number of 100 nanosecond intervals since January 1, 1601)
+    to Python time (the floating point number of seconds since 01/01/1970, see help(time)).
+    """
+    nsec = datetime[0]
+    # (datetime.date(1970,1,1) - datetime.date(1601,1,1)).total_seconds() * 1000 * 1000 * 10
+    return (nsec - 116444736000000000)/1e7
+def float_to_datetime(t, no_gc=True):
+    """
+    Python timestamp to SOPC_DateTime*.
+
+    Args:
+        no_gc: When True, the Python garbage collection mechanism is omited and the string must be
+               either manually deleted with a call to SOPC_String_Delete or passed to an object
+               which will call SOPC_String_Delete for you.
+    """
+    alloc = allocator_no_gc if no_gc else ffi.new
+    datetime = alloc('SOPC_DateTime*')
+    # (datetime.date(1970,1,1) - datetime.date(1601,1,1)).total_seconds() * 1000 * 1000 * 10
+    datetime[0] = int(t*1e7) + 116444736000000000
+    return datetime
+def ntp_to_python(i):
+    """uint64_t NTP to Python time."""
+    # Epoch is 01/01/1900 here.
+    secs = i>>32
+    fsecs = (i&0xFFFFFFFF)/(2**32)
+    return secs - 2208988800. + fsecs
+
 
 @total_ordering
 class Variant:
@@ -435,7 +464,7 @@ class Variant:
             elif sopc_type == libsub.SOPC_String_Id:
                 return Variant(string_to_str(variant.Value.String), sopc_type)
             elif sopc_type == libsub.SOPC_DateTime_Id:
-                return Variant(variant.Value.Date, sopc_type)  # int64_t
+                return Variant(datetime_to_float(variant.Value.Date), sopc_type)  # int64_t
             elif sopc_type == libsub.SOPC_Guid_Id:
                 return Variant(guid_to_uuid(variant.Value.Guid), sopc_type)
             elif sopc_type == libsub.SOPC_ByteString_Id:
@@ -494,7 +523,7 @@ class Variant:
             elif sopc_type == libsub.SOPC_String_Id:
                 return [Variant(string_to_str(ffi.addressof(content.StringArr[i])), sopc_type) for i in range(length)]
             elif sopc_type == libsub.SOPC_DateTime_Id:
-                return [Variant(content.DateArr[i], sopc_type) for i in range(length)]  # int64_t
+                return [Variant(datetime_to_float(content.DateArr[i]), sopc_type) for i in range(length)]  # int64_t
             elif sopc_type == libsub.SOPC_Guid_Id:
                 return [Variant(guid_to_uuid(ffi.addressof(content.GuidArr[i])), sopc_type) for i in range(length)]
             elif sopc_type == libsub.SOPC_ByteString_Id:
@@ -593,7 +622,7 @@ class Variant:
             elif sopc_type == libsub.SOPC_String_Id:
                 variant.Value.String = str_to_string(self._value, no_gc=True)[0]
             elif sopc_type == libsub.SOPC_DateTime_Id:
-                variant.Value.Date = self._value  # int64_t
+                variant.Value.Date = float_to_datetime(self._value, no_gc=True)[0]
             elif sopc_type == libsub.SOPC_Guid_Id:
                 variant.Value.Guid = uuid_to_guid(self._value, no_gc=True)[0]
             elif sopc_type == libsub.SOPC_ByteString_Id:
@@ -658,7 +687,7 @@ class Variant:
             elif sopc_type == libsub.SOPC_String_Id:
                 content.StringArr = allocator_no_gc('SOPC_String[]', [str_to_string(s, no_gc=True)[0] for s in self._value])
             elif sopc_type == libsub.SOPC_DateTime_Id:
-                content.DateArr = allocator_no_gc('SOPC_DateTime[]', self._value)  # int64_t
+                content.DateArr = allocator_no_gc('SOPC_DateTime[]', [float_to_datetime(s, no_gc=True)[0] for s in self._value])
             elif sopc_type == libsub.SOPC_Guid_Id:
                 content.GuidArr = allocator_no_gc('SOPC_Guid[]', uuid_to_guid(self._value, no_gc=True))
             elif sopc_type == libsub.SOPC_ByteString_Id:
@@ -763,15 +792,18 @@ class DataValue:
         Its main usage is in the data change callback used with subscriptions.
         See from_sopc_datavalue() for a more generic SOPC_DataValue conversion.
         """
-        return DataValue(libsub_value.source_timestamp, libsub_value.server_timestamp, libsub_value.quality, Variant.from_sopc_variant(libsub_value.raw_value))
+        return DataValue(ntp_to_python(libsub_value.source_timestamp),
+                         ntp_to_python(libsub_value.server_timestamp),
+                         libsub_value.quality, Variant.from_sopc_variant(libsub_value.raw_value))
 
     @staticmethod
     def from_sopc_datavalue(datavalue):
         """
         Converts a SOPC_DataValue* or SOPC_DataValue to a Python DataValue.
         """
-        return DataValue(datavalue.SourceTimestamp, datavalue.ServerTimestamp, datavalue.Status,
-                         Variant.from_sopc_variant(ffi.addressof(datavalue.Value)))
+        return DataValue(datetime_to_float(ffi.new('SOPC_DateTime*', datavalue.SourceTimestamp)),
+                         datetime_to_float(ffi.new('SOPC_DateTime*', datavalue.ServerTimestamp)),
+                         datavalue.Status, Variant.from_sopc_variant(ffi.addressof(datavalue.Value)))
 
     @staticmethod
     def from_python(val):
@@ -779,7 +811,6 @@ class DataValue:
         Creates a DataValue from the Python value.
         Creates the Variant, sets the status code to OK, and set source timestamp to now.
         """
-        # TODO: handle SOPC_Time and Python time, which are different.
         return DataValue(int(time.time()), 0, libsub.SOPC_STATUS_OK, Variant(val))
 
     allocator = ffi.new_allocator(alloc=libsub.malloc, free=libsub.SOPC_DataValue_Delete, should_clear_after_alloc=True)
@@ -798,8 +829,11 @@ class DataValue:
         sopc_variant = self.variant.to_sopc_variant(copy_type_from_variant=copy_type_from_variant, sopc_variant_type=sopc_variant_type, no_gc=True)
         datavalue.Value = sopc_variant[0]
         datavalue.Status = self.statusCode
-        datavalue.SourceTimestamp = self.timestampSource
-        datavalue.ServerTimestamp = self.timestampServer
+        # This allocs an int64_t which must be retained until it is copied in datavalue
+        source = float_to_datetime(self.timestampSource)
+        server = float_to_datetime(self.timestampServer)
+        datavalue.SourceTimestamp = source[0]
+        datavalue.ServerTimestamp = server[0]
         datavalue.SourcePicoSeconds = 0
         datavalue.ServerPicoSeconds = 0
         return datavalue
@@ -926,3 +960,12 @@ if __name__ == '__main__':
     assert val == Variant.from_sopc_variant(val.to_sopc_variant(sopc_variant_type=VariantType.String))
     vals = Variant(['Foo', 'Bar'])
     assert vals == Variant.from_sopc_variant(vals.to_sopc_variant(sopc_variant_type=VariantType.String))
+
+    t = time.time()
+    datetime = ffi.new('SOPC_DateTime*');
+    datetime[0] = libsub.SOPC_Time_GetCurrentTimeUTC()
+    assert abs(datetime_to_float(datetime) - t) < .1
+    assert datetime_to_float(float_to_datetime(t)) == t
+
+    # Thu Nov 30 04:57:25.694287 2034 UTC, unix timestamp is 2048471845.694287
+    assert ntp_to_python(18285654237264005879) == 2048471845.694287  # Hopefully with this one there is no float-rounding errors.

@@ -1032,6 +1032,7 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
 /********************************************************************
  * end of builtintypes.h
  *******************************************************************/
+SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void);
 
 extern struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType;
 typedef struct _OpcUa_ResponseHeader

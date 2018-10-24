@@ -25,7 +25,7 @@ import time
 
 class PrintSubs(BaseConnectionHandler):
     def on_datachanged(self, nodeId, dataValue):
-        print('Data changed "{}" -> {}'.format(nodeId, dataValue.variant))
+        print('Data changed "{}" -> {}, '.format(nodeId, dataValue.variant) + time.ctime(dataValue.timestampServer))
 
 def read_browsenames(connection, nids):
     response = connection.read_nodes(nids, [AttributeId.BrowseName]*len(nids))
@@ -40,11 +40,12 @@ if __name__ == '__main__':
         config = PyS2OPC.add_configuration_secured()
         PyS2OPC.configured()
         with PyS2OPC.connect(config, PrintSubs) as connection:
-            nids = ['i=84', 's=Counter', 's=StatusString', 'i=2255']
-            #connection.add_nodes_to_subscription(nids)
-            #print(connection.read_nodes(nids).results)
-            #if connection.write_nodes(['s=StatusString'], list(map(DataValue.from_python, ['Everything is Foobar.']))).is_ok():
-            #    print('Write Ok')
+            nids_subs = ['s=Counter', 's=StatusString']
+            nids = ['i=84', 'i=2255'] + nids_subs
+            connection.add_nodes_to_subscription(nids_subs)
+            print(connection.read_nodes(nids).results)
+            if connection.write_nodes(['s=StatusString'], list(map(DataValue.from_python, ['Everything is Foobar.']))).is_ok():
+                print('Write Ok')
             response = connection.browse_nodes(nids)
             browseNames = read_browsenames(connection, nids)
             for a, bwsr in zip(browseNames, response.results):
