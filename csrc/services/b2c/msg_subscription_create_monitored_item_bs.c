@@ -136,12 +136,12 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
         &createReq->ItemsToCreate[msg_subscription_create_monitored_item_bs__p_index - 1];
     *msg_subscription_create_monitored_item_bs__p_nid = &monitReq->ItemToMonitor.NodeId;
 
+    *msg_subscription_create_monitored_item_bs__p_aid = util_AttributeId__C_to_B(monitReq->ItemToMonitor.AttributeId);
     *msg_subscription_create_monitored_item_bs__p_bres =
-        util_AttributeId__C_to_B(monitReq->ItemToMonitor.AttributeId, msg_subscription_create_monitored_item_bs__p_aid);
+        *msg_subscription_create_monitored_item_bs__p_aid != constants__c_AttributeId_indet;
 
-    if (*msg_subscription_create_monitored_item_bs__p_bres == false)
+    if (false == *msg_subscription_create_monitored_item_bs__p_bres)
     {
-        *msg_subscription_create_monitored_item_bs__p_aid = constants__c_AttributeId_indet;
         *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_attribute_id_invalid;
     }
     else

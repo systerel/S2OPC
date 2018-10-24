@@ -167,9 +167,7 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
 
     util_status_code__B_to_C(monitored_item_notification_queue_bs__p_ValueSc, &pNewWriteValue->Value.Status);
 
-    uint32_t attributeId = 0;
-    bool res = util_AttributeId__B_to_C(monitored_item_notification_queue_bs__p_aid, &attributeId);
-    if (!res)
+    if (monitored_item_notification_queue_bs__p_aid == constants__c_AttributeId_indet)
     {
         retStatus = SOPC_STATUS_NOK;
     }
@@ -178,10 +176,10 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
     {
         SOPC_String indexRangeString;
         SOPC_String_Initialize(&indexRangeString);
-        retStatus = SOPC_InternalAddCommonFinishAddNotifElt(monitored_item_notification_queue_bs__p_queue, notifElt,
-                                                            &indexRangeString,
-                                                            monitored_item_notification_queue_bs__p_timestampToReturn,
-                                                            monitored_item_notification_queue_bs__p_nid, attributeId);
+        retStatus = SOPC_InternalAddCommonFinishAddNotifElt(
+            monitored_item_notification_queue_bs__p_queue, notifElt, &indexRangeString,
+            monitored_item_notification_queue_bs__p_timestampToReturn, monitored_item_notification_queue_bs__p_nid,
+            (uint32_t) monitored_item_notification_queue_bs__p_aid);
     }
 
     if (SOPC_STATUS_OK == retStatus)

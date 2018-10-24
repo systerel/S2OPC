@@ -249,15 +249,14 @@ void monitored_item_pointer_bs__is_notification_triggered(
     t_bool* const monitored_item_pointer_bs__bres)
 {
     *monitored_item_pointer_bs__bres = false;
-    bool res = false;
-    uint32_t miAttributeId = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t dtCompare = 0;
     SOPC_InternalMontitoredItem* monitItem = monitored_item_pointer_bs__p_monitoredItemPointer;
     // We already know that it is the same NodeId, check for attribute Id
     // TODO: check index if monitored item on an index of an array !
-    res = util_AttributeId__B_to_C(monitItem->aid, &miAttributeId);
-    if (false != res && monitored_item_pointer_bs__p_new_wv_pointer->AttributeId == miAttributeId)
+
+    if (monitItem->aid != constants__c_AttributeId_indet &&
+        monitored_item_pointer_bs__p_new_wv_pointer->AttributeId == (uint32_t) monitItem->aid)
     {
         // Same attribute, now compare values (no filters managed for now)
         status = SOPC_DataValue_CompareRange(&monitored_item_pointer_bs__p_old_wv_pointer->Value,

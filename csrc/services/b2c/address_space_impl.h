@@ -31,24 +31,6 @@
 #include "sopc_address_space.h"
 #include "sopc_types.h"
 
-/* AttributeIds: they are #defined by the SDK... */
-/* TODO: move them to util_*.*, and make conversion functions */
-typedef enum
-{
-    c_aid_indet = 0,
-    e_aid_NodeId,
-    e_aid_NodeClass,
-    e_aid_BrowseName,
-    e_aid_DisplayName,
-    e_aid_Description,
-    e_aid_Value = 13,
-    e_aid_AccessLevel = 17,
-    e_aid_UserExecutable = 22
-} util__AttributeId;
-
-#define e_aid_min e_aid_NodeId
-#define e_aid_max e_aid_UserExecutable
-
 /* Access levels, taken from Part 3 §5.6.2 Table 8 */
 #define SOPC_AccessLevelMask_CurrentRead 1
 #define SOPC_AccessLevelMask_CurrentWrite 2
