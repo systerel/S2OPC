@@ -119,16 +119,6 @@ def str_to_nodeid(nid, no_gc=True):
             libsub.free(no)
         return ffi.gc(node, nodeid_cleaner)
     return node
-def fill_nodeid(node, snid):
-    """
-    Internal. Updates an existing NodeId to the content of the string snid.
-    """
-    # Create a new NodeId, brutal extract its content, then free the new NodeId without freeing its content.
-    onode = str_to_nodeid(snid, no_gc=True)
-    node.IdentifierType = onode.IdentifierType
-    node.Namespace = onode.Namespace
-    node.Data = onode.Data
-    libsub.free(onode)
 
 def expandednodeid_to_str(exnode):
     """SOPC_ExpandedNodeId or SOPC_ExpandedNodeId* to its str representation in the OPC-UA XML syntax."""
@@ -813,18 +803,6 @@ class DataValue:
         datavalue.SourcePicoSeconds = 0
         datavalue.ServerPicoSeconds = 0
         return datavalue
-
-    def fill_sopc_datavalue(self, datavalue, **kwargs):
-        # Create a new DataValue to extract its internals
-        kwargs['no_gc'] = True
-        odatavalue = self.to_sopc_datavalue(**kwargs)
-        datavalue.Value = odatavalue.Value
-        datavalue.Status = odatavalue.Status
-        datavalue.SourceTimestamp = odatavalue.SourceTimestamp
-        datavalue.ServerTimestamp = odatavalue.ServerTimestamp
-        datavalue.SourcePicoSeconds = odatavalue.SourcePicoSeconds
-        datavalue.ServerPicoSeconds = odatavalue.ServerPicoSeconds
-        libsub.free(odatavalue)
 
 
 class AttributeId:

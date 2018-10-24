@@ -22,7 +22,7 @@
 import time
 
 from _pys2opc import ffi, lib as libsub
-from .types import Request, AttributeId, fill_nodeid, allocator_no_gc, EncodeableType, str_to_nodeid
+from .types import Request, AttributeId, allocator_no_gc, EncodeableType, str_to_nodeid
 from .responses import Response, ReadResponse, WriteResponse, BrowseResponse
 
 
@@ -205,7 +205,7 @@ class BaseConnectionHandler:
         nodesToRead = allocator_no_gc('OpcUa_ReadValueId[{}]'.format(len(nodeIds)))
         for i, (snid, attr) in enumerate(zip(nodeIds, attributes)):
             nodesToRead[i].encodeableType = EncodeableType.ReadValueId
-            fill_nodeid(nodesToRead[i].NodeId, snid)
+            nodesToRead[i].NodeId = str_to_nodeid(snid, no_gc=True)[0]
             nodesToRead[i].AttributeId = attr
         payload.NodesToRead = nodesToRead
 
@@ -271,9 +271,9 @@ class BaseConnectionHandler:
         nodesToWrite = allocator_no_gc('OpcUa_WriteValue[{}]'.format(len(nodeIds)))
         for i, (snid, attr, val) in enumerate(zip(nodeIds, attributes, datavalues)):
             nodesToWrite[i].encodeableType = EncodeableType.WriteValue
-            fill_nodeid(nodesToWrite[i].NodeId, snid)
+            nodesToWrite[i].NodeId = str_to_nodeid(snid)[0]
             nodesToWrite[i].AttributeId = attr
-            val.fill_sopc_datavalue(nodesToWrite[i].Value)
+            nodesToWrite[i].Value = val.to_sopc_datavalue(no_gc=True)[0]
         payload.NodesToWrite = nodesToWrite
 
         request = Request(payload)
@@ -291,13 +291,13 @@ class BaseConnectionHandler:
         payload.encodeableType = EncodeableType.BrowseRequest
         view = allocator_no_gc('OpcUa_ViewDescription *')
         view.encodeableType = EncodeableType.ViewDescription  # Leave the ViewDescription filled with NULLs
-        payload.View = view[0]  # TODO: If this works, maybe delete fill_nodeid, and fill_sopc_datavalue
+        payload.View = view[0]
         payload.RequestedMaxReferencesPerNode = 1000
         payload.NoOfNodesToBrowse = len(nodeIds)
         nodesToBrowse = allocator_no_gc('OpcUa_BrowseDescription[]', len(nodeIds))  # TODO: change '[{}]'.format(len) to this
         for i, snid in enumerate(nodeIds):
             nodesToBrowse[i].encodeableType = EncodeableType.BrowseDescription
-            nodesToBrowse[i].NodeId = str_to_nodeid(snid, no_gc=True)[0]  # TODO: delete fill_nodeid and fill_*
+            nodesToBrowse[i].NodeId = str_to_nodeid(snid, no_gc=True)[0]
             nodesToBrowse[i].BrowseDirection = libsub.OpcUa_BrowseDirection_Both
             nodesToBrowse[i].IncludeSubtypes = False
             nodesToBrowse[i].NodeClassMask = 0xFF  # See Part4 §5.8.2 Browse, §.2 Parameters
