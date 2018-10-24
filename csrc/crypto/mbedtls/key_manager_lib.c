@@ -399,48 +399,9 @@ static void* mem_search(const void* mem, size_t mem_len, const void* needle, siz
     }
 }
 
-static bool check_application_uri_in_general_names(const void* data, size_t data_len, const char* application_uri)
+/* Does not copy the string. Returns NULL if nothing found. In this case str_len might have been modified. */
+static const uint8_t* get_application_uri_ptr_from_crt_data(const SOPC_Certificate* crt, uint8_t* str_len)
 {
-    // Each GeneralName (sequence item) has a tag which is (0x80 | index) where
-    // index is the choice index (0x80 is the "context specific tag 0").
-    // We're interested in the uniformResourceIdentifier choice, which has index
-    // 6.
-    //
-    // The tag should be followed by a IA5String, which is one byte for the
-    // string length followed by the string data.
-
-    const void* uri_start = memchr(data, 0x86, data_len);
-
-    if (uri_start == NULL)
-    {
-        return false;
-    }
-
-    size_t remaining_len = data_len - ptr_offset(uri_start, data);
-
-    // tag + string length
-    if (remaining_len < 2)
-    {
-        return false;
-    }
-
-    uint8_t str_len = *(((const uint8_t*) uri_start) + 1);
-
-    // An URI is a scheme + some data, so at least 3 characters.
-    if ((str_len < 3) || (str_len > (remaining_len - 2)))
-    {
-        return false;
-    }
-
-    const void* str_data = (((const uint8_t*) uri_start) + 2);
-
-    return strncmp(application_uri, str_data, str_len) == 0;
-}
-
-bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* crt, const char* application_uri)
-{
-    assert(crt != NULL && application_uri != NULL);
-
     // Number belows are taken from ASN1 and RFC5280 section 4.2.1.6
     static const uint8_t ASN_SEQUENCE_TAG = 0x30;
     // id-ce-subjectAltName
@@ -451,7 +412,7 @@ bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* crt
 
     if (alt_names_start == NULL)
     {
-        return false;
+        return NULL;
     }
 
     size_t remaining_len = crt->crt.v3_ext.len - ptr_offset(alt_names_start, crt->crt.v3_ext.p);
@@ -467,7 +428,7 @@ bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* crt
     if (remaining_len < 8)
     {
         // Probably not the start of subjectAltNames, or invalid encoding
-        return false;
+        return NULL;
     }
 
     uint8_t object_len = *((const uint8_t*) alt_names_start + 5);
@@ -475,14 +436,14 @@ bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* crt
     if (object_len < 2 || object_len > (remaining_len - 6))
     {
         // Invalid object length
-        return false;
+        return NULL;
     }
 
     uint8_t sequence_tag = *((const uint8_t*) alt_names_start + 6);
 
     if (sequence_tag != ASN_SEQUENCE_TAG)
     {
-        return false;
+        return NULL;
     }
 
     uint8_t sequence_len = *((const uint8_t*) alt_names_start + 7);
@@ -490,10 +451,57 @@ bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* crt
     if (sequence_len > (object_len - 2))
     {
         // Invalid sequence length
-        return false;
+        return NULL;
     }
 
     const void* sequence_data_start = ((const uint8_t*) alt_names_start) + 8;
+    const size_t sequence_data_len = remaining_len - 8;
 
-    return check_application_uri_in_general_names(sequence_data_start, remaining_len - 8, application_uri);
+    // Each GeneralName (sequence item) has a tag which is (0x80 | index) where
+    // index is the choice index (0x80 is the "context specific tag 0").
+    // We're interested in the uniformResourceIdentifier choice, which has index
+    // 6.
+    //
+    // The tag should be followed by a IA5String, which is one byte for the
+    // string length followed by the string data.
+
+    const void* uri_start = memchr(sequence_data_start, 0x86, sequence_data_len);
+
+    if (uri_start == NULL)
+    {
+        return NULL;
+    }
+
+    remaining_len = sequence_data_len - ptr_offset(uri_start, sequence_data_start);
+
+    // tag + string length
+    if (remaining_len < 2)
+    {
+        return NULL;
+    }
+
+    *str_len = *(((const uint8_t*) uri_start) + 1);
+
+    // An URI is a scheme + some data, so at least 3 characters.
+    if ((*str_len < 3) || (*str_len > (remaining_len - 2)))
+    {
+        return NULL;
+    }
+
+    return (((const uint8_t*) uri_start) + 2);
+}
+
+bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* crt, const char* application_uri)
+{
+    assert(crt != NULL && application_uri != NULL);
+
+    uint8_t str_len = 0;
+    const void* str_data = get_application_uri_ptr_from_crt_data(crt, &str_len);
+
+    if (NULL == str_data)
+    {
+        return false;
+    }
+
+    return strncmp(application_uri, str_data, str_len) == 0;
 }
