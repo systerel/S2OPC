@@ -491,12 +491,12 @@ static const uint8_t* get_application_uri_ptr_from_crt_data(const SOPC_Certifica
     return (((const uint8_t*) uri_start) + 2);
 }
 
-bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* crt, const char* application_uri)
+bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* pCert, const char* application_uri)
 {
-    assert(crt != NULL && application_uri != NULL);
+    assert(pCert != NULL && application_uri != NULL);
 
     uint8_t str_len = 0;
-    const void* str_data = get_application_uri_ptr_from_crt_data(crt, &str_len);
+    const void* str_data = get_application_uri_ptr_from_crt_data(pCert, &str_len);
 
     if (NULL == str_data)
     {
@@ -504,4 +504,35 @@ bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* crt
     }
 
     return strncmp(application_uri, str_data, str_len) == 0;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_Certificate* pCert,
+                                                                     char** ppApplicationUri,
+                                                                     size_t* pStringLength)
+{
+    assert(NULL != pCert && NULL != ppApplicationUri);
+
+    uint8_t str_len = 0;
+    const void* str_data = get_application_uri_ptr_from_crt_data(pCert, &str_len);
+
+    if (NULL == str_data)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    char* data_copy = calloc(str_len + 1U, sizeof(char));
+
+    if (NULL == data_copy)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    memcpy(data_copy, str_data, str_len);
+    *ppApplicationUri = data_copy;
+    if (NULL != pStringLength)
+    {
+        *pStringLength = str_len;
+    }
+
+    return SOPC_STATUS_OK;
 }

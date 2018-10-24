@@ -251,24 +251,39 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
                                                             uint32_t lenDest);
 
 /**
- * \brief Verify the application URI embedded in a certificate
- * \param pCert           the certificate.
- * \param applicationUri  the value that should be stored in the URI subject
+ * \brief           Verify the application URI embedded in a certificate.
+ *
+ * This function does a strict, case sensitive comparison of the URIs and does not respect the URI comparison rules from
+ * RFC3986 (the URI scheme comparison for example is case sensitive).
+ *
+ * \warning         Some limitations apply, see \p SOPC_KeyManager_Certificate_GetMaybeApplicationUri.
+ *
+ * \param pCert     The certificate.
+ * \param applicationUri  The value that should be stored in the URI subject
  *                        altName of the certificate.
+ *
  * \return \c TRUE if the values match, \c FALSE else.
- *
- * Some limitations apply when using the MbedTLS crypto backend:
- * MbedTLS has no way to extract anything else than the DNS altName from the
- * certificate extensions (see https://github.com/ARMmbed/mbedtls/pull/731).
- * We have for now a poor man's ASN.1 "parser" that tries to find it. It should
- * not be considered as secure, as it can produce false positives (ie. extract
- * the application URI from a field that is not the right one).
- *
- * This function does a strict, case sensitive comparison of the URIs and does
- * not respect the URI comparison rules from RFC3986 (the URI scheme comparison
- * for example is case sensitive).
  */
-bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* cert, const char* applicationUri);
+bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* pCert, const char* applicationUri);
+
+/**
+ * \brief           Copy the application URI embedded in a certificate.
+ *
+ * \warning         Some limitations apply when using the MbedTLS crypto backend: MbedTLS has no way to extract
+ *                  anything else than the DNS altName from the certificate extensions
+ *                  (see https://github.com/ARMmbed/mbedtls/pull/731). We have for now a poor man's ASN.1 "parser" that
+ *                  tries to find it. It should not be considered as secure, as it can produce false positives (ie.
+ *                  extract the application URI from a field that is not the right one).
+ *
+ * \param pCert     The certificate.
+ * \param ppApplicationUri  A pointer to the newly allocated zero-terminated string containing the application URI.
+ * \param pStringLength     Optional pointer to the string length (excluding the trailing \0).
+ *
+ * \return          SOPC_STATUS_OK when successfully copied.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_Certificate* pCert,
+                                                                     char** ppApplicationUri,
+                                                                     size_t* pStringLength);
 
 /**
  * \brief Creates a serialized asymmetric key from a DER or PEM payload.
