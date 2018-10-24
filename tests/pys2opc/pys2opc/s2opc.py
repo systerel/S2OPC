@@ -62,7 +62,7 @@ def _callback_generic_event(connectionId, event, status, responsePayload, respon
 
 class PyS2OPC:
     """
-    Wraps the C library. Stores the global status for this purpose.
+    Python version of the S2OPC + client subscription libraries.
     """
     _initialized = False
     _configured = False
@@ -159,7 +159,76 @@ class PyS2OPC:
                                  'sc_lifetime': sc_lifetime,
                                  'token_target': token_target,
                                  'generic_response_callback': libsub._callback_generic_event}
-        #import pdb; pdb.set_trace()
+        status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
+        assert status == SOPC_STATUS_OK, 'Configuration failed with status {}.'.format(status)
+
+        cfgId = pCfgId[0]
+        config = ClientConfiguration(cfgId, dConnectionParameters)
+        PyS2OPC._dConfigurations[cfgId] = config
+        return config
+
+    @staticmethod
+    def add_configuration_secured(*,
+                                  server_url = 'opc.tcp://localhost:4841',
+                                  publish_period = 500,
+                                  n_max_keepalive = 3,
+                                  n_max_lifetime = 10,
+                                  timeout_ms = 10000,
+                                  sc_lifetime = 3600000,
+                                  token_target = 3,
+                                  security_mode = libsub.OpcUa_MessageSecurityMode_Sign,
+                                  security_policy = libsub.SOPC_SecurityPolicy_Basic256_URI,
+                                  path_cert_auth = '../../build/bin/trusted/cacert.der',
+                                  path_cert_srv = '../../build/bin/server_public/server_2k_cert.der',
+                                  path_cert_cli = '../../build/bin/client_public/client_2k_cert.der',
+                                  path_key_cli = '../../build/bin/client_private/client_2k_key.pem'):
+        """
+        Returns a configuration that can be later used in connect() or get_endpoints().
+
+        Args:
+            server_url: The endpoint and server url to connect to.
+            publish_period: The period of the subscription, in ms.
+            n_max_keepalive: The number of times the subscription has no notification to send before
+                             sending an empty PublishResponse (the KeepAlive message). It is necessary
+                             to keep `n_max_keepalive*timeout_ms*token_target < 5000ms`.
+            n_max_lifetime: The maximum number of times a subscription has notifications to send
+                            but no available token. In this case, the subscription is destroyed.
+            timeout_ms: The connect() timeout, in ms.
+            sc_lifetime: The target lifetime of the secure channel, before renewal, in ms.
+            token_target: The number of subscription tokens (PublishRequest) that should be
+                          made available to the server at anytime.
+            security_mode: The configured security mode. [TODO]
+            security_policy: The configured security policy. [TODO]
+            path_cert_auth: The path to the certificate authority (in DER or PEM format).
+            path_cert_srv: The path to the expected server certificate (in DER or PEM format).
+                           It must be signed by the certificate authority.
+            path_cert_cli: The path to the certificate of the client.
+            path_key_cli: The path to the private key of the client certificate.
+        """
+        assert PyS2OPC._initialized and not PyS2OPC._configured,\
+            'Toolkit is not initialized or already configured, cannot add new configurations.'
+
+        pCfgId = ffi.new('SOPC_LibSub_ConfigurationId *')
+        dConnectionParameters = {'server_url': ffi.new('char[]', server_url.encode()),
+                                 'security_policy': security_policy,
+                                 'security_mode': security_mode,
+                                 'disable_certificate_verification': False,
+                                 'path_cert_auth': ffi.new('char[]', path_cert_auth.encode()),
+                                 'path_cert_srv': ffi.new('char[]', path_cert_srv.encode()),
+                                 'path_cert_cli': ffi.new('char[]', path_cert_cli.encode()),
+                                 'path_key_cli': ffi.new('char[]', path_key_cli.encode()),
+                                 'path_crl': NULL,
+                                 'policyId': ffi.new('char[]', b"anonymous"),
+                                 'username': NULL,
+                                 'password': NULL,
+                                 'publish_period_ms': publish_period,
+                                 'n_max_keepalive': n_max_keepalive,
+                                 'n_max_lifetime': n_max_lifetime,
+                                 'data_change_callback': libsub._callback_datachanged,
+                                 'timeout_ms': timeout_ms,
+                                 'sc_lifetime': sc_lifetime,
+                                 'token_target': token_target,
+                                 'generic_response_callback': libsub._callback_generic_event}
         status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
         assert status == SOPC_STATUS_OK, 'Configuration failed with status {}.'.format(status)
 

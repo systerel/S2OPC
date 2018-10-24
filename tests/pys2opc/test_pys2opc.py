@@ -37,7 +37,7 @@ if __name__ == '__main__':
     print()
 
     with PyS2OPC.initialize():
-        config = PyS2OPC.add_configuration_unsecured()
+        config = PyS2OPC.add_configuration_secured()
         PyS2OPC.configured()
         with PyS2OPC.connect(config, PrintSubs) as connection:
             nids = ['i=84', 's=Counter', 's=StatusString', 'i=2255']
@@ -51,4 +51,5 @@ if __name__ == '__main__':
                 sA = '  {}'.format(a)
                 print(sA, end='' if bwsr.references else '\n')
                 print((' '*len(sA)).join((' -> ' if ref.isForward else ' <- ') + ref.browseName[1] + '\n' for ref in bwsr.references), end='')
+            print('Response time: {:.1f}ms'.format(1000*response.get_roundtrip_time()))
             time.sleep(2)
