@@ -503,6 +503,11 @@ bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* pCe
         return false;
     }
 
+    if (strlen(application_uri) != str_len)
+    {
+        return false;
+    }
+
     return strncmp(application_uri, str_data, str_len) == 0;
 }
 

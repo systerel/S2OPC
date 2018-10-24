@@ -259,8 +259,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
  * \warning         Some limitations apply, see \p SOPC_KeyManager_Certificate_GetMaybeApplicationUri.
  *
  * \param pCert     The certificate.
- * \param applicationUri  The value that should be stored in the URI subject
- *                        altName of the certificate.
+ * \param applicationUri  The value that should be stored in the URI subject altName of the certificate.
+                          This should be a zero-terminated string.
  *
  * \return \c TRUE if the values match, \c FALSE else.
  */

@@ -32,6 +32,7 @@ START_TEST(test_crypto_check_app_uri)
     SOPC_Certificate* crt_uri = SOPC_UnhexlifyCertificate(SRV_CRT);
     ck_assert(SOPC_KeyManager_Certificate_CheckApplicationUri(crt_uri, "urn:S2OPC:localhost"));
     ck_assert(!SOPC_KeyManager_Certificate_CheckApplicationUri(crt_uri, "urn:S1OPC:localhost"));
+    ck_assert(!SOPC_KeyManager_Certificate_CheckApplicationUri(crt_uri, "urn:S2OPC:localhost-postfix"));
     SOPC_KeyManager_Certificate_Free(crt_uri);
 
     SOPC_Certificate* crt_no_uri = SOPC_UnhexlifyCertificate(CA_CRT);
@@ -42,7 +43,7 @@ END_TEST
 
 START_TEST(test_crypto_get_app_uri)
 {
-    char *appUri = NULL;
+    char* appUri = NULL;
     size_t len = 0;
 
     SOPC_Certificate* crt_uri = SOPC_UnhexlifyCertificate(SRV_CRT);
