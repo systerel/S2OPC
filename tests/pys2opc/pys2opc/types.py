@@ -689,7 +689,7 @@ class Variant:
             elif sopc_type == libsub.SOPC_DateTime_Id:
                 content.DateArr = allocator_no_gc('SOPC_DateTime[]', [float_to_datetime(s, no_gc=True)[0] for s in self._value])
             elif sopc_type == libsub.SOPC_Guid_Id:
-                content.GuidArr = allocator_no_gc('SOPC_Guid[]', uuid_to_guid(self._value, no_gc=True))
+                content.GuidArr = allocator_no_gc('SOPC_Guid[]', [uuid_to_guid(s, no_gc=True)[0] for s in self._value])
             elif sopc_type == libsub.SOPC_ByteString_Id:
                 content.BstringArr = allocator_no_gc('SOPC_ByteString[]', [bytes_to_bytestring(v, no_gc=True)[0] for v in self._value])
             elif sopc_type == libsub.SOPC_XmlElement_Id:
