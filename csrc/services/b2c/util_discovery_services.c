@@ -21,6 +21,7 @@
 #include <stdlib.h>
 
 #include "constants.h"
+#include "sopc_crypto_profiles.h"
 #include "sopc_toolkit_config_internal.h"
 #include "util_discovery_services.h"
 
@@ -130,6 +131,37 @@ static void copyUserIdTokens(SOPC_SecurityPolicy* currentSecurityPolicy,
     }
 }
 
+/* This function computes the security level */
+/* see §7.10 Part4 - Value 0 is for not recommended endPoint.
+    Others values corresponds to more secured endPoints.*/
+static SOPC_Byte getSecurityLevel(OpcUa_MessageSecurityMode SecurityMode, SOPC_String* securityPolicy)
+{
+    const SOPC_CryptoProfile* secPolicy = SOPC_CryptoProfile_Get(SOPC_String_GetRawCString(securityPolicy));
+    SOPC_Byte secuPolicyWeight = 0;
+
+    switch (secPolicy->SecurityPolicyID)
+    {
+    case SOPC_SecurityPolicy_Basic256Sha256_ID:
+        secuPolicyWeight = 2;
+        break;
+    case SOPC_SecurityPolicy_Basic256_ID:
+        secuPolicyWeight = 1;
+        break;
+    default:
+        secuPolicyWeight = 0;
+    }
+
+    switch (SecurityMode)
+    {
+    case OpcUa_MessageSecurityMode_SignAndEncrypt:
+        return (SOPC_Byte)(2 * secuPolicyWeight);
+    case OpcUa_MessageSecurityMode_Sign:
+        return secuPolicyWeight;
+    default:
+        return 0;
+    }
+}
+
 constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
     const constants__t_endpoint_config_idx_i endpoint_config_idx,
     bool isCreateSessionResponse,
@@ -210,9 +242,8 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
                     copyUserIdTokens(&currentSecurityPolicy, &newEndPointDescription);
 
                     // Set securityLevel
-                    /* see §7.10 Part4 - Value 0 is for not recommended endPoint.
-                       Others values corresponds to more secured endPoints.*/
-                    newEndPointDescription.SecurityLevel = 0;
+                    newEndPointDescription.SecurityLevel =
+                        getSecurityLevel(newEndPointDescription.SecurityMode, &currentSecurityPolicy.securityPolicy);
 
                     OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
                     if (false == isCreateSessionResponse)
@@ -240,7 +271,9 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
                     copyUserIdTokens(&currentSecurityPolicy, &newEndPointDescription);
 
                     // Set securityLevel
-                    newEndPointDescription.SecurityLevel = 1;
+                    newEndPointDescription.SecurityLevel =
+                        getSecurityLevel(newEndPointDescription.SecurityMode, &currentSecurityPolicy.securityPolicy);
+                    ;
 
                     OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
                     if (false == isCreateSessionResponse)
@@ -270,7 +303,8 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
                     copyUserIdTokens(&currentSecurityPolicy, &newEndPointDescription);
 
                     // Set securityLevel
-                    newEndPointDescription.SecurityLevel = 1;
+                    newEndPointDescription.SecurityLevel =
+                        getSecurityLevel(newEndPointDescription.SecurityMode, &currentSecurityPolicy.securityPolicy);
 
                     OpcUa_ApplicationDescription_Initialize(&newEndPointDescription.Server);
                     if (false == isCreateSessionResponse)
