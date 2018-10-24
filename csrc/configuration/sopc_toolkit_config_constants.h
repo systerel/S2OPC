@@ -176,7 +176,7 @@
 
 /* @brief Maximum number of operations in a request accepted by server (Read, Write, etc.) */
 #ifndef SOPC_MAX_OPERATIONS_PER_MSG
-#define SOPC_MAX_OPERATIONS_PER_MSG 100000
+#define SOPC_MAX_OPERATIONS_PER_MSG 5000
 #endif
 
 #include "sopc_config_constants_check.h"
