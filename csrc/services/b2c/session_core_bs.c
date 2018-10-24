@@ -311,13 +311,21 @@ void session_core_bs__get_session_user_client(const constants__t_session_i sessi
     }
 }
 
+/* Sets *ok to true only when the appUri could be checked correctly and it is correct. Otherwise sets it to false.
+ * Returns SOPC_STATUS_OK if the appUri is empty.
+ * Otherwise, returns an error code when the certData is empty or the creation of the certificate fails.
+ */
 static SOPC_ReturnStatus check_application_uri(const SOPC_ByteString* certData, const SOPC_String* appUri, bool* ok)
 {
     SOPC_Certificate* certificate = NULL;
 
     *ok = false;
 
-    if (certData->Length < 0)
+    if (appUri->Length <= 0)
+    {
+        return SOPC_STATUS_OK;
+    }
+    if (certData->Length <= 0)
     {
         return SOPC_STATUS_NOK;
     }
