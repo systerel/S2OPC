@@ -21,6 +21,7 @@
 
 #include <check.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "check_crypto_certificates.h"
 #include "hexlify.h"
@@ -39,11 +40,29 @@ START_TEST(test_crypto_check_app_uri)
 }
 END_TEST
 
+START_TEST(test_crypto_get_app_uri)
+{
+    char *appUri = NULL;
+    size_t len = 0;
+
+    SOPC_Certificate* crt_uri = SOPC_UnhexlifyCertificate(SRV_CRT);
+    ck_assert(SOPC_STATUS_OK == SOPC_KeyManager_Certificate_GetMaybeApplicationUri(crt_uri, &appUri, &len));
+    ck_assert(strcmp(appUri, "urn:S2OPC:localhost") == 0);
+    free(appUri);
+    SOPC_KeyManager_Certificate_Free(crt_uri);
+
+    SOPC_Certificate* crt_no_uri = SOPC_UnhexlifyCertificate(CA_CRT);
+    ck_assert(SOPC_STATUS_OK != SOPC_KeyManager_Certificate_GetMaybeApplicationUri(crt_no_uri, &appUri, &len));
+    SOPC_KeyManager_Certificate_Free(crt_no_uri);
+}
+END_TEST
+
 Suite* tests_make_suite_crypto_tools(void)
 {
     Suite* s = suite_create("Crypto tools test");
     TCase* tc_check_app_uri = tcase_create("Check application URI");
     tcase_add_test(tc_check_app_uri, test_crypto_check_app_uri);
+    tcase_add_test(tc_check_app_uri, test_crypto_get_app_uri);
     suite_add_tcase(s, tc_check_app_uri);
 
     return s;
