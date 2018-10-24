@@ -38,7 +38,6 @@ typedef struct SOPC_SecureChannel_Config
 {
     uint8_t isClientSc;
     const char* url;
-    const char* applicationUri;
     const SOPC_SerializedCertificate* crt_cli;
     const SOPC_SerializedAsymmetricKey* key_priv_cli;
     const SOPC_SerializedCertificate* crt_srv;

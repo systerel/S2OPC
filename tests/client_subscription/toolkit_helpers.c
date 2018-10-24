@@ -178,16 +178,14 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         if (NULL != pscConfig)
         {
             pscConfig->isClientSc = true;
-            pscConfig->applicationUri = NULL;
             pscConfig->crt_cli = pCrtCli;
             pscConfig->key_priv_cli = pKeyCli;
             pscConfig->crt_srv = pCrtSrv;
             pscConfig->pki = pPki;
             pscConfig->requestedLifetime = iScRequestedLifetime;
             pscConfig->msgSecurityMode = msgSecurityMode;
-            pscConfig->applicationUri = NULL;
 
-            /* These strings are verified non NULL */
+            /* These input strings are verified non NULL */
             pscConfig->url = malloc(strlen(szServerUrl) + 1);
             pscConfig->reqSecuPolicyUri = malloc(strlen(szSecuPolicy) + 1);
             SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
@@ -240,7 +238,6 @@ void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
     SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->crt_srv);
     SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&pscConfig->pki));
     free((void*) pscConfig->url);
-    free((char*) pscConfig->applicationUri);
     free((void*) pscConfig->reqSecuPolicyUri);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 

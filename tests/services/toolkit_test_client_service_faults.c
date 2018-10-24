@@ -193,8 +193,6 @@ int main(void)
 
     uint32_t channel_config_idx = 0;
 
-    scConfig.applicationUri = "urn:S2OPC:localhost";
-
     /* Init stack configuration */
     SOPC_ReturnStatus status = SOPC_Toolkit_Initialize(Test_ComEvent_FctClient);
     if (SOPC_STATUS_OK != status)

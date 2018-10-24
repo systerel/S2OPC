@@ -21,6 +21,7 @@
    Exported Declarations
   ------------------------*/
 #include <assert.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -411,7 +412,7 @@ void message_out_bs__write_create_session_req_msg_crypto(
 {
     SOPC_SecureChannel_Config* pSCCfg = NULL;
     OpcUa_CreateSessionRequest* pReq = (OpcUa_CreateSessionRequest*) message_out_bs__p_req_msg;
-    const SOPC_Buffer* pCrtCli = NULL;
+    const SOPC_Buffer* pSerialCertCli = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     /* Retrieve the certificate */
@@ -422,9 +423,9 @@ void message_out_bs__write_create_session_req_msg_crypto(
         return;
     }
 
-    pCrtCli = pSCCfg->crt_cli;
+    pSerialCertCli = pSCCfg->crt_cli;
 
-    if (NULL == pCrtCli)
+    if (NULL == pSerialCertCli)
     {
         return;
     }
@@ -432,9 +433,10 @@ void message_out_bs__write_create_session_req_msg_crypto(
     /* Write the Certificate */
     SOPC_ByteString_Clear(&pReq->ClientCertificate);
     /* TODO: this is a malloc error, this can fail, and the B model should be notified */
-    assert(pCrtCli->length <= INT32_MAX);
-    status = SOPC_ByteString_CopyFromBytes(&pReq->ClientCertificate, pCrtCli->data, (int32_t) pCrtCli->length);
-    pReq->ClientCertificate.Length = (int32_t) pCrtCli->length;
+    assert(pSerialCertCli->length <= INT32_MAX);
+    status =
+        SOPC_ByteString_CopyFromBytes(&pReq->ClientCertificate, pSerialCertCli->data, (int32_t) pSerialCertCli->length);
+    pReq->ClientCertificate.Length = (int32_t) pSerialCertCli->length;
     if (SOPC_STATUS_OK != status)
         return;
 
@@ -445,7 +447,23 @@ void message_out_bs__write_create_session_req_msg_crypto(
     if (SOPC_STATUS_OK != status)
         return;
 
-    SOPC_String_CopyFromCString(&pReq->ClientDescription.ApplicationUri, pSCCfg->applicationUri);
+    SOPC_Certificate* pCertCli = NULL;
+    /* TODO: this can also fail because of the malloc */
+    if (SOPC_STATUS_OK != SOPC_KeyManager_SerializedCertificate_Deserialize(pSerialCertCli, &pCertCli))
+        return;
+
+    /* TODO: this may fail, but the certificate must still be freed. */
+    size_t len = 0;
+    if (SOPC_STATUS_OK == SOPC_KeyManager_Certificate_GetMaybeApplicationUri(
+                              pCertCli, (char**) &pReq->ClientDescription.ApplicationUri.Data, &len))
+    {
+        if (len <= INT32_MAX)
+        {
+            pReq->ClientDescription.ApplicationUri.Length = (int32_t) len;
+        }
+    }
+
+    SOPC_KeyManager_Certificate_Free(pCertCli);
 }
 
 void message_out_bs__write_create_session_msg_session_token(
