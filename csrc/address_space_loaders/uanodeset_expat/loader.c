@@ -339,14 +339,14 @@ static bool parse_float_value(const char* data, size_t len, uint8_t width, void*
         return false;
     }
 
-    if (width == 32 && val >= FLT_MIN && val <= FLT_MAX)
+    if (width == 32 && val >= -FLT_MAX && val <= FLT_MAX)
     {
         *((float*) dest) = (float) val;
         return true;
     }
-    else if (width == 64 && val >= DBL_MIN && val <= DBL_MAX)
+    else if (width == 64 && val >= -DBL_MAX && val <= DBL_MAX)
     {
-        *((double*) dest) = (double) val;
+        *((double*) dest) = val;
         return true;
     }
     else
