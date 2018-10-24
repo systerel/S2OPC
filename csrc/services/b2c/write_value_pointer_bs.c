@@ -83,7 +83,7 @@ void write_value_pointer_bs__get_write_value_pointer_NodeId_AttributeId(
     constants__t_AttributeId_i* const write_value_pointer_bs__p_aid)
 {
     *write_value_pointer_bs__p_nid = &write_value_pointer_bs__p_write_value->NodeId;
-    util_AttributeId__C_to_B(write_value_pointer_bs__p_write_value->AttributeId, write_value_pointer_bs__p_aid);
+    *write_value_pointer_bs__p_aid = util_AttributeId__C_to_B(write_value_pointer_bs__p_write_value->AttributeId);
 }
 
 void write_value_pointer_bs__write_value_pointer_is_valid(

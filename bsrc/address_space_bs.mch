@@ -149,7 +149,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc : {e_sc_bad_out_of_memory, e_sc_bad_internal_error})
         OR
-            IF aid : t_AttributeId - {e_aid_Description} THEN /* TODO: Description treatment */
+            IF aid : {e_aid_NodeId, e_aid_NodeClass, e_aid_BrowseName, e_aid_DisplayName, e_aid_Value, e_aid_AccessLevel} THEN /* TODO: rest of the attributes */
                 IF IsValid_VariantIndex(Generic_Node_Variant(ncl |-> node |-> aid) |-> index_range) = TRUE &
                     HasRange_VariantIndex(Generic_Node_Variant(ncl |-> node |-> aid) |-> index_range) = TRUE
                 THEN

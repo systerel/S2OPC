@@ -39,11 +39,11 @@ static SOPC_Variant* get_attribute_variant(SOPC_AddressSpace_Item* item, uint32_
 {
     switch (attr_id)
     {
-    case e_aid_NodeId:
+    case constants__e_aid_NodeId:
         return util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Item_Get_NodeId(item));
-    case e_aid_NodeClass:
+    case constants__e_aid_NodeClass:
         return util_variant__new_Variant_from_NodeClass(item->node_class);
-    case e_aid_Value:
+    case constants__e_aid_Value:
         return util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Item_Get_Value(item));
     default:
         return NULL;

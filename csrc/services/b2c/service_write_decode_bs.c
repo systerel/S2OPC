@@ -100,16 +100,13 @@ void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i 
     OpcUa_WriteValue* wv = &request->NodesToWrite[service_write_decode_bs__wvi - 1];
     switch (wv->AttributeId)
     {
-    case e_aid_NodeId:
-        *service_write_decode_bs__aid = constants__e_aid_NodeId;
-        break;
-    case e_aid_NodeClass:
-        *service_write_decode_bs__aid = constants__e_aid_NodeClass;
-        break;
-    case e_aid_Value:
-        *service_write_decode_bs__aid = constants__e_aid_Value;
+    case constants__e_aid_NodeId:
+    case constants__e_aid_NodeClass:
+    case constants__e_aid_Value:
+        *service_write_decode_bs__aid = (constants__t_AttributeId_i) wv->AttributeId;
         break;
     default:
+        *service_write_decode_bs__aid = constants__c_AttributeId_indet;
         *service_write_decode_bs__isvalid = false;
         *service_write_decode_bs__status = constants__e_sc_bad_attribute_id_invalid;
         return;

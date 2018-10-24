@@ -63,11 +63,8 @@ bool util_TimestampsToReturn__B_to_C(constants__t_TimestampsToReturn_i bttr, Opc
 /* Returns B enum value corresponding to C enum value of timestamps to return */
 constants__t_TimestampsToReturn_i util_TimestampsToReturn__C_to_B(OpcUa_TimestampsToReturn cttr);
 
-/* Returns true or false upon failure (c_AttributeId_indet or invalid pcaid) */
-bool util_AttributeId__B_to_C(constants__t_AttributeId_i baid, uint32_t* pcaid);
-
-/* Returns true or false upon failure (invalid caid or invalid pbaid) */
-bool util_AttributeId__C_to_B(uint32_t caid, constants__t_AttributeId_i* pbaid);
+/* Returns a "valid" enum value in constants__t_AttributeId_i, indet value is used if not recognised integer */
+constants__t_AttributeId_i util_AttributeId__C_to_B(uint32_t caid);
 
 /* Raise exception upon failure (invalid B operation type or invalid pointer) */
 void util_operation_type__B_to_C(constants__t_operation_type_i boptype, SOPC_UserAuthorization_OperationType* pcoptype);

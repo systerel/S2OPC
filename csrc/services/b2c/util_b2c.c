@@ -1197,75 +1197,37 @@ constants__t_TimestampsToReturn_i util_TimestampsToReturn__C_to_B(OpcUa_Timestam
     return result;
 }
 
-bool util_AttributeId__B_to_C(constants__t_AttributeId_i baid, uint32_t* pcaid)
+constants__t_AttributeId_i util_AttributeId__C_to_B(uint32_t caid)
 {
-    bool status = NULL != pcaid;
-
-    if (status)
+    switch (caid)
     {
-        switch (baid)
-        {
-        case constants__e_aid_NodeId:
-            *pcaid = e_aid_NodeId;
-            break;
-        case constants__e_aid_NodeClass:
-            *pcaid = e_aid_NodeClass;
-            break;
-        case constants__e_aid_BrowseName:
-            *pcaid = e_aid_BrowseName;
-            break;
-        case constants__e_aid_DisplayName:
-            *pcaid = e_aid_DisplayName;
-            break;
-        case constants__e_aid_Value:
-            *pcaid = e_aid_Value;
-            break;
-        case constants__e_aid_AccessLevel:
-            *pcaid = e_aid_AccessLevel;
-            break;
-        case constants__c_AttributeId_indet:
-        default:
-            status = false;
-            break;
-        }
+    case constants__e_aid_NodeId:
+    case constants__e_aid_NodeClass:
+    case constants__e_aid_BrowseName:
+    case constants__e_aid_DisplayName:
+    case constants__e_aid_Description:
+    case constants__e_aid_WriteMask:
+    case constants__e_aid_UserWriteMask:
+    case constants__e_aid_IsAbstract:
+    case constants__e_aid_Symmetric:
+    case constants__e_aid_InverseName:
+    case constants__e_aid_ContainsNoLoop:
+    case constants__e_aid_EventNotifier:
+    case constants__e_aid_Value:
+    case constants__e_aid_DataType:
+    case constants__e_aid_ValueRank:
+    case constants__e_aid_ArrayDimensions:
+    case constants__e_aid_AccessLevel:
+    case constants__e_aid_UserAccessLevel:
+    case constants__e_aid_MinimumSamplingInterval:
+    case constants__e_aid_Historizing:
+    case constants__e_aid_Executable:
+    case constants__e_aid_UserExecutable:
+        return (constants__t_AttributeId_i) caid;
+    default:
+        return constants__c_AttributeId_indet;
+        break;
     }
-
-    return status;
-}
-
-bool util_AttributeId__C_to_B(uint32_t caid, constants__t_AttributeId_i* pbaid)
-{
-    bool status = NULL != pbaid;
-
-    if (status)
-    {
-        switch (caid)
-        {
-        case e_aid_NodeId:
-            *pbaid = constants__e_aid_NodeId;
-            break;
-        case e_aid_NodeClass:
-            *pbaid = constants__e_aid_NodeClass;
-            break;
-        case e_aid_BrowseName:
-            *pbaid = constants__e_aid_BrowseName;
-            break;
-        case e_aid_DisplayName:
-            *pbaid = constants__e_aid_DisplayName;
-            break;
-        case e_aid_Value:
-            *pbaid = constants__e_aid_Value;
-            break;
-        case e_aid_AccessLevel:
-            *pbaid = constants__e_aid_AccessLevel;
-            break;
-        default:
-            status = false;
-            break;
-        }
-    }
-
-    return status;
 }
 
 void util_operation_type__B_to_C(constants__t_operation_type_i boptype, SOPC_UserAuthorization_OperationType* pcoptype)

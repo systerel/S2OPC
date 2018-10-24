@@ -51,11 +51,10 @@ void msg_read_request_bs__getall_req_ReadValue_AttributeId(const constants__t_ms
     static bool bWarned = false;
     *msg_read_request_bs__sc = constants__e_sc_ok;
 
-    *msg_read_request_bs__aid = constants__c_AttributeId_indet;
-    bool isvalid = util_AttributeId__C_to_B(msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].AttributeId,
-                                            msg_read_request_bs__aid);
+    *msg_read_request_bs__aid =
+        util_AttributeId__C_to_B(msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].AttributeId);
 
-    if (!isvalid)
+    if (*msg_read_request_bs__aid == constants__c_AttributeId_indet)
     {
         *msg_read_request_bs__sc = constants__e_sc_bad_attribute_id_invalid;
         if (!bWarned)

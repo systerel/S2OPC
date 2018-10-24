@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 08/11/2018 22:09:12
+ Date                 : 15/01/2019 14:12:33
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -100,8 +100,23 @@ typedef enum {
    constants__e_aid_BrowseName,
    constants__e_aid_DisplayName,
    constants__e_aid_Description,
+   constants__e_aid_WriteMask,
+   constants__e_aid_UserWriteMask,
+   constants__e_aid_IsAbstract,
+   constants__e_aid_Symmetric,
+   constants__e_aid_InverseName,
+   constants__e_aid_ContainsNoLoop,
+   constants__e_aid_EventNotifier,
    constants__e_aid_Value,
-   constants__e_aid_AccessLevel
+   constants__e_aid_DataType,
+   constants__e_aid_ValueRank,
+   constants__e_aid_ArrayDimensions,
+   constants__e_aid_AccessLevel,
+   constants__e_aid_UserAccessLevel,
+   constants__e_aid_MinimumSamplingInterval,
+   constants__e_aid_Historizing,
+   constants__e_aid_Executable,
+   constants__e_aid_UserExecutable
 } constants__t_AttributeId_i;
 typedef enum {
    constants__e_bd_indet,
