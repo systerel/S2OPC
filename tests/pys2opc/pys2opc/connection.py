@@ -147,7 +147,7 @@ class BaseConnectionHandler:
             n = len(nodeIds)
             lszNodeIds = [ffi.new('char[]', nid.encode()) for nid in nodeIds]
             lAttrIds = ffi.new('SOPC_LibSub_AttributeId[{}]'.format(n), [libsub.SOPC_LibSub_AttributeId_Value for _ in nodeIds])
-            lDataIds = ffi.new('SOPC_LibSub_DataId[{}]'.format(n))
+            lDataIds = ffi.new('SOPC_LibSub_DataId[]', n)
             status = libsub.SOPC_LibSub_AddToSubscription(self._id, lszNodeIds, lAttrIds, n, lDataIds)
             assert status == libsub.SOPC_STATUS_OK, 'Add to subscription failed with status {}'.format(status)
             for i, nid in zip(lDataIds, nodeIds):
@@ -202,7 +202,7 @@ class BaseConnectionHandler:
         payload.MaxAge = 0.
         payload.TimestampsToReturn = libsub.OpcUa_TimestampsToReturn_Both
         payload.NoOfNodesToRead = len(nodeIds)
-        nodesToRead = allocator_no_gc('OpcUa_ReadValueId[{}]'.format(len(nodeIds)))
+        nodesToRead = allocator_no_gc('OpcUa_ReadValueId[]', len(nodeIds))
         for i, (snid, attr) in enumerate(zip(nodeIds, attributes)):
             nodesToRead[i].encodeableType = EncodeableType.ReadValueId
             nodesToRead[i].NodeId = str_to_nodeid(snid, no_gc=True)[0]
@@ -268,7 +268,7 @@ class BaseConnectionHandler:
         payload = allocator_no_gc('OpcUa_WriteRequest *')
         payload.encodeableType = EncodeableType.WriteRequest
         payload.NoOfNodesToWrite = len(nodeIds)
-        nodesToWrite = allocator_no_gc('OpcUa_WriteValue[{}]'.format(len(nodeIds)))
+        nodesToWrite = allocator_no_gc('OpcUa_WriteValue[]', len(nodeIds))
         for i, (snid, attr, val) in enumerate(zip(nodeIds, attributes, datavalues)):
             nodesToWrite[i].encodeableType = EncodeableType.WriteValue
             nodesToWrite[i].NodeId = str_to_nodeid(snid)[0]
@@ -294,7 +294,7 @@ class BaseConnectionHandler:
         payload.View = view[0]
         payload.RequestedMaxReferencesPerNode = 1000
         payload.NoOfNodesToBrowse = len(nodeIds)
-        nodesToBrowse = allocator_no_gc('OpcUa_BrowseDescription[]', len(nodeIds))  # TODO: change '[{}]'.format(len) to this
+        nodesToBrowse = allocator_no_gc('OpcUa_BrowseDescription[]', len(nodeIds))
         for i, snid in enumerate(nodeIds):
             nodesToBrowse[i].encodeableType = EncodeableType.BrowseDescription
             nodesToBrowse[i].NodeId = str_to_nodeid(snid, no_gc=True)[0]

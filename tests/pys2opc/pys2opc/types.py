@@ -672,13 +672,13 @@ class Variant:
             elif sopc_type == libsub.SOPC_StatusCode_Id:
                 content.StatusArr = allocator_no_gc('SOPC_StatusCode[]', self._value)
             elif sopc_type == libsub.SOPC_QualifiedName_Id:
-                qnames = allocator_no_gc('SOPC_QualifiedName[{}]'.format(len(self._value)))
+                qnames = allocator_no_gc('SOPC_QualifiedName[]', len(self._value))
                 for i,v in enumerate(self._value):
                     qnames[i].NamespaceIndex = v[0]
                     qnames[i].Name = str_to_string(v[1], no_gc=True)
                 content.QnameArr = qnames
             elif sopc_type == libsub.SOPC_LocalizedText_Id:
-                locs = allocator_no_gc('SOPC_LocalizedText[{}]'.format(len(self._value)))
+                locs = allocator_no_gc('SOPC_LocalizedText[]', len(self._value))
                 for i,v in enumerate(self._value):
                     locs[i].Locale, locs[i].Text = map(lambda s:str_to_string(s, no_gc=True), v)
                 content.LocalizedTextArr = locs
