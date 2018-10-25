@@ -265,7 +265,7 @@ class VariableValue(object):
 
 class Node(object):
     __slots__ = 'tag', 'nodeid', 'browse_name', 'description', 'display_name', 'references',\
-                'idonly', 'value', 'accesslevel'
+                'idonly', 'value', 'data_type', 'value_rank', 'accesslevel'
 
     def __init__(self, tag, nodeid, browse_name, description, display_name, references):
         self.tag = tag
@@ -276,6 +276,8 @@ class Node(object):
         self.references = references
         self.idonly = False
         self.value = None
+        self.data_type = None
+        self.value_rank = None
         self.accesslevel = None
 
 
@@ -423,9 +425,9 @@ def parse_value_tag(tag_name):
 def identity(x):
     return x
 
-
 # Returns a VariableValue object
 def collect_variable_value(n):
+
     value_node = n.find(UA_VALUE_TAG)
 
     if value_node is None:
@@ -495,6 +497,55 @@ def collect_variable_value(n):
     val = collect_list_items(value, base_type, parse_func) if is_array else parse_func(value.text)
 
     return VariableValue(ty, val, is_array)
+
+
+datatype_to_numeric_nodeId = {
+    'Boolean' : 1,
+    'SByte' : 2,
+    'Byte' : 3,
+    'Int16' : 4,
+    'UInt16' : 5,
+    'Int32' : 6,
+    'UInt32' : 7,
+    'Int64' : 8,
+    'UInt64' : 9,
+    'Float' : 10,
+    'Double' : 11,
+    'String' : 12,
+    'DateTime' : 13,
+    'Guid' : 14,
+    'ByteString' : 15,
+    'XmlElement' : 16,
+    'NodeId' : 17,
+    'ExpandedNodeId' : 18,
+    'StatusCode' : 19,
+    'QualifiedName' : 20,
+    'LocalizedText' : 21,
+    'ExtensionObject' : 22,
+    'DataValue' : 23,
+    'Variant' : 24,
+    'DiagnosticInfo' : 25
+}
+
+# Parses the data type attribute of a Variable or Variable type
+# Returns a numeric nodeId
+def parse_datatype_attribute(datatype_attr):
+
+    if datatype_attr in datatype_to_numeric_nodeId:
+        # Infers numeric value for the given String data type
+        node = NodeId(None, ID_TYPE_NUMERIC, datatype_to_numeric_nodeId[datatype_attr])
+    else:
+        node = NodeId.parse(datatype_attr)
+    return node
+
+def parse_value_rank_attribute(value_rank_node):
+    value_rank = -1
+    if 'ValueRank' in value_rank_node.attrib:
+        try:
+            value_rank = int(value_rank_node.attrib['ValueRank'])
+        except:
+            raise ParseError('Non integer ValueRank for node %s' % value_rank_node['NodeId'])
+    return value_rank
 
 
 def generate_string(data):
@@ -602,7 +653,12 @@ def generate_value_variant(val):
     else:
         raise CodeGenerationError('Unknown value type: %d' % val.ty)
 
-
+def generate_datatype_variant(nodeNumId):
+    id_type = C_IDENTIFIER_TYPES[0]
+    data_struct_field = '.Data.' + id_type[len('SOPC_IdentifierType_'):]
+    
+    return {}
+    
 def parse_uanode(xml_node, source, aliases):
     parse_element(source, xml_node.tag)
     nodeid = NodeId.parse(xml_node.attrib['NodeId'])
@@ -623,6 +679,14 @@ def parse_uanode(xml_node, source, aliases):
     if (xml_node.tag == UA_VARIABLE_TAG) or (xml_node.tag == UA_VARIABLE_TYPE_TAG):
         node.value = collect_variable_value(xml_node)
 
+        if 'DataType' in xml_node.attrib:
+            node.data_type = parse_datatype_attribute(xml_node.attrib['DataType'])
+        else:
+            # TODO: VariableType DataType ?
+            node.data_type = NodeId(0,0,0)
+
+        node.value_rank = parse_value_rank_attribute(xml_node)
+        
         accesslevel = xml_node.get('AccessLevel', None)
 
         if accesslevel is not None:
@@ -697,16 +761,20 @@ def number_coalesce(n, default):
 
 
 def generate_item_variable(ua_node):
-    value_status = 'OpcUa_BadDataUnavailable' if ua_node.value is None else '0x00'
+    value_status = 'OpcUa_BadDataUnavailable' if ua_node.value is None else '0x00'   
     return generate_item(ua_node, 'Variable', 'variable', value_status,
                          Value=generate_value_variant(ua_node.value),
+                         DataType=generate_nodeid(ua_node.data_type),
+                         ValueRank="(%d)" % ua_node.value_rank,
                          AccessLevel=str(number_coalesce(ua_node.accesslevel, 1)))
 
 
 def generate_item_variable_type(ua_node):
     value_status = 'OpcUa_BadDataUnavailable' if ua_node.value is None else '0x00'
     return generate_item(ua_node, 'VariableType', 'variable_type', value_status,
-                         Value=generate_value_variant(ua_node.value))
+                         Value=generate_value_variant(ua_node.value),
+                         DataType=generate_nodeid(ua_node.data_type),
+                         ValueRank="(%d)" % ua_node.value_rank)
 
 
 def generate_item_object_type(ua_node):
