@@ -31,6 +31,8 @@
 #include "b2c.h"
 
 #include "address_space_impl.h"
+#include "opcua_identifiers.h"
+#include "sopc_builtintypes.h"
 #include "sopc_dict.h"
 #include "sopc_logger.h"
 #include "sopc_numeric_range.h"
@@ -41,6 +43,8 @@
 bool sopc_addressSpace_configured = false;
 SOPC_AddressSpace* address_space_bs__nodes = NULL;
 
+static SOPC_NodeId dataTypes[SOPC_BUILTINID_MAX + 1];
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -49,6 +53,12 @@ void address_space_bs__INITIALISATION(void)
     if (sopc_addressSpace_configured)
     {
         assert(NULL != address_space_bs__nodes);
+    }
+    for (uint8_t i = 0; i <= SOPC_BUILTINID_MAX; i++)
+    {
+        dataTypes[i].IdentifierType = SOPC_IdentifierType_Numeric;
+        dataTypes[i].Namespace = OPCUA_NAMESPACE_INDEX;
+        dataTypes[i].Data.Numeric = i;
     }
 }
 
@@ -190,7 +200,57 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
             return;
         }
         break;
+    case constants__e_aid_DataType:
+        if (constants__e_ncl_Variable == address_space_bs__ncl)
+        {
+            value = util_variant__new_Variant_from_NodeId(&item->data.variable.DataType);
+        }
+        else if (constants__e_ncl_VariableType == address_space_bs__ncl)
+        {
+            /* TODO: data not parsed for now */
+            value = util_variant__new_Variant_from_NodeId(&item->data.variable_type.DataType);
+        }
+        else
+        {
+            *address_space_bs__variant = util_variant__new_Variant_from_Indet();
+            *address_space_bs__sc = constants__e_sc_bad_attribute_id_invalid;
+            return;
+        }
+        break;
+    case constants__e_aid_ValueRank:
+        if (constants__e_ncl_Variable == address_space_bs__ncl)
+        {
+            value = util_variant__new_Variant_from_int32(item->data.variable.ValueRank);
+        }
+        else if (constants__e_ncl_VariableType == address_space_bs__ncl)
+        {
+            value = util_variant__new_Variant_from_int32(item->data.variable.ValueRank);
+        }
+        else
+        {
+            *address_space_bs__variant = util_variant__new_Variant_from_Indet();
+            *address_space_bs__sc = constants__e_sc_bad_attribute_id_invalid;
+            return;
+        }
+        break;
+    case constants__e_aid_EventNotifier:
+        if (constants__e_ncl_Object == address_space_bs__ncl || constants__e_ncl_View == address_space_bs__ncl)
+        {
+            // We do not manage event in any way
+            value = util_variant__new_Variant_from_Byte(0);
+        }
+        else
+        {
+            *address_space_bs__variant = util_variant__new_Variant_from_Indet();
+            *address_space_bs__sc = constants__e_sc_bad_attribute_id_invalid;
+            return;
+        }
+        break;
     case constants__e_aid_AccessLevel:
+        value =
+            util_variant__new_Variant_from_Byte(SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite);
+        break;
+    case constants__e_aid_UserAccessLevel:
         value =
             util_variant__new_Variant_from_Byte(SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite);
         break;

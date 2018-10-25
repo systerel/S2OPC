@@ -172,6 +172,21 @@ constants__t_Variant_i util_variant__new_Variant_from_int64(int64_t i)
     return pvar;
 }
 
+constants__t_Variant_i util_variant__new_Variant_from_int32(int32_t i)
+{
+    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+
+    if (NULL == pvar)
+        return NULL;
+
+    SOPC_Variant_Initialize(pvar);
+    pvar->BuiltInTypeId = SOPC_Int32_Id;
+    pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
+    pvar->Value.Int32 = i;
+
+    return pvar;
+}
+
 constants__t_Variant_i util_variant__new_Variant_from_double(double f)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
