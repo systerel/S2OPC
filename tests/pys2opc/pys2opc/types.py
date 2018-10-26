@@ -49,7 +49,8 @@ class Request:
         self.eventResponseReceived = threading.Event()
         # Does not use the ffi.new_handle and from_handle capabilities because from_handle is subject to "undefined behavior"
         #  when it is given an unknown pointer...
-        self._requestContext = ffi.cast('uintptr_t', ffi.new_handle(self))
+        self._requestContextVoid = ffi.new_handle(self)  # Keep the void* to avoid garbage collection, ...
+        self._requestContext = ffi.cast('uintptr_t', self._requestContextVoid)  # ... but only use the casted value.
         self.payload = payload
 
     @property
