@@ -39,6 +39,22 @@ LOGPATH=$(pwd)/pre-build-check.log
 # Redirect all output and errors to log file
 echo "Pre-build-check log" > $LOGPATH
 
+#### Check contributor list ####
+echo "Contributors list verification" | tee -a $LOGPATH
+ifs_save=$IFS
+IFS=$'\n'
+LIST_CONTRIB=(`git log --format="%an <%ae>" | sort -u`)
+
+for contrib in ${LIST_CONTRIB[*]}
+do
+    grep $contrib Contributors.md &> /dev/null
+    if [[ $? != 0 ]]; then
+        echo "ERROR: contributor not declared: $contrib" | tee -a $LOGPATH
+        EXITCODE=1
+    fi
+done
+
+IFS=$ifs_save
 
 #### Check absence of functions / includes ####
 
