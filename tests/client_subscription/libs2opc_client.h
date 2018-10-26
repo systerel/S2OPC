@@ -420,7 +420,9 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
 
 /*
  @description
-    Add a variable to an existing subscription
+    Add variables to the subscription of the connection.
+    This call is synchroneous: it waits for the server response, or the Toolkit times out.
+    The connection timeout is also used for this function.
  @param cliId
     The connection id.
  @param lszNodeId
@@ -435,7 +437,8 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
     It should be at least \p nElements long.
     The values will be used in call to data_change_callback.
  @return
-    The operation status. lDataId is only valid when the return status is SOPC_STATUS_OK. */
+    The operation status. lDataId is only valid when the return status is SOPC_STATUS_OK.
+    SOPC_STATUS_TIMEOUT is returned when the timeout expires before receiving a response. */
 SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId cliId,
                                                 const SOPC_LibSub_CstString* lszNodeId,
                                                 const SOPC_LibSub_AttributeId* lattrId,

@@ -474,7 +474,8 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
         *pCliId = nCreatedClient;
         status = SOPC_StaMac_Create(cfgId, *pCliId, pCfg->policyId, pCfg->username, pCfg->password,
                                     pCfg->data_change_callback, (double) pCfg->publish_period_ms, pCfg->n_max_keepalive,
-                                    pCfg->n_max_lifetime, pCfg->token_target, pCfg->generic_response_callback, &pSM);
+                                    pCfg->n_max_lifetime, pCfg->token_target, pCfg->timeout_ms,
+                                    pCfg->generic_response_callback, &pSM);
     }
 
     /* Adds it to the list */
@@ -562,6 +563,8 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
         status = SOPC_StaMac_CreateMonitoredItem(pSM, lszNodeId, lattrId, nElements, &appCtx, lDataId);
     }
 
+    int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
+
     /* Release the lock so that the event handler can work properly while waiting */
     mutStatus = Mutex_Unlock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
@@ -569,13 +572,23 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
     /* Wait for the monitored item to be created */
     if (SOPC_STATUS_OK == status)
     {
-        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasMonItByAppCtx(pSM, appCtx))
+        int count = 0;
+        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasMonItByAppCtx(pSM, appCtx) &&
+               count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
-            SOPC_Sleep(1);
+            SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
+            ++count;
         }
+        /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
+         *  and NOK is returned. */
         if (SOPC_StaMac_IsError(pSM))
         {
             status = SOPC_STATUS_NOK;
+        }
+        else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+            SOPC_StaMac_SetError(pSM);
         }
     }
 

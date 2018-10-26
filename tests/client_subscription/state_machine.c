@@ -80,6 +80,7 @@ struct SOPC_StaMac_Machine
     const char* szPolicyId;                   /* See SOPC_LibSub_ConnectionCfg */
     const char* szUsername;                   /* See SOPC_LibSub_ConnectionCfg */
     const char* szPassword;                   /* See SOPC_LibSub_ConnectionCfg */
+    int64_t iTimeoutMs;                       /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
 };
 
 /* Global variables */
@@ -143,6 +144,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      uint32_t iCntMaxKeepAlive,
                                      uint32_t iCntLifetime,
                                      uint32_t iTokenTarget,
+                                     int64_t iTimeoutMs,
                                      SOPC_LibSub_EventCbk cbkGenericEvent,
                                      SOPC_StaMac_Machine** ppSM)
 {
@@ -176,6 +178,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->szPolicyId = NULL;
         pSM->szUsername = NULL;
         pSM->szPassword = NULL;
+        pSM->iTimeoutMs = iTimeoutMs;
         if (NULL != szPolicyId)
         {
             pSM->szPolicyId = malloc(strlen(szPolicyId) + 1);
@@ -618,6 +621,12 @@ bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx)
     assert(SOPC_STATUS_OK == status);
 
     return bHasMonIt;
+}
+
+int64_t SOPC_StaMac_GetTimeout(SOPC_StaMac_Machine* pSM)
+{
+    assert(NULL != pSM);
+    return pSM->iTimeoutMs;
 }
 
 bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,

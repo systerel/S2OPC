@@ -95,6 +95,7 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  * \param iCntMaxKeepAlive  The number of times an empty PublishResponse is not sent
  * \param iCntLifetime      The number of times a PublishResponse cannot be sent before killing the subscription
  * \param iTokenTarget      Number of subscription tokens the server should always have
+ * \param iTimeoutMs        Timeout for the synchroneous calls
  * \param ppSM              The returned machine, when successful
  *
  * \return SOPC_STATUS_OK when \p ppSM points to a pointer to a valid machine.
@@ -110,6 +111,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      uint32_t iCntMaxKeepAlive,
                                      uint32_t iCntLifetime,
                                      uint32_t iTokenTarget,
+                                     int64_t iTimeoutMs,
                                      SOPC_LibSub_EventCbk cbkGenericEvent,
                                      SOPC_StaMac_Machine** ppSM);
 
@@ -203,6 +205,9 @@ bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM);
  * \brief Returns whether the machine has created the MonitoredItem with the given \p appCtx or not.
  */
 bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx);
+
+/** \brief Returns the timeout of the machine, used for the synchroneous calls. */
+int64_t SOPC_StaMac_GetTimeout(SOPC_StaMac_Machine* pSM);
 
 /**
  * \brief Handles the events from the Toolkit and changes the state machine state.
