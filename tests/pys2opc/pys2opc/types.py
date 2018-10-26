@@ -814,10 +814,12 @@ class DataValue:
     @staticmethod
     def from_python(val):
         """
-        Creates a DataValue from the Python value.
+        Creates a DataValue from a Python value or a Variant.
         Creates the Variant, sets the status code to OK, and set source timestamp to now.
         """
-        return DataValue(int(time.time()), 0, libsub.SOPC_STATUS_OK, Variant(val))
+        if not isinstance(val, Variant):
+            val = Variant(val)
+        return DataValue(time.time(), 0, libsub.SOPC_STATUS_OK, val)
 
     allocator = ffi.new_allocator(alloc=libsub.malloc, free=libsub.SOPC_DataValue_Delete, should_clear_after_alloc=True)
 
