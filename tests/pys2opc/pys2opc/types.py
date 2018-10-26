@@ -123,7 +123,12 @@ def str_to_nodeid(nid, no_gc=True):
 
 def expandednodeid_to_str(exnode):
     """SOPC_ExpandedNodeId or SOPC_ExpandedNodeId* to its str representation in the OPC-UA XML syntax."""
-    a = 'srv={};nsu={};'.format(exnode.ServerIndex, string_to_str(ffi.addressof(exnode.NamespaceUri)))
+    a = ''
+    if exnode.ServerIndex:
+        a += 'srv={};'.format(exnode.ServerIndex)
+    nsu = string_to_str(ffi.addressof(exnode.NamespaceUri))
+    if nsu:
+        a += 'nsu={};'.format(nsu)
     b = ffi.string(libsub.SOPC_NodeId_ToCString(ffi.addressof(exnode.NodeId))).decode()
     return a + b
 
@@ -888,7 +893,7 @@ class EncodeableType:
 
 class BrowseResult:
     """
-    The BrowseResult is a low-level structures that contains the list of references for a node,
+    The BrowseResult is a low-level structures that contains the list of References for a node,
     but also the status code of the Browse operation, and, if needed, a continuation point.
     """
     def __init__(self, sopc_browseresult):
@@ -916,7 +921,8 @@ class Reference:
         referenceTypeId: The string NodeId that defines the type of the Reference.
         isForward: True when the reference is forward (going from the browsed node to nodeId),
                    False when the reference is in the inverse direction (from the nodeId to the browsed node).
-        nodeId: Target nodeId of the Reference.
+        nodeId: Target Expanded nodeId of the Reference. When the node is in the address space,
+                Expanded NodeId and NodeId have the same string representation.
         browseName: Browse name of the nodeId, as a qualified name, i.e. a couple (namespaceIndex, str).
         displayName: Display name of the nodeId, as a localized text, i.e. a couple (str of the chosen locale, str in this locale).
         nodeClass: NodeClass of the nodeId.
