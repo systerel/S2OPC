@@ -36,10 +36,10 @@
 typedef enum
 {
     /* External events */
-    SOCKET_CREATE_SERVER,       /* id = endpoint description config index,
-                                   params = (const char*) URI,
-                                   auxParam = (bool) listenAllInterfaces
-                                */
+    SOCKET_CREATE_SERVER = 0x0, /* id = endpoint description config index,
+                             params = (const char*) URI,
+                             auxParam = (bool) listenAllInterfaces
+                          */
     SOCKET_ACCEPTED_CONNECTION, /* id = socket index,
                                    auxParam = secure channel connection index */
 
@@ -62,13 +62,13 @@ typedef enum
 
 typedef enum
 {
-    SOCKET_LISTENER_OPENED,     /* id = endpoint description config index,
-                                   auxParam = (uint32_t) socket index
-                               */
-    SOCKET_LISTENER_CONNECTION, /* id = endpoint description config index,
-                                   auxParam = (uint32_t) new connection socket index
-                               */
-    SOCKET_LISTENER_FAILURE,    /* id = endpoint description config index */
+    SOCKET_LISTENER_OPENED = 0x100, /* id = endpoint description config index,
+                               auxParam = (uint32_t) socket index
+                           */
+    SOCKET_LISTENER_CONNECTION,     /* id = endpoint description config index,
+                                       auxParam = (uint32_t) new connection socket index
+                                   */
+    SOCKET_LISTENER_FAILURE,        /* id = endpoint description config index */
 
     SOCKET_CONNECTION, /* id = secure channel connection index,
                           auxParam = (uint32_t) socket index */

@@ -26,10 +26,10 @@
 typedef enum
 {
     /* SC listener manager -> SC connection manager */
-    INT_EP_SC_CREATE, /* id = endpoint description configuration index,
+    INT_EP_SC_CREATE = 0x400, /* id = endpoint description configuration index,
                          auxParam = socket index */
-    INT_EP_SC_CLOSE,  /* id = secure channel connection index,
-                         auxParam = (uint32_t) endpoint description configuration index */
+    INT_EP_SC_CLOSE,          /* id = secure channel connection index,
+                                 auxParam = (uint32_t) endpoint description configuration index */
     /* SC connection manager -> SC listener manager */
     INT_EP_SC_CREATED,      /* id = endpoint description configuration index,
                                auxParam = (uint32_t) secure channel connection index */
@@ -73,10 +73,10 @@ typedef enum
 
 typedef enum
 {
-    TIMER_SC_CONNECTION_TIMEOUT, /* id = secure channel connection index */
-    TIMER_SC_CLIENT_OPN_RENEW,   /* id = secure channel connection index */
-    TIMER_SC_REQUEST_TIMEOUT,    /* id = secure channel connection index
-                                    auxParam = (uint32_t) requestId */
+    TIMER_SC_CONNECTION_TIMEOUT = 0x500, /* id = secure channel connection index */
+    TIMER_SC_CLIENT_OPN_RENEW,           /* id = secure channel connection index */
+    TIMER_SC_REQUEST_TIMEOUT,            /* id = secure channel connection index
+                                            auxParam = (uint32_t) requestId */
 } SOPC_SecureChannels_TimerEvent;
 
 // Secure channel internal event enqueue function

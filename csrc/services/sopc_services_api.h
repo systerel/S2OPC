@@ -35,19 +35,19 @@
 typedef enum SOPC_Services_Event
 {
     /* Services to services events */
-    SE_TO_SE_SC_ALL_DISCONNECTED,       // special event sent by services mgr itself (no parameters)
-    SE_TO_SE_ACTIVATE_ORPHANED_SESSION, /* Client side only:
-                                           id = session id
-                                           auxParam = (uint32_t) endpoint connection config index
-                                        */
-    SE_TO_SE_CREATE_SESSION,            /* Client side only:
-                                           id = session id
-                                           auxParam = (uint32_t) endpoint connection config index
-                                        */
-    SE_TO_SE_ACTIVATE_SESSION,          /* Client side only:
-                                         * id = session id
-                                         * params = (user token structure)
-                                         */
+    SE_TO_SE_SC_ALL_DISCONNECTED = 0x600, // special event sent by services mgr itself (no parameters)
+    SE_TO_SE_ACTIVATE_ORPHANED_SESSION,   /* Client side only:
+                                             id = session id
+                                             auxParam = (uint32_t) endpoint connection config index
+                                          */
+    SE_TO_SE_CREATE_SESSION,              /* Client side only:
+                                             id = session id
+                                             auxParam = (uint32_t) endpoint connection config index
+                                          */
+    SE_TO_SE_ACTIVATE_SESSION,            /* Client side only:
+                                           * id = session id
+                                           * params = (user token structure)
+                                           */
 
     SE_TO_SE_SERVER_DATA_CHANGED, /* Server side only:
                                     id = session id

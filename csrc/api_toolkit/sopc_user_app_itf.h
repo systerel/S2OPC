@@ -77,26 +77,26 @@ typedef struct SOPC_Endpoint_Config
 typedef enum SOPC_App_Com_Event
 {
     /* Client application events */
-    SE_SESSION_ACTIVATION_FAILURE, /* id = internal session id (or 0 if not yet defined)
+    SE_SESSION_ACTIVATION_FAILURE = 0x700, /* id = internal session id (or 0 if not yet defined)
                                       params = (SOPC_StatusCode)(uintptr_t) status code reason
                                       auxParam = user application session context
                                    */
-    SE_ACTIVATED_SESSION,          /* id = internal session id
-                                      auxParam = user application session context
-                                   */
-    SE_SESSION_REACTIVATING,       /* automatic new SC or manual new user on same SC */
-                                   /* id = internal session id
-                                      auxParam = user application session context
-                                   */
-    SE_RCV_SESSION_RESPONSE,       /* id = internal session id
-                                      params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
-                                      (deallocated by toolkit after callback call ends)
-                                      auxParam = user application request context
-                                   */
-    SE_CLOSED_SESSION,             /* id = internal session id
-                                      params = (SOPC_StatusCode)(uintptr_t) status code reason
-                                      auxParam = user application session context
-                                    */
+    SE_ACTIVATED_SESSION,                  /* id = internal session id
+                                              auxParam = user application session context
+                                           */
+    SE_SESSION_REACTIVATING,               /* automatic new SC or manual new user on same SC */
+                                           /* id = internal session id
+                                              auxParam = user application session context
+                                           */
+    SE_RCV_SESSION_RESPONSE,               /* id = internal session id
+                                              params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
+                                              (deallocated by toolkit after callback call ends)
+                                              auxParam = user application request context
+                                           */
+    SE_CLOSED_SESSION,                     /* id = internal session id
+                                              params = (SOPC_StatusCode)(uintptr_t) status code reason
+                                              auxParam = user application session context
+                                            */
     SE_RCV_DISCOVERY_RESPONSE, /* params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload structure
                                   (deallocated by toolkit after callback call ends)
                                   auxParam = user application request context
@@ -124,7 +124,7 @@ typedef enum SOPC_App_Com_Event
 typedef enum SOPC_App_AddSpace_Event
 {
     /* Server application events */
-    AS_WRITE_EVENT, /* opParam = (OpcUa_WriteValue*) single write value operation
+    AS_WRITE_EVENT = 0x800, /* opParam = (OpcUa_WriteValue*) single write value operation
                        opStatus = status of the write operation
                      */
 } SOPC_App_AddSpace_Event;

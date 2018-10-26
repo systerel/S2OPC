@@ -54,7 +54,7 @@ static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t r
     event.eltId = connectionIdx;
     event.params = NULL;
     event.auxParam = requestId;
-    return SOPC_EventTimer_Create(secureChannelsInputEventHandler, event, SOPC_REQUEST_TIMEOUT_MS);
+    return SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, SOPC_REQUEST_TIMEOUT_MS);
 }
 
 static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx, SOPC_StatusCode* errorStatus)
