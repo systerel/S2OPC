@@ -79,7 +79,7 @@ class BaseConnectionHandler:
             request.response = response
             response.request = request
             if responseContext not in self._sSkipResponse:
-                self.on_generic_response(response)
+                self.on_generic_response(request, response)
             else:
                 self._sSkipResponse.remove(responseContext)
         finally:
@@ -116,7 +116,8 @@ class BaseConnectionHandler:
         which tracks available responses (see pop_response).
         It is possible to not call the on_generic_response of the parent class.
         """
-        self._dequeResponses.append(response)
+        assert request.requestContext not in self._dPendingResponses, self._dPendingResponses
+        self._dPendingResponses[request.requestContext] = response
 
     # Disconnection
     def disconnect(self):
@@ -141,6 +142,7 @@ class BaseConnectionHandler:
         - "g=C496578A-0DFE-4b8f-870A-745238C6AEAE" for a GUID-NodeId,
         - "b=Barbar" for a ByteString.
         The string can be prepend by a "ns={};" which specifies the namespace index.
+        This call is always synchroneous, so that the Toolkit waits for the server response to return.
         """
         # TODO: check format?
         if nodeIds:
