@@ -222,12 +222,12 @@ class BaseConnectionHandler:
         Otherwise, returns the request.
 
         Types are found in 3 places, for each NodeId and DataValue :
-        - in each datavalue.variant_type,
+        - in each datavalue.variantType,
         - in the `types` list,
         - in a ReadResponse that is sent and waited upon if both previous sources are set to None.
 
-        The Read request is only sent when at least one datavalue lacks type in both datavalue.variant_type and `types`.
-        If both datavalue.variant_type and the type in `types` are given, they must be equal.
+        The Read request is only sent when at least one datavalue lacks type in both datavalue.variantType and `types`.
+        If both datavalue.variantType and the type in `types` are given, they must be equal.
 
         Args:
             nodeIds: NodeId described as a string "[ns=x;]t=y" where x is the namespace index, t is the NodeId type
@@ -247,10 +247,10 @@ class BaseConnectionHandler:
         sopc_types = []
         types = types or [None] * len(nodeIds)
         for dv, ty in zip(datavalues, types):
-            if dv.variant_type is not None:
-                if ty is not None or ty != dv.variant_type:
+            if dv.variantType is not None:
+                if ty is not None or ty != dv.variantType:
                     raise ValueError('Inconsistent type, type of datavalue is different from type given in types list')
-                sopc_types.append(dv.variant_type)
+                sopc_types.append(dv.variantType)
             else:
                 sopc_types.append(ty)
 
@@ -260,11 +260,11 @@ class BaseConnectionHandler:
             _, readNids, readAttrs = zip(*missingTypesInfo)
             readDatavalues = self.read_nodes(readNids, readAttrs, bWaitResponse=True)
             for (i, _, _), dv in zip(missingTypesInfo, readDatavalues.results):
-                sopc_types[i] = dv.variant_type
+                sopc_types[i] = dv.variantType
 
         # Overwrite values' type
         for dv, ty in zip(datavalues, sopc_types):
-            dv.variant_type = ty
+            dv.variantType = ty
 
         # Prepare the request, it will be freed by the Toolkit
         payload = allocator_no_gc('OpcUa_WriteRequest *')

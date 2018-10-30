@@ -210,11 +210,11 @@ class Variant:
     A Variant can be converted to a SOPC_Variant with the method to_sopc_variant().
 
     Attributes:
-        variant_type: Optional: The type of the Variant (see VariantType) when the value is produced from a SOPC_Variant*.
+        variantType: Optional: The type of the Variant (see VariantType) when the value is produced from a SOPC_Variant*.
     """
-    def __init__(self, python_value, variant_type=None):
+    def __init__(self, python_value, variantType=None):
         self._value = python_value
-        self.variant_type = variant_type
+        self.variantType = variantType
 
     def __repr__(self):
         return 'Variant(' + repr(self._value) + ')'
@@ -568,7 +568,7 @@ class Variant:
         """
         Converts the current Variant to a SOPC_Variant*.
         Handles both single values and array values.
-        The type may be specified by either self.variant_type, copy_type_from_variant, or sopc_variant_type.
+        The type may be specified by either self.variantType, copy_type_from_variant, or sopc_variant_type.
         If types is specified by multiple means, the type must be the same in all cases.
 
         Args:
@@ -579,17 +579,17 @@ class Variant:
                    which will call SOPC_String_Delete for you.
         """
         # Detect type
-        sPossibleTypes = {self.variant_type, sopc_variant_type}
+        sPossibleTypes = {self.variantType, sopc_variant_type}
         if copy_type_from_variant is not None:
             if isinstance(copy_type_from_variant, Variant):
-                sPossibleTypes.add(copy_type_from_variant.variant_type)
+                sPossibleTypes.add(copy_type_from_variant.variantType)
             else:
                 sPossibleTypes.add(copy_type_from_variant.BuiltInTypeId)
         sPossibleTypes.remove(None)
         if not sPossibleTypes:
-            raise ValueError('No type detected, please supply self.variant_type or sopc_variant_type or sopy_type_from_variant.')
+            raise ValueError('No type detected, please supply self.variantType or sopc_variant_type or sopy_type_from_variant.')
         if len(sPossibleTypes) > 1:
-            raise ValueError('More than one type detected, please supply self.variant_type or sopc_variant_type or sopy_type_from_variant.')
+            raise ValueError('More than one type detected, please supply self.variantType or sopc_variant_type or sopy_type_from_variant.')
         sopc_type, = sPossibleTypes
 
         # Create and fill variant
@@ -785,11 +785,11 @@ class DataValue:
         return repr(self)
 
     @property
-    def variant_type(self):
-        return self.variant.variant_type
-    @variant_type.setter
-    def variant_type(self, ty):
-        self.variant.variant_type = ty
+    def variantType(self):
+        return self.variant.variantType
+    @variantType.setter
+    def variantType(self, ty):
+        self.variant.variantType = ty
 
     @staticmethod
     def from_sopc_libsub_value(libsub_value):
