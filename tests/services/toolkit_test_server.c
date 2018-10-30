@@ -339,7 +339,7 @@ int main(int argc, char* argv[])
             epConfig.secuConfigurations[1].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
         }
         /*
-         * 2nd Security policy is Basic256 with anonymous and username (non encrypted) authentication allowed
+         * 3rd Security policy is Basic256Sha256 with anonymous and username (non encrypted) authentication allowed
          */
         if (SOPC_STATUS_OK == status)
         {

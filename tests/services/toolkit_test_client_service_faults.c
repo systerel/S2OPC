@@ -241,7 +241,7 @@ int main(void)
     /* Asynchronous request to connect with invalid user identity */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(channel_config_idx, 1, "UserName", "wrongUser",
+        SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(channel_config_idx, 1, "username", "wrongUser",
                                                                  (const uint8_t*) "noPassword",
                                                                  (int32_t) strlen("noPassword"));
         printf(">>Test_Client_Toolkit: Creating/Activating 1 session with invalid user identity\n");
