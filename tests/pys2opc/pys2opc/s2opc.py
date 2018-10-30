@@ -24,12 +24,11 @@ import time
 
 from _pys2opc import ffi, lib as libsub
 from .connection import BaseConnectionHandler
-from .types import DataValue
+from .types import DataValue, ReturnStatus, SecurityPolicy, SecurityMode
 from .responses import Response
 
 
 NULL = ffi.NULL
-SOPC_STATUS_OK = libsub.SOPC_STATUS_OK
 
 # TODO: make this configurable
 LOG_LEVEL = libsub.SOPC_TOOLKIT_LOG_LEVEL_DEBUG
@@ -92,7 +91,7 @@ class PyS2OPC:
         assert not PyS2OPC._initialized, 'Library is alread initialized'
 
         status = libsub.SOPC_LibSub_Initialize([(libsub._callback_log, libsub._callback_disconnected)])
-        assert status == SOPC_STATUS_OK, 'Library initialization failed with status code {}.'.format(status)
+        assert status == ReturnStatus.OK, 'Library initialization failed with status code {}.'.format(status)
         PyS2OPC._initialized = True
 
         try:
@@ -140,8 +139,8 @@ class PyS2OPC:
 
         pCfgId = ffi.new('SOPC_LibSub_ConfigurationId *')
         dConnectionParameters = {'server_url': ffi.new('char[]', server_url.encode()),
-                                 'security_policy': libsub.SOPC_SecurityPolicy_None_URI,
-                                 'security_mode': libsub.OpcUa_MessageSecurityMode_None,
+                                 'security_policy': SecurityPolicy.PolicyNone,
+                                 'security_mode': SecurityMode.ModeNone,
                                  'disable_certificate_verification': True,
                                  'path_cert_auth': NULL,
                                  'path_cert_srv': NULL,
@@ -160,7 +159,7 @@ class PyS2OPC:
                                  'token_target': token_target,
                                  'generic_response_callback': libsub._callback_generic_event}
         status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
-        assert status == SOPC_STATUS_OK, 'Configuration failed with status {}.'.format(status)
+        assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(status)
 
         cfgId = pCfgId[0]
         config = ClientConfiguration(cfgId, dConnectionParameters)
@@ -176,8 +175,8 @@ class PyS2OPC:
                                   timeout_ms = 10000,
                                   sc_lifetime = 3600000,
                                   token_target = 3,
-                                  security_mode = libsub.OpcUa_MessageSecurityMode_Sign,
-                                  security_policy = libsub.SOPC_SecurityPolicy_Basic256_URI,
+                                  security_mode = SecurityMode.Sign,
+                                  security_policy = SecurityPolicy.Basic256,
                                   path_cert_auth = '../../build/bin/trusted/cacert.der',
                                   path_cert_srv = '../../build/bin/server_public/server_2k_cert.der',
                                   path_cert_cli = '../../build/bin/client_public/client_2k_cert.der',
@@ -197,14 +196,15 @@ class PyS2OPC:
             sc_lifetime: The target lifetime of the secure channel, before renewal, in ms.
             token_target: The number of subscription tokens (PublishRequest) that should be
                           made available to the server at anytime.
-            security_mode: The configured security mode. [TODO]
-            security_policy: The configured security policy. [TODO]
+            security_mode: The configured security mode, one of the SecurityMode constants.
+            security_policy: The configured security policy, one of the SecurityPolicy constants.
             path_cert_auth: The path to the certificate authority (in DER or PEM format).
             path_cert_srv: The path to the expected server certificate (in DER or PEM format).
                            It must be signed by the certificate authority.
             path_cert_cli: The path to the certificate of the client.
             path_key_cli: The path to the private key of the client certificate.
         """
+        # TODO: factorize code with add_configuration_unsecured
         assert PyS2OPC._initialized and not PyS2OPC._configured,\
             'Toolkit is not initialized or already configured, cannot add new configurations.'
 
@@ -230,7 +230,7 @@ class PyS2OPC:
                                  'token_target': token_target,
                                  'generic_response_callback': libsub._callback_generic_event}
         status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
-        assert status == SOPC_STATUS_OK, 'Configuration failed with status {}.'.format(status)
+        assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(status)
 
         cfgId = pCfgId[0]
         config = ClientConfiguration(cfgId, dConnectionParameters)
@@ -250,7 +250,7 @@ class PyS2OPC:
         """
         assert PyS2OPC._initialized and not PyS2OPC._configured,\
             'Toolkit is not initialized or already configured, cannot add new configurations.'
-        assert libsub.SOPC_LibSub_Configured() == libsub.SOPC_STATUS_OK
+        assert libsub.SOPC_LibSub_Configured() == ReturnStatus.OK
         PyS2OPC._configured = True
 
 
@@ -283,7 +283,7 @@ class PyS2OPC:
 
         pConId = ffi.new('SOPC_LibSub_DataId *')
         status = libsub.SOPC_LibSub_Connect(cfgId, pConId)
-        if status != libsub.SOPC_STATUS_OK:
+        if status != ReturnStatus.OK:
             raise ConnectionError('Could not connect to the server with the given configuration.')
 
         connectionId = pConId[0]

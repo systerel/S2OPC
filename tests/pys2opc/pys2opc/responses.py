@@ -20,7 +20,7 @@
 
 
 from _pys2opc import ffi, lib as libsub
-from .types import EncodeableType, DataValue, BrowseResult
+from .types import EncodeableType, DataValue, BrowseResult, StatusCode
 
 
 class Response:
@@ -72,7 +72,7 @@ class WriteResponse(Response):
         """
         Returns True if all writes were done successfully.
         """
-        return all(res == libsub.SOPC_STATUS_OK for res in self.results)
+        return all(res == StatusCode.Good for res in self.results)
 
 
 class BrowseResponse(Response):

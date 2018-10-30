@@ -22,7 +22,7 @@
 import time
 
 from _pys2opc import ffi, lib as libsub
-from .types import Request, AttributeId, allocator_no_gc, EncodeableType, str_to_nodeid
+from .types import Request, AttributeId, allocator_no_gc, EncodeableType, str_to_nodeid, ReturnStatus
 from .responses import Response, ReadResponse, WriteResponse, BrowseResponse
 
 
@@ -127,7 +127,7 @@ class BaseConnectionHandler:
         """
         # The Toolkit will still call the on_disconnect() callback afterwards.
         status = libsub.SOPC_LibSub_Disconnect(self._id)
-        return status == libsub.SOPC_STATUS_OK
+        return status == ReturnStatus.OK
 
     @property
     def connected(self):
@@ -151,7 +151,7 @@ class BaseConnectionHandler:
             lAttrIds = ffi.new('SOPC_LibSub_AttributeId[{}]'.format(n), [libsub.SOPC_LibSub_AttributeId_Value for _ in nodeIds])
             lDataIds = ffi.new('SOPC_LibSub_DataId[]', n)
             status = libsub.SOPC_LibSub_AddToSubscription(self._id, lszNodeIds, lAttrIds, n, lDataIds)
-            assert status == libsub.SOPC_STATUS_OK, 'Add to subscription failed with status {}'.format(status)
+            assert status == ReturnStatus.OK, 'Add to subscription failed with status {}'.format(status)
             for i, nid in zip(lDataIds, nodeIds):
                 assert i not in self._dSubscription, 'data_id returned by Toolkit is already associated to a NodeId.'
                 self._dSubscription[i] = nid
