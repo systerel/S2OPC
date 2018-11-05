@@ -59,7 +59,8 @@ ffibuilder.set_source('_pys2opc',
                       extra_link_args=['-lclient_subscription', '-lingopcs', '-lmbedcrypto', '-lmbedtls', '-lmbedx509'],
                       include_dirs=['.'],
                       library_dirs=['../client_subscription/',
-                                    '../../build/lib/'],
+                                    '../../build/lib/',
+                                    '.'],  # Ease compilation outside of the S2OPC project
                      )
 
 if __name__ == '__main__':
