@@ -88,7 +88,7 @@ class Client2(Client):
 
 
 min_session_timeout = 10000
-max_session_timeout = 43200000
+max_session_timeout = 600000
 
 if __name__=='__main__':
 
@@ -99,7 +99,7 @@ if __name__=='__main__':
     headerString = "******************* {0} *********************"
 
     # Test revised session timeout
-    for l_session_timeout in [5000, 3600000, 45000000]:
+    for l_session_timeout in [5000, 360000, 45000000]:
         try:
             logger.begin_section("Requested session timeout {0}".format(l_session_timeout))
             session_timeout = l_session_timeout

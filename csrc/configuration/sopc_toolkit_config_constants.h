@@ -127,7 +127,7 @@
 
 /* @brief Maximum session timeout accepted by server */
 #ifndef SOPC_MAX_SESSION_TIMEOUT
-#define SOPC_MAX_SESSION_TIMEOUT 43200000 // 12 hours
+#define SOPC_MAX_SESSION_TIMEOUT 600000 // 10 minutes
 #endif
 
 /* SUBSCRIPTION CONFIGURATION */
