@@ -186,8 +186,17 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 
         if (XML_Parse(parser, buf, (int) r, 0) != XML_STATUS_OK)
         {
-            // The error here comes from one of the callbacks, that log an error
+            enum XML_Error parser_error = XML_GetErrorCode(parser);
+
+            if (parser_error != XML_ERROR_NONE)
+            {
+                fprintf(stderr, "XML parsing failed at line %lu, column %lu. Error code is %d.\n",
+                        XML_GetCurrentLineNumber(parser), XML_GetCurrentColumnNumber(parser), XML_GetErrorCode(parser));
+            }
+
+            // else, the error comes from one of the callbacks, that log an error
             // themselves.
+
             return SOPC_STATUS_NOK;
         }
     }
