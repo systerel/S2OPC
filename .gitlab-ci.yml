@@ -29,7 +29,6 @@ generation:
     name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
       - 'pre-build.log'
-      - 'csrc/services/bgenc'
     when: always
     expire_in: '1 month'
     when: always
