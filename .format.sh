@@ -22,6 +22,6 @@
 
 SRCS_DIR=.
 
-find $SRCS_DIR -name "*.[hc]" | xargs clang-format -style=file -i
-find $SRCS_DIR -name "*.[hc]" -or -name "*.mch" -or -name "*.imp" | xargs sed 's/\t/    /g' -i
-find $SRCS_DIR -name "*.[hc]" -or -name "*.mch" -or -name "*.imp" | xargs sed 's/\s\+$//g' -i
+find $SRCS_DIR -name "*.[hc]" ! -path "./csrc/services/bgenc/*" | xargs clang-format -style=file -i
+find $SRCS_DIR -name "*.[hc]" ! -path "./csrc/services/bgenc/*" -or -name "*.mch" -or -name "*.imp" | xargs sed 's/\t/    /g' -i
+find $SRCS_DIR -name "*.[hc]" ! -path "./csrc/services/bgenc/*" -or -name "*.mch" -or -name "*.imp" | xargs sed 's/\s\+$//g' -i
