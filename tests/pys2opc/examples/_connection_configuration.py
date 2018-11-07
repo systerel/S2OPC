@@ -23,7 +23,11 @@
 Defines the configurations used by the examples.
 """
 
+
+import os
+
 SERVER_URL = 'opc.tcp://localhost:4841'
+CERT_BASE_PATH = '../../build/bin'
 
 # See the documentation of pys2opc.PyS2OPC.add_configuration_unsecured for more parameters.
 configuration_parameters_no_subscription = {'server_url': SERVER_URL,
@@ -32,3 +36,11 @@ configuration_parameters_subscription = {'server_url': SERVER_URL,
                                          'publish_period' : 500,
                                          'n_max_keepalive' : 3,
                                          'token_target': 3}
+
+configuration_parameters_security = {'path_cert_auth': os.path.join(CERT_BASE_PATH, 'trusted', 'cacert.der'),
+                                     'path_cert_srv': os.path.join(CERT_BASE_PATH, 'server_public', 'server_2k_cert.der'),
+                                     'path_cert_cli': os.path.join(CERT_BASE_PATH, 'client_public', 'client_2k_cert.der'),
+                                     'path_key_cli': os.path.join(CERT_BASE_PATH, 'client_private', 'client_2k_key.pem')}
+
+def join_configs(*args):
+    return {k:v for k,v in sum(map(list, map(dict.items, args)), [])}

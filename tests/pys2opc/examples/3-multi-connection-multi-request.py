@@ -28,7 +28,7 @@ Some connections are secured and some unsecured. A subscription is made on the s
 import time
 
 from pys2opc import PyS2OPC, BaseConnectionHandler
-from _connection_configuration import configuration_parameters_no_subscription, configuration_parameters_subscription
+from _connection_configuration import configuration_parameters_no_subscription, configuration_parameters_subscription, configuration_parameters_security, join_configs
 
 
 NODES_A = ['s=BRD.NC_000.VP_96.TM.TSEN1.PTSE_TS1_DELTAP_P20_RAW',
@@ -50,9 +50,9 @@ class PrintSubs(BaseConnectionHandler):
 if __name__ == '__main__':
     with PyS2OPC.initialize():
         config_unsec_nosub = PyS2OPC.add_configuration_unsecured(**configuration_parameters_no_subscription)
-        config_sec_nosub = PyS2OPC.add_configuration_secured(**configuration_parameters_no_subscription)
+        config_sec_nosub = PyS2OPC.add_configuration_secured(**join_configs(configuration_parameters_no_subscription, configuration_parameters_security))
         config_unsec_sub = PyS2OPC.add_configuration_unsecured(**configuration_parameters_subscription)
-        config_sec_sub = PyS2OPC.add_configuration_secured(**configuration_parameters_subscription)
+        config_sec_sub = PyS2OPC.add_configuration_secured(**join_configs(configuration_parameters_subscription, configuration_parameters_security))
         PyS2OPC.configured()
         connections = [PyS2OPC.connect(config, PrintSubs) for config in (config_unsec_nosub, config_sec_nosub,
                                                                          config_unsec_sub, config_sec_sub)]
