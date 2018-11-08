@@ -186,6 +186,12 @@ void user_authentication_bs__is_user_token_supported(
             }
         }
     }
+
+    if (!compliantPolicy)
+    {
+        SOPC_Logger_TraceWarning("User token not compliant with userTokenPolicies.");
+    }
+
     *user_authentication_bs__p_supported_user_token_type = compliantPolicy;
 }
 
@@ -226,12 +232,15 @@ void user_authentication_bs__is_valid_user_authentication(
             break;
         case SOPC_USER_AUTHENTICATION_INVALID_TOKEN:
             *user_authentication_bs__p_sc_valid_user = constants__e_sc_bad_identity_token_invalid;
+            SOPC_Logger_TraceWarning("User identification failed: identity_token_invalid");
             break;
         case SOPC_USER_AUTHENTICATION_REJECTED_TOKEN:
             *user_authentication_bs__p_sc_valid_user = constants__e_sc_bad_identity_token_rejected;
+            SOPC_Logger_TraceWarning("User identification failed: identity_token_rejected");
             break;
         case SOPC_USER_AUTHENTICATION_ACCESS_DENIED:
             *user_authentication_bs__p_sc_valid_user = constants__e_sc_bad_user_access_denied;
+            SOPC_Logger_TraceWarning("User identification failed: identity_token_denied");
             break;
         default:
             /* Invalid of the authentication manager: we do not know if the token was rejected or user denied */
