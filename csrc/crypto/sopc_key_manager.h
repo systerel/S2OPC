@@ -30,6 +30,8 @@
 #ifndef SOPC_KEY_MANAGER_H_
 #define SOPC_KEY_MANAGER_H_
 
+#include <stddef.h>
+
 #include "sopc_buffer.h"
 #include "sopc_crypto_decl.h"
 #include "sopc_secret_buffer.h"
