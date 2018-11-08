@@ -22,7 +22,7 @@ stages:
 generation:
   <<: *docker_job
   stage: gen
-  image: com2.systerel.fr:5000/c765/gen-ext@sha256:07833aaecbb6de901f2216862d11b96d65b3b0462c3fe9353a951b3c609c6137 # gen-ext:1.1
+  image: com2.systerel.fr:5000/c765/gen-ext@sha256:46030280f56788c6156c2837151d8fd17270b9872c4e916cf615522b8c27a8f4 # gen-ext:1.2
   script:
     - ./.pre-build-ext.sh
   artifacts:
