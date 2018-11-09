@@ -30,7 +30,8 @@ GENERATED_FILES=`find $CSRCDIR -maxdepth 1 -name "*.[hc]"`
 EXITCODE=0
 
 # look for changes except date
-echo  "Checking for uncommited changes." | tee -a $LOGPATH
+echo "Check Generated Code: "
+echo  "- Checking for uncommited changes." | tee -a $LOGPATH
 for f in ${GENERATED_FILES[*]}
 do
     nb_lines=`git diff $f | grep '^[+-] ' | grep -v 'Date                 :' | wc -l`
@@ -43,7 +44,7 @@ do
 done
 
 # list untracked files
-echo  "Looking for untracked files." | tee -a $LOGPATH
+echo  "- Looking for untracked files." | tee -a $LOGPATH
 UNTRACKED_FILES=`git ls-files --others --exclude-standard $CSRCDIR`
 for f in ${UNTRACKED_FILES[*]}
 do
@@ -51,8 +52,8 @@ do
     EXITCODE=1
 done
 
-# list untracked files
-echo  "Looking for locally deleted files." | tee -a $LOGPATH
+# list locally deleted files
+echo  "- Looking for locally deleted files." | tee -a $LOGPATH
 DELETED_FILES=`git ls-files --deleted --exclude-standard $CSRCDIR`
 for f in ${DELETED_FILES[*]}
 do

@@ -73,9 +73,6 @@ fi
 # Remove pre-build directory in any case
 rm -rf $CURDIR/$PREBUILD
 
-# Check generated code
-./check_generated_code.sh
-
 if [[ $EXITCODE -eq 0 ]]; then
     echo "Completed with SUCCESS" | tee -a $LOGPATH
 else
