@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 06/11/2018 10:49:20
+ Date                 : 08/11/2018 22:09:12
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -311,6 +311,13 @@ typedef enum {
    constants__e_subscriptionState_late,
    constants__e_subscriptionState_keepAlive
 } constants__t_subscriptionState_i;
+typedef enum {
+   constants__c_userTokenType_indet,
+   constants__e_userTokenType_anonymous,
+   constants__e_userTokenType_userName,
+   constants__e_userTokenType_x509,
+   constants__e_userTokenType_issued
+} constants__t_user_token_type_i;
 
 /*--------------------------
    Added by the Translator

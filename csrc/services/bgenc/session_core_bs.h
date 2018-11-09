@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 06/11/2018 10:49:41
+ Date                 : 08/11/2018 22:09:35
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -52,11 +52,6 @@ extern void session_core_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void session_core_bs__allocate_valid_user(
-   const constants__t_user_token_i session_core_bs__p_user_token,
-   const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
-   constants__t_StatusCode_i * const session_core_bs__p_sc_valid_user,
-   constants__t_user_i * const session_core_bs__p_user);
 extern void session_core_bs__clear_Signature(
    const constants__t_session_i session_core_bs__p_session,
    const constants__t_SignatureData_i session_core_bs__p_signature);
@@ -101,8 +96,6 @@ extern void session_core_bs__client_get_token_from_session(
 extern void session_core_bs__client_set_session_token(
    const constants__t_session_i session_core_bs__session,
    const constants__t_session_token_i session_core_bs__token);
-extern void session_core_bs__deallocate_user(
-   const constants__t_user_i session_core_bs__p_user);
 extern void session_core_bs__delete_session_application_context(
    const constants__t_session_i session_core_bs__p_session);
 extern void session_core_bs__delete_session_token(
@@ -117,15 +110,16 @@ extern void session_core_bs__get_NonceClient(
 extern void session_core_bs__get_NonceServer(
    const constants__t_session_i session_core_bs__p_session,
    constants__t_Nonce_i * const session_core_bs__nonce);
-extern void session_core_bs__get_local_user(
-   const constants__t_endpoint_config_idx_i session_core_bs__endpoint_config_idx,
-   constants__t_user_i * const session_core_bs__p_user);
 extern void session_core_bs__get_session_user_client(
    const constants__t_session_i session_core_bs__session,
    constants__t_user_token_i * const session_core_bs__p_user_token);
 extern void session_core_bs__get_session_user_server(
    const constants__t_session_i session_core_bs__session,
    constants__t_user_i * const session_core_bs__p_user);
+extern void session_core_bs__is_same_user_server(
+   const constants__t_user_i session_core_bs__p_user_left,
+   const constants__t_user_i session_core_bs__p_user_right,
+   t_bool * const session_core_bs__p_bres);
 extern void session_core_bs__notify_set_session_state(
    const constants__t_session_i session_core_bs__session,
    const constants__t_sessionState session_core_bs__prec_state,
