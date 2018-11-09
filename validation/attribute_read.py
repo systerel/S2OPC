@@ -18,7 +18,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from opcua.ua import QualifiedName, LocalizedText, XmlElement
+from opcua.ua import QualifiedName, LocalizedText
 from common import variantInfoList
 
 def attribute_read_tests(client, logger):

@@ -22,20 +22,11 @@
 Simple client to launch validation tests
 """
 
-from opcua import ua
-from opcua.ua import SecurityPolicy
-from attribute_read import attribute_read_tests
-from attribute_write_values import attribute_write_values_tests, attribute_write_values_two_clients_tests
-from safety_secure_channels import secure_channels_connect
-from discovery_get_endpoints import discovery_get_endpoints_tests
-from view_basic import browse_tests
-from sc_renew import secure_channel_renew
+from time import sleep
+import sys
+
 from common import sUri, create_client
 from tap_logger import TapLogger
-from opcua.crypto import security_policies
-from time import sleep
-import re
-import sys
 
 if __name__=='__main__':
 

@@ -19,7 +19,6 @@
 # under the License.
 
 from opcua import ua
-from opcua.ua import QualifiedName, LocalizedText, XmlElement
 from common import variantInfoList
 
 def attribute_write_values_tests(client, logger):

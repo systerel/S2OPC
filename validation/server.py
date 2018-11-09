@@ -25,14 +25,11 @@ Simple server handling miscellaneous client tests
 import argparse
 import os.path
 import time
-import logging
 import signal
 import sys
 
 from opcua import ua, Server
 from common import sUri, variantInfoList
-#from tap_logger import TapLogger
-from opcua.crypto import security_policies
 
 stopFlag = False
 

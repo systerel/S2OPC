@@ -22,16 +22,15 @@
 Simple client to launch sc renew degraded tests
 """
 
-from opcua import ua
 from time import sleep
+import re
+import sys
+
 from opcua.ua import SecurityPolicy
 from safety_secure_channels import secure_channels_connect
-from sc_renew import secure_channel_renew
 from common import sUri, create_client
 from tap_logger import TapLogger
 from opcua.crypto import security_policies
-import re
-import sys
 
 
 def secure_channel_renew(client, logger):
