@@ -41,6 +41,9 @@ MIN_SESSION_TIMEOUT = 10000
 MAX_SESSION_TIMEOUT = 600000
 
 class Client2(Client):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.session_timeout = SESSION_TIMEOUT  # Default value
 
     # Overriding create session method to request 10 seconds timeout and deactivate keepalive sending
     def create_session(self):
@@ -63,7 +66,7 @@ class Client2(Client):
         params.EndpointUrl = self.server_url.geturl()
         params.SessionName = self.description + " Session" + str(self._session_counter)
         # START MODIFICATION
-        params.RequestedSessionTimeout = SESSION_TIMEOUT
+        params.RequestedSessionTimeout = self.session_timeout
         # END MODIFICATION
         params.MaxResponseMessageSize = 0  # means no max size
         response = self.uaclient.create_session(params)
@@ -98,6 +101,7 @@ if __name__=='__main__':
     for l_session_timeout in [5000, 360000, 45000000]:
         try:
             logger.begin_section("Requested session timeout {0}".format(l_session_timeout))
+            client.session_timeout = l_session_timeout
             # secure channel connection
             print(headerString.format("SC connection and session establishment with requested timeout {0}"
                                      .format(l_session_timeout)))
@@ -120,6 +124,7 @@ if __name__=='__main__':
             print('Disconnected')
 
     # Test session timeout expiration
+    client.session_timeout = SESSION_TIMEOUT
     for sp in [SecurityPolicy, security_policies.SecurityPolicyBasic256]:
         logger.begin_section("Requested session timeout {0} (policy {1})"
                              .format(SESSION_TIMEOUT, re.split("#",sp.URI)[-1]))
