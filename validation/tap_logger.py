@@ -20,7 +20,7 @@
 
 class TapLogger(object):
     """
-    This objective of this class is to generate a TAP report.
+    Generates a TAP report from test descriptions and result.
     """
     def __init__(self, report_name):
         self.report_name = report_name
@@ -29,6 +29,13 @@ class TapLogger(object):
         self.tests_results = list()
         self.section = ""
         self.has_failed_tests = False
+        self._finalized = False
+
+    def __del__(self):
+        if not self._finalized:
+            # When the object is destroyed but not finalized,
+            #  it means it is our last chance to save it.
+            self.finalize_report(last_chance_finalization = True)
 
     def begin_section(self, section_name):
         self.section = section_name
@@ -41,8 +48,13 @@ class TapLogger(object):
             self.tests_results.append("not ok {0} {1} {2}\n".format(self.nb_tests, self.section, test_description))
             self.has_failed_tests = True
 
-    def finalize_report(self):
+    def finalize_report(self, last_chance_finalization = False):
+        """
+        last_chance_finalization is an internal option which marks the finalization of the TAP as successful or failed.
+        """
+        self.begin_section('TAP')
+        self.add_test('logger instance correctly finalized', not last_chance_finalization)
         self.fd.write("1..{0}\n".format(self.nb_tests))
-        for test_result in self.tests_results:
-            self.fd.write(test_result)
+        self.fd.writelines(self.tests_results)
         self.fd.close()
+        self._finalized = True
