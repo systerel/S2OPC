@@ -49,9 +49,6 @@ test_script:
     # configure, build and test S2OPC project
     - |-
         cd %ROOT_DIR%
-        appveyor.exe DownloadFile https://gitlab.com/systerel/S2OPC/-/jobs/artifacts/master/download?job=generation -FileName bgenc-master.zip
-        unzip bgenc-master.zip
-        rm bgenc-master.zip
         mkdir build
         cd build
         cmake -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/RelWithDebInfo/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/RelWithDebInfo/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/RelWithDebInfo/mbedcrypto.lib -DCHECK_INCLUDE_DIR=%CHECK_BUILD_DIR%\;%CHECK_BUILD_DIR%/src -DCHECK_LIBRARY=%CHECK_BUILD_DIR%/src/RelWithDebInfo/check.lib\;%CHECK_BUILD_DIR%/lib/RelWithDebInfo/compat.lib .. -G "Visual Studio 15 2017 Win64"
