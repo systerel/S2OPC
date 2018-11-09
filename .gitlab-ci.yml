@@ -24,7 +24,9 @@ generation:
   stage: gen
   image: com2.systerel.fr:5000/c765/gen-ext@sha256:46030280f56788c6156c2837151d8fd17270b9872c4e916cf615522b8c27a8f4 # gen-ext:1.2
   script:
+    - ./clean.sh all
     - ./.pre-build-ext.sh
+    - ./check_generated_code.sh
   artifacts:
     name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:

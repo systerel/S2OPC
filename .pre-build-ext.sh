@@ -63,7 +63,10 @@ if [[ $? != 0 ]]; then
     EXITCODE=1
 fi
 # Remove pre-build directory in any case
-\rm -rf ./$PREBUILD
+rm -rf ./$PREBUILD
+
+# Check generated code
+./check_generated_code.sh
 
 if [[ $EXITCODE -eq 0 ]]; then
     echo "Completed with SUCCESS" | tee -a $LOGPATH
