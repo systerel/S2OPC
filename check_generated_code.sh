@@ -52,7 +52,7 @@ do
 done
 
 # list untracked files
-echo  "Looking for locally files:" | tee -a $LOGPATH
+echo  "Looking for locally deleted files:" | tee -a $LOGPATH
 DELETED_FILES=`git ls-files --deleted --exclude-standard $CSRCDIR`
 for f in ${DELETED_FILES[*]}
 do
