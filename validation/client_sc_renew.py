@@ -19,7 +19,9 @@
 # under the License.
 
 """
-Simple client to launch sc renew degraded tests
+Freeopcua based test client to validate the SOPC server.
+Tests that the server renew the SecureChannel and revises the timeout correctly,
+and does not accept messages after the specified timeout.
 """
 
 from time import sleep

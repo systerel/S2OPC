@@ -19,7 +19,15 @@
 # under the License.
 
 """
-Simple client to launch validation tests
+Freeopcua based test client to validate the SOPC server.
+Tests:
+- single connection (without encryption, then with encryption):
+  - GetEndpoints,
+  - Read, Write, Browse,
+  - SecureChannel renewal,
+- two simultaneous connections:
+  - connection,
+  - Write.
 """
 
 import re

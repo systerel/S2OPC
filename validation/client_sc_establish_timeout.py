@@ -19,7 +19,8 @@
 # under the License.
 
 """
-Simple client to launch validation tests
+Freeopcua based test client to validate the SOPC server.
+Tests that HEL/ACK and SecureChannel timeouts are respected by the server.
 """
 
 from time import sleep
