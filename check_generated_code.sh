@@ -26,14 +26,14 @@ LOGPATH=$CURDIR/pre-build.log
 ifs_save=$IFS
 IFS=$'\n'
 GENERATED_FILES=`find $CSRCDIR -maxdepth 1 -name "*.[hc]"`
-IFS=$ifs_save
 
 EXITCODE=0
 
-for f in "${GENERATED_FILES[*]}"
+# look for changes except date
+echo  "Checking for uncommited changes:" | tee -a $LOGPATH
+for f in ${GENERATED_FILES[*]}
 do
-    echo $f
-    git diff $f | grep -v "^[-+] Date" &> /dev/null
+    git diff -G '^[Date]' --exit-code $f &> /dev/null
 
     if [[ $? != 0 ]]; then
         echo "file $f is not up to date in configuration management." | tee -a $LOGPATH
@@ -41,6 +41,27 @@ do
     fi
 
 done
+
+# list untracked files
+echo  "Looking for untracked files:" | tee -a $LOGPATH
+UNTRACKED_FILES=`git ls-files --others --exclude-standard $CSRCDIR`
+for f in ${UNTRACKED_FILES[*]}
+do
+    echo "file $f is untracked in configuration management." | tee -a $LOGPATH
+    EXITCODE=1
+done
+
+# list untracked files
+echo  "Looking for locally files:" | tee -a $LOGPATH
+DELETED_FILES=`git ls-files --deleted --exclude-standard $CSRCDIR`
+for f in ${DELETED_FILES[*]}
+do
+    echo "file $f deletion is not commited in configuration management." | tee -a $LOGPATH
+    EXITCODE=1
+done
+
+
+IFS=$ifs_save
 
 exit $EXITCODE
 
