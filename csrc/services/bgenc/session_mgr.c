@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 06/11/2018 10:49:27
+ Date                 : 09/11/2018 11:04:54
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -287,6 +287,7 @@ void session_mgr__server_receive_session_req(
       constants__t_channel_i session_mgr__l_session_channel;
       t_bool session_mgr__l_is_valid_user_token;
       constants__t_user_token_i session_mgr__l_user_token;
+      constants__t_channel_config_idx_i session_mgr__l_channel_config_idx;
       constants__t_endpoint_config_idx_i session_mgr__l_endpoint_config_idx;
       constants__t_user_i session_mgr__l_user;
       
@@ -318,10 +319,13 @@ void session_mgr__server_receive_session_req(
                message_in_bs__read_activate_req_msg_identity_token(session_mgr__req_msg,
                   &session_mgr__l_is_valid_user_token,
                   &session_mgr__l_user_token);
+               channel_mgr__get_channel_info(session_mgr__channel,
+                  &session_mgr__l_channel_config_idx);
+               channel_mgr__server_get_endpoint_config(session_mgr__channel,
+                  &session_mgr__l_endpoint_config_idx);
                if (session_mgr__l_is_valid_user_token == true) {
-                  channel_mgr__server_get_endpoint_config(session_mgr__channel,
-                     &session_mgr__l_endpoint_config_idx);
-                  session_core__allocate_valid_user(session_mgr__l_user_token,
+                  user_authentication__allocate_valid_and_authenticated_user(session_mgr__l_user_token,
+                     session_mgr__l_channel_config_idx,
                      session_mgr__l_endpoint_config_idx,
                      session_mgr__service_ret,
                      &session_mgr__l_user);
@@ -333,7 +337,7 @@ void session_mgr__server_receive_session_req(
                         session_mgr__resp_msg,
                         session_mgr__service_ret);
                      if (*session_mgr__service_ret != constants__e_sc_ok) {
-                        session_core__deallocate_user(session_mgr__l_user);
+                        user_authentication__deallocate_user(session_mgr__l_user);
                      }
                   }
                }

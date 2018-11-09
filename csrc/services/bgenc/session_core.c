@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 06/11/2018 10:49:27
+ Date                 : 09/11/2018 11:04:53
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -371,15 +371,14 @@ void session_core__server_activate_session_req_and_resp_sm(
    constants__t_StatusCode_i * const session_core__ret) {
    {
       constants__t_channel_i session_core__l_channel;
-      constants__t_user_i session_core__l_user;
       constants__t_sessionState session_core__l_state;
+      constants__t_user_i session_core__l_user;
+      t_bool session_core__l_is_same_user;
       t_bool session_core__l_valid;
       constants__t_StatusCode_i session_core__l_ret;
       
       session_core_1__get_session_channel(session_core__session,
          &session_core__l_channel);
-      session_core_1__get_session_user_server(session_core__session,
-         &session_core__l_user);
       session_core_1__get_session_state(session_core__session,
          &session_core__l_state);
       if (session_core__l_state == constants__e_session_created) {
@@ -403,8 +402,13 @@ void session_core__server_activate_session_req_and_resp_sm(
          }
       }
       else if (session_core__l_state == constants__e_session_userActivated) {
+         session_core_1__get_session_user_server(session_core__session,
+            &session_core__l_user);
+         session_core_1__is_same_user_server(session_core__l_user,
+            session_core__user,
+            &session_core__l_is_same_user);
          if ((session_core__l_channel == session_core__channel) &&
-            (session_core__l_user != session_core__user)) {
+            (session_core__l_is_same_user == false)) {
             session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
                constants__e_session_userActivating,
@@ -420,7 +424,7 @@ void session_core__server_activate_session_req_and_resp_sm(
             }
          }
          else if ((session_core__l_channel != session_core__channel) &&
-            (session_core__l_user == session_core__user)) {
+            (session_core__l_is_same_user == true)) {
             session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
                constants__e_session_scActivating,
@@ -440,8 +444,13 @@ void session_core__server_activate_session_req_and_resp_sm(
          }
       }
       else if (session_core__l_state == constants__e_session_scOrphaned) {
+         session_core_1__get_session_user_server(session_core__session,
+            &session_core__l_user);
+         session_core_1__is_same_user_server(session_core__l_user,
+            session_core__user,
+            &session_core__l_is_same_user);
          if ((session_core__l_channel != session_core__channel) &&
-            (session_core__l_user == session_core__user)) {
+            (session_core__l_is_same_user == true)) {
             session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
                constants__e_session_scActivating,
