@@ -60,10 +60,6 @@ def secure_channel_renew(client, logger):
         logger.add_test('OPN renew test - read refused after timeout', True)
     else:
         logger.add_test('OPN renew test - read refused after timeout', False)
-    try:
-        client.disconnect()
-    except:
-        None
 
 
 if __name__=='__main__':
@@ -79,9 +75,14 @@ if __name__=='__main__':
         logger.begin_section("security policy {0}".format(re.split("#",sp.URI)[-1]))
         # secure channel connection
         print(headerString.format(re.split("#",sp.URI)[-1]))
-        secure_channels_connect(client, sp)
-
-        secure_channel_renew(client, logger)
+        try:
+            secure_channels_connect(client, sp)
+            secure_channel_renew(client, logger)
+        finally:
+            try:
+                client.disconnect()
+            except (TimeoutError, OSError):
+                pass
 
     logger.finalize_report()
 
