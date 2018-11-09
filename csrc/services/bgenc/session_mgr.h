@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 06/11/2018 10:49:27
+ Date                 : 09/11/2018 10:13:41
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -41,6 +41,7 @@
 #include "session_core.h"
 #include "session_mgr_it.h"
 #include "session_request_handle_bs.h"
+#include "user_authentication.h"
 
 /*--------------
    SEES Clause
@@ -60,7 +61,7 @@ extern void session_mgr__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define session_mgr__client_secure_channel_lost_session_sm session_core__client_secure_channel_lost_session_sm
-#define session_mgr__get_local_user session_core__get_local_user
+#define session_mgr__get_local_user user_authentication__get_local_user
 #define session_mgr__get_session_user_server session_core__get_session_user_server
 #define session_mgr__is_valid_session session_core__is_valid_session
 #define session_mgr__server_close_session_sm session_core__server_close_session_sm

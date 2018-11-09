@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 06/11/2018 10:49:44
+ Date                 : 09/11/2018 10:13:57
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -106,6 +106,8 @@
 #include "subscription_mgr.h"
 #include "toolkit_header.h"
 #include "unregister_nodes_it.h"
+#include "user_authentication.h"
+#include "user_authentication_bs.h"
 #include "user_authorization_bs.h"
 #include "write_value_pointer_bs.h"
 
@@ -132,6 +134,8 @@ void INITIALISATION(void) {
    session_core__INITIALISATION();
    session_mgr_it__INITIALISATION();
    session_request_handle_bs__INITIALISATION();
+   user_authentication_bs__INITIALISATION();
+   user_authentication__INITIALISATION();
    session_mgr__INITIALISATION();
    msg_read_request_bs__INITIALISATION();
    user_authorization_bs__INITIALISATION();

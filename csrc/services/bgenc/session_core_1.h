@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 06/11/2018 10:49:26
+ Date                 : 09/11/2018 10:13:40
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -59,7 +59,6 @@ extern void session_core_1__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define session_core_1__allocate_valid_user session_core_bs__allocate_valid_user
 #define session_core_1__clear_Signature session_core_bs__clear_Signature
 #define session_core_1__client_activate_session_req_do_crypto session_core_bs__client_activate_session_req_do_crypto
 #define session_core_1__client_activate_session_resp_check session_core_bs__client_activate_session_resp_check
@@ -72,12 +71,10 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__client_gen_create_session_internal_event session_core_bs__client_gen_create_session_internal_event
 #define session_core_1__client_get_token_from_session session_core_bs__client_get_token_from_session
 #define session_core_1__client_set_session_token session_core_bs__client_set_session_token
-#define session_core_1__deallocate_user session_core_bs__deallocate_user
 #define session_core_1__drop_NonceClient session_core_bs__drop_NonceClient
 #define session_core_1__drop_user_server session_core_bs__drop_user_server
 #define session_core_1__get_NonceClient session_core_bs__get_NonceClient
 #define session_core_1__get_NonceServer session_core_bs__get_NonceServer
-#define session_core_1__get_local_user session_core_bs__get_local_user
 #define session_core_1__get_session_channel session_core_2__get_session_channel
 #define session_core_1__get_session_state session_core_2__get_session_state
 #define session_core_1__get_session_user_client session_core_bs__get_session_user_client
@@ -85,6 +82,7 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__getall_orphaned session_core_2__getall_orphaned
 #define session_core_1__getall_session_channel session_core_2__getall_session_channel
 #define session_core_1__getall_to_create session_core_2__getall_to_create
+#define session_core_1__is_same_user_server session_core_bs__is_same_user_server
 #define session_core_1__is_valid_session session_core_2__is_valid_session
 #define session_core_1__reset_session_to_create session_core_2__reset_session_to_create
 #define session_core_1__server_activate_session_check_crypto session_core_bs__server_activate_session_check_crypto

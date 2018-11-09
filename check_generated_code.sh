@@ -33,7 +33,7 @@ EXITCODE=0
 echo  "Checking for uncommited changes." | tee -a $LOGPATH
 for f in ${GENERATED_FILES[*]}
 do
-    git diff -G '^[Date]' --exit-code $f &> /dev/null
+    git diff -G'^[^ Date]' --exit-code $f &> /dev/null
 
     if [[ $? != 0 ]]; then
         echo "file $f is not up to date in configuration management." | tee -a $LOGPATH
