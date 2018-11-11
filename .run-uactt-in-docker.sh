@@ -23,7 +23,7 @@
 set -e
 
 # uactt 1.4
-DOCKER_IMAGE=223b52ecee12
+DOCKER_IMAGE=sha256:1d1b9d0c10a68250630d174f679ae1c08c3cd2925cbf3f4e1af5eb7f9188c10f
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
     /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
