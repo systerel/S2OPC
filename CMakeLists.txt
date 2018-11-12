@@ -47,8 +47,10 @@ else()
 	# -f-no-omit-frame-pointer is set to use Perf profiling tool,
 	# it is not set in Release mode.
 	# -g option is already set in Debug and Debugwithdebinfo modes.
-	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer")
-	set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer")
+	# -fPIC option is added to produce position independent code, which is reusable in dynamic libraries.
+	# It is not set in Release mode.
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fPIC")
+	set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer -fPIC")
 endif()
 
 add_definitions(-DSOPC_PTR_SIZE=${CMAKE_SIZEOF_VOID_P})
