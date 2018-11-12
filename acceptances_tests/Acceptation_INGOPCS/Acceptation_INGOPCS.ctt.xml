@@ -13454,7 +13454,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="b="/>
+              <Value typename="QString" type="10" data="b=NULL"/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13563,7 +13563,7 @@
          </Column>
          <Column column="1">
           <ItemData role="0" rolename="DisplayRole">
-           <Value typename="QString" type="10" data="&quot;http://opcfoundation.org/UA/&quot;, &quot;urn:Nate-LaptopXPS:Quickstart Historical Access Server&quot;, &quot;http://opcfoundation.org/Quickstarts/HistoricalAccess&quot;, &quot;http://opcfoundation.org/UA/Diagnostics&quot;"/>
+           <Value typename="QString" type="10" data="&quot;http://opcfoundation.org/UA/&quot;, &quot;urn:S2OPC:localhost&quot;"/>
           </ItemData>
           <ChildRows size="0"/>
          </Column>
