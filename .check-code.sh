@@ -111,7 +111,7 @@ fi
 
 echo "Clang automatic formatting check" | tee -a $LOGPATH
 ./.format.sh >> $LOGPATH
-ALREADY_FORMAT=`git ls-files -m $BSRC $CSRC $TST`
+ALREADY_FORMAT=`git ls-files -m $BSRC $CSRC $TST | grep -v bgenc`
 
 if [[ -z $ALREADY_FORMAT ]]; then
     echo "C source code formatting already done" | tee -a $LOGPATH
