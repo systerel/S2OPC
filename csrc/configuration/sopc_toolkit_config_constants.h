@@ -167,11 +167,6 @@
 #define SOPC_MAX_LIFETIME_PUBLISH_INTERVALS 300 // >= 3 KeepAlive
 #endif
 
-/** @brief Maximum number of monitored items per subscription */
-#ifndef SOPC_MAX_MONITORED_ITEM
-#define SOPC_MAX_MONITORED_ITEM 100000
-#endif
-
 /* GENERIC CONFIGURATION*/
 
 /* @brief Maximum number of operations in a request accepted by server (Read, Write, etc.) */
