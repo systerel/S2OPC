@@ -27,6 +27,7 @@ and does not accept messages after the specified timeout.
 from time import sleep
 import re
 import sys
+import concurrent.futures
 
 from opcua.ua import SecurityPolicy
 from safety_secure_channels import secure_channels_connect
@@ -82,7 +83,7 @@ if __name__=='__main__':
         finally:
             try:
                 client.disconnect()
-            except (TimeoutError, OSError):
+            except (concurrent.futures.TimeoutError, TimeoutError, OSError):
                 pass
 
     logger.finalize_report()
