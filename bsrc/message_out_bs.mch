@@ -371,7 +371,7 @@ OPERATIONS
     ;
 
     /* Fills the Nonce and Certificate. Do not call when SC:Sec_pol is None */
-    write_create_session_req_msg_crypto(p_req_msg, p_channel_config_idx, p_nonce) =
+    bret <-- write_create_session_req_msg_crypto(p_req_msg, p_channel_config_idx, p_nonce) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg = c_msg_out &
@@ -382,7 +382,7 @@ OPERATIONS
         p_nonce : t_Nonce_i &
         p_nonce : t_Nonce
     THEN
-        skip
+        bret :: BOOL
     END
     ;
 

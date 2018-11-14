@@ -21,6 +21,7 @@
    Exported Declarations
   ------------------------*/
 #include <assert.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -408,8 +409,10 @@ void message_out_bs__write_create_session_req_msg_sessionTimeout(
 void message_out_bs__write_create_session_req_msg_crypto(
     const constants__t_msg_i message_out_bs__p_req_msg,
     const constants__t_channel_config_idx_i message_out_bs__p_channel_config_idx,
-    const constants__t_Nonce_i message_out_bs__p_nonce)
+    const constants__t_Nonce_i message_out_bs__p_nonce,
+    t_bool* const message_out_bs__bret)
 {
+    *message_out_bs__bret = false;
     SOPC_SecureChannel_Config* pSCCfg = NULL;
     OpcUa_CreateSessionRequest* pReq = (OpcUa_CreateSessionRequest*) message_out_bs__p_req_msg;
     const SOPC_Buffer* pSerialCertCli = NULL;
@@ -432,27 +435,26 @@ void message_out_bs__write_create_session_req_msg_crypto(
 
     /* Write the Certificate */
     SOPC_ByteString_Clear(&pReq->ClientCertificate);
-    /* TODO: this is a malloc error, this can fail, and the B model should be notified */
+
     assert(pSerialCertCli->length <= INT32_MAX);
     status =
         SOPC_ByteString_CopyFromBytes(&pReq->ClientCertificate, pSerialCertCli->data, (int32_t) pSerialCertCli->length);
-    pReq->ClientCertificate.Length = (int32_t) pSerialCertCli->length;
     if (SOPC_STATUS_OK != status)
         return;
+    pReq->ClientCertificate.Length = (int32_t) pSerialCertCli->length;
 
     /* Write the nonce */
     SOPC_ByteString_Clear(&pReq->ClientNonce);
-    /* TODO: this can also fail because of the malloc */
+
     status = SOPC_ByteString_Copy(&pReq->ClientNonce, message_out_bs__p_nonce);
     if (SOPC_STATUS_OK != status)
         return;
 
     SOPC_Certificate* pCertCli = NULL;
-    /* TODO: this can also fail because of the malloc */
+
     if (SOPC_STATUS_OK != SOPC_KeyManager_SerializedCertificate_Deserialize(pSerialCertCli, &pCertCli))
         return;
 
-    /* TODO: this may fail, but the certificate must still be freed. */
     size_t len = 0;
     if (SOPC_STATUS_OK == SOPC_KeyManager_Certificate_GetMaybeApplicationUri(
                               pCertCli, (char**) &pReq->ClientDescription.ApplicationUri.Data, &len))
@@ -461,6 +463,14 @@ void message_out_bs__write_create_session_req_msg_crypto(
         {
             pReq->ClientDescription.ApplicationUri.Length = (int32_t) len;
         }
+        *message_out_bs__bret = true;
+    }
+    else
+    {
+        SOPC_Logger_TraceError(
+            "write_create_session_req_msg_crypto: Failed to extract ApplicationUri from client certificate on "
+            "scConfigIdx=%" PRIu32,
+            message_out_bs__p_channel_config_idx);
     }
 
     SOPC_KeyManager_Certificate_Free(pCertCli);

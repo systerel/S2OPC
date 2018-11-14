@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 09/11/2018 11:04:53
+ Date                 : 14/11/2018 14:12:55
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -126,7 +126,8 @@ void session_core__client_create_session_req_sm(
                &session_core__l_nonce);
             message_out_bs__write_create_session_req_msg_crypto(session_core__create_req_msg,
                session_core__l_channel_config_idx,
-               session_core__l_nonce);
+               session_core__l_nonce,
+               session_core__valid);
          }
       }
    }
