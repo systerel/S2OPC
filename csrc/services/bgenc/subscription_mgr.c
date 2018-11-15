@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 06/11/2018 10:49:30
+ Date                 : 15/11/2018 10:24:36
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -184,6 +184,7 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
          &subscription_mgr__l_continue);
       while (subscription_mgr__l_continue == true) {
          subscription_mgr__l_node = constants__c_Node_indet;
+         subscription_mgr__l_ncl = constants__c_NodeClass_indet;
          subscription_mgr__l_value = constants__c_Variant_indet;
          subscription_mgr__l_valueSc = constants__e_sc_ok;
          subscription_mgr__l_monitoredItemId = constants__c_monitoredItemId_indet;
@@ -219,21 +220,24 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
                &subscription_mgr__l_sc,
                &subscription_mgr__l_ncl,
                &subscription_mgr__l_value);
-            if (subscription_mgr__l_ncl == constants__e_ncl_Variable) {
-               address_space__get_user_authorization(constants__e_operation_type_read,
-                  subscription_mgr__l_nid,
-                  subscription_mgr__l_aid,
-                  subscription_mgr__p_user,
-                  &subscription_mgr__l_authorized);
-               if (subscription_mgr__l_authorized == true) {
+         }
+         if (subscription_mgr__l_sc == constants__e_sc_ok) {
+            address_space__get_user_authorization(constants__e_operation_type_read,
+               subscription_mgr__l_nid,
+               subscription_mgr__l_aid,
+               subscription_mgr__p_user,
+               &subscription_mgr__l_authorized);
+            if (subscription_mgr__l_authorized == true) {
+               if ((subscription_mgr__l_aid == constants__e_aid_Value) &&
+                  (subscription_mgr__l_ncl == constants__e_ncl_Variable)) {
                   address_space__get_Value_StatusCode(subscription_mgr__p_user,
                      subscription_mgr__l_node,
                      &subscription_mgr__l_valueSc);
                }
-               else {
-                  address_space__read_AddressSpace_clear_value(subscription_mgr__l_value);
-                  subscription_mgr__l_valueSc = constants__e_sc_bad_user_access_denied;
-               }
+            }
+            else {
+               address_space__read_AddressSpace_clear_value(subscription_mgr__l_value);
+               subscription_mgr__l_valueSc = constants__e_sc_bad_user_access_denied;
             }
          }
          if (subscription_mgr__l_sc == constants__e_sc_ok) {
