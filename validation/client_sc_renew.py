@@ -47,10 +47,11 @@ def secure_channel_renew(client, logger):
     # Change revised time to avoid client to renew the security token in time
     client.secure_channel_timeout=10000
     # Read a node to be sure we are using the new security token
-    nid = 1001
+    nid_index = 1001
+    nid = u"ns=1;i={}".format(nid_index)
     node = client.get_node(nid)
     value = node.get_value()
-    print(' Value for Node {:03d}:'.format(nid), value)
+    print(' Value for Node {}:'.format(nid), value)
     # Wait timeout of the security token
     sleep(2)
     print(' Error expected on next read:')

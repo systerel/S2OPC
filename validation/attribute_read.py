@@ -25,12 +25,11 @@ def attribute_read_tests(client, logger):
 
     for (i,e) in enumerate(variantInfoList):
         (testedType, variantType, expectedValue, _) = e
-        nid = 1000 + i + 1
+        nid_index = 1000 + i + 1
+        nid = u"ns=1;i={}".format(nid_index)
         print('Checking nid:', nid)
-        expectedBrowseName = QualifiedName(testedType,0)
+        expectedBrowseName = QualifiedName(testedType,1)
         expectedDisplayName = LocalizedText(u"{}_1dn".format(testedType))
-        expectedDescription = u"{}_1d".format(testedType)
-        #expectedValue = Initial_values_list[i]
         node = client.get_node(nid)
 
         # check value
@@ -38,24 +37,27 @@ def attribute_read_tests(client, logger):
         if testedType == 'Float':
             # Handles float with epsilon diff, as random.uniform gave us a double,
             # which was allegedly truncated by freeopcua to a float...
-            logger.add_test('Read Test - Value for Node {:03d}'.format(nid), abs((value - expectedValue)/value) <= 2**(-24))
+            logger.add_test('Read Test - Value for Node {}'.format(nid), abs((value - expectedValue)/value) <= 2**(-24))
         else:
-            logger.add_test('Read Test - Value for Node {:03d}'.format(nid), value == expectedValue)
-        print(' Expected value for Node {:03d}:'.format(nid), expectedValue)
-        print(' Value for Node {:03d}:'.format(nid), value)
+            logger.add_test('Read Test - Value for Node {}'.format(nid), value == expectedValue)
+        print(' Expected value for Node {}:'.format(nid), expectedValue)
+        print(' Value for Node {}:'.format(nid), value)
 
         # check browseName
         browse_name = node.get_browse_name()
-        logger.add_test('Read Test - browse name for Node {:03d}'.format(nid), browse_name == expectedBrowseName)
+        logger.add_test('Read Test - browse name for Node {}'.format(nid), browse_name == expectedBrowseName)
+        print('expected browse_name: ', expectedBrowseName)
         print('browse_name: ', browse_name)
 
         # check display name
         display_name = node.get_display_name()
-        logger.add_test('Read Test - display name for Node {:03d}'.format(nid), display_name == expectedDisplayName)
+        logger.add_test('Read Test - display name for Node {}'.format(nid), display_name == expectedDisplayName)
+        print('expected display_name: ', expectedDisplayName)
+        print('display_name: ', display_name)
 
         # check node class
         class_name = node.get_node_class()
-        logger.add_test('Read Test - node class for Node {:03d}'.format(nid), str("NodeClass.Variable")==str(class_name))
+        logger.add_test('Read Test - node class for Node {}'.format(nid), str("NodeClass.Variable")==str(class_name))
 
         # TODO: check data type
         #data_type = node.get_data_type()

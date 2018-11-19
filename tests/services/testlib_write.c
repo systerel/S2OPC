@@ -67,14 +67,16 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
     /* int64 */
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
-        lwv[i] = (OpcUa_WriteValue){
-            .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = (uint32_t) i + 1000 + 1},
-            .AttributeId = e_aid_Value,
-            .IndexRange = {.Length = 0},
-            .Value = {.Value = {.BuiltInTypeId = SOPC_Int64_Id,
-                                .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                .Value.Int64 = (10000 + (int64_t) i) * ((int64_t) i % 2 ? 1 : -1)},
-                      .Status = SOPC_GoodGenericStatus}};
+        lwv[i] =
+            (OpcUa_WriteValue){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                          .Data.Numeric = (uint32_t) i + 1000 + 1,
+                                          .Namespace = 1},
+                               .AttributeId = e_aid_Value,
+                               .IndexRange = {.Length = 0},
+                               .Value = {.Value = {.BuiltInTypeId = SOPC_Int64_Id,
+                                                   .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                                   .Value.Int64 = (10000 + (int64_t) i) * ((int64_t) i % 2 ? 1 : -1)},
+                                         .Status = SOPC_GoodGenericStatus}};
     }
 
     /* uint32 */
@@ -82,7 +84,8 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
     {
         lwv[i + (N_VARS / N_GROUPS)] =
             (OpcUa_WriteValue){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                          .Data.Numeric = (uint32_t) i + (N_VARS / N_GROUPS) + 1000 + 1},
+                                          .Data.Numeric = (uint32_t) i + (N_VARS / N_GROUPS) + 1000 + 1,
+                                          .Namespace = 1},
                                .AttributeId = e_aid_Value,
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_UInt32_Id,
@@ -96,7 +99,8 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
     {
         lwv[i + (N_VARS / N_GROUPS) * 2] =
             (OpcUa_WriteValue){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                          .Data.Numeric = (uint32_t) i + 2 * (N_VARS / N_GROUPS) + 1000 + 1},
+                                          .Data.Numeric = (uint32_t) i + 2 * (N_VARS / N_GROUPS) + 1000 + 1,
+                                          .Namespace = 1},
                                .AttributeId = e_aid_Value,
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_Double_Id,
@@ -118,7 +122,8 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
 
         lwv[i + 3 * (N_VARS / N_GROUPS)] =
             (OpcUa_WriteValue){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                          .Data.Numeric = (uint32_t) i + 3 * (N_VARS / N_GROUPS) + 1000 + 1},
+                                          .Data.Numeric = (uint32_t) i + 3 * (N_VARS / N_GROUPS) + 1000 + 1,
+                                          .Namespace = 1},
                                .AttributeId = e_aid_Value,
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_String_Id,
@@ -140,7 +145,8 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
 
         lwv[i + 4 * (N_VARS / N_GROUPS)] =
             (OpcUa_WriteValue){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                          .Data.Numeric = (uint32_t) i + 4 * (N_VARS / N_GROUPS) + 1000 + 1},
+                                          .Data.Numeric = (uint32_t) i + 4 * (N_VARS / N_GROUPS) + 1000 + 1,
+                                          .Namespace = 1},
                                .AttributeId = e_aid_Value,
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_ByteString_Id,
@@ -162,7 +168,8 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
 
         lwv[i + 5 * (N_VARS / N_GROUPS)] =
             (OpcUa_WriteValue){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                          .Data.Numeric = (uint32_t) i + 5 * (N_VARS / N_GROUPS) + 1000 + 1},
+                                          .Data.Numeric = (uint32_t) i + 5 * (N_VARS / N_GROUPS) + 1000 + 1,
+                                          .Namespace = 1},
                                .AttributeId = e_aid_Value,
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_XmlElement_Id,
@@ -256,11 +263,12 @@ OpcUa_ReadRequest* tlibw_new_ReadRequest_check(void)
      * It should match (in the current implementation) the first of the two WriteValue. */
     for (i = 0; i < N_VARS; ++i)
     {
-        lrv[i] = (OpcUa_ReadValueId){
-            .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = (uint32_t) i + 1000 + 1},
-            .AttributeId = e_aid_Value,
-            .IndexRange = {.Length = 0},
-            .DataEncoding = {.Name.Length = 0}};
+        lrv[i] = (OpcUa_ReadValueId){.NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                                .Data.Numeric = (uint32_t) i + 1000 + 1,
+                                                .Namespace = 1},
+                                     .AttributeId = e_aid_Value,
+                                     .IndexRange = {.Length = 0},
+                                     .DataEncoding = {.Name.Length = 0}};
     }
 
     OpcUa_ReadRequest* pReadReq = DESIGNATE_NEW(OpcUa_ReadRequest, .encodeableType = &OpcUa_ReadRequest_EncodeableType,

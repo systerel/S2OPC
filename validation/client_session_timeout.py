@@ -136,7 +136,8 @@ if __name__=='__main__':
             # Read tests
             print(headerString.format("Read before session timeout"))
             # Read a node to be sure we are using the new security token
-            nid = 1001
+            nid_index = 1001
+            nid = u"ns=1;i={}".format(nid_index)
             node = client.get_node(nid)
             value = node.get_value()
 
