@@ -114,16 +114,19 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* config);
 
 /**
  * \brief Configure the toolkit log generation properties (SOPC_Toolkit_Initialize required,
- * !SOPC_Toolkit_Configured required)
+ *        !SOPC_Toolkit_Configured required)
  *
- * \param logDirPath   Absolute or relative path of the directory to be used for logs (shall exist and terminate with
- * directory separator). Default value is execution directory (same as "" value provided).
+ * \param logDirPath    Absolute or relative path of the directory to be used for logs (shall exist and terminate with
+ *                      directory separator). Default value is execution directory (same as "" value provided).
  *
- * \param maxBytes     A maximum amount of bytes (> 100) by log file before opening a new file incrementing the integer
- * suffix. It is a best effort value (amount verified after each print). Default value is 1024.
+ * \param maxBytes      A maximum amount of bytes (> 100) by log file before opening a new file incrementing the integer
+ *                      suffix. It is a best effort value (amount verified after each print). Default value is 1048576.
  *
- * \param maxFiles     A maximum number of files (> 0) to be used, when reached the older log file is overwritten
- * (starting with *_00001.log). Default value is 50.
+ * \param maxFiles      A maximum number of files (> 0) to be used, when reached the older log file is overwritten
+ *                      (starting with *_00001.log). Default value is 50.
+ *
+ * \warning The value of the pointer \p logDirPath is used afterwards by the Toolkit. The string is not copied. Hence,
+ *          it must not be modified nor freed by the caller before SOPC_Toolkit_Clear.
  */
 SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogPath(const char* logDirPath, uint32_t maxBytes, uint16_t maxFiles);
 
