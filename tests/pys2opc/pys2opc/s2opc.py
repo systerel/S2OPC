@@ -21,6 +21,7 @@
 
 from contextlib import contextmanager
 import time
+import os
 
 from _pys2opc import ffi, lib as libsub
 from .connection import BaseConnectionHandler
@@ -67,6 +68,7 @@ class PyS2OPC:
     _configured = False
     _dConfigurations = {}  # Stores known configurations {Id: configurationParameters}
     _dConnections = {}  # Stores known active connections {Id: ConnectionHandler()}
+    _pathLog = None  # Avoid garbage collection of the configured log path
 
     @staticmethod
     def get_version():
@@ -237,8 +239,26 @@ class PyS2OPC:
         PyS2OPC._dConfigurations[cfgId] = config
         return config
 
-    #def add_configuration_secured(parameters, security_parameters):
+    @staticmethod
+    def set_log_path(pathLog, maxLogSize = 1048576, maxFiles = 50):
+        """
+        Change the default path for logs (the current working directory) to logPath. logPath is created
+        if it does not exist.
+        This function must be called after PyS2OPC.initialize() and before PyS2OPC.configured().
 
+        Args:
+            maxLogSize: The maximum size (best effort) of the log files, before changing the log index.
+            maxFiles: The maximum number of log indexes before cycling logs and reusing the first log.
+        """
+        assert PyS2OPC._initialized and not PyS2OPC._configured
+        if os.path.exists(pathLog):
+            assert os.path.isdir(pathLog), 'Path exists but it is not a directory.'
+        else:
+            os.mkdir(pathLog)
+
+        pathLog = os.path.join(pathLog, '')  # Append a trailing / or \
+        PyS2OPC._pathLog = ffi.new('char[]', pathLog.encode())
+        assert libsub.SOPC_ToolkitConfig_SetLogPath(PyS2OPC._pathLog, maxLogSize, maxFiles) == ReturnStatus.OK
 
     @staticmethod
     def configured():

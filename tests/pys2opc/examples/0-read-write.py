@@ -27,6 +27,7 @@ and prints the new results.
 
 
 import time
+import tempfile
 
 from pys2opc import PyS2OPC, BaseConnectionHandler, DataValue
 from _connection_configuration import configuration_parameters_no_subscription
@@ -47,6 +48,10 @@ if __name__ == '__main__':
 
     # Initialize the toolkit and automatically clean it when the script finishes
     with PyS2OPC.initialize():
+        # Set the path for logs to a new temp dir, must be called before configured().
+        pathLog = tempfile.mkdtemp()
+        print('Log saved to', pathLog)
+        PyS2OPC.set_log_path(pathLog)
         # Configure a connection and freeze the S2OPC configurations.
         # See the documentation of this function for all the parameters.
         config = PyS2OPC.add_configuration_unsecured(**configuration_parameters_no_subscription)
