@@ -257,7 +257,7 @@ static SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM)
     {
         if (NULL != pReq)
         {
-            OpcUa_BrowseRequest_Clear(pReq);
+            OpcUa_ReadRequest_Clear(pReq);
             free(pReq);
         }
         if (NULL != lrv)
