@@ -362,6 +362,7 @@ def str_to_nodeid(nid, no_gc=True):
                which will call SOPC_String_Delete for you.
     """
     node = libsub.SOPC_NodeId_FromCString(ffi.new('char []', nid.encode()), len(nid))
+    assert node != ffi.NULL, 'SOPC_NodeId_FromCString failed on string "{}"'.format(nid)
     if not no_gc:
         # There is no SOPC_NodeId_Delete, so we must make this Deleter.
         # In fact, it is only required for GUID NodeIds...
