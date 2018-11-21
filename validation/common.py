@@ -48,6 +48,14 @@ variantInfoList = [ ('Int64', ua.VariantType.Int64, -1000, random.randint(-92233
                     ('Float', ua.VariantType.Float, 109517.875, random.uniform(-2**127,2**127)),
                   ]
 
+# Expected browse subtree. The backward reference should point to the same node, but wihout the trailing BALA_RLDS_G019
+browseSubTree = ('ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019',
+                 # Forward references BrowseNames
+                 ('RM', 'RC', 'SendCommand', 'OffBlocking-K', 'OffBlocking-CC'),
+                 # Forward references nodeIds
+                 ('i=61',),
+                )
+
 def create_client(uri=sUri):
     client = Client(uri)
     client.application_uri = "urn:S2OPC:localhost"

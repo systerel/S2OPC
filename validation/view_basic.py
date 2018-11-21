@@ -19,29 +19,26 @@
 # under the License.
 
 from opcua.common.node import Node
-from common import sUri
+from common import sUri, browseSubTree
 
 def browse_tests(client, logger):
 
-    print("Browsing children of node ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019")
-    n1 = client.get_node("ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019")
+    nid, subBrowseNames, subNids = browseSubTree
+    subNids = list(subNids)
+    for bn in subBrowseNames:
+        subNids.append(nid + '.' + bn)
+    print("Browsing children of node", nid)
+    n1 = client.get_node(nid)
     children = n1.get_children()
-    # checking number of children and their associated ids
-    logger.add_test('Browse Test - number of children for Node ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019', len(children) == 6)
-    #backward references shall not be taken into account
-    node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs")
-    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs', node not in children)
-    #checking forward references
-    node = Node(sUri,"i=61")
-    logger.add_test('Browse Test - child i=61', node in children)
-    node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM")
-    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM', node in children)
-    node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC")
-    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC', node in children)
-    node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand")
-    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand', node in children)
-    node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K")
-    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K', node in children)
-    node = Node(sUri,"ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC")
-    logger.add_test('Browse Test - child ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC', node in children)
+    # Checking number of children and their associated ids
+    logger.add_test('Browse Test - number of children for Node '+nid, len(children) == len(subNids))
+    # There shall not be backward references
+    parentNid = nid[:nid.rfind('.')]
+    node = Node(sUri, parentNid)
+    logger.add_test('Browse Test - child '+parentNid, node not in children)
+    # Checking forward references
+    for subNid in subNids:
+        print(subNid)
+        node = Node(sUri, subNid)
+        logger.add_test('Browse Test - child '+subNid, node in children)
 
