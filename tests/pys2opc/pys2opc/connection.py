@@ -273,7 +273,7 @@ class BaseConnectionHandler:
         nodesToWrite = allocator_no_gc('OpcUa_WriteValue[]', len(nodeIds))
         for i, (snid, attr, val) in enumerate(zip(nodeIds, attributes, datavalues)):
             nodesToWrite[i].encodeableType = EncodeableType.WriteValue
-            nodesToWrite[i].NodeId = str_to_nodeid(snid)[0]
+            nodesToWrite[i].NodeId = str_to_nodeid(snid, no_gc=True)[0]
             nodesToWrite[i].AttributeId = attr
             nodesToWrite[i].Value = val.to_sopc_datavalue(no_gc=True)[0]
         payload.NodesToWrite = nodesToWrite

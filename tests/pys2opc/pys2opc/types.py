@@ -326,7 +326,7 @@ def bytes_to_bytestring(b, no_gc=False):
     alloc = allocator_no_gc if no_gc else ffi.new
     bstring = alloc('SOPC_ByteString *')
     bstring.Length = len(b)
-    bstring.Data = ffi.new('char[{}]'.format(len(b)), b)
+    bstring.Data = allocator_no_gc('char[{}]'.format(len(b)), b)
     return bstring
 
 def string_to_str(string):
