@@ -1211,6 +1211,19 @@ class SecurityMode:
     Sign           = libsub.OpcUa_MessageSecurityMode_Sign
     SignAndEncrypt = libsub.OpcUa_MessageSecurityMode_SignAndEncrypt
 
+class NodeClass:
+    """
+    The available node classes. These are accessors to the OpcUa_NodeClass enum.
+    """
+    Unspecified   = libsub.OpcUa_NodeClass_Unspecified
+    Object        = libsub.OpcUa_NodeClass_Object
+    Variable      = libsub.OpcUa_NodeClass_Variable
+    Method        = libsub.OpcUa_NodeClass_Method
+    ObjectType    = libsub.OpcUa_NodeClass_ObjectType
+    VariableType  = libsub.OpcUa_NodeClass_VariableType
+    ReferenceType = libsub.OpcUa_NodeClass_ReferenceType
+    DataType      = libsub.OpcUa_NodeClass_DataType
+    View          = libsub.OpcUa_NodeClass_View
 
 if __name__ == '__main__':
     # Auto-test
