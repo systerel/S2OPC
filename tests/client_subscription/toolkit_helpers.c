@@ -469,11 +469,7 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
                     *(int64_t*) plsVal->value = pVal->Value.Value.Int64;
                     break;
                 case SOPC_UInt64_Id:
-                    if (INT64_MAX < pVal->Value.Value.Uint64)
-                    {
-                        status = SOPC_STATUS_NOK;
-                    }
-                    else
+                    if (INT64_MAX >= pVal->Value.Value.Uint64)
                     {
                         *(int64_t*) plsVal->value = (int64_t) pVal->Value.Value.Uint64;
                     }
