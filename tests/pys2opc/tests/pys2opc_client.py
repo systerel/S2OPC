@@ -38,6 +38,7 @@ Creates a subscription with unreasonable publish cycle, longer than the request 
 
 from itertools import product
 import time
+import threading
 
 from pys2opc import PyS2OPC, BaseConnectionHandler, SecurityMode, SecurityPolicy, AttributeId, VariantType, Variant, NodeClass, DataValue, StatusCode
 
@@ -92,6 +93,11 @@ class ConnectionHandler(BaseConnectionHandler):
         self.pendingRequests = {}  # {nid: request}
         self.responses = {}  # {nid: response}
         self.logger = None
+        # Set on the call to on_datachanged that empties expectedChanges dicts
+        self.subscriptionComplete = threading.Event()
+        self.expectedChangesInit = {}  # {nid: val}
+        self.expectedChangesNew = {}  # {nid: val}
+        self.i = 0
 
     def set_logger(self, logger):
         self.logger = logger
@@ -114,8 +120,27 @@ class ConnectionHandler(BaseConnectionHandler):
                 raise TimeoutError
 
     def on_datachanged(self, nodeId, dataValue):
-        print('  Data changed on connection "{}", "{}" -> {}, '.format(self.tag, nodeId, dataValue.variant) + time.ctime(dataValue.timestampServer))
+        # On each change notification, finds if the notification is expected or not,
+        #  and mark that it is received by deleting the expectation.
+        initValue = self.expectedChangesInit.get(nodeId, None)
+        newValue = self.expectedChangesNew.get(nodeId, None)
+        if dataValue.variant.variantType == VariantType.Float:
+            if initValue is not None and abs((dataValue.variant - initValue)/dataValue.variant) <= 2**(-24):
+                del self.expectedChangesInit[nodeId]
+            if newValue is not None and abs((dataValue.variant - newValue)/dataValue.variant) <= 2**(-24):
+                del self.expectedChangesNew[nodeId]
+        elif dataValue.variant.variantType == VariantType.XmlElement:
+            if initValue is not None and dataValue.variant == initValue.Value.encode():
+                del self.expectedChangesInit[nodeId]
+            if newValue is not None and dataValue.variant == newValue.Value.encode():
+                del self.expectedChangesNew[nodeId]
+        else:
+            if initValue is not None and dataValue.variant == initValue:
+                del self.expectedChangesInit[nodeId]
+            if newValue is not None and dataValue.variant == newValue:
+                del self.expectedChangesNew[nodeId]
 
+        # When no more notifications are expected, flag the Event.
         if not self.expectedChangesInit and not self.expectedChangesNew:
             self.subscriptionComplete.set()
 
@@ -248,6 +273,18 @@ class ConnectionHandler(BaseConnectionHandler):
         parentNid = nid[:nid.rfind('.')]
         self.logger.add_test('Parent is correct', {parentNid} == parentNodes)
 
+    def configure_subscription(self):
+        if self.configuration.parameters['token_target'] > 0:
+            nids = []
+            for i, (_, _, initVal, newVal) in enumerate(variantInfoList):
+                nid = 'ns={};i={}'.format(0, 1001+i)
+                nids.append(nid)
+                self.expectedChangesInit[nid] = initVal
+                self.expectedChangesNew[nid] = newVal
+            self.add_nodes_to_subscription(nids)
+        else:
+            self.subscriptionComplete.set()
+
 
 if __name__ == '__main__':
     logger_ = TapLogger('validation_pys2opc.tap')
@@ -277,7 +314,29 @@ if __name__ == '__main__':
                 print('Browse Tests')
                 connection.test_browse()
 
-        # Do the reads with multiple connections
+        # Do the read/write with multiple connections
+        print('Asynch Write/Reads on new connections')
+        connections = [PyS2OPC.connect(cfg, ConnectionHandler) for cfg in configs]
+        for conn in connections:
+            conn.set_logger(logger_)
+            conn.configure_subscription()
+        try:
+            # Do the write on one connection, reads on all others to assert the result.
+            logger_.begin_section('ReadWrite Tests -')
+            connA, *conns = connections
+            connA.test_write_and_assert()
+            for conn in conns:
+                conn._test_read(readInitValues = False, onlyValues = True)
+            connA.test_write_and_assert(resetInitValues = True)
+            # Wait for subscriptions to end. Does not wait more than the publish cycle,
+            #  as the last notifications should be received by then.
+            timeout = .001*max(cfg.parameters.get('publish_period_ms', 0.) for cfg in configs)
+            for conn in connections:
+                assert conn.subscriptionComplete.wait(timeout)
+            logger_.add_test('Values all correctly notified', True)
+        finally:
+            for conn in connections:
+                conn.disconnect()
 
     logger_.finalize_report()
     sys.exit(1 if logger_.has_failed_tests else 0)
