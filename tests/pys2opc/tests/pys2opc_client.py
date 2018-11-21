@@ -116,22 +116,34 @@ class ConnectionHandler(BaseConnectionHandler):
     def on_datachanged(self, nodeId, dataValue):
         print('  Data changed on connection "{}", "{}" -> {}, '.format(self.tag, nodeId, dataValue.variant) + time.ctime(dataValue.timestampServer))
 
-    def test_read_send_requests(self):
-        """Sends all the requests and does not wait on them."""
+        if not self.expectedChangesInit and not self.expectedChangesNew:
+            self.subscriptionComplete.set()
+
+    def test_read_send_requests(self, onlyValues = False):
+        """
+        Sends all the requests and does not wait on them.
+
+        Args:
+            onlyValues: When set, sends a single request for the values.
+        """
         # Check browse name, display name, description, value, node class, variant type (TODO DataType)
         # Create a request per node to read
-        attrs_per_node = [AttributeId.BrowseName, AttributeId.DisplayName, AttributeId.Description, AttributeId.Value, AttributeId.NodeClass]
-        for i,(typeName,uaType,initValue,newValue) in enumerate(variantInfoList):
-            nid = 'ns={};i={}'.format(0, 1001+i)
-            assert nid not in self.pendingRequests
-            self.pendingRequests[nid] = self.read_nodes([nid]*len(attrs_per_node), attrs_per_node, bWaitResponse=False)
+        if not onlyValues:
+            attrs_per_node = [AttributeId.BrowseName, AttributeId.DisplayName, AttributeId.Description, AttributeId.Value, AttributeId.NodeClass]
+            for i,(typeName,uaType,initValue,newValue) in enumerate(variantInfoList):
+                nid = 'ns={};i={}'.format(0, 1001+i)
+                assert nid not in self.pendingRequests
+                self.pendingRequests[nid] = self.read_nodes([nid]*len(attrs_per_node), attrs_per_node, bWaitResponse=False)
+        else:
+            self.pendingRequests['read'] = self.read_nodes(['ns={};i={}'.format(0, 1001+i) for i,_ in enumerate(variantInfoList)], bWaitResponse=False)
 
-    def test_read_check_results(self, readInitValues = True):
+    def test_read_check_results(self, readInitValues = True, onlyValues = False):
         """
         Waits for the responses and check the contents.
 
         Args:
-            reeadInitValues: when reset, expects the newValue instead of the initValue.
+            readInitValues: When reset, expects the newValue instead of the initValue.
+            onlyValues: When set, expects a single response with values only.
         """
         try:
             self._wait_for_responses()
@@ -141,10 +153,7 @@ class ConnectionHandler(BaseConnectionHandler):
             print('Error, could not synchronize read responses, abort.')
             return
 
-        for i,(typeName,uaType,initValue,newValue) in enumerate(variantInfoList):
-            nid = 'ns={};i={}'.format(0, 1001+i)
-            assert nid in self.responses
-            browseName, displayName, description, value, nodeClass = self.responses.pop(nid).results
+        def check_value(nid, uaType, value, initValue, newValue, readInitValues):
             if readInitValues:
                 expectedValue = initValue
             else:
@@ -155,20 +164,34 @@ class ConnectionHandler(BaseConnectionHandler):
                 self.logger.add_test('XmlElement value of Node {}'.format(nid), value.variant == expectedValue.Value.encode())
             else:
                 self.logger.add_test('Value of Node {}'.format(nid), value.variant == expectedValue)
-            self.logger.add_test('BrowseName of Node {}'.format(nid), browseName.variant == (0, typeName))
-            self.logger.add_test('DisplayName of Node {}'.format(nid), displayName.variant == ('', '{}_1dn'.format(typeName)))
-            self.logger.add_test('NodeClass of Node {}'.format(nid), nodeClass.variant == NodeClass.Variable)
 
-    def test_read(self):
+        if not onlyValues:
+            for i,(typeName,uaType,initValue,newValue) in enumerate(variantInfoList):
+                nid = 'ns={};i={}'.format(0, 1001+i)
+                assert nid in self.responses
+                browseName, displayName, description, value, nodeClass = self.responses.pop(nid).results
+                check_value(nid, uaType, value, initValue, newValue, readInitValues)
+                self.logger.add_test('BrowseName of Node {}'.format(nid), browseName.variant == (0, typeName))
+                self.logger.add_test('DisplayName of Node {}'.format(nid), displayName.variant == ('', '{}_1dn'.format(typeName)))
+                self.logger.add_test('NodeClass of Node {}'.format(nid), nodeClass.variant == NodeClass.Variable)
+        else:
+            for i,((_,uaType,initValue,newValue),value) in enumerate(zip(variantInfoList, self.responses.pop('read').results)):
+                nid = 'ns={};i={}'.format(0, 1001+i)
+                check_value(nid, uaType, value, initValue, newValue, readInitValues)
+
+    def test_read(self, onlyValues = False):
         """
         Sends the requests and check the contents.
+
+        Args:
+            onlyValues: When set, expects a single response with values only.
         """
         self.logger.begin_section('Read Tests -')
-        self._test_read(readInitValues = True)
+        self._test_read(readInitValues = True, onlyValues = onlyValues)
 
-    def _test_read(self, readInitValues = True):
-        self.test_read_send_requests()
-        self.test_read_check_results(readInitValues = readInitValues)
+    def _test_read(self, readInitValues = True, onlyValues = False):
+        self.test_read_send_requests(onlyValues = onlyValues)
+        self.test_read_check_results(readInitValues = readInitValues, onlyValues = onlyValues)
 
     def test_write_and_assert(self, resetInitValues = False):
         """
@@ -199,11 +222,11 @@ class ConnectionHandler(BaseConnectionHandler):
         # Writes the new values
         self.logger.begin_section('Write Tests -')
         self.test_write_and_assert()
-        self._test_read(readInitValues = False)
+        self._test_read(readInitValues = False, onlyValues = True)
         # Writes back the old values
         self.logger.begin_section('Write initValue Tests -')
         self.test_write_and_assert(resetInitValues = True)
-        self._test_read()
+        self._test_read(onlyValues = True)
 
     def test_browse(self):
         """
