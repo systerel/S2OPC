@@ -432,7 +432,6 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
         case SOPC_Int32_Id:
         case SOPC_UInt32_Id:
         case SOPC_Int64_Id:
-        case SOPC_UInt64_Id:
             plsVal->type = SOPC_LibSub_DataType_integer;
             plsVal->value = malloc(sizeof(int64_t));
             if (NULL == plsVal->value)
@@ -468,15 +467,28 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
                 case SOPC_Int64_Id:
                     *(int64_t*) plsVal->value = pVal->Value.Value.Int64;
                     break;
-                case SOPC_UInt64_Id:
-                    if (INT64_MAX >= pVal->Value.Value.Uint64)
-                    {
-                        *(int64_t*) plsVal->value = (int64_t) pVal->Value.Value.Uint64;
-                    }
-                    break;
                 default:
                     break;
                 }
+            }
+            break;
+        case SOPC_UInt64_Id:
+            if (INT64_MAX >= pVal->Value.Value.Uint64)
+            {
+                plsVal->type = SOPC_LibSub_DataType_integer;
+                plsVal->value = malloc(sizeof(int64_t));
+                if (NULL == plsVal->value)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+                else
+                {
+                    *(int64_t*) plsVal->value = (int64_t) pVal->Value.Value.Uint64;
+                }
+            }
+            else
+            {
+                plsVal->type = SOPC_LibSub_DataType_other;
             }
             break;
         case SOPC_String_Id:
