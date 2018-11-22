@@ -49,7 +49,7 @@ variantInfoList = [ ('Int64', ua.VariantType.Int64, -1000, random.randint(-92233
                   ]
 
 # Expected browse subtree. The backward reference should point to the same node, but wihout the trailing BALA_RLDS_G019
-browseSubTree = ('ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019',
+browseSubTree = ('ns=1;s=Objects.15361.SIGNALs.BALA_RDLS_G019',
                  # Forward references BrowseNames
                  ('RM', 'RC', 'SendCommand', 'OffBlocking-K', 'OffBlocking-CC'),
                  # Forward references nodeIds
