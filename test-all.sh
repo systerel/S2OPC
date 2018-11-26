@@ -24,6 +24,7 @@ MY_DIR=$(cd $(dirname $0) && pwd)
 BIN_DIR="${MY_DIR}/bin"
 BUILD_DIR="${MY_DIR}/build"
 VALIDATION_DIR="${MY_DIR}/validation"
+PYS2OPC_TESTS_DIR="${MY_DIR}/tests/pys2opc/tests"
 TEST_DIR=${BUILD_DIR}
 CTEST_FILE="${TEST_DIR}/CTestTestfile.cmake"
 TAP_DIR="${BUILD_DIR}/bin"
@@ -45,7 +46,8 @@ rm -f "${TAP_DIR}"/*.tap
 cd "${TEST_DIR}" && ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
 CTEST_RET=$?
 
-ls "${VALIDATION_DIR}"/*.tap >/dev/null 2>&1 && mv "${VALIDATION_DIR}"/*.tap "${TAP_DIR}"/
+mv "${VALIDATION_DIR}"/*.tap "${TAP_DIR}"/
+mv "${PYS2OPC_TESTS_DIR}"/*.tap "${TAP_DIR}"/
 
 EXPECTED_TAP_FILES="check_helpers.tap
 check_libsub.tap
@@ -66,7 +68,8 @@ secure_channel_level_Sign_B256_2048bit.tap
 session_timeout.tap
 toolkit_test_server_local_service.tap
 toolkit_test_suite_client.tap
-validation.tap"
+validation.tap
+validation_pys2opc.tap"
 
 ACTUAL_TAP_FILES=$(LANG=C ls "${TAP_DIR}"/*.tap | sed "s|${TAP_DIR}/||")
 

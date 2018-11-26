@@ -812,6 +812,26 @@ if(NOT WITH_ASAN AND NOT WITH_TSAN AND NOT WITH_UBSAN)
                     DEPENDS ${PYS2OPC_PLACEHOLDER}
                     DEPENDS ${PYS2OPC_FILES})
   add_dependencies(pys2opc s2opc_subscription_client)
+
+  # Validation test
+  if(ENABLE_TESTING)
+
+  function(pys2opc_validation_test name)
+      set(test_name "validation::${name}")
+      add_test(NAME "${test_name}"
+               WORKING_DIRECTORY "${PYS2OPC_PATH}/tests"
+               COMMAND
+                   "${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
+                   "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+                   "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
+                   "./${name}"
+               )
+      set_tests_properties(${test_name} PROPERTIES
+          ENVIRONMENT "PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}:${PYS2OPC_PATH};LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+  endfunction()
+
+  pys2opc_validation_test("pys2opc_client.py")
+  endif(ENABLE_TESTING)
 endif()
 
 ###### Doc ######
