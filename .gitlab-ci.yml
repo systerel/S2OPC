@@ -69,10 +69,10 @@ build-linux64-ASan:
 # Used by coverage
 build-linux64:
   <<: *build_linux
-  only:
+  except:
     variables:
-      - $WITH_COVERAGE
-      - $CROSS_COMPILE
+      - $WITH_COVERITY
+      - $WINDOWS_TEST
 
 build-win64: &build_win64
   <<: *docker_job
@@ -163,6 +163,10 @@ test-unit:
   image: registry.gitlab.com/systerel/s2opc/test@sha256:2517f830aa2dbf50868021cf184981c5b75f91b1768e4fbfdab282cc0daa8231  # test:2.3
   script:
     - ./test-all.sh
+  dependencies:
+    # Explicit dependencies to keep ASan binaries
+    - build-linux64
+    - build-linux64-ASan
   artifacts:
     name: 'test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
