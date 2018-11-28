@@ -69,7 +69,7 @@ fi
 
 #### Clang static analyzer ####
 echo "Compilation with Clang static analyzer" | tee -a $LOGPATH
-rm -fr build-analyzer && ./run-clang-static-analyzer.sh 2>&1 | tee -a $LOGPATH
+rm -fr build-analyzer && ./.run-clang-static-analyzer.sh 2>&1 | tee -a $LOGPATH
 if [[ ${PIPESTATUS[0]} != 0 ]]; then
     EXITCODE=1
 else
