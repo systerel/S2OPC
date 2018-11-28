@@ -34,7 +34,6 @@ setup(
     author_email='s2opc-support@systerel.fr',
     description='Python Wrapper for the S2OPC Toolkit',
     long_description=open('./README.md').read(),
-    long_description_content_type='text/markdown',
     url='https://gitlab.com/systerel/S2OPC/',
     keywords='OPC OPC-UA S2OPC',
     classifiers=[

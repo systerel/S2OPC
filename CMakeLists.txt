@@ -790,6 +790,32 @@ s2opc_client_validation_test(check_libsub)
 
 endif(ENABLE_TESTING)
 
+###### PyS2OPC ######
+
+# The library is built by python. It may use the shared library but it must not be built with ASan.
+# The problem with ASan is to embed a dynamic library compiled with ASan into Python, which is not compiled with ASan.
+if(NOT WITH_ASAN AND NOT WITH_TSAN AND NOT WITH_UBSAN)
+  set(PYS2OPC_PATH "${CMAKE_SOURCE_DIR}/tests/pys2opc")
+  set(PYS2OPC_FILES "${PYS2OPC_PATH}/pys2opc/__init__.py"
+                    "${PYS2OPC_PATH}/pys2opc/connection.py"
+                    "${PYS2OPC_PATH}/pys2opc/pys2opc_build.py"
+                    "${PYS2OPC_PATH}/pys2opc/responses.py"
+                    "${PYS2OPC_PATH}/pys2opc/s2opc.py"
+                    "${PYS2OPC_PATH}/pys2opc/types.py"
+                    )
+  set(PYS2OPC_PLACEHOLDER ${CMAKE_BINARY_DIR}/pys2opc_touch)
+  add_custom_command(OUTPUT ${PYS2OPC_PLACEHOLDER}
+                     COMMAND ${PYTHON_EXECUTABLE} setup.py build_ext -b ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} -t ${CMAKE_BINARY_DIR}
+                     COMMAND ${CMAKE_COMMAND} -E touch ${PYS2OPC_PLACEHOLDER}
+                     WORKING_DIRECTORY ${PYS2OPC_PATH})
+  add_custom_target(pys2opc ALL
+                    DEPENDS ${PYS2OPC_PLACEHOLDER}
+                    DEPENDS ${PYS2OPC_FILES})
+  add_dependencies(pys2opc s2opc_subscription_client)
+endif()
+
+###### Doc ######
+
 if(DOXYGEN_FOUND)
     add_custom_target(doc
         COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_SOURCE_PREFIX=${CMAKE_SOURCE_DIR}/ ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/doxygen/ingopcs-toolkit.doxyfile
