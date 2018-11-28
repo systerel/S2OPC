@@ -26,7 +26,7 @@ generation:
   script:
     - ./clean.sh all
     - ./.pre-build-ext.sh
-    - ./check_generated_code.sh
+    - ./.check_generated_code.sh
   artifacts:
     name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:

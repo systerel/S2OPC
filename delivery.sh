@@ -111,7 +111,7 @@ echo "Generate C source files"
 ./.pre-build-in-docker.sh ./pre-build.sh || exit 1
 echo "Check generated C source files were up to date"
 # check that generated C code is up to date in configuration management
-./clean.sh && ./check_generated_code.sh || exit 1
+./clean.sh && ./.check_generated_code.sh || exit 1
 
 echo "Re-Generate C source files and commit them with current date"
 # regenerate C source files to be sure we keep current date in source files
