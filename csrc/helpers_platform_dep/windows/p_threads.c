@@ -138,7 +138,7 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
     return status;
 }
 
-DWORD WINAPI SOPC_Thread_StartFct(LPVOID args)
+static DWORD WINAPI SOPC_Thread_StartFct(LPVOID args)
 {
     Thread* thread = (Thread*) args;
     // void* res =
