@@ -24,7 +24,7 @@
 
 echo "Check master branch name is valid"
 BRANCH_COMMIT=master
-VERSION_HEADER=./csrc/configuration/sopc_toolkit_constants.h
+VERSION_HEADER=./csrc/helpers/sopc_version.h
 
 git show-ref refs/heads/$BRANCH_COMMIT &> /dev/null
 if [[ $? != 0 ]]; then
@@ -80,28 +80,26 @@ if [[ $? == 0 ]]; then
 fi
 
 echo "Checking out $BRANCH_COMMIT"
-git co $BRANCH_COMMIT &> /dev/null || exit 1
+git checkout $BRANCH_COMMIT &> /dev/null || exit 1
 echo "Creation of $DELIVERY_NAME branch"
-git co -b $DELIVERY_NAME &> /dev/null || exit 1
+git checkout -b $DELIVERY_NAME &> /dev/null || exit 1
 
 echo "Checking out $2-update-tagged-version"
-git co -b $2-update-tagged-version &> /dev/null || exit 1
+git checkout -b $2-update-tagged-version &> /dev/null || exit 1
 echo "Update to $1* version in sopc_toolkit_constants.h in $2-update-tagged-version"
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJOR '"$major"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
-sed -i "s/#define SOPC_TOOLKIT_VERSION .*/#define SOPC_TOOLKIT_VERSION \"$major.$medium.$minor*\"/" $VERSION_HEADER || exit 1
 echo "Commit updated current version in $2-update-tagged-version: it shall be pushed as MR on gitlab ASAP"
 git commit $VERSION_HEADER -S -m "Ticket #$2: Update current version of Toolkit" &> /dev/null || exit 1
 
 echo "Checking out $DELIVERY_NAME"
-git co $DELIVERY_NAME || exit 1
+git checkout $DELIVERY_NAME || exit 1
 
 echo "Update to $1 version in sopc_toolkit_constants.h in $DELIVERY_NAME"
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJOR '"$major"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
-sed -i "s/#define SOPC_TOOLKIT_VERSION .*/#define SOPC_TOOLKIT_VERSION \"$major.$medium.$minor\"/" $VERSION_HEADER || exit 1
 git commit $VERSION_HEADER -S -m "Update tagged $1 version information" &> /dev/null || exit 1
 
 echo "Generate and commit version file 'VERSION' with '$1' content"
@@ -111,10 +109,21 @@ git commit -S -m "Add VERSION file" &> /dev/null || exit 1
 echo "Generate C source files"
 ./clean.sh all || exit 1
 ./.pre-build-in-docker.sh ./pre-build.sh || exit 1
-# Format the generated files added to avoid failure on further format verification
-./.check-in-docker.sh ./.format.sh || exit 1
-git add -f csrc/services/bgenc
-git commit -S -m "Add generated source files"
+echo "Check generated C source files were up to date"
+# check that generated C code is up to date in configuration management
+./clean.sh && ./check_generated_code.sh || exit 1
+
+echo "Re-Generate C source files and commit them with current date"
+# regenerate C source files to be sure we keep current date in source files
+./.pre-build-in-docker.sh ./pre-build.sh || exit 1
+git commit csrc/services/bgenc -m "Add generated source files with up to date generation timestamp"
+
+echo "Check code with clang tools"
+./.check-in-docker.sh ./.check-code.sh
+if [[ $? != 0 ]]; then
+    echo "Error: Checking code with clang tools";
+    exit 1
+fi
 
 # Clean directories in which windows binaries / libraries are installed
 rm -fr bin_windows install_windows
@@ -157,13 +166,6 @@ if [[ $? != 0 ]]; then
 fi
 mv bin ../
 cd ..
-
-echo "Check code with clang tools"
-./.check-in-docker.sh ./.check-code.sh
-if [[ $? != 0 ]]; then
-    echo "Error: Checking code with clang tools";
-    exit 1
-fi
 
 echo "Add Toolkit binaries"
 git add -f bin bin_windows &>/dev/null || exit 1
