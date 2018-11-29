@@ -143,8 +143,8 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm);
  * \brief Converts a UNIX timestamp to a time expressed in 100ns slices since
  *        1601/01/01 00:00:00 UTC.
  *
- * \param dt   the UNIX timestamp
- * \param res  the resulting time
+ * \param time  the UNIX timestamp
+ * \param res   the resulting time
  * \return     \ref SOPC_STATUS_OK on success, an error code on failure
  */
 SOPC_ReturnStatus SOPC_Time_FromTimeT(time_t time, int64_t* res);

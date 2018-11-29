@@ -63,10 +63,10 @@ typedef SOPC_Buffer SOPC_SerializedCertificate;
  *                  Public keys are usually extracted from Certificate, see
  * KeyManager_AsymmetricKey_CreateFromCertificate() or KeyManager_AsymmetricKey_CreateFromCertificate().
  *
- * \param buffer    A valid pointer to the buffer containing the DER or PEM description.
- * \param lenBuf    The length in bytes of the DER/PEM description of the key.
- * \param public    Whether the buffer holds a public or a private key.
- * \param ppKey     A handle to the created key. This object must be freed with a call to
+ * \param buffer     A valid pointer to the buffer containing the DER or PEM description.
+ * \param lenBuf     The length in bytes of the DER/PEM description of the key.
+ * \param is_public  Whether the buffer holds a public or a private key.
+ * \param ppKey      A handle to the created key. This object must be freed with a call to
  * KeyManager_AsymmetricKey_Free().
  *
  * \note            Content of the key is unspecified when return value is not SOPC_STATUS_OK.
@@ -304,7 +304,7 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(const u
  * \brief Creates a serialized asymmetric key from a file in DER or PEM format.
  *
  * \param path  path to the file
- * \param cert  out parameter, the created serialized key
+ * \param key   out parameter, the created serialized key
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
@@ -358,8 +358,8 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromFile(const cha
 /**
  * \brief Deserializes a serialized certificate.
  *
- * \param key  the serialized certificate
- * \param res  out parameter, the decoded certificate as a newly allocated SOPC_Certificate
+ * \param cert  the serialized certificate
+ * \param res   out parameter, the decoded certificate as a newly allocated SOPC_Certificate
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */

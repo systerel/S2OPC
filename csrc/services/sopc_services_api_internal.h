@@ -18,7 +18,7 @@
  */
 
 /**
- *  \file sopc_sockets_api_internal.h
+ *  \file sopc_services_api_internal.h
  *
  *  \brief Event oriented API of the Services layer for internal use only (from Services layer).
  */

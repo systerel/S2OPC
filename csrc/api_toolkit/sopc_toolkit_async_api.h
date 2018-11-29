@@ -106,7 +106,11 @@ void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
 /**
  * \brief Request to activate an anonymous session. See SOPC_ToolkitClient_AsyncActivateSession()
  *
- * \param policyId  The policy id to use for the identity token.
+ * \param endpointConnectionIdx  Endpoint connection configuration index provided by
+ *                               SOPC_ToolkitClient_AddSecureChannelConfig()
+ * \param sessionContext         A context value, it will be provided in case of session activation or failure
+ *                               notification
+ * \param policyId               The policy id to use for the identity token.
  *
  * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called.
  */
@@ -117,13 +121,17 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t end
 /**
  * \brief Request to activate a session with a UserNameIdentityToken. See SOPC_ToolkitClient_AsyncActivateSession().
  *
- * \warn The method does not support encryption yet. Hence this connection method shall not be used with an
+ * \warning The method does not support encryption yet. Hence this connection method shall not be used with an
  *       unencrypted endpoint.
  *
- * \param policyId  The policy id to use for the identity token, must not be NULL
- * \param username  The zero-terminated string username, may be NULL
- * \param password  The bytestring containing the password, may be NULL
- * \param length_password The password length, ignored when password is NULL
+ * \param endpointConnectionIdx  Endpoint connection configuration index provided by
+ *                               SOPC_ToolkitClient_AddSecureChannelConfig()
+ * \param sessionContext         A context value, it will be provided in case of session activation or failure
+ *                               notification
+ * \param policyId               The policy id to use for the identity token, must not be NULL
+ * \param username               The zero-terminated string username, may be NULL
+ * \param password               The bytestring containing the password, may be NULL
+ * \param length_password        The password length, ignored when password is NULL
  *
  * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called.
  */

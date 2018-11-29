@@ -160,7 +160,7 @@ struct SOPC_UserAuthorization_Manager
  *
  * \param authenticationManager  The SOPC_UserAuthentication_Manager instance.
  * \param pUser                  The user identity token which was received in the ActivateSession request.
- * \param pbUserAuthenticated    A valid pointer to the uninitialized result of the operation.
+ * \param pUserAuthenticated     A valid pointer to the uninitialized result of the operation.
  *    The callback sets it to one of the following values:
  *    - \p SOPC_USER_AUTHENTICATION_INVALID_TOKEN: the callback could not read the user identity token,
  *    - \p SOPC_USER_AUTHENTICATION_REJECTED_TOKEN: the proposed identity could not be authenticated,
