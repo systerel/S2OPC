@@ -43,4 +43,4 @@ pushd acceptances_tests/
 ../.run-uactt-in-docker.sh ./launch_acceptance_tests.sh
 popd
 # Build binaries for Windows target on Linux host
-./.mingwbuild-in-docker.sh WARNINGS_AS_ERRORS=0 ./build.sh
+./.mingwbuild-in-docker.sh ./build.sh
