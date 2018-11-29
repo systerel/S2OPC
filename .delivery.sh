@@ -182,7 +182,12 @@ git add -f bin/CTestTestfile.cmake &>/dev/null || exit 1
 git commit -S -m "Add CTest test file for version $DELIVERY_NAME" &> /dev/null || exit 1
 
 echo "Generate documentation with doxygen"
-doxygen doxygen/ingopcs-toolkit.doxyfile &> /dev/null || exit 1
+doxygen doxygen/ingopcs-toolkit.doxyfile &> /dev/null
+if [[ $? != 0 ]]; then
+    echo "Error: Documentation generation with doxygen failed";
+    exit 1
+fi
+
 echo "Add documentation in delivery branch"
 git add -f apidoc &> /dev/null || exit 1
 git commit -S -m "Add doxygen documentation for version $DELIVERY_NAME" &> /dev/null || exit 1
