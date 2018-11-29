@@ -46,7 +46,7 @@ else
    medium=${BASH_REMATCH[2]}
    minor=${BASH_REMATCH[3]}
 fi
-DELIVERY_NAME=INGOPCS_Toolkit_$1
+DELIVERY_NAME=S2OPC_Toolkit_$1
 
 echo "Check minor modification issue number is correct: $2"
 regexp='^[0-9]+$'
