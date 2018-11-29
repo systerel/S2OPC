@@ -212,7 +212,7 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
                         {
                             for (k = 0; k < lenThmb; ++k)
                             {
-                                printf("%02" SCNx8, pThmb[k]);
+                                printf("%02x", pThmb[k]);
                                 if (k < lenThmb - 1)
                                 {
                                     printf(":");

@@ -84,7 +84,7 @@ struct app_ctx_t
 
 static void make_nodeid(char* buf, size_t len, size_t idx)
 {
-    int n = snprintf(buf, len, "ns=1;s=Objects.%zd", idx);
+    int n = snprintf(buf, len, "ns=1;s=Objects.%" PRIu64, (uint64_t) idx);
     assert(n > 0 && (((size_t) n) < (len - 1)));
 }
 

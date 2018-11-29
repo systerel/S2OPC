@@ -37,7 +37,7 @@ int hexlify(const unsigned char* src, char* dst, size_t n)
 
     for (i = 0; i < n; ++i)
     {
-        sprintf(buffer, "%02hhx", src[i]); // sprintf copies the last \0 too
+        sprintf(buffer, "%02x", src[i]); // sprintf copies the last \0 too
         memcpy(dst + 2 * i, buffer, 2);
     }
 
