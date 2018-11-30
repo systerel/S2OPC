@@ -21,10 +21,12 @@
 #  Script to produce toolkit delivery archive
 #  $1 must be the delivery version number (e.g.: 1.0.0)
 #  $2 must be the current minor modification issue number
+#  $3 must be the LibSub delivery version number (e.g.: 1.0.0)
 
 echo "Check master branch name is valid"
 BRANCH_COMMIT=master
 VERSION_HEADER=./csrc/helpers/sopc_version.h
+LIBSUB_VERSION_HEADER=./tests/client_subscription/libs2opc_client.h
 
 git show-ref refs/heads/$BRANCH_COMMIT &> /dev/null
 if [[ $? != 0 ]]; then
@@ -49,10 +51,18 @@ fi
 DELIVERY_NAME=S2OPC_Toolkit_$1
 
 echo "Check minor modification issue number is correct: $2"
-regexp='^[0-9]+$'
-if ! [[ $2 =~ $regexp ]] ; then
+regexpTicket='^[0-9]+$'
+if ! [[ $2 =~ $regexpTicket ]] ; then
    echo "Error: '$2' is not a correct ticket number";
    exit 1
+fi
+
+echo "Check LibSub version number is correct: $3"
+if ! [[ $3 =~ $regexp ]] ; then
+   echo "Error: '$3' is not a correct version number X.Y.Z";
+   exit 1
+else
+   libsub_version=$3
 fi
 
 echo "Check branch and tag does not exist: $DELIVERY_NAME"
@@ -86,28 +96,35 @@ git checkout -b $DELIVERY_NAME &> /dev/null || exit 1
 
 echo "Checking out $2-update-tagged-version"
 git checkout -b $2-update-tagged-version &> /dev/null || exit 1
-echo "Update to $1* version in sopc_toolkit_constants.h in $2-update-tagged-version"
+echo "Update to $1* version in $VERSION_HEADER in $2-update-tagged-version"
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJOR '"$major"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
 echo "Update to $1 version in README.md file"
-sed -i "s/S2OPC_Toolkit_[0-9].[0-9].[0-9]/SOPC_Toolkit_$1/" README.md || exit 1
+sed -i 's/S2OPC_Toolkit_[0-9].[0-9].[0-9]/SOPC_Toolkit_'"$1"'/' README.md || exit 1
+
+echo "Update to $libsub_version* version in $LIBSUB_VERSION_HEADER"
+sed -i 's/#define SOPC_LIBSUB_VERSION .*/#define SOPC_LIBSUB_VERSION "'"$libsub_version"'*"/' $LIBSUB_VERSION_HEADER || exit 1
 
 echo "Commit updated current version in $2-update-tagged-version: it shall be pushed as MR on gitlab ASAP"
-git commit README.md $VERSION_HEADER -S -m "Ticket #$2: Update current version of Toolkit" &> /dev/null || exit 1
+git commit README.md $VERSION_HEADER $LIBSUB_VERSION_HEADER -S -m "Ticket #$2: Update current version of Toolkit / subscription library" &> /dev/null || exit 1
 
 
 echo "Checking out $DELIVERY_NAME"
 git checkout $DELIVERY_NAME || exit 1
 
-echo "Update to $1 version in sopc_toolkit_constants.h in $DELIVERY_NAME"
+echo "Update to $1 version in $VERSION_HEADER in $DELIVERY_NAME"
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJOR '"$major"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
 sed -i 's/ "\*"//' $VERSION_HEADER
 echo "Update to $1 version in README.md file"
-sed -i "s/S2OPC_Toolkit_[0-9].[0-9].[0-9]/SOPC_Toolkit_$1/" README.md || exit 1
-git commit README.md $VERSION_HEADER -S -m "Update tagged $1 version information" &> /dev/null || exit 1
+sed -i 's/S2OPC_Toolkit_[0-9].[0-9].[0-9]/SOPC_Toolkit_'"$1"'/' README.md || exit 1
+
+echo "Update to $libsub_version version in $LIBSUB_VERSION_HEADER"
+sed -i 's/#define SOPC_LIBSUB_VERSION .*/#define SOPC_LIBSUB_VERSION "'"$libsub_version"'"/' $LIBSUB_VERSION_HEADER || exit 1
+
+git commit README.md $VERSION_HEADER $LIBSUB_VERSION_HEADER -S -m "Update tagged $1 S2OPC version / $libsub_version subscription library version" &> /dev/null || exit 1
 
 echo "Generate and commit version file 'VERSION' with '$1' content"
 echo "$1" > VERSION
@@ -209,7 +226,7 @@ if [ $? -eq 0 ]; then
     echo "=============================================================="
     echo "Creation of delivery archive '$DELIVERY_NAME.tar.gz' succeeded"
     echo "Please push the $2-update-tagged-version branch as MR on gitlab closing issue #$2"
-    echo "Please tag the $DELIVERY_NAME branch on bare repository"
+    echo "Please tag the $DELIVERY_NAME branch on bare repository WITH SIGNATURE: $DELIVERY_NAME and S2OPC_LibSub_$libsub_version"
 else
     echo "==========================================================="
     echo "Creation of delivery archive '$DELIVERY_NAME.tar.gz' FAILED"
