@@ -86,7 +86,7 @@ git checkout -b $DELIVERY_NAME &> /dev/null || exit 1
 
 echo "Checking out $2-update-tagged-version"
 git checkout -b $2-update-tagged-version &> /dev/null || exit 1
-echo "Update to $1 version in sopc_toolkit_constants.h in $2-update-tagged-version"
+echo "Update to $1* version in sopc_toolkit_constants.h in $2-update-tagged-version"
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJOR '"$major"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
@@ -104,6 +104,7 @@ echo "Update to $1 version in sopc_toolkit_constants.h in $DELIVERY_NAME"
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJOR '"$major"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
+sed -i 's/ "\*"//' $VERSION_HEADER
 echo "Update to $1 version in README.md file"
 sed -i "s/S2OPC_Toolkit_[0-9].[0-9].[0-9]/SOPC_Toolkit_$1/" README.md || exit 1
 git commit README.md $VERSION_HEADER -S -m "Update tagged $1 version information" &> /dev/null || exit 1
