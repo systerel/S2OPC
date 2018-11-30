@@ -27,7 +27,7 @@ INGOPCS initial consortium:
 
 ## S2OPC Toolkit features
 
-Common features:
+### Common features:
 
 - Asynchronous user application API
 - Available security policies (encryption schemes) with any security mode:
@@ -38,29 +38,43 @@ Common features:
 Client side (e.g.: tests/services/toolkit_test_client.c):
 
 - Secure Channel configuration on Toolkit initialization
-- Activate a session with an anonymous user
-- Send a service on session request (read, write, browse, etc.)
-- Send a discovery service request (getEndpoints, etc.)
+- Activate a session with an anonymous use or user identified by username/password
+- Send a service on session request (read, write, browse, subscribe, etc.)
+- Send a discovery service request (getEndpoints, findServer, registerServer, etc.)
 
 Server side (e.g.: tests/services/toolkit_test_server.c):
 
 - Endpoint descriptions configuration on Toolkit initialization
 - 1 address space configuration on Toolkit initialization
 - Checks and accepts several instances of secure channels
-- Checks and accepts activation of several sessions with an anonymous user
+- Checks and accepts activation of several sessions with an anonymous user or user identified by username/password
 - Supported services:
   - Read service
   - Write service
   - Browse service (simplified: no continuation point)
-  - GetEndpoints service (restriction: locale Ids and profile URIs ignored)
+  - GetEndpoints service
+  - FindServers service
+  - RegisterNodes service
+  - Subscription services (simplified: no monitoredItems deletion, no subscription transfer)
+
+### Limitations:
+- Multi-chunk not supported by client and server (negotiated during connection)
+
+### Cryptography services use constraints
+- Only one authority certificate can be provided by channel (/endpoint)
+  for server (/client) certificates validation,
+- Authority certificate must be present in provided
+  "TrustListLocation" path in DER format and must be named
+  "cacert.der"
 
 ## Current status
 
 - Security policies available: None, Basic256 and Basic256Sha256
 - Security modes available: None, Sign and SignAndEncrypt
 - Server instantiation: several endpoint descriptions, 1 address space, multiple secure channel instances and session instances
-- Server services: getEndpoints, read (no index), write (no index) and simplified browse (no filtering, no continuation point)
-- Server local services: server services are locally accessible through application API
+- Server discovery services: getEndpoints, findServers
+- Server services: read, write, simplified browse (no filtering, no continuation point), subscription (no monitoredItems deletion, no subscription transfer), registerNodes
+- Server local services: read, write, browse and discovery services
 - Server address space modification notification: write notification events are reported through application API
 - Client instantiation: multiple secure channel instances and session instances
 - Client services requests: any discovery service or service on session request. Requests are only forwarded to server (no functional behavior)
