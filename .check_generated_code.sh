@@ -39,6 +39,17 @@ do
     if [[ $nb_lines != 0 ]]; then
         echo "file $f is not up to date in configuration management." | tee -a $LOGPATH
         EXITCODE=1
+    else
+        # Checkout the file to keep old generation timestamp if no change
+
+        # check filename is not empty and guarantee checkout in expected dir
+        filename=$(basename $f)
+        if [ -z "$filename" ];
+        then
+            echo "Error: impossible to checkout $f since filename is empty"
+        else
+            git checkout $CSRCDIR/$filename
+        fi
     fi
 
 done
