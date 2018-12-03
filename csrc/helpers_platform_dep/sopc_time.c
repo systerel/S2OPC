@@ -18,6 +18,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -40,11 +41,11 @@ static char* get_time_string(bool local, bool compact)
         return NULL;
     }
 
-    time_t seconds;
+    time_t seconds = 0;
     SOPC_ReturnStatus status = SOPC_Time_ToTimeT(dt_100ns, &seconds);
     assert(status == SOPC_STATUS_OK);
 
-    time_t milliseconds = (time_t)((dt_100ns / 10000) % 1000);
+    uint32_t milliseconds = (uint32_t)((dt_100ns / 10000) % 1000);
     struct tm tm;
 
     if (local)
@@ -76,7 +77,7 @@ static char* get_time_string(bool local, bool compact)
         return NULL;
     }
 
-    sprintf(buf + 19, compact ? "_%03lu" : ".%03lu", milliseconds);
+    sprintf(buf + 19, compact ? "_%03" PRIu32 : ".%03" PRIu32, milliseconds);
 
     return buf;
 }
