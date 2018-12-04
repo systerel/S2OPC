@@ -274,6 +274,11 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
+        status = SOPC_ToolkitConfig_SetCircularLogPath("./toolkit_test_server_local_service_logs/", true);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
         status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
     }
 

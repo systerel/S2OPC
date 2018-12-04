@@ -590,6 +590,9 @@ int main(int argc, char** argv)
     SOPC_StatusCode status = SOPC_Toolkit_Initialize(event_handler);
     assert(status == SOPC_STATUS_OK);
 
+    status = SOPC_ToolkitConfig_SetCircularLogPath("./bench_tool_logs/", true);
+    assert(status == SOPC_STATUS_OK);
+
     status = SOPC_Toolkit_Configured();
     assert(status == SOPC_STATUS_OK);
 

@@ -278,6 +278,8 @@ int main(int argc, char* argv[])
 
         scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
         assert(scConfigIdx != 0);
+
+        SOPC_ToolkitConfig_SetCircularLogPath("./test_secure_channels_client_logs/", true);
         status = SOPC_Toolkit_Configured();
         assert(status == SOPC_STATUS_OK);
 

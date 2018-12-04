@@ -73,6 +73,11 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
+        status = SOPC_ToolkitConfig_SetCircularLogPath("./s2opc_discovery_logs/", true);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
         status = SOPC_Toolkit_Configured();
         if (SOPC_STATUS_OK == status)
         {

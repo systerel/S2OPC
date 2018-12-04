@@ -33,6 +33,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_time.h" /* SOPC_Sleep, SOPC_TimeReference */
+#include "sopc_toolkit_config.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 #define SKIP_S2OPC_DEFINITIONS
@@ -163,6 +164,8 @@ START_TEST(test_subscription)
                                     .NodesToRead = lrv};
 
     ck_assert(SOPC_LibSub_Initialize(&cfg_cli) == SOPC_STATUS_OK);
+    ck_assert(SOPC_ToolkitConfig_SetCircularLogPath("./check_libsub_subscription_logs/", true) == SOPC_STATUS_OK);
+
     ck_assert(SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id) == SOPC_STATUS_OK);
     ck_assert(SOPC_LibSub_Configured() == SOPC_STATUS_OK);
     ck_assert(SOPC_LibSub_Connect(cfg_id, &con_id) == SOPC_STATUS_OK);
@@ -287,6 +290,7 @@ START_TEST(test_half_broken_subscriptions)
          .token_target = 3}};
 
     ck_assert(SOPC_LibSub_Initialize(&cfg_cli) == SOPC_STATUS_OK);
+    ck_assert(SOPC_ToolkitConfig_SetCircularLogPath("./check_libsub_broken_sub_logs/", true) == SOPC_STATUS_OK);
     for (int i = 0; i < N_CONNECTIONS; ++i)
     {
         ck_assert(SOPC_LibSub_ConfigureConnection(&cfg_con[i], &cfg_ids[i]) == SOPC_STATUS_OK);

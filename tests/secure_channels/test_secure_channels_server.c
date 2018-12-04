@@ -208,6 +208,8 @@ int main(int argc, char* argv[])
         epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);
 
         assert(epConfigIdx != 0);
+
+        SOPC_ToolkitConfig_SetCircularLogPath("./test_secure_channel_server_logs/", true);
         status = SOPC_Toolkit_Configured();
         assert(status == SOPC_STATUS_OK);
 

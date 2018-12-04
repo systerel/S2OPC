@@ -360,6 +360,11 @@ int main(void)
 
     if (SOPC_STATUS_OK == status)
     {
+        status = SOPC_ToolkitConfig_SetCircularLogPath("./toolkit_test_client_logs/", true);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
         status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
     }
 

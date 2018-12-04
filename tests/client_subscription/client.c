@@ -162,6 +162,12 @@ int main(int argc, char* const argv[])
         return 2;
     }
 
+    status = SOPC_ToolkitConfig_SetCircularLogPath("./client_subscription_logs/", true);
+    if (SOPC_STATUS_OK != status)
+    {
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure SDK logger.");
+    }
+
     status = SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id);
     if (SOPC_STATUS_OK != status)
     {

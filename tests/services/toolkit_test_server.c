@@ -221,6 +221,37 @@ static time_t parse_build_date(const char* build_date)
     return mktime(&time);
 }
 
+/* Set the log path and create (or keep existing) directory path built on executable path
+ *  + first argument of main */
+static char* Config_SetLogPath(int argc, char* argv[])
+{
+    if (argc > 1)
+    {
+        char* logDirPath = NULL;
+        size_t logDirPathSize = 2 + strlen("toolkit_test_server") + 1 + strlen(argv[1]) +
+                                7; // "./" + exec_name + _ + test_name + _logs/ + '\0'
+        if (logDirPathSize < 200)
+        {
+            logDirPath = malloc(logDirPathSize * sizeof(char));
+        }
+        if (NULL != logDirPath && (int) (logDirPathSize - 1) == snprintf(logDirPath, logDirPathSize, "./%s_%s_logs/",
+                                                                         "toolkit_test_server", argv[1]))
+        {
+            SOPC_StatusCode status = SOPC_ToolkitConfig_SetCircularLogPath(logDirPath, true);
+            if (status == SOPC_STATUS_OK)
+            {
+                return logDirPath;
+            }
+        }
+        free(logDirPath);
+    }
+    else
+    {
+        SOPC_ToolkitConfig_SetCircularLogPath("./toolkit_test_server_logs/", true);
+    }
+    return NULL;
+}
+
 /* The toolkit test servers shall pass the UACTT tests. Hence it shall authenticate
  * (ids and passwords can be changed in the UACTT settings/Server Test/Session):
  *  - anonymous users
@@ -278,14 +309,11 @@ static const SOPC_UserAuthentication_Functions authentication_uactt_functions = 
 
 int main(int argc, char* argv[])
 {
-    /* avoid unused parameter compiler warning */
-    (void) argc;
-    (void) argv;
-
     // Install signal handler to close the server gracefully when server needs to stop
     signal(SIGINT, Test_StopSignal);
     signal(SIGTERM, Test_StopSignal);
 
+    char* logDirPath = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t epConfigIdx = 0;
     SOPC_Endpoint_Config epConfig;
@@ -446,6 +474,8 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
+        logDirPath = Config_SetLogPath(argc, argv);
+
         status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
     }
 
@@ -606,6 +636,7 @@ int main(int argc, char* argv[])
 
     SOPC_UserAuthentication_FreeManager(&authenticationManager);
     SOPC_UserAuthorization_FreeManager(&authorizationManager);
+    free(logDirPath);
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }
