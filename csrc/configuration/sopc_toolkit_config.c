@@ -37,6 +37,7 @@
 
 #include "sopc_encodeable.h"
 #include "sopc_event_timer_manager.h"
+#include "sopc_filesystem.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mutexes.h"
@@ -441,10 +442,41 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNot
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogPath(const char* logDirPath, uint32_t maxBytes, uint16_t maxFiles)
+SOPC_ReturnStatus SOPC_ToolkitConfig_SetCircularLogPath(const char* logDirPath, bool createDirectory)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (logDirPath != NULL && maxBytes > 100 && maxFiles > 0)
+    if (logDirPath != NULL)
+    {
+        /* Create directory or check it already exists */
+        SOPC_FileSystem_CreationResult mkdirRes = SOPC_FileSystem_mkdir(logDirPath);
+        if (SOPC_FileSystem_Creation_Error_PathAlreadyExists == mkdirRes ||
+            (SOPC_FileSystem_Creation_OK == mkdirRes && true == createDirectory))
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        else
+        {
+            return SOPC_STATUS_INVALID_PARAMETERS;
+        }
+
+        if (tConfig.initDone != false)
+        {
+            Mutex_Lock(&tConfig.mut);
+            if (false == tConfig.locked)
+            {
+                tConfig.logDirPath = logDirPath;
+                status = SOPC_STATUS_OK;
+            }
+            Mutex_Unlock(&tConfig.mut);
+        }
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_ToolkitConfig_SetCircularLogProperties(uint32_t maxBytes, uint16_t maxFiles)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (maxBytes > 100 && maxFiles > 0)
     {
         status = SOPC_STATUS_INVALID_STATE;
         if (tConfig.initDone != false)
@@ -452,7 +484,6 @@ SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogPath(const char* logDirPath, uint32_t
             Mutex_Lock(&tConfig.mut);
             if (false == tConfig.locked)
             {
-                tConfig.logDirPath = logDirPath;
                 tConfig.logMaxBytes = maxBytes;
                 tConfig.logMaxFiles = maxFiles;
                 status = SOPC_STATUS_OK;
