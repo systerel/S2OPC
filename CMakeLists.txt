@@ -24,7 +24,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/bin>)
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
   # Specific flags for CERT rules
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wimplicit -Wreturn-type -Wsequence-point -Wcast-qual -Wuninitialized -Wcast-align -Wstrict-prototypes -Wchar-subscripts -Wformat=2 -Wno-pedantic-ms-format -Wconversion -Wshadow -Wmissing-prototypes")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wimplicit -Wreturn-type -Wsequence-point -Wcast-qual -Wuninitialized -Wcast-align -Wstrict-prototypes -Wchar-subscripts -Wformat=2 -Wconversion -Wshadow -Wmissing-prototypes")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wunreachable-code")
   # Specific flags for CERT rules
@@ -34,6 +34,11 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
 else()
   message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
+
+if(MINGW)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-pedantic-ms-format")
+endif()
+  
 
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
 	# TODO for MSVC
