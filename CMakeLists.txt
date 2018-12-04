@@ -662,13 +662,14 @@ s2opc_unit_test(check_sc_rcv_encrypted_buffer)
 # Validation tests
 
 function(s2opc_server_validation_test name)
+	get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory
 	set(test_name "validation::${name}")
 	add_test(NAME "${test_name}"
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/validation
 		COMMAND
 		"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
 		"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-		"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
+		"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT} ${no_ext_name}"
 		"${PYTHON_EXECUTABLE}" ${name})
 endfunction()
 
