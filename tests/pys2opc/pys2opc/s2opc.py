@@ -22,12 +22,15 @@
 from contextlib import contextmanager
 import time
 import os
+import json
 
 from _pys2opc import ffi, lib as libsub
 from .connection import BaseConnectionHandler
 from .types import DataValue, ReturnStatus, SecurityPolicy, SecurityMode
 from .responses import Response
 
+
+VERSION = json.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'version.json')))['version']
 
 NULL = ffi.NULL
 
@@ -72,8 +75,8 @@ class PyS2OPC:
 
     @staticmethod
     def get_version():
-        """Returns version string"""
-        return ffi.string(libsub.SOPC_LibSub_GetVersion()).decode()
+        """Returns complete version string (PyS2OPC, LibSub, S2OPC)"""
+        return 'PyS2OPC v' + VERSION + ' on ' + ffi.string(libsub.SOPC_LibSub_GetVersion()).decode()
 
     @staticmethod
     @contextmanager

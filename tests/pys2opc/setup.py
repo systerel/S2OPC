@@ -20,6 +20,8 @@
 
 
 from setuptools import setup
+import json
+import os
 
 setup(
     setup_requires=['cffi>=1.4.0'],
@@ -27,9 +29,10 @@ setup(
     cffi_modules=['pys2opc/pys2opc_build.py:ffibuilder'],
     packages=['pys2opc'],
     package_dir={'pys2opc': 'pys2opc'},
+    package_data={'pys2opc': ['version.json']},
 
     name='pys2opc',
-    version='0.0.1',
+    version=json.load(open('pys2opc/version.json'))['version'],
     author='Systerel S2OPC',
     author_email='s2opc-support@systerel.fr',
     description='Python Wrapper for the S2OPC Toolkit',
