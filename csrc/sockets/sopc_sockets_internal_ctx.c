@@ -107,6 +107,7 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx)
         sock->isUsed = false;
         sock->state = SOCKET_STATE_CLOSED;
         sock->waitTreatNetworkEvent = false;
+        sock->socketClosing = false;
         sock->isServerConnection = false;
         sock->listenerSocketIdx = 0;
         sock->listenerConnections = 0;

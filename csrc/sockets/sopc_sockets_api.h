@@ -56,7 +56,7 @@ typedef enum
     INT_SOCKET_CONNECTION_ATTEMPT_FAILED,   /* idx of socket for the rest */
     INT_SOCKET_CONNECTED,
     INT_SOCKET_CLOSE,
-    INT_SOCKET_READY_TO_READ,
+    INT_SOCKET_DATA_READ,
     INT_SOCKET_READY_TO_WRITE
 } SOPC_Sockets_InputEvent;
 

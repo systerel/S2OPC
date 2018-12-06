@@ -52,6 +52,9 @@ typedef struct SOPC_Socket
                                    network event is received and triggered an event to be treated by a socket event
                                    manager, the flag is set and no network event searched until triggered event is
                                    treated. */
+    bool socketClosing; /* Flag indicating to socket network thread the event to close the socket has been raised to
+                           event manager thread, do not try to read again on this socket even if indicated CONNECTED
+                           since it should be closed. */
     bool isNotWritable; // Indicates when a write attempt blocked, the flag is set until a write event occurs on socket
     bool isUsed;        /* Indicates if the socket is free (false) or used (true) */
     // false if it is a client connection, otherwise it is a server connection (linked to a listener)
