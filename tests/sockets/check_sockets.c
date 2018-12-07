@@ -35,6 +35,8 @@
 
 #include "sopc_async_queue.h"
 #include "sopc_event_timer_manager.h"
+#include "sopc_filesystem.h"
+#include "sopc_logger.h"
 #include "sopc_sockets_api.h"
 #include "sopc_toolkit_config_constants.h"
 
@@ -81,10 +83,15 @@ START_TEST(test_sockets)
     uint32_t idx = 0;
     uint8_t byte = 0;
     uint32_t receivedBytes = 0;
-    uint8_t attempts = 0;
+    uint32_t totalReceivedBytes = 0;
 
     SOPC_EventTimer_Initialize();
     SOPC_Sockets_Initialize();
+
+    SOPC_FileSystem_CreationResult mkdirRes = SOPC_FileSystem_mkdir("./check_sockets_logs/");
+    ck_assert(mkdirRes == SOPC_FileSystem_Creation_OK || mkdirRes == SOPC_FileSystem_Creation_Error_PathAlreadyExists);
+    ck_assert_int_eq(true, SOPC_Logger_Initialize("./check_sockets_logs/", 1048576, 5));
+    SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_DEBUG);
 
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_Init(&socketEvents, ""));
 
@@ -142,24 +149,24 @@ START_TEST(test_sockets)
 
     /* SERVER SIDE: receive a msg buffer through connection */
     // Accumulate received bytes in a unique buffer
-    receivedBytes = 0;
-    // Let 5 attempts to retrieve all the bytes
-    attempts = 0;
-    while (receivedBytes < 1000 && attempts < 5)
+    totalReceivedBytes = 0;
+
+    receivedBytes = 1;
+
+    while (totalReceivedBytes < 1000 && receivedBytes != 0)
     {
         SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
         free(ev);
 
         ck_assert(receivedBuffer->length <= 1000);
-        receivedBytes = receivedBytes + receivedBuffer->length;
+        receivedBytes = receivedBuffer->length;
+        totalReceivedBytes = totalReceivedBytes + receivedBytes;
         SOPC_Buffer_Write(accBuffer, receivedBuffer->data, receivedBuffer->length);
         SOPC_Buffer_Delete(receivedBuffer);
-
-        attempts++;
     }
 
-    ck_assert(receivedBytes == 1000 && accBuffer->length == 1000);
+    ck_assert(totalReceivedBytes == 1000 && accBuffer->length == 1000);
     receivedBuffer = NULL;
     SOPC_Buffer_SetPosition(accBuffer, 0);
 
@@ -184,24 +191,22 @@ START_TEST(test_sockets)
 
     /* CLIENT SIDE: receive a msg buffer through connection */
     // Accumulate received bytes in a unique buffer
-    receivedBytes = 0;
-    // Let 5 attempts to retrieve all the bytes
-    attempts = 0;
-    while (receivedBytes < 1000 && attempts < 5)
+    totalReceivedBytes = 0;
+    receivedBytes = 1;
+    while (totalReceivedBytes < 1000 && receivedBytes != 0)
     {
         SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, clientSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
         free(ev);
 
         ck_assert(receivedBuffer->length <= 1000);
-        receivedBytes = receivedBytes + receivedBuffer->length;
+        receivedBytes = receivedBuffer->length;
+        totalReceivedBytes = totalReceivedBytes + receivedBytes;
         SOPC_Buffer_Write(accBuffer, receivedBuffer->data, receivedBuffer->length);
         SOPC_Buffer_Delete(receivedBuffer);
-
-        attempts++;
     }
 
-    ck_assert(receivedBytes == 1000 && accBuffer->length == 1000);
+    ck_assert(totalReceivedBytes == 1000 && accBuffer->length == 1000);
     receivedBuffer = NULL;
     SOPC_Buffer_SetPosition(accBuffer, 0);
 
@@ -229,25 +234,23 @@ START_TEST(test_sockets)
 
     /* SERVER SIDE: receive a msg buffer through connection */
     // Accumulate received bytes in a unique buffer
-    receivedBytes = 0;
-    // Let 10 attempts to retrieve all the bytes
-    attempts = 0;
-    while (receivedBytes < 2 * SOPC_MAX_MESSAGE_LENGTH && attempts < 10)
+    totalReceivedBytes = 0;
+    receivedBytes = 1;
+    while (totalReceivedBytes < 2 * SOPC_MAX_MESSAGE_LENGTH && receivedBytes != 0)
     {
         SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
         free(ev);
 
         ck_assert(receivedBuffer->length <= 2 * SOPC_MAX_MESSAGE_LENGTH);
-        receivedBytes = receivedBytes + receivedBuffer->length;
+        receivedBytes = receivedBuffer->length;
+        totalReceivedBytes = totalReceivedBytes + receivedBytes;
         SOPC_Buffer_Write(accBuffer, receivedBuffer->data, receivedBuffer->length);
         SOPC_Buffer_Delete(receivedBuffer);
-
-        attempts++;
     }
 
-    ck_assert(receivedBytes == 2 * SOPC_MAX_MESSAGE_LENGTH && accBuffer->length == 2 * SOPC_MAX_MESSAGE_LENGTH);
-    ck_assert(attempts > 1);
+    ck_assert(totalReceivedBytes == 2 * SOPC_MAX_MESSAGE_LENGTH && accBuffer->length == 2 * SOPC_MAX_MESSAGE_LENGTH);
+    ck_assert(receivedBytes != totalReceivedBytes);
     receivedBuffer = NULL;
     SOPC_Buffer_SetPosition(accBuffer, 0);
 
