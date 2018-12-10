@@ -24,6 +24,6 @@
 #include <stdint.h>
 
 bool SC_InitNewConnection(uint32_t* newConnectionIdx);
-bool SC_CloseConnection(uint32_t connectionIdx);
+bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure);
 
 #endif // SOPC_SECURE_CONNECTION_STATE_MGR_INTERNAL_H_

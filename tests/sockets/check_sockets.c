@@ -264,7 +264,7 @@ START_TEST(test_sockets)
     SOPC_Buffer_Delete(accBuffer);
 
     /* CLIENT SIDE: receive a msg buffer through connection */
-    SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, clientSocketIdx, NULL, 0);
+    SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, clientSocketIdx, NULL, clientSecureChannelConnectionId);
 
     /* SERVER SIDE: accepted connection (socket level only) */
     {

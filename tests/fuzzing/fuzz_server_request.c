@@ -82,7 +82,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         }
     }
 
-    SC_CloseConnection(conn_idx);
+    SC_CloseConnection(conn_idx, false);
     SOPC_Buffer_Delete(chunkCtx->chunkInputBuffer);
     SOPC_Buffer_Delete(sopc_buffer);
 

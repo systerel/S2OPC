@@ -46,7 +46,8 @@ typedef enum
     SOCKET_CREATE_CLIENT, /* id = secure channel connection index,
                              params = (const char*) URI
                           */
-    SOCKET_CLOSE,         /* id = socket index */
+    SOCKET_CLOSE,         /* id = socket index, auxParam = secure channel connection index  */
+    SOCKET_CLOSE_SERVER,  /* id = socket index, auxParam = endpoint description config index */
     SOCKET_WRITE,         /* id = socket index,
                              params = (SOPC_Buffer*) message buffer
                           */

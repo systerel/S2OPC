@@ -108,7 +108,7 @@ SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx,
     }
 
     printf("               - SOCKET requested to be closed\n");
-    event = Check_Socket_Event_Received(SOCKET_CLOSE, socketIdx, 0);
+    event = Check_Socket_Event_Received(SOCKET_CLOSE, socketIdx, scIdx);
 
     if (NULL == event)
     {

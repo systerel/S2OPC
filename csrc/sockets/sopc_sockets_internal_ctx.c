@@ -104,19 +104,12 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx)
     {
         sock = &socketsArray[socketIdx];
         SOPC_Socket_Close(&sock->sock);
-        sock->isUsed = false;
-        sock->state = SOCKET_STATE_CLOSED;
-        sock->waitTreatNetworkEvent = false;
-        sock->socketClosing = false;
-        sock->isServerConnection = false;
-        sock->listenerSocketIdx = 0;
-        sock->listenerConnections = 0;
+
         if (sock->connectAddrs != NULL)
         {
             SOPC_Socket_AddrInfoDelete((SOPC_Socket_AddressInfo**) &sock->connectAddrs);
         }
-        sock->connectAddrs = NULL;
-        sock->nextConnectAttemptAddr = NULL;
+
         if (sock->writeQueue != NULL)
         {
             // Clear all buffers in the queue
@@ -130,6 +123,11 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx)
             // Clear the queue
             SOPC_AsyncQueue_Free(&sock->writeQueue);
         }
+
+        memset(sock, 0, sizeof(SOPC_Socket));
+
+        sock->socketIdx = socketIdx;
+        SOPC_Socket_Clear(&sock->sock);
     }
 }
 

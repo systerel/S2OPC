@@ -552,23 +552,52 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_EventHandler* handler,
         break;
     case SOCKET_CLOSE:
         assert(eltId < SOPC_MAX_SOCKETS);
-        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CLOSE socketIdx=%" PRIu32, eltId);
+        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CLOSE socketIdx=%" PRIu32 " connectionIdx=%" PRIuPTR, eltId,
+                               auxParam);
         /* id = socket index */
         socketElt = &socketsArray[eltId];
 
-        if (socketElt->isServerConnection != false && socketElt->state != SOCKET_STATE_CLOSED)
+        /* Check upper level request is still valid: expected socket state and upper connection id */
+        if (socketElt->state != SOCKET_STATE_CLOSED && socketElt->state != SOCKET_STATE_LISTENING &&
+            socketElt->connectionId == (uint32_t) auxParam)
         {
-            assert(socketElt->listenerSocketIdx < SOPC_MAX_SOCKETS);
-
-            // Management of number of connection on a listener
-            if (socketsArray[socketElt->listenerSocketIdx].state == SOCKET_STATE_LISTENING &&
-                socketsArray[socketElt->listenerSocketIdx].listenerConnections > 0)
+            if (socketElt->isServerConnection != false)
             {
-                socketsArray[socketElt->listenerSocketIdx].listenerConnections--;
-            }
-        }
+                assert(socketElt->listenerSocketIdx < SOPC_MAX_SOCKETS);
 
-        SOPC_SocketsInternalContext_CloseSocketLock(eltId);
+                // Management of number of connection on a listener
+                if (socketsArray[socketElt->listenerSocketIdx].state == SOCKET_STATE_LISTENING &&
+                    socketsArray[socketElt->listenerSocketIdx].listenerConnections > 0)
+                {
+                    socketsArray[socketElt->listenerSocketIdx].listenerConnections--;
+                }
+            }
+
+            SOPC_SocketsInternalContext_CloseSocketLock(eltId);
+        }
+        else
+        {
+            SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CLOSE ignored due to socketState=%d connectionIdx=%" PRIu32,
+                                   socketElt->state, socketElt->connectionId);
+        }
+        break;
+    case SOCKET_CLOSE_SERVER:
+        assert(eltId < SOPC_MAX_SOCKETS);
+        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CLOSE_SERVER socketIdx=%" PRIu32 " endpointIdx=%" PRIuPTR, eltId,
+                               auxParam);
+        /* id = socket index */
+        socketElt = &socketsArray[eltId];
+
+        /* Check upper level request is still valid: expected socket state and upper connection id */
+        if (socketElt->state == SOCKET_STATE_LISTENING && socketElt->connectionId == (uint32_t) auxParam)
+        {
+            SOPC_SocketsInternalContext_CloseSocketLock(eltId);
+        }
+        else
+        {
+            SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CLOSE ignored due to socketState=%d connectionIdx=%" PRIu32,
+                                   socketElt->state, socketElt->connectionId);
+        }
         break;
     case SOCKET_WRITE:
         assert(eltId < SOPC_MAX_SOCKETS);

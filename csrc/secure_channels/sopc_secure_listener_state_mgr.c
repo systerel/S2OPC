@@ -50,7 +50,7 @@ static bool SOPC_SecureListenerStateMgr_OpeningListener(uint32_t endpointConfigI
     return result;
 }
 
-static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx)
+static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx, bool socketFailure)
 {
     SOPC_SecureListener* scListener = NULL;
     bool result = false;
@@ -72,8 +72,12 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
                     scListener->connectionIdxArray[idx] = 0;
                 }
             }
-            // Close the socket listener
-            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, scListener->socketIndex, NULL, 0);
+            if (socketFailure == false)
+            {
+                // Close the socket listener in case it is not a socket failure (already done)
+                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_SERVER, scListener->socketIndex, NULL,
+                                          (uintptr_t) endpointConfigIdx);
+            }
             memset(scListener, 0, sizeof(SOPC_SecureListener));
         }
         else if (scListener->state == SECURE_LISTENER_STATE_OPENING)
@@ -220,7 +224,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENING)
         {
             // Error case: require socket closure
-            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
+            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_SERVER, (uint32_t) auxParam, NULL, (uintptr_t) eltId);
         }
         else
         {
@@ -259,7 +263,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
 
         if (epConfig != NULL)
         {
-            SOPC_SecureListenerStateMgr_CloseListener(eltId);
+            SOPC_SecureListenerStateMgr_CloseListener(eltId, true);
         }
         // Notify Services layer that EP_OPEN failed
         SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CLOSED, eltId, NULL, SOPC_STATUS_CLOSED);
@@ -313,7 +317,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
         if (epConfig != NULL)
         {
-            result = SOPC_SecureListenerStateMgr_CloseListener(eltId);
+            result = SOPC_SecureListenerStateMgr_CloseListener(eltId, false);
             if (result == false)
             {
                 status = SOPC_STATUS_INVALID_PARAMETERS;
