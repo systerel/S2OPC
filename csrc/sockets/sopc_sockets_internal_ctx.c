@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "sopc_sockets_internal_ctx.h"
@@ -31,8 +32,16 @@
 SOPC_Socket socketsArray[SOPC_MAX_SOCKETS];
 Mutex socketsMutex;
 SOPC_Looper* socketsLooper = NULL;
-SOPC_EventHandler* socketsInputEventHandler = NULL;
+SOPC_AsyncQueue* socketsInputEventQueue = NULL;
 SOPC_EventHandler* socketsEventHandler = NULL;
+
+struct Event
+{
+    SOPC_Sockets_InputEvent event;
+    uint32_t id;
+    void* params;
+    uintptr_t auxParam;
+};
 
 void SOPC_SocketsInternalContext_Initialize()
 {
@@ -43,20 +52,15 @@ void SOPC_SocketsInternalContext_Initialize()
         socketsArray[idx].socketIdx = idx;
         SOPC_Socket_Clear(&(socketsArray[idx].sock));
     }
-    Mutex_Initialization(&socketsMutex);
 
-    socketsLooper = SOPC_Looper_Create();
-    assert(socketsLooper != NULL);
-
-    socketsInputEventHandler = SOPC_EventHandler_Create(socketsLooper, SOPC_SocketsEventMgr_Dispatcher);
-    assert(socketsInputEventHandler != NULL);
+    SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&socketsInputEventQueue, "");
+    assert(SOPC_STATUS_OK == status);
 }
 
 void SOPC_SocketsInternalContext_Clear()
 {
     // Close any not closed remaining socket
     uint32_t idx = 0;
-    Mutex_Lock(&socketsMutex);
     for (idx = 0; idx < SOPC_MAX_SOCKETS; idx++)
     {
         if (false != socketsArray[idx].isUsed)
@@ -66,13 +70,10 @@ void SOPC_SocketsInternalContext_Clear()
         }
     }
 
-    SOPC_Looper_Delete(socketsLooper);
-
-    Mutex_Unlock(&socketsMutex);
-    Mutex_Clear(&socketsMutex);
+    SOPC_AsyncQueue_Free(&socketsInputEventQueue);
 }
 
-SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocketNoLock(bool isListener)
+SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocket(bool isListener)
 {
     SOPC_Socket* result = NULL;
     uint32_t idx = 1; // index 0 is forbidden => reserved for invalid index
@@ -95,7 +96,7 @@ SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocketNoLock(bool isListener)
     return result;
 }
 
-void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx)
+void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
 {
     SOPC_Socket* sock = NULL;
     void* elt = NULL;
@@ -131,16 +132,38 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx)
     }
 }
 
-void SOPC_SocketsInternalContext_CloseSocketLock(uint32_t socketIdx)
-{
-    Mutex_Lock(&socketsMutex);
-    SOPC_SocketsInternalContext_CloseSocketNoLock(socketIdx);
-    Mutex_Unlock(&socketsMutex);
-}
-
 void SOPC_Sockets_Emit(SOPC_Sockets_OutputEvent event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
     assert(socketsEventHandler != NULL);
     SOPC_ReturnStatus status = SOPC_EventHandler_Post(socketsEventHandler, (int32_t) event, eltId, params, auxParam);
     assert(status == SOPC_STATUS_OK);
+}
+
+SOPC_ReturnStatus SOPC_Sockets_EnqueueInputEvent(SOPC_Sockets_InputEvent socketEvent,
+                                                 uint32_t id,
+                                                 void* params,
+                                                 uintptr_t auxParam)
+{
+    struct Event* ev = calloc(1, sizeof(struct Event));
+    if (NULL == ev)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    ev->event = socketEvent;
+    ev->id = id;
+    ev->params = params;
+    ev->auxParam = auxParam;
+    return SOPC_AsyncQueue_BlockingEnqueue(socketsInputEventQueue, ev);
+}
+
+SOPC_ReturnStatus SOPC_Sockets_DequeueAndDispatchInputEvent()
+{
+    struct Event* ev = NULL;
+    SOPC_ReturnStatus status = SOPC_AsyncQueue_NonBlockingDequeue(socketsInputEventQueue, (void**) &ev);
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_SocketsEventMgr_Dispatcher(ev->event, ev->id, ev->params, ev->auxParam);
+        free(ev);
+    }
+    return status;
 }

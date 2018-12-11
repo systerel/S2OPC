@@ -29,8 +29,10 @@
 
 void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
-    assert(socketsInputEventHandler != NULL);
-    SOPC_EventHandler_Post(socketsInputEventHandler, (int32_t) socketEvent, id, params, auxParam);
+    if (SOPC_STATUS_OK == SOPC_Sockets_EnqueueInputEvent(socketEvent, id, params, auxParam))
+    {
+        SOPC_SocketsNetworkEventMgr_InterruptForInputEvent();
+    }
 }
 
 void SOPC_Sockets_Initialize()

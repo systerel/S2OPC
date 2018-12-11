@@ -22,6 +22,7 @@
 
 void SOPC_SocketsNetworkEventMgr_Initialize(void);
 void SOPC_SocketsNetworkEventMgr_Clear(void);
+void SOPC_SocketsNetworkEventMgr_InterruptForInputEvent(void);
 
 /**
  * \brief Maximum time for which select will wait for a network event.

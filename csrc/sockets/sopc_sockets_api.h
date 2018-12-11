@@ -48,17 +48,8 @@ typedef enum
                           */
     SOCKET_CLOSE,         /* id = socket index, auxParam = secure channel connection index  */
     SOCKET_CLOSE_SERVER,  /* id = socket index, auxParam = endpoint description config index */
-    SOCKET_WRITE,         /* id = socket index,
-                             params = (SOPC_Buffer*) message buffer
-                          */
-
-    /* Internal events (network event manager to event manager) */
-    INT_SOCKET_LISTENER_CONNECTION_ATTEMPT, /* idx of listening socket */
-    INT_SOCKET_CONNECTION_ATTEMPT_FAILED,   /* idx of socket for the rest */
-    INT_SOCKET_CONNECTED,
-    INT_SOCKET_CLOSE,
-    INT_SOCKET_READY_TO_READ,
-    INT_SOCKET_READY_TO_WRITE
+    SOCKET_WRITE          /* id = socket index,
+                             params = (SOPC_Buffer*) message buffer */
 } SOPC_Sockets_InputEvent;
 
 typedef enum

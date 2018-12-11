@@ -23,11 +23,25 @@
 #include <stdint.h>
 
 #include "sopc_event_handler.h"
+#include "sopc_sockets_api.h"
+#include "sopc_sockets_internal_ctx.h"
 
-void SOPC_SocketsEventMgr_Dispatcher(SOPC_EventHandler* handler,
-                                     int32_t event,
+typedef enum
+{
+    /* Internal events (network event manager to event manager) */
+    INT_SOCKET_LISTENER_CONNECTION_ATTEMPT = 0x10, /* idx of listening socket */
+    INT_SOCKET_CONNECTION_ATTEMPT_FAILED,          /* idx of socket for the rest */
+    INT_SOCKET_CONNECTED,
+    INT_SOCKET_CLOSE,
+    INT_SOCKET_READY_TO_READ,
+    INT_SOCKET_READY_TO_WRITE
+} SOPC_Sockets_InternalInputEvent;
+
+void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
                                      uint32_t eltId,
                                      void* params,
                                      uintptr_t auxParam);
+
+void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent event, SOPC_Socket* socketElt);
 
 #endif /* SOPC_SOCKETS_EVENT_MGR_H_ */

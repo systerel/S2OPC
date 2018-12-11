@@ -48,10 +48,6 @@ typedef struct SOPC_Socket
                               OR endpoint description configuration index when state = LISTENING only) */
     Socket sock;
     SOPC_AsyncQueue* writeQueue;
-    bool waitTreatNetworkEvent; /* Synchronization flag between socket network thread and event manager thread. Once a
-                                   network event is received and triggered an event to be treated by a socket event
-                                   manager, the flag is set and no network event searched until triggered event is
-                                   treated. */
     bool isNotWritable; // Indicates when a write attempt blocked, the flag is set until a write event occurs on socket
     bool isUsed;        /* Indicates if the socket is free (false) or used (true) */
     // false if it is a client connection, otherwise it is a server connection (linked to a listener)
@@ -68,14 +64,7 @@ typedef struct SOPC_Socket
 
 /** @brief Array containing all sockets that can be used */
 extern SOPC_Socket socketsArray[SOPC_MAX_SOCKETS];
-/** @brief Mutex to lock when using array containing all sockets
- *         or changing isUsed attribute of a socket (which determine validity in array).
- *
- *  Note: necessary since the socket network event manager runs on a cyclic thread
- *        in addition to the event dispatcher thread */
-extern Mutex socketsMutex;
 
-extern SOPC_EventHandler* socketsInputEventHandler;
 extern SOPC_EventHandler* socketsEventHandler;
 
 /** @brief Initialize the array of sockets */
@@ -88,20 +77,29 @@ void SOPC_SocketsInternalContext_Clear(void);
  *         In case socket is not a listnener, the write buffer queue is initialized.
  *  Note: caller must lock the mutex before calling it
  */
-SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocketNoLock(bool isListener);
+SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocket(bool isListener);
 
 /** @brief Close the socket and set it as not used anymore.
- *  Note: caller must lock the mutex before calling it
- *  Note2: defined here since it modifies validity of socket in array
  */
-void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx);
+void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx);
 
-/** @brief Close the socket and set it as not used anymore.
- *  (automatic lock of the mutex during call).
- *  Note: defined here since it modifies validity of socket in array
+/**
+ * @brief Emits an output event to the recorded output event handler socketsEventHandler
  */
-void SOPC_SocketsInternalContext_CloseSocketLock(uint32_t socketIdx);
-
 void SOPC_Sockets_Emit(SOPC_Sockets_OutputEvent event, uint32_t eltId, void* params, uintptr_t auxParam);
+
+/**
+ * @brief Enqueues an input event to the queue of events managed by the socket event manager
+ */
+SOPC_ReturnStatus SOPC_Sockets_EnqueueInputEvent(SOPC_Sockets_InputEvent socketEvent,
+                                                 uint32_t id,
+                                                 void* params,
+                                                 uintptr_t auxParam);
+
+/**
+ * @brief Dequeues an input event of the queue of events and call the event dispatcher of the socket event manager.
+ * If an event was dispatched SOPC_STATUS_OK is returned, if the queue is empty SOPC_STATUS_WOULD_BLOCK is returned.
+ */
+SOPC_ReturnStatus SOPC_Sockets_DequeueAndDispatchInputEvent(void);
 
 #endif /* SOPC_SOCKETS_INTERNAL_CTX_H_ */
