@@ -44,7 +44,7 @@ bool SOPC_Socket_Network_Clear()
     }
     return status;
 }
-
+#include <stdio.h>
 SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Socket_AddressInfo** addrs)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -54,10 +54,11 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Sock
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    if (port != NULL && addrs != NULL)
+    if ((hostname != NULL || port != NULL) && addrs != NULL)
     {
         if (getaddrinfo(hostname, port, &hints, addrs) != 0)
         {
+            printf("ERROR: %d\n", getaddrinfo(hostname, port, &hints, addrs));
             status = SOPC_STATUS_NOK;
         }
         else
@@ -231,6 +232,24 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
             status = SOPC_STATUS_OK;
         }
     }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_Socket_AddressInfo addr;
+    struct sockaddr saddr;
+    memset(&addr, 0, sizeof(SOPC_Socket_AddressInfo));
+    memset(&saddr, 0, sizeof(struct sockaddr));
+    addr.ai_addr = &saddr;
+    addr.ai_addrlen = sizeof(struct sockaddr);
+
+    if (0 == getsockname(to, addr.ai_addr, (int*) &addr.ai_addrlen))
+    {
+        status = SOPC_Socket_Connect(from, &addr);
+    }
+
     return status;
 }
 

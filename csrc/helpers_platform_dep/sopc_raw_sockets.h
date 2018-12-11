@@ -48,7 +48,7 @@ bool SOPC_Socket_Network_Clear(void);
  *  using the hostname and/or port if provided.
  *
  *  \param hostname    The hostname of the machine to connect or used to listen (optional for listening)
- *  \param port        The port number on which to connect or to listen to
+ *  \param port        The port number on which to connect or to listen to (optional for listening if hostname set)
  *  \param addrs       The addressing information to establish or listen a TCP connection over IPV4 and IPV6
  *
  *  \return            GOOD if operation succeeded, BAD otherwise.
@@ -139,6 +139,18 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
 SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr);
+
+/**
+ * \brief Operation to establish a connection using the given socket to the given local socket.
+ *  Both sockets shall have been created with same addressing information protocol.
+ *  The address to connected to is extracted from the target socket.
+ *
+ *  \param from    The socket used for establishing the connection
+ *  \param to      The socket to connect to
+ *
+ *  \return        GOOD if operation succeeded, BAD otherwise.
+ */
+SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to);
 
 /**
  *  \brief Operation to check connection establishment result on a connecting socket
