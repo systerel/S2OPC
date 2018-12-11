@@ -29,7 +29,6 @@
 #include "sopc_sockets_internal_ctx.h"
 
 #include "sopc_atomic.h"
-#include "sopc_buffer.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
 #include "sopc_mutexes.h"
@@ -46,48 +45,13 @@ static struct
     .stopFlag = 0,
 };
 
-static void SOPC_Internal_TriggerNetworkEventToSocketsManager(SOPC_Socket* socket,
-                                                              SOPC_Sockets_InputEvent socketEvent,
-                                                              uint32_t socketIdx)
+static void SOPC_Internal_TriggerEventToSocketsManager(SOPC_Socket* socket,
+                                                       SOPC_Sockets_InputEvent socketEvent,
+                                                       uint32_t socketIdx)
 {
-    if (INT_SOCKET_CLOSE == socketEvent)
-    {
-        socket->socketClosing = true;
-    }
     // Do not treat any network event until triggered event treated
     socket->waitTreatNetworkEvent = true;
     SOPC_Sockets_EnqueueEvent(socketEvent, socketIdx, NULL, 0);
-}
-
-static void on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
-{
-    SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
-
-    if (buffer == NULL)
-    {
-        SOPC_Logger_TraceError("SocketNetworkMgr: failed to allocate new buffer for socketIdx=%" PRIu32, socket_id);
-        SOPC_Internal_TriggerNetworkEventToSocketsManager(socket, INT_SOCKET_CLOSE, socket_id);
-        return;
-    }
-
-    uint32_t readBytes;
-    SOPC_ReturnStatus status = SOPC_Socket_Read(socket->sock, buffer->data, SOPC_MAX_MESSAGE_LENGTH, &readBytes);
-
-    if (status != SOPC_STATUS_OK)
-    {
-        SOPC_Buffer_Delete(buffer);
-        if (status != SOPC_STATUS_WOULD_BLOCK)
-        {
-            SOPC_Internal_TriggerNetworkEventToSocketsManager(socket, INT_SOCKET_CLOSE, socket_id);
-        }
-    }
-    else
-    {
-        status = SOPC_Buffer_SetDataLength(buffer, (uint32_t) readBytes);
-        assert(status == SOPC_STATUS_OK);
-
-        SOPC_Sockets_EnqueueEvent(INT_SOCKET_DATA_READ, socket_id, buffer, 0);
-    }
 }
 
 // Treat sockets events if some are present or wait for events (until timeout)
@@ -111,38 +75,25 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
     for (idx = 0; idx < SOPC_MAX_SOCKETS; idx++)
     {
         uaSock = &(socketsArray[idx]);
-        if (uaSock->isUsed != false && false == uaSock->socketClosing &&
+        if (uaSock->isUsed != false && false == uaSock->waitTreatNetworkEvent &&
             (uaSock->state == SOCKET_STATE_CONNECTED || uaSock->state == SOCKET_STATE_CONNECTING ||
              uaSock->state == SOCKET_STATE_LISTENING))
-        {
-            // Note: accepted state is a state in which we do not know what to do
-            //       in case of data received (no high-level connection set).
-            //       Wait CONNECTED state for those sockets to treat events again.
-
-            if (uaSock->state == SOCKET_STATE_CONNECTED)
+        { // Note: accepted state is a state in which we do not know what to do
+          //       in case of data received (no high-level connection set).
+          //       Wait CONNECTED state for those sockets to treat events again.
+            socketsUsed = true;
+            if (uaSock->state == SOCKET_STATE_CONNECTING ||
+                (uaSock->state == SOCKET_STATE_CONNECTED && uaSock->isNotWritable != false))
             {
-                socketsUsed = true;
-                // Always add a connected socket in read set since we read data locally
-                // (no read event provided to other layers)
+                // Wait for an event indicating connection succeeded/failed in CONNECTING state
+                // or Wait for an event indicating connection is writable again in CONNECTED state
+                SOPC_SocketSet_Add(uaSock->sock, &writeSet);
+            }
+            else
+            {
                 SOPC_SocketSet_Add(uaSock->sock, &readSet);
             }
-            if (false == uaSock->waitTreatNetworkEvent)
-            {
-                socketsUsed = true;
-                if (uaSock->state == SOCKET_STATE_CONNECTING ||
-                    (uaSock->state == SOCKET_STATE_CONNECTED && uaSock->isNotWritable != false))
-                {
-                    // Wait for an event indicating connection succeeded/failed in CONNECTING state
-                    // or Wait for an event indicating connection is writable again in CONNECTED state
-                    SOPC_SocketSet_Add(uaSock->sock, &writeSet);
-                }
-                else if (uaSock->state == SOCKET_STATE_LISTENING)
-                {
-                    // Wait for connection event in LISTENING state
-                    SOPC_SocketSet_Add(uaSock->sock, &readSet);
-                }
-                SOPC_SocketSet_Add(uaSock->sock, &exceptSet);
-            }
+            SOPC_SocketSet_Add(uaSock->sock, &exceptSet);
         }
     }
 
@@ -185,12 +136,12 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                         status = SOPC_Socket_CheckAckConnect(uaSock->sock);
                         if (SOPC_STATUS_OK != status)
                         {
-                            SOPC_Internal_TriggerNetworkEventToSocketsManager(
-                                uaSock, INT_SOCKET_CONNECTION_ATTEMPT_FAILED, idx);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CONNECTION_ATTEMPT_FAILED,
+                                                                       idx);
                         }
                         else
                         {
-                            SOPC_Internal_TriggerNetworkEventToSocketsManager(uaSock, INT_SOCKET_CONNECTED, idx);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CONNECTED, idx);
                         }
                     }
                 }
@@ -202,33 +153,31 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                     {
                         if (uaSock->state == SOCKET_STATE_CONNECTED)
                         {
-                            // Tread READ on socket locally: allow to re-add socket in read set immediately and avoid
-                            // synchronisation with other thread
-                            on_ready_read(uaSock, idx);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_READY_TO_READ, idx);
                         }
                         else if (uaSock->state == SOCKET_STATE_LISTENING)
                         {
-                            SOPC_Internal_TriggerNetworkEventToSocketsManager(
-                                uaSock, INT_SOCKET_LISTENER_CONNECTION_ATTEMPT, uaSock->socketIdx);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_LISTENER_CONNECTION_ATTEMPT,
+                                                                       uaSock->socketIdx);
                         }
                         else
                         {
                             SOPC_Logger_TraceError("SocketNetworkMgr: unexpected read event on socketIdx=%" PRIu32,
                                                    idx);
-                            SOPC_Internal_TriggerNetworkEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                         }
                     }
                     else if (SOPC_SocketSet_IsPresent(uaSock->sock, &writeSet) != false)
                     {
                         if (uaSock->state == SOCKET_STATE_CONNECTED)
                         {
-                            SOPC_Internal_TriggerNetworkEventToSocketsManager(uaSock, INT_SOCKET_READY_TO_WRITE, idx);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_READY_TO_WRITE, idx);
                         }
                         else
                         {
                             SOPC_Logger_TraceError("SocketNetworkMgr: unexpected write event on socketIdx=%" PRIu32,
                                                    idx);
-                            SOPC_Internal_TriggerNetworkEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
+                            SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                         }
                     }
                 }
@@ -238,7 +187,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                 {
                     // TODO: retrieve exception code
                     SOPC_Logger_TraceError("SocketNetworkMgr: exception event on socketIdx=%" PRIu32, idx);
-                    SOPC_Internal_TriggerNetworkEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
+                    SOPC_Internal_TriggerEventToSocketsManager(uaSock, INT_SOCKET_CLOSE, idx);
                 }
             }
         }
@@ -256,6 +205,8 @@ static void* SOPC_SocketsNetworkEventMgr_CyclicThreadLoop(void* nullData)
     {
         SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(SOPC_MAX_CYCLE_TIMEOUT_MS);
         SOPC_EventTimer_CyclicTimersEvaluation();
+        // Sleep used to avoid select (used by TreatSocketsEvents) to block other threads
+        SOPC_Sleep(1);
     }
     return NULL;
 }

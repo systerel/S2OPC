@@ -477,6 +477,37 @@ static void SOPC_SocketsEventMgr_SetInternalEventAsTreated_Lock(SOPC_Socket* soc
     Mutex_Unlock(&socketsMutex);
 }
 
+static SOPC_ReturnStatus on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
+{
+    if (socket->state != SOCKET_STATE_CONNECTED)
+    {
+        // ignore event since socket could have been closed since event was triggered
+        return SOPC_STATUS_OK;
+    }
+
+    SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
+
+    if (buffer == NULL)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    uint32_t readBytes;
+    SOPC_ReturnStatus status = SOPC_Socket_Read(socket->sock, buffer->data, SOPC_MAX_MESSAGE_LENGTH, &readBytes);
+
+    if (status != SOPC_STATUS_OK)
+    {
+        SOPC_Buffer_Delete(buffer);
+        return (status == SOPC_STATUS_WOULD_BLOCK) ? SOPC_STATUS_OK : status;
+    }
+
+    status = SOPC_Buffer_SetDataLength(buffer, (uint32_t) readBytes);
+    assert(status == SOPC_STATUS_OK);
+
+    SOPC_Sockets_Emit(SOCKET_RCV_BYTES, socket->connectionId, (void*) buffer, socket_id);
+    return SOPC_STATUS_OK;
+}
+
 void SOPC_SocketsEventMgr_Dispatcher(SOPC_EventHandler* handler,
                                      int32_t event,
                                      uint32_t eltId,
@@ -774,22 +805,20 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_EventHandler* handler,
 
         SOPC_SocketsInternalContext_CloseSocketLock(eltId);
         break;
-    case INT_SOCKET_DATA_READ:
+    case INT_SOCKET_READY_TO_READ:
         assert(eltId < SOPC_MAX_SOCKETS);
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_DATA_READ socketIdx=%" PRIu32, eltId);
+        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_READY_TO_READ socketIdx=%" PRIu32, eltId);
         socketElt = &socketsArray[eltId];
-        buffer = (SOPC_Buffer*) params;
 
-        if (socketElt->state != SOCKET_STATE_CONNECTED)
+        status = on_ready_read(socketElt, eltId);
+
+        if (status != SOPC_STATUS_OK)
         {
-            // ignore event since socket could have been closed since event was triggered
-            SOPC_Buffer_Delete(buffer);
-            buffer = NULL;
+            SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
+            SOPC_SocketsInternalContext_CloseSocketLock(eltId);
         }
-        else
-        {
-            SOPC_Sockets_Emit(SOCKET_RCV_BYTES, socketElt->connectionId, (void*) buffer, eltId);
-        }
+
+        SOPC_SocketsEventMgr_SetInternalEventAsTreated_Lock(socketElt);
 
         break;
     case INT_SOCKET_READY_TO_WRITE:
