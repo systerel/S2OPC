@@ -247,7 +247,7 @@ class PyS2OPC:
         """
         Change the default path for logs (the current working directory) to logPath. logPath is created
         if it does not exist.
-        This function must be called after PyS2OPC.initialize() and before PyS2OPC.configured().
+        This function must be called after PyS2OPC.initialize() and before PyS2OPC.mark_configured().
 
         Args:
             maxLogSize: The maximum size (best effort) of the log files, before changing the log index.
@@ -264,7 +264,7 @@ class PyS2OPC:
         assert libsub.SOPC_ToolkitConfig_SetLogPath(PyS2OPC._pathLog, maxLogSize, maxFiles) == ReturnStatus.OK
 
     @staticmethod
-    def configured():
+    def mark_configured():
         """
         Must be called after all calls to add_configuration_unsecured() and add_configuration_secured(),
         and before connect() or get_endpoints().

@@ -53,7 +53,7 @@ if __name__ == '__main__':
         config_sec_nosub = PyS2OPC.add_configuration_secured(**join_configs(configuration_parameters_no_subscription, configuration_parameters_security))
         config_unsec_sub = PyS2OPC.add_configuration_unsecured(**configuration_parameters_subscription)
         config_sec_sub = PyS2OPC.add_configuration_secured(**join_configs(configuration_parameters_subscription, configuration_parameters_security))
-        PyS2OPC.configured()
+        PyS2OPC.mark_configured()
         connections = [PyS2OPC.connect(config, PrintSubs) for config in (config_unsec_nosub, config_sec_nosub,
                                                                          config_unsec_sub, config_sec_sub)]
         conn_unsec_nosub, conn_sec_nosub, conn_unsec_sub, conn_sec_sub = connections

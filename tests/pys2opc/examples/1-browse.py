@@ -33,7 +33,7 @@ from _connection_configuration import configuration_parameters_no_subscription
 if __name__ == '__main__':
     with PyS2OPC.initialize():
         config = PyS2OPC.add_configuration_unsecured(**configuration_parameters_no_subscription)
-        PyS2OPC.configured()
+        PyS2OPC.mark_configured()
         with PyS2OPC.connect(config, BaseConnectionHandler) as connection:
             # The tree structure: stores explored nodes
             dNodes = {}  # {parent_node_id: [sub_node_id for each sub_node]}

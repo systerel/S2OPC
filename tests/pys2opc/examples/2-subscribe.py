@@ -54,7 +54,7 @@ if __name__ == '__main__':
     with PyS2OPC.initialize():
         # Subscription parameters are defined in configuration_parameters_no_subscription
         config = PyS2OPC.add_configuration_unsecured(**configuration_parameters_subscription)
-        PyS2OPC.configured()
+        PyS2OPC.mark_configured()
         with PyS2OPC.connect(config, PrintSubs) as connection:
             # Add multiple nodes to the subscription.
             # The subscription always notifies of the first value.

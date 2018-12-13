@@ -300,7 +300,7 @@ if __name__ == '__main__':
             cfg.update(cfgsec)
             add_configuration_function = cfg.pop('add_configuration_function')
             configs.append(add_configuration_function(**cfg))
-        PyS2OPC.configured()
+        PyS2OPC.mark_configured()
 
         # Do the tests on all configurations
         for config in configs:

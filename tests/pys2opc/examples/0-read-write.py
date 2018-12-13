@@ -55,7 +55,7 @@ if __name__ == '__main__':
         # Configure a connection and freeze the S2OPC configurations.
         # See the documentation of this function for all the parameters.
         config = PyS2OPC.add_configuration_unsecured(**configuration_parameters_no_subscription)
-        PyS2OPC.configured()
+        PyS2OPC.mark_configured()
         # Use the configuration to create a new connection.
         # The connection is automatically closed when reaching out of the with context.
         # The default BaseConnectionHandler is used, as we do not intent to use subscription.
