@@ -285,7 +285,7 @@ class BaseConnectionHandler:
         request = Request(payload)
         return self.send_generic_request(request, bWaitResponse=bWaitResponse)
 
-    def browse_nodes(self, nodeIds, bWaitResponse=True):
+    def browse_nodes(self, nodeIds, maxReferencesPerNode=1000, bWaitResponse=True):
         """
         Forges an OpcUa_BrowseResponse and sends it.
         When bWaitResponse, waits for  and returns the BrowseResponse,
@@ -298,7 +298,7 @@ class BaseConnectionHandler:
         view = allocator_no_gc('OpcUa_ViewDescription *')
         view.encodeableType = EncodeableType.ViewDescription  # Leave the ViewDescription filled with NULLs
         payload.View = view[0]
-        payload.RequestedMaxReferencesPerNode = 1000
+        payload.RequestedMaxReferencesPerNode = maxReferencesPerNode
         payload.NoOfNodesToBrowse = len(nodeIds)
         nodesToBrowse = allocator_no_gc('OpcUa_BrowseDescription[]', len(nodeIds))
         for i, snid in enumerate(nodeIds):
