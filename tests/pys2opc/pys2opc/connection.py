@@ -34,8 +34,8 @@ class BaseConnectionHandler:
     The class supports Python's "with" statements.
     In this case, the connection is automatically closed upon exit of the context.
     """
-    def __init__(self, id, configuration):
-        self._id = id
+    def __init__(self, connId, configuration):
+        self._id = connId
         self.configuration = configuration
         self._dRequestContexts = {}  # Stores requests by their context {requestContext: Request()}
         self._dPendingResponses = {}  # Stores available responses {requestContext: Response()}. See get_response()
@@ -116,7 +116,8 @@ class BaseConnectionHandler:
         which tracks available responses (see pop_response).
         It is possible to not call the on_generic_response of the parent class.
         """
-        assert request.requestContext not in self._dPendingResponses, self._dPendingResponses
+        assert request.requestContext not in self._dPendingResponses,\
+            'A request with context {} is still waiting for a response'.format(request.requestContext)
         self._dPendingResponses[request.requestContext] = response
 
     # Disconnection
@@ -167,6 +168,7 @@ class BaseConnectionHandler:
         self._dRequestContexts[reqCtx] = request
         request.timestampSent = time.time()
         status = libsub.SOPC_LibSub_AsyncSendRequestOnSession(self._id, request.payload, request.requestContext)
+        assert status == ReturnStatus.OK, 'AsyncSendRequestOnSession failed with status {}'.format(status)
         if bWaitResponse:
             self._sSkipResponse.add(reqCtx)
             return self._wait_for_response(request)

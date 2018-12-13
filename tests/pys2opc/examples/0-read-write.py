@@ -20,7 +20,7 @@
 
 
 """
-Example script: this script initilizes the toolkit, creates a unsecured connection,
+Example script: this script initializes the toolkit, creates a unsecured connection,
 makes a single read on multiple nodes, prints the result, write something else, reads again,
 and prints the new results.
 """

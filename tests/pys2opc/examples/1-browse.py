@@ -45,7 +45,7 @@ if __name__ == '__main__':
             # The structure to store known-but-yet-to-be-explored nodes
             sCandidates = {'i=84'}  # The Root node
             while sCandidates:
-                lToBrowse = list(sCandidates)[:50]  # Make a request of max 100 nodes
+                lToBrowse = list(sCandidates)[:50]  # Make a request of max 50 nodes
                 # Make the request
                 print('.', end='', flush=True)
                 respBrowse = connection.browse_nodes(lToBrowse)

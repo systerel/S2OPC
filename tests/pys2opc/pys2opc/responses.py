@@ -19,7 +19,7 @@
 # under the License.
 
 
-from _pys2opc import ffi, lib as libsub
+from _pys2opc import ffi
 from .types import EncodeableType, DataValue, BrowseResult, StatusCode
 
 
@@ -38,6 +38,11 @@ class Response:
         self.payload = payload
 
     def get_roundtrip_time(self):
+        """
+        Returns the duration of the asynchronous call through the S²OPC toolkit.
+        Said otherwise, the request timestamp corresponds to the moment that the request is given to the C API,
+        and the response timestamp corresponds to the moment that the Python callback is called by the C API.
+        """
         return self.timestampReceived - self.request.timestampSent
 
 
