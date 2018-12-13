@@ -59,7 +59,8 @@ def _callback_datachanged(connectionId, dataId, c_value):
 
 @ffi.def_extern()
 def _callback_generic_event(connectionId, event, status, responsePayload, responseContext):
-    return PyS2OPC._callback_generic_event(connectionId, event, status, responsePayload, responseContext)
+    timestamp = time.time()
+    return PyS2OPC._callback_generic_event(connectionId, event, status, responsePayload, responseContext, timestamp)
 
 
 
@@ -329,11 +330,11 @@ class PyS2OPC:
         connection._on_datachanged(dataId, value)
 
     @staticmethod
-    def _callback_generic_event(connectionId, event, status, responsePayload, responseContext):
+    def _callback_generic_event(connectionId, event, status, responsePayload, responseContext, timestamp):
         assert connectionId in PyS2OPC._dConnections, 'Event notification on unknown connection'
         connection = PyS2OPC._dConnections[connectionId]
         # It is not possible to store the payload, as it is freed by the caller of the callback.
-        connection._on_response(event, status, responsePayload, responseContext)
+        connection._on_response(event, status, responsePayload, responseContext, timestamp)
 
 
 

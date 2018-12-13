@@ -56,7 +56,7 @@ class BaseConnectionHandler:
                          EncodeableType.BrowseResponse: BrowseResponse,
                          }
 
-    def _on_response(self, event, status, responsePayload, responseContext):
+    def _on_response(self, event, status, responsePayload, responseContext, timestamp):
         """
         Receives an OpcUa_*Response, creates a Response, associates it to a Request both-ways.
         It is called for every response received through the LibSub callback_generic_event.
@@ -64,8 +64,10 @@ class BaseConnectionHandler:
         It is possible to add new elements to this dict to support more response decoders, or override existing decoders.
 
         Warning: responsePayload is freed by the caller, so the structure or its content must be copied before returning.
+
+        The timestamp parameters is computed on the first line of the event callback,
+        hence it is the most accurate instant when the response was received by the Python layer.
         """
-        ts = time.time()
         assert responseContext in self._dRequestContexts, 'Unknown requestContext {}.'.format(responseContext)
         request = self._dRequestContexts[responseContext]
         try:
@@ -75,7 +77,7 @@ class BaseConnectionHandler:
             # Build typed response
             encType = ffi.cast('SOPC_EncodeableType**', responsePayload)
             response = self._dResponseClasses.get(encType[0], Response)(responsePayload)
-            response.timestampReceived = ts
+            response.timestampReceived = timestamp  # Passing the timestamp instead of acquiring it here reduces it by ~10µs
             request.response = response
             response.request = request
             if responseContext not in self._sSkipResponse:
