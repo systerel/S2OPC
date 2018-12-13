@@ -254,14 +254,9 @@ class PyS2OPC:
             maxFiles: The maximum number of log indexes before cycling logs and reusing the first log.
         """
         assert PyS2OPC._initialized and not PyS2OPC._configured
-        if os.path.exists(pathLog):
-            assert os.path.isdir(pathLog), 'Path exists but it is not a directory.'
-        else:
-            os.mkdir(pathLog)
-
-        pathLog = os.path.join(pathLog, '')  # Append a trailing / or \
         PyS2OPC._pathLog = ffi.new('char[]', pathLog.encode())
-        assert libsub.SOPC_ToolkitConfig_SetLogPath(PyS2OPC._pathLog, maxLogSize, maxFiles) == ReturnStatus.OK
+        assert libsub.SOPC_ToolkitConfig_SetCircularLogPath(PyS2OPC._pathLog, True) == ReturnStatus.OK
+        assert libsub.SOPC_ToolkitConfig_SetCircularLogProperties(maxLogSize, maxFiles) == ReturnStatus.OK
 
     @staticmethod
     def mark_configured():
