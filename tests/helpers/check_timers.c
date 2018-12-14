@@ -103,8 +103,7 @@ START_TEST(test_timers)
 
     while (SOPC_Atomic_Int_Get((int32_t*) &timersTriggered) < NB_TIMERS)
     {
-        // Manually trigger the timers evaluation
-        SOPC_EventTimer_CyclicTimersEvaluation();
+        SOPC_Sleep(50);
     }
 
     for (i = 0; i < NB_TIMERS; i++)
@@ -172,8 +171,7 @@ START_TEST(test_timers_with_cancellation)
     i = 0;
     while (SOPC_Atomic_Int_Get((int32_t*) &timersTriggeredWithCancel) < NB_TIMERS_WITH_CANCEL)
     {
-        // Manually trigger the timers evaluation
-        SOPC_EventTimer_CyclicTimersEvaluation();
+        SOPC_Sleep(50);
         // Delete two last timers
         if (i >= NB_TIMERS - 2 && i < NB_TIMERS)
         {

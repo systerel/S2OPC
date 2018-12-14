@@ -295,7 +295,6 @@ static void* SOPC_SocketsNetworkEventMgr_ThreadLoop(void* nullData)
     while (result)
     {
         result = SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(receptionThread.sigServerConnectionSock);
-        SOPC_EventTimer_CyclicTimersEvaluation();
     }
     assert(SOPC_Atomic_Int_Get(&receptionThread.stopFlag) != 0);
     return NULL;

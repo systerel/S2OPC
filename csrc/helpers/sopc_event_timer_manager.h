@@ -34,6 +34,12 @@
 #include "sopc_time.h"
 
 /**
+ * Maximum resolution time for the event timers evaluation
+ *
+ */
+#define SOPC_TIMER_RESOLUTION_MS 50
+
+/**
  * \brief Initialize the event timer manager (necessary to create timers)
  *
  */
@@ -89,13 +95,5 @@ bool SOPC_EventTimer_ModifyPeriodic(uint32_t timerId, uint64_t msPeriod);
  *
  */
 void SOPC_EventTimer_Cancel(uint32_t timerId);
-
-/**
- * \brief Evaluation of the started timers, in case of timeout the given event will be triggered to the given event
- * dispatcher manager
- *
- * Note: this function is automatically called by the toolkit
- */
-void SOPC_EventTimer_CyclicTimersEvaluation(void);
 
 #endif /* SOPC_EVENT_TIMER_MANAGER_H_ */

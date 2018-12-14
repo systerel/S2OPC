@@ -24,11 +24,4 @@ void SOPC_SocketsNetworkEventMgr_Initialize(void);
 void SOPC_SocketsNetworkEventMgr_Clear(void);
 void SOPC_SocketsNetworkEventMgr_InterruptForInputEvent(void);
 
-/**
- * \brief Maximum time for which select will wait for a network event.
- * Important Note: this is also the maximum resolution time for the event timers evaluated on each cycle.
- *
- */
-#define SOPC_MAX_CYCLE_TIMEOUT_MS 50
-
 #endif /* SOPC_SOCKETS_NETWORK_EVENT_MGR_H_ */
