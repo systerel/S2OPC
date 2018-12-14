@@ -38,7 +38,7 @@
 #define EVENT 1000
 
 // Common and nominal
-static uint32_t timersTriggered = 0;
+static int32_t timersTriggered = 0;
 const uint64_t timersDelay[NB_TIMERS] = {1000, 550, 800, 250, 400};
 const uint8_t eltsIdNoCancel[NB_TIMERS] = {3, 4, 1, 2, 0}; // position of timers ordered by increasing delay
 static SOPC_DateTime dateTimeResults[NB_TIMERS] = {0, 0, 0, 0, 0};
@@ -47,7 +47,7 @@ static SOPC_DateTime startTime = 0;
 // With cancellation
 #define NB_TIMERS_WITH_CANCEL 3
 #define NB_TIMERS_TO_CANCEL 2
-static uint32_t timersTriggeredWithCancel = 0;
+static int32_t timersTriggeredWithCancel = 0;
 const uint64_t timersDelayWithCancel[NB_TIMERS] = {250, 400, 800, 550, 1000};
 // position of (not canceled) timers ordered by increasing delay regarding timersDelay array
 static SOPC_DateTime dateTimeResultsWithCancel[NB_TIMERS_WITH_CANCEL] = {0, 0, 0};
@@ -59,7 +59,7 @@ static void timeout_event(SOPC_EventHandler* handler, int32_t event, uint32_t el
     /* avoid unused parameter compiler warning */
     (void) handler;
 
-    uint32_t triggered = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &timersTriggered);
+    uint32_t triggered = (uint32_t) SOPC_Atomic_Int_Get(&timersTriggered);
 
     ck_assert(EVENT == event);
     ck_assert(eltId < NB_TIMERS);
@@ -69,7 +69,7 @@ static void timeout_event(SOPC_EventHandler* handler, int32_t event, uint32_t el
     ck_assert(NULL != dateTime);
     *dateTime = SOPC_Time_GetCurrentTimeUTC();
 
-    SOPC_Atomic_Int_Add((int32_t*) &timersTriggered, 1);
+    SOPC_Atomic_Int_Add(&timersTriggered, 1);
 }
 
 START_TEST(test_timers)
@@ -101,7 +101,7 @@ START_TEST(test_timers)
         ck_assert(timerId != 0);
     }
 
-    while (SOPC_Atomic_Int_Get((int32_t*) &timersTriggered) < NB_TIMERS)
+    while (SOPC_Atomic_Int_Get(&timersTriggered) < NB_TIMERS)
     {
         SOPC_Sleep(50);
     }
@@ -127,7 +127,7 @@ static void canceled_timeout_event(SOPC_EventHandler* handler,
 {
     (void) handler;
 
-    uint32_t triggeredWithCancel = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &timersTriggeredWithCancel);
+    uint32_t triggeredWithCancel = (uint32_t) SOPC_Atomic_Int_Get(&timersTriggeredWithCancel);
 
     ck_assert(EVENT == event);
     ck_assert(eltId < NB_TIMERS);
@@ -137,7 +137,7 @@ static void canceled_timeout_event(SOPC_EventHandler* handler,
     ck_assert(NULL != dateTime);
     *dateTime = SOPC_Time_GetCurrentTimeUTC();
 
-    SOPC_Atomic_Int_Add((int32_t*) &timersTriggeredWithCancel, 1);
+    SOPC_Atomic_Int_Add(&timersTriggeredWithCancel, 1);
 }
 
 START_TEST(test_timers_with_cancellation)
@@ -167,19 +167,26 @@ START_TEST(test_timers_with_cancellation)
         timersId[i] = SOPC_EventTimer_Create(eventHandler, event, timersDelayWithCancel[i]);
         ck_assert(timersId[i] != 0);
     }
-
-    i = 0;
-    while (SOPC_Atomic_Int_Get((int32_t*) &timersTriggeredWithCancel) < NB_TIMERS_WITH_CANCEL)
+    // Create and cancel two last timers
+    for (i = NB_TIMERS_WITH_CANCEL; i < NB_TIMERS; i++)
     {
-        SOPC_Sleep(50);
-        // Delete two last timers
-        if (i >= NB_TIMERS - 2 && i < NB_TIMERS)
-        {
-            // Cancel timers
-            SOPC_EventTimer_Cancel(timersId[i]);
-        }
-        i++;
+        event.eltId = i;
+        event.auxParam = i;
+        event.params = &dateTimeResults[i];
+        timersId[i] = SOPC_EventTimer_Create(eventHandler, event, timersDelayWithCancel[i]);
+        ck_assert(timersId[i] != 0);
     }
+    for (i = NB_TIMERS_WITH_CANCEL; i < NB_TIMERS; i++)
+    {
+        // Cancel timers
+        SOPC_EventTimer_Cancel(timersId[i]);
+    }
+
+    // Wait all timers (even canceled) should have timeout
+    SOPC_Sleep(1500);
+
+    // Check only created and non-canceled timers expired
+    ck_assert(SOPC_Atomic_Int_Get(&timersTriggeredWithCancel) == NB_TIMERS_WITH_CANCEL);
 
     for (i = 0; i < NB_TIMERS_WITH_CANCEL; i++)
     {
