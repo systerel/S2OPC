@@ -25,31 +25,12 @@ BIN_DIR="${MY_DIR}/bin"
 BUILD_DIR="${MY_DIR}/build"
 VALIDATION_DIR="${MY_DIR}/validation"
 PYS2OPC_TESTS_DIR="${MY_DIR}/tests/pys2opc/tests"
+PYS2OPC_BINARY="${BIN_DIR}/pyS2opc"
 TEST_DIR=${BUILD_DIR}
 CTEST_FILE="${TEST_DIR}/CTestTestfile.cmake"
 TAP_DIR="${BUILD_DIR}/bin"
 
-if [ ! -f "${CTEST_FILE}" ]; then
-	TEST_DIR=${BIN_DIR}
-	CTEST_FILE="${TEST_DIR}/CTestTestfile.cmake"
-	TAP_DIR="${BIN_DIR}"
-fi
-
-if [ ! -f "${CTEST_FILE}" ]; then
-	echo "No CTestTestfile in ${BIN_DIR} or ${BUILD_DIR}"
-	echo "Is this a tagged release, or has CMake been run?"
-	exit 1
-fi
-
-rm -f "${TAP_DIR}"/*.tap
-
-cd "${TEST_DIR}" && ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
-CTEST_RET=$?
-
-mv "${VALIDATION_DIR}"/*.tap "${TAP_DIR}"/
-mv "${PYS2OPC_TESTS_DIR}"/*.tap "${TAP_DIR}"/
-
-EXPECTED_TAP_FILES="check_helpers.tap
+CORE_TAP_FILES='check_helpers.tap
 check_libsub.tap
 check_sc_rcv_buffer.tap
 check_sc_rcv_encrypted_buffer.tap
@@ -68,8 +49,37 @@ secure_channel_level_Sign_B256_2048bit.tap
 session_timeout.tap
 toolkit_test_server_local_service.tap
 toolkit_test_suite_client.tap
-validation.tap
-validation_pys2opc.tap"
+validation.tap'
+
+PYS2OPC_TAP_FILES='validation_pys2opc.tap'
+
+if [ ! -f "${CTEST_FILE}" ]; then
+	TEST_DIR=${BIN_DIR}
+	CTEST_FILE="${TEST_DIR}/CTestTestfile.cmake"
+	TAP_DIR="${BIN_DIR}"
+fi
+
+if [ ! -f "${CTEST_FILE}" ]; then
+	echo "No CTestTestfile in ${BIN_DIR} or ${BUILD_DIR}"
+	echo "Is this a tagged release, or has CMake been run?"
+	exit 1
+fi
+
+rm -f "${TAP_DIR}"/*.tap
+
+cd "${TEST_DIR}"
+if [ ! -f "${PYS2OPC_BINARY}" ]; then
+    EXPECTED_TAP_FILES="$CORE_TAP_FILES"
+    ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -E 'pys2opc*'
+    CTEST_RET=$?
+else
+    EXPECTED_TAP_FILES=$CORE_TAP_FILES$PYS2OPC_TAP_FILES
+    ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
+    CTEST_RET=$?
+    mv "${PYS2OPC_TESTS_DIR}"/*.tap "${TAP_DIR}"/
+fi
+
+mv "${VALIDATION_DIR}"/*.tap "${TAP_DIR}"/
 
 ACTUAL_TAP_FILES=$(LANG=C ls "${TAP_DIR}"/*.tap | sed "s|${TAP_DIR}/||")
 
