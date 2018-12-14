@@ -189,7 +189,7 @@ test-uactt:
     paths:
       - 'build/'
       - 'acceptances_tests/*.log'
-    when: on_failure
+    when: always
     expire_in: '1 month'
 
 ###
