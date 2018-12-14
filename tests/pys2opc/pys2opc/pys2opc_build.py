@@ -20,6 +20,7 @@
 
 
 from cffi import FFI
+import os
 
 ffibuilder = FFI()
 # TODO: generate this file
@@ -54,7 +55,21 @@ source = r'''
 # However, it requires a gcc.
 # The other way, dlopen, loads the ABI, is less safe, slower, but only requires the .so/.dll
 # TODO: automatize configuration
-ffibuilder.set_source('_pys2opc',
+
+if os.name == 'nt':
+# Windows
+    ffibuilder.set_source('_pys2opc',
+                      source,
+                      extra_link_args=['Advapi32.lib', 'ws2_32.lib', 'client_subscription.lib', 's2opc.lib', 'mbedcrypto.lib', 'mbedtls.lib', 'mbedx509.lib'],
+                      include_dirs=['.'],
+                      library_dirs=['../client_subscription/',
+                                    '../../build/lib/',
+                                    '../../build/mbedtls_dir' #mbedtls libraries shall be copied here
+                                    '.'],  # Ease compilation outside of the S2OPC project
+                     )
+else:
+# Linux
+    ffibuilder.set_source('_pys2opc',
                       source,
                       extra_link_args=['-lclient_subscription', '-ls2opc', '-lmbedcrypto', '-lmbedtls', '-lmbedx509'],
                       include_dirs=['.'],
