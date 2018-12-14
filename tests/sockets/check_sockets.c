@@ -72,6 +72,41 @@ static SOPC_Event* expect_event(int32_t event, uint32_t id)
     return ev;
 }
 
+static void expect_events(int32_t event1,
+                          uint32_t id1,
+                          SOPC_Event** ev1,
+                          int32_t event2,
+                          uint32_t id2,
+                          SOPC_Event** ev2)
+{
+    bool event1_received = false;
+    bool event2_received = false;
+    SOPC_Event* ev = NULL;
+    while (!event1_received || !event2_received)
+    {
+        ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingDequeue(socketEvents, (void**) &ev));
+        if (event2 == ev->event && !event2_received)
+        {
+            ck_assert_int_eq(event2, ev->event);
+            ck_assert_uint_eq(id2, ev->eltId);
+            event2_received = true;
+            *ev2 = ev;
+        }
+        else if (!event1_received)
+        {
+            ck_assert_int_eq(event1, ev->event);
+            ck_assert_uint_eq(id1, ev->eltId);
+            event1_received = true;
+            *ev1 = ev;
+        }
+        else
+        {
+            ck_assert_int_eq(event1, ev->event);
+            ck_assert_uint_eq(id1, ev->eltId);
+        }
+    }
+}
+
 START_TEST(test_sockets)
 {
     uint32_t serverSocketIdx = 0;
@@ -119,18 +154,19 @@ START_TEST(test_sockets)
     SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, clientSecureChannelConnectionId, (void*) uri, 0);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    /* SERVER SIDE: accepted connection (socket level only) */
+    /* SERVER SIDE: accepted connection (socket level only)
+     * CLIENT SIDE: socket connection done (it does not mean accepted)
+     * Note: both events can occur first, therefore check both at same time
+     * */
     {
-        SOPC_Event* ev = expect_event(SOCKET_LISTENER_CONNECTION, endpointDescConfigId);
-        serverSocketIdx = (uint32_t) ev->auxParam;
-        free(ev);
-    }
-
-    /* CLIENT SIDE: accepted socket connection */
-    {
-        SOPC_Event* ev = expect_event(SOCKET_CONNECTION, clientSecureChannelConnectionId);
-        clientSocketIdx = (uint32_t) ev->auxParam;
-        free(ev);
+        SOPC_Event* ev1 = NULL;
+        SOPC_Event* ev2 = NULL;
+        expect_events(SOCKET_LISTENER_CONNECTION, endpointDescConfigId, &ev1, SOCKET_CONNECTION,
+                      clientSecureChannelConnectionId, &ev2);
+        serverSocketIdx = (uint32_t) ev1->auxParam;
+        clientSocketIdx = (uint32_t) ev2->auxParam;
+        free(ev1);
+        free(ev2);
     }
 
     /* SERVER SIDE: finish accepting connection (secure channel level) */
