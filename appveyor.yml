@@ -51,6 +51,10 @@ test_script:
         cd %ROOT_DIR%
         mkdir build
         cd build
+        mkdir lib
+        cp "%MBEDTLS_BUILD_DIR%\library\RelWithDebInfo\mbedtls.lib" lib
+        cp "%MBEDTLS_BUILD_DIR%\library\RelWithDebInfo\mbedx509.lib" lib
+        cp "%MBEDTLS_BUILD_DIR%\library\RelWithDebInfo\mbedcrypto.lib" lib
         cmake -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/RelWithDebInfo/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/RelWithDebInfo/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/RelWithDebInfo/mbedcrypto.lib -DCHECK_INCLUDE_DIR=%CHECK_BUILD_DIR%\;%CHECK_BUILD_DIR%/src -DCHECK_LIBRARY=%CHECK_BUILD_DIR%/src/RelWithDebInfo/check.lib\;%CHECK_BUILD_DIR%/lib/RelWithDebInfo/compat.lib .. -G "Visual Studio 15 2017 Win64"
         cmake --build . --config RelWithDebInfo
     - "ctest -T test -C RelWithDebInfo --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536"
