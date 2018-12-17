@@ -43,13 +43,13 @@ if __name__ == '__main__':
         dNodes['i=87'] = []  # Views
         # The structure to store known-but-yet-to-be-explored nodes
         sCandidates = {'i=84'}  # The Root node
-        try:
-            with PyS2OPC.connect(config, BaseConnectionHandler) as connection:
+        with PyS2OPC.connect(config, BaseConnectionHandler) as connection:
+            try:
                 while sCandidates:
                     lToBrowse = list(sCandidates)[:50]  # Make a request of max 50 nodes
                     # Make the request
                     print('.', end='', flush=True)
-                    respBrowse = connection.browse_nodes(lToBrowse)
+                    respBrowse = connection.browse_nodes(lToBrowse, maxReferencesPerNode=100)
                     # Put the browsed node face to its browse result
                     for a, bwsr in zip(lToBrowse, respBrowse.results):
                         sCandidates.remove(a)
@@ -73,19 +73,22 @@ if __name__ == '__main__':
                 # Finds missing names (mostly, the root node)
                 lToName = [node for node in dNodes if node not in dNames]
                 respRead = connection.read_nodes(lToName, [AttributeId.BrowseName]*len(lToName))
-                print('x')
                 for node, dvName in zip(lToName, respRead.results):
                     dNames[node] = dvName.variant[1]
-        except:
-            print('Connection failed, printing partial Address Space')
+            except:
+                print('Connection failed, printing partial Address Space')
 
     def print_recurs(node, iIndent=0, sPrinted=set()):
         global dNodes, dNames
         """
         Prints subnodes indented, and keep in memory which nodes were printed, hence avoiding loops.
         """
-        print('  '*iIndent + dNames[node] + ('   ({})'.format(node) if not dNodes[node] else ''))
-        for subnode in dNodes[node]:
+        if node in dNames and node in dNodes:
+            print('  '*iIndent + dNames[node] + ('   ({})'.format(node) if not dNodes[node] else ''))
+        else:
+            print('  '*iIndent + node)
+        for subnode in dNodes.get(node, []):
             print_recurs(subnode, iIndent+1, sPrinted | {node})
 
     print_recurs('i=84')
+    print('\nNombre d\'items affiches: {}'.format(sum(1 for v in dNodes.values() for _ in v)))
