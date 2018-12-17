@@ -798,7 +798,7 @@ endif(ENABLE_TESTING)
 # The library is built by python. It may use the shared library but it must not be built with ASan.
 # The problem with ASan is to embed a dynamic library compiled with ASan into Python, which is not compiled with ASan.
 # The compilation is not done with clang-analyszer either, as this would analyze CFFI-generated code.
-if(NOT WIN32 AND NOT CROSS_COMPILE AND NOT WITH_ASAN AND NOT WITH_TSAN AND NOT WITH_UBSAN AND NOT WITH_CLANG_ANALYZER AND NOT WITH_COVERAGE AND NOT WITH_COVERITY)
+if(NOT CROSS_COMPILE AND NOT WITH_ASAN AND NOT WITH_TSAN AND NOT WITH_UBSAN AND NOT WITH_CLANG_ANALYZER AND NOT WITH_COVERAGE AND NOT WITH_COVERITY)
   set(PYS2OPC_PATH "${CMAKE_SOURCE_DIR}/tests/pys2opc")
   set(PYS2OPC_FILES "${PYS2OPC_PATH}/pys2opc/__init__.py"
                     "${PYS2OPC_PATH}/pys2opc/connection.py"
