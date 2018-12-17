@@ -110,8 +110,9 @@ START_TEST(test_timers)
     {
         ck_assert(dateTimeResults[i] >= 0 && startTime >= 0 && dateTimeResults[i] >= startTime);
         elapsedMs = ((uint64_t) dateTimeResults[i] - (uint64_t) startTime) / 10000; // 100 nanoseconds to milliseconds
-        // Check computed elapsed time value (on non monotonic clock) is delayMs +/- 50ms
-        ck_assert(timersDelay[i] - 50 < elapsedMs && elapsedMs < timersDelay[i] + 50);
+        // Check computed elapsed time value (on non monotonic clock) is delayMs +/- 100ms
+        ck_assert_uint_le(timersDelay[i] - 100, elapsedMs);
+        ck_assert_uint_le(elapsedMs, timersDelay[i] + 100);
     }
 
     SOPC_Looper_Delete(looper);
@@ -193,8 +194,9 @@ START_TEST(test_timers_with_cancellation)
         ck_assert(dateTimeResultsWithCancel[i] >= 0 && startTime >= 0 && dateTimeResultsWithCancel[i] >= startTime);
         elapsedMs =
             ((uint64_t) dateTimeResultsWithCancel[i] - (uint64_t) startTime) / 10000; // 100 nanoseconds to milliseconds
-        // Check computed elapsed time value (on non monotonic clock) is delayMs +/- 50ms
-        ck_assert(timersDelayWithCancel[i] - 50 < elapsedMs && elapsedMs < timersDelayWithCancel[i] + 50);
+        // Check computed elapsed time value (on non monotonic clock) is delayMs +/- 100ms
+        ck_assert_uint_le(timersDelayWithCancel[i] - 100, elapsedMs);
+        ck_assert_uint_le(elapsedMs, timersDelayWithCancel[i] + 100);
     }
 
     SOPC_Looper_Delete(looper);
