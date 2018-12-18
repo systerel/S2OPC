@@ -37,7 +37,7 @@
 
 static struct
 {
-    bool initDone;
+    int32_t initDone;
     int32_t stopFlag;
     Thread thread;
     Socket sigServerListeningSock;  /* A local server used to connect a local client for signaling interruption */
@@ -58,7 +58,6 @@ static bool SOPC_Internal_InitSocketsToInterruptSelect(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool serverListening = false;
-    bool clientConnected = false;
 
     SOPC_Socket_AddressInfo* addrs = NULL;
     SOPC_Socket_AddressInfo* iter = NULL;
@@ -76,7 +75,7 @@ static bool SOPC_Internal_InitSocketsToInterruptSelect(void)
         iter = addrs;
         while (!serverListening && iter != NULL)
         {
-            status = SOPC_Socket_CreateNew(iter, true, true, &receptionThread.sigServerListeningSock);
+            status = SOPC_Socket_CreateNew(iter, true, false, &receptionThread.sigServerListeningSock);
             if (SOPC_STATUS_OK == status)
             {
                 status = SOPC_Socket_Listen(receptionThread.sigServerListeningSock, iter);
@@ -109,32 +108,10 @@ static bool SOPC_Internal_InitSocketsToInterruptSelect(void)
 
     SOPC_Socket_AddrInfoDelete(&addrs);
 
-    /* Connection already initiated, we are ensured to receive events on sockets */
-    while (SOPC_STATUS_OK == status && !clientConnected)
-    {
-        SOPC_SocketSet_Add(receptionThread.sigServerListeningSock, &readSet);
-        SOPC_SocketSet_Add(receptionThread.sigServerListeningSock, &exceptSet);
+    /* Blocking accept on socket connection that will be used to interrupt "select" on sockets */
+    status = SOPC_Socket_Accept(receptionThread.sigServerListeningSock, true, &receptionThread.sigServerConnectionSock);
 
-        // Blocking call, returns number of ready descriptor or -1 in case of error
-        int32_t nbReady = SOPC_Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, 0);
-
-        if (nbReady > 0)
-        {
-            if (SOPC_SocketSet_IsPresent(receptionThread.sigServerListeningSock, &readSet))
-            {
-                /* Listening server socket received a connection request: accepts it */
-                status = SOPC_Socket_Accept(receptionThread.sigServerListeningSock, true,
-                                            &receptionThread.sigServerConnectionSock);
-                clientConnected = true;
-            }
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
-
-    return (SOPC_STATUS_OK == status && clientConnected);
+    return SOPC_STATUS_OK == status;
 }
 
 static bool SOPC_Internal_ConsumeSigBytes(Socket sigSocket, SOPC_SocketSet* readSet)
@@ -302,7 +279,7 @@ static void* SOPC_SocketsNetworkEventMgr_ThreadLoop(void* nullData)
 
 static bool SOPC_SocketsNetworkEventMgr_LoopThreadStart(void)
 {
-    if (receptionThread.initDone)
+    if (SOPC_Atomic_Int_Get(&receptionThread.initDone))
     {
         return false;
     }
@@ -322,14 +299,14 @@ static bool SOPC_SocketsNetworkEventMgr_LoopThreadStart(void)
         return false;
     }
 
-    receptionThread.initDone = true;
+    SOPC_Atomic_Int_Set(&receptionThread.initDone, true);
 
     return true;
 }
 
 static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
 {
-    if (!receptionThread.initDone)
+    if (!SOPC_Atomic_Int_Get(&receptionThread.initDone))
     {
         return;
     }
@@ -337,7 +314,7 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     // stop the reception thread
-    SOPC_Atomic_Int_Add(&receptionThread.stopFlag, 1);
+    SOPC_Atomic_Int_Set(&receptionThread.stopFlag, 1);
 
     /* Send signal to interrupt "select" and stop */
     SOPC_Socket_Close(&receptionThread.sigClientSock);
@@ -345,7 +322,11 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
     status = SOPC_Thread_Join(receptionThread.thread);
     assert(status == SOPC_STATUS_OK);
 
-    receptionThread.initDone = false;
+    /* Close all sockets created to interrupt select */
+    SOPC_Socket_Close(&receptionThread.sigServerConnectionSock);
+    SOPC_Socket_Close(&receptionThread.sigServerListeningSock);
+
+    SOPC_Atomic_Int_Set(&receptionThread.initDone, false);
 }
 
 void SOPC_SocketsNetworkEventMgr_Initialize()
@@ -364,7 +345,7 @@ void SOPC_SocketsNetworkEventMgr_InterruptForInputEvent()
     const uint8_t data = 0;
     uint32_t length = 1;
 
-    if (!receptionThread.initDone)
+    if (!SOPC_Atomic_Int_Get(&receptionThread.initDone))
     {
         return;
     }
