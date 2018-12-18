@@ -1,4 +1,0 @@
-V	21180910154811Z		FA	unknown	/C=FR/ST=France/O=Systerel/CN=S2OPC Century Certificate for Test Clients
-V	21180910154813Z		FB	unknown	/C=FR/ST=France/O=Systerel/CN=S2OPC Century Certificate for Test Clients
-V	21180910154816Z		FC	unknown	/C=FR/ST=France/O=Systerel/CN=S2OPC Century Certificate for Test Servers
-V	21180910154819Z		FD	unknown	/C=FR/ST=France/O=Systerel/CN=S2OPC Century Certificate for Test Servers

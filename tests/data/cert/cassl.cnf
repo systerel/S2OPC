@@ -34,34 +34,51 @@ emailAddress        = optional
 
 ####################################################################
 [ req ]
+prompt = no
 distinguished_name  = ca_distinguished_name
 x509_extensions     = ca_extensions
 string_mask         = utf8only
+req_extensions      = req_ext
 
 ####################################################################
 [ ca_distinguished_name ]
-countryName                 = Country Name (2 letter code)
-countryName_default         = FR
-stateOrProvinceName         = State or Province Name (full name)
-stateOrProvinceName_default = France
-organizationName            = Organization Name (eg, company)
-organizationName_default    = Systerel
-commonName                  = Common Name (e.g. server FQDN or YOUR name)
-commonName_default          = S2OPC Century Certificate Authority for Tests
-emailAddress                = Email Address
-emailAddress_default        = s2opc-support@systerel.fr
+countryName         = FR
+stateOrProvinceName = France
+organizationName    = Systerel
+commonName          = S2OPC Century Certificate Authority for Tests
+emailAddress        = s2opc-support@systerel.fr
 
 ####################################################################
 [ ca_extensions ]
-subjectKeyIdentifier    = hash
-authorityKeyIdentifier  = keyid:always, issuer
-basicConstraints        = critical, CA:true
-keyUsage                = keyCertSign, cRLSign
+# Extensions for a typical CA (`man x509v3_config`).
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
 
 ####################################################################
-[ signing_req ]
-subjectKeyIdentifier    = hash
-authorityKeyIdentifier  = keyid,issuer
-basicConstraints        = CA:FALSE
-keyUsage                = digitalSignature, keyEncipherment
+[ usr_cert ]
+# Extensions for client certificates (`man x509v3_config`).
+basicConstraints = CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth, emailProtection
 
+####################################################################
+[ server_cert ]
+# Extensions for server certificates (`man x509v3_config`).
+basicConstraints = CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth, clientAuth
+
+####################################################################
+[ req_ext]
+subjectAltName = @alternate_names
+
+####################################################################
+[ alternate_names ]
+URI     = urn:S2OPC:localhost  # ApplicationUri
+DNS.1   = localhost
