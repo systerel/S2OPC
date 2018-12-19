@@ -254,7 +254,7 @@ class BaseConnectionHandler:
         types = types or [None] * len(nodeIds)
         for dv, ty in zip(datavalues, types):
             if dv.variantType is not None:
-                if ty is not None or ty != dv.variantType:
+                if ty is not None and ty != dv.variantType:
                     raise ValueError('Inconsistent type, type of datavalue is different from type given in types list')
                 sopc_types.append(dv.variantType)
             else:
