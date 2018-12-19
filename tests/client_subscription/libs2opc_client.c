@@ -668,9 +668,11 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId)
     /* Wait for the connection to be closed */
     if (SOPC_STATUS_OK == status)
     {
-        while (!SOPC_StaMac_IsError(pSM) && SOPC_StaMac_IsConnected(pSM))
+        int count = 0;
+        while (!SOPC_StaMac_IsError(pSM) && SOPC_StaMac_IsConnected(pSM) && count < 100)
         {
-            SOPC_Sleep(1);
+            SOPC_Sleep(10);
+            count += 1;
         }
     }
 
