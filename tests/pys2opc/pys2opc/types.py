@@ -75,7 +75,24 @@ class ReturnStatus:
     NOT_SUPPORTED      = libsub.SOPC_STATUS_NOT_SUPPORTED
 
 
-class StatusCode:
+class NamedMembers:
+    """
+    This class has the class function :func:`get_name_from_id` which takes an id of a member of the class
+    and returns the name of the member that has this value.
+    """
+    _dCodeNames = None
+    @classmethod
+    def get_name_from_id(cls, memberId):
+        """
+        Returns the name of the class member that has the :param:`memberId`.
+        Exclude getters and private members.
+        """
+        if cls._dCodeNames is None:
+            cls._dCodeNames = {getattr(cls, name): name for name in dir(cls) if not name.startswith('get_') and not name.startswith('_')}
+        return cls._dCodeNames[memberId]
+
+
+class StatusCode(NamedMembers):
     """
     The OpcUa status codes. Directly generated from csrc/opcua_types/opcua_statuscodes.h.
     Status codes are used in various places among the OPC-UA protocol.
@@ -981,7 +998,7 @@ class Variant:
         return variant
 
 
-class VariantType:
+class VariantType(NamedMembers):
     """
     A copy of the SOPC_BuiltinId type.
     """
@@ -1099,7 +1116,7 @@ class DataValue:
         return datavalue
 
 
-class AttributeId:
+class AttributeId(NamedMembers):
     """
     The constants to use for the attributes to read or write.
     These are accessors to the SOPC_LibSub_AttributeId C enum.
@@ -1128,7 +1145,7 @@ class AttributeId:
     UserExecutable          = libsub.SOPC_LibSub_AttributeId_UserExecutable
 
 
-class EncodeableType:
+class EncodeableType(NamedMembers):
     """
     The known SOPC_EncodeableTypes*, used in the request and response OpcUa_* types.
     """
@@ -1194,7 +1211,7 @@ class Reference:
         self.typeDefinition  = typeDefinition
 
 
-class SecurityPolicy:
+class SecurityPolicy(NamedMembers):
     """
     The available security policies. These are accessors to the SOPC_SecurityPolicy_* strings.
     """
@@ -1203,7 +1220,7 @@ class SecurityPolicy:
     Basic256       = libsub.SOPC_SecurityPolicy_Basic256_URI
     Basic256Sha256 = libsub.SOPC_SecurityPolicy_Basic256Sha256_URI
 
-class SecurityMode:
+class SecurityMode(NamedMembers):
     """
     The available security modes. These are accessors to the OpcUa_MessageSecurityMode enum.
     """
@@ -1212,7 +1229,7 @@ class SecurityMode:
     Sign           = libsub.OpcUa_MessageSecurityMode_Sign
     SignAndEncrypt = libsub.OpcUa_MessageSecurityMode_SignAndEncrypt
 
-class NodeClass:
+class NodeClass(NamedMembers):
     """
     The available node classes. These are accessors to the OpcUa_NodeClass enum.
     """
