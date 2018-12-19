@@ -317,7 +317,7 @@ class PyS2OPC:
     @staticmethod
     def _callback_disconnected(clientId):
         if clientId not in PyS2OPC._dConnections:
-            print('Disconnected unknown client', clientId)
+            print('# Warning: Disconnected unknown client', clientId, file=sys.stderr)
             return
         connection = PyS2OPC._dConnections.pop(clientId)
         connection.on_disconnect()

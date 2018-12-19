@@ -72,6 +72,8 @@ class BaseConnectionHandler:
         request = self._dRequestContexts[responseContext]
         try:
             if event == libsub.SOPC_LibSub_ApplicativeEvent_SendFailed:
+                self._connected = False  # Prevent further sends
+                self.disconnect()  # Explicitly disconnects to free S²OPC resources
                 raise RuntimeError('Request was not sent with status 0x{:08X}'.format(status))
             assert event == libsub.SOPC_LibSub_ApplicativeEvent_Response
             # Build typed response
