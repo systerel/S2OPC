@@ -997,6 +997,15 @@ class Variant:
                 raise ValueError('Python to SOPC_Variant conversion not supported for the given type {}.'.format(sopc_type))
         return variant
 
+    def get_python(self):
+        """
+        Returns the python object wrapped by this Variant.
+        Use this when it is known that the Variant object will not be reused (e.g. by a future call to write_nodes).
+
+        Does not copy the object before returning it.
+        """
+        return self._value
+
 
 class VariantType(NamedMembers):
     """
@@ -1114,6 +1123,16 @@ class DataValue:
         datavalue.SourcePicoSeconds = 0
         datavalue.ServerPicoSeconds = 0
         return datavalue
+
+    def get_python(self):
+        """
+        Returns the python object wrapped by this DataValue.
+        Accessor to Variant.get_python().
+        Use this when it is known that the Variant object will not be reused (e.g. by a future call to write_nodes).
+
+        Does not copy the object before returning it.
+        """
+        return self.variant.get_python()
 
 
 class AttributeId(NamedMembers):
