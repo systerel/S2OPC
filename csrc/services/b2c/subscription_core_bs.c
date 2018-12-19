@@ -55,7 +55,6 @@ void subscription_core_bs__INITIALISATION(void)
 
 void subscription_core_bs__subscription_core_bs_UNINITIALISATION(void)
 {
-    assert(nodeIdToMonitoredItemQueue != NULL);
     SOPC_Dict_Delete(nodeIdToMonitoredItemQueue);
     nodeIdToMonitoredItemQueue = NULL;
 }
