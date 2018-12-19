@@ -45,6 +45,7 @@ START_TEST(test_username_password)
     ck_assert(NULL != g_pSM);
     ck_assert(StateMachine_ConfigureMachine(g_pSM) == SOPC_STATUS_OK);
     ck_assert(SOPC_ToolkitConfig_SetCircularLogPath("./test_session_logs/", true) == SOPC_STATUS_OK);
+    ck_assert(SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG) == SOPC_STATUS_OK);
     ck_assert(SOPC_Toolkit_Configured() == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartSession_UsernamePassword(g_pSM, "UserName", "user", (const uint8_t*) "password",

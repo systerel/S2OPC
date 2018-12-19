@@ -280,6 +280,8 @@ int main(int argc, char* argv[])
         assert(scConfigIdx != 0);
 
         SOPC_ToolkitConfig_SetCircularLogPath("./test_secure_channels_client_logs/", true);
+        SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
+
         status = SOPC_Toolkit_Configured();
         assert(status == SOPC_STATUS_OK);
 

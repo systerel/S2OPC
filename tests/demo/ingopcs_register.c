@@ -77,12 +77,12 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
+        status = SOPC_ToolkitConfig_SetCircularLogPath("./s2opc_register_logs/", true);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitConfig_SetCircularLogPath("./s2opc_register_logs/", true);
+        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
     }
 
     if (SOPC_STATUS_OK == status)

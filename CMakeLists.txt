@@ -819,13 +819,14 @@ if(NOT WIN32 AND NOT CROSS_COMPILE AND NOT WITH_ASAN AND NOT WITH_TSAN AND NOT W
   if(ENABLE_TESTING)
 
   function(pys2opc_validation_test name)
+      get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory
       set(test_name "validation::${name}")
       add_test(NAME "${test_name}"
                WORKING_DIRECTORY "${PYS2OPC_PATH}/tests"
                COMMAND
                    "${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
                    "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-                   "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
+                   "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT} ${no_ext_name}"
                    "./${name}"
                )
       set_tests_properties(${test_name} PROPERTIES
