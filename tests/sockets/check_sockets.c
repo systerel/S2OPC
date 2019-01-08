@@ -119,6 +119,7 @@ START_TEST(test_sockets)
     uint8_t byte = 0;
     uint32_t receivedBytes = 0;
     uint32_t totalReceivedBytes = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     SOPC_EventTimer_Initialize();
     SOPC_Sockets_Initialize();
@@ -198,18 +199,21 @@ START_TEST(test_sockets)
         ck_assert(receivedBuffer->length <= 1000);
         receivedBytes = receivedBuffer->length;
         totalReceivedBytes = totalReceivedBytes + receivedBytes;
-        SOPC_Buffer_Write(accBuffer, receivedBuffer->data, receivedBuffer->length);
+        status = SOPC_Buffer_Write(accBuffer, receivedBuffer->data, receivedBuffer->length);
+        ck_assert(SOPC_STATUS_OK == status);
         SOPC_Buffer_Delete(receivedBuffer);
     }
 
     ck_assert(totalReceivedBytes == 1000 && accBuffer->length == 1000);
     receivedBuffer = NULL;
-    SOPC_Buffer_SetPosition(accBuffer, 0);
+    status = SOPC_Buffer_SetPosition(accBuffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
 
     // Check acc buffer content
     for (idx = 0; idx < 1000; idx++)
     {
-        SOPC_Buffer_Read(&byte, accBuffer, 1);
+        status = SOPC_Buffer_Read(&byte, accBuffer, 1);
+        ck_assert(SOPC_STATUS_OK == status);
         ck_assert(byte == (idx % 256));
     }
 
@@ -238,7 +242,8 @@ START_TEST(test_sockets)
         ck_assert(receivedBuffer->length <= 1000);
         receivedBytes = receivedBuffer->length;
         totalReceivedBytes = totalReceivedBytes + receivedBytes;
-        SOPC_Buffer_Write(accBuffer, receivedBuffer->data, receivedBuffer->length);
+        status = SOPC_Buffer_Write(accBuffer, receivedBuffer->data, receivedBuffer->length);
+        ck_assert(SOPC_STATUS_OK == status);
         SOPC_Buffer_Delete(receivedBuffer);
     }
 
@@ -249,7 +254,8 @@ START_TEST(test_sockets)
     // Check acc buffer content
     for (idx = 0; idx < 1000; idx++)
     {
-        SOPC_Buffer_Read(&byte, accBuffer, 1);
+        status = SOPC_Buffer_Read(&byte, accBuffer, 1);
+        ck_assert(SOPC_STATUS_OK == status);
         ck_assert(byte == (idx % 256));
     }
 
@@ -263,7 +269,8 @@ START_TEST(test_sockets)
     for (idx = 0; idx < 2 * SOPC_MAX_MESSAGE_LENGTH; idx++)
     {
         byte = (uint8_t)(idx % 256);
-        SOPC_Buffer_Write(sendBuffer, &byte, 1);
+        status = SOPC_Buffer_Write(sendBuffer, &byte, 1);
+        ck_assert(SOPC_STATUS_OK == status);
     }
     SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (void*) sendBuffer, 0);
     sendBuffer = NULL; // deallocated by Socket event manager
@@ -281,19 +288,22 @@ START_TEST(test_sockets)
         ck_assert(receivedBuffer->length <= 2 * SOPC_MAX_MESSAGE_LENGTH);
         receivedBytes = receivedBuffer->length;
         totalReceivedBytes = totalReceivedBytes + receivedBytes;
-        SOPC_Buffer_Write(accBuffer, receivedBuffer->data, receivedBuffer->length);
+        status = SOPC_Buffer_Write(accBuffer, receivedBuffer->data, receivedBuffer->length);
+        ck_assert(SOPC_STATUS_OK == status);
         SOPC_Buffer_Delete(receivedBuffer);
     }
 
     ck_assert(totalReceivedBytes == 2 * SOPC_MAX_MESSAGE_LENGTH && accBuffer->length == 2 * SOPC_MAX_MESSAGE_LENGTH);
     ck_assert(receivedBytes != totalReceivedBytes);
     receivedBuffer = NULL;
-    SOPC_Buffer_SetPosition(accBuffer, 0);
+    status = SOPC_Buffer_SetPosition(accBuffer, 0);
+    ck_assert(SOPC_STATUS_OK == status);
 
     // Check acc buffer content
     for (idx = 0; idx < 2 * SOPC_MAX_MESSAGE_LENGTH; idx++)
     {
-        SOPC_Buffer_Read(&byte, accBuffer, 1);
+        status = SOPC_Buffer_Read(&byte, accBuffer, 1);
+        ck_assert(SOPC_STATUS_OK == status);
         ck_assert(byte == (idx % 256));
     }
 

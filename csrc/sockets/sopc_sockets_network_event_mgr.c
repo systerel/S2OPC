@@ -105,11 +105,14 @@ static bool SOPC_Internal_InitSocketsToInterruptSelect(void)
     {
         status = SOPC_Socket_ConnectToLocal(receptionThread.sigClientSock, receptionThread.sigServerListeningSock);
     }
+    /* Blocking accept on socket connection that will be used to interrupt "select" on sockets */
+    if (SOPC_STATUS_OK == status)
+    {
+        status =
+            SOPC_Socket_Accept(receptionThread.sigServerListeningSock, true, &receptionThread.sigServerConnectionSock);
+    }
 
     SOPC_Socket_AddrInfoDelete(&addrs);
-
-    /* Blocking accept on socket connection that will be used to interrupt "select" on sockets */
-    status = SOPC_Socket_Accept(receptionThread.sigServerListeningSock, true, &receptionThread.sigServerConnectionSock);
 
     return SOPC_STATUS_OK == status;
 }
