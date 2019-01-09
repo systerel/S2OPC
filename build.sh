@@ -69,6 +69,7 @@ else
     append_cmake_option WITH_UBSAN
     append_cmake_option WITH_COVERAGE
     append_cmake_option WARNINGS_AS_ERRORS
+    append_cmake_option CROSS_COMPILE
     append_cmake_option CMAKE_BUILD_TYPE RelWithDebInfo
     echo "cmake $CMAKE_OPTIONS .." >> $CURDIR/build.log
     cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
