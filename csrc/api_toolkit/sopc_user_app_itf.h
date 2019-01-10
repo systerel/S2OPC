@@ -149,7 +149,10 @@ typedef enum SOPC_App_AddSpace_Event
 typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
 
 /* Toolkit address space notification events callback type */
-typedef void SOPC_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus);
+typedef void SOPC_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event,
+                                        SOPC_User* user,
+                                        void* opParam,
+                                        SOPC_StatusCode opStatus);
 
 typedef enum
 {

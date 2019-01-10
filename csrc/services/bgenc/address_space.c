@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 14/03/2019 17:22:20
+ Date                 : 19/03/2019 09:27:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -664,7 +664,8 @@ void address_space__treat_write_request_WriteValues(
                &address_space__l_bres_wv_copy,
                &address_space__l_wv_copy);
             if (address_space__l_bres_wv_copy == true) {
-               service_response_cb_bs__srv_write_notification(address_space__l_wv_copy,
+               service_response_cb_bs__srv_write_notification(address_space__p_user,
+                  address_space__l_wv_copy,
                   address_space__l_status2);
             }
             else {

@@ -77,6 +77,7 @@ void service_response_cb_bs__srv_service_response(
 }
 
 void service_response_cb_bs__srv_write_notification(
+    const constants__t_user_i service_response_cb_bs__p_user,
     const constants__t_WriteValuePointer_i service_response_cb_bs__write_request_pointer,
     const constants_statuscodes_bs__t_StatusCode_i service_response_cb_bs__write_status)
 {
@@ -86,7 +87,9 @@ void service_response_cb_bs__srv_write_notification(
     {
         util_status_code__B_to_C(service_response_cb_bs__write_status, &sc);
         // Trigger notification event
-        SOPC_App_EnqueueAddressSpaceNotification(AS_WRITE_EVENT, 0, (void*) wv, (uintptr_t) sc);
+        SOPC_App_EnqueueAddressSpaceNotification(
+            AS_WRITE_EVENT, sc, (void*) wv,
+            (uintptr_t) SOPC_UserWithAuthorization_GetUser(service_response_cb_bs__p_user));
     }
     else
     {

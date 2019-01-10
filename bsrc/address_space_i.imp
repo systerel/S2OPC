@@ -719,7 +719,7 @@ OPERATIONS
             THEN
                 l_bres_wv_copy, l_wv_copy <-- copy_write_value_pointer_content (l_wv);
                 IF l_bres_wv_copy = TRUE THEN
-                    srv_write_notification (l_wv_copy, l_status2)
+                    srv_write_notification (p_user, l_wv_copy, l_status2)
                 ELSE
                     /* TODO: Generates an out of memory service result or error trace ? */
                     skip

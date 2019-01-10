@@ -66,8 +66,10 @@ OPERATIONS
     END
     ;
 
-    srv_write_notification (write_value_pointer, write_status) =
+    srv_write_notification (p_user, write_value_pointer, write_status) =
     PRE
+        p_user : t_user_i &
+        p_user : t_user &
         write_value_pointer : t_WriteValuePointer_i &
         write_status : t_StatusCode_i &
         write_status : t_StatusCode
