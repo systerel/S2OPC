@@ -1090,8 +1090,8 @@ class DataValue:
         datavalue.Value = sopc_variant[0]
         datavalue.Status = self.statusCode
         # This allocs an int64_t which must be retained until it is copied in datavalue
-        source = float_to_datetime(self.timestampSource)
-        server = float_to_datetime(self.timestampServer)
+        source = float_to_datetime(self.timestampSource) if self.timestampSource else (0,)
+        server = float_to_datetime(self.timestampServer) if self.timestampServer else (0,)
         datavalue.SourceTimestamp = source[0]
         datavalue.ServerTimestamp = server[0]
         datavalue.SourcePicoSeconds = 0
@@ -1226,6 +1226,7 @@ class NodeClass:
     DataType      = libsub.OpcUa_NodeClass_DataType
     View          = libsub.OpcUa_NodeClass_View
 
+
 if __name__ == '__main__':
     # Auto-test
     import struct
@@ -1256,7 +1257,7 @@ if __name__ == '__main__':
     assert vals == Variant.from_sopc_variant(vals.to_sopc_variant(sopc_variant_type=VariantType.String))
 
     t = time.time()
-    datetime = ffi.new('SOPC_DateTime*');
+    datetime = ffi.new('SOPC_DateTime*')
     datetime[0] = libsub.SOPC_Time_GetCurrentTimeUTC()
     assert abs(datetime_to_float(datetime) - t) < .1
     assert datetime_to_float(float_to_datetime(t)) == t
