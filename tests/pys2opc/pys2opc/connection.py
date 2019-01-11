@@ -22,7 +22,7 @@
 import time
 
 from _pys2opc import ffi, lib as libsub
-from .types import Request, AttributeId, allocator_no_gc, EncodeableType, str_to_nodeid, ReturnStatus
+from .types import Request, AttributeId, allocator_no_gc, EncodeableType, str_to_nodeid, ReturnStatus, VariantType
 from .responses import Response, ReadResponse, WriteResponse, BrowseResponse
 
 
@@ -266,6 +266,7 @@ class BaseConnectionHandler:
             _, readNids, readAttrs = zip(*missingTypesInfo)
             readDatavalues = self.read_nodes(readNids, readAttrs, bWaitResponse=True)
             for (i, _, _), dv in zip(missingTypesInfo, readDatavalues.results):
+                assert dv.variantType != VariantType.Null, 'Automatic type detection failed, null type read.'
                 sopc_types[i] = dv.variantType
 
         # Overwrite values' type
