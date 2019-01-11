@@ -69,7 +69,7 @@ class BaseConnectionHandler:
         hence it is the most accurate instant when the response was received by the Python layer.
         """
         assert responseContext in self._dRequestContexts, 'Unknown requestContext {}.'.format(responseContext)
-        request = self._dRequestContexts[responseContext]
+        request = self._dRequestContexts.pop(responseContext)
         try:
             if event == libsub.SOPC_LibSub_ApplicativeEvent_SendFailed:
                 self._connected = False  # Prevent further sends
