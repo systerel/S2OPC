@@ -22,6 +22,7 @@
 from contextlib import contextmanager
 import time
 import os
+import sys
 import json
 
 from _pys2opc import ffi, lib as libsub
@@ -47,7 +48,7 @@ def _callback_log(level, text):
               libsub.SOPC_TOOLKIT_LOG_LEVEL_INFO: '# Info: ',
               libsub.SOPC_TOOLKIT_LOG_LEVEL_DEBUG: '# Debug: '}
     if level <= LOG_LEVEL:
-        print(dLevel[level] + ffi.string(text).decode())
+        print(dLevel[level] + ffi.string(text).decode(), file=sys.stderr)
 
 @ffi.def_extern()
 def _callback_disconnected(clientId):
