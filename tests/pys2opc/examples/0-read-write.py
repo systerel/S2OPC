@@ -28,18 +28,19 @@ and prints the new results.
 
 import time
 import tempfile
+import random
 
-from pys2opc import PyS2OPC, BaseConnectionHandler, DataValue
+from pys2opc import PyS2OPC, BaseConnectionHandler, DataValue, StatusCode, Variant, VariantType
 from _connection_configuration import configuration_parameters_no_subscription
 
 
 # All those nodes are Variable nodes.
-NODES_TO_READ = ['s=BRD.NC_000.VP_96.TM.TSEN1.PTSE_TS1_DELTAP_P20_RAW',
-                 's=BRD.NC_000.VP_96.TM.TF.PMC2_TF_MODE_MPPT_RAW',
-                 's=BRD.NC_000.VP_96.TC.OBC_TC_LOAD_NTEL.CHIFFRE03_RAW',
-                 's=BRD.NC_000.VP_96.TC.MC2_TC_MODE_SELECT_GS.MC2_AR_ID_MODE_SELECT_GS_RAW',
-                 's=BRD.NC_000.VP_96.TM.TMAI.POBC_MA_CALL_PERIOD_RAW',
-                 's=BRD.NC_000.VP_96.TM.TSEN2.PTSE_TS2_DP_SIGN_D20_RAW']
+NODES_TO_READ = [#'ns=1;s=OpcComDaServers.SV.OPCDAServer.1.DeviceManual',
+                 ##'ns=4;s=F:Path:SYSTEME//Architecture//REP_FILECONVERT_APP',
+                 #'ns=4;s=SYSTEME.Architecture.REP_DEXTER_PRESTO_SRVCL.Simulated'
+                 'ns=4;s=BRD.NC_023.VP_74.TM.TM.PCOM_TM_TC_APID',
+                 'ns=4;s=BRD.NC_023.VP_74.TC.BAA_TC_OPEN_V1.BAA_AR_OPEN_V1'
+                ]
 
 
 if __name__ == '__main__':
@@ -63,12 +64,23 @@ if __name__ == '__main__':
             # Make a read. Responses are in the same order. By default, reads the Value attribute.
             respRead = connection.read_nodes(NODES_TO_READ)
             for node, datavalue in zip(NODES_TO_READ, respRead.results):
-                print('  Value of {} is {}, timestamp is {}'.format(node, str(datavalue.variant), time.ctime(datavalue.timestampSource)))
-            # Make a write. Increment previously read values.
-            newValues = [DataValue.from_python(dv.variant + 1) for dv in respRead.results]
+                print('  Value of {} is {}, status code is {} (0x{:08X}), timestamp is {}'.format(node, str(datavalue.variant), StatusCode.get_name_from_id(datavalue.statusCode), datavalue.statusCode, time.ctime(datavalue.timestampSource)))
+            # Make a write. Choose random values.
+            newValues = [DataValue.from_python(Variant(10*random.random(), variantType=VariantType.Double)) for dv in respRead.results]
+            for dv in newValues:
+                # timestampSource is set to 0 for UA Gateway compatibility
+                dv.timestampSource = 0
+                # For test purposes, status code and variant type can be changed
+                #dv.statusCode = StatusCode.Bad
+                #dv.variant.variantType = VariantType.Null
+
             respWrite = connection.write_nodes(NODES_TO_READ, newValues)
             print('Written.')
-            assert respWrite.is_ok()
+            try:
+                assert respWrite.is_ok()
+            except AssertionError:
+                print(', '.join(map(lambda sc: '{} (0x{:08X})'.format(StatusCode.get_name_from_id(sc), sc), respWrite.results)))
+                raise
             # Make a new read, expect the values to have changed.
             respRead = connection.read_nodes(NODES_TO_READ)
             for node, datavalue, expected in zip(NODES_TO_READ, respRead.results, newValues):
