@@ -56,7 +56,7 @@ source = r'''
 # TODO: automatize configuration
 ffibuilder.set_source('_pys2opc',
                       source,
-                      extra_link_args=['-lclient_subscription', '-lingopcs', '-lmbedcrypto', '-lmbedtls', '-lmbedx509'],
+                      extra_link_args=['-lclient_subscription', '-ls2opc', '-lmbedcrypto', '-lmbedtls', '-lmbedx509'],
                       include_dirs=['.'],
                       library_dirs=['../client_subscription/',
                                     '../../build/lib/',

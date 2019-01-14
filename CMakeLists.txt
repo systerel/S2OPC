@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8.8)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 
-project (INGOPCS LANGUAGES C)
+project (S2OPC LANGUAGES C)
 include(CheckCCompilerFlag)
 include (CheckTypeSize)
 
@@ -147,7 +147,7 @@ endif()
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
 
-# Source files of INGOPCS library
+# Source files of S2OPC library
 
 # Define platform dependent source files
 if(UNIX)
@@ -225,7 +225,7 @@ if(ENABLE_TESTING)
 endif()
 
 # Define non-platform dependent source files
-file(GLOB_RECURSE INGOPCS_SRCS
+file(GLOB_RECURSE S2OPC_SRCS
     "csrc/api_toolkit/*.c"
     "csrc/configuration/*.c"
     "csrc/helpers/*.c"
@@ -236,8 +236,8 @@ file(GLOB_RECURSE INGOPCS_SRCS
     "csrc/services/*.c"
 )
 
-# Define INGOPCS library includes
-file(GLOB INGOPCS_INCLUDE_FILES
+# Define S2OPC library includes
+file(GLOB S2OPC_INCLUDE_FILES
     "csrc/api_toolkit/*.h"
     "csrc/configuration/*.h"
     "csrc/helpers/*.h"
@@ -246,7 +246,7 @@ file(GLOB INGOPCS_INCLUDE_FILES
     "csrc/helpers_platform_dep/*.h"
     "csrc/services/b2c/*.h")
 
-set(INGOPCS_PUBLIC_INCLUDES
+set(S2OPC_PUBLIC_INCLUDES
     "csrc/api_toolkit"
     "csrc/configuration"
     "csrc/helpers"
@@ -256,7 +256,7 @@ set(INGOPCS_PUBLIC_INCLUDES
     "csrc/services/b2c"
 )
 
-set(INGOPCS_PRIVATE_INCLUDES
+set(S2OPC_PRIVATE_INCLUDES
     "csrc/sockets"
     "csrc/secure_channels"
     "csrc/services"
@@ -265,19 +265,19 @@ set(INGOPCS_PRIVATE_INCLUDES
     "csrc/services/bgenc"
 )
 
-# Define INGOPCS library dependencies
-set(INGOPCS_DEP_LIBS ${MBEDTLS_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
-set(INGOPCS_STATIC_DEP_LIBS ${MBEDTLS_STATIC_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
+# Define S2OPC library dependencies
+set(S2OPC_DEP_LIBS ${MBEDTLS_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
+set(S2OPC_STATIC_DEP_LIBS ${MBEDTLS_STATIC_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
 
-add_library(ingopcs_obj OBJECT ${PLATFORM_SRCS} ${INGOPCS_SRCS})
-target_include_directories(ingopcs_obj BEFORE
-	PUBLIC  ${INGOPCS_PUBLIC_INCLUDES}
-	PRIVATE ${INGOPCS_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS}
+add_library(s2opc_obj OBJECT ${PLATFORM_SRCS} ${S2OPC_SRCS})
+target_include_directories(s2opc_obj BEFORE
+	PUBLIC  ${S2OPC_PUBLIC_INCLUDES}
+	PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS}
 )
-add_dependencies(ingopcs_obj build_info)
+add_dependencies(s2opc_obj build_info)
 
 # Needed if we want to use the objects in a shared library
-set_property(TARGET ingopcs_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
+set_property(TARGET s2opc_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 # minimum Vista for IPV6 support
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
@@ -289,38 +289,38 @@ elseif(MINGW)
   add_definitions(-D_WIN32_WINNT=0x0600)
 endif()
 
-add_library(ingopcs $<TARGET_OBJECTS:ingopcs_obj>)
-target_include_directories(ingopcs PUBLIC ${INGOPCS_PUBLIC_INCLUDES})
-target_link_libraries(ingopcs PUBLIC ${INGOPCS_DEP_LIBS})
+add_library(s2opc $<TARGET_OBJECTS:s2opc_obj>)
+target_include_directories(s2opc PUBLIC ${S2OPC_PUBLIC_INCLUDES})
+target_link_libraries(s2opc PUBLIC ${S2OPC_DEP_LIBS})
 
 if(MINGW)
     # always link libc statically (even in case of shared library)
-    target_link_libraries(ingopcs PRIVATE -static-libgcc)
+    target_link_libraries(s2opc PRIVATE -static-libgcc)
 endif()
 
-# Ensure we always build a static version of ingopcs for the tests
+# Ensure we always build a static version of s2opc for the tests
 if (${BUILD_SHARED_LIBS})
-	add_library(ingopcs_static STATIC $<TARGET_OBJECTS:ingopcs_obj>)
-	target_include_directories(ingopcs_static PUBLIC ${INGOPCS_PUBLIC_INCLUDES})
-	target_link_libraries(ingopcs_static PUBLIC ${INGOPCS_STATIC_DEP_LIBS})
+	add_library(s2opc_static STATIC $<TARGET_OBJECTS:s2opc_obj>)
+	target_include_directories(s2opc_static PUBLIC ${S2OPC_PUBLIC_INCLUDES})
+	target_link_libraries(s2opc_static PUBLIC ${S2OPC_STATIC_DEP_LIBS})
 endif()
 
 if (${BUILD_SHARED_LIBS})
-	set(INGOPCS_STATIC_LIB ingopcs_static)
+	set(S2OPC_STATIC_LIB s2opc_static)
 else()
-	set(INGOPCS_STATIC_LIB ingopcs)
+	set(S2OPC_STATIC_LIB s2opc)
 endif()
 
 # Define installation targets
 ## retrieve public include files
-foreach(dir ${INGOPCS_PUBLIC_INCLUDES})
+foreach(dir ${S2OPC_PUBLIC_INCLUDES})
     file(GLOB temp_files "${dir}/*.h")
-    list(APPEND INGOPCS_INCLUDE_FILES ${temp_files})
+    list(APPEND S2OPC_INCLUDE_FILES ${temp_files})
 endforeach()
 ## set public header property
-set_target_properties(ingopcs PROPERTIES PUBLIC_HEADER "${INGOPCS_INCLUDE_FILES}")
+set_target_properties(s2opc PROPERTIES PUBLIC_HEADER "${S2OPC_INCLUDE_FILES}")
 ## install files
-install(TARGETS ingopcs
+install(TARGETS s2opc
         LIBRARY DESTINATION lib # Supposedly dynamic lib
         ARCHIVE DESTINATION lib # Supposedly static lib
         PUBLIC_HEADER DESTINATION include
@@ -328,9 +328,9 @@ install(TARGETS ingopcs
 
 # Address space loader backends
 
-add_library(ingopcs-loader-embedded STATIC csrc/address_space_loaders/embedded/loader.c)
-target_link_libraries(ingopcs-loader-embedded PRIVATE ingopcs)
-target_include_directories(ingopcs-loader-embedded PRIVATE ${INGOPCS_PUBLIC_INCLUDES} PUBLIC "csrc/address_space_loaders")
+add_library(s2opc-loader-embedded STATIC csrc/address_space_loaders/embedded/loader.c)
+target_link_libraries(s2opc-loader-embedded PRIVATE s2opc)
+target_include_directories(s2opc-loader-embedded PRIVATE ${S2OPC_PUBLIC_INCLUDES} PUBLIC "csrc/address_space_loaders")
 
 function(s2opc_embed_address_space var_name uanodeset_path)
     set(c_file_path "address_space_${var_name}.c")
@@ -338,7 +338,7 @@ function(s2opc_embed_address_space var_name uanodeset_path)
     add_custom_command(
         OUTPUT ${c_file_path}
         DEPENDS ${uanodeset_path}
-		COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/generate-ingopcs-address-space ${uanodeset_path} ${c_file_path}
+		COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/generate-s2opc-address-space ${uanodeset_path} ${c_file_path}
         COMMENT "Generating address space ${var_name}"
         VERBATIM
     )
@@ -354,13 +354,13 @@ endfunction()
 find_package(EXPAT)
 
 if (EXPAT_FOUND)
-	add_library(ingopcs-loader-uanodeset-expat STATIC csrc/address_space_loaders/uanodeset_expat/loader.c)
-	target_link_libraries(ingopcs-loader-uanodeset-expat PUBLIC ${EXPAT_LIBRARIES} PRIVATE ingopcs)
-	target_include_directories(ingopcs-loader-uanodeset-expat PRIVATE ${INGOPCS_PUBLIC_INCLUDES} ${EXPAT_INCLUDE_DIRS} PUBLIC "csrc/address_space_loaders")
-	set_target_properties(ingopcs-loader-uanodeset-expat PROPERTIES COMPILE_DEFINITIONS "UANODESET_LOADER_LOG")
+	add_library(s2opc-loader-uanodeset-expat STATIC csrc/address_space_loaders/uanodeset_expat/loader.c)
+	target_link_libraries(s2opc-loader-uanodeset-expat PUBLIC ${EXPAT_LIBRARIES} PRIVATE s2opc)
+	target_include_directories(s2opc-loader-uanodeset-expat PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${EXPAT_INCLUDE_DIRS} PUBLIC "csrc/address_space_loaders")
+	set_target_properties(s2opc-loader-uanodeset-expat PROPERTIES COMPILE_DEFINITIONS "UANODESET_LOADER_LOG")
 endif()
 
-# INGOPCS tests ################################################################################
+# S2OPC tests ################################################################################
 
 if(WIN32)
     set(FILE_EXT .exe)
@@ -386,13 +386,13 @@ endfunction()
 
 enable_testing()
 
-s2opc_embed_address_space(TEST_ADDRESS_SPACE "${CMAKE_SOURCE_DIR}/tests/data/address_space/ingopcs.xml")
+s2opc_embed_address_space(TEST_ADDRESS_SPACE "${CMAKE_SOURCE_DIR}/tests/data/address_space/s2opc.xml")
 
 # Helpers unit tests
 file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
 add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
-target_include_directories(check_helpers PRIVATE ${INGOPCS_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
-target_link_libraries(check_helpers PRIVATE ${INGOPCS_STATIC_LIB} ${CHECK_LIBRARIES})
+target_include_directories(check_helpers PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
+target_link_libraries(check_helpers PRIVATE ${S2OPC_STATIC_LIB} ${CHECK_LIBRARIES})
 
 s2opc_unit_test(check_helpers)
 
@@ -412,9 +412,9 @@ add_executable(toolkit_test_server_local_service "tests/services/toolkit_test_se
                                                  "tests/services/test_results.c"
                                                  "tests/services/testlib_read_response.c"
                                                  ${TEST_ADDRESS_SPACE})
-target_link_libraries(toolkit_test_server_local_service PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
-target_include_directories(toolkit_test_server_local_service PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                                     ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(toolkit_test_server_local_service PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_include_directories(toolkit_test_server_local_service PRIVATE ${S2OPC_PUBLIC_INCLUDES}
+                                                                     ${S2OPC_PRIVATE_INCLUDES})
 s2opc_unit_test(toolkit_test_server_local_service GENERATE_TAP)
 
 # Client tests
@@ -424,15 +424,15 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
                                    ${TEST_ADDRESS_SPACE})
-target_link_libraries(toolkit_test_client PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
-target_include_directories(toolkit_test_client PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                       ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(toolkit_test_client PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_include_directories(toolkit_test_client PRIVATE ${S2OPC_PUBLIC_INCLUDES}
+                                                       ${S2OPC_PRIVATE_INCLUDES})
 
 
 add_executable(toolkit_test_client_service_faults "tests/services/toolkit_test_client_service_faults.c")
-target_link_libraries(toolkit_test_client_service_faults PRIVATE ${INGOPCS_STATIC_LIB})
-target_include_directories(toolkit_test_client_service_faults PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                                      ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(toolkit_test_client_service_faults PRIVATE ${S2OPC_STATIC_LIB})
+target_include_directories(toolkit_test_client_service_faults PRIVATE ${S2OPC_PUBLIC_INCLUDES}
+                                                                      ${S2OPC_PRIVATE_INCLUDES})
 
 add_executable(toolkit_test_suite_client "tests/demo/test_suite_client.c"
                                          "tests/demo/test_discovery.c"
@@ -440,9 +440,9 @@ add_executable(toolkit_test_suite_client "tests/demo/test_suite_client.c"
                                          "tests/demo/state_machine.c"
                                          "tests/demo/wait_machines.c"
                                          "tests/demo/test_session.c")
-target_link_libraries(toolkit_test_suite_client PRIVATE ${INGOPCS_STATIC_LIB} ${CHECK_LIBRARIES})
-target_include_directories(toolkit_test_suite_client PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                             ${INGOPCS_PRIVATE_INCLUDES}
+target_link_libraries(toolkit_test_suite_client PRIVATE ${S2OPC_STATIC_LIB} ${CHECK_LIBRARIES})
+target_include_directories(toolkit_test_suite_client PRIVATE ${S2OPC_PUBLIC_INCLUDES}
+                                                             ${S2OPC_PRIVATE_INCLUDES}
                                                              ${CHECK_INCLUDE_DIRS})
 
 # Server test
@@ -450,12 +450,12 @@ add_executable(toolkit_test_server
     "tests/services/runtime_variables.c"
     "tests/services/toolkit_test_server.c"
     ${TEST_ADDRESS_SPACE})
-target_link_libraries(toolkit_test_server PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
-target_include_directories(toolkit_test_server PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                       ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(toolkit_test_server PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_include_directories(toolkit_test_server PRIVATE ${S2OPC_PUBLIC_INCLUDES}
+                                                       ${S2OPC_PRIVATE_INCLUDES})
 
 if (EXPAT_FOUND)
-	target_link_libraries(toolkit_test_server PRIVATE ingopcs-loader-uanodeset-expat)
+	target_link_libraries(toolkit_test_server PRIVATE s2opc-loader-uanodeset-expat)
 	set_target_properties(toolkit_test_server PROPERTIES COMPILE_DEFINITIONS "WITH_EXPAT")
 endif()
 
@@ -480,55 +480,55 @@ add_test(NAME "validation::client_service_faults_test"
 set_tests_properties("validation::client_service_faults_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_service_faults_test.tap")
 
 # Demo clients
-add_executable(ingopcs_browse "tests/demo/ingopcs_browse.c"
+add_executable(s2opc_browse "tests/demo/s2opc_browse.c"
                               "tests/demo/state_machine.c"
                               "tests/demo/config.c"
                               )
-target_link_libraries(ingopcs_browse PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
-target_include_directories(ingopcs_browse PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                  ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(s2opc_browse PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_include_directories(s2opc_browse PRIVATE ${S2OPC_PUBLIC_INCLUDES}
+                                                  ${S2OPC_PRIVATE_INCLUDES})
 
-add_executable(ingopcs_read "tests/demo/ingopcs_read.c"
+add_executable(s2opc_read "tests/demo/s2opc_read.c"
                             "tests/demo/state_machine.c"
                             "tests/demo/config.c"
                             )
-target_link_libraries(ingopcs_read PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
-target_include_directories(ingopcs_read PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(s2opc_read PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_include_directories(s2opc_read PRIVATE ${S2OPC_PUBLIC_INCLUDES}
+                                                ${S2OPC_PRIVATE_INCLUDES})
 
-add_executable(ingopcs_write "tests/demo/ingopcs_write.c"
+add_executable(s2opc_write "tests/demo/s2opc_write.c"
                              "tests/demo/state_machine.c"
                              "tests/demo/config.c"
                              )
-target_link_libraries(ingopcs_write PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
-target_include_directories(ingopcs_write PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                 ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(s2opc_write PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_include_directories(s2opc_write PRIVATE ${S2OPC_PUBLIC_INCLUDES}
+                                                 ${S2OPC_PRIVATE_INCLUDES})
 
-add_executable(ingopcs_discovery "tests/demo/ingopcs_discovery.c"
+add_executable(s2opc_discovery "tests/demo/s2opc_discovery.c"
                                  "tests/demo/state_machine.c"
                                  "tests/demo/config.c"
                                  )
-target_link_libraries(ingopcs_discovery PRIVATE ${INGOPCS_STATIC_LIB} ingopcs-loader-embedded)
-target_include_directories(ingopcs_discovery PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                     ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(s2opc_discovery PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_include_directories(s2opc_discovery PRIVATE ${S2OPC_PUBLIC_INCLUDES}
+                                                     ${S2OPC_PRIVATE_INCLUDES})
 
-add_executable(ingopcs_findserver "tests/demo/ingopcs_findserver.c"
+add_executable(s2opc_findserver "tests/demo/s2opc_findserver.c"
                                   "tests/demo/state_machine.c"
                                   "tests/demo/config.c"
                                    )
-target_link_libraries(ingopcs_findserver PRIVATE ${INGOPCS_STATIC_LIB})
-target_include_directories(ingopcs_findserver PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
-                                                       ${INGOPCS_PUBLIC_INCLUDES}
-                                                       ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(s2opc_findserver PRIVATE ${S2OPC_STATIC_LIB})
+target_include_directories(s2opc_findserver PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
+                                                       ${S2OPC_PUBLIC_INCLUDES}
+                                                       ${S2OPC_PRIVATE_INCLUDES})
 
-add_executable(ingopcs_register "tests/demo/ingopcs_register.c"
+add_executable(s2opc_register "tests/demo/s2opc_register.c"
                                   "tests/demo/state_machine.c"
                                   "tests/demo/config.c"
                                    )
-target_link_libraries(ingopcs_register PRIVATE ${INGOPCS_STATIC_LIB})
-target_include_directories(ingopcs_register PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
-                                                       ${INGOPCS_PUBLIC_INCLUDES}
-                                                       ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(s2opc_register PRIVATE ${S2OPC_STATIC_LIB})
+target_include_directories(s2opc_register PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
+                                                       ${S2OPC_PUBLIC_INCLUDES}
+                                                       ${S2OPC_PRIVATE_INCLUDES})
 add_custom_command(
     TARGET toolkit_test_server POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked
@@ -551,10 +551,10 @@ add_custom_command(
 
 # Sockets layer tests
 add_executable(check_sockets "tests/sockets/check_sockets.c")
-target_include_directories(check_sockets PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                 ${INGOPCS_PRIVATE_INCLUDES}
+target_include_directories(check_sockets PRIVATE ${S2OPC_PUBLIC_INCLUDES}
+                                                 ${S2OPC_PRIVATE_INCLUDES}
                                                  ${CHECK_INCLUDE_DIRS})
-target_link_libraries(check_sockets PRIVATE ${CHECK_LIBRARIES} ${INGOPCS_STATIC_LIB})
+target_link_libraries(check_sockets PRIVATE ${CHECK_LIBRARIES} ${S2OPC_STATIC_LIB})
 s2opc_unit_test(check_sockets)
 
 # Secure channels (stubbed on services side) tests
@@ -589,20 +589,20 @@ add_executable(test_secure_channels_client ${SOCKETS_SRC}
                                            ${SECURE_CHANNELS_CLIENT_TEST})
 
 target_include_directories(test_secure_channels_client PRIVATE "tests/secure_channels/stubs"
-                                                               ${INGOPCS_PUBLIC_INCLUDES}
-                                                               ${INGOPCS_PRIVATE_INCLUDES}
+                                                               ${S2OPC_PUBLIC_INCLUDES}
+                                                               ${S2OPC_PRIVATE_INCLUDES}
                                                                ${MBEDTLS_INCLUDE_DIRS})
-target_link_libraries(test_secure_channels_client PRIVATE ${INGOPCS_STATIC_DEP_LIBS})
+target_link_libraries(test_secure_channels_client PRIVATE ${S2OPC_STATIC_DEP_LIBS})
 
 # Secure channels tests: SERVER executable
 add_executable(test_secure_channels_server ${SOCKETS_SRC}
                                            ${SECURE_CHANNELS_SRC}
                                            ${SECURE_CHANNELS_SERVER_TEST})
-target_link_libraries(test_secure_channels_server PRIVATE ${INGOPCS_STATIC_DEP_LIBS})
+target_link_libraries(test_secure_channels_server PRIVATE ${S2OPC_STATIC_DEP_LIBS})
 
 target_include_directories(test_secure_channels_server PRIVATE "tests/secure_channels/stubs"
-                                                               ${INGOPCS_PUBLIC_INCLUDES}
-                                                               ${INGOPCS_PRIVATE_INCLUDES}
+                                                               ${S2OPC_PUBLIC_INCLUDES}
+                                                               ${S2OPC_PRIVATE_INCLUDES}
                                                                ${MBEDTLS_INCLUDE_DIRS})
 
 # Secure channels tests: tests on received buffer
@@ -618,13 +618,13 @@ file(GLOB_RECURSE SECURE_CHANNELS_BUFFER_TEST
 
 add_executable(check_sc_rcv_buffer ${SECURE_CHANNELS_SRC}
                                                ${SECURE_CHANNELS_BUFFER_TEST})
-target_link_libraries(check_sc_rcv_buffer PRIVATE ${CHECK_LIBRARIES} ${INGOPCS_STATIC_DEP_LIBS})
+target_link_libraries(check_sc_rcv_buffer PRIVATE ${CHECK_LIBRARIES} ${S2OPC_STATIC_DEP_LIBS})
 
 target_include_directories(check_sc_rcv_buffer PRIVATE "tests/secure_channels/stubs"
                                                        "tests/secure_channels"
                                                        "tests/helpers"
-                                                       ${INGOPCS_PUBLIC_INCLUDES}
-                                                       ${INGOPCS_PRIVATE_INCLUDES}
+                                                       ${S2OPC_PUBLIC_INCLUDES}
+                                                       ${S2OPC_PRIVATE_INCLUDES}
                                                        ${MBEDTLS_INCLUDE_DIRS}
                                                        ${CHECK_INCLUDE_DIRS})
 s2opc_unit_test(check_sc_rcv_buffer)
@@ -642,13 +642,13 @@ file(GLOB_RECURSE SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST
 
 add_executable(check_sc_rcv_encrypted_buffer ${SECURE_CHANNELS_SRC}
                                              ${SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST})
-target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE ${CHECK_LIBRARIES} ${INGOPCS_STATIC_DEP_LIBS})
+target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE ${CHECK_LIBRARIES} ${S2OPC_STATIC_DEP_LIBS})
 
 target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "tests/secure_channels/stubs"
                                                                  "tests/secure_channels"
                                                                  "tests/helpers"
-                                                                 ${INGOPCS_PUBLIC_INCLUDES}
-                                                                 ${INGOPCS_PRIVATE_INCLUDES}
+                                                                 ${S2OPC_PUBLIC_INCLUDES}
+                                                                 ${S2OPC_PRIVATE_INCLUDES}
                                                                  ${MBEDTLS_INCLUDE_DIRS}
                                                                  ${CHECK_INCLUDE_DIRS})
 add_custom_command(
@@ -716,13 +716,13 @@ s2opc_sc_level_test("SignAndEncrypt_B256Sha256_2048bit_server_vs_4096bit_client"
 
 # Benchmarks
 add_executable(bench_tool "tests/benchmarks/bench_tool.c")
-target_link_libraries(bench_tool PRIVATE ${INGOPCS_STATIC_LIB})
-target_include_directories(bench_tool PRIVATE ${INGOPCS_PUBLIC_INCLUDES} ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(bench_tool PRIVATE ${S2OPC_STATIC_LIB})
+target_include_directories(bench_tool PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
 
 if (EXPAT_FOUND)
-	add_executable(ingopcs_parse_uanodeset "tests/demo/ingopcs_parse_uanodeset.c")
-	target_link_libraries(ingopcs_parse_uanodeset PRIVATE ingopcs "ingopcs-loader-uanodeset-expat")
-	target_include_directories(ingopcs_parse_uanodeset PRIVATE ${INGOPCS_PUBLIC_INCLUDES})
+	add_executable(s2opc_parse_uanodeset "tests/demo/s2opc_parse_uanodeset.c")
+	target_link_libraries(s2opc_parse_uanodeset PRIVATE s2opc "s2opc-loader-uanodeset-expat")
+	target_include_directories(s2opc_parse_uanodeset PRIVATE ${S2OPC_PUBLIC_INCLUDES})
 endif()
 
 # Fuzzing
@@ -731,14 +731,14 @@ function(s2opc_fuzzer name src_file)
 	set(fuzz_target_name "${name}.libfuzzer")
 
 	add_executable(${standalone_target_name} "tests/fuzzing/${src_file}" "tests/fuzzing/standalone_fuzzer.c")
-	target_include_directories(${standalone_target_name} PRIVATE ${INGOPCS_PUBLIC_INCLUDES} ${INGOPCS_PRIVATE_INCLUDES})
-	target_link_libraries(${standalone_target_name} ${INGOPCS_STATIC_LIB})
+	target_include_directories(${standalone_target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
+	target_link_libraries(${standalone_target_name} ${S2OPC_STATIC_LIB})
 
 	add_executable(${fuzz_target_name} "tests/fuzzing/${src_file}")
 	set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
 	set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
-	target_include_directories(${fuzz_target_name} PRIVATE ${INGOPCS_PUBLIC_INCLUDES} ${INGOPCS_PRIVATE_INCLUDES})
-	target_link_libraries(${fuzz_target_name} ${INGOPCS_STATIC_LIB})
+	target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
+	target_link_libraries(${fuzz_target_name} ${S2OPC_STATIC_LIB})
 endfunction()
 
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
@@ -762,10 +762,10 @@ add_library(client_subscription "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
                                 "${LIBSUBSCRIBE_PATH}/state_machine.c"
                                 "${LIBSUBSCRIBE_PATH}/pki_permissive.c"
                                 )
-# add_dependencies(client_subscription ${INGOPCS_STATIC_LIB})
-target_link_libraries(client_subscription PRIVATE ${INGOPCS_STATIC_LIB}) # ${INGOPCS_DEP_LIBS})
-target_include_directories(client_subscription PRIVATE ${INGOPCS_PUBLIC_INCLUDES}
-                                                       ${INGOPCS_PRIVATE_INCLUDES}
+# add_dependencies(client_subscription ${S2OPC_STATIC_LIB})
+target_link_libraries(client_subscription PRIVATE ${S2OPC_STATIC_LIB}) # ${S2OPC_DEP_LIBS})
+target_include_directories(client_subscription PRIVATE ${S2OPC_PUBLIC_INCLUDES}
+                                                       ${S2OPC_PRIVATE_INCLUDES}
                                                        ${LIBSUBSCRIBE_PATH})
 set_target_properties(client_subscription PROPERTIES PUBLIC_HEADER "${LIBSUBSCRIBE_PATH}/libs2opc_client.h")
 install(TARGETS client_subscription
@@ -785,8 +785,8 @@ endif(NOT WIN32)
 
 # Helpers unit tests
 add_executable(check_libsub "${LIBSUBSCRIBE_PATH}/check_libsub.c")
-target_include_directories(check_libsub PRIVATE ${INGOPCS_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
-target_link_libraries(check_libsub PRIVATE client_subscription ${INGOPCS_STATIC_LIB} ${CHECK_LIBRARIES})
+target_include_directories(check_libsub PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
+target_link_libraries(check_libsub PRIVATE client_subscription ${S2OPC_STATIC_LIB} ${CHECK_LIBRARIES})
 s2opc_client_validation_test(check_libsub)
 
 endif(ENABLE_TESTING)
@@ -841,7 +841,7 @@ endif()
 
 if(DOXYGEN_FOUND)
     add_custom_target(doc
-        COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_SOURCE_PREFIX=${CMAKE_SOURCE_DIR}/ ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/doxygen/ingopcs-toolkit.doxyfile
+        COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_SOURCE_PREFIX=${CMAKE_SOURCE_DIR}/ ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/doxygen/s2opc-toolkit.doxyfile
         COMMENT "Generating API documentation"
         VERBATIM
     )
