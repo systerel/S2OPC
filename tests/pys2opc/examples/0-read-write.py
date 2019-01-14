@@ -35,11 +35,12 @@ from _connection_configuration import configuration_parameters_no_subscription
 
 
 # All those nodes are Variable nodes.
-NODES_TO_READ = [#'ns=1;s=OpcComDaServers.SV.OPCDAServer.1.DeviceManual',
-                 ##'ns=4;s=F:Path:SYSTEME//Architecture//REP_FILECONVERT_APP',
-                 #'ns=4;s=SYSTEME.Architecture.REP_DEXTER_PRESTO_SRVCL.Simulated'
-                 'ns=4;s=BRD.NC_023.VP_74.TM.TM.PCOM_TM_TC_APID',
-                 'ns=4;s=BRD.NC_023.VP_74.TC.BAA_TC_OPEN_V1.BAA_AR_OPEN_V1'
+NODES_TO_READ = ['s=BRD.NC_000.VP_96.TM.TSEN1.PTSE_TS1_DELTAP_P20_RAW',
+                 's=BRD.NC_000.VP_96.TM.TF.PMC2_TF_MODE_MPPT_RAW',
+                 's=BRD.NC_000.VP_96.TC.OBC_TC_LOAD_NTEL.CHIFFRE03_RAW',
+                 's=BRD.NC_000.VP_96.TC.MC2_TC_MODE_SELECT_GS.MC2_AR_ID_MODE_SELECT_GS_RAW',
+                 's=BRD.NC_000.VP_96.TM.TMAI.POBC_MA_CALL_PERIOD_RAW',
+                 's=BRD.NC_000.VP_96.TM.TSEN2.PTSE_TS2_DP_SIGN_D20_RAW'
                 ]
 
 
