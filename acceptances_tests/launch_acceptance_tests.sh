@@ -29,7 +29,7 @@ ROOT_DIR=$(cd $(dirname $0)/.. && pwd)
 LOG_FILE=server_acceptance_tests.log
 TMP_FILE=`mktemp`
 TAP_FILE=server_acceptance_tests.tap
-SELECTION=Acceptation_INGOPCS/Acceptation_INGOPCS.selection.xml
+SELECTION=Acceptation_S2OPC/Acceptation_S2OPC.selection.xml
 UACTT_ERROR_FILE=uactt_error.log
 SERVER_ERROR=server_error.log
 
@@ -90,7 +90,7 @@ echo "Launching Acceptance Test Tool"
 mkdir -p /tmp/wineprefix
 export WINEPREFIX="/tmp/wineprefix"
 export WINEARCH="win32"
-wine /opt/uactt/uacompliancetest.exe -s $(winepath -w ./Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml) --selection $(winepath -w $SELECTION) -h -c -r $(winepath -w ./$LOG_FILE) 2>$UACTT_ERROR_FILE
+wine /opt/uactt/uacompliancetest.exe -s $(winepath -w ./Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml) --selection $(winepath -w $SELECTION) -h -c -r $(winepath -w ./$LOG_FILE) 2>$UACTT_ERROR_FILE
 
 echo "Closing Acceptance Test Tool"
 
