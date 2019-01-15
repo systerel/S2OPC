@@ -20,13 +20,88 @@
 #include "runtime_variables.h"
 
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "opcua_identifiers.h"
 #include "sopc_array.h"
+#include "sopc_encodeable.h"
+#include "sopc_macros.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_types.h"
+
+static time_t parse_build_date(const char* build_date)
+{
+    struct tm time;
+    memset(&time, 0, sizeof(struct tm));
+
+    if (sscanf(build_date, "%4d-%2d-%2d", &time.tm_year, &time.tm_mon, &time.tm_mday) != 3)
+    {
+        return 0;
+    }
+
+    if (time.tm_year < 1900 || time.tm_mon < 0 || time.tm_mon > 11 || time.tm_mday < 0 || time.tm_mday > 31)
+    {
+        return 0;
+    }
+
+    time.tm_year -= 1900;
+    time.tm_mon--;
+
+    return mktime(&time);
+}
+
+RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
+                                         const char* product_uri,
+                                         const char** app_namespace_uris,
+                                         const char* manufacturer_name)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    RuntimeVariables runtimeVariables;
+
+    runtimeVariables.server_uri = product_uri;
+    runtimeVariables.app_namespace_uris = app_namespace_uris;
+
+    runtimeVariables.server_state = OpcUa_ServerState_Running;
+
+    OpcUa_BuildInfo_Initialize(&runtimeVariables.build_info);
+
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+
+    status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.ProductUri, (char*) product_uri);
+    assert(SOPC_STATUS_OK == status);
+
+    status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.ManufacturerName, (char*) manufacturer_name);
+    assert(SOPC_STATUS_OK == status);
+
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+
+    status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.ProductName, "S2OPC");
+    assert(SOPC_STATUS_OK == status);
+
+    status =
+        SOPC_String_AttachFromCstring(&runtimeVariables.build_info.SoftwareVersion, (char*) build_info.toolkitVersion);
+    assert(SOPC_STATUS_OK == status);
+
+    status =
+        SOPC_String_AttachFromCstring(&runtimeVariables.build_info.BuildNumber, (char*) build_info.toolkitSrcCommit);
+    assert(SOPC_STATUS_OK == status);
+
+    time_t buildDateAsTimet = parse_build_date(build_info.toolkitBuildDate);
+    SOPC_DateTime buildDate;
+    status = SOPC_Time_FromTimeT(buildDateAsTimet, &buildDate);
+    assert(SOPC_STATUS_OK == status);
+
+    runtimeVariables.build_info.BuildDate = buildDate;
+
+    runtimeVariables.service_level = 255;
+    runtimeVariables.auditing = true;
+
+    return runtimeVariables;
+}
 
 static void set_write_value_id(OpcUa_WriteValue* wv, uint32_t id)
 {
@@ -71,12 +146,12 @@ static bool set_write_value_bool(OpcUa_WriteValue* wv, uint32_t id, bool value)
     return true;
 }
 
-static bool set_write_value_string(OpcUa_WriteValue* wv, uint32_t id, const char* value)
+static bool set_write_value_string(OpcUa_WriteValue* wv, uint32_t id, SOPC_String value)
 {
     set_write_value_id(wv, id);
     set_variant_scalar(&wv->Value.Value, SOPC_String_Id);
 
-    return SOPC_String_CopyFromCString(&wv->Value.Value.Value.String, value) == SOPC_STATUS_OK;
+    return SOPC_String_AttachFrom(&wv->Value.Value.Value.String, &value) == SOPC_STATUS_OK;
 }
 
 static bool set_write_value_datetime(OpcUa_WriteValue* wv, uint32_t id, SOPC_DateTime value)
@@ -87,25 +162,58 @@ static bool set_write_value_datetime(OpcUa_WriteValue* wv, uint32_t id, SOPC_Dat
     return true;
 }
 
-static bool set_server_server_status_build_info_variables(SOPC_Array* write_values,
-                                                          const RuntimeVariablesBuildInfo* build_info)
+static bool set_write_value_build_info(OpcUa_WriteValue* wv, const OpcUa_BuildInfo* build_info)
 {
-    OpcUa_WriteValue* values = append_write_values(write_values, 6);
-    SOPC_DateTime build_date;
-    SOPC_ReturnStatus status = SOPC_Time_FromTimeT(build_info->build_date, &build_date);
+    /* create extension object */
+    SOPC_ExtensionObject* extObject = calloc(1, sizeof(SOPC_ExtensionObject));
+    OpcUa_BuildInfo* build_info_in_extObject = NULL;
+    SOPC_ReturnStatus status;
 
-    return values != NULL && status == SOPC_STATUS_OK &&
+    SOPC_ExtensionObject_Initialize(extObject);
+    status =
+        SOPC_Encodeable_CreateExtension(extObject, &OpcUa_BuildInfo_EncodeableType, (void**) &build_info_in_extObject);
+    assert(SOPC_STATUS_OK == status);
+
+    /* copy values */
+    status = SOPC_String_Copy(&build_info_in_extObject->ProductUri, &build_info->ProductUri);
+    assert(SOPC_STATUS_OK == status);
+    status = SOPC_String_Copy(&build_info_in_extObject->ManufacturerName, &build_info->ManufacturerName);
+    assert(SOPC_STATUS_OK == status);
+    status = SOPC_String_Copy(&build_info_in_extObject->ProductName, &build_info->ProductName);
+    assert(SOPC_STATUS_OK == status);
+    status = SOPC_String_Copy(&build_info_in_extObject->SoftwareVersion, &build_info->SoftwareVersion);
+    assert(SOPC_STATUS_OK == status);
+    status = SOPC_String_Copy(&build_info_in_extObject->BuildNumber, &build_info->BuildNumber);
+    assert(SOPC_STATUS_OK == status);
+    build_info_in_extObject->BuildDate = build_info->BuildDate;
+
+    /* Prepare write of this extension object */
+    set_write_value_id(wv, OpcUaId_Server_ServerStatus_BuildInfo);
+    wv->Value.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    wv->Value.Value.BuiltInTypeId = SOPC_ExtensionObject_Id;
+    wv->Value.Value.Value.ExtObject = extObject;
+
+    return true;
+}
+
+static bool set_server_server_status_build_info_variables(SOPC_Array* write_values, const OpcUa_BuildInfo* build_info)
+{
+    OpcUa_WriteValue* values = append_write_values(write_values, 7);
+
+    return values != NULL &&
            set_write_value_string(&values[0], OpcUaId_Server_ServerStatus_BuildInfo_ProductUri,
-                                  build_info->product_uri) &&
+                                  build_info->ProductUri) &&
            set_write_value_string(&values[1], OpcUaId_Server_ServerStatus_BuildInfo_ManufacturerName,
-                                  build_info->manufacturer_name) &&
+                                  build_info->ManufacturerName) &&
            set_write_value_string(&values[2], OpcUaId_Server_ServerStatus_BuildInfo_ProductName,
-                                  build_info->product_name) &&
+                                  build_info->ProductName) &&
            set_write_value_string(&values[3], OpcUaId_Server_ServerStatus_BuildInfo_SoftwareVersion,
-                                  build_info->software_version) &&
+                                  build_info->SoftwareVersion) &&
            set_write_value_string(&values[4], OpcUaId_Server_ServerStatus_BuildInfo_BuildNumber,
-                                  build_info->build_number) &&
-           set_write_value_datetime(&values[5], OpcUaId_Server_ServerStatus_BuildInfo_BuildDate, build_date);
+                                  build_info->BuildNumber) &&
+           set_write_value_datetime(&values[5], OpcUaId_Server_ServerStatus_BuildInfo_BuildDate,
+                                    build_info->BuildDate) &&
+           set_write_value_build_info(&values[6], build_info);
 }
 
 static bool set_server_server_status_state_value(OpcUa_WriteValue* wv, OpcUa_ServerState state)
@@ -116,15 +224,15 @@ static bool set_server_server_status_state_value(OpcUa_WriteValue* wv, OpcUa_Ser
     return true;
 }
 
-static bool set_server_server_status_variables(SOPC_Array* write_values, const RuntimeVariables* vars)
+static bool set_server_server_status_variables(SOPC_Array* write_values, RuntimeVariables vars)
 {
     OpcUa_WriteValue* values = append_write_values(write_values, 3);
     return values != NULL &&
            set_write_value_datetime(&values[0], OpcUaId_Server_ServerStatus_StartTime, SOPC_Time_GetCurrentTimeUTC()) &&
            set_write_value_datetime(&values[1], OpcUaId_Server_ServerStatus_CurrentTime,
                                     SOPC_Time_GetCurrentTimeUTC()) &&
-           set_server_server_status_state_value(&values[2], vars->server_state) &&
-           set_server_server_status_build_info_variables(write_values, &vars->build_info);
+           set_server_server_status_state_value(&values[2], vars.server_state) &&
+           set_server_server_status_build_info_variables(write_values, &vars.build_info);
 }
 
 static bool set_server_server_array_value(OpcUa_WriteValue* wv, const char* server_uri)
@@ -212,19 +320,18 @@ static bool set_server_service_level_value(OpcUa_WriteValue* wv, SOPC_Byte level
     return true;
 }
 
-static bool set_server_variables(SOPC_Array* write_values, const RuntimeVariables* vars)
+static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables vars)
 {
     OpcUa_WriteValue* values = append_write_values(write_values, 5);
-
-    return values != NULL && set_server_server_array_value(&values[0], vars->server_uri) &&
-           set_server_namespace_array_value(&values[1], vars->app_namespace_uris) &&
-           set_server_service_level_value(&values[2], vars->service_level) &&
-           set_write_value_bool(&values[3], OpcUaId_Server_Auditing, vars->auditing) &&
+    return values != NULL && set_server_server_array_value(&values[0], vars.server_uri) &&
+           set_server_namespace_array_value(&values[1], vars.app_namespace_uris) &&
+           set_server_service_level_value(&values[2], vars.service_level) &&
+           set_write_value_bool(&values[3], OpcUaId_Server_Auditing, vars.auditing) &&
            set_write_value_bool(&values[4], OpcUaId_Server_ServerDiagnostics_EnabledFlag, false) &&
            set_server_server_status_variables(write_values, vars);
 }
 
-bool set_runtime_variables(uint32_t endpoint_config_idx, const RuntimeVariables* vars)
+bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars)
 {
     OpcUa_WriteRequest* request = calloc(1, sizeof(OpcUa_WriteRequest));
     SOPC_Array* write_values = SOPC_Array_Create(sizeof(OpcUa_WriteValue), 0, OpcUa_WriteValue_Clear);

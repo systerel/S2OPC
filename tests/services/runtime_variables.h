@@ -21,26 +21,36 @@
 #define SOPC_RUNTIME_VARIABLES_H
 
 #include "sopc_types.h"
-
-typedef struct _RuntimeVariablesBuildInfo
-{
-    const char* product_uri;
-    const char* manufacturer_name;
-    const char* product_name;
-    const char* software_version;
-    const char* build_number;
-    time_t build_date;
-} RuntimeVariablesBuildInfo;
+#include "sopc_user_app_itf.h"
 
 typedef struct _RuntimeVariables
 {
     const char* server_uri;
     const char** app_namespace_uris;
     OpcUa_ServerState server_state;
-    const RuntimeVariablesBuildInfo build_info;
+    OpcUa_BuildInfo build_info;
     SOPC_Byte service_level;
     bool auditing;
 } RuntimeVariables;
+
+/**
+ * \brief Builds the structure containing the values for runtime variables in the address space.
+ *
+ * \param build_info  Toolkit build information structure
+ *
+ * \param product_uri Server product URI
+ *
+ * \param app_namespace_uris Server namespace URIs
+ *
+ * \param  manufacturer_name Sever manufacturer name.
+ *
+ * \return structure containing all runtime variables.
+ *
+ */
+RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
+                                         const char* product_uri,
+                                         const char** app_namespace_uris,
+                                         const char* manufacturer_name);
 
 /**
  * \brief Sets the values for runtime variables in the address space.
@@ -59,6 +69,6 @@ typedef struct _RuntimeVariables
  * might be a delay between when this function returns, and when the values are
  * observable in the address space.
  */
-bool set_runtime_variables(uint32_t endpoint_config_idx, const RuntimeVariables* vars);
+bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars);
 
 #endif

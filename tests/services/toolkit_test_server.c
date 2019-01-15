@@ -200,27 +200,6 @@ static SOPC_AddressSpace* load_nodeset_from_file(const char* filename)
 }
 #endif
 
-static time_t parse_build_date(const char* build_date)
-{
-    struct tm time;
-    memset(&time, 0, sizeof(struct tm));
-
-    if (sscanf(build_date, "%4d-%2d-%2d", &time.tm_year, &time.tm_mon, &time.tm_mday) != 3)
-    {
-        return 0;
-    }
-
-    if (time.tm_year < 1900 || time.tm_mon < 0 || time.tm_mon > 11 || time.tm_mday < 0 || time.tm_mday > 31)
-    {
-        return 0;
-    }
-
-    time.tm_year -= 1900;
-    time.tm_mon--;
-
-    return mktime(&time);
-}
-
 /* Set the log path and create (or keep existing) directory path built on executable path
  *  + first argument of main */
 static char* Config_SetLogPath(int argc, char* argv[])
@@ -563,24 +542,10 @@ int main(int argc, char* argv[])
         printf("<Test_Server_Toolkit: Opening endpoint... \n");
         SOPC_ToolkitServer_AsyncOpenEndpoint(epConfigIdx);
 
-        RuntimeVariables runtime_vars = {
-            .server_uri = PRODUCT_URI,
-            .app_namespace_uris = app_namespace_uris,
-            .server_state = OpcUa_ServerState_Running,
-            .build_info =
-                {
-                    .product_uri = PRODUCT_URI,
-                    .manufacturer_name = "Systerel",
-                    .product_name = "S2OPC",
-                    .software_version = build_info.toolkitVersion,
-                    .build_number = build_info.toolkitSrcCommit,
-                    .build_date = parse_build_date(build_info.toolkitBuildDate),
-                },
-            .service_level = 255,
-            .auditing = true,
-        };
+        RuntimeVariables runtime_vars =
+            build_runtime_variables(build_info, PRODUCT_URI, app_namespace_uris, "Systerel");
 
-        if (!set_runtime_variables(epConfigIdx, &runtime_vars))
+        if (!set_runtime_variables(epConfigIdx, runtime_vars))
         {
             printf("<Test_Server_Toolkit: Failed to populate Server object");
             status = SOPC_STATUS_NOK;
