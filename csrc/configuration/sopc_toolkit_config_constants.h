@@ -37,7 +37,7 @@
 
 /** @brief Maximum ByteString/String/XmlElement length in bytes used */
 #ifndef SOPC_MAX_STRING_LENGTH
-#define SOPC_MAX_STRING_LENGTH 16777216
+#define SOPC_MAX_STRING_LENGTH UINT16_MAX
 #endif /* SOPC_MAX_MESSAGE_LENGTH */
 
 /** @brief Maximum array length that could be stored in a variant */
