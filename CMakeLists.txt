@@ -366,6 +366,9 @@ endif()
 
 if(WIN32)
     set(FILE_EXT .exe)
+    set(ENV_PATH_SEP "\;")
+else()
+    set(ENV_PATH_SEP ":")
 endif()
 
 if(ENABLE_TESTING)
@@ -829,10 +832,10 @@ if(NOT CROSS_COMPILE AND NOT WITH_ASAN AND NOT WITH_TSAN AND NOT WITH_UBSAN AND 
                    "${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
                    "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
                    "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT} ${no_ext_name}"
-                   "./${name}"
+                   "${PYTHON_EXECUTABLE}" "${name}"
                )
       set_tests_properties(${test_name} PROPERTIES
-          ENVIRONMENT "PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}:${PYS2OPC_PATH};LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+          ENVIRONMENT "PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}${ENV_PATH_SEP}${PYS2OPC_PATH};LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
   endfunction()
 
   pys2opc_validation_test("pys2opc_client.py")
