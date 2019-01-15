@@ -111,6 +111,7 @@ static bool isCompliantWithUserTokenPolicy(const OpcUa_UserTokenPolicy* userToke
         {
             return false;
         }
+        assert(SOPC_ExtObjBodyEncoding_Object == user_token->Encoding);
         tokenPolicyId = &((OpcUa_UserNameIdentityToken*) user_token->Body.Object.Value)->PolicyId;
         break;
     case OpcUa_UserTokenType_Certificate:
@@ -118,6 +119,7 @@ static bool isCompliantWithUserTokenPolicy(const OpcUa_UserTokenPolicy* userToke
         {
             return false;
         }
+        assert(SOPC_ExtObjBodyEncoding_Object == user_token->Encoding);
         tokenPolicyId = &((OpcUa_X509IdentityToken*) user_token->Body.Object.Value)->PolicyId;
         break;
     case OpcUa_UserTokenType_IssuedToken:

@@ -917,6 +917,7 @@ static void StaMac_ProcessEvent_stActivated(SOPC_StaMac_Machine* pSM,
             assert(1 >= pNotifMsg->NoOfNotificationData);
             if (0 < pNotifMsg->NoOfNotificationData)
             {
+                assert(SOPC_ExtObjBodyEncoding_Object == pNotifMsg->NotificationData[0].Encoding);
                 assert(&OpcUa_DataChangeNotification_EncodeableType ==
                        pNotifMsg->NotificationData[0].Body.Object.ObjType);
                 pDataNotif = (OpcUa_DataChangeNotification*) pNotifMsg->NotificationData[0].Body.Object.Value;

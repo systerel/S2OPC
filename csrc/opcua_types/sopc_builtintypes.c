@@ -31,6 +31,9 @@
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 
+#include "opcua_identifiers.h"
+#include "sopc_toolkit_config_constants.h"
+
 void SOPC_Boolean_InitializeAux(void* value)
 {
     SOPC_Boolean_Initialize((SOPC_Boolean*) value);
@@ -2422,6 +2425,9 @@ void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj)
 SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SOPC_ExtensionObject* src)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Buffer* encodedObject = NULL;
+    SOPC_ExtObjectBodyEncoding encoding = SOPC_ExtObjBodyEncoding_None;
+
     if (NULL == dest || NULL == src)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -2433,40 +2439,54 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
         break;
     case SOPC_ExtObjBodyEncoding_ByteString:
         status = SOPC_ByteString_Copy(&dest->Body.Bstring, &src->Body.Bstring);
+        encoding = SOPC_ExtObjBodyEncoding_ByteString;
         break;
     case SOPC_ExtObjBodyEncoding_XMLElement:
         status = SOPC_XmlElement_Copy(&dest->Body.Xml, &src->Body.Xml);
+        encoding = SOPC_ExtObjBodyEncoding_XMLElement;
         break;
     case SOPC_ExtObjBodyEncoding_Object:
         if (NULL != src->Body.Object.ObjType && NULL != src->Body.Object.Value)
         {
-            dest->Body.Object.Value = malloc(src->Body.Object.ObjType->AllocationSize);
-            if (NULL == dest->Body.Object.Value)
+            /* We do not have the copy method for the object but we can encode it */
+            encoding = SOPC_ExtObjBodyEncoding_ByteString;
+            encodedObject = SOPC_Buffer_Create(SOPC_MAX_STRING_LENGTH + 4); /* String content + length */
+            if (NULL == encodedObject)
             {
-                status = SOPC_STATUS_NOK;
+                status = SOPC_STATUS_OUT_OF_MEMORY;
             }
-            else
+
+            if (SOPC_STATUS_OK == status)
             {
-                // TODO: full copy ? need to provide a copy function in encodeable type ?
-                if (dest->Body.Object.Value ==
-                    memcpy(dest->Body.Object.Value, src->Body.Object.Value, src->Body.Object.ObjType->AllocationSize))
-                {
-                    dest->Body.Object.ObjType = src->Body.Object.ObjType;
-                }
-                else
-                {
-                    status = SOPC_STATUS_NOK;
-                }
+                status = src->Body.Object.ObjType->Encode(src->Body.Object.Value, encodedObject);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                SOPC_ByteString_Initialize(&dest->Body.Bstring);
+                assert(SOPC_MAX_STRING_LENGTH + 4 <= INT32_MAX); // Ensure conversion to int32_t is valid
+                // Do a copy to keep only used data in buffer
+                status = SOPC_ByteString_CopyFromBytes(&dest->Body.Bstring, encodedObject->data,
+                                                       (int32_t) encodedObject->length);
+                SOPC_Buffer_Delete(encodedObject);
+                encodedObject = NULL;
             }
         }
     }
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ExpandedNodeId_Copy(&dest->TypeId, &src->TypeId);
+        status = SOPC_ExpandedNodeId_Copy(&dest->TypeId, &src->TypeId);
+
+        /* Since we have encoded Object into ByteString for copy, ensure the type NodeId is correct */
+        if (SOPC_STATUS_OK == status && src->Encoding == SOPC_ExtObjBodyEncoding_Object)
+        {
+            dest->TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
+            dest->TypeId.NodeId.Namespace = OPCUA_NAMESPACE_INDEX;
+            dest->TypeId.NodeId.Data.Numeric = src->Body.Object.ObjType->BinaryEncodingTypeId;
+        }
     }
     if (SOPC_STATUS_OK == status)
     {
-        dest->Encoding = src->Encoding;
+        dest->Encoding = encoding;
         dest->Length = src->Length;
     }
     else

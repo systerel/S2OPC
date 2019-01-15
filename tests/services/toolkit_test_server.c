@@ -270,6 +270,7 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
     assert(NULL != token && NULL != authenticated);
 
     *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
+    assert(SOPC_ExtObjBodyEncoding_Object == token->Encoding);
     if (&OpcUa_UserNameIdentityToken_EncodeableType == token->Body.Object.ObjType)
     {
         OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;

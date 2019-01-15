@@ -88,6 +88,7 @@ static SOPC_ReturnStatus selectiveAuthenticationValidate(SOPC_UserAuthentication
 
     /* Only validates the username with the correct password */
     *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
+    assert(SOPC_ExtObjBodyEncoding_Object == token->Encoding);
     if (&OpcUa_UserNameIdentityToken_EncodeableType == token->Body.Object.ObjType)
     {
         OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;

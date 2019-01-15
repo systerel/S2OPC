@@ -18,7 +18,6 @@
  */
 
 #include "notification_republish_queue_bs.h"
-#include "notification_republish_queue_util.h"
 
 #include <assert.h>
 
@@ -32,66 +31,6 @@ void notification_republish_queue_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-SOPC_ReturnStatus SOPC_InternalOpcUa_DataChangeNotification_Copy(OpcUa_DataChangeNotification* dest,
-                                                                 OpcUa_DataChangeNotification* src)
-{
-    assert(dest != NULL);
-    assert(src != NULL);
-
-    dest->NoOfDiagnosticInfos = src->NoOfDiagnosticInfos;
-    if (dest->NoOfDiagnosticInfos != 0)
-    {
-        dest->DiagnosticInfos = calloc((size_t) dest->NoOfDiagnosticInfos, sizeof(SOPC_DiagnosticInfo));
-        if (dest->DiagnosticInfos == NULL)
-        {
-            return SOPC_STATUS_NOK;
-        }
-        for (int32_t i = 0; i < dest->NoOfDiagnosticInfos; i++)
-        {
-            SOPC_DiagnosticInfo_Initialize(&dest->DiagnosticInfos[i]);
-            if (SOPC_DiagnosticInfo_Copy(&dest->DiagnosticInfos[i], &src->DiagnosticInfos[i]) != SOPC_STATUS_OK)
-            {
-                free(dest->DiagnosticInfos);
-                dest->DiagnosticInfos = NULL;
-                return SOPC_STATUS_NOK;
-            }
-        }
-    }
-    else
-    {
-        dest->DiagnosticInfos = NULL;
-    }
-
-    dest->NoOfMonitoredItems = src->NoOfMonitoredItems;
-    if (dest->NoOfMonitoredItems != 0)
-    {
-        dest->MonitoredItems = calloc((size_t) dest->NoOfMonitoredItems, sizeof(OpcUa_MonitoredItemNotification));
-        if (dest->MonitoredItems == NULL)
-        {
-            return SOPC_STATUS_NOK;
-        }
-        for (int32_t i = 0; i < dest->NoOfMonitoredItems; i++)
-        {
-            OpcUa_MonitoredItemNotification_Initialize(&dest->MonitoredItems[i]);
-            if (SOPC_DataValue_Copy(&dest->MonitoredItems[i].Value, &src->MonitoredItems[i].Value) != SOPC_STATUS_OK)
-            {
-                free(dest->DiagnosticInfos);
-                dest->DiagnosticInfos = NULL;
-
-                free(dest->MonitoredItems);
-                dest->MonitoredItems = NULL;
-                return SOPC_STATUS_NOK;
-            }
-            dest->MonitoredItems[i].ClientHandle = src->MonitoredItems[i].ClientHandle;
-        }
-    }
-    else
-    {
-        dest->MonitoredItems = NULL;
-    }
-
-    return SOPC_STATUS_OK;
-}
 
 static bool notification_message_copy(OpcUa_NotificationMessage* dst, const OpcUa_NotificationMessage* src)
 {
@@ -107,10 +46,7 @@ static bool notification_message_copy(OpcUa_NotificationMessage* dst, const OpcU
 
     SOPC_ExtensionObject_Initialize(notification_data);
 
-    if (SOPC_ExtensionObject_Copy(notification_data, src->NotificationData) != SOPC_STATUS_OK ||
-        SOPC_InternalOpcUa_DataChangeNotification_Copy(
-            (OpcUa_DataChangeNotification*) notification_data->Body.Object.Value,
-            (OpcUa_DataChangeNotification*) src->NotificationData->Body.Object.Value) != SOPC_STATUS_OK)
+    if (SOPC_ExtensionObject_Copy(notification_data, src->NotificationData) != SOPC_STATUS_OK)
     {
         SOPC_ExtensionObject_Clear(notification_data);
         free(notification_data);

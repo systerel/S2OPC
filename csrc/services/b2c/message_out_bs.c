@@ -348,39 +348,9 @@ void message_out_bs__write_activate_msg_user(const constants__t_msg_i message_ou
     OpcUa_ActivateSessionRequest* req = (OpcUa_ActivateSessionRequest*) message_out_bs__msg;
 
     SOPC_ReturnStatus status = SOPC_ExtensionObject_Copy(&req->UserIdentityToken, message_out_bs__p_user_token);
-    assert(SOPC_STATUS_OK == status);
-    /* SOPC_ExtensionObject_Copy does only a shallow copy, and generated OPC-UA types don't have a copy function */
-    /* TODO: invent a better copy */
-    assert(SOPC_ExtObjBodyEncoding_Object == req->UserIdentityToken.Encoding);
-    if (req->UserIdentityToken.Body.Object.ObjType == &OpcUa_AnonymousIdentityToken_EncodeableType)
+    if (SOPC_STATUS_OK != status)
     {
-        OpcUa_AnonymousIdentityToken* src = message_out_bs__p_user_token->Body.Object.Value;
-        OpcUa_AnonymousIdentityToken* dst = req->UserIdentityToken.Body.Object.Value;
-        SOPC_String_Initialize(&dst->PolicyId);
-        status = SOPC_String_Copy(&dst->PolicyId, &src->PolicyId);
-        assert(SOPC_STATUS_OK == status);
-    }
-    else if (req->UserIdentityToken.Body.Object.ObjType == &OpcUa_UserNameIdentityToken_EncodeableType)
-    {
-        OpcUa_UserNameIdentityToken* src =
-            (OpcUa_UserNameIdentityToken*) (message_out_bs__p_user_token->Body.Object.Value);
-        OpcUa_UserNameIdentityToken* dst = (OpcUa_UserNameIdentityToken*) (req->UserIdentityToken.Body.Object.Value);
-        SOPC_String_Initialize(&dst->PolicyId);
-        SOPC_String_Initialize(&dst->UserName);
-        SOPC_ByteString_Initialize(&dst->Password);
-        SOPC_String_Initialize(&dst->EncryptionAlgorithm);
-        status = SOPC_String_Copy(&dst->PolicyId, &src->PolicyId);
-        assert(SOPC_STATUS_OK == status);
-        status = SOPC_String_Copy(&dst->UserName, &src->UserName);
-        assert(SOPC_STATUS_OK == status);
-        status = SOPC_ByteString_Copy(&dst->Password, &src->Password);
-        assert(SOPC_STATUS_OK == status);
-        status = SOPC_String_Copy(&dst->EncryptionAlgorithm, &src->EncryptionAlgorithm);
-        assert(SOPC_STATUS_OK == status);
-    }
-    else
-    {
-        SOPC_Logger_TraceError("Unsupported IdentityToken.");
+        SOPC_Logger_TraceError("message_out_bs__write_activate_msg_user: userToken copy failed");
         assert(false);
     }
 }

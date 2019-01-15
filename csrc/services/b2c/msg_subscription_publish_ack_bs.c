@@ -19,7 +19,6 @@
 
 #include "msg_subscription_publish_ack_bs.h"
 
-#include "notification_republish_queue_util.h"
 #include "util_b2c.h"
 
 #include <assert.h>
@@ -176,20 +175,6 @@ void msg_subscription_publish_ack_bs__setall_msg_republish_response(
         SOPC_Logger_TraceError(
             "msg_subscription_publish_ack_bs__setall_msg_republish_response: SOPC_ExtensionObject_Copy failure");
         return;
-    }
-    else
-    {
-        /* TODO: deep copy not managed by SOPC_ExtensionObject_Copy, do it manually */
-        if (SOPC_InternalOpcUa_DataChangeNotification_Copy(
-                (OpcUa_DataChangeNotification*) resp->NotificationMessage.NotificationData->Body.Object.Value,
-                (OpcUa_DataChangeNotification*)
-                    msg_subscription_publish_ack_bs__p_notifMsg->NotificationData->Body.Object.Value) != SOPC_STATUS_OK)
-        {
-            SOPC_Logger_TraceError(
-                "msg_subscription_publish_ack_bs__setall_msg_republish_response: "
-                "SOPC_InternalOpcUa_DataChangeNotification_Copy failure");
-            return;
-        }
     }
     *msg_subscription_publish_ack_bs__sc = constants__e_sc_ok;
 }
