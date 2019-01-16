@@ -53,7 +53,7 @@ class TapLogger(object):
         last_chance_finalization is an internal option which marks the finalization of the TAP as successful or failed.
         """
         self.begin_section('TAP')
-        self.add_test('logger instance correctly finalized', not last_chance_finalization)
+        self.add_test('- test finished', not last_chance_finalization)
         self.fd.write("1..{0}\n".format(self.nb_tests))
         self.fd.writelines(self.tests_results)
         self.fd.close()
