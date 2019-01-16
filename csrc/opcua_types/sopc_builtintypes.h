@@ -521,7 +521,13 @@ void SOPC_LocalizedText_ClearAux(void* value);
 
 void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj);
 void SOPC_ExtensionObject_InitializeAux(void* value);
-// In case it contains an object, full copy is not possible for now => shallow copy in this case
+
+/* Copy returned is encoded version of the extension object if its representation was an Object.
+ * i.e.: if src contains an Object, dest contains a ByteString with encoded object. In other case the ByteString or
+ * XmlElement content is just copied.
+ *
+ * Note: reason is we do not have a copy method for Object type but we have an encoder
+ */
 SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SOPC_ExtensionObject* src);
 SOPC_ReturnStatus SOPC_ExtensionObject_CopyAux(void* dest, const void* src);
 // Only for non object representation

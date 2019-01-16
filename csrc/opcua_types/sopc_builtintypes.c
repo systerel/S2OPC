@@ -2450,7 +2450,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
         {
             /* We do not have the copy method for the object but we can encode it */
             encoding = SOPC_ExtObjBodyEncoding_ByteString;
-            encodedObject = SOPC_Buffer_Create(SOPC_MAX_STRING_LENGTH + 4); /* String content + length */
+            encodedObject = SOPC_Buffer_Create(SOPC_MAX_STRING_LENGTH); /* String content + length */
             if (NULL == encodedObject)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
