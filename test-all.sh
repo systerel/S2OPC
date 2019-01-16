@@ -25,7 +25,7 @@ BIN_DIR="${MY_DIR}/bin"
 BUILD_DIR="${MY_DIR}/build"
 VALIDATION_DIR="${MY_DIR}/validation"
 PYS2OPC_TESTS_DIR="${MY_DIR}/tests/pys2opc/tests"
-PYS2OPC_BINARY="${BIN_DIR}/pyS2opc"
+PYS2OPC_LIB_IS_PRESENT=$(ls ./build/lib/_pys2opc* 2> /dev/null | wc -l)
 TEST_DIR=${BUILD_DIR}
 CTEST_FILE="${TEST_DIR}/CTestTestfile.cmake"
 TAP_DIR="${BUILD_DIR}/bin"
@@ -51,7 +51,7 @@ toolkit_test_server_local_service.tap
 toolkit_test_suite_client.tap
 validation.tap'
 
-PYS2OPC_TAP_FILES='validation_pys2opc.tap'
+PYS2OPC_TAP_FILES=$'\nvalidation_pys2opc.tap'
 
 if [ ! -f "${CTEST_FILE}" ]; then
 	TEST_DIR=${BIN_DIR}
@@ -68,7 +68,7 @@ fi
 rm -f "${TAP_DIR}"/*.tap
 
 cd "${TEST_DIR}"
-if [ ! -f "${PYS2OPC_BINARY}" ]; then
+if [ "$PYS2OPC_LIB_IS_PRESENT" == "0" ]; then
     EXPECTED_TAP_FILES="$CORE_TAP_FILES"
     ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -E 'pys2opc*'
     CTEST_RET=$?
