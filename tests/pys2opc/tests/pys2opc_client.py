@@ -156,11 +156,11 @@ class ConnectionHandler(BaseConnectionHandler):
         if not onlyValues:
             attrs_per_node = [AttributeId.BrowseName, AttributeId.DisplayName, AttributeId.Description, AttributeId.Value, AttributeId.NodeClass]
             for i,(typeName,uaType,initValue,newValue) in enumerate(variantInfoList):
-                nid = 'ns={};i={}'.format(0, 1001+i)
+                nid = 'ns={};i={}'.format(1, 1001+i)
                 assert nid not in self.pendingRequests
                 self.pendingRequests[nid] = self.read_nodes([nid]*len(attrs_per_node), attrs_per_node, bWaitResponse=False)
         else:
-            self.pendingRequests['read'] = self.read_nodes(['ns={};i={}'.format(0, 1001+i) for i,_ in enumerate(variantInfoList)], bWaitResponse=False)
+            self.pendingRequests['read'] = self.read_nodes(['ns={};i={}'.format(1, 1001+i) for i,_ in enumerate(variantInfoList)], bWaitResponse=False)
 
     def test_read_check_results(self, readInitValues = True, onlyValues = False):
         """
@@ -192,16 +192,16 @@ class ConnectionHandler(BaseConnectionHandler):
 
         if not onlyValues:
             for i,(typeName,uaType,initValue,newValue) in enumerate(variantInfoList):
-                nid = 'ns={};i={}'.format(0, 1001+i)
+                nid = 'ns={};i={}'.format(1, 1001+i)
                 assert nid in self.responses
                 browseName, displayName, description, value, nodeClass = self.responses.pop(nid).results
                 check_value(nid, uaType, value, initValue, newValue, readInitValues)
-                self.logger.add_test('BrowseName of Node {}'.format(nid), browseName.variant == (0, typeName))
+                self.logger.add_test('BrowseName of Node {}'.format(nid), browseName.variant == (1, typeName))
                 self.logger.add_test('DisplayName of Node {}'.format(nid), displayName.variant == ('', '{}_1dn'.format(typeName)))
                 self.logger.add_test('NodeClass of Node {}'.format(nid), nodeClass.variant == NodeClass.Variable)
         else:
             for i,((_,uaType,initValue,newValue),value) in enumerate(zip(variantInfoList, self.responses.pop('read').results)):
-                nid = 'ns={};i={}'.format(0, 1001+i)
+                nid = 'ns={};i={}'.format(1, 1001+i)
                 check_value(nid, uaType, value, initValue, newValue, readInitValues)
 
     def test_read(self, onlyValues = False):
@@ -230,7 +230,7 @@ class ConnectionHandler(BaseConnectionHandler):
         # Explicitly filters the values to replace the XmlElement with something less freeopcua.
         nids, values = [], []
         for i, (_, uaType, initVal, newVal) in enumerate(variantInfoList):
-            nids.append('ns={};i={}'.format(0, 1001+i))
+            nids.append('ns={};i={}'.format(1, 1001+i))
             if not resetInitValues:
                 value = newVal
             else:
@@ -277,7 +277,7 @@ class ConnectionHandler(BaseConnectionHandler):
         if self.configuration.parameters['token_target'] > 0:
             nids = []
             for i, (_, _, initVal, newVal) in enumerate(variantInfoList):
-                nid = 'ns={};i={}'.format(0, 1001+i)
+                nid = 'ns={};i={}'.format(1, 1001+i)
                 nids.append(nid)
                 self.expectedChangesInit[nid] = initVal
                 self.expectedChangesNew[nid] = newVal
