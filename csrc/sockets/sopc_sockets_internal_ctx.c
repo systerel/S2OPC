@@ -105,6 +105,7 @@ void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
     {
         sock = &socketsArray[socketIdx];
         SOPC_Socket_Close(&sock->sock);
+        SOPC_Socket_Clear(&sock->sock);
 
         if (sock->connectAddrs != NULL)
         {
@@ -125,10 +126,29 @@ void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
             SOPC_AsyncQueue_Free(&sock->writeQueue);
         }
 
+        if (sock->state != SOCKET_STATE_CLOSED)
+        {
+            if (sock->isServerConnection != false)
+            {
+                assert(sock->listenerSocketIdx < SOPC_MAX_SOCKETS);
+
+                // Management of number of connection on a listener
+                if (socketsArray[sock->listenerSocketIdx].state == SOCKET_STATE_LISTENING &&
+                    socketsArray[sock->listenerSocketIdx].listenerConnections > 0)
+                {
+                    socketsArray[sock->listenerSocketIdx].listenerConnections--;
+                }
+            }
+        }
+
+        /* Equivalent to
+         * sock->isUsed = false;
+         * sock->state = SOCKET_STATE_CLOSED;
+         * ...
+         * */
         memset(sock, 0, sizeof(SOPC_Socket));
 
         sock->socketIdx = socketIdx;
-        SOPC_Socket_Clear(&sock->sock);
     }
 }
 

@@ -569,18 +569,6 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         if (socketElt->state != SOCKET_STATE_CLOSED && socketElt->state != SOCKET_STATE_LISTENING &&
             socketElt->connectionId == (uint32_t) auxParam)
         {
-            if (socketElt->isServerConnection != false)
-            {
-                assert(socketElt->listenerSocketIdx < SOPC_MAX_SOCKETS);
-
-                // Management of number of connection on a listener
-                if (socketsArray[socketElt->listenerSocketIdx].state == SOCKET_STATE_LISTENING &&
-                    socketsArray[socketElt->listenerSocketIdx].listenerConnections > 0)
-                {
-                    socketsArray[socketElt->listenerSocketIdx].listenerConnections--;
-                }
-            }
-
             SOPC_SocketsInternalContext_CloseSocket(eltId);
         }
         else
@@ -690,7 +678,6 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
                                         &acceptSock->sock);
             if (SOPC_STATUS_OK == status)
             {
-                acceptSock->isUsed = true;
                 acceptSock->isServerConnection = true;
                 acceptSock->listenerSocketIdx = socketElt->socketIdx;
                 // Temporarly copy endpoint description config index (waiting for new SC connection
@@ -707,6 +694,10 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
                 SOPC_Sockets_Emit(SOCKET_LISTENER_CONNECTION,
                                   acceptSock->connectionId, // endpoint description config index
                                   NULL, acceptSock->socketIdx);
+            }
+            else
+            {
+                SOPC_SocketsInternalContext_CloseSocket(acceptSock->socketIdx);
             }
         }
 
@@ -760,17 +751,6 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
         }
         else if (socketElt->state != SOCKET_STATE_CLOSED)
         {
-            if (socketElt->isServerConnection != false)
-            {
-                assert(socketElt->listenerSocketIdx < SOPC_MAX_SOCKETS);
-
-                // Management of number of connection on a listener
-                if (socketsArray[socketElt->listenerSocketIdx].state == SOCKET_STATE_LISTENING &&
-                    socketsArray[socketElt->listenerSocketIdx].listenerConnections > 0)
-                {
-                    socketsArray[socketElt->listenerSocketIdx].listenerConnections--;
-                }
-            }
             SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, NULL, socketIdx);
         }
 
