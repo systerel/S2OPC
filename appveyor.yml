@@ -22,7 +22,7 @@ test_script:
     - set CHECK_DIR_NAME=check-0.12.0
     - set CHECK_DIR="%ROOT_DIR%\%CHECK_DIR_NAME%"
     - set CHECK_BUILD_DIR="%CHECK_DIR%\build"
-    - set MBEDTLS_DIR_NAME=mbedtls-2.12.0
+    - set MBEDTLS_DIR_NAME=mbedtls-2.16.0
     - set MBEDTLS_DIR="%ROOT_DIR%\%MBEDTLS_DIR_NAME%"
     - set MBEDTLS_BUILD_DIR="%MBEDTLS_DIR%\build"
 
