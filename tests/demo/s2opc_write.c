@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     double dVal = 0.;
     int64_t iVal = 0;
 
-    printf("INGOPCS write demo (only the Value attribute).\n");
+    printf("S2OPC write demo (only the Value attribute).\n");
     /* Read the start node id from the command line */
     if (argc != 4)
     {

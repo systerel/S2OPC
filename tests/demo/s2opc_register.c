@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t iWait = 0;
 
-    printf("INGOPCS register server demo.\n");
+    printf("S2OPC register server demo.\n");
     /* Init */
     status = SOPC_Toolkit_Initialize(EventDispatcher_Register);
     g_pSM = StateMachine_Create();

@@ -26,7 +26,7 @@
  * The complete license agreement can be found here:
  * http://opcfoundation.org/License/MIT/1.00/
  *
- * Modifications: adaptation for INGOPCS project
+ * Modifications: adaptation for S2OPC project
  * ======================================================================*/
 
 #ifndef SOPC_Types_H_

@@ -2665,7 +2665,7 @@ static void ApplyToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
     case SOPC_Variant_Id:
         // Part 6 Table 14 (v1.03): "The value shall not be a Variant
         //                           but it could be an array of Variants."
-        // Note: Variant is not encoded in INGOPCS stack for this case
+        // Note: Variant is not encoded in S2OPC stack for this case
         break;
     default:
         break;
@@ -2993,7 +2993,7 @@ static SOPC_ReturnStatus ApplyOpToVariantNonArrayBuiltInType(SOPC_BuiltinId buil
     case SOPC_Variant_Id:
         // Part 6 Table 14 (v1.03): "The value shall not be a Variant
         //                           but it could be an array of Variants."
-        // Note: Variant is not encoded in INGOPCS stack for this case
+        // Note: Variant is not encoded in S2OPC stack for this case
         break;
     default:
         break;
@@ -3180,7 +3180,7 @@ static SOPC_ReturnStatus CompareVariantsNonArrayBuiltInType(SOPC_BuiltinId built
     case SOPC_Variant_Id:
         // Part 6 Table 14 (v1.03): "The value shall not be a Variant
         //                           but it could be an array of Variants."
-        // Note: Variant is not encoded in INGOPCS stack for this case
+        // Note: Variant is not encoded in S2OPC stack for this case
         break;
     default:
         break;
@@ -3712,7 +3712,7 @@ static SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInT
     case SOPC_Variant_Id:
         // Part 6 Table 14 (v1.03): "The value shall not be a Variant
         //                           but it could be an array of Variants."
-        // Note: Variant is not encoded in INGOPCS stack for this case
+        // Note: Variant is not encoded in S2OPC stack for this case
         break;
     }
     return status;
@@ -3799,7 +3799,7 @@ static void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId, SOPC_Va
     case SOPC_Variant_Id:
         // Part 6 Table 14 (v1.03): "The value shall not be a Variant
         //                           but it could be an array of Variants."
-        // Note: Variant is not encoded in INGOPCS stack for this case
+        // Note: Variant is not encoded in S2OPC stack for this case
         break;
     }
 }

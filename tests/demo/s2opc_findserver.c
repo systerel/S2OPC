@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t iWait = 0;
 
-    printf("INGOPCS find server demo.\n");
+    printf("S2OPC find server demo.\n");
     /* Init */
     status = SOPC_Toolkit_Initialize(EventDispatcher_Discovery);
     g_pSM = StateMachine_Create();

@@ -44,7 +44,7 @@ typedef void(SOPC_EncodeableObject_PfnClear)(void* value);
 
 /**
  *  \brief Get size function generic signature for an encodeable object
- *  Note: Unused in INGOPCS, NULL pointer may be provided instead of function pointer
+ *  Note: Unused in S2OPC, NULL pointer may be provided instead of function pointer
  */
 typedef void(SOPC_EncodeableObject_PfnGetSize)(void);
 

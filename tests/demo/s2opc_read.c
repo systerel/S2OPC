@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t iWait = 0;
 
-    printf("INGOPCS read demo.\n");
+    printf("S2OPC read demo.\n");
     /* Read the start node id from the command line */
     if (argc != 3)
     {

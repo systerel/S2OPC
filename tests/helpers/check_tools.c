@@ -53,7 +53,7 @@
 #define NODEID_NSS "58942"
 #define NODEID_I 126042
 #define NODEID_IS "126042"
-#define NODEID_S "ingopcs.foo/bar"
+#define NODEID_S "s2opc.foo/bar"
 #define NODEID_G                                                                       \
     {                                                                                  \
         0xC496578A, 0x0DFE, 0x4B8F, { 0x87, 0x0A, 0x74, 0x52, 0x38, 0xC6, 0xAE, 0xAE } \

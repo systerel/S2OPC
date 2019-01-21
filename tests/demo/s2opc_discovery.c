@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t iWait = 0;
 
-    printf("INGOPCS discovery demo.\n");
+    printf("S2OPC discovery demo.\n");
     /* Init */
     if (SOPC_STATUS_OK == status)
     {

@@ -83,7 +83,7 @@ Server side (e.g.: tests/services/toolkit_test_server.c):
 
 ## Address space generation
 
-The `generate-ingopcs-address-space` tool converts a UANodeSet XML file into a
+The `generate-s2opc-address-space` tool converts a UANodeSet XML file into a
 C file that can be compiled in the binary, and used with the embedded address
 space loader (see the `tests/data/address_space/parts/User_Address_Space.xml`
 file for example). Not all the features of the schema are supported at the
@@ -182,7 +182,7 @@ To build the Toolkit library and tests with default configuration on current sta
   REM Build S2OPC Project
   cmake --build . --config RelWithDebInfo
 ```
-The project file INGOPCS.sln can be imported in Visual Studio environment.
+The project file S2OPC.sln can be imported in Visual Studio environment.
 
 For more information, or to compile the master branch on its latest commit, please refer to the [wiki](https://gitlab.com/systerel/S2OPC/wikis/compilation) .
 
@@ -213,7 +213,7 @@ Run a particular test (build/bin/ directory):
 
 Run OPC UA Compliance Test Tool (UACTT: tool available for OPC foundation corporate members only):
 - Run toolkit server example with long timeout parameter in build/bin/ directory: ./toolkit_test_server
-- Run the UACTT tests using the UACTT project configuration file acceptances_tests/Acceptation_INGOPCS/Acceptation_INGOPCS.ctt.xml
+- Run the UACTT tests using the UACTT project configuration file acceptances_tests/Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml
 
 ## Licenses
 

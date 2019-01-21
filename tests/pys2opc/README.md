@@ -11,7 +11,7 @@ See https://gitlab.com/systerel/S2OPC/ for more information.
 - gcc (tested with 4.8.5)
 - s2opc libraries and its dependencies, compiled with -fPIC:
   - libclient_subscription.a
-  - libingopcs.a
+  - libs2opc.a
   - libmbedcrypto.a
   - libmbedtls.a
   - libmbedx509.a

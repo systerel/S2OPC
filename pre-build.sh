@@ -18,7 +18,7 @@
 # under the License.
 
 
-# Script to generate data necessary to build the INGOPCS project:
+# Script to generate data necessary to build the S2OPC project:
 #
 # Steps (if necessary):
 # - generate sources files from B model
@@ -29,7 +29,7 @@
 
 BMODEL_DIR=bsrc
 PREBUILD=pre-build
-PROJET=ingopcs_genc
+PROJET=s2opc_genc
 
 CURDIR=`pwd`
 LOGPATH=$CURDIR/pre-build.log

@@ -774,7 +774,7 @@ def generate_address_space(source, out):
 
 
 def main():
-    argparser = argparse.ArgumentParser(description='Generate the INGOPCS address space from an OPC UA NodeSet')
+    argparser = argparse.ArgumentParser(description='Generate the S2OPC address space from an OPC UA NodeSet')
     argparser.add_argument('xml_file', metavar='XML_FILE',
                            help='Path to the address space XML file')
     argparser.add_argument('c_file', metavar='C_FILE',

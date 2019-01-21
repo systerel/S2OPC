@@ -17,7 +17,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Script to build the INGOPCS project:
+# Script to build the S2OPC project:
 #
 # Options:
 # - Variable CMAKE_TOOLCHAIN_FILE set with filename of toolchain config in root directory

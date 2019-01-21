@@ -1,18 +1,18 @@
 Tests are covering the following cases:
 - Unit tests: cryptographic library and tools used by the stack
 - Client/Server simple use case:
-  * Client side (stub_client_ingopcs):
+  * Client side (stub_client_s2opc):
     > Client requests to open a secure channel with security policy
       Basic256Sha256 and in SignAndEncrypt mode
     > If request is accepted, the client send a GetEndpoints request and
       checks the response received (a server stub will respond with a
       service fault since it does not really implement the service)
-  * Server side (stub_server_ingopcs):
+  * Server side (stub_server_s2opcs):
     > Server opens an endpoint with security policy Basic256Sha256 and
       in SignAndEncrypt mode and wait for connections from one client
     > On client connection and reception of an open a secure channel
       request, it responds with an open secure channel response and
       keep the secure channel opened
     > On reception of a service request on the opened secure channel
-      it responds with default service implementation (service fault)  
+      it responds with default service implementation (service fault)
     > When TCP connection is closed by client it stops.

@@ -35,7 +35,7 @@ First, we generate the XML file of the address space:
 
 We're now ready to actually run the benchmark. Make sure that the XML address
 space loader was compiled with S2OPC: there should be a file named
-`libingopcs-loader-uanodeset-expat.a` in your build directory. If that file is
+`libs2opc-loader-uanodeset-expat.a` in your build directory. If that file is
 not present, make sure the Expat library and its development headers are found
 by CMake at configuration time.
 

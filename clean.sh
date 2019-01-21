@@ -18,7 +18,7 @@
 # under the License.
 
 
-# Script to clean the INGOPCS toolkit project:
+# Script to clean the S2OPC toolkit project:
 # - clean the build logs and build directories (build and bin)
 # - if first argument is all it also clean the generated code
 set -e
