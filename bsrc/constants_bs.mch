@@ -26,6 +26,10 @@ SETS
     t_Variant_i;
     t_DataValue_i;
     t_byte_buffer_i;
+    t_DateTime;
+    t_Int32;
+    t_access_level;
+
     t_WriteValuePointer_i;
 
     t_channel_i;

@@ -27,13 +27,27 @@ SEES
 DEFINITIONS
     "definitions.def";
     d_variables ==
-        /* Attributes */
+        /* Attributes (mandatory) */
         a_NodeId,
         a_NodeClass,
         a_BrowseName,
         a_DisplayName,
         a_Value,
         a_Value_StatusCode,
+        a_Value_SourceTimestamp,
+        a_IsAbstract,
+        a_EventNotifier,
+        a_DataType,
+        a_ValueRank,
+        a_AccessLevel,
+        a_UserAccessLevel,
+        a_Historizing,
+        a_Executable,
+        a_UserExecutable,
+        a_ContainsNoLoops,
+        a_Symmetric,
+
+
 
         /* References */
         Reference_SourceNode,
@@ -71,11 +85,49 @@ DEFINITIONS
         a_Value : t_Node +-> t_Variant &
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
         dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+        dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) & /* All Variable have value but not all VariableType */
 
         /* Value attribute meta-data */
         a_Value_StatusCode : t_Node +-> t_StatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
+        a_Value_SourceTimestamp : t_Node +-> t_DateTime &
+        dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        a_IsAbstract : t_Node +-> BOOL &
+        dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
+
+        a_EventNotifier : t_Node +-> BOOL &
+        dom(a_EventNotifier) = dom(a_NodeClass|>{e_ncl_Object, e_ncl_View}) &
+
+        a_DataType : t_Node +-> t_NodeId &
+        dom(a_DataType) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+
+        a_ValueRank : t_Node +-> t_Int32 &
+        dom(a_ValueRank) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+
+        a_AccessLevel : t_Node +-> t_access_level &
+        dom(a_AccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        a_UserAccessLevel : t_Node +-> t_access_level &
+        dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) & /* Dynamic value evaluation depending on authorization of user */
+
+        a_Historizing : t_Node +-> BOOL &
+        dom(a_Historizing) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        a_Executable : t_Node +-> BOOL &
+        dom(a_Executable) = dom(a_NodeClass|>{e_ncl_Method}) &
+
+        a_UserExecutable : t_Node +-> BOOL &
+        dom(a_UserExecutable) = dom(a_NodeClass|>{e_ncl_Method}) &
+
+        a_ContainsNoLoops : t_Node +-> BOOL &
+        dom(a_ContainsNoLoops) = dom(a_NodeClass|>{e_ncl_View}) &
+
+        a_Symmetric : t_Node +-> BOOL &
+        dom(a_Symmetric) = dom(a_NodeClass|>{e_ncl_ReferenceType}) &
+
+        /* Special reference (see def) */
         Ref_HasTypeDefinition : t_Node +-> t_ExpandedNodeId &
         dom(Ref_HasTypeDefinition) = dom(a_NodeClass |> {e_ncl_Variable, e_ncl_Object}) &
 

@@ -140,6 +140,10 @@ SETS
     t_byte_buffer_i; /* (SOPC_Buffer*) */
     t_LocalizedText_i; /* (SOPC_LocalizedText*) */
     t_QualifiedName_i; /* (SOPC_QualifiedName*) */
+    t_DateTime; /* SOPC_DateTime */
+    t_Int32; /* int32_t */
+
+    t_access_level; /* SOPC_Byte */
 
     t_session_i;
     t_session_token_i; /* (SOPC_NodeId*) */
@@ -514,13 +518,7 @@ PROPERTIES
                             e_ttr_both,
                             e_ttr_neither} &
 
-    t_AttributeId = {e_aid_NodeId,
-                     e_aid_NodeClass,
-                     e_aid_BrowseName,
-                     e_aid_DisplayName,
-                     e_aid_Description,
-                     e_aid_Value,
-                     e_aid_AccessLevel} &
+    t_AttributeId = t_AttributeId_i - {c_AttributeId_indet} &
 
     t_NodeClass = t_NodeClass_i - {c_NodeClass_indet} &
 
