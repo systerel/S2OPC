@@ -22,7 +22,7 @@ stages:
 generation:
   <<: *docker_job
   stage: gen
-  image: com2.systerel.fr:5000/c765/gen-ext@sha256:46030280f56788c6156c2837151d8fd17270b9872c4e916cf615522b8c27a8f4 # gen-ext:1.2
+  image: com2.systerel.fr:5000/c765/gen-ext@sha256:46030280f56788c6156c2837151d8fd17270b9872c4e916cf615522b8c27a8f4 # digest of gen-ext:1.2
   script:
     - ./clean.sh all
     - ./.pre-build-ext.sh
@@ -42,7 +42,7 @@ generation:
 .build-linux: &build_linux
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:d3e940a91ae3563d6973a3de8d082ffea11f382a47fc6d5e887fc8b9ac843909 # build:1.10
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:17d9703e1d8cc414be0f3ccab0b9f1cc3f938d3c0ba0da0482bf6ecbcf32828e # digest of build:1.11
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install && ../tests/scripts/make-ctestfile-relative CTestTestfile.cmake > ./bin/CTestTestfile.cmake || exit 1'
   variables: &build_linux_variables
@@ -77,7 +77,7 @@ build-linux64:
 build-win64: &build_win64
   <<: *docker_job
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:e7406077be95ec42a922ede175ea3de63c6c59cdd5bea7f2be91d7f3a5a019cf # mingw_build:1.6
+  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:2f795355fd5e4b9ce3da064f049d9bf1296a13aa1fea3092cc81937b00a2bc8e # digest of mingw_build:1.7
   script:
     - *build_command_line
   variables: &build_win64_variables
@@ -118,7 +118,7 @@ build-win32:
 build-linux64-coverity:
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:ab3e668e8753488732b61c97b6ba9f72fcf93a5b36205fbaa60da3d6562eeac2 # coverity:1.2
+  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:c6a7d2c85f838a665ca9160de187183e747337db67e62562140f3dfbf17bf5d4 # digest of coverity:1.3
   script: |-
     mkdir build
     cd build
@@ -144,7 +144,7 @@ build-linux64-coverity:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/check@sha256:7c75489e900e1026ae86ee6bfc0f55c3ce9e0c05793278ac0ee35244fb23ff23 # check:1.3
+  image: registry.gitlab.com/systerel/s2opc/check@sha256:519f8cb1376aa29ed4432ec34d4ea865bce8a74cfb58940afb6c9fe856305059 # digest of check:1.4
   script:
     - ./.check-code.sh
   dependencies:
@@ -160,7 +160,7 @@ test-check:
 
 test-unit:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:2517f830aa2dbf50868021cf184981c5b75f91b1768e4fbfdab282cc0daa8231  # test:2.3
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:2517f830aa2dbf50868021cf184981c5b75f91b1768e4fbfdab282cc0daa8231  # digest of test:2.3
   script:
     - ./test-all.sh
   dependencies:
@@ -181,7 +181,7 @@ test-unit:
 
 test-uactt:
   <<: *test_linux
-  image: com2.systerel.fr:5000/c765/uactt@sha256:d986fad99fe526ab81aca1149cd488db85b6a478187239c0ebdd265968d8c4c9  # uactt:1.5
+  image: com2.systerel.fr:5000/c765/uactt@sha256:d986fad99fe526ab81aca1149cd488db85b6a478187239c0ebdd265968d8c4c9  # digest of uactt:1.5
   script:
     - 'cd acceptances_tests/ && ./launch_acceptance_tests.sh'
   artifacts:
@@ -199,7 +199,7 @@ test-uactt:
 coverage-analysis:
   <<: *docker_job
   stage: analyses
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:2517f830aa2dbf50868021cf184981c5b75f91b1768e4fbfdab282cc0daa8231  # test:2.3
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:2517f830aa2dbf50868021cf184981c5b75f91b1768e4fbfdab282cc0daa8231  # digest of test:2.3
   script:
     - ./.gen_coverage.sh
   artifacts:
