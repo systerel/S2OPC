@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 15/01/2019 14:12:33
+ Date                 : 22/01/2019 17:17:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -44,8 +44,10 @@
    SETS Clause: deferred sets
   -----------------------------*/
 #define constants__t_DataValue_i constants_bs__t_DataValue_i
+#define constants__t_DateTime constants_bs__t_DateTime
 #define constants__t_ExpandedNodeId_i constants_bs__t_ExpandedNodeId_i
 #define constants__t_IndexRange_i constants_bs__t_IndexRange_i
+#define constants__t_Int32 constants_bs__t_Int32
 #define constants__t_LocalizedText_i constants_bs__t_LocalizedText_i
 #define constants__t_NodeId_i constants_bs__t_NodeId_i
 #define constants__t_Node_i constants_bs__t_Node_i
@@ -55,6 +57,7 @@
 #define constants__t_SignatureData_i constants_bs__t_SignatureData_i
 #define constants__t_Variant_i constants_bs__t_Variant_i
 #define constants__t_WriteValuePointer_i constants_bs__t_WriteValuePointer_i
+#define constants__t_access_level constants_bs__t_access_level
 #define constants__t_application_context_i constants_bs__t_application_context_i
 #define constants__t_byte_buffer_i constants_bs__t_byte_buffer_i
 #define constants__t_channel_config_idx_i constants_bs__t_channel_config_idx_i
@@ -338,8 +341,10 @@ typedef enum {
    Added by the Translator
   --------------------------*/
 #define constants__t_DataValue_i_max constants_bs__t_DataValue_i_max
+#define constants__t_DateTime_max constants_bs__t_DateTime_max
 #define constants__t_ExpandedNodeId_i_max constants_bs__t_ExpandedNodeId_i_max
 #define constants__t_IndexRange_i_max constants_bs__t_IndexRange_i_max
+#define constants__t_Int32_max constants_bs__t_Int32_max
 #define constants__t_LocalizedText_i_max constants_bs__t_LocalizedText_i_max
 #define constants__t_NodeId_i_max constants_bs__t_NodeId_i_max
 #define constants__t_Node_i_max constants_bs__t_Node_i_max
@@ -349,6 +354,7 @@ typedef enum {
 #define constants__t_SignatureData_i_max constants_bs__t_SignatureData_i_max
 #define constants__t_Variant_i_max constants_bs__t_Variant_i_max
 #define constants__t_WriteValuePointer_i_max constants_bs__t_WriteValuePointer_i_max
+#define constants__t_access_level_max constants_bs__t_access_level_max
 #define constants__t_application_context_i_max constants_bs__t_application_context_i_max
 #define constants__t_byte_buffer_i_max constants_bs__t_byte_buffer_i_max
 #define constants__t_channel_config_idx_i_max constants_bs__t_channel_config_idx_i_max
