@@ -18,7 +18,7 @@
 # under the License.
 
 
-# Script to check properties on code of the INGOPCS project:
+# Script to check properties on code of the S2OPC project:
 # - check absence of use of functions and includes which guarantee compliance with some CERT rules
 # - run C sources compilation with Clang compiler using specific options to guarantee some CERT rules
 # - run C sources analysis using Clang tidy tool using specific options to guarantee some CERT rules
