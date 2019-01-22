@@ -46,8 +46,10 @@
    SETS Clause: deferred sets
   -----------------------------*/
 typedef SOPC_DataValue* constants_bs__t_DataValue_i;
+typedef SOPC_DateTime constants_bs__t_DateTime;
 typedef SOPC_ExpandedNodeId* constants_bs__t_ExpandedNodeId_i;
 typedef SOPC_String* constants_bs__t_IndexRange_i;
+typedef int32_t constants_bs__t_Int32;
 typedef SOPC_LocalizedText* constants_bs__t_LocalizedText_i;
 typedef SOPC_NodeId* constants_bs__t_NodeId_i;
 typedef SOPC_AddressSpace_Item* constants_bs__t_Node_i;
@@ -57,6 +59,7 @@ typedef OpcUa_ReferenceNode* constants_bs__t_Reference_i;
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
 typedef SOPC_Variant* constants_bs__t_Variant_i;
 typedef OpcUa_WriteValue* constants_bs__t_WriteValuePointer_i;
+typedef SOPC_Byte constants_bs__t_access_level;
 typedef uintptr_t constants_bs__t_application_context_i;
 typedef SOPC_Buffer* constants_bs__t_byte_buffer_i;
 typedef uint32_t constants_bs__t_channel_config_idx_i;
@@ -92,8 +95,10 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
    Added by the Translator
   --------------------------*/
 #define constants_bs__t_DataValue_i_max (-1)
+#define constants_bs__t_DateTime_max (-1)
 #define constants_bs__t_ExpandedNodeId_i_max (-1)
 #define constants_bs__t_IndexRange_i_max (-1)
+#define constants_bs__t_Int32_max (-1)
 #define constants_bs__t_LocalizedText_i_max (-1)
 #define constants_bs__t_NodeId_i_max (-1)
 #define constants_bs__t_Node_i_max (-1)
@@ -103,6 +108,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__t_SignatureData_i_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
 #define constants_bs__t_WriteValuePointer_i_max (-1)
+#define constants_bs__t_access_level_max (-1)
 #define constants_bs__t_application_context_i_max (-1)
 #define constants_bs__t_byte_buffer_i_max (-1)
 #define constants_bs__t_channel_config_idx_i_max (2 * SOPC_MAX_SECURE_CONNECTIONS)
