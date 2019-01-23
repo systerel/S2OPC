@@ -25,7 +25,7 @@ REFINES
 SEES
     constants,
     service_write_decode_bs
-    
+
 EXTENDS
     data_value_pointer_bs
 

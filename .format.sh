@@ -21,7 +21,8 @@
 # Script to format code using clang-format
 
 SRCS_DIR=.
+BSRCS_DIR=$SRCS_DIR/bsrc
 
 find $SRCS_DIR -name "*.[hc]" ! -path "./csrc/services/bgenc/*" | xargs clang-format -style=file -i
-find $SRCS_DIR -name "*.[hc]" ! -path "./csrc/services/bgenc/*" -or -name "*.mch" -or -name "*.imp" | xargs sed 's/\t/    /g' -i
-find $SRCS_DIR -name "*.[hc]" ! -path "./csrc/services/bgenc/*" -or -name "*.mch" -or -name "*.imp" | xargs sed 's/\s\+$//g' -i
+find $BSRCS_DIR -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" | xargs sed 's/\t/    /g' -i
+find $BSRCS_DIR -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" | xargs sed 's/\s\+$//g' -i
