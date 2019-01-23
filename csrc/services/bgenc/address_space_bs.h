@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 06/11/2018 10:49:31
+ Date                 : 23/01/2019 17:18:43
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -50,6 +50,9 @@ extern void address_space_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void address_space_bs__get_AccessLevel(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants__t_access_level * const address_space_bs__p_access_level);
 extern void address_space_bs__get_BrowseName(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_QualifiedName_i * const address_space_bs__p_browse_name);

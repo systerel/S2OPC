@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 22/01/2019 17:17:49
+ Date                 : 23/01/2019 17:18:31
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -191,7 +191,8 @@ typedef enum {
    constants__e_sc_bad_certificate_uri_invalid,
    constants__e_sc_bad_security_checks_failed,
    constants__e_sc_bad_request_interrupted,
-   constants__e_sc_bad_data_unavailable
+   constants__e_sc_bad_data_unavailable,
+   constants__e_sc_bad_not_writable
 } constants__t_StatusCode_i;
 typedef enum {
    constants__c_TimestampsToReturn_indet,
@@ -467,6 +468,10 @@ extern void constants__INITIALISATION(void);
 #define constants__get_cast_t_session constants_bs__get_cast_t_session
 #define constants__get_cast_t_subscription constants_bs__get_cast_t_subscription
 #define constants__getall_conv_ExpandedNodeId_NodeId constants_bs__getall_conv_ExpandedNodeId_NodeId
+#define constants__is_t_acces_level_currentRead constants_bs__is_t_acces_level_currentRead
+#define constants__is_t_acces_level_currentWrite constants_bs__is_t_acces_level_currentWrite
+#define constants__is_t_acces_level_statusWrite constants_bs__is_t_acces_level_statusWrite
+#define constants__is_t_acces_level_timestampWrite constants_bs__is_t_acces_level_timestampWrite
 #define constants__is_t_channel constants_bs__is_t_channel
 #define constants__is_t_channel_config_idx constants_bs__is_t_channel_config_idx
 #define constants__is_t_endpoint_config_idx constants_bs__is_t_endpoint_config_idx

@@ -24,6 +24,7 @@
 
 #include "service_write_decode_bs.h"
 #include "b2c.h"
+#include "util_b2c.h"
 
 #include "address_space_impl.h" /* e_aid_* */
 #include "sopc_types.h"
@@ -98,15 +99,9 @@ void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i 
     *service_write_decode_bs__dataValue = constants__c_DataValue_indet;
 
     OpcUa_WriteValue* wv = &request->NodesToWrite[service_write_decode_bs__wvi - 1];
-    switch (wv->AttributeId)
+    *service_write_decode_bs__aid = util_AttributeId__C_to_B(wv->AttributeId);
+    if (*service_write_decode_bs__aid == constants__c_AttributeId_indet)
     {
-    case constants__e_aid_NodeId:
-    case constants__e_aid_NodeClass:
-    case constants__e_aid_Value:
-        *service_write_decode_bs__aid = (constants__t_AttributeId_i) wv->AttributeId;
-        break;
-    default:
-        *service_write_decode_bs__aid = constants__c_AttributeId_indet;
         *service_write_decode_bs__isvalid = false;
         *service_write_decode_bs__status = constants__e_sc_bad_attribute_id_invalid;
         return;

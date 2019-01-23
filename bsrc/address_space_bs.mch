@@ -34,6 +34,19 @@ DEFINITIONS
         a_DisplayName,
         a_Value,
         a_Value_StatusCode,
+        a_Value_SourceTimestamp,
+        a_Value_ServerTimestamp,
+        a_IsAbstract,
+        a_EventNotifier,
+        a_DataType,
+        a_ValueRank,
+        a_AccessLevel,
+        a_UserAccessLevel,
+        a_Historizing,
+        a_Executable,
+        a_UserExecutable,
+        a_ContainsNoLoops,
+        a_Symmetric,
 
         Ref_HasTypeDefinition,
 
@@ -53,14 +66,56 @@ DEFINITIONS
     d_inv ==
     (
         /* Attributes */
-        a_NodeId      : t_Node +-> t_NodeId    &
-        a_NodeClass   : t_Node +-> t_NodeClass &
-        a_BrowseName  : t_Node +-> t_QualifiedName &
-        a_DisplayName : t_Node +-> t_LocalizedText &
-        a_Value       : t_Node +-> t_Variant   &
+        a_NodeId      : t_Node >-> t_NodeId        &
+        a_NodeClass   : t_Node --> t_NodeClass     &
+        a_BrowseName  : t_Node --> t_QualifiedName &
+        a_DisplayName : t_Node --> t_LocalizedText &
 
-        /* Value attribute meta-data */
+        a_Value       : t_Node +-> t_Variant   &
+        dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
+        dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+        dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) & /* All Variable have value but not all VariableType */
+
+        /* + Value attribute meta-data */
         a_Value_StatusCode : t_Node +-> t_StatusCode &
+        dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
+        a_Value_SourceTimestamp : t_Node +-> t_DateTime &
+        dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
+        a_Value_ServerTimestamp : t_Node +-> t_DateTime &
+        dom(a_Value_ServerTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        a_IsAbstract : t_Node +-> BOOL &
+        dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
+
+        a_EventNotifier : t_Node +-> BOOL &
+        dom(a_EventNotifier) = dom(a_NodeClass|>{e_ncl_Object, e_ncl_View}) &
+
+        a_DataType : t_Node +-> t_NodeId &
+        dom(a_DataType) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+
+        a_ValueRank : t_Node +-> t_Int32 &
+        dom(a_ValueRank) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+
+        a_AccessLevel : t_Node +-> t_access_level &
+        dom(a_AccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        a_UserAccessLevel : t_Node +-> t_access_level &
+        dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) & /* Dynamic value evaluation depending on authorization of user */
+
+        a_Historizing : t_Node +-> BOOL &
+        dom(a_Historizing) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        a_Executable : t_Node +-> BOOL &
+        dom(a_Executable) = dom(a_NodeClass|>{e_ncl_Method}) &
+
+        a_UserExecutable : t_Node +-> BOOL &
+        dom(a_UserExecutable) = dom(a_NodeClass|>{e_ncl_Method}) &
+
+        a_ContainsNoLoops : t_Node +-> BOOL &
+        dom(a_ContainsNoLoops) = dom(a_NodeClass|>{e_ncl_View}) &
+
+        a_Symmetric : t_Node +-> BOOL &
+        dom(a_Symmetric) = dom(a_NodeClass|>{e_ncl_ReferenceType}) &
 
         Ref_HasTypeDefinition : t_Node +-> t_ExpandedNodeId &
 
@@ -75,7 +130,10 @@ DEFINITIONS
         Generic_Node_Variant : t_NodeClass * t_Node * t_AttributeId +-> t_Variant &
         IsValid_VariantIndex : t_Variant * t_IndexRange +-> BOOL &
         HasRange_VariantIndex  : t_Variant * t_IndexRange +-> BOOL
-    )
+    );
+
+    d_init ==
+        d_inv
 
 ABSTRACT_VARIABLES
     d_variables
@@ -85,28 +143,7 @@ INVARIANT
 
 INITIALISATION
     /* This is where the Address Space is filled */
-    d_variables
-    :(
-        a_NodeId : t_Node >-> t_NodeId &
-        a_NodeClass : t_Node --> t_NodeClass &
-
-        a_Value : t_Node +-> t_Variant &
-        dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
-        dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
-
-        a_Value_StatusCode : t_Node +-> t_StatusCode &
-        dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
-
-        /* References */
-        Reference_SourceNode    : t_Reference --> t_NodeId         &
-        Reference_ReferenceType : t_Reference --> t_NodeId         &
-        Reference_TargetNode    : t_Reference --> t_ExpandedNodeId &
-        Reference_IsForward     : t_Reference --> BOOL &
-
-        Generic_Node_Variant : t_NodeClass * t_Node * t_AttributeId --> t_Variant &
-        IsValid_VariantIndex : t_Variant * t_IndexRange_i --> BOOL &
-        HasRange_VariantIndex  : t_Variant * t_IndexRange_i --> BOOL
-     )
+    d_variables :( d_init )
 
 OPERATIONS
 
@@ -301,6 +338,17 @@ OPERATIONS
     THEN
         p_node_class :(p_node_class : t_NodeClass_i &
                        p_node_class = a_NodeClass(p_node))
+    END
+    ;
+
+    p_access_level <-- get_AccessLevel(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node   &
+        p_node : dom(a_AccessLevel)
+    THEN
+        p_access_level :(p_access_level : t_access_level &
+                         p_access_level = a_AccessLevel(p_node))
     END
     ;
 

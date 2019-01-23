@@ -430,6 +430,13 @@ void address_space_bs__write_AddressSpace_free_dataValue(const constants__t_Data
     free(address_space_bs__data);
 }
 
+void address_space_bs__get_AccessLevel(const constants__t_Node_i address_space_bs__p_node,
+                                       constants__t_access_level* const address_space_bs__p_access_level)
+{
+    SOPC_AddressSpace_Item* item = address_space_bs__p_node;
+    *address_space_bs__p_access_level = *SOPC_AddressSpace_Item_Get_AccessLevel(item);
+}
+
 void address_space_bs__get_BrowseName(const constants__t_Node_i address_space_bs__p_node,
                                       constants__t_QualifiedName_i* const address_space_bs__p_browse_name)
 {

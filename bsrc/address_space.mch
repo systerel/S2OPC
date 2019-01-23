@@ -35,6 +35,7 @@ DEFINITIONS
         a_Value,
         a_Value_StatusCode,
         a_Value_SourceTimestamp,
+        a_Value_ServerTimestamp,
         a_IsAbstract,
         a_EventNotifier,
         a_DataType,
@@ -87,12 +88,14 @@ DEFINITIONS
         dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) & /* All Variable have value but not all VariableType */
 
-        /* Value attribute meta-data */
+        /* + Value attribute meta-data */
         a_Value_StatusCode : t_Node +-> t_StatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
         a_Value_SourceTimestamp : t_Node +-> t_DateTime &
         dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
+        a_Value_ServerTimestamp : t_Node +-> t_DateTime &
+        dom(a_Value_ServerTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
         a_IsAbstract : t_Node +-> BOOL &
         dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
@@ -355,13 +358,25 @@ OPERATIONS
     THEN
         StatusCode_service,
         a_Value,
+        a_Value_StatusCode,
+        a_Value_SourceTimestamp,
+        a_Value_ServerTimestamp,
         ResponseWrite_StatusCode
         :(
             StatusCode_service : t_StatusCode_i &
             StatusCode_service : t_StatusCode &
+
             a_Value : t_Node +-> t_Variant &
             dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
             dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
+            a_Value_StatusCode : t_Node +-> t_StatusCode &
+            dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
+            a_Value_SourceTimestamp : t_Node +-> t_DateTime &
+            dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
+            a_Value_ServerTimestamp : t_Node +-> t_DateTime &
+            dom(a_Value_ServerTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
             ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode
         )
     END

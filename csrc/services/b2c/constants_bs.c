@@ -49,6 +49,39 @@ void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_Expan
     *constants_bs__p_nid = &constants_bs__p_expnid->NodeId;
 }
 
+/* Access levels, taken from Part 3 §5.6.2 Table 8 */
+#define SOPC_AccessLevelMask_CurrentRead 1     // bit0
+#define SOPC_AccessLevelMask_CurrentWrite 2    // bit1
+#define SOPC_AccessLevelMask_StatusWrite 32    // bit5
+#define SOPC_AccessLevelMask_TimestampWrite 64 // bit6
+
+void constants_bs__is_t_acces_level_currentRead(const constants_bs__t_access_level constants_bs__p_access_lvl,
+                                                t_bool* const constants_bs__bres)
+{
+    *constants_bs__bres = (constants_bs__p_access_lvl & SOPC_AccessLevelMask_CurrentRead) != 0;
+}
+
+void constants_bs__is_t_acces_level_currentWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
+                                                 t_bool* const constants_bs__bres)
+{
+    *constants_bs__bres = (constants_bs__p_access_lvl & SOPC_AccessLevelMask_CurrentWrite) != 0;
+}
+
+void constants_bs__is_t_acces_level_statusWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
+                                                t_bool* const constants_bs__bres)
+{
+    *constants_bs__bres = (constants_bs__p_access_lvl & SOPC_AccessLevelMask_StatusWrite) != 0;
+}
+
+void constants_bs__is_t_acces_level_timestampWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
+                                                   t_bool* const constants_bs__bres)
+{
+    *constants_bs__bres = (constants_bs__p_access_lvl & SOPC_AccessLevelMask_TimestampWrite) != 0;
+}
+
+void constants_bs__is_t_channel(const constants_bs__t_channel_i constants_bs__p_channel,
+                                t_bool* const constants_bs__p_res);
+
 void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel)
 {
     *constants_bs__p_card_channel = constants_bs__t_channel_i_max;

@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 06/11/2018 10:49:18
+ Date                 : 24/01/2019 09:56:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -177,40 +177,64 @@ void address_space__treat_write_1(
       t_bool address_space__l_isvalid;
       constants__t_Node_i address_space__l_node;
       constants__t_NodeClass_i address_space__l_ncl;
+      constants__t_access_level address_space__l_access_lvl;
+      t_bool address_space__l_access_write;
       t_bool address_space__l_authorized_write;
+      t_bool address_space__l_local_treatment;
       
       *address_space__prev_dataValue = constants__c_DataValue_indet;
       if (address_space__isvalid == true) {
-         *address_space__serviceStatusCode = constants__e_sc_bad_node_id_unknown;
          address_space_bs__readall_AddressSpace_Node(address_space__nid,
             &address_space__l_isvalid,
             &address_space__l_node);
          if (address_space__l_isvalid == true) {
-            if (address_space__aid == constants__e_aid_Value) {
-               address_space_bs__get_NodeClass(address_space__l_node,
-                  &address_space__l_ncl);
-               if (address_space__l_ncl == constants__e_ncl_Variable) {
-                  user_authorization_bs__get_user_authorization(constants__e_operation_type_write,
-                     address_space__nid,
-                     address_space__aid,
-                     address_space__p_user,
-                     &address_space__l_authorized_write);
-                  if (address_space__l_authorized_write == true) {
-                     address_space_bs__set_Value(address_space__p_user,
-                        address_space__l_node,
-                        address_space__dataValue,
-                        address_space__index_range,
-                        address_space__serviceStatusCode,
-                        address_space__prev_dataValue);
+            address_space_bs__get_NodeClass(address_space__l_node,
+               &address_space__l_ncl);
+            if ((address_space__aid == constants__e_aid_Value) &&
+               (address_space__l_ncl == constants__e_ncl_Variable)) {
+               service_mgr_1__is_local_service_treatment(&address_space__l_local_treatment);
+               if (address_space__l_local_treatment == true) {
+                  address_space_bs__set_Value(address_space__p_user,
+                     address_space__l_node,
+                     address_space__dataValue,
+                     address_space__index_range,
+                     address_space__serviceStatusCode,
+                     address_space__prev_dataValue);
+               }
+               else {
+                  address_space_bs__get_AccessLevel(address_space__l_node,
+                     &address_space__l_access_lvl);
+                  constants__is_t_acces_level_currentWrite(address_space__l_access_lvl,
+                     &address_space__l_access_write);
+                  if (address_space__l_access_write == true) {
+                     user_authorization_bs__get_user_authorization(constants__e_operation_type_write,
+                        address_space__nid,
+                        address_space__aid,
+                        address_space__p_user,
+                        &address_space__l_authorized_write);
+                     if (address_space__l_authorized_write == true) {
+                        address_space_bs__set_Value(address_space__p_user,
+                           address_space__l_node,
+                           address_space__dataValue,
+                           address_space__index_range,
+                           address_space__serviceStatusCode,
+                           address_space__prev_dataValue);
+                     }
+                     else {
+                        *address_space__serviceStatusCode = constants__e_sc_bad_user_access_denied;
+                     }
                   }
                   else {
-                     *address_space__serviceStatusCode = constants__e_sc_bad_user_access_denied;
+                     *address_space__serviceStatusCode = constants__e_sc_bad_not_writable;
                   }
                }
             }
             else {
-               *address_space__serviceStatusCode = constants__e_sc_bad_write_not_supported;
+               *address_space__serviceStatusCode = constants__e_sc_bad_not_writable;
             }
+         }
+         else {
+            *address_space__serviceStatusCode = constants__e_sc_bad_node_id_unknown;
          }
       }
       else {
