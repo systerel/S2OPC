@@ -37,6 +37,19 @@ DEFINITIONS
         a_DisplayName,
         a_Value,
         a_Value_StatusCode,
+        a_Value_SourceTimestamp,
+        a_Value_ServerTimestamp,
+        a_IsAbstract,
+        a_EventNotifier,
+        a_DataType,
+        a_ValueRank,
+        a_AccessLevel,
+        a_UserAccessLevel,
+        a_Historizing,
+        a_Executable,
+        a_UserExecutable,
+        a_ContainsNoLoops,
+        a_Symmetric,
 
         Ref_HasTypeDefinition,
 
@@ -71,9 +84,46 @@ DEFINITIONS
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
         dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
-        /* Value attribute meta-data */
+        /* + Value attribute meta-data */
         a_Value_StatusCode : t_Node +-> t_StatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
+        a_Value_SourceTimestamp : t_Node +-> t_DateTime &
+        dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
+        a_Value_ServerTimestamp : t_Node +-> t_DateTime &
+        dom(a_Value_ServerTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        a_IsAbstract : t_Node +-> BOOL &
+        dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
+
+        a_EventNotifier : t_Node +-> BOOL &
+        dom(a_EventNotifier) = dom(a_NodeClass|>{e_ncl_Object, e_ncl_View}) &
+
+        a_DataType : t_Node +-> t_NodeId &
+        dom(a_DataType) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+
+        a_ValueRank : t_Node +-> t_Int32 &
+        dom(a_ValueRank) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+
+        a_AccessLevel : t_Node +-> t_access_level &
+        dom(a_AccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        a_UserAccessLevel : t_Node +-> t_access_level &
+        dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) & /* Dynamic value evaluation depending on authorization of user */
+
+        a_Historizing : t_Node +-> BOOL &
+        dom(a_Historizing) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        a_Executable : t_Node +-> BOOL &
+        dom(a_Executable) = dom(a_NodeClass|>{e_ncl_Method}) &
+
+        a_UserExecutable : t_Node +-> BOOL &
+        dom(a_UserExecutable) = dom(a_NodeClass|>{e_ncl_Method}) &
+
+        a_ContainsNoLoops : t_Node +-> BOOL &
+        dom(a_ContainsNoLoops) = dom(a_NodeClass|>{e_ncl_View}) &
+
+        a_Symmetric : t_Node +-> BOOL &
+        dom(a_Symmetric) = dom(a_NodeClass|>{e_ncl_ReferenceType}) &
 
         Ref_HasTypeDefinition : t_Node +-> t_ExpandedNodeId &
         dom(Ref_HasTypeDefinition) = dom(a_NodeClass |> {e_ncl_Variable, e_ncl_Object}) &
@@ -107,12 +157,11 @@ DEFINITIONS
 
     /* Relation associating to a node a value which is requested to be written
        in the address space */
-    d_a_Value_requested ==
+    d_a_DataValue_requested ==
         (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
                                                      WriteValue_NodeId~ ;
          (cast_t_WriteValue[1..nb_WriteValue] /\
-          WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_DataValue;
-                                                     DataValue_Variant)
+          WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_DataValue)
 
 ABSTRACT_VARIABLES
     d_variables
@@ -132,6 +181,9 @@ OPERATIONS
     THEN
         StatusCode_service := e_sc_ok ||
         a_Value,
+        a_Value_StatusCode,
+        a_Value_SourceTimestamp,
+        a_Value_ServerTimestamp,
         ResponseWrite_StatusCode
         :(  ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
 
@@ -142,11 +194,14 @@ OPERATIONS
             /* At most one value should be written for each node */
             a_Value : t_Node +-> t_Variant &
 
-            /* Each node with a value requested to be written should indeed be written */
-            dom(a_Value) = dom(a_Value$0 <+ d_a_Value_requested) &
-
             /* The value requested to be written should be contained in the requested values */
-            a_Value <: a_Value$0 <+ d_a_Value_requested &
+            a_Value <: a_Value$0 <+ (d_a_DataValue_requested;DataValue_Variant) &
+
+            /* Same for meta-attributes */
+            a_Value_StatusCode <: a_Value_StatusCode$0 <+ (d_a_DataValue_requested;DataValue_StatusCode) &
+            a_Value_SourceTimestamp <: a_Value_SourceTimestamp$0 <+ (d_a_DataValue_requested;DataValue_SourceTimestamp) &
+            a_Value_ServerTimestamp <: a_Value_ServerTimestamp$0 <+ (d_a_DataValue_requested;DataValue_ServerTimestamp) &
+
 
             ResponseWrite_StatusCode = %wvi.(
                 wvi : t_WriteValue &
@@ -155,7 +210,7 @@ OPERATIONS
                 |
                 {FALSE |-> e_sc_bad_attribute_id_invalid,
                  TRUE  |-> {FALSE |-> e_sc_bad_node_id_unknown,
-                            TRUE  |-> {FALSE |-> e_sc_bad_write_not_supported,
+                            TRUE  |-> {FALSE |-> e_sc_bad_not_writable, /* when attribute is invalid for given node class, should return attribute invalid*/
                                        TRUE  |-> {FALSE |-> e_sc_bad_user_access_denied,
                                                   TRUE |-> {FALSE |-> e_sc_bad_index_range_invalid,
                                                             TRUE |-> {FALSE |-> e_sc_bad_index_range_no_data,
@@ -168,9 +223,10 @@ OPERATIONS
                                                                WriteValue_DataValue(wvi)) |-> WriteValue_IndexRange(wvi)))
                                                  }(bool(e_operation_type_write |-> WriteValue_NodeId(wvi) |-> WriteValue_AttributeId(wvi) |-> p_user : s_AuthorizedOperations))
                                       }(bool(WriteValue_AttributeId(wvi) = e_aid_Value &
-                                             a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) = e_ncl_Variable))
+                                             a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) = e_ncl_Variable & /* writemask not managed => only var/value writable */
+                                             conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(WriteValue_NodeId(wvi)))) = TRUE))
                            }(bool(WriteValue_NodeId(wvi) : ran(a_NodeId)))
-                }(bool(WriteValue_AttributeId(wvi) : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value}))
+                }(bool(WriteValue_AttributeId(wvi) : t_AttributeId))
             )
         )
     END

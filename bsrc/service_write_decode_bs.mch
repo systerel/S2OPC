@@ -111,7 +111,7 @@ OPERATIONS
         wvi : dom(WriteValue_AttributeId) &
         wvi : dom(WriteValue_DataValue)
     THEN
-        IF WriteValue_AttributeId(wvi) : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value}
+        IF WriteValue_AttributeId(wvi) : t_AttributeId
         THEN
             isvalid := TRUE ||
             status := e_sc_ok ||

@@ -108,7 +108,8 @@ SETS
                       e_sc_bad_certificate_uri_invalid,
                       e_sc_bad_security_checks_failed,
                       e_sc_bad_request_interrupted,
-                      e_sc_bad_data_unavailable};
+                      e_sc_bad_data_unavailable,
+                      e_sc_bad_not_writable};
 
     t_BrowseDirection_i = {e_bd_indet,
                            e_bd_forward,
@@ -398,6 +399,11 @@ ABSTRACT_CONSTANTS
     conv_NodeId_Variant,
     conv_NodeClass_Variant,
 
+    conv_AccessLevel_CurrentWrite,
+    conv_AccessLevel_CurrentRead,
+    conv_AccessLevel_StatusWrite,
+    conv_AccessLevel_TimestampWrite,
+
     conv_ExpandedNodeId_NodeId,
 
     t_StatusCode,
@@ -524,6 +530,11 @@ PROPERTIES
 
     conv_NodeId_Variant : t_NodeId --> t_Variant &
     conv_NodeClass_Variant : t_NodeClass --> t_Variant &
+
+    conv_AccessLevel_CurrentWrite : t_access_level --> BOOL &
+    conv_AccessLevel_CurrentRead : t_access_level --> BOOL &
+    conv_AccessLevel_StatusWrite : t_access_level --> BOOL &
+    conv_AccessLevel_TimestampWrite : t_access_level --> BOOL &
 
     conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId &
 
@@ -981,6 +992,38 @@ OPERATIONS
         p_ind : dom(cast_t_subscription)
     THEN
         p_subscription := cast_t_subscription(p_ind)
+    END
+    ;
+
+    bres <-- is_t_acces_level_currentWrite(p_access_lvl) =
+    PRE
+        p_access_lvl : t_access_level
+    THEN
+        bres := conv_AccessLevel_CurrentWrite(p_access_lvl)
+    END
+    ;
+
+    bres <-- is_t_acces_level_currentRead(p_access_lvl) =
+    PRE
+        p_access_lvl : t_access_level
+    THEN
+        bres := conv_AccessLevel_CurrentRead(p_access_lvl)
+    END
+    ;
+
+    bres <-- is_t_acces_level_statusWrite(p_access_lvl) =
+    PRE
+        p_access_lvl : t_access_level
+    THEN
+        bres := conv_AccessLevel_StatusWrite(p_access_lvl)
+    END
+    ;
+
+    bres <-- is_t_acces_level_timestampWrite(p_access_lvl) =
+    PRE
+        p_access_lvl : t_access_level
+    THEN
+        bres := conv_AccessLevel_TimestampWrite(p_access_lvl)
     END
 
 END

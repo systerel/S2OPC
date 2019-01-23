@@ -25,15 +25,21 @@ SEES
 
 ABSTRACT_VARIABLES
     DataValue_Variant,
-    DataValue_StatusCode
+    DataValue_StatusCode,
+    DataValue_SourceTimestamp,
+    DataValue_ServerTimestamp
 
 INVARIANT
     DataValue_Variant : t_DataValue --> t_Variant &
-    DataValue_StatusCode : t_DataValue --> t_StatusCode
+    DataValue_StatusCode : t_DataValue --> t_StatusCode &
+    DataValue_SourceTimestamp : t_DataValue --> t_DateTime &
+    DataValue_ServerTimestamp : t_DataValue --> t_DateTime
 
 INITIALISATION
     DataValue_Variant :: {} ||
-    DataValue_StatusCode :: {}
+    DataValue_StatusCode :: {} ||
+    DataValue_SourceTimestamp :: {} ||
+    DataValue_ServerTimestamp :: {}
 
     /*
 OPERATIONS

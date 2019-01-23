@@ -58,6 +58,15 @@ PROMOTES
 CONCRETE_VARIABLES
     ResponseWrite_allocated
 
+DEFINITIONS
+    /* Relation associating to a node a value which is requested to be written
+    in the address space */
+    d_a_DataValue_requested ==
+        (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
+                                                     WriteValue_NodeId~ ;
+         (cast_t_WriteValue[1..nb_WriteValue] /\
+          WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_DataValue)
+
 INITIALISATION
     ResponseWrite_allocated := FALSE
 
@@ -87,35 +96,65 @@ LOCAL_OPERATIONS
     THEN
         serviceStatusCode,
         prev_dataValue,
-        a_Value
+        a_Value,
+        a_Value_StatusCode,
+        a_Value_SourceTimestamp,
+        a_Value_ServerTimestamp
         :(
             serviceStatusCode : t_StatusCode_i &
             serviceStatusCode : t_StatusCode &
             prev_dataValue : t_DataValue_i &
             a_Value : t_Node +-> t_Variant &
+            a_Value_StatusCode : t_Node +-> t_StatusCode &
+            a_Value_SourceTimestamp : t_Node +-> t_DateTime &
+            a_Value_ServerTimestamp : t_Node +-> t_DateTime &
+
             (isvalid = TRUE &
              nid : ran(a_NodeId) &
              aid = e_aid_Value &
              a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable &
-             e_operation_type_write |-> nid |-> aid |-> p_user : s_AuthorizedOperations &
-             e_operation_type_read |-> nid |-> aid |-> p_user : s_AuthorizedOperations
+             (local_service_treatment = TRUE
+              or
+              (conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE &
+               e_operation_type_write |-> nid |-> aid |-> p_user : s_AuthorizedOperations)
+             )
              =>
              serviceStatusCode = e_sc_ok &
              prev_dataValue : t_DataValue &
-             DataValue_StatusCode(prev_dataValue) = a_Value_StatusCode(a_NodeId~(nid)) &
              DataValue_Variant(prev_dataValue) = a_Value$0(a_NodeId~(nid)) &
-             a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> DataValue_Variant(dataValue)}) &
+             a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> DataValue_Variant(dataValue)} &
+
+             (conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE =>
+                    DataValue_StatusCode(prev_dataValue) = a_Value_StatusCode$0(a_NodeId~(nid)) &
+                    a_Value_StatusCode = a_Value_StatusCode$0 <+ {a_NodeId~(nid) |-> DataValue_StatusCode(dataValue)}) &
+             (conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = FALSE => a_Value_StatusCode = a_Value_StatusCode$0) &
+
+             (conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE =>
+                    DataValue_SourceTimestamp(prev_dataValue) = a_Value_SourceTimestamp$0(a_NodeId~(nid)) &
+                    a_Value_SourceTimestamp = a_Value_SourceTimestamp$0 <+ {a_NodeId~(nid) |-> DataValue_SourceTimestamp(dataValue)}) &
+             (conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = FALSE => a_Value_SourceTimestamp = a_Value_SourceTimestamp$0) &
+
+             DataValue_ServerTimestamp(prev_dataValue) = a_Value_ServerTimestamp$0(a_NodeId~(nid)) &
+             a_Value_ServerTimestamp = a_Value_ServerTimestamp$0 <+ {a_NodeId~(nid) |-> DataValue_ServerTimestamp(dataValue)}) &
+
+            /* TODO: detail all status code values regarding error case !*/
             (not(isvalid = TRUE &
                  status : t_StatusCode_i &
                  status : t_StatusCode &
                  nid : ran(a_NodeId) &
                  aid = e_aid_Value &
-                 a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable) &
-                 serviceStatusCode /= e_sc_bad_user_access_denied
+                 a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable &
+                 local_service_treatment = FALSE &
+                 conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE &
+                 e_operation_type_write |-> nid |-> aid |-> p_user : s_AuthorizedOperations)
              =>
              serviceStatusCode :
-               {e_sc_bad_internal_error, e_sc_bad_attribute_id_invalid, e_sc_bad_node_id_unknown, e_sc_bad_write_not_supported, e_sc_bad_user_access_denied, e_sc_bad_index_range_no_data, e_sc_bad_index_range_invalid} &
-             a_Value = a_Value$0)
+               {e_sc_bad_internal_error, e_sc_bad_attribute_id_invalid, e_sc_bad_node_id_unknown, e_sc_bad_not_writable, e_sc_bad_user_access_denied, e_sc_bad_index_range_no_data, e_sc_bad_index_range_invalid} &
+             a_Value = a_Value$0 &
+             a_Value_StatusCode = a_Value_StatusCode$0 &
+             a_Value_SourceTimestamp = a_Value_SourceTimestamp$0 &
+             a_Value_ServerTimestamp = a_Value_ServerTimestamp$0
+            )
         )
     END
 
@@ -200,19 +239,10 @@ OPERATIONS
 
             a_Value : t_Node +-> t_Variant &
 
-            dom(a_Value) = dom(a_Value$0 <+
-                               (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
-                                                                            WriteValue_NodeId~ ;
-                                (wreqs_iterated /\
-                                 WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_DataValue;
-                                                                            DataValue_Variant)) &
-
-            a_Value <: a_Value$0 <+
-                       (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
-                                                                    WriteValue_NodeId~ ;
-                        (cast_t_WriteValue[1..nb_WriteValue] /\
-                         WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_DataValue;
-                                                                    DataValue_Variant) &
+            a_Value <: a_Value$0 <+ (d_a_DataValue_requested;DataValue_Variant) &
+            a_Value_StatusCode <: a_Value_StatusCode$0 <+ (d_a_DataValue_requested;DataValue_StatusCode) &
+            a_Value_SourceTimestamp <: a_Value_SourceTimestamp$0 <+ (d_a_DataValue_requested;DataValue_SourceTimestamp) &
+            a_Value_ServerTimestamp <: a_Value_ServerTimestamp$0 <+ (d_a_DataValue_requested;DataValue_ServerTimestamp) &
 
             ResponseWrite_StatusCode = %wvi.(
                 wvi : t_WriteValue &
@@ -220,20 +250,23 @@ OPERATIONS
                 |
                 {FALSE |-> e_sc_bad_attribute_id_invalid,
                  TRUE  |-> {FALSE |-> e_sc_bad_node_id_unknown,
-                            TRUE  |-> {FALSE |-> e_sc_bad_write_not_supported,
-                                       TRUE  |-> {FALSE |-> e_sc_bad_index_range_invalid,
-                                                  TRUE |-> {FALSE |-> e_sc_bad_index_range_no_data,
-                                                            TRUE |-> e_sc_ok
-                                                           }(HasRange_VariantIndex(
+                            TRUE  |-> {FALSE |-> e_sc_bad_not_writable, /* when attribute is invalid for given node class, should return attribute invalid*/
+                                       TRUE  |-> {FALSE |-> e_sc_bad_user_access_denied,
+                                                  TRUE |-> {FALSE |-> e_sc_bad_index_range_invalid,
+                                                            TRUE |-> {FALSE |-> e_sc_bad_index_range_no_data,
+                                                                      TRUE |-> e_sc_ok
+                                                                      }(HasRange_VariantIndex(
+                                                                         DataValue_Variant(
+                                                                          WriteValue_DataValue(wvi)) |-> WriteValue_IndexRange(wvi)))
+                                                           }(IsValid_VariantIndex(
                                                               DataValue_Variant(
                                                                WriteValue_DataValue(wvi)) |-> WriteValue_IndexRange(wvi)))
-                                                 }(IsValid_VariantIndex(
-                                                    DataValue_Variant(
-                                                     WriteValue_DataValue(wvi)) |-> WriteValue_IndexRange(wvi)))
+                                                 }(bool(e_operation_type_write |-> WriteValue_NodeId(wvi) |-> WriteValue_AttributeId(wvi) |-> p_user : s_AuthorizedOperations))
                                       }(bool(WriteValue_AttributeId(wvi) = e_aid_Value &
-                                             a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) = e_ncl_Variable))
+                                             a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) = e_ncl_Variable & /* writemask not managed => only var/value writable */
+                                             conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(WriteValue_NodeId(wvi)))) = TRUE))
                            }(bool(WriteValue_NodeId(wvi) : ran(a_NodeId)))
-                }(bool(WriteValue_AttributeId(wvi) : {e_aid_NodeId, e_aid_NodeClass, e_aid_Value}))
+                }(bool(WriteValue_AttributeId(wvi) : t_AttributeId))
             )
         VARIANT
             card(wreqs_to_iterate)
@@ -253,30 +286,41 @@ OPERATIONS
         l_isvalid,
         l_node,
         l_ncl,
-        l_authorized_write
+        l_access_lvl,
+        l_access_write,
+        l_authorized_write,
+        l_local_treatment
     IN
         prev_dataValue := c_DataValue_indet;
         IF isvalid = TRUE THEN
-            serviceStatusCode := e_sc_bad_node_id_unknown;
             l_isvalid, l_node <-- readall_AddressSpace_Node(nid);
             IF l_isvalid = TRUE THEN
-                IF aid = e_aid_Value THEN
-                    l_ncl <-- get_NodeClass(l_node);
-                    IF l_ncl = e_ncl_Variable THEN
-                        /* Write authorization is for set_Value, and read authorization is for get_Value_StatusCode */
-                        /* TODO: it should be decided what to do when the value is write only */
-                        l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
-                        IF l_authorized_write = TRUE THEN
-                            serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, dataValue, index_range)
+                l_ncl <-- get_NodeClass(l_node);
+                IF aid = e_aid_Value & l_ncl = e_ncl_Variable THEN
+                    l_local_treatment <-- is_local_service_treatment;
+                    IF l_local_treatment = TRUE THEN
+                        /* No access authorization check for local treatment */
+                        serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, dataValue, index_range)
+                    ELSE
+                        l_access_lvl <-- get_AccessLevel(l_node);
+                        l_access_write <-- is_t_acces_level_currentWrite(l_access_lvl);
+                        IF l_access_write = TRUE THEN
+                            /* Write authorization is for set_Value, and read authorization is for get_Value_StatusCode */
+                            l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
+                            IF l_authorized_write = TRUE THEN
+                                serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, dataValue, index_range)
+                            ELSE
+                                serviceStatusCode := e_sc_bad_user_access_denied
+                            END
                         ELSE
-                            serviceStatusCode := e_sc_bad_user_access_denied
+                            serviceStatusCode := e_sc_bad_not_writable
                         END
-                    /* TODO: ELSE clause */
                     END
                 ELSE
-                    serviceStatusCode := e_sc_bad_write_not_supported
+                    serviceStatusCode := e_sc_bad_not_writable
                 END
-            /* TODO: ELSE clause */
+            ELSE
+                serviceStatusCode := e_sc_bad_node_id_unknown
             END
         ELSE
             serviceStatusCode := status

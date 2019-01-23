@@ -45,6 +45,7 @@ static SOPC_Variant* get_attribute_variant(SOPC_AddressSpace_Item* item, uint32_
         return util_variant__new_Variant_from_NodeClass(item->node_class);
     case constants__e_aid_Value:
         return util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Item_Get_Value(item));
+    /* TODO: rest of mandatory attributes */
     default:
         return NULL;
     }
