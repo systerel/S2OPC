@@ -43,8 +43,6 @@
 bool sopc_addressSpace_configured = false;
 SOPC_AddressSpace* address_space_bs__nodes = NULL;
 
-static SOPC_NodeId dataTypes[SOPC_BUILTINID_MAX + 1];
-
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -53,12 +51,6 @@ void address_space_bs__INITIALISATION(void)
     if (sopc_addressSpace_configured)
     {
         assert(NULL != address_space_bs__nodes);
-    }
-    for (uint8_t i = 0; i <= SOPC_BUILTINID_MAX; i++)
-    {
-        dataTypes[i].IdentifierType = SOPC_IdentifierType_Numeric;
-        dataTypes[i].Namespace = OPCUA_NAMESPACE_INDEX;
-        dataTypes[i].Data.Numeric = i;
     }
 }
 
@@ -414,6 +406,13 @@ void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_sp
     util_status_code__C_to_B(item->value_status, address_space_bs__sc);
 }
 
+void address_space_bs__is_NodeId_equal(const constants__t_NodeId_i address_space_bs__nid1,
+                                       const constants__t_NodeId_i address_space_bs__nid2,
+                                       t_bool* const address_space_bs__bres)
+{
+    *address_space_bs__bres = SOPC_NodeId_Equal(address_space_bs__nid1, address_space_bs__nid2);
+}
+
 void address_space_bs__read_AddressSpace_clear_value(const constants__t_Variant_i address_space_bs__val)
 {
     SOPC_Variant_Clear(address_space_bs__val);
@@ -464,6 +463,22 @@ void address_space_bs__get_NodeClass(const constants__t_Node_i address_space_bs_
     }
 }
 
+void address_space_bs__get_DataType(const constants__t_Node_i address_space_bs__p_node,
+                                    constants__t_NodeId_i* const address_space_bs__p_data_type)
+{
+    assert(NULL != address_space_bs__p_node);
+    SOPC_AddressSpace_Item* item = address_space_bs__p_node;
+    *address_space_bs__p_data_type = SOPC_AddressSpace_Item_Get_DataType(item);
+}
+
+void address_space_bs__get_ValueRank(const constants__t_Node_i address_space_bs__p_node,
+                                     t_entier4* const address_space_bs__p_value_rank)
+{
+    assert(NULL != address_space_bs__p_node);
+    SOPC_AddressSpace_Item* item = address_space_bs__p_node;
+    *address_space_bs__p_value_rank = SOPC_AddressSpace_Item_Get_ValueRank(item);
+}
+
 static bool is_type_definition(const OpcUa_ReferenceNode* ref)
 {
     if (ref->IsInverse)
@@ -472,7 +487,7 @@ static bool is_type_definition(const OpcUa_ReferenceNode* ref)
     }
 
     return ref->ReferenceTypeId.IdentifierType == SOPC_IdentifierType_Numeric &&
-           ref->ReferenceTypeId.Data.Numeric == 61;
+           ref->ReferenceTypeId.Data.Numeric == OpcUaId_HasTypeDefinition;
 }
 
 void address_space_bs__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,

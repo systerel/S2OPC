@@ -55,7 +55,9 @@ VALUES
     c_BrowseValue_indet = 0;
     c_BrowseResult_indet = 0;
 
-    t_counter = NAT
+    t_counter = NAT;
+    t_ValueRank = INT;
+    t_ConcreteValueRank = INT
 
 PROMOTES
     is_t_channel_config_idx,
@@ -65,7 +67,6 @@ PROMOTES
     get_cast_t_session,
     get_card_t_channel,
     get_cast_t_channel,
-    get_Is_SubType,
     getall_conv_ExpandedNodeId_NodeId,
     get_card_t_subscription,
     get_cast_t_subscription,

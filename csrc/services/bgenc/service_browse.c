@@ -21,7 +21,7 @@
 
  File Name            : service_browse.c
 
- Date                 : 06/11/2018 10:49:22
+ Date                 : 28/01/2019 16:44:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -101,21 +101,28 @@ void service_browse__Is_RefTypes_Compatible(
    const t_bool service_browse__p_inc_subtypes,
    const constants__t_NodeId_i service_browse__p_ref_type2,
    t_bool * const service_browse__p_ref_types_compat) {
-   if (service_browse__p_is_ref_type1 == true) {
-      if (service_browse__p_ref_type1 == service_browse__p_ref_type2) {
-         *service_browse__p_ref_types_compat = true;
-      }
-      else if (service_browse__p_inc_subtypes == true) {
-         constants__get_Is_SubType(service_browse__p_ref_type2,
-            service_browse__p_ref_type1,
-            service_browse__p_ref_types_compat);
+   {
+      t_bool service_browse__l_node_ids_equal;
+      
+      if (service_browse__p_is_ref_type1 == true) {
+         address_space__is_NodeId_equal(service_browse__p_ref_type1,
+            service_browse__p_ref_type2,
+            &service_browse__l_node_ids_equal);
+         if (service_browse__l_node_ids_equal == true) {
+            *service_browse__p_ref_types_compat = true;
+         }
+         else if (service_browse__p_inc_subtypes == true) {
+            address_space__is_transitive_subtype(service_browse__p_ref_type2,
+               service_browse__p_ref_type1,
+               service_browse__p_ref_types_compat);
+         }
+         else {
+            *service_browse__p_ref_types_compat = false;
+         }
       }
       else {
-         *service_browse__p_ref_types_compat = false;
+         *service_browse__p_ref_types_compat = true;
       }
-   }
-   else {
-      *service_browse__p_ref_types_compat = true;
    }
 }
 

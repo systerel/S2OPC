@@ -34,6 +34,42 @@
 #include "opcua_identifiers.h"
 #include "sopc_toolkit_config_constants.h"
 
+const SOPC_NodeId SOPC_Null_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0};
+const SOPC_NodeId SOPC_Boolean_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Boolean};
+const SOPC_NodeId SOPC_SByte_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_SByte};
+const SOPC_NodeId SOPC_Byte_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Byte};
+const SOPC_NodeId SOPC_Int16_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Int16};
+const SOPC_NodeId SOPC_UInt16_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_UInt16};
+const SOPC_NodeId SOPC_Int32_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Int32};
+const SOPC_NodeId SOPC_UInt32_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_UInt32};
+const SOPC_NodeId SOPC_Int64_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Int64};
+const SOPC_NodeId SOPC_UInt64_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_UInt64};
+const SOPC_NodeId SOPC_Float_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Float};
+const SOPC_NodeId SOPC_Double_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Double};
+const SOPC_NodeId SOPC_String_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_String};
+const SOPC_NodeId SOPC_DateTime_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_DateTime};
+const SOPC_NodeId SOPC_Guid_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Guid};
+const SOPC_NodeId SOPC_ByteString_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_ByteString};
+const SOPC_NodeId SOPC_XmlElement_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_XmlElement};
+const SOPC_NodeId SOPC_NodeId_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_NodeId};
+const SOPC_NodeId SOPC_ExpandedNodeId_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_ExpandedNodeId};
+const SOPC_NodeId SOPC_StatusCode_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_StatusCode};
+const SOPC_NodeId SOPC_QualifiedName_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_QualifiedName};
+const SOPC_NodeId SOPC_LocalizedText_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_LocalizedText};
+const SOPC_NodeId SOPC_Structure_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Structure};
+const SOPC_NodeId SOPC_DataValue_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_DataValue};
+const SOPC_NodeId SOPC_BaseData_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_BaseDataType};
+const SOPC_NodeId SOPC_DiagnosticInfo_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_DiagnosticInfo};
+
+const SOPC_NodeId* SOPC_BuiltInTypeId_To_DataTypeNodeId[26] = {
+    &SOPC_Null_Type,          &SOPC_Boolean_Type,       &SOPC_SByte_Type,          &SOPC_Byte_Type,
+    &SOPC_Int16_Type,         &SOPC_UInt16_Type,        &SOPC_Int32_Type,          &SOPC_UInt32_Type,
+    &SOPC_Int64_Type,         &SOPC_UInt64_Type,        &SOPC_Float_Type,          &SOPC_Double_Type,
+    &SOPC_String_Type,        &SOPC_DateTime_Type,      &SOPC_Guid_Type,           &SOPC_ByteString_Type,
+    &SOPC_XmlElement_Type,    &SOPC_NodeId_Type,        &SOPC_ExpandedNodeId_Type, &SOPC_StatusCode_Type,
+    &SOPC_QualifiedName_Type, &SOPC_LocalizedText_Type, &SOPC_Structure_Type,      &SOPC_DataValue_Type,
+    &SOPC_BaseData_Type,      &SOPC_DiagnosticInfo_Type};
+
 void SOPC_Boolean_InitializeAux(void* value)
 {
     SOPC_Boolean_Initialize((SOPC_Boolean*) value);
@@ -1585,6 +1621,21 @@ SOPC_ReturnStatus SOPC_NodeId_Compare(const SOPC_NodeId* left, const SOPC_NodeId
 SOPC_ReturnStatus SOPC_NodeId_CompareAux(const void* left, const void* right, int32_t* comparison)
 {
     return SOPC_NodeId_Compare((const SOPC_NodeId*) left, (const SOPC_NodeId*) right, comparison);
+}
+
+bool SOPC_NodeId_Equal(const SOPC_NodeId* left, const SOPC_NodeId* right)
+{
+    if (NULL == left || NULL == right)
+    {
+        return false;
+    }
+    int32_t compare = -1;
+    SOPC_ReturnStatus status = SOPC_NodeId_Compare(left, right, &compare);
+    if (SOPC_STATUS_OK != status)
+    {
+        return false;
+    }
+    return compare == 0;
 }
 
 void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash)
@@ -4782,5 +4833,83 @@ SOPC_ReturnStatus SOPC_Variant_SetRange(SOPC_Variant* variant, const SOPC_Varian
     default:
         // Matrix will come later
         return SOPC_STATUS_NOT_SUPPORTED;
+    }
+}
+
+const SOPC_NodeId* SOPC_Variant_Get_DataType(SOPC_Variant* var)
+{
+    switch (var->BuiltInTypeId)
+    {
+    case SOPC_Null_Id:
+    case SOPC_Boolean_Id:
+    case SOPC_SByte_Id:
+    case SOPC_Byte_Id:
+    case SOPC_Int16_Id:
+    case SOPC_UInt16_Id:
+    case SOPC_Int32_Id:
+    case SOPC_UInt32_Id:
+    case SOPC_Int64_Id:
+    case SOPC_UInt64_Id:
+    case SOPC_Float_Id:
+    case SOPC_Double_Id:
+    case SOPC_String_Id:
+    case SOPC_DateTime_Id:
+    case SOPC_Guid_Id:
+    case SOPC_ByteString_Id:
+    case SOPC_XmlElement_Id:
+    case SOPC_NodeId_Id:
+    case SOPC_ExpandedNodeId_Id:
+    case SOPC_StatusCode_Id:
+    case SOPC_QualifiedName_Id:
+    case SOPC_LocalizedText_Id:
+    case SOPC_DiagnosticInfo_Id:
+    case SOPC_DataValue_Id:
+    case SOPC_Variant_Id: /* Corresponds to BaseDataType: could only be an array of Variant */
+        return SOPC_BuiltInTypeId_To_DataTypeNodeId[var->BuiltInTypeId];
+    case SOPC_ExtensionObject_Id:
+
+        if (var->ArrayType == SOPC_VariantArrayType_SingleValue && var->Value.ExtObject->TypeId.ServerIndex == 0 &&
+            var->Value.ExtObject->TypeId.NamespaceUri.Length <= 0)
+        {
+            if (var->Value.ExtObject->Encoding == SOPC_ExtObjBodyEncoding_Object &&
+                NULL != var->Value.ExtObject->Body.Object.ObjType)
+            {
+                // Restore the DataType type id if it was the encoding object node
+                var->Value.ExtObject->TypeId.NodeId.Data.Numeric = var->Value.ExtObject->Body.Object.ObjType->TypeId;
+                return &var->Value.ExtObject->TypeId.NodeId;
+            }
+            else
+            {
+                // TODO / Note: if the type is unknown we cannot guarantee here the NodeId is a DataType, since it could
+                // be the DefaultEncoding Object instead.
+                // Returns the generic Structure type instead
+                return &SOPC_Structure_Type;
+            }
+        }
+        else
+        {
+            /* If type defined in another server or variant is an array, no guarantee that all are of same type. Keep
+             * "Structure" generic type. */
+            return &SOPC_Structure_Type;
+        }
+    default:
+        assert(false); // Invalid type
+        return &SOPC_Null_Type;
+    }
+}
+
+int32_t SOPC_Variant_Get_ValueRank(SOPC_Variant* var)
+{
+    switch (var->ArrayType)
+    {
+    case SOPC_VariantArrayType_SingleValue:
+        return -1; // Scalar
+    case SOPC_VariantArrayType_Array:
+        return 1; // One dimension array
+    case SOPC_VariantArrayType_Matrix:
+        return var->Value.Matrix.Dimensions;
+    default:
+        assert(false); // Invalid value
+        return -3;
     }
 }

@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 09/11/2018 10:13:57
+ Date                 : 25/01/2019 12:04:54
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,6 +38,8 @@
 #include "address_space.h"
 #include "address_space_bs.h"
 #include "address_space_it.h"
+#include "address_space_typing.h"
+#include "address_space_typing_bs.h"
 #include "channel_mgr.h"
 #include "channel_mgr_1.h"
 #include "channel_mgr_bs.h"
@@ -141,6 +143,8 @@ void INITIALISATION(void) {
    user_authorization_bs__INITIALISATION();
    data_value_pointer_bs__INITIALISATION();
    address_space_bs__INITIALISATION();
+   address_space_typing_bs__INITIALISATION();
+   address_space_typing__INITIALISATION();
    response_write_bs__INITIALISATION();
    address_space_it__INITIALISATION();
    gen_subscription_event_bs__INITIALISATION();

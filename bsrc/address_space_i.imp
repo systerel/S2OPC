@@ -28,21 +28,24 @@ SEES
     service_write_decode_bs,
     service_mgr_1,
     service_response_cb_bs,
-    write_value_pointer_bs
+    write_value_pointer_bs,
+    data_value_pointer_bs
 
 IMPORTS
     address_space_bs,
+    address_space_typing,
     response_write_bs,
     address_space_it,
     gen_subscription_event_bs,
-    user_authorization_bs,
-    data_value_pointer_bs
+    user_authorization_bs
 
 PROMOTES
     readall_AddressSpace_Node,
     get_NodeClass,
     get_BrowseName,
     get_DisplayName,
+    is_transitive_subtype,
+    is_NodeId_equal,
     get_TypeDefinition,
     get_Reference_ReferenceType,
     get_Reference_TargetNode,
@@ -65,7 +68,22 @@ DEFINITIONS
         (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
                                                      WriteValue_NodeId~ ;
          (cast_t_WriteValue[1..nb_WriteValue] /\
-          WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_DataValue)
+             WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_DataValue);
+
+    d_Type_IsVariableSubtype_NeedConv(dvNodeId, dvConcValueRank, varNodeId, varValueRank) ==
+    /* A scalar ByteString is compatible with a 1 dimension Byte array */
+    (dvNodeId = c_ByteString_Type_NodeId & dvConcValueRank = -1 &
+     varNodeId = c_Byte_Type_NodeId & 1 |-> varValueRank : Type_IsIncludedValueRank)
+    or /* A 1 dimension Byte array is compatible with a scalar ByteString */
+    (dvNodeId = c_Byte_Type_NodeId & dvConcValueRank = 1 &
+     varNodeId = c_ByteString_Type_NodeId & -1 |-> varValueRank : Type_IsIncludedValueRank);
+
+    d_Type_IsVariableSubtype(dvNodeId, dvConcValueRank, varNodeId, varValueRank) ==
+    ((dvNodeId = c_Null_Type_NodeId or dvNodeId = varNodeId or dvNodeId |-> varNodeId : Type_IsTransitiveSubtype) &
+        dvConcValueRank |-> varValueRank : Type_IsIncludedValueRank)
+    /* + Management of exceptional cases when typing a variable */
+    or d_Type_IsVariableSubtype_NeedConv(dvNodeId, dvConcValueRank, varNodeId, varValueRank)
+
 
 INITIALISATION
     ResponseWrite_allocated := FALSE
@@ -113,6 +131,7 @@ LOCAL_OPERATIONS
              nid : ran(a_NodeId) &
              aid = e_aid_Value &
              a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable &
+             d_Type_IsVariableSubtype(DataValue_LocalDataType(dataValue), DataValue_ValueRank(dataValue), a_DataType(a_NodeId~(nid)), a_ValueRank(a_NodeId~(nid))) &
              (local_service_treatment = TRUE
               or
               (conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE &
@@ -144,9 +163,13 @@ LOCAL_OPERATIONS
                  nid : ran(a_NodeId) &
                  aid = e_aid_Value &
                  a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable &
-                 local_service_treatment = FALSE &
-                 conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE &
-                 e_operation_type_write |-> nid |-> aid |-> p_user : s_AuthorizedOperations)
+                 d_Type_IsVariableSubtype(DataValue_LocalDataType(dataValue), DataValue_ValueRank(dataValue), a_DataType(a_NodeId~(nid)), a_ValueRank(a_NodeId~(nid))) &
+                    (local_service_treatment = TRUE
+                     or
+                     (conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE &
+                      e_operation_type_write |-> nid |-> aid |-> p_user : s_AuthorizedOperations)
+                    )
+                )
              =>
              serviceStatusCode :
                {e_sc_bad_internal_error, e_sc_bad_attribute_id_invalid, e_sc_bad_node_id_unknown, e_sc_bad_not_writable, e_sc_bad_user_access_denied, e_sc_bad_index_range_no_data, e_sc_bad_index_range_invalid} &
@@ -157,8 +180,88 @@ LOCAL_OPERATIONS
             )
         )
     END
+    ;
+
+    /* Computes if DataValue has a compatible type or compatible subtype */
+    btyp_ok, btyp_need_conv <-- is_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr) =
+    PRE
+        p_dv_typ_nid : t_NodeId_i &
+        p_dv_vr : t_ConcreteValueRank &
+        p_var_typ_nid : t_NodeId_i &
+        p_var_typ_nid : t_NodeId &
+        p_var_vr : t_ValueRank
+    THEN
+        btyp_ok := bool(d_Type_IsVariableSubtype(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr)) ||
+        btyp_need_conv := bool(d_Type_IsVariableSubtype_NeedConv(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr))
+    END
 
 OPERATIONS
+    /* LOCAL_OPERATIONS */
+
+    /* TODO: move treat_write_1 here in a separated commit */
+
+    btyp_ok, btyp_need_conv <-- is_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr) =
+    VAR
+        l_node_ids_eq,
+        l_dv_is_null_type,
+        l_dv_is_sub_typ,
+        l_dv_is_byte_type,
+        l_dv_is_bytestring_type,
+        l_var_is_byte_type,
+        l_var_is_bytestring_type,
+        l_var_is_scalar_vr,
+        l_var_is_one_dim_vr,
+        l_typ_is_ok,
+        l_typ_need_conv,
+        l_value_rank_is_ok
+    IN
+        l_typ_is_ok := FALSE;
+        l_typ_need_conv := FALSE;
+        l_value_rank_is_ok := FALSE;
+        IF p_dv_typ_nid /= c_NodeId_indet THEN
+            l_node_ids_eq <-- is_NodeId_equal(p_dv_typ_nid, p_var_typ_nid);
+            l_dv_is_null_type <-- is_NodeId_equal(p_dv_typ_nid, c_Null_Type_NodeId);
+            l_value_rank_is_ok <-- is_included_ValueRank(p_dv_vr, p_var_vr);
+            IF l_node_ids_eq = TRUE THEN
+                l_typ_is_ok := TRUE
+            ELSIF l_dv_is_null_type = TRUE THEN
+                l_typ_is_ok := TRUE
+            ELSE
+                l_dv_is_sub_typ <-- is_transitive_subtype(p_dv_typ_nid, p_var_typ_nid);
+                IF l_dv_is_sub_typ = TRUE THEN
+                    l_typ_is_ok := TRUE
+                ELSE
+                    l_dv_is_bytestring_type <-- is_NodeId_equal(p_dv_typ_nid, c_ByteString_Type_NodeId);
+                    l_dv_is_byte_type <-- is_NodeId_equal(p_dv_typ_nid, c_Byte_Type_NodeId);
+                    l_var_is_bytestring_type <-- is_NodeId_equal(p_var_typ_nid, c_ByteString_Type_NodeId);
+                    l_var_is_byte_type <-- is_NodeId_equal(p_var_typ_nid, c_Byte_Type_NodeId);
+                    l_var_is_scalar_vr <-- is_included_ValueRank(-1, p_var_vr);
+                    l_var_is_one_dim_vr <-- is_included_ValueRank(1, p_var_vr);
+                    IF l_dv_is_bytestring_type = TRUE & p_dv_vr = -1 &
+                        l_var_is_byte_type = TRUE & l_var_is_one_dim_vr = TRUE
+                    THEN
+                        /* New DataValue is ByteString and Variable accepts Byte[]: compatiblity with conversion */
+                        l_typ_is_ok := TRUE;
+                        l_typ_need_conv := TRUE;
+                        l_value_rank_is_ok := TRUE
+                    ELSIF l_dv_is_byte_type = TRUE & p_dv_vr = 1 &
+                        l_var_is_bytestring_type = TRUE & l_var_is_scalar_vr = TRUE
+                    THEN
+                        /* New DataValue is Byte[] and Variable accepts ByteString: compatiblity with conversion */
+                        l_typ_is_ok := TRUE;
+                        l_typ_need_conv := TRUE;
+                        l_value_rank_is_ok := TRUE
+                    END
+                END
+            END
+        END;
+        btyp_ok := bool(l_typ_is_ok = TRUE & l_value_rank_is_ok = TRUE);
+        btyp_need_conv := l_typ_need_conv
+    END
+    ;
+
+    /* END LOCAL_OPERATIONS */
+
     sc, ncl, val <-- read_NodeClass_Attribute(p_user, node, aid, index_range) =
     BEGIN
         ncl <-- get_NodeClass(node);
@@ -289,6 +392,12 @@ OPERATIONS
         l_access_lvl,
         l_access_write,
         l_authorized_write,
+        l_compatible_type,
+        l_compat_with_conv,
+        l_var_datatype_nid,
+        l_var_vr,
+        l_dv_datatype_nid,
+        l_dv_datatype_vr,
         l_local_treatment
     IN
         prev_dataValue := c_DataValue_indet;
@@ -297,24 +406,33 @@ OPERATIONS
             IF l_isvalid = TRUE THEN
                 l_ncl <-- get_NodeClass(l_node);
                 IF aid = e_aid_Value & l_ncl = e_ncl_Variable THEN
-                    l_local_treatment <-- is_local_service_treatment;
-                    IF l_local_treatment = TRUE THEN
-                        /* No access authorization check for local treatment */
-                        serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, dataValue, index_range)
-                    ELSE
-                        l_access_lvl <-- get_AccessLevel(l_node);
-                        l_access_write <-- is_t_acces_level_currentWrite(l_access_lvl);
-                        IF l_access_write = TRUE THEN
-                            /* Write authorization is for set_Value, and read authorization is for get_Value_StatusCode */
-                            l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
-                            IF l_authorized_write = TRUE THEN
-                                serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, dataValue, index_range)
-                            ELSE
-                                serviceStatusCode := e_sc_bad_user_access_denied
-                            END
+                    l_var_datatype_nid <-- get_DataType(l_node);
+                    l_var_vr <-- get_ValueRank(l_node);
+                    l_dv_datatype_nid <-- get_conv_DataValue_LocalDataType(dataValue);
+                    l_dv_datatype_vr <-- get_conv_DataValue_ValueRank(dataValue);
+                    l_compatible_type, l_compat_with_conv <-- is_variable_compat_type(l_dv_datatype_nid, l_dv_datatype_vr, l_var_datatype_nid, l_var_vr);
+                    IF l_compatible_type = TRUE THEN
+                        l_local_treatment <-- is_local_service_treatment;
+                        IF l_local_treatment = TRUE THEN
+                            /* No access authorization check for local treatment */
+                            serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, dataValue, index_range)
                         ELSE
-                            serviceStatusCode := e_sc_bad_not_writable
+                            l_access_lvl <-- get_AccessLevel(l_node);
+                            l_access_write <-- is_t_acces_level_currentWrite(l_access_lvl);
+                            IF l_access_write = TRUE THEN
+                                /* Write authorization is for set_Value, and read authorization is for get_Value_StatusCode */
+                                l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
+                                IF l_authorized_write = TRUE THEN
+                                    serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, dataValue, index_range)
+                                ELSE
+                                    serviceStatusCode := e_sc_bad_user_access_denied
+                                END
+                            ELSE
+                                serviceStatusCode := e_sc_bad_not_writable
+                            END
                         END
+                    ELSE
+                        serviceStatusCode := e_sc_bad_type_mismatch
                     END
                 ELSE
                     serviceStatusCode := e_sc_bad_not_writable

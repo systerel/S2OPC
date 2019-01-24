@@ -93,7 +93,7 @@ DEFINITIONS
         a_DataType : t_Node +-> t_NodeId &
         dom(a_DataType) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
-        a_ValueRank : t_Node +-> t_Int32 &
+        a_ValueRank : t_Node +-> t_ValueRank &
         dom(a_ValueRank) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
         a_AccessLevel : t_Node +-> t_access_level &
@@ -146,6 +146,17 @@ INITIALISATION
     d_variables :( d_init )
 
 OPERATIONS
+
+    bres <-- is_NodeId_equal(nid1, nid2) =
+    PRE
+        nid1 : t_NodeId_i &
+        nid1 : t_NodeId &
+        nid2 : t_NodeId_i &
+        nid2 : t_NodeId
+    THEN
+        bres := bool(nid1 = nid2)
+    END
+    ;
 
     /* a_NodeId~ */
     nid_valid, node <-- readall_AddressSpace_Node(nid) =
@@ -341,6 +352,27 @@ OPERATIONS
     END
     ;
 
+    p_data_type <-- get_DataType(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node   &
+        p_node : dom(a_DataType)
+    THEN
+        p_data_type :(p_data_type : t_NodeId_i &
+                      p_data_type = a_DataType(p_node))
+    END
+    ;
+
+    p_value_rank <-- get_ValueRank(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node   &
+        p_node : dom(a_ValueRank)
+    THEN
+        p_value_rank :(p_value_rank = a_ValueRank(p_node))
+    END
+    ;
+
     p_access_level <-- get_AccessLevel(p_node) =
     PRE
         p_node : t_Node_i &
@@ -419,5 +451,6 @@ OPERATIONS
         p_ref :(p_ref : t_Reference_i &
                 p_ref = RefIndex_Reference(p_node |-> p_ref_index))
     END
+
 
 END

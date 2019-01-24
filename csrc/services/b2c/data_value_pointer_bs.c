@@ -22,6 +22,8 @@
   --------------*/
 #include "data_value_pointer_bs.h"
 
+#include "sopc_macros.h"
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -30,3 +32,37 @@ void data_value_pointer_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void data_value_pointer_bs__get_conv_DataValue_LocalDataType(
+    const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
+    constants__t_NodeId_i* const data_value_pointer_bs__p_dt)
+{
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    *data_value_pointer_bs__p_dt = (SOPC_NodeId*) SOPC_Variant_Get_DataType(&data_value_pointer_bs__p_dataValue->Value);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+}
+
+void data_value_pointer_bs__get_conv_DataValue_SourceTimestamp(
+    const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
+    constants__t_DateTime* const data_value_pointer_bs__p_st)
+{
+    *data_value_pointer_bs__p_st = data_value_pointer_bs__p_dataValue->SourceTimestamp;
+}
+
+void data_value_pointer_bs__get_conv_DataValue_Status(const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
+                                                      constants__t_StatusCode_i* const data_value_pointer_bs__p_sc)
+{
+    *data_value_pointer_bs__p_sc = data_value_pointer_bs__p_dataValue->Status;
+}
+
+void data_value_pointer_bs__get_conv_DataValue_ValueRank(
+    const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
+    t_entier4* const data_value_pointer_bs__p_vr)
+{
+    *data_value_pointer_bs__p_vr = SOPC_Variant_Get_ValueRank(&data_value_pointer_bs__p_dataValue->Value);
+}
+void data_value_pointer_bs__get_conv_DataValue_Variant(
+    const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
+    constants__t_Variant_i* const data_value_pointer_bs__p_variant)
+{
+    *data_value_pointer_bs__p_variant = &data_value_pointer_bs__p_dataValue->Value;
+}

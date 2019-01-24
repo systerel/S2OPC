@@ -25,7 +25,16 @@
 #include "constants_bs.h"
 #include "b2c.h"
 
+#include "sopc_builtintypes.h"
 #include "sopc_types.h"
+
+static SOPC_NodeId ByteString_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_ByteString};
+static SOPC_NodeId Byte_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Byte};
+static SOPC_NodeId Null_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0};
+
+const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId = &ByteString_Type;
+const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId = &Byte_Type;
+const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId = &Null_Type;
 
 void constants_bs__INITIALISATION(void) {}
 

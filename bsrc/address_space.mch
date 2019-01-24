@@ -41,14 +41,15 @@ DEFINITIONS
         a_DataType,
         a_ValueRank,
         a_AccessLevel,
-        a_UserAccessLevel,
+        /* a_UserAccessLevel  (see d_inv) */
         a_Historizing,
         a_Executable,
         a_UserExecutable,
         a_ContainsNoLoops,
         a_Symmetric,
 
-
+        /* Types */
+        Type_IsTransitiveSubtype,
 
         /* References */
         Reference_SourceNode,
@@ -73,6 +74,7 @@ DEFINITIONS
 
         /* User authorization */
         s_AuthorizedOperations
+
     ;
 
     d_inv ==
@@ -106,14 +108,15 @@ DEFINITIONS
         a_DataType : t_Node +-> t_NodeId &
         dom(a_DataType) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
-        a_ValueRank : t_Node +-> t_Int32 &
+        a_ValueRank : t_Node +-> t_ValueRank &
         dom(a_ValueRank) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
         a_AccessLevel : t_Node +-> t_access_level &
         dom(a_AccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
+        /* Note: Dynamic value evaluation depending on authorization of user
         a_UserAccessLevel : t_Node +-> t_access_level &
-        dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) & /* Dynamic value evaluation depending on authorization of user */
+        dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) & */
 
         a_Historizing : t_Node +-> BOOL &
         dom(a_Historizing) = dom(a_NodeClass|>{e_ncl_Variable}) &
@@ -129,6 +132,10 @@ DEFINITIONS
 
         a_Symmetric : t_Node +-> BOOL &
         dom(a_Symmetric) = dom(a_NodeClass|>{e_ncl_ReferenceType}) &
+
+
+        /* Types */
+        Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
 
         /* Special reference (see def) */
         Ref_HasTypeDefinition : t_Node +-> t_ExpandedNodeId &
@@ -244,6 +251,31 @@ OPERATIONS
                          p_display_name = a_DisplayName(p_node))
     END
     ;
+
+    /* Types */
+    bres <-- is_transitive_subtype(p_subtype, p_parent_type) =
+    PRE
+        p_subtype : t_NodeId_i &
+        p_subtype : t_NodeId &
+        p_parent_type : t_NodeId_i &
+        p_parent_type : t_NodeId
+    THEN
+        bres := bool(p_subtype |-> p_parent_type : Type_IsTransitiveSubtype)
+    END
+    ;
+
+    bres <-- is_NodeId_equal(nid1, nid2) =
+    PRE
+        nid1 : t_NodeId_i &
+        nid1 : t_NodeId &
+        nid2 : t_NodeId_i &
+        nid2 : t_NodeId
+    THEN
+        bres := bool(nid1 = nid2)
+    END
+    ;
+
+    /* References */
 
     p_type_def <-- get_TypeDefinition(p_node) =
     PRE

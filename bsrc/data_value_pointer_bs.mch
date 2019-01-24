@@ -27,21 +27,31 @@ ABSTRACT_VARIABLES
     DataValue_Variant,
     DataValue_StatusCode,
     DataValue_SourceTimestamp,
-    DataValue_ServerTimestamp
+    DataValue_ServerTimestamp,
+
+    DataValue_LocalDataType,
+    DataValue_ValueRank
 
 INVARIANT
     DataValue_Variant : t_DataValue --> t_Variant &
     DataValue_StatusCode : t_DataValue --> t_StatusCode &
     DataValue_SourceTimestamp : t_DataValue --> t_DateTime &
-    DataValue_ServerTimestamp : t_DataValue --> t_DateTime
+    DataValue_ServerTimestamp : t_DataValue --> t_DateTime &
+
+    DataValue_LocalDataType : t_DataValue --> t_NodeId & /* ExpandedNodeId from different server returns Structure <=> NodeId(i=22)
+                                                            / Null value return NodeId(i=0) */
+    DataValue_ValueRank : t_DataValue --> t_ConcreteValueRank
+
 
 INITIALISATION
     DataValue_Variant :: {} ||
     DataValue_StatusCode :: {} ||
     DataValue_SourceTimestamp :: {} ||
-    DataValue_ServerTimestamp :: {}
+    DataValue_ServerTimestamp :: {} ||
 
-    /*
+    DataValue_LocalDataType :: {} ||
+    DataValue_ValueRank :: {}
+
 OPERATIONS
 
     p_variant <-- get_conv_DataValue_Variant(p_dataValue) =
@@ -49,7 +59,7 @@ OPERATIONS
         p_dataValue : t_DataValue_i &
         p_dataValue : t_DataValue_i
     THEN
-        p_variant :(p_variant: t_Variant_i & p_variant: t_Variant)
+        p_variant :(p_variant : t_Variant_i & p_variant = DataValue_Variant(p_dataValue))
     END
     ;
 
@@ -58,8 +68,34 @@ OPERATIONS
         p_dataValue : t_DataValue_i &
         p_dataValue : t_DataValue_i
     THEN
-        p_sc :(p_sc: t_StatusCode_i & p_sc: t_StatusCode)
+        p_sc :(p_sc : t_StatusCode_i & p_sc = DataValue_StatusCode(p_dataValue))
     END
-    */
+    ;
+
+    p_st <-- get_conv_DataValue_SourceTimestamp(p_dataValue) =
+    PRE
+        p_dataValue : t_DataValue_i &
+        p_dataValue : t_DataValue_i
+    THEN
+        p_st := DataValue_SourceTimestamp(p_dataValue)
+    END
+    ;
+
+    p_dt <-- get_conv_DataValue_LocalDataType(p_dataValue) =
+    PRE
+        p_dataValue : t_DataValue_i &
+        p_dataValue : t_DataValue_i
+    THEN
+        p_dt :(p_dt : t_NodeId_i & p_dt = DataValue_LocalDataType(p_dataValue))
+    END
+    ;
+
+    p_vr <-- get_conv_DataValue_ValueRank(p_dataValue) =
+    PRE
+        p_dataValue : t_DataValue_i &
+        p_dataValue : t_DataValue_i
+    THEN
+        p_vr := DataValue_ValueRank(p_dataValue)
+    END
 
 END

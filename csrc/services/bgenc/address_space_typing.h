@@ -19,21 +19,26 @@
 
 /******************************************************************************
 
- File Name            : data_value_pointer_bs.h
+ File Name            : address_space_typing.h
 
- Date                 : 25/01/2019 12:04:40
+ Date                 : 28/01/2019 16:44:20
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
 ******************************************************************************/
 
-#ifndef _data_value_pointer_bs_h
-#define _data_value_pointer_bs_h
+#ifndef _address_space_typing_h
+#define _address_space_typing_h
 
 /*--------------------------
    Added by the Translator
   --------------------------*/
 #include "b2c.h"
+
+/*-----------------
+   IMPORTS Clause
+  -----------------*/
+#include "address_space_typing_bs.h"
 
 /*--------------
    SEES Clause
@@ -43,25 +48,19 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void data_value_pointer_bs__INITIALISATION(void);
+extern void address_space_typing__INITIALISATION(void);
+
+/*-------------------------------
+   PROMOTES and EXTENDS Clauses
+  -------------------------------*/
+#define address_space_typing__is_transitive_subtype address_space_typing_bs__is_transitive_subtype
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void data_value_pointer_bs__get_conv_DataValue_LocalDataType(
-   const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-   constants__t_NodeId_i * const data_value_pointer_bs__p_dt);
-extern void data_value_pointer_bs__get_conv_DataValue_SourceTimestamp(
-   const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-   constants__t_DateTime * const data_value_pointer_bs__p_st);
-extern void data_value_pointer_bs__get_conv_DataValue_Status(
-   const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-   constants__t_StatusCode_i * const data_value_pointer_bs__p_sc);
-extern void data_value_pointer_bs__get_conv_DataValue_ValueRank(
-   const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-   t_entier4 * const data_value_pointer_bs__p_vr);
-extern void data_value_pointer_bs__get_conv_DataValue_Variant(
-   const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-   constants__t_Variant_i * const data_value_pointer_bs__p_variant);
+extern void address_space_typing__is_included_ValueRank(
+   const t_entier4 address_space_typing__p_concValueRank,
+   const t_entier4 address_space_typing__p_expValueRank,
+   t_bool * const address_space_typing__bres);
 
 #endif

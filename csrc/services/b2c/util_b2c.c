@@ -768,6 +768,9 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     case constants__e_sc_bad_not_writable:
         *status = OpcUa_BadNotWritable;
         break;
+    case constants__e_sc_bad_type_mismatch:
+        *status = OpcUa_BadTypeMismatch;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -979,6 +982,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i*
         break;
     case OpcUa_BadNotWritable:
         *bstatus = constants__e_sc_bad_not_writable;
+        break;
+    case OpcUa_BadTypeMismatch:
+        *bstatus = constants__e_sc_bad_type_mismatch;
         break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)

@@ -143,8 +143,8 @@ OPERATIONS
         IF  p_is_ref_type1 = TRUE THEN
             IF  p_ref_type1 = p_ref_type2 THEN
                 p_ref_types_compat := TRUE
-            ELSIF p_inc_subtypes = TRUE THEN
-                p_ref_types_compat := Is_SubType(p_ref_type2 |-> p_ref_type1)
+            ELSIF p_inc_subtypes = TRUE & p_ref_type1 /= c_NodeId_indet THEN
+                p_ref_types_compat := bool(p_ref_type2 |-> p_ref_type1 : Type_IsTransitiveSubtype)
             ELSE
                 p_ref_types_compat := FALSE
             END

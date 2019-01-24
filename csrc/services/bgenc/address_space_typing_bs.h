@@ -19,16 +19,16 @@
 
 /******************************************************************************
 
- File Name            : data_value_pointer_bs.h
+ File Name            : address_space_typing_bs.h
 
- Date                 : 25/01/2019 12:04:40
+ Date                 : 28/01/2019 16:44:34
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
 ******************************************************************************/
 
-#ifndef _data_value_pointer_bs_h
-#define _data_value_pointer_bs_h
+#ifndef _address_space_typing_bs_h
+#define _address_space_typing_bs_h
 
 /*--------------------------
    Added by the Translator
@@ -43,25 +43,14 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void data_value_pointer_bs__INITIALISATION(void);
+extern void address_space_typing_bs__INITIALISATION(void);
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void data_value_pointer_bs__get_conv_DataValue_LocalDataType(
-   const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-   constants__t_NodeId_i * const data_value_pointer_bs__p_dt);
-extern void data_value_pointer_bs__get_conv_DataValue_SourceTimestamp(
-   const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-   constants__t_DateTime * const data_value_pointer_bs__p_st);
-extern void data_value_pointer_bs__get_conv_DataValue_Status(
-   const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-   constants__t_StatusCode_i * const data_value_pointer_bs__p_sc);
-extern void data_value_pointer_bs__get_conv_DataValue_ValueRank(
-   const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-   t_entier4 * const data_value_pointer_bs__p_vr);
-extern void data_value_pointer_bs__get_conv_DataValue_Variant(
-   const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-   constants__t_Variant_i * const data_value_pointer_bs__p_variant);
+extern void address_space_typing_bs__is_transitive_subtype(
+   const constants__t_NodeId_i address_space_typing_bs__p_subtype,
+   const constants__t_NodeId_i address_space_typing_bs__p_parent_type,
+   t_bool * const address_space_typing_bs__bres);
 
 #endif

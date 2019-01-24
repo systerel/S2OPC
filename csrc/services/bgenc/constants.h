@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 23/01/2019 17:18:31
+ Date                 : 25/01/2019 13:23:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -192,7 +192,8 @@ typedef enum {
    constants__e_sc_bad_security_checks_failed,
    constants__e_sc_bad_request_interrupted,
    constants__e_sc_bad_data_unavailable,
-   constants__e_sc_bad_not_writable
+   constants__e_sc_bad_not_writable,
+   constants__e_sc_bad_type_mismatch
 } constants__t_StatusCode_i;
 typedef enum {
    constants__c_TimestampsToReturn_indet,
@@ -393,6 +394,8 @@ typedef enum {
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
+#define constants__c_ByteString_Type_NodeId constants_bs__c_ByteString_Type_NodeId
+#define constants__c_Byte_Type_NodeId constants_bs__c_Byte_Type_NodeId
 #define constants__c_DataValue_indet constants_bs__c_DataValue_indet
 #define constants__c_ExpandedNodeId_indet constants_bs__c_ExpandedNodeId_indet
 #define constants__c_IndexRange_indet constants_bs__c_IndexRange_indet
@@ -400,6 +403,7 @@ typedef enum {
 #define constants__c_NodeId_indet constants_bs__c_NodeId_indet
 #define constants__c_Node_indet constants_bs__c_Node_indet
 #define constants__c_Nonce_indet constants_bs__c_Nonce_indet
+#define constants__c_Null_Type_NodeId constants_bs__c_Null_Type_NodeId
 #define constants__c_QualifiedName_indet constants_bs__c_QualifiedName_indet
 #define constants__c_Reference_indet constants_bs__c_Reference_indet
 #define constants__c_SignatureData_indet constants_bs__c_SignatureData_indet
@@ -460,7 +464,6 @@ extern void constants__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define constants__get_Is_SubType constants_bs__get_Is_SubType
 #define constants__get_card_t_channel constants_bs__get_card_t_channel
 #define constants__get_card_t_session constants_bs__get_card_t_session
 #define constants__get_card_t_subscription constants_bs__get_card_t_subscription

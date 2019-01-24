@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 06/11/2018 10:49:20
+ Date                 : 25/01/2019 12:04:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    IMPORTS Clause
   -----------------*/
 #include "channel_mgr.h"
+#include "data_value_pointer_bs.h"
 #include "service_mgr.h"
 #include "write_value_pointer_bs.h"
 
