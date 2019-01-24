@@ -33,6 +33,7 @@
   --------------------------*/
 #include "b2c.h"
 
+#include "opcua_identifiers.h"
 #include "sopc_address_space.h"
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
@@ -143,6 +144,9 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
+
+extern const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId;
+extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
 #define constants_bs__c_DataValue_indet NULL
 #define constants_bs__c_ExpandedNodeId_indet NULL
 #define constants_bs__c_IndexRange_indet 0
@@ -150,6 +154,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__c_NodeId_indet 0
 #define constants_bs__c_Node_indet 0
 #define constants_bs__c_Nonce_indet 0
+extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_QualifiedName_indet 0
 #define constants_bs__c_Reference_indet 0
 #define constants_bs__c_SignatureData_indet 0

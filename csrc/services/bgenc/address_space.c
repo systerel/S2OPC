@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 24/01/2019 09:56:14
+ Date                 : 28/01/2019 16:44:19
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,6 +47,97 @@ void address_space__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void address_space__is_variable_compat_type(
+   const constants__t_NodeId_i address_space__p_dv_typ_nid,
+   const t_entier4 address_space__p_dv_vr,
+   const constants__t_NodeId_i address_space__p_var_typ_nid,
+   const t_entier4 address_space__p_var_vr,
+   t_bool * const address_space__btyp_ok,
+   t_bool * const address_space__btyp_need_conv) {
+   {
+      t_bool address_space__l_node_ids_eq;
+      t_bool address_space__l_dv_is_null_type;
+      t_bool address_space__l_dv_is_sub_typ;
+      t_bool address_space__l_dv_is_byte_type;
+      t_bool address_space__l_dv_is_bytestring_type;
+      t_bool address_space__l_var_is_byte_type;
+      t_bool address_space__l_var_is_bytestring_type;
+      t_bool address_space__l_var_is_scalar_vr;
+      t_bool address_space__l_var_is_one_dim_vr;
+      t_bool address_space__l_typ_is_ok;
+      t_bool address_space__l_typ_need_conv;
+      t_bool address_space__l_value_rank_is_ok;
+      
+      address_space__l_typ_is_ok = false;
+      address_space__l_typ_need_conv = false;
+      address_space__l_value_rank_is_ok = false;
+      if (address_space__p_dv_typ_nid != constants__c_NodeId_indet) {
+         address_space_bs__is_NodeId_equal(address_space__p_dv_typ_nid,
+            address_space__p_var_typ_nid,
+            &address_space__l_node_ids_eq);
+         address_space_bs__is_NodeId_equal(address_space__p_dv_typ_nid,
+            constants__c_Null_Type_NodeId,
+            &address_space__l_dv_is_null_type);
+         address_space_typing__is_included_ValueRank(address_space__p_dv_vr,
+            address_space__p_var_vr,
+            &address_space__l_value_rank_is_ok);
+         if (address_space__l_node_ids_eq == true) {
+            address_space__l_typ_is_ok = true;
+         }
+         else if (address_space__l_dv_is_null_type == true) {
+            address_space__l_typ_is_ok = true;
+         }
+         else {
+            address_space_typing__is_transitive_subtype(address_space__p_dv_typ_nid,
+               address_space__p_var_typ_nid,
+               &address_space__l_dv_is_sub_typ);
+            if (address_space__l_dv_is_sub_typ == true) {
+               address_space__l_typ_is_ok = true;
+            }
+            else {
+               address_space_bs__is_NodeId_equal(address_space__p_dv_typ_nid,
+                  constants__c_ByteString_Type_NodeId,
+                  &address_space__l_dv_is_bytestring_type);
+               address_space_bs__is_NodeId_equal(address_space__p_dv_typ_nid,
+                  constants__c_Byte_Type_NodeId,
+                  &address_space__l_dv_is_byte_type);
+               address_space_bs__is_NodeId_equal(address_space__p_var_typ_nid,
+                  constants__c_ByteString_Type_NodeId,
+                  &address_space__l_var_is_bytestring_type);
+               address_space_bs__is_NodeId_equal(address_space__p_var_typ_nid,
+                  constants__c_Byte_Type_NodeId,
+                  &address_space__l_var_is_byte_type);
+               address_space_typing__is_included_ValueRank(-1,
+                  address_space__p_var_vr,
+                  &address_space__l_var_is_scalar_vr);
+               address_space_typing__is_included_ValueRank(1,
+                  address_space__p_var_vr,
+                  &address_space__l_var_is_one_dim_vr);
+               if ((((address_space__l_dv_is_bytestring_type == true) &&
+                  (address_space__p_dv_vr == -1)) &&
+                  (address_space__l_var_is_byte_type == true)) &&
+                  (address_space__l_var_is_one_dim_vr == true)) {
+                  address_space__l_typ_is_ok = true;
+                  address_space__l_typ_need_conv = true;
+                  address_space__l_value_rank_is_ok = true;
+               }
+               else if ((((address_space__l_dv_is_byte_type == true) &&
+                  (address_space__p_dv_vr == 1)) &&
+                  (address_space__l_var_is_bytestring_type == true)) &&
+                  (address_space__l_var_is_scalar_vr == true)) {
+                  address_space__l_typ_is_ok = true;
+                  address_space__l_typ_need_conv = true;
+                  address_space__l_value_rank_is_ok = true;
+               }
+            }
+         }
+      }
+      *address_space__btyp_ok = ((address_space__l_typ_is_ok == true) &&
+         (address_space__l_value_rank_is_ok == true));
+      *address_space__btyp_need_conv = address_space__l_typ_need_conv;
+   }
+}
+
 void address_space__read_NodeClass_Attribute(
    const constants__t_user_i address_space__p_user,
    const constants__t_Node_i address_space__node,
@@ -180,6 +271,12 @@ void address_space__treat_write_1(
       constants__t_access_level address_space__l_access_lvl;
       t_bool address_space__l_access_write;
       t_bool address_space__l_authorized_write;
+      t_bool address_space__l_compatible_type;
+      t_bool address_space__l_compat_with_conv;
+      constants__t_NodeId_i address_space__l_var_datatype_nid;
+      t_entier4 address_space__l_var_vr;
+      constants__t_NodeId_i address_space__l_dv_datatype_nid;
+      t_entier4 address_space__l_dv_datatype_vr;
       t_bool address_space__l_local_treatment;
       
       *address_space__prev_dataValue = constants__c_DataValue_indet;
@@ -192,41 +289,60 @@ void address_space__treat_write_1(
                &address_space__l_ncl);
             if ((address_space__aid == constants__e_aid_Value) &&
                (address_space__l_ncl == constants__e_ncl_Variable)) {
-               service_mgr_1__is_local_service_treatment(&address_space__l_local_treatment);
-               if (address_space__l_local_treatment == true) {
-                  address_space_bs__set_Value(address_space__p_user,
-                     address_space__l_node,
-                     address_space__dataValue,
-                     address_space__index_range,
-                     address_space__serviceStatusCode,
-                     address_space__prev_dataValue);
-               }
-               else {
-                  address_space_bs__get_AccessLevel(address_space__l_node,
-                     &address_space__l_access_lvl);
-                  constants__is_t_acces_level_currentWrite(address_space__l_access_lvl,
-                     &address_space__l_access_write);
-                  if (address_space__l_access_write == true) {
-                     user_authorization_bs__get_user_authorization(constants__e_operation_type_write,
-                        address_space__nid,
-                        address_space__aid,
-                        address_space__p_user,
-                        &address_space__l_authorized_write);
-                     if (address_space__l_authorized_write == true) {
-                        address_space_bs__set_Value(address_space__p_user,
-                           address_space__l_node,
-                           address_space__dataValue,
-                           address_space__index_range,
-                           address_space__serviceStatusCode,
-                           address_space__prev_dataValue);
-                     }
-                     else {
-                        *address_space__serviceStatusCode = constants__e_sc_bad_user_access_denied;
-                     }
+               address_space_bs__get_DataType(address_space__l_node,
+                  &address_space__l_var_datatype_nid);
+               address_space_bs__get_ValueRank(address_space__l_node,
+                  &address_space__l_var_vr);
+               data_value_pointer_bs__get_conv_DataValue_LocalDataType(address_space__dataValue,
+                  &address_space__l_dv_datatype_nid);
+               data_value_pointer_bs__get_conv_DataValue_ValueRank(address_space__dataValue,
+                  &address_space__l_dv_datatype_vr);
+               address_space__is_variable_compat_type(address_space__l_dv_datatype_nid,
+                  address_space__l_dv_datatype_vr,
+                  address_space__l_var_datatype_nid,
+                  address_space__l_var_vr,
+                  &address_space__l_compatible_type,
+                  &address_space__l_compat_with_conv);
+               if (address_space__l_compatible_type == true) {
+                  service_mgr_1__is_local_service_treatment(&address_space__l_local_treatment);
+                  if (address_space__l_local_treatment == true) {
+                     address_space_bs__set_Value(address_space__p_user,
+                        address_space__l_node,
+                        address_space__dataValue,
+                        address_space__index_range,
+                        address_space__serviceStatusCode,
+                        address_space__prev_dataValue);
                   }
                   else {
-                     *address_space__serviceStatusCode = constants__e_sc_bad_not_writable;
+                     address_space_bs__get_AccessLevel(address_space__l_node,
+                        &address_space__l_access_lvl);
+                     constants__is_t_acces_level_currentWrite(address_space__l_access_lvl,
+                        &address_space__l_access_write);
+                     if (address_space__l_access_write == true) {
+                        user_authorization_bs__get_user_authorization(constants__e_operation_type_write,
+                           address_space__nid,
+                           address_space__aid,
+                           address_space__p_user,
+                           &address_space__l_authorized_write);
+                        if (address_space__l_authorized_write == true) {
+                           address_space_bs__set_Value(address_space__p_user,
+                              address_space__l_node,
+                              address_space__dataValue,
+                              address_space__index_range,
+                              address_space__serviceStatusCode,
+                              address_space__prev_dataValue);
+                        }
+                        else {
+                           *address_space__serviceStatusCode = constants__e_sc_bad_user_access_denied;
+                        }
+                     }
+                     else {
+                        *address_space__serviceStatusCode = constants__e_sc_bad_not_writable;
+                     }
                   }
+               }
+               else {
+                  *address_space__serviceStatusCode = constants__e_sc_bad_type_mismatch;
                }
             }
             else {

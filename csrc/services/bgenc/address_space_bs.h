@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 23/01/2019 17:18:43
+ Date                 : 25/01/2019 13:08:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -56,6 +56,9 @@ extern void address_space_bs__get_AccessLevel(
 extern void address_space_bs__get_BrowseName(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_QualifiedName_i * const address_space_bs__p_browse_name);
+extern void address_space_bs__get_DataType(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants__t_NodeId_i * const address_space_bs__p_data_type);
 extern void address_space_bs__get_DisplayName(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_LocalizedText_i * const address_space_bs__p_display_name);
@@ -81,10 +84,17 @@ extern void address_space_bs__get_Reference_TargetNode(
 extern void address_space_bs__get_TypeDefinition(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_ExpandedNodeId_i * const address_space_bs__p_type_def);
+extern void address_space_bs__get_ValueRank(
+   const constants__t_Node_i address_space_bs__p_node,
+   t_entier4 * const address_space_bs__p_value_rank);
 extern void address_space_bs__get_Value_StatusCode(
    const constants__t_user_i address_space_bs__p_user,
    const constants__t_Node_i address_space_bs__node,
    constants__t_StatusCode_i * const address_space_bs__sc);
+extern void address_space_bs__is_NodeId_equal(
+   const constants__t_NodeId_i address_space_bs__nid1,
+   const constants__t_NodeId_i address_space_bs__nid2,
+   t_bool * const address_space_bs__bres);
 extern void address_space_bs__read_AddressSpace_Attribute_value(
    const constants__t_user_i address_space_bs__p_user,
    const constants__t_Node_i address_space_bs__node,

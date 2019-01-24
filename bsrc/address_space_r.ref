@@ -24,9 +24,7 @@ REFINES
 
 SEES
     constants,
-    service_write_decode_bs
-
-EXTENDS
+    service_write_decode_bs,
     data_value_pointer_bs
 
 DEFINITIONS
@@ -44,12 +42,13 @@ DEFINITIONS
         a_DataType,
         a_ValueRank,
         a_AccessLevel,
-        a_UserAccessLevel,
         a_Historizing,
         a_Executable,
         a_UserExecutable,
         a_ContainsNoLoops,
         a_Symmetric,
+
+        Type_IsTransitiveSubtype,
 
         Ref_HasTypeDefinition,
 
@@ -101,14 +100,11 @@ DEFINITIONS
         a_DataType : t_Node +-> t_NodeId &
         dom(a_DataType) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
-        a_ValueRank : t_Node +-> t_Int32 &
+        a_ValueRank : t_Node +-> t_ValueRank &
         dom(a_ValueRank) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
         a_AccessLevel : t_Node +-> t_access_level &
         dom(a_AccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
-
-        a_UserAccessLevel : t_Node +-> t_access_level &
-        dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) & /* Dynamic value evaluation depending on authorization of user */
 
         a_Historizing : t_Node +-> BOOL &
         dom(a_Historizing) = dom(a_NodeClass|>{e_ncl_Variable}) &
@@ -125,10 +121,13 @@ DEFINITIONS
         a_Symmetric : t_Node +-> BOOL &
         dom(a_Symmetric) = dom(a_NodeClass|>{e_ncl_ReferenceType}) &
 
+        /* Types */
+        Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
+
+        /* References */
         Ref_HasTypeDefinition : t_Node +-> t_ExpandedNodeId &
         dom(Ref_HasTypeDefinition) = dom(a_NodeClass |> {e_ncl_Variable, e_ncl_Object}) &
 
-        /* References */
         Reference_SourceNode    : t_Reference --> t_NodeId         &
         Reference_ReferenceType : t_Reference --> t_NodeId         &
         Reference_TargetNode    : t_Reference --> t_ExpandedNodeId &

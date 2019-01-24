@@ -26,7 +26,8 @@ SEES
 IMPORTS
     service_mgr,
     channel_mgr,
-    write_value_pointer_bs
+    write_value_pointer_bs,
+    data_value_pointer_bs
 
 LOCAL_OPERATIONS
 

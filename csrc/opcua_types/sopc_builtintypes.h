@@ -296,6 +296,8 @@ typedef struct SOPC_DataValue
     uint16_t ServerPicoSeconds;
 } SOPC_DataValue;
 
+extern const SOPC_NodeId* SOPC_BuiltInTypeId_To_DataTypeNodeId[26];
+
 #define SECURITY_POLICY_NONE "http://opcfoundation.org/UA/SecurityPolicy#None"
 #define SECURITY_POLICY_BASIC128RSA15 "http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15"
 #define SECURITY_POLICY_BASIC256 "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
@@ -459,6 +461,7 @@ void SOPC_NodeId_ClearAux(void* value);
 
 SOPC_ReturnStatus SOPC_NodeId_Compare(const SOPC_NodeId* left, const SOPC_NodeId* right, int32_t* comparison);
 SOPC_ReturnStatus SOPC_NodeId_CompareAux(const void* left, const void* right, int32_t* comparison);
+bool SOPC_NodeId_Equal(const SOPC_NodeId* left, const SOPC_NodeId* right);
 
 void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash);
 
@@ -571,6 +574,9 @@ SOPC_ReturnStatus SOPC_Variant_CompareRange(const SOPC_Variant* left,
 void SOPC_Variant_Clear(SOPC_Variant* variant);
 void SOPC_Variant_ClearAux(void* value);
 void SOPC_Variant_Delete(SOPC_Variant* variant);
+
+const SOPC_NodeId* SOPC_Variant_Get_DataType(SOPC_Variant* var);
+int32_t SOPC_Variant_Get_ValueRank(SOPC_Variant* var);
 
 void SOPC_DataValue_Initialize(SOPC_DataValue* dataValue);
 void SOPC_DataValue_InitializeAux(void* value);

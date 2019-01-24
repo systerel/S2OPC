@@ -76,12 +76,15 @@ OPERATIONS
     ;
 
     p_ref_types_compat <-- Is_RefTypes_Compatible(p_is_ref_type1, p_ref_type1, p_inc_subtypes, p_ref_type2) =
-    BEGIN
+    VAR
+        l_node_ids_equal
+    IN
         IF  p_is_ref_type1 = TRUE THEN
-            IF  p_ref_type1 = p_ref_type2 THEN
+            l_node_ids_equal <-- is_NodeId_equal(p_ref_type1, p_ref_type2);
+            IF  l_node_ids_equal = TRUE THEN
                 p_ref_types_compat := TRUE
             ELSIF p_inc_subtypes = TRUE THEN
-                p_ref_types_compat <-- get_Is_SubType(p_ref_type2, p_ref_type1)
+                p_ref_types_compat <-- is_transitive_subtype(p_ref_type2, p_ref_type1)
             ELSE
                 p_ref_types_compat := FALSE
             END

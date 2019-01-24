@@ -87,6 +87,34 @@ SOPC_Variant* SOPC_AddressSpace_Item_Get_Value(SOPC_AddressSpace_Item* item)
     }
 }
 
+SOPC_NodeId* SOPC_AddressSpace_Item_Get_DataType(SOPC_AddressSpace_Item* item)
+{
+    switch (item->node_class)
+    {
+    case OpcUa_NodeClass_Variable:
+        return &item->data.variable.DataType;
+    case OpcUa_NodeClass_VariableType:
+        return &item->data.variable_type.DataType;
+    default:
+        assert(false && "Current element has no data type.");
+        return NULL;
+    }
+}
+
+int32_t SOPC_AddressSpace_Item_Get_ValueRank(SOPC_AddressSpace_Item* item)
+{
+    switch (item->node_class)
+    {
+    case OpcUa_NodeClass_Variable:
+        return item->data.variable.ValueRank;
+    case OpcUa_NodeClass_VariableType:
+        return item->data.variable_type.ValueRank;
+    default:
+        assert(false && "Current element has no value rank.");
+        return -3;
+    }
+}
+
 SOPC_Byte* SOPC_AddressSpace_Item_Get_AccessLevel(SOPC_AddressSpace_Item* item)
 {
     switch (item->node_class)

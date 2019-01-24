@@ -83,6 +83,10 @@ CONCRETE_CONSTANTS
     k_n_registerNodes_max,
     k_n_unregisterNodes_max,
 
+    c_Null_Type_NodeId,
+    c_ByteString_Type_NodeId,
+    c_Byte_Type_NodeId,
+
     c_Variant_indet,
     c_DataValue_indet,
     c_Node_indet,
@@ -199,9 +203,17 @@ PROPERTIES
     c_Node_indet : t_Node_i &
     c_Node_indet /: t_Node &
 
-    t_NodeId <: t_NodeId_i &
     c_NodeId_indet : t_NodeId_i &
-    c_NodeId_indet /: t_NodeId &
+    t_NodeId = t_NodeId_i - {c_NodeId_indet} &
+
+    c_Null_Type_NodeId : t_NodeId_i &
+    c_Null_Type_NodeId : t_NodeId &
+
+    c_ByteString_Type_NodeId : t_NodeId_i &
+    c_ByteString_Type_NodeId : t_NodeId &
+
+    c_Byte_Type_NodeId : t_NodeId_i &
+    c_Byte_Type_NodeId : t_NodeId &
 
     t_byte_buffer <: t_byte_buffer_i &
     c_byte_buffer_indet : t_byte_buffer_i &
@@ -407,17 +419,6 @@ OPERATIONS
         p_ind : dom(cast_t_channel)
     THEN
         p_channel := cast_t_channel(p_ind)
-    END
-    ;
-
-    p_res <-- get_Is_SubType(p_type1, p_type2) =
-    PRE
-        p_type1 : t_NodeId_i &
-        p_type1 : t_NodeId   &
-        p_type2 : t_NodeId_i &
-        p_type2 : t_NodeId
-    THEN
-        p_res :: BOOL
     END
     ;
 

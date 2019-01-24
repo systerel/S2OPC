@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 06/11/2018 10:49:18
+ Date                 : 28/01/2019 16:44:19
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -40,7 +40,7 @@
   -----------------*/
 #include "address_space_bs.h"
 #include "address_space_it.h"
-#include "data_value_pointer_bs.h"
+#include "address_space_typing.h"
 #include "gen_subscription_event_bs.h"
 #include "response_write_bs.h"
 #include "user_authorization_bs.h"
@@ -49,6 +49,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "data_value_pointer_bs.h"
 #include "service_mgr_1.h"
 #include "service_response_cb_bs.h"
 #include "service_write_decode_bs.h"
@@ -78,6 +79,8 @@ extern void address_space__INITIALISATION(void);
 #define address_space__get_TypeDefinition address_space_bs__get_TypeDefinition
 #define address_space__get_Value_StatusCode address_space_bs__get_Value_StatusCode
 #define address_space__get_user_authorization user_authorization_bs__get_user_authorization
+#define address_space__is_NodeId_equal address_space_bs__is_NodeId_equal
+#define address_space__is_transitive_subtype address_space_typing__is_transitive_subtype
 #define address_space__read_AddressSpace_clear_value address_space_bs__read_AddressSpace_clear_value
 #define address_space__read_AddressSpace_free_variant address_space_bs__read_AddressSpace_free_variant
 #define address_space__readall_AddressSpace_Node address_space_bs__readall_AddressSpace_Node
@@ -86,6 +89,13 @@ extern void address_space__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
+extern void address_space__is_variable_compat_type(
+   const constants__t_NodeId_i address_space__p_dv_typ_nid,
+   const t_entier4 address_space__p_dv_vr,
+   const constants__t_NodeId_i address_space__p_var_typ_nid,
+   const t_entier4 address_space__p_var_vr,
+   t_bool * const address_space__btyp_ok,
+   t_bool * const address_space__btyp_need_conv);
 extern void address_space__treat_write_1(
    const t_bool address_space__isvalid,
    const constants__t_StatusCode_i address_space__status,

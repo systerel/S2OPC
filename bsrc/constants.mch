@@ -109,7 +109,8 @@ SETS
                       e_sc_bad_security_checks_failed,
                       e_sc_bad_request_interrupted,
                       e_sc_bad_data_unavailable,
-                      e_sc_bad_not_writable};
+                      e_sc_bad_not_writable,
+                      e_sc_bad_type_mismatch};
 
     t_BrowseDirection_i = {e_bd_indet,
                            e_bd_forward,
@@ -345,6 +346,10 @@ CONCRETE_CONSTANTS
     k_n_registerNodes_max,
     k_n_unregisterNodes_max,
 
+    c_Null_Type_NodeId,
+    c_ByteString_Type_NodeId,
+    c_Byte_Type_NodeId,
+
     c_Variant_indet,
     c_DataValue_indet,
     c_NodeId_indet,
@@ -393,7 +398,9 @@ CONCRETE_CONSTANTS
     c_timer_id_indet,
     c_IndexRange_indet,
 
-    t_counter
+    t_counter,
+    t_ValueRank,
+    t_ConcreteValueRank
 
 ABSTRACT_CONSTANTS
     conv_NodeId_Variant,
@@ -483,7 +490,6 @@ ABSTRACT_CONSTANTS
     s_service_reqs,
     s_service_resps,
 
-    Is_SubType,
     Is_Dir_Forward_Compatible
 
 PROPERTIES
@@ -501,9 +507,17 @@ PROPERTIES
     c_Node_indet : t_Node_i &
     c_Node_indet /: t_Node &
 
-    t_NodeId <: t_NodeId_i &
     c_NodeId_indet : t_NodeId_i &
-    c_NodeId_indet /: t_NodeId &
+    t_NodeId = t_NodeId_i - {c_NodeId_indet} &
+
+    c_Null_Type_NodeId : t_NodeId_i &
+    c_Null_Type_NodeId : t_NodeId &
+
+    c_ByteString_Type_NodeId : t_NodeId_i &
+    c_ByteString_Type_NodeId : t_NodeId &
+
+    c_Byte_Type_NodeId : t_NodeId_i &
+    c_Byte_Type_NodeId : t_NodeId &
 
     t_ExpandedNodeId <: t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet : t_ExpandedNodeId_i &
@@ -651,6 +665,10 @@ PROPERTIES
     t_subscriptionState = t_subscriptionState_i - {c_subscriptionState_indet} &
 
     t_counter = NAT &
+
+    t_ValueRank = INT &
+    t_ConcreteValueRank <: INT &
+    t_ConcreteValueRank = NAT1 \/ {-1} &
 
     t_notif_msg <: t_notif_msg_i &
     c_notif_msg_indet : t_notif_msg_i &
@@ -847,8 +865,6 @@ PROPERTIES
     c_msg_service_class_indet /: t_msg_service_class &
     t_msg_service_class = t_msg_service_class_i - {c_msg_service_class_indet} &
 
-    Is_SubType : t_NodeId * t_NodeId --> BOOL &
-
     Is_Dir_Forward_Compatible : t_BrowseDirection * BOOL --> BOOL &
     Is_Dir_Forward_Compatible = {e_bd_forward |-> FALSE |-> FALSE,
                                  e_bd_forward |-> TRUE  |-> TRUE,
@@ -966,17 +982,6 @@ OPERATIONS
         p_IsForward : BOOL
     THEN
         p_dir_compat := Is_Dir_Forward_Compatible(p_dir |-> p_IsForward)
-    END
-    ;
-
-    p_res <-- get_Is_SubType(p_type1, p_type2) =
-    PRE
-        p_type1 : t_NodeId_i &
-        p_type1 : t_NodeId   &
-        p_type2 : t_NodeId_i &
-        p_type2 : t_NodeId
-    THEN
-        p_res := Is_SubType(p_type1 |-> p_type2)
     END
     ;
 
