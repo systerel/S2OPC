@@ -124,8 +124,8 @@ LOCAL_OPERATIONS
             prev_dataValue : t_DataValue_i &
             a_Value : t_Node +-> t_Variant &
             a_Value_StatusCode : t_Node +-> t_StatusCode &
-            a_Value_SourceTimestamp : t_Node +-> t_DateTime &
-            a_Value_ServerTimestamp : t_Node +-> t_DateTime &
+            a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
+            a_Value_ServerTimestamp : t_Node +-> t_Timestamp &
 
             (isvalid = TRUE &
              nid : ran(a_NodeId) &

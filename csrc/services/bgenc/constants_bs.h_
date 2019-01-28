@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 25/01/2019 13:23:40
+ Date                 : 28/01/2019 17:12:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,7 +39,6 @@
    SETS Clause: deferred sets
   -----------------------------*/
 #define constants_bs__t_DataValue_i t_entier4
-#define constants_bs__t_DateTime t_entier4
 #define constants_bs__t_ExpandedNodeId_i t_entier4
 #define constants_bs__t_IndexRange_i t_entier4
 #define constants_bs__t_Int32 t_entier4
@@ -50,6 +49,7 @@
 #define constants_bs__t_QualifiedName_i t_entier4
 #define constants_bs__t_Reference_i t_entier4
 #define constants_bs__t_SignatureData_i t_entier4
+#define constants_bs__t_Timestamp t_entier4
 #define constants_bs__t_Variant_i t_entier4
 #define constants_bs__t_WriteValuePointer_i t_entier4
 #define constants_bs__t_access_level t_entier4
@@ -88,7 +88,6 @@
    Added by the Translator
   --------------------------*/
 #define constants_bs__t_DataValue_i_max (-1)
-#define constants_bs__t_DateTime_max (-1)
 #define constants_bs__t_ExpandedNodeId_i_max (-1)
 #define constants_bs__t_IndexRange_i_max (-1)
 #define constants_bs__t_Int32_max (-1)
@@ -99,6 +98,7 @@
 #define constants_bs__t_QualifiedName_i_max (-1)
 #define constants_bs__t_Reference_i_max (-1)
 #define constants_bs__t_SignatureData_i_max (-1)
+#define constants_bs__t_Timestamp_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
 #define constants_bs__t_WriteValuePointer_i_max (-1)
 #define constants_bs__t_access_level_max (-1)

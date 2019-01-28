@@ -79,9 +79,9 @@ DEFINITIONS
         /* + Value attribute meta-data */
         a_Value_StatusCode : t_Node +-> t_StatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
-        a_Value_SourceTimestamp : t_Node +-> t_DateTime &
+        a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
         dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
-        a_Value_ServerTimestamp : t_Node +-> t_DateTime &
+        a_Value_ServerTimestamp : t_Node +-> t_Timestamp &
         dom(a_Value_ServerTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
         a_IsAbstract : t_Node +-> BOOL &

@@ -142,7 +142,7 @@ SETS
     t_byte_buffer_i; /* (SOPC_Buffer*) */
     t_LocalizedText_i; /* (SOPC_LocalizedText*) */
     t_QualifiedName_i; /* (SOPC_QualifiedName*) */
-    t_DateTime; /* SOPC_DateTime */
+    t_Timestamp; /* SOPC_Internal_Timestamp */
     t_Int32; /* int32_t */
 
     t_access_level; /* SOPC_Byte */

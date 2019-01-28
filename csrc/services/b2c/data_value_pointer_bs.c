@@ -43,9 +43,10 @@ void data_value_pointer_bs__get_conv_DataValue_LocalDataType(
 
 void data_value_pointer_bs__get_conv_DataValue_SourceTimestamp(
     const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-    constants__t_DateTime* const data_value_pointer_bs__p_st)
+    constants__t_Timestamp* const data_value_pointer_bs__p_st)
 {
-    *data_value_pointer_bs__p_st = data_value_pointer_bs__p_dataValue->SourceTimestamp;
+    *data_value_pointer_bs__p_st = (constants__t_Timestamp){data_value_pointer_bs__p_dataValue->SourceTimestamp,
+                                                            data_value_pointer_bs__p_dataValue->SourcePicoSeconds};
 }
 
 void data_value_pointer_bs__get_conv_DataValue_Status(const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,

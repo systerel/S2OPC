@@ -31,10 +31,6 @@
 #include "sopc_address_space.h"
 #include "sopc_types.h"
 
-/* Access levels, taken from Part 3 §5.6.2 Table 8 */
-#define SOPC_AccessLevelMask_CurrentRead 1
-#define SOPC_AccessLevelMask_CurrentWrite 2
-
 /* Attributes, and references */
 extern SOPC_AddressSpace* address_space_bs__nodes;
 

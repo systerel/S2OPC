@@ -26,7 +26,7 @@ SETS
     t_Variant_i;
     t_DataValue_i;
     t_byte_buffer_i;
-    t_DateTime;
+    t_Timestamp;
     t_Int32;
     t_access_level;
 

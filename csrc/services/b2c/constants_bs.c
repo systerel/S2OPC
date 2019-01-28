@@ -58,12 +58,6 @@ void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_Expan
     *constants_bs__p_nid = &constants_bs__p_expnid->NodeId;
 }
 
-/* Access levels, taken from Part 3 §5.6.2 Table 8 */
-#define SOPC_AccessLevelMask_CurrentRead 1     // bit0
-#define SOPC_AccessLevelMask_CurrentWrite 2    // bit1
-#define SOPC_AccessLevelMask_StatusWrite 32    // bit5
-#define SOPC_AccessLevelMask_TimestampWrite 64 // bit6
-
 void constants_bs__is_t_acces_level_currentRead(const constants_bs__t_access_level constants_bs__p_access_lvl,
                                                 t_bool* const constants_bs__bres)
 {
