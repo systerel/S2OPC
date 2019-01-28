@@ -43,6 +43,18 @@
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
+typedef struct SOPC_Internal_Timestamp
+{
+    SOPC_DateTime timestamp;
+    uint16_t picoSeconds;
+} SOPC_Internal_Timestamp;
+
+/* Access levels, taken from Part 3 §5.6.2 Table 8 */
+#define SOPC_AccessLevelMask_CurrentRead 1     // bit0
+#define SOPC_AccessLevelMask_CurrentWrite 2    // bit1
+#define SOPC_AccessLevelMask_StatusWrite 32    // bit5
+#define SOPC_AccessLevelMask_TimestampWrite 64 // bit6
+
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
@@ -58,6 +70,7 @@ typedef SOPC_ByteString* constants_bs__t_Nonce_i;
 typedef SOPC_QualifiedName* constants_bs__t_QualifiedName_i;
 typedef OpcUa_ReferenceNode* constants_bs__t_Reference_i;
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
+typedef SOPC_Internal_Timestamp constants_bs__t_Timestamp;
 typedef SOPC_Variant* constants_bs__t_Variant_i;
 typedef OpcUa_WriteValue* constants_bs__t_WriteValuePointer_i;
 typedef SOPC_Byte constants_bs__t_access_level;

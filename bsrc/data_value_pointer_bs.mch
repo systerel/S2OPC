@@ -35,8 +35,8 @@ ABSTRACT_VARIABLES
 INVARIANT
     DataValue_Variant : t_DataValue --> t_Variant &
     DataValue_StatusCode : t_DataValue --> t_StatusCode &
-    DataValue_SourceTimestamp : t_DataValue --> t_DateTime &
-    DataValue_ServerTimestamp : t_DataValue --> t_DateTime &
+    DataValue_SourceTimestamp : t_DataValue --> t_Timestamp &
+    DataValue_ServerTimestamp : t_DataValue --> t_Timestamp &
 
     DataValue_LocalDataType : t_DataValue --> t_NodeId & /* ExpandedNodeId from different server returns Structure <=> NodeId(i=22)
                                                             / Null value return NodeId(i=0) */

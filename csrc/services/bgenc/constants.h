@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 25/01/2019 13:23:28
+ Date                 : 28/01/2019 17:12:26
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -44,7 +44,6 @@
    SETS Clause: deferred sets
   -----------------------------*/
 #define constants__t_DataValue_i constants_bs__t_DataValue_i
-#define constants__t_DateTime constants_bs__t_DateTime
 #define constants__t_ExpandedNodeId_i constants_bs__t_ExpandedNodeId_i
 #define constants__t_IndexRange_i constants_bs__t_IndexRange_i
 #define constants__t_Int32 constants_bs__t_Int32
@@ -55,6 +54,7 @@
 #define constants__t_QualifiedName_i constants_bs__t_QualifiedName_i
 #define constants__t_Reference_i constants_bs__t_Reference_i
 #define constants__t_SignatureData_i constants_bs__t_SignatureData_i
+#define constants__t_Timestamp constants_bs__t_Timestamp
 #define constants__t_Variant_i constants_bs__t_Variant_i
 #define constants__t_WriteValuePointer_i constants_bs__t_WriteValuePointer_i
 #define constants__t_access_level constants_bs__t_access_level
@@ -343,7 +343,6 @@ typedef enum {
    Added by the Translator
   --------------------------*/
 #define constants__t_DataValue_i_max constants_bs__t_DataValue_i_max
-#define constants__t_DateTime_max constants_bs__t_DateTime_max
 #define constants__t_ExpandedNodeId_i_max constants_bs__t_ExpandedNodeId_i_max
 #define constants__t_IndexRange_i_max constants_bs__t_IndexRange_i_max
 #define constants__t_Int32_max constants_bs__t_Int32_max
@@ -354,6 +353,7 @@ typedef enum {
 #define constants__t_QualifiedName_i_max constants_bs__t_QualifiedName_i_max
 #define constants__t_Reference_i_max constants_bs__t_Reference_i_max
 #define constants__t_SignatureData_i_max constants_bs__t_SignatureData_i_max
+#define constants__t_Timestamp_max constants_bs__t_Timestamp_max
 #define constants__t_Variant_i_max constants_bs__t_Variant_i_max
 #define constants__t_WriteValuePointer_i_max constants_bs__t_WriteValuePointer_i_max
 #define constants__t_access_level_max constants_bs__t_access_level_max
