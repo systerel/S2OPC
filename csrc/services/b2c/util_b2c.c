@@ -620,155 +620,155 @@ void util_message__get_message_type(SOPC_EncodeableType* encType, constants__t_m
     }
 }
 
-void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode* status)
+void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, SOPC_StatusCode* status)
 {
     switch (bstatus)
     {
-    case constants__e_sc_ok:
+    case constants_statuscodes_bs__e_sc_ok:
         *status = SOPC_GoodGenericStatus;
         break;
-    case constants__e_sc_bad_generic:
+    case constants_statuscodes_bs__e_sc_bad_generic:
         *status = SOPC_BadStatusMask; // generic bad status
         break;
-    case constants__e_sc_uncertain_generic:
+    case constants_statuscodes_bs__e_sc_uncertain_generic:
         *status = SOPC_UncertainStatusMask; // generic uncertain status
         break;
-    case constants__e_sc_bad_internal_error:
+    case constants_statuscodes_bs__e_sc_bad_internal_error:
         *status = OpcUa_BadInternalError;
         break;
-    case constants__e_sc_bad_secure_channel_id_invalid:
+    case constants_statuscodes_bs__e_sc_bad_secure_channel_id_invalid:
         *status = OpcUa_BadSecureChannelIdInvalid;
         break;
-    case constants__e_sc_bad_secure_channel_closed:
+    case constants_statuscodes_bs__e_sc_bad_secure_channel_closed:
         *status = OpcUa_BadSecureChannelClosed;
         break;
-    case constants__e_sc_bad_connection_closed:
+    case constants_statuscodes_bs__e_sc_bad_connection_closed:
         *status = OpcUa_BadConnectionClosed;
         break;
-    case constants__e_sc_bad_invalid_state:
+    case constants_statuscodes_bs__e_sc_bad_invalid_state:
         *status = OpcUa_BadInvalidState;
         break;
-    case constants__e_sc_bad_session_id_invalid:
+    case constants_statuscodes_bs__e_sc_bad_session_id_invalid:
         *status = OpcUa_BadSessionIdInvalid;
         break;
-    case constants__e_sc_bad_session_closed:
+    case constants_statuscodes_bs__e_sc_bad_session_closed:
         *status = OpcUa_BadSessionClosed;
         break;
-    case constants__e_sc_bad_session_not_activated:
+    case constants_statuscodes_bs__e_sc_bad_session_not_activated:
         *status = OpcUa_BadSessionNotActivated;
         break;
-    case constants__e_sc_bad_too_many_sessions:
+    case constants_statuscodes_bs__e_sc_bad_too_many_sessions:
         *status = OpcUa_BadTooManySessions;
         break;
-    case constants__e_sc_bad_identity_token_invalid:
+    case constants_statuscodes_bs__e_sc_bad_identity_token_invalid:
         *status = OpcUa_BadIdentityTokenInvalid;
         break;
-    case constants__e_sc_bad_identity_token_rejected:
+    case constants_statuscodes_bs__e_sc_bad_identity_token_rejected:
         *status = OpcUa_BadIdentityTokenRejected;
         break;
-    case constants__e_sc_bad_encoding_error:
+    case constants_statuscodes_bs__e_sc_bad_encoding_error:
         *status = OpcUa_BadEncodingError;
         break;
-    case constants__e_sc_bad_decoding_error:
+    case constants_statuscodes_bs__e_sc_bad_decoding_error:
         *status = OpcUa_BadDecodingError;
         break;
-    case constants__e_sc_bad_invalid_argument:
+    case constants_statuscodes_bs__e_sc_bad_invalid_argument:
         *status = OpcUa_BadInvalidArgument;
         break;
-    case constants__e_sc_bad_unexpected_error:
+    case constants_statuscodes_bs__e_sc_bad_unexpected_error:
         *status = OpcUa_BadUnexpectedError;
         break;
-    case constants__e_sc_bad_out_of_memory:
+    case constants_statuscodes_bs__e_sc_bad_out_of_memory:
         *status = OpcUa_BadOutOfMemory;
         break;
-    case constants__e_sc_bad_nothing_to_do:
+    case constants_statuscodes_bs__e_sc_bad_nothing_to_do:
         *status = OpcUa_BadNothingToDo;
         break;
-    case constants__e_sc_bad_too_many_ops:
+    case constants_statuscodes_bs__e_sc_bad_too_many_ops:
         *status = OpcUa_BadTooManyOperations;
         break;
-    case constants__e_sc_bad_max_age_invalid:
+    case constants_statuscodes_bs__e_sc_bad_max_age_invalid:
         *status = OpcUa_BadMaxAgeInvalid;
         break;
-    case constants__e_sc_bad_timestamps_to_return_invalid:
+    case constants_statuscodes_bs__e_sc_bad_timestamps_to_return_invalid:
         *status = OpcUa_BadTimestampsToReturnInvalid;
         break;
-    case constants__e_sc_bad_node_id_unknown:
+    case constants_statuscodes_bs__e_sc_bad_node_id_unknown:
         *status = OpcUa_BadNodeIdUnknown;
         break;
-    case constants__e_sc_bad_node_id_invalid:
+    case constants_statuscodes_bs__e_sc_bad_node_id_invalid:
         *status = OpcUa_BadNodeIdInvalid;
         break;
-    case constants__e_sc_bad_view_id_unknown:
+    case constants_statuscodes_bs__e_sc_bad_view_id_unknown:
         *status = OpcUa_BadViewIdUnknown;
         break;
-    case constants__e_sc_bad_attribute_id_invalid:
+    case constants_statuscodes_bs__e_sc_bad_attribute_id_invalid:
         *status = OpcUa_BadAttributeIdInvalid;
         break;
-    case constants__e_sc_bad_browse_direction_invalid:
+    case constants_statuscodes_bs__e_sc_bad_browse_direction_invalid:
         *status = OpcUa_BadBrowseDirectionInvalid;
         break;
-    case constants__e_sc_bad_service_unsupported:
+    case constants_statuscodes_bs__e_sc_bad_service_unsupported:
         *status = OpcUa_BadServiceUnsupported;
         break;
-    case constants__e_sc_bad_write_not_supported:
+    case constants_statuscodes_bs__e_sc_bad_write_not_supported:
         *status = OpcUa_BadWriteNotSupported;
         break;
-    case constants__e_sc_bad_timeout:
+    case constants_statuscodes_bs__e_sc_bad_timeout:
         *status = OpcUa_BadTimeout;
         break;
-    case constants__e_sc_bad_too_many_subscriptions:
+    case constants_statuscodes_bs__e_sc_bad_too_many_subscriptions:
         *status = OpcUa_BadTooManySubscriptions;
         break;
-    case constants__e_sc_bad_no_subscription:
+    case constants_statuscodes_bs__e_sc_bad_no_subscription:
         *status = OpcUa_BadNoSubscription;
         break;
-    case constants__e_sc_bad_subscription_id_invalid:
+    case constants_statuscodes_bs__e_sc_bad_subscription_id_invalid:
         *status = OpcUa_BadSubscriptionIdInvalid;
         break;
-    case constants__e_sc_bad_too_many_monitored_items:
+    case constants_statuscodes_bs__e_sc_bad_too_many_monitored_items:
         *status = OpcUa_BadTooManyMonitoredItems;
         break;
-    case constants__e_sc_bad_monitoring_mode_invalid:
+    case constants_statuscodes_bs__e_sc_bad_monitoring_mode_invalid:
         *status = OpcUa_BadMonitoringModeInvalid;
         break;
-    case constants__e_sc_bad_monitored_item_filter_unsupported:
+    case constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported:
         *status = OpcUa_BadMonitoredItemFilterUnsupported;
         break;
-    case constants__e_sc_bad_too_many_publish_requests:
+    case constants_statuscodes_bs__e_sc_bad_too_many_publish_requests:
         *status = OpcUa_BadTooManyPublishRequests;
         break;
-    case constants__e_sc_bad_message_not_available:
+    case constants_statuscodes_bs__e_sc_bad_message_not_available:
         *status = OpcUa_BadMessageNotAvailable;
         break;
-    case constants__e_sc_bad_sequence_number_unknown:
+    case constants_statuscodes_bs__e_sc_bad_sequence_number_unknown:
         *status = OpcUa_BadSequenceNumberUnknown;
         break;
-    case constants__e_sc_bad_index_range_invalid:
+    case constants_statuscodes_bs__e_sc_bad_index_range_invalid:
         *status = OpcUa_BadIndexRangeInvalid;
         break;
-    case constants__e_sc_bad_index_range_no_data:
+    case constants_statuscodes_bs__e_sc_bad_index_range_no_data:
         *status = OpcUa_BadIndexRangeNoData;
         break;
-    case constants__e_sc_bad_user_access_denied:
+    case constants_statuscodes_bs__e_sc_bad_user_access_denied:
         *status = OpcUa_BadUserAccessDenied;
         break;
-    case constants__e_sc_bad_certificate_uri_invalid:
+    case constants_statuscodes_bs__e_sc_bad_certificate_uri_invalid:
         *status = OpcUa_BadCertificateUriInvalid;
         break;
-    case constants__e_sc_bad_security_checks_failed:
+    case constants_statuscodes_bs__e_sc_bad_security_checks_failed:
         *status = OpcUa_BadSecurityChecksFailed;
         break;
-    case constants__e_sc_bad_request_interrupted:
+    case constants_statuscodes_bs__e_sc_bad_request_interrupted:
         *status = OpcUa_BadRequestInterrupted;
         break;
-    case constants__e_sc_bad_data_unavailable:
+    case constants_statuscodes_bs__e_sc_bad_data_unavailable:
         *status = OpcUa_BadDataUnavailable;
         break;
-    case constants__e_sc_bad_not_writable:
+    case constants_statuscodes_bs__e_sc_bad_not_writable:
         *status = OpcUa_BadNotWritable;
         break;
-    case constants__e_sc_bad_type_mismatch:
+    case constants_statuscodes_bs__e_sc_bad_type_mismatch:
         *status = OpcUa_BadTypeMismatch;
         break;
     default:
@@ -776,66 +776,66 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode
     }
 }
 
-SOPC_ReturnStatus util_status_code__B_to_return_status_C(constants__t_StatusCode_i bstatus)
+SOPC_ReturnStatus util_status_code__B_to_return_status_C(constants_statuscodes_bs__t_StatusCode_i bstatus)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_NOK;
     switch (bstatus)
     {
-    case constants__e_sc_ok:
+    case constants_statuscodes_bs__e_sc_ok:
         result = SOPC_STATUS_OK;
         break;
-    case constants__e_sc_bad_generic:
+    case constants_statuscodes_bs__e_sc_bad_generic:
         result = SOPC_STATUS_NOK;
         break;
-    case constants__e_sc_uncertain_generic:
+    case constants_statuscodes_bs__e_sc_uncertain_generic:
         result = SOPC_STATUS_NOK;
         break;
-    case constants__e_sc_bad_internal_error:
+    case constants_statuscodes_bs__e_sc_bad_internal_error:
         result = SOPC_STATUS_NOK;
         break;
-    case constants__e_sc_bad_secure_channel_id_invalid:
+    case constants_statuscodes_bs__e_sc_bad_secure_channel_id_invalid:
         result = SOPC_STATUS_INVALID_PARAMETERS;
         break;
-    case constants__e_sc_bad_secure_channel_closed:
+    case constants_statuscodes_bs__e_sc_bad_secure_channel_closed:
         result = SOPC_STATUS_CLOSED;
         break;
-    case constants__e_sc_bad_connection_closed:
+    case constants_statuscodes_bs__e_sc_bad_connection_closed:
         result = SOPC_STATUS_CLOSED;
         break;
-    case constants__e_sc_bad_invalid_state:
+    case constants_statuscodes_bs__e_sc_bad_invalid_state:
         result = SOPC_STATUS_INVALID_STATE;
         break;
-    case constants__e_sc_bad_session_id_invalid:
+    case constants_statuscodes_bs__e_sc_bad_session_id_invalid:
         result = SOPC_STATUS_INVALID_PARAMETERS;
         break;
-    case constants__e_sc_bad_session_closed:
+    case constants_statuscodes_bs__e_sc_bad_session_closed:
         result = SOPC_STATUS_INVALID_STATE;
         break;
-    case constants__e_sc_bad_session_not_activated:
+    case constants_statuscodes_bs__e_sc_bad_session_not_activated:
         result = SOPC_STATUS_INVALID_STATE;
         break;
-    case constants__e_sc_bad_identity_token_invalid:
+    case constants_statuscodes_bs__e_sc_bad_identity_token_invalid:
         result = SOPC_STATUS_INVALID_PARAMETERS;
         break;
-    case constants__e_sc_bad_identity_token_rejected:
+    case constants_statuscodes_bs__e_sc_bad_identity_token_rejected:
         result = SOPC_STATUS_INVALID_PARAMETERS;
         break;
-    case constants__e_sc_bad_encoding_error:
+    case constants_statuscodes_bs__e_sc_bad_encoding_error:
         result = SOPC_STATUS_ENCODING_ERROR;
         break;
-    case constants__e_sc_bad_decoding_error:
+    case constants_statuscodes_bs__e_sc_bad_decoding_error:
         result = SOPC_STATUS_ENCODING_ERROR;
         break;
-    case constants__e_sc_bad_invalid_argument:
+    case constants_statuscodes_bs__e_sc_bad_invalid_argument:
         result = SOPC_STATUS_INVALID_PARAMETERS;
         break;
-    case constants__e_sc_bad_out_of_memory:
+    case constants_statuscodes_bs__e_sc_bad_out_of_memory:
         result = SOPC_STATUS_OUT_OF_MEMORY;
         break;
-    case constants__e_sc_bad_too_many_ops:
+    case constants_statuscodes_bs__e_sc_bad_too_many_ops:
         result = SOPC_STATUS_OUT_OF_MEMORY;
         break;
-    case constants__e_sc_bad_timeout:
+    case constants_statuscodes_bs__e_sc_bad_timeout:
         result = SOPC_STATUS_TIMEOUT;
         break;
     default:
@@ -844,165 +844,165 @@ SOPC_ReturnStatus util_status_code__B_to_return_status_C(constants__t_StatusCode
     return result;
 }
 
-void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i* bstatus)
+void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__t_StatusCode_i* bstatus)
 {
     switch (status)
     {
     case OpcUa_BadInternalError:
-        *bstatus = constants__e_sc_bad_internal_error;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_internal_error;
         break;
     case OpcUa_BadSecureChannelClosed:
-        *bstatus = constants__e_sc_bad_secure_channel_closed;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_secure_channel_closed;
         break;
     case OpcUa_BadSecureChannelIdInvalid:
-        *bstatus = constants__e_sc_bad_secure_channel_id_invalid;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_secure_channel_id_invalid;
         break;
     case OpcUa_BadConnectionClosed:
-        *bstatus = constants__e_sc_bad_connection_closed;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_connection_closed;
         break;
     case OpcUa_BadInvalidState:
-        *bstatus = constants__e_sc_bad_invalid_state;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_invalid_state;
         break;
     case OpcUa_BadSessionIdInvalid:
-        *bstatus = constants__e_sc_bad_session_id_invalid;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_session_id_invalid;
         break;
     case OpcUa_BadSessionClosed:
-        *bstatus = constants__e_sc_bad_session_closed;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_session_closed;
         break;
     case OpcUa_BadSessionNotActivated:
-        *bstatus = constants__e_sc_bad_session_not_activated;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_session_not_activated;
         break;
     case OpcUa_BadTooManySessions:
-        *bstatus = constants__e_sc_bad_too_many_sessions;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_too_many_sessions;
         break;
     case OpcUa_BadIdentityTokenInvalid:
-        *bstatus = constants__e_sc_bad_identity_token_invalid;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
         break;
     case OpcUa_BadIdentityTokenRejected:
-        *bstatus = constants__e_sc_bad_identity_token_rejected;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_identity_token_rejected;
         break;
     case OpcUa_BadEncodingError:
-        *bstatus = constants__e_sc_bad_encoding_error;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_encoding_error;
         break;
     case OpcUa_BadDecodingError:
-        *bstatus = constants__e_sc_bad_decoding_error;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_decoding_error;
         break;
     case OpcUa_BadInvalidArgument:
-        *bstatus = constants__e_sc_bad_invalid_argument;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_invalid_argument;
         break;
     case OpcUa_BadUnexpectedError:
-        *bstatus = constants__e_sc_bad_unexpected_error;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_unexpected_error;
         break;
     case OpcUa_BadOutOfMemory:
-        *bstatus = constants__e_sc_bad_out_of_memory;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_out_of_memory;
         break;
     case OpcUa_BadNothingToDo:
-        *bstatus = constants__e_sc_bad_nothing_to_do;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_nothing_to_do;
         break;
     case OpcUa_BadTooManyOperations:
-        *bstatus = constants__e_sc_bad_too_many_ops;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_too_many_ops;
         break;
     case OpcUa_BadMaxAgeInvalid:
-        *bstatus = constants__e_sc_bad_max_age_invalid;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_max_age_invalid;
         break;
     case OpcUa_BadTimestampsToReturnInvalid:
-        *bstatus = constants__e_sc_bad_timestamps_to_return_invalid;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_timestamps_to_return_invalid;
         break;
     case OpcUa_BadNodeIdUnknown:
-        *bstatus = constants__e_sc_bad_node_id_unknown;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
         break;
     case OpcUa_BadNodeIdInvalid:
-        *bstatus = constants__e_sc_bad_node_id_invalid;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_node_id_invalid;
         break;
     case OpcUa_BadViewIdUnknown:
-        *bstatus = constants__e_sc_bad_view_id_unknown;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_view_id_unknown;
         break;
     case OpcUa_BadAttributeIdInvalid:
-        *bstatus = constants__e_sc_bad_attribute_id_invalid;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
         break;
     case OpcUa_BadBrowseDirectionInvalid:
-        *bstatus = constants__e_sc_bad_browse_direction_invalid;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_browse_direction_invalid;
         break;
     case OpcUa_BadServiceUnsupported:
-        *bstatus = constants__e_sc_bad_service_unsupported;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_service_unsupported;
         break;
     case OpcUa_BadWriteNotSupported:
-        *bstatus = constants__e_sc_bad_write_not_supported;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_write_not_supported;
         break;
     case OpcUa_BadTimeout:
-        *bstatus = constants__e_sc_bad_timeout;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_timeout;
         break;
     case OpcUa_BadTooManySubscriptions:
-        *bstatus = constants__e_sc_bad_too_many_subscriptions;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_too_many_subscriptions;
         break;
     case OpcUa_BadNoSubscription:
-        *bstatus = constants__e_sc_bad_no_subscription;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_no_subscription;
         break;
     case OpcUa_BadSubscriptionIdInvalid:
-        *bstatus = constants__e_sc_bad_subscription_id_invalid;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_subscription_id_invalid;
         break;
     case OpcUa_BadTooManyMonitoredItems:
-        *bstatus = constants__e_sc_bad_too_many_monitored_items;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_too_many_monitored_items;
         break;
     case OpcUa_BadMonitoringModeInvalid:
-        *bstatus = constants__e_sc_bad_monitoring_mode_invalid;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_monitoring_mode_invalid;
         break;
     case OpcUa_BadMonitoredItemFilterUnsupported:
-        *bstatus = constants__e_sc_bad_monitored_item_filter_unsupported;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;
         break;
     case OpcUa_BadTooManyPublishRequests:
-        *bstatus = constants__e_sc_bad_too_many_publish_requests;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_too_many_publish_requests;
         break;
     case OpcUa_BadMessageNotAvailable:
-        *bstatus = constants__e_sc_bad_message_not_available;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_message_not_available;
         break;
     case OpcUa_BadSequenceNumberUnknown:
-        *bstatus = constants__e_sc_bad_sequence_number_unknown;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_sequence_number_unknown;
         break;
     case OpcUa_BadIndexRangeInvalid:
-        *bstatus = constants__e_sc_bad_index_range_invalid;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_index_range_invalid;
         break;
     case OpcUa_BadIndexRangeNoData:
-        *bstatus = constants__e_sc_bad_index_range_no_data;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_index_range_no_data;
         break;
     case OpcUa_BadUserAccessDenied:
-        *bstatus = constants__e_sc_bad_user_access_denied;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_user_access_denied;
         break;
     case OpcUa_BadCertificateUriInvalid:
-        *bstatus = constants__e_sc_bad_certificate_uri_invalid;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_certificate_uri_invalid;
         break;
     case OpcUa_BadSecurityChecksFailed:
-        *bstatus = constants__e_sc_bad_security_checks_failed;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_security_checks_failed;
         break;
     case OpcUa_BadRequestInterrupted:
-        *bstatus = constants__e_sc_bad_request_interrupted;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_request_interrupted;
         break;
     case OpcUa_BadDataUnavailable:
-        *bstatus = constants__e_sc_bad_data_unavailable;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_data_unavailable;
         break;
     case OpcUa_BadNotWritable:
-        *bstatus = constants__e_sc_bad_not_writable;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_not_writable;
         break;
     case OpcUa_BadTypeMismatch:
-        *bstatus = constants__e_sc_bad_type_mismatch;
+        *bstatus = constants_statuscodes_bs__e_sc_bad_type_mismatch;
         break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)
         {
-            *bstatus = constants__e_sc_ok;
+            *bstatus = constants_statuscodes_bs__e_sc_ok;
         }
         else if ((status & SOPC_BadStatusMask) != 0)
         {
-            *bstatus = constants__e_sc_bad_generic;
+            *bstatus = constants_statuscodes_bs__e_sc_bad_generic;
         }
         else if ((status & SOPC_UncertainStatusMask) != 0)
         {
-            *bstatus = constants__e_sc_uncertain_generic;
+            *bstatus = constants_statuscodes_bs__e_sc_uncertain_generic;
         }
         else
         {
             // Not identified status code => Use severity Bad
-            *bstatus = constants__e_sc_bad_generic;
+            *bstatus = constants_statuscodes_bs__e_sc_bad_generic;
         }
     }
 }

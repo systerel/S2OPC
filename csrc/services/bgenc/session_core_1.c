@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.c
 
- Date                 : 29/01/2019 09:56:44
+ Date                 : 29/01/2019 12:57:54
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -55,7 +55,7 @@ void session_core_1__l_set_session_state(
       session_core_bs__notify_set_session_state(session_core_1__p_session,
          session_core_1__l_prec_state,
          session_core_1__p_state,
-         constants__c_StatusCode_indet,
+         constants_statuscodes_bs__c_StatusCode_indet,
          session_core_1__is_client);
    }
 }
@@ -88,7 +88,7 @@ void session_core_1__init_new_session(
          session_core_bs__notify_set_session_state(*session_core_1__p_session,
             constants__e_session_closed,
             constants__e_session_init,
-            constants__c_StatusCode_indet,
+            constants_statuscodes_bs__c_StatusCode_indet,
             session_core_1__is_client);
       }
    }
@@ -117,7 +117,7 @@ void session_core_1__set_session_state(
 
 void session_core_1__set_session_state_closed(
    const constants__t_session_i session_core_1__session,
-   const constants__t_StatusCode_i session_core_1__sc_reason,
+   const constants_statuscodes_bs__t_StatusCode_i session_core_1__sc_reason,
    const t_bool session_core_1__is_client) {
    {
       constants__t_sessionState session_core_1__l_prec_state;

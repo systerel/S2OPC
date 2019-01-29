@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 29/01/2019 09:56:49
+ Date                 : 29/01/2019 12:57:58
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -101,18 +101,18 @@ void subscription_mgr__fill_publish_response_msg_ack_results(
             if (subscription_mgr__l_valid_seq_num == true) {
                msg_subscription_publish_ack_bs__setall_msg_publish_resp_ack_result(subscription_mgr__p_resp_msg,
                   subscription_mgr__l_index,
-                  constants__e_sc_ok);
+                  constants_statuscodes_bs__e_sc_ok);
             }
             else {
                msg_subscription_publish_ack_bs__setall_msg_publish_resp_ack_result(subscription_mgr__p_resp_msg,
                   subscription_mgr__l_index,
-                  constants__e_sc_bad_sequence_number_unknown);
+                  constants_statuscodes_bs__e_sc_bad_sequence_number_unknown);
             }
          }
          else {
             msg_subscription_publish_ack_bs__setall_msg_publish_resp_ack_result(subscription_mgr__p_resp_msg,
                subscription_mgr__l_index,
-               constants__e_sc_bad_subscription_id_invalid);
+               constants_statuscodes_bs__e_sc_bad_subscription_id_invalid);
          }
          subscription_mgr__l_index = subscription_mgr__l_index +
             1;
@@ -169,10 +169,10 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
       constants__t_opcua_duration_i subscription_mgr__l_samplingItv;
       t_entier4 subscription_mgr__l_queueSize;
       constants__t_Node_i subscription_mgr__l_node;
-      constants__t_StatusCode_i subscription_mgr__l_sc;
+      constants_statuscodes_bs__t_StatusCode_i subscription_mgr__l_sc;
       constants__t_NodeClass_i subscription_mgr__l_ncl;
       constants__t_Variant_i subscription_mgr__l_value;
-      constants__t_StatusCode_i subscription_mgr__l_valueSc;
+      constants__t_RawStatusCode subscription_mgr__l_valueSc;
       constants__t_monitoredItemPointer_i subscription_mgr__l_monitoredItemPointer;
       constants__t_monitoredItemId_i subscription_mgr__l_monitoredItemId;
       constants__t_opcua_duration_i subscription_mgr__l_revSamplingItv;
@@ -186,7 +186,6 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
          subscription_mgr__l_node = constants__c_Node_indet;
          subscription_mgr__l_ncl = constants__c_NodeClass_indet;
          subscription_mgr__l_value = constants__c_Variant_indet;
-         subscription_mgr__l_valueSc = constants__e_sc_ok;
          subscription_mgr__l_monitoredItemId = constants__c_monitoredItemId_indet;
          subscription_mgr__l_revSamplingItv = constants__c_opcua_duration_indet;
          subscription_mgr__l_revQueueSize = 0;
@@ -204,15 +203,17 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
             &subscription_mgr__l_samplingItv,
             &subscription_mgr__l_queueSize,
             &subscription_mgr__l_indexRange);
+         constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(constants_statuscodes_bs__e_sc_bad_user_access_denied,
+            &subscription_mgr__l_valueSc);
          if (subscription_mgr__l_bres == true) {
             address_space__readall_AddressSpace_Node(subscription_mgr__l_nid,
                &subscription_mgr__l_bres,
                &subscription_mgr__l_node);
             if (subscription_mgr__l_bres == false) {
-               subscription_mgr__l_sc = constants__e_sc_bad_node_id_unknown;
+               subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
             }
          }
-         if (subscription_mgr__l_sc == constants__e_sc_ok) {
+         if (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_ok) {
             address_space__read_NodeClass_Attribute(subscription_mgr__p_user,
                subscription_mgr__l_node,
                subscription_mgr__l_aid,
@@ -221,7 +222,7 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
                &subscription_mgr__l_ncl,
                &subscription_mgr__l_value);
          }
-         if (subscription_mgr__l_sc == constants__e_sc_ok) {
+         if (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_ok) {
             address_space__get_user_authorization(constants__e_operation_type_read,
                subscription_mgr__l_nid,
                subscription_mgr__l_aid,
@@ -237,10 +238,9 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
             }
             else {
                address_space__read_AddressSpace_clear_value(subscription_mgr__l_value);
-               subscription_mgr__l_valueSc = constants__e_sc_bad_user_access_denied;
             }
          }
-         if (subscription_mgr__l_sc == constants__e_sc_ok) {
+         if (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_ok) {
             subscription_core__create_monitored_item(subscription_mgr__p_subscription,
                subscription_mgr__l_nid,
                subscription_mgr__l_aid,
@@ -421,7 +421,7 @@ void subscription_mgr__treat_create_subscription_request(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
    {
       t_bool subscription_mgr__l_session_has_subscription;
       constants__t_subscription_i subscription_mgr__l_sub;
@@ -462,7 +462,7 @@ void subscription_mgr__treat_create_subscription_request(
             subscription_mgr__l_publishEnabled,
             subscription_mgr__StatusCode_service,
             &subscription_mgr__l_subscription);
-         if (*subscription_mgr__StatusCode_service == constants__e_sc_ok) {
+         if (*subscription_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
             msg_subscription_create_bs__set_msg_create_subscription_resp_params(subscription_mgr__p_resp_msg,
                subscription_mgr__l_subscription,
                subscription_mgr__l_revisedPublishInterval,
@@ -471,7 +471,7 @@ void subscription_mgr__treat_create_subscription_request(
          }
       }
       else {
-         *subscription_mgr__StatusCode_service = constants__e_sc_bad_too_many_subscriptions;
+         *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_too_many_subscriptions;
       }
    }
 }
@@ -480,7 +480,7 @@ void subscription_mgr__treat_modify_subscription_request(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
    {
       t_bool subscription_mgr__l_session_has_subscription;
       constants__t_subscription_i subscription_mgr__l_session_sub;
@@ -522,10 +522,10 @@ void subscription_mgr__treat_modify_subscription_request(
             subscription_mgr__l_revisedPublishInterval,
             subscription_mgr__l_revisedLifetimeCount,
             subscription_mgr__l_revisedMaxKeepAlive);
-         *subscription_mgr__StatusCode_service = constants__e_sc_ok;
+         *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
       }
       else {
-         *subscription_mgr__StatusCode_service = constants__e_sc_bad_subscription_id_invalid;
+         *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_subscription_id_invalid;
       }
    }
 }
@@ -534,7 +534,7 @@ void subscription_mgr__treat_delete_subscriptions_request(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
    {
       t_bool subscription_mgr__l_session_has_subscription;
       constants__t_subscription_i subscription_mgr__l_session_sub;
@@ -557,17 +557,17 @@ void subscription_mgr__treat_delete_subscriptions_request(
                subscription_mgr__l_session_has_subscription,
                subscription_mgr__l_session_sub,
                subscription_mgr__l_nb_reqs);
-            *subscription_mgr__StatusCode_service = constants__e_sc_ok;
+            *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
          }
          else {
-            *subscription_mgr__StatusCode_service = constants__e_sc_bad_out_of_memory;
+            *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
          }
       }
       else if (subscription_mgr__l_nb_reqs <= 0) {
-         *subscription_mgr__StatusCode_service = constants__e_sc_bad_nothing_to_do;
+         *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_nothing_to_do;
       }
       else {
-         *subscription_mgr__StatusCode_service = constants__e_sc_bad_too_many_ops;
+         *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_too_many_ops;
       }
    }
 }
@@ -576,7 +576,7 @@ void subscription_mgr__treat_publishing_mode_request(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
    {
       t_bool subscription_mgr__l_session_has_subscription;
       constants__t_subscription_i subscription_mgr__l_session_sub;
@@ -602,17 +602,17 @@ void subscription_mgr__treat_publishing_mode_request(
                subscription_mgr__l_session_sub,
                subscription_mgr__l_pub_enabled,
                subscription_mgr__l_nb_reqs);
-            *subscription_mgr__StatusCode_service = constants__e_sc_ok;
+            *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
          }
          else {
-            *subscription_mgr__StatusCode_service = constants__e_sc_bad_out_of_memory;
+            *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
          }
       }
       else if (subscription_mgr__l_nb_reqs <= 0) {
-         *subscription_mgr__StatusCode_service = constants__e_sc_bad_nothing_to_do;
+         *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_nothing_to_do;
       }
       else {
-         *subscription_mgr__StatusCode_service = constants__e_sc_bad_too_many_ops;
+         *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_too_many_ops;
       }
    }
 }
@@ -624,7 +624,7 @@ void subscription_mgr__treat_subscription_publish_request(
    const constants__t_server_request_handle_i subscription_mgr__p_req_handle,
    const constants__t_request_context_i subscription_mgr__p_req_ctx,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service,
    t_bool * const subscription_mgr__async_resp_msg) {
    {
       t_bool subscription_mgr__l_session_has_subscription;
@@ -656,19 +656,19 @@ void subscription_mgr__treat_subscription_publish_request(
                   subscription_mgr__p_req_msg,
                   subscription_mgr__p_resp_msg,
                   subscription_mgr__l_nb_subscriptionAcks);
-               *subscription_mgr__StatusCode_service = constants__e_sc_ok;
+               *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
             }
             else {
-               *subscription_mgr__StatusCode_service = constants__e_sc_bad_out_of_memory;
+               *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
             }
          }
          else if (subscription_mgr__l_nb_subscriptionAcks > constants__k_n_genericOperationPerReq_max) {
-            *subscription_mgr__StatusCode_service = constants__e_sc_bad_too_many_ops;
+            *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_too_many_ops;
          }
          else {
-            *subscription_mgr__StatusCode_service = constants__e_sc_ok;
+            *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
          }
-         if (*subscription_mgr__StatusCode_service == constants__e_sc_ok) {
+         if (*subscription_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
             subscription_core__receive_publish_request(subscription_mgr__p_session,
                subscription_mgr__l_req_exp_time,
                subscription_mgr__p_req_handle,
@@ -679,7 +679,7 @@ void subscription_mgr__treat_subscription_publish_request(
                &subscription_mgr__l_subscription,
                &subscription_mgr__l_moreNotifs);
          }
-         if ((*subscription_mgr__StatusCode_service == constants__e_sc_ok) &&
+         if ((*subscription_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) &&
             (*subscription_mgr__async_resp_msg == false)) {
             subscription_mgr__fill_publish_response_msg(subscription_mgr__p_resp_msg,
                subscription_mgr__l_subscription,
@@ -687,7 +687,7 @@ void subscription_mgr__treat_subscription_publish_request(
          }
       }
       else {
-         *subscription_mgr__StatusCode_service = constants__e_sc_bad_no_subscription;
+         *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_no_subscription;
       }
    }
 }
@@ -696,7 +696,7 @@ void subscription_mgr__treat_subscription_republish_request(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
    {
       t_bool subscription_mgr__l_session_has_subscription;
       constants__t_subscription_i subscription_mgr__l_session_sub;
@@ -726,11 +726,11 @@ void subscription_mgr__treat_subscription_republish_request(
                subscription_mgr__StatusCode_service);
          }
          else {
-            *subscription_mgr__StatusCode_service = constants__e_sc_bad_message_not_available;
+            *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_message_not_available;
          }
       }
       else {
-         *subscription_mgr__StatusCode_service = constants__e_sc_bad_subscription_id_invalid;
+         *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_subscription_id_invalid;
       }
    }
 }
@@ -740,9 +740,9 @@ void subscription_mgr__treat_subscription_create_monitored_items_req(
    const constants__t_user_i subscription_mgr__p_user,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
    {
-      constants__t_StatusCode_i subscription_mgr__l_sc;
+      constants_statuscodes_bs__t_StatusCode_i subscription_mgr__l_sc;
       constants__t_subscription_i subscription_mgr__l_subscription;
       t_bool subscription_mgr__l_valid_subscription;
       constants__t_TimestampsToReturn_i subscription_mgr__l_timestampToRet;
@@ -754,7 +754,7 @@ void subscription_mgr__treat_subscription_create_monitored_items_req(
          &subscription_mgr__l_subscription,
          &subscription_mgr__l_timestampToRet,
          &subscription_mgr__l_nb_monitored_items);
-      if (subscription_mgr__l_sc == constants__e_sc_ok) {
+      if (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_ok) {
          subscription_core__is_valid_subscription_on_session(subscription_mgr__p_session,
             subscription_mgr__l_subscription,
             &subscription_mgr__l_valid_subscription);
@@ -769,14 +769,14 @@ void subscription_mgr__treat_subscription_create_monitored_items_req(
                   subscription_mgr__p_req_msg,
                   subscription_mgr__p_resp_msg,
                   subscription_mgr__l_nb_monitored_items);
-               *subscription_mgr__StatusCode_service = constants__e_sc_ok;
+               *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
             }
             else {
-               *subscription_mgr__StatusCode_service = constants__e_sc_bad_out_of_memory;
+               *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
             }
          }
          else {
-            *subscription_mgr__StatusCode_service = constants__e_sc_bad_subscription_id_invalid;
+            *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_subscription_id_invalid;
          }
       }
       else {
@@ -822,7 +822,7 @@ void subscription_mgr__server_subscription_publish_timeout(
    {
       t_bool subscription_mgr__l_closeSubscription;
       t_bool subscription_mgr__l_msg_to_send;
-      constants__t_StatusCode_i subscription_mgr__l_msg_sc;
+      constants_statuscodes_bs__t_StatusCode_i subscription_mgr__l_msg_sc;
       constants__t_session_i subscription_mgr__l_session;
       constants__t_msg_i subscription_mgr__l_publish_resp_msg;
       constants__t_server_request_handle_i subscription_mgr__l_req_handle;
@@ -896,7 +896,7 @@ void subscription_mgr__server_subscription_publish_timeout(
                subscription_mgr__l_publish_resp_msg,
                subscription_mgr__l_req_handle,
                subscription_mgr__l_req_context,
-               constants__e_sc_ok);
+               constants_statuscodes_bs__e_sc_ok);
          }
       }
    }

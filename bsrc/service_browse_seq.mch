@@ -22,6 +22,7 @@ MACHINE
 
 SEES
     constants,
+    constants_statuscodes_bs,
     message_in_bs
 
 ABSTRACT_VARIABLES

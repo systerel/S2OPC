@@ -21,7 +21,7 @@
 
  File Name            : message_in_bs.h
 
- Date                 : 29/01/2019 09:56:53
+ Date                 : 29/01/2019 12:58:01
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -110,7 +111,7 @@ extern void message_in_bs__read_msg_req_header_session_token(
    constants__t_session_token_i * const message_in_bs__session_token);
 extern void message_in_bs__read_msg_resp_header_service_status(
    const constants__t_msg_header_i message_in_bs__msg_header,
-   constants__t_StatusCode_i * const message_in_bs__status);
+   constants_statuscodes_bs__t_StatusCode_i * const message_in_bs__status);
 extern void message_in_bs__server_read_msg_header_req_handle(
    const constants__t_msg_header_i message_in_bs__msg_header,
    constants__t_server_request_handle_i * const message_in_bs__handle);

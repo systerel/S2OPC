@@ -141,7 +141,7 @@ void msg_subscription_publish_ack_bs__getall_msg_publish_request_ack(
 void msg_subscription_publish_ack_bs__setall_msg_publish_resp_ack_result(
     const constants__t_msg_i msg_subscription_publish_ack_bs__p_resp_msg,
     const t_entier4 msg_subscription_publish_ack_bs__p_index,
-    const constants__t_StatusCode_i msg_subscription_publish_ack_bs__p_sc)
+    const constants_statuscodes_bs__t_StatusCode_i msg_subscription_publish_ack_bs__p_sc)
 {
     OpcUa_PublishResponse* resp = (OpcUa_PublishResponse*) msg_subscription_publish_ack_bs__p_resp_msg;
     util_status_code__B_to_C(msg_subscription_publish_ack_bs__p_sc,
@@ -171,9 +171,9 @@ void msg_subscription_publish_ack_bs__getall_msg_republish_request(
 void msg_subscription_publish_ack_bs__setall_msg_republish_response(
     const constants__t_msg_i msg_subscription_publish_ack_bs__p_resp_msg,
     const constants__t_notif_msg_i msg_subscription_publish_ack_bs__p_notifMsg,
-    constants__t_StatusCode_i* const msg_subscription_publish_ack_bs__sc)
+    constants_statuscodes_bs__t_StatusCode_i* const msg_subscription_publish_ack_bs__sc)
 {
-    *msg_subscription_publish_ack_bs__sc = constants__e_sc_bad_out_of_memory;
+    *msg_subscription_publish_ack_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     OpcUa_RepublishResponse* resp = (OpcUa_RepublishResponse*) msg_subscription_publish_ack_bs__p_resp_msg;
     resp->NotificationMessage = *msg_subscription_publish_ack_bs__p_notifMsg; /* Shallow copy */
     resp->NotificationMessage.NotificationData =
@@ -190,5 +190,5 @@ void msg_subscription_publish_ack_bs__setall_msg_republish_response(
             "msg_subscription_publish_ack_bs__setall_msg_republish_response: SOPC_ExtensionObject_Copy failure");
         return;
     }
-    *msg_subscription_publish_ack_bs__sc = constants__e_sc_ok;
+    *msg_subscription_publish_ack_bs__sc = constants_statuscodes_bs__e_sc_ok;
 }

@@ -29,6 +29,7 @@
 
 #include "address_space_impl.h"
 #include "testlib_read_response.h"
+#include "util_variant.h"
 
 extern SOPC_AddressSpace* address_space_bs__nodes;
 

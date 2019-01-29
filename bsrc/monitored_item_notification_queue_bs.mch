@@ -21,7 +21,8 @@ MACHINE
     monitored_item_notification_queue_bs
 
 SEES
-    constants
+    constants,
+    constants_statuscodes_bs
 
 ABSTRACT_VARIABLES
     s_notificationQueue,
@@ -91,8 +92,7 @@ OPERATIONS
         p_aid : t_AttributeId &
         p_VariantValuePointer : t_Variant_i &
         p_VariantValuePointer : t_Variant &
-        p_ValueSc : t_StatusCode_i &
-        p_ValueSc : t_StatusCode
+        p_ValueSc : t_RawStatusCode
     THEN
         CHOICE
             bres := FALSE

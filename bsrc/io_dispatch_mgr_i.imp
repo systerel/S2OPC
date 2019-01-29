@@ -21,7 +21,8 @@ IMPLEMENTATION io_dispatch_mgr_i
 REFINES io_dispatch_mgr
 
 SEES
-    constants
+    constants,
+    constants_statuscodes_bs
 
 IMPORTS
     service_mgr,

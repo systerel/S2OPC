@@ -21,7 +21,7 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 29/01/2019 09:56:53
+ Date                 : 29/01/2019 12:58:02
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "request_handle_bs.h"
 
@@ -114,7 +115,7 @@ extern void message_out_bs__write_create_session_msg_server_endpoints(
    const constants__t_msg_i message_out_bs__req_msg,
    const constants__t_msg_i message_out_bs__resp_msg,
    const constants__t_endpoint_config_idx_i message_out_bs__endpoint_config_idx,
-   constants__t_StatusCode_i * const message_out_bs__ret);
+   constants_statuscodes_bs__t_StatusCode_i * const message_out_bs__ret);
 extern void message_out_bs__write_create_session_msg_session_revised_timeout(
    const constants__t_msg_i message_out_bs__req_msg,
    const constants__t_msg_i message_out_bs__resp_msg);
@@ -142,6 +143,6 @@ extern void message_out_bs__write_msg_out_header_session_token(
    const constants__t_session_token_i message_out_bs__session_token);
 extern void message_out_bs__write_msg_resp_header_service_status(
    const constants__t_msg_header_i message_out_bs__msg_header,
-   const constants__t_StatusCode_i message_out_bs__status_code);
+   const constants_statuscodes_bs__t_StatusCode_i message_out_bs__status_code);
 
 #endif

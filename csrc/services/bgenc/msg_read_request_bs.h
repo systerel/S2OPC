@@ -21,7 +21,7 @@
 
  File Name            : msg_read_request_bs.h
 
- Date                 : 29/01/2019 09:56:56
+ Date                 : 29/01/2019 12:58:04
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 
 /*------------------------
@@ -52,7 +53,7 @@ extern void msg_read_request_bs__INITIALISATION(void);
 extern void msg_read_request_bs__getall_req_ReadValue_AttributeId(
    const constants__t_msg_i msg_read_request_bs__msg,
    const constants__t_ReadValue_i msg_read_request_bs__rvi,
-   constants__t_StatusCode_i * const msg_read_request_bs__p_sc,
+   constants_statuscodes_bs__t_StatusCode_i * const msg_read_request_bs__p_sc,
    constants__t_AttributeId_i * const msg_read_request_bs__aid);
 extern void msg_read_request_bs__getall_req_ReadValue_IndexRange(
    const constants__t_msg_i msg_read_request_bs__msg,

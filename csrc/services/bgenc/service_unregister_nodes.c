@@ -21,7 +21,7 @@
 
  File Name            : service_unregister_nodes.c
 
- Date                 : 29/01/2019 09:56:44
+ Date                 : 29/01/2019 12:57:53
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,7 +43,7 @@ void service_unregister_nodes__INITIALISATION(void) {
   --------------------*/
 void service_unregister_nodes__treat_unregister_nodes_request(
    const constants__t_msg_i service_unregister_nodes__p_req_msg,
-   constants__t_StatusCode_i * const service_unregister_nodes__ret) {
+   constants_statuscodes_bs__t_StatusCode_i * const service_unregister_nodes__ret) {
    {
       t_entier4 service_unregister_nodes__l_nb_nodes;
       

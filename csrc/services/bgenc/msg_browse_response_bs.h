@@ -21,7 +21,7 @@
 
  File Name            : msg_browse_response_bs.h
 
- Date                 : 29/01/2019 09:56:56
+ Date                 : 29/01/2019 12:58:03
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_out_bs.h"
 
 /*------------------------
@@ -73,7 +74,7 @@ extern void msg_browse_response_bs__reset_ResponseBrowse_Res_TypeDefinition(
    const constants__t_BrowseResult_i msg_browse_response_bs__p_bri);
 extern void msg_browse_response_bs__set_ResponseBrowse_BrowseStatus(
    const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
-   const constants__t_StatusCode_i msg_browse_response_bs__p_sc);
+   const constants_statuscodes_bs__t_StatusCode_i msg_browse_response_bs__p_sc);
 extern void msg_browse_response_bs__set_ResponseBrowse_ContinuationPoint(
    const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
    const constants__t_Reference_i msg_browse_response_bs__p_ref);

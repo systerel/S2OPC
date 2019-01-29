@@ -24,6 +24,7 @@ REFINES
 
 SEES
     constants,
+    constants_statuscodes_bs,
     service_write_decode_bs,
     data_value_pointer_bs
 
@@ -84,7 +85,7 @@ DEFINITIONS
         dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
         /* + Value attribute meta-data */
-        a_Value_StatusCode : t_Node +-> t_StatusCode &
+        a_Value_StatusCode : t_Node +-> t_RawStatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
         a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
         dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &

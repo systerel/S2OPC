@@ -99,11 +99,12 @@ void session_core_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
-void session_core_bs__notify_set_session_state(const constants__t_session_i session_core_bs__session,
-                                               const constants__t_sessionState session_core_bs__prec_state,
-                                               const constants__t_sessionState session_core_bs__state,
-                                               const constants__t_StatusCode_i session_core_bs__sc_reason,
-                                               const t_bool session_core_bs__is_client)
+void session_core_bs__notify_set_session_state(
+    const constants__t_session_i session_core_bs__session,
+    const constants__t_sessionState session_core_bs__prec_state,
+    const constants__t_sessionState session_core_bs__state,
+    const constants_statuscodes_bs__t_StatusCode_i session_core_bs__sc_reason,
+    const t_bool session_core_bs__is_client)
 {
     if (session_core_bs__is_client)
     {
@@ -162,7 +163,8 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
                                          (uint32_t) session_core_bs__session, NULL, (uintptr_t) session_core_bs__state);
         }
 
-        if (session_core_bs__state == constants__e_session_closed && constants__e_sc_ok != session_core_bs__sc_reason)
+        if (session_core_bs__state == constants__e_session_closed &&
+            constants_statuscodes_bs__e_sc_ok != session_core_bs__sc_reason)
         {
             SOPC_StatusCode scReason;
             util_status_code__B_to_C(session_core_bs__sc_reason, &scReason);
@@ -353,7 +355,7 @@ void session_core_bs__server_create_session_req_do_crypto(
     const constants__t_msg_i session_core_bs__p_req_msg,
     const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
     const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
-    constants__t_StatusCode_i* const session_core_bs__status,
+    constants_statuscodes_bs__t_StatusCode_i* const session_core_bs__status,
     constants__t_SignatureData_i* const session_core_bs__signature)
 {
     SOPC_CryptoProvider* pProvider = NULL;
@@ -373,7 +375,7 @@ void session_core_bs__server_create_session_req_do_crypto(
 
     if (constants__c_session_indet == session_core_bs__p_session)
     {
-        *session_core_bs__status = constants__e_sc_bad_unexpected_error;
+        *session_core_bs__status = constants_statuscodes_bs__e_sc_bad_unexpected_error;
         return;
     }
 
@@ -386,7 +388,7 @@ void session_core_bs__server_create_session_req_do_crypto(
 
     if (NULL == pSCCfg || NULL == pECfg)
     {
-        *session_core_bs__status = constants__e_sc_bad_unexpected_error;
+        *session_core_bs__status = constants_statuscodes_bs__e_sc_bad_unexpected_error;
         return;
     }
 
@@ -504,17 +506,17 @@ void session_core_bs__server_create_session_req_do_crypto(
 
         if (SOPC_STATUS_OK == status)
         {
-            *session_core_bs__status =
-                application_uri_ok ? constants__e_sc_ok : constants__e_sc_bad_certificate_uri_invalid;
+            *session_core_bs__status = application_uri_ok ? constants_statuscodes_bs__e_sc_ok
+                                                          : constants_statuscodes_bs__e_sc_bad_certificate_uri_invalid;
         }
         else
         {
-            *session_core_bs__status = constants__e_sc_bad_unexpected_error;
+            *session_core_bs__status = constants_statuscodes_bs__e_sc_bad_unexpected_error;
         }
     }
     else
     {
-        *session_core_bs__status = constants__e_sc_ok;
+        *session_core_bs__status = constants_statuscodes_bs__e_sc_ok;
     }
 
     /* Clean */

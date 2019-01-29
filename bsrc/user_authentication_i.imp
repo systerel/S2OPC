@@ -24,7 +24,8 @@ REFINES
     user_authentication
 
 SEES
-    constants
+    constants,
+    constants_statuscodes_bs
 
 IMPORTS
     user_authentication_bs

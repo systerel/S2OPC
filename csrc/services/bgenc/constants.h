@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 29/01/2019 09:56:37
+ Date                 : 29/01/2019 12:57:47
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -36,7 +36,7 @@
 #include "b2c.h"
 
 /*-----------------
-   IMPORTS Clause
+   EXTENDS Clause
   -----------------*/
 #include "constants_bs.h"
 
@@ -52,6 +52,7 @@
 #define constants__t_Node_i constants_bs__t_Node_i
 #define constants__t_Nonce_i constants_bs__t_Nonce_i
 #define constants__t_QualifiedName_i constants_bs__t_QualifiedName_i
+#define constants__t_RawStatusCode constants_bs__t_RawStatusCode
 #define constants__t_Reference_i constants_bs__t_Reference_i
 #define constants__t_SignatureData_i constants_bs__t_SignatureData_i
 #define constants__t_Timestamp constants_bs__t_Timestamp
@@ -143,58 +144,6 @@ typedef enum {
    constants__e_secpol_B256,
    constants__e_secpol_B256S256
 } constants__t_SecurityPolicy;
-typedef enum {
-   constants__c_StatusCode_indet,
-   constants__e_sc_ok,
-   constants__e_sc_bad_generic,
-   constants__e_sc_uncertain_generic,
-   constants__e_sc_bad_internal_error,
-   constants__e_sc_bad_secure_channel_closed,
-   constants__e_sc_bad_secure_channel_id_invalid,
-   constants__e_sc_bad_connection_closed,
-   constants__e_sc_bad_invalid_state,
-   constants__e_sc_bad_session_id_invalid,
-   constants__e_sc_bad_session_closed,
-   constants__e_sc_bad_session_not_activated,
-   constants__e_sc_bad_too_many_sessions,
-   constants__e_sc_bad_identity_token_invalid,
-   constants__e_sc_bad_identity_token_rejected,
-   constants__e_sc_bad_encoding_error,
-   constants__e_sc_bad_decoding_error,
-   constants__e_sc_bad_invalid_argument,
-   constants__e_sc_bad_unexpected_error,
-   constants__e_sc_bad_out_of_memory,
-   constants__e_sc_bad_nothing_to_do,
-   constants__e_sc_bad_too_many_ops,
-   constants__e_sc_bad_timestamps_to_return_invalid,
-   constants__e_sc_bad_max_age_invalid,
-   constants__e_sc_bad_node_id_unknown,
-   constants__e_sc_bad_node_id_invalid,
-   constants__e_sc_bad_view_id_unknown,
-   constants__e_sc_bad_attribute_id_invalid,
-   constants__e_sc_bad_browse_direction_invalid,
-   constants__e_sc_bad_service_unsupported,
-   constants__e_sc_bad_write_not_supported,
-   constants__e_sc_bad_timeout,
-   constants__e_sc_bad_too_many_subscriptions,
-   constants__e_sc_bad_no_subscription,
-   constants__e_sc_bad_subscription_id_invalid,
-   constants__e_sc_bad_sequence_number_unknown,
-   constants__e_sc_bad_too_many_monitored_items,
-   constants__e_sc_bad_monitoring_mode_invalid,
-   constants__e_sc_bad_monitored_item_filter_unsupported,
-   constants__e_sc_bad_too_many_publish_requests,
-   constants__e_sc_bad_message_not_available,
-   constants__e_sc_bad_index_range_invalid,
-   constants__e_sc_bad_index_range_no_data,
-   constants__e_sc_bad_user_access_denied,
-   constants__e_sc_bad_certificate_uri_invalid,
-   constants__e_sc_bad_security_checks_failed,
-   constants__e_sc_bad_request_interrupted,
-   constants__e_sc_bad_data_unavailable,
-   constants__e_sc_bad_not_writable,
-   constants__e_sc_bad_type_mismatch
-} constants__t_StatusCode_i;
 typedef enum {
    constants__c_TimestampsToReturn_indet,
    constants__e_ttr_source,
@@ -351,6 +300,7 @@ typedef enum {
 #define constants__t_Node_i_max constants_bs__t_Node_i_max
 #define constants__t_Nonce_i_max constants_bs__t_Nonce_i_max
 #define constants__t_QualifiedName_i_max constants_bs__t_QualifiedName_i_max
+#define constants__t_RawStatusCode_max constants_bs__t_RawStatusCode_max
 #define constants__t_Reference_i_max constants_bs__t_Reference_i_max
 #define constants__t_SignatureData_i_max constants_bs__t_SignatureData_i_max
 #define constants__t_Timestamp_max constants_bs__t_Timestamp_max

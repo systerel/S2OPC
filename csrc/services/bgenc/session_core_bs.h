@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 29/01/2019 09:57:04
+ Date                 : 29/01/2019 12:58:11
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -40,6 +40,7 @@
   --------------*/
 #include "channel_mgr.h"
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
@@ -124,7 +125,7 @@ extern void session_core_bs__notify_set_session_state(
    const constants__t_session_i session_core_bs__session,
    const constants__t_sessionState session_core_bs__prec_state,
    const constants__t_sessionState session_core_bs__state,
-   const constants__t_StatusCode_i session_core_bs__sc_reason,
+   const constants_statuscodes_bs__t_StatusCode_i session_core_bs__sc_reason,
    const t_bool session_core_bs__is_client);
 extern void session_core_bs__remove_NonceServer(
    const constants__t_session_i session_core_bs__p_session);
@@ -142,7 +143,7 @@ extern void session_core_bs__server_create_session_req_do_crypto(
    const constants__t_msg_i session_core_bs__p_req_msg,
    const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
    const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
-   constants__t_StatusCode_i * const session_core_bs__status,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core_bs__status,
    constants__t_SignatureData_i * const session_core_bs__signature);
 extern void session_core_bs__server_get_fresh_session_token(
    const constants__t_session_i session_core_bs__session,

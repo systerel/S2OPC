@@ -28,6 +28,7 @@ DEFINITIONS
 
 SEES
     constants,
+    constants_statuscodes_bs,
     address_space,
     message_in_bs,
     message_out_bs
@@ -58,7 +59,7 @@ LOCAL_OPERATIONS
         data_Value_Value,
         data_Value_StatusCode
         :(data_Value_Value      : t_ReadValue +-> t_Variant    &
-          data_Value_StatusCode : t_ReadValue +-> t_StatusCode &
+          data_Value_StatusCode : t_ReadValue +-> t_RawStatusCode &
 
           (p_sc = e_sc_ok &
            p_nid : dom(a_NodeId~)
@@ -73,13 +74,13 @@ LOCAL_OPERATIONS
            (not(a_NodeClass(a_NodeId~(p_nid)) = e_ncl_Variable)
             =>
             data_Value_StatusCode = data_Value_StatusCode$0 <+
-                                    {p_rvi |-> e_sc_ok})) &
+                                    {p_rvi |-> conv_StatusCode_To_RawStatusCode(e_sc_ok)})) &
           (not(p_sc = e_sc_ok &
                p_nid : dom(a_NodeId~))
            =>
            data_Value_Value = {p_rvi} <<| data_Value_Value$0 &
            data_Value_StatusCode = data_Value_StatusCode$0 <+
-                                   {p_rvi |-> e_sc_bad_internal_error})
+                                   {p_rvi |-> conv_StatusCode_To_RawStatusCode(e_sc_bad_internal_error)})
          )
     END
 
@@ -92,6 +93,7 @@ OPERATIONS
         l_ncl,
         l_value,
         l_sc,
+        l_raw_sc,
         l_authorized
     IN
         IF  p_sc = e_sc_ok
@@ -105,24 +107,29 @@ OPERATIONS
                         IF  p_aid = e_aid_Value &
                             l_ncl = e_ncl_Variable
                         THEN
-                            l_sc <-- get_Value_StatusCode(p_user, l_node)
+                            l_raw_sc <-- get_Value_StatusCode(p_user, l_node)
                         ELSE
-                            l_sc := e_sc_ok
+                            l_raw_sc <-- getall_conv_StatusCode_To_RawStatusCode(e_sc_ok)
                         END
+                    ELSE
+                        l_raw_sc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc)
                     END;
-                    set_read_response(p_resp_msg, p_rvi, l_value, l_sc, p_aid);
+                    set_read_response(p_resp_msg, p_rvi, l_value, l_raw_sc, p_aid);
                     read_AddressSpace_free_variant(l_value)
                 ELSE
+                    l_raw_sc <-- getall_conv_StatusCode_To_RawStatusCode(e_sc_bad_user_access_denied);
                     /* User was not authorized */
-                    set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_user_access_denied, p_aid)
+                    set_read_response(p_resp_msg, p_rvi, c_Variant_indet, l_raw_sc, p_aid)
                 END
             ELSE
                 /* Invalid at this level means the node Id is unknown:
-                   node Id cannot be invalid in case p_is_valid = TRUE */
-                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_node_id_unknown, p_aid)
+                node Id cannot be invalid in case p_is_valid = TRUE */
+                l_raw_sc <-- getall_conv_StatusCode_To_RawStatusCode(e_sc_bad_node_id_unknown);
+                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, l_raw_sc, p_aid)
             END
         ELSE
-            set_read_response(p_resp_msg, p_rvi, c_Variant_indet, p_sc, p_aid)
+            l_raw_sc <-- getall_conv_StatusCode_To_RawStatusCode(p_sc);
+            set_read_response(p_resp_msg, p_rvi, c_Variant_indet, l_raw_sc, p_aid)
         END
     END
     ;
@@ -165,9 +172,9 @@ OPERATIONS
             %rvi.(rvi : t_ReadValue &
                   rvi : rreqs_iterated
                   |
-                  {FALSE |-> e_sc_bad_internal_error,
+                  {FALSE |-> conv_StatusCode_To_RawStatusCode(e_sc_bad_internal_error),
                    TRUE  |->
-                             {FALSE |-> e_sc_ok,
+                             {FALSE |-> conv_StatusCode_To_RawStatusCode(e_sc_ok),
                               TRUE  |-> a_Value_StatusCode(a_NodeId~(ReadValue_NodeId(rvi)))}
                              (bool(ReadValue_AttributeId(rvi) = e_aid_Value &
                                    a_NodeClass(a_NodeId~(ReadValue_NodeId(rvi))) = e_ncl_Variable))}

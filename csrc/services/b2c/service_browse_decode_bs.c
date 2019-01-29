@@ -44,25 +44,25 @@ void service_browse_decode_bs__INITIALISATION(void)
   --------------------*/
 void service_browse_decode_bs__decode_browse_request(
     const constants__t_msg_i service_browse_decode_bs__req_payload,
-    constants__t_StatusCode_i* const service_browse_decode_bs__StatusCode_service)
+    constants_statuscodes_bs__t_StatusCode_i* const service_browse_decode_bs__StatusCode_service)
 {
     /* TODO: actually decode something */
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) service_browse_decode_bs__req_payload;
-    *service_browse_decode_bs__StatusCode_service = constants__e_sc_bad_unexpected_error;
+    *service_browse_decode_bs__StatusCode_service = constants_statuscodes_bs__e_sc_bad_unexpected_error;
 
     if (encType == &OpcUa_BrowseRequest_EncodeableType)
     {
         OpcUa_BrowseRequest* req = (OpcUa_BrowseRequest*) service_browse_decode_bs__req_payload;
 
         if (0 == req->NoOfNodesToBrowse)
-            *service_browse_decode_bs__StatusCode_service = constants__e_sc_bad_nothing_to_do;
+            *service_browse_decode_bs__StatusCode_service = constants_statuscodes_bs__e_sc_bad_nothing_to_do;
         else if (req->NoOfNodesToBrowse > constants__k_n_BrowseResponse_max)
-            *service_browse_decode_bs__StatusCode_service = constants__e_sc_bad_too_many_ops;
+            *service_browse_decode_bs__StatusCode_service = constants_statuscodes_bs__e_sc_bad_too_many_ops;
         else
         {
             /* TODO: req shall not be freed before request is null... */
             request = req;
-            *service_browse_decode_bs__StatusCode_service = constants__e_sc_ok;
+            *service_browse_decode_bs__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
         }
     }
 }

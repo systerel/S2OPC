@@ -28,6 +28,7 @@ SETS
     t_byte_buffer_i;
     t_Timestamp;
     t_Int32;
+    t_RawStatusCode;
     t_access_level;
 
     t_WriteValuePointer_i;
@@ -132,6 +133,7 @@ CONCRETE_CONSTANTS
     c_IndexRange_indet
 
 ABSTRACT_CONSTANTS
+
     t_Variant,
     t_DataValue,
     t_Node,

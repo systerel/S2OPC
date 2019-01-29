@@ -22,6 +22,7 @@ MACHINE
 
 SEES
     constants,
+    constants_statuscodes_bs,
     message_out_bs,
     request_handle_bs,
     message_in_bs
@@ -846,8 +847,7 @@ OPERATIONS
         p_indexRange : t_IndexRange_i &
         p_value : t_Variant_i &
         p_value : t_Variant &
-        p_valueSc : t_StatusCode_i &
-        p_valueSc : t_StatusCode &
+        p_valueSc : t_RawStatusCode &
         p_timestampToReturn : t_TimestampsToReturn_i &
         p_timestampToReturn : t_TimestampsToReturn &
         p_monitoringMode : t_monitoringMode_i &

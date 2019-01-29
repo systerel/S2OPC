@@ -83,21 +83,22 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
     }
 }
 
-static constants__t_StatusCode_i index_range_bad_returnstatus_to_service_statuscode(SOPC_ReturnStatus status)
+static constants_statuscodes_bs__t_StatusCode_i index_range_bad_returnstatus_to_service_statuscode(
+    SOPC_ReturnStatus status)
 {
     switch (status)
     {
     case SOPC_STATUS_OUT_OF_MEMORY:
-        return constants__e_sc_bad_out_of_memory;
+        return constants_statuscodes_bs__e_sc_bad_out_of_memory;
     default:
         SOPC_Logger_TraceWarning("index_range_statuscode: internal error generated from return status code %d", status);
-        return constants__e_sc_bad_internal_error;
+        return constants_statuscodes_bs__e_sc_bad_internal_error;
     }
 }
 
-static constants__t_StatusCode_i read_value_indexed_helper(const SOPC_Variant* value,
-                                                           const SOPC_NumericRange* range,
-                                                           SOPC_Variant* dereferenced)
+static constants_statuscodes_bs__t_StatusCode_i read_value_indexed_helper(const SOPC_Variant* value,
+                                                                          const SOPC_NumericRange* range,
+                                                                          SOPC_Variant* dereferenced)
 {
     bool has_range = false;
     SOPC_ReturnStatus status = SOPC_Variant_HasRange(value, range, &has_range);
@@ -109,12 +110,13 @@ static constants__t_StatusCode_i read_value_indexed_helper(const SOPC_Variant* v
             SOPC_Logger_TraceWarning("read_value_indexed: matrix index range not supported");
         }
 
-        return constants__e_sc_bad_index_range_invalid; // In case we do not support  the range either (matrix)
+        return constants_statuscodes_bs__e_sc_bad_index_range_invalid; // In case we do not support  the range either
+                                                                       // (matrix)
     }
 
     if (!has_range)
     {
-        return constants__e_sc_bad_index_range_no_data;
+        return constants_statuscodes_bs__e_sc_bad_index_range_no_data;
     }
 
     status = SOPC_Variant_GetRange(dereferenced, value, range);
@@ -124,23 +126,23 @@ static constants__t_StatusCode_i read_value_indexed_helper(const SOPC_Variant* v
         return index_range_bad_returnstatus_to_service_statuscode(status);
     }
 
-    return constants__e_sc_ok;
+    return constants_statuscodes_bs__e_sc_ok;
 }
 
-static constants__t_StatusCode_i read_value_indexed(const SOPC_Variant* value,
-                                                    const SOPC_String* range_str,
-                                                    SOPC_Variant* dereferenced)
+static constants_statuscodes_bs__t_StatusCode_i read_value_indexed(const SOPC_Variant* value,
+                                                                   const SOPC_String* range_str,
+                                                                   SOPC_Variant* dereferenced)
 {
     SOPC_NumericRange* range = NULL;
     SOPC_ReturnStatus status = SOPC_NumericRange_Parse(SOPC_String_GetRawCString(range_str), &range);
 
     if (status != SOPC_STATUS_OK)
     {
-        return (status == SOPC_STATUS_NOK) ? constants__e_sc_bad_index_range_invalid
+        return (status == SOPC_STATUS_NOK) ? constants_statuscodes_bs__e_sc_bad_index_range_invalid
                                            : index_range_bad_returnstatus_to_service_statuscode(status);
     }
 
-    constants__t_StatusCode_i ret = read_value_indexed_helper(value, range, dereferenced);
+    constants_statuscodes_bs__t_StatusCode_i ret = read_value_indexed_helper(value, range, dereferenced);
     SOPC_NumericRange_Delete(range);
 
     return ret;
@@ -149,13 +151,14 @@ static constants__t_StatusCode_i read_value_indexed(const SOPC_Variant* value,
 /* Reads any attribute and outputs a variant (valid or not)
  * As this function uses the *_2_Variant_i functions, the value must be freed once used
  */
-void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user_i address_space_bs__p_user,
-                                                         const constants__t_Node_i address_space_bs__node,
-                                                         const constants__t_NodeClass_i address_space_bs__ncl,
-                                                         const constants__t_AttributeId_i address_space_bs__aid,
-                                                         const constants__t_IndexRange_i address_space_bs__index_range,
-                                                         constants__t_StatusCode_i* const address_space_bs__sc,
-                                                         constants__t_Variant_i* const address_space_bs__variant)
+void address_space_bs__read_AddressSpace_Attribute_value(
+    const constants__t_user_i address_space_bs__p_user,
+    const constants__t_Node_i address_space_bs__node,
+    const constants__t_NodeClass_i address_space_bs__ncl,
+    const constants__t_AttributeId_i address_space_bs__aid,
+    const constants__t_IndexRange_i address_space_bs__index_range,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
 {
     (void) (address_space_bs__p_user); /* Keep for B precondition: User is already authorized for this operation */
 
@@ -188,7 +191,7 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
         else
         {
             *address_space_bs__variant = constants__c_Variant_indet;
-            *address_space_bs__sc = constants__e_sc_bad_attribute_id_invalid;
+            *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
             return;
         }
         break;
@@ -205,7 +208,7 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
         else
         {
             *address_space_bs__variant = util_variant__new_Variant_from_Indet();
-            *address_space_bs__sc = constants__e_sc_bad_attribute_id_invalid;
+            *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
             return;
         }
         break;
@@ -221,7 +224,7 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
         else
         {
             *address_space_bs__variant = util_variant__new_Variant_from_Indet();
-            *address_space_bs__sc = constants__e_sc_bad_attribute_id_invalid;
+            *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
             return;
         }
         break;
@@ -234,7 +237,7 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
         else
         {
             *address_space_bs__variant = util_variant__new_Variant_from_Indet();
-            *address_space_bs__sc = constants__e_sc_bad_attribute_id_invalid;
+            *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
             return;
         }
         break;
@@ -248,20 +251,20 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
         break;
     default:
         *address_space_bs__variant = constants__c_Variant_indet;
-        *address_space_bs__sc = constants__e_sc_bad_attribute_id_invalid;
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
         return;
     }
 
     if (value == NULL)
     {
-        *address_space_bs__sc = constants__e_sc_bad_out_of_memory;
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
         *address_space_bs__variant = NULL;
         return;
     }
 
     if (address_space_bs__index_range == NULL || address_space_bs__index_range->Length <= 0)
     {
-        *address_space_bs__sc = constants__e_sc_ok;
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
         *address_space_bs__variant = value;
     }
     else
@@ -270,7 +273,7 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
 
         if (*address_space_bs__variant == NULL)
         {
-            *address_space_bs__sc = constants__e_sc_bad_out_of_memory;
+            *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
         }
         else
         {
@@ -282,22 +285,23 @@ void address_space_bs__read_AddressSpace_Attribute_value(const constants__t_user
     }
 }
 
-static constants__t_StatusCode_i set_value_full(SOPC_Variant* node_value,
-                                                const SOPC_Variant* new_value,
-                                                SOPC_Variant* previous_value)
+static constants_statuscodes_bs__t_StatusCode_i set_value_full(SOPC_Variant* node_value,
+                                                               const SOPC_Variant* new_value,
+                                                               SOPC_Variant* previous_value)
 {
     SOPC_Variant_Move(previous_value, node_value);
     SOPC_Variant_Clear(node_value);
     SOPC_Variant_Initialize(node_value);
     SOPC_ReturnStatus status = SOPC_Variant_Copy(node_value, new_value);
 
-    return (status == SOPC_STATUS_OK) ? constants__e_sc_ok : constants__e_sc_bad_internal_error;
+    return (status == SOPC_STATUS_OK) ? constants_statuscodes_bs__e_sc_ok
+                                      : constants_statuscodes_bs__e_sc_bad_internal_error;
 }
 
-static constants__t_StatusCode_i set_value_indexed_helper(SOPC_Variant* node_value,
-                                                          const SOPC_Variant* new_value,
-                                                          const SOPC_NumericRange* range,
-                                                          SOPC_Variant* previous_value)
+static constants_statuscodes_bs__t_StatusCode_i set_value_indexed_helper(SOPC_Variant* node_value,
+                                                                         const SOPC_Variant* new_value,
+                                                                         const SOPC_NumericRange* range,
+                                                                         SOPC_Variant* previous_value)
 {
     bool has_range = false;
     SOPC_ReturnStatus status = SOPC_Variant_HasRange(node_value, range, &has_range);
@@ -309,19 +313,20 @@ static constants__t_StatusCode_i set_value_indexed_helper(SOPC_Variant* node_val
             SOPC_Logger_TraceWarning("set_value_indexed: matrix index range not supported");
         }
 
-        return constants__e_sc_bad_index_range_invalid; // In case we do not support  the range either (matrix)
+        return constants_statuscodes_bs__e_sc_bad_index_range_invalid; // In case we do not support  the range either
+                                                                       // (matrix)
     }
 
     if (!has_range)
     {
-        return constants__e_sc_bad_index_range_no_data;
+        return constants_statuscodes_bs__e_sc_bad_index_range_no_data;
     }
 
     status = SOPC_Variant_Copy(previous_value, node_value);
 
     if (status != SOPC_STATUS_OK)
     {
-        return constants__e_sc_bad_out_of_memory;
+        return constants_statuscodes_bs__e_sc_bad_out_of_memory;
     }
 
     status = SOPC_Variant_SetRange(node_value, new_value, range);
@@ -331,24 +336,25 @@ static constants__t_StatusCode_i set_value_indexed_helper(SOPC_Variant* node_val
         return index_range_bad_returnstatus_to_service_statuscode(status);
     }
 
-    return constants__e_sc_ok;
+    return constants_statuscodes_bs__e_sc_ok;
 }
 
-static constants__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
-                                                   const SOPC_Variant* new_value,
-                                                   const SOPC_String* range_str,
-                                                   SOPC_Variant* previous_value)
+static constants_statuscodes_bs__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
+                                                                  const SOPC_Variant* new_value,
+                                                                  const SOPC_String* range_str,
+                                                                  SOPC_Variant* previous_value)
 {
     SOPC_NumericRange* range = NULL;
     SOPC_ReturnStatus status = SOPC_NumericRange_Parse(SOPC_String_GetRawCString(range_str), &range);
 
     if (status != SOPC_STATUS_OK)
     {
-        return (status == SOPC_STATUS_NOK) ? constants__e_sc_bad_index_range_invalid
-                                           : constants__e_sc_bad_out_of_memory;
+        return (status == SOPC_STATUS_NOK) ? constants_statuscodes_bs__e_sc_bad_index_range_invalid
+                                           : constants_statuscodes_bs__e_sc_bad_out_of_memory;
     }
 
-    constants__t_StatusCode_i ret = set_value_indexed_helper(node_value, new_value, range, previous_value);
+    constants_statuscodes_bs__t_StatusCode_i ret =
+        set_value_indexed_helper(node_value, new_value, range, previous_value);
     SOPC_NumericRange_Delete(range);
 
     return ret;
@@ -358,7 +364,7 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
                                  const constants__t_Node_i address_space_bs__node,
                                  const constants__t_Variant_i address_space_bs__variant,
                                  const constants__t_IndexRange_i address_space_bs__index_range,
-                                 constants__t_StatusCode_i* const address_space_bs__serviceStatusCode,
+                                 constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__serviceStatusCode,
                                  constants__t_DataValue_i* const address_space_bs__prev_dataValue)
 {
     (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
@@ -368,7 +374,7 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
 
     if (*address_space_bs__prev_dataValue == NULL)
     {
-        *address_space_bs__serviceStatusCode = constants__e_sc_bad_out_of_memory;
+        *address_space_bs__serviceStatusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
         return;
     }
 
@@ -384,7 +390,7 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
                               &(*address_space_bs__prev_dataValue)->Value);
     }
 
-    if (*address_space_bs__serviceStatusCode == constants__e_sc_ok)
+    if (*address_space_bs__serviceStatusCode == constants_statuscodes_bs__e_sc_ok)
     {
         (*address_space_bs__prev_dataValue)->Status = item->value_status;
         (*address_space_bs__prev_dataValue)->SourceTimestamp = item->value_source_ts.timestamp;
@@ -425,7 +431,7 @@ void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_sp
 
 void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_space_bs__p_user,
                                             const constants__t_Node_i address_space_bs__node,
-                                            constants__t_StatusCode_i* const address_space_bs__sc)
+                                            constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc)
 {
     (void) (address_space_bs__p_user); /* User is already authorized for this operation */
     SOPC_AddressSpace_Item* item = address_space_bs__node;

@@ -21,7 +21,7 @@
 
  File Name            : msg_subscription_publish_bs.h
 
- Date                 : 29/01/2019 09:56:58
+ Date                 : 29/01/2019 12:58:06
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
@@ -61,7 +62,7 @@ extern void msg_subscription_publish_bs__generate_internal_send_publish_response
    const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg,
    const constants__t_server_request_handle_i msg_subscription_publish_bs__p_req_handle,
    const constants__t_request_context_i msg_subscription_publish_bs__p_req_context,
-   const constants__t_StatusCode_i msg_subscription_publish_bs__p_statusCode);
+   const constants_statuscodes_bs__t_StatusCode_i msg_subscription_publish_bs__p_statusCode);
 extern void msg_subscription_publish_bs__get_notification_message_no_items(
    const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg,
    constants__t_notif_msg_i * const msg_subscription_publish_bs__p_notifMsg);

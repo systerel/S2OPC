@@ -157,7 +157,7 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
 
         if (NULL != params)
         {
-            constants__t_StatusCode_i statusCode;
+            constants_statuscodes_bs__t_StatusCode_i statusCode;
             util_status_code__C_to_B((SOPC_StatusCode) auxParam, &statusCode);
             io_dispatch_mgr__snd_msg_failure(id, (constants__t_request_context_i) * (uint32_t*) params, statusCode);
             free(params);
@@ -180,7 +180,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
     SOPC_Services_Event event = (SOPC_Services_Event) scEvent;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Endpoint_Config* epConfig = NULL;
-    constants__t_StatusCode_i sCode = constants__e_sc_ok;
+    constants_statuscodes_bs__t_StatusCode_i sCode = constants_statuscodes_bs__e_sc_ok;
     SOPC_EncodeableType* encType = NULL;
     bool bres = false;
     void* msg = NULL;
@@ -217,7 +217,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         {
             SOPC_Logger_TraceError("ServicesMgr: SE_TO_SE_ACTIVATE_SESSION session=%" PRIu32 " user parameter is NULL",
                                    id);
-            sCode = constants__e_sc_bad_generic;
+            sCode = constants_statuscodes_bs__e_sc_bad_generic;
         }
         break;
     case SE_TO_SE_SERVER_DATA_CHANGED:
@@ -265,7 +265,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         /* Server side only:
            id = session id
            params = (SOPC_Internal_AsyncSendMsgData*)
-           auxParams = (constants__t_StatusCode_i) service result code
+           auxParams = (constants_statuscodes_bs__t_StatusCode_i) service result code
          */
         SOPC_Logger_TraceDebug("ServicesMgr: SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO session=%" PRIu32, id);
 
@@ -274,7 +274,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
 
         io_dispatch_mgr__internal_server_send_publish_response_prio_event(
             (constants__t_session_i) id, msg_data->requestHandle, msg_data->requestId, msg_data->msgToSend,
-            (constants__t_StatusCode_i) auxParam, &bres);
+            (constants_statuscodes_bs__t_StatusCode_i) auxParam, &bres);
         free(msg_data);
 
         if (bres == false)
@@ -349,7 +349,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         assert(id <= INT32_MAX);
 
         io_dispatch_mgr__server_treat_local_service_request(id, params, auxParam, &sCode);
-        if (constants__e_sc_ok != sCode)
+        if (constants_statuscodes_bs__e_sc_ok != sCode)
         {
             // Error case
             status = SOPC_Encodeable_Create(&OpcUa_ServiceFault_EncodeableType, &msg);
@@ -403,7 +403,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         assert(id <= constants__t_session_i_max);
 
         io_dispatch_mgr__client_send_service_request(id, params, auxParam, &sCode);
-        if (sCode != constants__e_sc_ok)
+        if (sCode != constants_statuscodes_bs__e_sc_ok)
         {
             SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, util_status_code__B_to_return_status_C(sCode), encType,
                                      auxParam);
@@ -421,7 +421,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         assert(id <= constants__t_session_i_max);
 
         io_dispatch_mgr__client_send_close_session_request(id, &sCode);
-        if (sCode != constants__e_sc_ok)
+        if (sCode != constants_statuscodes_bs__e_sc_ok)
         {
             SOPC_Logger_TraceError("ServicesMgr: APP_TO_SE_CLOSE_SESSION failed session=%" PRIu32, id);
         }
@@ -440,7 +440,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         assert(id <= constants_bs__t_channel_config_idx_i_max);
 
         io_dispatch_mgr__client_send_discovery_request(id, params, auxParam, &sCode);
-        if (sCode != constants__e_sc_ok)
+        if (sCode != constants_statuscodes_bs__e_sc_ok)
         {
             SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, util_status_code__B_to_return_status_C(sCode), encType,
                                      auxParam);

@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 29/01/2019 09:56:48
+ Date                 : 29/01/2019 12:57:57
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -58,6 +58,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
@@ -122,11 +123,11 @@ extern void subscription_core__create_monitored_item(
    const constants__t_AttributeId_i subscription_core__p_aid,
    const constants__t_IndexRange_i subscription_core__p_indexRange,
    const constants__t_Variant_i subscription_core__p_value,
-   const constants__t_StatusCode_i subscription_core__p_valueSc,
+   const constants__t_RawStatusCode subscription_core__p_valueSc,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
    const constants__t_monitoringMode_i subscription_core__p_monitoringMode,
    const constants__t_client_handle_i subscription_core__p_clientHandle,
-   constants__t_StatusCode_i * const subscription_core__StatusCode_service,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode_service,
    constants__t_monitoredItemPointer_i * const subscription_core__monitoredItemPointer,
    constants__t_monitoredItemId_i * const subscription_core__monitoredItemId);
 extern void subscription_core__create_subscription(
@@ -136,7 +137,7 @@ extern void subscription_core__create_subscription(
    const t_entier4 subscription_core__p_revMaxKeepAlive,
    const t_entier4 subscription_core__p_maxNotificationsPerPublish,
    const t_bool subscription_core__p_publishEnabled,
-   constants__t_StatusCode_i * const subscription_core__StatusCode_service,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode_service,
    constants__t_subscription_i * const subscription_core__subscription);
 extern void subscription_core__empty_session_publish_requests(
    const constants__t_subscription_i subscription_core__p_subscription);
@@ -156,7 +157,7 @@ extern void subscription_core__receive_publish_request(
    const constants__t_server_request_handle_i subscription_core__p_req_handle,
    const constants__t_request_context_i subscription_core__p_req_ctx,
    const constants__t_msg_i subscription_core__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_core__StatusCode_service,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode_service,
    t_bool * const subscription_core__async_resp_msg,
    constants__t_subscription_i * const subscription_core__subscription,
    t_bool * const subscription_core__moreNotifs);
@@ -172,7 +173,7 @@ extern void subscription_core__server_subscription_core_publish_timeout(
    const constants__t_subscription_i subscription_core__p_subscription,
    const t_bool subscription_core__p_validPublishReqQueued,
    t_bool * const subscription_core__p_msg_to_send,
-   constants__t_StatusCode_i * const subscription_core__p_msg_sc,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_msg_sc,
    constants__t_session_i * const subscription_core__p_session,
    constants__t_msg_i * const subscription_core__p_publish_resp_msg,
    constants__t_server_request_handle_i * const subscription_core__p_req_handle,
@@ -190,7 +191,7 @@ extern void subscription_core__server_subscription_core_publish_timeout_check_li
 extern void subscription_core__server_subscription_core_publish_timeout_return_moreNotifs(
    const constants__t_subscription_i subscription_core__p_subscription,
    t_bool * const subscription_core__p_msg_to_send,
-   constants__t_StatusCode_i * const subscription_core__p_msg_sc,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_msg_sc,
    constants__t_session_i * const subscription_core__p_session,
    constants__t_msg_i * const subscription_core__p_publish_resp_msg,
    constants__t_server_request_handle_i * const subscription_core__p_req_handle,

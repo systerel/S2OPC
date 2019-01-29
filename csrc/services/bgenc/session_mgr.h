@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 29/01/2019 09:56:46
+ Date                 : 29/01/2019 12:57:55
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -48,6 +48,7 @@
   --------------*/
 #include "channel_mgr.h"
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
@@ -74,11 +75,11 @@ extern void session_mgr__local_client_activate_sessions_on_SC_connection(
    const constants__t_channel_config_idx_i session_mgr__channel_config_idx);
 extern void session_mgr__local_client_close_session(
    const constants__t_session_i session_mgr__session,
-   const constants__t_StatusCode_i session_mgr__sc_reason);
+   const constants_statuscodes_bs__t_StatusCode_i session_mgr__sc_reason);
 extern void session_mgr__local_client_close_session_if_needed(
    const t_bool session_mgr__cond,
    const constants__t_session_i session_mgr__session,
-   const constants__t_StatusCode_i session_mgr__sc_reason);
+   const constants_statuscodes_bs__t_StatusCode_i session_mgr__sc_reason);
 extern void session_mgr__local_client_close_sessions_on_SC_final_connection_failure(
    const constants__t_channel_config_idx_i session_mgr__channel_config_idx);
 
@@ -101,12 +102,12 @@ extern void session_mgr__client_channel_connected_event_session(
    const constants__t_channel_i session_mgr__channel);
 extern void session_mgr__client_close_session(
    const constants__t_session_i session_mgr__session,
-   const constants__t_StatusCode_i session_mgr__sc_reason);
+   const constants_statuscodes_bs__t_StatusCode_i session_mgr__sc_reason);
 extern void session_mgr__client_close_session_req(
    const constants__t_session_i session_mgr__session,
    const constants__t_client_request_handle_i session_mgr__req_handle,
    const constants__t_msg_i session_mgr__close_req_msg,
-   constants__t_StatusCode_i * const session_mgr__ret,
+   constants_statuscodes_bs__t_StatusCode_i * const session_mgr__ret,
    constants__t_channel_i * const session_mgr__channel,
    constants__t_session_token_i * const session_mgr__session_token);
 extern void session_mgr__client_close_sessions_on_final_connection_failure(
@@ -129,20 +130,20 @@ extern void session_mgr__client_sc_activate_session_req(
    const constants__t_client_request_handle_i session_mgr__req_handle,
    const constants__t_channel_i session_mgr__channel,
    const constants__t_msg_i session_mgr__activate_req_msg,
-   constants__t_StatusCode_i * const session_mgr__ret,
+   constants_statuscodes_bs__t_StatusCode_i * const session_mgr__ret,
    constants__t_session_token_i * const session_mgr__session_token);
 extern void session_mgr__client_user_activate_session_req(
    const constants__t_session_i session_mgr__session,
    const constants__t_client_request_handle_i session_mgr__req_handle,
    const constants__t_user_token_i session_mgr__p_user_token,
    const constants__t_msg_i session_mgr__activate_req_msg,
-   constants__t_StatusCode_i * const session_mgr__ret,
+   constants_statuscodes_bs__t_StatusCode_i * const session_mgr__ret,
    constants__t_channel_i * const session_mgr__channel,
    constants__t_session_token_i * const session_mgr__session_token);
 extern void session_mgr__client_validate_session_service_req(
    const constants__t_session_i session_mgr__session,
    const constants__t_client_request_handle_i session_mgr__req_handle,
-   constants__t_StatusCode_i * const session_mgr__ret,
+   constants_statuscodes_bs__t_StatusCode_i * const session_mgr__ret,
    constants__t_channel_i * const session_mgr__channel,
    constants__t_session_token_i * const session_mgr__session_token);
 extern void session_mgr__client_validate_session_service_resp(
@@ -163,17 +164,17 @@ extern void session_mgr__server_receive_session_req(
    const constants__t_msg_type_i session_mgr__req_typ,
    const constants__t_msg_i session_mgr__resp_msg,
    constants__t_session_i * const session_mgr__session,
-   constants__t_StatusCode_i * const session_mgr__service_ret);
+   constants_statuscodes_bs__t_StatusCode_i * const session_mgr__service_ret);
 extern void session_mgr__server_validate_session_service_req(
    const constants__t_channel_i session_mgr__channel,
    const constants__t_session_token_i session_mgr__session_token,
    t_bool * const session_mgr__is_valid_res,
    constants__t_session_i * const session_mgr__session,
-   constants__t_StatusCode_i * const session_mgr__status_code_err);
+   constants_statuscodes_bs__t_StatusCode_i * const session_mgr__status_code_err);
 extern void session_mgr__server_validate_session_service_resp(
    const constants__t_session_i session_mgr__session,
    t_bool * const session_mgr__is_valid_res,
-   constants__t_StatusCode_i * const session_mgr__status_code_err,
+   constants_statuscodes_bs__t_StatusCode_i * const session_mgr__status_code_err,
    constants__t_channel_i * const session_mgr__channel);
 
 #endif

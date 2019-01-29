@@ -21,7 +21,7 @@
 
  File Name            : user_authentication_bs.h
 
- Date                 : 29/01/2019 09:57:05
+ Date                 : 29/01/2019 12:58:12
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -71,6 +72,6 @@ extern void user_authentication_bs__is_valid_user_authentication(
    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
    const constants__t_user_token_i user_authentication_bs__p_user_token,
-   constants__t_StatusCode_i * const user_authentication_bs__p_sc_valid_user);
+   constants_statuscodes_bs__t_StatusCode_i * const user_authentication_bs__p_sc_valid_user);
 
 #endif

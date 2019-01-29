@@ -41,22 +41,23 @@ void msg_read_request_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void msg_read_request_bs__getall_req_ReadValue_AttributeId(const constants__t_msg_i msg_read_request_bs__msg,
-                                                           const constants__t_ReadValue_i msg_read_request_bs__rvi,
-                                                           constants__t_StatusCode_i* const msg_read_request_bs__sc,
-                                                           constants__t_AttributeId_i* const msg_read_request_bs__aid)
+void msg_read_request_bs__getall_req_ReadValue_AttributeId(
+    const constants__t_msg_i msg_read_request_bs__msg,
+    const constants__t_ReadValue_i msg_read_request_bs__rvi,
+    constants_statuscodes_bs__t_StatusCode_i* const msg_read_request_bs__sc,
+    constants__t_AttributeId_i* const msg_read_request_bs__aid)
 {
     /* TODO: is message type checked at this point? */
     OpcUa_ReadRequest* msg_read_req = (OpcUa_ReadRequest*) msg_read_request_bs__msg;
     static bool bWarned = false;
-    *msg_read_request_bs__sc = constants__e_sc_ok;
+    *msg_read_request_bs__sc = constants_statuscodes_bs__e_sc_ok;
 
     *msg_read_request_bs__aid =
         util_AttributeId__C_to_B(msg_read_req->NodesToRead[msg_read_request_bs__rvi - 1].AttributeId);
 
     if (*msg_read_request_bs__aid == constants__c_AttributeId_indet)
     {
-        *msg_read_request_bs__sc = constants__e_sc_bad_attribute_id_invalid;
+        *msg_read_request_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
         if (!bWarned)
         {
             SOPC_Logger_TraceWarning("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id");

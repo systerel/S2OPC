@@ -319,8 +319,9 @@ void message_in_bs__read_msg_req_header_session_token(const constants__t_msg_hea
     *message_in_bs__session_token = &((OpcUa_RequestHeader*) message_in_bs__msg_header)->AuthenticationToken;
 }
 
-void message_in_bs__read_msg_resp_header_service_status(const constants__t_msg_header_i message_in_bs__msg_header,
-                                                        constants__t_StatusCode_i* const message_in_bs__status)
+void message_in_bs__read_msg_resp_header_service_status(
+    const constants__t_msg_header_i message_in_bs__msg_header,
+    constants_statuscodes_bs__t_StatusCode_i* const message_in_bs__status)
 {
     util_status_code__C_to_B(((OpcUa_ResponseHeader*) message_in_bs__msg_header)->ServiceResult, message_in_bs__status);
 }

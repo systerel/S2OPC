@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 29/01/2019 09:56:38
+ Date                 : 29/01/2019 12:57:48
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,6 +47,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -85,17 +86,17 @@ extern void io_dispatch_mgr__client_secure_channel_timeout(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx);
 extern void io_dispatch_mgr__client_send_close_session_request(
    const constants__t_session_i io_dispatch_mgr__session,
-   constants__t_StatusCode_i * const io_dispatch_mgr__ret);
+   constants_statuscodes_bs__t_StatusCode_i * const io_dispatch_mgr__ret);
 extern void io_dispatch_mgr__client_send_discovery_request(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
    const constants__t_msg_i io_dispatch_mgr__req_msg,
    const constants__t_application_context_i io_dispatch_mgr__app_context,
-   constants__t_StatusCode_i * const io_dispatch_mgr__ret);
+   constants_statuscodes_bs__t_StatusCode_i * const io_dispatch_mgr__ret);
 extern void io_dispatch_mgr__client_send_service_request(
    const constants__t_session_i io_dispatch_mgr__session,
    const constants__t_msg_i io_dispatch_mgr__req_msg,
    const constants__t_application_context_i io_dispatch_mgr__app_context,
-   constants__t_StatusCode_i * const io_dispatch_mgr__ret);
+   constants_statuscodes_bs__t_StatusCode_i * const io_dispatch_mgr__ret);
 extern void io_dispatch_mgr__close_all_active_connections(
    t_bool * const io_dispatch_mgr__bres);
 extern void io_dispatch_mgr__internal_client_activate_orphaned_session(
@@ -119,7 +120,7 @@ extern void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
    const constants__t_server_request_handle_i io_dispatch_mgr__p_req_handle,
    const constants__t_request_context_i io_dispatch_mgr__p_req_context,
    const constants__t_msg_i io_dispatch_mgr__p_publish_resp_msg,
-   const constants__t_StatusCode_i io_dispatch_mgr__p_statusCode,
+   const constants_statuscodes_bs__t_StatusCode_i io_dispatch_mgr__p_statusCode,
    t_bool * const io_dispatch_mgr__bres);
 extern void io_dispatch_mgr__internal_server_subscription_publish_timeout(
    const constants__t_subscription_i io_dispatch_mgr__p_subscription,
@@ -139,10 +140,10 @@ extern void io_dispatch_mgr__server_treat_local_service_request(
    const constants__t_endpoint_config_idx_i io_dispatch_mgr__endpoint_config_idx,
    const constants__t_msg_i io_dispatch_mgr__req_msg,
    const constants__t_application_context_i io_dispatch_mgr__app_context,
-   constants__t_StatusCode_i * const io_dispatch_mgr__ret);
+   constants_statuscodes_bs__t_StatusCode_i * const io_dispatch_mgr__ret);
 extern void io_dispatch_mgr__snd_msg_failure(
    const constants__t_channel_i io_dispatch_mgr__channel,
    const constants__t_request_context_i io_dispatch_mgr__request_id,
-   const constants__t_StatusCode_i io_dispatch_mgr__error_status);
+   const constants_statuscodes_bs__t_StatusCode_i io_dispatch_mgr__error_status);
 
 #endif

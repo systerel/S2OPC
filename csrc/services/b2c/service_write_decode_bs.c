@@ -45,7 +45,7 @@ void service_write_decode_bs__INITIALISATION(void)
   --------------------*/
 void service_write_decode_bs__decode_write_request(
     const constants__t_msg_i service_write_decode_bs__write_msg,
-    constants__t_StatusCode_i* const service_write_decode_bs__StatusCode_service)
+    constants_statuscodes_bs__t_StatusCode_i* const service_write_decode_bs__StatusCode_service)
 {
     OpcUa_WriteRequest* req = (OpcUa_WriteRequest*) service_write_decode_bs__write_msg;
 
@@ -53,17 +53,17 @@ void service_write_decode_bs__decode_write_request(
     {
         /* TODO: req shall not be freed before request is null... */
         request = req;
-        *service_write_decode_bs__StatusCode_service = constants__e_sc_ok;
+        *service_write_decode_bs__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
     }
     else
     {
         if (req->NoOfNodesToWrite <= 0)
         {
-            *service_write_decode_bs__StatusCode_service = constants__e_sc_bad_nothing_to_do;
+            *service_write_decode_bs__StatusCode_service = constants_statuscodes_bs__e_sc_bad_nothing_to_do;
         }
         else if (req->NoOfNodesToWrite > constants__k_n_WriteResponse_max)
         {
-            *service_write_decode_bs__StatusCode_service = constants__e_sc_bad_too_many_ops;
+            *service_write_decode_bs__StatusCode_service = constants_statuscodes_bs__e_sc_bad_too_many_ops;
         }
     }
 }
@@ -87,13 +87,14 @@ void service_write_decode_bs__get_nb_WriteValue(t_entier4* const service_write_d
  * \p nid and \p value are borrowed from request,
  * you should not free them.
  */
-void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i service_write_decode_bs__wvi,
-                                                t_bool* const service_write_decode_bs__isvalid,
-                                                constants__t_StatusCode_i* const service_write_decode_bs__status,
-                                                constants__t_NodeId_i* const service_write_decode_bs__nid,
-                                                constants__t_AttributeId_i* const service_write_decode_bs__aid,
-                                                constants__t_DataValue_i* const service_write_decode_bs__dataValue,
-                                                constants__t_IndexRange_i* const service_write_decode_bs__index_range)
+void service_write_decode_bs__getall_WriteValue(
+    const constants__t_WriteValue_i service_write_decode_bs__wvi,
+    t_bool* const service_write_decode_bs__isvalid,
+    constants_statuscodes_bs__t_StatusCode_i* const service_write_decode_bs__status,
+    constants__t_NodeId_i* const service_write_decode_bs__nid,
+    constants__t_AttributeId_i* const service_write_decode_bs__aid,
+    constants__t_DataValue_i* const service_write_decode_bs__dataValue,
+    constants__t_IndexRange_i* const service_write_decode_bs__index_range)
 {
     *service_write_decode_bs__nid = constants__c_NodeId_indet;
     *service_write_decode_bs__dataValue = constants__c_DataValue_indet;
@@ -103,7 +104,7 @@ void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i 
     if (*service_write_decode_bs__aid == constants__c_AttributeId_indet)
     {
         *service_write_decode_bs__isvalid = false;
-        *service_write_decode_bs__status = constants__e_sc_bad_attribute_id_invalid;
+        *service_write_decode_bs__status = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
         return;
     }
 
@@ -111,7 +112,7 @@ void service_write_decode_bs__getall_WriteValue(const constants__t_WriteValue_i 
     *service_write_decode_bs__dataValue = &wv->Value;
     *service_write_decode_bs__index_range = &wv->IndexRange;
     *service_write_decode_bs__isvalid = true;
-    *service_write_decode_bs__status = constants__e_sc_ok;
+    *service_write_decode_bs__status = constants_statuscodes_bs__e_sc_ok;
 }
 
 void service_write_decode_bs__getall_WriteValuePointer(

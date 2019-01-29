@@ -32,7 +32,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "util_variant.h"
 #include "wrap_read.h"
 
 #include "sopc_types.h"
@@ -50,8 +49,6 @@
  *  2 -> 1 + prints the comparisons
  * Returns true when ReadResponse is deemed ok.
  */
-bool test_read_request_response(OpcUa_ReadResponse* pReadResp,
-                                constants__t_StatusCode_i status_code,
-                                int verbose_level);
+bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode status_code, int verbose_level);
 
 #endif /* TEST_READ_RESPONSE_H_ */

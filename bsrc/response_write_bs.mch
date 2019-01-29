@@ -21,7 +21,8 @@ MACHINE
     response_write_bs
 
 SEES
-    constants
+    constants,
+    constants_statuscodes_bs
 
 ABSTRACT_VARIABLES
     ResponseWrite_StatusCode

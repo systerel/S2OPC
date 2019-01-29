@@ -21,7 +21,7 @@
 
  File Name            : service_register_nodes.c
 
- Date                 : 29/01/2019 09:56:43
+ Date                 : 29/01/2019 12:57:53
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -76,9 +76,9 @@ void service_register_nodes__fill_response_register_nodes(
 void service_register_nodes__treat_register_nodes_request(
    const constants__t_msg_i service_register_nodes__p_req_msg,
    const constants__t_msg_i service_register_nodes__p_resp_msg,
-   constants__t_StatusCode_i * const service_register_nodes__ret) {
+   constants_statuscodes_bs__t_StatusCode_i * const service_register_nodes__ret) {
    {
-      constants__t_StatusCode_i service_register_nodes__l_sc;
+      constants_statuscodes_bs__t_StatusCode_i service_register_nodes__l_sc;
       t_entier4 service_register_nodes__l_nb_nodes;
       t_bool service_register_nodes__l_bres;
       
@@ -86,7 +86,7 @@ void service_register_nodes__treat_register_nodes_request(
       msg_register_nodes__getall_msg_register_nodes_req_nb_nodes(service_register_nodes__p_req_msg,
          &service_register_nodes__l_sc,
          &service_register_nodes__l_nb_nodes);
-      if (service_register_nodes__l_sc == constants__e_sc_ok) {
+      if (service_register_nodes__l_sc == constants_statuscodes_bs__e_sc_ok) {
          msg_register_nodes__alloc_msg_register_nodes_resp_results(service_register_nodes__p_resp_msg,
             service_register_nodes__l_nb_nodes,
             &service_register_nodes__l_bres);
@@ -96,14 +96,14 @@ void service_register_nodes__treat_register_nodes_request(
                service_register_nodes__l_nb_nodes,
                &service_register_nodes__l_bres);
             if (service_register_nodes__l_bres == true) {
-               *service_register_nodes__ret = constants__e_sc_ok;
+               *service_register_nodes__ret = constants_statuscodes_bs__e_sc_ok;
             }
             else {
-               *service_register_nodes__ret = constants__e_sc_bad_unexpected_error;
+               *service_register_nodes__ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
             }
          }
          else {
-            *service_register_nodes__ret = constants__e_sc_bad_out_of_memory;
+            *service_register_nodes__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
          }
       }
       else {

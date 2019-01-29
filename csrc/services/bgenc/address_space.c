@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 29/01/2019 09:56:35
+ Date                 : 29/01/2019 12:57:45
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -143,7 +143,7 @@ void address_space__read_NodeClass_Attribute(
    const constants__t_Node_i address_space__node,
    const constants__t_AttributeId_i address_space__aid,
    const constants__t_IndexRange_i address_space__index_range,
-   constants__t_StatusCode_i * const address_space__sc,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__sc,
    constants__t_NodeClass_i * const address_space__ncl,
    constants__t_Variant_i * const address_space__val) {
    address_space_bs__get_NodeClass(address_space__node,
@@ -172,7 +172,7 @@ void address_space__alloc_write_request_responses(
 
 void address_space__treat_write_request_WriteValues(
    const constants__t_user_i address_space__p_user,
-   constants__t_StatusCode_i * const address_space__StatusCode_service) {
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__StatusCode_service) {
    {
       t_entier4 address_space__l_nb_req;
       t_bool address_space__l_continue;
@@ -181,8 +181,8 @@ void address_space__treat_write_request_WriteValues(
       constants__t_DataValue_i address_space__l_dataValue;
       constants__t_IndexRange_i address_space__l_index_range;
       constants__t_WriteValue_i address_space__l_wvi;
-      constants__t_StatusCode_i address_space__l_status1;
-      constants__t_StatusCode_i address_space__l_status2;
+      constants_statuscodes_bs__t_StatusCode_i address_space__l_status1;
+      constants_statuscodes_bs__t_StatusCode_i address_space__l_status2;
       constants__t_DataValue_i address_space__l_prev_dataValue;
       t_bool address_space__l_isvalid;
       t_bool address_space__l_local_treatment;
@@ -190,7 +190,7 @@ void address_space__treat_write_request_WriteValues(
       t_bool address_space__l_bres_wv_copy;
       constants__t_WriteValuePointer_i address_space__l_wv_copy;
       
-      *address_space__StatusCode_service = constants__e_sc_ok;
+      *address_space__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
       service_write_decode_bs__get_nb_WriteValue(&address_space__l_nb_req);
       address_space_it__init_iter_write_request(address_space__l_nb_req,
          &address_space__l_continue);
@@ -217,7 +217,7 @@ void address_space__treat_write_request_WriteValues(
             address_space__l_status2);
          service_write_decode_bs__getall_WriteValuePointer(address_space__l_wvi,
             &address_space__l_wv);
-         if (address_space__l_status2 == constants__e_sc_ok) {
+         if (address_space__l_status2 == constants_statuscodes_bs__e_sc_ok) {
             write_value_pointer_bs__copy_write_value_pointer_content(address_space__l_wv,
                &address_space__l_bres_wv_copy,
                &address_space__l_wv_copy);
@@ -256,13 +256,13 @@ void address_space__dealloc_write_request_responses(void) {
 
 void address_space__treat_write_1(
    const t_bool address_space__isvalid,
-   const constants__t_StatusCode_i address_space__status,
+   const constants_statuscodes_bs__t_StatusCode_i address_space__status,
    const constants__t_user_i address_space__p_user,
    const constants__t_NodeId_i address_space__nid,
    const constants__t_AttributeId_i address_space__aid,
    const constants__t_DataValue_i address_space__dataValue,
    const constants__t_IndexRange_i address_space__index_range,
-   constants__t_StatusCode_i * const address_space__serviceStatusCode,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__serviceStatusCode,
    constants__t_DataValue_i * const address_space__prev_dataValue) {
    {
       t_bool address_space__l_isvalid;
@@ -320,7 +320,7 @@ void address_space__treat_write_1(
                         address_space__index_range,
                         address_space__serviceStatusCode,
                         address_space__prev_dataValue);
-                     if (*address_space__serviceStatusCode == constants__e_sc_ok) {
+                     if (*address_space__serviceStatusCode == constants_statuscodes_bs__e_sc_ok) {
                         address_space_bs__set_Value_StatusCode(address_space__p_user,
                            address_space__l_node,
                            address_space__dataValue);
@@ -351,7 +351,7 @@ void address_space__treat_write_1(
                               address_space__index_range,
                               address_space__serviceStatusCode,
                               address_space__prev_dataValue);
-                           if (*address_space__serviceStatusCode == constants__e_sc_ok) {
+                           if (*address_space__serviceStatusCode == constants_statuscodes_bs__e_sc_ok) {
                               if (address_space__l_access_write_status == true) {
                                  address_space_bs__set_Value_StatusCode(address_space__p_user,
                                     address_space__l_node,
@@ -365,24 +365,24 @@ void address_space__treat_write_1(
                            }
                         }
                         else {
-                           *address_space__serviceStatusCode = constants__e_sc_bad_user_access_denied;
+                           *address_space__serviceStatusCode = constants_statuscodes_bs__e_sc_bad_user_access_denied;
                         }
                      }
                      else {
-                        *address_space__serviceStatusCode = constants__e_sc_bad_not_writable;
+                        *address_space__serviceStatusCode = constants_statuscodes_bs__e_sc_bad_not_writable;
                      }
                   }
                }
                else {
-                  *address_space__serviceStatusCode = constants__e_sc_bad_type_mismatch;
+                  *address_space__serviceStatusCode = constants_statuscodes_bs__e_sc_bad_type_mismatch;
                }
             }
             else {
-               *address_space__serviceStatusCode = constants__e_sc_bad_not_writable;
+               *address_space__serviceStatusCode = constants_statuscodes_bs__e_sc_bad_not_writable;
             }
          }
          else {
-            *address_space__serviceStatusCode = constants__e_sc_bad_node_id_unknown;
+            *address_space__serviceStatusCode = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
          }
       }
       else {

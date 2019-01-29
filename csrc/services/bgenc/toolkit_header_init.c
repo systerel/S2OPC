@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 29/01/2019 09:57:07
+ Date                 : 29/01/2019 12:58:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -46,6 +46,7 @@
 #include "channel_mgr_it.h"
 #include "constants.h"
 #include "constants_bs.h"
+#include "constants_statuscodes_bs.h"
 #include "data_value_pointer_bs.h"
 #include "gen_subscription_event_bs.h"
 #include "io_dispatch_mgr.h"
@@ -119,6 +120,7 @@
 void INITIALISATION(void) {
    constants_bs__INITIALISATION();
    constants__INITIALISATION();
+   constants_statuscodes_bs__INITIALISATION();
    message_in_bs__INITIALISATION();
    request_handle_bs__INITIALISATION();
    message_out_bs__INITIALISATION();

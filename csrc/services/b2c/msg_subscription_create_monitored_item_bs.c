@@ -115,7 +115,7 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
     const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_req_msg,
     const t_entier4 msg_subscription_create_monitored_item_bs__p_index,
     t_bool* const msg_subscription_create_monitored_item_bs__p_bres,
-    constants__t_StatusCode_i* const msg_subscription_create_monitored_item_bs__p_sc,
+    constants_statuscodes_bs__t_StatusCode_i* const msg_subscription_create_monitored_item_bs__p_sc,
     constants__t_NodeId_i* const msg_subscription_create_monitored_item_bs__p_nid,
     constants__t_AttributeId_i* const msg_subscription_create_monitored_item_bs__p_aid,
     constants__t_monitoringMode_i* const msg_subscription_create_monitored_item_bs__p_monitMode,
@@ -124,7 +124,6 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
     t_entier4* const msg_subscription_create_monitored_item_bs__p_queueSize,
     constants__t_IndexRange_i* const msg_subscription_create_monitored_item_bs__p_indexRange)
 {
-    *msg_subscription_create_monitored_item_bs__p_sc = constants__c_StatusCode_indet;
     *msg_subscription_create_monitored_item_bs__p_aid = constants__c_AttributeId_indet;
     *msg_subscription_create_monitored_item_bs__p_monitMode = constants__c_monitoringMode_indet;
     *msg_subscription_create_monitored_item_bs__p_clientHandle = 0;
@@ -140,11 +139,9 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
     *msg_subscription_create_monitored_item_bs__p_bres =
         *msg_subscription_create_monitored_item_bs__p_aid != constants__c_AttributeId_indet;
 
-    if (false == *msg_subscription_create_monitored_item_bs__p_bres)
-    {
-        *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_attribute_id_invalid;
-    }
-    else
+    *msg_subscription_create_monitored_item_bs__p_sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
+
+    if (*msg_subscription_create_monitored_item_bs__p_bres)
     {
         if (monitReq->ItemToMonitor.IndexRange.Length > 0)
         {
@@ -172,7 +169,8 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
         default:
             *msg_subscription_create_monitored_item_bs__p_bres = false;
             *msg_subscription_create_monitored_item_bs__p_monitMode = constants__c_monitoringMode_indet;
-            *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_monitoring_mode_invalid;
+            *msg_subscription_create_monitored_item_bs__p_sc =
+                constants_statuscodes_bs__e_sc_bad_monitoring_mode_invalid;
         }
     }
 
@@ -195,20 +193,21 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
         {
             // We do not support filter but there is one requested
             *msg_subscription_create_monitored_item_bs__p_bres = false;
-            *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_bad_monitored_item_filter_unsupported;
+            *msg_subscription_create_monitored_item_bs__p_sc =
+                constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;
         }
     }
 
     if (*msg_subscription_create_monitored_item_bs__p_bres)
     {
-        *msg_subscription_create_monitored_item_bs__p_sc = constants__e_sc_ok;
+        *msg_subscription_create_monitored_item_bs__p_sc = constants_statuscodes_bs__e_sc_ok;
     }
 }
 
 void msg_subscription_create_monitored_item_bs__setall_msg_monitored_item_resp_params(
     const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_resp_msg,
     const t_entier4 msg_subscription_create_monitored_item_bs__p_index,
-    const constants__t_StatusCode_i msg_subscription_create_monitored_item_bs__p_sc,
+    const constants_statuscodes_bs__t_StatusCode_i msg_subscription_create_monitored_item_bs__p_sc,
     const constants__t_monitoredItemId_i msg_subscription_create_monitored_item_bs__p_monitored_item_id,
     const constants__t_opcua_duration_i msg_subscription_create_monitored_item_bs__p_revSamplingItv,
     const t_entier4 msg_subscription_create_monitored_item_bs__p_revQueueSize)

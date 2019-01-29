@@ -22,13 +22,14 @@ MACHINE
 
 SEES
     constants,
+    constants_statuscodes_bs,
     message_out_bs
 
 DEFINITIONS
     d_inv_response == (
         response_StatusCode : t_StatusCode_i &
         data_Value_Value : t_ReadValue +-> t_Variant &
-        data_Value_StatusCode : t_ReadValue +-> t_StatusCode
+        data_Value_StatusCode : t_ReadValue +-> t_RawStatusCode
 
         /*data_Value_SourceTimestamp : t_ReadValue +-> t_Timestamp &
         data_Value_ServerTimestamp : t_ReadValue +-> t_Timestamp*/
@@ -74,7 +75,7 @@ OPERATIONS
     END
     ;
 
-    set_read_response(resp_msg, rvi, val, sc, aid) =
+    set_read_response(resp_msg, rvi, val, raw_sc, aid) =
     PRE
         resp_msg    : t_msg_i         &
         resp_msg    = c_msg_out       &
@@ -85,10 +86,9 @@ OPERATIONS
         (val /= c_Variant_indet
          =>
          val : t_Variant)             &
-        sc          : t_StatusCode_i  &
-        sc          : t_StatusCode    &
+        raw_sc          : t_RawStatusCode &
         aid         : t_AttributeId_i &
-        (sc = e_sc_ok
+        (raw_sc = conv_StatusCode_To_RawStatusCode(e_sc_ok)
          =>
          aid : t_AttributeId)
     THEN
@@ -97,7 +97,7 @@ OPERATIONS
         ELSE
             data_Value_Value := {rvi} <<| data_Value_Value
         END ||
-        data_Value_StatusCode(rvi) := sc
+        data_Value_StatusCode(rvi) := raw_sc
     END
 
 END

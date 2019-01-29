@@ -20,11 +20,6 @@
 #include "monitored_item_pointer_bs.h"
 #include "monitored_item_pointer_impl.h"
 
-/*--------------
-   SEES Clause
-  --------------*/
-#include "constants.h"
-
 #include <assert.h>
 #include <inttypes.h>
 
@@ -109,11 +104,11 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
     const constants__t_monitoringMode_i monitored_item_pointer_bs__p_monitoringMode,
     const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
-    constants__t_StatusCode_i* const monitored_item_pointer_bs__StatusCode,
+    constants_statuscodes_bs__t_StatusCode_i* const monitored_item_pointer_bs__StatusCode,
     constants__t_monitoredItemPointer_i* const monitored_item_pointer_bs__monitoredItemPointer,
     constants__t_monitoredItemId_i* const monitored_item_pointer_bs__monitoredItemId)
 {
-    *monitored_item_pointer_bs__StatusCode = constants__e_sc_bad_out_of_memory;
+    *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     uintptr_t freshId = 0;
     SOPC_InternalMontitoredItem* monitItem = malloc(sizeof(SOPC_InternalMontitoredItem));
     SOPC_NodeId* nid = malloc(sizeof(SOPC_NodeId));
@@ -136,7 +131,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
 
         if (SOPC_STATUS_OK != retStatus)
         {
-            *monitored_item_pointer_bs__StatusCode = constants__e_sc_bad_index_range_invalid;
+            *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_index_range_invalid;
         }
     }
 
@@ -181,7 +176,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
 
     if (SOPC_STATUS_OK == retStatus)
     {
-        *monitored_item_pointer_bs__StatusCode = constants__e_sc_ok;
+        *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_ok;
         *monitored_item_pointer_bs__monitoredItemPointer = monitItem;
         *monitored_item_pointer_bs__monitoredItemId = monitItem->monitoredItemId;
     }

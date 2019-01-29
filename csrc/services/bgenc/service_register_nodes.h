@@ -21,7 +21,7 @@
 
  File Name            : service_register_nodes.h
 
- Date                 : 29/01/2019 09:56:43
+ Date                 : 29/01/2019 12:57:53
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -45,6 +45,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 
@@ -68,6 +69,6 @@ extern void service_register_nodes__fill_response_register_nodes(
 extern void service_register_nodes__treat_register_nodes_request(
    const constants__t_msg_i service_register_nodes__p_req_msg,
    const constants__t_msg_i service_register_nodes__p_resp_msg,
-   constants__t_StatusCode_i * const service_register_nodes__ret);
+   constants_statuscodes_bs__t_StatusCode_i * const service_register_nodes__ret);
 
 #endif

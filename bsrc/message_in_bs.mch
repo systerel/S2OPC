@@ -20,7 +20,8 @@
 MACHINE
     message_in_bs
 SEES
-    constants
+    constants,
+    constants_statuscodes_bs
 
 DEFINITIONS
     d_variables ==
