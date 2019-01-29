@@ -21,7 +21,8 @@ MACHINE
     user_authentication
 
 SEES
-    constants
+    constants,
+    constants_statuscodes_bs
 
 OPERATIONS
 

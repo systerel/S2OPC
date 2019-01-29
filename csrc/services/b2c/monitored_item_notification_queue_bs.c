@@ -139,7 +139,7 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
     const constants__t_NodeId_i monitored_item_notification_queue_bs__p_nid,
     const constants__t_AttributeId_i monitored_item_notification_queue_bs__p_aid,
     const constants__t_Variant_i monitored_item_notification_queue_bs__p_VariantValuePointer,
-    const constants__t_StatusCode_i monitored_item_notification_queue_bs__p_ValueSc,
+    const constants_statuscodes_bs__t_StatusCode_i monitored_item_notification_queue_bs__p_ValueSc,
     t_bool* const monitored_item_notification_queue_bs__bres)
 {
     *monitored_item_notification_queue_bs__bres = false;

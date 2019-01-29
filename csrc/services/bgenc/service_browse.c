@@ -21,7 +21,7 @@
 
  File Name            : service_browse.c
 
- Date                 : 29/01/2019 09:56:40
+ Date                 : 29/01/2019 12:57:50
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -197,7 +197,7 @@ void service_browse__fill_continuation_point(
    const t_bool service_browse__p_continue_ref,
    const constants__t_Reference_i service_browse__p_ref) {
    msg_browse_response_bs__set_ResponseBrowse_BrowseStatus(service_browse__p_bvi,
-      constants__e_sc_ok);
+      constants_statuscodes_bs__e_sc_ok);
    if (service_browse__p_continue_ref == true) {
       msg_browse_response_bs__set_ResponseBrowse_ContinuationPoint(service_browse__p_bvi,
          service_browse__p_ref);

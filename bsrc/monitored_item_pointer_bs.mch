@@ -21,7 +21,8 @@ MACHINE
     monitored_item_pointer_bs
 
 SEES
-    constants
+    constants,
+    constants_statuscodes_bs
 
 ABSTRACT_VARIABLES
     s_monitoredItemPointer,

@@ -21,7 +21,7 @@
 
  File Name            : user_authentication.h
 
- Date                 : 29/01/2019 09:56:50
+ Date                 : 29/01/2019 12:57:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -44,6 +44,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -62,8 +63,8 @@ extern void user_authentication__INITIALISATION(void);
 extern void user_authentication__allocate_user_if_authenticated(
    const constants__t_endpoint_config_idx_i user_authentication__p_endpoint_config_idx,
    const constants__t_user_token_i user_authentication__p_user_token,
-   const constants__t_StatusCode_i user_authentication__p_sc_valid_user,
-   constants__t_StatusCode_i * const user_authentication__p_sc_allocated_valid_user,
+   const constants_statuscodes_bs__t_StatusCode_i user_authentication__p_sc_valid_user,
+   constants_statuscodes_bs__t_StatusCode_i * const user_authentication__p_sc_allocated_valid_user,
    constants__t_user_i * const user_authentication__p_user);
 
 /*--------------------
@@ -73,7 +74,7 @@ extern void user_authentication__allocate_valid_and_authenticated_user(
    const constants__t_user_token_i user_authentication__p_user_token,
    const constants__t_channel_config_idx_i user_authentication__p_channel_config_idx,
    const constants__t_endpoint_config_idx_i user_authentication__p_endpoint_config_idx,
-   constants__t_StatusCode_i * const user_authentication__p_sc_valid_user,
+   constants_statuscodes_bs__t_StatusCode_i * const user_authentication__p_sc_valid_user,
    constants__t_user_i * const user_authentication__p_user);
 
 #endif

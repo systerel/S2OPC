@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 29/01/2019 09:56:35
+ Date                 : 29/01/2019 12:57:45
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -49,6 +49,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "data_value_pointer_bs.h"
 #include "service_mgr_1.h"
 #include "service_response_cb_bs.h"
@@ -98,13 +99,13 @@ extern void address_space__is_variable_compat_type(
    t_bool * const address_space__btyp_need_conv);
 extern void address_space__treat_write_1(
    const t_bool address_space__isvalid,
-   const constants__t_StatusCode_i address_space__status,
+   const constants_statuscodes_bs__t_StatusCode_i address_space__status,
    const constants__t_user_i address_space__p_user,
    const constants__t_NodeId_i address_space__nid,
    const constants__t_AttributeId_i address_space__aid,
    const constants__t_DataValue_i address_space__dataValue,
    const constants__t_IndexRange_i address_space__index_range,
-   constants__t_StatusCode_i * const address_space__serviceStatusCode,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__serviceStatusCode,
    constants__t_DataValue_i * const address_space__prev_dataValue);
 
 /*--------------------
@@ -119,11 +120,11 @@ extern void address_space__read_NodeClass_Attribute(
    const constants__t_Node_i address_space__node,
    const constants__t_AttributeId_i address_space__aid,
    const constants__t_IndexRange_i address_space__index_range,
-   constants__t_StatusCode_i * const address_space__sc,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__sc,
    constants__t_NodeClass_i * const address_space__ncl,
    constants__t_Variant_i * const address_space__val);
 extern void address_space__treat_write_request_WriteValues(
    const constants__t_user_i address_space__p_user,
-   constants__t_StatusCode_i * const address_space__StatusCode_service);
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__StatusCode_service);
 
 #endif

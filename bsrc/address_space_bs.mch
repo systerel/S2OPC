@@ -22,6 +22,7 @@ MACHINE
 
 SEES
     constants,
+    constants_statuscodes_bs,
     user_authorization_bs,
     data_value_pointer_bs
 
@@ -77,7 +78,7 @@ DEFINITIONS
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) & /* All Variable have value but not all VariableType */
 
         /* + Value attribute meta-data */
-        a_Value_StatusCode : t_Node +-> t_StatusCode &
+        a_Value_StatusCode : t_Node +-> t_RawStatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
         a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
         dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
@@ -282,7 +283,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     /* TODO: status code are limited to values in constants if we use the B type, use the data value to avoid loss of info */
     set_Value_StatusCode(p_user, p_node, dataValue) =
     PRE
@@ -298,7 +299,7 @@ OPERATIONS
         a_Value_StatusCode(p_node) := DataValue_StatusCode(dataValue)
     END
     ;
-    
+
     set_Value_SourceTimestamp(p_user, p_node, p_ts) =
     PRE
         p_user : t_user_i   &
@@ -323,8 +324,7 @@ OPERATIONS
         node : dom(a_Value_StatusCode) &
         e_operation_type_read |-> a_NodeId(node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
     THEN
-        sc :(sc : t_StatusCode_i &
-             sc = a_Value_StatusCode(node))
+        sc := a_Value_StatusCode(node)
     END
     ;
 

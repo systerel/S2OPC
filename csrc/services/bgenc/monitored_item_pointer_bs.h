@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_pointer_bs.h
 
- Date                 : 29/01/2019 09:56:54
+ Date                 : 29/01/2019 12:58:02
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -56,7 +57,7 @@ extern void monitored_item_pointer_bs__create_monitored_item_pointer(
    const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
    const constants__t_monitoringMode_i monitored_item_pointer_bs__p_monitoringMode,
    const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
-   constants__t_StatusCode_i * const monitored_item_pointer_bs__StatusCode,
+   constants_statuscodes_bs__t_StatusCode_i * const monitored_item_pointer_bs__StatusCode,
    constants__t_monitoredItemPointer_i * const monitored_item_pointer_bs__monitoredItemPointer,
    constants__t_monitoredItemId_i * const monitored_item_pointer_bs__monitoredItemId);
 extern void monitored_item_pointer_bs__delete_monitored_item_pointer(

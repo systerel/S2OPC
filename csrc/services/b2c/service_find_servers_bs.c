@@ -45,7 +45,7 @@ void service_find_servers_bs__treat_find_servers_request(
     const constants__t_msg_i service_find_servers_bs__req_msg,
     const constants__t_msg_i service_find_servers_bs__resp_msg,
     const constants__t_endpoint_config_idx_i service_find_servers_bs__endpoint_config_idx,
-    constants__t_StatusCode_i* const service_find_servers_bs__ret)
+    constants_statuscodes_bs__t_StatusCode_i* const service_find_servers_bs__ret)
 {
     (void) service_find_servers_bs__req_msg;
     OpcUa_FindServersResponse* response = service_find_servers_bs__resp_msg;
@@ -55,7 +55,7 @@ void service_find_servers_bs__treat_find_servers_request(
 
     if (endpoint_config == NULL)
     {
-        *service_find_servers_bs__ret = constants__e_sc_bad_internal_error;
+        *service_find_servers_bs__ret = constants_statuscodes_bs__e_sc_bad_internal_error;
         return;
     }
 
@@ -68,7 +68,7 @@ void service_find_servers_bs__treat_find_servers_request(
 
     if (response->Servers == NULL)
     {
-        *service_find_servers_bs__ret = constants__e_sc_bad_out_of_memory;
+        *service_find_servers_bs__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
         return;
     }
 
@@ -81,7 +81,7 @@ void service_find_servers_bs__treat_find_servers_request(
 
     if (dst_desc->DiscoveryUrls == NULL)
     {
-        *service_find_servers_bs__ret = constants__e_sc_bad_out_of_memory;
+        *service_find_servers_bs__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
         return;
     }
 
@@ -94,5 +94,6 @@ void service_find_servers_bs__treat_find_servers_request(
         (SOPC_LocalizedText_Copy(&dst_desc->ApplicationName, &src_desc->ApplicationName) == SOPC_STATUS_OK) &&
         (SOPC_String_CopyFromCString(&dst_desc->DiscoveryUrls[0], endpoint_config->endpointURL) == SOPC_STATUS_OK);
 
-    *service_find_servers_bs__ret = (ok ? constants__e_sc_ok : constants__e_sc_bad_out_of_memory);
+    *service_find_servers_bs__ret =
+        (ok ? constants_statuscodes_bs__e_sc_ok : constants_statuscodes_bs__e_sc_bad_out_of_memory);
 }

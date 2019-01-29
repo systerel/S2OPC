@@ -61,7 +61,8 @@ typedef enum SOPC_Services_Event
     SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO, /* Server side only:
                                                  id = session id
                                                  params = (SOPC_Internal_AsyncSendMsgData*)
-                                                 auxParams = (constants__t_StatusCode_i) service result code
+                                                 auxParams = (constants_statuscodes_bs__t_StatusCode_i) service result
+                                                 code
                                                */
 
     /* Timer to services events */

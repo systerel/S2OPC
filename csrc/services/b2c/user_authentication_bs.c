@@ -201,7 +201,7 @@ void user_authentication_bs__is_valid_user_authentication(
     const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
     const constants__t_user_token_type_i user_authentication_bs__p_token_type,
     const constants__t_user_token_i user_authentication_bs__p_user_token,
-    constants__t_StatusCode_i* const user_authentication_bs__p_sc_valid_user)
+    constants_statuscodes_bs__t_StatusCode_i* const user_authentication_bs__p_sc_valid_user)
 {
     (void) user_authentication_bs__p_token_type; // Only for B precondition corresponding to asserts:
     assert(user_authentication_bs__p_token_type != constants__c_userTokenType_indet);
@@ -220,7 +220,7 @@ void user_authentication_bs__is_valid_user_authentication(
     if (SOPC_STATUS_OK != status)
     {
         /* Failure of the authentication manager: we do not know if the token was rejected or user denied */
-        *user_authentication_bs__p_sc_valid_user = constants__e_sc_bad_user_access_denied;
+        *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_user_access_denied;
         SOPC_Logger_TraceWarning(
             "User authentication manager failed to check user validity on endpoint config idx %" PRIu32,
             user_authentication_bs__p_endpoint_config_idx);
@@ -230,23 +230,23 @@ void user_authentication_bs__is_valid_user_authentication(
         switch (authnStatus)
         {
         case SOPC_USER_AUTHENTICATION_OK:
-            *user_authentication_bs__p_sc_valid_user = constants__e_sc_ok;
+            *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_ok;
             break;
         case SOPC_USER_AUTHENTICATION_INVALID_TOKEN:
-            *user_authentication_bs__p_sc_valid_user = constants__e_sc_bad_identity_token_invalid;
+            *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
             SOPC_Logger_TraceWarning("User identification failed: identity_token_invalid");
             break;
         case SOPC_USER_AUTHENTICATION_REJECTED_TOKEN:
-            *user_authentication_bs__p_sc_valid_user = constants__e_sc_bad_identity_token_rejected;
+            *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_rejected;
             SOPC_Logger_TraceWarning("User identification failed: identity_token_rejected");
             break;
         case SOPC_USER_AUTHENTICATION_ACCESS_DENIED:
-            *user_authentication_bs__p_sc_valid_user = constants__e_sc_bad_user_access_denied;
+            *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_user_access_denied;
             SOPC_Logger_TraceWarning("User identification failed: identity_token_denied");
             break;
         default:
             /* Invalid of the authentication manager: we do not know if the token was rejected or user denied */
-            *user_authentication_bs__p_sc_valid_user = constants__e_sc_bad_user_access_denied;
+            *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_user_access_denied;
             SOPC_Logger_TraceWarning(
                 "User authentication manager returned an invalid authentication status on endpoint config idx %" PRIu32,
                 user_authentication_bs__p_endpoint_config_idx);

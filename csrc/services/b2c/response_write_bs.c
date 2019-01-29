@@ -82,8 +82,9 @@ void response_write_bs__reset_ResponseWrite(void)
     nb_req = 0;
 }
 
-void response_write_bs__set_ResponseWrite_StatusCode(const constants__t_WriteValue_i response_write_bs__wvi,
-                                                     const constants__t_StatusCode_i response_write_bs__sc)
+void response_write_bs__set_ResponseWrite_StatusCode(
+    const constants__t_WriteValue_i response_write_bs__wvi,
+    const constants_statuscodes_bs__t_StatusCode_i response_write_bs__sc)
 {
     util_status_code__B_to_C(response_write_bs__sc, &arr_StatusCode[response_write_bs__wvi]);
 }

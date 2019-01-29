@@ -22,7 +22,8 @@ MACHINE
 
 SEES
     channel_mgr,
-    constants
+    constants,
+    constants_statuscodes_bs
 
 DEFINITIONS
     d_msg_variables ==

@@ -21,7 +21,7 @@
 
  File Name            : msg_subscription_create_monitored_item_bs.h
 
- Date                 : 29/01/2019 09:56:57
+ Date                 : 29/01/2019 12:58:05
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 
@@ -70,7 +71,7 @@ extern void msg_subscription_create_monitored_item_bs__getall_monitored_item_req
    const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_req_msg,
    const t_entier4 msg_subscription_create_monitored_item_bs__p_index,
    t_bool * const msg_subscription_create_monitored_item_bs__p_bres,
-   constants__t_StatusCode_i * const msg_subscription_create_monitored_item_bs__p_sc,
+   constants_statuscodes_bs__t_StatusCode_i * const msg_subscription_create_monitored_item_bs__p_sc,
    constants__t_NodeId_i * const msg_subscription_create_monitored_item_bs__p_nid,
    constants__t_AttributeId_i * const msg_subscription_create_monitored_item_bs__p_aid,
    constants__t_monitoringMode_i * const msg_subscription_create_monitored_item_bs__p_monitMode,
@@ -81,7 +82,7 @@ extern void msg_subscription_create_monitored_item_bs__getall_monitored_item_req
 extern void msg_subscription_create_monitored_item_bs__setall_msg_monitored_item_resp_params(
    const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_resp_msg,
    const t_entier4 msg_subscription_create_monitored_item_bs__p_index,
-   const constants__t_StatusCode_i msg_subscription_create_monitored_item_bs__p_sc,
+   const constants_statuscodes_bs__t_StatusCode_i msg_subscription_create_monitored_item_bs__p_sc,
    const constants__t_monitoredItemId_i msg_subscription_create_monitored_item_bs__p_monitored_item_id,
    const constants__t_opcua_duration_i msg_subscription_create_monitored_item_bs__p_revSamplingItv,
    const t_entier4 msg_subscription_create_monitored_item_bs__p_revQueueSize);

@@ -22,6 +22,7 @@ MACHINE
 
 SEES
     constants,
+    constants_statuscodes_bs,
     address_space
 
 DEFINITIONS

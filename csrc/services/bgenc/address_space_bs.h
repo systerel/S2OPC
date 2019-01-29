@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 29/01/2019 09:56:51
+ Date                 : 29/01/2019 12:57:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "data_value_pointer_bs.h"
 #include "user_authorization_bs.h"
 
@@ -90,7 +91,7 @@ extern void address_space_bs__get_ValueRank(
 extern void address_space_bs__get_Value_StatusCode(
    const constants__t_user_i address_space_bs__p_user,
    const constants__t_Node_i address_space_bs__node,
-   constants__t_StatusCode_i * const address_space_bs__sc);
+   constants__t_RawStatusCode * const address_space_bs__sc);
 extern void address_space_bs__is_NodeId_equal(
    const constants__t_NodeId_i address_space_bs__nid1,
    const constants__t_NodeId_i address_space_bs__nid2,
@@ -101,7 +102,7 @@ extern void address_space_bs__read_AddressSpace_Attribute_value(
    const constants__t_NodeClass_i address_space_bs__ncl,
    const constants__t_AttributeId_i address_space_bs__aid,
    const constants__t_IndexRange_i address_space_bs__index_range,
-   constants__t_StatusCode_i * const address_space_bs__sc,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_clear_value(
    const constants__t_Variant_i address_space_bs__val);
@@ -116,7 +117,7 @@ extern void address_space_bs__set_Value(
    const constants__t_Node_i address_space_bs__node,
    const constants__t_Variant_i address_space_bs__variant,
    const constants__t_IndexRange_i address_space_bs__index_range,
-   constants__t_StatusCode_i * const address_space_bs__serviceStatusCode,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__serviceStatusCode,
    constants__t_DataValue_i * const address_space_bs__prev_dataValue);
 extern void address_space_bs__set_Value_SourceTimestamp(
    const constants__t_user_i address_space_bs__p_user,

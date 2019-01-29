@@ -21,7 +21,7 @@
 
  File Name            : msg_subscription_publish_ack_bs.h
 
- Date                 : 29/01/2019 09:56:58
+ Date                 : 29/01/2019 12:58:06
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
@@ -77,7 +78,7 @@ extern void msg_subscription_publish_ack_bs__getall_msg_republish_request(
 extern void msg_subscription_publish_ack_bs__setall_msg_publish_resp_ack_result(
    const constants__t_msg_i msg_subscription_publish_ack_bs__p_resp_msg,
    const t_entier4 msg_subscription_publish_ack_bs__p_index,
-   const constants__t_StatusCode_i msg_subscription_publish_ack_bs__p_sc);
+   const constants_statuscodes_bs__t_StatusCode_i msg_subscription_publish_ack_bs__p_sc);
 extern void msg_subscription_publish_ack_bs__setall_msg_publish_resp_available_seq_num(
    const constants__t_msg_i msg_subscription_publish_ack_bs__p_resp_msg,
    const t_entier4 msg_subscription_publish_ack_bs__p_index,
@@ -85,6 +86,6 @@ extern void msg_subscription_publish_ack_bs__setall_msg_publish_resp_available_s
 extern void msg_subscription_publish_ack_bs__setall_msg_republish_response(
    const constants__t_msg_i msg_subscription_publish_ack_bs__p_resp_msg,
    const constants__t_notif_msg_i msg_subscription_publish_ack_bs__p_notifMsg,
-   constants__t_StatusCode_i * const msg_subscription_publish_ack_bs__sc);
+   constants_statuscodes_bs__t_StatusCode_i * const msg_subscription_publish_ack_bs__sc);
 
 #endif

@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 29/01/2019 09:56:49
+ Date                 : 29/01/2019 12:57:58
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -51,6 +51,7 @@
   --------------*/
 #include "address_space.h"
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
@@ -124,28 +125,28 @@ extern void subscription_mgr__treat_create_subscription_request(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service);
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service);
 extern void subscription_mgr__treat_delete_subscriptions_request(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service);
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service);
 extern void subscription_mgr__treat_modify_subscription_request(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service);
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service);
 extern void subscription_mgr__treat_publishing_mode_request(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service);
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service);
 extern void subscription_mgr__treat_subscription_create_monitored_items_req(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_user_i subscription_mgr__p_user,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service);
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service);
 extern void subscription_mgr__treat_subscription_publish_request(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_header_i subscription_mgr__p_req_header,
@@ -153,12 +154,12 @@ extern void subscription_mgr__treat_subscription_publish_request(
    const constants__t_server_request_handle_i subscription_mgr__p_req_handle,
    const constants__t_request_context_i subscription_mgr__p_req_ctx,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service,
    t_bool * const subscription_mgr__async_resp_msg);
 extern void subscription_mgr__treat_subscription_republish_request(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   constants__t_StatusCode_i * const subscription_mgr__StatusCode_service);
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service);
 
 #endif

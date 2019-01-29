@@ -21,7 +21,7 @@
 
  File Name            : response_write_bs.h
 
- Date                 : 29/01/2019 09:57:01
+ Date                 : 29/01/2019 12:58:09
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -54,7 +55,7 @@ extern void response_write_bs__alloc_write_request_responses_malloc(
 extern void response_write_bs__reset_ResponseWrite(void);
 extern void response_write_bs__set_ResponseWrite_StatusCode(
    const constants__t_WriteValue_i response_write_bs__wvi,
-   const constants__t_StatusCode_i response_write_bs__sc);
+   const constants_statuscodes_bs__t_StatusCode_i response_write_bs__sc);
 extern void response_write_bs__write_WriteResponse_msg_out(
    const constants__t_msg_i response_write_bs__msg_out);
 

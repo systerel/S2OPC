@@ -23,8 +23,10 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "address_space_impl.h"
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
+
+#include "address_space_impl.h"
 #include "opcua_statuscodes.h"
 #include "sopc_encodeable.h"
 #include "sopc_types.h"
@@ -37,11 +39,11 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
 
 void util_message__get_message_type(SOPC_EncodeableType* encType, constants__t_msg_type_i* message__msg_type);
 
-void util_status_code__B_to_C(constants__t_StatusCode_i bstatus, SOPC_StatusCode* status);
+void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, SOPC_StatusCode* status);
 
-void util_status_code__C_to_B(SOPC_StatusCode status, constants__t_StatusCode_i* bstatus);
+void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__t_StatusCode_i* bstatus);
 
-SOPC_ReturnStatus util_status_code__B_to_return_status_C(constants__t_StatusCode_i bstatus);
+SOPC_ReturnStatus util_status_code__B_to_return_status_C(constants_statuscodes_bs__t_StatusCode_i bstatus);
 
 bool util_channel__SecurityPolicy_C_to_B(const char* uri, constants__t_SecurityPolicy* secpol);
 

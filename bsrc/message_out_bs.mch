@@ -21,6 +21,7 @@ MACHINE
     message_out_bs
 SEES
     constants,
+    constants_statuscodes_bs,
     message_in_bs,
     request_handle_bs
 

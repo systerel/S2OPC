@@ -43,7 +43,7 @@ void service_get_endpoints_bs__treat_get_endpoints_request(
     const constants__t_msg_i service_get_endpoints_bs__req_msg,
     const constants__t_msg_i service_get_endpoints_bs__resp_msg,
     const constants__t_endpoint_config_idx_i service_get_endpoints_bs__endpoint_config_idx,
-    constants__t_StatusCode_i* const service_get_endpoints_bs__ret)
+    constants_statuscodes_bs__t_StatusCode_i* const service_get_endpoints_bs__ret)
 {
     bool getEndpoints = false;
     OpcUa_GetEndpointsRequest* getEndpointsReq = (OpcUa_GetEndpointsRequest*) service_get_endpoints_bs__req_msg;
@@ -68,7 +68,7 @@ void service_get_endpoints_bs__treat_get_endpoints_request(
     else
     {
         // No endpoint to return in case incompatible profile URI provided
-        *service_get_endpoints_bs__ret = constants__e_sc_ok;
+        *service_get_endpoints_bs__ret = constants_statuscodes_bs__e_sc_ok;
         getEndpointsResp->NoOfEndpoints = 0;
     }
 }

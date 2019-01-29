@@ -21,7 +21,8 @@ MACHINE
     data_value_pointer_bs
 
 SEES
-    constants
+    constants,
+    constants_statuscodes_bs
 
 ABSTRACT_VARIABLES
     DataValue_Variant,
@@ -34,7 +35,7 @@ ABSTRACT_VARIABLES
 
 INVARIANT
     DataValue_Variant : t_DataValue --> t_Variant &
-    DataValue_StatusCode : t_DataValue --> t_StatusCode &
+    DataValue_StatusCode : t_DataValue --> t_RawStatusCode &
     DataValue_SourceTimestamp : t_DataValue --> t_Timestamp &
     DataValue_ServerTimestamp : t_DataValue --> t_Timestamp &
 
@@ -68,7 +69,7 @@ OPERATIONS
         p_dataValue : t_DataValue_i &
         p_dataValue : t_DataValue_i
     THEN
-        p_sc :(p_sc : t_StatusCode_i & p_sc = DataValue_StatusCode(p_dataValue))
+        p_sc := DataValue_StatusCode(p_dataValue)
     END
     ;
 

@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 29/01/2019 09:56:52
+ Date                 : 29/01/2019 12:58:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,6 +47,7 @@
 #define constants_bs__t_Node_i t_entier4
 #define constants_bs__t_Nonce_i t_entier4
 #define constants_bs__t_QualifiedName_i t_entier4
+#define constants_bs__t_RawStatusCode t_entier4
 #define constants_bs__t_Reference_i t_entier4
 #define constants_bs__t_SignatureData_i t_entier4
 #define constants_bs__t_Timestamp t_entier4
@@ -96,6 +97,7 @@
 #define constants_bs__t_Node_i_max (-1)
 #define constants_bs__t_Nonce_i_max (-1)
 #define constants_bs__t_QualifiedName_i_max (-1)
+#define constants_bs__t_RawStatusCode_max (-1)
 #define constants_bs__t_Reference_i_max (-1)
 #define constants_bs__t_SignatureData_i_max (-1)
 #define constants_bs__t_Timestamp_max (-1)

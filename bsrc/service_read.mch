@@ -22,6 +22,7 @@ MACHINE
 
 SEES
     constants,
+    constants_statuscodes_bs,
     address_space,
     message_in_bs,
     message_out_bs
@@ -37,7 +38,7 @@ DEFINITIONS
     ;
     d_inv_response == (
         data_Value_Value           : t_ReadValue +-> t_Variant &
-        data_Value_StatusCode      : t_ReadValue +-> t_StatusCode /*&
+        data_Value_StatusCode      : t_ReadValue +-> t_RawStatusCode /*&
         data_Value_SourceTimestamp : set_read_elements +-> t_Timestamp &
         data_Value_ServerTimestamp : set_read_elements --> t_Timestamp*/
     )

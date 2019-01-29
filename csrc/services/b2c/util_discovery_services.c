@@ -162,14 +162,14 @@ static SOPC_Byte getSecurityLevel(OpcUa_MessageSecurityMode SecurityMode, SOPC_S
     }
 }
 
-constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
+constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
     const constants__t_endpoint_config_idx_i endpoint_config_idx,
     bool isCreateSessionResponse,
     SOPC_String* requestEndpointUrl,
     uint32_t* nbOfEndpointDescriptions,
     OpcUa_EndpointDescription** endpointDescriptions)
 {
-    constants__t_StatusCode_i serviceResult = constants__e_sc_bad_invalid_argument;
+    constants_statuscodes_bs__t_StatusCode_i serviceResult = constants_statuscodes_bs__e_sc_bad_invalid_argument;
 
     SOPC_Endpoint_Config* sopcEndpointConfig = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -190,14 +190,14 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
 
         /* Note: comparison with requested URL is not necessary since we have to return a default URL in any case */
         (void) requestEndpointUrl;
-        serviceResult = constants__e_sc_ok;
+        serviceResult = constants_statuscodes_bs__e_sc_ok;
     }
     else
     {
-        serviceResult = constants__e_sc_bad_unexpected_error;
+        serviceResult = constants_statuscodes_bs__e_sc_bad_unexpected_error;
     }
 
-    if (constants__e_sc_ok == serviceResult)
+    if (constants_statuscodes_bs__e_sc_ok == serviceResult)
     {
         nbSecuConfigs = sopcEndpointConfig->nbSecuConfigs;
         tabSecurityPolicy = sopcEndpointConfig->secuConfigurations;
@@ -328,7 +328,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
         }
         else
         {
-            serviceResult = constants__e_sc_bad_out_of_memory;
+            serviceResult = constants_statuscodes_bs__e_sc_bad_out_of_memory;
         }
 
         OpcUa_EndpointDescription* final_OpcUa_EndpointDescription = NULL;
@@ -344,7 +344,7 @@ constants__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
             }
             else
             {
-                serviceResult = constants__e_sc_bad_out_of_memory;
+                serviceResult = constants_statuscodes_bs__e_sc_bad_out_of_memory;
             }
         }
         *nbOfEndpointDescriptions = nbEndpointDescription;

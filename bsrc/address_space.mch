@@ -22,6 +22,7 @@ MACHINE
 
 SEES
     constants,
+    constants_statuscodes_bs,
     service_write_decode_bs /* TODO: move to refinment */
 
 DEFINITIONS
@@ -91,7 +92,7 @@ DEFINITIONS
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) & /* All Variable have value but not all VariableType */
 
         /* + Value attribute meta-data */
-        a_Value_StatusCode : t_Node +-> t_StatusCode &
+        a_Value_StatusCode : t_Node +-> t_RawStatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
         a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
@@ -355,9 +356,7 @@ OPERATIONS
         node : t_Node &
         a_NodeClass(node) = e_ncl_Variable
     THEN
-        sc :(sc : t_StatusCode_i &
-             sc = a_Value_StatusCode(node)
-            )
+        sc := a_Value_StatusCode(node)
     END
     ;
 
@@ -402,7 +401,7 @@ OPERATIONS
             dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
             dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
             dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
-            a_Value_StatusCode : t_Node +-> t_StatusCode &
+            a_Value_StatusCode : t_Node +-> t_RawStatusCode &
             dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
             a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
             dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &

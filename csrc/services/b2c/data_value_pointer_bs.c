@@ -52,9 +52,9 @@ void data_value_pointer_bs__get_conv_DataValue_SourceTimestamp(
 }
 
 void data_value_pointer_bs__get_conv_DataValue_Status(const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-                                                      constants__t_StatusCode_i* const data_value_pointer_bs__p_sc)
+                                                      constants__t_RawStatusCode* const data_value_pointer_bs__p_sc)
 {
-    util_status_code__C_to_B(data_value_pointer_bs__p_dataValue->Status, data_value_pointer_bs__p_sc);
+    *data_value_pointer_bs__p_sc = data_value_pointer_bs__p_dataValue->Status;
 }
 
 void data_value_pointer_bs__get_conv_DataValue_ValueRank(

@@ -21,7 +21,7 @@
 
  File Name            : service_browse.h
 
- Date                 : 29/01/2019 09:56:40
+ Date                 : 29/01/2019 12:57:50
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -45,6 +45,7 @@
   --------------*/
 #include "address_space.h"
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*------------------------
    INITIALISATION Clause

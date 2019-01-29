@@ -21,7 +21,7 @@
 
  File Name            : data_value_pointer_bs.h
 
- Date                 : 29/01/2019 09:56:52
+ Date                 : 29/01/2019 12:58:01
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -56,7 +57,7 @@ extern void data_value_pointer_bs__get_conv_DataValue_SourceTimestamp(
    constants__t_Timestamp * const data_value_pointer_bs__p_st);
 extern void data_value_pointer_bs__get_conv_DataValue_Status(
    const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-   constants__t_StatusCode_i * const data_value_pointer_bs__p_sc);
+   constants__t_RawStatusCode * const data_value_pointer_bs__p_sc);
 extern void data_value_pointer_bs__get_conv_DataValue_ValueRank(
    const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
    t_entier4 * const data_value_pointer_bs__p_vr);

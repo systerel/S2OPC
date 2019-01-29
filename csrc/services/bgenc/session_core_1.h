@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 29/01/2019 09:56:44
+ Date                 : 29/01/2019 12:57:54
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,6 +47,7 @@
   --------------*/
 #include "channel_mgr.h"
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
@@ -129,7 +130,7 @@ extern void session_core_1__set_session_state(
    const t_bool session_core_1__is_client);
 extern void session_core_1__set_session_state_closed(
    const constants__t_session_i session_core_1__session,
-   const constants__t_StatusCode_i session_core_1__sc_reason,
+   const constants_statuscodes_bs__t_StatusCode_i session_core_1__sc_reason,
    const t_bool session_core_1__is_client);
 
 #endif

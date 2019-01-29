@@ -71,7 +71,7 @@ void msg_browse_response_bs__INITIALISATION(void)
   --------------------*/
 void msg_browse_response_bs__set_ResponseBrowse_BrowseStatus(
     const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
-    const constants__t_StatusCode_i msg_browse_response_bs__p_sc)
+    const constants_statuscodes_bs__t_StatusCode_i msg_browse_response_bs__p_sc)
 {
     assert(NULL != pBrowseStatus);
     util_status_code__B_to_C(msg_browse_response_bs__p_sc, &pBrowseStatus[msg_browse_response_bs__p_bvi]);

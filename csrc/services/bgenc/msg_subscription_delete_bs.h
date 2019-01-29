@@ -21,7 +21,7 @@
 
  File Name            : msg_subscription_delete_bs.h
 
- Date                 : 29/01/2019 09:56:58
+ Date                 : 29/01/2019 12:58:05
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 

@@ -21,7 +21,7 @@
 
  File Name            : msg_read_request.h
 
- Date                 : 29/01/2019 09:56:38
+ Date                 : 29/01/2019 12:57:48
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -45,6 +45,7 @@
   --------------*/
 #include "address_space.h"
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 
 /*----------------------------
@@ -65,13 +66,13 @@ extern void msg_read_request__check_ReadRequest(
    t_bool * const msg_read_request__p_read_ok,
    t_entier4 * const msg_read_request__p_nb_ReadValue,
    constants__t_TimestampsToReturn_i * const msg_read_request__p_tsToReturn,
-   constants__t_StatusCode_i * const msg_read_request__p_statusCode);
+   constants_statuscodes_bs__t_StatusCode_i * const msg_read_request__p_statusCode);
 extern void msg_read_request__get_nb_ReadValue(
    t_entier4 * const msg_read_request__p_nb_ReadValue);
 extern void msg_read_request__getall_ReadValue_NodeId_AttributeId(
    const constants__t_msg_i msg_read_request__p_msg,
    const constants__t_ReadValue_i msg_read_request__p_rvi,
-   constants__t_StatusCode_i * const msg_read_request__p_sc,
+   constants_statuscodes_bs__t_StatusCode_i * const msg_read_request__p_sc,
    constants__t_NodeId_i * const msg_read_request__p_nid,
    constants__t_AttributeId_i * const msg_read_request__p_aid,
    constants__t_IndexRange_i * const msg_read_request__p_index_range);

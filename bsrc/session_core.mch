@@ -21,6 +21,7 @@ MACHINE
     session_core
 SEES
     constants,
+    constants_statuscodes_bs,
     message_in_bs,
     message_out_bs,
     channel_mgr,

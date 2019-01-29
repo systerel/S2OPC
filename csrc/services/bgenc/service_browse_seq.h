@@ -21,7 +21,7 @@
 
  File Name            : service_browse_seq.h
 
- Date                 : 29/01/2019 09:56:41
+ Date                 : 29/01/2019 12:57:50
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,6 +47,7 @@
   --------------*/
 #include "address_space.h"
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 
 /*------------------------
@@ -89,6 +90,6 @@ extern void service_browse_seq__treat_browse_request_BrowseValue_1(
    OPERATIONS Clause
   --------------------*/
 extern void service_browse_seq__treat_browse_request_BrowseValues(
-   constants__t_StatusCode_i * const service_browse_seq__StatusCode_service);
+   constants_statuscodes_bs__t_StatusCode_i * const service_browse_seq__StatusCode_service);
 
 #endif

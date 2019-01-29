@@ -484,7 +484,7 @@ void message_out_bs__write_create_session_msg_server_endpoints(
     const constants__t_msg_i message_out_bs__req_msg,
     const constants__t_msg_i message_out_bs__resp_msg,
     const constants__t_endpoint_config_idx_i message_out_bs__endpoint_config_idx,
-    constants__t_StatusCode_i* const message_out_bs__ret)
+    constants_statuscodes_bs__t_StatusCode_i* const message_out_bs__ret)
 {
     OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) message_out_bs__req_msg;
     OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) message_out_bs__resp_msg;
@@ -634,8 +634,9 @@ void message_out_bs__write_msg_out_header_session_token(
     assert(SOPC_STATUS_OK == status);
 }
 
-void message_out_bs__write_msg_resp_header_service_status(const constants__t_msg_header_i message_out_bs__msg_header,
-                                                          const constants__t_StatusCode_i message_out_bs__status_code)
+void message_out_bs__write_msg_resp_header_service_status(
+    const constants__t_msg_header_i message_out_bs__msg_header,
+    const constants_statuscodes_bs__t_StatusCode_i message_out_bs__status_code)
 {
     SOPC_StatusCode status = OpcUa_BadInternalError;
     util_status_code__B_to_C(message_out_bs__status_code, &status);

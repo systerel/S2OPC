@@ -22,6 +22,7 @@ MACHINE
 
 SEES
     constants,
+    constants_statuscodes_bs,
     message_out_bs
 
 DEFINITIONS

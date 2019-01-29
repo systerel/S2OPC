@@ -21,7 +21,7 @@
 
  File Name            : service_find_servers_bs.h
 
- Date                 : 29/01/2019 09:57:02
+ Date                 : 29/01/2019 12:58:10
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 
@@ -54,6 +55,6 @@ extern void service_find_servers_bs__treat_find_servers_request(
    const constants__t_msg_i service_find_servers_bs__req_msg,
    const constants__t_msg_i service_find_servers_bs__resp_msg,
    const constants__t_endpoint_config_idx_i service_find_servers_bs__endpoint_config_idx,
-   constants__t_StatusCode_i * const service_find_servers_bs__ret);
+   constants_statuscodes_bs__t_StatusCode_i * const service_find_servers_bs__ret);
 
 #endif

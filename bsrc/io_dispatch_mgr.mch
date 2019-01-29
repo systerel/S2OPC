@@ -21,7 +21,8 @@ MACHINE
     io_dispatch_mgr
 
 SEES
-    constants
+    constants,
+    constants_statuscodes_bs
 
 DEFINITIONS
     d_msg_variables ==

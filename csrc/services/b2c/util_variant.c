@@ -24,7 +24,7 @@
 
 #include "util_variant.h"
 
-constants__t_Variant_i util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid)
+SOPC_Variant* util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
@@ -40,7 +40,7 @@ constants__t_Variant_i util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid)
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass ncl)
+SOPC_Variant* util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass ncl)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
@@ -55,7 +55,7 @@ constants__t_Variant_i util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass 
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* qn)
+SOPC_Variant* util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* qn)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
@@ -71,7 +71,7 @@ constants__t_Variant_i util_variant__new_Variant_from_QualifiedName(SOPC_Qualifi
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt)
+SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
@@ -87,7 +87,7 @@ constants__t_Variant_i util_variant__new_Variant_from_LocalizedText(SOPC_Localiz
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_Indet(void)
+SOPC_Variant* util_variant__new_Variant_from_Indet(void)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
@@ -101,7 +101,7 @@ constants__t_Variant_i util_variant__new_Variant_from_Indet(void)
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_Variant(SOPC_Variant* pvara)
+SOPC_Variant* util_variant__new_Variant_from_Variant(SOPC_Variant* pvara)
 {
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
     SOPC_Variant* pvar;
@@ -127,7 +127,7 @@ constants__t_Variant_i util_variant__new_Variant_from_Variant(SOPC_Variant* pvar
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_Byte(uint8_t i)
+SOPC_Variant* util_variant__new_Variant_from_Byte(uint8_t i)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
@@ -142,7 +142,7 @@ constants__t_Variant_i util_variant__new_Variant_from_Byte(uint8_t i)
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_uint32(uint32_t i)
+SOPC_Variant* util_variant__new_Variant_from_uint32(uint32_t i)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
@@ -157,7 +157,7 @@ constants__t_Variant_i util_variant__new_Variant_from_uint32(uint32_t i)
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_int64(int64_t i)
+SOPC_Variant* util_variant__new_Variant_from_int64(int64_t i)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
@@ -172,7 +172,7 @@ constants__t_Variant_i util_variant__new_Variant_from_int64(int64_t i)
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_int32(int32_t i)
+SOPC_Variant* util_variant__new_Variant_from_int32(int32_t i)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
@@ -187,7 +187,7 @@ constants__t_Variant_i util_variant__new_Variant_from_int32(int32_t i)
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_double(double f)
+SOPC_Variant* util_variant__new_Variant_from_double(double f)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 
@@ -202,7 +202,7 @@ constants__t_Variant_i util_variant__new_Variant_from_double(double f)
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_ByteString(SOPC_ByteString buf)
+SOPC_Variant* util_variant__new_Variant_from_ByteString(SOPC_ByteString buf)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
 

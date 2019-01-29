@@ -22,7 +22,7 @@ IMPLEMENTATION
 REFINES
     constants
 
-IMPORTS
+EXTENDS
     constants_bs
 
 PROPERTIES
@@ -58,22 +58,6 @@ VALUES
     t_counter = NAT;
     t_ValueRank = INT;
     t_ConcreteValueRank = INT
-
-PROMOTES
-    is_t_channel_config_idx,
-    is_t_endpoint_config_idx,
-    is_t_channel,
-    get_card_t_session,
-    get_cast_t_session,
-    get_card_t_channel,
-    get_cast_t_channel,
-    getall_conv_ExpandedNodeId_NodeId,
-    get_card_t_subscription,
-    get_cast_t_subscription,
-    is_t_access_level_currentWrite,
-    is_t_access_level_currentRead,
-    is_t_access_level_statusWrite,
-    is_t_access_level_timestampWrite
 
 OPERATIONS
 

@@ -25,6 +25,7 @@ REFINES
 
 SEES
     constants,
+    constants_statuscodes_bs,
     service_write_decode_bs,
     service_mgr_1,
     service_response_cb_bs,
@@ -123,7 +124,7 @@ LOCAL_OPERATIONS
             serviceStatusCode : t_StatusCode &
             prev_dataValue : t_DataValue_i &
             a_Value : t_Node +-> t_Variant &
-            a_Value_StatusCode : t_Node +-> t_StatusCode &
+            a_Value_StatusCode : t_Node +-> t_RawStatusCode &
             a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
             a_Value_ServerTimestamp : t_Node +-> t_Timestamp &
 
@@ -430,7 +431,7 @@ OPERATIONS
                             l_access_lvl <-- get_AccessLevel(l_node);
                             l_access_write <-- is_t_access_level_currentWrite(l_access_lvl);
                             l_access_write_status <-- is_t_access_level_statusWrite(l_access_lvl);
-                            l_access_write_timestamp <-- is_t_access_level_timestampWrite(l_access_lvl); 
+                            l_access_write_timestamp <-- is_t_access_level_timestampWrite(l_access_lvl);
                             IF l_access_write = TRUE THEN
                                 /* Write authorization is for set_Value, and read authorization is for get_Value_StatusCode */
                                 l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);

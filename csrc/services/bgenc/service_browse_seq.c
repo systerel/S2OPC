@@ -21,7 +21,7 @@
 
  File Name            : service_browse_seq.c
 
- Date                 : 29/01/2019 09:56:41
+ Date                 : 29/01/2019 12:57:51
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -163,7 +163,7 @@ void service_browse_seq__treat_browse_request_BrowseValue_1(
                &service_browse_seq__l_nb_bri);
             if (service_browse_seq__l_isvalid == true) {
                service_browse__set_ResponseBrowse_BrowseStatus(service_browse_seq__p_bvi,
-                  constants__e_sc_ok);
+                  constants_statuscodes_bs__e_sc_ok);
                service_browse_seq__fill_browse_response(service_browse_seq__p_bvi,
                   service_browse_seq__l_nb_bri,
                   service_browse_seq__l_src_node,
@@ -174,23 +174,23 @@ void service_browse_seq__treat_browse_request_BrowseValue_1(
             }
             else {
                service_browse__set_ResponseBrowse_BrowseStatus(service_browse_seq__p_bvi,
-                  constants__e_sc_bad_out_of_memory);
+                  constants_statuscodes_bs__e_sc_bad_out_of_memory);
             }
          }
          else {
             service_browse__set_ResponseBrowse_BrowseStatus(service_browse_seq__p_bvi,
-               constants__e_sc_bad_node_id_unknown);
+               constants_statuscodes_bs__e_sc_bad_node_id_unknown);
          }
       }
       else {
          service_browse__set_ResponseBrowse_BrowseStatus(service_browse_seq__p_bvi,
-            constants__e_sc_bad_browse_direction_invalid);
+            constants_statuscodes_bs__e_sc_bad_browse_direction_invalid);
       }
    }
 }
 
 void service_browse_seq__treat_browse_request_BrowseValues(
-   constants__t_StatusCode_i * const service_browse_seq__StatusCode_service) {
+   constants_statuscodes_bs__t_StatusCode_i * const service_browse_seq__StatusCode_service) {
    {
       constants__t_NodeId_i service_browse_seq__l_nid_view;
       t_entier4 service_browse_seq__l_nb_target_max;
@@ -207,7 +207,7 @@ void service_browse_seq__treat_browse_request_BrowseValues(
             service_browse__alloc_browse_response(service_browse_seq__l_nb_bvi,
                &service_browse_seq__l_isallocated);
             if (service_browse_seq__l_isallocated == true) {
-               *service_browse_seq__StatusCode_service = constants__e_sc_ok;
+               *service_browse_seq__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
                service_browse_seq_it__init_iter_browse_request(service_browse_seq__l_nb_bvi,
                   &service_browse_seq__l_continue);
                while (service_browse_seq__l_continue == true) {
@@ -218,15 +218,15 @@ void service_browse_seq__treat_browse_request_BrowseValues(
                }
             }
             else {
-               *service_browse_seq__StatusCode_service = constants__e_sc_bad_out_of_memory;
+               *service_browse_seq__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
             }
          }
          else {
-            *service_browse_seq__StatusCode_service = constants__e_sc_bad_nothing_to_do;
+            *service_browse_seq__StatusCode_service = constants_statuscodes_bs__e_sc_bad_nothing_to_do;
          }
       }
       else {
-         *service_browse_seq__StatusCode_service = constants__e_sc_bad_view_id_unknown;
+         *service_browse_seq__StatusCode_service = constants_statuscodes_bs__e_sc_bad_view_id_unknown;
       }
    }
 }

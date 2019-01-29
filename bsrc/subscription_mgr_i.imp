@@ -24,6 +24,7 @@ REFINES
 
 SEES
     constants,
+    constants_statuscodes_bs,
     message_in_bs,
     message_out_bs,
     write_value_pointer_bs,
@@ -556,7 +557,6 @@ OPERATIONS
             l_node := c_Node_indet;
             l_ncl := c_NodeClass_indet;
             l_value := c_Variant_indet;
-            l_valueSc := e_sc_ok;
             l_monitoredItemId := c_monitoredItemId_indet;
             l_revSamplingItv := c_opcua_duration_indet;
             l_revQueueSize := 0;
@@ -564,6 +564,7 @@ OPERATIONS
             l_continue, l_index <-- continue_iter_monitored_item_request;
             l_bres, l_sc, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_queueSize, l_indexRange
               <-- getall_monitored_item_req_params(p_req_msg, l_index);
+            l_valueSc <-- getall_conv_StatusCode_To_RawStatusCode(e_sc_bad_user_access_denied);
             /* Check validity of NodeId */
             IF l_bres = TRUE
             THEN
@@ -597,8 +598,7 @@ OPERATIONS
                 ELSE
                     /* Clear the value content since the access is denied
                     (notification will contain an empty value) */
-                    read_AddressSpace_clear_value (l_value);
-                    l_valueSc := e_sc_bad_user_access_denied
+                    read_AddressSpace_clear_value (l_value)
                 END
             END
             ;

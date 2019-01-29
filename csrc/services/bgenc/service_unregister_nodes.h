@@ -21,7 +21,7 @@
 
  File Name            : service_unregister_nodes.h
 
- Date                 : 29/01/2019 09:56:44
+ Date                 : 29/01/2019 12:57:53
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -45,6 +45,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 
@@ -58,6 +59,6 @@ extern void service_unregister_nodes__INITIALISATION(void);
   --------------------*/
 extern void service_unregister_nodes__treat_unregister_nodes_request(
    const constants__t_msg_i service_unregister_nodes__p_req_msg,
-   constants__t_StatusCode_i * const service_unregister_nodes__ret);
+   constants_statuscodes_bs__t_StatusCode_i * const service_unregister_nodes__ret);
 
 #endif

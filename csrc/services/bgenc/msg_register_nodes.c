@@ -21,7 +21,7 @@
 
  File Name            : msg_register_nodes.c
 
- Date                 : 29/01/2019 09:56:39
+ Date                 : 29/01/2019 12:57:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -49,19 +49,19 @@ void msg_register_nodes__INITIALISATION(void) {
   --------------------*/
 void msg_register_nodes__getall_msg_register_nodes_req_nb_nodes(
    const constants__t_msg_i msg_register_nodes__p_req_msg,
-   constants__t_StatusCode_i * const msg_register_nodes__p_sc,
+   constants_statuscodes_bs__t_StatusCode_i * const msg_register_nodes__p_sc,
    t_entier4 * const msg_register_nodes__p_nb_nodes) {
    msg_register_nodes_bs__get_msg_register_nodes_req_nb_nodes(msg_register_nodes__p_req_msg,
       msg_register_nodes__p_nb_nodes);
    if (*msg_register_nodes__p_nb_nodes <= 0) {
-      *msg_register_nodes__p_sc = constants__e_sc_bad_nothing_to_do;
+      *msg_register_nodes__p_sc = constants_statuscodes_bs__e_sc_bad_nothing_to_do;
    }
    else if (*msg_register_nodes__p_nb_nodes > constants__k_n_registerNodes_max) {
-      *msg_register_nodes__p_sc = constants__e_sc_bad_too_many_ops;
+      *msg_register_nodes__p_sc = constants_statuscodes_bs__e_sc_bad_too_many_ops;
    }
    else {
       msg_register_nodes__nb_nodes = *msg_register_nodes__p_nb_nodes;
-      *msg_register_nodes__p_sc = constants__e_sc_ok;
+      *msg_register_nodes__p_sc = constants_statuscodes_bs__e_sc_ok;
    }
 }
 

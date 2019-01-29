@@ -52,7 +52,7 @@ void service_response_cb_bs__cli_service_response(
 void service_response_cb_bs__cli_snd_failure(
     const constants__t_msg_type_i service_response_cb_bs__req_typ,
     const constants__t_application_context_i service_response_cb_bs__app_context,
-    const constants__t_StatusCode_i service_response_cb_bs__error_status)
+    const constants_statuscodes_bs__t_StatusCode_i service_response_cb_bs__error_status)
 {
     SOPC_EncodeableType* reqEncType = NULL;
     SOPC_EncodeableType* respEncType = NULL;
@@ -78,7 +78,7 @@ void service_response_cb_bs__srv_service_response(
 
 void service_response_cb_bs__srv_write_notification(
     const constants__t_WriteValuePointer_i service_response_cb_bs__write_request_pointer,
-    const constants__t_StatusCode_i service_response_cb_bs__write_status)
+    const constants_statuscodes_bs__t_StatusCode_i service_response_cb_bs__write_status)
 {
     SOPC_StatusCode sc;
     OpcUa_WriteValue* wv = service_response_cb_bs__write_request_pointer;

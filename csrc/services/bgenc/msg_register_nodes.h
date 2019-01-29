@@ -21,7 +21,7 @@
 
  File Name            : msg_register_nodes.h
 
- Date                 : 29/01/2019 09:56:39
+ Date                 : 29/01/2019 12:57:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -44,6 +44,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 
@@ -69,7 +70,7 @@ extern void msg_register_nodes__INITIALISATION(void);
   --------------------*/
 extern void msg_register_nodes__getall_msg_register_nodes_req_nb_nodes(
    const constants__t_msg_i msg_register_nodes__p_req_msg,
-   constants__t_StatusCode_i * const msg_register_nodes__p_sc,
+   constants_statuscodes_bs__t_StatusCode_i * const msg_register_nodes__p_sc,
    t_entier4 * const msg_register_nodes__p_nb_nodes);
 
 #endif

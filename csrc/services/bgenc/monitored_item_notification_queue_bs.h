@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_notification_queue_bs.h
 
- Date                 : 29/01/2019 09:56:54
+ Date                 : 29/01/2019 12:58:02
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -55,7 +56,7 @@ extern void monitored_item_notification_queue_bs__add_first_monitored_item_notif
    const constants__t_NodeId_i monitored_item_notification_queue_bs__p_nid,
    const constants__t_AttributeId_i monitored_item_notification_queue_bs__p_aid,
    const constants__t_Variant_i monitored_item_notification_queue_bs__p_VariantValuePointer,
-   const constants__t_StatusCode_i monitored_item_notification_queue_bs__p_ValueSc,
+   const constants__t_RawStatusCode monitored_item_notification_queue_bs__p_ValueSc,
    t_bool * const monitored_item_notification_queue_bs__bres);
 extern void monitored_item_notification_queue_bs__add_monitored_item_notification_to_queue(
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
