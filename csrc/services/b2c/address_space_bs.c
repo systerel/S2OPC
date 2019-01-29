@@ -356,7 +356,7 @@ static constants__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
 
 void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_user,
                                  const constants__t_Node_i address_space_bs__node,
-                                 const constants__t_DataValue_i address_space_bs__dataValue,
+                                 const constants__t_Variant_i address_space_bs__variant,
                                  const constants__t_IndexRange_i address_space_bs__index_range,
                                  constants__t_StatusCode_i* const address_space_bs__serviceStatusCode,
                                  constants__t_DataValue_i* const address_space_bs__prev_dataValue)
@@ -375,19 +375,25 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
     if (address_space_bs__index_range->Length <= 0)
     {
         *address_space_bs__serviceStatusCode =
-            set_value_full(pvar, &address_space_bs__dataValue->Value, &(*address_space_bs__prev_dataValue)->Value);
+            set_value_full(pvar, address_space_bs__variant, &(*address_space_bs__prev_dataValue)->Value);
     }
     else
     {
         *address_space_bs__serviceStatusCode =
-            set_value_indexed(pvar, &address_space_bs__dataValue->Value, address_space_bs__index_range,
+            set_value_indexed(pvar, address_space_bs__variant, address_space_bs__index_range,
                               &(*address_space_bs__prev_dataValue)->Value);
     }
 
     if (*address_space_bs__serviceStatusCode == constants__e_sc_ok)
     {
         (*address_space_bs__prev_dataValue)->Status = item->value_status;
-        item->value_status = address_space_bs__dataValue->Status;
+        (*address_space_bs__prev_dataValue)->SourceTimestamp = item->value_source_ts.timestamp;
+        (*address_space_bs__prev_dataValue)->SourcePicoSeconds = item->value_source_ts.picoSeconds;
+        (*address_space_bs__prev_dataValue)->ServerTimestamp = item->value_server_ts.timestamp;
+        (*address_space_bs__prev_dataValue)->ServerPicoSeconds = item->value_server_ts.picoSeconds;
+
+        item->value_server_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
+        item->value_server_ts.picoSeconds = 0;
     }
     else
     {
@@ -395,6 +401,26 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
         free(*address_space_bs__prev_dataValue);
         *address_space_bs__prev_dataValue = NULL;
     }
+}
+
+void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i address_space_bs__p_user,
+                                                 const constants__t_Node_i address_space_bs__p_node,
+                                                 const constants__t_Timestamp address_space_bs__p_ts)
+{
+    (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
+    SOPC_AddressSpace_Item* item = address_space_bs__p_node;
+    assert(item->node_class == OpcUa_NodeClass_Variable);
+    item->value_source_ts = address_space_bs__p_ts;
+}
+
+void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_space_bs__p_user,
+                                            const constants__t_Node_i address_space_bs__p_node,
+                                            const constants__t_DataValue_i address_space_bs__dataValue)
+{
+    (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
+    SOPC_AddressSpace_Item* item = address_space_bs__p_node;
+    assert(item->node_class == OpcUa_NodeClass_Variable);
+    item->value_status = address_space_bs__dataValue->Status;
 }
 
 void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_space_bs__p_user,

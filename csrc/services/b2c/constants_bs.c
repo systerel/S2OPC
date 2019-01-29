@@ -58,26 +58,26 @@ void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_Expan
     *constants_bs__p_nid = &constants_bs__p_expnid->NodeId;
 }
 
-void constants_bs__is_t_acces_level_currentRead(const constants_bs__t_access_level constants_bs__p_access_lvl,
-                                                t_bool* const constants_bs__bres)
+void constants_bs__is_t_access_level_currentRead(const constants_bs__t_access_level constants_bs__p_access_lvl,
+                                                 t_bool* const constants_bs__bres)
 {
     *constants_bs__bres = (constants_bs__p_access_lvl & SOPC_AccessLevelMask_CurrentRead) != 0;
 }
 
-void constants_bs__is_t_acces_level_currentWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
-                                                 t_bool* const constants_bs__bres)
+void constants_bs__is_t_access_level_currentWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
+                                                  t_bool* const constants_bs__bres)
 {
     *constants_bs__bres = (constants_bs__p_access_lvl & SOPC_AccessLevelMask_CurrentWrite) != 0;
 }
 
-void constants_bs__is_t_acces_level_statusWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
-                                                t_bool* const constants_bs__bres)
+void constants_bs__is_t_access_level_statusWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
+                                                 t_bool* const constants_bs__bres)
 {
     *constants_bs__bres = (constants_bs__p_access_lvl & SOPC_AccessLevelMask_StatusWrite) != 0;
 }
 
-void constants_bs__is_t_acces_level_timestampWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
-                                                   t_bool* const constants_bs__bres)
+void constants_bs__is_t_access_level_timestampWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
+                                                    t_bool* const constants_bs__bres)
 {
     *constants_bs__bres = (constants_bs__p_access_lvl & SOPC_AccessLevelMask_TimestampWrite) != 0;
 }

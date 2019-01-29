@@ -70,10 +70,10 @@ PROMOTES
     getall_conv_ExpandedNodeId_NodeId,
     get_card_t_subscription,
     get_cast_t_subscription,
-    is_t_acces_level_currentWrite,
-    is_t_acces_level_currentRead,
-    is_t_acces_level_statusWrite,
-    is_t_acces_level_timestampWrite
+    is_t_access_level_currentWrite,
+    is_t_access_level_currentRead,
+    is_t_access_level_statusWrite,
+    is_t_access_level_timestampWrite
 
 OPERATIONS
 

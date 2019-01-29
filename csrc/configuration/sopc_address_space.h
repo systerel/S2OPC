@@ -34,10 +34,18 @@
 #define ELEMENT_ATTRIBUTE_GETTER_DECL(ret_type, lowercase_name, camel_case_name) \
     ret_type* current_element_##lowercase_name(SOPC_AddressSpace_Item* item);
 
+typedef struct SOPC_Value_Timestamp
+{
+    SOPC_DateTime timestamp;
+    uint16_t picoSeconds;
+} SOPC_Value_Timestamp;
+
 typedef struct
 {
     OpcUa_NodeClass node_class;
     SOPC_StatusCode value_status;
+    SOPC_Value_Timestamp value_source_ts;
+    SOPC_Value_Timestamp value_server_ts;
     union {
         OpcUa_DataTypeNode data_type;
         OpcUa_MethodNode method;

@@ -290,10 +290,10 @@ typedef struct SOPC_DataValue
 {
     SOPC_Variant Value;
     SOPC_StatusCode Status;
-    SOPC_DateTime SourceTimestamp;
-    SOPC_DateTime ServerTimestamp;
-    uint16_t SourcePicoSeconds;
-    uint16_t ServerPicoSeconds;
+    SOPC_DateTime SourceTimestamp; // 100 nanoseconds
+    SOPC_DateTime ServerTimestamp; // 100 nanoseconds
+    uint16_t SourcePicoSeconds;    // 10 picoseconds
+    uint16_t ServerPicoSeconds;    // 10 picoseconds
 } SOPC_DataValue;
 
 extern const SOPC_NodeId* SOPC_BuiltInTypeId_To_DataTypeNodeId[26];
@@ -559,7 +559,7 @@ SOPC_ReturnStatus SOPC_Variant_ShallowCopy(SOPC_Variant* dst, const SOPC_Variant
 // Does a shallow copy from src to dst, transfering the ownership to dst.
 //
 // The value of DoNotClear is transfered from src to dst, and src->DoNotClear is
-// set to false after this function returns (since the ownership of the data moved
+// set to true after this function returns (since the ownership of the data moved
 // to dst).
 void SOPC_Variant_Move(SOPC_Variant* dest, SOPC_Variant* src);
 

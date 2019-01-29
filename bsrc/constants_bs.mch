@@ -448,7 +448,7 @@ OPERATIONS
         p_subscription := cast_t_subscription(p_ind)
     END;
 
-    bres <-- is_t_acces_level_currentWrite(p_access_lvl) =
+    bres <-- is_t_access_level_currentWrite(p_access_lvl) =
     PRE
         p_access_lvl : t_access_level
     THEN
@@ -456,7 +456,7 @@ OPERATIONS
     END
     ;
 
-    bres <-- is_t_acces_level_currentRead(p_access_lvl) =
+    bres <-- is_t_access_level_currentRead(p_access_lvl) =
     PRE
         p_access_lvl : t_access_level
     THEN
@@ -464,7 +464,7 @@ OPERATIONS
     END
     ;
 
-    bres <-- is_t_acces_level_statusWrite(p_access_lvl) =
+    bres <-- is_t_access_level_statusWrite(p_access_lvl) =
     PRE
         p_access_lvl : t_access_level
     THEN
@@ -472,7 +472,7 @@ OPERATIONS
     END
     ;
 
-    bres <-- is_t_acces_level_timestampWrite(p_access_lvl) =
+    bres <-- is_t_access_level_timestampWrite(p_access_lvl) =
     PRE
         p_access_lvl : t_access_level
     THEN

@@ -47,6 +47,10 @@ void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeC
 
     item->node_class = node_class;
     item->value_status = OpcUa_BadDataUnavailable;
+    item->value_source_ts.timestamp = 0;
+    item->value_source_ts.picoSeconds = 0;
+    item->value_server_ts.timestamp = 0;
+    item->value_server_ts.picoSeconds = 0;
 }
 
 #define ELEMENT_ATTRIBUTE_GETTER_CASE(val, field, extra) \

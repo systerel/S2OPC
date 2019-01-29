@@ -391,6 +391,8 @@ OPERATIONS
         l_ncl,
         l_access_lvl,
         l_access_write,
+        l_access_write_status,
+        l_access_write_timestamp,
         l_authorized_write,
         l_compatible_type,
         l_compat_with_conv,
@@ -398,7 +400,9 @@ OPERATIONS
         l_var_vr,
         l_dv_datatype_nid,
         l_dv_datatype_vr,
-        l_local_treatment
+        l_local_treatment,
+        l_variant,
+        l_source_ts
     IN
         prev_dataValue := c_DataValue_indet;
         IF isvalid = TRUE THEN
@@ -413,17 +417,33 @@ OPERATIONS
                     l_compatible_type, l_compat_with_conv <-- is_variable_compat_type(l_dv_datatype_nid, l_dv_datatype_vr, l_var_datatype_nid, l_var_vr);
                     IF l_compatible_type = TRUE THEN
                         l_local_treatment <-- is_local_service_treatment;
+                        l_variant <-- get_conv_DataValue_Variant(dataValue);
+                        l_source_ts <-- get_conv_DataValue_SourceTimestamp(dataValue);
                         IF l_local_treatment = TRUE THEN
                             /* No access authorization check for local treatment */
-                            serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, dataValue, index_range)
+                            serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, l_variant, index_range);
+                            IF serviceStatusCode = e_sc_ok THEN
+                                set_Value_StatusCode(p_user, l_node, dataValue);
+                                set_Value_SourceTimestamp(p_user, l_node, l_source_ts)
+                            END
                         ELSE
                             l_access_lvl <-- get_AccessLevel(l_node);
-                            l_access_write <-- is_t_acces_level_currentWrite(l_access_lvl);
+                            l_access_write <-- is_t_access_level_currentWrite(l_access_lvl);
+                            l_access_write_status <-- is_t_access_level_statusWrite(l_access_lvl);
+                            l_access_write_timestamp <-- is_t_access_level_timestampWrite(l_access_lvl); 
                             IF l_access_write = TRUE THEN
                                 /* Write authorization is for set_Value, and read authorization is for get_Value_StatusCode */
                                 l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
                                 IF l_authorized_write = TRUE THEN
-                                    serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, dataValue, index_range)
+                                    serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, l_variant, index_range);
+                                    IF serviceStatusCode = e_sc_ok THEN
+                                        IF l_access_write_status = TRUE THEN
+                                            set_Value_StatusCode(p_user, l_node, dataValue)
+                                        END;
+                                        IF l_access_write_timestamp = TRUE THEN
+                                            set_Value_SourceTimestamp(p_user, l_node, l_source_ts)
+                                        END
+                                    END
                                 ELSE
                                     serviceStatusCode := e_sc_bad_user_access_denied
                                 END

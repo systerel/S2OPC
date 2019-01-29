@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 28/01/2019 16:44:19
+ Date                 : 29/01/2019 09:56:35
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -270,6 +270,8 @@ void address_space__treat_write_1(
       constants__t_NodeClass_i address_space__l_ncl;
       constants__t_access_level address_space__l_access_lvl;
       t_bool address_space__l_access_write;
+      t_bool address_space__l_access_write_status;
+      t_bool address_space__l_access_write_timestamp;
       t_bool address_space__l_authorized_write;
       t_bool address_space__l_compatible_type;
       t_bool address_space__l_compat_with_conv;
@@ -278,6 +280,8 @@ void address_space__treat_write_1(
       constants__t_NodeId_i address_space__l_dv_datatype_nid;
       t_entier4 address_space__l_dv_datatype_vr;
       t_bool address_space__l_local_treatment;
+      constants__t_Variant_i address_space__l_variant;
+      constants__t_Timestamp address_space__l_source_ts;
       
       *address_space__prev_dataValue = constants__c_DataValue_indet;
       if (address_space__isvalid == true) {
@@ -305,19 +309,35 @@ void address_space__treat_write_1(
                   &address_space__l_compat_with_conv);
                if (address_space__l_compatible_type == true) {
                   service_mgr_1__is_local_service_treatment(&address_space__l_local_treatment);
+                  data_value_pointer_bs__get_conv_DataValue_Variant(address_space__dataValue,
+                     &address_space__l_variant);
+                  data_value_pointer_bs__get_conv_DataValue_SourceTimestamp(address_space__dataValue,
+                     &address_space__l_source_ts);
                   if (address_space__l_local_treatment == true) {
                      address_space_bs__set_Value(address_space__p_user,
                         address_space__l_node,
-                        address_space__dataValue,
+                        address_space__l_variant,
                         address_space__index_range,
                         address_space__serviceStatusCode,
                         address_space__prev_dataValue);
+                     if (*address_space__serviceStatusCode == constants__e_sc_ok) {
+                        address_space_bs__set_Value_StatusCode(address_space__p_user,
+                           address_space__l_node,
+                           address_space__dataValue);
+                        address_space_bs__set_Value_SourceTimestamp(address_space__p_user,
+                           address_space__l_node,
+                           address_space__l_source_ts);
+                     }
                   }
                   else {
                      address_space_bs__get_AccessLevel(address_space__l_node,
                         &address_space__l_access_lvl);
-                     constants__is_t_acces_level_currentWrite(address_space__l_access_lvl,
+                     constants__is_t_access_level_currentWrite(address_space__l_access_lvl,
                         &address_space__l_access_write);
+                     constants__is_t_access_level_statusWrite(address_space__l_access_lvl,
+                        &address_space__l_access_write_status);
+                     constants__is_t_access_level_timestampWrite(address_space__l_access_lvl,
+                        &address_space__l_access_write_timestamp);
                      if (address_space__l_access_write == true) {
                         user_authorization_bs__get_user_authorization(constants__e_operation_type_write,
                            address_space__nid,
@@ -327,10 +347,22 @@ void address_space__treat_write_1(
                         if (address_space__l_authorized_write == true) {
                            address_space_bs__set_Value(address_space__p_user,
                               address_space__l_node,
-                              address_space__dataValue,
+                              address_space__l_variant,
                               address_space__index_range,
                               address_space__serviceStatusCode,
                               address_space__prev_dataValue);
+                           if (*address_space__serviceStatusCode == constants__e_sc_ok) {
+                              if (address_space__l_access_write_status == true) {
+                                 address_space_bs__set_Value_StatusCode(address_space__p_user,
+                                    address_space__l_node,
+                                    address_space__dataValue);
+                              }
+                              if (address_space__l_access_write_timestamp == true) {
+                                 address_space_bs__set_Value_SourceTimestamp(address_space__p_user,
+                                    address_space__l_node,
+                                    address_space__l_source_ts);
+                              }
+                           }
                         }
                         else {
                            *address_space__serviceStatusCode = constants__e_sc_bad_user_access_denied;
