@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 29/01/2019 12:57:59
+ Date                 : 29/01/2019 13:28:20
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -126,7 +126,7 @@ extern void address_space_bs__set_Value_SourceTimestamp(
 extern void address_space_bs__set_Value_StatusCode(
    const constants__t_user_i address_space_bs__p_user,
    const constants__t_Node_i address_space_bs__p_node,
-   const constants__t_DataValue_i address_space_bs__dataValue);
+   const constants__t_RawStatusCode address_space_bs__p_sc);
 extern void address_space_bs__write_AddressSpace_free_dataValue(
    const constants__t_DataValue_i address_space_bs__data);
 

@@ -285,18 +285,17 @@ OPERATIONS
     ;
 
     /* TODO: status code are limited to values in constants if we use the B type, use the data value to avoid loss of info */
-    set_Value_StatusCode(p_user, p_node, dataValue) =
+    set_Value_StatusCode(p_user, p_node, p_sc) =
     PRE
         p_user : t_user_i   &
         p_user : t_user     &
         p_node  : t_Node_i    &
         p_node  : t_Node      &
         p_node : dom(a_Value_StatusCode) &
-        dataValue : t_DataValue_i &
-        dataValue : t_DataValue   &
+        p_sc : t_RawStatusCode &
         e_operation_type_write |-> a_NodeId(p_node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
     THEN
-        a_Value_StatusCode(p_node) := DataValue_StatusCode(dataValue)
+        a_Value_StatusCode(p_node) := p_sc
     END
     ;
 

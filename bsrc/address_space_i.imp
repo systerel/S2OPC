@@ -403,7 +403,8 @@ OPERATIONS
         l_dv_datatype_vr,
         l_local_treatment,
         l_variant,
-        l_source_ts
+        l_source_ts,
+        l_raw_sc
     IN
         prev_dataValue := c_DataValue_indet;
         IF isvalid = TRUE THEN
@@ -420,11 +421,12 @@ OPERATIONS
                         l_local_treatment <-- is_local_service_treatment;
                         l_variant <-- get_conv_DataValue_Variant(dataValue);
                         l_source_ts <-- get_conv_DataValue_SourceTimestamp(dataValue);
+                        l_raw_sc <-- get_conv_DataValue_Status(dataValue);
                         IF l_local_treatment = TRUE THEN
                             /* No access authorization check for local treatment */
                             serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, l_variant, index_range);
                             IF serviceStatusCode = e_sc_ok THEN
-                                set_Value_StatusCode(p_user, l_node, dataValue);
+                                set_Value_StatusCode(p_user, l_node, l_raw_sc);
                                 set_Value_SourceTimestamp(p_user, l_node, l_source_ts)
                             END
                         ELSE
@@ -439,7 +441,7 @@ OPERATIONS
                                     serviceStatusCode, prev_dataValue <-- set_Value(p_user, l_node, l_variant, index_range);
                                     IF serviceStatusCode = e_sc_ok THEN
                                         IF l_access_write_status = TRUE THEN
-                                            set_Value_StatusCode(p_user, l_node, dataValue)
+                                            set_Value_StatusCode(p_user, l_node, l_raw_sc)
                                         END;
                                         IF l_access_write_timestamp = TRUE THEN
                                             set_Value_SourceTimestamp(p_user, l_node, l_source_ts)
