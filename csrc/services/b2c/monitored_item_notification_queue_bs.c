@@ -139,7 +139,7 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
     const constants__t_NodeId_i monitored_item_notification_queue_bs__p_nid,
     const constants__t_AttributeId_i monitored_item_notification_queue_bs__p_aid,
     const constants__t_Variant_i monitored_item_notification_queue_bs__p_VariantValuePointer,
-    const constants_statuscodes_bs__t_StatusCode_i monitored_item_notification_queue_bs__p_ValueSc,
+    const constants__t_RawStatusCode monitored_item_notification_queue_bs__p_ValueSc,
     t_bool* const monitored_item_notification_queue_bs__bres)
 {
     *monitored_item_notification_queue_bs__bres = false;
@@ -165,7 +165,7 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
     retStatus =
         SOPC_Variant_Copy(&pNewWriteValue->Value.Value, monitored_item_notification_queue_bs__p_VariantValuePointer);
 
-    util_status_code__B_to_C(monitored_item_notification_queue_bs__p_ValueSc, &pNewWriteValue->Value.Status);
+    pNewWriteValue->Value.Status = monitored_item_notification_queue_bs__p_ValueSc;
 
     if (monitored_item_notification_queue_bs__p_aid == constants__c_AttributeId_indet)
     {

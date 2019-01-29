@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 29/01/2019 12:57:45
+ Date                 : 29/01/2019 13:28:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -282,6 +282,7 @@ void address_space__treat_write_1(
       t_bool address_space__l_local_treatment;
       constants__t_Variant_i address_space__l_variant;
       constants__t_Timestamp address_space__l_source_ts;
+      constants__t_RawStatusCode address_space__l_raw_sc;
       
       *address_space__prev_dataValue = constants__c_DataValue_indet;
       if (address_space__isvalid == true) {
@@ -313,6 +314,8 @@ void address_space__treat_write_1(
                      &address_space__l_variant);
                   data_value_pointer_bs__get_conv_DataValue_SourceTimestamp(address_space__dataValue,
                      &address_space__l_source_ts);
+                  data_value_pointer_bs__get_conv_DataValue_Status(address_space__dataValue,
+                     &address_space__l_raw_sc);
                   if (address_space__l_local_treatment == true) {
                      address_space_bs__set_Value(address_space__p_user,
                         address_space__l_node,
@@ -323,7 +326,7 @@ void address_space__treat_write_1(
                      if (*address_space__serviceStatusCode == constants_statuscodes_bs__e_sc_ok) {
                         address_space_bs__set_Value_StatusCode(address_space__p_user,
                            address_space__l_node,
-                           address_space__dataValue);
+                           address_space__l_raw_sc);
                         address_space_bs__set_Value_SourceTimestamp(address_space__p_user,
                            address_space__l_node,
                            address_space__l_source_ts);
@@ -355,7 +358,7 @@ void address_space__treat_write_1(
                               if (address_space__l_access_write_status == true) {
                                  address_space_bs__set_Value_StatusCode(address_space__p_user,
                                     address_space__l_node,
-                                    address_space__dataValue);
+                                    address_space__l_raw_sc);
                               }
                               if (address_space__l_access_write_timestamp == true) {
                                  address_space_bs__set_Value_SourceTimestamp(address_space__p_user,

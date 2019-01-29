@@ -421,21 +421,21 @@ void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i addre
 
 void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_space_bs__p_user,
                                             const constants__t_Node_i address_space_bs__p_node,
-                                            const constants__t_DataValue_i address_space_bs__dataValue)
+                                            const constants__t_RawStatusCode address_space_bs__p_sc)
 {
     (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Item* item = address_space_bs__p_node;
     assert(item->node_class == OpcUa_NodeClass_Variable);
-    item->value_status = address_space_bs__dataValue->Status;
+    item->value_status = address_space_bs__p_sc;
 }
 
 void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_space_bs__p_user,
                                             const constants__t_Node_i address_space_bs__node,
-                                            constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc)
+                                            constants__t_RawStatusCode* const address_space_bs__sc)
 {
     (void) (address_space_bs__p_user); /* User is already authorized for this operation */
     SOPC_AddressSpace_Item* item = address_space_bs__node;
-    util_status_code__C_to_B(item->value_status, address_space_bs__sc);
+    *address_space_bs__sc = item->value_status;
 }
 
 void address_space_bs__is_NodeId_equal(const constants__t_NodeId_i address_space_bs__nid1,

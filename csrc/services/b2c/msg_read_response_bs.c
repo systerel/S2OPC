@@ -83,7 +83,7 @@ void msg_read_response_bs__alloc_read_response(
 void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_response_bs__resp_msg,
                                              const constants__t_ReadValue_i msg_read_response_bs__rvi,
                                              const constants__t_Variant_i msg_read_response_bs__val,
-                                             const constants_statuscodes_bs__t_StatusCode_i msg_read_response_bs__sc,
+                                             const constants__t_RawStatusCode msg_read_response_bs__raw_sc,
                                              const constants__t_AttributeId_i msg_read_response_bs__aid)
 {
     OpcUa_ReadResponse* pMsgReadResp = (OpcUa_ReadResponse*) msg_read_response_bs__resp_msg;
@@ -102,7 +102,7 @@ void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_r
             SOPC_Variant_Move(&pDataValue->Value, msg_read_response_bs__val);
         }
 
-        util_status_code__B_to_C(msg_read_response_bs__sc, &pDataValue->Status);
+        pDataValue->Status = msg_read_response_bs__raw_sc;
 
         if (msg_read_response_bs__aid == constants__e_aid_Value &&
             (constants__e_ttr_both == ttrRequested || constants__e_ttr_source == ttrRequested))
