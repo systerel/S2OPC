@@ -278,7 +278,7 @@ OPERATIONS
         OR
             serviceStatusCode
             :(serviceStatusCode : t_StatusCode_i &
-                serviceStatusCode : {e_sc_bad_out_of_memory, e_sc_bad_internal_error}) ||
+              serviceStatusCode = e_sc_bad_out_of_memory) ||
             prev_dataValue := c_DataValue_indet
         END
     END

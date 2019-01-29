@@ -202,32 +202,10 @@ OPERATIONS
             a_Value_SourceTimestamp <: a_Value_SourceTimestamp$0 <+ (d_a_DataValue_requested;DataValue_SourceTimestamp) &
             a_Value_ServerTimestamp <: a_Value_ServerTimestamp$0 <+ (d_a_DataValue_requested;DataValue_ServerTimestamp) &
 
-
-            ResponseWrite_StatusCode = %wvi.(
-                wvi : t_WriteValue &
-                wvi : cast_t_WriteValue[1..nb_WriteValue]
-                /* TODO: out_of_memory handling */
-                |
-                {FALSE |-> e_sc_bad_attribute_id_invalid,
-                 TRUE  |-> {FALSE |-> e_sc_bad_node_id_unknown,
-                            TRUE  |-> {FALSE |-> e_sc_bad_not_writable, /* when attribute is invalid for given node class, should return attribute invalid*/
-                                       TRUE  |-> {FALSE |-> e_sc_bad_user_access_denied,
-                                                  TRUE |-> {FALSE |-> e_sc_bad_index_range_invalid,
-                                                            TRUE |-> {FALSE |-> e_sc_bad_index_range_no_data,
-                                                                      TRUE |-> e_sc_ok
-                                                                      }(HasRange_VariantIndex(
-                                                                         DataValue_Variant(
-                                                                          WriteValue_DataValue(wvi)) |-> WriteValue_IndexRange(wvi)))
-                                                           }(IsValid_VariantIndex(
-                                                              DataValue_Variant(
-                                                               WriteValue_DataValue(wvi)) |-> WriteValue_IndexRange(wvi)))
-                                                 }(bool(e_operation_type_write |-> WriteValue_NodeId(wvi) |-> WriteValue_AttributeId(wvi) |-> p_user : s_AuthorizedOperations))
-                                      }(bool(WriteValue_AttributeId(wvi) = e_aid_Value &
-                                             a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) = e_ncl_Variable & /* writemask not managed => only var/value writable */
-                                             conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(WriteValue_NodeId(wvi)))) = TRUE))
-                           }(bool(WriteValue_NodeId(wvi) : ran(a_NodeId)))
-                }(bool(WriteValue_AttributeId(wvi) : t_AttributeId))
-            )
+            !wvi.(wvi : t_WriteValue & wvi : cast_t_WriteValue[1..nb_WriteValue]
+                => ResponseWrite_StatusCode(wvi) : {e_sc_bad_out_of_memory, e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid,
+                    e_sc_bad_node_id_unknown, e_sc_bad_not_writable, e_sc_bad_type_mismatch,
+                    e_sc_bad_user_access_denied, e_sc_bad_index_range_no_data})
         )
     END
     ;
