@@ -684,6 +684,8 @@ def generate_item(ua_node, ty, variant_field, value_status='OpcUa_BadDataUnavail
     return '''    {
         OpcUa_NodeClass_%s,
         %s,
+        {0, 0},
+        {0, 0},
         {.%s={
             .encodeableType = &OpcUa_%sNode_EncodeableType,
             .NodeId = %s,

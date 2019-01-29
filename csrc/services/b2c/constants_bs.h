@@ -43,12 +43,6 @@
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
-typedef struct SOPC_Internal_Timestamp
-{
-    SOPC_DateTime timestamp;
-    uint16_t picoSeconds;
-} SOPC_Internal_Timestamp;
-
 /* Access levels, taken from Part 3 §5.6.2 Table 8 */
 #define SOPC_AccessLevelMask_CurrentRead 1     // bit0
 #define SOPC_AccessLevelMask_CurrentWrite 2    // bit1
@@ -70,7 +64,7 @@ typedef SOPC_ByteString* constants_bs__t_Nonce_i;
 typedef SOPC_QualifiedName* constants_bs__t_QualifiedName_i;
 typedef OpcUa_ReferenceNode* constants_bs__t_Reference_i;
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
-typedef SOPC_Internal_Timestamp constants_bs__t_Timestamp;
+typedef SOPC_Value_Timestamp constants_bs__t_Timestamp;
 typedef SOPC_Variant* constants_bs__t_Variant_i;
 typedef OpcUa_WriteValue* constants_bs__t_WriteValuePointer_i;
 typedef SOPC_Byte constants_bs__t_access_level;
@@ -239,14 +233,15 @@ extern void constants_bs__get_cast_t_subscription(const t_entier4 constants_bs__
 extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
     const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
     constants_bs__t_NodeId_i* const constants_bs__p_nid);
-extern void constants_bs__is_t_acces_level_currentRead(const constants_bs__t_access_level constants_bs__p_access_lvl,
-                                                       t_bool* const constants_bs__bres);
-extern void constants_bs__is_t_acces_level_currentWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
+extern void constants_bs__is_t_access_level_currentRead(const constants_bs__t_access_level constants_bs__p_access_lvl,
                                                         t_bool* const constants_bs__bres);
-extern void constants_bs__is_t_acces_level_statusWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
-                                                       t_bool* const constants_bs__bres);
-extern void constants_bs__is_t_acces_level_timestampWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
-                                                          t_bool* const constants_bs__bres);
+extern void constants_bs__is_t_access_level_currentWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
+                                                         t_bool* const constants_bs__bres);
+extern void constants_bs__is_t_access_level_statusWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
+                                                        t_bool* const constants_bs__bres);
+extern void constants_bs__is_t_access_level_timestampWrite(
+    const constants_bs__t_access_level constants_bs__p_access_lvl,
+    t_bool* const constants_bs__bres);
 extern void constants_bs__is_t_channel(const constants_bs__t_channel_i constants_bs__p_channel,
                                        t_bool* const constants_bs__p_res);
 extern void constants_bs__is_t_channel_config_idx(const constants_bs__t_channel_config_idx_i constants_bs__p_config_idx,

@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 25/01/2019 13:08:07
+ Date                 : 29/01/2019 09:56:51
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -114,10 +114,18 @@ extern void address_space_bs__readall_AddressSpace_Node(
 extern void address_space_bs__set_Value(
    const constants__t_user_i address_space_bs__p_user,
    const constants__t_Node_i address_space_bs__node,
-   const constants__t_DataValue_i address_space_bs__dataValue,
+   const constants__t_Variant_i address_space_bs__variant,
    const constants__t_IndexRange_i address_space_bs__index_range,
    constants__t_StatusCode_i * const address_space_bs__serviceStatusCode,
    constants__t_DataValue_i * const address_space_bs__prev_dataValue);
+extern void address_space_bs__set_Value_SourceTimestamp(
+   const constants__t_user_i address_space_bs__p_user,
+   const constants__t_Node_i address_space_bs__p_node,
+   const constants__t_Timestamp address_space_bs__p_ts);
+extern void address_space_bs__set_Value_StatusCode(
+   const constants__t_user_i address_space_bs__p_user,
+   const constants__t_Node_i address_space_bs__p_node,
+   const constants__t_DataValue_i address_space_bs__dataValue);
 extern void address_space_bs__write_AddressSpace_free_dataValue(
    const constants__t_DataValue_i address_space_bs__data);
 

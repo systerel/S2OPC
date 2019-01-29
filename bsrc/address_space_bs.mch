@@ -238,7 +238,7 @@ OPERATIONS
     ;
 
     /* a_Value, setter */
-    serviceStatusCode, prev_dataValue <-- set_Value(p_user, node, dataValue, index_range) =
+    serviceStatusCode, prev_dataValue <-- set_Value(p_user, node, variant, index_range) =
     PRE
         p_user : t_user_i   &
         p_user : t_user     &
@@ -246,22 +246,27 @@ OPERATIONS
         node  : t_Node      &
         node : dom(a_Value) &
         node : dom(a_Value_StatusCode) &
-        dataValue : t_DataValue_i &
-        dataValue : t_DataValue   &
+        variant : t_Variant_i &
+        variant : t_Variant   &
         index_range : t_IndexRange_i &
         e_operation_type_write |-> a_NodeId(node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
     THEN
         CHOICE
-            IF IsValid_VariantIndex(DataValue_Variant(dataValue) |-> index_range) = TRUE &
-                HasRange_VariantIndex(DataValue_Variant(dataValue) |-> index_range) = TRUE
+            IF IsValid_VariantIndex(variant |-> index_range) = TRUE &
+                HasRange_VariantIndex(variant |-> index_range) = TRUE
             THEN
                 serviceStatusCode := e_sc_ok ||
                 prev_dataValue :(prev_dataValue : t_DataValue_i &
                                  prev_dataValue : t_DataValue &
                                  DataValue_Variant(prev_dataValue) = a_Value(node) &
-                                 DataValue_StatusCode(prev_dataValue) = a_Value_StatusCode(node)) ||
-                a_Value(node) := DataValue_Variant(dataValue)
-            ELSIF IsValid_VariantIndex(DataValue_Variant(dataValue) |-> index_range) = FALSE
+                                 DataValue_StatusCode(prev_dataValue) = a_Value_StatusCode(node) &
+                                 DataValue_SourceTimestamp(prev_dataValue) = a_Value_SourceTimestamp(node) &
+                                 DataValue_ServerTimestamp(prev_dataValue) = a_Value_ServerTimestamp(node)) ||
+                a_Value(node) := variant ||
+                /* In case of success, update server timestamp */
+                a_Value_ServerTimestamp :({node} <<| a_Value_ServerTimestamp = {node} <<| a_Value_ServerTimestamp$0 &
+                                          {node} <| a_Value_ServerTimestamp : t_Node +-> t_Timestamp)
+            ELSIF IsValid_VariantIndex(variant |-> index_range) = FALSE
             THEN
                 serviceStatusCode := e_sc_bad_index_range_invalid ||
                 prev_dataValue := c_DataValue_indet
@@ -275,6 +280,36 @@ OPERATIONS
                 serviceStatusCode : {e_sc_bad_out_of_memory, e_sc_bad_internal_error}) ||
             prev_dataValue := c_DataValue_indet
         END
+    END
+    ;
+    
+    /* TODO: status code are limited to values in constants if we use the B type, use the data value to avoid loss of info */
+    set_Value_StatusCode(p_user, p_node, dataValue) =
+    PRE
+        p_user : t_user_i   &
+        p_user : t_user     &
+        p_node  : t_Node_i    &
+        p_node  : t_Node      &
+        p_node : dom(a_Value_StatusCode) &
+        dataValue : t_DataValue_i &
+        dataValue : t_DataValue   &
+        e_operation_type_write |-> a_NodeId(p_node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
+    THEN
+        a_Value_StatusCode(p_node) := DataValue_StatusCode(dataValue)
+    END
+    ;
+    
+    set_Value_SourceTimestamp(p_user, p_node, p_ts) =
+    PRE
+        p_user : t_user_i   &
+        p_user : t_user     &
+        p_node  : t_Node_i    &
+        p_node  : t_Node      &
+        p_node : dom(a_Value_StatusCode) &
+        p_ts : t_Timestamp &
+        e_operation_type_write |-> a_NodeId(p_node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
+    THEN
+        a_Value_SourceTimestamp(p_node) := p_ts
     END
     ;
 
