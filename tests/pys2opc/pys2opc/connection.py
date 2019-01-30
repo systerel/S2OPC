@@ -168,7 +168,7 @@ class BaseConnectionHandler:
         - waits for the response and returns it,
         - otherwise, returns the request, and the response will be available through get_response().
         """
-        reqCtx = request.requestContext
+        reqCtx = int(request.requestContext)
         self._dRequestContexts[reqCtx] = request
         request.timestampSent = time.time()
         status = libsub.SOPC_LibSub_AsyncSendRequestOnSession(self._id, request.payload, request.requestContext)
