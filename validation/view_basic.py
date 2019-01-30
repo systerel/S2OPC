@@ -23,22 +23,35 @@ from common import sUri, browseSubTree
 
 def browse_tests(client, logger):
 
-    nid, subBrowseNames, subNids = browseSubTree
-    subNids = list(subNids)
-    for bn in subBrowseNames:
-        subNids.append(nid + '.' + bn)
-    print("Browsing children of node", nid)
+    nid, subPostfixNodeIdHierarchical, subNodeIdNonHierarchical = browseSubTree
+
+    # Hierarchical referenced node
+    childrenNids = list()
+    for bn in subPostfixNodeIdHierarchical:
+        childrenNids.append(nid + '.' + bn)
+    print("Browsing children of node {} expecting nodes {}".format(nid, childrenNids))
     n1 = client.get_node(nid)
-    children = n1.get_children()
+     # Get all children of a node. By default hierarchical references and all node classes are returned.
+    children = n1.get_children() # <=> n1.get_children(refs=33) for HierarchicalReferences
     # Checking number of children and their associated ids
-    logger.add_test('Browse Test - number of children for Node '+nid, len(children) == len(subNids))
+    logger.add_test('Browse Test - number of children for Node {}. Expecting {} == {}'.format(nid, len(childrenNids), len(children)), len(childrenNids) == len(children))
     # There shall not be backward references
     parentNid = nid[:nid.rfind('.')]
     node = Node(sUri, parentNid)
-    logger.add_test('Browse Test - child '+parentNid, node not in children)
+    logger.add_test('Browse Test - parent {} is not in browsed children'.format(parentNid), node not in children)
     # Checking forward references
-    for subNid in subNids:
-        print(subNid)
-        node = Node(sUri, subNid)
-        logger.add_test('Browse Test - child '+subNid, node in children)
+    for childNid in childrenNids:
+        print(childNid)
+        node = Node(sUri, childNid)
+        logger.add_test('Browse Test - child retrieved in browsed children'.format(childNid), node in children)
 
+    nonHierarchicalNids = list(subNodeIdNonHierarchical)
+    nonHierChildren = n1.get_children(refs=32) #NonHierarchicalReferences
+    print ("Non hier children: "+str(nonHierChildren))
+    # Checking number of children and their associated ids
+    logger.add_test('Browse Test - number of non hierarchical children for Node {}. Expecting {} == {}'.format(nid, len(nonHierarchicalNids), len(nonHierChildren)), len(nonHierarchicalNids) == len(nonHierChildren))
+    # Checking forward references
+    for childNid in nonHierarchicalNids:
+        print(childNid)
+        node = Node(sUri, childNid)
+        logger.add_test('Browse Test - non hierarchical child '+childNid, node in nonHierChildren)
