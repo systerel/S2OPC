@@ -123,6 +123,7 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
 {
     (void) handler;
     (void) id;
+    OpcUa_WriteValue* wv = NULL;
 
     SOPC_App_AddSpace_Event asEvent = (SOPC_App_AddSpace_Event) event;
 
@@ -134,7 +135,28 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
 
         if (nodeId != NULL)
         {
-            SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT on nodeId '%s'", nodeId);
+            wv = (OpcUa_WriteValue*) params;
+            if (wv != NULL)
+            {
+                switch (wv->NodeId.IdentifierType)
+                {
+                case SOPC_IdentifierType_Numeric:
+                    SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT on : Namespace %" PRIu16 ", ID %" PRIu32
+                                           ", AttributeId: %" PRIu32 ", Write status: %" PRIX32,
+                                           wv->NodeId.Namespace, wv->NodeId.Data.Numeric, wv->AttributeId,
+                                           (SOPC_StatusCode) auxParam);
+                    break;
+                case SOPC_IdentifierType_String:
+                    SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT on : Namespace %" PRIu16
+                                           ", ID %s"
+                                           ", AttributeId: %" PRIu32 ", Write status: %" PRIX32,
+                                           wv->NodeId.Namespace, SOPC_String_GetRawCString(&wv->NodeId.Data.String),
+                                           wv->AttributeId, (SOPC_StatusCode) auxParam);
+                    break;
+                default:
+                    break;
+                }
+            }
             free(nodeId);
         }
         else
