@@ -124,31 +124,11 @@ static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatu
 
 static void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus)
 {
-    OpcUa_WriteValue* wv = NULL;
-    if (event == AS_WRITE_EVENT)
-    {
-        printf("<Test_Server_Toolkit: address space WRITE event: OK\n");
-        wv = (OpcUa_WriteValue*) opParam;
-        if (wv != NULL)
-        {
-            switch (wv->NodeId.IdentifierType)
-            {
-            case SOPC_IdentifierType_Numeric:
-                printf("  NodeId: Namespace %" PRIu16 ", ID %" PRIu32 "\n", wv->NodeId.Namespace,
-                       wv->NodeId.Data.Numeric);
-                break;
-            case SOPC_IdentifierType_String:
-                printf("  NodeId: Namespace %" PRIu16 ", ID %s\n", wv->NodeId.Namespace,
-                       SOPC_String_GetRawCString(&wv->NodeId.Data.String));
-                break;
-            default:
-                break;
-            }
-            printf("  AttributeId: %" PRIu32 "\n", wv->AttributeId);
-            printf("  Write status: %" PRIX32 "\n", opStatus);
-        }
-    }
-    else
+    /* avoid unused parameter compiler warning */
+    (void) opParam;
+    (void) opStatus;
+
+    if (event != AS_WRITE_EVENT)
     {
         printf("<Test_Server_Toolkit: unexpected address space event %d : NOK\n", event);
     }
