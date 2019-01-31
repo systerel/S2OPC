@@ -131,37 +131,22 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
     {
     case AS_WRITE_EVENT:
     {
-        char* nodeId = (params != NULL) ? SOPC_NodeId_ToCString(&((OpcUa_WriteValue*) params)->NodeId) : NULL;
+        wv = (OpcUa_WriteValue*) params;
+        if (wv != NULL)
+        {
+            char* nodeId = (params != NULL) ? SOPC_NodeId_ToCString(&wv->NodeId) : NULL;
 
-        if (nodeId != NULL)
-        {
-            wv = (OpcUa_WriteValue*) params;
-            if (wv != NULL)
+            if (nodeId != NULL)
             {
-                switch (wv->NodeId.IdentifierType)
-                {
-                case SOPC_IdentifierType_Numeric:
-                    SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT on : Namespace %" PRIu16 ", ID %" PRIu32
-                                           ", AttributeId: %" PRIu32 ", Write status: %" PRIX32,
-                                           wv->NodeId.Namespace, wv->NodeId.Data.Numeric, wv->AttributeId,
-                                           (SOPC_StatusCode) auxParam);
-                    break;
-                case SOPC_IdentifierType_String:
-                    SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT on : Namespace %" PRIu16
-                                           ", ID %s"
-                                           ", AttributeId: %" PRIu32 ", Write status: %" PRIX32,
-                                           wv->NodeId.Namespace, SOPC_String_GetRawCString(&wv->NodeId.Data.String),
-                                           wv->AttributeId, (SOPC_StatusCode) auxParam);
-                    break;
-                default:
-                    break;
-                }
+                SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT on NodeId: %s, AttributeId: %" PRIu32
+                                       ", Write status: %" PRIX32,
+                                       nodeId, wv->AttributeId, (SOPC_StatusCode) auxParam);
+                free(nodeId);
             }
-            free(nodeId);
-        }
-        else
-        {
-            SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT (WriteValue or NodeId string invalid)");
+            else
+            {
+                SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT (WriteValue or NodeId string invalid)");
+            }
         }
 
         if (NULL != appAddressSpaceNotificationCallback)
