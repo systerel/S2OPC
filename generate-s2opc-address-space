@@ -21,6 +21,7 @@
 
 import argparse
 import base64
+import binascii
 import sys
 import uuid
 from xml.etree.ElementTree import iterparse, Element
@@ -425,6 +426,10 @@ def parse_value_tag(tag_name):
 def identity(x):
     return x
 
+# Bytestrings are encoded as base4
+def decode_bytestring(x):
+    return binascii.a2b_base64(x).decode('utf-8')
+
 # Returns a VariableValue object
 def collect_variable_value(n):
 
@@ -484,7 +489,7 @@ def collect_variable_value(n):
         parse_func = identity
     elif base_type == UA_VALUE_TYPE_BYTESTRING:
         ty = VALUE_TYPE_BYTESTRING
-        parse_func = identity
+        parse_func = decode_bytestring
     elif base_type == UA_VALUE_TYPE_XMLELEMENT:
         ty = VALUE_TYPE_XMLELEMENT
         parse_func = identity

@@ -1064,7 +1064,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:ByteString>ByteString:S2OPC</uax:ByteString>
+      <uax:ByteString>Qnl0ZVN0cmluZzpTMk9QQw==</uax:ByteString>
     </Value>
   </UAVariable>
   <UAVariable AccessLevel="99" BrowseName="1:XmlElement" DataType="XmlElement" NodeId="ns=1;i=1006" ParentNodeId="ns=1;i=1000">
@@ -1369,11 +1369,11 @@
     </References>
     <Value>
       <uax:ListOfByteString>
-        <uax:ByteString>The quick</uax:ByteString>
-        <uax:ByteString>brown fox</uax:ByteString>
-        <uax:ByteString>jumps over</uax:ByteString>
-        <uax:ByteString>the lazy</uax:ByteString>
-        <uax:ByteString>dog</uax:ByteString>
+				<uax:ByteString>Qnl0ZVN0cmluZzpJTkdPUENT</uax:ByteString>
+				<uax:ByteString>Qnl0ZVN0cmluZzpJTkdPUENT</uax:ByteString>
+				<uax:ByteString>Qnl0ZVN0cmluZzpJTkdPUENT</uax:ByteString>
+				<uax:ByteString>Qnl0ZVN0cmluZzpJTkdPUENT</uax:ByteString>
+				<uax:ByteString>Qnl0ZVN0cmluZzpJTkdPUENT</uax:ByteString>
       </uax:ListOfByteString>
     </Value>
   </UAVariable>
@@ -1386,11 +1386,11 @@
     </References>
     <Value>
       <uax:ListOfXmlElement>
-        <uax:XmlElement>The quick</uax:XmlElement>
-        <uax:XmlElement>brown fox</uax:XmlElement>
-        <uax:XmlElement>jumps over</uax:XmlElement>
-        <uax:XmlElement>the lazy</uax:XmlElement>
-        <uax:XmlElement>dog</uax:XmlElement>
+				<uax:XmlElement>The_quick</uax:XmlElement>
+				<uax:XmlElement>brown_fox</uax:XmlElement>
+				<uax:XmlElement>jumps_over</uax:XmlElement>
+				<uax:XmlElement>the_lazy</uax:XmlElement>
+				<uax:XmlElement>dog</uax:XmlElement>
       </uax:ListOfXmlElement>
     </Value>
   </UAVariable>
