@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 29/01/2019 12:57:47
+ Date                 : 06/02/2019 08:23:25
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,6 +43,7 @@
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
+#define constants__t_Byte constants_bs__t_Byte
 #define constants__t_DataValue_i constants_bs__t_DataValue_i
 #define constants__t_ExpandedNodeId_i constants_bs__t_ExpandedNodeId_i
 #define constants__t_IndexRange_i constants_bs__t_IndexRange_i
@@ -109,7 +110,7 @@ typedef enum {
    constants__e_aid_IsAbstract,
    constants__e_aid_Symmetric,
    constants__e_aid_InverseName,
-   constants__e_aid_ContainsNoLoop,
+   constants__e_aid_ContainsNoLoops,
    constants__e_aid_EventNotifier,
    constants__e_aid_Value,
    constants__e_aid_DataType,
@@ -291,6 +292,7 @@ typedef enum {
 /*--------------------------
    Added by the Translator
   --------------------------*/
+#define constants__t_Byte_max constants_bs__t_Byte_max
 #define constants__t_DataValue_i_max constants_bs__t_DataValue_i_max
 #define constants__t_ExpandedNodeId_i_max constants_bs__t_ExpandedNodeId_i_max
 #define constants__t_IndexRange_i_max constants_bs__t_IndexRange_i_max
@@ -357,6 +359,7 @@ typedef enum {
 #define constants__c_QualifiedName_indet constants_bs__c_QualifiedName_indet
 #define constants__c_Reference_indet constants_bs__c_Reference_indet
 #define constants__c_SignatureData_indet constants_bs__c_SignatureData_indet
+#define constants__c_Timestamp_null constants_bs__c_Timestamp_null
 #define constants__c_Variant_indet constants_bs__c_Variant_indet
 #define constants__c_WriteValuePointer_indet constants_bs__c_WriteValuePointer_indet
 #define constants__c_byte_buffer_indet constants_bs__c_byte_buffer_indet

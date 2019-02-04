@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 29/01/2019 12:57:45
+ Date                 : 05/02/2019 12:57:12
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -90,6 +90,10 @@ extern void address_space__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
+extern void address_space__is_mandatory_attribute(
+   const constants__t_NodeClass_i address_space__p_ncl,
+   const constants__t_AttributeId_i address_space__p_aid,
+   t_bool * const address_space__bres);
 extern void address_space__is_variable_compat_type(
    const constants__t_NodeId_i address_space__p_dv_typ_nid,
    const t_entier4 address_space__p_dv_vr,
@@ -97,6 +101,17 @@ extern void address_space__is_variable_compat_type(
    const t_entier4 address_space__p_var_vr,
    t_bool * const address_space__btyp_ok,
    t_bool * const address_space__btyp_need_conv);
+extern void address_space__read_AddressSpace_Attribute_value(
+   const constants__t_user_i address_space__p_user,
+   const constants__t_Node_i address_space__p_node,
+   const constants__t_NodeId_i address_space__p_nid,
+   const constants__t_AttributeId_i address_space__p_aid,
+   const constants__t_IndexRange_i address_space__p_index_range,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__sc,
+   constants__t_Variant_i * const address_space__val,
+   constants__t_RawStatusCode * const address_space__val_sc,
+   constants__t_Timestamp * const address_space__val_ts_src,
+   constants__t_Timestamp * const address_space__val_ts_srv);
 extern void address_space__treat_write_1(
    const t_bool address_space__isvalid,
    const constants_statuscodes_bs__t_StatusCode_i address_space__status,
@@ -115,14 +130,17 @@ extern void address_space__alloc_write_request_responses(
    const t_entier4 address_space__nb_req,
    t_bool * const address_space__bret);
 extern void address_space__dealloc_write_request_responses(void);
-extern void address_space__read_NodeClass_Attribute(
+extern void address_space__read_Node_Attribute(
    const constants__t_user_i address_space__p_user,
-   const constants__t_Node_i address_space__node,
-   const constants__t_AttributeId_i address_space__aid,
-   const constants__t_IndexRange_i address_space__index_range,
+   const constants__t_Node_i address_space__p_node,
+   const constants__t_NodeId_i address_space__p_nid,
+   const constants__t_AttributeId_i address_space__p_aid,
+   const constants__t_IndexRange_i address_space__p_index_range,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__sc,
-   constants__t_NodeClass_i * const address_space__ncl,
-   constants__t_Variant_i * const address_space__val);
+   constants__t_Variant_i * const address_space__val,
+   constants__t_RawStatusCode * const address_space__val_sc,
+   constants__t_Timestamp * const address_space__val_ts_src,
+   constants__t_Timestamp * const address_space__val_ts_srv);
 extern void address_space__treat_write_request_WriteValues(
    const constants__t_user_i address_space__p_user,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__StatusCode_service);

@@ -44,16 +44,16 @@
 #include "sopc_user_app_itf.h"
 
 /* Access levels, taken from Part 3 §5.6.2 Table 8 */
-#define SOPC_AccessLevelMask_CurrentRead 1     // bit0
-#define SOPC_AccessLevelMask_CurrentWrite 2    // bit1
-#define SOPC_AccessLevelMask_StatusWrite 32    // bit5
-#define SOPC_AccessLevelMask_TimestampWrite 64 // bit6
+#define SOPC_AccessLevelMask_CurrentRead (uint8_t) 1     // bit0
+#define SOPC_AccessLevelMask_CurrentWrite (uint8_t) 2    // bit1
+#define SOPC_AccessLevelMask_StatusWrite (uint8_t) 32    // bit5
+#define SOPC_AccessLevelMask_TimestampWrite (uint8_t) 64 // bit6
 
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
+typedef uint8_t constants_bs__t_Byte;
 typedef SOPC_DataValue* constants_bs__t_DataValue_i;
-typedef SOPC_DateTime constants_bs__t_DateTime;
 typedef SOPC_ExpandedNodeId* constants_bs__t_ExpandedNodeId_i;
 typedef SOPC_String* constants_bs__t_IndexRange_i;
 typedef int32_t constants_bs__t_Int32;
@@ -104,7 +104,6 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
    Added by the Translator
   --------------------------*/
 #define constants_bs__t_DataValue_i_max (-1)
-#define constants_bs__t_DateTime_max (-1)
 #define constants_bs__t_ExpandedNodeId_i_max (-1)
 #define constants_bs__t_IndexRange_i_max (-1)
 #define constants_bs__t_Int32_max (-1)
@@ -113,8 +112,10 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__t_Node_i_max (-1)
 #define constants_bs__t_Nonce_i_max (-1)
 #define constants_bs__t_QualifiedName_i_max (-1)
+#define constants_bs__t_RawStatusCode_max (-1)
 #define constants_bs__t_Reference_i_max (-1)
 #define constants_bs__t_SignatureData_i_max (-1)
+#define constants_bs__t_Timestamp_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
 #define constants_bs__t_WriteValuePointer_i_max (-1)
 #define constants_bs__t_access_level_max (-1)
@@ -152,7 +153,6 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
-
 extern const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId;
 extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
 #define constants_bs__c_DataValue_indet NULL
@@ -166,6 +166,8 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_QualifiedName_indet 0
 #define constants_bs__c_Reference_indet 0
 #define constants_bs__c_SignatureData_indet 0
+#define constants_bs__c_Timestamp_null \
+    (SOPC_Value_Timestamp) { 0, 0 }
 #define constants_bs__c_Variant_indet 0
 #define constants_bs__c_WriteValuePointer_indet 0
 #define constants_bs__c_byte_buffer_indet 0
@@ -200,6 +202,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_user_token_indet 0
 #define constants_bs__k_n_BrowseResponse_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_BrowseTarget_max SOPC_MAX_OPERATIONS_PER_MSG
+#define constants_bs__k_n_IndexRange_max 0
 #define constants_bs__k_n_WriteResponse_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_genericOperationPerReq_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_monitoredItemNotif_max SOPC_MAX_OPERATIONS_PER_MSG
@@ -207,7 +210,6 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__k_n_publishRequestPerSub_max SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS
 #define constants_bs__k_n_read_resp_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_republishNotifPerSub_max (2 * SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS)
-#define constants_bs__c_IndexRange_indet 0
 #define constants_bs__k_n_registerNodes_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_unregisterNodes_max SOPC_MAX_OPERATIONS_PER_MSG
 

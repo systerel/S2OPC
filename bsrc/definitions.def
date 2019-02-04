@@ -18,32 +18,22 @@
  */
 
 DEFINITIONS
-    /*TODO: add browse name and display name */
     AttributeID_Node_Variant == ({
-/*        e_aid_NodeId,
-        e_aid_NodeClass,
-        e_aid_BrowseName,
-        e_aid_DisplayName,
-        e_aid_Description,
-        e_aid_WriteMask,
-        e_aid_UserWriteMask,
-        e_aid_IsAbstract,
-        e_aid_Symmetric,
-        e_aid_InverseName,
-        e_aid_ContainsNoLoop,
-        e_aid_EventNotifier,
-        e_aid_Value,
-        e_aid_DataType,
-        e_aid_ValueRank,
-        e_aid_ArrayDimensions,
-        e_aid_AccessLevel,
-        e_aid_UserAccessLevel,
-        e_aid_MinimumSamplingInterval,
-        e_aid_Historizing,
-        e_aid_Executable,
-        e_aid_UserExecutable
-*/
-        e_aid_NodeId |-> (a_NodeId;conv_NodeId_Variant),
+        /* mandatory attributes: */
+        e_aid_AccessLevel |-> (a_AccessLevel;conv_AccessLevel_Variant),
+        e_aid_BrowseName |-> (a_BrowseName;conv_QualifiedName_Variant),
+        e_aid_ContainsNoLoops |-> (a_ContainsNoLoops;conv_Boolean_Variant),
+        e_aid_DataType |-> (a_DataType;conv_NodeId_Variant),
+        e_aid_DisplayName |-> (a_DisplayName;conv_LocalizedText_Variant),
+        e_aid_EventNotifier |-> (a_EventNotifier;conv_Byte_Variant),
+        e_aid_Executable |-> (a_Executable;conv_Boolean_Variant),
+        e_aid_Historizing |-> (a_Historizing;conv_Boolean_Variant),
+        e_aid_IsAbstract |-> (a_IsAbstract;conv_Boolean_Variant),
         e_aid_NodeClass |-> (a_NodeClass;conv_NodeClass_Variant),
-        e_aid_Value |-> a_Value
+        e_aid_NodeId |-> (a_NodeId;conv_NodeId_Variant),
+        e_aid_Symmetric |-> (a_Symmetric;conv_Boolean_Variant),
+        e_aid_UserAccessLevel |-> (a_UserAccessLevel;conv_AccessLevel_Variant),
+        e_aid_UserExecutable |-> (a_UserExecutable;conv_Boolean_Variant),
+        e_aid_Value |-> a_Value,
+        e_aid_ValueRank |-> (a_ValueRank;conv_ValueRank_Variant)
     })

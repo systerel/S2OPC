@@ -21,7 +21,7 @@
 
  File Name            : service_read.c
 
- Date                 : 29/01/2019 12:57:52
+ Date                 : 05/02/2019 12:57:19
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -42,6 +42,7 @@ void service_read__INITIALISATION(void) {
    OPERATIONS Clause
   --------------------*/
 void service_read__fill_read_response_1(
+   const constants__t_TimestampsToReturn_i service_read__p_TimestampsToReturn,
    const constants__t_user_i service_read__p_user,
    const constants__t_msg_i service_read__p_resp_msg,
    const constants_statuscodes_bs__t_StatusCode_i service_read__p_sc,
@@ -52,61 +53,59 @@ void service_read__fill_read_response_1(
    {
       t_bool service_read__l_is_valid;
       constants__t_Node_i service_read__l_node;
-      constants__t_NodeClass_i service_read__l_ncl;
       constants__t_Variant_i service_read__l_value;
       constants_statuscodes_bs__t_StatusCode_i service_read__l_sc;
       constants__t_RawStatusCode service_read__l_raw_sc;
-      t_bool service_read__l_authorized;
+      constants__t_Timestamp service_read__l_ts_src;
+      constants__t_Timestamp service_read__l_ts_srv;
       
       if (service_read__p_sc == constants_statuscodes_bs__e_sc_ok) {
          address_space__readall_AddressSpace_Node(service_read__p_nid,
             &service_read__l_is_valid,
             &service_read__l_node);
          if (service_read__l_is_valid == true) {
-            address_space__get_user_authorization(constants__e_operation_type_read,
+            address_space__read_Node_Attribute(service_read__p_user,
+               service_read__l_node,
                service_read__p_nid,
                service_read__p_aid,
-               service_read__p_user,
-               &service_read__l_authorized);
-            if (service_read__l_authorized == true) {
-               address_space__read_NodeClass_Attribute(service_read__p_user,
-                  service_read__l_node,
-                  service_read__p_aid,
-                  service_read__p_index_range,
-                  &service_read__l_sc,
-                  &service_read__l_ncl,
-                  &service_read__l_value);
-               if (service_read__l_sc == constants_statuscodes_bs__e_sc_ok) {
-                  if ((service_read__p_aid == constants__e_aid_Value) &&
-                     (service_read__l_ncl == constants__e_ncl_Variable)) {
-                     address_space__get_Value_StatusCode(service_read__p_user,
-                        service_read__l_node,
-                        &service_read__l_raw_sc);
-                  }
-                  else {
-                     constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(constants_statuscodes_bs__e_sc_ok,
-                        &service_read__l_raw_sc);
-                  }
-               }
-               else {
-                  constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(service_read__l_sc,
-                     &service_read__l_raw_sc);
+               service_read__p_index_range,
+               &service_read__l_sc,
+               &service_read__l_value,
+               &service_read__l_raw_sc,
+               &service_read__l_ts_src,
+               &service_read__l_ts_srv);
+            if (service_read__l_sc == constants_statuscodes_bs__e_sc_ok) {
+               switch (service_read__p_TimestampsToReturn) {
+               case constants__e_ttr_source:
+                  service_read__l_ts_srv = constants__c_Timestamp_null;
+                  break;
+               case constants__e_ttr_server:
+                  service_read__l_ts_src = constants__c_Timestamp_null;
+                  break;
+               case constants__e_ttr_neither:
+                  service_read__l_ts_src = constants__c_Timestamp_null;
+                  service_read__l_ts_srv = constants__c_Timestamp_null;
+                  break;
+               default:
+                  break;
                }
                msg_read_response_bs__set_read_response(service_read__p_resp_msg,
                   service_read__p_rvi,
                   service_read__l_value,
                   service_read__l_raw_sc,
-                  service_read__p_aid);
+                  service_read__l_ts_src,
+                  service_read__l_ts_srv);
                address_space__read_AddressSpace_free_variant(service_read__l_value);
             }
             else {
-               constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(constants_statuscodes_bs__e_sc_bad_user_access_denied,
+               constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(service_read__l_sc,
                   &service_read__l_raw_sc);
                msg_read_response_bs__set_read_response(service_read__p_resp_msg,
                   service_read__p_rvi,
                   constants__c_Variant_indet,
                   service_read__l_raw_sc,
-                  service_read__p_aid);
+                  constants__c_Timestamp_null,
+                  constants__c_Timestamp_null);
             }
          }
          else {
@@ -116,7 +115,8 @@ void service_read__fill_read_response_1(
                service_read__p_rvi,
                constants__c_Variant_indet,
                service_read__l_raw_sc,
-               service_read__p_aid);
+               constants__c_Timestamp_null,
+               constants__c_Timestamp_null);
          }
       }
       else {
@@ -126,12 +126,14 @@ void service_read__fill_read_response_1(
             service_read__p_rvi,
             constants__c_Variant_indet,
             service_read__l_raw_sc,
-            service_read__p_aid);
+            constants__c_Timestamp_null,
+            constants__c_Timestamp_null);
       }
    }
 }
 
 void service_read__fill_read_response(
+   const constants__t_TimestampsToReturn_i service_read__p_TimestampsToReturn,
    const constants__t_user_i service_read__p_user,
    const constants__t_msg_i service_read__req_msg,
    const constants__t_msg_i service_read__resp_msg) {
@@ -156,7 +158,8 @@ void service_read__fill_read_response(
             &service_read__l_nid,
             &service_read__l_aid,
             &service_read__l_index_range);
-         service_read__fill_read_response_1(service_read__p_user,
+         service_read__fill_read_response_1(service_read__p_TimestampsToReturn,
+            service_read__p_user,
             service_read__resp_msg,
             service_read__l_sc,
             service_read__l_nid,

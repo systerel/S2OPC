@@ -63,6 +63,8 @@ CONCRETE_VARIABLES
     ResponseWrite_allocated
 
 DEFINITIONS
+    "definitions.def";
+
     /* Relation associating to a node a value which is requested to be written
     in the address space */
     d_a_DataValue_requested ==
@@ -83,13 +85,55 @@ DEFINITIONS
     ((dvNodeId = c_Null_Type_NodeId or dvNodeId = varNodeId or dvNodeId |-> varNodeId : Type_IsTransitiveSubtype) &
         dvConcValueRank |-> varValueRank : Type_IsIncludedValueRank)
     /* + Management of exceptional cases when typing a variable */
-    or d_Type_IsVariableSubtype_NeedConv(dvNodeId, dvConcValueRank, varNodeId, varValueRank)
+    or d_Type_IsVariableSubtype_NeedConv(dvNodeId, dvConcValueRank, varNodeId, varValueRank);
+
+    d_Mandatory_Attribute(dvNcl, dvAid) ==
+    /* COMMON MANDATORY ATTRIBUTES: all node classes have it */
+    (dvAid = e_aid_BrowseName or dvAid = e_aid_DisplayName or
+        dvAid = e_aid_NodeClass or dvAid = e_aid_NodeId) or
+
+    (dvNcl = e_ncl_Variable & /* VARIABLE */
+        (dvAid = e_aid_AccessLevel or dvAid = e_aid_DataType or
+            dvAid = e_aid_Historizing or dvAid = e_aid_UserAccessLevel or
+            dvAid = e_aid_Value or dvAid = e_aid_ValueRank)
+    ) or
+    (dvNcl = e_ncl_VariableType & /* VARIABLE TYPE */
+        (dvAid = e_aid_DataType or dvAid = e_aid_IsAbstract or dvAid = e_aid_ValueRank)
+    ) or
+    (dvNcl = e_ncl_Object & /* OBJECT */
+        dvAid = e_aid_EventNotifier
+    ) or
+    (dvNcl = e_ncl_ObjectType & /* OBJECT TYPE */
+        dvAid = e_aid_IsAbstract
+    ) or
+    (dvNcl = e_ncl_ReferenceType & /* REFERENCE TYPE */
+        (dvAid = e_aid_IsAbstract or dvAid = e_aid_Symmetric)
+    ) or
+    (dvNcl = e_ncl_DataType & /* DATA TYPE */
+        dvAid = e_aid_IsAbstract
+    ) or
+    (dvNcl = e_ncl_Method & /* METHOD */
+        dvAid = e_aid_UserExecutable
+    ) or
+    (dvNcl = e_ncl_View & /* VIEW */
+        (dvAid = e_aid_EventNotifier or dvAid = e_aid_ContainsNoLoops))
 
 
 INITIALISATION
     ResponseWrite_allocated := FALSE
 
 LOCAL_OPERATIONS
+    bres <-- is_mandatory_attribute(p_ncl, p_aid) =
+    PRE
+        p_ncl : t_NodeClass_i &
+        p_ncl : t_NodeClass &
+        p_aid : t_AttributeId_i &
+        p_aid : t_AttributeId
+    THEN
+        bres := bool(d_Mandatory_Attribute(p_ncl, p_aid))
+    END
+    ;
+
     /* Outer treat operation. Validates isvalid, validates user, records the write. */
     serviceStatusCode, prev_dataValue <-- treat_write_1(isvalid, status, p_user, nid, aid, dataValue, index_range) =
     PRE
@@ -226,11 +270,121 @@ LOCAL_OPERATIONS
         btyp_ok := bool(d_Type_IsVariableSubtype(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr)) ||
         btyp_need_conv := bool(d_Type_IsVariableSubtype_NeedConv(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr))
     END
+    ;
+
+    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_node, p_nid, p_aid, p_index_range) =
+    PRE
+        p_user : t_user_i &
+        p_user : t_user   &
+        p_node : t_Node_i &
+        p_node : t_Node &
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId &
+        p_nid = a_NodeId(p_node) &
+        p_aid : t_AttributeId_i &
+        p_aid : t_AttributeId &
+        p_index_range : t_IndexRange_i &
+        p_node : dom(AttributeID_Node_Variant(p_aid)) &
+        (a_NodeClass(p_node) = e_ncl_Variable & p_aid = e_aid_Value =>
+        (local_service_treatment = TRUE or
+         (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
+          e_operation_type_read |-> a_NodeId(p_node) |-> p_aid |-> p_user : s_AuthorizedOperations)))
+    THEN
+        sc,
+        val,
+        val_sc,
+        val_ts_src,
+        val_ts_srv
+        :(sc : t_StatusCode_i &
+          sc : t_StatusCode &
+          val : t_Variant_i &
+          val_sc : t_RawStatusCode &
+          val_ts_src : t_Timestamp &
+          val_ts_srv : t_Timestamp &
+          /* Attribute is Value and IndexRange of Value is invalid */
+          (p_aid = e_aid_Value &
+           IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE
+           =>
+           val = c_Variant_indet &
+           sc = e_sc_bad_index_range_invalid
+          ) &
+          /* Attribute is Value and IndexRange of Value does not contains data */
+          (p_aid = e_aid_Value &
+           IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
+           HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE
+           =>
+           val = c_Variant_indet &
+           sc = e_sc_bad_index_range_no_data
+          ) &
+          /* Attribute is not Value or IndexRange of Value is valid and contains data*/
+          ((p_aid /= e_aid_Value or
+            p_aid = e_aid_Value &
+            IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
+            HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE) =>
+           sc = e_sc_ok or
+           (val = c_Variant_indet &
+            sc = e_sc_bad_out_of_memory)
+          ) &
+
+          /* In case of success set other output paramaters */
+          (sc = e_sc_ok =>
+            /* Set Variant value */
+            val = AttributeID_Node_Variant(p_aid)(p_node) &
+            /* Fill status code and timestamp: Variable Value / NOT Variable Value */
+            (a_NodeClass(p_node) = e_ncl_Variable & p_aid = e_aid_Value =>
+             val_sc = a_Value_StatusCode(p_node) &
+             val_ts_src = a_Value_SourceTimestamp(p_node) &
+             val_ts_srv = a_Value_ServerTimestamp(p_node)) &
+            (not (a_NodeClass(p_node) = e_ncl_Variable  & p_aid = e_aid_Value)  =>
+             val_sc = c_RawStatusCode_Good &
+             val_ts_src = c_Timestamp_null &
+             val_ts_srv = c_Timestamp_null)
+          ) &
+          /* In case of failure set other output parameters */
+          (not (sc = e_sc_ok) =>
+             val = c_Variant_indet &
+             val_sc = c_RawStatusCode_BadInvalidState &
+             val_ts_src = c_Timestamp_null &
+             val_ts_srv = c_Timestamp_null)
+        )
+    END
 
 OPERATIONS
     /* LOCAL_OPERATIONS */
 
-serviceStatusCode, prev_dataValue <-- treat_write_1(isvalid, status, p_user, nid, aid, dataValue, index_range) =
+    /* We only manage mandatory attributes */
+    bres <-- is_mandatory_attribute(p_ncl, p_aid) =
+    BEGIN
+        /* Check attributes present in all node clasess */
+        bres := bool(p_aid = e_aid_BrowseName or p_aid = e_aid_DisplayName or
+                     p_aid = e_aid_NodeClass or p_aid = e_aid_NodeId);
+        IF bres = FALSE THEN
+            CASE p_ncl OF
+                EITHER e_ncl_Variable THEN /* VARIABLE */
+                    bres := bool(p_aid = e_aid_AccessLevel or p_aid = e_aid_DataType or
+                        p_aid = e_aid_Historizing or p_aid = e_aid_UserAccessLevel or
+                        p_aid = e_aid_Value or p_aid = e_aid_ValueRank)
+                OR e_ncl_VariableType THEN /* VARIABLE TYPE */
+                    bres := bool(p_aid = e_aid_DataType or p_aid = e_aid_IsAbstract or p_aid = e_aid_ValueRank)
+                OR e_ncl_Object THEN /* OBJECT */
+                    bres := bool(p_aid = e_aid_EventNotifier)
+                OR e_ncl_ObjectType THEN /* OBJECT TYPE */
+                    bres := bool(p_aid = e_aid_IsAbstract)
+                OR e_ncl_ReferenceType THEN /* REFERENCE TYPE */
+                    bres := bool(p_aid = e_aid_IsAbstract or p_aid = e_aid_Symmetric)
+                OR e_ncl_DataType THEN /* DATA TYPE */
+                    bres := bool(p_aid = e_aid_IsAbstract)
+                OR e_ncl_Method THEN /* METHOD */
+                    bres := bool(p_aid = e_aid_Executable or p_aid = e_aid_UserExecutable)
+                OR e_ncl_View THEN /* VIEW */
+                    bres := bool(p_aid = e_aid_EventNotifier or p_aid = e_aid_ContainsNoLoops)
+                END
+           END
+        END
+    END
+    ;
+
+    serviceStatusCode, prev_dataValue <-- treat_write_1(isvalid, status, p_user, nid, aid, dataValue, index_range) =
     VAR
         l_isvalid,
         l_node,
@@ -374,12 +528,100 @@ serviceStatusCode, prev_dataValue <-- treat_write_1(isvalid, status, p_user, nid
     END
     ;
 
+    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_node, p_nid, p_aid, p_index_range) =
+    VAR
+        l_user_read_auth,
+        l_user_write_auth
+    IN
+        sc := e_sc_ok;
+        val_sc <-- const_RawStatusCode_Good;
+        val := c_Variant_indet;
+        val_ts_src := c_Timestamp_null;
+        val_ts_srv := c_Timestamp_null;
+        CASE p_aid OF
+            EITHER e_aid_AccessLevel THEN
+                sc, val <-- read_AddressSpace_AccessLevel_value(p_node)
+            OR e_aid_BrowseName THEN
+                sc, val <-- read_AddressSpace_BrowseName_value(p_node)
+            OR e_aid_ContainsNoLoops THEN
+                sc, val <-- read_AddressSpace_ContainsNoLoops_value(p_node)
+            OR e_aid_DataType THEN
+                sc, val <-- read_AddressSpace_DataType_value(p_node)
+            OR e_aid_DisplayName THEN
+                sc, val <-- read_AddressSpace_DisplayName_value(p_node)
+            OR e_aid_EventNotifier THEN
+                sc, val <-- read_AddressSpace_EventNotifier_value(p_node)
+            OR e_aid_Executable THEN
+                sc, val <-- read_AddressSpace_Executable_value(p_node)
+            OR e_aid_Historizing THEN
+                sc, val <-- read_AddressSpace_Historizing_value(p_node)
+            OR e_aid_IsAbstract THEN
+                sc, val <-- read_AddressSpace_IsAbstract_value(p_node)
+            OR e_aid_NodeClass THEN
+                sc, val <-- read_AddressSpace_NodeClass_value(p_node)
+            OR e_aid_NodeId THEN
+                sc, val <-- read_AddressSpace_NodeId_value(p_node)
+            OR e_aid_Symmetric THEN
+                sc, val <-- read_AddressSpace_Symmetric_value(p_node)
+            OR e_aid_UserAccessLevel THEN
+                l_user_read_auth <-- get_user_authorization(e_operation_type_read, p_nid, e_aid_Value, p_user);
+                l_user_write_auth <-- get_user_authorization(e_operation_type_write, p_nid, e_aid_Value, p_user);
+                sc, val <-- read_AddressSpace_UserAccessLevel_value(p_node, l_user_read_auth, l_user_write_auth)
+            OR e_aid_UserExecutable THEN
+                sc, val <-- read_AddressSpace_UserExecutable_value(p_node)
+            OR e_aid_Value THEN
+                sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Value_value(p_node, p_index_range)
+            OR e_aid_ValueRank THEN
+                sc, val <-- read_AddressSpace_ValueRank_value(p_node)
+            END
+        END
+    END
+    ;
+
+
     /* END LOCAL_OPERATIONS */
 
-    sc, ncl, val <-- read_NodeClass_Attribute(p_user, node, aid, index_range) =
-    BEGIN
-        ncl <-- get_NodeClass(node);
-        sc, val <-- read_AddressSpace_Attribute_value(p_user, node, ncl, aid, index_range)
+    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_Node_Attribute(p_user, p_node, p_nid, p_aid, p_index_range) =
+    VAR
+        l_is_mandatory_attribute,
+        l_ncl,
+        l_is_local_read,
+        l_access_lvl,
+        l_access_read,
+        l_user_auth
+    IN
+        sc := e_sc_bad_attribute_id_invalid;
+        val_sc <-- const_RawStatusCode_BadInvalidState;
+        val := c_Variant_indet;
+        val_ts_src := c_Timestamp_null;
+        val_ts_srv := c_Timestamp_null;
+        l_ncl <-- get_NodeClass(p_node);
+        l_is_mandatory_attribute <-- is_mandatory_attribute(l_ncl, p_aid);
+        IF l_is_mandatory_attribute = TRUE THEN
+            IF l_ncl = e_ncl_Variable & p_aid = e_aid_Value THEN
+                l_is_local_read <-- is_local_service_treatment;
+                IF l_is_local_read = TRUE THEN
+                    /* local read service call always authorized */
+                    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_node, p_nid, p_aid, p_index_range)
+                ELSE
+                    l_access_lvl <-- get_AccessLevel(p_node);
+                    l_access_read <-- is_t_access_level_currentRead(l_access_lvl);
+                    IF l_access_read = TRUE THEN
+                        l_user_auth <-- get_user_authorization(e_operation_type_read, p_nid, p_aid, p_user);
+                        IF l_user_auth = TRUE THEN
+                            sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_node, p_nid, p_aid, p_index_range)
+                        ELSE
+                            sc := e_sc_bad_user_access_denied
+                        END
+                    ELSE
+                       sc := e_sc_bad_not_readable
+                    END
+                END
+            ELSE
+                /* If not a Variable Value, read is always authorized (no access rights) */
+                sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_node, p_nid, p_aid, p_index_range)
+            END
+        END
     END
     ;
 

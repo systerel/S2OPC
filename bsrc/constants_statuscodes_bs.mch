@@ -72,15 +72,22 @@ SETS
                       e_sc_bad_request_interrupted,
                       e_sc_bad_data_unavailable,
                       e_sc_bad_not_writable,
+                      e_sc_bad_not_readable,
                       e_sc_bad_type_mismatch}
 
 ABSTRACT_CONSTANTS
+    c_RawStatusCode_BadInvalidState,
+    c_RawStatusCode_Good,
+
     conv_StatusCode_To_RawStatusCode,
     conv_RawStatusCode_To_StatusCode,
 
     t_StatusCode
 
 PROPERTIES
+
+    c_RawStatusCode_BadInvalidState : t_RawStatusCode &
+    c_RawStatusCode_Good : t_RawStatusCode &
 
     t_StatusCode = t_StatusCode_i - {c_StatusCode_indet} &
 
@@ -103,6 +110,18 @@ OPERATIONS
         p_raw_sc : t_RawStatusCode
     THEN
         p_sc :(p_sc : t_StatusCode_i & p_sc = conv_RawStatusCode_To_StatusCode(p_raw_sc))
+    END
+    ;
+
+    p_raw_sc <-- const_RawStatusCode_Good =
+    BEGIN
+        p_raw_sc := conv_StatusCode_To_RawStatusCode(e_sc_ok)
+    END
+    ;
+
+    p_raw_sc <-- const_RawStatusCode_BadInvalidState =
+    BEGIN
+        p_raw_sc := conv_StatusCode_To_RawStatusCode(e_sc_bad_invalid_state)
     END
 
 END

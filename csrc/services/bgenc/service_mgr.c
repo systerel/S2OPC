@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 29/01/2019 12:57:52
+ Date                 : 05/02/2019 12:57:18
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -179,11 +179,11 @@ void service_mgr__treat_read_request(
          service_mgr__StatusCode_service);
       if (service_mgr__l_is_valid == true) {
          service_read__alloc_read_response(service_mgr__l_nb_ReadValue,
-            service_mgr__l_TimestampsToReturn,
             service_mgr__p_response_msg,
             &service_mgr__l_is_valid);
          if (service_mgr__l_is_valid == true) {
-            service_read__fill_read_response(service_mgr__p_user,
+            service_read__fill_read_response(service_mgr__l_TimestampsToReturn,
+               service_mgr__p_user,
                service_mgr__p_request_msg,
                service_mgr__p_response_msg);
          }
