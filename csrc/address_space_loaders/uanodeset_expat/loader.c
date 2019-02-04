@@ -30,6 +30,7 @@
 #include <sopc_dict.h>
 #include <sopc_encoder.h>
 #include <sopc_hash.h>
+#include <sopc_macros.h>
 
 #ifdef UANODESET_LOADER_LOG
 #define LOG(str) fprintf(stderr, "UANODESET_LOADER: %s:%d: %s\n", __FILE__, __LINE__, (str))
@@ -949,6 +950,111 @@ static uint8_t type_width(SOPC_BuiltinId ty)
         return false;                                                          \
     }
 
+/* Using https://en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64#C_2
+ * to decode base64 */
+#define WHITESPACE 64
+#define EQUALS 65
+#define INVALID 66
+
+static const unsigned char d[] = {
+    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 64, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 62, 66, 66, 66, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
+    66, 66, 66, 65, 66, 66, 66, 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+    22, 23, 24, 25, 66, 66, 66, 66, 66, 66, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44,
+    45, 46, 47, 48, 49, 50, 51, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66,
+    66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66};
+
+static bool base64decode(const char* input, unsigned char* out, size_t* outLen)
+{
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    char* current = (char*) input;
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+    char* end = current + strlen(input);
+    char iter = 0;
+    uint32_t buf = 0;
+    size_t len = 0;
+
+    while (current < end)
+    {
+        unsigned char c = d[(int) *current];
+        current++;
+
+        switch (c)
+        {
+        case WHITESPACE:
+            continue; /* skip whitespace */
+        case INVALID:
+            return false; /* invalid input, return error */
+        case EQUALS:      /* pad character, end of data */
+            current = end;
+            continue;
+        default:
+            buf = buf << 6 | c;
+            iter++; // increment the number of iteration
+            /* If the buffer is full, split it into bytes */
+            if (iter == 4)
+            {
+                if ((len += 3) > *outLen)
+                    return 1; /* buffer overflow */
+                *(out++) = (buf >> 16) & 255;
+                *(out++) = (buf >> 8) & 255;
+                *(out++) = buf & 255;
+                buf = 0;
+                iter = 0;
+            }
+        }
+    }
+
+    if (iter == 3)
+    {
+        if ((len += 2) > *outLen)
+            return 1; /* buffer overflow */
+        *(out++) = (buf >> 10) & 255;
+        *(out++) = (buf >> 2) & 255;
+    }
+    else if (iter == 2)
+    {
+        if (++len > *outLen)
+            return 1; /* buffer overflow */
+        *(out++) = (buf >> 4) & 255;
+    }
+
+    *outLen = len; /* modify to reflect the actual output size */
+    return true;
+}
+
+static bool set_variant_value_bstring(SOPC_Variant* var, const char* bstring_str)
+{
+    size_t length = strlen(bstring_str);
+    SOPC_ReturnStatus status;
+    bool return_code;
+
+    /* By definition, ByteString length is greater than its corresponding string length */
+    unsigned char* str = calloc(1, length);
+
+    return_code = base64decode(bstring_str, str, &length);
+    assert(true == return_code);
+
+    status = SOPC_String_CopyFromCString(&var->Value.Bstring, (char*) str);
+    free(str);
+
+    if (status == SOPC_STATUS_OK)
+    {
+        var->BuiltInTypeId = SOPC_ByteString_Id;
+        return true;
+    }
+    else
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    return true;
+}
+
 static bool set_variant_value_guid(SOPC_Variant* var, const char* guid_str)
 {
     SOPC_Guid* guid = calloc(1, sizeof(SOPC_Guid));
@@ -1082,7 +1188,7 @@ static bool set_variant_value(SOPC_Variant* var, SOPC_BuiltinId type_id, const c
     case SOPC_String_Id:
         SET_STR_ELEMENT_VALUE_CASE(String)
     case SOPC_ByteString_Id:
-        SET_STR_ELEMENT_VALUE_CASE(Bstring)
+        return set_variant_value_bstring(var, val);
     case SOPC_XmlElement_Id:
         SET_STR_ELEMENT_VALUE_CASE(XmlElt)
     case SOPC_Guid_Id:
