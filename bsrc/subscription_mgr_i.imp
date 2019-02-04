@@ -542,20 +542,19 @@ OPERATIONS
         l_queueSize,
         l_node,
         l_sc,
-        l_ncl,
         l_value,
         l_valueSc,
+        l_val_ts_src,
+        l_val_ts_srv,
         l_monitoredItemPointer,
         l_monitoredItemId,
         l_revSamplingItv,
         l_revQueueSize,
-        l_authorized,
         l_indexRange
     IN
         l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
         WHILE l_continue = TRUE DO
             l_node := c_Node_indet;
-            l_ncl := c_NodeClass_indet;
             l_value := c_Variant_indet;
             l_monitoredItemId := c_monitoredItemId_indet;
             l_revSamplingItv := c_opcua_duration_indet;
@@ -572,51 +571,26 @@ OPERATIONS
                 IF l_bres = FALSE
                 THEN
                     l_sc := e_sc_bad_node_id_unknown
-                END
-            END
-            ;
-            /* Check validity of requested node / attribute / index range */
-            IF l_sc = e_sc_ok
-            THEN
-                /* TODO: used to check requested paramaters first but should be done with a new operation which does not require user auth
-                   => this call is not provable in current state */
-                l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(p_user, l_node, l_aid, l_indexRange)
-            END
-            ;
-            /* Check validity of user access authorization */
-            IF l_sc = e_sc_ok
-            THEN
-                l_authorized <-- get_user_authorization(e_operation_type_read, l_nid, l_aid, p_user);
-                IF l_authorized = TRUE THEN
-                    /* TODO: see previous TODO, the actual read value shall be done here
-                       => l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(...) */
-                    IF l_aid = e_aid_Value &
-                        l_ncl = e_ncl_Variable
-                    THEN
-                        l_valueSc <-- get_Value_StatusCode (p_user, l_node)
-                    END
                 ELSE
-                    /* Clear the value content since the access is denied
-                    (notification will contain an empty value) */
-                    read_AddressSpace_clear_value (l_value)
+                    /* Read monitored item value */
+                    l_sc, l_value, l_valueSc, l_val_ts_src, l_val_ts_srv <-- read_Node_Attribute(p_user, l_node, l_nid, l_aid, l_indexRange);
+                    /* Create monitored item */
+                    IF l_sc = e_sc_ok THEN
+                        l_sc, l_monitoredItemPointer, l_monitoredItemId <-- create_monitored_item (p_subscription,
+                            l_nid,
+                            l_aid,
+                            l_indexRange,
+                            l_value,
+                            l_valueSc,
+                            p_tsToReturn,
+                            l_monitMode,
+                            l_clientHandle);
+                        l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize);
+                        read_AddressSpace_free_variant(l_value)
+                    END
                 END
             END
             ;
-            /* Create monitored item */
-            IF l_sc = e_sc_ok
-            THEN
-                l_sc, l_monitoredItemPointer, l_monitoredItemId <-- create_monitored_item (p_subscription,
-                                                                                           l_nid,
-                                                                                           l_aid,
-                                                                                           l_indexRange,
-                                                                                           l_value,
-                                                                                           l_valueSc,
-                                                                                           p_tsToReturn,
-                                                                                           l_monitMode,
-                                                                                           l_clientHandle);
-                l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize)
-            END;
-            read_AddressSpace_free_variant(l_value);
             setall_msg_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_monitoredItemId, l_revSamplingItv, l_revQueueSize)
 
         INVARIANT

@@ -55,6 +55,11 @@ SOPC_Variant* util_variant__new_Variant_from_Variant(SOPC_Variant* pvara);
 /**
  * The returned Variant is malloced and shall be freed by the consumer.
  */
+SOPC_Variant* util_variant__new_Variant_from_Bool(bool b);
+
+/**
+ * The returned Variant is malloced and shall be freed by the consumer.
+ */
 SOPC_Variant* util_variant__new_Variant_from_Byte(uint8_t i);
 
 /**

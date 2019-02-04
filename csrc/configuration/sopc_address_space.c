@@ -119,14 +119,32 @@ int32_t SOPC_AddressSpace_Item_Get_ValueRank(SOPC_AddressSpace_Item* item)
     }
 }
 
-SOPC_Byte* SOPC_AddressSpace_Item_Get_AccessLevel(SOPC_AddressSpace_Item* item)
+SOPC_Byte SOPC_AddressSpace_Item_Get_AccessLevel(SOPC_AddressSpace_Item* item)
 {
     switch (item->node_class)
     {
     case OpcUa_NodeClass_Variable:
-        return &item->data.variable.AccessLevel;
+        return item->data.variable.AccessLevel;
     default:
         assert(false && "Current element has no access level.");
+        return 0;
+    }
+}
+
+SOPC_Boolean* SOPC_AddressSpace_Item_Get_IsAbstract(SOPC_AddressSpace_Item* item)
+{
+    switch (item->node_class)
+    {
+    case OpcUa_NodeClass_VariableType:
+        return &item->data.variable_type.IsAbstract;
+    case OpcUa_NodeClass_ObjectType:
+        return &item->data.object_type.IsAbstract;
+    case OpcUa_NodeClass_ReferenceType:
+        return &item->data.reference_type.IsAbstract;
+    case OpcUa_NodeClass_DataType:
+        return &item->data.data_type.IsAbstract;
+    default:
+        assert(false && "Current element has no IsAbstract attribute.");
         return NULL;
     }
 }

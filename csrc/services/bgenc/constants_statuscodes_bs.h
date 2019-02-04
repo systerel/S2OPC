@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 29/01/2019 12:58:00
+ Date                 : 05/02/2019 17:21:39
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -93,6 +93,7 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_request_interrupted,
    constants_statuscodes_bs__e_sc_bad_data_unavailable,
    constants_statuscodes_bs__e_sc_bad_not_writable,
+   constants_statuscodes_bs__e_sc_bad_not_readable,
    constants_statuscodes_bs__e_sc_bad_type_mismatch
 } constants_statuscodes_bs__t_StatusCode_i;
 
@@ -104,6 +105,10 @@ extern void constants_statuscodes_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void constants_statuscodes_bs__const_RawStatusCode_BadInvalidState(
+   constants__t_RawStatusCode * const constants_statuscodes_bs__p_raw_sc);
+extern void constants_statuscodes_bs__const_RawStatusCode_Good(
+   constants__t_RawStatusCode * const constants_statuscodes_bs__p_raw_sc);
 extern void constants_statuscodes_bs__getall_conv_RawStatusCode_To_StatusCode(
    const constants__t_RawStatusCode constants_statuscodes_bs__p_raw_sc,
    constants_statuscodes_bs__t_StatusCode_i * const constants_statuscodes_bs__p_sc);

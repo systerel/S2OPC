@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 29/01/2019 13:28:20
+ Date                 : 05/02/2019 12:57:26
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -96,14 +96,76 @@ extern void address_space_bs__is_NodeId_equal(
    const constants__t_NodeId_i address_space_bs__nid1,
    const constants__t_NodeId_i address_space_bs__nid2,
    t_bool * const address_space_bs__bres);
-extern void address_space_bs__read_AddressSpace_Attribute_value(
-   const constants__t_user_i address_space_bs__p_user,
-   const constants__t_Node_i address_space_bs__node,
-   const constants__t_NodeClass_i address_space_bs__ncl,
-   const constants__t_AttributeId_i address_space_bs__aid,
-   const constants__t_IndexRange_i address_space_bs__index_range,
+extern void address_space_bs__read_AddressSpace_AccessLevel_value(
+   const constants__t_Node_i address_space_bs__p_node,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_BrowseName_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_DataType_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_DisplayName_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_EventNotifier_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_Executable_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_Historizing_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_IsAbstract_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_NodeClass_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_NodeId_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_Symmetric_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_UserAccessLevel_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   const t_bool address_space_bs__p_is_user_read_auth,
+   const t_bool address_space_bs__p_is_user_write_auth,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_UserExecutable_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_ValueRank_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_Value_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   const constants__t_IndexRange_i address_space_bs__index_range,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant,
+   constants__t_RawStatusCode * const address_space_bs__val_sc,
+   constants__t_Timestamp * const address_space_bs__val_ts_src,
+   constants__t_Timestamp * const address_space_bs__val_ts_srv);
 extern void address_space_bs__read_AddressSpace_clear_value(
    const constants__t_Variant_i address_space_bs__val);
 extern void address_space_bs__read_AddressSpace_free_variant(

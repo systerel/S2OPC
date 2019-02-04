@@ -49,7 +49,7 @@ SETS
                        e_aid_IsAbstract,
                        e_aid_Symmetric,
                        e_aid_InverseName,
-                       e_aid_ContainsNoLoop,
+                       e_aid_ContainsNoLoops,
                        e_aid_EventNotifier,
                        e_aid_Value,
                        e_aid_DataType,
@@ -92,8 +92,9 @@ SETS
     t_byte_buffer_i; /* (SOPC_Buffer*) */
     t_LocalizedText_i; /* (SOPC_LocalizedText*) */
     t_QualifiedName_i; /* (SOPC_QualifiedName*) */
-    t_Timestamp; /* SOPC_Internal_Timestamp */
+    t_Timestamp; /* SOPC_Value_Timestamp */
     t_Int32; /* int32_t */
+    t_Byte; /* uint8_t */
     t_RawStatusCode; /* uint32_t */
 
     t_access_level; /* SOPC_Byte */
@@ -316,6 +317,7 @@ CONCRETE_CONSTANTS
     c_LocalizedText_indet,
     c_QualifiedName_indet,
 
+    c_Timestamp_null,
     c_endpoint_config_idx_indet,
     c_user_indet,
     c_user_token_indet,
@@ -354,8 +356,14 @@ CONCRETE_CONSTANTS
     t_ConcreteValueRank
 
 ABSTRACT_CONSTANTS
-    conv_NodeId_Variant,
+    conv_AccessLevel_Variant,
+    conv_QualifiedName_Variant,
+    conv_LocalizedText_Variant,
+    conv_Boolean_Variant,
+    conv_Byte_Variant,
     conv_NodeClass_Variant,
+    conv_NodeId_Variant,
+    conv_ValueRank_Variant,
 
     conv_AccessLevel_CurrentWrite,
     conv_AccessLevel_CurrentRead,
@@ -490,16 +498,6 @@ PROPERTIES
 
     t_NodeClass = t_NodeClass_i - {c_NodeClass_indet} &
 
-    conv_NodeId_Variant : t_NodeId --> t_Variant &
-    conv_NodeClass_Variant : t_NodeClass --> t_Variant &
-
-    conv_AccessLevel_CurrentWrite : t_access_level --> BOOL &
-    conv_AccessLevel_CurrentRead : t_access_level --> BOOL &
-    conv_AccessLevel_StatusWrite : t_access_level --> BOOL &
-    conv_AccessLevel_TimestampWrite : t_access_level --> BOOL &
-
-    conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId &
-
     k_n_read_resp_max : NAT &
     k_n_WriteResponse_max : NAT &
     k_n_BrowseResponse_max : NAT &
@@ -566,6 +564,8 @@ PROPERTIES
     t_QualifiedName <: t_QualifiedName_i &
     c_QualifiedName_indet : t_QualifiedName_i &
     c_QualifiedName_indet /: t_QualifiedName &
+
+    c_Timestamp_null : t_Timestamp &
 
     t_channel <: t_channel_i &
     c_channel_indet : t_channel_i &
@@ -819,7 +819,26 @@ PROPERTIES
                                  e_bd_inverse |-> FALSE |-> TRUE,
                                  e_bd_inverse |-> TRUE  |-> FALSE,
                                  e_bd_both    |-> FALSE |-> TRUE,
-                                 e_bd_both    |-> TRUE  |-> TRUE}
+                                 e_bd_both    |-> TRUE  |-> TRUE} &
+
+    conv_AccessLevel_Variant : t_access_level --> t_Variant &
+    conv_QualifiedName_Variant : t_QualifiedName_i --> t_Variant &
+    dom(conv_QualifiedName_Variant) = t_QualifiedName &
+    conv_LocalizedText_Variant : t_LocalizedText_i --> t_Variant &
+    dom(conv_LocalizedText_Variant) = t_LocalizedText &
+    conv_Boolean_Variant : BOOL --> t_Variant &
+    conv_Byte_Variant : t_Byte --> t_Variant &
+    conv_NodeClass_Variant : t_NodeClass --> t_Variant &
+    conv_NodeId_Variant : t_NodeId --> t_Variant &
+    conv_ValueRank_Variant : t_ValueRank --> t_Variant &
+
+
+    conv_AccessLevel_CurrentWrite : t_access_level --> BOOL &
+    conv_AccessLevel_CurrentRead : t_access_level --> BOOL &
+    conv_AccessLevel_StatusWrite : t_access_level --> BOOL &
+    conv_AccessLevel_TimestampWrite : t_access_level --> BOOL &
+
+    conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId
 
 OPERATIONS
 

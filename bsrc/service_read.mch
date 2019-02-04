@@ -32,23 +32,27 @@ DEFINITIONS
     d_inv_read == (
         nb_ReadValue          : NAT                           &
         nb_ReadValue         <= k_n_read_resp_max             &
+        ReadValues_TimestampToReturn : t_TimestampsToReturn_i &
         ReadValue_NodeId      : t_ReadValue +-> t_NodeId      &
         ReadValue_AttributeId : t_ReadValue +-> t_AttributeId_i
     )
     ;
     d_inv_response == (
         data_Value_Value           : t_ReadValue +-> t_Variant &
-        data_Value_StatusCode      : t_ReadValue +-> t_RawStatusCode /*&
-        data_Value_SourceTimestamp : set_read_elements +-> t_Timestamp &
-        data_Value_ServerTimestamp : set_read_elements --> t_Timestamp*/
+        data_Value_StatusCode      : t_ReadValue +-> t_RawStatusCode &
+        data_Value_SourceTimestamp : t_ReadValue +-> t_Timestamp &
+        data_Value_ServerTimestamp : t_ReadValue +-> t_Timestamp
     )
 
 ABSTRACT_VARIABLES
     nb_ReadValue,
+    ReadValues_TimestampToReturn,
     ReadValue_NodeId,
     ReadValue_AttributeId,
     data_Value_Value,
-    data_Value_StatusCode
+    data_Value_StatusCode,
+    data_Value_SourceTimestamp,
+    data_Value_ServerTimestamp
 
 INVARIANT
     d_inv_read &
@@ -56,10 +60,13 @@ INVARIANT
 
 INITIALISATION
     nb_ReadValue          := 0  ||
+    ReadValues_TimestampToReturn := c_TimestampsToReturn_indet ||
     ReadValue_NodeId      := {} ||
     ReadValue_AttributeId := {} ||
     data_Value_Value      := {} ||
-    data_Value_StatusCode := {}
+    data_Value_StatusCode := {} ||
+    data_Value_SourceTimestamp := {} ||
+    data_Value_ServerTimestamp := {}
 
 OPERATIONS
 
@@ -75,10 +82,12 @@ OPERATIONS
         p_tsToReturn,
         p_statusCode,
         nb_ReadValue,
+        ReadValues_TimestampToReturn,
         ReadValue_NodeId,
         ReadValue_AttributeId
         :(  p_read_ok      : BOOL & /* Error code, for now a simple bool */
             p_nb_ReadValue : INT  &
+            ReadValues_TimestampToReturn : t_TimestampsToReturn_i &
             p_tsToReturn   : t_TimestampsToReturn_i &
             p_statusCode   : {e_sc_ok, e_sc_bad_too_many_ops, e_sc_bad_nothing_to_do,
                               e_sc_bad_timestamps_to_return_invalid, e_sc_bad_max_age_invalid} &
@@ -89,9 +98,11 @@ OPERATIONS
              ReadValue_AttributeId : cast_t_ReadValue[1..nb_ReadValue] --> t_AttributeId_i &
              p_nb_ReadValue = nb_ReadValue &
              p_tsToReturn : t_TimestampsToReturn &
+             ReadValues_TimestampToReturn = p_tsToReturn &
              p_statusCode = e_sc_ok) &
             (p_read_ok = FALSE =>
              nb_ReadValue = 0 &
+             ReadValues_TimestampToReturn = c_TimestampsToReturn_indet &
              ReadValue_NodeId = {} &
              ReadValue_AttributeId = {} &
              p_statusCode /= e_sc_ok
@@ -100,12 +111,10 @@ OPERATIONS
     END
     ;
 
-    p_isvalid <-- alloc_read_response(p_nb_resps, p_TimestampsToReturn, p_resp_msg) =
+    p_isvalid <-- alloc_read_response(p_nb_resps, p_resp_msg) =
     PRE
         p_nb_resps : NAT                              &
         p_nb_resps <= k_n_read_resp_max               &
-        p_TimestampsToReturn : t_TimestampsToReturn_i &
-        p_TimestampsToReturn : t_TimestampsToReturn   &
         p_resp_msg : t_msg_i                          &
         p_resp_msg = c_msg_out                        &
         c_msg_out  : t_msg
@@ -114,8 +123,10 @@ OPERATIONS
     END
     ;
 
-    fill_read_response(p_user, req_msg, resp_msg) =
+    fill_read_response(p_TimestampsToReturn, p_user, req_msg, resp_msg) =
     PRE
+        p_TimestampsToReturn : t_TimestampsToReturn_i &
+        p_TimestampsToReturn : t_TimestampsToReturn   &
         p_user    : t_user_i &
         p_user    : t_user   &
         req_msg   : t_msg_i &
@@ -126,7 +137,9 @@ OPERATIONS
         c_msg_out : t_msg
     THEN
         data_Value_Value,
-        data_Value_StatusCode
+        data_Value_StatusCode,
+        data_Value_SourceTimestamp,
+        data_Value_ServerTimestamp
         :(
             d_inv_response
          )

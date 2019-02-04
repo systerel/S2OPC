@@ -21,7 +21,7 @@
 
  File Name            : msg_read_response_bs.h
 
- Date                 : 29/01/2019 12:58:04
+ Date                 : 05/02/2019 12:57:31
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -52,14 +52,14 @@ extern void msg_read_response_bs__INITIALISATION(void);
   --------------------*/
 extern void msg_read_response_bs__alloc_read_response(
    const t_entier4 msg_read_response_bs__p_nb_resps,
-   const constants__t_TimestampsToReturn_i msg_read_response_bs__p_TimestampsToReturn,
    const constants__t_msg_i msg_read_response_bs__p_resp_msg,
    t_bool * const msg_read_response_bs__p_isvalid);
 extern void msg_read_response_bs__set_read_response(
-   const constants__t_msg_i msg_read_response_bs__resp_msg,
-   const constants__t_ReadValue_i msg_read_response_bs__rvi,
-   const constants__t_Variant_i msg_read_response_bs__val,
-   const constants__t_RawStatusCode msg_read_response_bs__raw_sc,
-   const constants__t_AttributeId_i msg_read_response_bs__aid);
+   const constants__t_msg_i msg_read_response_bs__p_resp_msg,
+   const constants__t_ReadValue_i msg_read_response_bs__p_rvi,
+   const constants__t_Variant_i msg_read_response_bs__p_value,
+   const constants__t_RawStatusCode msg_read_response_bs__p_raw_sc,
+   const constants__t_Timestamp msg_read_response_bs__p_ts_src,
+   const constants__t_Timestamp msg_read_response_bs__p_ts_srv);
 
 #endif

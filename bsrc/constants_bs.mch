@@ -28,6 +28,7 @@ SETS
     t_byte_buffer_i;
     t_Timestamp;
     t_Int32;
+    t_Byte;
     t_RawStatusCode;
     t_access_level;
 
@@ -113,6 +114,7 @@ CONCRETE_CONSTANTS
     c_Reference_indet,
     c_LocalizedText_indet,
     c_QualifiedName_indet,
+    c_Timestamp_null,
     c_subscription_indet,
     c_notif_msg_indet,
     c_sub_seq_num_indet,
@@ -355,6 +357,8 @@ PROPERTIES
     t_QualifiedName <: t_QualifiedName_i &
     c_QualifiedName_indet : t_QualifiedName_i &
     c_QualifiedName_indet /: t_QualifiedName &
+
+    c_Timestamp_null : t_Timestamp &
 
     t_WriteValuePointer <: t_WriteValuePointer_i &
     c_WriteValuePointer_indet : t_WriteValuePointer_i &

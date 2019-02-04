@@ -127,6 +127,21 @@ SOPC_Variant* util_variant__new_Variant_from_Variant(SOPC_Variant* pvara)
     return pvar;
 }
 
+SOPC_Variant* util_variant__new_Variant_from_Bool(bool b)
+{
+    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+
+    if (NULL != pvar)
+    {
+        SOPC_Variant_Initialize(pvar);
+        pvar->BuiltInTypeId = SOPC_Boolean_Id;
+        pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
+        pvar->Value.Byte = b;
+    }
+
+    return pvar;
+}
+
 SOPC_Variant* util_variant__new_Variant_from_Byte(uint8_t i)
 {
     SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));

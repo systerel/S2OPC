@@ -148,112 +148,281 @@ static constants_statuscodes_bs__t_StatusCode_i read_value_indexed(const SOPC_Va
     return ret;
 }
 
-/* Reads any attribute and outputs a variant (valid or not)
- * As this function uses the *_2_Variant_i functions, the value must be freed once used
- */
-void address_space_bs__read_AddressSpace_Attribute_value(
-    const constants__t_user_i address_space_bs__p_user,
-    const constants__t_Node_i address_space_bs__node,
-    const constants__t_NodeClass_i address_space_bs__ncl,
-    const constants__t_AttributeId_i address_space_bs__aid,
-    const constants__t_IndexRange_i address_space_bs__index_range,
+void address_space_bs__read_AddressSpace_AccessLevel_value(
+    const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    (void) (address_space_bs__p_user); /* Keep for B precondition: User is already authorized for this operation */
-
-    assert(NULL != address_space_bs__node);
-    SOPC_AddressSpace_Item* item = address_space_bs__node;
-    SOPC_Variant* value = NULL;
-
-    /* Note: conv_* variables are abstract, we must be confident */
-
-    switch (address_space_bs__aid)
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
+    SOPC_Byte accessLevel = address_space_bs__p_node->data.variable.AccessLevel;
+    // Note: keep only supported access level flags
+    accessLevel = (accessLevel & (SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite |
+                                  SOPC_AccessLevelMask_StatusWrite | SOPC_AccessLevelMask_TimestampWrite));
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    *address_space_bs__variant = util_variant__new_Variant_from_Byte(accessLevel);
+    if (*address_space_bs__variant == NULL)
     {
-    case constants__e_aid_NodeId:
-        value = util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Item_Get_NodeId(item));
-        break;
-    case constants__e_aid_NodeClass:
-        value = util_variant__new_Variant_from_NodeClass(item->node_class);
-        break;
-    case constants__e_aid_BrowseName:
-        value = util_variant__new_Variant_from_QualifiedName(SOPC_AddressSpace_Item_Get_BrowseName(item));
-        break;
-    case constants__e_aid_DisplayName:
-        value = util_variant__new_Variant_from_LocalizedText(SOPC_AddressSpace_Item_Get_DisplayName(item));
-        break;
-    case constants__e_aid_Value:
-        if (constants__e_ncl_Variable == address_space_bs__ncl ||
-            constants__e_ncl_VariableType == address_space_bs__ncl)
-        {
-            value = util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Item_Get_Value(item));
-        }
-        else
-        {
-            *address_space_bs__variant = constants__c_Variant_indet;
-            *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
-            return;
-        }
-        break;
-    case constants__e_aid_DataType:
-        if (constants__e_ncl_Variable == address_space_bs__ncl)
-        {
-            value = util_variant__new_Variant_from_NodeId(&item->data.variable.DataType);
-        }
-        else if (constants__e_ncl_VariableType == address_space_bs__ncl)
-        {
-            /* TODO: data not parsed for now */
-            value = util_variant__new_Variant_from_NodeId(&item->data.variable_type.DataType);
-        }
-        else
-        {
-            *address_space_bs__variant = util_variant__new_Variant_from_Indet();
-            *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
-            return;
-        }
-        break;
-    case constants__e_aid_ValueRank:
-        if (constants__e_ncl_Variable == address_space_bs__ncl)
-        {
-            value = util_variant__new_Variant_from_int32(item->data.variable.ValueRank);
-        }
-        else if (constants__e_ncl_VariableType == address_space_bs__ncl)
-        {
-            value = util_variant__new_Variant_from_int32(item->data.variable.ValueRank);
-        }
-        else
-        {
-            *address_space_bs__variant = util_variant__new_Variant_from_Indet();
-            *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
-            return;
-        }
-        break;
-    case constants__e_aid_EventNotifier:
-        if (constants__e_ncl_Object == address_space_bs__ncl || constants__e_ncl_View == address_space_bs__ncl)
-        {
-            // We do not manage event in any way
-            value = util_variant__new_Variant_from_Byte(0);
-        }
-        else
-        {
-            *address_space_bs__variant = util_variant__new_Variant_from_Indet();
-            *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
-            return;
-        }
-        break;
-    case constants__e_aid_AccessLevel:
-        value =
-            util_variant__new_Variant_from_Byte(SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite);
-        break;
-    case constants__e_aid_UserAccessLevel:
-        value =
-            util_variant__new_Variant_from_Byte(SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite);
-        break;
-    default:
-        *address_space_bs__variant = constants__c_Variant_indet;
-        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
-        return;
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
     }
+}
+
+void address_space_bs__read_AddressSpace_BrowseName_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    *address_space_bs__variant =
+        util_variant__new_Variant_from_QualifiedName(SOPC_AddressSpace_Item_Get_BrowseName(address_space_bs__p_node));
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_View);
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    // Note: always returns false since we do not check this property
+    *address_space_bs__variant = util_variant__new_Variant_from_Bool(false);
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_DataType_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
+           address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    *address_space_bs__variant =
+        util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Item_Get_DataType(address_space_bs__p_node));
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_DisplayName_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    *address_space_bs__variant =
+        util_variant__new_Variant_from_LocalizedText(SOPC_AddressSpace_Item_Get_DisplayName(address_space_bs__p_node));
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_EventNotifier_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_View ||
+           address_space_bs__p_node->node_class == OpcUa_NodeClass_Object);
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    // Note: always returns 0 since we do not implement events
+    *address_space_bs__variant = util_variant__new_Variant_from_Byte(0);
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_Executable_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Method);
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    // Note: always returns false since we do not implement method execution
+    *address_space_bs__variant = util_variant__new_Variant_from_Bool(false);
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_Historizing_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    // Note: always returns false since we do not implement historization
+    *address_space_bs__variant = util_variant__new_Variant_from_Bool(false);
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_IsAbstract_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType ||
+           address_space_bs__p_node->node_class == OpcUa_NodeClass_ObjectType ||
+           address_space_bs__p_node->node_class == OpcUa_NodeClass_ReferenceType ||
+           address_space_bs__p_node->node_class == OpcUa_NodeClass_DataType);
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    *address_space_bs__variant =
+        util_variant__new_Variant_from_Bool(SOPC_AddressSpace_Item_Get_IsAbstract(address_space_bs__p_node));
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_NodeClass_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    *address_space_bs__variant = util_variant__new_Variant_from_NodeClass(address_space_bs__p_node->node_class);
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_NodeId_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    *address_space_bs__variant =
+        util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Item_Get_NodeId(address_space_bs__p_node));
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+void address_space_bs__read_AddressSpace_Symmetric_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_ReferenceType);
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    *address_space_bs__variant =
+        util_variant__new_Variant_from_Bool(address_space_bs__p_node->data.reference_type.Symmetric);
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_UserAccessLevel_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    const t_bool address_space_bs__p_is_user_read_auth,
+    const t_bool address_space_bs__p_is_user_write_auth,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
+    SOPC_Byte accessLevel = address_space_bs__p_node->data.variable.AccessLevel;
+    SOPC_Byte userAccessLevel = 0;
+    if (address_space_bs__p_is_user_read_auth)
+    {
+        // Keep supported read flags
+        userAccessLevel = accessLevel & SOPC_AccessLevelMask_CurrentRead;
+    }
+    if (address_space_bs__p_is_user_write_auth)
+    {
+        // Keep supported write flags
+        uint8_t supportedWriteFlags =
+            SOPC_AccessLevelMask_CurrentWrite | SOPC_AccessLevelMask_StatusWrite | SOPC_AccessLevelMask_TimestampWrite;
+        userAccessLevel |= (accessLevel & supportedWriteFlags);
+    }
+
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    *address_space_bs__variant = util_variant__new_Variant_from_Byte(userAccessLevel);
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_UserExecutable_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Method);
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    // Note: always returns false since we do not implement method execution
+    *address_space_bs__variant = util_variant__new_Variant_from_Bool(false);
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_ValueRank_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
+           address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    *address_space_bs__variant =
+        util_variant__new_Variant_from_int32(SOPC_AddressSpace_Item_Get_ValueRank(address_space_bs__p_node));
+    if (*address_space_bs__variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        *address_space_bs__variant = NULL;
+    }
+}
+
+void address_space_bs__read_AddressSpace_Value_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    const constants__t_IndexRange_i address_space_bs__index_range,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant,
+    constants__t_RawStatusCode* const address_space_bs__val_sc,
+    constants__t_Timestamp* const address_space_bs__val_ts_src,
+    constants__t_Timestamp* const address_space_bs__val_ts_srv)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
+           address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
+    *address_space_bs__val_sc = OpcUa_BadInvalidState;
+    *address_space_bs__val_ts_src = constants_bs__c_Timestamp_null;
+    *address_space_bs__val_ts_srv = constants_bs__c_Timestamp_null;
+
+    SOPC_Variant* value =
+        util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Item_Get_Value(address_space_bs__p_node));
 
     if (value == NULL)
     {
@@ -279,9 +448,29 @@ void address_space_bs__read_AddressSpace_Attribute_value(
         {
             *address_space_bs__sc =
                 read_value_indexed(value, address_space_bs__index_range, *address_space_bs__variant);
+
+            if (constants_statuscodes_bs__e_sc_ok != *address_space_bs__sc)
+            {
+                SOPC_Variant_Delete(*address_space_bs__variant);
+                *address_space_bs__variant = NULL;
+            }
         }
 
         SOPC_Variant_Delete(value);
+    }
+
+    if (constants_statuscodes_bs__e_sc_ok == *address_space_bs__sc)
+    {
+        if (address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable)
+        {
+            *address_space_bs__val_sc = address_space_bs__p_node->value_status;
+            *address_space_bs__val_ts_src = address_space_bs__p_node->value_source_ts;
+            *address_space_bs__val_ts_srv = address_space_bs__p_node->value_server_ts;
+        }
+        else
+        {
+            *address_space_bs__val_sc = SOPC_GoodGenericStatus;
+        }
     }
 }
 
@@ -465,7 +654,7 @@ void address_space_bs__get_AccessLevel(const constants__t_Node_i address_space_b
                                        constants__t_access_level* const address_space_bs__p_access_level)
 {
     SOPC_AddressSpace_Item* item = address_space_bs__p_node;
-    *address_space_bs__p_access_level = *SOPC_AddressSpace_Item_Get_AccessLevel(item);
+    *address_space_bs__p_access_level = SOPC_AddressSpace_Item_Get_AccessLevel(item);
 }
 
 void address_space_bs__get_BrowseName(const constants__t_Node_i address_space_bs__p_node,

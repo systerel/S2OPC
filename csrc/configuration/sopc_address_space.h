@@ -71,9 +71,10 @@ SOPC_LocalizedText* SOPC_AddressSpace_Item_Get_Description(SOPC_AddressSpace_Ite
 int32_t* SOPC_AddressSpace_Item_Get_NoOfReferences(SOPC_AddressSpace_Item* item);
 OpcUa_ReferenceNode** SOPC_AddressSpace_Item_Get_References(SOPC_AddressSpace_Item* item);
 SOPC_Variant* SOPC_AddressSpace_Item_Get_Value(SOPC_AddressSpace_Item* item);
-SOPC_Byte* SOPC_AddressSpace_Item_Get_AccessLevel(SOPC_AddressSpace_Item* item);
+SOPC_Byte SOPC_AddressSpace_Item_Get_AccessLevel(SOPC_AddressSpace_Item* item);
 SOPC_NodeId* SOPC_AddressSpace_Item_Get_DataType(SOPC_AddressSpace_Item* item);
 int32_t SOPC_AddressSpace_Item_Get_ValueRank(SOPC_AddressSpace_Item* item);
+SOPC_Boolean* SOPC_AddressSpace_Item_Get_IsAbstract(SOPC_AddressSpace_Item* item);
 
 void SOPC_AddressSpace_Item_Clear(SOPC_AddressSpace_Item* item);
 

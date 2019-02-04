@@ -27,6 +27,7 @@ SEES
     data_value_pointer_bs
 
 DEFINITIONS
+    "definitions.def";
 
     d_variables ==
         a_NodeId,
@@ -59,7 +60,6 @@ DEFINITIONS
         Node_RefIndexEnd,
         RefIndex_Reference,
 
-        Generic_Node_Variant,
         IsValid_VariantIndex, /* Valid (or none) index range value for Variant */
         HasRange_VariantIndex /* Valid index range but has no range in  Variant */
     ;
@@ -88,7 +88,7 @@ DEFINITIONS
         a_IsAbstract : t_Node +-> BOOL &
         dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
 
-        a_EventNotifier : t_Node +-> BOOL &
+        a_EventNotifier : t_Node +-> t_Byte &
         dom(a_EventNotifier) = dom(a_NodeClass|>{e_ncl_Object, e_ncl_View}) &
 
         a_DataType : t_Node +-> t_NodeId &
@@ -128,7 +128,6 @@ DEFINITIONS
         Node_RefIndexEnd        : t_Node     +-> t_RefIndex  &
         RefIndex_Reference      : t_Node * t_RefIndex +-> t_Reference &
 
-        Generic_Node_Variant : t_NodeClass * t_Node * t_AttributeId +-> t_Variant &
         IsValid_VariantIndex : t_Variant * t_IndexRange +-> BOOL &
         HasRange_VariantIndex  : t_Variant * t_IndexRange +-> BOOL
     );
@@ -174,66 +173,354 @@ OPERATIONS
     END
     ;
 
-    /* Reads any attribute and outputs a variant (valid or not)
-     * As this function uses the util_variant__new_Variant_from_* functions, the value must be freed once used
-     */
-    sc, variant <-- read_AddressSpace_Attribute_value(p_user, node, ncl, aid, index_range) =
+    sc, variant <-- read_AddressSpace_AccessLevel_value(p_node) =
     PRE
-        p_user : t_user_i       &
-        p_user : t_user         &
-        node : t_Node_i         &
-        node : t_Node           &
-        node : dom(a_NodeId)    &
-        node : dom(a_NodeClass) &
-        ncl : t_NodeClass_i &
-        ncl = a_NodeClass(node) &
-        aid  : t_AttributeId_i  &
-        aid  : t_AttributeId    &
-        index_range : t_IndexRange_i &
-        e_operation_type_read |-> a_NodeId(node) |-> aid |-> p_user : s_AuthorizedOperations
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_AccessLevel))
     THEN
         CHOICE
             variant := c_Variant_indet ||
             sc
             :(sc : t_StatusCode_i &
-                sc : {e_sc_bad_out_of_memory, e_sc_bad_internal_error})
+              sc = e_sc_bad_out_of_memory)
         OR
-            IF aid : {e_aid_NodeId, e_aid_NodeClass, e_aid_BrowseName, e_aid_DisplayName, e_aid_Value, e_aid_AccessLevel} THEN /* TODO: rest of the attributes */
-                IF IsValid_VariantIndex(Generic_Node_Variant(ncl |-> node |-> aid) |-> index_range) = TRUE &
-                    HasRange_VariantIndex(Generic_Node_Variant(ncl |-> node |-> aid) |-> index_range) = TRUE
-                THEN
-                    SELECT aid = e_aid_NodeId THEN
-                        sc,
-                        variant
-                        :(  sc = e_sc_ok &
-                            variant : t_Variant_i &
-                            variant = conv_NodeId_Variant(a_NodeId(node))
-                        )
-                    WHEN aid = e_aid_NodeClass THEN
-                        variant := conv_NodeClass_Variant(a_NodeClass(node)) ||
-                        sc := e_sc_ok
-                    WHEN aid = e_aid_Value &
-                         (ncl = e_ncl_Variable or ncl = e_ncl_VariableType) THEN
-                        variant := a_Value(node) ||
-                        sc := e_sc_ok
-                    ELSE
-                        /* TODO: add BrowseName, DisplayName, AccessLevel cases (a_NodeClass shall not be used) */
-                        variant := conv_NodeClass_Variant(a_NodeClass(node)) ||
-                        sc := e_sc_ok
-                    END
-                ELSIF IsValid_VariantIndex(Generic_Node_Variant(ncl |-> node |-> aid) |-> index_range) = FALSE
-                THEN
-                    variant := c_Variant_indet ||
-                    sc := e_sc_bad_index_range_invalid
-                ELSE
-                    variant := c_Variant_indet ||
-                    sc := e_sc_bad_index_range_no_data
-                END
-            ELSE
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_AccessLevel)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
 
+    sc, variant <-- read_AddressSpace_BrowseName_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_BrowseName))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+                sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_BrowseName)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_ContainsNoLoops_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_ContainsNoLoops))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+                sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_ContainsNoLoops)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_DataType_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_DataType))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+                sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_DataType)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_DisplayName_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_DisplayName))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+                sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_DisplayName)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_EventNotifier_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_EventNotifier))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+                sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_EventNotifier)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_Executable_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_Executable))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+                sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_Executable)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_Historizing_value(p_node) =
+    PRE
+        p_node : t_Node_i          &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_Historizing))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+                sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_Historizing)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_IsAbstract_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_IsAbstract))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+                sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_IsAbstract)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_NodeClass_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_NodeClass))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+                sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_NodeClass)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_NodeId_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_NodeId))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+                sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_NodeId)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_Symmetric_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_Symmetric))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+              sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_Symmetric)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_UserAccessLevel_value(p_node, p_is_user_read_auth, p_is_user_write_auth) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_UserAccessLevel)) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_AccessLevel)) & /* AccessLevel used to generate value */
+        p_is_user_read_auth : BOOL &
+        p_is_user_write_auth : BOOL
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+              sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_UserAccessLevel)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_UserExecutable_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_UserExecutable))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+              sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_UserExecutable)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Value_value(p_node, index_range) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_Value)) &
+        index_range : t_IndexRange_i
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            val_sc := c_RawStatusCode_BadInvalidState ||
+            val_ts_src := c_Timestamp_null ||
+            val_ts_srv := c_Timestamp_null ||
+            sc := e_sc_bad_out_of_memory
+        OR
+            IF IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> index_range) = TRUE &
+                HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> index_range) = TRUE
+            THEN
+                variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_Value)(p_node)) ||
+                sc := e_sc_ok ||
+                IF a_NodeClass(p_node) = e_ncl_Variable THEN
+                    val_sc := a_Value_StatusCode(p_node) ||
+                    val_ts_src := a_Value_SourceTimestamp(p_node) ||
+                    val_ts_srv := a_Value_ServerTimestamp(p_node)
+                ELSE
+                    /* VariableType */
+                    val_sc := c_RawStatusCode_Good ||
+                    val_ts_src := c_Timestamp_null ||
+                    val_ts_srv := c_Timestamp_null
+                END
+            ELSIF IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> index_range) = FALSE
+            THEN
                 variant := c_Variant_indet ||
-                sc := e_sc_bad_attribute_id_invalid
+                val_sc := c_RawStatusCode_BadInvalidState ||
+                val_ts_src := c_Timestamp_null ||
+                val_ts_srv := c_Timestamp_null ||
+                sc := e_sc_bad_index_range_invalid
+            ELSE
+                variant := c_Variant_indet ||
+                val_sc := c_RawStatusCode_BadInvalidState ||
+                val_ts_src := c_Timestamp_null ||
+                val_ts_srv := c_Timestamp_null ||
+                sc := e_sc_bad_index_range_no_data
             END
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_ValueRank_value(p_node) =
+    PRE
+        p_node : t_Node_i          &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_ValueRank))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+                sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_ValueRank)(p_node)) ||
+            sc := e_sc_ok
         END
     END
     ;

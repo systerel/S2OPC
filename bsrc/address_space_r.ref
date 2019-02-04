@@ -26,7 +26,8 @@ SEES
     constants,
     constants_statuscodes_bs,
     service_write_decode_bs,
-    data_value_pointer_bs
+    data_value_pointer_bs,
+    service_mgr_1
 
 DEFINITIONS
     d_variables ==
@@ -43,6 +44,7 @@ DEFINITIONS
         a_DataType,
         a_ValueRank,
         a_AccessLevel,
+        a_UserAccessLevel,
         a_Historizing,
         a_Executable,
         a_UserExecutable,
@@ -95,7 +97,7 @@ DEFINITIONS
         a_IsAbstract : t_Node +-> BOOL &
         dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
 
-        a_EventNotifier : t_Node +-> BOOL &
+        a_EventNotifier : t_Node +-> t_Byte &
         dom(a_EventNotifier) = dom(a_NodeClass|>{e_ncl_Object, e_ncl_View}) &
 
         a_DataType : t_Node +-> t_NodeId &
@@ -106,6 +108,9 @@ DEFINITIONS
 
         a_AccessLevel : t_Node +-> t_access_level &
         dom(a_AccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        a_UserAccessLevel : t_Node +-> t_access_level &
+        dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
         a_Historizing : t_Node +-> BOOL &
         dom(a_Historizing) = dom(a_NodeClass|>{e_ncl_Variable}) &

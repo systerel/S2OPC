@@ -402,9 +402,9 @@ OPERATIONS
     IN
         l_is_valid, l_nb_ReadValue, l_TimestampsToReturn, StatusCode_service <-- check_ReadRequest(p_request_msg);
         IF  l_is_valid = TRUE THEN
-            l_is_valid <-- alloc_read_response(l_nb_ReadValue, l_TimestampsToReturn, p_response_msg);
+            l_is_valid <-- alloc_read_response(l_nb_ReadValue, p_response_msg);
             IF  l_is_valid = TRUE THEN
-                fill_read_response(p_user, p_request_msg, p_response_msg)
+                fill_read_response(l_TimestampsToReturn, p_user, p_request_msg, p_response_msg)
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory
             END

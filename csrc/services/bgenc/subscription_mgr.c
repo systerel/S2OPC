@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 29/01/2019 12:57:58
+ Date                 : 05/02/2019 17:21:36
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -170,21 +170,20 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
       t_entier4 subscription_mgr__l_queueSize;
       constants__t_Node_i subscription_mgr__l_node;
       constants_statuscodes_bs__t_StatusCode_i subscription_mgr__l_sc;
-      constants__t_NodeClass_i subscription_mgr__l_ncl;
       constants__t_Variant_i subscription_mgr__l_value;
       constants__t_RawStatusCode subscription_mgr__l_valueSc;
+      constants__t_Timestamp subscription_mgr__l_val_ts_src;
+      constants__t_Timestamp subscription_mgr__l_val_ts_srv;
       constants__t_monitoredItemPointer_i subscription_mgr__l_monitoredItemPointer;
       constants__t_monitoredItemId_i subscription_mgr__l_monitoredItemId;
       constants__t_opcua_duration_i subscription_mgr__l_revSamplingItv;
       t_entier4 subscription_mgr__l_revQueueSize;
-      t_bool subscription_mgr__l_authorized;
       constants__t_IndexRange_i subscription_mgr__l_indexRange;
       
       subscription_create_monitored_item_it__init_iter_monitored_item_request(subscription_mgr__p_nb_monitored_items,
          &subscription_mgr__l_continue);
       while (subscription_mgr__l_continue == true) {
          subscription_mgr__l_node = constants__c_Node_indet;
-         subscription_mgr__l_ncl = constants__c_NodeClass_indet;
          subscription_mgr__l_value = constants__c_Variant_indet;
          subscription_mgr__l_monitoredItemId = constants__c_monitoredItemId_indet;
          subscription_mgr__l_revSamplingItv = constants__c_opcua_duration_indet;
@@ -212,52 +211,37 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
             if (subscription_mgr__l_bres == false) {
                subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
             }
-         }
-         if (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_ok) {
-            address_space__read_NodeClass_Attribute(subscription_mgr__p_user,
-               subscription_mgr__l_node,
-               subscription_mgr__l_aid,
-               subscription_mgr__l_indexRange,
-               &subscription_mgr__l_sc,
-               &subscription_mgr__l_ncl,
-               &subscription_mgr__l_value);
-         }
-         if (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_ok) {
-            address_space__get_user_authorization(constants__e_operation_type_read,
-               subscription_mgr__l_nid,
-               subscription_mgr__l_aid,
-               subscription_mgr__p_user,
-               &subscription_mgr__l_authorized);
-            if (subscription_mgr__l_authorized == true) {
-               if ((subscription_mgr__l_aid == constants__e_aid_Value) &&
-                  (subscription_mgr__l_ncl == constants__e_ncl_Variable)) {
-                  address_space__get_Value_StatusCode(subscription_mgr__p_user,
-                     subscription_mgr__l_node,
-                     &subscription_mgr__l_valueSc);
+            else {
+               address_space__read_Node_Attribute(subscription_mgr__p_user,
+                  subscription_mgr__l_node,
+                  subscription_mgr__l_nid,
+                  subscription_mgr__l_aid,
+                  subscription_mgr__l_indexRange,
+                  &subscription_mgr__l_sc,
+                  &subscription_mgr__l_value,
+                  &subscription_mgr__l_valueSc,
+                  &subscription_mgr__l_val_ts_src,
+                  &subscription_mgr__l_val_ts_srv);
+               if (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_ok) {
+                  subscription_core__create_monitored_item(subscription_mgr__p_subscription,
+                     subscription_mgr__l_nid,
+                     subscription_mgr__l_aid,
+                     subscription_mgr__l_indexRange,
+                     subscription_mgr__l_value,
+                     subscription_mgr__l_valueSc,
+                     subscription_mgr__p_tsToReturn,
+                     subscription_mgr__l_monitMode,
+                     subscription_mgr__l_clientHandle,
+                     &subscription_mgr__l_sc,
+                     &subscription_mgr__l_monitoredItemPointer,
+                     &subscription_mgr__l_monitoredItemId);
+                  subscription_core__compute_create_monitored_item_revised_params(subscription_mgr__l_queueSize,
+                     &subscription_mgr__l_revSamplingItv,
+                     &subscription_mgr__l_revQueueSize);
+                  address_space__read_AddressSpace_free_variant(subscription_mgr__l_value);
                }
             }
-            else {
-               address_space__read_AddressSpace_clear_value(subscription_mgr__l_value);
-            }
          }
-         if (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_ok) {
-            subscription_core__create_monitored_item(subscription_mgr__p_subscription,
-               subscription_mgr__l_nid,
-               subscription_mgr__l_aid,
-               subscription_mgr__l_indexRange,
-               subscription_mgr__l_value,
-               subscription_mgr__l_valueSc,
-               subscription_mgr__p_tsToReturn,
-               subscription_mgr__l_monitMode,
-               subscription_mgr__l_clientHandle,
-               &subscription_mgr__l_sc,
-               &subscription_mgr__l_monitoredItemPointer,
-               &subscription_mgr__l_monitoredItemId);
-            subscription_core__compute_create_monitored_item_revised_params(subscription_mgr__l_queueSize,
-               &subscription_mgr__l_revSamplingItv,
-               &subscription_mgr__l_revQueueSize);
-         }
-         address_space__read_AddressSpace_free_variant(subscription_mgr__l_value);
          msg_subscription_create_monitored_item__setall_msg_monitored_item_resp_params(subscription_mgr__p_resp_msg,
             subscription_mgr__l_index,
             subscription_mgr__l_sc,

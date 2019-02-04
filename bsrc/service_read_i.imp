@@ -44,8 +44,10 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    fill_read_response_1(p_user, p_resp_msg, p_sc, p_nid, p_aid, p_index_range, p_rvi) =
+    fill_read_response_1(p_TimestampsToReturn, p_user, p_resp_msg, p_sc, p_nid, p_aid, p_index_range, p_rvi) =
     PRE
+        p_TimestampsToReturn : t_TimestampsToReturn_i &
+        p_TimestampsToReturn : t_TimestampsToReturn   &
         p_user     : t_user_i &
         p_user     : t_user   &
         p_resp_msg : t_msg_i         &
@@ -57,84 +59,117 @@ LOCAL_OPERATIONS
         p_rvi      : t_ReadValue_i
     THEN
         data_Value_Value,
-        data_Value_StatusCode
+        data_Value_StatusCode,
+        data_Value_SourceTimestamp,
+        data_Value_ServerTimestamp
         :(data_Value_Value      : t_ReadValue +-> t_Variant    &
           data_Value_StatusCode : t_ReadValue +-> t_RawStatusCode &
+          data_Value_SourceTimestamp : t_ReadValue +-> t_Timestamp &
+          data_Value_ServerTimestamp : t_ReadValue +-> t_Timestamp &
 
           (p_sc = e_sc_ok &
            p_nid : dom(a_NodeId~)
            =>
-           data_Value_Value = data_Value_Value$0 <+
+           /* Success case */
+           (data_Value_Value = data_Value_Value$0 <+
                               {p_rvi |-> AttributeID_Node_Variant(p_aid)(a_NodeId~(p_nid))} &
-           (a_NodeClass(a_NodeId~(p_nid)) = e_ncl_Variable
-            =>
-            data_Value_StatusCode = data_Value_StatusCode$0 <+
-                                    {p_rvi |-> a_Value_StatusCode(a_NodeId~(p_nid))}) &
-            /* TODO: model e_sc_bad_user_access_level */
-           (not(a_NodeClass(a_NodeId~(p_nid)) = e_ncl_Variable)
-            =>
-            data_Value_StatusCode = data_Value_StatusCode$0 <+
-                                    {p_rvi |-> conv_StatusCode_To_RawStatusCode(e_sc_ok)})) &
-          (not(p_sc = e_sc_ok &
-               p_nid : dom(a_NodeId~))
+            (a_NodeClass(a_NodeId~(p_nid)) = e_ncl_Variable
+             =>
+             data_Value_StatusCode = data_Value_StatusCode$0 <+
+                                     {p_rvi |-> a_Value_StatusCode(a_NodeId~(p_nid))} &
+             (p_TimestampsToReturn = e_ttr_source =>
+              data_Value_SourceTimestamp = data_Value_SourceTimestamp$0 <+ {p_rvi |-> a_Value_SourceTimestamp(a_NodeId~(p_nid))} &
+              data_Value_ServerTimestamp = data_Value_ServerTimestamp$0 <+ {p_rvi |-> c_Timestamp_null}) &
+             (p_TimestampsToReturn = e_ttr_server =>
+              data_Value_SourceTimestamp = data_Value_SourceTimestamp$0 <+ {p_rvi |-> c_Timestamp_null} &
+              data_Value_ServerTimestamp = data_Value_ServerTimestamp$0 <+ {p_rvi |-> a_Value_ServerTimestamp(a_NodeId~(p_nid))}) &
+             (p_TimestampsToReturn = e_ttr_both =>
+              data_Value_SourceTimestamp = data_Value_SourceTimestamp$0 <+ {p_rvi |-> a_Value_SourceTimestamp(a_NodeId~(p_nid))} &
+              data_Value_ServerTimestamp = data_Value_ServerTimestamp$0 <+ {p_rvi |-> c_Timestamp_null}) &
+             (p_TimestampsToReturn = e_ttr_neither =>
+              data_Value_SourceTimestamp = data_Value_SourceTimestamp$0 <+ {p_rvi |-> c_Timestamp_null} &
+              data_Value_ServerTimestamp = data_Value_ServerTimestamp$0 <+ {p_rvi |-> c_Timestamp_null})
+            ) &
+            (not(a_NodeClass(a_NodeId~(p_nid)) = e_ncl_Variable)
+             =>
+             data_Value_StatusCode = data_Value_StatusCode$0 <+
+             {p_rvi |-> c_RawStatusCode_Good})
+           ) or
+           /* Failure case */
+           (data_Value_Value = data_Value_Value$0 <+ {p_rvi |-> c_Variant_indet} &
+            {p_rvi} <<| data_Value_StatusCode = {p_rvi} <<| data_Value_StatusCode$0 &
+            {p_rvi} <| data_Value_StatusCode : t_ReadValue +-> t_RawStatusCode &
+            data_Value_StatusCode(p_rvi) : conv_StatusCode_To_RawStatusCode[{e_sc_bad_not_readable, e_sc_bad_user_access_denied,
+                                                                             e_sc_bad_index_range_invalid, e_sc_bad_index_range_no_data,
+                                                                             e_sc_bad_out_of_memory}] &
+            data_Value_SourceTimestamp = data_Value_SourceTimestamp$0 <+ {p_rvi |-> c_Timestamp_null} &
+            data_Value_ServerTimestamp = data_Value_ServerTimestamp$0 <+ {p_rvi |-> c_Timestamp_null}
+           )
+          ) &
+          (not(p_sc = e_sc_ok)
            =>
            data_Value_Value = {p_rvi} <<| data_Value_Value$0 &
            data_Value_StatusCode = data_Value_StatusCode$0 <+
-                                   {p_rvi |-> conv_StatusCode_To_RawStatusCode(e_sc_bad_internal_error)})
+                                   {p_rvi |-> conv_StatusCode_To_RawStatusCode(p_sc)}) &
+          (p_sc = e_sc_ok & not(p_nid : dom(a_NodeId~))
+           =>
+           data_Value_Value = {p_rvi} <<| data_Value_Value$0 &
+           data_Value_StatusCode = data_Value_StatusCode$0 <+
+                                   {p_rvi |-> conv_StatusCode_To_RawStatusCode(e_sc_bad_node_id_unknown)})
          )
     END
 
 OPERATIONS
 
-    fill_read_response_1(p_user, p_resp_msg, p_sc, p_nid, p_aid, p_index_range, p_rvi) =
+    fill_read_response_1(p_TimestampsToReturn, p_user, p_resp_msg, p_sc, p_nid, p_aid, p_index_range, p_rvi) =
     VAR
         l_is_valid,
         l_node,
-        l_ncl,
         l_value,
         l_sc,
         l_raw_sc,
-        l_authorized
+        l_ts_src,
+        l_ts_srv
     IN
         IF  p_sc = e_sc_ok
         THEN
             l_is_valid, l_node <-- readall_AddressSpace_Node(p_nid);
             IF l_is_valid = TRUE THEN
-                l_authorized <-- get_user_authorization(e_operation_type_read, p_nid, p_aid, p_user);
-                IF l_authorized = TRUE THEN
-                    l_sc, l_ncl, l_value <-- read_NodeClass_Attribute(p_user, l_node, p_aid, p_index_range);
-                    IF l_sc = e_sc_ok THEN
-                        IF  p_aid = e_aid_Value &
-                            l_ncl = e_ncl_Variable
-                        THEN
-                            l_raw_sc <-- get_Value_StatusCode(p_user, l_node)
-                        ELSE
-                            l_raw_sc <-- getall_conv_StatusCode_To_RawStatusCode(e_sc_ok)
+                l_sc, l_value, l_raw_sc, l_ts_src, l_ts_srv <-- read_Node_Attribute(p_user, l_node, p_nid, p_aid, p_index_range);
+                IF  l_sc = e_sc_ok
+                THEN
+                    CASE p_TimestampsToReturn OF
+                        EITHER e_ttr_source THEN
+                            l_ts_srv := c_Timestamp_null
+                        OR e_ttr_server THEN
+                            l_ts_src := c_Timestamp_null
+                        OR e_ttr_neither THEN
+                            l_ts_src := c_Timestamp_null;
+                            l_ts_srv := c_Timestamp_null
+                            /* ELSE: keep both timestamps retrieved */
                         END
-                    ELSE
-                        l_raw_sc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc)
-                    END;
-                    set_read_response(p_resp_msg, p_rvi, l_value, l_raw_sc, p_aid);
+                    END
+                    ;
+                    set_read_response(p_resp_msg, p_rvi, l_value, l_raw_sc, l_ts_src, l_ts_srv);
                     read_AddressSpace_free_variant(l_value)
                 ELSE
-                    l_raw_sc <-- getall_conv_StatusCode_To_RawStatusCode(e_sc_bad_user_access_denied);
-                    /* User was not authorized */
-                    set_read_response(p_resp_msg, p_rvi, c_Variant_indet, l_raw_sc, p_aid)
+                    l_raw_sc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc);
+                    set_read_response(p_resp_msg, p_rvi, c_Variant_indet, l_raw_sc, c_Timestamp_null, c_Timestamp_null)
                 END
             ELSE
                 /* Invalid at this level means the node Id is unknown:
                 node Id cannot be invalid in case p_is_valid = TRUE */
                 l_raw_sc <-- getall_conv_StatusCode_To_RawStatusCode(e_sc_bad_node_id_unknown);
-                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, l_raw_sc, p_aid)
+                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, l_raw_sc, c_Timestamp_null, c_Timestamp_null)
             END
         ELSE
             l_raw_sc <-- getall_conv_StatusCode_To_RawStatusCode(p_sc);
-            set_read_response(p_resp_msg, p_rvi, c_Variant_indet, l_raw_sc, p_aid)
+            set_read_response(p_resp_msg, p_rvi, c_Variant_indet, l_raw_sc, c_Timestamp_null, c_Timestamp_null)
         END
     END
     ;
 
-    fill_read_response(p_user, req_msg, resp_msg) =
+    fill_read_response(p_TimestampsToReturn, p_user, req_msg, resp_msg) =
     VAR
         l_nb_ReadValue,
         l_continue,
@@ -149,7 +184,7 @@ OPERATIONS
         WHILE l_continue = TRUE DO
             l_continue, l_rvi <-- continue_iter_write_request;
             l_sc, l_nid, l_aid, l_index_range <-- getall_ReadValue_NodeId_AttributeId(req_msg, l_rvi);
-            fill_read_response_1(p_user, resp_msg, l_sc, l_nid, l_aid, l_index_range, l_rvi)
+            fill_read_response_1(p_TimestampsToReturn, p_user, resp_msg, l_sc, l_nid, l_aid, l_index_range, l_rvi)
         INVARIANT
             rreqs_to_iterate <: t_ReadValue &
             rreqs_iterated   <: t_ReadValue &
@@ -157,29 +192,28 @@ OPERATIONS
             rreqs_to_iterate \/ rreqs_iterated = cast_t_ReadValue[1..nb_ReadValue] &
             l_continue = bool(rreqs_to_iterate /= {}) &
 
-            data_Value_Value =
-            %rvi.(rvi : t_ReadValue &
-                  rvi : rreqs_iterated &
-                  rvi : dom(ReadValue_NodeId) &
-                  ReadValue_NodeId(rvi) : dom(a_NodeId~) &
-                  rvi : dom(ReadValue_AttributeId) &
-                  a_NodeId~(ReadValue_NodeId(rvi)) : dom(AttributeID_Node_Variant(ReadValue_AttributeId(rvi)))
-                  |
-                  AttributeID_Node_Variant(ReadValue_AttributeId(rvi))(a_NodeId~(ReadValue_NodeId(rvi)))
-                 ) &
+            /* Do not repeat properties of unitary item defined by fill_read_response_1,
+               moreover it is not deterministic (out of memory case) */
+            !rvi.(rvi : t_ReadValue & rvi : rreqs_iterated & rvi : dom(ReadValue_NodeId) =>
+                    rvi : dom(data_Value_Value)) &
+            !rvi.(rvi : t_ReadValue & rvi : rreqs_to_iterate & rvi : dom(ReadValue_NodeId) =>
+                    rvi /: dom(data_Value_Value)) &
 
-            data_Value_StatusCode =
-            %rvi.(rvi : t_ReadValue &
-                  rvi : rreqs_iterated
-                  |
-                  {FALSE |-> conv_StatusCode_To_RawStatusCode(e_sc_bad_internal_error),
-                   TRUE  |->
-                             {FALSE |-> conv_StatusCode_To_RawStatusCode(e_sc_ok),
-                              TRUE  |-> a_Value_StatusCode(a_NodeId~(ReadValue_NodeId(rvi)))}
-                             (bool(ReadValue_AttributeId(rvi) = e_aid_Value &
-                                   a_NodeClass(a_NodeId~(ReadValue_NodeId(rvi))) = e_ncl_Variable))}
-                  (bool(rvi : dom(data_Value_Value)))
-                 )
+            !rvi.(rvi : t_ReadValue & rvi : rreqs_iterated & rvi : dom(ReadValue_NodeId) =>
+                    rvi : dom(data_Value_StatusCode)) &
+            !rvi.(rvi : t_ReadValue & rvi : rreqs_to_iterate & rvi : dom(ReadValue_NodeId) =>
+                rvi /: dom(data_Value_StatusCode)) &
+
+            !rvi.(rvi : t_ReadValue & rvi : rreqs_iterated & rvi : dom(ReadValue_NodeId) =>
+                    rvi : dom(data_Value_SourceTimestamp)) &
+            !rvi.(rvi : t_ReadValue & rvi : rreqs_to_iterate & rvi : dom(ReadValue_NodeId) =>
+                    rvi /: dom(data_Value_SourceTimestamp)) &
+
+            !rvi.(rvi : t_ReadValue & rvi : rreqs_iterated & rvi : dom(ReadValue_NodeId) =>
+                    rvi : dom(data_Value_ServerTimestamp)) &
+            !rvi.(rvi : t_ReadValue & rvi : rreqs_to_iterate & rvi : dom(ReadValue_NodeId) =>
+                    rvi /: dom(data_Value_ServerTimestamp))
+
         VARIANT
             card(rreqs_to_iterate)
         END

@@ -768,6 +768,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_not_writable:
         *status = OpcUa_BadNotWritable;
         break;
+    case constants_statuscodes_bs__e_sc_bad_not_readable:
+        *status = OpcUa_BadNotReadable;
+        break;
     case constants_statuscodes_bs__e_sc_bad_type_mismatch:
         *status = OpcUa_BadTypeMismatch;
         break;
@@ -982,6 +985,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadNotWritable:
         *bstatus = constants_statuscodes_bs__e_sc_bad_not_writable;
+        break;
+    case OpcUa_BadNotReadable:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_not_readable;
         break;
     case OpcUa_BadTypeMismatch:
         *bstatus = constants_statuscodes_bs__e_sc_bad_type_mismatch;
@@ -1223,7 +1229,7 @@ constants__t_AttributeId_i util_AttributeId__C_to_B(uint32_t caid)
     case constants__e_aid_IsAbstract:
     case constants__e_aid_Symmetric:
     case constants__e_aid_InverseName:
-    case constants__e_aid_ContainsNoLoop:
+    case constants__e_aid_ContainsNoLoops:
     case constants__e_aid_EventNotifier:
     case constants__e_aid_Value:
     case constants__e_aid_DataType:

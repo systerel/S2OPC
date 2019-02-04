@@ -32,11 +32,6 @@
 #include "sopc_time.h"
 #include "sopc_types.h"
 
-/*----------
-   Globals
-  ----------*/
-static constants__t_TimestampsToReturn_i ttrRequested = constants__e_ttr_neither;
-
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -45,11 +40,9 @@ void msg_read_response_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void msg_read_response_bs__alloc_read_response(
-    const t_entier4 msg_read_response_bs__p_nb_resps,
-    const constants__t_TimestampsToReturn_i msg_read_response_bs__p_TimestampsToReturn,
-    const constants__t_msg_i msg_read_response_bs__p_resp_msg,
-    t_bool* const msg_read_response_bs__p_isvalid)
+void msg_read_response_bs__alloc_read_response(const t_entier4 msg_read_response_bs__p_nb_resps,
+                                               const constants__t_msg_i msg_read_response_bs__p_resp_msg,
+                                               t_bool* const msg_read_response_bs__p_isvalid)
 {
     OpcUa_ReadResponse* msg_read_resp = (OpcUa_ReadResponse*) msg_read_response_bs__p_resp_msg;
 
@@ -76,42 +69,34 @@ void msg_read_response_bs__alloc_read_response(
 
     msg_read_resp->NoOfDiagnosticInfos = 0;
     msg_read_resp->DiagnosticInfos = NULL;
-
-    ttrRequested = msg_read_response_bs__p_TimestampsToReturn;
 }
 
-void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_response_bs__resp_msg,
-                                             const constants__t_ReadValue_i msg_read_response_bs__rvi,
-                                             const constants__t_Variant_i msg_read_response_bs__val,
-                                             const constants__t_RawStatusCode msg_read_response_bs__raw_sc,
-                                             const constants__t_AttributeId_i msg_read_response_bs__aid)
+void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_response_bs__p_resp_msg,
+                                             const constants__t_ReadValue_i msg_read_response_bs__p_rvi,
+                                             const constants__t_Variant_i msg_read_response_bs__p_value,
+                                             const constants__t_RawStatusCode msg_read_response_bs__p_raw_sc,
+                                             const constants__t_Timestamp msg_read_response_bs__p_ts_src,
+                                             const constants__t_Timestamp msg_read_response_bs__p_ts_srv)
 {
-    OpcUa_ReadResponse* pMsgReadResp = (OpcUa_ReadResponse*) msg_read_response_bs__resp_msg;
+    OpcUa_ReadResponse* resp = (OpcUa_ReadResponse*) msg_read_response_bs__p_resp_msg;
     SOPC_DataValue* pDataValue = NULL;
 
-    if (msg_read_response_bs__rvi > 0)
+    assert(msg_read_response_bs__p_rvi > 0);
+
+    /* rvi is castable, it's one of its properties, but it starts at 1 */
+    pDataValue = &resp->Results[msg_read_response_bs__p_rvi - 1];
+
+    SOPC_Variant_Initialize(&pDataValue->Value);
+
+    if (constants__c_Variant_indet != msg_read_response_bs__p_value)
     {
-        /* rvi is castable, it's one of its properties, but it starts at 1 */
-        pDataValue = &pMsgReadResp->Results[msg_read_response_bs__rvi - 1];
-
-        SOPC_Variant_Initialize(&pDataValue->Value);
-
-        if (constants__c_Variant_indet != msg_read_response_bs__val)
-        {
-            /* Note: the following only copies the context of the Variant, not the entire Variant */
-            SOPC_Variant_Move(&pDataValue->Value, msg_read_response_bs__val);
-        }
-
-        pDataValue->Status = msg_read_response_bs__raw_sc;
-
-        if (msg_read_response_bs__aid == constants__e_aid_Value &&
-            (constants__e_ttr_both == ttrRequested || constants__e_ttr_source == ttrRequested))
-        {
-            pDataValue->SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
-        }
-        if (constants__e_ttr_both == ttrRequested || constants__e_ttr_server == ttrRequested)
-        {
-            pDataValue->ServerTimestamp = SOPC_Time_GetCurrentTimeUTC();
-        }
+        /* Note: the following only copies the context of the Variant, not the entire Variant */
+        SOPC_Variant_Move(&pDataValue->Value, msg_read_response_bs__p_value);
     }
+
+    pDataValue->Status = msg_read_response_bs__p_raw_sc;
+    pDataValue->SourceTimestamp = msg_read_response_bs__p_ts_src.timestamp;
+    pDataValue->SourcePicoSeconds = msg_read_response_bs__p_ts_src.picoSeconds;
+    pDataValue->ServerTimestamp = msg_read_response_bs__p_ts_srv.timestamp;
+    pDataValue->ServerPicoSeconds = msg_read_response_bs__p_ts_srv.picoSeconds;
 }

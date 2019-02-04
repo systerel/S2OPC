@@ -23,10 +23,12 @@ MACHINE
 SEES
     constants,
     constants_statuscodes_bs,
-    service_write_decode_bs /* TODO: move to refinment */
+    service_write_decode_bs, /* TODO: move to refinment */
+    service_mgr_1
 
 DEFINITIONS
     "definitions.def";
+
     d_variables ==
         /* Attributes (mandatory) */
         a_NodeId,
@@ -42,7 +44,7 @@ DEFINITIONS
         a_DataType,
         a_ValueRank,
         a_AccessLevel,
-        /* a_UserAccessLevel  (see d_inv) */
+        a_UserAccessLevel,
         a_Historizing,
         a_Executable,
         a_UserExecutable,
@@ -103,7 +105,7 @@ DEFINITIONS
         a_IsAbstract : t_Node +-> BOOL &
         dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
 
-        a_EventNotifier : t_Node +-> BOOL &
+        a_EventNotifier : t_Node +-> t_Byte &
         dom(a_EventNotifier) = dom(a_NodeClass|>{e_ncl_Object, e_ncl_View}) &
 
         a_DataType : t_Node +-> t_NodeId &
@@ -115,9 +117,9 @@ DEFINITIONS
         a_AccessLevel : t_Node +-> t_access_level &
         dom(a_AccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
-        /* Note: Dynamic value evaluation depending on authorization of user
+        /* Note: Dynamic value evaluation depending on authorization of user */
         a_UserAccessLevel : t_Node +-> t_access_level &
-        dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) & */
+        dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
         a_Historizing : t_Node +-> BOOL &
         dom(a_Historizing) = dom(a_NodeClass|>{e_ncl_Variable}) &
@@ -179,31 +181,121 @@ INITIALISATION
     )
 
 OPERATIONS
+
     /* a_NodeClass(node) and any_attribute(node) */
-    sc, ncl, val <-- read_NodeClass_Attribute(p_user, node, aid, index_range) =
+    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_Node_Attribute(p_user, p_node, p_nid, p_aid, p_index_range) =
     PRE
         p_user : t_user_i &
         p_user : t_user   &
-        node : t_Node_i &
-        node : t_Node &
-        aid : t_AttributeId_i &
-        aid : t_AttributeId &
-        index_range : t_IndexRange_i
+        p_node : t_Node_i &
+        p_node : t_Node &
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId &
+        p_nid = a_NodeId(p_node) &
+        p_aid : t_AttributeId_i &
+        p_aid : t_AttributeId &
+        p_index_range : t_IndexRange_i
     THEN
-        /* TODO: define cases of failure (sc /= e_sc_ok): value requested on non Variable* type */
+        LET ncl BE ncl = a_NodeClass(p_node) IN
         sc,
-        ncl,
-        val:(sc : t_StatusCode_i &
-             sc : t_StatusCode &
-             ncl : t_NodeClass_i &
-             ncl = a_NodeClass(node) &
-             val : t_Variant_i & /* TODO: must not be left undeterministic in concretisation, so there must be an _indet */
-            (
-            node : dom(AttributeID_Node_Variant(aid))
-            =>
-            val = AttributeID_Node_Variant(aid)(node)
-            )
-        )
+        val,
+        val_sc,
+        val_ts_src,
+        val_ts_srv
+        :(sc : t_StatusCode_i &
+          sc : t_StatusCode &
+          val : t_Variant_i &
+          val_sc : t_RawStatusCode &
+          val_ts_src : t_Timestamp &
+          val_ts_srv : t_Timestamp &
+          (p_node : dom(AttributeID_Node_Variant(p_aid))
+           =>
+           /* Specific treatement for Value of Variable attribute: check access rights + index range */
+           (ncl = e_ncl_Variable & p_aid = e_aid_Value =>
+             (local_service_treatment = FALSE &
+              conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = FALSE =>
+               sc = e_sc_bad_not_readable) &
+             (local_service_treatment = FALSE &
+              conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
+              not(e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) =>
+                 sc = e_sc_bad_user_access_denied) &
+
+             (local_service_treatment = TRUE or
+              (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
+               e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
+               IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE =>
+                 sc = e_sc_bad_index_range_invalid
+             ) &
+
+             (local_service_treatment = TRUE or
+              (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
+               e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
+               IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
+               HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE  =>
+                 sc = e_sc_bad_index_range_no_data
+             ) &
+
+             (local_service_treatment = TRUE or
+              (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
+               e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
+               IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
+               HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE
+              =>
+                (val = AttributeID_Node_Variant(p_aid)(p_node) &
+                sc = e_sc_ok) or
+                (val = c_Variant_indet &
+                  sc = e_sc_bad_out_of_memory)
+             )
+
+           ) &
+           /* Specific treatement for Value of VariableType attribute: check index range */
+           (not(ncl = e_ncl_Variable & p_aid = e_aid_Value) &
+               ncl = e_ncl_VariableType & p_aid = e_aid_Value =>
+               (IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE =>
+                 sc = e_sc_bad_index_range_invalid
+               ) &
+               (IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
+                HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE =>
+                 sc = e_sc_bad_index_range_no_data
+               ) &
+               (IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
+                HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE =>
+                (val = AttributeID_Node_Variant(p_aid)(p_node) &
+                 sc = e_sc_ok) or
+                (val = c_Variant_indet &
+                  sc = e_sc_bad_out_of_memory)
+                )
+           ) &
+           /* Generic treatment for all other attributes */
+           (not(ncl = e_ncl_Variable & p_aid = e_aid_Value) &
+             not(ncl = e_ncl_VariableType & p_aid = e_aid_Value) =>
+               (val = AttributeID_Node_Variant(p_aid)(p_node) &
+                sc = e_sc_ok) or
+                (val = c_Variant_indet &
+                  sc = e_sc_bad_out_of_memory)
+          ) &
+          /* Specific treatement for status code and timestamps for Variable Value */
+          (ncl = e_ncl_Variable & p_aid = e_aid_Value =>
+           val_sc = a_Value_StatusCode(p_node) &
+           val_ts_src = a_Value_SourceTimestamp(p_node) &
+           val_ts_srv = a_Value_ServerTimestamp(p_node)) &
+          /* Generic treatement for status code and timestamps     */
+          (not (ncl = e_ncl_Variable & p_aid = e_aid_Value) =>
+           val_sc = c_RawStatusCode_Good &
+           val_ts_src = c_Timestamp_null &
+           val_ts_srv = c_Timestamp_null)
+          ) &
+          /* Invalid attribute for the given node */
+          (not(p_node : dom(AttributeID_Node_Variant(p_aid)))
+           =>
+           val = c_Variant_indet &
+           sc = e_sc_bad_attribute_id_invalid &
+           val_sc = c_RawStatusCode_BadInvalidState &
+           val_ts_src = c_Timestamp_null &
+           val_ts_srv = c_Timestamp_null
+          )
+       )
+    END /* LET END */
     END
     ;
 

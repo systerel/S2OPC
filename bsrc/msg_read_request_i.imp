@@ -53,7 +53,10 @@ OPERATIONS
                 p_read_ok := FALSE;
                 p_statusCode := e_sc_bad_timestamps_to_return_invalid
             ELSE
-                /* Note: manage max age parameter for valid values but best effort valid when it is not invalid */
+                /* Note: only check max age parameter invalid values (< 0),  otherwise we do not need to manage max age:
+                   Part4: "If the Server cannot meet the requested maxAge,
+                           it returns its 'best effort' value rather than rejecting the request."
+                */
                 p_read_ok <-- read_req_MaxAge(p_msg);
                 IF  p_read_ok = FALSE THEN
                     p_statusCode := e_sc_bad_max_age_invalid
