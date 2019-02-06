@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 05/02/2019 17:21:22
+ Date                 : 06/02/2019 17:15:16
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -106,10 +106,10 @@ void address_space__treat_write_1(
    const constants__t_DataValue_i address_space__dataValue,
    const constants__t_IndexRange_i address_space__index_range,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__serviceStatusCode,
-   constants__t_DataValue_i * const address_space__prev_dataValue) {
+   constants__t_DataValue_i * const address_space__prev_dataValue,
+   constants__t_Node_i * const address_space__node) {
    {
       t_bool address_space__l_isvalid;
-      constants__t_Node_i address_space__l_node;
       constants__t_NodeClass_i address_space__l_ncl;
       constants__t_access_level address_space__l_access_lvl;
       t_bool address_space__l_access_write;
@@ -127,19 +127,20 @@ void address_space__treat_write_1(
       constants__t_Timestamp address_space__l_source_ts;
       constants__t_RawStatusCode address_space__l_raw_sc;
       
+      *address_space__node = constants__c_Node_indet;
       *address_space__prev_dataValue = constants__c_DataValue_indet;
       if (address_space__isvalid == true) {
          address_space_bs__readall_AddressSpace_Node(address_space__nid,
             &address_space__l_isvalid,
-            &address_space__l_node);
+            address_space__node);
          if (address_space__l_isvalid == true) {
-            address_space_bs__get_NodeClass(address_space__l_node,
+            address_space_bs__get_NodeClass(*address_space__node,
                &address_space__l_ncl);
             if ((address_space__aid == constants__e_aid_Value) &&
                (address_space__l_ncl == constants__e_ncl_Variable)) {
-               address_space_bs__get_DataType(address_space__l_node,
+               address_space_bs__get_DataType(*address_space__node,
                   &address_space__l_var_datatype_nid);
-               address_space_bs__get_ValueRank(address_space__l_node,
+               address_space_bs__get_ValueRank(*address_space__node,
                   &address_space__l_var_vr);
                data_value_pointer_bs__get_conv_DataValue_LocalDataType(address_space__dataValue,
                   &address_space__l_dv_datatype_nid);
@@ -161,22 +162,22 @@ void address_space__treat_write_1(
                      &address_space__l_raw_sc);
                   if (address_space__l_local_treatment == true) {
                      address_space_bs__set_Value(address_space__p_user,
-                        address_space__l_node,
+                        *address_space__node,
                         address_space__l_variant,
                         address_space__index_range,
                         address_space__serviceStatusCode,
                         address_space__prev_dataValue);
                      if (*address_space__serviceStatusCode == constants_statuscodes_bs__e_sc_ok) {
                         address_space_bs__set_Value_StatusCode(address_space__p_user,
-                           address_space__l_node,
+                           *address_space__node,
                            address_space__l_raw_sc);
                         address_space_bs__set_Value_SourceTimestamp(address_space__p_user,
-                           address_space__l_node,
+                           *address_space__node,
                            address_space__l_source_ts);
                      }
                   }
                   else {
-                     address_space_bs__get_AccessLevel(address_space__l_node,
+                     address_space_bs__get_AccessLevel(*address_space__node,
                         &address_space__l_access_lvl);
                      constants__is_t_access_level_currentWrite(address_space__l_access_lvl,
                         &address_space__l_access_write);
@@ -192,7 +193,7 @@ void address_space__treat_write_1(
                            &address_space__l_authorized_write);
                         if (address_space__l_authorized_write == true) {
                            address_space_bs__set_Value(address_space__p_user,
-                              address_space__l_node,
+                              *address_space__node,
                               address_space__l_variant,
                               address_space__index_range,
                               address_space__serviceStatusCode,
@@ -200,12 +201,12 @@ void address_space__treat_write_1(
                            if (*address_space__serviceStatusCode == constants_statuscodes_bs__e_sc_ok) {
                               if (address_space__l_access_write_status == true) {
                                  address_space_bs__set_Value_StatusCode(address_space__p_user,
-                                    address_space__l_node,
+                                    *address_space__node,
                                     address_space__l_raw_sc);
                               }
                               if (address_space__l_access_write_timestamp == true) {
                                  address_space_bs__set_Value_SourceTimestamp(address_space__p_user,
-                                    address_space__l_node,
+                                    *address_space__node,
                                     address_space__l_source_ts);
                               }
                            }
@@ -571,6 +572,9 @@ void address_space__treat_write_request_WriteValues(
       constants_statuscodes_bs__t_StatusCode_i address_space__l_status1;
       constants_statuscodes_bs__t_StatusCode_i address_space__l_status2;
       constants__t_DataValue_i address_space__l_prev_dataValue;
+      constants__t_Node_i address_space__l_node;
+      constants__t_access_level address_space__l_access_lvl;
+      t_bool address_space__l_access_read;
       t_bool address_space__l_isvalid;
       t_bool address_space__l_local_treatment;
       constants__t_WriteValuePointer_i address_space__l_wv;
@@ -599,21 +603,28 @@ void address_space__treat_write_request_WriteValues(
             address_space__l_dataValue,
             address_space__l_index_range,
             &address_space__l_status2,
-            &address_space__l_prev_dataValue);
+            &address_space__l_prev_dataValue,
+            &address_space__l_node);
          response_write_bs__set_ResponseWrite_StatusCode(address_space__l_wvi,
             address_space__l_status2);
          service_write_decode_bs__getall_WriteValuePointer(address_space__l_wvi,
             &address_space__l_wv);
          if (address_space__l_status2 == constants_statuscodes_bs__e_sc_ok) {
-            write_value_pointer_bs__copy_write_value_pointer_content(address_space__l_wv,
-               &address_space__l_bres_wv_copy,
-               &address_space__l_wv_copy);
-            if (address_space__l_bres_wv_copy == true) {
-               gen_subscription_event_bs__gen_data_changed_event(address_space__l_prev_dataValue,
-                  address_space__l_wv_copy);
-            }
-            else {
-               gen_subscription_event_bs__gen_data_changed_event_failed(address_space__l_prev_dataValue);
+            address_space_bs__get_AccessLevel(address_space__l_node,
+               &address_space__l_access_lvl);
+            constants__is_t_access_level_currentRead(address_space__l_access_lvl,
+               &address_space__l_access_read);
+            if (address_space__l_access_read == true) {
+               write_value_pointer_bs__copy_write_value_pointer_content(address_space__l_wv,
+                  &address_space__l_bres_wv_copy,
+                  &address_space__l_wv_copy);
+               if (address_space__l_bres_wv_copy == true) {
+                  gen_subscription_event_bs__gen_data_changed_event(address_space__l_prev_dataValue,
+                     address_space__l_wv_copy);
+               }
+               else {
+                  gen_subscription_event_bs__gen_data_changed_event_failed(address_space__l_prev_dataValue);
+               }
             }
          }
          else {

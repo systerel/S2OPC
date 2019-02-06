@@ -74,25 +74,26 @@ OPERATIONS
 
     bres <-- add_first_monitored_item_notification_to_queue (p_queue,
                                                              p_monitoredItem,
-                                                             p_timestampToReturn,
                                                              p_nid,
                                                              p_aid,
                                                              p_VariantValuePointer,
-                                                             p_ValueSc) =
+                                                             p_ValueSc,
+                                                             p_val_ts_src,
+                                                             p_val_ts_srv) =
     PRE
         p_queue : t_notificationQueue_i &
         p_queue : s_notificationQueue &
         p_monitoredItem : t_monitoredItemPointer_i &
         p_monitoredItem : t_monitoredItemPointer &
-        p_timestampToReturn : t_TimestampsToReturn_i &
-        p_timestampToReturn : t_TimestampsToReturn &
         p_nid : t_NodeId_i &
         p_nid : t_NodeId &
         p_aid : t_AttributeId_i &
         p_aid : t_AttributeId &
         p_VariantValuePointer : t_Variant_i &
         p_VariantValuePointer : t_Variant &
-        p_ValueSc : t_RawStatusCode
+        p_ValueSc : t_RawStatusCode &
+        p_val_ts_src : t_Timestamp &
+        p_val_ts_srv : t_Timestamp
     THEN
         CHOICE
             bres := FALSE
@@ -112,6 +113,7 @@ OPERATIONS
     END
     ;
 
+    /* Note: Call address_space_bs:get_Variant_IndexRange in C implem for now */
     bres <-- add_monitored_item_notification_to_queue (p_queue,
                                                        p_monitoredItem,
                                                        p_timestampToReturn,

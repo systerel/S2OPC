@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 29/01/2019 12:57:57
+ Date                 : 06/02/2019 17:15:34
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -685,6 +685,8 @@ void subscription_core__create_monitored_item(
    const constants__t_IndexRange_i subscription_core__p_indexRange,
    const constants__t_Variant_i subscription_core__p_value,
    const constants__t_RawStatusCode subscription_core__p_valueSc,
+   const constants__t_Timestamp subscription_core__p_val_ts_src,
+   const constants__t_Timestamp subscription_core__p_val_ts_srv,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
    const constants__t_monitoringMode_i subscription_core__p_monitoringMode,
    const constants__t_client_handle_i subscription_core__p_clientHandle,
@@ -696,6 +698,8 @@ void subscription_core__create_monitored_item(
       constants__t_monitoredItemQueue_i subscription_core__l_sub_monitIt_queue;
       constants__t_monitoredItemQueue_i subscription_core__l_node_monitIt_queue;
       constants__t_notificationQueue_i subscription_core__l_sub_notif_queue;
+      constants__t_Timestamp subscription_core__l_ts_src;
+      constants__t_Timestamp subscription_core__l_ts_srv;
       
       monitored_item_pointer_bs__create_monitored_item_pointer(subscription_core__p_subscription,
          subscription_core__p_nid,
@@ -732,13 +736,32 @@ void subscription_core__create_monitored_item(
                subscription_core_1__get_subscription_notificationQueue(subscription_core__p_subscription,
                   &subscription_core__l_sub_notif_queue);
                if (subscription_core__p_monitoringMode == constants__e_monitoringMode_reporting) {
+                  switch (subscription_core__p_timestampToReturn) {
+                  case constants__e_ttr_source:
+                     subscription_core__l_ts_src = subscription_core__p_val_ts_src;
+                     subscription_core__l_ts_srv = constants__c_Timestamp_null;
+                     break;
+                  case constants__e_ttr_server:
+                     subscription_core__l_ts_src = constants__c_Timestamp_null;
+                     subscription_core__l_ts_srv = subscription_core__p_val_ts_srv;
+                     break;
+                  case constants__e_ttr_neither:
+                     subscription_core__l_ts_src = constants__c_Timestamp_null;
+                     subscription_core__l_ts_srv = constants__c_Timestamp_null;
+                     break;
+                  default:
+                     subscription_core__l_ts_src = subscription_core__p_val_ts_src;
+                     subscription_core__l_ts_srv = subscription_core__p_val_ts_srv;
+                     break;
+                  }
                   monitored_item_notification_queue_bs__add_first_monitored_item_notification_to_queue(subscription_core__l_sub_notif_queue,
                      *subscription_core__monitoredItemPointer,
-                     subscription_core__p_timestampToReturn,
                      subscription_core__p_nid,
                      subscription_core__p_aid,
                      subscription_core__p_value,
                      subscription_core__p_valueSc,
+                     subscription_core__l_ts_src,
+                     subscription_core__l_ts_srv,
                      &subscription_core__l_bres);
                }
                if (subscription_core__l_bres == false) {

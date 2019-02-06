@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 05/02/2019 12:57:12
+ Date                 : 06/02/2019 17:15:16
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -121,7 +121,8 @@ extern void address_space__treat_write_1(
    const constants__t_DataValue_i address_space__dataValue,
    const constants__t_IndexRange_i address_space__index_range,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__serviceStatusCode,
-   constants__t_DataValue_i * const address_space__prev_dataValue);
+   constants__t_DataValue_i * const address_space__prev_dataValue,
+   constants__t_Node_i * const address_space__node);
 
 /*--------------------
    OPERATIONS Clause
