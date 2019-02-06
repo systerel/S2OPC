@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 05/02/2019 17:21:36
+ Date                 : 06/02/2019 17:15:36
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -202,8 +202,6 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
             &subscription_mgr__l_samplingItv,
             &subscription_mgr__l_queueSize,
             &subscription_mgr__l_indexRange);
-         constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(constants_statuscodes_bs__e_sc_bad_user_access_denied,
-            &subscription_mgr__l_valueSc);
          if (subscription_mgr__l_bres == true) {
             address_space__readall_AddressSpace_Node(subscription_mgr__l_nid,
                &subscription_mgr__l_bres,
@@ -222,6 +220,14 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
                   &subscription_mgr__l_valueSc,
                   &subscription_mgr__l_val_ts_src,
                   &subscription_mgr__l_val_ts_srv);
+               if ((subscription_mgr__l_sc != constants_statuscodes_bs__e_sc_ok) &&
+                  (((subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_not_readable) ||
+                  (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_user_access_denied)) ||
+                  (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_index_range_invalid))) {
+                  constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(subscription_mgr__l_sc,
+                     &subscription_mgr__l_valueSc);
+                  subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_ok;
+               }
                if (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_ok) {
                   subscription_core__create_monitored_item(subscription_mgr__p_subscription,
                      subscription_mgr__l_nid,
@@ -229,6 +235,8 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
                      subscription_mgr__l_indexRange,
                      subscription_mgr__l_value,
                      subscription_mgr__l_valueSc,
+                     subscription_mgr__l_val_ts_src,
+                     subscription_mgr__l_val_ts_srv,
                      subscription_mgr__p_tsToReturn,
                      subscription_mgr__l_monitMode,
                      subscription_mgr__l_clientHandle,

@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_notification_queue_bs.h
 
- Date                 : 29/01/2019 12:58:02
+ Date                 : 07/02/2019 14:02:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -52,11 +52,12 @@ extern void monitored_item_notification_queue_bs__INITIALISATION(void);
 extern void monitored_item_notification_queue_bs__add_first_monitored_item_notification_to_queue(
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
-   const constants__t_TimestampsToReturn_i monitored_item_notification_queue_bs__p_timestampToReturn,
    const constants__t_NodeId_i monitored_item_notification_queue_bs__p_nid,
    const constants__t_AttributeId_i monitored_item_notification_queue_bs__p_aid,
    const constants__t_Variant_i monitored_item_notification_queue_bs__p_VariantValuePointer,
    const constants__t_RawStatusCode monitored_item_notification_queue_bs__p_ValueSc,
+   const constants__t_Timestamp monitored_item_notification_queue_bs__p_val_ts_src,
+   const constants__t_Timestamp monitored_item_notification_queue_bs__p_val_ts_srv,
    t_bool * const monitored_item_notification_queue_bs__bres);
 extern void monitored_item_notification_queue_bs__add_monitored_item_notification_to_queue(
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,

@@ -834,6 +834,8 @@ OPERATIONS
                                                                                          p_indexRange,
                                                                                          p_value,
                                                                                          p_valueSc,
+                                                                                         p_val_ts_src,
+                                                                                         p_val_ts_srv,
                                                                                          p_timestampToReturn,
                                                                                          p_monitoringMode,
                                                                                          p_clientHandle) =
@@ -848,6 +850,8 @@ OPERATIONS
         p_value : t_Variant_i &
         p_value : t_Variant &
         p_valueSc : t_RawStatusCode &
+        p_val_ts_src : t_Timestamp &
+        p_val_ts_srv : t_Timestamp &
         p_timestampToReturn : t_TimestampsToReturn_i &
         p_timestampToReturn : t_TimestampsToReturn &
         p_monitoringMode : t_monitoringMode_i &

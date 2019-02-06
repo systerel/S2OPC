@@ -563,7 +563,6 @@ OPERATIONS
             l_continue, l_index <-- continue_iter_monitored_item_request;
             l_bres, l_sc, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_queueSize, l_indexRange
               <-- getall_monitored_item_req_params(p_req_msg, l_index);
-            l_valueSc <-- getall_conv_StatusCode_To_RawStatusCode(e_sc_bad_user_access_denied);
             /* Check validity of NodeId */
             IF l_bres = TRUE
             THEN
@@ -575,16 +574,34 @@ OPERATIONS
                     /* Read monitored item value */
                     l_sc, l_value, l_valueSc, l_val_ts_src, l_val_ts_srv <-- read_Node_Attribute(p_user, l_node, l_nid, l_aid, l_indexRange);
                     /* Create monitored item */
-                    IF l_sc = e_sc_ok THEN
+                    /* From part 4:
+                       When a user adds a monitored item that the user is denied read access to, the add operation for
+                       the item shall succeed and the bad status Bad_NotReadable or Bad_UserAccessDenied shall be
+                       returned in the Publish response.
+                       The same procedure shall be applied for an IndexRange that does not deliver data
+                       for the current value but could deliver data in the future.
+                    */
+                    IF l_sc /= e_sc_ok & (l_sc = e_sc_bad_not_readable or
+                                          l_sc = e_sc_bad_user_access_denied or
+                                          l_sc = e_sc_bad_index_range_invalid)
+                    THEN
+                        /* For PublishResponse */
+                        l_valueSc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc);
+                        l_sc := e_sc_ok
+                    END;
+                    IF l_sc = e_sc_ok
+                    THEN
                         l_sc, l_monitoredItemPointer, l_monitoredItemId <-- create_monitored_item (p_subscription,
-                            l_nid,
-                            l_aid,
-                            l_indexRange,
-                            l_value,
-                            l_valueSc,
-                            p_tsToReturn,
-                            l_monitMode,
-                            l_clientHandle);
+                                                                                                   l_nid,
+                                                                                                   l_aid,
+                                                                                                   l_indexRange,
+                                                                                                   l_value,
+                                                                                                   l_valueSc,
+                                                                                                   l_val_ts_src,
+                                                                                                   l_val_ts_srv,
+                                                                                                   p_tsToReturn,
+                                                                                                   l_monitMode,
+                                                                                                   l_clientHandle);
                         l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize);
                         read_AddressSpace_free_variant(l_value)
                     END
@@ -640,6 +657,7 @@ OPERATIONS
             l_valid_subscription <-- is_valid_subscription (l_subscription);
             IF l_valid_subscription = TRUE
             THEN
+                /* Note: AccessLevel not checked here, it shall be a condition to generate a DataChange event (inhibition if read forbidden)*/
                 l_session <-- getall_session (l_subscription);
                 l_user <-- get_session_user_server(l_session);
                 /* TODO: when user access right property will be modifiable previous user right shall be
@@ -652,6 +670,9 @@ OPERATIONS
             ;
             IF l_valid_user_access = TRUE & l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting
             THEN
+                /* Note: Call address_space_bs:get_Variant_IndexRange in C implem for now
+                   It is necessary to filter the monitoredItem index range.
+                */
                 server_subscription_add_notification (l_subscription, l_monitoredItemPointer, l_timestampToReturn, p_new_wv_pointer)
             END
         INVARIANT

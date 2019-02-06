@@ -26,11 +26,12 @@
   --------------*/
 #include "constants.h"
 
+#include "monitored_item_pointer_impl.h"
 #include "util_b2c.h"
 
 typedef struct SOPC_InternalNotificationElement
 {
-    constants__t_monitoredItemPointer_i monitoredItemPointer;
+    SOPC_InternalMontitoredItem* monitoredItemPointer;
     OpcUa_WriteValue* value;
 } SOPC_InternalNotificationElement;
 
@@ -77,8 +78,9 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     SOPC_InternalNotificationElement* notifElt,
     const SOPC_String* indexRange,
-    const constants__t_TimestampsToReturn_i monitored_item_notification_queue_bs__p_timestampToReturn,
-    const constants__t_NodeId_i monitored_item_notification_queue_bs__p_nid,
+    const SOPC_Value_Timestamp monitored_item_notification_queue_bs__p_val_ts_src,
+    const SOPC_Value_Timestamp monitored_item_notification_queue_bs__p_val_ts_srv,
+    const SOPC_NodeId* monitored_item_notification_queue_bs__p_nid,
     const uint32_t attributeId)
 {
     assert(notifElt != NULL);
@@ -96,30 +98,10 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
     }
 
     notifElt->value->AttributeId = attributeId;
-
-    if (notifElt->value->Value.SourceTimestamp == 0)
-    {
-        notifElt->value->Value.SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
-    } // else use the source timestamp of the writeValue request
-    notifElt->value->Value.ServerTimestamp = SOPC_Time_GetCurrentTimeUTC();
-
-    /* Complying with timestamp to return configured */
-    switch (monitored_item_notification_queue_bs__p_timestampToReturn)
-    {
-    case constants__e_ttr_source:
-        notifElt->value->Value.ServerTimestamp = 0;
-        break;
-    case constants__e_ttr_server:
-        notifElt->value->Value.SourceTimestamp = 0;
-        break;
-    case constants__e_ttr_neither:
-        notifElt->value->Value.ServerTimestamp = 0;
-        notifElt->value->Value.SourceTimestamp = 0;
-        break;
-    default:
-        // Keep both in other cases
-        break;
-    }
+    notifElt->value->Value.SourceTimestamp = monitored_item_notification_queue_bs__p_val_ts_src.timestamp;
+    notifElt->value->Value.SourcePicoSeconds = monitored_item_notification_queue_bs__p_val_ts_src.picoSeconds;
+    notifElt->value->Value.ServerTimestamp = monitored_item_notification_queue_bs__p_val_ts_srv.timestamp;
+    notifElt->value->Value.ServerPicoSeconds = monitored_item_notification_queue_bs__p_val_ts_srv.picoSeconds;
 
     checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
     if (checkAdded == notifElt)
@@ -135,11 +117,12 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
 void monitored_item_notification_queue_bs__add_first_monitored_item_notification_to_queue(
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
-    const constants__t_TimestampsToReturn_i monitored_item_notification_queue_bs__p_timestampToReturn,
     const constants__t_NodeId_i monitored_item_notification_queue_bs__p_nid,
     const constants__t_AttributeId_i monitored_item_notification_queue_bs__p_aid,
     const constants__t_Variant_i monitored_item_notification_queue_bs__p_VariantValuePointer,
     const constants__t_RawStatusCode monitored_item_notification_queue_bs__p_ValueSc,
+    const constants__t_Timestamp monitored_item_notification_queue_bs__p_val_ts_src,
+    const constants__t_Timestamp monitored_item_notification_queue_bs__p_val_ts_srv,
     t_bool* const monitored_item_notification_queue_bs__bres)
 {
     *monitored_item_notification_queue_bs__bres = false;
@@ -178,8 +161,8 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
         SOPC_String_Initialize(&indexRangeString);
         retStatus = SOPC_InternalAddCommonFinishAddNotifElt(
             monitored_item_notification_queue_bs__p_queue, notifElt, &indexRangeString,
-            monitored_item_notification_queue_bs__p_timestampToReturn, monitored_item_notification_queue_bs__p_nid,
-            (uint32_t) monitored_item_notification_queue_bs__p_aid);
+            monitored_item_notification_queue_bs__p_val_ts_src, monitored_item_notification_queue_bs__p_val_ts_srv,
+            monitored_item_notification_queue_bs__p_nid, (uint32_t) monitored_item_notification_queue_bs__p_aid);
     }
 
     if (SOPC_STATUS_OK == retStatus)
@@ -227,10 +210,33 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
 
     if (retStatus == SOPC_STATUS_OK)
     {
+        SOPC_Value_Timestamp srcTs =
+            (SOPC_Value_Timestamp){monitored_item_notification_queue_bs__p_writeValuePointer->Value.SourceTimestamp,
+                                   monitored_item_notification_queue_bs__p_writeValuePointer->Value.SourcePicoSeconds};
+        SOPC_Value_Timestamp srvTs =
+            (SOPC_Value_Timestamp){monitored_item_notification_queue_bs__p_writeValuePointer->Value.ServerTimestamp,
+                                   monitored_item_notification_queue_bs__p_writeValuePointer->Value.ServerPicoSeconds};
+
+        switch (monitored_item_notification_queue_bs__p_timestampToReturn)
+        {
+        case constants__e_ttr_source:
+            srcTs = constants__c_Timestamp_null;
+            break;
+        case constants__e_ttr_server:
+            srvTs = constants__c_Timestamp_null;
+            break;
+        case constants__e_ttr_neither:
+            srcTs = constants__c_Timestamp_null;
+            srvTs = constants__c_Timestamp_null;
+            break;
+        default:
+            // Keep both in other cases
+            break;
+        }
+
         retStatus = SOPC_InternalAddCommonFinishAddNotifElt(
             monitored_item_notification_queue_bs__p_queue, notifElt,
-            &monitored_item_notification_queue_bs__p_writeValuePointer->IndexRange,
-            monitored_item_notification_queue_bs__p_timestampToReturn,
+            &monitored_item_notification_queue_bs__p_writeValuePointer->IndexRange, srcTs, srvTs,
             &monitored_item_notification_queue_bs__p_writeValuePointer->NodeId,
             monitored_item_notification_queue_bs__p_writeValuePointer->AttributeId);
     }

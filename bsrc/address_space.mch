@@ -214,16 +214,19 @@ OPERATIONS
            (ncl = e_ncl_Variable & p_aid = e_aid_Value =>
              (local_service_treatment = FALSE &
               conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = FALSE =>
+               val = c_Variant_indet &
                sc = e_sc_bad_not_readable) &
              (local_service_treatment = FALSE &
               conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
               not(e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) =>
+                 val = c_Variant_indet &
                  sc = e_sc_bad_user_access_denied) &
 
              (local_service_treatment = TRUE or
               (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
                e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
-               IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE =>
+              IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE =>
+                 val = c_Variant_indet &
                  sc = e_sc_bad_index_range_invalid
              ) &
 
@@ -232,6 +235,7 @@ OPERATIONS
                e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
                IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
                HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE  =>
+                 val = c_Variant_indet &
                  sc = e_sc_bad_index_range_no_data
              ) &
 
@@ -275,12 +279,12 @@ OPERATIONS
                   sc = e_sc_bad_out_of_memory)
           ) &
           /* Specific treatement for status code and timestamps for Variable Value */
-          (ncl = e_ncl_Variable & p_aid = e_aid_Value =>
+          (sc = e_sc_ok & ncl = e_ncl_Variable & p_aid = e_aid_Value =>
            val_sc = a_Value_StatusCode(p_node) &
            val_ts_src = a_Value_SourceTimestamp(p_node) &
            val_ts_srv = a_Value_ServerTimestamp(p_node)) &
           /* Generic treatement for status code and timestamps     */
-          (not (ncl = e_ncl_Variable & p_aid = e_aid_Value) =>
+          (sc = e_sc_ok & not (ncl = e_ncl_Variable & p_aid = e_aid_Value) =>
            val_sc = c_RawStatusCode_Good &
            val_ts_src = c_Timestamp_null &
            val_ts_srv = c_Timestamp_null)

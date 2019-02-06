@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 29/01/2019 12:57:57
+ Date                 : 06/02/2019 17:15:34
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -124,6 +124,8 @@ extern void subscription_core__create_monitored_item(
    const constants__t_IndexRange_i subscription_core__p_indexRange,
    const constants__t_Variant_i subscription_core__p_value,
    const constants__t_RawStatusCode subscription_core__p_valueSc,
+   const constants__t_Timestamp subscription_core__p_val_ts_src,
+   const constants__t_Timestamp subscription_core__p_val_ts_srv,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
    const constants__t_monitoringMode_i subscription_core__p_monitoringMode,
    const constants__t_client_handle_i subscription_core__p_clientHandle,
