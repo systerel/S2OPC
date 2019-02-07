@@ -34,8 +34,7 @@ DEFINITIONS
     a_buffer_out_state,
     c_msg_out_header,
     c_msg_out,
-    a_msg_out_type,
-    local_service_treatment;
+    a_msg_out_type;
 
     d_msg_typing ==
     a_buffer_in_state : t_buffer_in_state_i &
@@ -45,8 +44,7 @@ DEFINITIONS
     a_buffer_out_state : t_buffer_out_state_i &
     c_msg_out_header : t_msg_header_i &
     c_msg_out : t_msg_i &
-    a_msg_out_type : t_msg_type_i &
-    local_service_treatment : BOOL
+    a_msg_out_type : t_msg_type_i
 
 ABSTRACT_VARIABLES
     d_msg_variables

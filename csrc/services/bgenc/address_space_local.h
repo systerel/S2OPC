@@ -19,16 +19,16 @@
 
 /******************************************************************************
 
- File Name            : service_mgr_1.h
+ File Name            : address_space_local.h
 
- Date                 : 29/01/2019 09:56:41
+ Date                 : 08/02/2019 08:22:13
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
 ******************************************************************************/
 
-#ifndef _service_mgr_1_h
-#define _service_mgr_1_h
+#ifndef _address_space_local_h
+#define _address_space_local_h
 
 /*--------------------------
    Added by the Translator
@@ -38,19 +38,19 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-extern t_bool service_mgr_1__local_service_treatment_i;
+extern t_entier4 address_space_local__local_service_treatment_i;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void service_mgr_1__INITIALISATION(void);
+extern void address_space_local__INITIALISATION(void);
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void service_mgr_1__is_local_service_treatment(
-   t_bool * const service_mgr_1__bres);
-extern void service_mgr_1__set_local_service_treatment(void);
-extern void service_mgr_1__unset_local_service_treatment(void);
+extern void address_space_local__is_local_service_treatment(
+   t_bool * const address_space_local__bres);
+extern void address_space_local__set_local_service_treatment(void);
+extern void address_space_local__unset_local_service_treatment(void);
 
 #endif

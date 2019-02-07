@@ -21,7 +21,7 @@
 
  File Name            : gen_subscription_event_bs.h
 
- Date                 : 29/01/2019 09:56:53
+ Date                 : 14/03/2019 14:10:32
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -51,9 +51,13 @@ extern void gen_subscription_event_bs__INITIALISATION(void);
    OPERATIONS Clause
   --------------------*/
 extern void gen_subscription_event_bs__gen_data_changed_event(
+   const constants__t_NodeId_i gen_subscription_event_bs__p_nid,
+   const constants__t_AttributeId_i gen_subscription_event_bs__p_attribute,
    const constants__t_DataValue_i gen_subscription_event_bs__p_prev_dataValue,
-   const constants__t_WriteValuePointer_i gen_subscription_event_bs__p_new_value_pointer);
-extern void gen_subscription_event_bs__gen_data_changed_event_failed(
-   const constants__t_DataValue_i gen_subscription_event_bs__p_prev_dataValue);
+   const constants__t_Variant_i gen_subscription_event_bs__p_new_val,
+   const constants__t_RawStatusCode gen_subscription_event_bs__p_new_val_sc,
+   const constants__t_Timestamp gen_subscription_event_bs__p_new_val_ts_src,
+   const constants__t_Timestamp gen_subscription_event_bs__p_new_val_ts_srv);
+extern void gen_subscription_event_bs__gen_data_changed_event_failed(void);
 
 #endif

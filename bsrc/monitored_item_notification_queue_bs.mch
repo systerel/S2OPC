@@ -113,7 +113,7 @@ OPERATIONS
     END
     ;
 
-    /* Note: Call address_space_bs:get_Variant_IndexRange in C implem for now */
+    /* Note: indexRange filtering on value done in C implementation for now */
     bres <-- add_monitored_item_notification_to_queue (p_queue,
                                                        p_monitoredItem,
                                                        p_timestampToReturn,

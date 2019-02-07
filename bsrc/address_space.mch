@@ -23,8 +23,7 @@ MACHINE
 SEES
     constants,
     constants_statuscodes_bs,
-    service_write_decode_bs, /* TODO: move to refinment */
-    service_mgr_1
+    service_write_decode_bs /* TODO: move to refinment */
 
 DEFINITIONS
     "definitions.def";
@@ -66,6 +65,9 @@ DEFINITIONS
 
         IsValid_VariantIndex,
         HasRange_VariantIndex,
+
+        /* Local treament */
+        local_service_treatment,
 
         /* Service Write */
         ResponseWrite_allocated,
@@ -157,6 +159,9 @@ DEFINITIONS
         IsValid_VariantIndex : t_Variant * t_IndexRange_i --> BOOL &
         HasRange_VariantIndex  : t_Variant * t_IndexRange_i --> BOOL &
 
+        /* Local treatment */
+        local_service_treatment : NAT &
+
         /* Service Write */
         ResponseWrite_allocated : BOOL &
         ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
@@ -212,17 +217,17 @@ OPERATIONS
            =>
            /* Specific treatement for Value of Variable attribute: check access rights + index range */
            (ncl = e_ncl_Variable & p_aid = e_aid_Value =>
-             (local_service_treatment = FALSE &
+             (local_service_treatment = 0 &
               conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = FALSE =>
                val = c_Variant_indet &
                sc = e_sc_bad_not_readable) &
-             (local_service_treatment = FALSE &
+             (local_service_treatment = 0 &
               conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
               not(e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) =>
                  val = c_Variant_indet &
                  sc = e_sc_bad_user_access_denied) &
 
-             (local_service_treatment = TRUE or
+             (local_service_treatment /= 0 or
               (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
                e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
               IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE =>
@@ -230,7 +235,7 @@ OPERATIONS
                  sc = e_sc_bad_index_range_invalid
              ) &
 
-             (local_service_treatment = TRUE or
+             (local_service_treatment /= 0 or
               (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
                e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
                IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
@@ -239,7 +244,7 @@ OPERATIONS
                  sc = e_sc_bad_index_range_no_data
              ) &
 
-             (local_service_treatment = TRUE or
+             (local_service_treatment /= 0 or
               (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
                e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
                IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
@@ -471,6 +476,20 @@ OPERATIONS
         val : t_Variant_i
     THEN
         skip
+    END
+    ;
+
+    set_local_service_treatment =
+    BEGIN
+        local_service_treatment := local_service_treatment + 1
+    END
+    ;
+
+    unset_local_service_treatment =
+    BEGIN
+        IF local_service_treatment /= 0 THEN
+            local_service_treatment := local_service_treatment - 1
+        END
     END
     ;
 

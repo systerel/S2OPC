@@ -27,7 +27,6 @@ SEES
     constants,
     constants_statuscodes_bs,
     service_write_decode_bs,
-    service_mgr_1,
     service_response_cb_bs,
     write_value_pointer_bs,
     data_value_pointer_bs
@@ -35,6 +34,7 @@ SEES
 IMPORTS
     address_space_bs,
     address_space_typing,
+    address_space_local,
     response_write_bs,
     address_space_it,
     gen_subscription_event_bs,
@@ -56,6 +56,8 @@ PROMOTES
     get_Value_StatusCode,
     read_AddressSpace_clear_value,
     read_AddressSpace_free_variant,
+    set_local_service_treatment,
+    unset_local_service_treatment,
     write_WriteResponse_msg_out,
     get_user_authorization
 
@@ -179,7 +181,7 @@ LOCAL_OPERATIONS
              aid = e_aid_Value &
              a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable &
              d_Type_IsVariableSubtype(DataValue_LocalDataType(dataValue), DataValue_ValueRank(dataValue), a_DataType(a_NodeId~(nid)), a_ValueRank(a_NodeId~(nid))) &
-             (local_service_treatment = TRUE
+             (local_service_treatment /= 0
               or
               (conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE &
                e_operation_type_write |-> nid |-> aid |-> p_user : s_AuthorizedOperations)
@@ -214,7 +216,7 @@ LOCAL_OPERATIONS
                  aid = e_aid_Value &
                  a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable &
                  d_Type_IsVariableSubtype(DataValue_LocalDataType(dataValue), DataValue_ValueRank(dataValue), a_DataType(a_NodeId~(nid)), a_ValueRank(a_NodeId~(nid))) &
-                    (local_service_treatment = TRUE
+                    (local_service_treatment /= 0
                      or
                      (conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE &
                       e_operation_type_write |-> nid |-> aid |-> p_user : s_AuthorizedOperations)
@@ -249,7 +251,7 @@ LOCAL_OPERATIONS
                                                                                         }(IsValid_VariantIndex(DataValue_Variant(dataValue) |-> index_range))
                                                                               }(bool(e_operation_type_write |-> nid |-> aid |-> p_user : s_AuthorizedOperations))
                                                                     }(conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(nid))))
-                                                         }(local_service_treatment)
+                                                         }(bool(local_service_treatment /= 0))
                                                }(bool(d_Type_IsVariableSubtype
                                                         (DataValue_LocalDataType(dataValue), DataValue_ValueRank(dataValue),
                                                          a_DataType(a_NodeId~(nid)), a_ValueRank(a_NodeId~(nid)))))
@@ -289,7 +291,7 @@ LOCAL_OPERATIONS
         p_index_range : t_IndexRange_i &
         p_node : dom(AttributeID_Node_Variant(p_aid)) &
         (a_NodeClass(p_node) = e_ncl_Variable & p_aid = e_aid_Value =>
-        (local_service_treatment = TRUE or
+        (local_service_treatment /= 0 or
          (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
           e_operation_type_read |-> a_NodeId(p_node) |-> p_aid |-> p_user : s_AuthorizedOperations)))
     THEN
@@ -661,7 +663,12 @@ OPERATIONS
         l_local_treatment,
         l_wv,
         l_bres_wv_copy,
-        l_wv_copy
+        l_wv_copy,
+        l_new_sc,
+        l_new_val,
+        l_new_val_sc,
+        l_new_val_ts_src,
+        l_new_val_ts_srv
     IN
         StatusCode_service := e_sc_ok;
         l_nb_req <-- get_nb_WriteValue;
@@ -671,8 +678,10 @@ OPERATIONS
             l_isvalid, l_status1, l_nid, l_aid, l_dataValue, l_index_range <-- getall_WriteValue(l_wvi);
             /* Avoids the IFs with a local operation. */
             l_status2, l_prev_dataValue, l_node <-- treat_write_1(l_isvalid, l_status1, p_user, l_nid, l_aid, l_dataValue, l_index_range);
+            l_new_val := c_Variant_indet;
             set_ResponseWrite_StatusCode(l_wvi, l_status2);
             l_wv <-- getall_WriteValuePointer(l_wvi);
+            /* If write succeeded, generates a data change event for subscriptions */
             IF l_status2 = e_sc_ok
             THEN
                 /* Check access level: read access right <=> data change event for subscription */
@@ -683,16 +692,21 @@ OPERATIONS
                 l_access_lvl <-- get_AccessLevel(l_node);
                 l_access_read <-- is_t_access_level_currentRead(l_access_lvl);
                 IF l_access_read = TRUE THEN
-                    l_bres_wv_copy, l_wv_copy <-- copy_write_value_pointer_content (l_wv);
-                    IF l_bres_wv_copy = TRUE THEN
-                        gen_data_changed_event (l_prev_dataValue, l_wv_copy)
+                    /* Read updated value after write: necessary since write value item can be partial due to indexRange */
+                    /* Set local treatment since user can be anyone in subscription: avoid user right verification */
+                    set_local_service_treatment;
+                    l_new_sc, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv
+                      <-- read_AddressSpace_Attribute_value(p_user, l_node, l_nid, l_aid, l_index_range);
+                    unset_local_service_treatment;
+                    IF l_new_sc = e_sc_ok THEN
+                        gen_data_changed_event (l_nid, l_aid, l_prev_dataValue, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv)
                     ELSE
-                        gen_data_changed_event_failed (l_prev_dataValue)
+                        gen_data_changed_event_failed
                     END
                 END
-            ELSE
-                write_AddressSpace_free_dataValue (l_prev_dataValue)
             END;
+            write_AddressSpace_free_dataValue (l_prev_dataValue);
+            read_AddressSpace_free_variant (l_new_val);
             l_local_treatment <-- is_local_service_treatment;
             IF l_local_treatment = FALSE
             THEN
