@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 05/02/2019 12:57:18
+ Date                 : 07/02/2019 16:21:08
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -1020,7 +1020,7 @@ void service_mgr__server_receive_local_service_req(
       t_bool service_mgr__l_valid_resp_header;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       
-      service_mgr_1__set_local_service_treatment();
+      address_space__set_local_service_treatment();
       switch (service_mgr__req_class) {
       case constants__e_msg_session_service_class:
       case constants__e_msg_discovery_service_class:
@@ -1081,7 +1081,7 @@ void service_mgr__server_receive_local_service_req(
       else {
          *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
       }
-      service_mgr_1__unset_local_service_treatment();
+      address_space__unset_local_service_treatment();
    }
 }
 

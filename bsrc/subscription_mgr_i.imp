@@ -647,6 +647,7 @@ OPERATIONS
         l_continue, l_iterator <-- init_iter_monitored_item (p_monitoredItemQueue);
         WHILE l_continue = TRUE DO
             l_continue, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, p_monitoredItemQueue);
+            /* Check if notification is triggered: indexRange is evaluated here */
             l_notification_triggered <-- is_notification_triggered (l_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer);
             l_monitoredItemId,
             l_subscription,
@@ -676,9 +677,7 @@ OPERATIONS
             ;
             IF l_valid_user_access = TRUE & l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting
             THEN
-                /* Note: Call address_space_bs:get_Variant_IndexRange in C implem for now
-                   It is necessary to filter the monitoredItem index range.
-                */
+                /* Note: indexRange filtering on value done in C implementation for now */
                 server_subscription_add_notification (l_subscription, l_monitoredItemPointer, l_timestampToReturn, p_new_wv_pointer)
             END
         INVARIANT

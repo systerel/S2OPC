@@ -27,24 +27,28 @@ SEES
 
 OPERATIONS
 
-    gen_data_changed_event (p_prev_dataValue, p_new_value_pointer) =
+    gen_data_changed_event (p_nid, p_attribute, p_prev_dataValue, p_new_val, p_new_val_sc, p_new_val_ts_src, p_new_val_ts_srv) =
     PRE
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId &
+        p_attribute : t_AttributeId_i &
+        p_attribute : t_AttributeId &
         p_prev_dataValue : t_DataValue_i &
         p_prev_dataValue : t_DataValue &
-        p_new_value_pointer : t_WriteValuePointer_i &
-        p_new_value_pointer : t_WriteValuePointer
+        p_new_val : t_Variant_i &
+        p_new_val : t_Variant &
+        p_new_val_sc : t_RawStatusCode &
+        p_new_val_ts_src : t_Timestamp &
+        p_new_val_ts_srv : t_Timestamp
     THEN
         /* Generates a data changed event */
         skip
     END
     ;
 
-    gen_data_changed_event_failed (p_prev_dataValue) =
-    PRE
-        p_prev_dataValue : t_DataValue_i &
-        p_prev_dataValue : t_DataValue_i
-    THEN
-        /* Failed to generate data event, clear the prev value and generate trace */
+    gen_data_changed_event_failed =
+    BEGIN
+        /* Failed to generate data event, generate trace */
         skip
     END
 

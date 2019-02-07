@@ -26,8 +26,7 @@ SEES
     constants,
     constants_statuscodes_bs,
     service_write_decode_bs,
-    data_value_pointer_bs,
-    service_mgr_1
+    data_value_pointer_bs
 
 DEFINITIONS
     d_variables ==
@@ -66,6 +65,9 @@ DEFINITIONS
 
         IsValid_VariantIndex,
         HasRange_VariantIndex,
+
+        /* Local treament */
+        local_service_treatment,
 
         /* Service Write */
         ResponseWrite_allocated,
@@ -146,6 +148,9 @@ DEFINITIONS
         IsValid_VariantIndex : t_Variant * t_IndexRange_i --> BOOL &
         HasRange_VariantIndex  : t_Variant * t_IndexRange_i --> BOOL &
 
+        /* Local treament */
+        local_service_treatment : NAT &
+
         /* Service Write */
         ResponseWrite_allocated : BOOL &
         ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
@@ -156,6 +161,7 @@ DEFINITIONS
 
     d_init ==
         d_inv &
+        local_service_treatment = 0 &
         ResponseWrite_allocated = FALSE &
         ResponseWrite_StatusCode = {}
     ;

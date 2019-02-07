@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 06/02/2019 17:15:16
+ Date                 : 07/02/2019 16:20:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -40,6 +40,7 @@
   -----------------*/
 #include "address_space_bs.h"
 #include "address_space_it.h"
+#include "address_space_local.h"
 #include "address_space_typing.h"
 #include "gen_subscription_event_bs.h"
 #include "response_write_bs.h"
@@ -51,7 +52,6 @@
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
 #include "data_value_pointer_bs.h"
-#include "service_mgr_1.h"
 #include "service_response_cb_bs.h"
 #include "service_write_decode_bs.h"
 #include "write_value_pointer_bs.h"
@@ -85,6 +85,8 @@ extern void address_space__INITIALISATION(void);
 #define address_space__read_AddressSpace_clear_value address_space_bs__read_AddressSpace_clear_value
 #define address_space__read_AddressSpace_free_variant address_space_bs__read_AddressSpace_free_variant
 #define address_space__readall_AddressSpace_Node address_space_bs__readall_AddressSpace_Node
+#define address_space__set_local_service_treatment address_space_local__set_local_service_treatment
+#define address_space__unset_local_service_treatment address_space_local__unset_local_service_treatment
 #define address_space__write_WriteResponse_msg_out response_write_bs__write_WriteResponse_msg_out
 
 /*--------------------------

@@ -19,9 +19,9 @@
 
 /******************************************************************************
 
- File Name            : service_mgr_1.c
+ File Name            : address_space_local.c
 
- Date                 : 29/01/2019 09:56:41
+ Date                 : 08/02/2019 08:22:13
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -30,33 +30,37 @@
 /*------------------------
    Exported Declarations
   ------------------------*/
-#include "service_mgr_1.h"
+#include "address_space_local.h"
 
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-t_bool service_mgr_1__local_service_treatment_i;
+t_entier4 address_space_local__local_service_treatment_i;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void service_mgr_1__INITIALISATION(void) {
-   service_mgr_1__local_service_treatment_i = false;
+void address_space_local__INITIALISATION(void) {
+   address_space_local__local_service_treatment_i = 0;
 }
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void service_mgr_1__set_local_service_treatment(void) {
-   service_mgr_1__local_service_treatment_i = true;
+void address_space_local__set_local_service_treatment(void) {
+   address_space_local__local_service_treatment_i = address_space_local__local_service_treatment_i +
+      1;
 }
 
-void service_mgr_1__unset_local_service_treatment(void) {
-   service_mgr_1__local_service_treatment_i = false;
+void address_space_local__unset_local_service_treatment(void) {
+   if (address_space_local__local_service_treatment_i != 0) {
+      address_space_local__local_service_treatment_i = address_space_local__local_service_treatment_i -
+         1;
+   }
 }
 
-void service_mgr_1__is_local_service_treatment(
-   t_bool * const service_mgr_1__bres) {
-   *service_mgr_1__bres = service_mgr_1__local_service_treatment_i;
+void address_space_local__is_local_service_treatment(
+   t_bool * const address_space_local__bres) {
+   *address_space_local__bres = (address_space_local__local_service_treatment_i != 0);
 }
 

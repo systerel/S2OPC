@@ -30,7 +30,6 @@ SEES
 IMPORTS
     message_in_bs,
     message_out_bs,
-    service_mgr_1,
     service_mgr_bs,
     session_mgr,
     service_read,

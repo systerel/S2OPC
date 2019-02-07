@@ -17,35 +17,41 @@
  * under the License.
  */
 
-MACHINE
-    service_mgr_1
+IMPLEMENTATION
+    address_space_local_i
 
-ABSTRACT_VARIABLES
-    local_service_treatment
+REFINES
+    address_space_local
+
+CONCRETE_VARIABLES
+    local_service_treatment_i
 
 INVARIANT
-    local_service_treatment : BOOL
+    local_service_treatment_i : NAT &
+    local_service_treatment = local_service_treatment_i
 
 INITIALISATION
-    local_service_treatment := FALSE
+    local_service_treatment_i := 0
 
 OPERATIONS
 
     set_local_service_treatment =
     BEGIN
-        local_service_treatment := TRUE
+        local_service_treatment_i := local_service_treatment_i + 1
     END
     ;
 
     unset_local_service_treatment =
     BEGIN
-        local_service_treatment := FALSE
+        IF local_service_treatment_i /= 0 THEN
+            local_service_treatment_i := local_service_treatment_i - 1
+        END
     END
     ;
 
     bres <-- is_local_service_treatment =
     BEGIN
-        bres := local_service_treatment
+        bres := bool(local_service_treatment_i /= 0)
     END
 
 END

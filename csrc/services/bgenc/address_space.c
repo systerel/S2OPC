@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 06/02/2019 17:15:16
+ Date                 : 14/03/2019 14:10:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -153,7 +153,7 @@ void address_space__treat_write_1(
                   &address_space__l_compatible_type,
                   &address_space__l_compat_with_conv);
                if (address_space__l_compatible_type == true) {
-                  service_mgr_1__is_local_service_treatment(&address_space__l_local_treatment);
+                  address_space_local__is_local_service_treatment(&address_space__l_local_treatment);
                   data_value_pointer_bs__get_conv_DataValue_Variant(address_space__dataValue,
                      &address_space__l_variant);
                   data_value_pointer_bs__get_conv_DataValue_SourceTimestamp(address_space__dataValue,
@@ -484,7 +484,7 @@ void address_space__read_Node_Attribute(
       if (address_space__l_is_mandatory_attribute == true) {
          if ((address_space__l_ncl == constants__e_ncl_Variable) &&
             (address_space__p_aid == constants__e_aid_Value)) {
-            service_mgr_1__is_local_service_treatment(&address_space__l_is_local_read);
+            address_space_local__is_local_service_treatment(&address_space__l_is_local_read);
             if (address_space__l_is_local_read == true) {
                address_space__read_AddressSpace_Attribute_value(address_space__p_user,
                   address_space__p_node,
@@ -580,6 +580,11 @@ void address_space__treat_write_request_WriteValues(
       constants__t_WriteValuePointer_i address_space__l_wv;
       t_bool address_space__l_bres_wv_copy;
       constants__t_WriteValuePointer_i address_space__l_wv_copy;
+      constants_statuscodes_bs__t_StatusCode_i address_space__l_new_sc;
+      constants__t_Variant_i address_space__l_new_val;
+      constants__t_RawStatusCode address_space__l_new_val_sc;
+      constants__t_Timestamp address_space__l_new_val_ts_src;
+      constants__t_Timestamp address_space__l_new_val_ts_srv;
       
       *address_space__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
       service_write_decode_bs__get_nb_WriteValue(&address_space__l_nb_req);
@@ -605,6 +610,7 @@ void address_space__treat_write_request_WriteValues(
             &address_space__l_status2,
             &address_space__l_prev_dataValue,
             &address_space__l_node);
+         address_space__l_new_val = constants__c_Variant_indet;
          response_write_bs__set_ResponseWrite_StatusCode(address_space__l_wvi,
             address_space__l_status2);
          service_write_decode_bs__getall_WriteValuePointer(address_space__l_wvi,
@@ -615,22 +621,35 @@ void address_space__treat_write_request_WriteValues(
             constants__is_t_access_level_currentRead(address_space__l_access_lvl,
                &address_space__l_access_read);
             if (address_space__l_access_read == true) {
-               write_value_pointer_bs__copy_write_value_pointer_content(address_space__l_wv,
-                  &address_space__l_bres_wv_copy,
-                  &address_space__l_wv_copy);
-               if (address_space__l_bres_wv_copy == true) {
-                  gen_subscription_event_bs__gen_data_changed_event(address_space__l_prev_dataValue,
-                     address_space__l_wv_copy);
+               address_space_local__set_local_service_treatment();
+               address_space__read_AddressSpace_Attribute_value(address_space__p_user,
+                  address_space__l_node,
+                  address_space__l_nid,
+                  address_space__l_aid,
+                  address_space__l_index_range,
+                  &address_space__l_new_sc,
+                  &address_space__l_new_val,
+                  &address_space__l_new_val_sc,
+                  &address_space__l_new_val_ts_src,
+                  &address_space__l_new_val_ts_srv);
+               address_space_local__unset_local_service_treatment();
+               if (address_space__l_new_sc == constants_statuscodes_bs__e_sc_ok) {
+                  gen_subscription_event_bs__gen_data_changed_event(address_space__l_nid,
+                     address_space__l_aid,
+                     address_space__l_prev_dataValue,
+                     address_space__l_new_val,
+                     address_space__l_new_val_sc,
+                     address_space__l_new_val_ts_src,
+                     address_space__l_new_val_ts_srv);
                }
                else {
-                  gen_subscription_event_bs__gen_data_changed_event_failed(address_space__l_prev_dataValue);
+                  gen_subscription_event_bs__gen_data_changed_event_failed();
                }
             }
          }
-         else {
-            address_space_bs__write_AddressSpace_free_dataValue(address_space__l_prev_dataValue);
-         }
-         service_mgr_1__is_local_service_treatment(&address_space__l_local_treatment);
+         address_space_bs__write_AddressSpace_free_dataValue(address_space__l_prev_dataValue);
+         address_space_bs__read_AddressSpace_free_variant(address_space__l_new_val);
+         address_space_local__is_local_service_treatment(&address_space__l_local_treatment);
          if (address_space__l_local_treatment == false) {
             write_value_pointer_bs__copy_write_value_pointer_content(address_space__l_wv,
                &address_space__l_bres_wv_copy,

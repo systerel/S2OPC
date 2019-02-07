@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 29/01/2019 12:58:14
+ Date                 : 07/02/2019 16:21:33
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,6 +38,7 @@
 #include "address_space.h"
 #include "address_space_bs.h"
 #include "address_space_it.h"
+#include "address_space_local.h"
 #include "address_space_typing.h"
 #include "address_space_typing_bs.h"
 #include "channel_mgr.h"
@@ -84,7 +85,6 @@
 #include "service_find_servers_bs.h"
 #include "service_get_endpoints_bs.h"
 #include "service_mgr.h"
-#include "service_mgr_1.h"
 #include "service_mgr_bs.h"
 #include "service_read.h"
 #include "service_read_it.h"
@@ -124,7 +124,6 @@ void INITIALISATION(void) {
    message_in_bs__INITIALISATION();
    request_handle_bs__INITIALISATION();
    message_out_bs__INITIALISATION();
-   service_mgr_1__INITIALISATION();
    channel_mgr_1__INITIALISATION();
    channel_mgr_it__INITIALISATION();
    channel_mgr_bs__INITIALISATION();
@@ -147,6 +146,7 @@ void INITIALISATION(void) {
    address_space_bs__INITIALISATION();
    address_space_typing_bs__INITIALISATION();
    address_space_typing__INITIALISATION();
+   address_space_local__INITIALISATION();
    response_write_bs__INITIALISATION();
    address_space_it__INITIALISATION();
    gen_subscription_event_bs__INITIALISATION();
