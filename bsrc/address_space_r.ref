@@ -37,7 +37,6 @@ DEFINITIONS
         a_Value,
         a_Value_StatusCode,
         a_Value_SourceTimestamp,
-        a_Value_ServerTimestamp,
         a_IsAbstract,
         a_EventNotifier,
         a_DataType,
@@ -93,8 +92,6 @@ DEFINITIONS
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
         a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
         dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
-        a_Value_ServerTimestamp : t_Node +-> t_Timestamp &
-        dom(a_Value_ServerTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
         a_IsAbstract : t_Node +-> BOOL &
         dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
@@ -194,7 +191,6 @@ OPERATIONS
         a_Value,
         a_Value_StatusCode,
         a_Value_SourceTimestamp,
-        a_Value_ServerTimestamp,
         ResponseWrite_StatusCode
         :(  ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
 
@@ -211,7 +207,6 @@ OPERATIONS
             /* Same for meta-attributes */
             a_Value_StatusCode <: a_Value_StatusCode$0 <+ (d_a_DataValue_requested;DataValue_StatusCode) &
             a_Value_SourceTimestamp <: a_Value_SourceTimestamp$0 <+ (d_a_DataValue_requested;DataValue_SourceTimestamp) &
-            a_Value_ServerTimestamp <: a_Value_ServerTimestamp$0 <+ (d_a_DataValue_requested;DataValue_ServerTimestamp) &
 
             !wvi.(wvi : t_WriteValue & wvi : cast_t_WriteValue[1..nb_WriteValue]
                 => ResponseWrite_StatusCode(wvi) : {e_sc_bad_out_of_memory, e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid,

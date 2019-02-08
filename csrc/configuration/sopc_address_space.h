@@ -45,7 +45,6 @@ typedef struct
     OpcUa_NodeClass node_class;
     SOPC_StatusCode value_status;
     SOPC_Value_Timestamp value_source_ts;
-    SOPC_Value_Timestamp value_server_ts;
     union {
         OpcUa_DataTypeNode data_type;
         OpcUa_MethodNode method;

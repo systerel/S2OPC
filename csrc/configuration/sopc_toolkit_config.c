@@ -396,8 +396,9 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
     return res;
 }
 
-void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
+static void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
 {
+    assert(NULL != addressSpace);
     address_space_bs__nodes = addressSpace;
     sopc_addressSpace_configured = true;
 }
