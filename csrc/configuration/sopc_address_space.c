@@ -24,6 +24,7 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_address_space.h"
+#include "sopc_time.h"
 #include "sopc_types.h"
 
 #define ELEMENT_ATTRIBUTE_INITIALIZE_CASE(val, field, extra) \
@@ -46,11 +47,19 @@ void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeC
     }
 
     item->node_class = node_class;
-    item->value_status = OpcUa_BadDataUnavailable;
-    item->value_source_ts.timestamp = 0;
-    item->value_source_ts.picoSeconds = 0;
-    item->value_server_ts.timestamp = 0;
-    item->value_server_ts.picoSeconds = 0;
+    if (node_class == OpcUa_NodeClass_Variable)
+    {
+        item->value_status = OpcUa_BadDataUnavailable;
+        /*Note: set an initial timestamp to could return non null timestamps */
+        item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
+        item->value_source_ts.picoSeconds = 0;
+    }
+    else
+    {
+        item->value_status = SOPC_GoodGenericStatus;
+        item->value_source_ts.timestamp = 0;
+        item->value_source_ts.picoSeconds = 0;
+    }
 }
 
 #define ELEMENT_ATTRIBUTE_GETTER_CASE(val, field, extra) \
@@ -186,6 +195,19 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items)
 SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
 {
     SOPC_NodeId* id = SOPC_AddressSpace_Item_Get_NodeId(item);
+
+    if (item->node_class == OpcUa_NodeClass_Variable)
+    {
+        /*Note: set an initial timestamp to could return non null timestamps */
+        if ((item->value_source_ts.timestamp == 0 && item->value_source_ts.picoSeconds == 0))
+        {
+            if (item->value_source_ts.timestamp == 0 && item->value_source_ts.picoSeconds == 0)
+            {
+                item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
+            }
+        }
+    }
+
     return SOPC_Dict_Insert(space, id, item) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 

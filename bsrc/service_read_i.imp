@@ -82,10 +82,16 @@ LOCAL_OPERATIONS
               data_Value_ServerTimestamp = data_Value_ServerTimestamp$0 <+ {p_rvi |-> c_Timestamp_null}) &
              (p_TimestampsToReturn = e_ttr_server =>
               data_Value_SourceTimestamp = data_Value_SourceTimestamp$0 <+ {p_rvi |-> c_Timestamp_null} &
-              data_Value_ServerTimestamp = data_Value_ServerTimestamp$0 <+ {p_rvi |-> a_Value_ServerTimestamp(a_NodeId~(p_nid))}) &
+              /* Set server timestamp as current date */
+              {p_rvi} <<| data_Value_ServerTimestamp = {p_rvi} <<| data_Value_ServerTimestamp$0 &
+              p_rvi : dom(data_Value_ServerTimestamp) &
+              data_Value_ServerTimestamp(p_rvi) /= c_Timestamp_null) &
              (p_TimestampsToReturn = e_ttr_both =>
               data_Value_SourceTimestamp = data_Value_SourceTimestamp$0 <+ {p_rvi |-> a_Value_SourceTimestamp(a_NodeId~(p_nid))} &
-              data_Value_ServerTimestamp = data_Value_ServerTimestamp$0 <+ {p_rvi |-> c_Timestamp_null}) &
+              /* Set server timestamp as current date */
+              {p_rvi} <<| data_Value_ServerTimestamp = {p_rvi} <<| data_Value_ServerTimestamp$0 &
+              p_rvi : dom(data_Value_ServerTimestamp) &
+              data_Value_ServerTimestamp(p_rvi) /= c_Timestamp_null) &
              (p_TimestampsToReturn = e_ttr_neither =>
               data_Value_SourceTimestamp = data_Value_SourceTimestamp$0 <+ {p_rvi |-> c_Timestamp_null} &
               data_Value_ServerTimestamp = data_Value_ServerTimestamp$0 <+ {p_rvi |-> c_Timestamp_null})

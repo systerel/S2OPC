@@ -37,7 +37,6 @@ DEFINITIONS
         a_Value,
         a_Value_StatusCode,
         a_Value_SourceTimestamp,
-        a_Value_ServerTimestamp,
         a_IsAbstract,
         a_EventNotifier,
         a_DataType,
@@ -101,8 +100,6 @@ DEFINITIONS
 
         a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
         dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
-        a_Value_ServerTimestamp : t_Node +-> t_Timestamp &
-        dom(a_Value_ServerTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
         a_IsAbstract : t_Node +-> BOOL &
         dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
@@ -287,7 +284,7 @@ OPERATIONS
           (sc = e_sc_ok & ncl = e_ncl_Variable & p_aid = e_aid_Value =>
            val_sc = a_Value_StatusCode(p_node) &
            val_ts_src = a_Value_SourceTimestamp(p_node) &
-           val_ts_srv = a_Value_ServerTimestamp(p_node)) &
+           val_ts_srv /= c_Timestamp_null /* current date on S2OPC server*/ ) &
           /* Generic treatement for status code and timestamps     */
           (sc = e_sc_ok & not (ncl = e_ncl_Variable & p_aid = e_aid_Value) =>
            val_sc = c_RawStatusCode_Good &
@@ -506,7 +503,6 @@ OPERATIONS
         a_Value,
         a_Value_StatusCode,
         a_Value_SourceTimestamp,
-        a_Value_ServerTimestamp,
         ResponseWrite_StatusCode
         :(
             StatusCode_service : t_StatusCode_i &
@@ -520,9 +516,6 @@ OPERATIONS
             dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
             a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
             dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
-            a_Value_ServerTimestamp : t_Node +-> t_Timestamp &
-            dom(a_Value_ServerTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
-
             ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode
         )
     END

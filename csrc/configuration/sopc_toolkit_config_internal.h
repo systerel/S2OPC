@@ -88,6 +88,4 @@ SOPC_SecureChannel_Config* SOPC_ToolkitServer_GetSecureChannelConfig(uint32_t se
  */
 SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx);
 
-void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
-
 #endif /* SOPC_TOOLKIT_CONFIG_INTERNAL_H_ */

@@ -37,7 +37,6 @@ DEFINITIONS
         a_Value,
         a_Value_StatusCode,
         a_Value_SourceTimestamp,
-        a_Value_ServerTimestamp,
         a_IsAbstract,
         a_EventNotifier,
         a_DataType,
@@ -82,8 +81,6 @@ DEFINITIONS
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
         a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
         dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
-        a_Value_ServerTimestamp : t_Node +-> t_Timestamp &
-        dom(a_Value_ServerTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
         a_IsAbstract : t_Node +-> BOOL &
         dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
@@ -480,7 +477,7 @@ OPERATIONS
                 IF a_NodeClass(p_node) = e_ncl_Variable THEN
                     val_sc := a_Value_StatusCode(p_node) ||
                     val_ts_src := a_Value_SourceTimestamp(p_node) ||
-                    val_ts_srv := a_Value_ServerTimestamp(p_node)
+                    val_ts_srv :(val_ts_srv : t_Timestamp & val_ts_srv /= c_Timestamp_null)
                 ELSE
                     /* VariableType */
                     val_sc := c_RawStatusCode_Good ||
@@ -548,12 +545,8 @@ OPERATIONS
                                  prev_dataValue : t_DataValue &
                                  DataValue_Variant(prev_dataValue) = a_Value(node) &
                                  DataValue_StatusCode(prev_dataValue) = a_Value_StatusCode(node) &
-                                 DataValue_SourceTimestamp(prev_dataValue) = a_Value_SourceTimestamp(node) &
-                                 DataValue_ServerTimestamp(prev_dataValue) = a_Value_ServerTimestamp(node)) ||
-                a_Value(node) := variant ||
-                /* In case of success, update server timestamp */
-                a_Value_ServerTimestamp :({node} <<| a_Value_ServerTimestamp = {node} <<| a_Value_ServerTimestamp$0 &
-                                          {node} <| a_Value_ServerTimestamp : t_Node +-> t_Timestamp)
+                                 DataValue_SourceTimestamp(prev_dataValue) = a_Value_SourceTimestamp(node)) ||
+                a_Value(node) := variant
             ELSIF IsValid_VariantIndex(variant |-> index_range) = FALSE
             THEN
                 serviceStatusCode := e_sc_bad_index_range_invalid ||

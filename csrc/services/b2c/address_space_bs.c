@@ -400,7 +400,8 @@ void address_space_bs__read_AddressSpace_Value_value(
         {
             *address_space_bs__val_sc = address_space_bs__p_node->value_status;
             *address_space_bs__val_ts_src = address_space_bs__p_node->value_source_ts;
-            *address_space_bs__val_ts_srv = address_space_bs__p_node->value_server_ts;
+            address_space_bs__val_ts_srv->timestamp = SOPC_Time_GetCurrentTimeUTC();
+            address_space_bs__val_ts_srv->picoSeconds = 0;
         }
         else
         {
@@ -519,11 +520,6 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
         (*address_space_bs__prev_dataValue)->Status = item->value_status;
         (*address_space_bs__prev_dataValue)->SourceTimestamp = item->value_source_ts.timestamp;
         (*address_space_bs__prev_dataValue)->SourcePicoSeconds = item->value_source_ts.picoSeconds;
-        (*address_space_bs__prev_dataValue)->ServerTimestamp = item->value_server_ts.timestamp;
-        (*address_space_bs__prev_dataValue)->ServerPicoSeconds = item->value_server_ts.picoSeconds;
-
-        item->value_server_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
-        item->value_server_ts.picoSeconds = 0;
     }
     else
     {
@@ -540,7 +536,15 @@ void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i addre
     (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Item* item = address_space_bs__p_node;
     assert(item->node_class == OpcUa_NodeClass_Variable);
-    item->value_source_ts = address_space_bs__p_ts;
+    if (address_space_bs__p_ts.timestamp == 0 && address_space_bs__p_ts.picoSeconds == 0)
+    {
+        // Update source timestamp with current date if no date provided
+        item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
+    }
+    else
+    {
+        item->value_source_ts = address_space_bs__p_ts;
+    }
 }
 
 void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_space_bs__p_user,
