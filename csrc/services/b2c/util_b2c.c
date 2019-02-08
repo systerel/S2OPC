@@ -847,6 +847,18 @@ SOPC_ReturnStatus util_status_code__B_to_return_status_C(constants_statuscodes_b
     return result;
 }
 
+constants_statuscodes_bs__t_StatusCode_i util_return_status__C_to_status_code_B(SOPC_ReturnStatus status)
+{
+    switch (status)
+    {
+    case SOPC_STATUS_OUT_OF_MEMORY:
+        return constants_statuscodes_bs__e_sc_bad_out_of_memory;
+    default:
+        SOPC_Logger_TraceWarning("index_range_statuscode: internal error generated from return status code %d", status);
+        return constants_statuscodes_bs__e_sc_bad_internal_error;
+    }
+}
+
 void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__t_StatusCode_i* bstatus)
 {
     switch (status)
@@ -1263,4 +1275,59 @@ void util_operation_type__B_to_C(constants__t_operation_type_i boptype, SOPC_Use
     default:
         assert(false); /* Unexpected operation type */
     }
+}
+
+constants_statuscodes_bs__t_StatusCode_i util_read_value_indexed_helper(SOPC_Variant* dst,
+                                                                        const SOPC_Variant* src,
+                                                                        const SOPC_NumericRange* range)
+{
+    assert(NULL != dst);
+    assert(NULL != src);
+    assert(NULL != range);
+    bool has_range = false;
+    SOPC_ReturnStatus status = SOPC_Variant_HasRange(src, range, &has_range);
+
+    if (status != SOPC_STATUS_OK)
+    {
+        if (SOPC_STATUS_NOT_SUPPORTED == status)
+        {
+            SOPC_Logger_TraceWarning("read_value_indexed: matrix index range not supported");
+        }
+
+        return constants_statuscodes_bs__e_sc_bad_index_range_invalid; // In case we do not support  the range
+                                                                       // either (matrix)
+    }
+
+    if (!has_range)
+    {
+        return constants_statuscodes_bs__e_sc_bad_index_range_no_data;
+    }
+
+    status = SOPC_Variant_GetRange(dst, src, range);
+
+    if (status != SOPC_STATUS_OK)
+    {
+        return util_return_status__C_to_status_code_B(status);
+    }
+
+    return constants_statuscodes_bs__e_sc_ok;
+}
+
+constants_statuscodes_bs__t_StatusCode_i util_read_value_string_indexed(SOPC_Variant* dst,
+                                                                        const SOPC_Variant* src,
+                                                                        const SOPC_String* range_str)
+{
+    SOPC_NumericRange* range = NULL;
+    SOPC_ReturnStatus status = SOPC_NumericRange_Parse(SOPC_String_GetRawCString(range_str), &range);
+
+    if (status != SOPC_STATUS_OK)
+    {
+        return (status == SOPC_STATUS_NOK) ? constants_statuscodes_bs__e_sc_bad_index_range_invalid
+                                           : util_return_status__C_to_status_code_B(status);
+    }
+
+    constants_statuscodes_bs__t_StatusCode_i ret = util_read_value_indexed_helper(dst, src, range);
+    SOPC_NumericRange_Delete(range);
+
+    return ret;
 }
