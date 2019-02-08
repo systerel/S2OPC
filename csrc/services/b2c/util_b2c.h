@@ -45,6 +45,8 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
 
 SOPC_ReturnStatus util_status_code__B_to_return_status_C(constants_statuscodes_bs__t_StatusCode_i bstatus);
 
+constants_statuscodes_bs__t_StatusCode_i util_return_status__C_to_status_code_B(SOPC_ReturnStatus status);
+
 bool util_channel__SecurityPolicy_C_to_B(const char* uri, constants__t_SecurityPolicy* secpol);
 
 /* Returns true or false upon failure (e_bd_indet or invalid cdir) */
@@ -70,5 +72,15 @@ constants__t_AttributeId_i util_AttributeId__C_to_B(uint32_t caid);
 
 /* Raise exception upon failure (invalid B operation type or invalid pointer) */
 void util_operation_type__B_to_C(constants__t_operation_type_i boptype, SOPC_UserAuthorization_OperationType* pcoptype);
+
+/* Fill empty allocated and initialized variant dest with the given IndexRange of the source variant src */
+constants_statuscodes_bs__t_StatusCode_i util_read_value_indexed_helper(SOPC_Variant* dst,
+                                                                        const SOPC_Variant* src,
+                                                                        const SOPC_NumericRange* range);
+
+/* Fill empty allocated and initialized variant dest with the given IndexRange (as String) of the source variant src */
+constants_statuscodes_bs__t_StatusCode_i util_read_value_string_indexed(SOPC_Variant* dst,
+                                                                        const SOPC_Variant* src,
+                                                                        const SOPC_String* range_str);
 
 #endif /* UTIL_B2C_H */

@@ -83,71 +83,6 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
     }
 }
 
-static constants_statuscodes_bs__t_StatusCode_i index_range_bad_returnstatus_to_service_statuscode(
-    SOPC_ReturnStatus status)
-{
-    switch (status)
-    {
-    case SOPC_STATUS_OUT_OF_MEMORY:
-        return constants_statuscodes_bs__e_sc_bad_out_of_memory;
-    default:
-        SOPC_Logger_TraceWarning("index_range_statuscode: internal error generated from return status code %d", status);
-        return constants_statuscodes_bs__e_sc_bad_internal_error;
-    }
-}
-
-static constants_statuscodes_bs__t_StatusCode_i read_value_indexed_helper(const SOPC_Variant* value,
-                                                                          const SOPC_NumericRange* range,
-                                                                          SOPC_Variant* dereferenced)
-{
-    bool has_range = false;
-    SOPC_ReturnStatus status = SOPC_Variant_HasRange(value, range, &has_range);
-
-    if (status != SOPC_STATUS_OK)
-    {
-        if (SOPC_STATUS_NOT_SUPPORTED == status)
-        {
-            SOPC_Logger_TraceWarning("read_value_indexed: matrix index range not supported");
-        }
-
-        return constants_statuscodes_bs__e_sc_bad_index_range_invalid; // In case we do not support  the range either
-                                                                       // (matrix)
-    }
-
-    if (!has_range)
-    {
-        return constants_statuscodes_bs__e_sc_bad_index_range_no_data;
-    }
-
-    status = SOPC_Variant_GetRange(dereferenced, value, range);
-
-    if (status != SOPC_STATUS_OK)
-    {
-        return index_range_bad_returnstatus_to_service_statuscode(status);
-    }
-
-    return constants_statuscodes_bs__e_sc_ok;
-}
-
-static constants_statuscodes_bs__t_StatusCode_i read_value_indexed(const SOPC_Variant* value,
-                                                                   const SOPC_String* range_str,
-                                                                   SOPC_Variant* dereferenced)
-{
-    SOPC_NumericRange* range = NULL;
-    SOPC_ReturnStatus status = SOPC_NumericRange_Parse(SOPC_String_GetRawCString(range_str), &range);
-
-    if (status != SOPC_STATUS_OK)
-    {
-        return (status == SOPC_STATUS_NOK) ? constants_statuscodes_bs__e_sc_bad_index_range_invalid
-                                           : index_range_bad_returnstatus_to_service_statuscode(status);
-    }
-
-    constants_statuscodes_bs__t_StatusCode_i ret = read_value_indexed_helper(value, range, dereferenced);
-    SOPC_NumericRange_Delete(range);
-
-    return ret;
-}
-
 void address_space_bs__read_AddressSpace_AccessLevel_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -447,7 +382,7 @@ void address_space_bs__read_AddressSpace_Value_value(
         else
         {
             *address_space_bs__sc =
-                read_value_indexed(value, address_space_bs__index_range, *address_space_bs__variant);
+                util_read_value_string_indexed(*address_space_bs__variant, value, address_space_bs__index_range);
 
             if (constants_statuscodes_bs__e_sc_ok != *address_space_bs__sc)
             {
@@ -522,7 +457,7 @@ static constants_statuscodes_bs__t_StatusCode_i set_value_indexed_helper(SOPC_Va
 
     if (status != SOPC_STATUS_OK)
     {
-        return index_range_bad_returnstatus_to_service_statuscode(status);
+        return util_return_status__C_to_status_code_B(status);
     }
 
     return constants_statuscodes_bs__e_sc_ok;
