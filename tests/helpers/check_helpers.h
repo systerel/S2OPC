@@ -62,4 +62,6 @@ Suite* tests_make_suite_users(void);
 
 Suite* tests_make_suite_B_base_machines(void);
 
+Suite* tests_make_suite_encodeable_types(void);
+
 #endif // CHECK_HELPERS_H

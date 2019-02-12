@@ -14,4 +14,5 @@ the legal rights to contribute.
 # Contributor list
 * Adrien Bustany <adrien.bustany@systerel.fr>
 * matclab <mathieu@clabaut.net>
+* Matthieu Archez <matthieu.archez@systerel.fr>
 * Simon Chollet <simon.chollet-stg@systerel.fr>
