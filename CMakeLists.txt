@@ -255,6 +255,7 @@ set(S2OPC_PUBLIC_INCLUDES
     "csrc/opcua_types"
     "csrc/crypto"
     "csrc/helpers_platform_dep"
+    "csrc/helpers_platform_dep/${PLATFORM_DIR}"
     "csrc/services/b2c"
 )
 
@@ -263,7 +264,6 @@ set(S2OPC_PRIVATE_INCLUDES
     "csrc/secure_channels"
     "csrc/services"
     "csrc/crypto/mbedtls"
-    "csrc/helpers_platform_dep/${PLATFORM_DIR}"
     "csrc/services/bgenc"
 )
 
