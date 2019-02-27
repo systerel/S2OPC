@@ -333,6 +333,11 @@ install(TARGETS s2opc
 add_library(s2opc-loader-embedded STATIC csrc/address_space_loaders/embedded/loader.c)
 target_link_libraries(s2opc-loader-embedded PRIVATE s2opc)
 target_include_directories(s2opc-loader-embedded PRIVATE ${S2OPC_PUBLIC_INCLUDES} PUBLIC "csrc/address_space_loaders")
+set_target_properties(s2opc-loader-embedded PROPERTIES PUBLIC_HEADER "csrc/address_space_loaders/embedded/loader.h")
+install(TARGETS s2opc-loader-embedded
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        PUBLIC_HEADER DESTINATION "include/embedded")
 
 function(s2opc_embed_address_space var_name uanodeset_path)
     set(c_file_path "address_space_${var_name}.c")
@@ -356,10 +361,15 @@ endfunction()
 find_package(EXPAT)
 
 if (EXPAT_FOUND)
-	add_library(s2opc-loader-uanodeset-expat STATIC csrc/address_space_loaders/uanodeset_expat/loader.c)
-	target_link_libraries(s2opc-loader-uanodeset-expat PUBLIC ${EXPAT_LIBRARIES} PRIVATE s2opc)
-	target_include_directories(s2opc-loader-uanodeset-expat PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${EXPAT_INCLUDE_DIRS} PUBLIC "csrc/address_space_loaders")
-	set_target_properties(s2opc-loader-uanodeset-expat PROPERTIES COMPILE_DEFINITIONS "UANODESET_LOADER_LOG")
+  add_library(s2opc-loader-uanodeset-expat STATIC csrc/address_space_loaders/uanodeset_expat/loader.c)
+  target_link_libraries(s2opc-loader-uanodeset-expat PUBLIC ${EXPAT_LIBRARIES} PRIVATE s2opc)
+  target_include_directories(s2opc-loader-uanodeset-expat PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${EXPAT_INCLUDE_DIRS} PUBLIC "csrc/address_space_loaders")
+  set_target_properties(s2opc-loader-uanodeset-expat PROPERTIES COMPILE_DEFINITIONS "UANODESET_LOADER_LOG")
+  set_target_properties(s2opc-loader-uanodeset-expat PROPERTIES PUBLIC_HEADER "csrc/address_space_loaders/uanodeset_expat/loader.h")
+  install(TARGETS s2opc-loader-uanodeset-expat
+          LIBRARY DESTINATION lib
+          ARCHIVE DESTINATION lib
+          PUBLIC_HEADER DESTINATION "include/uanodeset_expat")
 endif()
 
 # S2OPC tests ################################################################################
