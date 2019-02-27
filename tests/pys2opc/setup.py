@@ -20,8 +20,23 @@
 
 
 from setuptools import setup
+from setuptools.command.build_ext import build_ext
+from distutils.file_util import copy_file
 import json
 import os
+
+
+class BuildExtWithCopy(build_ext):
+    """Build the extension library as _pys2opc.xxx.so and copy it to _pys2opc.so so that cmake can use it more easily"""
+    def run(self):
+        super().run()
+        for ext in self.extensions:
+            basename = self.get_ext_fullname(ext.name)
+            filename = self.get_ext_filename(basename)
+            src_fname = os.path.join(self.build_lib, filename)
+            dst_fname = os.path.join(self.build_lib, '.'.join((basename, filename.split('.')[-1])))
+            copy_file(src_fname, dst_fname, verbose=self.verbose, dry_run=self.dry_run)
+
 
 setup(
     setup_requires=['cffi>=1.4.0'],
@@ -30,6 +45,7 @@ setup(
     packages=['pys2opc'],
     package_dir={'pys2opc': 'pys2opc'},
     package_data={'pys2opc': ['version.json']},
+    cmdclass={'build_ext': BuildExtWithCopy},
 
     name='pys2opc',
     version=json.load(open('pys2opc/version.json'))['version'],
