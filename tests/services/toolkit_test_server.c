@@ -103,7 +103,7 @@ static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatu
 
         bool ok = (write_response->ResponseHeader.ServiceResult == SOPC_GoodGenericStatus);
 
-        for (int32_t i = 0; i < write_response->NoOfResults; ++i)
+        for (int32_t i = 0; i < write_response->NoOfResults && ok; ++i)
         {
             ok &= (write_response->Results[i] == SOPC_GoodGenericStatus);
         }
@@ -112,8 +112,6 @@ static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatu
         {
             printf("<Test_Server_Toolkit: Error while updating address space\n");
         }
-
-        return;
     }
 
     else
