@@ -32,7 +32,8 @@ HEADER_XSL=$(mktemp)
 # Helper script takes the reference header and the file to test
 echo '#!/bin/bash
 if [[ -z $1 || -z "$2" ]] ; then
-    exit 2
+    echo Warning: empty argument, there may be no file found with this extension
+    exit 0
 fi
 n_lines=$(wc -l < $1)
 if [[ $n_lines -eq 0 ]] ; then
