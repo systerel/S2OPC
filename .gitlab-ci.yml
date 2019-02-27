@@ -47,7 +47,7 @@ generation:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install && ../tests/scripts/make-ctestfile-relative CTestTestfile.cmake > ./bin/CTestTestfile.cmake || exit 1'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_IMAGE: 'sha256:a5c83c23530d5f845927f53926eee4546d473c5ed1f44e0a3e52f9942726a0a5'
+    DOCKER_IMAGE: 'sha256:88ff9b24dfaeceac59b3347a5d3c7081a5b7162ec52b56005571949ebddc0614'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
