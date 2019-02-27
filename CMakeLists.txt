@@ -820,15 +820,21 @@ if(NOT CROSS_COMPILE AND NOT WITH_ASAN AND NOT WITH_TSAN AND NOT WITH_UBSAN AND 
                     "${PYS2OPC_PATH}/pys2opc/s2opc.py"
                     "${PYS2OPC_PATH}/pys2opc/types.py"
                     )
-  set(PYS2OPC_PLACEHOLDER ${CMAKE_BINARY_DIR}/pys2opc_touch)
+  set(PYS2OPC_PLACEHOLDER "${CMAKE_BINARY_DIR}/pys2opc_install.cmake")
   add_custom_command(OUTPUT ${PYS2OPC_PLACEHOLDER}
                      COMMAND ${PYTHON_EXECUTABLE} setup.py build_ext -b ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} -t ${CMAKE_BINARY_DIR}
-                     COMMAND ${CMAKE_COMMAND} -E touch ${PYS2OPC_PLACEHOLDER}
-                     WORKING_DIRECTORY ${PYS2OPC_PATH})
+                     #COMMAND ${CMAKE_COMMAND} -E touch ${PYS2OPC_PLACEHOLDER}
+                     # TODO: COMMAND ls ?
+                     COMMAND ${PYTHON_EXECUTABLE} -c "import os,sys; print('execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/{} ${CMAKE_INSTALL_PREFIX}/lib)'.format([f for f in os.listdir('${CMAKE_LIBRARY_OUTPUT_DIRECTORY}') if f.startswith('_pys2opc')][0]), file=open('${PYS2OPC_PLACEHOLDER}', 'w'))" 
+                     WORKING_DIRECTORY ${PYS2OPC_PATH}
+                     VERBATIM)
   add_custom_target(pys2opc ALL
                     DEPENDS ${PYS2OPC_PLACEHOLDER}
                     DEPENDS ${PYS2OPC_FILES})
   add_dependencies(pys2opc s2opc_subscription_client)
+
+  #file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/pys2opc_install.cmake" CONTENT "execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/_pys2opc.* ${CMAKE_INSTALL_PREFIX}/lib)")
+  install(SCRIPT "${CMAKE_BINARY_DIR}/pys2opc_install.cmake")
 
   # Validation test
   if(ENABLE_TESTING)
