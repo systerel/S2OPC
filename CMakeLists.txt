@@ -829,8 +829,8 @@ if(NOT CROSS_COMPILE AND NOT WITH_ASAN AND NOT WITH_TSAN AND NOT WITH_UBSAN AND 
                     DEPENDS ${PYS2OPC_PLACEHOLDER}
                     DEPENDS ${PYS2OPC_FILES})
   add_dependencies(pys2opc s2opc_subscription_client)
-  install(FILES "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/_pys2opc${CMAKE_SHARED_LIBRARY_SUFFIX}"
-          DESTINATION lib)
+  install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py install --root ${CMAKE_INSTALL_PREFIX}
+                                WORKING_DIRECTORY ${PYS2OPC_PATH})")
 
   # Validation test
   if(ENABLE_TESTING)
