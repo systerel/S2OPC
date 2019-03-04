@@ -4471,7 +4471,7 @@ static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange
 
     if (variant->ArrayType != SOPC_VariantArrayType_Array)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        return false;
     }
 
     if (variant->Value.Array.Length <= 0)
