@@ -31,7 +31,7 @@
 #include "sopc_user_app_itf.h"
 
 /* Secure Channel configuration */
-#define ENDPOINT_URL "opc.tcp://localhost:4841"
+extern char* ENDPOINT_URL; // See config.c, possible override by main
 #define APPLICATION_URI "urn:S2OPC:localhost"
 #define PRODUCT_URI "urn:S2OPC:localhost"
 #define GATEWAY_SERVER_URI ""

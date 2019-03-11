@@ -26,6 +26,8 @@
 
 #include "config.h"
 
+char* ENDPOINT_URL = "opc.tcp://localhost:4841";
+
 /* Only supports one set of certificates at a time. They are all shared by the configs. */
 int nCfgCreated = 0; /* Number of created configs with certificates, to remember when to release certificates */
 SOPC_SerializedCertificate* pCrtCli = NULL;

@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_helper_uri.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
@@ -60,38 +61,51 @@ int main(int argc, char* argv[])
 
     printf("S2OPC write demo (only the Value attribute).\n");
     /* Read the start node id from the command line */
-    if (argc != 4)
+    if (argc != 5)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
     if (SOPC_STATUS_OK == status)
     {
-        assert(strlen(argv[1]) <= INT32_MAX);
+        assert(strlen(argv[1]) <= 100);
+
+        size_t tmp, tmp2, tmp3;
+        bool res = SOPC_Helper_URI_ParseTcpUaUri(argv[1], &tmp, &tmp2, &tmp3);
+        if (!res)
+        {
+            printf("# Error: invalid OPC UA server address\n");
+            status = SOPC_STATUS_NOK;
+        }
+        ENDPOINT_URL = argv[1];
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        assert(strlen(argv[2]) <= INT32_MAX);
 
         /* argv are always null-terminated */
-        g_pNid = SOPC_NodeId_FromCString(argv[1], (int32_t) strlen(argv[1]));
+        g_pNid = SOPC_NodeId_FromCString(argv[2], (int32_t) strlen(argv[2]));
         if (NULL == g_pNid)
         {
-            printf("# Error: nodeid not recognized: \"%s\"\n", argv[1]);
+            printf("# Error: nodeid not recognized: \"%s\"\n", argv[2]);
             status = SOPC_STATUS_NOK;
         }
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (strstr(argv[2], "-d") == NULL && strstr(argv[2], "-i") == NULL)
+        if (strstr(argv[3], "-d") == NULL && strstr(argv[3], "-i") == NULL)
         {
-            printf("# Error: type qualifier not recognized: \"%s\"\n", argv[2]);
+            printf("# Error: type qualifier not recognized: \"%s\"\n", argv[3]);
             status = SOPC_STATUS_NOK;
         }
     }
     if (SOPC_STATUS_OK == status)
     {
         SOPC_DataValue_Initialize(&g_dv);
-        if (strstr(argv[2], "-d") != NULL)
+        if (strstr(argv[3], "-d") != NULL)
         {
-            if (sscanf(argv[3], "%lf", &dVal) == 0)
+            if (sscanf(argv[4], "%lf", &dVal) == 0)
             {
-                printf("# Error: failed to read a double \"%s\"\n", argv[3]);
+                printf("# Error: failed to read a double \"%s\"\n", argv[4]);
                 status = SOPC_STATUS_NOK;
             }
             if (SOPC_STATUS_OK == status)
@@ -101,11 +115,11 @@ int main(int argc, char* argv[])
                 g_dv.Value.Value.Doublev = dVal;
             }
         }
-        else if (strstr(argv[2], "-i") != NULL)
+        else if (strstr(argv[3], "-i") != NULL)
         {
-            if (sscanf(argv[3], "%" SCNd64, &iVal) == 0)
+            if (sscanf(argv[4], "%" SCNd64, &iVal) == 0)
             {
-                printf("# Error: failed to read an integer \"%s\"\n", argv[3]);
+                printf("# Error: failed to read an integer \"%s\"\n", argv[4]);
                 status = SOPC_STATUS_NOK;
             }
             if (SOPC_STATUS_OK == status)
@@ -120,6 +134,7 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK != status)
     {
         printf("# Error: Expects exactly 3 arguments:\n");
+        printf("  - the server TCP UA address URL: 'opc.tcp://<ip>:<port>[/<name>]'\n");
         printf("  - the node id XML formatted: [ns=<digits>;]<i, s, g or b>=<nodeid>,\n");
         printf("  - the type \"-d\" for a floating point value or \"-i\" for signed integer,\n");
         printf("  - the value.\n");
