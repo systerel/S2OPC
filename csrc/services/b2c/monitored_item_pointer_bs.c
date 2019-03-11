@@ -253,10 +253,20 @@ void monitored_item_pointer_bs__is_notification_triggered(
     if (monitItem->aid != constants__c_AttributeId_indet &&
         monitored_item_pointer_bs__p_new_wv_pointer->AttributeId == (uint32_t) monitItem->aid)
     {
-        // Same attribute, now compare values (no filters managed for now)
-        status = SOPC_DataValue_CompareRange(&monitored_item_pointer_bs__p_old_wv_pointer->Value,
-                                             &monitored_item_pointer_bs__p_new_wv_pointer->Value, monitItem->indexRange,
-                                             &dtCompare);
+        // Same attribute, now compare values (no filters managed for now: STATUS_VALUE_1 behavior)
+        if (monitored_item_pointer_bs__p_old_wv_pointer->Value.Status ==
+            monitored_item_pointer_bs__p_new_wv_pointer->Value.Status)
+        {
+            status = SOPC_Variant_CompareRange(&monitored_item_pointer_bs__p_old_wv_pointer->Value.Value,
+                                               &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value,
+                                               monitItem->indexRange, &dtCompare);
+        }
+        else
+        {
+            // Statuses are differents
+            status = SOPC_STATUS_OK;
+            dtCompare = -1;
+        }
         if (SOPC_STATUS_OK == status)
         {
             if (dtCompare != 0)
