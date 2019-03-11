@@ -115,6 +115,15 @@ saxonb-xslt -xsl:analyse_log.xsl -s:$LOG_FILE -o:$TMP_FILE
 # next step: build a tap report
 num_tests=0
 
+# Note: codes corresponding to result in XML (.log here)
+# 0: Fail/Error
+# 1: Warning
+# 2: Not Implemented
+# 3: Skipped
+# 4: Not Supported
+# 5: OK / Log
+# 6: Back-trace
+
 while read line; do
     test_status=`echo $line | awk -F '|' '{print $1}'`
     test_number=`echo $line | awk -F '|' '{print $2}'`
