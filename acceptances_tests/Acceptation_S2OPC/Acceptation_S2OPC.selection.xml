@@ -4,8 +4,7 @@
   <ConformanceGroup name="Address Space Model">
    <ConformanceUnit name="Address Space Base">
     <TestCases>
-     <!-- This makes UACTT crash -->
-     <!-- <TestCase name="001.js"/> -->
+     <TestCase name="001.js"/>
      <TestCase name="002.js"/>
     </TestCases>
    </ConformanceUnit>
