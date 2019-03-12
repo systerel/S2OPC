@@ -718,9 +718,16 @@ def generate_item_object(ua_node):
 def number_coalesce(n, default):
     return n if n is not None else default
 
+def default_variable_status(ua_node):
+    value_status = '0x00' # Good status
+    if ua_node.value is None and ua_node.nodeid.ns != None and ua_node.nodeid.ns != 0:
+        # Keep OPC UA default namespace nodes with a Good status, necessary to pass UACTT
+        # othewise keep Good status only if a value is defined
+        value_status='OpcUa_BadDataUnavailable'
+    return value_status
 
 def generate_item_variable(ua_node):
-    value_status = 'OpcUa_BadDataUnavailable' if ua_node.value is None else '0x00'   
+    value_status = default_variable_status(ua_node)
     return generate_item(ua_node, 'Variable', 'variable', value_status,
                          Value=generate_value_variant(ua_node.value),
                          DataType=generate_nodeid(ua_node.data_type),
@@ -729,12 +736,11 @@ def generate_item_variable(ua_node):
 
 
 def generate_item_variable_type(ua_node):
-    value_status = 'OpcUa_BadDataUnavailable' if ua_node.value is None else '0x00'
+    value_status = default_variable_status(ua_node)
     return generate_item(ua_node, 'VariableType', 'variable_type', value_status,
                          Value=generate_value_variant(ua_node.value),
                          DataType=generate_nodeid(ua_node.data_type),
                          ValueRank="(%d)" % ua_node.value_rank)
-
 
 def generate_item_object_type(ua_node):
     return generate_item(ua_node, 'ObjectType', 'object_type')
