@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 29/01/2019 12:57:55
+ Date                 : 14/03/2019 09:08:21
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -529,10 +529,10 @@ void session_mgr__server_validate_session_service_req(
                else {
                   *session_mgr__status_code_err = constants_statuscodes_bs__e_sc_bad_invalid_state;
                }
+               session_core__server_close_session_sm(session_mgr__l_session,
+                  *session_mgr__status_code_err);
             }
             *session_mgr__is_valid_res = false;
-            session_core__server_close_session_sm(session_mgr__l_session,
-               *session_mgr__status_code_err);
          }
       }
       else {
