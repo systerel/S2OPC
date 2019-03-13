@@ -109,10 +109,35 @@
      <TestCase name="002.js"/>
     </TestCases>
    </ConformanceUnit>
+   <ConformanceUnit name="Base Info OptionSet">
+    <TestCases>
+     <TestCase name="manual.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Base Info Placeholder Modelling Rules">
+    <TestCases>
+     <TestCase name="manual.js"/>
+    </TestCases>
+   </ConformanceUnit>
    <ConformanceUnit name="Base Info ValueAsText">
     <TestCases>
      <TestCase name="001.js"/>
      <TestCase name="002.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Base Info Server Capabilities">
+    <TestCases>
+     <TestCase name="000.js"/>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="005.js"/>
+     <TestCase name="006.js"/>
+     <TestCase name="007.js"/>
+     <TestCase name="008.js"/>
+     <TestCase name="011.js"/>
+     <TestCase name="014.js"/>
+     <TestCase name="015.js"/>
+     <TestCase name="016.js"/>
     </TestCases>
    </ConformanceUnit>
   </ConformanceGroup>
