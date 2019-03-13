@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 07/02/2019 16:21:08
+ Date                 : 13/03/2019 17:57:18
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -727,9 +727,9 @@ void service_mgr__server_receive_session_service_req(
                   &service_mgr__l_valid_msg);
                message_out_bs__is_valid_msg_out_header(service_mgr__l_resp_msg_header,
                   &service_mgr__l_valid_resp_header);
-               service_mgr__l_resp_msg_allocated = true;
                if ((service_mgr__l_valid_msg == true) &&
                   (service_mgr__l_valid_resp_header == true)) {
+                  service_mgr__l_resp_msg_allocated = true;
                   service_mgr__treat_session_service_req(service_mgr__l_session,
                      service_mgr__req_typ,
                      service_mgr__l_request_handle,
