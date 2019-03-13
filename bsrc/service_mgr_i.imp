@@ -795,10 +795,10 @@ OPERATIONS
                     l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
                     l_valid_msg <-- is_valid_msg_out (l_resp_msg);
                     l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header);
-                    l_resp_msg_allocated := TRUE;
                     IF l_valid_msg = TRUE &
                         l_valid_resp_header = TRUE
                     THEN
+                        l_resp_msg_allocated := TRUE;
                         // Call local operation to dispatch the service request on right service
                             l_ret, l_async_resp
                               <-- treat_session_service_req (l_session,
