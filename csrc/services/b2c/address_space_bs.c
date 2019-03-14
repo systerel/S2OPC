@@ -566,6 +566,16 @@ void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_sp
     *address_space_bs__sc = item->value_status;
 }
 
+void address_space_bs__is_IndexRangeDefined(const constants__t_IndexRange_i address_space_bs__p_index_range,
+                                            t_bool* const address_space_bs__bres)
+{
+    *address_space_bs__bres = false;
+    if (NULL != address_space_bs__p_index_range)
+    {
+        *address_space_bs__bres = (address_space_bs__p_index_range->Length > 0);
+    }
+}
+
 void address_space_bs__is_NodeId_equal(const constants__t_NodeId_i address_space_bs__nid1,
                                        const constants__t_NodeId_i address_space_bs__nid2,
                                        t_bool* const address_space_bs__bres)
