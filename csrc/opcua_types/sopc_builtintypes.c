@@ -4806,6 +4806,23 @@ static SOPC_ReturnStatus set_range_array(SOPC_Variant* variant, const SOPC_Varia
 
     const size_t type_size = size_of_builtin_type(src->BuiltInTypeId);
 
+    /* Note: fix to ensure we will free the variant content at the end.
+     * If the variant was a static definition it has DoNotClear flag
+     * but since we will do partial modification (to be cleared) on it we need to change that.
+     * Make the variant "clearable" by copying itself before the partial modification.
+     */
+    if (variant->DoNotClear)
+    {
+        SOPC_Variant tmp;
+        SOPC_Variant_Initialize(&tmp);
+        SOPC_ReturnStatus status = SOPC_Variant_Copy(&tmp, variant);
+        if (status != SOPC_STATUS_OK)
+        {
+            return status;
+        }
+        *variant = tmp;
+    }
+
     // Untyped pointer to the source array data at the correct offset
     const uint8_t* src_i = *((const uint8_t* const*) &src->Value.Array.Content);
     uint8_t* dst_i = *((uint8_t**) &variant->Value.Array.Content) + start * type_size;
