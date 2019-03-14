@@ -104,13 +104,7 @@ OPERATIONS
             p_sc_valid_user, p_user <-- allocate_user_if_authenticated (p_endpoint_config_idx, p_user_token, l_sc_user_authentication)
         ELSE
             p_user := c_user_indet;
-            IF l_user_token_type = c_userTokenType_indet
-            THEN
-                p_sc_valid_user := e_sc_bad_identity_token_invalid
-            ELSE
-                /* We do not know if the token is invalid, we just reject token based on its type */
-                p_sc_valid_user := e_sc_bad_identity_token_rejected
-            END
+            p_sc_valid_user := e_sc_bad_identity_token_invalid
         END
     END
 

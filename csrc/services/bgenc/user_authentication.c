@@ -21,7 +21,7 @@
 
  File Name            : user_authentication.c
 
- Date                 : 29/01/2019 12:57:59
+ Date                 : 14/03/2019 10:48:21
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -106,12 +106,7 @@ void user_authentication__allocate_valid_and_authenticated_user(
       }
       else {
          *user_authentication__p_user = constants__c_user_indet;
-         if (user_authentication__l_user_token_type == constants__c_userTokenType_indet) {
-            *user_authentication__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
-         }
-         else {
-            *user_authentication__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_rejected;
-         }
+         *user_authentication__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
       }
    }
 }

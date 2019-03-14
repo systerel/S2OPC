@@ -35,6 +35,8 @@
  * but its authorization manager is changed according to the endpoint configuration */
 static SOPC_UserWithAuthorization user_local = {.user = NULL, .authorizationManager = NULL};
 
+static SOPC_String SOPC_SECURITY_POLICY_NONE = {sizeof(SECURITY_POLICY_NONE), true, (SOPC_Byte*) SECURITY_POLICY_NONE};
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -92,6 +94,7 @@ static bool isCompliantWithUserTokenPolicy(const OpcUa_UserTokenPolicy* userToke
                                            const constants__t_user_token_i user_token)
 {
     SOPC_String* tokenPolicyId = NULL;
+    SOPC_String* encryptionAlgo = NULL;
     switch (userTokenPolicy->TokenType)
     {
     case OpcUa_UserTokenType_Anonymous:
@@ -113,6 +116,15 @@ static bool isCompliantWithUserTokenPolicy(const OpcUa_UserTokenPolicy* userToke
         }
         assert(SOPC_ExtObjBodyEncoding_Object == user_token->Encoding);
         tokenPolicyId = &((OpcUa_UserNameIdentityToken*) user_token->Body.Object.Value)->PolicyId;
+        encryptionAlgo = &((OpcUa_UserNameIdentityToken*) user_token->Body.Object.Value)->EncryptionAlgorithm;
+        if (encryptionAlgo->Length > 0)
+        {
+            if (!SOPC_String_Equal(&SOPC_SECURITY_POLICY_NONE, encryptionAlgo))
+            {
+                // we do not support encryption algorithm, therefore if defined only None is accepted
+                return false;
+            }
+        } // else: no algorithm defined => OK because we do not support encryption
         break;
     case OpcUa_UserTokenType_Certificate:
         if (user_token_type != constants__e_userTokenType_x509)
