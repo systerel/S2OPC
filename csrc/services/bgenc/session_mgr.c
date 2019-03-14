@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 14/03/2019 09:08:21
+ Date                 : 14/03/2019 10:30:04
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -344,11 +344,7 @@ void session_mgr__server_receive_session_req(
                else {
                   *session_mgr__service_ret = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
                }
-               if (*session_mgr__service_ret != constants_statuscodes_bs__e_sc_ok) {
-                  session_core__server_close_session_sm(*session_mgr__session,
-                     *session_mgr__service_ret);
-               }
-               else {
+               if (*session_mgr__service_ret == constants_statuscodes_bs__e_sc_ok) {
                   session_core__server_session_timeout_msg_received(*session_mgr__session);
                }
             }

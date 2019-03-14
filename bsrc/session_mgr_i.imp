@@ -414,11 +414,8 @@ OPERATIONS
                             // invalid user token type
                             service_ret := e_sc_bad_identity_token_invalid
                         END;
-                        IF service_ret /= e_sc_ok
+                        IF service_ret = e_sc_ok
                         THEN
-                            // Invalid user or parameters in received request: choice is to close the session in this case (not specified)
-                            server_close_session_sm (session, service_ret)
-                        ELSE
                             server_session_timeout_msg_received (session)
                         END
                     ELSE
