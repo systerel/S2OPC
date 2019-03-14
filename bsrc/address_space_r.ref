@@ -62,6 +62,7 @@ DEFINITIONS
         Node_RefIndexEnd,
         RefIndex_Reference,
 
+        IsRangeDefined,
         IsValid_VariantIndex,
         HasRange_VariantIndex,
 
@@ -142,6 +143,7 @@ DEFINITIONS
         Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
         RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference &
 
+        IsRangeDefined : t_IndexRange_i --> BOOL &
         IsValid_VariantIndex : t_Variant * t_IndexRange_i --> BOOL &
         HasRange_VariantIndex  : t_Variant * t_IndexRange_i --> BOOL &
 

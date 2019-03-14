@@ -59,6 +59,7 @@ DEFINITIONS
         Node_RefIndexEnd,
         RefIndex_Reference,
 
+        IsRangeDefined, /* <=> range string != NULL */
         IsValid_VariantIndex, /* Valid (or none) index range value for Variant */
         HasRange_VariantIndex /* Valid index range but has no range in  Variant */
     ;
@@ -125,6 +126,7 @@ DEFINITIONS
         Node_RefIndexEnd        : t_Node     +-> t_RefIndex  &
         RefIndex_Reference      : t_Node * t_RefIndex +-> t_Reference &
 
+        IsRangeDefined : t_IndexRange_i --> BOOL &
         IsValid_VariantIndex : t_Variant * t_IndexRange +-> BOOL &
         HasRange_VariantIndex  : t_Variant * t_IndexRange +-> BOOL
     );
@@ -765,6 +767,13 @@ OPERATIONS
         p_ref :(p_ref : t_Reference_i &
                 p_ref = RefIndex_Reference(p_node |-> p_ref_index))
     END
+    ;
 
+    bres <-- is_IndexRangeDefined(p_index_range) =
+    PRE
+        p_index_range : t_IndexRange_i
+    THEN
+        bres := IsRangeDefined(p_index_range)
+    END
 
 END

@@ -62,6 +62,7 @@ DEFINITIONS
         Node_RefIndexEnd,
         RefIndex_Reference,
 
+        IsRangeDefined,
         IsValid_VariantIndex,
         HasRange_VariantIndex,
 
@@ -153,6 +154,7 @@ DEFINITIONS
         Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
         RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference &
 
+        IsRangeDefined : t_IndexRange_i --> BOOL &
         IsValid_VariantIndex : t_Variant * t_IndexRange_i --> BOOL &
         HasRange_VariantIndex  : t_Variant * t_IndexRange_i --> BOOL &
 
@@ -275,10 +277,16 @@ OPERATIONS
            /* Generic treatment for all other attributes */
            (not(ncl = e_ncl_Variable & p_aid = e_aid_Value) &
              not(ncl = e_ncl_VariableType & p_aid = e_aid_Value) =>
-               (val = AttributeID_Node_Variant(p_aid)(p_node) &
-                sc = e_sc_ok) or
-                (val = c_Variant_indet &
-                  sc = e_sc_bad_out_of_memory)
+               /* Other attributes are not expecting a defined index range */
+               (IsRangeDefined(p_index_range) = TRUE =>
+                 val = c_Variant_indet &
+                 sc = e_sc_bad_index_range_invalid) &
+               /* Nominal case */
+               (IsRangeDefined(p_index_range) = FALSE =>
+                (val = AttributeID_Node_Variant(p_aid)(p_node) &
+                 sc = e_sc_ok) or
+                 (val = c_Variant_indet &
+                  sc = e_sc_bad_out_of_memory))
           ) &
           /* Specific treatement for status code and timestamps for Variable Value */
           (sc = e_sc_ok & ncl = e_ncl_Variable & p_aid = e_aid_Value =>

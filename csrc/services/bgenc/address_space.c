@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 14/03/2019 14:10:14
+ Date                 : 14/03/2019 17:22:20
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -343,111 +343,120 @@ void address_space__read_AddressSpace_Attribute_value(
    {
       t_bool address_space__l_user_read_auth;
       t_bool address_space__l_user_write_auth;
+      t_bool address_space__l_is_range_defined;
       
       *address_space__sc = constants_statuscodes_bs__e_sc_ok;
       constants_statuscodes_bs__const_RawStatusCode_Good(address_space__val_sc);
       *address_space__val = constants__c_Variant_indet;
       *address_space__val_ts_src = constants__c_Timestamp_null;
       *address_space__val_ts_srv = constants__c_Timestamp_null;
-      switch (address_space__p_aid) {
-      case constants__e_aid_AccessLevel:
-         address_space_bs__read_AddressSpace_AccessLevel_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_BrowseName:
-         address_space_bs__read_AddressSpace_BrowseName_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_ContainsNoLoops:
-         address_space_bs__read_AddressSpace_ContainsNoLoops_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_DataType:
-         address_space_bs__read_AddressSpace_DataType_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_DisplayName:
-         address_space_bs__read_AddressSpace_DisplayName_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_EventNotifier:
-         address_space_bs__read_AddressSpace_EventNotifier_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_Executable:
-         address_space_bs__read_AddressSpace_Executable_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_Historizing:
-         address_space_bs__read_AddressSpace_Historizing_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_IsAbstract:
-         address_space_bs__read_AddressSpace_IsAbstract_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_NodeClass:
-         address_space_bs__read_AddressSpace_NodeClass_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_NodeId:
-         address_space_bs__read_AddressSpace_NodeId_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_Symmetric:
-         address_space_bs__read_AddressSpace_Symmetric_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_UserAccessLevel:
-         user_authorization_bs__get_user_authorization(constants__e_operation_type_read,
-            address_space__p_nid,
-            constants__e_aid_Value,
-            address_space__p_user,
-            &address_space__l_user_read_auth);
-         user_authorization_bs__get_user_authorization(constants__e_operation_type_write,
-            address_space__p_nid,
-            constants__e_aid_Value,
-            address_space__p_user,
-            &address_space__l_user_write_auth);
-         address_space_bs__read_AddressSpace_UserAccessLevel_value(address_space__p_node,
-            address_space__l_user_read_auth,
-            address_space__l_user_write_auth,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_UserExecutable:
-         address_space_bs__read_AddressSpace_UserExecutable_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      case constants__e_aid_Value:
-         address_space_bs__read_AddressSpace_Value_value(address_space__p_node,
-            address_space__p_index_range,
-            address_space__sc,
-            address_space__val,
-            address_space__val_sc,
-            address_space__val_ts_src,
-            address_space__val_ts_srv);
-         break;
-      case constants__e_aid_ValueRank:
-         address_space_bs__read_AddressSpace_ValueRank_value(address_space__p_node,
-            address_space__sc,
-            address_space__val);
-         break;
-      default:
-         break;
+      address_space_bs__is_IndexRangeDefined(address_space__p_index_range,
+         &address_space__l_is_range_defined);
+      if ((address_space__p_aid != constants__e_aid_Value) &&
+         (address_space__l_is_range_defined == true)) {
+         *address_space__sc = constants_statuscodes_bs__e_sc_bad_index_range_no_data;
+      }
+      else {
+         switch (address_space__p_aid) {
+         case constants__e_aid_AccessLevel:
+            address_space_bs__read_AddressSpace_AccessLevel_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_BrowseName:
+            address_space_bs__read_AddressSpace_BrowseName_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_ContainsNoLoops:
+            address_space_bs__read_AddressSpace_ContainsNoLoops_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_DataType:
+            address_space_bs__read_AddressSpace_DataType_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_DisplayName:
+            address_space_bs__read_AddressSpace_DisplayName_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_EventNotifier:
+            address_space_bs__read_AddressSpace_EventNotifier_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_Executable:
+            address_space_bs__read_AddressSpace_Executable_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_Historizing:
+            address_space_bs__read_AddressSpace_Historizing_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_IsAbstract:
+            address_space_bs__read_AddressSpace_IsAbstract_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_NodeClass:
+            address_space_bs__read_AddressSpace_NodeClass_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_NodeId:
+            address_space_bs__read_AddressSpace_NodeId_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_Symmetric:
+            address_space_bs__read_AddressSpace_Symmetric_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_UserAccessLevel:
+            user_authorization_bs__get_user_authorization(constants__e_operation_type_read,
+               address_space__p_nid,
+               constants__e_aid_Value,
+               address_space__p_user,
+               &address_space__l_user_read_auth);
+            user_authorization_bs__get_user_authorization(constants__e_operation_type_write,
+               address_space__p_nid,
+               constants__e_aid_Value,
+               address_space__p_user,
+               &address_space__l_user_write_auth);
+            address_space_bs__read_AddressSpace_UserAccessLevel_value(address_space__p_node,
+               address_space__l_user_read_auth,
+               address_space__l_user_write_auth,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_UserExecutable:
+            address_space_bs__read_AddressSpace_UserExecutable_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_Value:
+            address_space_bs__read_AddressSpace_Value_value(address_space__p_node,
+               address_space__p_index_range,
+               address_space__sc,
+               address_space__val,
+               address_space__val_sc,
+               address_space__val_ts_src,
+               address_space__val_ts_srv);
+            break;
+         case constants__e_aid_ValueRank:
+            address_space_bs__read_AddressSpace_ValueRank_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         default:
+            break;
+         }
       }
    }
 }
