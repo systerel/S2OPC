@@ -30,7 +30,9 @@
 #include "address_space_impl.h"
 
 #include "sopc_address_space.h"
+#include "sopc_embedded_nodeset2.h"
 #include "sopc_logger.h"
+#include "sopc_toolkit_config_constants.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -45,39 +47,35 @@ static void log_error_for_unknown_node(const SOPC_NodeId* nodeId, const char* no
 {
     if (nodeId->IdentifierType == SOPC_IdentifierType_Numeric)
     {
-        SOPC_Logger_TraceError("address_space_typing_bs__is_transitive_child: %s node, error %s: ns=%" PRIu16
-                               ";i=%" PRIu32,
-                               node_adjective, error, nodeId->Namespace, nodeId->Data.Numeric);
+        SOPC_Logger_TraceError("address_space_typing_bs__is_transitive_child: %s, %s node: ns=%" PRIu16 ";i=%" PRIu32,
+                               error, node_adjective, nodeId->Namespace, nodeId->Data.Numeric);
     }
     else if (nodeId->IdentifierType == SOPC_IdentifierType_String)
     {
-        SOPC_Logger_TraceError("address_space_typing_bs__is_transitive_child: %s node, error %s: ns=%" PRIu16 ";s=%s",
-                               node_adjective, error, nodeId->Namespace,
-                               SOPC_String_GetRawCString(&nodeId->Data.String));
+        SOPC_Logger_TraceError("address_space_typing_bs__is_transitive_child: %s, %s node: ns=%" PRIu16 ";s=%s", error,
+                               node_adjective, nodeId->Namespace, SOPC_String_GetRawCString(&nodeId->Data.String));
     }
     else
     {
-        SOPC_Logger_TraceError("address_space_typing_bs__is_transitive_child: %s node, error: %s", node_adjective,
-                               error);
+        SOPC_Logger_TraceError("address_space_typing_bs__is_transitive_child: %s node: %s", node_adjective, error);
     }
 }
 
-static void log_info_for_unknown_node(const SOPC_NodeId* nodeId, const char* node_adjective, const char* info)
+static void log_debug_for_unknown_node(const SOPC_NodeId* nodeId, const char* node_adjective, const char* info)
 {
     if (nodeId->IdentifierType == SOPC_IdentifierType_Numeric)
     {
-        SOPC_Logger_TraceInfo("address_space_typing_bs__is_transitive_child: %s node, info %s: ns=%" PRIu16
-                              ";i=%" PRIu32,
-                              node_adjective, info, nodeId->Namespace, nodeId->Data.Numeric);
+        SOPC_Logger_TraceDebug("address_space_typing_bs__is_transitive_child: %s, %s node: ns=%" PRIu16 ";i=%" PRIu32,
+                               info, node_adjective, nodeId->Namespace, nodeId->Data.Numeric);
     }
     else if (nodeId->IdentifierType == SOPC_IdentifierType_String)
     {
-        SOPC_Logger_TraceInfo("address_space_typing_bs__is_transitive_child: %s node, info %s: ns=%" PRIu16 ";s=%s",
-                              node_adjective, info, nodeId->Namespace, SOPC_String_GetRawCString(&nodeId->Data.String));
+        SOPC_Logger_TraceDebug("address_space_typing_bs__is_transitive_child: %s, %s node: ns=%" PRIu16 ";s=%s", info,
+                               node_adjective, nodeId->Namespace, SOPC_String_GetRawCString(&nodeId->Data.String));
     }
     else
     {
-        SOPC_Logger_TraceInfo("address_space_typing_bs__is_transitive_child: %s node, info: %s", node_adjective, info);
+        SOPC_Logger_TraceDebug("address_space_typing_bs__is_transitive_child: %s node: %s", node_adjective, info);
     }
 }
 
@@ -93,7 +91,7 @@ static bool is_reversed_has_child(const OpcUa_ReferenceNode* ref)
            ref->ReferenceTypeId.Data.Numeric == OpcUaId_HasSubtype;
 }
 
-static const SOPC_NodeId* get_direct_parent(const constants__t_Node_i child)
+static const SOPC_NodeId* get_direct_parent_of_node(const constants__t_Node_i child)
 {
     SOPC_NodeId* directParent = NULL;
     int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(child);
@@ -118,6 +116,38 @@ static const SOPC_NodeId* get_direct_parent(const constants__t_Node_i child)
     return directParent;
 }
 
+static const SOPC_NodeId* get_direct_parent(const SOPC_NodeId* childNodeId)
+{
+    const SOPC_NodeId* result = NULL;
+
+    if (SOPC_IdentifierType_Numeric == childNodeId->IdentifierType && OPCUA_NAMESPACE_INDEX == childNodeId->Namespace &&
+        childNodeId->Data.Numeric <= SOPC_MAX_HAS_HASUBTYPE_BACKWARD_NODE_ID)
+    {
+        result = &SOPC_Embedded_HasSubTypeBackward[childNodeId->Data.Numeric];
+        if (SOPC_IdentifierType_Numeric == result->IdentifierType && 0 == result->Data.Numeric)
+        {
+            // Null NodeId case
+            result = NULL;
+        }
+    }
+    else if (SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION)
+    {
+        // Parent not found in static array of extracted HasSubtype references, start research in address space
+
+        void* node;
+        bool node_found = false;
+
+        node = SOPC_Dict_Get(address_space_bs__nodes, childNodeId, &node_found);
+
+        if (node_found)
+        {
+            // Starting to check if direct parent is researched parent
+            result = get_direct_parent_of_node(node);
+        }
+    }
+    return result;
+}
+
 #define RECURSION_LIMIT SOPC_MAX_VARIANT_NESTED_LEVEL
 
 static bool recursive_is_transitive_subtype(int recursionLimit,
@@ -131,41 +161,29 @@ static bool recursive_is_transitive_subtype(int recursionLimit,
         return false;
     }
 
-    void* node;
-    bool node_found = false;
-
-    node = SOPC_Dict_Get(address_space_bs__nodes, currentTypeOrSubtype, &node_found);
-
-    if (node_found)
+    // Starting to check if direct parent is researched parent
+    const SOPC_NodeId* directParent = get_direct_parent(currentTypeOrSubtype);
+    if (NULL == directParent)
     {
-        // Starting to check if direct parent is researched parent
-        const SOPC_NodeId* directParent = get_direct_parent(node);
-        if (NULL == directParent)
-        {
-            log_info_for_unknown_node(originSubtype, "root subtype", "while searching for parent");
-            log_info_for_unknown_node(currentTypeOrSubtype, "transitive parent type", "has no more parent");
-        }
-        else
-        {
-            if (NULL != directParent)
-            {
-                if (SOPC_NodeId_Equal(directParent, expectedParentType))
-                {
-                    return true;
-                }
-                else
-                {
-                    return recursive_is_transitive_subtype(recursionLimit, originSubtype, directParent,
-                                                           expectedParentType);
-                }
-            }
-        }
+        log_debug_for_unknown_node(originSubtype, "child type", "while searching for transitive parent");
+        log_debug_for_unknown_node(expectedParentType, "target type", "never reached in resolution");
+        log_debug_for_unknown_node(currentTypeOrSubtype, "transitive parent type", "has no more parent");
     }
     else
     {
-        log_error_for_unknown_node(originSubtype, "root subtype", "while searching for parent");
-        log_error_for_unknown_node(currentTypeOrSubtype, "transitive parent type", "is not present in address space");
+        if (NULL != directParent)
+        {
+            if (SOPC_NodeId_Equal(directParent, expectedParentType))
+            {
+                return true;
+            }
+            else
+            {
+                return recursive_is_transitive_subtype(recursionLimit, originSubtype, directParent, expectedParentType);
+            }
+        }
     }
+
     return false;
 }
 
