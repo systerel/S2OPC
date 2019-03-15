@@ -3960,6 +3960,10 @@ SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src)
             dest->BuiltInTypeId = src->BuiltInTypeId;
             dest->ArrayType = src->ArrayType;
         }
+        else
+        {
+            SOPC_Variant_Clear(dest);
+        }
 
         return status;
     }
