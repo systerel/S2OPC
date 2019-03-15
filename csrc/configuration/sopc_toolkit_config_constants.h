@@ -58,6 +58,11 @@
 #define SOPC_MAX_VARIANT_NESTED_LEVEL 10
 #endif /* SOPC_MAX_MESSAGE_LENGTH */
 
+/* @brief Maximum number of operations in a request accepted by server (Read, Write, etc.) */
+#ifndef SOPC_MAX_OPERATIONS_PER_MSG
+#define SOPC_MAX_OPERATIONS_PER_MSG 5000
+#endif /* SOPC_MAX_OPERATIONS_PER_MSG */
+
 /* TCP SOCKETS CONFIGURATION */
 
 /** @brief Maximum number of TCP sockets (listeners and connections) */
@@ -167,11 +172,13 @@
 #define SOPC_MAX_LIFETIME_PUBLISH_INTERVALS 300 // >= 3 KeepAlive
 #endif
 
-/* GENERIC CONFIGURATION*/
+/* ADDRESS SPACE MANAGEMENT */
 
-/* @brief Maximum number of operations in a request accepted by server (Read, Write, etc.) */
-#ifndef SOPC_MAX_OPERATIONS_PER_MSG
-#define SOPC_MAX_OPERATIONS_PER_MSG 5000
+/** @brief By default resolution of HasSubtype references used in services uses only the static and limited extraction
+ * provided by sopc_embedded_nodeset2.h header. If variable is set to true the references are also searched into
+ * instantiated address space when not available in static extraction.*/
+#ifndef SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION
+#define SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION false
 #endif
 
 #include "sopc_config_constants_check.h"
