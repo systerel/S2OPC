@@ -228,7 +228,8 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
 
 static uint32_t SC_StartConnectionEstablishTimer(uint32_t connectionIdx)
 {
-    assert(connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS);
+    assert(connectionIdx > 0);
+    assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS);
     SOPC_Event event;
     event.eltId = connectionIdx;
     event.event = TIMER_SC_CONNECTION_TIMEOUT;
@@ -239,7 +240,8 @@ static uint32_t SC_StartConnectionEstablishTimer(uint32_t connectionIdx)
 
 static uint32_t SC_Client_StartOPNrenewTimer(uint32_t connectionIdx, uint32_t timeoutMs)
 {
-    assert(connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS);
+    assert(connectionIdx > 0);
+    assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS);
     SOPC_Event event;
     event.eltId = connectionIdx;
     event.event = TIMER_SC_CLIENT_OPN_RENEW;

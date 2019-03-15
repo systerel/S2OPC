@@ -493,7 +493,8 @@ static const uint8_t* get_application_uri_ptr_from_crt_data(const SOPC_Certifica
 
 bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* pCert, const char* application_uri)
 {
-    assert(pCert != NULL && application_uri != NULL);
+    assert(pCert != NULL);
+    assert(application_uri != NULL);
 
     uint8_t str_len = 0;
     const void* str_data = get_application_uri_ptr_from_crt_data(pCert, &str_len);
@@ -515,7 +516,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_
                                                                      char** ppApplicationUri,
                                                                      size_t* pStringLength)
 {
-    assert(NULL != pCert && NULL != ppApplicationUri);
+    assert(NULL != pCert);
+    assert(NULL != ppApplicationUri);
 
     uint8_t str_len = 0;
     const void* str_data = get_application_uri_ptr_from_crt_data(pCert, &str_len);

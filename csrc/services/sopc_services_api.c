@@ -168,7 +168,8 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
 
         /* id = secure channel connection index,
            auxParam = request handle */
-        assert(id <= constants__t_channel_i_max && auxParam <= SOPC_MAX_PENDING_REQUESTS);
+        assert(id <= constants__t_channel_i_max);
+        assert(auxParam <= SOPC_MAX_PENDING_REQUESTS);
         io_dispatch_mgr__client_request_timeout(id, (uint32_t) auxParam);
         break;
     }

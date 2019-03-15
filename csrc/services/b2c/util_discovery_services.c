@@ -61,7 +61,8 @@ static void SOPC_SetServerCertificate(SOPC_Endpoint_Config* sopcEndpointConfig, 
     status = SOPC_ByteString_CopyFromBytes((SOPC_ByteString*) &epDesc->ServerCertificate,
                                            sopcEndpointConfig->serverCertificate->data,
                                            (int32_t) sopcEndpointConfig->serverCertificate->length);
-    assert(SOPC_STATUS_OK == status && tmpLength <= INT32_MAX);
+    assert(SOPC_STATUS_OK == status);
+    assert(tmpLength <= INT32_MAX);
     epDesc->ServerCertificate.Length = (int32_t) sopcEndpointConfig->serverCertificate->length;
 }
 

@@ -30,9 +30,11 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
                                                               const SOPC_ExtensionObject* pUser,
                                                               SOPC_UserAuthentication_Status* pUserAuthenticated)
 {
-    assert(NULL != authenticationManager && NULL != pUser && NULL != pUserAuthenticated);
-    assert(NULL != authenticationManager->pFunctions &&
-           NULL != authenticationManager->pFunctions->pFuncValidateUserIdentity);
+    assert(NULL != authenticationManager);
+    assert(NULL != pUser);
+    assert(NULL != pUserAuthenticated);
+    assert(NULL != authenticationManager->pFunctions);
+    assert(NULL != authenticationManager->pFunctions->pFuncValidateUserIdentity);
 
     /* UACTT tests expect that a UserName identity token with empty username is invalid. */
     if (&OpcUa_UserNameIdentityToken_EncodeableType == pUser->Body.Object.ObjType)
@@ -55,11 +57,15 @@ SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserWithAuth
                                                                uint32_t attributeId,
                                                                bool* pbOperationAuthorized)
 {
-    assert(NULL != userWithAuthorization && NULL != nodeId && NULL != pbOperationAuthorized);
+    assert(NULL != userWithAuthorization);
+    assert(NULL != nodeId);
+    assert(NULL != pbOperationAuthorized);
     SOPC_User* user = userWithAuthorization->user;
     SOPC_UserAuthorization_Manager* authorizationManager = userWithAuthorization->authorizationManager;
-    assert(NULL != user && NULL != authorizationManager && NULL != authorizationManager->pFunctions &&
-           NULL != authorizationManager->pFunctions->pFuncAuthorizeOperation);
+    assert(NULL != user);
+    assert(NULL != authorizationManager);
+    assert(NULL != authorizationManager->pFunctions);
+    assert(NULL != authorizationManager->pFunctions->pFuncAuthorizeOperation);
 
     return (authorizationManager->pFunctions->pFuncAuthorizeOperation)(authorizationManager, operationType, nodeId,
                                                                        attributeId, user, pbOperationAuthorized);
@@ -73,7 +79,8 @@ void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAut
     }
 
     SOPC_UserAuthentication_Manager* authenticationManager = *ppAuthenticationManager;
-    assert(NULL != authenticationManager->pFunctions && NULL != authenticationManager->pFunctions->pFuncFree);
+    assert(NULL != authenticationManager->pFunctions);
+    assert(NULL != authenticationManager->pFunctions->pFuncFree);
     authenticationManager->pFunctions->pFuncFree(authenticationManager);
     *ppAuthenticationManager = NULL;
 }
@@ -86,7 +93,8 @@ void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAutho
     }
 
     SOPC_UserAuthorization_Manager* authorizationManager = *ppAuthorizationManager;
-    assert(NULL != authorizationManager->pFunctions && NULL != authorizationManager->pFunctions->pFuncFree);
+    assert(NULL != authorizationManager->pFunctions);
+    assert(NULL != authorizationManager->pFunctions->pFuncFree);
     authorizationManager->pFunctions->pFuncFree(authorizationManager);
     *ppAuthorizationManager = NULL;
 }

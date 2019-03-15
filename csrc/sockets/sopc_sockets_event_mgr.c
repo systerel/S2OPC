@@ -529,7 +529,8 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
 
         /* id = socket index,
          * auxParam = secure channel connection index associated to accepted connection */
-        assert(auxParam <= UINT32_MAX && eltId < SOPC_MAX_SOCKETS);
+        assert(auxParam <= UINT32_MAX);
+        assert(eltId < SOPC_MAX_SOCKETS);
 
         socketElt = &socketsArray[eltId];
         if (socketElt->state == SOCKET_STATE_ACCEPTED)

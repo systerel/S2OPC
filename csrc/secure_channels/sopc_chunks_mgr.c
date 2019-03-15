@@ -252,7 +252,8 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     assert(scConnection != NULL);
     assert(scConnection->cryptoProvider != NULL);
     assert(scConnection->chunksCtx.chunkInputBuffer != NULL);
-    assert(senderCertificatePresence != NULL && receiverCertificatePresence != NULL);
+    assert(senderCertificatePresence != NULL);
+    assert(receiverCertificatePresence != NULL);
     assert(clientSenderCertificate != NULL);
     assert(errorStatus != NULL);
 
@@ -2889,8 +2890,8 @@ static bool SC_Chunks_TreatSendBuffer(
                     {
                         // Server side only (SC renew): new token is not active yet, use the precedent token
                         // TODO: timeout on precedent token validity to be implemented
-                        assert(scConnection->precedentSecurityToken.tokenId != 0 &&
-                               scConnection->precedentSecurityToken.secureChannelId != 0);
+                        assert(scConnection->precedentSecurityToken.tokenId != 0);
+                        assert(scConnection->precedentSecurityToken.secureChannelId != 0);
                         tokenId = scConnection->precedentSecurityToken.tokenId;
                     }
                     else
