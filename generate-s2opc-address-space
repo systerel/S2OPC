@@ -498,44 +498,8 @@ def collect_variable_value(n):
 
     return VariableValue(ty, val, is_array)
 
-
-datatype_to_numeric_nodeId = {
-    'Boolean' : 1,
-    'SByte' : 2,
-    'Byte' : 3,
-    'Int16' : 4,
-    'UInt16' : 5,
-    'Int32' : 6,
-    'UInt32' : 7,
-    'Int64' : 8,
-    'UInt64' : 9,
-    'Float' : 10,
-    'Double' : 11,
-    'String' : 12,
-    'DateTime' : 13,
-    'Guid' : 14,
-    'ByteString' : 15,
-    'XmlElement' : 16,
-    'NodeId' : 17,
-    'ExpandedNodeId' : 18,
-    'StatusCode' : 19,
-    'QualifiedName' : 20,
-    'LocalizedText' : 21,
-    'ExtensionObject' : 22,
-    'DataValue' : 23,
-    'Variant' : 24,
-    'DiagnosticInfo' : 25
-}
-
-# Parses the data type attribute of a Variable or Variable type
-# Returns a numeric nodeId
-def parse_datatype_attribute(datatype_attr):
-
-    if datatype_attr in datatype_to_numeric_nodeId:
-        # Infers numeric value for the given String data type
-        node = NodeId(None, ID_TYPE_NUMERIC, datatype_to_numeric_nodeId[datatype_attr])
-    else:
-        node = NodeId.parse(datatype_attr)
+def parse_datatype_attribute(datatype_attr, aliases):
+    node = NodeId.parse(aliases.get(datatype_attr, datatype_attr))
     return node
 
 def parse_value_rank_attribute(value_rank_node):
@@ -653,12 +617,6 @@ def generate_value_variant(val):
     else:
         raise CodeGenerationError('Unknown value type: %d' % val.ty)
 
-def generate_datatype_variant(nodeNumId):
-    id_type = C_IDENTIFIER_TYPES[0]
-    data_struct_field = '.Data.' + id_type[len('SOPC_IdentifierType_'):]
-    
-    return {}
-    
 def parse_uanode(xml_node, source, aliases):
     parse_element(source, xml_node.tag)
     nodeid = NodeId.parse(xml_node.attrib['NodeId'])
@@ -680,7 +638,7 @@ def parse_uanode(xml_node, source, aliases):
         node.value = collect_variable_value(xml_node)
 
         if 'DataType' in xml_node.attrib:
-            node.data_type = parse_datatype_attribute(xml_node.attrib['DataType'])
+            node.data_type = parse_datatype_attribute(xml_node.attrib['DataType'], aliases)
         else:
             # TODO: VariableType DataType ?
             node.data_type = NodeId(0,0,0)
