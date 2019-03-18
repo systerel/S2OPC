@@ -6761,6 +6761,742 @@ SOPC_ReturnStatus SOPC_Read_EnumeratedType(SOPC_Buffer* buf, int32_t* enumeratio
 SOPC_ReturnStatus SOPC_Write_EnumeratedType(SOPC_Buffer* buf, const int32_t* enumerationValue);
 
 /*============================================================================
+ * Indexes in the table of known encodeable types.
+ *
+ * The enumerated values are indexes in the SOPC_KnownEncodeableTypes array.
+ *===========================================================================*/
+typedef enum SOPC_TypeInternalIndex
+{
+#ifndef OPCUA_EXCLUDE_ReferenceNode
+    SOPC_TypeInternalIndex_ReferenceNode,
+#endif
+#ifndef OPCUA_EXCLUDE_Node
+    SOPC_TypeInternalIndex_Node,
+#endif
+#ifndef OPCUA_EXCLUDE_InstanceNode
+    SOPC_TypeInternalIndex_InstanceNode,
+#endif
+#ifndef OPCUA_EXCLUDE_TypeNode
+    SOPC_TypeInternalIndex_TypeNode,
+#endif
+#ifndef OPCUA_EXCLUDE_ObjectNode
+    SOPC_TypeInternalIndex_ObjectNode,
+#endif
+#ifndef OPCUA_EXCLUDE_ObjectTypeNode
+    SOPC_TypeInternalIndex_ObjectTypeNode,
+#endif
+#ifndef OPCUA_EXCLUDE_VariableNode
+    SOPC_TypeInternalIndex_VariableNode,
+#endif
+#ifndef OPCUA_EXCLUDE_VariableTypeNode
+    SOPC_TypeInternalIndex_VariableTypeNode,
+#endif
+#ifndef OPCUA_EXCLUDE_ReferenceTypeNode
+    SOPC_TypeInternalIndex_ReferenceTypeNode,
+#endif
+#ifndef OPCUA_EXCLUDE_MethodNode
+    SOPC_TypeInternalIndex_MethodNode,
+#endif
+#ifndef OPCUA_EXCLUDE_ViewNode
+    SOPC_TypeInternalIndex_ViewNode,
+#endif
+#ifndef OPCUA_EXCLUDE_DataTypeNode
+    SOPC_TypeInternalIndex_DataTypeNode,
+#endif
+#ifndef OPCUA_EXCLUDE_Argument
+    SOPC_TypeInternalIndex_Argument,
+#endif
+#ifndef OPCUA_EXCLUDE_EnumValueType
+    SOPC_TypeInternalIndex_EnumValueType,
+#endif
+#ifndef OPCUA_EXCLUDE_EnumField
+    SOPC_TypeInternalIndex_EnumField,
+#endif
+#ifndef OPCUA_EXCLUDE_OptionSet
+    SOPC_TypeInternalIndex_OptionSet,
+#endif
+#ifndef OPCUA_EXCLUDE_TimeZoneDataType
+    SOPC_TypeInternalIndex_TimeZoneDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_ApplicationDescription
+    SOPC_TypeInternalIndex_ApplicationDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_RequestHeader
+    SOPC_TypeInternalIndex_RequestHeader,
+#endif
+#ifndef OPCUA_EXCLUDE_ResponseHeader
+    SOPC_TypeInternalIndex_ResponseHeader,
+#endif
+#ifndef OPCUA_EXCLUDE_ServiceFault
+    SOPC_TypeInternalIndex_ServiceFault,
+#endif
+#ifndef OPCUA_EXCLUDE_FindServers
+#ifndef OPCUA_EXCLUDE_FindServersRequest
+    SOPC_TypeInternalIndex_FindServersRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_FindServersResponse
+    SOPC_TypeInternalIndex_FindServersResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_ServerOnNetwork
+    SOPC_TypeInternalIndex_ServerOnNetwork,
+#endif
+#ifndef OPCUA_EXCLUDE_FindServersOnNetwork
+#ifndef OPCUA_EXCLUDE_FindServersOnNetworkRequest
+    SOPC_TypeInternalIndex_FindServersOnNetworkRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_FindServersOnNetworkResponse
+    SOPC_TypeInternalIndex_FindServersOnNetworkResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_UserTokenPolicy
+    SOPC_TypeInternalIndex_UserTokenPolicy,
+#endif
+#ifndef OPCUA_EXCLUDE_EndpointDescription
+    SOPC_TypeInternalIndex_EndpointDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_GetEndpoints
+#ifndef OPCUA_EXCLUDE_GetEndpointsRequest
+    SOPC_TypeInternalIndex_GetEndpointsRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_GetEndpointsResponse
+    SOPC_TypeInternalIndex_GetEndpointsResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_RegisteredServer
+    SOPC_TypeInternalIndex_RegisteredServer,
+#endif
+#ifndef OPCUA_EXCLUDE_RegisterServer
+#ifndef OPCUA_EXCLUDE_RegisterServerRequest
+    SOPC_TypeInternalIndex_RegisterServerRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_RegisterServerResponse
+    SOPC_TypeInternalIndex_RegisterServerResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_MdnsDiscoveryConfiguration
+    SOPC_TypeInternalIndex_MdnsDiscoveryConfiguration,
+#endif
+#ifndef OPCUA_EXCLUDE_RegisterServer2
+#ifndef OPCUA_EXCLUDE_RegisterServer2Request
+    SOPC_TypeInternalIndex_RegisterServer2Request,
+#endif
+#ifndef OPCUA_EXCLUDE_RegisterServer2Response
+    SOPC_TypeInternalIndex_RegisterServer2Response,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_ChannelSecurityToken
+    SOPC_TypeInternalIndex_ChannelSecurityToken,
+#endif
+#ifndef OPCUA_EXCLUDE_OpenSecureChannel
+#ifndef OPCUA_EXCLUDE_OpenSecureChannelRequest
+    SOPC_TypeInternalIndex_OpenSecureChannelRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_OpenSecureChannelResponse
+    SOPC_TypeInternalIndex_OpenSecureChannelResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_CloseSecureChannel
+#ifndef OPCUA_EXCLUDE_CloseSecureChannelRequest
+    SOPC_TypeInternalIndex_CloseSecureChannelRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_CloseSecureChannelResponse
+    SOPC_TypeInternalIndex_CloseSecureChannelResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_SignedSoftwareCertificate
+    SOPC_TypeInternalIndex_SignedSoftwareCertificate,
+#endif
+#ifndef OPCUA_EXCLUDE_SignatureData
+    SOPC_TypeInternalIndex_SignatureData,
+#endif
+#ifndef OPCUA_EXCLUDE_CreateSession
+#ifndef OPCUA_EXCLUDE_CreateSessionRequest
+    SOPC_TypeInternalIndex_CreateSessionRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_CreateSessionResponse
+    SOPC_TypeInternalIndex_CreateSessionResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_UserIdentityToken
+    SOPC_TypeInternalIndex_UserIdentityToken,
+#endif
+#ifndef OPCUA_EXCLUDE_AnonymousIdentityToken
+    SOPC_TypeInternalIndex_AnonymousIdentityToken,
+#endif
+#ifndef OPCUA_EXCLUDE_UserNameIdentityToken
+    SOPC_TypeInternalIndex_UserNameIdentityToken,
+#endif
+#ifndef OPCUA_EXCLUDE_X509IdentityToken
+    SOPC_TypeInternalIndex_X509IdentityToken,
+#endif
+#ifndef OPCUA_EXCLUDE_KerberosIdentityToken
+    SOPC_TypeInternalIndex_KerberosIdentityToken,
+#endif
+#ifndef OPCUA_EXCLUDE_IssuedIdentityToken
+    SOPC_TypeInternalIndex_IssuedIdentityToken,
+#endif
+#ifndef OPCUA_EXCLUDE_ActivateSession
+#ifndef OPCUA_EXCLUDE_ActivateSessionRequest
+    SOPC_TypeInternalIndex_ActivateSessionRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_ActivateSessionResponse
+    SOPC_TypeInternalIndex_ActivateSessionResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_CloseSession
+#ifndef OPCUA_EXCLUDE_CloseSessionRequest
+    SOPC_TypeInternalIndex_CloseSessionRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_CloseSessionResponse
+    SOPC_TypeInternalIndex_CloseSessionResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_Cancel
+#ifndef OPCUA_EXCLUDE_CancelRequest
+    SOPC_TypeInternalIndex_CancelRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_CancelResponse
+    SOPC_TypeInternalIndex_CancelResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_NodeAttributes
+    SOPC_TypeInternalIndex_NodeAttributes,
+#endif
+#ifndef OPCUA_EXCLUDE_ObjectAttributes
+    SOPC_TypeInternalIndex_ObjectAttributes,
+#endif
+#ifndef OPCUA_EXCLUDE_VariableAttributes
+    SOPC_TypeInternalIndex_VariableAttributes,
+#endif
+#ifndef OPCUA_EXCLUDE_MethodAttributes
+    SOPC_TypeInternalIndex_MethodAttributes,
+#endif
+#ifndef OPCUA_EXCLUDE_ObjectTypeAttributes
+    SOPC_TypeInternalIndex_ObjectTypeAttributes,
+#endif
+#ifndef OPCUA_EXCLUDE_VariableTypeAttributes
+    SOPC_TypeInternalIndex_VariableTypeAttributes,
+#endif
+#ifndef OPCUA_EXCLUDE_ReferenceTypeAttributes
+    SOPC_TypeInternalIndex_ReferenceTypeAttributes,
+#endif
+#ifndef OPCUA_EXCLUDE_DataTypeAttributes
+    SOPC_TypeInternalIndex_DataTypeAttributes,
+#endif
+#ifndef OPCUA_EXCLUDE_ViewAttributes
+    SOPC_TypeInternalIndex_ViewAttributes,
+#endif
+#ifndef OPCUA_EXCLUDE_AddNodesItem
+    SOPC_TypeInternalIndex_AddNodesItem,
+#endif
+#ifndef OPCUA_EXCLUDE_AddNodesResult
+    SOPC_TypeInternalIndex_AddNodesResult,
+#endif
+#ifndef OPCUA_EXCLUDE_AddNodes
+#ifndef OPCUA_EXCLUDE_AddNodesRequest
+    SOPC_TypeInternalIndex_AddNodesRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_AddNodesResponse
+    SOPC_TypeInternalIndex_AddNodesResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_AddReferencesItem
+    SOPC_TypeInternalIndex_AddReferencesItem,
+#endif
+#ifndef OPCUA_EXCLUDE_AddReferences
+#ifndef OPCUA_EXCLUDE_AddReferencesRequest
+    SOPC_TypeInternalIndex_AddReferencesRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_AddReferencesResponse
+    SOPC_TypeInternalIndex_AddReferencesResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteNodesItem
+    SOPC_TypeInternalIndex_DeleteNodesItem,
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteNodes
+#ifndef OPCUA_EXCLUDE_DeleteNodesRequest
+    SOPC_TypeInternalIndex_DeleteNodesRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteNodesResponse
+    SOPC_TypeInternalIndex_DeleteNodesResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteReferencesItem
+    SOPC_TypeInternalIndex_DeleteReferencesItem,
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteReferences
+#ifndef OPCUA_EXCLUDE_DeleteReferencesRequest
+    SOPC_TypeInternalIndex_DeleteReferencesRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteReferencesResponse
+    SOPC_TypeInternalIndex_DeleteReferencesResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_ViewDescription
+    SOPC_TypeInternalIndex_ViewDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_BrowseDescription
+    SOPC_TypeInternalIndex_BrowseDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_ReferenceDescription
+    SOPC_TypeInternalIndex_ReferenceDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_BrowseResult
+    SOPC_TypeInternalIndex_BrowseResult,
+#endif
+#ifndef OPCUA_EXCLUDE_Browse
+#ifndef OPCUA_EXCLUDE_BrowseRequest
+    SOPC_TypeInternalIndex_BrowseRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_BrowseResponse
+    SOPC_TypeInternalIndex_BrowseResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_BrowseNext
+#ifndef OPCUA_EXCLUDE_BrowseNextRequest
+    SOPC_TypeInternalIndex_BrowseNextRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_BrowseNextResponse
+    SOPC_TypeInternalIndex_BrowseNextResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_RelativePathElement
+    SOPC_TypeInternalIndex_RelativePathElement,
+#endif
+#ifndef OPCUA_EXCLUDE_RelativePath
+    SOPC_TypeInternalIndex_RelativePath,
+#endif
+#ifndef OPCUA_EXCLUDE_BrowsePath
+    SOPC_TypeInternalIndex_BrowsePath,
+#endif
+#ifndef OPCUA_EXCLUDE_BrowsePathTarget
+    SOPC_TypeInternalIndex_BrowsePathTarget,
+#endif
+#ifndef OPCUA_EXCLUDE_BrowsePathResult
+    SOPC_TypeInternalIndex_BrowsePathResult,
+#endif
+#ifndef OPCUA_EXCLUDE_TranslateBrowsePathsToNodeIds
+#ifndef OPCUA_EXCLUDE_TranslateBrowsePathsToNodeIdsRequest
+    SOPC_TypeInternalIndex_TranslateBrowsePathsToNodeIdsRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_TranslateBrowsePathsToNodeIdsResponse
+    SOPC_TypeInternalIndex_TranslateBrowsePathsToNodeIdsResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_RegisterNodes
+#ifndef OPCUA_EXCLUDE_RegisterNodesRequest
+    SOPC_TypeInternalIndex_RegisterNodesRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_RegisterNodesResponse
+    SOPC_TypeInternalIndex_RegisterNodesResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_UnregisterNodes
+#ifndef OPCUA_EXCLUDE_UnregisterNodesRequest
+    SOPC_TypeInternalIndex_UnregisterNodesRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_UnregisterNodesResponse
+    SOPC_TypeInternalIndex_UnregisterNodesResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_EndpointConfiguration
+    SOPC_TypeInternalIndex_EndpointConfiguration,
+#endif
+#ifndef OPCUA_EXCLUDE_SupportedProfile
+    SOPC_TypeInternalIndex_SupportedProfile,
+#endif
+#ifndef OPCUA_EXCLUDE_SoftwareCertificate
+    SOPC_TypeInternalIndex_SoftwareCertificate,
+#endif
+#ifndef OPCUA_EXCLUDE_QueryDataDescription
+    SOPC_TypeInternalIndex_QueryDataDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_NodeTypeDescription
+    SOPC_TypeInternalIndex_NodeTypeDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_QueryDataSet
+    SOPC_TypeInternalIndex_QueryDataSet,
+#endif
+#ifndef OPCUA_EXCLUDE_NodeReference
+    SOPC_TypeInternalIndex_NodeReference,
+#endif
+#ifndef OPCUA_EXCLUDE_ContentFilterElement
+    SOPC_TypeInternalIndex_ContentFilterElement,
+#endif
+#ifndef OPCUA_EXCLUDE_ContentFilter
+    SOPC_TypeInternalIndex_ContentFilter,
+#endif
+#ifndef OPCUA_EXCLUDE_ElementOperand
+    SOPC_TypeInternalIndex_ElementOperand,
+#endif
+#ifndef OPCUA_EXCLUDE_LiteralOperand
+    SOPC_TypeInternalIndex_LiteralOperand,
+#endif
+#ifndef OPCUA_EXCLUDE_AttributeOperand
+    SOPC_TypeInternalIndex_AttributeOperand,
+#endif
+#ifndef OPCUA_EXCLUDE_SimpleAttributeOperand
+    SOPC_TypeInternalIndex_SimpleAttributeOperand,
+#endif
+#ifndef OPCUA_EXCLUDE_ContentFilterElementResult
+    SOPC_TypeInternalIndex_ContentFilterElementResult,
+#endif
+#ifndef OPCUA_EXCLUDE_ContentFilterResult
+    SOPC_TypeInternalIndex_ContentFilterResult,
+#endif
+#ifndef OPCUA_EXCLUDE_ParsingResult
+    SOPC_TypeInternalIndex_ParsingResult,
+#endif
+#ifndef OPCUA_EXCLUDE_QueryFirst
+#ifndef OPCUA_EXCLUDE_QueryFirstRequest
+    SOPC_TypeInternalIndex_QueryFirstRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_QueryFirstResponse
+    SOPC_TypeInternalIndex_QueryFirstResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_QueryNext
+#ifndef OPCUA_EXCLUDE_QueryNextRequest
+    SOPC_TypeInternalIndex_QueryNextRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_QueryNextResponse
+    SOPC_TypeInternalIndex_QueryNextResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_ReadValueId
+    SOPC_TypeInternalIndex_ReadValueId,
+#endif
+#ifndef OPCUA_EXCLUDE_Read
+#ifndef OPCUA_EXCLUDE_ReadRequest
+    SOPC_TypeInternalIndex_ReadRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_ReadResponse
+    SOPC_TypeInternalIndex_ReadResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_HistoryReadValueId
+    SOPC_TypeInternalIndex_HistoryReadValueId,
+#endif
+#ifndef OPCUA_EXCLUDE_HistoryReadResult
+    SOPC_TypeInternalIndex_HistoryReadResult,
+#endif
+#ifndef OPCUA_EXCLUDE_EventFilter
+    SOPC_TypeInternalIndex_EventFilter,
+#endif
+#ifndef OPCUA_EXCLUDE_ReadEventDetails
+    SOPC_TypeInternalIndex_ReadEventDetails,
+#endif
+#ifndef OPCUA_EXCLUDE_ReadRawModifiedDetails
+    SOPC_TypeInternalIndex_ReadRawModifiedDetails,
+#endif
+#ifndef OPCUA_EXCLUDE_AggregateConfiguration
+    SOPC_TypeInternalIndex_AggregateConfiguration,
+#endif
+#ifndef OPCUA_EXCLUDE_ReadProcessedDetails
+    SOPC_TypeInternalIndex_ReadProcessedDetails,
+#endif
+#ifndef OPCUA_EXCLUDE_ReadAtTimeDetails
+    SOPC_TypeInternalIndex_ReadAtTimeDetails,
+#endif
+#ifndef OPCUA_EXCLUDE_HistoryData
+    SOPC_TypeInternalIndex_HistoryData,
+#endif
+#ifndef OPCUA_EXCLUDE_ModificationInfo
+    SOPC_TypeInternalIndex_ModificationInfo,
+#endif
+#ifndef OPCUA_EXCLUDE_HistoryModifiedData
+    SOPC_TypeInternalIndex_HistoryModifiedData,
+#endif
+#ifndef OPCUA_EXCLUDE_HistoryEventFieldList
+    SOPC_TypeInternalIndex_HistoryEventFieldList,
+#endif
+#ifndef OPCUA_EXCLUDE_HistoryEvent
+    SOPC_TypeInternalIndex_HistoryEvent,
+#endif
+#ifndef OPCUA_EXCLUDE_HistoryRead
+#ifndef OPCUA_EXCLUDE_HistoryReadRequest
+    SOPC_TypeInternalIndex_HistoryReadRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_HistoryReadResponse
+    SOPC_TypeInternalIndex_HistoryReadResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_WriteValue
+    SOPC_TypeInternalIndex_WriteValue,
+#endif
+#ifndef OPCUA_EXCLUDE_Write
+#ifndef OPCUA_EXCLUDE_WriteRequest
+    SOPC_TypeInternalIndex_WriteRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_WriteResponse
+    SOPC_TypeInternalIndex_WriteResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_HistoryUpdateDetails
+    SOPC_TypeInternalIndex_HistoryUpdateDetails,
+#endif
+#ifndef OPCUA_EXCLUDE_UpdateDataDetails
+    SOPC_TypeInternalIndex_UpdateDataDetails,
+#endif
+#ifndef OPCUA_EXCLUDE_UpdateStructureDataDetails
+    SOPC_TypeInternalIndex_UpdateStructureDataDetails,
+#endif
+#ifndef OPCUA_EXCLUDE_UpdateEventDetails
+    SOPC_TypeInternalIndex_UpdateEventDetails,
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteRawModifiedDetails
+    SOPC_TypeInternalIndex_DeleteRawModifiedDetails,
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteAtTimeDetails
+    SOPC_TypeInternalIndex_DeleteAtTimeDetails,
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteEventDetails
+    SOPC_TypeInternalIndex_DeleteEventDetails,
+#endif
+#ifndef OPCUA_EXCLUDE_HistoryUpdateResult
+    SOPC_TypeInternalIndex_HistoryUpdateResult,
+#endif
+#ifndef OPCUA_EXCLUDE_HistoryUpdate
+#ifndef OPCUA_EXCLUDE_HistoryUpdateRequest
+    SOPC_TypeInternalIndex_HistoryUpdateRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_HistoryUpdateResponse
+    SOPC_TypeInternalIndex_HistoryUpdateResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_CallMethodRequest
+    SOPC_TypeInternalIndex_CallMethodRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_CallMethodResult
+    SOPC_TypeInternalIndex_CallMethodResult,
+#endif
+#ifndef OPCUA_EXCLUDE_Call
+#ifndef OPCUA_EXCLUDE_CallRequest
+    SOPC_TypeInternalIndex_CallRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_CallResponse
+    SOPC_TypeInternalIndex_CallResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_DataChangeFilter
+    SOPC_TypeInternalIndex_DataChangeFilter,
+#endif
+#ifndef OPCUA_EXCLUDE_AggregateFilter
+    SOPC_TypeInternalIndex_AggregateFilter,
+#endif
+#ifndef OPCUA_EXCLUDE_EventFilterResult
+    SOPC_TypeInternalIndex_EventFilterResult,
+#endif
+#ifndef OPCUA_EXCLUDE_AggregateFilterResult
+    SOPC_TypeInternalIndex_AggregateFilterResult,
+#endif
+#ifndef OPCUA_EXCLUDE_MonitoringParameters
+    SOPC_TypeInternalIndex_MonitoringParameters,
+#endif
+#ifndef OPCUA_EXCLUDE_MonitoredItemCreateRequest
+    SOPC_TypeInternalIndex_MonitoredItemCreateRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_MonitoredItemCreateResult
+    SOPC_TypeInternalIndex_MonitoredItemCreateResult,
+#endif
+#ifndef OPCUA_EXCLUDE_CreateMonitoredItems
+#ifndef OPCUA_EXCLUDE_CreateMonitoredItemsRequest
+    SOPC_TypeInternalIndex_CreateMonitoredItemsRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_CreateMonitoredItemsResponse
+    SOPC_TypeInternalIndex_CreateMonitoredItemsResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_MonitoredItemModifyRequest
+    SOPC_TypeInternalIndex_MonitoredItemModifyRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_MonitoredItemModifyResult
+    SOPC_TypeInternalIndex_MonitoredItemModifyResult,
+#endif
+#ifndef OPCUA_EXCLUDE_ModifyMonitoredItems
+#ifndef OPCUA_EXCLUDE_ModifyMonitoredItemsRequest
+    SOPC_TypeInternalIndex_ModifyMonitoredItemsRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_ModifyMonitoredItemsResponse
+    SOPC_TypeInternalIndex_ModifyMonitoredItemsResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_SetMonitoringMode
+#ifndef OPCUA_EXCLUDE_SetMonitoringModeRequest
+    SOPC_TypeInternalIndex_SetMonitoringModeRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_SetMonitoringModeResponse
+    SOPC_TypeInternalIndex_SetMonitoringModeResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_SetTriggering
+#ifndef OPCUA_EXCLUDE_SetTriggeringRequest
+    SOPC_TypeInternalIndex_SetTriggeringRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_SetTriggeringResponse
+    SOPC_TypeInternalIndex_SetTriggeringResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteMonitoredItems
+#ifndef OPCUA_EXCLUDE_DeleteMonitoredItemsRequest
+    SOPC_TypeInternalIndex_DeleteMonitoredItemsRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteMonitoredItemsResponse
+    SOPC_TypeInternalIndex_DeleteMonitoredItemsResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_CreateSubscription
+#ifndef OPCUA_EXCLUDE_CreateSubscriptionRequest
+    SOPC_TypeInternalIndex_CreateSubscriptionRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_CreateSubscriptionResponse
+    SOPC_TypeInternalIndex_CreateSubscriptionResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_ModifySubscription
+#ifndef OPCUA_EXCLUDE_ModifySubscriptionRequest
+    SOPC_TypeInternalIndex_ModifySubscriptionRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_ModifySubscriptionResponse
+    SOPC_TypeInternalIndex_ModifySubscriptionResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_SetPublishingMode
+#ifndef OPCUA_EXCLUDE_SetPublishingModeRequest
+    SOPC_TypeInternalIndex_SetPublishingModeRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_SetPublishingModeResponse
+    SOPC_TypeInternalIndex_SetPublishingModeResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_NotificationMessage
+    SOPC_TypeInternalIndex_NotificationMessage,
+#endif
+#ifndef OPCUA_EXCLUDE_MonitoredItemNotification
+    SOPC_TypeInternalIndex_MonitoredItemNotification,
+#endif
+#ifndef OPCUA_EXCLUDE_DataChangeNotification
+    SOPC_TypeInternalIndex_DataChangeNotification,
+#endif
+#ifndef OPCUA_EXCLUDE_EventFieldList
+    SOPC_TypeInternalIndex_EventFieldList,
+#endif
+#ifndef OPCUA_EXCLUDE_EventNotificationList
+    SOPC_TypeInternalIndex_EventNotificationList,
+#endif
+#ifndef OPCUA_EXCLUDE_StatusChangeNotification
+    SOPC_TypeInternalIndex_StatusChangeNotification,
+#endif
+#ifndef OPCUA_EXCLUDE_SubscriptionAcknowledgement
+    SOPC_TypeInternalIndex_SubscriptionAcknowledgement,
+#endif
+#ifndef OPCUA_EXCLUDE_Publish
+#ifndef OPCUA_EXCLUDE_PublishRequest
+    SOPC_TypeInternalIndex_PublishRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_PublishResponse
+    SOPC_TypeInternalIndex_PublishResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_Republish
+#ifndef OPCUA_EXCLUDE_RepublishRequest
+    SOPC_TypeInternalIndex_RepublishRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_RepublishResponse
+    SOPC_TypeInternalIndex_RepublishResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_TransferResult
+    SOPC_TypeInternalIndex_TransferResult,
+#endif
+#ifndef OPCUA_EXCLUDE_TransferSubscriptions
+#ifndef OPCUA_EXCLUDE_TransferSubscriptionsRequest
+    SOPC_TypeInternalIndex_TransferSubscriptionsRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_TransferSubscriptionsResponse
+    SOPC_TypeInternalIndex_TransferSubscriptionsResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteSubscriptions
+#ifndef OPCUA_EXCLUDE_DeleteSubscriptionsRequest
+    SOPC_TypeInternalIndex_DeleteSubscriptionsRequest,
+#endif
+#ifndef OPCUA_EXCLUDE_DeleteSubscriptionsResponse
+    SOPC_TypeInternalIndex_DeleteSubscriptionsResponse,
+#endif
+#endif
+#ifndef OPCUA_EXCLUDE_BuildInfo
+    SOPC_TypeInternalIndex_BuildInfo,
+#endif
+#ifndef OPCUA_EXCLUDE_RedundantServerDataType
+    SOPC_TypeInternalIndex_RedundantServerDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_EndpointUrlListDataType
+    SOPC_TypeInternalIndex_EndpointUrlListDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_NetworkGroupDataType
+    SOPC_TypeInternalIndex_NetworkGroupDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_SamplingIntervalDiagnosticsDataType
+    SOPC_TypeInternalIndex_SamplingIntervalDiagnosticsDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_ServerDiagnosticsSummaryDataType
+    SOPC_TypeInternalIndex_ServerDiagnosticsSummaryDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_ServerStatusDataType
+    SOPC_TypeInternalIndex_ServerStatusDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_ServiceCounterDataType
+    SOPC_TypeInternalIndex_ServiceCounterDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_SessionDiagnosticsDataType
+    SOPC_TypeInternalIndex_SessionDiagnosticsDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_SessionSecurityDiagnosticsDataType
+    SOPC_TypeInternalIndex_SessionSecurityDiagnosticsDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_StatusResult
+    SOPC_TypeInternalIndex_StatusResult,
+#endif
+#ifndef OPCUA_EXCLUDE_SubscriptionDiagnosticsDataType
+    SOPC_TypeInternalIndex_SubscriptionDiagnosticsDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_ModelChangeStructureDataType
+    SOPC_TypeInternalIndex_ModelChangeStructureDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_SemanticChangeStructureDataType
+    SOPC_TypeInternalIndex_SemanticChangeStructureDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_Range
+    SOPC_TypeInternalIndex_Range,
+#endif
+#ifndef OPCUA_EXCLUDE_EUInformation
+    SOPC_TypeInternalIndex_EUInformation,
+#endif
+#ifndef OPCUA_EXCLUDE_ComplexNumberType
+    SOPC_TypeInternalIndex_ComplexNumberType,
+#endif
+#ifndef OPCUA_EXCLUDE_DoubleComplexNumberType
+    SOPC_TypeInternalIndex_DoubleComplexNumberType,
+#endif
+#ifndef OPCUA_EXCLUDE_AxisInformation
+    SOPC_TypeInternalIndex_AxisInformation,
+#endif
+#ifndef OPCUA_EXCLUDE_XVType
+    SOPC_TypeInternalIndex_XVType,
+#endif
+#ifndef OPCUA_EXCLUDE_ProgramDiagnosticDataType
+    SOPC_TypeInternalIndex_ProgramDiagnosticDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_Annotation
+    SOPC_TypeInternalIndex_Annotation,
+#endif
+    SOPC_TypeInternalIndex_SIZE
+} SOPC_TypeInternalIndex;
+
+/*============================================================================
  * Table of known types.
  *===========================================================================*/
 extern struct SOPC_EncodeableType** SOPC_KnownEncodeableTypes;

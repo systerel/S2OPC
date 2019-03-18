@@ -23,6 +23,7 @@
 #
 
 import argparse
+from collections import OrderedDict
 import xml.etree.ElementTree as ET
 import sys
 
@@ -69,6 +70,8 @@ def gen_header_file(schema):
     with open(H_FILE_PATH, "w") as out:
         out.write(H_FILE_START)
         gen_header_types(out, schema)
+        out.write(H_FILE_ENUM_FUN_DECLS)
+        schema.gen_type_index_decl(out)
         out.write(H_FILE_END)
 
 
@@ -315,8 +318,9 @@ class BinarySchema:
         root = self.tree.getroot()
         if root.tag != self.ROOT_TAG:
             fatal("Invalid root element in bsd file: %s" % root.tag)
-        self.bsd2c = dict(self.BUILTIN_TYPES)
+        self.bsd2c = OrderedDict(self.BUILTIN_TYPES)
         self.enums = set()
+        self.known_writer = KnownEncodeableTypeWriter()
 
     def gen_header_pair(self, out, basename):
         """
@@ -327,9 +331,14 @@ class BinarySchema:
         common name.
         """
         out.write(BLOCK_PROTECTION_START.format(name=basename))
-        self.gen_header_type(out, basename + 'Request')
-        self.gen_header_type(out, basename + 'Response')
-        out.write(BLOCK_PROTECTION_END.format(name=basename))
+        typename = basename + 'Request'
+        self.gen_header_type(out, typename)
+        self.known_writer.block_start[typename] = basename
+
+        typename = basename + 'Response'
+        self.gen_header_type(out, typename)
+        self.known_writer.block_end[typename] = basename
+        out.write(BLOCK_PROTECTION_END.format(name=basename) + '\n')
 
     def gen_header_type(self, out, typename):
         """
@@ -343,12 +352,28 @@ class BinarySchema:
         node = self._get_node(barename)
         if node.tag == self.STRUC_TAG:
             ctype = self._gen_struct_decl(out, node, barename)
+            self.known_writer.encodeable_types.append(typename)
         elif node.tag == self.ENUM_TAG:
             ctype = self._gen_enum_decl(out, node, barename)
             self.enums.add(typename)
         else:
             fatal("Unknown node kind: %s" % node.tag)
         self.bsd2c[typename] = ctype
+
+    def gen_type_index_decl(self, out):
+        """
+        Generates an enumerated type for indexing in SOPC_KnownEncodeableTypes
+
+        We use an enumerated type without explicit values, so that the indexes
+        are always compact, even when some type is excluded.  The purpose of
+        these indexes is to access rapidly to the description of a type.
+        """
+        def writer(barename):
+            out.write(TYPE_INDEX_DECL_ENCODEABLE_TYPE.format(name=barename))
+
+        out.write(TYPE_INDEX_DECL_START)
+        self.known_writer.gen_types(out, writer)
+        out.write(TYPE_INDEX_DECL_END)
 
     def untranslated_typenames(self):
         """
@@ -479,6 +504,36 @@ class Field:
             fatal("Missing type name for field node: %s", node)
 
 
+class KnownEncodeableTypeWriter:
+    """
+    Writer for the array of known encodeable types.
+
+    Also used to generate the type of the indexes in that array, to ensure that
+    the two are always in sync.
+    """
+    def __init__(self):
+        self.encodeable_types = []
+        self.block_start = {}
+        self.block_end = {}
+
+    def gen_types(self, out, write):
+        """
+        Generates declarations for all encodeable types.
+
+        The ``write`` parameter is a function that takes the barename of a type
+        and writes the piece of C code appropriate for that type.
+        """
+        for typename in self.encodeable_types:
+            barename = typename.split(':')[1]
+            blockname = self.block_start.get(barename, None)
+            if blockname:
+                out.write(BLOCK_PROTECTION_START.format(name=blockname))
+            write(barename)
+            blockname = self.block_end.get(barename, None)
+            if blockname:
+                out.write('\n' + BLOCK_PROTECTION_END.format(name=blockname))
+
+
 def fatal(msg):
     """
     Prints an error message on stdout and exits in error.
@@ -527,7 +582,7 @@ H_FILE_START = """
 #include "sopc_encodeabletype.h"
 """[1:]
 
-H_FILE_END = """
+H_FILE_ENUM_FUN_DECLS = """
 void SOPC_Initialize_EnumeratedType(int32_t* enumerationValue);
 
 void SOPC_Clear_EnumeratedType(int32_t* enumerationValue);
@@ -537,7 +592,9 @@ int32_t* enumerationValue);
 
 SOPC_ReturnStatus SOPC_Write_EnumeratedType(SOPC_Buffer* buf, \
 const int32_t* enumerationValue);
+"""
 
+H_FILE_END = """
 /*============================================================================
  * Table of known types.
  *===========================================================================*/
@@ -550,9 +607,7 @@ extern struct SOPC_EncodeableType** SOPC_KnownEncodeableTypes;
 BLOCK_PROTECTION_START = """
 #ifndef OPCUA_EXCLUDE_{name}"""
 
-BLOCK_PROTECTION_END = """
-#endif
-"""[1:]
+BLOCK_PROTECTION_END = """#endif"""
 
 STRUCT_DECL_START = """
 #ifndef OPCUA_EXCLUDE_{name}
@@ -603,6 +658,25 @@ ENUM_DECL_END = """
 
 #endif
 """[1:]
+
+TYPE_INDEX_DECL_START = """
+/*============================================================================
+ * Indexes in the table of known encodeable types.
+ *
+ * The enumerated values are indexes in the SOPC_KnownEncodeableTypes array.
+ *===========================================================================*/
+typedef enum SOPC_TypeInternalIndex
+{"""
+
+TYPE_INDEX_DECL_ENCODEABLE_TYPE = """
+#ifndef OPCUA_EXCLUDE_{name}
+    SOPC_TypeInternalIndex_{name},
+#endif"""
+
+TYPE_INDEX_DECL_END = """
+    SOPC_TypeInternalIndex_SIZE
+} SOPC_TypeInternalIndex;
+"""
 
 PREDEFINED_TYPES = [
         # Various encodings of NodeId
