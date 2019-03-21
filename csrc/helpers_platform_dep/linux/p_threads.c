@@ -25,6 +25,11 @@
 #include "sopc_threads.h"
 #include "sopc_time.h"
 
+// 10^9
+#define SOPC_SECOND_TO_NANOSECONDS 1000000000
+// 10^6
+#define SOPC_MILLISECOND_TO_NANOSECONDS 1000000
+
 SOPC_ReturnStatus Condition_Init(Condition* cond)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -197,8 +202,21 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
     {
         // Retrieve current time
         clock_gettime(CLOCK_REALTIME, &absoluteTimeout);
+
         absoluteTimeout.tv_sec = absoluteTimeout.tv_sec + (time_t)(milliSecs / 1000);
-        absoluteTimeout.tv_nsec = absoluteTimeout.tv_nsec + (long) (milliSecs % 1000);
+        uint64_t nanoseconds = (milliSecs % 1000) * SOPC_MILLISECOND_TO_NANOSECONDS;
+
+        assert(absoluteTimeout.tv_nsec < SOPC_SECOND_TO_NANOSECONDS);
+        if (SOPC_SECOND_TO_NANOSECONDS - (uint64_t) absoluteTimeout.tv_nsec < nanoseconds)
+        {
+            // Additional second
+            absoluteTimeout.tv_sec += 1;
+            absoluteTimeout.tv_nsec = (long) nanoseconds - (SOPC_SECOND_TO_NANOSECONDS - absoluteTimeout.tv_nsec);
+        }
+        else
+        {
+            absoluteTimeout.tv_nsec = absoluteTimeout.tv_nsec + (long) nanoseconds;
+        }
 
         retCode = pthread_cond_timedwait(cond, mut, &absoluteTimeout);
         if (retCode == 0)
