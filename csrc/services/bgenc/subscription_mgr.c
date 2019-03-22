@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 15/11/2018 10:24:36
+ Date                 : 22/03/2019 13:43:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -281,6 +281,7 @@ void subscription_mgr__create_notification_on_monitored_items_if_data_changed(
       constants__t_subscription_i subscription_mgr__l_subscription;
       t_bool subscription_mgr__l_valid_subscription;
       constants__t_session_i subscription_mgr__l_session;
+      t_bool subscription_mgr__l_session_valid;
       constants__t_user_i subscription_mgr__l_user;
       t_bool subscription_mgr__l_valid_user_access;
       constants__t_NodeId_i subscription_mgr__l_nid;
@@ -311,16 +312,21 @@ void subscription_mgr__create_notification_on_monitored_items_if_data_changed(
             &subscription_mgr__l_clientHandle);
          subscription_core__is_valid_subscription(subscription_mgr__l_subscription,
             &subscription_mgr__l_valid_subscription);
+         subscription_mgr__l_valid_user_access = false;
          if (subscription_mgr__l_valid_subscription == true) {
             subscription_core__getall_session(subscription_mgr__l_subscription,
                &subscription_mgr__l_session);
-            session_mgr__get_session_user_server(subscription_mgr__l_session,
-               &subscription_mgr__l_user);
-            address_space__get_user_authorization(constants__e_operation_type_read,
-               subscription_mgr__l_nid,
-               subscription_mgr__l_aid,
-               subscription_mgr__l_user,
-               &subscription_mgr__l_valid_user_access);
+            session_mgr__is_valid_session(subscription_mgr__l_session,
+               &subscription_mgr__l_session_valid);
+            if (subscription_mgr__l_session_valid == true) {
+               session_mgr__get_session_user_server(subscription_mgr__l_session,
+                  &subscription_mgr__l_user);
+               address_space__get_user_authorization(constants__e_operation_type_read,
+                  subscription_mgr__l_nid,
+                  subscription_mgr__l_aid,
+                  subscription_mgr__l_user,
+                  &subscription_mgr__l_valid_user_access);
+            }
          }
          else {
             subscription_mgr__l_valid_user_access = false;

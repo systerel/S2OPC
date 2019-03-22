@@ -644,6 +644,7 @@ OPERATIONS
         l_subscription,
         l_valid_subscription,
         l_session,
+        l_session_valid,
         l_user,
         l_valid_user_access,
         l_nid,
@@ -664,14 +665,19 @@ OPERATIONS
             l_monitoringMode,
             l_clientHandle <--getall_monitoredItemPointer (l_monitoredItemPointer);
             l_valid_subscription <-- is_valid_subscription (l_subscription);
+            l_valid_user_access := FALSE;
             IF l_valid_subscription = TRUE
             THEN
                 l_session <-- getall_session (l_subscription);
-                l_user <-- get_session_user_server(l_session);
-                /* TODO: when user access right property will be modifiable previous user right shall be
-                   checked to notify a user access denied status when it is newly denied for the user
-                */
-                l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user)
+                l_session_valid <-- is_valid_session (l_session);
+                IF l_session_valid = TRUE
+                THEN
+                    l_user <-- get_session_user_server(l_session);
+                    /* TODO: when user access right property will be modifiable previous user right shall be
+                    checked to notify a user access denied status when it is newly denied for the user
+                    */
+                    l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user)
+                END
             ELSE
                 l_valid_user_access := FALSE
             END

@@ -151,9 +151,13 @@ void session_core_bs__notify_set_session_state(const constants__t_session_i sess
     else
     {
         /* SERVER SIDE ONLY */
-        if (session_core_bs__prec_state == constants__e_session_userActivated &&
-            session_core_bs__state != constants__e_session_userActivated)
+        if ((session_core_bs__prec_state == constants__e_session_userActivated &&
+             session_core_bs__state != constants__e_session_userActivated) ||
+            session_core_bs__state == constants__e_session_closed)
         {
+            // Session was active and is not anymore or session is closed:
+            // - Session becomes inactive: subscription will clear session context only (publish requests)
+            // - Session is closed: subscription will be closed
             SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO,
                                          (uint32_t) session_core_bs__session, NULL, (uintptr_t) session_core_bs__state);
         }
