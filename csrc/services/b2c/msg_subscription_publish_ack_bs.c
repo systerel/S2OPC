@@ -26,6 +26,7 @@
 #include "sopc_logger.h"
 
 static const uint64_t SOPC_MILLISECOND_TO_100_NANOSECONDS = 10000; // 10^4
+static const uint64_t SOPC_YEAR_TO_MILLISECONDS = 31536000000;     // 365 * 24 * 60 * 60 * 1000
 
 /*------------------------
    INITIALISATION Clause
@@ -79,25 +80,38 @@ void msg_subscription_publish_ack_bs__get_msg_header_expiration_time(
     OpcUa_RequestHeader* pubReqHeader = msg_subscription_publish_bs__p_req_header;
     *msg_subscription_publish_bs__req_expiration_time = SOPC_TimeReference_GetCurrent();
 
-    int64_t dtDelta = SOPC_Time_GetCurrentTimeUTC() - pubReqHeader->Timestamp;
     uint64_t millisecondsToTarget = 0;
-    if (dtDelta > 0)
+    if (0 == pubReqHeader->TimeoutHint)
     {
-        if (pubReqHeader->TimeoutHint >= (uint64_t) dtDelta / SOPC_MILLISECOND_TO_100_NANOSECONDS)
-        {
-            millisecondsToTarget = pubReqHeader->TimeoutHint - (uint64_t) dtDelta / SOPC_MILLISECOND_TO_100_NANOSECONDS;
-        }
-        else
-        {
-            // Already expired
-            millisecondsToTarget = 0;
-            // TODO: log ?
-        }
+        // Request does not expire: set 1 year validity
+        millisecondsToTarget = SOPC_YEAR_TO_MILLISECONDS;
     }
     else
     {
-        // Keep only timeoutHint from current time
-        millisecondsToTarget = pubReqHeader->TimeoutHint;
+        int64_t dtDelta = SOPC_Time_GetCurrentTimeUTC() - pubReqHeader->Timestamp;
+
+        if (dtDelta > 0)
+        {
+            if (pubReqHeader->TimeoutHint >= (uint64_t) dtDelta / SOPC_MILLISECOND_TO_100_NANOSECONDS)
+            {
+                millisecondsToTarget =
+                    pubReqHeader->TimeoutHint - (uint64_t) dtDelta / SOPC_MILLISECOND_TO_100_NANOSECONDS;
+            }
+            else
+            {
+                // Already expired
+                millisecondsToTarget = 0;
+                SOPC_Logger_TraceError(
+                    "msg_subscription_publish_ack_bs__get_msg_header_expiration_time: received an already expired "
+                    "publish "
+                    "request");
+            }
+        }
+        else
+        {
+            // Keep only timeoutHint from current time
+            millisecondsToTarget = pubReqHeader->TimeoutHint;
+        }
     }
     *msg_subscription_publish_bs__req_expiration_time =
         SOPC_TimeReference_AddMilliseconds(*msg_subscription_publish_bs__req_expiration_time, millisecondsToTarget);
