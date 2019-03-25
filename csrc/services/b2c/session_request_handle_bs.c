@@ -54,8 +54,8 @@ void session_request_handle_bs__client_add_session_request_handle(
 {
     assert(session_request_handle_bs__session != constants__c_session_indet);
     assert(session_request_handle_bs__req_handle != constants__c_client_request_handle_indet);
-    // It shall be a fresh request handle which means it cannot be assigned to another session
-    assert(client_requests[session_request_handle_bs__req_handle] == constants__c_session_indet);
+    // Request handle freshness is guaranteed by request_handle_bs,
+    // in degraded cases an old session number could be overwritten here
     client_requests[session_request_handle_bs__req_handle] = session_request_handle_bs__session;
     session_pending_requests_nb[session_request_handle_bs__session]++;
 }
@@ -64,6 +64,7 @@ void session_request_handle_bs__client_get_session_and_remove_request_handle(
     const constants__t_client_request_handle_i session_request_handle_bs__req_handle,
     constants__t_session_i* const session_request_handle_bs__session)
 {
+    // Note: validity of request handle is guaranteed by request_handle_bs
     *session_request_handle_bs__session = constants__c_session_indet;
 
     if (session_request_handle_bs__req_handle != constants__c_client_request_handle_indet)
