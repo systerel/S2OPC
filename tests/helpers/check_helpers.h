@@ -60,4 +60,6 @@ Suite* tests_make_suite_numeric_range(void);
 
 Suite* tests_make_suite_users(void);
 
+Suite* tests_make_suite_B_base_machines(void);
+
 #endif // CHECK_HELPERS_H
