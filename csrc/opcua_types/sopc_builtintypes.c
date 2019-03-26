@@ -1041,6 +1041,11 @@ SOPC_ReturnStatus SOPC_String_CopyFromCString(SOPC_String* string, const char* c
                 status = SOPC_STATUS_NOK;
             }
         }
+        else if (0 == stringLength)
+        {
+            // Empty C string case is valid
+            string->Length = 0;
+        }
         else
         {
             status = SOPC_STATUS_NOK;
