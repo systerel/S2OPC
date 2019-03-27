@@ -75,11 +75,12 @@ bool SC_InitNewConnection(uint32_t* newConnectionIdx)
         assert(SOPC_MAX_MESSAGE_LENGTH > SOPC_TCP_UA_MIN_BUFFER_SIZE);
         scConnection->tcpMsgProperties.receiveBufferSize = SOPC_MAX_MESSAGE_LENGTH;
         scConnection->tcpMsgProperties.sendBufferSize = SOPC_MAX_MESSAGE_LENGTH;
-        scConnection->tcpMsgProperties.maxMessageSize = SOPC_MAX_MESSAGE_LENGTH; // TODO: reduce size since it includes
-                                                                                 // only the body and not the
-                                                                                 // headers/signature ?
+        // TODO: reduce size since it includes only the body and not the headers/signature ?
+        scConnection->tcpMsgProperties.receiveMaxMessageSize = SOPC_MAX_MESSAGE_LENGTH;
+        scConnection->tcpMsgProperties.sendMaxMessageSize = SOPC_MAX_MESSAGE_LENGTH;
         // Note: we do not manage multiple chunks in this version of the toolkit
-        scConnection->tcpMsgProperties.maxChunkCount = 1;
+        scConnection->tcpMsgProperties.receiveMaxChunkCount = 1;
+        scConnection->tcpMsgProperties.sendMaxChunkCount = 1;
 
         // Initialize TCP sequence properties
         scConnection->tcpSeqProperties.sentRequestIds = SOPC_SLinkedList_Create(0);
@@ -635,11 +636,11 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.maxMessageSize, msgBuffer);
+            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveMaxMessageSize, msgBuffer);
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.maxChunkCount, msgBuffer);
+            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveMaxChunkCount, msgBuffer);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -766,31 +767,31 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
         }
     }
 
-    // MaxMessageSize of SERVER
+    // MaxMessageSize of SERVER: request received by server => sent by client
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer);
         if (SOPC_STATUS_OK == status)
         {
-            if (scConnection->tcpMsgProperties.maxMessageSize > tempValue ||
-                scConnection->tcpMsgProperties.maxMessageSize == 0)
+            if (scConnection->tcpMsgProperties.sendMaxMessageSize > tempValue ||
+                scConnection->tcpMsgProperties.sendMaxMessageSize == 0)
             {
-                scConnection->tcpMsgProperties.maxMessageSize = tempValue;
+                scConnection->tcpMsgProperties.sendMaxMessageSize = tempValue;
             }
             // if "<" => OK since it is the maximum size requested by server will never be reached
         }
     }
 
-    // MaxChunkCount of SERVER
+    // MaxChunkCount of SERVER: request received by server => sent by client
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer);
         if (SOPC_STATUS_OK == status)
         {
-            if (scConnection->tcpMsgProperties.maxChunkCount > tempValue ||
-                scConnection->tcpMsgProperties.maxChunkCount == 0)
+            if (scConnection->tcpMsgProperties.sendMaxChunkCount > tempValue ||
+                scConnection->tcpMsgProperties.sendMaxChunkCount == 0)
             {
-                scConnection->tcpMsgProperties.maxChunkCount = tempValue;
+                scConnection->tcpMsgProperties.sendMaxChunkCount = tempValue;
             }
         }
     }
@@ -1277,16 +1278,16 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
         }
     }
 
-    // MaxMessageSize of CLIENT
+    // MaxMessageSize of CLIENT: response received by client => sent by server
     if (result != false)
     {
         status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
         if (SOPC_STATUS_OK == status)
         {
-            if (scConnection->tcpMsgProperties.maxMessageSize > tempValue ||
-                scConnection->tcpMsgProperties.maxMessageSize == 0)
+            if (scConnection->tcpMsgProperties.sendMaxMessageSize > tempValue ||
+                scConnection->tcpMsgProperties.sendMaxMessageSize == 0)
             {
-                scConnection->tcpMsgProperties.maxMessageSize = tempValue;
+                scConnection->tcpMsgProperties.sendMaxMessageSize = tempValue;
             }
         }
         else
@@ -1296,16 +1297,16 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
         }
     }
 
-    // MaxChunkCount of CLIENT
+    // MaxChunkCount of CLIENT: response received by client => sent by server
     if (result != false)
     {
         status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
         if (SOPC_STATUS_OK == status)
         {
-            if (scConnection->tcpMsgProperties.maxChunkCount > tempValue ||
-                scConnection->tcpMsgProperties.maxChunkCount == 0)
+            if (scConnection->tcpMsgProperties.sendMaxChunkCount > tempValue ||
+                scConnection->tcpMsgProperties.sendMaxChunkCount == 0)
             {
-                scConnection->tcpMsgProperties.maxChunkCount = tempValue;
+                scConnection->tcpMsgProperties.sendMaxChunkCount = tempValue;
             }
         }
         else
@@ -1417,11 +1418,11 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.maxMessageSize, ackMsgBuffer);
+        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveMaxMessageSize, ackMsgBuffer);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.maxChunkCount, ackMsgBuffer);
+        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveMaxChunkCount, ackMsgBuffer);
     }
 
     if (SOPC_STATUS_OK == status)

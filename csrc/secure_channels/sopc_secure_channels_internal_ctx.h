@@ -102,8 +102,11 @@ typedef struct SOPC_SecureConnection_TcpProperties
     uint32_t protocolVersion;
     uint32_t receiveBufferSize; // Maximum size of connection for reception (static by configuration)
     uint32_t sendBufferSize;    // Maximum size of connection for sending (dynamic on HEL/ACK exchange)
-    uint32_t maxMessageSize;    // Maximum size of OPC UA message BODY (see also part 4 §5.3 last § for more detail)
-    uint32_t maxChunkCount;     // Maximum number of chunks accepted
+    uint32_t
+        receiveMaxMessageSize; // Max size of received OPC UA message BODY (see also part 4 §5.3 last § for more detail)
+    uint32_t sendMaxMessageSize;   // Max size of OPC UA message BODY that could be used to send a message
+    uint32_t receiveMaxChunkCount; // Maximum number of chunks accepted for a message received
+    uint32_t sendMaxChunkCount;    // Maximum number of chunks that could be used to send a message
 } SOPC_SecureConnection_TcpProperties;
 
 // Set on OPN request reception (see OPC UA specification Part 6 table 27): necessary to check coherence with body OPN
